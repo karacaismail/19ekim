@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { HomePage } from '../views/HomePage';
+---
+
+<BaseLayout>
+  <HomePage pathname={Astro.url.pathname} />
+</BaseLayout>

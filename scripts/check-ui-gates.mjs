@@ -1,0 +1,185 @@
+#!/usr/bin/env node
+/**
+ * Kaynak kapısı: hareket, odak, yazı boyutu ve tablo kurallarını src/ altında denetler.
+ * İhlalde sıfırdan farklı kodla çıkar. Çalışma zamanı kanıtı değildir; tarayıcı testleri
+ * (tests/ui.spec.ts) hesaplanmış stilleri ayrıca doğrular.
+ */
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
+
+const ROOT = new URL('..', import.meta.url).pathname;
+const SRC = join(ROOT, 'src');
+const TOKENS = join(SRC, 'styles', 'tokens.css');
+const APPROVED_EASING = /^cubic-bezier\(\s*\.65,\s*0,\s*\.35,\s*1\s*\)$/;
+const MIN_FONT_PX = 14;
+
+const errors = [];
+const fail = (file, msg) => errors.push(`${relative(ROOT, file)}: ${msg}`);
+
+function walk(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    return statSync(path).isDirectory() ? walk(path) : [path];
+  });
+}
+
+/** Çok küçük bir CSS ayrıştırıcı: kural bloklarını, bağlam (at-rule) yığınıyla döndürür. */
+function parseCss(css) {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [];
+  const stack = [];
+  let buffer = '';
+  for (const char of clean) {
+    if (char === '{') {
+      stack.push(buffer.trim());
+      buffer = '';
+    } else if (char === '}') {
+      const selector = stack.pop() ?? '';
+      if (buffer.trim()) rules.push({ selector, context: [...stack], body: buffer.trim() });
+      buffer = '';
+    } else {
+      buffer += char;
+    }
+  }
+  return rules;
+}
+
+function declarations(body) {
+  return body
+    .split(';')
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .map((d) => {
+      const i = d.indexOf(':');
+      return { prop: d.slice(0, i).trim(), value: d.slice(i + 1).trim() };
+    });
+}
+
+function toPx(value) {
+  const m = value.match(/^([\d.]+)(px|rem|em)$/);
+  if (!m) return null;
+  return m[2] === 'px' ? Number(m[1]) : Number(m[1]) * 16;
+}
+
+const files = walk(SRC);
+
+for (const file of files.filter((f) => f.endsWith('.css'))) {
+  const isTokens = file === TOKENS;
+  for (const rule of parseCss(readFileSync(file, 'utf8'))) {
+    const inReducedMotion = rule.context.some((c) => c.includes('prefers-reduced-motion'));
+    const inForcedColors = rule.context.some((c) => c.includes('forced-colors'));
+    const decls = declarations(rule.body);
+    const props = new Set(decls.map((d) => d.prop));
+
+    for (const { prop, value } of decls) {
+      // Hareket
+      if (/^(transition|animation)/.test(prop)) {
+        if (/\ball\b/.test(value)) fail(file, `${rule.selector}: "${prop}: ${value}" — transition: all yasak`);
+        const literal = value.replace(/var\([^)]*\)/g, '');
+        if (/\b(linear|ease|ease-in|ease-out|ease-in-out|step-start|step-end)\b|steps\(|cubic-bezier\(/.test(literal)) {
+          fail(file, `${rule.selector}: "${prop}: ${value}" — token dışı easing`);
+        }
+        if (/(duration|timing-function|delay)$/.test(prop) && !value.startsWith('var(--motion-')) {
+          fail(file, `${rule.selector}: "${prop}: ${value}" — hareket tokenı kullanılmalı`);
+        }
+        if (prop === 'transition' || prop === 'animation') {
+          fail(file, `${rule.selector}: "${prop}" kısaltması yerine açık property + token kullan`);
+        }
+        if (/:hover|\[aria-current|\[data-section/.test(rule.selector)) {
+          fail(file, `${rule.selector}: geçiş yalnız etkin durumda tanımlanamaz; temel öğede tanımla`);
+        }
+      }
+      if (prop.startsWith('--motion-duration') && !isTokens) fail(file, `${prop} yalnız tokens.css içinde tanımlanır`);
+      if (prop.startsWith('--motion-duration') && isTokens && !inReducedMotion) {
+        const ms = Number(value.replace('ms', ''));
+        if (!(ms >= 120 && ms <= 320)) fail(file, `${prop}: ${value} — normal süre 120–320 ms aralığında olmalı`);
+      }
+      if (prop === '--motion-ease-standard' && !APPROVED_EASING.test(value)) fail(file, `${prop}: ${value} — onaylı Cubic eğri değil`);
+
+      // Odak
+      if (prop === 'outline' || prop === 'outline-style' || prop === 'outline-width') {
+        const allowed = value === 'none' || (inForcedColors && value === '2px solid CanvasText');
+        if (!allowed) fail(file, `${rule.selector}: "${prop}: ${value}" — çevreleyen odak halkası yasak`);
+      }
+      if (/:focus/.test(rule.selector) && prop === 'box-shadow' && !/^inset var\(--focus-indicator-width\) 0 0 0 /.test(value)) {
+        fail(file, `${rule.selector}: odakta yalnız tek kenar iç çubuk kullanılabilir`);
+      }
+      if (/:focus/.test(rule.selector) && /^border/.test(prop) && !/radius$/.test(prop)) fail(file, `${rule.selector}: odakta kenarlık değiştirilemez`);
+
+      // Kavisli vurgu kenarı yasağı: renkli kenar çizgisi yalnız kenar sistemiyle (data-edge) ve düz çizilir.
+      if (prop === 'box-shadow' && /inset/.test(value) && !/:focus/.test(rule.selector)) {
+        fail(file, `${rule.selector}: iç gölge çubuğu yasak; kenar sistemi (data-edge) kullan`);
+      }
+      if (/^border(-(top|right|bottom|left|inline|block|inline-start|inline-end|block-start|block-end))?$/.test(prop) && /var\(--(tone|accent|role-|selected|edge)/.test(value)) {
+        fail(file, `${rule.selector}: "${prop}: ${value}" renkli vurgu kenarı yasak; kenar sistemi (data-edge) kullan`);
+      }
+
+      // Yazı boyutu
+      if (prop === 'font-size') {
+        const px = toPx(value);
+        if (px !== null && px < MIN_FONT_PX) fail(file, `${rule.selector}: font-size ${value} < 14px`);
+      }
+      if (isTokens && /^--text-/.test(prop)) {
+        const px = toPx(value);
+        const clampMin = value.match(/^clamp\(([\d.]+rem)/);
+        const min = px ?? (clampMin ? toPx(clampMin[1]) : null);
+        if (min !== null && min < MIN_FONT_PX) fail(file, `${prop}: ${value} < 14px`);
+      }
+
+      // Tablo
+      if ((prop === 'word-break' && value === 'break-all') || (prop === 'overflow-wrap' && value === 'anywhere')) {
+        fail(file, `${rule.selector}: "${prop}: ${value}" yasak`);
+      }
+    }
+
+    if (/:focus-within/.test(rule.selector)) fail(file, `${rule.selector}: :focus-within çerçevesi yasak`);
+    if (props.has('transition-property') && !(props.has('transition-duration') && props.has('transition-timing-function'))) {
+      fail(file, `${rule.selector}: transition-property, süre ve easing tokenıyla birlikte tanımlanmalı`);
+    }
+  }
+}
+
+// Kenar sistemi bütünlüğü: her kenar türü, çizginin değdiği iki köşeyi radiussuz yapmalıdır.
+const EDGE_CORNERS = {
+  start: ['border-start-start-radius', 'border-end-start-radius'],
+  top: ['border-start-start-radius', 'border-start-end-radius'],
+};
+const globalCss = join(SRC, 'styles', 'global.css');
+const edgeRules = parseCss(readFileSync(globalCss, 'utf8'));
+for (const [edge, corners] of Object.entries(EDGE_CORNERS)) {
+  const rule = edgeRules.find((r) => r.selector === `[data-edge='${edge}']`);
+  const decls = rule ? declarations(rule.body) : [];
+  for (const corner of corners) {
+    if (!decls.some((d) => d.prop === corner && d.value === '0')) {
+      fail(globalCss, `[data-edge='${edge}'] kuralı ${corner}: 0 içermeli (çizgi düz kalmalı)`);
+    }
+  }
+}
+
+for (const file of files.filter((f) => /\.(tsx|ts|astro)$/.test(f))) {
+  const text = readFileSync(file, 'utf8');
+  for (const match of text.matchAll(/style=\{\{([^}]*)\}\}/g)) {
+    if (!/^\s*minWidth: col\.minWidth\s*$/.test(match[1])) fail(file, `satır içi stil yasak: ${match[0]}`);
+  }
+  const code = text.replace(/\/\/.*$/gm, '');
+  for (const m of code.matchAll(/data-edge=(?:"([\w-]+)"|\{([^}]*)\})/g)) {
+    const values = m[1] ? [m[1]] : [...m[2].matchAll(/'([\w-]+)'/g)].map((v) => v[1]);
+    for (const value of values) {
+      if (!(value in EDGE_CORNERS)) fail(file, `bilinmeyen kenar türü data-edge="${value}"`);
+    }
+  }
+  // JS/TSX içinde hareket değerleri yalnız tokenlardan okunur; sabit eğri veya süre yazılamaz.
+  if (/cubic-bezier\(|animate\(/.test(code)) fail(file, 'JS/TSX içinde sabit easing veya WAAPI animasyonu yasak; tokenları kullan');
+  if (/transition(-duration)?\s*:\s*['"`]?\d/.test(code) || /animationDuration(Update)?\s*:\s*\d/.test(code)) {
+    fail(file, 'JS/TSX içinde sabit hareket süresi yasak; --motion-duration-* tokenını oku');
+  }
+  for (const m of code.matchAll(/animationEasing(Update)?\s*:\s*'([^']+)'/g)) {
+    if (m[2] !== 'cubicInOut') fail(file, `ECharts easing "${m[2]}" yerine simetrik cubicInOut kullan`);
+  }
+}
+
+if (errors.length) {
+  console.error(`UI kapısı: ${errors.length} ihlal\n` + errors.map((e) => `  - ${e}`).join('\n'));
+  process.exit(1);
+}
+console.log(`UI kapısı: ${files.length} dosya denetlendi, ihlal yok.`);

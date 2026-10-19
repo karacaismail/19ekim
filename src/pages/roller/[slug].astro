@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { RolePage } from '../../views/RolePage';
+import { getRole, roles } from '../../data/roles';
+
+export function getStaticPaths() {
+  return roles.map((role) => ({ params: { slug: role.slug } }));
+}
+
+const role = getRole(Astro.params.slug as string);
+---
+
+<BaseLayout title={role.title} description={role.summary}>
+  <RolePage pathname={Astro.url.pathname} role={role} />
+</BaseLayout>

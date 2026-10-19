@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { PlanPage } from '../views/OtherPages';
+---
+
+<BaseLayout title="Eylem planı" description="Hafta hafta 90 günlük eylem planı ve kontrol noktaları.">
+  <PlanPage pathname={Astro.url.pathname} />
+</BaseLayout>

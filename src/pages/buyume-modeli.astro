@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { GrowthPage } from '../views/OtherPages';
+---
+
+<BaseLayout title="Çok katmanlı pazarlama ağı" description="Çok katmanlı pazarlama (MLM) ağı: kademe yapısı, terimler, Meta ile aday bulma, kazanç ve uyum ilkeleri.">
+  <GrowthPage pathname={Astro.url.pathname} />
+</BaseLayout>
+
+<script>
+  import '../scripts/charts.ts';
+</script>

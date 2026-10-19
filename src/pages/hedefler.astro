@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { GoalsPage } from '../views/OtherPages';
+---
+
+<BaseLayout title="Hedefler" description="90 günde 100 aktif satıcı, 300 pasif satıcı ve en az 3 milyon ₺ ciro: grafikler ve kaynak dağılımı.">
+  <GoalsPage pathname={Astro.url.pathname} />
+</BaseLayout>
+
+<script>
+  import '../scripts/charts.ts';
+</script>

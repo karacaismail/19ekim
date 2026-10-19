@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { NotFoundPage } from '../views/OtherPages';
+---
+
+<BaseLayout title="Sayfa bulunamadı" description="Sayfa bulunamadı.">
+  <NotFoundPage pathname={Astro.url.pathname} />
+</BaseLayout>
