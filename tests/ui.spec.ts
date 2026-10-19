@@ -373,7 +373,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
 
   test('takvim ve zaman çizelgesi: Mantine bileşenleri, metin en az 14 px', async ({ page }) => {
     await page.goto('istihdam/');
-    await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(6);
+    await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(7);
     await expect(page.locator('.cal')).toHaveCount(4);
     expect(await page.locator('.cal-day[data-event]').count()).toBe(11);
     const sizes = await page

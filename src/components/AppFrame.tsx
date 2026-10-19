@@ -132,8 +132,8 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
           <div className="wrap">
             <p>
               19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
-              2. haftanın sonunda gerçek veriyle kalibre edilir. Ücret ve bütçe tutarları (Meta reklam bütçesi hariç) bu
-              herkese açık sitede yayımlanmaz.
+              2. haftanın sonunda gerçek veriyle kalibre edilir. Yayımlanan tutarlar yalnız kesinleşen kararlardır (Meta
+              bütçesi, saha ücreti ve prim); diğer ücret ve bütçe tutarları yayımlanmaz.
             </p>
             <p>
               <a className="text-link" data-standalone="" href={href('/arsiv/')}>

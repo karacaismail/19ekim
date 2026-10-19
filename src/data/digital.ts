@@ -22,7 +22,7 @@ export const integrations: Integration[] = [
   { name: 'Yandex Metrica', measures: 'Hedefler, ısı haritası, oturum kaydı (Webvisor)', done: 'Kayıt formu ve paket sayfası hedefleri ölçülüyor', date: '2026-11-13' },
   { name: 'Search Console + Yandex Webmaster', measures: 'Site haritası, dizine ekleme, arama sorguları', done: 'Site haritası onaylı; dizine ekleme hatası 0', date: '2026-11-13' },
   { name: 'Meta Pixel + Conversions API', measures: 'Temsilci başvurusu ve kayıt; reklam hesabı İsmail Karaca’dan devralınır', done: 'Başvuru olayı tarayıcı + sunucu kaynaklı, tekilleştirilmiş', date: '2026-11-16' },
-  { name: 'UTM standardı + CRM kaynak alanı', measures: 'Her paylaşım ve reklam bağlantısının kaynağı', done: 'UTM’li paylaşım %100; kaynağı boş CRM kaydı %0', date: '2026-11-20' },
+  { name: 'UTM standardı + CRM kaynak alanı', measures: 'Her paylaşım ve reklam bağlantısının kaynağı Frappe CRM’de', done: 'UTM’li paylaşım %100; kaynağı boş CRM kaydı %0', date: '2026-11-20' },
   { name: 'Haftalık ölçüm panosu', measures: 'GA4 + Metrica + CRM: kaynak → kayıt → aktif satıcı', done: 'Her Pazartesi 09:00 yönetici brifinginde', date: '2026-11-23' },
 ];
 
@@ -50,6 +50,24 @@ export const pipeline: PipelineStep[] = [
   { step: 'Onay', what: 'Bilgi, fiyat ve uyum kontrol listesi; gelir vaadi yok', mode: 'onay', measure: 'Hatalı bilgiyle yayın 0' },
   { step: 'Zamanlama ve paylaşım', what: 'Tek kuyruktan tüm kanallara zamanlanmış paylaşım', mode: 'otomatik', measure: 'Paylaşımların %80’i otomatik (Ocak)' },
   { step: 'Ölçüm ve geri besleme', what: 'UTM → GA4 ve Metrica; yorum ve mesajdaki talep CRM’e', mode: 'otomatik', measure: 'Talep 24 saatte masa başına' },
+];
+
+/** Araç kararı (19 Ekim 2026): otomasyon açık kaynak ve kendi sunucumuzda; üretim ve paylaşım ücretli araçlarla. */
+export const AI_TOOL_BUDGET = 7_500;
+
+export interface AiTool {
+  tool: string;
+  use: string;
+  license: string;
+}
+
+export const aiTools: AiTool[] = [
+  { tool: 'n8n', use: 'Hat otomasyonu: kaynak toplama, kuyruk, yorum ve mesajdan CRM’e talep', license: 'Açık kaynak, kendi sunucumuzda (lisans 0 ₺)' },
+  { tool: 'Claude', use: 'Senaryo, kanca, altyazı metni, makale taslağı', license: 'Ücretli abonelik' },
+  { tool: 'ElevenLabs', use: 'Türkçe seslendirme', license: 'Ücretli abonelik' },
+  { tool: 'CapCut Pro', use: 'Kurgu, otomatik altyazı, marka şablonları', license: 'Ücretli abonelik' },
+  { tool: 'Canva Pro', use: 'Kapak, carousel, görsel şablonlar', license: 'Ücretli abonelik' },
+  { tool: 'Metricool', use: 'Zamanlanmış paylaşım: Instagram, TikTok, YouTube, LinkedIn, Facebook', license: 'Ücretli abonelik' },
 ];
 
 /* ---------- 3. Üretim ve paylaşım otomasyonu ---------- */
@@ -123,7 +141,7 @@ export const digitalPlan: DigitalPlanRow[] = [
   { stream: 'olcum', from: '2026-11-02', to: '2026-11-13', action: 'GTM, çerez onayı, GA4, Yandex Metrica, Search Console + Yandex Webmaster', target: 'Hepsi 13 Kasım’da yayında', milestone: true },
   { stream: 'olcum', from: '2026-11-16', to: '2026-11-20', action: 'Meta Pixel + Conversions API; UTM standardı ve CRM kaynak alanı', target: 'UTM’li paylaşım %100' },
   { stream: 'olcum', from: '2026-11-23', to: '2027-01-30', action: 'Haftalık ölçüm panosu', target: 'Her Pazartesi 09:00' },
-  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araç kararı (6 Kasım); hat v1: kaynak → senaryo → üretim yarı otomatik', target: '%30 otomatik paylaşım' },
+  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool); hat v1: kaynak → senaryo → üretim yarı otomatik', target: '%30 otomatik paylaşım · araç gideri ≤ 7.500 ₺ / ay' },
   { stream: 'otomasyon', from: '2026-11-30', to: '2026-12-26', action: 'Hat v2: zamanlayıcı ve yorum → CRM otomasyonu', target: '%60 otomatik · talep 24 saatte' },
   { stream: 'otomasyon', from: '2026-12-28', to: '2027-01-30', action: 'Hat v3: çok dilli altyazı, tam otomatik zamanlama', target: '%80 otomatik', milestone: true },
   { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar: ürün yenilikleri ve nasıl yapılır', target: 'Günde 1 video' },

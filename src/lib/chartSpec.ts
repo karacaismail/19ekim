@@ -35,4 +35,6 @@ export type ChartSpec =
   /** Doğrusal hat: adımlar yukarıdan aşağı zincir olarak çizilir. */
   | { kind: 'chain'; steps: { name: string; sub: string; role: RoleKey }[] }
   /** Adetli halka grafik (ör. haftalık içerik karması). */
-  | { kind: 'mix'; unit: string; items: { name: string; value: number; role: RoleKey }[] };
+  | { kind: 'mix'; unit: string; items: { name: string; value: number; role: RoleKey }[] }
+  /** Kümülatif çizgiler ve yatay tavan çizgisi (ör. yıllık fazla çalışma). */
+  | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] };

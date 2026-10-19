@@ -59,9 +59,16 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
   tutarları yazılmaz. Kullanıcının açıkça siteye eklettiği değerler: İsmail Karaca adı, haftalık 5.000 ₺ Meta reklam
   bütçesi, 90 gün ≥ 3.000.000 ₺ ciro hedefi, aktif satıcı aboneliği 399 € / ay, 30K / 90K / 500K paket bantları.
+  19 Ekim 2026 kararlarıyla ayrıca: işveren maliyeti = maaş × 2, saha satış maaşı 60.000 ₺, saha prim eşiği aylık
+  120.000 ₺ satış, satış başına prim 2.500 ₺, sponsor payı 500 ₺, ekip lideri liderlik farkı 10.000 ₺ ve ekip payı
+  250 ₺, yapay zekâ araç bütçesi aylık en çok 7.500 ₺. Diğer rollerin maaşları karar bekler ve yazılmaz. Yatırımcının
+  adı yazılmaz (rol: “Yatırımcı”).
   Kur yalnız oran olarak (≈ 55,31 ₺/€) tutulur; kaynağındaki toplam tutarlar yazılmaz.
 - Asistan kararı netleşmemiştir; asistansız senaryoda dijital pazarlama 1 Ocak 2027’de başlar. Bu koşul kişi adı
   verilmeden yazılır.
+- Mesai modeli 4857 sayılı İş Kanunu tavanlarına göre (`workPeriods`, `LEGAL_LIMITS`): Dönem 1 (2 Kasım–30 Ocak)
+  haftada 60 sa, Dönem 2 (1 Şubat’tan) haftada 45 sa; yıllık fazla çalışma ≤ 270 sa, günlük ≤ 11 sa. Rol saatleri
+  değişirse `tests/data.spec.ts` tavanları denetler.
 - Lisans henüz seçilmedi; kullanıcının onayı olmadan lisans eklenmez.
 
 ## Komutlar

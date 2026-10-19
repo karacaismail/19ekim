@@ -65,7 +65,8 @@ export interface Role {
   kpis: Kpi[];
   ramp: Ramp;
   plan: PlanRow[];
-  hours: { weekday: string; saturday: string; weeklyNet: string };
+  /** Dönem 1 (2 Kasım–30 Ocak) saatleri; `fromFeb`: 1 Şubat’tan Dönem 2 (haftada 45 saat). */
+  hours: { weekday: string; saturday: string; weeklyNet: string; fromFeb: string };
   daily: ScheduleRow[];
   saturday: ScheduleRow[];
 }

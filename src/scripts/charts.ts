@@ -124,7 +124,8 @@ function base(): Opt {
 function axis(): Opt {
   const muted = token('--text-secondary');
   return {
-    axisLabel: { color: muted, fontSize: FONT_SIZE },
+    // Satır yüksekliği: sarılan eksen etiketinin satırları her motorda birbirine binmez.
+    axisLabel: { color: muted, fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 6 },
     nameTextStyle: { color: muted, fontSize: FONT_SIZE },
     axisLine: { lineStyle: { color: token('--rule-strong') } },
     splitLine: { lineStyle: { color: token('--rule') } },
@@ -316,10 +317,10 @@ function build(spec: ChartSpec, width: number): Opt {
           symbolSize: 8,
           itemStyle: { color: i === 0 ? t.line : text, borderRadius: 0 },
           lineStyle: { color: text, width: 2 },
-          // İki seride çubuk değeri çubuğun içinde, çizgi değeri üstte: etiketler çakışmaz.
+          // İki seride çubuk değeri çubuğun tabanında, çizgi değeri noktanın üstünde: etiketler çakışmaz.
           label:
             two && i === 0
-              ? { show: true, position: 'insideTop', fontSize: FONT_SIZE, fontWeight: 600, color: token('--surface-raised') }
+              ? { show: true, position: 'insideBottom', fontSize: FONT_SIZE, fontWeight: 600, color: token('--surface-raised') }
               : { show: true, position: 'top', fontSize: FONT_SIZE, color: text },
         })),
       };
@@ -522,6 +523,36 @@ function build(spec: ChartSpec, width: number): Opt {
           },
         ],
       };
+
+    case 'cumulative': {
+      const names = spec.series.map((x) => x.name);
+      return {
+        ...base(),
+        grid: { ...grid, top: legendTop(names, width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(v)} ${spec.unit}` },
+        legend: { ...(base().legend as Opt), data: names },
+        xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false } },
+        yAxis: { type: 'value', max: Math.ceil(Math.max(spec.cap * 1.15, ...spec.series.flatMap((x) => x.values)) / 50) * 50, ...axis() },
+        series: spec.series.map((x, i) => ({
+          name: x.name,
+          type: 'line',
+          data: x.values,
+          symbol: 'none',
+          lineStyle: { color: token(`--role-${x.role}`), width: 2, type: x.dashed ? 'dashed' : 'solid' },
+          itemStyle: { color: token(`--role-${x.role}`) },
+          markLine:
+            i === 0
+              ? {
+                  symbol: 'none',
+                  silent: true,
+                  data: [{ yAxis: spec.cap }],
+                  lineStyle: { color: token('--accent-strong'), type: 'dashed', width: 2 },
+                  label: { formatter: spec.capLabel, color: token('--accent-strong'), fontSize: FONT_SIZE, position: 'insideStartTop' },
+                }
+              : undefined,
+        })),
+      };
+    }
 
     case 'huni': {
       const t = tone(spec.role);

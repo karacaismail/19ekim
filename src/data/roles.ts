@@ -15,6 +15,8 @@ export const ROLE_LABELS: Record<RoleKey, string> = {
 const WEEKDAY = '08:00–20:00 · 60 dk ara · 11 saat net';
 const SATURDAY = '08:00–13:30 · 30 dk ara · 5 saat net';
 const WEEKLY = '60 saat net (45 normal + 15 fazla çalışma)';
+/** 1 Şubat 2027’den Dönem 2: yıllık 270 saat fazla çalışma tavanı nedeniyle haftada 45 saat. */
+const FROM_FEB = 'Pzt–Cum 08:30–17:30 (8 sa) · Cmt 08:00–13:30 (5 sa) · haftada 45 sa, planlı fazla çalışma yok';
 
 /** Günlük blok listesi: [saat aralığı, blok]. Ara dinlenme çalışma süresinden sayılmaz. */
 const day = (rows: [string, string][]): ScheduleRow[] =>
@@ -51,7 +53,7 @@ const dijital: Role = {
     { from: '2026-11-30', to: '2026-12-26', action: '201 Like ve 301 Talep: zamanlayıcı, yorum → CRM otomasyonu, içerik planı v2', target: 'Günde 2 video · %60 otomatik · haftada 5 talep' },
     { from: '2026-12-28', to: '2027-01-30', action: '401 Ölçek ve 501 Hakkını vermek: altı içerik sütunu, çok dilli altyazı', target: 'Günde 3 video · %80 otomatik · haftada 10 talep', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY },
+  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
     ['08:00–08:15', 'Ekip stand-up'],
     ['08:15–09:00', 'Ölçüm panosu (GA4, Metrica, CRM)'],
@@ -106,7 +108,7 @@ const pazarlamaci: Role = {
     { from: '2026-11-30', to: '2026-12-26', action: 'Oda ve dernek listeleriyle temas, tavsiye istemi', target: 'Haftada 15 randevu · gerçekleşme ≥ %70' },
     { from: '2026-12-28', to: '2027-01-30', action: 'Üye satıcı aktivasyon aramaları, arama playbook’u', target: 'Haftada 18 randevu', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY },
+  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
     ['08:00–08:15', 'Ekip stand-up'],
     ['08:15–09:00', 'Arama listesi'],
@@ -136,10 +138,10 @@ const saha: Role = {
   title: 'Saha pazarlama ekibi',
   shortTitle: 'Saha ekibi',
   icon: 'map',
-  count: '2 kişi (sonra ağla büyür)',
-  start: '1 Kasım 2026',
+  count: '3 kişi (2’si 1 Kasım, 1’i 1 Aralık; sonra ağla büyür)',
+  start: '1 Kasım 2026 (3. kişi 1 Aralık)',
   startStatus: 'karar',
-  pay: 'Maaş + satış başı prim + kota',
+  pay: '60.000 ₺ maaş · ay içinde 120.000 ₺ satıştan sonra satış başına 2.500 ₺ prim',
   reportsTo: 'İsmail Karaca; 1 Aralık’tan ekip lideri',
   seeks: ['Satış dili', 'Hırslı'],
   mission: 'İstoç’ta randevulu ve çat kapı ziyaretle satıcıyı kaydeder, 48 saatte onboard eder, aboneliğe çevirir ve yeniletir.',
@@ -150,18 +152,18 @@ const saha: Role = {
     { task: 'Yıllık peşin ve pazarlama çözümü teklifi', measure: 'Her aktif satıcıya ilk 30 günde' },
   ],
   kpis: [
-    { metric: 'Kayıt (ekip)', value: '375', unit: '/ 90 gün', when: '30 Ocak' },
-    { metric: 'Yeni aktif satıcı (ekip)', value: '55', unit: '/ 90 gün', when: '30 Ocak' },
+    { metric: 'Kayıt (ekip)', value: '420', unit: '/ 90 gün', when: '30 Ocak' },
+    { metric: 'Yeni aktif satıcı (ekip)', value: '63', unit: '/ 90 gün', when: '30 Ocak' },
     { metric: 'Aylık elde tutma', value: '≥ %70', unit: '', when: 'Her ay sonu' },
     { metric: 'Müşteri onboarding’i', value: '48', unit: 'saat', when: 'Her kayıt' },
   ],
-  ramp: { metric: 'Kayıt / ay', values: [80, 130, 165], second: { metric: 'Yeni aktif satıcı / ay', values: [10, 20, 25] } },
+  ramp: { metric: 'Kayıt / ay', values: [80, 145, 195], second: { metric: 'Yeni aktif satıcı / ay', values: [10, 22, 31] } },
   plan: [
     { from: '2026-11-02', to: '2026-11-28', action: 'İstoç blok haritası, 20 dakikalık demo, ilk abonelikler', target: '80 kayıt · 10 aktif satıcı' },
-    { from: '2026-11-30', to: '2026-12-26', action: 'Ekip lideriyle tam ritim, yenileme takibi', target: '130 kayıt · 20 aktif satıcı · elde tutma ≥ %70' },
-    { from: '2026-12-28', to: '2027-01-30', action: 'Üye satıcı ziyaretleri, temsilcilerle ortak ziyaret', target: '165 kayıt · 25 aktif satıcı', milestone: true },
+    { from: '2026-11-30', to: '2026-12-26', action: 'Ekip lideri ve 3. saha personeliyle (1 Aralık) tam ritim, yenileme takibi', target: '145 kayıt · 22 aktif satıcı · elde tutma ≥ %70' },
+    { from: '2026-12-28', to: '2027-01-30', action: 'Üye satıcı ziyaretleri, temsilcilerle ortak ziyaret', target: '195 kayıt · 31 aktif satıcı', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY },
+  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
     ['08:00–08:15', 'Ekip stand-up'],
     ['08:15–09:00', 'Rota planı'],
@@ -194,7 +196,7 @@ const ekipLideri: Role = {
   count: '1 kişi (içeriden)',
   start: '1 Aralık 2026',
   startStatus: 'karar',
-  pay: 'Mevcut ücret + liderlik farkı + ekip primi',
+  pay: '70.000 ₺ maaş (saha + 10.000 ₺ liderlik farkı) · ekibin her satışından 250 ₺ · kendi satışı saha kuralıyla',
   reportsTo: 'İsmail Karaca',
   seeks: ['Cevval', 'Kasım KPI’larında üst sırada'],
   mission: '1 Kasım’da başlayanlar arasından seçilir; ekibi koçlar ve çok katmanlı pazarlama ağını yönetir.',
@@ -216,7 +218,7 @@ const ekipLideri: Role = {
     { from: '2026-12-01', to: '2026-12-26', action: 'Ritmi devralmak, koçluk, ilk temsilci eşlikleri', target: '~3 aktif temsilci · koçluk ≥ 5 saat / hafta' },
     { from: '2026-12-28', to: '2027-01-30', action: 'Haftada 2 bilgilendirme toplantısı, temsilci kaynaklı satış', target: '~5 aktif temsilci · ağdan ~9 aktif satıcı', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY },
+  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
     ['08:00–08:15', 'Stand-up yönetimi'],
     ['08:15–09:00', 'Pipeline ve dağıtım'],
@@ -271,7 +273,12 @@ const organizator: Role = {
     { from: '2026-12-14', to: '2027-01-16', action: 'Tam ritim: 5 eğitim + 2 organizasyon / hafta; kurumsal görüşmeler', target: '50 katılımcı / hafta · 1 protokol' },
     { from: '2027-01-18', to: '2027-02-27', action: 'Aktivasyon kampanyası, mentor programı, 2. ve 3. protokol', target: '60 katılımcı / hafta · 3 protokol', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: '08:00–15:30 · 30 dk ara · 7 saat net', weeklyNet: '62 saat net (45 normal + 17 fazla çalışma)' },
+  hours: {
+    weekday: WEEKDAY,
+    saturday: '08:00–15:30 · 30 dk ara · 7 saat net',
+    weeklyNet: '62 saat net (45 normal + 17 fazla çalışma)',
+    fromFeb: 'Pzt–Cum 10:30–19:30 (8 sa, 17:00 eğitimi dahil) · Cmt 10:00–15:30 (5 sa) · haftada 45 sa',
+  },
   daily: day([
     ['08:00–08:15', 'Ekip stand-up'],
     ['08:15–09:30', 'Segment ve davet planı'],
@@ -325,9 +332,9 @@ const asistan: Role = {
   plan: [
     { from: '2026-11-02', to: '2026-11-27', action: 'Şablonlar; kazanç planı seçenekleri; ekip lideri seçim dokümanı', target: 'Teslim 14 Kasım ve 27 Kasım', milestone: true },
     { from: '2026-11-30', to: '2026-12-30', action: 'M1–M5 eğitim desteleri; 60. gün raporu', target: '5 deste 26 Aralık · rapor 30 Aralık' },
-    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabı; 90. gün raporu; 4. ay mesai seçenekleri', target: 'Rapor 30 Ocak', milestone: true },
+    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabı; 90. gün raporu; Dönem 2 vardiya listesi (1 Şubat)', target: 'Rapor 30 Ocak', milestone: true },
   ],
-  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY },
+  hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
     ['08:00–08:15', 'Stand-up notları'],
     ['08:15–08:45', 'Yönetici brifingi'],

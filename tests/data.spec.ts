@@ -7,7 +7,15 @@ import {
   calendarEvents,
   checkpoints,
   CIRO_TARGET,
+  COMMISSION_PER_SALE,
+  decisions,
+  EMPLOYER_COST_FACTOR,
   hiringOrder,
+  OVERTIME_CAP,
+  overtimeUsed,
+  SAHA_COMMISSION_THRESHOLD,
+  SAHA_SALARY,
+  workPeriods,
   managerPlan,
   NEW_ACTIVE,
   openDecisions,
@@ -62,10 +70,11 @@ test.describe('veri tutarlılığı', () => {
     expect(sum(targetPlan.flatMap((t) => t.kayit))).toBe(600);
     expect(sum(targetPlan.flatMap((t) => t.aktif))).toBe(100);
     expect(NEW_ACTIVE).toEqual([12, 35, 53]);
-    // saha ekibinin KPI’ları hedef dağılımıyla aynı
+    // saha ekibinin (3 kişi; 3. kişi kapasite açığını kapatır: 45 kayıt, 8 aktif) KPI’ları hedef dağılımıyla aynı
     const saha = targetPlan.find((t) => t.role === 'saha-uzmani');
-    expect(sum(saha?.kayit ?? [])).toBe(375);
-    expect(sum(saha?.aktif ?? [])).toBe(55);
+    expect(sum(saha?.kayit ?? [])).toBe(375 + 45);
+    expect(sum(saha?.aktif ?? [])).toBe(55 + 8);
+    expect(getRole('saha-uzmani').kpis.slice(0, 2).map((k) => k.value)).toEqual([String(sum(saha!.kayit)), String(sum(saha!.aktif))]);
     expect(getRole('saha-uzmani').ramp.values).toEqual(saha?.kayit);
   });
 
@@ -90,8 +99,8 @@ test.describe('veri tutarlılığı', () => {
   });
 
   test('istihdam sırası kararınızdaki gibi; asistan yoksa dijital 1 Ocak', () => {
-    expect(hiringOrder.map((h) => h.no)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(hiringOrder.map((h) => h.role)).toEqual(['yonetici', 'asistan', 'pazarlamaci', 'saha-uzmani', 'dijital-pazarlama', 'organizator']);
+    expect(hiringOrder.map((h) => h.no)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(hiringOrder.map((h) => h.role)).toEqual(['yonetici', 'asistan', 'pazarlamaci', 'saha-uzmani', 'dijital-pazarlama', 'organizator', 'saha-uzmani']);
     expect(hiringOrder.map((h) => h.date)).toEqual([
       'Şimdi',
       '1 Kasım 2026',
@@ -99,14 +108,42 @@ test.describe('veri tutarlılığı', () => {
       '1 Kasım 2026',
       '1 Kasım 2026 (asistan yoksa 1 Ocak 2027)',
       '1 Aralık 2026',
+      '1 Aralık 2026',
     ]);
     expect(hiringOrder.find((h) => h.role === 'saha-uzmani')?.count).toBe('2');
     for (const e of calendarEvents) expect(e.date >= '2026-10-01' && e.date <= '2027-01-31', e.title).toBe(true);
     for (const d of openDecisions) expect(d.deadline, d.topic).toMatch(ISO);
   });
 
-  test('karar bekleyenlerde karar veren yalnız İsmail Karaca veya yatırımcı', () => {
+  test('karar bekleyenlerde karar veren yalnız İsmail Karaca veya yatırımcı; kesinleşenler bekleyenlerde yok', () => {
     for (const d of openDecisions) expect(['yonetici', 'yatirimci'], d.topic).toContain(d.owner);
+    const open = openDecisions.map((d) => d.topic);
+    for (const d of decisions) expect(open, d.topic).not.toContain(d.topic);
+    for (const topic of ['Ücret, prim ve kota', 'CRM aracı ve aşamaları', 'Kazanç planı (MLM)', 'Ekip lideri primi', '4. aydan itibaren mesai modeli']) {
+      expect(decisions.some((d) => d.topic === topic), topic).toBe(true);
+    }
+  });
+
+  test('ücret ve prim: maliyet = maaş × 2; saha prim eşiği kendi maliyeti; satış başına 2.500 ₺', () => {
+    expect(EMPLOYER_COST_FACTOR).toBe(2);
+    expect(SAHA_SALARY).toBe(60_000);
+    expect(SAHA_COMMISSION_THRESHOLD).toBe(120_000);
+    expect(COMMISSION_PER_SALE).toBe(2_500);
+  });
+
+  test('mesai modeli yasal tavanda: günde ≤ 11 sa, Dönem 2 haftada 45 sa, yıllık fazla çalışma ≤ 270 sa', () => {
+    const [p1, p2] = workPeriods;
+    expect(p1.weekly - p1.overtimePerWeek).toBe(45);
+    expect(p2.weekly).toBe(45);
+    expect(p2.overtimePerWeek).toBe(0);
+    for (const used of Object.values(overtimeUsed)) expect(used).toBeLessThanOrEqual(OVERTIME_CAP);
+    for (const role of roles) {
+      for (const row of role.daily) expect(minutes(row.time)).toBeLessThanOrEqual(11 * 60);
+      expect(role.hours.fromFeb, role.slug).toContain('45 sa');
+    }
+    // Dönem 1 düzeni sürseydi tavan 18. haftada dolardı: bu yüzden 1 Şubat’ta Dönem 2.
+    expect(Math.ceil(OVERTIME_CAP / p1.overtimePerWeek)).toBe(18);
+    expect(p1.weeks).toBeLessThan(18);
   });
 
   test('organizatör: eğitimden 60 kayıt ve 12 aktif satıcı; haftalık kayıt Aralık 5, Ocak 10', () => {

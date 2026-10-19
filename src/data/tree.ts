@@ -34,7 +34,7 @@ export const ORG: OrgNode = {
       role: 'saha-uzmani',
       href: '/roller/saha-uzmani/',
       children: [
-        node('saha-uzmani', 'Saha ekibi'),
+        node('saha-uzmani', 'Saha ekibi', { sub: '3 kişi · 2’si 1 Kasım, 1’i 1 Aralık' }),
         node('ekip-lideri', 'Ekip lideri', {
           children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2 · Ocak sonu ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
         }),

@@ -29,8 +29,21 @@ import {
   MONTHS,
   NEW_ACTIVE,
   type OpenDecision,
+  COMMISSION_PER_SALE,
+  crmStages,
+  decisions,
+  EMPLOYER_COST_FACTOR,
+  LEAD_TEAM_SHARE,
+  LEGAL_LIMITS,
   openDecisions,
+  OVERTIME_CAP,
+  overtimeHourly,
+  overtimeUsed,
   payments,
+  payRules,
+  SAHA_SALARY,
+  SPONSOR_SHARE,
+  workPeriods,
   RETENTION_SCENARIOS,
   SUBSCRIPTION_EUR,
   SUBSCRIPTION_TRY,
@@ -39,6 +52,7 @@ import {
 } from '../data/program';
 import { ROLE_LABELS, roles } from '../data/roles';
 import type { RoleKey } from '../data/types';
+import type { CrmStage, PayRule, WorkPeriod } from '../data/program';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
 const lira = (value: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(value))} ₺`;
@@ -223,7 +237,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="kaynak" index={4} title="Kaynaklara göre" desc="Yeni aktif satıcı ve kayıt; kapasite açığı kararı 30 Aralık.">
+      <Section id="kaynak" index={4} title="Kaynaklara göre" desc="Yeni aktif satıcı ve kayıt. Kapasite açığı (45 kayıt, 8 aktif) 1 Aralık’ta başlayan 3. saha personeliyle kapandı.">
         <Chart
           id="kaynak-ay"
           title="Yeni aktif satıcı: kaynak × ay"
@@ -239,7 +253,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
             { key: 't', header: 'Toplam', nowrap: true, render: (t) => `${sum(t.kayit)} / ${sum(t.aktif)}` },
           ]}
           rows={[...targetPlan, { source: 'Toplam', short: 'Toplam', role: 'yonetici' as RoleKey, kayit: [0, 1, 2].map((i) => sum(targetPlan.map((t) => t.kayit[i]))), aktif: NEW_ACTIVE }]}
-          rowTone={(t) => (t.gap ? 'gap' : t.source === 'Toplam' ? 'total' : undefined)}
+          rowTone={(t) => (t.source === 'Toplam' ? 'total' : undefined)}
         />
       </Section>
     </AppFrame>
@@ -355,24 +369,37 @@ export function AuthorityPage({ pathname }: { pathname: string }) {
 
 /* ---------- Karar bekleyenler ---------- */
 
+const CUMULATIVE_WEEKS = 30;
+
+/** Kişi başı kümülatif fazla çalışma (hafta 1 = 2 Kasım 2026). */
+function overtimeSeries(startWeek: number, perWeek: number, lastWeek: number) {
+  let total = 0;
+  return Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => {
+    if (w + 1 >= startWeek && w + 1 <= lastWeek) total += perWeek;
+    return total;
+  });
+}
+
 export function PendingPage({ pathname }: { pathname: string }) {
   const sorted = [...openDecisions].sort((a, b) => a.deadline.localeCompare(b.deadline));
+  const [p1, p2] = workPeriods;
+  const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(new Date(Date.UTC(2026, 10, 2 + w * 7)).toISOString().slice(0, 10)));
+  const sahaCost = SAHA_SALARY * EMPLOYER_COST_FACTOR;
+  const sahaPersonMonths = 2 * 3 + 1 * 2;
+  const monthlyOvertime = Math.round((p1.overtimePerWeek * 52) / 12);
   return (
     <AppFrame pathname={pathname}>
-      <Hero eyebrow="Ortak" title="Karar bekleyenler" lead={`${openDecisions.length} karar; her birinin sahibi ve son tarihi var.`} />
+      <Hero eyebrow="Ortak" title="Karar bekleyenler" lead={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim’de kesinleşti.`} />
 
-      <Section id="takvim" index={1} title="Son tarihler">
+      <Section id="bekleyen" index={1} title="Bekleyen kararlar">
         <Chart
           id="son-tarih"
           title="Karar × son tarih"
           summary={sorted.map((d) => `${d.topic}: ${shortDate(d.deadline)}, ${ROLE_LABELS[d.owner]}`).join('; ')}
-          spec={{ kind: 'deadlines', start: '2026-10-19', end: '2027-02-05', items: sorted.map((d) => ({ name: d.topic, date: d.deadline, role: d.owner })) }}
-          size="xl"
+          spec={{ kind: 'deadlines', start: '2026-10-19', end: '2026-11-13', items: sorted.map((d) => ({ name: d.topic, date: d.deadline, role: d.owner })) }}
+          size="md"
           wide
         />
-      </Section>
-
-      <Section id="liste" index={2} title="Kararlar">
         <DataTable<OpenDecision>
           id="karar"
           title="Konu, öneri, karar veren"
@@ -394,6 +421,128 @@ export function PendingPage({ pathname }: { pathname: string }) {
           ]}
           rows={sorted}
         />
+      </Section>
+
+      <Section id="kesin" index={2} title="Kesinleşen kararlar" desc="19 Ekim 2026; ayrıntılar aşağıdaki bölümlerde.">
+        <DataTable
+          id="kesin"
+          title="Konu ve karar"
+          columns={[
+            { key: 'topic', header: 'Konu', minWidth: '12rem', rowHeader: true, render: (d: (typeof decisions)[number]) => d.topic },
+            { key: 'decision', header: 'Karar', minWidth: '24rem', render: (d) => d.decision },
+          ]}
+          rows={decisions}
+        />
+      </Section>
+
+      <Section
+        id="ucret"
+        index={3}
+        title="Ücret ve prim"
+        desc={`İşveren maliyeti = maaş × ${EMPLOYER_COST_FACTOR} (SGK, yemek, bilgisayar, vergi ve diğerleri). Prim yalnız kriterleri tamamlanan satıştan doğar.`}
+      >
+        <DataTable<PayRule>
+          id="ucret"
+          title="Kişi başı, aylık"
+          columns={[
+            { key: 'who', header: 'Kim', minWidth: '13rem', rowHeader: true, render: (r) => r.who },
+            { key: 'status', header: 'Statü', minWidth: '12rem', render: (r) => r.status },
+            { key: 'fixed', header: 'Sabit', minWidth: '12rem', render: (r) => r.fixed },
+            { key: 'cost', header: 'İşveren maliyeti', minWidth: '11rem', render: (r) => r.cost },
+            { key: 'commission', header: 'Prim', minWidth: '18rem', render: (r) => r.commission },
+          ]}
+          rows={payRules}
+        />
+        <Note title="Hesap">
+          <p>
+            Saha ekibinin 90 günlük sabit maliyeti: {sahaPersonMonths} kişi-ay × {lira(sahaCost)} = {lira(sahaPersonMonths * sahaCost)} (2 kişi 3 ay, 3. kişi 2 ay).
+          </p>
+          <p>
+            Bir temsilci satışında toplam pay en çok {lira(COMMISSION_PER_SALE + SPONSOR_SHARE + LEAD_TEAM_SHARE)}: temsilci {lira(COMMISSION_PER_SALE)} + sponsor {lira(SPONSOR_SHARE)} + ekip lideri {lira(LEAD_TEAM_SHARE)}.
+          </p>
+        </Note>
+      </Section>
+
+      <Section id="crm" index={4} title="CRM aşamaları ve prim kriterleri" desc="Frappe CRM. Prim kriterleri aşamalarla aynıdır: Onboarding, Mağaza açıldı, İlk ürünler ve Ödeme tamamlanınca prim hak edilir.">
+        <Chart
+          id="crm-asamalari"
+          title="Adaydan yenilemeye"
+          summary={crmStages.map((c, i) => `${i + 1}. ${c.stage}${c.commission ? ' (prim kriteri)' : ''}`).join('; ')}
+          spec={{
+            kind: 'chain',
+            steps: crmStages.map((c, i) => ({
+              name: `${i + 1}. ${c.stage}`,
+              sub: c.stage === 'Ödeme' ? `Prim hak edilir: ${lira(COMMISSION_PER_SALE)}` : c.commission ? 'Prim kriteri' : c.owner,
+              role: c.commission ? 'saha-uzmani' : 'yonetici',
+            })),
+          }}
+          size="xxl"
+        />
+        <DataTable<CrmStage>
+          id="crm"
+          title="Aşama, geçiş kuralı, sorumlu"
+          columns={[
+            { key: 'stage', header: 'Aşama', nowrap: true, rowHeader: true, render: (r) => r.stage },
+            { key: 'rule', header: 'Geçiş kuralı', minWidth: '18rem', render: (r) => r.rule },
+            { key: 'owner', header: 'Sorumlu', minWidth: '11rem', render: (r) => r.owner },
+            { key: 'commission', header: 'Prim kriteri', nowrap: true, render: (r) => (r.commission ? 'Evet' : 'Hayır') },
+          ]}
+          rows={crmStages}
+        />
+      </Section>
+
+      <Section
+        id="mesai"
+        index={5}
+        title="Mesai modeli: yasal tavan"
+        desc={`4857 sayılı İş Kanunu. Yıllık fazla çalışma tavanı ${OVERTIME_CAP} saat; sayım işe girişten itibaren 12 ay (en temkinli yorum).`}
+      >
+        <DataTable
+          id="yasal"
+          title="Yasal sınırlar"
+          columns={[
+            { key: 'rule', header: 'Kural', minWidth: '13rem', rowHeader: true, render: (r: (typeof LEGAL_LIMITS)[number]) => r.rule },
+            { key: 'limit', header: 'Sınır', minWidth: '16rem', render: (r) => r.limit },
+            { key: 'source', header: 'Dayanak', minWidth: '11rem', render: (r) => r.source },
+          ]}
+          rows={LEGAL_LIMITS}
+        />
+        <DataTable<WorkPeriod>
+          id="donem"
+          title="Dönemler"
+          columns={[
+            { key: 'name', header: 'Dönem', minWidth: '12rem', rowHeader: true, render: (r) => <>{r.name}<span className="cell-sub">{shortDate(r.from)} – {shortDate(r.to)}</span></> },
+            { key: 'week', header: 'Hafta içi ve Cumartesi', minWidth: '18rem', render: (r) => <>{r.weekday}<span className="cell-sub">{r.saturday}</span></> },
+            { key: 'weekly', header: 'Haftalık', nowrap: true, render: (r) => `${r.weekly} sa (${r.overtimePerWeek} sa fazla)` },
+            { key: 'org', header: 'Organizatör', minWidth: '16rem', render: (r) => r.organizer },
+          ]}
+          rows={workPeriods}
+        />
+        <Chart
+          id="fazla-calisma"
+          title="Kişi başı kümülatif fazla çalışma"
+          note="Kesikli çizgi: Dönem 1 düzeni sürseydi tavan 18. haftada (6 Mart) dolardı."
+          summary={`Kasım’da başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir; tavan ${OVERTIME_CAP} saat. Dönem 1 düzeni sürseydi tavan 18. haftada dolardı.`}
+          spec={{
+            kind: 'cumulative',
+            labels: weekLabels,
+            unit: 'sa',
+            cap: OVERTIME_CAP,
+            capLabel: `Yasal tavan ${OVERTIME_CAP} sa`,
+            series: [
+              { name: 'Kasım’da başlayanlar', role: 'saha-uzmani', values: overtimeSeries(1, p1.overtimePerWeek, p1.weeks) },
+              { name: 'Organizatör (1 Aralık)', role: 'organizator', values: overtimeSeries(5, p1.organizerOvertimePerWeek, p1.weeks) },
+              { name: 'Dönem 1 sürseydi', role: 'yonetici', values: overtimeSeries(1, p1.overtimePerWeek, CUMULATIVE_WEEKS), dashed: true },
+            ],
+          }}
+          size="lg"
+        />
+        <Note title="Fazla çalışma ücreti">
+          <p>
+            Saat ücreti {lira(SAHA_SALARY / 225)}, fazla çalışma saati {lira(overtimeHourly)} (60.000 ₺ brüt varsayımı, aylık 225 saat, %50 zamlı).
+            Dönem 1’de ayda yaklaşık {monthlyOvertime} saat: kişi başı ≈ {lira(monthlyOvertime * overtimeHourly)} / ay. {p2.name} ile bu gider kalkar.
+          </p>
+        </Note>
       </Section>
     </AppFrame>
   );

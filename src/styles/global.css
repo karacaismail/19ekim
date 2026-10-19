@@ -920,10 +920,6 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   color: var(--text-secondary);
 }
 
-.data-table tr[data-tone='gap'] > * {
-  background-color: var(--status-bekliyor-bg);
-}
-
 .data-table tr[data-tone='break'] > * {
   color: var(--text-secondary);
 }

@@ -15,6 +15,8 @@ import {
   TextLink,
 } from '../components/ui';
 import {
+  AI_TOOL_BUDGET,
+  aiTools,
   channels,
   contentPlan,
   digitalPlan,
@@ -23,6 +25,7 @@ import {
   productionRamp,
   STEP_MODE_LABELS,
   STREAM_LABELS,
+  type AiTool,
   type Channel,
   type ContentPillar,
   type DigitalPlanRow,
@@ -83,7 +86,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Hafta içi ${role.hours.weekday}; Cumartesi ${role.hours.saturday}. Haftalık ${role.hours.weeklyNet}.`}
+      desc={`Dönem 1 (2 Kasım – 30 Ocak): hafta içi ${role.hours.weekday}; Cumartesi ${role.hours.saturday}; haftalık ${role.hours.weeklyNet}. 1 Şubat’tan Dönem 2: ${role.hours.fromFeb} (yıllık 270 saat fazla çalışma tavanı).`}
     >
       <Chart
         id="zaman-payi"
@@ -188,6 +191,17 @@ function DigitalSections({ role }: { role: Role }) {
             { key: 'measure', header: 'Ölçüt', minWidth: '12rem', render: (r) => r.measure },
           ]}
           rows={pipeline}
+        />
+        <DataTable<AiTool>
+          id="arac"
+          title={`Araçlar · bütçe en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ / ay`}
+          note="Karar 19 Ekim. Tavan aşımı İsmail Karaca onayıyla; 30 Aralık’ta ölçüm panosuyla yeniden bakılır."
+          columns={[
+            { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
+            { key: 'use', header: 'Ne için', minWidth: '18rem', render: (r) => r.use },
+            { key: 'license', header: 'Lisans', minWidth: '12rem', render: (r) => r.license },
+          ]}
+          rows={aiTools}
         />
       </Section>
 
