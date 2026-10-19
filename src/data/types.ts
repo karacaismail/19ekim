@@ -15,91 +15,57 @@ export type Status = 'karar' | 'oneri' | 'bekliyor';
 export interface ScheduleRow {
   time: string;
   block: string;
-  work: string;
-  output: string;
-  tone?: 'break' | 'milestone';
+  tone?: 'break';
 }
 
-export interface WeeklyRow {
-  day: string;
-  focus: string;
-  work: string;
-  output: string;
+/** SMART görev: ne yapılır ve nasıl ölçülür. */
+export interface Task {
+  task: string;
+  measure: string;
 }
 
-export interface KpiRow {
+export interface Kpi {
   metric: string;
-  daily: string;
-  weekly: string;
-  ramp: string;
-}
-
-export interface PlanRow {
-  week: string;
-  dates: string;
-  focus: string;
-  actions: string[];
-  target: string;
-  tone?: 'milestone';
-}
-
-export interface FlowBranch {
+  value: string;
+  unit: string;
   when: string;
-  then: string;
 }
 
-export interface FlowStep {
-  title: string;
-  owners: RoleKey[];
-  detail: string;
-  output?: string;
-  sla?: string;
-  kind?: 'step' | 'decision';
-  branches?: FlowBranch[];
+/** Tarihli, ölçülebilir eylem: ne yapılır, ne zaman, hangi hedefle. */
+export interface PlanRow {
+  from: string;
+  to: string;
+  action: string;
+  target: string;
+  milestone?: boolean;
 }
 
-export interface Workflow {
-  id: string;
-  title: string;
-  desc: string;
-  steps: FlowStep[];
-}
-
-export interface RiskRow {
-  risk: string;
-  mitigation: string;
+/** Ana hedefin aylara göre artışı (grafik için). */
+export interface Ramp {
+  metric: string;
+  values: number[];
+  months?: string[];
+  second?: { metric: string; values: number[] };
 }
 
 export interface Role {
   slug: RoleKey;
+  tree: string;
   title: string;
   shortTitle: string;
   icon: 'phone' | 'map' | 'presentation' | 'notebook' | 'flag' | 'video';
-  boardNote: string;
   count: string;
   start: string;
   startStatus: Status;
-  step: string;
-  employment: string;
+  pay: string;
   reportsTo: string;
-  worksWith: string;
+  seeks: string[];
   mission: string;
-  summary: string;
-  responsibilities: string[];
-  qualifications: {
-    source: string;
-    fromSource: string[];
-    required: string[];
-    plus: string[];
-  };
-  tools: string[];
+  tasks: Task[];
+  kpis: Kpi[];
+  ramp: Ramp;
+  plan: PlanRow[];
   hours: { weekday: string; saturday: string; weeklyNet: string };
   daily: ScheduleRow[];
   saturday: ScheduleRow[];
-  weekly: WeeklyRow[];
-  kpis: KpiRow[];
-  workflow: Workflow;
-  plan: { range: string; rows: PlanRow[] };
-  firstWeek: string[];
-  risks: RiskRow[];
 }

@@ -3,10 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { HiringPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="İstihdam" description="İstihdam takvimi, kadro, işe alım süreci, mülakat, personel onboarding’i ve ücret yapısı.">
+<BaseLayout title="İstihdam takvimi" description="Kim, hangi sırayla, hangi tarihte başlıyor: takvim ve işe alım sırası.">
   <HiringPage pathname={Astro.url.pathname} />
 </BaseLayout>
-
-<script>
-  import '../scripts/charts.ts';
-</script>

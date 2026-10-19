@@ -3,6 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { HomePage } from '../views/HomePage';
 ---
 
-<BaseLayout>
+<BaseLayout description="iStoc organizasyon şeması: İsmail Karaca, kurmay ve dört ağaç.">
   <HomePage pathname={Astro.url.pathname} />
 </BaseLayout>
+
+<script>
+  import '../scripts/charts.ts';
+</script>

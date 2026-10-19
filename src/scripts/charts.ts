@@ -1,16 +1,20 @@
 /**
  * Grafikler: yalnız [data-chart] içeren sayfalarda ve görünür olduklarında ECharts’ı yükler.
  * Renk, yazı ve hareket değerleri tasarım tokenlarından okunur; tema değişince yeniden çizilir.
- * Tüm metinler 14 CSS px; hareket simetrik easeInOut Cubic (ECharts: cubicInOut); hareket
- * azaltma tercihinde animasyon kapanır. Aynı veriler sayfada tablo olarak da vardır.
+ * Metin boyutu --text-sm tokenından (kullanıcının kök yazı boyutunu izler, en az 14 CSS px); hareket simetrik
+ * easeInOut Cubic (ECharts: cubicInOut); hareket azaltma tercihinde animasyon kapanır. Çubuk ve kutular radiussuzdur.
+ * Seçenekler kapsayıcı genişliğine göre kurulur (açıklama satırları, eksen etiket genişliği).
  */
-import type { ChartSpec } from '../lib/chartSpec';
+import type { ChartSpec, ChartTreeNode } from '../lib/chartSpec';
 
 type EChartsModule = typeof import('../lib/echarts-setup');
 type Instance = ReturnType<EChartsModule['echarts']['init']>;
+type Opt = Record<string, unknown>;
 
-const FONT_SIZE = 14;
-const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec }>();
+/** Geçerli grafik yazı boyutu (px); her çizimde tokendan yeniden okunur. */
+let FONT_SIZE = 14;
+const DAY = 86_400_000;
+const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec; width: number }>();
 let loader: Promise<EChartsModule> | null = null;
 
 const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -19,198 +23,512 @@ const number = new Intl.NumberFormat('tr-TR');
 const lira = (value: number) =>
   value >= 1_000_000
     ? `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(value / 1_000_000)} milyon ₺`
-    : `${number.format(value)} ₺`;
+    : `${number.format(Math.round(value))} ₺`;
+const millions = (v: number) => (v === 0 ? '0' : `${v / 1_000_000} M`);
+const ms = (iso: string) => new Date(`${iso}T00:00:00`).getTime();
+const shortDate = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(t));
 
-function motion() {
-  if (reducedMotion()) return { animation: false };
-  const ms = parseFloat(token('--motion-duration-base')) || 240;
+/** --text-sm (rem) → px; kök yazı boyutu büyütülürse grafik metni de büyür. Alt sınır 14 CSS px. */
+function fontPx() {
+  const raw = token('--text-sm');
+  const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const value = /rem$/.test(raw) ? parseFloat(raw) * root : parseFloat(raw);
+  return Math.max(14, Number.isFinite(value) ? value : 14);
+}
+
+/** Yatay açıklamanın kaç satıra sarılacağını genişlikten tahmin eder; ızgara açıklamanın altında başlar. */
+function legendTop(names: string[], width: number) {
+  const available = width - 32;
+  let rows = 1;
+  let x = 0;
+  for (const name of names) {
+    const item = name.length * FONT_SIZE * 0.56 + 25 + 16;
+    if (x > 0 && x + item > available) {
+      rows += 1;
+      x = 0;
+    }
+    x += item;
+  }
+  return rows * (FONT_SIZE + 18) + 24;
+}
+
+/** CSS süresini ms'ye çevirir: tarayıcı tokenı "240ms" veya ".24s" olarak döndürebilir. */
+const toMs = (raw: string) => {
+  const value = parseFloat(raw);
+  if (!Number.isFinite(value)) return NaN;
+  return /ms$/.test(raw) ? value : /s$/.test(raw) ? value * 1000 : value;
+};
+
+/** --motion-duration-base (ms); hareket azaltmada token 0ms olur. Token okunamazsa 240 ms. */
+const duration = () => {
+  const value = toMs(token('--motion-duration-base'));
+  return Number.isFinite(value) ? value : 240;
+};
+
+/** Seri, işaret çizgisi ve göstergeler için ortak hareket: simetrik cubicInOut, token süresi. */
+function motion(): Opt {
+  const d = reducedMotion() ? 0 : duration();
+  if (!d) return { animation: false, animationDuration: d, animationDurationUpdate: d };
   return {
     animation: true,
-    animationDuration: ms,
+    animationDuration: d,
     animationEasing: 'cubicInOut',
-    animationDurationUpdate: ms,
+    animationDurationUpdate: d,
     animationEasingUpdate: 'cubicInOut',
+    animationDelay: 0,
+    animationDelayUpdate: 0,
   };
 }
 
-function base() {
-  const text = token('--text-primary');
+function base(): Opt {
   const muted = token('--text-secondary');
-  const fast = reducedMotion() ? 0 : (parseFloat(token('--motion-duration-fast')) || 160) / 1000;
+  const d = reducedMotion() ? 0 : duration();
+  const reduced = !d;
   return {
     ...motion(),
-    aria: { enabled: true, decal: { show: false } },
+    // Ekran okuyucu metni kapsayıcının Türkçe özetidir (role="img"); ECharts'ın otomatik İngilizce metni kapalı.
+    aria: { enabled: false },
+    stateAnimation: { duration: d, easing: 'cubicInOut' },
     textStyle: { fontFamily: token('--font-sans'), fontSize: FONT_SIZE, color: muted },
     tooltip: {
       backgroundColor: token('--surface-raised'),
       borderColor: token('--rule'),
-      textStyle: { color: text, fontSize: FONT_SIZE, fontFamily: token('--font-sans') },
-      transitionDuration: fast,
-      extraCssText: `transition-timing-function: ${token('--motion-ease-standard')}; box-shadow: none;`,
+      textStyle: { color: token('--text-primary'), fontSize: FONT_SIZE, fontFamily: token('--font-sans') },
+      transitionDuration: d / 1000,
+      hideDelay: 0,
+      // İpucu grafik kutusunda kalır ve uzun metni sarar (dar ekranda dışarı taşmaz).
+      confine: true,
+      extraCssText: `transition-timing-function: ${token('--motion-ease-standard')}; box-shadow: none; white-space: normal; max-width: min(22rem, 80vw);`,
+      axisPointer: {
+        animation: !reduced,
+        animationDurationUpdate: d,
+        animationEasingUpdate: 'cubicInOut',
+        lineStyle: { color: token('--rule-strong') },
+        shadowStyle: { color: token('--surface-sunken') },
+      },
     },
-    legend: { top: 0, left: 0, textStyle: { color: muted, fontSize: FONT_SIZE }, itemGap: 16 },
+    legend: {
+      top: 0,
+      left: 0,
+      textStyle: { color: muted, fontSize: FONT_SIZE },
+      itemGap: 16,
+      inactiveColor: token('--rule-strong'),
+      animationDurationUpdate: d,
+      pageTextStyle: { color: muted, fontSize: FONT_SIZE },
+      pageIconColor: token('--text-primary'),
+      pageIconInactiveColor: token('--rule-strong'),
+    },
   };
 }
 
-function axisStyle() {
+function axis(): Opt {
   const muted = token('--text-secondary');
-  const rule = token('--rule');
   return {
     axisLabel: { color: muted, fontSize: FONT_SIZE },
     nameTextStyle: { color: muted, fontSize: FONT_SIZE },
     axisLine: { lineStyle: { color: token('--rule-strong') } },
-    splitLine: { lineStyle: { color: rule } },
+    splitLine: { lineStyle: { color: token('--rule') } },
     axisTick: { show: false },
   };
 }
 
-function build(spec: ChartSpec): Record<string, unknown> {
+const tone = (role: string) => ({ fill: token(`--role-${role}-bg`), line: token(`--role-${role}`), text: token(`--role-${role}-fg`) });
+
+function targetLine(target: number, position = 'insideStartTop'): Opt {
+  const strong = token('--accent-strong');
+  return {
+    symbol: 'none',
+    silent: true,
+    data: [{ yAxis: target }],
+    lineStyle: { color: strong, type: 'dashed', width: 2 },
+    label: { formatter: `Hedef ${lira(target)}`, color: strong, fontSize: FONT_SIZE, position },
+  };
+}
+
+/** Ağaç düğümünü ECharts verisine çevirir: radiussuz kutu, rol tonu, iki satırlı etiket. */
+function treeData(node: ChartTreeNode): Opt {
+  const t = tone(node.role);
+  return {
+    name: node.name,
+    value: node.href ?? '',
+    sub: node.sub ?? '',
+    itemStyle: { color: t.fill, borderColor: t.line, borderWidth: 2 },
+    label: { color: t.text },
+    children: node.children?.map(treeData),
+  };
+}
+
+/** Kutu içi etiket: kelime sınırından satıra bölünür (kelime ortasından bölünmez). */
+function wrap(text: string, max: number): string[] {
+  const lines: string[] = [];
+  for (const word of text.split(' ')) {
+    const last = lines.length - 1;
+    if (last >= 0 && `${lines[last]} ${word}`.length <= max) lines[last] = `${lines[last]} ${word}`;
+    else lines.push(word);
+  }
+  return lines;
+}
+
+function treeSeries(root: ChartTreeNode, orient: 'TB' | 'LR', size: [number, number]): Opt {
+  const tb = orient === 'TB';
+  // Satır başına karakter, yazı boyutuna göre (kullanıcı kök boyutu büyütürse satırlar kısalır).
+  const max = Math.floor((size[0] - 16) / (FONT_SIZE * 0.57));
+  const line = { fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 4, width: size[0] - 16, align: 'center' };
+  return {
+    type: 'tree',
+    data: [treeData(root)],
+    orient,
+    layout: 'orthogonal',
+    // Kardeş ekseninde ECharts uçlara yarım aralık bırakır; derinlik ekseninde kutunun yarısı kadar pay gerekir.
+    top: tb ? size[1] / 2 + 8 : 8,
+    bottom: tb ? size[1] / 2 + 8 : 8,
+    left: tb ? 8 : size[0] / 2 + 8,
+    right: tb ? 8 : size[0] / 2 + 8,
+    symbol: 'rect',
+    symbolSize: size,
+    edgeShape: 'polyline',
+    edgeForkPosition: '50%',
+    initialTreeDepth: -1,
+    expandAndCollapse: false,
+    roam: false,
+    lineStyle: { color: token('--rule-strong'), width: 2, curveness: 0 },
+    label: {
+      position: 'inside',
+      formatter: (p: { name: string; data: { sub: string } }) =>
+        [...wrap(p.name, max).map((l) => `{n|${l}}`), ...(p.data.sub ? wrap(p.data.sub, max).map((l) => `{s|${l}}`) : [])].join('\n'),
+      rich: {
+        n: { ...line, fontWeight: 600 },
+        s: { ...line, fontWeight: 400, color: token('--text-secondary') },
+      },
+    },
+    leaves: { label: { position: 'inside' } },
+    emphasis: { focus: 'none' },
+  };
+}
+
+function build(spec: ChartSpec, width: number): Opt {
+  FONT_SIZE = fontPx();
   const text = token('--text-primary');
   const accent = token('--accent');
-  const accentStrong = token('--accent-strong');
-  const grid = { left: 4, right: 12, bottom: 4, top: 56, containLabel: true };
+  const grid = { left: 4, right: 16, bottom: 4, top: 72, containLabel: true };
 
   switch (spec.kind) {
-    case 'gelir-ay': {
-      let running = 0;
-      const cumulative = spec.first.map((f, i) => (running += f + spec.renew[i]));
+    case 'org':
+      return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(spec.root, 'TB', [156, 96])] };
+
+    case 'gov':
+      return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(spec.root, 'LR', [240, 64])] };
+
+    case 'gantt': {
+      const start = ms(spec.start);
       return {
         ...base(),
-        grid,
-        tooltip: { ...base().tooltip, trigger: 'axis', valueFormatter: (v: number) => lira(Math.round(v)) },
-        legend: { ...base().legend, data: ['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'] },
-        xAxis: { type: 'category', data: spec.months, ...axisStyle(), splitLine: { show: false } },
-        yAxis: {
+        // Sağ pay: eksen sonundaki işaret çizgisinin etiketi (ör. 90. gün) taşmasın.
+        grid: { left: 4, right: 40, top: 40, bottom: 4, containLabel: true },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'item',
+          formatter: (p: { seriesIndex: number; data: { name: string; text: string; range: string } }) =>
+            p.seriesIndex === 1 ? `${p.data.name}<br/>${p.data.range}<br/>${p.data.text}` : '',
+        },
+        xAxis: {
           type: 'value',
-          ...axisStyle(),
-          axisLabel: { ...axisStyle().axisLabel, formatter: (v: number) => (v === 0 ? '0' : `${v / 1_000_000} M`) },
+          min: 0,
+          max: (ms(spec.end) - start) / DAY,
+          ...axis(),
+          axisLabel: { ...(axis().axisLabel as Opt), showMaxLabel: false, formatter: (v: number) => shortDate(start + v * DAY) },
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: spec.rows.map((r) => r.name),
+          ...axis(),
+          splitLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), color: text, width: 190, overflow: 'break' },
         },
         series: [
-          { name: 'İlk ödemeler', type: 'bar', stack: 'ay', data: spec.first, barMaxWidth: 64, itemStyle: { color: accent, borderRadius: 0 } },
-          { name: 'Yenilemeler', type: 'bar', stack: 'ay', data: spec.renew, barMaxWidth: 64, itemStyle: { color: token('--role-saha-uzmani'), borderRadius: 0 } },
           {
-            name: 'Kümülatif ciro',
-            type: 'line',
-            data: cumulative,
-            symbolSize: 8,
-            lineStyle: { color: text, width: 2 },
-            itemStyle: { color: text },
+            type: 'bar',
+            stack: 'g',
+            silent: true,
+            tooltip: { show: false },
+            itemStyle: { color: 'transparent' },
+            data: spec.rows.map((r) => (ms(r.from) - start) / DAY),
+          },
+          {
+            type: 'bar',
+            stack: 'g',
+            barMaxWidth: 26,
+            label: {
+              show: true,
+              position: 'insideLeft',
+              fontSize: FONT_SIZE,
+              fontWeight: 600,
+              formatter: (p: { data: { range: string } }) => p.data.range,
+            },
+            data: spec.rows.map((r) => {
+              const t = tone(r.role);
+              const days = (ms(r.to) - ms(r.from)) / DAY + 1;
+              // Kısa çubukta tarih etiketi çubuğun sağına taşınır (sığmayan metin kesilmez).
+              const short = days / ((ms(spec.end) - start) / DAY) < 0.16;
+              return {
+                value: days,
+                name: r.name,
+                text: r.text,
+                range: `${shortDate(ms(r.from))} – ${shortDate(ms(r.to))}`,
+                itemStyle: { color: t.fill, borderColor: t.line, borderWidth: r.milestone ? 3 : 2, borderRadius: 0 },
+                label: short ? { position: 'right', color: text } : { color: t.text },
+              };
+            }),
             markLine: {
               symbol: 'none',
-              data: [{ yAxis: spec.target }],
-              lineStyle: { color: accentStrong, type: 'dashed', width: 2 },
-              label: { formatter: `Hedef ${lira(spec.target)}`, color: accentStrong, fontSize: FONT_SIZE, position: 'insideStartTop' },
+              silent: true,
+              lineStyle: { color: token('--rule-strong'), type: 'dashed', width: 1 },
+              label: { fontSize: FONT_SIZE, color: token('--text-secondary'), position: 'start' },
+              data: spec.marks.map((m) => ({ xAxis: (ms(m.date) - start) / DAY, label: { formatter: m.label } })),
             },
           },
         ],
       };
     }
-    case 'kopru':
+
+    case 'ramp': {
+      const t = tone(spec.role);
+      const two = spec.series.length > 1;
       return {
         ...base(),
-        grid,
-        tooltip: { ...base().tooltip, trigger: 'axis', valueFormatter: (v: number) => lira(Math.round(v)) },
-        legend: { ...base().legend, data: ['İlk ödemeler (100 aktif satıcı)', 'Yenilemeler'] },
-        xAxis: { type: 'category', data: spec.scenarios, ...axisStyle(), splitLine: { show: false } },
-        yAxis: {
-          type: 'value',
-          max: Math.max(spec.target * 1.2, ...spec.first.map((f, i) => f + spec.renew[i])),
-          ...axisStyle(),
-          axisLabel: { ...axisStyle().axisLabel, formatter: (v: number) => (v === 0 ? '0' : `${v / 1_000_000} M`) },
-        },
-        series: [
-          { name: 'İlk ödemeler (100 aktif satıcı)', type: 'bar', stack: 'senaryo', data: spec.first, barMaxWidth: 64, itemStyle: { color: accent, borderRadius: 0 } },
-          {
-            name: 'Yenilemeler',
-            type: 'bar',
-            stack: 'senaryo',
-            data: spec.renew,
-            barMaxWidth: 64,
-            itemStyle: { color: token('--role-saha-uzmani'), borderRadius: 0 },
-            markLine: {
-              symbol: 'none',
-              data: [{ yAxis: spec.target }],
-              lineStyle: { color: accentStrong, type: 'dashed', width: 2 },
-              label: { formatter: `Hedef ${lira(spec.target)}`, color: accentStrong, fontSize: FONT_SIZE, position: 'insideStartTop' },
-            },
-          },
-        ],
-      };
-    case 'kaynak-ay':
-      return {
-        ...base(),
-        grid,
-        tooltip: { ...base().tooltip, trigger: 'axis' },
-        xAxis: { type: 'category', data: spec.months, ...axisStyle(), splitLine: { show: false } },
-        yAxis: { type: 'value', name: spec.unit, ...axisStyle(), minInterval: 1 },
-        series: spec.series.map((s) => ({
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis' },
+        grid: { ...grid, top: legendTop(spec.series.map((s) => s.name), width) },
+        legend: { ...(base().legend as Opt), data: spec.series.map((s) => s.name) },
+        xAxis: { type: 'category', data: spec.months, ...axis(), splitLine: { show: false } },
+        yAxis: two
+          ? [
+              { type: 'value', ...axis(), minInterval: 1 },
+              { type: 'value', ...axis(), minInterval: 1, splitLine: { show: false } },
+            ]
+          : { type: 'value', ...axis(), minInterval: 1 },
+        series: spec.series.map((s, i) => ({
           name: s.name,
-          type: 'bar',
-          stack: 'toplam',
+          type: i === 0 ? 'bar' : 'line',
+          yAxisIndex: two ? i : 0,
           data: s.values,
-          barMaxWidth: 64,
-          itemStyle: { color: token(`--role-${s.role}`), borderRadius: 0 },
+          barMaxWidth: 56,
+          symbolSize: 8,
+          itemStyle: { color: i === 0 ? t.line : text, borderRadius: 0 },
+          lineStyle: { color: text, width: 2 },
+          // İki seride çubuk değeri çubuğun içinde, çizgi değeri üstte: etiketler çakışmaz.
+          label:
+            two && i === 0
+              ? { show: true, position: 'insideTop', fontSize: FONT_SIZE, fontWeight: 600, color: token('--surface-raised') }
+              : { show: true, position: 'top', fontSize: FONT_SIZE, color: text },
         })),
-        legend: { ...base().legend, type: 'scroll' },
       };
-    case 'satici-yapisi':
+    }
+
+    case 'pay': {
+      const t = tone(spec.role);
+      const hours = (v: number) => `${Math.floor(v / 60) ? `${Math.floor(v / 60)} sa` : ''}${v % 60 ? ` ${v % 60} dk` : ''}`.trim();
       return {
         ...base(),
-        tooltip: { ...base().tooltip, trigger: 'item' },
-        legend: { ...base().legend, bottom: 0, top: 'auto' },
-        series: [
-          {
-            type: 'pie',
-            radius: ['52%', '78%'],
-            center: ['50%', '46%'],
-            label: { show: true, formatter: '{c}', fontSize: FONT_SIZE, color: text, fontWeight: 600 },
-            labelLine: { lineStyle: { color: token('--rule-strong') } },
-            data: spec.items.map((item, i) => ({
-              ...item,
-              itemStyle: { color: i === 0 ? accent : token('--rule-strong') },
-            })),
-          },
-        ],
-      };
-    case 'senaryo':
-      return {
-        ...base(),
-        grid: { ...grid, top: 24 },
-        tooltip: { ...base().tooltip, trigger: 'axis', valueFormatter: (v: number) => lira(v) },
-        xAxis: { type: 'category', data: spec.items.map((i) => i.name), ...axisStyle(), splitLine: { show: false } },
+        grid: { left: 4, right: 88, top: 8, bottom: 8, containLabel: true },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${p.name}: ${hours(p.value)}` },
+        legend: { show: false },
+        xAxis: { type: 'value', show: false },
         yAxis: {
-          type: 'value',
-          ...axisStyle(),
-          axisLabel: { ...axisStyle().axisLabel, formatter: (v: number) => (v === 0 ? '0' : `${v / 1_000_000} M`) },
+          type: 'category',
+          inverse: true,
+          data: spec.items.map((i) => i.name),
+          ...axis(),
+          axisLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), color: text, width: Math.min(240, width * 0.42), overflow: 'break' },
         },
         series: [
           {
             type: 'bar',
             data: spec.items.map((i) => i.value),
-            barMaxWidth: 72,
-            itemStyle: { color: accent, borderRadius: 0 },
-            label: { show: true, position: 'top', formatter: (p: { value: number }) => lira(p.value), fontSize: FONT_SIZE, color: text },
-            markLine: {
-              symbol: 'none',
-              data: [{ yAxis: spec.target }],
-              lineStyle: { color: accentStrong, type: 'dashed', width: 2 },
-              label: { formatter: 'Hedef', color: accentStrong, fontSize: FONT_SIZE, position: 'insideEndTop' },
-            },
+            barMaxWidth: 24,
+            itemStyle: { color: t.line, borderRadius: 0 },
+            label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => hours(p.value) },
           },
         ],
       };
-    case 'piramit':
-      // Şekil için kademe sırası kullanılır; etiketler gerçek kişi sayısını gösterir (pyramidLabels).
+    }
+
+    case 'kopru':
       return {
         ...base(),
-        tooltip: { ...base().tooltip, trigger: 'item' },
+        grid: { ...grid, top: legendTop(['İlk ödemeler (100 aktif satıcı)', 'Yenilemeler'], width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
+        legend: { ...(base().legend as Opt), data: ['İlk ödemeler (100 aktif satıcı)', 'Yenilemeler'] },
+        xAxis: { type: 'category', data: spec.scenarios, ...axis(), splitLine: { show: false } },
+        yAxis: {
+          type: 'value',
+          max: Math.max(spec.target * 1.2, ...spec.first.map((f, i) => f + spec.renew[i])),
+          ...axis(),
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: millions },
+        },
+        series: [
+          { name: 'İlk ödemeler (100 aktif satıcı)', type: 'bar', stack: 's', data: spec.first, barMaxWidth: 64, itemStyle: { color: accent, borderRadius: 0 } },
+          { name: 'Yenilemeler', type: 'bar', stack: 's', data: spec.renew, barMaxWidth: 64, itemStyle: { color: token('--role-saha-uzmani'), borderRadius: 0 }, markLine: targetLine(spec.target) },
+        ],
+      };
+
+    case 'gelir-ay': {
+      let running = 0;
+      const cumulative = spec.first.map((f, i) => (running += f + spec.renew[i]));
+      return {
+        ...base(),
+        grid: { ...grid, top: legendTop(['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'], width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
+        legend: { ...(base().legend as Opt), data: ['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'] },
+        xAxis: { type: 'category', data: spec.months, ...axis(), splitLine: { show: false } },
+        yAxis: { type: 'value', ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        series: [
+          { name: 'İlk ödemeler', type: 'bar', stack: 'a', data: spec.first, barMaxWidth: 64, itemStyle: { color: accent, borderRadius: 0 } },
+          { name: 'Yenilemeler', type: 'bar', stack: 'a', data: spec.renew, barMaxWidth: 64, itemStyle: { color: token('--role-saha-uzmani'), borderRadius: 0 } },
+          { name: 'Kümülatif ciro', type: 'line', data: cumulative, symbolSize: 8, lineStyle: { color: text, width: 2 }, itemStyle: { color: text }, markLine: targetLine(spec.target) },
+        ],
+      };
+    }
+
+    case 'kaynak-ay':
+      return {
+        ...base(),
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis' },
+        // Açıklama birden çok satıra sarılır (sayfalı açıklama yok); ızgara onun altında başlar.
+        legend: { ...(base().legend as Opt), right: 0 },
+        grid: { ...grid, top: legendTop(spec.series.map((x) => x.name), width) },
+        xAxis: { type: 'category', data: spec.months, ...axis(), splitLine: { show: false } },
+        yAxis: { type: 'value', ...axis(), minInterval: 1 },
+        series: spec.series.map((s) => ({
+          name: s.name,
+          type: 'bar',
+          stack: 'k',
+          data: s.values,
+          barMaxWidth: 64,
+          itemStyle: { color: token(`--role-${s.role}`), borderRadius: 0 },
+        })),
+      };
+
+    case 'checkpoint':
+      return {
+        ...base(),
+        grid: { ...grid, top: legendTop(['Kümülatif aktif satıcı', 'Kümülatif ciro'], width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis' },
+        legend: { ...(base().legend as Opt), data: ['Kümülatif aktif satıcı', 'Kümülatif ciro'] },
+        xAxis: { type: 'category', data: spec.days, ...axis(), splitLine: { show: false } },
+        yAxis: [
+          { type: 'value', ...axis(), minInterval: 1 },
+          { type: 'value', ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        ],
+        series: [
+          { name: 'Kümülatif aktif satıcı', type: 'bar', data: spec.aktif, barMaxWidth: 56, itemStyle: { color: accent, borderRadius: 0 }, label: { show: true, position: 'top', fontSize: FONT_SIZE, color: text } },
+          {
+            name: 'Kümülatif ciro',
+            type: 'line',
+            yAxisIndex: 1,
+            data: spec.ciro,
+            symbolSize: 8,
+            lineStyle: { color: text, width: 2 },
+            itemStyle: { color: text },
+            tooltip: { valueFormatter: (v: number) => lira(v) },
+            markLine: targetLine(spec.target, 'insideEndTop'),
+          },
+        ],
+      };
+
+    case 'deadlines': {
+      const start = ms(spec.start);
+      return {
+        ...base(),
+        grid: { left: 4, right: 40, top: 16, bottom: 4, containLabel: true },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'item',
+          formatter: (p: { data: { name: string; value: number[] } }) => `${p.data.name}<br/>${shortDate(start + p.data.value[0] * DAY)}`,
+        },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: (ms(spec.end) - start) / DAY,
+          ...axis(),
+          axisLabel: { ...(axis().axisLabel as Opt), showMaxLabel: false, formatter: (v: number) => shortDate(start + v * DAY) },
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: spec.items.map((i) => i.name),
+          ...axis(),
+          splitLine: { show: true, lineStyle: { color: token('--rule') } },
+          axisLabel: { ...(axis().axisLabel as Opt), color: text, width: 220, overflow: 'break' },
+        },
+        series: [
+          {
+            type: 'scatter',
+            symbol: 'rect',
+            symbolSize: 16,
+            data: spec.items.map((item, i) => {
+              const t = tone(item.role);
+              return {
+                name: item.name,
+                value: [(ms(item.date) - start) / DAY, i],
+                itemStyle: { color: t.line },
+                label: { show: true, position: 'right', fontSize: FONT_SIZE, color: t.text, formatter: shortDate(ms(item.date)) },
+              };
+            }),
+          },
+        ],
+      };
+    }
+
+    case 'piramit':
+      return {
+        ...base(),
+        tooltip: { ...(base().tooltip as Opt), trigger: 'item' },
         legend: { show: false },
         series: [{ type: 'funnel', sort: 'ascending', left: '4%', right: '4%', top: 8, bottom: 8, minSize: '22%', maxSize: '100%', gap: 4, data: [] }],
       };
-    case 'huni':
+
+    case 'chain': {
+      // Zincir: her adım bir öncekinin tek çocuğu; ağaç yerleşimi adımları dikey hizalar.
+      const root = [...spec.steps].reverse().reduce<ChartTreeNode | undefined>(
+        (child, step) => ({ name: step.name, sub: step.sub, role: step.role, children: child ? [child] : undefined }),
+        undefined,
+      ) as ChartTreeNode;
+      return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(root, 'TB', [232, 64])] };
+    }
+
+    case 'mix':
       return {
         ...base(),
-        tooltip: { ...base().tooltip, trigger: 'item', formatter: (p: { name: string; value: number }) => `${p.name}: ${number.format(p.value)}` },
+        grid: { left: 4, right: 88, top: 8, bottom: 8, containLabel: true },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${p.name}: ${p.value} ${spec.unit}` },
+        legend: { show: false },
+        xAxis: { type: 'value', show: false },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: spec.items.map((i) => i.name),
+          ...axis(),
+          axisLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), color: text, width: Math.min(220, width * 0.42), overflow: 'break' },
+        },
+        series: [
+          {
+            type: 'bar',
+            barMaxWidth: 28,
+            label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => `${p.value} ${spec.unit}` },
+            data: spec.items.map((item) => ({ value: item.value, itemStyle: { color: token(`--role-${item.role}`), borderRadius: 0 } })),
+          },
+        ],
+      };
+
+    case 'huni': {
+      const t = tone(spec.role);
+      const label = (p: { name: string; value: number }) => `${p.name}: ${number.format(p.value)}`;
+      return {
+        ...base(),
+        tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: label },
         legend: { show: false },
         series: [
           {
@@ -222,90 +540,9 @@ function build(spec: ChartSpec): Record<string, unknown> {
             bottom: 8,
             minSize: '28%',
             gap: 4,
-            label: {
-              show: true,
-              position: 'inside',
-              fontSize: FONT_SIZE,
-              fontWeight: 600,
-              color: token(`--role-${spec.role}-fg`),
-              formatter: (p: { name: string; value: number }) => `${p.name}: ${number.format(p.value)}`,
-            },
-            itemStyle: { color: token(`--role-${spec.role}-bg`), borderColor: token(`--role-${spec.role}`), borderWidth: 2 },
+            label: { show: true, position: 'inside', fontSize: FONT_SIZE, fontWeight: 600, color: t.text, formatter: label },
+            itemStyle: { color: t.fill, borderColor: t.line, borderWidth: 2 },
             data: spec.items,
-          },
-        ],
-      };
-    case 'takvim': {
-      const day0 = new Date(`${spec.start}T00:00:00`);
-      const dateLabel = (day: number) => {
-        const d = new Date(day0);
-        d.setDate(d.getDate() + Math.round(day));
-        return new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(d);
-      };
-      return {
-        ...base(),
-        grid: { left: 4, right: 24, top: 40, bottom: 4, containLabel: true },
-        tooltip: {
-          ...base().tooltip,
-          trigger: 'item',
-          formatter: (p: { seriesIndex: number; data: { name: string; text: string } }) =>
-            p.seriesIndex === 1 ? `${p.data.name}: ${p.data.text}` : '',
-        },
-        xAxis: {
-          type: 'value',
-          min: 0,
-          max: spec.end,
-          ...axisStyle(),
-          axisLabel: { ...axisStyle().axisLabel, formatter: (v: number) => dateLabel(v) },
-        },
-        yAxis: {
-          type: 'category',
-          inverse: true,
-          data: spec.rows.map((r) => r.name),
-          ...axisStyle(),
-          splitLine: { show: false },
-          axisLabel: { ...axisStyle().axisLabel, color: text, width: 150, overflow: 'break' },
-        },
-        series: [
-          {
-            type: 'bar',
-            stack: 'takvim',
-            silent: true,
-            tooltip: { show: false },
-            itemStyle: { color: 'transparent' },
-            data: spec.rows.map((r) => r.from),
-          },
-          {
-            type: 'bar',
-            stack: 'takvim',
-            barMaxWidth: 28,
-            label: {
-              show: true,
-              position: 'insideLeft',
-              fontSize: FONT_SIZE,
-              fontWeight: 600,
-              formatter: (p: { data: { text: string } }) => p.data.text,
-            },
-            data: spec.rows.map((r) => ({
-              value: r.to - r.from,
-              name: r.name,
-              text: r.text,
-              itemStyle: {
-                color: token(`--role-${r.role}-bg`),
-                borderColor: token(`--role-${r.role}`),
-                borderWidth: 2,
-                borderType: r.alt ? 'dashed' : 'solid',
-                borderRadius: 0,
-              },
-              label: { color: token(`--role-${r.role}-fg`) },
-            })),
-            markLine: {
-              symbol: 'none',
-              silent: true,
-              lineStyle: { color: token('--rule-strong'), type: 'dashed', width: 1 },
-              label: { fontSize: FONT_SIZE, color: token('--text-secondary'), position: 'start' },
-              data: spec.marks.map((m) => ({ xAxis: m.day, label: { formatter: m.label } })),
-            },
           },
         ],
       };
@@ -313,33 +550,69 @@ function build(spec: ChartSpec): Record<string, unknown> {
   }
 }
 
-function pyramidLabels(spec: ChartSpec, options: Record<string, unknown>) {
-  if (spec.kind !== 'piramit') return options;
-  // Her kademenin etiket metni ve rengi ayrı tanımlanır.
-  const series = (options.series as Record<string, unknown>[])[0];
-  series.data = spec.items.map((item, i) => ({
-    name: item.name,
-    value: i + 1,
-    count: item.count,
-    itemStyle: { color: token(`--role-${item.role}-bg`), borderColor: token(`--role-${item.role}`), borderWidth: 2 },
-    label: { color: token(`--role-${item.role}-fg`), formatter: `${item.name} · ${item.count}` },
-  }));
-  series.label = { show: true, position: 'inside', fontSize: FONT_SIZE, fontWeight: 600 };
-  (options.tooltip as Record<string, unknown>).formatter = (p: { data: { name: string; count: number } }) =>
-    `${p.data.name}: ${p.data.count} kişi`;
+/** ECharts seri varsayılanları (çizgi doğrusal, pasta 1000 ms, işaret çizgisi doğrusal) token hareketiyle ezilir. */
+function applyMotion(options: Opt) {
+  const m = motion();
+  for (const series of options.series as Opt[]) {
+    Object.assign(series, m);
+    if (series.markLine) Object.assign(series.markLine as Opt, m);
+  }
   return options;
 }
 
+/** Piramit: şekil için kademe sırası; etiket ve ipucu gerçek kişi sayısı. */
+function finalize(spec: ChartSpec, options: Opt) {
+  applyMotion(options);
+  if (spec.kind !== 'piramit') return options;
+  const series = (options.series as Opt[])[0];
+  series.data = spec.items.map((item, i) => {
+    const t = tone(item.role);
+    return {
+      name: item.name,
+      value: i + 1,
+      count: item.count,
+      itemStyle: { color: t.fill, borderColor: t.line, borderWidth: 2 },
+      label: { color: t.text, formatter: `${item.name} · ${item.count}` },
+    };
+  });
+  series.label = { show: true, position: 'inside', fontSize: FONT_SIZE, fontWeight: 600 };
+  (options.tooltip as Opt).formatter = (p: { data: { name: string; count: number } }) => `${p.data.name}: ${p.data.count} kişi`;
+  return options;
+}
+
+const widthOf = (el: HTMLElement) => el.clientWidth;
+
 function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
-  el.querySelector('.chart-fallback')?.remove();
   const chart = mod.echarts.init(el, undefined, { renderer: 'svg' });
-  chart.setOption(pyramidLabels(spec, build(spec)));
-  charts.set(el, { chart, spec });
-  new ResizeObserver(() => chart.resize()).observe(el);
+  chart.setOption(finalize(spec, build(spec, widthOf(el))));
+  if (spec.kind === 'org' || spec.kind === 'gov') {
+    // Düğüm bağlantıları rol sayfasına gider; aynı bağlantılar ana gezinmede de vardır.
+    chart.on('click', (p) => {
+      const target = (p.data as { value?: string } | null)?.value;
+      if (target) window.location.href = target;
+    });
+  }
+  el.querySelector('.chart-fallback')?.remove();
+  // Dar ekranda organizasyon şeması tepeyi (ortayı) göstererek açılır; kaydırma animasyonsuz.
+  const scroller = el.closest<HTMLElement>('.chart-scroll');
+  if (scroller && spec.kind === 'org') scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
+  charts.set(el, { chart, spec, width: widthOf(el) });
+  new ResizeObserver(() => {
+    chart.resize();
+    // Genişlik belirgin değişince açıklama satırları ve etiket genişlikleri yeniden hesaplanır.
+    const entry = charts.get(el);
+    if (entry && Math.abs(widthOf(el) - entry.width) > 48) {
+      entry.width = widthOf(el);
+      chart.setOption(finalize(spec, build(spec, entry.width)), { notMerge: true });
+    }
+  }).observe(el);
 }
 
 function redrawAll() {
-  for (const { chart, spec } of charts.values()) chart.setOption(pyramidLabels(spec, build(spec)), { notMerge: true });
+  for (const [el, entry] of charts) {
+    entry.width = widthOf(el);
+    entry.chart.setOption(finalize(entry.spec, build(entry.spec, entry.width)), { notMerge: true });
+  }
 }
 
 async function initChart(el: HTMLElement) {
@@ -347,7 +620,17 @@ async function initChart(el: HTMLElement) {
   const raw = el.dataset.chart;
   if (!raw) return;
   loader ??= import('../lib/echarts-setup');
-  render(el, await loader, JSON.parse(raw) as ChartSpec);
+  try {
+    const mod = await loader;
+    // Etiket ölçüleri Outfit ile hesaplansın: yazı tipi yüklenmeden ilk çizim yapılmaz.
+    await document.fonts?.ready;
+    render(el, mod, JSON.parse(raw) as ChartSpec);
+  } catch {
+    // Grafik çizilemezse kutu küçülür; özet metni görünür kalır.
+    loader = null;
+    el.dataset.chartFailed = '';
+    el.querySelector('.chart-fallback')?.insertAdjacentText('afterbegin', 'Grafik yüklenemedi. ');
+  }
 }
 
 const nodes = [...document.querySelectorAll<HTMLElement>('[data-chart]')];

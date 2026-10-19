@@ -10,6 +10,10 @@ export function getStaticPaths() {
 const role = getRole(Astro.params.slug as string);
 ---
 
-<BaseLayout title={role.title} description={role.summary}>
+<BaseLayout title={role.title} description={role.mission}>
   <RolePage pathname={Astro.url.pathname} role={role} />
 </BaseLayout>
+
+<script>
+  import '../../scripts/charts.ts';
+</script>

@@ -110,8 +110,13 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
       if (prop === 'box-shadow' && /inset/.test(value) && !/:focus/.test(rule.selector)) {
         fail(file, `${rule.selector}: iç gölge çubuğu yasak; kenar sistemi (data-edge) kullan`);
       }
-      if (/^border(-(top|right|bottom|left|inline|block|inline-start|inline-end|block-start|block-end))?$/.test(prop) && /var\(--(tone|accent|role-|selected|edge)/.test(value)) {
-        fail(file, `${rule.selector}: "${prop}: ${value}" renkli vurgu kenarı yasak; kenar sistemi (data-edge) kullan`);
+      // Kenarlık rengi/kalınlığı yalnız nötr tokenlarla (çizgi, ince çizgi, mürekkep); kısaltma ve uzun biçimler dahil.
+      if (/^border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-(color|width))?$/.test(prop)) {
+        const tokens = [...value.matchAll(/var\(--([\w-]+)/g)].map((m) => m[1]);
+        const colored = tokens.filter((t) => !/^(rule|rule-strong|hairline|text-primary)$/.test(t));
+        if (colored.length) {
+          fail(file, `${rule.selector}: "${prop}: ${value}" renkli vurgu kenarı yasak; kenar sistemi (data-edge) kullan`);
+        }
       }
 
       // Yazı boyutu

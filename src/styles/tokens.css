@@ -56,6 +56,16 @@
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-pill: 999px;
+
+  /* Grafik yükseklikleri ve geniş grafiklerin okunabilir en küçük genişliği (dar ekranda kendi kutusunda kayar) */
+  --chart-h-sm: 16rem;
+  --chart-h-md: 22rem;
+  --chart-h-lg: 26rem;
+  --chart-h-xl: 40rem;
+  --chart-h-xxl: 54rem;
+  --chart-wide-min: 56rem;
+  --chart-org-min: 69rem;
+  --chart-gov-min: 68rem;
   --hairline: 1px;
   --bar-width: 4px;
   /* Kenar sistemi: düz vurgu çizgisi kalınlığı (kavisli kenar yasak) */

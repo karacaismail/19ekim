@@ -3,6 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { PlanPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="Eylem planı" description="Hafta hafta 90 günlük eylem planı ve kontrol noktaları.">
+<BaseLayout title="Eylem planı" description="istoc.com genel eylem planı: kişi × zaman Gantt şeması ve eylem tablosu.">
   <PlanPage pathname={Astro.url.pathname} />
 </BaseLayout>
+
+<script>
+  import '../scripts/charts.ts';
+</script>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { meta } from '../data/program';
-import { APEX, COMMON_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { COMMON_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { href, normalizePath } from '../lib/paths';
 
@@ -43,6 +43,8 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
   const stop = index >= 0 ? SEQUENCE[index] : null;
   const prev = index > 0 ? SEQUENCE[index - 1] : null;
   const next = index >= 0 && index < SEQUENCE.length - 1 ? SEQUENCE[index + 1] : null;
+  // Ara kırıntı, tek kırıntılı sayfanın etiketiyse o sayfaya bağlanır (ör. Ağaç 3 → saha ekibi).
+  const crumbPath = (label: string) => SEQUENCE.find((s) => s.crumb.length === 1 && s.crumb[0] === label)?.path;
 
   return (
     <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
@@ -91,13 +93,17 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
               <nav aria-label="Ağaç yolu" className="crumbs">
                 <ol>
                   <li>
-                    <a href={href('/')}>{APEX.name}</a>
+                    <a href={href('/')}>İsmail Karaca</a>
                   </li>
-                  {stop.crumb.map((c, i) => (
-                    <li key={c} aria-current={i === stop.crumb.length - 1 ? 'page' : undefined}>
-                      {c}
-                    </li>
-                  ))}
+                  {stop.crumb.map((c, i) => {
+                    const last = i === stop.crumb.length - 1;
+                    const path = last ? undefined : crumbPath(c);
+                    return (
+                      <li key={c} aria-current={last ? 'page' : undefined}>
+                        {path ? <a href={href(path)}>{c}</a> : c}
+                      </li>
+                    );
+                  })}
                 </ol>
               </nav>
             ) : null}
@@ -128,6 +134,11 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
               19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
               2. haftanın sonunda gerçek veriyle kalibre edilir. Ücret ve bütçe tutarları (Meta reklam bütçesi hariç) bu
               herkese açık sitede yayımlanmaz.
+            </p>
+            <p>
+              <a className="text-link" data-standalone="" href={href('/arsiv/')}>
+                Arşiv: tahtadan karara
+              </a>
             </p>
           </div>
         </footer>
