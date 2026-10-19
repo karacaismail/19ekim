@@ -599,15 +599,51 @@ test.describe('parametreler', () => {
   });
 });
 
-test.describe('BCG matrisi', () => {
-  test('dört kutu ve iki ürün çizilir; Türkçe etiketler', async ({ page }) => {
+test.describe('BCG eğitimi', () => {
+  test('dört kutu, nakit döngüsü okları ve örnek balon matrisi Türkçe çizilir', async ({ page }) => {
     await page.goto('bcg/');
-    const canvas = page.locator('.chart-canvas[data-kind="bcg"]');
-    await canvas.scrollIntoViewIfNeeded();
-    await expect(canvas.locator('svg')).toBeVisible({ timeout: 10_000 });
-    const texts = await canvas.locator('svg text').allTextContents();
-    for (const label of ['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek', 'istoc.com', 'Segika', 'Yüksek pay', 'Hızlı büyüme']) {
-      expect(texts, label).toContain(label);
+    const quad = page.locator('.chart-canvas[data-kind="bcg"]');
+    await quad.scrollIntoViewIfNeeded();
+    await expect(quad.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const quadTexts = await quad.locator('svg text').allTextContents();
+    for (const label of ['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek', 'Nakit akar', 'Pay kazanırsa', 'Yüksek pay', 'Hızlı büyüme']) {
+      expect(quadTexts, label).toContain(label);
     }
+    const example = page.locator('.chart-canvas[data-kind="bcg-num"]');
+    await example.scrollIntoViewIfNeeded();
+    await expect(example.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const exampleTexts = await example.locator('svg text').allTextContents();
+    for (const label of ['Akıllı saat', 'Kahve makinesi', 'Elektrikli scooter', 'Akıllı termostat', 'DVD oynatıcı']) {
+      expect(exampleTexts, label).toContain(label);
+    }
+  });
+
+  test('alıştırma cevabı açılır; klavye odağında halka yok, alt çizgi var', async ({ page, browserName }) => {
+    test.skip(
+      browserName === 'webkit',
+      'not_run: Playwright WebKit Tab/Alt+Tab ile <summary> öğesine odaklanmıyor (Safari varsayılanı); gerçek Safari’de elle doğrulanmalı',
+    );
+    const tab = 'Tab';
+    await page.goto('bcg/');
+    const first = page.locator('.quiz-item').first();
+    await first.locator('summary').click();
+    await expect(first.locator('.quiz-answer')).toBeVisible();
+    // WebKit tıklamada özete odak vermez; odak doğrudan verilir, sonra klavyeyle ileri-geri gidilir.
+    await first.locator('summary').focus();
+    await page.keyboard.press(tab);
+    await page.keyboard.press(`Shift+${tab}`);
+    const state = await first.locator('summary').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        focused: document.activeElement === el,
+        mode: document.documentElement.dataset.focusMode,
+        ring: cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0,
+        underline: cs.textDecorationLine,
+      };
+    });
+    expect(state.focused).toBe(true);
+    expect(state.mode).toBe('keyboard');
+    expect(state.ring).toBe(false);
+    expect(state.underline).toContain('underline');
   });
 });

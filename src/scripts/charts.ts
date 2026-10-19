@@ -541,6 +541,7 @@ function build(spec: ChartSpec, width: number): Opt {
       };
       const name = (key: string) => spec.quadrants.find((q) => q.key === key)?.name ?? key;
       const ends = (low: string, high: string) => (v: number) => (v === 0 ? low : v === 1 ? high : '');
+      const items = spec.items ?? [];
       return {
         ...base(),
         grid: { left: 4, right: 16, top: 8, bottom: 4, containLabel: true },
@@ -572,7 +573,7 @@ function build(spec: ChartSpec, width: number): Opt {
           {
             type: 'scatter',
             symbolSize: 22,
-            data: spec.items.map((item) => ({
+            data: items.map((item) => ({
               name: item.name,
               quadrant: item.quadrant,
               value: [item.x, item.y],
@@ -604,10 +605,100 @@ function build(spec: ChartSpec, width: number): Opt {
               symbol: ['none', 'arrow'],
               symbolSize: 14,
               lineStyle: { color: text, type: 'dashed', width: 2 },
-              label: { show: false },
-              data: spec.items
-                .filter((item) => item.toward)
-                .map((item) => [{ coord: [item.x, item.y] }, { coord: [item.toward!.x, item.toward!.y] }]),
+              label: { show: true, position: 'middle', fontSize: FONT_SIZE, fontWeight: 600, color: text, backgroundColor: token('--surface-raised'), padding: [2, 6] },
+              data: [
+                ...items
+                  .filter((item) => item.toward)
+                  .map((item) => [{ coord: [item.x, item.y], label: { show: false } }, { coord: [item.toward!.x, item.toward!.y] }]),
+                ...(spec.flows ?? []).map((flow) => [{ coord: flow.from, label: { formatter: flow.label } }, { coord: flow.to }]),
+              ],
+            },
+          },
+        ],
+      };
+    }
+
+    case 'bcg-num': {
+      // Klasik BCG: göreli pay log ölçekte, yüksek pay solda; dikeyde pazar büyümesi (%). Balon alanı ciroyla orantılı.
+      const fills: Record<string, string> = {
+        yildiz: token('--role-ekip-lideri-bg'),
+        soru: token('--role-pazarlamaci-bg'),
+        inek: token('--role-saha-uzmani-bg'),
+        kopek: token('--surface-sunken'),
+      };
+      const tones: Record<string, string> = {
+        yildiz: token('--role-ekip-lideri'),
+        soru: token('--role-pazarlamaci'),
+        inek: token('--role-saha-uzmani'),
+        kopek: token('--role-yazilim'),
+      };
+      const name = (key: string) => spec.quadrants.find((q) => q.key === key)?.name ?? key;
+      const xMin = 0.05;
+      const xMax = 10;
+      // Eksen 10’un katlarına hizalı: büyüme eşiği (%10) bir çizgiye denk gelir.
+      const yMin = Math.min(-10, Math.floor((Math.min(...spec.items.map((i) => i.growth)) - 4) / 10) * 10);
+      const yMax = Math.max(30, Math.ceil((Math.max(...spec.items.map((i) => i.growth)) + 8) / 10) * 10);
+      const maxRevenue = Math.max(...spec.items.map((i) => i.revenue));
+      const bounds: Record<string, [number, number, number, number]> = {
+        yildiz: [spec.shareSplit, xMax, spec.growthSplit, yMax],
+        soru: [xMin, spec.shareSplit, spec.growthSplit, yMax],
+        inek: [spec.shareSplit, xMax, yMin, spec.growthSplit],
+        kopek: [xMin, spec.shareSplit, yMin, spec.growthSplit],
+      };
+      return {
+        ...base(),
+        grid: { left: 4, right: 20, top: 8, bottom: 4, containLabel: true },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'item',
+          formatter: (p: { data?: { name?: string; value?: number[]; revenue?: number; quadrant?: string } }) =>
+            p.data?.value
+              ? `${p.data.name}<br/>Büyüme %${number.format(p.data.value[1])} · Göreli pay ${number.format(p.data.value[0])}<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺ · ${name(p.data.quadrant ?? '')}`
+              : '',
+        },
+        xAxis: {
+          type: 'log',
+          logBase: 10,
+          min: xMin,
+          max: xMax,
+          inverse: true,
+          ...axis(),
+          splitLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => number.format(v) },
+        },
+        yAxis: {
+          type: 'value',
+          min: yMin,
+          max: yMax,
+          interval: 10,
+          ...axis(),
+          splitLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => (v < 0 ? `−%${-v}` : `%${v}`) },
+        },
+        series: [
+          {
+            type: 'scatter',
+            data: spec.items.map((item) => ({
+              name: item.name,
+              quadrant: item.quadrant,
+              revenue: item.revenue,
+              value: [item.share, item.growth],
+              symbolSize: 14 + 46 * Math.sqrt(item.revenue / maxRevenue),
+              itemStyle: { color: tones[item.quadrant], opacity: 0.85, borderColor: token('--surface-raised'), borderWidth: 2 },
+              label: { show: true, position: 'bottom', distance: 6, fontSize: FONT_SIZE, fontWeight: 600, color: text, formatter: item.name },
+            })),
+            markArea: {
+              silent: true,
+              data: Object.entries(bounds).map(([key, [x0, x1, y0, y1]]) => [
+                {
+                  name: name(key),
+                  xAxis: x1,
+                  yAxis: y1,
+                  itemStyle: { color: fills[key] },
+                  label: { show: true, position: key === 'yildiz' || key === 'inek' ? 'insideTopLeft' : 'insideTopRight', fontSize: FONT_SIZE, fontWeight: 600, color: text },
+                },
+                { xAxis: x0, yAxis: y0 },
+              ]),
             },
           },
         ],

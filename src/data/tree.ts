@@ -75,7 +75,7 @@ export const SEQUENCE: Stop[] = [
   { path: '/eylem-plani/', label: 'Eylem planı', crumb: ['Eylem planı'] },
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
-  { path: '/bcg/', label: 'BCG matrisi', crumb: ['BCG matrisi'] },
+  { path: '/bcg/', label: 'BCG matrisi eğitimi', crumb: ['BCG matrisi eğitimi'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
 ];
 
@@ -96,6 +96,6 @@ export const COMMON_NAV = [
   { label: 'MLM ağı', path: '/buyume-modeli/' },
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
-  { label: 'BCG matrisi', path: '/bcg/' },
+  { label: 'BCG eğitimi', path: '/bcg/' },
   { label: 'Parametreler', path: '/parametreler/' },
 ];

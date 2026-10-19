@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
@@ -240,14 +241,16 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
   });
 });
 
-test.describe('BCG matrisi', () => {
-  test('ürünlerin konumu kutularıyla uyumlu (yatay: göreli pay, dikey: büyüme; eşik 0,5)', () => {
-    const box = (x: number, y: number) => (y >= 0.5 ? (x >= 0.5 ? 'yildiz' : 'soru') : x >= 0.5 ? 'inek' : 'kopek');
-    for (const item of m.bcg.items) {
-      expect(box(item.x, item.y), item.name).toBe(item.quadrant);
-      expect(item.strategy.length).toBeGreaterThan(0);
+test.describe('BCG eğitimi', () => {
+  test('örnekte göreli pay ve kutu eşiklerle doğru hesaplanır; her kutudan en az bir ürün var', () => {
+    const boxes = EXAMPLE.map((p) => quadrantOf(p.growth, relativeShare(p)));
+    expect(boxes).toEqual(['yildiz', 'inek', 'soru', 'soru', 'kopek']);
+    expect(new Set(boxes).size).toBe(4);
+    expect(relativeShare(EXAMPLE[0])).toBe(1.5);
+    for (const q of QUIZ) {
+      const nums = [...q.why.matchAll(/(\d+(?:,\d+)?) ÷ (\d+)/g)];
+      for (const [, a, b] of nums) expect(Number(a.replace(',', '.')) / Number(b) > 0).toBe(true);
     }
-    expect(m.bcg.items.map((i) => i.name)).toEqual(['istoc.com satıcı aboneliği', 'Segika SGK teşvik yazılımı']);
   });
 });
 

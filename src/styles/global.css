@@ -40,11 +40,11 @@ dd {
  * Normal temalarda çevreleyen halka yoktur. Gösterge yalnız klavye modu + :focus-visible
  * iken tek kenarda (metin alt çizgisi veya iç sol çubuk) görünür ve anında belirir.
  */
-:where(a[href], button, [tabindex], .mainnav-list, .table-scroll):focus {
+:where(a[href], button, summary, [tabindex], .mainnav-list, .table-scroll):focus {
   outline: none;
 }
 
-html[data-focus-mode='keyboard'] :where(a[href], button):focus-visible {
+html[data-focus-mode='keyboard'] :where(a[href], button, summary):focus-visible {
   text-decoration-line: underline;
   text-decoration-style: solid;
   text-decoration-color: var(--focus-indicator);
@@ -1295,4 +1295,40 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
 
 .params-notice .text-link {
   color: inherit;
+}
+
+/* ---------- Eğitim: kendini sına ---------- */
+.quiz {
+  display: grid;
+  gap: var(--gap-normal);
+  margin-top: var(--space-6);
+  max-width: 48rem;
+}
+
+.quiz-item {
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.quiz-item summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  min-height: var(--hit-min);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+}
+
+.quiz-no {
+  color: var(--text-link);
+  font-weight: var(--weight-semibold);
+}
+
+.quiz-answer {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--text-primary);
 }
