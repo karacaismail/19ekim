@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
+import { DEFAULT_NOTES } from '../src/data/notes';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
@@ -251,6 +252,16 @@ test.describe('BCG eğitimi', () => {
       const nums = [...q.why.matchAll(/(\d+(?:,\d+)?) ÷ (\d+)/g)];
       for (const [, a, b] of nums) expect(Number(a.replace(',', '.')) / Number(b) > 0).toBe(true);
     }
+  });
+});
+
+test.describe('notlar', () => {
+  test('varsayılan notlar: partner ağı 5, İK yönetimi 5; her not bilinen bir listede', () => {
+    const count = (list: string) => DEFAULT_NOTES.notes.filter((n) => n.list === list).length;
+    expect([count('partner'), count('ik')]).toEqual([5, 5]);
+    const lists = new Set(DEFAULT_NOTES.lists.map((l) => l.id));
+    for (const n of DEFAULT_NOTES.notes) expect(lists.has(n.list), n.text).toBe(true);
+    expect(new Set(DEFAULT_NOTES.notes.map((n) => n.id)).size).toBe(DEFAULT_NOTES.notes.length);
   });
 });
 

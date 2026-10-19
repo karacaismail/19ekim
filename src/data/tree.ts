@@ -77,6 +77,7 @@ export const SEQUENCE: Stop[] = [
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
   { path: '/bcg/', label: 'BCG matrisi eğitimi', crumb: ['BCG matrisi eğitimi'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
+  { path: '/notlar/', label: 'Notlar', crumb: ['Notlar'] },
 ];
 
 export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: number; also?: string[] }[] = [
@@ -98,4 +99,5 @@ export const COMMON_NAV = [
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
   { label: 'BCG eğitimi', path: '/bcg/' },
   { label: 'Parametreler', path: '/parametreler/' },
+  { label: 'Notlar', path: '/notlar/' },
 ];

@@ -1332,3 +1332,265 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
   padding: 0 var(--space-4) var(--space-4);
   color: var(--text-primary);
 }
+
+/* ---------- Notlar (basit görev listesi) ---------- */
+.notes {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+@media (min-width: 48em) {
+  .notes {
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.note-lists ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-dense);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 48em) {
+  .note-lists ul {
+    flex-direction: column;
+  }
+}
+
+.note-list-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.note-list-btn:hover {
+  background: var(--surface-hover);
+}
+
+.note-list-btn[aria-pressed='true'] {
+  background: var(--surface-selected);
+  font-weight: var(--weight-semibold);
+}
+
+.note-count {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.note-new-list,
+.note-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.note-add {
+  margin-top: var(--space-4);
+}
+
+.note-field {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.note-field-label {
+  margin-bottom: var(--space-1);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.note-input {
+  --input-height: var(--hit-min);
+  --input-bd: var(--rule-strong);
+  --input-bd-focus: var(--rule-strong);
+  min-height: var(--hit-min);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+.note-input:focus {
+  outline: none;
+}
+
+.note-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.note-btn {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-link);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.note-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.note-btn:disabled {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.note-btn[data-armed] {
+  color: var(--status-bekliyor-fg);
+}
+
+.note-btn-primary {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.note-btn-primary:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.note-btn-primary:disabled {
+  background: var(--surface-sunken);
+}
+
+.note-items {
+  display: grid;
+  gap: var(--gap-dense);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.note-check {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.note-check-body {
+  align-items: center;
+}
+
+.note-check-input {
+  cursor: pointer;
+}
+
+.note-check-input:focus {
+  outline: none;
+}
+
+.note-text {
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  cursor: pointer;
+}
+
+.note-row[data-done] .note-text {
+  color: var(--text-secondary);
+  text-decoration-line: line-through;
+}
+
+.note-list-tag {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.note-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-inline-start: auto;
+}
+
+.note-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+
+.note-empty {
+  margin: var(--space-4) 0 0;
+  color: var(--text-secondary);
+}
+
+.note-done {
+  margin-top: var(--space-6);
+}
+
+.note-done summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.note-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.note-status {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Klavye odağı: çevrelemeyen tek gösterge (alan etiketinin veya not metninin alt çizgisi). */
+html[data-focus-mode='keyboard'] .note-field:has(:focus-visible) .note-field-label,
+html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) .note-text {
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}

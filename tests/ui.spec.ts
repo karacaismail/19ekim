@@ -17,11 +17,12 @@ const PAGES = [
   'roller/segika/',
   'bcg/',
   'parametreler/',
+  'notlar/',
   'arsiv/',
 ];
 
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/'].includes(p));
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/'].includes(p));
 
 /** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
@@ -643,6 +644,80 @@ test.describe('BCG eğitimi', () => {
     });
     expect(state.focused).toBe(true);
     expect(state.mode).toBe('keyboard');
+    expect(state.ring).toBe(false);
+    expect(state.underline).toContain('underline');
+  });
+});
+
+test.describe('notlar', () => {
+  test('not eklenir, işaretlenir, düzenlenir, silinir ve tarayıcıda saklanır', async ({ page }) => {
+    await page.goto('notlar/');
+    await hydrated(page);
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-notlar'));
+    await page.reload();
+    await hydrated(page);
+    await expect(page.locator('.note-row')).toHaveCount(10);
+
+    // Liste seç ve not ekle (Enter ile)
+    await page.getByRole('button', { name: /^Partner ağı/ }).click();
+    await expect(page.locator('.note-row')).toHaveCount(5);
+    const input = page.getByLabel(/Yeni not/);
+    await input.fill('Sertifika ölçütlerini yaz');
+    await input.press('Enter');
+    await expect(page.locator('.note-row').first()).toContainText('Sertifika ölçütlerini yaz');
+
+    // İşaretle: tamamlananlara geçer
+    // İşaretlenen not tamamlananlara taşınır (kapalı bölüm); bu yüzden tıklanır, sonuç sayıdan okunur.
+    await page.getByRole('checkbox', { name: 'Sertifika ölçütlerini yaz' }).click();
+    await expect(page.locator('.note-done summary')).toContainText('Tamamlanan (1)');
+
+    // Kalıcı
+    await page.reload();
+    await hydrated(page);
+    await page.locator('.note-done summary').click();
+    await expect(page.getByRole('checkbox', { name: 'Sertifika ölçütlerini yaz' })).toBeChecked();
+
+    // Düzenle
+    const row = page.locator('.note-row', { hasText: 'Prim sistemi eklemeli' });
+    await row.getByRole('button', { name: /Düzenle/ }).click();
+    const edit = page.getByLabel('Notu düzenle');
+    await edit.fill('Prim sistemi: kurallar');
+    await edit.press('Enter');
+    await expect(page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' })).toHaveCount(1);
+
+    // Sil (iki adım)
+    const target = page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' });
+    await target.getByRole('button', { name: 'Sil' }).click();
+    await target.getByRole('button', { name: 'Silinsin mi?' }).click();
+    await expect(page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' })).toHaveCount(0);
+
+    // Varsayılana dön
+    const reset = page.getByRole('button', { name: 'Varsayılan notlara dön' });
+    await reset.click();
+    await page.getByRole('button', { name: 'Emin misiniz? Tekrar basın' }).click();
+    await expect(page.locator('.note-row', { hasText: 'Prim sistemi eklemeli' })).toHaveCount(1);
+    expect(await page.evaluate(() => localStorage.getItem('istoc-plan-notlar'))).toBeNull();
+  });
+
+  test('klavye: not kutusu odakta metnin altı çizili; çevreleyen halka yok', async ({ page, browserName }) => {
+    const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+    await page.goto('notlar/');
+    await hydrated(page);
+    await page.locator('.note-check-input').first().focus();
+    await page.keyboard.press(tab);
+    await page.keyboard.press(`Shift+${tab}`);
+    const state = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const row = el.closest('.note-row');
+      const text = row?.querySelector('.note-text') as HTMLElement | null;
+      const cs = getComputedStyle(el);
+      return {
+        isCheck: el.classList.contains('note-check-input'),
+        ring: cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0,
+        underline: text ? getComputedStyle(text).textDecorationLine : '',
+      };
+    });
+    expect(state.isCheck).toBe(true);
     expect(state.ring).toBe(false);
     expect(state.underline).toContain('underline');
   });

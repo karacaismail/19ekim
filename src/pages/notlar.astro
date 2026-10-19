@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { NotesPage } from '../views/NotesPage';
+---
+
+<BaseLayout title="Notlar" description="Basit not ve görev listesi: partner ağı ve İK yönetimi notları; tarayıcıda saklanır.">
+  <NotesPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>
