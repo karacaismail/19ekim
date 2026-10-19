@@ -4,5 +4,5 @@ import { HiringPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="İstihdam takvimi" description="Kim, hangi sırayla, hangi tarihte başlıyor: takvim ve işe alım sırası.">
-  <HiringPage pathname={Astro.url.pathname} />
+  <HiringPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

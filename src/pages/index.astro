@@ -4,9 +4,6 @@ import { HomePage } from '../views/HomePage';
 ---
 
 <BaseLayout description="iStoc organizasyon şeması: İsmail Karaca, kurmay ve dört ağaç.">
-  <HomePage pathname={Astro.url.pathname} />
+  <HomePage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

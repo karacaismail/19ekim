@@ -14,11 +14,16 @@ const PAGES = [
   'roller/ekip-lideri/',
   'roller/organizator/',
   'roller/asistan/',
+  'roller/segika/',
+  'parametreler/',
   'arsiv/',
 ];
 
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/'].includes(p));
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/'].includes(p));
+
+/** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
+const hydrated = (page: Page) => page.waitForSelector('astro-island:not([ssr])', { state: 'attached' });
 
 const WIDTHS = [320, 360, 375, 390, 768, 1280];
 const APPROVED_EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
@@ -342,6 +347,7 @@ test.describe('tema düğmesi', () => {
   test('açık/koyu geçişi anında, kalıcı ve aria-pressed ile', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('');
+    await hydrated(page);
     const toggle = page.locator('[data-theme-toggle]');
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
@@ -349,6 +355,7 @@ test.describe('tema düğmesi', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     expect(await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('dark');
     await page.reload();
+    await hydrated(page);
     expect(await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('dark');
     await expect(page.locator('[data-theme-toggle]')).toHaveAttribute('aria-pressed', 'true');
     await page.locator('[data-theme-toggle]').click();
@@ -373,7 +380,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
 
   test('takvim ve zaman çizelgesi: Mantine bileşenleri, metin en az 14 px', async ({ page }) => {
     await page.goto('istihdam/');
-    await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(7);
+    await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(8);
     await expect(page.locator('.cal')).toHaveCount(4);
     expect(await page.locator('.cal-day[data-event]').count()).toBe(11);
     const sizes = await page
@@ -460,7 +467,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
       if (!url) return [];
       const { echarts } = await import(url);
       const out: { kind: string; values: (string | number | boolean)[][] }[] = [];
-      for (const el of document.querySelectorAll<HTMLElement>('.chart-canvas')) {
+      for (const el of document.querySelectorAll<HTMLElement>('.chart-canvas .chart-host')) {
         const inst = echarts.getInstanceByDom(el);
         if (!inst) continue;
         const option = inst.getOption();
@@ -476,7 +483,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
         values.push(['durum', !!state.duration, state.easing, state.duration, state.easing, state.duration]);
         const pointer = option.tooltip?.[0]?.axisPointer;
         if (pointer) values.push(['işaretçi', pointer.animation, pointer.animationEasingUpdate, pointer.animationDurationUpdate, pointer.animationEasingUpdate, pointer.animationDurationUpdate]);
-        out.push({ kind: el.dataset.kind ?? '', values });
+        out.push({ kind: (el.parentElement as HTMLElement).dataset.kind ?? '', values });
       }
       return out;
     });
@@ -515,5 +522,76 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
     for (const chart of charts) {
       for (const [part, on, , duration] of chart.values) expect([on, duration], `${chart.kind} ${part}`).toEqual([false, 0]);
     }
+  });
+});
+
+test.describe('parametreler', () => {
+  test('değişiklik tarayıcıya kaydedilir, tüm sayfalara yansır ve varsayılana dönülür', async ({ page }) => {
+    await page.goto('parametreler/');
+    await hydrated(page);
+    const salary = page.getByLabel('Saha satış maaşı');
+    await salary.fill('70000');
+    await salary.blur();
+    await expect(page.locator('.param-status')).toContainText('1 değer varsayılandan farklı');
+    await expect(page.locator('.params-notice')).toBeVisible();
+
+    await page.goto('karar-bekleyenler/');
+    await hydrated(page);
+    await expect(page.getByText('70.000 ₺ maaş / ay').first()).toBeVisible();
+    await expect(page.getByText('Kota: ay içinde 140.000 ₺ satış', { exact: false }).first()).toBeVisible();
+    await expect(page.locator('.params-notice')).toBeVisible();
+
+    await page.goto('roller/saha-uzmani/');
+    await hydrated(page);
+    await expect(page.locator('.facts-row')).toContainText('70.000 ₺ maaş');
+
+    await page.goto('parametreler/');
+    await hydrated(page);
+    const reset = page.locator('.param-reset');
+    await reset.click();
+    await expect(reset).toHaveText('Emin misiniz? Tekrar basın');
+    await reset.click();
+    await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
+    await page.goto('karar-bekleyenler/');
+    await hydrated(page);
+    await expect(page.getByText('60.000 ₺ maaş / ay').first()).toBeVisible();
+    await expect(page.locator('.params-notice')).toHaveCount(0);
+  });
+
+  test('tarih parametresi takvimi ve kontrol tarihlerini kaydırır', async ({ page }) => {
+    await page.goto('parametreler/');
+    await hydrated(page);
+    await page.evaluate(() => localStorage.setItem('istoc-plan-parametreler', JSON.stringify({ startDate: '2026-11-15' })));
+    await page.goto('karar-yetkisi/');
+    await hydrated(page);
+    await expect(page.locator('.data-table').first()).toContainText('13 Ocak');
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
+  });
+
+  test('klavye odağı: alan etiketi altı çizili; çevreleyen halka yok', async ({ page, browserName }) => {
+    const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+    await page.goto('parametreler/');
+    await hydrated(page);
+    await page.getByLabel('Program başlangıcı').focus();
+    await page.keyboard.press(tab);
+    const state = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const label = el.closest('.param-field')?.querySelector('.param-label') as HTMLElement | null;
+      const cs = getComputedStyle(el);
+      return {
+        mode: document.documentElement.dataset.focusMode,
+        outline: cs.outlineStyle === 'none' || parseFloat(cs.outlineWidth) === 0,
+        shadow: cs.boxShadow,
+        border: [cs.borderTopColor, cs.borderRightColor, cs.borderBottomColor, cs.borderLeftColor],
+        underline: label ? getComputedStyle(label).textDecorationLine : '',
+        thickness: label ? parseFloat(getComputedStyle(label).textDecorationThickness) : 0,
+      };
+    });
+    expect(state.mode).toBe('keyboard');
+    expect(state.outline).toBe(true);
+    expect(state.shadow).toBe('none');
+    expect(new Set(state.border).size, 'odakta kenarlık rengi değişmez, tek renk').toBe(1);
+    expect(state.underline).toContain('underline');
+    expect(state.thickness).toBeGreaterThanOrEqual(3);
   });
 });

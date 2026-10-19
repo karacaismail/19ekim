@@ -4,5 +4,5 @@ import { NotFoundPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Sayfa bulunamadı" description="Sayfa bulunamadı.">
-  <NotFoundPage pathname={Astro.url.pathname} />
+  <NotFoundPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

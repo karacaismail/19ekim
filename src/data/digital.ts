@@ -1,3 +1,6 @@
+import { addDays, daysBetween, shiftText } from '../lib/dates';
+import { tl } from '../lib/format';
+import { DEFAULT_PARAMS, type Params } from './params';
 import type { RoleKey } from './types';
 
 /**
@@ -15,11 +18,11 @@ export interface Integration {
   date: string;
 }
 
-export const integrations: Integration[] = [
+const BASE_INTEGRATIONS: Integration[] = [
   { name: 'Google Tag Manager', measures: 'Tüm etiketler tek kapsayıcıda: istoc.com ve alt alan adları', done: 'Önizlemede tüm etiketler tetikleniyor; sürüm notlu yayın', date: '2026-11-06' },
   { name: 'Çerez onayı (KVKK) + Consent Mode', measures: 'Ziyaretçi izni; izin yoksa ölçüm etiketi çalışmaz', done: 'Onaysız oturumda ölçüm isteği 0', date: '2026-11-06' },
   { name: 'Google Analytics 4', measures: 'Kayıt → onboarding → abonelik (399 €) → yenileme olayları', done: 'Huni raporu CRM sayılarıyla ± %5 içinde', date: '2026-11-13' },
-  { name: 'Yandex Metrica', measures: 'Hedefler, ısı haritası, oturum kaydı (Webvisor)', done: 'Kayıt formu ve paket sayfası hedefleri ölçülüyor', date: '2026-11-13' },
+  { name: 'Yandex Metrica', measures: 'Hedefler, ısı haritası, oturum kaydı (Webvisor)', done: 'Kayıt formu ve abonelik sayfası hedefleri ölçülüyor', date: '2026-11-13' },
   { name: 'Search Console + Yandex Webmaster', measures: 'Site haritası, dizine ekleme, arama sorguları', done: 'Site haritası onaylı; dizine ekleme hatası 0', date: '2026-11-13' },
   { name: 'Meta Pixel + Conversions API', measures: 'Temsilci başvurusu ve kayıt; reklam hesabı İsmail Karaca’dan devralınır', done: 'Başvuru olayı tarayıcı + sunucu kaynaklı, tekilleştirilmiş', date: '2026-11-16' },
   { name: 'UTM standardı + CRM kaynak alanı', measures: 'Her paylaşım ve reklam bağlantısının kaynağı Frappe CRM’de', done: 'UTM’li paylaşım %100; kaynağı boş CRM kaydı %0', date: '2026-11-20' },
@@ -52,8 +55,7 @@ export const pipeline: PipelineStep[] = [
   { step: 'Ölçüm ve geri besleme', what: 'UTM → GA4 ve Metrica; yorum ve mesajdaki talep CRM’e', mode: 'otomatik', measure: 'Talep 24 saatte masa başına' },
 ];
 
-/** Araç kararı (19 Ekim 2026): otomasyon açık kaynak ve kendi sunucumuzda; üretim ve paylaşım ücretli araçlarla. */
-export const AI_TOOL_BUDGET = 7_500;
+/** Araç kararı (19 Ekim 2026): otomasyon açık kaynak ve kendi sunucumuzda; üretim ve paylaşım ücretli araçlarla. Tavan: parametre. */
 
 export interface AiTool {
   tool: string;
@@ -137,11 +139,11 @@ export interface DigitalPlanRow {
   milestone?: boolean;
 }
 
-export const digitalPlan: DigitalPlanRow[] = [
+const BASE_DIGITAL_PLAN: DigitalPlanRow[] = [
   { stream: 'olcum', from: '2026-11-02', to: '2026-11-13', action: 'GTM, çerez onayı, GA4, Yandex Metrica, Search Console + Yandex Webmaster', target: 'Hepsi 13 Kasım’da yayında', milestone: true },
   { stream: 'olcum', from: '2026-11-16', to: '2026-11-20', action: 'Meta Pixel + Conversions API; UTM standardı ve CRM kaynak alanı', target: 'UTM’li paylaşım %100' },
   { stream: 'olcum', from: '2026-11-23', to: '2027-01-30', action: 'Haftalık ölçüm panosu', target: 'Her Pazartesi 09:00' },
-  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool); hat v1: kaynak → senaryo → üretim yarı otomatik', target: '%30 otomatik paylaşım · araç gideri ≤ 7.500 ₺ / ay' },
+  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool); hat v1: kaynak → senaryo → üretim yarı otomatik', target: '%30 otomatik paylaşım · araç gideri tavanın içinde' },
   { stream: 'otomasyon', from: '2026-11-30', to: '2026-12-26', action: 'Hat v2: zamanlayıcı ve yorum → CRM otomasyonu', target: '%60 otomatik · talep 24 saatte' },
   { stream: 'otomasyon', from: '2026-12-28', to: '2027-01-30', action: 'Hat v3: çok dilli altyazı, tam otomatik zamanlama', target: '%80 otomatik', milestone: true },
   { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar: ürün yenilikleri ve nasıl yapılır', target: 'Günde 1 video' },
@@ -151,3 +153,25 @@ export const digitalPlan: DigitalPlanRow[] = [
   { stream: 'plan', from: '2026-11-30', to: '2026-12-04', action: 'İçerik planı v2: ilk ayın verisiyle sütun oranları', target: 'Ölçüte göre en zayıf 2 sütun yeniden dengelenir' },
   { stream: 'plan', from: '2026-12-28', to: '2026-12-31', action: 'İçerik planı v3: Ocak takvimi', target: 'Haftada 18 video planlı' },
 ];
+
+/** Tarihli dijital veriler: takvim parametresine göre kayar; araç tavanı parametreden. */
+export function makeDigital(p: Params) {
+  const d = daysBetween(DEFAULT_PARAMS.startDate, p.startDate);
+  return {
+    aiToolBudget: p.aiToolsMonthly,
+    integrations: BASE_INTEGRATIONS.map((i) => ({ ...i, date: addDays(i.date, d), done: shiftText(i.done, d) })),
+    digitalPlan: BASE_DIGITAL_PLAN.map((r) => ({
+      ...r,
+      from: addDays(r.from, d),
+      to: addDays(r.to, d),
+      action: shiftText(r.action, d),
+      target: shiftText(r.target, d).replace('tavanın içinde', `≤ ${tl(p.aiToolsMonthly)} / ay`),
+    })),
+    planStart: addDays('2026-11-02', d),
+    planEnd: addDays('2027-01-30', d),
+    marks: [
+      { date: addDays('2026-12-30', d), label: '60. gün' },
+      { date: addDays('2027-01-30', d), label: '90. gün' },
+    ],
+  };
+}

@@ -1,9 +1,91 @@
-import type { ReactNode } from 'react';
-import { MantineProvider } from '@mantine/core';
+import { useEffect, useState, type ReactNode } from 'react';
+import { MantineProvider, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { meta } from '../data/program';
+import { ModelProvider, useParams } from './ModelContext';
 import { COMMON_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { href, normalizePath } from '../lib/paths';
+
+const THEME_KEY = 'istoc-plan-tema';
+
+/**
+ * Renk şeması tema düğmesinin anahtarında saklanır; kayıt yoksa işletim sistemi tercihi (auto). İlk boyamayı
+ * BaseLayout içindeki satır içi betik yapar, Mantine aynı kaynaktan okur (iki taraf çelişmez).
+ */
+const themeManager: MantineColorSchemeManager = {
+  get: () => {
+    try {
+      const value = localStorage.getItem(THEME_KEY);
+      return value === 'light' || value === 'dark' ? value : 'auto';
+    } catch {
+      return 'auto';
+    }
+  },
+  set: (value) => {
+    try {
+      if (value === 'auto') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, value);
+    } catch {
+      /* Depolama kapalıysa tercih yalnız bu sayfada geçerli olur. */
+    }
+  },
+  subscribe: () => undefined,
+  unsubscribe: () => undefined,
+  clear: () => {
+    try {
+      localStorage.removeItem(THEME_KEY);
+    } catch {
+      /* yok */
+    }
+  },
+};
+
+/** Durum anında güncellenir: aria-pressed kök öğedeki şemayı izler. JavaScript yoksa düğme gizli kalır. */
+function ThemeToggle() {
+  const { setColorScheme } = useMantineColorScheme();
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setDark(root.getAttribute('data-mantine-color-scheme') === 'dark');
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ['data-mantine-color-scheme'] });
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      data-theme-toggle
+      aria-pressed={dark ? 'true' : 'false'}
+      hidden
+      onClick={() => setColorScheme(dark ? 'light' : 'dark')}
+    >
+      <span className="theme-track" aria-hidden="true">
+        <span className="theme-thumb" />
+      </span>
+      <span>Koyu tema</span>
+    </button>
+  );
+}
+
+/** Parametreler varsayılandan farklıysa her sayfada görünür not. */
+function ParamsNotice() {
+  const { changed } = useParams();
+  if (!changed) return null;
+  return (
+    <div className="params-notice" role="status">
+      <div className="wrap">
+        <p>
+          Bu tarayıcıda {changed} parametre değiştirildi; sayfalardaki değerler varsayılandan farklı.{' '}
+          <a className="text-link" href={href('/parametreler/')}>
+            Parametreler
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function NavItem({
   label,
@@ -37,7 +119,7 @@ function NavItem({
   );
 }
 
-export function AppFrame({ pathname, children }: { pathname: string; children: ReactNode }) {
+export function AppFrame({ pathname, children, wide = false }: { pathname: string; children: ReactNode; wide?: boolean }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
   const stop = index >= 0 ? SEQUENCE[index] : null;
@@ -47,7 +129,8 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
   const crumbPath = (label: string) => SEQUENCE.find((s) => s.crumb.length === 1 && s.crumb[0] === label)?.path;
 
   return (
-    <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
+    <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="auto" colorSchemeManager={themeManager}>
+      <ModelProvider>
       <a className="skip-link" href="#icerik">
         İçeriğe geç
       </a>
@@ -60,12 +143,7 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
             </a>
             <div className="topbar-tools">
               <p className="plan-date">Plan tarihi: {meta.planDate}</p>
-              <button type="button" className="theme-toggle" data-theme-toggle aria-pressed="false" hidden>
-                <span className="theme-track" aria-hidden="true">
-                  <span className="theme-thumb" />
-                </span>
-                <span>Koyu tema</span>
-              </button>
+              <ThemeToggle />
             </div>
           </div>
         </header>
@@ -87,8 +165,9 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
             </ul>
           </div>
         </nav>
+        <ParamsNotice />
         <main className="app-main" id="icerik" tabIndex={-1}>
-          <div className="wrap">
+          <div className="wrap" data-wide={wide ? '' : undefined}>
             {stop && stop.crumb.length ? (
               <nav aria-label="Ağaç yolu" className="crumbs">
                 <ol>
@@ -132,8 +211,8 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
           <div className="wrap">
             <p>
               19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
-              2. haftanın sonunda gerçek veriyle kalibre edilir. Yayımlanan tutarlar yalnız kesinleşen kararlardır (Meta
-              bütçesi, saha ücreti ve prim); diğer ücret ve bütçe tutarları yayımlanmaz.
+              2. haftanın sonunda gerçek veriyle kalibre edilir. Tutarlar kesinleşen kararlardır; Parametreler sayfasında
+              değiştirilen değerler yalnız o tarayıcıda saklanır.
             </p>
             <p>
               <a className="text-link" data-standalone="" href={href('/arsiv/')}>
@@ -143,6 +222,7 @@ export function AppFrame({ pathname, children }: { pathname: string; children: R
           </div>
         </footer>
       </div>
+      </ModelProvider>
     </MantineProvider>
   );
 }

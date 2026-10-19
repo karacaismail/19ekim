@@ -4,5 +4,5 @@ import { ArchivePage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Arşiv: tahtadan karara" description="19 Ekim tahta notlarının plandaki karşılığı.">
-  <ArchivePage pathname={Astro.url.pathname} />
+  <ArchivePage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

@@ -128,6 +128,10 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   padding-inline: var(--page-gutter);
 }
 
+.wrap[data-wide] {
+  max-width: var(--content-wide-max);
+}
+
 /* ---------- Üst bant ve gezinme ---------- */
 .app {
   min-height: 100dvh;
@@ -547,6 +551,7 @@ html[data-js] .theme-toggle[hidden] {
 [data-role='dijital-pazarlama'] { --tone: var(--role-dijital-pazarlama); --tone-bg: var(--role-dijital-pazarlama-bg); --tone-fg: var(--role-dijital-pazarlama-fg); }
 [data-role='yazilim'] { --tone: var(--role-yazilim); --tone-bg: var(--role-yazilim-bg); --tone-fg: var(--role-yazilim-fg); }
 [data-role='yatirimci'] { --tone: var(--role-yatirimci); --tone-bg: var(--role-yatirimci-bg); --tone-fg: var(--role-yatirimci-fg); }
+[data-role='segika'] { --tone: var(--role-segika); --tone-bg: var(--role-segika-bg); --tone-fg: var(--role-segika-fg); }
 
 .chip[data-role] {
   background: var(--tone-bg);
@@ -707,6 +712,7 @@ html[data-js] .theme-toggle[hidden] {
 }
 
 .chart-canvas {
+  position: relative;
   height: var(--chart-h-md);
   padding: var(--space-4);
   border-radius: var(--radius-md);
@@ -729,6 +735,17 @@ html[data-js] .theme-toggle[hidden] {
 
 .chart-scroll .chart-canvas[data-kind='gov'] {
   min-width: var(--chart-gov-min);
+}
+
+/* ECharts kutusu: kapsayıcının iç alanını doldurur; React yalnız kapsayıcıyı yönetir. */
+.chart-host {
+  position: absolute;
+  inset: var(--space-4);
+}
+
+.chart-canvas[data-chart-failed] .chart-host,
+html:not([data-js]) .chart-host {
+  display: none;
 }
 
 /* Grafik çizilemezse (JavaScript yok veya yükleme hatası) kutu boş kalmaz: yalnız özet görünür. */
@@ -1171,4 +1188,107 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   inset-inline: 0;
   inset-block-start: 0;
   block-size: var(--edge-width);
+}
+
+/* ---------- Parametreler ---------- */
+.param-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.param-status {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.param-reset {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.param-reset:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.param-reset:disabled {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.param-grid {
+  display: grid;
+  gap: var(--space-6) var(--gap-normal);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  margin-top: var(--space-6);
+}
+
+.param-label {
+  margin-bottom: var(--space-1);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.param-help {
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.param-field[data-changed] .param-help {
+  color: var(--text-link);
+}
+
+/* Giriş kutusu: tam ve nötr kenarlık; odakta kenarlık rengi değişmez (çevreleyen halka yok). */
+.param-input {
+  --input-height: var(--hit-min);
+  --input-bd: var(--rule-strong);
+  --input-bd-focus: var(--rule-strong);
+  min-height: var(--hit-min);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.param-input:focus {
+  outline: none;
+}
+
+/* Klavye odağı: çevrelemeyen tek gösterge, alanın etiketinin alt çizgisi. */
+html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}
+
+/* Parametre değiştiyse her sayfada görünen not */
+.params-notice {
+  background: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+}
+
+.params-notice p {
+  margin: 0;
+  padding: var(--space-3) 0;
+}
+
+.params-notice .text-link {
+  color: inherit;
 }

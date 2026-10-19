@@ -4,9 +4,6 @@ import { AuthorityPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Karar yetkisi ve kontrol noktaları" description="Kim neye karar verir; 30, 60 ve 90. gün eşikleri.">
-  <AuthorityPage pathname={Astro.url.pathname} />
+  <AuthorityPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

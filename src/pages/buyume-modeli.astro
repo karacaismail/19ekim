@@ -4,9 +4,6 @@ import { GrowthPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Çok katmanlı pazarlama ağı" description="Çok katmanlı pazarlama (MLM) ağı: kademe piramidi, haftalık işe alım hunisi, hedefler ve uyum.">
-  <GrowthPage pathname={Astro.url.pathname} />
+  <GrowthPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

@@ -15,12 +15,9 @@ import {
   TextLink,
 } from '../components/ui';
 import {
-  AI_TOOL_BUDGET,
   aiTools,
   channels,
   contentPlan,
-  digitalPlan,
-  integrations,
   pipeline,
   productionRamp,
   STEP_MODE_LABELS,
@@ -32,7 +29,8 @@ import {
   type Integration,
   type PipelineStep,
 } from '../data/digital';
-import { MONTHS } from '../data/program';
+import { useModel } from '../components/ModelContext';
+import { addDays } from '../lib/dates';
 import type { PlanRow, Role, ScheduleRow, Task } from '../data/types';
 
 const minutes = (time: string) => {
@@ -79,6 +77,7 @@ function RoleHero({ role }: { role: Role }) {
 }
 
 function DaySection({ role, index }: { role: Role; index: number }) {
+  const [p1, p2] = useModel().workPeriods;
   const share = timeShare(role.daily);
   const top = share.slice(0, 3);
   return (
@@ -86,7 +85,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Dönem 1 (2 Kasım – 30 Ocak): hafta içi ${role.hours.weekday}; Cumartesi ${role.hours.saturday}; haftalık ${role.hours.weeklyNet}. 1 Şubat’tan Dönem 2: ${role.hours.fromFeb} (yıllık 270 saat fazla çalışma tavanı).`}
+      desc={`Dönem 1 (${formatDate(p1.from)} – ${formatDate(p1.to)}): hafta içi ${role.hours.weekday}; Cumartesi ${role.hours.saturday}; haftalık ${role.hours.weeklyNet}. Dönem 2 (${formatDate(p2.from)} itibarıyla): ${role.hours.fromFeb} (yıllık fazla çalışma tavanı).`}
     >
       <Chart
         id="zaman-payi"
@@ -94,7 +93,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
         note={`En büyük üç blok: ${top.map((t) => `${t.name} ${hours(t.value)}`).join(' · ')}`}
         summary={`Hafta içi çalışma süresinin dağılımı: ${share.map((s) => `${s.name} ${hours(s.value)}`).join(', ')}.`}
         spec={{ kind: 'pay', role: role.slug, items: share }}
-        size={share.length > 8 ? 'xl' : 'lg'}
+        size={share.length > 9 ? 'xxl' : share.length > 7 ? 'xl' : 'lg'}
       />
       <div className="split">
         <DataTable<ScheduleRow>
@@ -134,6 +133,9 @@ function DaySection({ role, index }: { role: Role; index: number }) {
  * 1 Ölçüm → 2 AI-first paylaşım otomasyonu → 3 Üretim ve paylaşım → 4 İçerik planı → 5 Plan → 6 Gün.
  */
 function DigitalSections({ role }: { role: Role }) {
+  const m = useModel();
+  const { integrations, digitalPlan, aiToolBudget: AI_TOOL_BUDGET, planStart, planEnd, marks } = m.digital;
+  const integrationDates = integrations.map((i) => i.date).sort();
   const weekly = contentPlan.reduce((sum, p) => sum + p.perWeek, 0);
   const last = integrations[integrations.length - 1];
   return (
@@ -148,7 +150,7 @@ function DigitalSections({ role }: { role: Role }) {
           id="entegrasyon"
           title="Entegrasyon × tamamlanma tarihi"
           summary={integrations.map((i) => `${i.name}: ${shortDate(i.date)}`).join('; ')}
-          spec={{ kind: 'deadlines', start: '2026-11-02', end: '2026-11-27', items: integrations.map((i) => ({ name: i.name, date: i.date, role: role.slug })) }}
+          spec={{ kind: 'deadlines', start: integrationDates[0], end: addDays(integrationDates[integrationDates.length - 1], 4), items: integrations.map((i) => ({ name: i.name, date: i.date, role: role.slug })) }}
           size="lg"
           wide
         />
@@ -291,8 +293,8 @@ function DigitalSections({ role }: { role: Role }) {
           summary={digitalPlan.map((p) => `${STREAM_LABELS[p.stream]}, ${shortRange(p)}: ${p.action}; hedef ${p.target}`).join('. ')}
           spec={{
             kind: 'gantt',
-            start: '2026-11-02',
-            end: '2027-01-30',
+            start: planStart,
+            end: planEnd,
             rows: digitalPlan.map((p, i) => ({
               name: `${STREAM_LABELS[p.stream]} · ${digitalPlan.slice(0, i + 1).filter((r) => r.stream === p.stream).length}`,
               from: p.from,
@@ -301,10 +303,7 @@ function DigitalSections({ role }: { role: Role }) {
               text: `${p.action} · Hedef: ${p.target}`,
               milestone: p.milestone,
             })),
-            marks: [
-              { date: '2026-12-30', label: '60. gün' },
-              { date: '2027-01-30', label: '90. gün' },
-            ],
+            marks,
           }}
           size="xl"
           wide
@@ -321,7 +320,7 @@ function DigitalSections({ role }: { role: Role }) {
           rows={digitalPlan}
         />
         <Note title="Asistan alınmazsa">
-          <p>Uzman 1 Ocak 2027’de başlar ve bu sayfadaki tarihler 2 ay kayar. Meta reklamları o güne kadar İsmail Karaca’da kalır.</p>
+          <p>Uzman {formatDate(m.params.dijitalAltDate)} itibarıyla başlar ve bu sayfadaki tarihler buna göre kayar. Meta reklamları o güne kadar İsmail Karaca’da kalır.</p>
         </Note>
       </Section>
 
@@ -331,7 +330,7 @@ function DigitalSections({ role }: { role: Role }) {
 }
 
 function GenericSections({ role }: { role: Role }) {
-  const months = role.ramp.months ?? MONTHS;
+  const months = role.ramp.months ?? useModel().MONTHS;
   const series = [{ name: role.ramp.metric, values: role.ramp.values }];
   if (role.ramp.second) series.push({ name: role.ramp.second.metric, values: role.ramp.second.values });
   return (
@@ -390,11 +389,20 @@ function GenericSections({ role }: { role: Role }) {
   );
 }
 
-export function RolePage({ pathname, role }: { pathname: string; role: Role }) {
+function RoleContent({ slug }: { slug: string }) {
+  const role = useModel().role(slug);
   return (
-    <AppFrame pathname={pathname}>
+    <>
       <RoleHero role={role} />
       {role.slug === 'dijital-pazarlama' ? <DigitalSections role={role} /> : <GenericSections role={role} />}
+    </>
+  );
+}
+
+export function RolePage({ pathname, slug }: { pathname: string; slug: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <RoleContent slug={slug} />
     </AppFrame>
   );
 }

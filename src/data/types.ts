@@ -7,7 +7,8 @@ export type RoleKey =
   | 'organizator'
   | 'dijital-pazarlama'
   | 'yazilim'
-  | 'yatirimci';
+  | 'yatirimci'
+  | 'segika';
 
 /** karar: alınmış karar · oneri: bu planın önerisi · bekliyor: karar bekliyor */
 export type Status = 'karar' | 'oneri' | 'bekliyor';
@@ -53,7 +54,7 @@ export interface Role {
   tree: string;
   title: string;
   shortTitle: string;
-  icon: 'phone' | 'map' | 'presentation' | 'notebook' | 'flag' | 'video';
+  icon: 'phone' | 'map' | 'presentation' | 'notebook' | 'flag' | 'video' | 'shield';
   count: string;
   start: string;
   startStatus: Status;

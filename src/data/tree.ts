@@ -1,8 +1,9 @@
-import { getRole } from './roles';
-import type { RoleKey } from './types';
+import { shortDate } from '../lib/dates';
+import type { Params } from './params';
+import type { Role, RoleKey } from './types';
 
 /**
- * Organizasyon şeması (ECharts ağacı): tepede İsmail Karaca; altında kurmay ve rol bazlı dört ağaç.
+ * Organizasyon şeması (ECharts ağacı): tepede İsmail Karaca; altında kurmay, rol bazlı dört ağaç ve Segika.
  * Düğümler rol sayfalarına bağlanır; sunum sırası (SEQUENCE) önceki/sonraki gezinmesini belirler.
  */
 
@@ -14,35 +15,43 @@ export interface OrgNode {
   children?: OrgNode[];
 }
 
-const node = (slug: RoleKey, name: string, extra: Partial<OrgNode> = {}): OrgNode => {
-  const role = getRole(slug);
-  return { name, sub: `${role.count.split(' (')[0]} · ${role.start.split(' (')[0]}`, role: slug, href: `/roller/${slug}/`, ...extra };
-};
-
-export const ORG: OrgNode = {
-  name: 'İsmail Karaca',
-  sub: 'Strateji ve operasyon',
-  role: 'yonetici',
-  children: [
-    node('asistan', 'Asistan', { sub: '1 kişi · 1 Kasım (onay bekliyor)' }),
-    { name: 'Yazılım ekibi', sub: '4 kişi · Scrum', role: 'yazilim' },
-    node('dijital-pazarlama', 'Ağaç 1 · Dijital pazarlama'),
-    node('pazarlamaci', 'Ağaç 2 · Masa başı (CRM)'),
-    {
-      name: 'Ağaç 3 · Saha satış',
-      sub: 'Kayıt · abonelik · ağ',
-      role: 'saha-uzmani',
-      href: '/roller/saha-uzmani/',
-      children: [
-        node('saha-uzmani', 'Saha ekibi', { sub: '3 kişi · 2’si 1 Kasım, 1’i 1 Aralık' }),
-        node('ekip-lideri', 'Ekip lideri', {
-          children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2 · Ocak sonu ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
-        }),
-      ],
-    },
-    node('organizator', 'Ağaç 4 · Organizatör'),
-  ],
-};
+/** Kişi sayısı ve başlangıç tarihleri parametrelerden gelir. */
+export function makeOrg(p: Params, _roles: Role[]): OrgNode {
+  const node = (slug: RoleKey, name: string, count: number, date: string, extra: Partial<OrgNode> = {}): OrgNode => ({
+    name,
+    sub: `${count} kişi · ${shortDate(date)}`,
+    role: slug,
+    href: `/roller/${slug}/`,
+    ...extra,
+  });
+  return {
+    name: 'İsmail Karaca',
+    sub: 'Strateji ve operasyon',
+    role: 'yonetici',
+    children: [
+      node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi · ${shortDate(p.startDate)} (onay bekliyor)` }),
+      { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi · Scrum`, role: 'yazilim' },
+      node('dijital-pazarlama', 'Ağaç 1 · Dijital pazarlama', p.dijitalCount, p.startDate),
+      node('pazarlamaci', 'Ağaç 2 · Masa başı (CRM)', p.masaCount, p.startDate),
+      {
+        name: 'Ağaç 3 · Saha satış',
+        sub: 'Kayıt · abonelik · ağ',
+        role: 'saha-uzmani',
+        href: '/roller/saha-uzmani/',
+        children: [
+          node('saha-uzmani', 'Saha ekibi', p.sahaCount + p.sahaDecCount, p.startDate, {
+            sub: `${p.sahaCount + p.sahaDecCount} kişi · ${p.sahaCount} + ${p.sahaDecCount} (${shortDate(p.decStartDate)})`,
+          }),
+          node('ekip-lideri', 'Ekip lideri', 1, p.decStartDate, {
+            children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2 · 90. günde ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
+          }),
+        ],
+      },
+      node('organizator', 'Ağaç 4 · Organizatör', p.organizatorCount, p.decStartDate),
+      node('segika', 'Segika · Masa başı (CRM)', p.segikaCount, p.startDate),
+    ],
+  };
+}
 
 export interface Stop {
   path: string;
@@ -59,12 +68,14 @@ export const SEQUENCE: Stop[] = [
   { path: '/roller/ekip-lideri/', label: 'Ağaç 3 · Ekip lideri', crumb: ['Ağaç 3 · Saha satış', 'Ekip lideri'] },
   { path: '/buyume-modeli/', label: 'Ağaç 3 · Çok katmanlı pazarlama ağı', crumb: ['Ağaç 3 · Saha satış', 'Çok katmanlı pazarlama ağı'] },
   { path: '/roller/organizator/', label: 'Ağaç 4 · Organizatör', crumb: ['Ağaç 4 · Organizatör'] },
+  { path: '/roller/segika/', label: 'Segika · Masa başı (CRM)', crumb: ['Segika · Masa başı (CRM)'] },
   { path: '/roller/asistan/', label: 'Kurmay · Asistan', crumb: ['Kurmay · Asistan'] },
   { path: '/istihdam/', label: 'İstihdam takvimi', crumb: ['İstihdam takvimi'] },
   { path: '/hedefler/', label: '90 gün hedefleri', crumb: ['90 gün hedefleri'] },
   { path: '/eylem-plani/', label: 'Eylem planı', crumb: ['Eylem planı'] },
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
+  { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
 ];
 
 export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: number; also?: string[] }[] = [
@@ -73,6 +84,7 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
   { label: 'Masa başı', path: '/roller/pazarlamaci/', role: 'pazarlamaci', no: 2 },
   { label: 'Saha satış', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 3, also: ['/roller/ekip-lideri/', '/buyume-modeli/'] },
   { label: 'Organizatör', path: '/roller/organizator/', role: 'organizator', no: 4 },
+  { label: 'Segika', path: '/roller/segika/', role: 'segika' },
   { label: 'Asistan', path: '/roller/asistan/', role: 'asistan' },
 ];
 
@@ -83,4 +95,5 @@ export const COMMON_NAV = [
   { label: 'MLM ağı', path: '/buyume-modeli/' },
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
+  { label: 'Parametreler', path: '/parametreler/' },
 ];

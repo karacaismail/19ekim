@@ -14,7 +14,7 @@ type Opt = Record<string, unknown>;
 /** Geçerli grafik yazı boyutu (px); her çizimde tokendan yeniden okunur. */
 let FONT_SIZE = 14;
 const DAY = 86_400_000;
-const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec; width: number }>();
+const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec; width: number; observer: ResizeObserver }>();
 let loader: Promise<EChartsModule> | null = null;
 
 const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -215,7 +215,7 @@ function build(spec: ChartSpec, width: number): Opt {
 
   switch (spec.kind) {
     case 'org':
-      return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(spec.root, 'TB', [156, 96])] };
+      return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(spec.root, 'TB', [150, 96])] };
 
     case 'gov':
       return { ...base(), tooltip: { ...(base().tooltip as Opt), show: false }, series: [treeSeries(spec.root, 'LR', [240, 64])] };
@@ -623,20 +623,20 @@ function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
       if (target) window.location.href = target;
     });
   }
-  el.querySelector('.chart-fallback')?.remove();
   // Dar ekranda organizasyon şeması tepeyi (ortayı) göstererek açılır; kaydırma animasyonsuz.
   const scroller = el.closest<HTMLElement>('.chart-scroll');
   if (scroller && spec.kind === 'org') scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
-  charts.set(el, { chart, spec, width: widthOf(el) });
-  new ResizeObserver(() => {
+  const observer = new ResizeObserver(() => {
     chart.resize();
     // Genişlik belirgin değişince açıklama satırları ve etiket genişlikleri yeniden hesaplanır.
     const entry = charts.get(el);
     if (entry && Math.abs(widthOf(el) - entry.width) > 48) {
       entry.width = widthOf(el);
-      chart.setOption(finalize(spec, build(spec, entry.width)), { notMerge: true });
+      chart.setOption(finalize(entry.spec, build(entry.spec, entry.width)), { notMerge: true });
     }
-  }).observe(el);
+  });
+  observer.observe(el);
+  charts.set(el, { chart, spec, width: widthOf(el), observer });
 }
 
 function redrawAll() {
@@ -646,45 +646,42 @@ function redrawAll() {
   }
 }
 
-async function initChart(el: HTMLElement) {
-  if (charts.has(el)) return;
-  const raw = el.dataset.chart;
-  if (!raw) return;
-  loader ??= import('../lib/echarts-setup');
-  try {
-    const mod = await loader;
-    // Etiket ölçüleri Outfit ile hesaplansın: yazı tipi yüklenmeden ilk çizim yapılmaz.
-    await document.fonts?.ready;
-    render(el, mod, JSON.parse(raw) as ChartSpec);
-  } catch {
-    // Grafik çizilemezse kutu küçülür; özet metni görünür kalır.
-    loader = null;
-    el.dataset.chartFailed = '';
-    el.querySelector('.chart-fallback')?.insertAdjacentText('afterbegin', 'Grafik yüklenemedi. ');
-  }
+let globalObservers = false;
+/** Tema ve hareket azaltma tercihi değişince tüm grafikler tokenlarla yeniden çizilir. */
+function watchPreferences() {
+  if (globalObservers) return;
+  globalObservers = true;
+  new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-mantine-color-scheme'] });
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', redrawAll);
 }
 
-const nodes = [...document.querySelectorAll<HTMLElement>('[data-chart]')];
-if (nodes.length) {
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            observer.unobserve(entry.target);
-            void initChart(entry.target as HTMLElement);
-          }
-        }
-      },
-      { rootMargin: '200px' },
-    );
-    nodes.forEach((node) => observer.observe(node));
-  } else {
-    nodes.forEach((node) => void initChart(node));
+/** İlk çağrıda grafiği kurar; sonrakilerde aynı grafiği yeni spec ile yeniden çizer. */
+export async function drawChart(el: HTMLElement, spec: ChartSpec) {
+  loader ??= import('../lib/echarts-setup');
+  let mod: EChartsModule;
+  try {
+    mod = await loader;
+  } catch (error) {
+    loader = null;
+    throw error;
   }
-  new MutationObserver(redrawAll).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-mantine-color-scheme'],
-  });
-  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', redrawAll);
+  // Etiket ölçüleri Outfit ile hesaplansın: yazı tipi yüklenmeden ilk çizim yapılmaz.
+  await document.fonts?.ready;
+  const entry = charts.get(el);
+  if (entry) {
+    entry.spec = spec;
+    entry.width = widthOf(el);
+    entry.chart.setOption(finalize(spec, build(spec, entry.width)), { notMerge: true });
+    return;
+  }
+  render(el, mod, spec);
+  watchPreferences();
+}
+
+export function disposeChart(el: HTMLElement) {
+  const entry = charts.get(el);
+  if (!entry) return;
+  entry.observer.disconnect();
+  entry.chart.dispose();
+  charts.delete(el);
 }

@@ -46,6 +46,8 @@
   --gap-dense: 0.25rem;
   --section-gap: var(--space-12);
   --content-max: 74rem;
+  /* Organizasyon şeması gibi geniş tek grafik sayfaları */
+  --content-wide-max: 92rem;
   --prose-max: 44rem;
 
   /* Etkileşim alanı: ince işaretçide 44, kaba işaretçide 48 CSS px */
@@ -191,6 +193,10 @@
   --role-yazilim: #7b8288;
   --role-yazilim-bg: #eef0f1;
   --role-yazilim-fg: #3f454a;
+  /* Segika: SGK teşvik yazılımı (ayrı ürün hattı) */
+  --role-segika: #5f3dc4;
+  --role-segika-bg: #efebfb;
+  --role-segika-fg: #4527a0;
   --role-yatirimci: #a37a00;
   --role-yatirimci-bg: #fbf3d6;
   --role-yatirimci-fg: #6f5300;
@@ -257,6 +263,9 @@
   --role-yazilim: #adb5bd;
   --role-yazilim-bg: #212529;
   --role-yazilim-fg: #d5dade;
+  --role-segika: #9775fa;
+  --role-segika-bg: #221a3d;
+  --role-segika-fg: #c5b3fd;
   --role-yatirimci: #fcc419;
   --role-yatirimci-bg: #2b250d;
   --role-yatirimci-fg: #f5d978;

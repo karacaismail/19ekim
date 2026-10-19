@@ -4,9 +4,6 @@ import { GoalsPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="90 gün hedefleri" description="90 günde 100 aktif satıcı, 500 üye satıcı ve en az 3.000.000 ₺ ciro: ciro köprüsü, açık ve kaynaklar.">
-  <GoalsPage pathname={Astro.url.pathname} />
+  <GoalsPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

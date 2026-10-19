@@ -1,3 +1,7 @@
+import { addDays, daysBetween, longDate, monthName, nextMonth, shiftText, shortDate } from '../lib/dates';
+import { int, times, tl } from '../lib/format';
+import { DEFAULT_PARAMS, type Params } from './params';
+import type { Program } from './program';
 import type { Role, RoleKey, ScheduleRow } from './types';
 
 export const ROLE_LABELS: Record<RoleKey, string> = {
@@ -10,6 +14,7 @@ export const ROLE_LABELS: Record<RoleKey, string> = {
   'dijital-pazarlama': 'Dijital pazarlama',
   yazilim: 'Yazılım ekibi',
   yatirimci: 'Yatırımcı',
+  segika: 'Segika (CRM)',
 };
 
 const WEEKDAY = '08:00–20:00 · 60 dk ara · 11 saat net';
@@ -358,9 +363,119 @@ const asistan: Role = {
   ]),
 };
 
-export const roles: Role[] = [dijital, pazarlamaci, saha, ekipLideri, organizator, asistan];
+/** Segika: masa başı pazarlama (CRM) rolünün kopyası, aynı yaklaşım; ürün SGK teşvik yazılımı. */
+const segika: Role = {
+  ...pazarlamaci,
+  slug: 'segika',
+  tree: 'Segika',
+  title: 'Segika masa başı pazarlama (CRM)',
+  shortTitle: 'Segika (CRM)',
+  icon: 'shield',
+  reportsTo: 'İsmail Karaca',
+  mission:
+    'Segika markalı SGK teşvik yazılımı için telefon, WhatsApp ve e-postayla talep üretir; demo randevusu açar; CRM’deki Segika hattını günlük tutar. Masa başı rolünün kopyası, aynı yaklaşım.',
+  tasks: [
+    { task: 'Soğuk arama: işverenler, mali müşavirler, İK', measure: 'Günde 60 arama, 20 nitelikli görüşme' },
+    { task: 'Demo randevusu', measure: 'Günde 3 randevu; gerçekleşme ≥ %70' },
+    { task: 'İzinli WhatsApp ve e-posta', measure: 'Günde 20 kişiye özel mesaj; haftada 1 bülten' },
+    { task: 'Data ve CRM (Segika hattı)', measure: 'Günde 40 yeni aday; her temas aynı gün CRM’de' },
+  ],
+  kpis: [
+    { metric: 'Arama', value: '60', unit: '/ gün', when: '16 Kasım’dan' },
+    { metric: 'Randevu', value: '18', unit: '/ hafta', when: 'Ocak 2027' },
+    { metric: 'Randevu gerçekleşme', value: '≥ %70', unit: '', when: 'Aralık’tan' },
+    { metric: 'Yeni aday (CRM)', value: '40', unit: '/ gün', when: '16 Kasım’dan' },
+  ],
+  plan: [
+    { from: '2026-11-02', to: '2026-11-28', action: 'Segika arama senaryosu v1–v2, hedef liste (işverenler, mali müşavirler), CRM’de Segika hattı', target: 'Haftada 12 randevu' },
+    { from: '2026-11-30', to: '2026-12-26', action: 'Mali müşavir ve İK toplulukları, tavsiye istemi', target: 'Haftada 15 randevu · gerçekleşme ≥ %70' },
+    { from: '2026-12-28', to: '2027-01-30', action: 'Demo sonrası takip, arama playbook’u', target: 'Haftada 18 randevu', milestone: true },
+  ],
+};
 
-export function getRole(slug: string): Role {
+/** Varsayılan parametrelerle rol listesi (Astro sayfa yolları ve sayfa başlıkları için). */
+export const BASE_ROLES: Role[] = [dijital, pazarlamaci, saha, ekipLideri, organizator, asistan, segika];
+
+/**
+ * Rolleri parametrelerle kurar: kişi sayısı, başlangıç, ücret ve hedefler parametrelerden; plan tarihleri ve
+ * metindeki tarihler takvim parametresine göre kayar (organizatör ve ekip lideri Aralık başlangıcına bağlı).
+ */
+export function makeRoles(p: Params, prog: Program): Role[] {
+  const d1 = daysBetween(DEFAULT_PARAMS.startDate, p.startDate);
+  const d2 = daysBetween(DEFAULT_PARAMS.decStartDate, p.decStartDate);
+  const { salaries } = prog;
+  const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
+  const row = (role: RoleKey) => prog.targetPlan.find((t) => t.role === role)!;
+  const person = (n: number) => `${n} kişi`;
+  const start = longDate(p.startDate);
+  const dec = longDate(p.decStartDate);
+  const salaryText = (salary: number, multiplier: number) => `${tl(salary)} maaş (${times(multiplier)} asgari ücret)`;
+
+  const shift = (r: Role, delta: number): Role => ({
+    ...r,
+    mission: shiftText(r.mission, delta),
+    reportsTo: shiftText(r.reportsTo, d2),
+    tasks: r.tasks.map((t) => ({ task: shiftText(t.task, delta), measure: shiftText(t.measure, delta) })),
+    kpis: r.kpis.map((k) => ({ ...k, when: shiftText(k.when, delta) })),
+    plan: r.plan.map((x) => ({ ...x, from: addDays(x.from, delta), to: addDays(x.to, delta), action: shiftText(x.action, delta), target: shiftText(x.target, delta) })),
+  });
+  const setKpi = (r: Role, metric: string, value: string): Role => ({ ...r, kpis: r.kpis.map((k) => (k.metric === metric ? { ...k, value } : k)) });
+
+  const sahaRow = row('saha-uzmani');
+  const mlmRow = row('ekip-lideri');
+  const orgRow = row('organizator');
+  const masaRow = row('pazarlamaci');
+
+  let sahaRole: Role = {
+    ...shift(saha, d1),
+    count: `${person(p.sahaCount + p.sahaDecCount)} (${p.sahaCount} kişi ${shortDate(p.startDate)}, ${p.sahaDecCount} kişi ${shortDate(p.decStartDate)}; sonra ağla büyür)`,
+    start: `${start} (Aralık takviyesi ${dec})`,
+    pay: `${tl(p.sahaSalary)} maaş · kota ay içinde ${tl(prog.quota)} satış; sonrasında satış başına ${tl(p.commission)} prim`,
+    ramp: { ...saha.ramp, values: sahaRow.kayit, second: { metric: saha.ramp.second!.metric, values: sahaRow.aktif } },
+  };
+  sahaRole = setKpi(setKpi(sahaRole, 'Kayıt (ekip)', int(sum(sahaRow.kayit))), 'Yeni aktif satıcı (ekip)', int(sum(sahaRow.aktif)));
+  sahaRole.plan = sahaRole.plan.map((x, i) => ({
+    ...x,
+    target: [`${sahaRow.kayit[i]} kayıt · ${sahaRow.aktif[i]} aktif satıcı`, i === 1 ? ' · elde tutma ≥ %70' : ''].join(''),
+  }));
+
+  let leadRole: Role = {
+    ...shift(ekipLideri, d2),
+    start: dec,
+    pay: `${tl(salaries.lead)} maaş (saha + ${tl(p.leadUplift)} liderlik farkı) · ekibin her satışından ${tl(p.leadTeamShare)} · kendi satışı saha kuralıyla`,
+  };
+  leadRole = setKpi(leadRole, 'Ağdan aktif satıcı', `~${int(sum(mlmRow.aktif))}`);
+
+  const orgMonths = [p.decStartDate, nextMonth(p.decStartDate), nextMonth(nextMonth(p.decStartDate))].map(monthName);
+  let orgRole: Role = {
+    ...shift(organizator, d2),
+    count: person(p.organizatorCount),
+    start: dec,
+    pay: salaryText(salaries.organizator, p.organizatorMultiplier),
+    ramp: { ...organizator.ramp, months: orgMonths },
+  };
+  orgRole = setKpi(orgRole, 'Eğitimden kayıt', `${Math.round(orgRow.kayit[1] / 4)} → ${Math.round(orgRow.kayit[2] / 4)}`);
+  orgRole.tasks = orgRole.tasks.map((t) =>
+    t.task.startsWith('Eğitimden kayıt') ? { ...t, measure: `90 günde ~${int(sum(orgRow.kayit))} kayıt, ~${int(sum(orgRow.aktif))} aktif satıcı` } : t,
+  );
+
+  return [
+    {
+      ...shift(dijital, d1),
+      count: person(p.dijitalCount),
+      start: `${start} (asistan yoksa ${longDate(p.dijitalAltDate)})`,
+      pay: salaryText(salaries.dijital, p.dijitalMultiplier),
+    },
+    setKpi({ ...shift(pazarlamaci, d1), count: person(p.masaCount), start, pay: salaryText(salaries.masa, p.masaMultiplier) }, 'Uzaktan aktif satıcı', int(sum(masaRow.aktif))),
+    sahaRole,
+    leadRole,
+    orgRole,
+    { ...shift(asistan, d1), count: person(p.asistanCount), start: `${start} (onay bekliyor)`, pay: salaryText(salaries.asistan, p.asistanMultiplier) },
+    { ...shift(segika, d1), count: person(p.segikaCount), start, pay: salaryText(salaries.segika, p.segikaMultiplier) },
+  ];
+}
+
+export function getRole(roles: Role[], slug: string): Role {
   const role = roles.find((r) => r.slug === slug);
   if (!role) throw new Error(`Bilinmeyen rol: ${slug}`);
   return role;

@@ -4,9 +4,6 @@ import { PendingPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Karar bekleyenler" description="Karar bekleyen konular: öneri, karar veren ve son tarih.">
-  <PendingPage pathname={Astro.url.pathname} />
+  <PendingPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

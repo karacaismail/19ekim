@@ -16,43 +16,11 @@ import {
   TextLink,
 } from '../components/ui';
 import { boardMapping, type BoardRow } from '../data/archive';
-import { compliance, growthKpis, levels, recruitmentFunnel } from '../data/growth';
-import {
-  ANNUAL_TRY,
-  calendarEvents,
-  checkpoints,
-  CIRO_TARGET,
-  type GovNode,
-  governanceTree,
-  hiringOrder,
-  managerPlan,
-  MONTHS,
-  NEW_ACTIVE,
-  type OpenDecision,
-  COMMISSION_PER_SALE,
-  crmStages,
-  decisions,
-  EMPLOYER_COST_FACTOR,
-  LEAD_TEAM_SHARE,
-  LEGAL_LIMITS,
-  openDecisions,
-  OVERTIME_CAP,
-  overtimeHourly,
-  overtimeUsed,
-  payments,
-  payRules,
-  SAHA_SALARY,
-  SPONSOR_SHARE,
-  workPeriods,
-  RETENTION_SCENARIOS,
-  SUBSCRIPTION_EUR,
-  SUBSCRIPTION_TRY,
-  targetPlan,
-  targets,
-} from '../data/program';
-import { ROLE_LABELS, roles } from '../data/roles';
+import type { CrmStage, GovNode, OpenDecision, PayRule, WorkPeriod } from '../data/program';
+import { ROLE_LABELS } from '../data/roles';
 import type { RoleKey } from '../data/types';
-import type { CrmStage, PayRule, WorkPeriod } from '../data/program';
+import { useModel } from '../components/ModelContext';
+import { addDays, longDate, monthStart, nextMonth } from '../lib/dates';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
 const lira = (value: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(value))} ₺`;
@@ -63,14 +31,19 @@ const shortDate = (iso: string) =>
 
 /* ---------- İstihdam takvimi: takvim + zaman çizelgesi ---------- */
 
-const CALENDAR_MONTHS = ['2026-10-01', '2026-11-01', '2026-12-01', '2027-01-01'];
 const monthTitle = (iso: string) =>
   new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
 
-export function HiringPage({ pathname }: { pathname: string }) {
+function HiringContent() {
+  const m = useModel();
+  const { calendarEvents, hiringOrder } = m;
+  /** Takvim ayları: ilk olaydan son olaya. */
+  const CALENDAR_MONTHS: string[] = [];
+  for (let month = monthStart(calendarEvents[0].date); month <= calendarEvents[calendarEvents.length - 1].date; month = nextMonth(month)) CALENDAR_MONTHS.push(month);
+
   const byDate = new Map(calendarEvents.map((e) => [e.date, e]));
   return (
-    <AppFrame pathname={pathname}>
+    <>
       <Hero eyebrow="Ortak" title="İstihdam takvimi" lead="Kim, hangi sırayla, hangi tarihte başlıyor." />
 
       <Section id="sira" index={1} title="İşe alım sırası">
@@ -133,14 +106,14 @@ export function HiringPage({ pathname }: { pathname: string }) {
                     ))}
                   </ol>
                 ) : (
-                  <p className="cal-empty">20 Ekim’den önce olay yok.</p>
+                  <p className="cal-empty">Bu ayda tarihli olay yok.</p>
                 )}
               </section>
             );
           })}
         </div>
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -148,7 +121,10 @@ export function HiringPage({ pathname }: { pathname: string }) {
 
 const SCENARIO_LABEL = (r: number) => `Elde tutma ${pct(r)}`;
 
-export function GoalsPage({ pathname }: { pathname: string }) {
+function GoalsContent() {
+  const m = useModel();
+  const { ANNUAL_TRY, CIRO_TARGET, MONTHS, NEW_ACTIVE, payments, RETENTION_SCENARIOS, SUBSCRIPTION_EUR, SUBSCRIPTION_TRY, targetPlan, targets, dates, labels } = m;
+
   const firstTotal = sum(NEW_ACTIVE);
   const scenarios = RETENTION_SCENARIOS.map((r) => {
     const p = payments(r);
@@ -157,18 +133,15 @@ export function GoalsPage({ pathname }: { pathname: string }) {
   const worst = scenarios[0];
   const gap = CIRO_TARGET - worst.ciro;
   const gapMonths = Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY - firstTotal);
-  const plan = payments(0.7);
+  const plan = payments(m.planRetention);
   const options = [
     { option: 'Yıllık peşin (10 ay ücreti, 2 ay bedava)', unit: lira(ANNUAL_TRY), count: Math.ceil(gap / (ANNUAL_TRY - SUBSCRIPTION_TRY)), note: 'Aylık yerine peşin ödeyen aktif satıcı' },
-    { option: 'Pazarlama çözümü 30K', unit: '30.000 ₺', count: Math.ceil(gap / 30_000), note: 'Paket içeriği 31 Ekim’de netleşir' },
-    { option: 'Pazarlama çözümü 90K', unit: '90.000 ₺', count: Math.ceil(gap / 90_000), note: 'Paket içeriği 31 Ekim’de netleşir' },
-    { option: 'Pazarlama çözümü 500K', unit: '500.000 ₺', count: Math.ceil(gap / 500_000), note: 'Kurumsal satış' },
     { option: 'Üye satıcıyı aktife çevirmek', unit: `${SUBSCRIPTION_EUR} € / ay`, count: gapMonths, note: `500 üyenin ${pct(gapMonths / 500)} oranı` },
   ];
 
   return (
-    <AppFrame pathname={pathname}>
-      <Hero eyebrow="Ortak" title="90 gün hedefleri" lead="1 Kasım 2026 – 30 Ocak 2027. Aktif satıcı ayda 399 € öder; bazıları ilk aydan sonra bırakabilir.">
+    <>
+      <Hero eyebrow="Ortak" title="90 gün hedefleri" lead={`${longDate(dates.start)} – ${longDate(dates.day90)}. Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder; bazıları ilk aydan sonra bırakabilir.`}>
         <Stats items={targets} />
       </Hero>
 
@@ -176,7 +149,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
         id="kopru"
         index={1}
         title="Ciro köprüsü"
-        desc={`100 aktif satıcının ilk ödemeleri ${lira(firstTotal * SUBSCRIPTION_TRY)}. Hedef için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir; aylık elde tutma ≥ %66 olmalı.`}
+        desc={`${firstTotal} aktif satıcının ilk ödemeleri ${lira(firstTotal * SUBSCRIPTION_TRY)}. Hedef için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir; ${m.retentionThreshold === null ? 'abonelik tek başına yetmez' : `aylık elde tutma ≥ ${pct(m.retentionThreshold)} olmalı`}.`}
       >
         <Chart
           id="kopru"
@@ -222,7 +195,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="aylik" index={3} title="Aylık ciro" desc="Plan senaryosu: aylık elde tutma %70.">
+      <Section id="aylik" index={3} title="Aylık ciro" desc={`Plan senaryosu: aylık elde tutma ${pct(m.planRetention)}.`}>
         <Chart
           id="gelir-ay"
           title="İlk ödemeler, yenilemeler ve kümülatif ciro"
@@ -237,7 +210,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="kaynak" index={4} title="Kaynaklara göre" desc="Yeni aktif satıcı ve kayıt. Kapasite açığı (45 kayıt, 8 aktif) 1 Aralık’ta başlayan 3. saha personeliyle kapandı.">
+      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Yeni aktif satıcı ve kayıt. Kapasite açığı (45 kayıt, 8 aktif) ${shortDate(dates.dec)} itibarıyla Aralık takviyesiyle (${labels.sahaDecLabel || "yok"}) kapanır.`}>
         <Chart
           id="kaynak-ay"
           title="Yeni aktif satıcı: kaynak × ay"
@@ -256,7 +229,7 @@ export function GoalsPage({ pathname }: { pathname: string }) {
           rowTone={(t) => (t.source === 'Toplam' ? 'total' : undefined)}
         />
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -272,33 +245,36 @@ interface ActionRow {
   milestone?: boolean;
 }
 
-const actionRows: ActionRow[] = [
-  ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca · ${i + 1}`, ...p })),
-  ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle} · ${i + 1}`, ...p }))),
-];
 
-export function PlanPage({ pathname }: { pathname: string }) {
+function PlanContent() {
+  const m = useModel();
+  const { managerPlan, roles, dates } = m;
+  const actionRows: ActionRow[] = [
+    ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca · ${i + 1}`, ...p })),
+    ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle} · ${i + 1}`, ...p }))),
+  ];
+
   const start = actionRows.reduce((min, r) => (r.from < min ? r.from : min), actionRows[0].from);
   const end = actionRows.reduce((max, r) => (r.to > max ? r.to : max), actionRows[0].to);
   const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action} · Hedef: ${r.target}`, milestone: r.milestone }));
   return (
-    <AppFrame pathname={pathname}>
+    <>
       <Hero eyebrow="Ortak" title="Eylem planı" lead={`istoc.com genel planı: ${formatDate(start)} – ${formatDate(end)}. Her satır tarihli bir eylem ve ölçülebilir hedef.`} />
 
-      <Section id="gantt" index={1} title="Gantt şeması" desc="Kesikli çizgiler: 60. gün (30 Aralık) ve 90. gün (30 Ocak) kontrolleri.">
+      <Section id="gantt" index={1} title="Gantt şeması" desc={`Kesikli çizgiler: 60. gün (${shortDate(dates.day60)}) ve 90. gün (${shortDate(dates.day90)}) kontrolleri.`}>
         <Chart
           id="gantt"
           title="Kişi × zaman"
-          summary={`${actionRows.length} eylem, ${formatDate(start)} ile ${formatDate(end)} arasında. Kontroller 30 Aralık ve 30 Ocak.`}
+          summary={`${actionRows.length} eylem, ${formatDate(start)} ile ${formatDate(end)} arasında. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)}.`}
           spec={{
             kind: 'gantt',
             start,
             end,
             rows,
             marks: [
-              { date: '2026-11-01', label: 'Başlangıç' },
-              { date: '2026-12-30', label: '60. gün' },
-              { date: '2027-01-30', label: '90. gün' },
+              { date: dates.start, label: 'Başlangıç' },
+              { date: dates.day60, label: '60. gün' },
+              { date: dates.day90, label: '90. gün' },
             ],
           }}
           size="xxl"
@@ -319,7 +295,7 @@ export function PlanPage({ pathname }: { pathname: string }) {
           rows={actionRows}
         />
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -327,23 +303,26 @@ export function PlanPage({ pathname }: { pathname: string }) {
 
 const govChart = (node: GovNode): ChartTreeNode => ({ name: node.name, role: node.role ?? 'yonetici', children: node.children?.map(govChart) });
 
-export function AuthorityPage({ pathname }: { pathname: string }) {
+function AuthorityContent() {
+  const m = useModel();
+  const { checkpoints, governanceTree, CIRO_TARGET, dates } = m;
+
   return (
-    <AppFrame pathname={pathname}>
+    <>
       <Hero eyebrow="Ortak" title="Karar yetkisi ve kontrol noktaları" lead="Kim neye karar verir; hangi tarihte hangi eşik ölçülür." />
 
       <Section id="yetki" index={1} title="Karar yetkisi">
         <Chart
           id="yetki"
           title="Yatırımcı → İsmail Karaca → kararlar"
-          summary="Yatırımcı ürün, bütçe ve kayıp tavanına karar verir. İsmail Karaca maliyet, kanıt ve kapasiteyi yönetir. Harcama yetki sınırı içinde İsmail Karaca, sınırı aşarsa yatırımcı karar verir. Kanal yalnız A (iç satış ve saha, seçili) veya B (dijital müşteri edinme). Kontroller 30 Aralık ve 30 Ocak: sürdür, iyileştir veya durdur."
+          summary={`Yatırımcı ürün, bütçe ve kayıp tavanına karar verir. İsmail Karaca maliyet, kanıt ve kapasiteyi yönetir. Harcama yetki sınırı içinde İsmail Karaca, sınırı aşarsa yatırımcı karar verir. Kanal yalnız A (iç satış ve saha, seçili) veya B (dijital müşteri edinme). Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)}: sürdür, iyileştir veya durdur.`}
           spec={{ kind: 'gov', root: govChart(governanceTree) }}
           size="xxl"
           wide
         />
       </Section>
 
-      <Section id="kontrol" index={2} title="Kontrol noktaları" desc="Ciro değerleri aylık %70 elde tutma senaryosuyla.">
+      <Section id="kontrol" index={2} title="Kontrol noktaları" desc={`Ciro değerleri aylık ${pct(m.planRetention)} elde tutma senaryosuyla.`}>
         <Chart
           id="kontrol"
           title="Kümülatif aktif satıcı ve ciro"
@@ -363,7 +342,7 @@ export function AuthorityPage({ pathname }: { pathname: string }) {
           rows={checkpoints}
         />
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -371,7 +350,7 @@ export function AuthorityPage({ pathname }: { pathname: string }) {
 
 const CUMULATIVE_WEEKS = 30;
 
-/** Kişi başı kümülatif fazla çalışma (hafta 1 = 2 Kasım 2026). */
+/** Kişi başı kümülatif fazla çalışma (hafta 1 = programın ilk iş günü). */
 function overtimeSeries(startWeek: number, perWeek: number, lastWeek: number) {
   let total = 0;
   return Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => {
@@ -380,23 +359,28 @@ function overtimeSeries(startWeek: number, perWeek: number, lastWeek: number) {
   });
 }
 
-export function PendingPage({ pathname }: { pathname: string }) {
+function PendingContent() {
+  const m = useModel();
+  const { openDecisions, decisions, payRules, crmStages, LEGAL_LIMITS, workPeriods, OVERTIME_CAP, overtimeUsed, overtimeHourly, dates, params } = m;
+  const COMMISSION_PER_SALE = params.commission;
+
   const sorted = [...openDecisions].sort((a, b) => a.deadline.localeCompare(b.deadline));
   const [p1, p2] = workPeriods;
-  const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(new Date(Date.UTC(2026, 10, 2 + w * 7)).toISOString().slice(0, 10)));
-  const sahaCost = SAHA_SALARY * EMPLOYER_COST_FACTOR;
-  const sahaPersonMonths = 2 * 3 + 1 * 2;
+  const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(addDays(dates.firstDay, w * 7)));
+  const decWeek = Math.max(1, Math.round((new Date(dates.dec).getTime() - new Date(dates.firstDay).getTime()) / (7 * 86_400_000)) + 1);
+  const deadlines = sorted.map((d) => d.deadline);
+  const crossWeek = Math.ceil(OVERTIME_CAP / Math.max(1, p1.overtimePerWeek));
   const monthlyOvertime = Math.round((p1.overtimePerWeek * 52) / 12);
   return (
-    <AppFrame pathname={pathname}>
-      <Hero eyebrow="Ortak" title="Karar bekleyenler" lead={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim’de kesinleşti.`} />
+    <>
+      <Hero eyebrow="Ortak" title="Karar bekleyenler" lead={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim 2026’da kesinleşti.`} />
 
       <Section id="bekleyen" index={1} title="Bekleyen kararlar">
         <Chart
           id="son-tarih"
           title="Karar × son tarih"
           summary={sorted.map((d) => `${d.topic}: ${shortDate(d.deadline)}, ${ROLE_LABELS[d.owner]}`).join('; ')}
-          spec={{ kind: 'deadlines', start: '2026-10-19', end: '2026-11-13', items: sorted.map((d) => ({ name: d.topic, date: d.deadline, role: d.owner })) }}
+          spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.topic, date: d.deadline, role: d.owner })) }}
           size="md"
           wide
         />
@@ -439,7 +423,7 @@ export function PendingPage({ pathname }: { pathname: string }) {
         id="ucret"
         index={3}
         title="Ücret ve prim"
-        desc={`İşveren maliyeti = maaş × ${EMPLOYER_COST_FACTOR} (SGK, yemek, bilgisayar, vergi ve diğerleri). Prim yalnız kriterleri tamamlanan satıştan doğar.`}
+        desc={`İşveren maliyeti = maaş × ${params.costFactor.toLocaleString('tr-TR')} (SGK, yemek, bilgisayar, vergi ve diğerleri). Prim yalnız kriterleri tamamlanan satıştan doğar. Saha kotası: ay içinde ${lira(m.quota)} satış.`}
       >
         <DataTable<PayRule>
           id="ucret"
@@ -455,10 +439,10 @@ export function PendingPage({ pathname }: { pathname: string }) {
         />
         <Note title="Hesap">
           <p>
-            Saha ekibinin 90 günlük sabit maliyeti: {sahaPersonMonths} kişi-ay × {lira(sahaCost)} = {lira(sahaPersonMonths * sahaCost)} (2 kişi 3 ay, 3. kişi 2 ay).
+            90 günlük personel maliyeti (işveren): {lira(m.staffCost90)}; bunun {lira(m.sahaCost90)} kadarı saha ekibi ({params.sahaCount} kişi 3 ay, {params.sahaDecCount} kişi {m.decMonths} ay).
           </p>
           <p>
-            Bir temsilci satışında toplam pay en çok {lira(COMMISSION_PER_SALE + SPONSOR_SHARE + LEAD_TEAM_SHARE)}: temsilci {lira(COMMISSION_PER_SALE)} + sponsor {lira(SPONSOR_SHARE)} + ekip lideri {lira(LEAD_TEAM_SHARE)}.
+            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)}: temsilci {lira(params.commission)} + sponsor {lira(params.sponsorShare)} + ekip lideri {lira(params.leadTeamShare)}.
           </p>
         </Note>
       </Section>
@@ -521,8 +505,8 @@ export function PendingPage({ pathname }: { pathname: string }) {
         <Chart
           id="fazla-calisma"
           title="Kişi başı kümülatif fazla çalışma"
-          note="Kesikli çizgi: Dönem 1 düzeni sürseydi tavan 18. haftada (6 Mart) dolardı."
-          summary={`Kasım’da başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir; tavan ${OVERTIME_CAP} saat. Dönem 1 düzeni sürseydi tavan 18. haftada dolardı.`}
+          note={`Kesikli çizgi: Dönem 1 düzeni sürseydi tavan ${crossWeek}. haftada (${shortDate(addDays(dates.firstDay, (crossWeek - 1) * 7))}) dolardı.`}
+          summary={`Program başında başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir; tavan ${OVERTIME_CAP} saat. Dönem 1 düzeni sürseydi tavan ${crossWeek}. haftada dolardı.`}
           spec={{
             kind: 'cumulative',
             labels: weekLabels,
@@ -530,8 +514,8 @@ export function PendingPage({ pathname }: { pathname: string }) {
             cap: OVERTIME_CAP,
             capLabel: `Yasal tavan ${OVERTIME_CAP} sa`,
             series: [
-              { name: 'Kasım’da başlayanlar', role: 'saha-uzmani', values: overtimeSeries(1, p1.overtimePerWeek, p1.weeks) },
-              { name: 'Organizatör (1 Aralık)', role: 'organizator', values: overtimeSeries(5, p1.organizerOvertimePerWeek, p1.weeks) },
+              { name: 'Program başında başlayanlar', role: 'saha-uzmani', values: overtimeSeries(1, p1.overtimePerWeek, p1.weeks) },
+              { name: `Organizatör (${shortDate(dates.dec)})`, role: 'organizator', values: overtimeSeries(decWeek, p1.organizerOvertimePerWeek, p1.weeks) },
               { name: 'Dönem 1 sürseydi', role: 'yonetici', values: overtimeSeries(1, p1.overtimePerWeek, CUMULATIVE_WEEKS), dashed: true },
             ],
           }}
@@ -539,12 +523,12 @@ export function PendingPage({ pathname }: { pathname: string }) {
         />
         <Note title="Fazla çalışma ücreti">
           <p>
-            Saat ücreti {lira(SAHA_SALARY / 225)}, fazla çalışma saati {lira(overtimeHourly)} (60.000 ₺ brüt varsayımı, aylık 225 saat, %50 zamlı).
+            Saha için saat ücreti {lira(params.sahaSalary / 225)}, fazla çalışma saati {lira(overtimeHourly)} (maaş / 225 saat, %50 zamlı; bordroda brüt esas alınır).
             Dönem 1’de ayda yaklaşık {monthlyOvertime} saat: kişi başı ≈ {lira(monthlyOvertime * overtimeHourly)} / ay. {p2.name} ile bu gider kalkar.
           </p>
         </Note>
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -552,16 +536,20 @@ export function PendingPage({ pathname }: { pathname: string }) {
 
 const LEVEL_ROLES: RoleKey[] = ['yonetici', 'ekip-lideri', 'saha-uzmani', 'pazarlamaci'];
 
-export function GrowthPage({ pathname }: { pathname: string }) {
+function GrowthContent() {
+  const m = useModel();
+  const { levels, recruitmentFunnel, growthKpis, compliance } = m.growth;
+  const { params, dates } = m;
+
   return (
-    <AppFrame pathname={pathname}>
+    <>
       <Hero
         eyebrow="Ağaç 3 · Saha satış"
         title="Çok katmanlı pazarlama ağı (MLM)"
         lead="Doğrudan satış modeli: bağımsız satış temsilcileri Meta reklamlarıyla bulunur; kazanç yalnız gerçek satıştan doğar."
       />
 
-      <Section id="kademe" index={1} title="Kademeler" desc="30 Ocak 2027 hedefi.">
+      <Section id="kademe" index={1} title="Kademeler" desc={`${longDate(dates.day90)} hedefi.`}>
         <Chart
           id="piramit"
           title="Kademe piramidi"
@@ -580,7 +568,7 @@ export function GrowthPage({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="huni" index={2} title="Haftalık işe alım hunisi" desc="Meta reklamı 5.000 ₺ / hafta (~20.000 ₺ / ay) → ayda en fazla ~2 aktif temsilci.">
+      <Section id="huni" index={2} title="Haftalık işe alım hunisi" desc={`Meta reklamı ${lira(params.metaWeekly)} / hafta (~${lira((params.metaWeekly * 52) / 12)} / ay) → ayda en fazla ~${m.growth.monthlyRepsText} aktif temsilci.`}>
         <Chart
           id="huni"
           title="Başvurudan aktif temsilciye (haftalık)"
@@ -609,7 +597,7 @@ export function GrowthPage({ pathname }: { pathname: string }) {
           </ul>
         </Note>
       </Section>
-    </AppFrame>
+    </>
   );
 }
 
@@ -642,6 +630,54 @@ export function NotFoundPage({ pathname }: { pathname: string }) {
           Organizasyon şemasına dön
         </TextLink>
       </p>
+    </AppFrame>
+  );
+}
+
+export function HiringPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <HiringContent />
+    </AppFrame>
+  );
+}
+
+export function GoalsPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <GoalsContent />
+    </AppFrame>
+  );
+}
+
+export function PlanPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <PlanContent />
+    </AppFrame>
+  );
+}
+
+export function AuthorityPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <AuthorityContent />
+    </AppFrame>
+  );
+}
+
+export function PendingPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <PendingContent />
+    </AppFrame>
+  );
+}
+
+export function GrowthPage({ pathname }: { pathname: string }) {
+  return (
+    <AppFrame pathname={pathname}>
+      <GrowthContent />
     </AppFrame>
   );
 }

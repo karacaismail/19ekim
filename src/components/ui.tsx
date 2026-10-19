@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Anchor, Badge, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
@@ -10,6 +10,7 @@ import {
   IconNotebook,
   IconPhoneCall,
   IconPresentation,
+  IconShieldCheck,
 } from '@tabler/icons-react';
 import { ROLE_LABELS } from '../data/roles';
 import type { Kpi, RoleKey, Status } from '../data/types';
@@ -32,6 +33,7 @@ const ROLE_ICONS: Record<RoleKey, typeof IconPhoneCall> = {
   yonetici: IconCompass,
   yazilim: IconCode,
   yatirimci: IconBuildingBank,
+  segika: IconShieldCheck,
 };
 
 export const formatDate = (iso: string) =>
@@ -266,7 +268,8 @@ export function Note({ title, children }: { title: string; children: ReactNode }
 }
 
 /* ---------- Grafik ----------
- * Veri sayfaya gömülür; ECharts yalnız görünürken istemcide yüklenir (src/scripts/charts.ts).
+ * ECharts yalnız grafik görünür olunca yüklenir (src/scripts/charts.ts, ayrı paket). Spec değişince (ör. Parametreler)
+ * aynı grafik yeniden çizilir. Çizilene kadar ve çizilemezse Türkçe özet görünür; ekran okuyucu metni de bu özettir.
  * Geniş grafikler (`wide`) dar ekranda kendi kapsayıcısında yatay kayar; sayfa taşmaz.
  */
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
@@ -289,9 +292,68 @@ export function Chart({
   wide?: boolean;
 }) {
   const titleId = `${id}-grafik`;
+  const host = useRef<HTMLDivElement>(null);
+  const seen = useRef(false);
+  const [state, setState] = useState<'idle' | 'ready' | 'failed'>('idle');
+  const json = JSON.stringify(spec);
+
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return undefined;
+    let cancelled = false;
+    let observer: IntersectionObserver | null = null;
+    const draw = () => {
+      import('../scripts/charts')
+        .then((mod) => mod.drawChart(el, JSON.parse(json) as ChartSpec))
+        .then(() => !cancelled && setState('ready'))
+        .catch(() => !cancelled && setState('failed'));
+    };
+    if (seen.current || !('IntersectionObserver' in window)) {
+      seen.current = true;
+      draw();
+    } else {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer?.disconnect();
+            seen.current = true;
+            draw();
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(el);
+    }
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+    };
+  }, [json]);
+
+  useEffect(
+    () => () => {
+      const el = host.current;
+      if (el) void import('../scripts/charts').then((mod) => mod.disposeChart(el));
+    },
+    [],
+  );
+
   const canvas = (
-    <div className="chart-canvas" data-chart={JSON.stringify(spec)} data-kind={spec.kind} data-size={size} role="img" aria-label={summary}>
-      <p className="chart-fallback">{summary}</p>
+    <div
+      className="chart-canvas"
+      data-kind={spec.kind}
+      data-size={size}
+      data-chart-failed={state === 'failed' ? '' : undefined}
+      role="img"
+      aria-label={summary}
+    >
+      <div className="chart-host" ref={host} />
+      {state === 'ready' ? null : (
+        <p className="chart-fallback">
+          {state === 'failed' ? 'Grafik yüklenemedi. ' : ''}
+          {summary}
+        </p>
+      )}
     </div>
   );
   return (

@@ -4,9 +4,6 @@ import { PlanPage } from '../views/OtherPages';
 ---
 
 <BaseLayout title="Eylem planı" description="istoc.com genel eylem planı: kişi × zaman Gantt şeması ve eylem tablosu.">
-  <PlanPage pathname={Astro.url.pathname} />
+  <PlanPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 
-<script>
-  import '../scripts/charts.ts';
-</script>

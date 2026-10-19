@@ -9,15 +9,28 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 
 - Astro 7.4.0 (statik), @astrojs/react 7.1.0, React 19.3.1, @mantine/core 9.7.3, @mantine/dates 9.7.3 (dayjs 1.11),
   ECharts 6.1.0, TypeScript 6.
-- Her sayfa tek bir React ağacıdır (`src/views/*`), `AppFrame` içinde `MantineProvider` ile **hidrasyonsuz** sunucu
-  tarafında çizilir. Astro’da React bağlamı sayfa sınırını geçmez; Mantine bileşenleri her zaman `AppFrame` içinde kalır.
-- İstemci JavaScript’i yalnız şunlardır: `BaseLayout.astro` içindeki satır içi betikler (renk şeması ve tema düğmesi,
-  merkezi klavye odak modu, gezinme şeridi) ve grafikli sayfalarda `src/scripts/charts.ts`. ECharts, `echarts-setup.ts`
-  üzerinden modüler ve yalnız grafik görünür olunca yüklenir. İstihdam ve arşiv sayfaları ECharts indirmez.
+- Her sayfa tek bir React ağacıdır (`src/views/*`), `AppFrame` içinde `MantineProvider` + `ModelProvider` ile sunucuda
+  çizilir ve `client:load` ile hidrasyon alır. Astro’da React bağlamı sayfa sınırını geçmez; Mantine bileşenleri ve
+  `useModel()` her zaman `AppFrame` içinde kalır (sayfa bileşeni yalnız `AppFrame` + içerik bileşenini döndürür).
+- **Tek veri kaynağı: parametreler.** Kararlaştırılan tarih, kişi sayısı, ücret, prim, kota, bütçe, hedef ve yasal tavan
+  `src/data/params.ts` içindedir (`DEFAULT_PARAMS`, `PARAM_GROUPS`). `src/data/model.ts` → `buildModel(params)` tüm
+  sayfaların verisini türetir (`makeProgram`, `makeRoles`, `makeDigital`, `makeGrowth`, `makeOrg`). Sayı ve tarih
+  içeren yeni metin, parametreden üretilir; sabit yazılmaz.
+- Takvim kayması: program başlangıcı tüm planı, Aralık başlangıcı organizatör / ekip lideri / Aralık saha kohortunu
+  kaydırır. Metindeki “13 Kasım” gibi tarihler `shiftText` ile aynı gün sayısı kadar kayar (`src/lib/dates.ts`).
+- `/parametreler/` değerleri düzenler; değişiklik anında tüm sayfaların modeline yansır ve `localStorage`
+  (`istoc-plan-parametreler`, yalnız varsayılandan farklı anahtarlar) içinde saklanır. Yayındaki site herkes için
+  varsayılanları gösterir; değişiklik varsa her sayfada not görünür. Varsayılanı kalıcı değiştirmek için `params.ts`.
+- İstemci JavaScript’i: React adaları, `BaseLayout.astro` içindeki satır içi betikler (ilk renk şeması, merkezi klavye
+  odak modu, gezinme şeridi) ve grafikler. `Chart` bileşeni ECharts’ı (`src/scripts/charts.ts` → `echarts-setup.ts`)
+  yalnız grafik görünür olunca dinamik yükler; spec değişince aynı grafiği yeniden çizer. İstihdam, arşiv ve
+  Parametreler sayfaları ECharts indirmez. Tema düğmesi Mantine `colorSchemeManager` ile `istoc-plan-tema` anahtarını
+  kullanır.
 - Site, İsmail Karaca ile yatırımcı arasındaki toplantı içindir: yalnız SMART (tarihli, ölçülebilir) veri, kısa bağlam.
   Sayfalar:
   - `/` yalnız ECharts organizasyon şeması (`src/data/tree.ts` → `ORG`).
   - `/roller/<rol>/` görevler ve ölçüt, KPI, aylık artış grafiği, rol Gantt’ı + adımlar, günlük zaman payı + program.
+    `segika` rolü masa başı (CRM) rolünün kopyasıdır (kullanıcı kararı 2026-10-19).
   - `/roller/dijital-pazarlama/` veri türüne göre değil iş akışına göre kümelenir (kullanıcı kararı 2026-10-19):
     1 Ölçüm ve entegrasyonlar (GA4, Yandex Metrica, GTM…) → 2 AI-first paylaşım otomasyonu → 3 Üretim ve paylaşım
     otomasyonu → 4 İçerik planı (ne üretileceği) → 5 90 günlük plan → 6 Günlük düzen. Veri: `src/data/digital.ts`.
@@ -26,6 +39,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/eylem-plani/` istoc.com genel planı: Gantt + tablo (İsmail Karaca ve her rolün tarihli adımları).
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
+  - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).
@@ -58,11 +72,12 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
   tutarları yazılmaz. Kullanıcının açıkça siteye eklettiği değerler: İsmail Karaca adı, haftalık 5.000 ₺ Meta reklam
-  bütçesi, 90 gün ≥ 3.000.000 ₺ ciro hedefi, aktif satıcı aboneliği 399 € / ay, 30K / 90K / 500K paket bantları.
-  19 Ekim 2026 kararlarıyla ayrıca: işveren maliyeti = maaş × 2, saha satış maaşı 60.000 ₺, saha prim eşiği aylık
-  120.000 ₺ satış, satış başına prim 2.500 ₺, sponsor payı 500 ₺, ekip lideri liderlik farkı 10.000 ₺ ve ekip payı
-  250 ₺, yapay zekâ araç bütçesi aylık en çok 7.500 ₺. Diğer rollerin maaşları karar bekler ve yazılmaz. Yatırımcının
-  adı yazılmaz (rol: “Yatırımcı”).
+  bütçesi, 90 gün ≥ 3.000.000 ₺ ciro hedefi, aktif satıcı aboneliği 399 € / ay.
+  19 Ekim 2026 kararlarıyla ayrıca: işveren maliyeti = maaş × 2, saha satış maaşı 60.000 ₺, saha kotası (prim eşiği)
+  aylık 120.000 ₺ satış, satış başına prim 2.500 ₺, sponsor payı 500 ₺, ekip lideri liderlik farkı 10.000 ₺ ve ekip payı
+  250 ₺, yapay zekâ araç bütçesi aylık en çok 7.500 ₺; asgari ücret (net, 2026: 28.075,50 ₺) çarpanları: masa başı ve
+  Segika 1,25, dijital 1,25, asistan 1,5, organizatör 2. Yatırımcının adı yazılmaz (rol: “Yatırımcı”). Tahtadaki
+  “Pazarlama çözümleri 30K / 90K / 500K” notu yalnız değerlendirmeydi; kullanıcı kararıyla yok sayılır, sitede yer almaz.
   Kur yalnız oran olarak (≈ 55,31 ₺/€) tutulur; kaynağındaki toplam tutarlar yazılmaz.
 - Asistan kararı netleşmemiştir; asistansız senaryoda dijital pazarlama 1 Ocak 2027’de başlar. Bu koşul kişi adı
   verilmeden yazılır.
