@@ -24,6 +24,8 @@ export function ModelProvider({ children }: { children: ReactNode }) {
   const [saved, setSaved] = useState<Date | false | null>(null);
 
   useEffect(() => {
+    // Hidrasyon tamamlandı: etkileşim artık React’e ulaşır (testler ve kayıtlı parametreler için sinyal).
+    document.documentElement.setAttribute('data-hydrated', '');
     const stored = loadParams();
     if (stored) setParams(stored);
     const onStorage = (event: StorageEvent) => {

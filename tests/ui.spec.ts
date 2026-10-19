@@ -23,7 +23,7 @@ const PAGES = [
 const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/'].includes(p));
 
 /** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
-const hydrated = (page: Page) => page.waitForSelector('astro-island:not([ssr])', { state: 'attached' });
+const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
 
 const WIDTHS = [320, 360, 375, 390, 768, 1280];
 const APPROVED_EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
@@ -516,6 +516,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
   test('grafik hareketi: hareket azaltma tercihinde kapalı', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('hedefler/');
+    await page.locator('.chart-canvas').first().scrollIntoViewIfNeeded();
     await expect(page.locator('.chart-canvas svg').first()).toBeVisible({ timeout: 10_000 });
     const charts = await chartMotion(page);
     expect(charts.length).toBeGreaterThan(0);
@@ -531,6 +532,7 @@ test.describe('parametreler', () => {
     await hydrated(page);
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
+    await expect(salary).toHaveValue(/70\.000/);
     await salary.blur();
     await expect(page.locator('.param-status')).toContainText('1 değer varsayılandan farklı');
     await expect(page.locator('.params-notice')).toBeVisible();
