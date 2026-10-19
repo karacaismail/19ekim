@@ -1744,3 +1744,188 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   color: var(--text-primary);
   line-height: var(--leading-snug);
 }
+
+/* ---------- E-posta (yalnız adresle açılır) ----------
+ * Yazma penceresi düzeni: 1 Konu, 2 İleti, ardından alıcının göreceği önizleme. Önizlemedeki e-posta metin rengi
+ * taşımaz; sayfanın açık ve koyu temasını, gerçek e-posta da istemcinin temasını izler.
+ */
+.email {
+  max-width: var(--prose-max);
+}
+
+.email-compose {
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.email-step {
+  padding: var(--space-4);
+}
+
+.email-step + .email-step,
+.email-body {
+  border-top: var(--hairline) solid var(--rule);
+}
+
+/* Düğme yer varsa başlıkla aynı satırda, dar ekranda alt satırda tam genişlikte durur. */
+.email-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.email-step-head {
+  flex: 999 1 16rem;
+  min-width: 0;
+}
+
+.email-step-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.email-step-no {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: var(--radius-pill);
+  background: var(--surface-accent);
+  color: var(--accent-strong);
+  letter-spacing: 0;
+}
+
+.email-subject {
+  margin: var(--space-2) 0 0;
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+}
+
+.email-hint {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.email-btn {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-control);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-align: center;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.email-btn:hover {
+  background: var(--surface-control-hover);
+}
+
+.email-btn[data-primary] {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.email-btn[data-primary]:hover {
+  background: var(--accent-hover);
+}
+
+.email-btn-labels {
+  display: grid;
+}
+
+.email-btn-labels > span {
+  grid-area: 1 / 1;
+}
+
+.email-btn-labels > span:not([data-active]) {
+  visibility: hidden;
+}
+
+/* Turuncu zeminde marka odak rengi 3:1 altında kalır; odak çizgisi zemin üstü metin rengini alır. */
+html[data-focus-mode='keyboard'] .email-btn[data-primary]:focus-visible {
+  text-decoration-color: var(--text-on-accent);
+}
+
+html:not([data-js]) .email-btn {
+  display: none;
+}
+
+.email-status {
+  margin: 0;
+  color: var(--status-karar-fg);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.email-status[data-failed] {
+  margin-top: var(--space-3);
+  color: var(--status-bekliyor-fg);
+}
+
+.email-body {
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+.email-preview-head {
+  margin-bottom: var(--space-5);
+}
+
+.email-preview-head .email-hint {
+  margin-top: var(--space-1);
+}
+
+.email-preview-label {
+  margin: 0;
+  line-height: var(--leading-snug);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.email-preview {
+  color: var(--text-primary);
+}
+
+@media (min-width: 48em) {
+  .email-step {
+    padding: var(--space-5) var(--space-6);
+  }
+
+  .email-body {
+    padding: var(--space-6) var(--space-6) var(--space-8);
+  }
+}
+
+@media (forced-colors: active) {
+  .email-btn {
+    border: 1px solid ButtonText;
+  }
+}

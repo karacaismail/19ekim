@@ -19,10 +19,11 @@ const PAGES = [
   'parametreler/',
   'notlar/',
   'arsiv/',
+  'email/',
 ];
 
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/'].includes(p));
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'email/'].includes(p));
 
 /** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
@@ -43,6 +44,11 @@ async function audit(page: Page) {
       .filter((el) => visible(el) && !el.closest('.visually-hidden'))
       .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 14)
       .map((el) => `${el.tagName.toLowerCase()}.${el.className}: ${getComputedStyle(el).fontSize}`);
+    const light = [...document.querySelectorAll('body *')]
+      .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim()))
+      .filter((el) => visible(el) && !el.closest('.visually-hidden'))
+      .filter((el) => Number(getComputedStyle(el).fontWeight) < 300)
+      .map((el) => `${el.tagName.toLowerCase()}.${el.className}: ${getComputedStyle(el).fontWeight}`);
     const headerOverflow = [...document.querySelectorAll('.data-table th')]
       .filter((th) => th.scrollWidth > th.clientWidth + 1)
       .map((th) => th.textContent?.trim());
@@ -59,19 +65,20 @@ async function audit(page: Page) {
       // Kaydırılan bölge ya bir tablo ya da geniş bir grafik taşır.
       hasContent: !!r.querySelector(r.classList.contains('chart-scroll') ? '.chart-canvas' : 'table'),
     }));
-    return { overflow: doc.scrollWidth - window.innerWidth, small, headerOverflow, breaking, regions };
+    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions };
   });
 }
 
 test.describe('yerleşim ve okunabilirlik', () => {
   for (const width of WIDTHS) {
-    test(`${width} px: yatay taşma yok, metin ≥ 14 px, tablo başlıkları bölünmez`, async ({ page }) => {
+    test(`${width} px: yatay taşma yok, metin ≥ 14 px ve ağırlık ≥ 300, tablo başlıkları bölünmez`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       for (const path of PAGES) {
         await page.goto(path);
         const result = await audit(page);
         expect(result.overflow, `${path} sayfası yatay taşıyor`).toBeLessThanOrEqual(0);
         expect(result.small, `${path} 14 px altı metin`).toEqual([]);
+        expect(result.light, `${path} 300 altı yazı ağırlığı`).toEqual([]);
         expect(result.headerOverflow, `${path} başlık hücresi taşıyor`).toEqual([]);
         expect(result.breaking, `${path} zorlayıcı kelime bölme`).toEqual([]);
         for (const region of result.regions) {
@@ -335,7 +342,7 @@ test.describe('kenar sistemi (kavisli vurgu kenarı yasak)', () => {
             }
           }
         }
-        const rounded = [...document.querySelectorAll<HTMLElement>('.chip, .kpi, .cal, .chart-canvas, .table-scroll, .note, .pager-link')]
+        const rounded = [...document.querySelectorAll<HTMLElement>('.chip, .kpi, .cal, .chart-canvas, .table-scroll, .note, .pager-link, .email-compose, .email-btn')]
           .filter((el) => parseFloat(getComputedStyle(el).borderEndEndRadius) > 0).length;
         return { bad, rounded };
       });

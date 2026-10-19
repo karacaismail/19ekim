@@ -214,6 +214,11 @@
   --toggle-thumb-off: #555a5f;
   --toggle-track-on: #ff8600;
   --toggle-thumb-on: #16181a;
+
+  /* Düğme yüzeyi (ikincil eylem) ve vurgu düğmesinin üzerine gelme tonu */
+  --surface-control: #efede7;
+  --surface-control-hover: #e4e1d8;
+  --accent-hover: #ff9a2e;
 }
 
 /* Koyu tema */
@@ -282,4 +287,8 @@
   --toggle-thumb-off: #a8aeb4;
   --toggle-track-on: #ff8600;
   --toggle-thumb-on: #16181a;
+
+  --surface-control: #262a2e;
+  --surface-control-hover: #31363b;
+  --accent-hover: #ff9a2e;
 }

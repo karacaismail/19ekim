@@ -12,6 +12,8 @@ const SRC = join(ROOT, 'src');
 const TOKENS = join(SRC, 'styles', 'tokens.css');
 const APPROVED_EASING = /^cubic-bezier\(\s*\.65,\s*0,\s*\.35,\s*1\s*\)$/;
 const MIN_FONT_PX = 14;
+/** En ince yazı ağırlığı (kullanıcı kararı 2026-10-19). */
+const MIN_FONT_WEIGHT = 300;
 
 const errors = [];
 const fail = (file, msg) => errors.push(`${relative(ROOT, file)}: ${msg}`);
@@ -131,6 +133,14 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
         if (min !== null && min < MIN_FONT_PX) fail(file, `${prop}: ${value} < 14px`);
       }
 
+      // Yazı ağırlığı: 300 altı (100, 200, lighter) yasak; tokenlar dahil.
+      if (prop === 'font-weight' || /^--weight-/.test(prop)) {
+        const weight = Number(value);
+        if (value === 'lighter' || (Number.isFinite(weight) && weight < MIN_FONT_WEIGHT)) {
+          fail(file, `${rule.selector}: "${prop}: ${value}" — yazı ağırlığı ${MIN_FONT_WEIGHT} altında`);
+        }
+      }
+
       // Tablo
       if ((prop === 'word-break' && value === 'break-all') || (prop === 'overflow-wrap' && value === 'anywhere')) {
         fail(file, `${rule.selector}: "${prop}: ${value}" yasak`);
@@ -172,6 +182,10 @@ for (const file of files.filter((f) => /\.(tsx|ts|astro)$/.test(f))) {
     for (const value of values) {
       if (!(value in EDGE_CORNERS)) fail(file, `bilinmeyen kenar türü data-edge="${value}"`);
     }
+  }
+  // JS/TSX ve satır içi HTML (e-posta) içinde de yazı ağırlığı 300 altına inmez.
+  for (const m of code.matchAll(/font-?[wW]eight\s*:\s*['"]?(\d{3})\b/g)) {
+    if (Number(m[1]) < MIN_FONT_WEIGHT) fail(file, `yazı ağırlığı ${m[1]} < ${MIN_FONT_WEIGHT}`);
   }
   // JS/TSX içinde hareket değerleri yalnız tokenlardan okunur; sabit eğri veya süre yazılamaz.
   if (/cubic-bezier\(|animate\(/.test(code)) fail(file, 'JS/TSX içinde sabit easing veya WAAPI animasyonu yasak; tokenları kullan');
