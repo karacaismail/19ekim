@@ -524,107 +524,13 @@ function build(spec: ChartSpec, width: number): Opt {
         ],
       };
 
-    case 'bcg': {
-      // Klasik yerleşim: yatayda yüksek pay solda (eksen ters), dikeyde hızlı büyüme üstte.
-      // Kutular birbirinden ayırt edilsin: ton aileleri farklı.
-      const fills: Record<string, string> = {
-        yildiz: token('--role-ekip-lideri-bg'),
-        soru: token('--role-pazarlamaci-bg'),
-        inek: token('--role-saha-uzmani-bg'),
-        kopek: token('--surface-sunken'),
-      };
-      const bounds: Record<string, [number, number, number, number]> = {
-        yildiz: [0.5, 1, 0.5, 1],
-        soru: [0, 0.5, 0.5, 1],
-        inek: [0.5, 1, 0, 0.5],
-        kopek: [0, 0.5, 0, 0.5],
-      };
-      const name = (key: string) => spec.quadrants.find((q) => q.key === key)?.name ?? key;
-      const ends = (low: string, high: string) => (v: number) => (v === 0 ? low : v === 1 ? high : '');
-      const items = spec.items ?? [];
-      return {
-        ...base(),
-        grid: { left: 4, right: 16, top: 8, bottom: 4, containLabel: true },
-        tooltip: {
-          ...(base().tooltip as Opt),
-          trigger: 'item',
-          formatter: (p: { data?: { name?: string; quadrant?: string } }) => (p.data?.quadrant ? `${p.data.name}: ${name(p.data.quadrant)}` : ''),
-        },
-        xAxis: {
-          type: 'value',
-          min: 0,
-          max: 1,
-          interval: 0.5,
-          inverse: true,
-          ...axis(),
-          splitLine: { show: false },
-          axisLabel: { ...(axis().axisLabel as Opt), formatter: ends('Düşük pay', 'Yüksek pay') },
-        },
-        yAxis: {
-          type: 'value',
-          min: 0,
-          max: 1,
-          interval: 0.5,
-          ...axis(),
-          splitLine: { show: false },
-          axisLabel: { ...(axis().axisLabel as Opt), formatter: ends('Yavaş büyüme', 'Hızlı büyüme') },
-        },
-        series: [
-          {
-            type: 'scatter',
-            symbolSize: 22,
-            data: items.map((item) => ({
-              name: item.name,
-              quadrant: item.quadrant,
-              value: [item.x, item.y],
-              itemStyle: {
-                color: item.uncertain ? token('--surface-raised') : token(`--role-${item.role}`),
-                borderColor: token(`--role-${item.role}`),
-                borderWidth: 3,
-                borderType: item.uncertain ? 'dashed' : 'solid',
-              },
-              // Aşağı inen okla çakışmasın: oku dikey olan noktanın etiketi sağda.
-              label: { show: true, position: item.toward && item.toward.x === item.x ? 'right' : 'bottom', distance: 10, fontSize: FONT_SIZE, fontWeight: 600, color: text, formatter: item.name.split(' ')[0] },
-            })),
-            markArea: {
-              silent: true,
-              data: Object.entries(bounds).map(([key, [x0, x1, y0, y1]]) => [
-                {
-                  name: name(key),
-                  xAxis: x0,
-                  yAxis: y1,
-                  itemStyle: { color: fills[key] },
-                  // Eksen ters: ekranda sol kutuların dış köşesi “insideTopLeft”, sağ kutularınki “insideTopRight”.
-                  label: { show: true, position: key === 'yildiz' || key === 'inek' ? 'insideTopLeft' : 'insideTopRight', fontSize: FONT_SIZE, fontWeight: 600, color: text },
-                },
-                { xAxis: x1, yAxis: y0 },
-              ]),
-            },
-            markLine: {
-              silent: true,
-              symbol: ['none', 'arrow'],
-              symbolSize: 14,
-              lineStyle: { color: text, type: 'dashed', width: 2 },
-              label: { show: true, position: 'middle', fontSize: FONT_SIZE, fontWeight: 600, color: text, backgroundColor: token('--surface-raised'), padding: [2, 6] },
-              data: [
-                ...items
-                  .filter((item) => item.toward)
-                  .map((item) => [{ coord: [item.x, item.y], label: { show: false } }, { coord: [item.toward!.x, item.toward!.y] }]),
-                ...(spec.flows ?? []).map((flow) => [{ coord: flow.from, label: { formatter: flow.label } }, { coord: flow.to }]),
-              ],
-            },
-          },
-        ],
-      };
-    }
-
     case 'bcg-num': {
       // Klasik BCG: göreli pay log ölçekte, yüksek pay solda; dikeyde pazar büyümesi (%). Balon alanı ciroyla orantılı.
       const fills: Record<string, string> = {
         yildiz: token('--role-ekip-lideri-bg'),
         soru: token('--role-pazarlamaci-bg'),
         inek: token('--role-saha-uzmani-bg'),
-        kopek: token('--surface-sunken'),
+        kopek: token('--role-yazilim-bg'),
       };
       const tones: Record<string, string> = {
         yildiz: token('--role-ekip-lideri'),
@@ -632,6 +538,7 @@ function build(spec: ChartSpec, width: number): Opt {
         inek: token('--role-saha-uzmani'),
         kopek: token('--role-yazilim'),
       };
+      const muted = token('--text-secondary');
       const name = (key: string) => spec.quadrants.find((q) => q.key === key)?.name ?? key;
       const xMin = 0.05;
       const xMax = 10;
@@ -645,15 +552,17 @@ function build(spec: ChartSpec, width: number): Opt {
         inek: [spec.shareSplit, xMax, yMin, spec.growthSplit],
         kopek: [xMin, spec.shareSplit, yMin, spec.growthSplit],
       };
+      const axisName = { color: text, fontSize: FONT_SIZE, fontWeight: 600 };
       return {
         ...base(),
-        grid: { left: 4, right: 20, top: 8, bottom: 4, containLabel: true },
+        // Eksen adları için sabit pay: ECharts containLabel eksen adını hesaba katmaz.
+        grid: { left: FONT_SIZE * 6, right: FONT_SIZE * 2, top: FONT_SIZE, bottom: FONT_SIZE * 4.5, containLabel: false },
         tooltip: {
           ...(base().tooltip as Opt),
           trigger: 'item',
           formatter: (p: { data?: { name?: string; value?: number[]; revenue?: number; quadrant?: string } }) =>
             p.data?.value
-              ? `${p.data.name}<br/>Büyüme %${number.format(p.data.value[1])} · Göreli pay ${number.format(p.data.value[0])}<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺ · ${name(p.data.quadrant ?? '')}`
+              ? `${p.data.name}<br/>Pazar büyümesi %${number.format(p.data.value[1])} · Göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺ · ${name(p.data.quadrant ?? '')}`
               : '',
         },
         xAxis: {
@@ -662,16 +571,27 @@ function build(spec: ChartSpec, width: number): Opt {
           min: xMin,
           max: xMax,
           inverse: true,
+          name: 'Göreli pazar payı  (← yüksek · düşük →)',
+          nameLocation: 'middle',
+          nameGap: FONT_SIZE * 2.4,
+          nameTextStyle: axisName,
           ...axis(),
+          axisLine: { show: false },
           splitLine: { show: false },
-          axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => number.format(v) },
+          axisLabel: { ...(axis().axisLabel as Opt), showMinLabel: false, formatter: (v: number) => `${number.format(v)}×` },
         },
         yAxis: {
           type: 'value',
           min: yMin,
           max: yMax,
           interval: 10,
+          name: 'Pazar büyümesi',
+          nameLocation: 'middle',
+          nameGap: FONT_SIZE * 3.6,
+          nameRotate: 90,
+          nameTextStyle: axisName,
           ...axis(),
+          axisLine: { show: false },
           splitLine: { show: false },
           axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => (v < 0 ? `−%${-v}` : `%${v}`) },
         },
@@ -683,9 +603,18 @@ function build(spec: ChartSpec, width: number): Opt {
               quadrant: item.quadrant,
               revenue: item.revenue,
               value: [item.share, item.growth],
-              symbolSize: 14 + 46 * Math.sqrt(item.revenue / maxRevenue),
-              itemStyle: { color: tones[item.quadrant], opacity: 0.85, borderColor: token('--surface-raised'), borderWidth: 2 },
-              label: { show: true, position: 'bottom', distance: 6, fontSize: FONT_SIZE, fontWeight: 600, color: text, formatter: item.name },
+              symbolSize: 16 + 40 * Math.sqrt(item.revenue / maxRevenue),
+              itemStyle: { color: tones[item.quadrant], borderColor: token('--surface-raised'), borderWidth: 2 },
+              label: {
+                show: true,
+                // Sağ kenara yakın balonun (düşük pay) etiketi solda: dar ekranda grafik dışına taşmaz.
+                position: (Math.log10(xMax) - Math.log10(item.share)) / (Math.log10(xMax) - Math.log10(xMin)) > 0.72 ? 'left' : 'right',
+                distance: 8,
+                fontSize: FONT_SIZE,
+                color: text,
+                formatter: `{n|${item.name}}\n{v|${number.format(item.revenue)} milyon ₺}`,
+                rich: { n: { fontSize: FONT_SIZE, fontWeight: 600, color: text, lineHeight: FONT_SIZE + 4 }, v: { fontSize: FONT_SIZE, color: muted, lineHeight: FONT_SIZE + 4 } },
+              },
             })),
             markArea: {
               silent: true,
@@ -695,10 +624,25 @@ function build(spec: ChartSpec, width: number): Opt {
                   xAxis: x1,
                   yAxis: y1,
                   itemStyle: { color: fills[key] },
-                  label: { show: true, position: key === 'yildiz' || key === 'inek' ? 'insideTopLeft' : 'insideTopRight', fontSize: FONT_SIZE, fontWeight: 600, color: text },
+                  label: {
+                    show: true,
+                    position: key === 'yildiz' || key === 'inek' ? 'insideTopLeft' : 'insideTopRight',
+                    distance: FONT_SIZE / 2,
+                    fontSize: FONT_SIZE,
+                    fontWeight: 600,
+                    color: token(`--role-${key === 'yildiz' ? 'ekip-lideri' : key === 'soru' ? 'pazarlamaci' : key === 'inek' ? 'saha-uzmani' : 'yazilim'}-fg`),
+                  },
                 },
                 { xAxis: x0, yAxis: y0 },
               ]),
+            },
+            // Eşikler: göreli pay 1× ve pazar büyümesi %10 (ince kesikli çizgi, etiketsiz).
+            markLine: {
+              silent: true,
+              symbol: 'none',
+              label: { show: false },
+              lineStyle: { color: token('--rule-strong'), type: 'dashed', width: 1 },
+              data: [{ xAxis: spec.shareSplit }, { yAxis: spec.growthSplit }],
             },
           },
         ],

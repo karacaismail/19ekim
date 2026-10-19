@@ -37,13 +37,6 @@ export type ChartSpec =
   /** Adetli halka grafik (ör. haftalık içerik karması). */
   | { kind: 'mix'; unit: string; items: { name: string; value: number; role: RoleKey }[] }
   /** Kümülatif çizgiler ve yatay tavan çizgisi (ör. yıllık fazla çalışma). */
-  /** BCG matrisi (nitel): dört kutu; isteğe bağlı noktalar (0–1) ve kutular arası oklar. */
-  | {
-      kind: 'bcg';
-      quadrants: { key: string; name: string }[];
-      items?: { name: string; quadrant: string; role: RoleKey; x: number; y: number; uncertain?: boolean; toward?: { x: number; y: number } }[];
-      flows?: { from: [number, number]; to: [number, number]; label: string }[];
-    }
   /** BCG matrisi (sayısal): yatay göreli pay (log), dikey pazar büyümesi (%), balon = ciro. */
   | {
       kind: 'bcg-num';

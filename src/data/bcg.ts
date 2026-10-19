@@ -9,6 +9,9 @@ export interface Quadrant {
   key: QuadrantKey;
   name: string;
   english: string;
+  /** Matris kartında: kısa durum ve kısa eylem */
+  rule: string;
+  short: string;
   growth: string;
   share: string;
   cash: string;
@@ -21,6 +24,8 @@ export const QUADRANTS: Quadrant[] = [
     key: 'yildiz',
     name: 'Yıldız',
     english: 'Star',
+    rule: 'Hızlı pazar · yüksek pay',
+    short: 'Yatırım yap, liderliği koru',
     growth: 'Hızlı',
     share: 'Yüksek (lideriz)',
     cash: 'Çok kazanır, büyümek için çok harcar',
@@ -31,6 +36,8 @@ export const QUADRANTS: Quadrant[] = [
     key: 'soru',
     name: 'Soru işareti',
     english: 'Question mark',
+    rule: 'Hızlı pazar · düşük pay',
+    short: 'Seç: yatırım ya da bırak',
     growth: 'Hızlı',
     share: 'Düşük (henüz küçüğüz)',
     cash: 'Çok harcar, az kazanır',
@@ -41,6 +48,8 @@ export const QUADRANTS: Quadrant[] = [
     key: 'inek',
     name: 'Nakit ineği',
     english: 'Cash cow',
+    rule: 'Yavaş pazar · yüksek pay',
+    short: 'Nakit topla, diğerlerine aktar',
     growth: 'Yavaş',
     share: 'Yüksek (lideriz)',
     cash: 'Çok kazanır, az harcar',
@@ -51,12 +60,22 @@ export const QUADRANTS: Quadrant[] = [
     key: 'kopek',
     name: 'Köpek',
     english: 'Dog',
+    rule: 'Yavaş pazar · düşük pay',
+    short: 'Küçült veya çık',
     growth: 'Yavaş',
     share: 'Düşük',
     cash: 'Az kazanır, az harcar',
     action: 'Para bağlama; küçük tut veya çık',
     next: 'Kapatılır ya da elden çıkarılır',
   },
+];
+
+/** Nakit döngüsü: ürünlerin ve nakdin kutular arasındaki olağan hareketi. */
+export const FLOWS: { from: QuadrantKey; to: QuadrantKey; text: string }[] = [
+  { from: 'inek', to: 'soru', text: 'Nakit ineğinin kazandığı nakit Soru işaretlerine yatırılır.' },
+  { from: 'soru', to: 'yildiz', text: 'Pay kazanan Soru işareti Yıldız olur.' },
+  { from: 'yildiz', to: 'inek', text: 'Pazarı yavaşlayan Yıldız Nakit ineğine döner.' },
+  { from: 'soru', to: 'kopek', text: 'Pay kazanamayan Soru işareti Köpek olur ve bırakılır.' },
 ];
 
 export const PURPOSES = [

@@ -601,22 +601,27 @@ test.describe('parametreler', () => {
 });
 
 test.describe('BCG eğitimi', () => {
-  test('dört kutu, nakit döngüsü okları ve örnek balon matrisi Türkçe çizilir', async ({ page }) => {
+  test('dört kutu matrisi, nakit döngüsü ve örnek balon matrisi Türkçe; matris yerleşimi klasik', async ({ page }) => {
     await page.goto('bcg/');
-    const quad = page.locator('.chart-canvas[data-kind="bcg"]');
-    await quad.scrollIntoViewIfNeeded();
-    await expect(quad.locator('svg')).toBeVisible({ timeout: 10_000 });
-    const quadTexts = await quad.locator('svg text').allTextContents();
-    for (const label of ['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek', 'Nakit akar', 'Pay kazanırsa', 'Yüksek pay', 'Hızlı büyüme']) {
-      expect(quadTexts, label).toContain(label);
-    }
+    const cells = page.locator('.bcg-cell');
+    await expect(cells).toHaveCount(4);
+    expect(await cells.locator('.bcg-name').allTextContents()).toEqual(['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek']);
+    // Klasik yerleşim: Yıldız sol üst, Köpek sağ alt.
+    const box = async (i: number) => (await cells.nth(i).boundingBox())!;
+    const [star, question, cow, dog] = [await box(0), await box(1), await box(2), await box(3)];
+    expect(star.x).toBeLessThan(question.x);
+    expect(star.y).toBeLessThan(cow.y);
+    expect(dog.x).toBeGreaterThan(cow.x);
+    await expect(page.locator('.bcg-flow')).toHaveCount(4);
+
     const example = page.locator('.chart-canvas[data-kind="bcg-num"]');
     await example.scrollIntoViewIfNeeded();
     await expect(example.locator('svg')).toBeVisible({ timeout: 10_000 });
-    const exampleTexts = await example.locator('svg text').allTextContents();
-    for (const label of ['Akıllı saat', 'Kahve makinesi', 'Elektrikli scooter', 'Akıllı termostat', 'DVD oynatıcı']) {
-      expect(exampleTexts, label).toContain(label);
+    const texts = (await example.locator('svg text').allTextContents()).join(' | ');
+    for (const label of ['Akıllı saat', 'Kahve makinesi', 'Elektrikli scooter', 'Akıllı termostat', 'DVD oynatıcı', 'Pazar büyümesi', 'Göreli pazar payı', '1×']) {
+      expect(texts, label).toContain(label);
     }
+    expect(texts).not.toContain('0,05');
   });
 
   test('alıştırma cevabı açılır; klavye odağında halka yok, alt çizgi var', async ({ page, browserName }) => {

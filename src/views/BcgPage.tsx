@@ -1,8 +1,10 @@
+import { IconArrowRight, IconCoin, IconDog, IconQuestionMark, IconStar } from '@tabler/icons-react';
 import { AppFrame } from '../components/AppFrame';
 import { Chart, DataTable, Hero, Note, Section } from '../components/ui';
 import {
   AXES,
   EXAMPLE,
+  FLOWS,
   GROWTH_SPLIT,
   LIMITS,
   MISTAKES,
@@ -17,11 +19,82 @@ import {
   STRATEGIES,
   type ExampleProduct,
   type Quadrant,
+  type QuadrantKey,
 } from '../data/bcg';
 import { num } from '../lib/format';
 
 const quadrantName = (key: string) => QUADRANTS.find((q) => q.key === key)?.name ?? key;
 const quadrantSpec = QUADRANTS.map((q) => ({ key: q.key, name: q.name }));
+
+const ICONS: Record<QuadrantKey, typeof IconStar> = { yildiz: IconStar, soru: IconQuestionMark, inek: IconCoin, kopek: IconDog };
+const quadrant = (key: QuadrantKey) => QUADRANTS.find((q) => q.key === key)!;
+
+/**
+ * Dört kutu: klasik yerleşim (sol üst Yıldız, sağ üst Soru işareti, sol alt Nakit ineği, sağ alt Köpek).
+ * Eksen adları kutuların dışında; matrisin içinde yalnız kutu bilgisi var.
+ */
+function BcgMatrix() {
+  return (
+    <figure className="bcg-matrix" aria-labelledby="bcg-matrix-baslik">
+      <figcaption className="bcg-matrix-caption">
+        <span className="chart-title" id="bcg-matrix-baslik">
+          Dört kutu
+        </span>
+        <span className="chart-note">Dikey: pazar büyüme hızı (yukarı = hızlı). Yatay: göreli pazar payı (sol = yüksek, klasik BCG yerleşimi).</span>
+      </figcaption>
+      <div className="bcg-frame">
+        <div className="bcg-y" aria-hidden="true">
+          <span>Düşük</span>
+          <span className="bcg-axis-name">Pazar büyüme hızı</span>
+          <span>Yüksek</span>
+        </div>
+        <ul className="bcg-cells">
+          {(['yildiz', 'soru', 'inek', 'kopek'] as QuadrantKey[]).map((key) => {
+            const q = quadrant(key);
+            const Icon = ICONS[key];
+            return (
+              <li key={key} className="bcg-cell" data-quadrant={key}>
+                <span className="bcg-icon" aria-hidden="true">
+                  <Icon size={28} stroke={1.75} />
+                </span>
+                <span className="bcg-name">{q.name}</span>
+                <span className="bcg-rule">{q.rule}</span>
+                <span className="bcg-short">{q.short}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="bcg-x" aria-hidden="true">
+          <span>Yüksek</span>
+          <span className="bcg-axis-name">Göreli pazar payı</span>
+          <span>Düşük</span>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+/** Nakit döngüsü: matrisin üstüne çizilmez; ayrı, sıralı akış. */
+function CashCycle() {
+  return (
+    <ol className="bcg-flows" aria-label="Nakit döngüsü">
+      {FLOWS.map((f) => (
+        <li key={`${f.from}-${f.to}`} className="bcg-flow">
+          <span className="bcg-flow-path">
+            <span className="bcg-flow-chip" data-quadrant={f.from}>
+              {quadrant(f.from).name}
+            </span>
+            <IconArrowRight size={18} stroke={2} aria-hidden="true" />
+            <span className="bcg-flow-chip" data-quadrant={f.to}>
+              {quadrant(f.to).name}
+            </span>
+          </span>
+          <span className="bcg-flow-text">{f.text}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 function BcgContent() {
   const rows = EXAMPLE.map((p) => ({ ...p, rel: relativeShare(p), quadrant: quadrantOf(p.growth, relativeShare(p)) }));
@@ -69,25 +142,9 @@ function BcgContent() {
       </Section>
 
       <Section id="kutular" index={3} title="Dört kutu ve nakit döngüsü" desc="Hızlı pazarda güçlüysen Yıldız, zayıfsan Soru işareti; yavaş pazarda güçlüysen Nakit ineği, zayıfsan Köpek.">
-        <Chart
-          id="dort-kutu"
-          title="Dört kutu"
-          note="Yatayda solda yüksek pay (klasik BCG yerleşimi); oklar ürünlerin ve nakdin olağan hareketi."
-          summary="Sol üst Yıldız, sağ üst Soru işareti, sol alt Nakit ineği, sağ alt Köpek. Nakit ineğinin nakdi Soru işaretine akar; pay kazanan Soru işareti Yıldız olur; pazarı yavaşlayan Yıldız Nakit ineği olur; pay kazanamayan Soru işareti Köpek olur."
-          spec={{
-            kind: 'bcg',
-            quadrants: quadrantSpec,
-            flows: [
-              // Oklar kutu adlarından (dış köşeler) uzak: dar ekranda etiketler çakışmaz.
-              { from: [0.62, 0.22], to: [0.38, 0.62], label: 'Nakit akar' },
-              { from: [0.3, 0.88], to: [0.7, 0.88], label: 'Pay kazanırsa' },
-              { from: [0.75, 0.72], to: [0.75, 0.3], label: 'Pazar yavaşlarsa' },
-              { from: [0.22, 0.72], to: [0.22, 0.3], label: 'Pay kazanamazsa' },
-            ],
-          }}
-          size="lg"
-          wide
-        />
+        <BcgMatrix />
+        <h3 className="block-title">Nakit döngüsü</h3>
+        <CashCycle />
         <DataTable<Quadrant>
           id="kutu"
           title="Kutu, durum ve yapılacak iş"
@@ -143,7 +200,7 @@ function BcgContent() {
         <Chart
           id="ornek-matris"
           title="Örnek matris"
-          note="Yatay: göreli pazar payı (logaritmik, solda yüksek). Dikey: pazar büyümesi. Balon büyüklüğü: ciro."
+          note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşiklerdir: göreli pay 1×, pazar büyümesi %10. Yatay eksen logaritmik."
           summary={rows.map((r) => `${r.name}: büyüme %${r.growth}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('; ')}
           spec={{
             kind: 'bcg-num',

@@ -1594,3 +1594,153 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   text-decoration-thickness: var(--focus-indicator-width);
   text-underline-offset: var(--focus-indicator-offset);
 }
+
+/* ---------- BCG eğitimi: dört kutu (HTML matris) ---------- */
+[data-quadrant='yildiz'] { --tone: var(--role-ekip-lideri); --tone-bg: var(--role-ekip-lideri-bg); --tone-fg: var(--role-ekip-lideri-fg); }
+[data-quadrant='soru'] { --tone: var(--role-pazarlamaci); --tone-bg: var(--role-pazarlamaci-bg); --tone-fg: var(--role-pazarlamaci-fg); }
+[data-quadrant='inek'] { --tone: var(--role-saha-uzmani); --tone-bg: var(--role-saha-uzmani-bg); --tone-fg: var(--role-saha-uzmani-fg); }
+[data-quadrant='kopek'] { --tone: var(--role-yazilim); --tone-bg: var(--role-yazilim-bg); --tone-fg: var(--role-yazilim-fg); }
+
+.bcg-matrix {
+  margin: var(--space-8) 0 0;
+  max-width: 52rem;
+}
+
+.bcg-matrix-caption {
+  margin: 0 0 var(--space-4);
+}
+
+.bcg-frame {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Dikey eksen: alttan üste okunur (Düşük → Yüksek). */
+.bcg-y {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.bcg-x {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.bcg-axis-name {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.bcg-y .bcg-axis-name::after {
+  content: ' →';
+}
+
+.bcg-x .bcg-axis-name::before {
+  content: '← ';
+}
+
+.bcg-cells {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-normal);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bcg-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 11rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+}
+
+.bcg-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--tone);
+}
+
+.bcg-name {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.bcg-rule {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.bcg-short {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* Nakit döngüsü: sıralı akış kartları */
+.bcg-flows {
+  display: grid;
+  gap: var(--gap-normal);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: flow;
+  max-width: 52rem;
+}
+
+.bcg-flow {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.bcg-flow-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
+
+.bcg-flow-chip {
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.bcg-flow-text {
+  color: var(--text-primary);
+  line-height: var(--leading-snug);
+}
