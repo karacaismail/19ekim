@@ -524,6 +524,96 @@ function build(spec: ChartSpec, width: number): Opt {
         ],
       };
 
+    case 'bcg': {
+      // Klasik yerleşim: yatayda yüksek pay solda (eksen ters), dikeyde hızlı büyüme üstte.
+      // Kutular birbirinden ayırt edilsin: ton aileleri farklı.
+      const fills: Record<string, string> = {
+        yildiz: token('--role-ekip-lideri-bg'),
+        soru: token('--role-pazarlamaci-bg'),
+        inek: token('--role-saha-uzmani-bg'),
+        kopek: token('--surface-sunken'),
+      };
+      const bounds: Record<string, [number, number, number, number]> = {
+        yildiz: [0.5, 1, 0.5, 1],
+        soru: [0, 0.5, 0.5, 1],
+        inek: [0.5, 1, 0, 0.5],
+        kopek: [0, 0.5, 0, 0.5],
+      };
+      const name = (key: string) => spec.quadrants.find((q) => q.key === key)?.name ?? key;
+      const ends = (low: string, high: string) => (v: number) => (v === 0 ? low : v === 1 ? high : '');
+      return {
+        ...base(),
+        grid: { left: 4, right: 16, top: 8, bottom: 4, containLabel: true },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'item',
+          formatter: (p: { data?: { name?: string; quadrant?: string } }) => (p.data?.quadrant ? `${p.data.name}: ${name(p.data.quadrant)}` : ''),
+        },
+        xAxis: {
+          type: 'value',
+          min: 0,
+          max: 1,
+          interval: 0.5,
+          inverse: true,
+          ...axis(),
+          splitLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: ends('Düşük pay', 'Yüksek pay') },
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          max: 1,
+          interval: 0.5,
+          ...axis(),
+          splitLine: { show: false },
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: ends('Yavaş büyüme', 'Hızlı büyüme') },
+        },
+        series: [
+          {
+            type: 'scatter',
+            symbolSize: 22,
+            data: spec.items.map((item) => ({
+              name: item.name,
+              quadrant: item.quadrant,
+              value: [item.x, item.y],
+              itemStyle: {
+                color: item.uncertain ? token('--surface-raised') : token(`--role-${item.role}`),
+                borderColor: token(`--role-${item.role}`),
+                borderWidth: 3,
+                borderType: item.uncertain ? 'dashed' : 'solid',
+              },
+              // Aşağı inen okla çakışmasın: oku dikey olan noktanın etiketi sağda.
+              label: { show: true, position: item.toward && item.toward.x === item.x ? 'right' : 'bottom', distance: 10, fontSize: FONT_SIZE, fontWeight: 600, color: text, formatter: item.name.split(' ')[0] },
+            })),
+            markArea: {
+              silent: true,
+              data: Object.entries(bounds).map(([key, [x0, x1, y0, y1]]) => [
+                {
+                  name: name(key),
+                  xAxis: x0,
+                  yAxis: y1,
+                  itemStyle: { color: fills[key] },
+                  // Eksen ters: ekranda sol kutuların dış köşesi “insideTopLeft”, sağ kutularınki “insideTopRight”.
+                  label: { show: true, position: key === 'yildiz' || key === 'inek' ? 'insideTopLeft' : 'insideTopRight', fontSize: FONT_SIZE, fontWeight: 600, color: text },
+                },
+                { xAxis: x1, yAxis: y0 },
+              ]),
+            },
+            markLine: {
+              silent: true,
+              symbol: ['none', 'arrow'],
+              symbolSize: 14,
+              lineStyle: { color: text, type: 'dashed', width: 2 },
+              label: { show: false },
+              data: spec.items
+                .filter((item) => item.toward)
+                .map((item) => [{ coord: [item.x, item.y] }, { coord: [item.toward!.x, item.toward!.y] }]),
+            },
+          },
+        ],
+      };
+    }
+
     case 'cumulative': {
       const names = spec.series.map((x) => x.name);
       return {
@@ -587,6 +677,7 @@ function applyMotion(options: Opt) {
   for (const series of options.series as Opt[]) {
     Object.assign(series, m);
     if (series.markLine) Object.assign(series.markLine as Opt, m);
+    if (series.markArea) Object.assign(series.markArea as Opt, m);
   }
   return options;
 }

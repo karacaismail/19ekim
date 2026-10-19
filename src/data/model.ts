@@ -2,6 +2,7 @@
  * Tek veri kaynağı: tüm sayfaların verisi parametrelerden türetilir. Sunucu varsayılanlarla çizer; tarayıcıda
  * Parametreler sayfasında kaydedilen değerler okunur ve aynı model yeniden kurulur.
  */
+import { makeBcg } from './bcg';
 import { makeDigital } from './digital';
 import { makeGrowth } from './growth';
 import { DEFAULT_PARAMS, type Params } from './params';
@@ -20,6 +21,7 @@ export function buildModel(p: Params) {
     digital: makeDigital(p),
     growth: makeGrowth(p, program),
     org: makeOrg(p, roles),
+    bcg: makeBcg(p, program),
   };
 }
 

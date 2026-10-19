@@ -40,6 +40,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
+  - `/bcg/` BCG matrisi (Türkçe): iki eksen, dört kutu, iStoc ürünleri (istoc.com, Segika). Pazar büyümesi ve pay
+    ölçülmediği için noktalar yalnız kutuyu gösterir; sayısal konum uydurulmaz (`src/data/bcg.ts`).
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).

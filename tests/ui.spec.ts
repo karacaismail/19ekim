@@ -15,6 +15,7 @@ const PAGES = [
   'roller/organizator/',
   'roller/asistan/',
   'roller/segika/',
+  'bcg/',
   'parametreler/',
   'arsiv/',
 ];
@@ -595,5 +596,18 @@ test.describe('parametreler', () => {
     expect(new Set(state.border).size, 'odakta kenarlık rengi değişmez, tek renk').toBe(1);
     expect(state.underline).toContain('underline');
     expect(state.thickness).toBeGreaterThanOrEqual(3);
+  });
+});
+
+test.describe('BCG matrisi', () => {
+  test('dört kutu ve iki ürün çizilir; Türkçe etiketler', async ({ page }) => {
+    await page.goto('bcg/');
+    const canvas = page.locator('.chart-canvas[data-kind="bcg"]');
+    await canvas.scrollIntoViewIfNeeded();
+    await expect(canvas.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const texts = await canvas.locator('svg text').allTextContents();
+    for (const label of ['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek', 'istoc.com', 'Segika', 'Yüksek pay', 'Hızlı büyüme']) {
+      expect(texts, label).toContain(label);
+    }
   });
 });

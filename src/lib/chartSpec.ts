@@ -37,4 +37,10 @@ export type ChartSpec =
   /** Adetli halka grafik (ör. haftalık içerik karması). */
   | { kind: 'mix'; unit: string; items: { name: string; value: number; role: RoleKey }[] }
   /** Kümülatif çizgiler ve yatay tavan çizgisi (ör. yıllık fazla çalışma). */
+  /** BCG matrisi: dört kutu ve kutu içi konumlar (0–1; ölçülmüş değer değil). */
+  | {
+      kind: 'bcg';
+      quadrants: { key: string; name: string }[];
+      items: { name: string; quadrant: string; role: RoleKey; x: number; y: number; uncertain?: boolean; toward?: { x: number; y: number } }[];
+    }
   | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] };

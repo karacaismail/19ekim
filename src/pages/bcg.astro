@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { BcgPage } from '../views/BcgPage';
+---
+
+<BaseLayout title="BCG matrisi" description="BCG matrisi Türkçe: iki eksen, dört kutu (Yıldız, Soru işareti, Nakit ineği, Köpek) ve iStoc ürünlerinin yeri.">
+  <BcgPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

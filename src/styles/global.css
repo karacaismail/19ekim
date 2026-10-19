@@ -737,6 +737,10 @@ html[data-js] .theme-toggle[hidden] {
   min-width: var(--chart-gov-min);
 }
 
+.chart-scroll .chart-canvas[data-kind='bcg'] {
+  min-width: var(--chart-bcg-min);
+}
+
 /* ECharts kutusu: kapsayıcının iç alanını doldurur; React yalnız kapsayıcıyı yönetir. */
 .chart-host {
   position: absolute;

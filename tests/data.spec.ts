@@ -240,6 +240,17 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
   });
 });
 
+test.describe('BCG matrisi', () => {
+  test('ürünlerin konumu kutularıyla uyumlu (yatay: göreli pay, dikey: büyüme; eşik 0,5)', () => {
+    const box = (x: number, y: number) => (y >= 0.5 ? (x >= 0.5 ? 'yildiz' : 'soru') : x >= 0.5 ? 'inek' : 'kopek');
+    for (const item of m.bcg.items) {
+      expect(box(item.x, item.y), item.name).toBe(item.quadrant);
+      expect(item.strategy.length).toBeGreaterThan(0);
+    }
+    expect(m.bcg.items.map((i) => i.name)).toEqual(['istoc.com satıcı aboneliği', 'Segika SGK teşvik yazılımı']);
+  });
+});
+
 test.describe('bağlantılar', () => {
   test('dist içindeki her /19ekim/ bağlantısı bir sayfaya ve varsa bir id’ye çözülür', () => {
     const dist = new URL('../dist/', import.meta.url).pathname;
