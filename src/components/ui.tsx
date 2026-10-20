@@ -154,6 +154,7 @@ export function DataTable<T>({
   columns,
   rows,
   rowTone,
+  rowKey,
 }: {
   id: string;
   title: string;
@@ -161,6 +162,8 @@ export function DataTable<T>({
   columns: Column<T>[];
   rows: T[];
   rowTone?: (row: T) => string | undefined;
+  /** Satırın kalıcı anahtarı (veri güncellenince satır kayarsa hücreler yanlış satıra eşlenmesin); yoksa sıra. */
+  rowKey?: (row: T, index: number) => string;
 }) {
   const titleId = `${id}-tablo`;
   return (
@@ -191,7 +194,7 @@ export function DataTable<T>({
             </Table.Thead>
             <Table.Tbody>
               {rows.map((row, index) => (
-                <Table.Tr key={index} data-tone={rowTone?.(row)}>
+                <Table.Tr key={rowKey ? rowKey(row, index) : index} data-tone={rowTone?.(row)}>
                   {columns.map((col) =>
                     col.rowHeader ? (
                       <Table.Th key={col.key} scope="row" className={col.nowrap ? 'cell-nowrap' : undefined}>

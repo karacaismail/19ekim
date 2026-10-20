@@ -174,6 +174,11 @@ Pages yayınından önce çalıştırır.
   ucu (`tests/opex-script.spec.ts`) Node’da, sayfa sahte yanıtla (`tests/giderler.spec.ts`) denetlenir. Kurulum/Sheets API çağrıları Node
   testlerinde sahte nesnelerle denetlenir (tip denetimi yok); gerçek Sheets davranışı (kurulum, basit tetikleyicide
   kilit/önbellek, kesme işaretli metin, koşullu biçim) yalnız canlı tabloda çalıştırılarak doğrulanır.
+- Hesaplar düz değer olduğundan satır ekleme/silme/sıralama (basit `onEdit` tetiklenmez; `onChange` kurulu tetikleyici
+  ister, kullanılmaz) hesapları hemen güncellemez: sonraki değer düzenlemesi, Sheets’in açılması, açık sayfanın veri
+  isteği ya da OPEX → Hesapları yenile günceller. Elle değiştirilen kod hücresi (hesap sütunu, Toplam satırı,
+  hesaplanan sayfa) o düzenlemede geri yazılır. Bir düzenlemenin hesap yazımı canlıda ≈2–4 sn sürer (Apps Script
+  çağrı gecikmesi); bu sırada eski değer görünür.
 - Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalı; 2027 yasal değerleri (asgari ücret,
   dilimler, destek) varsayımdır ve Parametreler/Teşvikler sayfasında güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).

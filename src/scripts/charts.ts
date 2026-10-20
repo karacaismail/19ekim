@@ -14,7 +14,14 @@ type Opt = Record<string, unknown>;
 /** Geçerli grafik yazı boyutu (px); her çizimde tokendan yeniden okunur. */
 let FONT_SIZE = 14;
 const DAY = 86_400_000;
-const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec; width: number; observer: ResizeObserver }>();
+const charts = new Map<HTMLElement, { chart: Instance; spec: ChartSpec; width: number; observer: ResizeObserver; shape: string }>();
+
+/** Seçeneğin yapısı (seri sayısı ve türleri, eksen sayıları): aynıysa yerinde güncellenir, değiştiyse baştan çizilir. */
+function shapeOf(option: Opt) {
+  const count = (v: unknown) => (Array.isArray(v) ? v.length : v ? 1 : 0);
+  const series = Array.isArray(option.series) ? (option.series as Opt[]).map((s) => String(s.type)).join(',') : '';
+  return `${series}|${count(option.xAxis)}|${count(option.yAxis)}|${count(option.radar)}`;
+}
 let loader: Promise<EChartsModule> | null = null;
 
 const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -941,7 +948,8 @@ const widthOf = (el: HTMLElement) => el.clientWidth;
 
 function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
   const chart = mod.echarts.init(el, undefined, { renderer: 'svg' });
-  chart.setOption(finalize(spec, build(spec, widthOf(el))));
+  const option = finalize(spec, build(spec, widthOf(el)));
+  chart.setOption(option);
   if (spec.kind === 'org' || spec.kind === 'gov') {
     // Düğüm bağlantıları rol sayfasına gider; aynı bağlantılar ana gezinmede de vardır.
     chart.on('click', (p) => {
@@ -962,7 +970,7 @@ function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
     }
   });
   observer.observe(el);
-  charts.set(el, { chart, spec, width: widthOf(el), observer });
+  charts.set(el, { chart, spec, width: widthOf(el), observer, shape: shapeOf(option) });
 }
 
 function redrawAll() {
@@ -998,12 +1006,13 @@ export async function drawChart(el: HTMLElement, spec: ChartSpec) {
   await document.fonts?.ready;
   const entry = charts.get(el);
   if (entry) {
-    const sameKind = entry.spec.kind === spec.kind;
-    entry.spec = spec;
     entry.width = widthOf(el);
     const option = finalize(spec, build(spec, entry.width));
-    if (sameKind) entry.chart.setOption(option, { replaceMerge: ['series'] });
+    const shape = shapeOf(option);
+    if (entry.spec.kind === spec.kind && entry.shape === shape) entry.chart.setOption(option, { replaceMerge: ['series'] });
     else entry.chart.setOption(option, { notMerge: true });
+    entry.spec = spec;
+    entry.shape = shape;
     return;
   }
   render(el, mod, spec);

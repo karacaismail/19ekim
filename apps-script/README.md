@@ -9,7 +9,9 @@ değerler değişir.
 hesaplar ve yalnız içeriği değişen tabloları (Giderler Hepsi, Bordro, Hesap, Personel ve Teşvik hesap sütunları, Toplam
 satırları) yazar; hücre “Yükleniyor…” olmaz, eski değer yenisi gelene kadar görünür. Döviz kuru Parametreler’de canlı
 GOOGLEFINANCE formülüdür; kur değişince hesaplar Sheets açılınca, sayfa veri istediğinde ya da OPEX → Hesapları yenile ile
-yazılır. Zamanlanmış veya kurulu tetikleyici yoktur.
+yazılır. Zamanlanmış veya kurulu tetikleyici yoktur. Satır ekleyip sildikten sonra (bu işlem düzenleme tetikleyicisini
+çalıştırmaz) hesaplar bir sonraki düzenlemede, Sheets açılınca ya da OPEX → Hesapları yenile ile güncellenir. Kodun
+yazdığı bir hücre (hesap sütunu, Toplam satırı, Giderler Hepsi/Bordro/Hesap) elle değiştirilirse hemen geri yazılır.
 
 ## Dosyalar
 

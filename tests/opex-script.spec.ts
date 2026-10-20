@@ -74,7 +74,7 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
         const t = oku(name)!;
         let son = 0;
         t.forEach((r, i) => { if (dolu(r)) son = i + 1; });
-        const genislik = Math.max(1, ...t.slice(0, son).map((r) => r.reduce((n, v, j) => (v !== '' && v !== undefined ? j + 1 : n), 0)));
+        const genislik = Math.max(1, ...t.slice(0, son).map((r) => r.reduce<number>((n, v, j) => (v !== '' && v !== undefined ? j + 1 : n), 0)));
         return { getValues: () => Array.from({ length: Math.max(son, 1) }, (_, i) => Array.from({ length: genislik }, (_, j) => t[i]?.[j] ?? '')) };
       },
       getMaxColumns: () => Math.max(26, ...oku(name)!.map((r) => r.length)),
@@ -103,7 +103,15 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
   let saat = 0;
   const ctx: Record<string, unknown> = {
     console: { log: () => undefined },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: (k: string) => props.get(k) ?? null, setProperty: (k: string, v: string) => void props.set(k, v) }) },
+    PropertiesService: {
+      getScriptProperties: () => ({
+        getProperty: (k: string) => props.get(k) ?? null,
+        getProperties: () => Object.fromEntries(props),
+        setProperty: (k: string, v: string) => void props.set(k, v),
+        setProperties: (o: Record<string, string>) => Object.entries(o).forEach(([k, v]) => props.set(k, v)),
+        deleteProperty: (k: string) => void props.delete(k),
+      }),
+    },
     SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: sheet, getUrl: () => 'https://docs.google.com/spreadsheets/d/ornek/edit' }), flush: () => undefined },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (s: string) => ({ body: s, setMimeType() { return this; } }) },
     Utilities: {
@@ -370,6 +378,7 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     const ss = { setSpreadsheetLocale: (l: string) => void diller.push(l), setSpreadsheetTimeZone: () => undefined, getSheetByName: () => ({}), setActiveSheet: () => undefined, toast: () => undefined };
     g.SpreadsheetApp = { ...(g.SpreadsheetApp as object), getActiveSpreadsheet: () => ss, flush: () => undefined };
     g.anahtariSagla_ = () => void yapilan.push('anahtar');
+    g.hesaplariYaz_ = () => void yapilan.push('son hesap');
     g.baglantiBilgisi = () => void yapilan.push('bilgi');
     const adimlar = g.OPEX_KURULUM_ADIMLARI as [string, (ss: unknown) => void][];
     adimlar.forEach((a) => (a[1] = () => { yapilan.push(a[0]); saat += 60_000; }));
@@ -380,8 +389,8 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(JSON.parse(ozellik.get('OPEX_KURULUM')!).adim).toBe(4);
     let tur = 1;
     while (ozellik.has('OPEX_KURULUM') && tur < 10) { kurulum(); tur++; }
-    expect(yapilan.filter((x) => x !== 'anahtar' && x !== 'bilgi'), 'her adım bir kez, sırayla').toEqual(adimlar.map((a) => a[0]));
-    expect(yapilan.slice(-2), 'bitince anahtar ve bağlantı bilgisi').toEqual(['anahtar', 'bilgi']);
+    expect(yapilan.filter((x) => x !== 'anahtar' && x !== 'bilgi' && x !== 'son hesap'), 'her adım bir kez, sırayla').toEqual(adimlar.map((a) => a[0]));
+    expect(yapilan.slice(-3), 'bitince kurulum sürerken yapılan düzenlemeler yazılır; anahtar ve bağlantı bilgisi').toEqual(['son hesap', 'anahtar', 'bilgi']);
     expect(diller.filter((d) => d === 'tr_TR').length, 'her çalıştırma tr_TR ile biter').toBe(tur);
     // Eski (6 saatten eski) yarım kayıt yok sayılır; baştan başlar.
     ozellik.set('OPEX_KURULUM', JSON.stringify({ adim: 5, zaman: saat - 7 * 3600_000 }));
@@ -645,17 +654,53 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
 
     test('onEdit: girdi sayfasında yazar; Pano’da yazmaz; hesaplanan sayfada elle değişiklik geri yazılır', () => {
       const { ctx, yazimlar } = yazici();
-      const duzenle = (ad: string) =>
-        (ctx.onEdit as (e: unknown) => void)({ range: { getSheet: () => ({ getName: () => ad, getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => 5, getColumn: () => 2, getLastColumn: () => 2, getNumRows: () => 1 } });
+      const duzenle = (ad: string, satir = 5, sutun = 2) =>
+        (ctx.onEdit as (e: unknown) => void)({
+          range: { getSheet: () => ({ getName: () => ad, getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => satir, getLastRow: () => satir, getColumn: () => sutun, getLastColumn: () => sutun, getNumRows: () => 1 },
+        });
       duzenle('Pano');
       expect(yazimlar).toEqual([]);
       duzenle('Giderler OFİS');
       const ilk = yazimlar.length;
       expect(ilk).toBeGreaterThan(10);
       duzenle('Giderler OFİS');
-      expect(yazimlar.length, 'girdi aynı: yazılmaz').toBe(ilk);
+      expect(yazimlar.length, 'girdi aynı ve kod hücresine değmiyor: yazılmaz').toBe(ilk);
+      // Hesaplanan sayfada elle değişiklik (Hesap B5: kpi bloğu): yalnız o blok geri yazılır.
       duzenle('Hesap');
-      expect(yazimlar.length, 'hesaplanan sayfa: hepsi yeniden yazılır').toBeGreaterThan(ilk + 10);
+      expect(yazimlar.slice(ilk).map((y) => `${y.sayfa}!${y.c}`)).toEqual(['Hesap!1']);
+    });
+
+    test('elle değiştirilen kod hücresi (Toplam satırı, Personel K:O) geri yazılır; girdi aynı olsa da', () => {
+      const { ctx, yaz, oku, yazimlar } = yazici();
+      yaz();
+      const ofis = oku('Giderler OFİS')!;
+      const toplamSatir = ofis.findIndex((r) => r[0] === 'Toplam (₺)') + 1;
+      const dogru = ofis[toplamSatir - 1][KAS];
+      // Kullanıcı Toplam hücresine elle yazar (girdi sayılmaz: özet aynı).
+      (ctx.SpreadsheetApp as { getActiveSpreadsheet: () => { getSheetByName: (n: string) => { getRange: (r: number, c: number) => { setValues: (v: unknown[][]) => void } } } })
+        .getActiveSpreadsheet().getSheetByName('Giderler OFİS').getRange(toplamSatir, KAS + 1).setValues([[1]]);
+      const n = yazimlar.length;
+      const duzenle = (ad: string, satir: number, sutun: number) =>
+        (ctx.onEdit as (e: unknown) => void)({
+          range: { getSheet: () => ({ getName: () => ad, getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => satir, getLastRow: () => satir, getColumn: () => sutun, getLastColumn: () => sutun, getNumRows: () => 1 },
+        });
+      duzenle('Giderler OFİS', toplamSatir, KAS + 1);
+      expect(yazimlar.slice(n + 1).map((y) => y.sayfa)).toEqual(['Giderler OFİS']);
+      expect(oku('Giderler OFİS')![toplamSatir - 1][KAS]).toBe(dogru);
+      duzenle('Giderler PERSONEL', 6, 12);
+      expect(yazimlar.at(-1)).toMatchObject({ sayfa: 'Giderler PERSONEL', r: 1, c: 11 });
+    });
+
+    test('yarıda kalan yazım (süre/hata): sonraki yazım bütün blokları yeniden yazar', () => {
+      const { yaz, props, yazimlar } = yazici();
+      yaz();
+      // Yazım öncesi işaret kaldı (çalıştırma kesildi).
+      props.set('OPEX_YAZIM', JSON.stringify({ anahtar: null, izler: {}, yaziyor: true }));
+      const n = yazimlar.length;
+      const r = yaz();
+      expect(r.yazilan.length).toBeGreaterThan(15);
+      expect(yazimlar.length - n).toBeGreaterThan(15);
+      expect(JSON.parse(props.get('OPEX_YAZIM')!).yaziyor).toBeUndefined();
     });
 
     test('bekleyen istek: özet aynıysa Sheets değişene kadar bekler, değişince yeni modeli döner', () => {
@@ -695,6 +740,33 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       const ilk2 = yok.post(JSON.stringify({ anahtar: KEY }));
       expect(yok.post(JSON.stringify({ anahtar: KEY, ozet: ilk2.ozet, bekle: true }))).toMatchObject({ degismedi: true, bekledi: false });
       expect(yok.saat()).toBe(0);
+    });
+
+    test('bekleyen istek: önbellekteki özet bayatsa beklemeden döner ve “bekledi” demez (art arda istek olmaz)', () => {
+      const onbellek = new Map<string, string>();
+      const s = yazici(yeniYerlesim(), { onbellek });
+      const ilk = s.post(JSON.stringify({ anahtar: KEY }));
+      onbellek.set('opex_ozet', 'eski');
+      const r = s.post(JSON.stringify({ anahtar: KEY, ozet: ilk.ozet, bekle: true }));
+      expect(r).toMatchObject({ degismedi: true, bekledi: false });
+      expect(s.saat()).toBe(0);
+    });
+
+    test('bekleyen istek: süre istek başından sayılır (okuma ve yazım bekleme süresinden düşer)', () => {
+      const s = yazici(yeniYerlesim(), { onbellek: new Map() });
+      const ilk = s.post(JSON.stringify({ anahtar: KEY }));
+      const g = s.ctx as Record<string, unknown>;
+      const oku = g.girdileriOku_ as (x?: unknown) => unknown;
+      // Her okuma 3 sn sürsün.
+      let saat = s.saat();
+      const asil = g.opexSimdi_ as () => number;
+      g.opexSimdi_ = () => asil() + saat;
+      g.girdileriOku_ = (x?: unknown) => { saat += 3000; return oku(x); };
+      const once = (g.opexSimdi_ as () => number)();
+      expect(s.post(JSON.stringify({ anahtar: KEY, ozet: ilk.ozet, bekle: true }))).toMatchObject({ degismedi: true, bekledi: true });
+      const gecen = (g.opexSimdi_ as () => number)() - once;
+      expect(gecen).toBeGreaterThanOrEqual(20000);
+      expect(gecen).toBeLessThan(20000 + 1000);
     });
 
     test('kur değişince (GOOGLEFINANCE, onEdit yok) veri isteği Sheets hesaplarını yazar', () => {

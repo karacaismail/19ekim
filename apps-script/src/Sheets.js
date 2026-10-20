@@ -161,12 +161,34 @@ function yazimAnahtari_(ozet, simdi) {
   return ozet + '|' + simdi.getFullYear() + '-' + (simdi.getMonth() + 1);
 }
 
-function yazimKaydi_() {
+/** Betik özellikleri tek çağrıyla (her Apps Script çağrısı bir gidiş-dönüştür). */
+function ozellikler_() {
   try {
-    return JSON.parse(PropertiesService.getScriptProperties().getProperty(OPEX_YAZIM_OZELLIGI) || '{}') || {};
+    return PropertiesService.getScriptProperties().getProperties() || {};
   } catch (hata) {
     return {};
   }
+}
+
+function jsonOzellik_(p, ad) {
+  try {
+    return JSON.parse((p && p[ad]) || '{}') || {};
+  } catch (hata) {
+    return {};
+  }
+}
+
+/**
+ * Sayfalar tek çağrıyla (getSheets) ada göre; `getSheetByName` ile aynı arayüz. Sayfa listesi okunamazsa (ör. test
+ * sahtesi) tek tek sorulur.
+ */
+function sayfaHaritasi_(ss) {
+  if (!ss || typeof ss.getSheets !== 'function') return ss;
+  var h = {};
+  ss.getSheets().forEach(function (sh) { h[sh.getName()] = sh; });
+  return {
+    getSheetByName: function (ad) { return Object.prototype.hasOwnProperty.call(h, ad) ? h[ad] : null; },
+  };
 }
 
 /** Hücre değeri: metin kesme işaretiyle yazılır (tarih/sayı/formül sanılmasın, ör. “Eki 2026”); sayı olduğu gibi. */
@@ -185,40 +207,60 @@ function blokDegerleri_(tablo, genislik) {
   });
 }
 
+/** Aylık ızgaranın ilk başlığı mı (metin “Eki 2026”; Sheets tarihe çevirdiyse Ekim 2026 tarihi). */
+function izgaraIlkMi_(h) {
+  if (Object.prototype.toString.call(h) === '[object Date]') return h.getFullYear() === 2026 && h.getMonth() === 9;
+  return String(h).trim() === OPEX_IZGARA_ILK;
+}
+
 /**
  * Yazılacak bloklar: Giderler Hepsi, Bordro, Hesap sayfası blokları, Giderler PERSONEL ve Teşvikler hesap sütunları,
- * her girdi sayfasının “Toplam (₺)” satırı (yalnız o sayfanın kalemleri). Değerler istenince üretilir.
+ * her girdi sayfasının “Toplam (₺)” satırı (yalnız o sayfanın kalemleri). Konumlar modelsiz bilinir; değerler istenince
+ * üretilir (`modelAl` modeli bir kez hesaplar).
  */
-function hesapBloklari_(ss, girdi, model) {
+function hesapBloklari_(ss, girdi, modelAl) {
   var rapor = function (ad) {
-    return function () { return OpexMotor.rapor(model, ad, girdi); };
+    return function () { return OpexMotor.rapor(modelAl(), ad, girdi); };
   };
   var bloklar = [];
-  var ekle = function (ad, sh, satir, sutun, genislik, uret, tekSatir) {
-    if (sh) bloklar.push({ ad: ad, sh: sh, satir: satir, sutun: sutun, genislik: genislik, uret: uret, tekSatir: !!tekSatir });
+  var ekle = function (ad, sayfa, sh, satir, sutun, genislik, uret, tekSatir) {
+    if (sh) bloklar.push({ ad: ad, sayfa: sayfa, sh: sh, satir: satir, sutun: sutun, genislik: genislik, uret: uret, tekSatir: !!tekSatir });
   };
-  ekle('hepsi', ss.getSheetByName(OPEX_SAYFA.hepsi), 3, 1, 28, rapor('hepsi'));
+  var sayfa = function (k) {
+    var sh = opexSayfasi_(ss, k);
+    return { sh: sh, ad: sh ? sh.getName() : '' };
+  };
+  ekle('hepsi', OPEX_SAYFA.hepsi, ss.getSheetByName(OPEX_SAYFA.hepsi), 3, 1, 28, rapor('hepsi'));
   var bordro = ss.getSheetByName(OPEX_SAYFA.bordro);
-  ekle('bordro-2026', bordro, 4, 1, 15, rapor('bordro-2026'));
-  ekle('bordro-2027', bordro, 4, 17, 15, rapor('bordro-2027'));
+  ekle('bordro-2026', OPEX_SAYFA.bordro, bordro, 4, 1, 15, rapor('bordro-2026'));
+  ekle('bordro-2027', OPEX_SAYFA.bordro, bordro, 4, 17, 15, rapor('bordro-2027'));
   var hesap = ss.getSheetByName(OPEX_SAYFA.hesap);
-  OPEX_BLOKLAR.forEach(function (b) { ekle('hesap-' + b.rapor, hesap, 1, b.sutun, b.genislik, rapor(b.rapor)); });
+  OPEX_BLOKLAR.forEach(function (b) { ekle('hesap-' + b.rapor, OPEX_SAYFA.hesap, hesap, 1, b.sutun, b.genislik, rapor(b.rapor)); });
   var hs = OPEX_HESAP_SUTUNLARI;
-  ekle('personel-sutun', opexSayfasi_(ss, 'personel'), 1, hs.personel[0], hs.personel[1] - hs.personel[0] + 1, rapor('personel-sutun'));
-  ekle('tesvik-sutun', ss.getSheetByName(OPEX_SAYFA.tesvikler), 1, hs.tesvikler[0], hs.tesvikler[1] - hs.tesvikler[0] + 1, rapor('tesvik-sutun'));
+  var per = sayfa('personel');
+  ekle('personel-sutun', per.ad, per.sh, 1, hs.personel[0], hs.personel[1] - hs.personel[0] + 1, rapor('personel-sutun'));
+  ekle('tesvik-sutun', OPEX_SAYFA.tesvikler, ss.getSheetByName(OPEX_SAYFA.tesvikler), 1, hs.tesvikler[0], hs.tesvikler[1] - hs.tesvikler[0] + 1, rapor('tesvik-sutun'));
   [['personel', girdi.personel], ['teknoloji', girdi.giderler], ['ofis', girdi.giderler2]].forEach(function (x) {
     var k = x[0];
     var rows = x[1] || [];
     var ilk = OPEX_IZGARA[k];
-    if (String((rows[2] || [])[ilk - 1]) !== OPEX_IZGARA_ILK) return;
+    if (!izgaraIlkMi_((rows[2] || [])[ilk - 1])) return;
     var satir = 0;
     rows.forEach(function (r, i) { if (i >= 3 && toplamSatiriMi_(r[0])) satir = i + 1; });
     if (!satir) return;
-    ekle('toplam-' + k, opexSayfasi_(ss, k), satir, ilk, OPEX_IZGARA.genislik, function () {
-      return [OpexMotor.kaynakToplami(model, k, rows).slice(ilk - 1, ilk - 1 + OPEX_IZGARA.genislik)];
+    var sy = sayfa(k);
+    ekle('toplam-' + k, sy.ad, sy.sh, satir, ilk, OPEX_IZGARA.genislik, function () {
+      return [OpexMotor.kaynakToplami(modelAl(), k, rows).slice(ilk - 1, ilk - 1 + OPEX_IZGARA.genislik)];
     }, true);
   });
   return bloklar;
+}
+
+/** Düzenlenen alan bloğun alanına değiyor mu (blok sütunları; satır: tek satırlık blokta o satır, değilse bloğun altı da). */
+function alanCakisir_(b, alan) {
+  if (!alan || alan.sayfa !== b.sayfa) return false;
+  var sonSatir = b.tekSatir ? b.satir : Infinity;
+  return alan.son >= b.satir && alan.satir <= sonSatir && alan.sonSutun >= b.sutun && alan.sutun <= b.sutun + b.genislik - 1;
 }
 
 /**
@@ -232,52 +274,74 @@ function blokYaz_(b, degerler, son) {
   if (son >= bas) b.sh.getRange(bas, b.sutun, son - bas + 1, b.genislik).clearContent();
 }
 
+/** Düzenleme tetikleyicisi kilit için en çok bu kadar bekler (basit tetikleyici 30 sn’de kesilir; yazıma süre kalsın). */
+var OPEX_KILIT_BEKLEME_MS = 15000;
+
 /**
  * Hesapları Sheets’e düz değer olarak yazar. Girdi değişmediyse (aynı özet ve ay) yazmaz; değiştiyse yalnız içeriği
  * değişen blokları yazar. Aynı anda tek yazım (betik kilidi); girdi kilit alındıktan sonra okunur, son düzenleme kazanır.
- * Seçenek: zorla (tüm bloklar), bekleme (kilit için ms; 0 = meşgulse atla), kilitli (çağıran kilidi tutuyor).
+ * Yazımdan önce kayıt “yazıyor” işaretlenir: çalıştırma yarıda kesilirse sonraki yazım bütün blokları yeniden yazar.
+ * Seçenek: zorla (tüm bloklar), alan (düzenlenen alan: değdiği kod hücreleri, ör. elle değiştirilen Toplam, yeniden
+ * yazılır), bekleme (kilit için ms; 0 = meşgulse atla), kilitli (çağıran kilidi tutuyor).
  */
 function hesaplariYaz_(secenek) {
   var s = secenek || {};
   var sure = { bas: opexSimdi_() };
   var gecen = function (ad) { sure[ad] = opexSimdi_() - sure.bas; };
-  var kilit = s.kilitli ? null : kilitAl_(s.bekleme === undefined ? 20000 : s.bekleme);
+  var kilit = s.kilitli ? null : kilitAl_(s.bekleme === undefined ? OPEX_KILIT_BEKLEME_MS : s.bekleme);
   if (kilit === false) return { durum: 'mesgul', yazilan: [] };
   try {
     gecen('kilit');
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sayfalar = sayfaHaritasi_(ss);
+    gecen('sayfalar');
     var simdi = new Date();
-    var girdi = girdileriOku_();
+    var girdi = girdileriOku_(sayfalar);
     var ozet = ozetAl_(girdi);
     ozetDuyur_(ozet);
     gecen('oku');
+    var p = ozellikler_();
+    var kayit = jsonOzellik_(p, OPEX_YAZIM_OZELLIGI);
     var anahtar = yazimAnahtari_(ozet, simdi);
-    var kayit = yazimKaydi_();
-    if (!s.zorla && kayit.anahtar === anahtar) return { durum: 'guncel', yazilan: [] };
-    var model = OpexMotor.hesapla(girdi, { simdi: simdi });
-    var izler = s.zorla ? {} : kayit.izler || {};
+    var zorla = !!s.zorla || !!kayit.yaziyor;
+    var model = null;
+    var modelAl = function () { return model || (model = OpexMotor.hesapla(girdi, { simdi: simdi })); };
+    var bloklar = hesapBloklari_(sayfalar, girdi, modelAl);
+    var cakisan = bloklar.filter(function (b) { return alanCakisir_(b, s.alan); }).map(function (b) { return b.ad; });
+    if (!zorla && kayit.anahtar === anahtar && !cakisan.length) return { durum: 'guncel', yazilan: [] };
+    var izler = zorla ? {} : kayit.izler || {};
     // Önce değişen bloklar ve sayfaların son satırı (okumalar), sonra yalnız yazımlar.
     var degisen = [];
-    hesapBloklari_(ss, girdi, model).forEach(function (b) {
+    bloklar.forEach(function (b) {
       var degerler = blokDegerleri_(b.uret(), b.genislik);
       // Konum da ize girer: satır eklenip Toplam satırı kayınca aynı değerler yeni yerine yazılır.
       var iz = ozetMetni_(b.satir + ':' + b.sutun + ':' + JSON.stringify(degerler), 16);
-      if (izler[b.ad] !== iz) degisen.push({ b: b, degerler: degerler, iz: iz });
+      if (izler[b.ad] !== iz || cakisan.indexOf(b.ad) >= 0) degisen.push({ b: b, degerler: degerler, iz: iz });
     });
     gecen('hesap');
+    var props = PropertiesService.getScriptProperties();
+    var degisim = degisimKaydi_(p, ozet);
+    var ilkKayit = {};
+    if (degisim.yeni) ilkKayit[OPEX_DEGISIM_OZELLIGI] = degisim.yeni;
+    if (degisen.length) {
+      var once = {};
+      Object.keys(izler).forEach(function (ad) { once[ad] = izler[ad]; });
+      degisen.forEach(function (x) { delete once[x.b.ad]; });
+      ilkKayit[OPEX_YAZIM_OZELLIGI] = JSON.stringify({ anahtar: null, izler: once, yaziyor: true, zaman: simdi.toISOString() });
+    }
+    if (Object.keys(ilkKayit).length) props.setProperties(ilkKayit);
     var sonSatir = {};
     degisen.forEach(function (x) {
-      var ad = x.b.sh.getName();
-      if (!x.b.tekSatir && !Object.prototype.hasOwnProperty.call(sonSatir, ad)) sonSatir[ad] = x.b.sh.getLastRow();
+      if (!x.b.tekSatir && !Object.prototype.hasOwnProperty.call(sonSatir, x.b.sayfa)) sonSatir[x.b.sayfa] = x.b.sh.getLastRow();
     });
     degisen.forEach(function (x) {
-      blokYaz_(x.b, x.degerler, sonSatir[x.b.sh.getName()] || 0);
+      blokYaz_(x.b, x.degerler, sonSatir[x.b.sayfa] || 0);
       izler[x.b.ad] = x.iz;
     });
-    SpreadsheetApp.flush();
+    // Kilit bırakılmadan yazımlar tamamlanır (sonraki çalıştırma yeni değerleri okur).
+    if (degisen.length) SpreadsheetApp.flush();
     gecen('yaz');
-    PropertiesService.getScriptProperties().setProperty(OPEX_YAZIM_OZELLIGI, JSON.stringify({ anahtar: anahtar, izler: izler, zaman: simdi.toISOString() }));
-    degisimiKaydet_(ozet);
+    props.setProperty(OPEX_YAZIM_OZELLIGI, JSON.stringify({ anahtar: anahtar, izler: izler, zaman: simdi.toISOString() }));
     var yazilan = degisen.map(function (x) { return x.b.ad; });
     gecen('son');
     console.log('hesap yazımı ' + JSON.stringify({ ms: sure, bloklar: yazilan }));
@@ -287,15 +351,17 @@ function hesaplariYaz_(secenek) {
   }
 }
 
-/** Düzenleme tetikleyicisi (onEdit): girdi sayfasında hesaplar yazılır; hesaplanan sayfada elle değişiklik geri alınır. */
+/**
+ * Düzenleme tetikleyicisi (onEdit): girdi sayfasında hesaplar yazılır; kodun yazdığı bir hücre (hesaplanan sayfa,
+ * hesap sütunu, Toplam satırı) elle değiştiyse o blok yeniden yazılır.
+ */
 function hesaplariTetikle_(e) {
   var r = e && e.range;
   if (!r) return null;
   var ad = r.getSheet().getName();
-  var girdiler = [OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.personel, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji].concat(OPEX_ESKI_AD.teknoloji, OPEX_ESKI_AD.personel);
-  if (girdiler.indexOf(ad) >= 0) return hesaplariYaz_({});
-  if ([OPEX_SAYFA.hepsi, OPEX_SAYFA.bordro, OPEX_SAYFA.hesap].indexOf(ad) >= 0) return hesaplariYaz_({ zorla: true });
-  return null;
+  var izlenen = [OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.personel, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.hepsi, OPEX_SAYFA.bordro, OPEX_SAYFA.hesap].concat(OPEX_ESKI_AD.teknoloji, OPEX_ESKI_AD.personel);
+  if (izlenen.indexOf(ad) < 0) return null;
+  return hesaplariYaz_({ alan: { sayfa: ad, satir: r.getRow(), son: r.getLastRow(), sutun: r.getColumn(), sonSutun: r.getLastColumn() } });
 }
 
 /** OPEX menüsü → Hesapları yenile: tüm hesap tabloları yeniden yazılır. */
@@ -310,19 +376,25 @@ function hesaplariYenile() {
 }
 
 /**
- * Bekleyen web isteği: önbellekteki özet değişene (düzenleme hesapları yazınca) ya da OPEX_BEKLEME_MS dolana kadar
- * bekler. Önbellek yoksa beklemez.
+ * Bekleyen web isteği: bu bekleme sırasında önbellekteki özet değişene (düzenleme hesapları yazınca) ya da istek
+ * başlangıcından OPEX_BEKLEME_MS dolana kadar bekler. Önbellekteki özet okunandan farklıysa (az önce değişti ya da
+ * bayat) beklemeden yeniden okunur ve “bekledi” denmez (sayfa aralığa döner, art arda istek olmaz). Önbellek yoksa
+ * beklemez.
  */
-function degisimiBekle_(ozet) {
+function degisimiBekle_(ozet, bas) {
   var c = onbellek_();
   if (!c) return { bekledi: false, degisti: false };
-  var bas = opexSimdi_();
-  do {
-    var son = c.get(OPEX_OZET_ONBELLEK);
-    if (son && son !== ozet) return { bekledi: true, degisti: true };
+  var ilk = c.get(OPEX_OZET_ONBELLEK);
+  if (ilk && ilk !== ozet) return { bekledi: false, degisti: true };
+  var bitis = (bas === undefined ? opexSimdi_() : bas) + OPEX_BEKLEME_MS;
+  var uyudu = false;
+  while (opexSimdi_() < bitis) {
     Utilities.sleep(OPEX_BEKLEME_ADIM_MS);
-  } while (opexSimdi_() - bas < OPEX_BEKLEME_MS);
-  return { bekledi: true, degisti: false };
+    uyudu = true;
+    var son = c.get(OPEX_OZET_ONBELLEK);
+    if (son && son !== ilk) return { bekledi: true, degisti: true };
+  }
+  return { bekledi: uyudu, degisti: false };
 }
 
 /* ---------- Web uygulaması ---------- */
@@ -339,6 +411,7 @@ function doGet() {
  * `bekledi: true` taşır). Sheets hesapları güncel değilse (ör. kur değişti) burada yazılır.
  */
 function doPost(e) {
+  var bas = opexSimdi_();
   var istek;
   try {
     istek = JSON.parse((e && e.postData && e.postData.contents) || '{}');
@@ -347,9 +420,10 @@ function doPost(e) {
   }
   if (!istek || typeof istek !== 'object' || Array.isArray(istek)) return json_({ ok: false, hata: 'istek', mesaj: 'İstek gövdesi nesne olmalı.' });
   var girdi = girdileriOku_();
+  var p = ozellikler_();
   // Parametreler → “Sayfa erişimi”: Herkese açık ise anahtar istenmez (kullanıcı kararı); değilse anahtar zorunlu.
   if (!OpexMotor.erisimAcik(girdi.parametreler)) {
-    var gercek = PropertiesService.getScriptProperties().getProperty(OPEX_ANAHTAR_OZELLIGI);
+    var gercek = p[OPEX_ANAHTAR_OZELLIGI];
     if (!gercek) return json_({ ok: false, hata: 'kurulum', mesaj: 'Erişim anahtarı tanımlı değil; Sheets’te OPEX → Kurulum / onarım çalıştırın.' });
     // Bekleme yok: anahtar ≈ 244 bit rastgeledir; bekleme yalnız eşzamanlı çalışma kotasını tüketirdi.
     if (typeof istek.anahtar !== 'string' || !sabitZamanliEsit_(istek.anahtar, gercek)) {
@@ -360,7 +434,9 @@ function doPost(e) {
   var simdi = new Date();
   // Kur (GOOGLEFINANCE) değişince onEdit tetiklenmez: Sheets hesapları burada yazılır (girdi kilitle yeniden okunur;
   // başka yazım sürüyorsa beklenmez).
-  if (yazimKaydi_().anahtar !== yazimAnahtari_(ozet, simdi)) {
+  var tazele = false;
+  if (jsonOzellik_(p, OPEX_YAZIM_OZELLIGI).anahtar !== yazimAnahtari_(ozet, simdi)) {
+    tazele = true;
     try {
       hesaplariYaz_({ bekleme: 0 });
     } catch (hata) {
@@ -369,15 +445,16 @@ function doPost(e) {
   }
   var bekledi = false;
   if (istek.bekle === true && istek.ozet && istek.ozet === ozet) {
-    var b = degisimiBekle_(ozet);
+    var b = degisimiBekle_(ozet, bas);
     bekledi = b.bekledi;
     if (b.degisti) {
+      tazele = true;
       girdi = girdileriOku_();
       ozet = ozetAl_(girdi);
       simdi = new Date();
     }
   }
-  var degisti = degisimiKaydet_(ozet);
+  var degisti = degisimiKaydet_(ozet, tazele ? null : p);
   var temel = { ok: true, sema: OpexMotor.SEMA, ozet: ozet, denetlendi: new Date().toISOString(), degisti: degisti, bekledi: bekledi };
   if (istek.ozet && istek.ozet === ozet) {
     temel.degismedi = true;
@@ -412,8 +489,8 @@ function hesapAlanlariniAyikla_(rows, sutunlar) {
 }
 
 /** Girdi sayfalarının ham değerleri (motorun beklediği biçim). */
-function girdileriOku_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+function girdileriOku_(sayfalar) {
+  var ss = sayfalar || sayfaHaritasi_(SpreadsheetApp.getActiveSpreadsheet());
   // Sayfa başına tek okuma (dolu alan): her Sheets çağrısı bir gidiş-dönüştür.
   var oku = function (sh, sutun) {
     if (!sh) return [];
@@ -467,20 +544,19 @@ function ozetMetni_(metin, n) {
   return bayt.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('').slice(0, n);
 }
 
-/** Özet değiştiyse zamanı saklar; Sheets’teki son değişikliğin ilk görüldüğü an döner. */
-function degisimiKaydet_(ozet) {
-  var props = PropertiesService.getScriptProperties();
-  var kayit = {};
-  try {
-    kayit = JSON.parse(props.getProperty(OPEX_DEGISIM_OZELLIGI) || '{}');
-  } catch (hata) {
-    kayit = {};
-  }
-  if (kayit.ozet !== ozet) {
-    kayit = { ozet: ozet, zaman: new Date().toISOString() };
-    props.setProperty(OPEX_DEGISIM_OZELLIGI, JSON.stringify(kayit));
-  }
-  return kayit.zaman;
+/** Son değişiklik kaydı: özet değiştiyse yazılacak yeni kayıt (`yeni`) ve değişikliğin ilk görüldüğü an. */
+function degisimKaydi_(p, ozet) {
+  var kayit = jsonOzellik_(p, OPEX_DEGISIM_OZELLIGI);
+  if (kayit.ozet === ozet) return { zaman: kayit.zaman, yeni: null };
+  var zaman = new Date().toISOString();
+  return { zaman: zaman, yeni: JSON.stringify({ ozet: ozet, zaman: zaman }) };
+}
+
+/** Özet değiştiyse zamanı saklar; Sheets’teki son değişikliğin ilk görüldüğü an döner. `p`: okunmuş özellikler. */
+function degisimiKaydet_(ozet, p) {
+  var d = degisimKaydi_(p || ozellikler_(), ozet);
+  if (d.yeni) PropertiesService.getScriptProperties().setProperty(OPEX_DEGISIM_OZELLIGI, d.yeni);
+  return d.zaman;
 }
 
 /* ---------- Erişim anahtarı ---------- */

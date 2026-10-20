@@ -19,6 +19,8 @@ export const OPEX_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxHXSXT5WN
  */
 export const OPEX_POLL_MS = 15_000;
 export const OPEX_MIN_GAP_MS = 1_500;
+/** Bekletildiğini söyleyen “değişmedi” yanıtı bundan kısa sürdüyse sunucu beklememiştir: aralığa dönülür. */
+export const OPEX_MIN_WAIT_MS = 5_000;
 export const OPEX_TIMEOUT_MS = 30_000;
 /** Bekleyen istekte zaman aşımı: sunucu beklemesi (≈20 sn) + okuma ve hesap payı. */
 export const OPEX_WAIT_TIMEOUT_MS = 45_000;
@@ -94,6 +96,8 @@ export interface YilAylari<T> {
 
 export interface Gider {
   satir: number;
+  /** Kaynak sayfa: 'teknoloji' (Giderler TEKNOLOJİ) ya da 'ofis' (Giderler OFİS); satır numarası sayfa içindedir. */
+  kaynak?: string;
   kalem: string;
   hesap: string;
   kume: KumeKod;

@@ -89,7 +89,13 @@ function kurulum() {
   // Kurulum sürerken düzenleme tetikleyicisi hesap yazmaz (aynı betik kilidi).
   var kilit = kilitAl_(30000);
   if (kilit === false) {
-    console.log('Hesaplar yazılıyor; Kurulum’u birkaç saniye sonra yeniden çalıştırın.');
+    var mesgul = 'Hesaplar yazılıyor; Kurulum’u birkaç saniye sonra yeniden çalıştırın.';
+    console.log(mesgul);
+    try {
+      ss.toast(mesgul, 'OPEX', 10);
+    } catch (hata) {
+      // Düzenleyiciden çalıştırılınca bildirim gösterilemeyebilir.
+    }
     return;
   }
   try {
@@ -101,6 +107,8 @@ function kurulum() {
 
 function kurulumAdimlari_(ss) {
   var props = PropertiesService.getDocumentProperties();
+  // Kurulum kodun yazdığı alanları temizler (Giderler Hepsi, Toplam satırları): blok izlerine artık güvenilmez.
+  PropertiesService.getScriptProperties().deleteProperty(OPEX_YAZIM_OZELLIGI);
   var bas = opexSimdi_();
   var kayit = {};
   try {
@@ -134,6 +142,8 @@ function kurulumAdimlari_(ss) {
     return;
   }
   props.deleteProperty(OPEX_KURULUM_OZELLIGI);
+  // Kurulum sürerken yapılan düzenlemeler (tetikleyici kilidi alamadı) burada yazılır; değişiklik yoksa yalnız okunur.
+  hesaplariYaz_({ kilitli: true });
   ss.setActiveSheet(ss.getSheetByName(OPEX_SAYFA.pano));
   anahtariSagla_();
   // Düzenleyiciden çalıştırılınca Sheets arayüzü yoktur (getUi hata verir); bilgi OPEX menüsünden de açılır.
@@ -231,11 +241,12 @@ function paraBiciminiDuzenle_(e) {
   var ad = sh.getName();
   var giderSayfasi = OPEX_GIDER_SAYFALARI.some(function (k) { return ad === OPEX_SAYFA[k]; }) || OPEX_ESKI_AD.teknoloji.indexOf(ad) >= 0;
   if (!giderSayfasi) return;
-  // Yalnız yeni yerleşimde (ızgara I’den başlar); kurulumdan önceki eski yerleşime dokunmaz.
-  if (sh.getRange(3, OPEX_IZGARA.teknoloji).getDisplayValue() !== izgaraBasliklari_()[0]) return;
+  // Önce yalnız Para sütunu (E) değdiyse sürer: başlık okuması (bir Sheets çağrısı) diğer düzenlemeleri yavaşlatmaz.
   var ilk = Math.max(r.getRow(), 4);
   var son = r.getRow() + r.getNumRows() - 1;
   if (son < ilk || r.getColumn() > 5 || r.getLastColumn() < 5) return;
+  // Yalnız yeni yerleşimde (ızgara I’den başlar); kurulumdan önceki eski yerleşime dokunmaz.
+  if (sh.getRange(3, OPEX_IZGARA.teknoloji).getDisplayValue() !== izgaraBasliklari_()[0]) return;
   paraBiciminiUygula_(sh, ilk, son - ilk + 1);
 }
 

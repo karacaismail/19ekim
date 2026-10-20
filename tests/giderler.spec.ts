@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
-import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
+import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_MIN_WAIT_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
 import { buildModel, exampleTohum, reply } from './opex-fixture';
 
 /**
@@ -221,6 +221,36 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     // Yıl sekmesi değişince vurgu yok (veri değişmedi).
     await page.getByRole('tab', { name: /^2027/ }).click();
     await expect(page.locator('[data-changed]')).toHaveCount(0);
+  });
+
+  test('“Şimdi yenile” bekleyen istek kipini bozmaz: beklemeden sorar, sonra yine bekleyen istek gider', async ({ page }) => {
+    const server = await mockScript(page, { ozet: 'ozet-1', model: MODEL }, 'keyed', { pushMs: 20_000 });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    await expect.poll(() => server.keyed().filter((b) => b.bekle).length).toBe(1);
+    await page.getByRole('button', { name: 'Şimdi yenile' }).click();
+    await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(3);
+    expect(server.keyed()[2].bekle).toBeUndefined();
+    await expect.poll(() => server.keyed().filter((b) => b.bekle).length, { timeout: 5_000 }).toBe(2);
+    await expect(page.locator('.opex-live-meta')).toContainText('Sheets değişince birkaç saniyede gelir');
+  });
+
+  test('“bekledi” deyip hemen dönen yanıt: art arda istek yok, aralığa döner', async ({ page }) => {
+    await page.clock.install();
+    const server = await mockScript(page, { ozet: 'ozet-1', model: MODEL }, 'keyed', { pushMs: 0 });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    await page.clock.runFor(OPEX_MIN_GAP_MS + 500);
+    await expect.poll(() => server.keyed().length).toBe(2);
+    await page.clock.runFor(OPEX_MIN_WAIT_MS);
+    expect(server.keyed().length, 'hemen dönen “bekledi” yanıtından sonra art arda istek yok').toBe(2);
+    // Sahte saat ilerlerken gerçek yanıt gecikebilir; aralık dolunca yeni istek gider.
+    await page.clock.runFor(OPEX_POLL_MS);
+    await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(3);
   });
 
   test('eski sunucu (bekletmez): istekler 15 sn aralığa döner; sık istek yok', async ({ page }) => {

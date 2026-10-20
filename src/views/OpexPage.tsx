@@ -5,6 +5,7 @@ import { Chart, DataTable, FactsRow, Hero, Note, Section, type Column } from '..
 import {
   OPEX_ENDPOINT,
   OPEX_MIN_GAP_MS,
+  OPEX_MIN_WAIT_MS,
   OPEX_POLL_MS,
   OPEX_TIMEOUT_MS,
   OPEX_WAIT_TIMEOUT_MS,
@@ -186,8 +187,12 @@ function useOpexLive() {
           if (data) {
             const next = { ...data, degisti: reply.degisti ?? data.degisti, denetlendi: reply.denetlendi };
             last.current = next;
-            soon = reply.bekledi;
-            pushing = reply.bekledi;
+            // Yalnız bekleyen istekte sunucunun beklediği anlaşılır; “Şimdi yenile” (beklemesiz) kipi değiştirmez.
+            // Bekledim deyip hemen dönen yanıt beklememiştir: art arda istek olmasın diye aralığa dönülür.
+            if (wait) {
+              pushing = reply.bekledi;
+              soon = reply.bekledi && Date.now() - lastStart >= OPEX_MIN_WAIT_MS;
+            } else soon = pushing;
             setLive({ status: 'ready', data: next, checked: reply.denetlendi, push: pushing });
           } else {
             // Elde veri yokken “değişmedi” gelirse (yarış) özet sıfırlanır ve hemen tüm model istenir.
@@ -626,6 +631,8 @@ type KalemRow =
   | { kind: 'gider'; g: Gider; ay: KalemDonem; aylik: number; donem: number }
   | { kind: 'kisi'; k: Kisi; ay: AyBilgi & { aylar: (number | null)[] }; tutar: number; aylik: number; donem: number }
   | { kind: 'total'; label: string; aylar: number[]; aylik: number; donem: number };
+/** Kalem satırının kalıcı anahtarı: kaynak sayfa + Sheets satırı (+ ad); kişi Sheets satırıyla. */
+const kalemKey = (r: KalemRow) => (r.kind === 'gider' ? `g:${r.g.kaynak ?? ''}:${r.g.satir}:${r.g.kalem}` : r.kind === 'kisi' ? `k:${r.k.satir}` : `t:${r.label}`);
 type KalemFiltre = 'tumu' | KumeKod;
 
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
@@ -856,6 +863,7 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         columns={columns}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
+        rowKey={kalemKey}
       />
       <DataTable
         id={`kalem-aylari-${d.yil}`}
@@ -864,6 +872,7 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         columns={ayColumns}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
+        rowKey={kalemKey}
       />
     </>
   );
@@ -886,6 +895,7 @@ function TechVendors({ m, d }: { m: OpexModel; d: Donem }) {
 }
 
 type KisiRow = { kind: 'kisi'; k: Kisi; s: Satir } | { kind: 'total'; s: Satir };
+const kisiKey = (r: KisiRow) => (r.kind === 'kisi' ? `k:${r.k.satir}` : 'toplam');
 
 function People({ m, d }: { m: OpexModel; d: Donem }) {
   const per = m.kisiler.map((k) => ({ k, s: kisiDonem(k, d).toplam }));
@@ -968,6 +978,7 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
         columns={columns}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
+        rowKey={kisiKey}
       />
       <div className="opex-grid">
         <Chart
