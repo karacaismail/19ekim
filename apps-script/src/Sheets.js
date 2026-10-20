@@ -8,27 +8,37 @@
 
 var OPEX_SAYFA = {
   pano: 'Pano',
-  giderler: 'Düzenli Giderler',
-  personel: 'Personel Giderleri',
+  // Kullanıcı kararı 2026-10-20: [Giderler Hepsi, Giderler OFİS, Giderler TEKNOLOJİ, Giderler PERSONEL].
+  hepsi: 'Giderler Hepsi',
+  ofis: 'Giderler OFİS',
+  teknoloji: 'Giderler TEKNOLOJİ',
+  personel: 'Giderler PERSONEL',
   parametreler: 'Parametreler',
   tesvikler: 'Teşvikler',
   bordro: 'Bordro',
   hesap: 'Hesap',
 };
-/** Kullanıcı sayfaları yeniden adlandırdı (2026-10-20); eski adla duran tablo da okunur ve kurulumda yeni ada taşınır. */
-var OPEX_ESKI_AD = { giderler: 'Giderler', personel: 'Personel' };
+/**
+ * Eski adlar (yeniden adlandırmalar, 2026-10-20): eski adla duran tablo da okunur; kurulum yeni ada taşır. Ayrılmamış
+ * “Düzenli Giderler” (teknoloji + ofis birlikte) teknoloji kaynağı olarak okunur, kurulum onu iki sayfaya ayırır.
+ */
+var OPEX_ESKI_AD = { teknoloji: ['Düzenli Giderler', 'Giderler'], personel: ['Personel Giderleri', 'Personel'] };
 
 /**
- * Aylık ızgara: ilk sütun (Düzenli Giderler I — A:G girdi, H boşluk; Personel Giderleri Q — A:I girdi, K:O hesap);
+ * Aylık ızgara: ilk sütun (gider sayfaları I — A:G girdi, H boşluk; Giderler PERSONEL Q — A:I girdi, K:O hesap);
  * 15 aylık plan (Ekim 2026 → Aralık 2027), her ay yan yana onay kutusu + tutar (30 sütun).
  */
-var OPEX_IZGARA = { giderler: 9, personel: 17, genislik: 30 };
-/** Girdi sütun sayısı (A’dan): Düzenli Giderler A:G, Personel Giderleri A:I. */
-var OPEX_GIRDI_SUTUN = { giderler: 7, personel: 9 };
+var OPEX_IZGARA = { teknoloji: 9, ofis: 9, personel: 17, genislik: 30 };
+/** Girdi sütun sayısı (A’dan): gider sayfaları A:G, Giderler PERSONEL A:I. */
+var OPEX_GIRDI_SUTUN = { teknoloji: 7, ofis: 7, personel: 9 };
+/** Gider girdi sayfaları (motorda birinci ve ikinci gider kaynağı). */
+var OPEX_GIDER_SAYFALARI = ['teknoloji', 'ofis'];
 
-/** Sayfa: yeni adıyla, yoksa eski adıyla. */
+/** Sayfa: yeni adıyla, yoksa eski adlarından biriyle. */
 function opexSayfasi_(ss, anahtar) {
-  return ss.getSheetByName(OPEX_SAYFA[anahtar]) || (OPEX_ESKI_AD[anahtar] ? ss.getSheetByName(OPEX_ESKI_AD[anahtar]) : null);
+  var sh = ss.getSheetByName(OPEX_SAYFA[anahtar]);
+  (OPEX_ESKI_AD[anahtar] || []).forEach(function (ad) { sh = sh || ss.getSheetByName(ad); });
+  return sh;
 }
 var OPEX_ANAHTAR_OZELLIGI = 'OPEX_ERISIM_ANAHTARI';
 var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
@@ -39,16 +49,21 @@ var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
  * @param {string} rapor kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027,
  *   personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, asgari-net-2026, asgari-net-2027, uyari
  * @param {A1:F200} parametreler Parametreler!A:F
- * @param {A1:I200} personel 'Personel Giderleri'!A:I
- * @param {A1:G400} giderler 'Düzenli Giderler'!A:G
+ * @param {A1:I200} personel 'Giderler PERSONEL'!A:I
+ * @param {A1:G400} giderler 'Giderler TEKNOLOJİ'!A:G
  * @param {A1:I100} tesvikler 'Teşvikler'!A:I
- * @param {I1:AL400} giderAylari Düzenli Giderler aylık ızgarası (ay ay etkin / tutar)
- * @param {Q1:AT200} personelAylari Personel aylık ızgarası (ay ay etkin / tutar)
+ * @param {I1:AL400} giderAylari Giderler TEKNOLOJİ aylık ızgarası (ay ay etkin / tutar)
+ * @param {Q1:AT200} personelAylari Giderler PERSONEL aylık ızgarası (ay ay etkin / tutar)
+ * @param {A1:G400} giderler2 'Giderler OFİS'!A:G
+ * @param {I1:AL400} giderAylari2 Giderler OFİS aylık ızgarası
  * @return Tablo (ilk satır başlık)
  * @customfunction
  */
-function OPEX(rapor, parametreler, personel, giderler, tesvikler, giderAylari, personelAylari) {
-  var girdi = { parametreler: parametreler, personel: personel, giderler: giderler, tesvikler: tesvikler, giderAylari: giderAylari, personelAylari: personelAylari };
+function OPEX(rapor, parametreler, personel, giderler, tesvikler, giderAylari, personelAylari, giderler2, giderAylari2) {
+  var girdi = {
+    parametreler: parametreler, personel: personel, giderler: giderler, tesvikler: tesvikler, giderAylari: giderAylari,
+    personelAylari: personelAylari, giderler2: giderler2, giderAylari2: giderAylari2,
+  };
   var model = OpexMotor.hesapla(girdi, { simdi: new Date() });
   return OpexMotor.rapor(model, String(rapor || ''), girdi);
 }
@@ -127,15 +142,18 @@ function girdileriOku_() {
   };
   // Giderler ve personel tüm sayfa okunur: motor sütunları başlık adıyla, ızgarayı ay başlıklarıyla bulur
   // (sütun silinse veya yer değişse de doğru okunur).
-  var gider = oku(opexSayfasi_(ss, 'giderler'));
+  var teknoloji = oku(opexSayfasi_(ss, 'teknoloji'));
+  var ofis = oku(ss.getSheetByName(OPEX_SAYFA.ofis));
   var personel = oku(opexSayfasi_(ss, 'personel'));
   return {
     parametreler: oku(ss.getSheetByName(OPEX_SAYFA.parametreler), 6),
     personel: personel,
-    giderler: gider,
+    giderler: teknoloji,
     tesvikler: oku(ss.getSheetByName(OPEX_SAYFA.tesvikler), 9),
-    giderAylari: gider,
+    giderAylari: teknoloji,
     personelAylari: personel,
+    giderler2: ofis,
+    giderAylari2: ofis,
   };
 }
 

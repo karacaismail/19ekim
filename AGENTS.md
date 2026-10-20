@@ -47,9 +47,12 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
     uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa, görünürken 15 sn’de bir özet sorar (`src/data/opex.ts`).
     Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.
-    Sayfa adları (kullanıcı kararı 2026-10-20): “Düzenli Giderler” (girdi `A:G`, `H` boşluk, ızgara `I:AL`; eski “Bu ay
-    ödendi / Dahil / Fatura / Not” ve hesap sütunları kaldırıldı → ödeme takibi yok, `odeme.takip=false`) ve “Personel
-    Giderleri” (girdi `A:I`, hesap `K:O`, ızgara `Q:AT`); eski adlar da okunur, kurulum yeni ada taşır. Veri ucu sayfanın
+    Sayfalar (kullanıcı kararı 2026-10-20): “Giderler Hepsi” (kod hesaplar: `OPEX("hepsi")`, gruplar Ofis / Teknoloji /
+    Personel ay ay ₺), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (ikisi de girdi `A:G`, `H` boşluk, ızgara `I:AL`; motorda
+    `giderler2` ve `giderler` kaynakları; Küme boşsa sayfanın grubu) ve “Giderler PERSONEL” (girdi `A:I`, hesap `K:O`,
+    ızgara `Q:AT`). Eski “Düzenli Giderler” (eski “Bu ay ödendi / Dahil / Fatura / Not” ve hesap sütunları kaldırıldı →
+    ödeme takibi yok, `odeme.takip=false`) Küme’ye göre ikiye ayrılır (`giderSayfalariniAyir_`); eski adlar da okunur.
+    Sayfadaki kalem süzgeci: Hepsi, Ofis, Teknoloji, Personel. Veri ucu sayfanın
     tamamını okur (sütunlar başlıkla, ızgara ay başlıklarıyla bulunur). Son veri satırının altında “Toplam (₺)” satırı:
     `=OPEX("gider-toplam"|"personel-toplam", …)` motor spill’i (aralık `INDEX(…,ROW()-1)` ile bir üst satırda biter, döngü
     yok); motor “Toplam…” satırını kalem/kişi saymaz. Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);

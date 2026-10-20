@@ -143,7 +143,7 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
     const formul = (ctx.opexFormulu_ as (r: string) => string)('kpi');
-    expect(formul).toContain("'Düzenli Giderler'!I1:AL,'Personel Giderleri'!Q1:AT)");
+    expect(formul).toContain("'Giderler OFİS'!A1:G,'Giderler OFİS'!I1:AL)");
     expect([...(ctx.izgaraBasliklari_ as () => string[])()]).toEqual(IZGARA_BASLIKLARI);
     expect((ctx.personelVarsayilani_ as (r: number, y: number) => string)(5, 2027)).toBe(
       // N(): Tutar boşsa sayı 0 (boş metin “sayı ≥ 0” doğrulamasını bozardı; 17. satırdaki kurulum hatası).
@@ -161,6 +161,49 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(a.model.giderler.length).toBe(exampleTohum.giderler.filter((r) => r[8] !== false).length);
     expect(a.model.kisiler.length).toBe(b.model.kisiler.length);
     expect(a.model.kisiler.length).toBeGreaterThan(0);
+  });
+
+  test('dört sayfa: Giderler TEKNOLOJİ + Giderler OFİS + Giderler PERSONEL okunur; ayrılmamış Düzenli Giderler de çalışır', () => {
+    const b = OpexBasliklar();
+    const bas = [b.giderler.kalem, b.giderler.hesap, b.giderler.kume, b.giderler.kategori, b.giderler.para, b.giderler.tutar, b.giderler.artis];
+    const sayfa = (rows: unknown[][]) => [['Başlık'], ['Açıklama'], bas, ...rows];
+    const tek = sayfa([['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur']]);
+    const ofis = sayfa([['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira']]);
+    const { Giderler: _g, Personel: _p, ...diger } = SHEETS;
+    const ayri = loadScript({ ...diger, 'Giderler TEKNOLOJİ': tek, 'Giderler OFİS': ofis, 'Giderler PERSONEL': SHEETS.Personel }).post(JSON.stringify({ anahtar: KEY })) as unknown as {
+      model: { giderler: { kalem: string }[]; kisiler: unknown[] };
+    };
+    expect(ayri.model.giderler.map((g) => g.kalem)).toEqual(['Araç', 'Kira']);
+    expect(ayri.model.kisiler.length).toBeGreaterThan(0);
+    const birlesik = sayfa([['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur'], ['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira']]);
+    const once = loadScript({ ...diger, 'Düzenli Giderler': birlesik, 'Personel Giderleri': SHEETS.Personel }).post(JSON.stringify({ anahtar: KEY })) as unknown as {
+      model: { giderler: { kalem: string }[] };
+    };
+    expect(once.model.giderler.map((g) => g.kalem), 'ayırmadan önce').toEqual(['Araç', 'Kira']);
+  });
+
+  test('Kurulum: Düzenli Giderler Küme’ye göre Giderler TEKNOLOJİ ve Giderler OFİS’e ayrılır (kopya; satırlar silinir)', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const ayir = ctx.giderSayfalariniAyir_ as (ss: unknown) => boolean;
+    type Sahte = { ad: string; kume: string[]; silinen: number[] };
+    const sayfalar: Record<string, Sahte> = {};
+    const yap = (ad: string, kume: string[]): Sahte => (sayfalar[ad] = { ad, kume, silinen: [] });
+    const sheetOf = (s: Sahte) => ({
+      getName: () => s.ad,
+      setName: (n: string) => { delete sayfalar[s.ad]; s.ad = n; sayfalar[n] = s; return sheetOf(s); },
+      getLastRow: () => 3 + s.kume.length,
+      getRange: (r: number, c: number, nr = 1) => ({ getValues: () => Array.from({ length: nr }, (_, i) => [c === 1 ? (s.kume[r - 4 + i] === 'T' ? 'Toplam (₺)' : `kalem ${r + i}`) : s.kume[r - 4 + i]]) }),
+      deleteRow: (r: number) => void s.silinen.push(r),
+      copyTo: () => sheetOf(yap('Düzenli Giderler kopyası', [...s.kume])),
+    });
+    yap('Düzenli Giderler', ['Teknoloji', 'Teknoloji', 'Ofis ve işletme', 'Ofis ve işletme', 'T']);
+    const ss = { getSheetByName: (n: string) => (sayfalar[n] ? sheetOf(sayfalar[n]) : null) };
+    expect(ayir(ss)).toBe(true);
+    expect(Object.keys(sayfalar).sort()).toEqual(['Giderler OFİS', 'Giderler TEKNOLOJİ']);
+    expect(sayfalar['Giderler TEKNOLOJİ'].silinen, 'ofis satırları ve toplam; alttan üste').toEqual([8, 7, 6]);
+    expect(sayfalar['Giderler OFİS'].silinen, 'teknoloji satırları ve toplam').toEqual([8, 5, 4]);
+    expect(ayir(ss), 'ikinci kez: dokunmaz').toBe(false);
   });
 
   test('yeni yerleşim: Düzenli Giderler A:G + boşluk + I:AL ızgara ve Toplam satırı; Personel Q:AT; tüm sayfa okunur', () => {
@@ -186,15 +229,16 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
     const f = ctx as Record<string, (...a: unknown[]) => string>;
     expect(f.opexFormulu_('kpi')).toBe(
-      "=OPEX(\"kpi\",Parametreler!A1:F,'Personel Giderleri'!A1:I,'Düzenli Giderler'!A1:G,'Teşvikler'!A1:I,'Düzenli Giderler'!I1:AL,'Personel Giderleri'!Q1:AT)",
+      "=OPEX(\"kpi\",Parametreler!A1:F,'Giderler PERSONEL'!A1:I,'Giderler TEKNOLOJİ'!A1:G,'Teşvikler'!A1:I,'Giderler TEKNOLOJİ'!I1:AL,'Giderler PERSONEL'!Q1:AT,'Giderler OFİS'!A1:G,'Giderler OFİS'!I1:AL)",
     );
     // Alt toplam satırı: motor (özel işlev) hesaplar; aralık formülün bir üst satırında biter (döngüsel başvuru yok).
     // OFFSET: aralık formülün bir üst satırında biter; kendi çıktısına başvurmaz (döngüsel başvuru yok).
-    expect(f.toplamFormulu_('giderler')).toBe(
-      "=OPEX(\"gider-toplam\",Parametreler!A1:F,\"\",OFFSET('Düzenli Giderler'!A1,0,0,ROW()-1,7),\"\",OFFSET('Düzenli Giderler'!I1,0,0,ROW()-1,30),\"\")",
+    expect(f.toplamFormulu_('ofis')).toBe(
+      "=OPEX(\"gider-toplam\",Parametreler!A1:F,\"\",OFFSET('Giderler OFİS'!A1,0,0,ROW()-1,7),\"\",OFFSET('Giderler OFİS'!I1,0,0,ROW()-1,30),\"\")",
     );
+    expect(f.toplamFormulu_('teknoloji')).toContain("OFFSET('Giderler TEKNOLOJİ'!I1,0,0,ROW()-1,30)");
     expect(f.toplamFormulu_('personel')).toBe(
-      "=OPEX(\"personel-toplam\",Parametreler!A1:F,OFFSET('Personel Giderleri'!A1,0,0,ROW()-1,9),\"\",\"\",\"\",OFFSET('Personel Giderleri'!Q1,0,0,ROW()-1,30))",
+      "=OPEX(\"personel-toplam\",Parametreler!A1:F,OFFSET('Giderler PERSONEL'!A1,0,0,ROW()-1,9),\"\",\"\",\"\",OFFSET('Giderler PERSONEL'!Q1,0,0,ROW()-1,30))",
     );
     expect(f.asgariNetFormulu_(2027)).toBe('=OPEX("asgari-net-2027",Parametreler!A1:F)');
     expect([f.paraBicimi_('USD'), f.paraBicimi_('eur'), f.paraBicimi_('TRY'), f.paraBicimi_('')]).toEqual(['[$$]#,##0.00', '[$€]#,##0.00', '#,##0.00 "₺"', '#,##0.00 "₺"']);

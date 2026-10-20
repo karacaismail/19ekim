@@ -15,6 +15,9 @@ export interface Girdi {
   tesvikler?: Table;
   giderAylari?: Table;
   personelAylari?: Table;
+  /** İkinci gider sayfası (Giderler OFİS); birinci Giderler TEKNOLOJİ. */
+  giderler2?: Table;
+  giderAylari2?: Table;
 }
 interface ParamDef {
   grup: string;
@@ -89,7 +92,16 @@ export function izgara(satirlar: IzgaraSatiri[], basliklar: unknown[] = IZGARA_B
 }
 
 export function buildInput(
-  opts: { params?: Record<string, unknown>; personel?: Table; giderler?: Table; title?: boolean; giderAylari?: IzgaraSatiri[]; personelAylari?: IzgaraSatiri[] } = {},
+  opts: {
+    params?: Record<string, unknown>;
+    personel?: Table;
+    giderler?: Table;
+    giderler2?: Table;
+    title?: boolean;
+    giderAylari?: IzgaraSatiri[];
+    giderAylari2?: IzgaraSatiri[];
+    personelAylari?: IzgaraSatiri[];
+  } = {},
 ): Girdi {
   const b = motor.BASLIKLAR;
   const title = opts.title ?? true;
@@ -103,6 +115,8 @@ export function buildInput(
       title,
     ),
     ...(opts.giderAylari ? { giderAylari: izgara(opts.giderAylari) } : {}),
+    ...(opts.giderler2 ? { giderler2: sheet(Object.values(b.giderler), opts.giderler2, title) } : {}),
+    ...(opts.giderAylari2 ? { giderAylari2: izgara(opts.giderAylari2) } : {}),
     ...(opts.personelAylari ? { personelAylari: izgara(opts.personelAylari) } : {}),
   };
 }

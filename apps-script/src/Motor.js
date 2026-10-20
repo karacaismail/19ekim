@@ -657,7 +657,6 @@ var OpexMotor = (function () {
 
     var tesvikKodlari = {};
     var ayP = girdi && girdi.personelAylari ? ayIzgarasi(girdi.personelAylari) : null;
-    var ayG = girdi && girdi.giderAylari ? ayIzgarasi(girdi.giderAylari) : null;
     tesvikler.forEach(function (t) { tesvikKodlari[t.kod] = t; });
 
     // Personel
@@ -744,65 +743,76 @@ var OpexMotor = (function () {
     // Giderler
     var artisOrani = { Kur: p.kur_artis_2027, Kira: p.kira_artis_2027, Genel: p.genel_artis_2027, Yok: 0 };
     var giderler = [];
-    var giderTablosu = girdi && girdi.giderler ? tabloyuOku(girdi.giderler, 'giderler', uyarilar) : null;
+    // Gider sayfaları (kullanıcı kararı 2026-10-20): Giderler TEKNOLOJİ (giderler) ve Giderler OFİS (giderler2); her
+    // birinin kendi ızgarası vardır. Küme boşsa sayfanın grubu sayılır. Ayrılmamış eski sayfa birinci kaynaktır.
+    var giderKaynaklari = [
+      { tablo: girdi && girdi.giderler, aylar: girdi && girdi.giderAylari, kume: 'teknoloji' },
+      { tablo: girdi && girdi.giderler2, aylar: girdi && girdi.giderAylari2, kume: 'ofis' },
+    ];
     // “Bu ay ödendi” sütunu kaldırılmışsa ödeme takibi yoktur (sayfa ve pano ödenen/bekleyen göstermez).
-    var odemeTakibi = !!(giderTablosu && giderTablosu.sutunlar && giderTablosu.sutunlar.odendi >= 0);
-    (giderTablosu || []).forEach(function (s) {
-      var kalem = metin(s.kalem);
-      if (!kalem || toplamSatiri(kalem)) return;
-      if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
-      var kume = kumeKodu(s.kume);
-      if (!kume) {
-        uyarilar.push('Gider “' + kalem + '” kümesi tanınmadı (' + metin(s.kume) + '); Ofis ve işletme sayıldı.');
-        kume = 'ofis';
-      }
-      var para = metin(s.para).toUpperCase() || 'TRY';
-      if (!ps.kur[para]) {
-        uyarilar.push('Gider “' + kalem + '” para birimi tanınmadı (' + para + '); TRY sayıldı.');
-        para = 'TRY';
-      }
-      var tutar = sayi(s.tutar);
-      var eksik = !(tutar > 0);
-      if (!Number.isFinite(tutar)) tutar = 0;
-      var artis = metin(s.artis) || (para === 'TRY' ? 'Genel' : 'Kur');
-      if (!(artis in artisOrani)) artis = 'Genel';
-      var tl = r2(tutar * ps.kur[para].deger);
-      var tl2027 = r2(tl * (1 + artisOrani[artis]));
-      var fatura = metin(s.fatura);
-      // Aylık ızgara: işaretsiz ay 0; tutar satırın para biriminde. Varsayılan (Sheets formülü de bunu yazar): 2026 Tutar;
-      // 2027 Kur esaslı döviz kalemi aynı döviz tutarı (₺ artışı kur varsayımıyla), diğerleri Tutar × (1 + artış).
-      var ga = satirAylari(ayG, s.satir);
-      var kurDoviz = para !== 'TRY' && artis === 'Kur';
-      var tutarYil = { 2026: tutar, 2027: kurDoviz ? tutar : r2(tutar * (1 + artisOrani[artis])) };
-      var giderOzel = { 2026: [], 2027: [] };
-      var aylikTl = function (yil, varsayilan) {
-        var kur = ps.kur[para].deger * (yil === 2027 && kurDoviz ? 1 + p.kur_artis_2027 : 1);
-        return ga.aktif[yil].map(function (on, i) {
-          var v = ga.tutar[yil][i];
-          var ozel = on && farkli(v, tutarYil[yil]);
-          giderOzel[yil][i] = ozel;
-          return !on ? 0 : ozel ? r2(v * kur) : varsayilan;
+    var odemeTakibi = false;
+    giderKaynaklari.forEach(function (kaynak) {
+      if (!kaynak.tablo) return;
+      var giderTablosu = tabloyuOku(kaynak.tablo, 'giderler', uyarilar);
+      if (giderTablosu && giderTablosu.sutunlar && giderTablosu.sutunlar.odendi >= 0) odemeTakibi = true;
+      var ayG = kaynak.aylar ? ayIzgarasi(kaynak.aylar) : null;
+      (giderTablosu || []).forEach(function (s) {
+        var kalem = metin(s.kalem);
+        if (!kalem || toplamSatiri(kalem)) return;
+        if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
+        var kume = metin(s.kume) === '' ? kaynak.kume : kumeKodu(s.kume);
+        if (!kume) {
+          uyarilar.push('Gider “' + kalem + '” kümesi tanınmadı (' + metin(s.kume) + '); ' + KUME_ADI[kaynak.kume] + ' sayıldı.');
+          kume = kaynak.kume;
+        }
+        var para = metin(s.para).toUpperCase() || 'TRY';
+        if (!ps.kur[para]) {
+          uyarilar.push('Gider “' + kalem + '” para birimi tanınmadı (' + para + '); TRY sayıldı.');
+          para = 'TRY';
+        }
+        var tutar = sayi(s.tutar);
+        var eksik = !(tutar > 0);
+        if (!Number.isFinite(tutar)) tutar = 0;
+        var artis = metin(s.artis) || (para === 'TRY' ? 'Genel' : 'Kur');
+        if (!(artis in artisOrani)) artis = 'Genel';
+        var tl = r2(tutar * ps.kur[para].deger);
+        var tl2027 = r2(tl * (1 + artisOrani[artis]));
+        var fatura = metin(s.fatura);
+        // Aylık ızgara: işaretsiz ay 0; tutar satırın para biriminde. Varsayılan (Sheets formülü de bunu yazar): 2026 Tutar;
+        // 2027 Kur esaslı döviz kalemi aynı döviz tutarı (₺ artışı kur varsayımıyla), diğerleri Tutar × (1 + artış).
+        var ga = satirAylari(ayG, s.satir);
+        var kurDoviz = para !== 'TRY' && artis === 'Kur';
+        var tutarYil = { 2026: tutar, 2027: kurDoviz ? tutar : r2(tutar * (1 + artisOrani[artis])) };
+        var giderOzel = { 2026: [], 2027: [] };
+        var aylikTl = function (yil, varsayilan) {
+          var kur = ps.kur[para].deger * (yil === 2027 && kurDoviz ? 1 + p.kur_artis_2027 : 1);
+          return ga.aktif[yil].map(function (on, i) {
+            var v = ga.tutar[yil][i];
+            var ozel = on && farkli(v, tutarYil[yil]);
+            giderOzel[yil][i] = ozel;
+            return !on ? 0 : ozel ? r2(v * kur) : varsayilan;
+          });
+        };
+        giderler.push({
+          satir: s.satir,
+          kalem: kalem,
+          hesap: metin(s.hesap),
+          kume: kume,
+          kategori: metin(s.kategori) || 'Diğer',
+          para: para,
+          tutar: tutar,
+          tl: tl,
+          tl2027: tl2027,
+          aylikTl: { y2026: aylikTl(2026, tl), y2027: aylikTl(2027, tl2027) },
+          aktif: { y2026: ga.aktif[2026], y2027: ga.aktif[2027] },
+          ozel: { y2026: giderOzel[2026], y2027: giderOzel[2027] },
+          artis: artis,
+          artisOrani: artisOrani[artis],
+          odendi: evet(s.odendi),
+          eksik: eksik,
+          fatura: /^https:\/\//.test(fatura) ? fatura : '',
+          not: metin(s.not),
         });
-      };
-      giderler.push({
-        satir: s.satir,
-        kalem: kalem,
-        hesap: metin(s.hesap),
-        kume: kume,
-        kategori: metin(s.kategori) || 'Diğer',
-        para: para,
-        tutar: tutar,
-        tl: tl,
-        tl2027: tl2027,
-        aylikTl: { y2026: aylikTl(2026, tl), y2027: aylikTl(2027, tl2027) },
-        aktif: { y2026: ga.aktif[2026], y2027: ga.aktif[2027] },
-        ozel: { y2026: giderOzel[2026], y2027: giderOzel[2027] },
-        artis: artis,
-        artisOrani: artisOrani[artis],
-        odendi: evet(s.odendi),
-        eksik: eksik,
-        fatura: /^https:\/\//.test(fatura) ? fatura : '',
-        not: metin(s.not),
       });
     });
 
@@ -1087,13 +1097,15 @@ var OpexMotor = (function () {
       case 'gider-toplam':
       case 'personel-toplam':
         return altToplam(m, ad, girdi);
+      case 'hepsi':
+        return hepsiTablosu(m);
       case 'asgari-net-2026':
       case 'asgari-net-2027':
         return [[m.asgari[ad === 'asgari-net-2027' ? 'y2027' : 'y2026'].net]];
       case 'uyari':
         return [['Uyarılar']].concat(m.uyarilar.length ? m.uyarilar.map(function (u) { return [u]; }) : [['Uyarı yok.']]);
       default:
-        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, asgari-net-2026, asgari-net-2027, uyari.']];
+        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, hepsi, asgari-net-2026, asgari-net-2027, uyari.']];
     }
   }
 
@@ -1118,6 +1130,44 @@ var OpexMotor = (function () {
       satir[c.j] = r2(toplam);
     });
     return [satir];
+  }
+
+  /**
+   * Giderler Hepsi sayfası: bütün kalemler gruplara göre (Ofis, Teknoloji, Personel) planın ayları boyunca ₺ (gider:
+   * satırın kuruyla, işaretli ay; personel: işveren maliyeti, freelancer fatura), grup ara toplamları ve genel toplam.
+   */
+  function hepsiTablosu(m) {
+    var aylar = [];
+    for (var k = (m.donem.yil * 12 + m.donem.ay - 1); k <= 2027 * 12 + 11; k++) aylar.push({ yil: Math.floor(k / 12), ay: k % 12 });
+    var bas = ['Grup', 'Kalem', 'Ayrıntı'].concat(aylar.map(function (a) { return KISA_AYLAR[a.ay] + ' ' + a.yil; }), ['Toplam']);
+    var satirlar = [bas];
+    var genel = aylar.map(function () { return 0; });
+    var satirYaz = function (grup, kalem, ayrinti, degerler) {
+      satirlar.push([grup, kalem, ayrinti].concat(degerler.map(r2), [r2(topla(degerler))]));
+    };
+    [
+      { kume: 'ofis', ad: 'Ofis' },
+      { kume: 'teknoloji', ad: 'Teknoloji' },
+      { kume: 'insan', ad: 'Personel' },
+    ].forEach(function (grup) {
+      var ara = aylar.map(function () { return 0; });
+      var ekle = function (kalem, ayrinti, degerler) {
+        degerler.forEach(function (v, i) { ara[i] += v; genel[i] += v; });
+        satirYaz(grup.ad, kalem, ayrinti, degerler);
+      };
+      if (grup.kume === 'insan') {
+        m.kisiler.forEach(function (kisi) {
+          ekle(kisi.ad, kisi.tur === 'Freelancer' ? 'Freelancer · fatura' : kisi.tur + ' · ' + kisi.esas, aylar.map(function (a) { return kisi['y' + a.yil].aylar[a.ay].maliyet; }));
+        });
+      } else {
+        m.giderler.filter(function (g) { return g.kume === grup.kume; }).forEach(function (g) {
+          ekle(g.kalem, (g.hesap ? g.hesap + ' · ' : '') + g.para, aylar.map(function (a) { return g.aylikTl['y' + a.yil][a.ay]; }));
+        });
+      }
+      satirYaz(grup.ad, grup.ad + ' toplamı', '', ara);
+    });
+    satirYaz('Hepsi', 'Hepsi toplamı', '', genel);
+    return satirlar;
   }
 
   /** Girdi sayfasının satırlarıyla hizalı hesap sütunları (aynı satır numarası). */

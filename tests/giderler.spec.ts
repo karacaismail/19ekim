@@ -260,14 +260,15 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(stored.session).toContain(ENDPOINT);
   });
 
-  test('kalemler üç grup: Teknoloji, Ofis ve işletme, Personel; Tümü toplamı dönem OPEX’i', async ({ page }) => {
+  // Kullanıcı kararı 2026-10-20: süzgeç [Hepsi, Ofis, Teknoloji, Personel].
+  test('kalemler süzgeci: Hepsi, Ofis, Teknoloji, Personel; Hepsi toplamı dönem OPEX’i', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
     await connect(page);
     const group = page.getByRole('group', { name: 'Grup süzgeci' });
     const n = { tech: MODEL.giderler.filter((g) => g.kume === 'teknoloji').length, office: MODEL.giderler.filter((g) => g.kume === 'ofis').length, people: MODEL.kisiler.length };
-    await expect(group.getByRole('button')).toHaveText([`Tümü (${n.tech + n.office + n.people})`, `Teknoloji (${n.tech})`, `Ofis ve işletme (${n.office})`, `Personel (${n.people})`]);
+    await expect(group.getByRole('button')).toHaveText([`Hepsi (${n.tech + n.office + n.people})`, `Ofis (${n.office})`, `Teknoloji (${n.tech})`, `Personel (${n.people})`]);
     const table = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
     // Toplam satırı: [Kategori, Tutar, Etkin ay, Aylık ort. ₺, 3 ay ₺, Bu ay]; dönem sütunu ≈ dönem grup toplamı (kuruş yuvarlaması).
     const total = async () => Number((await table.locator('tr[data-tone="total"] td').nth(4).innerText()).replace(/[^\d,]/g, '').replace(',', '.'));

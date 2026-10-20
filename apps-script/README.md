@@ -20,8 +20,10 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 ## Sayfalar (Google Sheets)
 
 - **Pano**: KPI kutuları, küme özeti, bordro köprüsü, 8 grafik, kişi tablosu.
-- **Düzenli Giderler** (girdi): teknoloji ve ofis/işletme kalemleri; para birimi, aylık tutar, 2027 artış esası; aylık ızgara ve “Toplam (₺)”.
-- **Personel Giderleri** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik; aylık ızgara ve “Toplam (₺)”.
+- **Giderler Hepsi** (hesaplanır): tüm kalemler ay ay ₺.
+- **Giderler OFİS** (girdi): kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları; aylık ızgara ve “Toplam (₺)”.
+- **Giderler TEKNOLOJİ** (girdi): yazılım, yapay zekâ, sunucu, API, AWS vb.; aylık ızgara ve “Toplam (₺)”.
+- **Giderler PERSONEL** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik; aylık ızgara ve “Toplam (₺)”.
 - **Bordro**: kişi × ay netten brüte tablo, 2026 ve 2027.
 - **Parametreler** (girdi): kur (canlı Google Finance, yedekli), 2026 enflasyonu, 2027 zam esası, bordro oranları, dilimler.
 - **Teşvikler** (girdi): standart (genel prim indirimi, asgari ücret desteği) ve koşullu teşvikler.
@@ -29,9 +31,12 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 
 Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
 
-**Sayfa adları ve yerleşim:** “Düzenli Giderler” (girdi `A:G`, ızgara `I:AL`) ve “Personel Giderleri” (girdi `A:I`,
-hesap `K:O`, ızgara `Q:AT`). Eski adlar (“Giderler”, “Personel”) da okunur; Kurulum yeni ada taşır ve Düzenli
-Giderler’deki eski “Bu ay ödendi / Dahil / Fatura bağlantısı / Not” sütunlarını yalnız beklenen içerikle kaldırır. Son
+**Sayfa adları ve yerleşim:** “Giderler Hepsi” (kod hesaplar; bütün kalemler Ofis / Teknoloji / Personel gruplarıyla
+ay ay ₺, grup ara toplamları ve genel toplam), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (girdi `A:G`, ızgara `I:AL`) ve
+“Giderler PERSONEL” (girdi `A:I`, hesap `K:O`, ızgara `Q:AT`). Eski adlar (“Düzenli Giderler”, “Giderler”, “Personel
+Giderleri”, “Personel”) da okunur; Kurulum Düzenli Giderler’i Küme’ye göre iki sayfaya ayırır (işaretler, elle yazılmış
+tutarlar ve formüller korunur) ve eski “Bu ay ödendi / Dahil / Fatura bağlantısı / Not” sütunlarını yalnız beklenen
+içerikle kaldırır. Son
 veri satırının altındaki **Toplam (₺)** satırını kod (özel işlev) hesaplar: giderde satırın kuruyla ₺, yalnız işaretli
 aylar; personelde yazılan tutarların toplamı. Gider tutarları satırın para birimiyle ($, €, ₺) görünür; para birimi
 değişince biçim kendiliğinden güncellenir. Formül veya kod sonucu olan hücreler mavi yazılır.

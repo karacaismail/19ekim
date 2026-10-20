@@ -484,6 +484,37 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(arac.aylikTl.y2026[0], 'Ekim’de etkin: Ocak’tan beri').toBe(arac.tl);
   });
 
+  test('iki gider sayfası (Giderler TEKNOLOJİ + Giderler OFİS): her biri kendi ızgarasıyla; model ikisini birlikte hesaplar', () => {
+    // Kullanıcı kararı 2026-10-20: Düzenli Giderler → Giderler OFİS ve Giderler TEKNOLOJİ (satır numaraları çakışabilir).
+    const tek = [['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur', false, true, '', '']];
+    const ofis = [['Kira', '', '', 'Kira', 'TRY', 1000, 'Kira', false, true, '', '']];
+    const mm = buildModel({ personel: [], giderler: tek, giderler2: ofis, giderAylari: [{}], giderAylari2: [{ aktif: { 'Kas 2026': false } }] });
+    expect(mm.giderler.map((g) => [g.kalem, g.kume, g.satir])).toEqual([['Araç', 'teknoloji', 4], ['Kira', 'ofis', 4]]);
+    expect(mm.uyarilar, 'Küme boşsa sayfanın grubu (uyarı yok)').toEqual([]);
+    expect(mm.giderler[1].aylikTl.y2026.slice(9)).toEqual([1000, 0, 1000]);
+    expect(mm.giderler[0].aylikTl.y2026[10], 'Ofis’in Kasım işareti Teknoloji’yi etkilemez').toBe(mm.giderler[0].tl);
+    expect(mm.ozet.buAy.ofis).toBe(1000);
+  });
+
+  test('“hepsi” raporu: Ofis, Teknoloji, Personel grupları ay ay ₺, grup ara toplamları ve genel toplam', () => {
+    const tek = [['Araç', 'bt', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur', false, true, '', '']];
+    const ofis = [['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira', false, true, '', '']];
+    const mm = buildModel({ personel: [NET('Kişi A', 50000)], giderler: tek, giderler2: ofis });
+    const r = motor.rapor(mm, 'hepsi');
+    expect(r[0].slice(0, 3)).toEqual(['Grup', 'Kalem', 'Ayrıntı']);
+    expect(r[0][3]).toBe('Eki 2026');
+    expect(r[0][r[0].length - 2]).toBe('Ara 2027');
+    expect(r[0][r[0].length - 1]).toBe('Toplam');
+    expect(r[0].length).toBe(3 + 15 + 1);
+    expect(r.map((x) => x[1])).toEqual(['Kalem', 'Kira', 'Ofis toplamı', 'Araç', 'Teknoloji toplamı', 'Kişi A', 'Personel toplamı', 'Hepsi toplamı']);
+    expect(r.every((x) => x.length === r[0].length), 'dikdörtgen tablo').toBe(true);
+    const ekim = (ad: string) => r.find((x) => x[1] === ad)![3] as number;
+    expect(ekim('Kira')).toBe(1000);
+    expect(ekim('Kişi A')).toBe(mm.kisiler[0].y2026.aylar[9].maliyet);
+    expect(ekim('Hepsi toplamı')).toBe(Math.round((1000 + mm.giderler[0].tl + mm.kisiler[0].y2026.aylar[9].maliyet) * 100) / 100);
+    expect(r.find((x) => x[1] === 'Araç')![2]).toBe('bt · USD');
+  });
+
   test('ızgara yoksa her ay etkin ve varsayılan tutar (eski Sheets kurulumu)', () => {
     for (const g of m.giderler) {
       expect(g.aylikTl.y2026).toEqual(Array(12).fill(g.tl));

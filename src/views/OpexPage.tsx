@@ -427,7 +427,7 @@ function ShareBar({ ratio, tone }: { ratio: number; tone: OpexTone }) {
 }
 
 const GRUPLAR: { kume: KumeKod; tone: OpexTone; note: string }[] = [
-  { kume: 'teknoloji', tone: 'tech', note: 'Yapay zekâ, sunucu ve bulut, lisans' },
+  { kume: 'teknoloji', tone: 'tech', note: 'Yazılım, yapay zekâ, sunucu, API, AWS vb.' },
   { kume: 'ofis', tone: 'office', note: 'Kira, faturalar, ofis ihtiyaçları' },
   { kume: 'insan', tone: 'people', note: 'Bordro işveren maliyeti ve freelancer faturaları' },
 ];
@@ -568,7 +568,7 @@ type KalemFiltre = 'tumu' | KumeKod;
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
 const ARTIS: Record<Gider['artis'], string> = { Kur: 'kur', Kira: 'kira', Genel: 'genel', Yok: 'artışsız' };
 
-/** Dönemin kalemleri: üç grup (teknoloji, ofis ve işletme, personel); “Tümü” toplamı dönem OPEX’idir. */
+/** Dönemin kalemleri: üç grup (ofis, teknoloji, personel); “Hepsi” toplamı dönem OPEX’idir. */
 function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
   const [filter, setFilter] = useState<KalemFiltre>('tumu');
   const all: KalemRow[] = [
@@ -780,9 +780,9 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         value={filter}
         onChange={setFilter}
         options={[
-          { value: 'tumu', label: `Tümü (${all.length})` },
+          { value: 'tumu', label: `Hepsi (${all.length})` },
+          { value: 'ofis', label: `Ofis (${count('ofis')})` },
           { value: 'teknoloji', label: `Teknoloji (${count('teknoloji')})` },
-          { value: 'ofis', label: `Ofis ve işletme (${count('ofis')})` },
           { value: 'insan', label: `Personel (${count('insan')})` },
         ]}
       />
@@ -1157,7 +1157,7 @@ function YearPanel({ m, d }: { m: OpexModel; d: Donem }) {
       <Section id={`plan-${d.yil}-bolum`} index={no()} title={`Aylık plan · ${d.etiket}`} desc="Her ayın teknoloji, ofis ve işletme ve personel gideri ayrı hesaplanır.">
         <Plan m={m} d={d} />
       </Section>
-      <Section id={`kalemler-${d.yil}-bolum`} index={no()} title="Kalemler" desc="Üç grup: teknoloji (yapay zekâ, sunucu, lisans), ofis ve işletme (kira, faturalar, ofis ihtiyaçları), personel (bordro ve freelancer).">
+      <Section id={`kalemler-${d.yil}-bolum`} index={no()} title="Kalemler" desc="Üç grup: ofis (kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları), teknoloji (yazılım, yapay zekâ, sunucu, API, AWS vb.), personel (bordro ve freelancer).">
         <Expenses m={m} d={d} />
         <TechVendors m={m} d={d} />
       </Section>
