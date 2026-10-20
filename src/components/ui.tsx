@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Anchor, Badge, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
@@ -293,6 +293,7 @@ export function Chart({
   summary,
   size = 'md',
   wide = false,
+  rows,
 }: {
   id: string;
   spec: ChartSpec;
@@ -301,6 +302,8 @@ export function Chart({
   summary: string;
   size?: ChartSize;
   wide?: boolean;
+  /** Kategori satırı sayısı: kutu en az satır başına bir etiket yüksekliği kadar uzar (etiketler üst üste binmez). */
+  rows?: number;
 }) {
   const titleId = `${id}-grafik`;
   const host = useRef<HTMLDivElement>(null);
@@ -354,6 +357,8 @@ export function Chart({
       className="chart-canvas"
       data-kind={spec.kind}
       data-size={size}
+      data-rows={rows ?? undefined}
+      style={rows ? ({ '--chart-rows': rows } as CSSProperties) : undefined}
       data-chart-failed={state === 'failed' ? '' : undefined}
       role="img"
       aria-label={summary}

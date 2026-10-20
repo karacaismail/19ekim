@@ -122,13 +122,16 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   veya grafik yüklenemezse görünür yedek metindir.
 - Başlık ve gezinme (kullanıcı kararı 2026-10-20): üst bant tek satır (dar ekranda marka alt yazısı ve tema yazısı
   gizlenir), gezinme tek satır; organizasyon, rol sayfaları ve istihdam takvimi “İstihdam” açılır menüsünde (Mantine
-  Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok). Sayfa başlıkları sıkışık
-  (`--text-title`; 1280 px’te rol ≤ 139 px, diğerleri ≤ 146 px, ana sayfa ≤ 87 px; test). Rol başlığı: ad + durum,
-  sağda görev, altta tek akışta bilgiler. Kırıntı satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
+  Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak ekranda panel kendi
+  içinde kayar; JavaScript yoksa menü yerine düz bağlantılar). Sayfa başlıkları sıkışık (`--text-title`, geniş
+  ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
+  (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
+  satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
 - Giderler ilk ekranı (kullanıcı kararı 2026-10-20): canlı durum kırıntı satırında küçük şerit (nokta, kısa metin,
   simge düğmeler); 2026/2027 sekmeleri başlığın sağında, aynı şablonda (seçim radyo noktasıyla); özet kutuları tek
-  sırada; Gruplar ve Kategoriler yan yana alçak (≥ 1200 px). 1280×800 ve 1440×900’de grafikler kaydırmadan görünür
-  (test). Kategori ekseninde her ad yazılır (`interval: 0`).
+  sırada; Gruplar ve Kategoriler yan yana alçak (≥ 1200 px). Gerçek tarayıcı alanlarında (1280×720, 1440×800,
+  1920×960) grafikler kaydırmadan görünür (test). Kategori ekseninde her ad yazılır (`interval: 0`); grafik kutusu
+  satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır 20 px, dar grafikte 44 px, telefonda 64 px).
 - En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
 

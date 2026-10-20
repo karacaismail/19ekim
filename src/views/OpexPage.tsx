@@ -399,8 +399,8 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
  * noktası, kısa metin ve simge düğmeler (erişilebilir adlarıyla). Ayrıntı (erişim, son denetim) ipucunda.
  */
 function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extract<Live, { status: 'ready' }>; settingsOpen: boolean; onRefresh: () => void; onSettings: () => void }) {
-  const [host, setHost] = useState<HTMLElement | null>(null);
-  useEffect(() => setHost(document.getElementById(PAGE_TOOLS_ID)), []);
+  // Yalnız istemcide (veri gelince) çizilir: hedef ilk çizimde bulunur, şerit gövdede bir an görünmez.
+  const [host] = useState<HTMLElement | null>(() => document.getElementById(PAGE_TOOLS_ID));
   const detay = `Erişim: ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim ${clock(live.checked)} · Sheets’te son değişiklik ${clock(live.data.degisti)}`;
   const strip = (
     <div className="opex-live" data-state={live.stale ? 'stale' : 'live'}>
@@ -410,6 +410,7 @@ function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extrac
         <span className="opex-live-meta">
           Sheets {clock(live.data.degisti)} · {live.push ? 'anlık' : `${OPEX_POLL_MS / 1000} sn’de bir`}
         </span>
+        <span className="visually-hidden"> · {detay}</span>
       </p>
       <button type="button" className="opex-icon-btn" aria-label="Şimdi yenile" title="Şimdi yenile" onClick={onRefresh}>
         <IconRefresh size={20} stroke={1.75} aria-hidden="true" />
@@ -477,9 +478,8 @@ function YearTabs({ value, onChange, donemler }: { value: Yil; onChange: (y: Yil
             </svg>
           </span>
           <span className="opex-year-sub">
-            {d.etiket.replace(` ${d.yil}`, '')} · {d.aySayisi} ay
+            {d.etiket.replace(` ${d.yil}`, '')} · <span className="opex-year-total">{tl(d.toplam.toplam)}</span>
           </span>
-          <span className="opex-year-sub opex-year-total">{tl(d.toplam.toplam)}</span>
         </button>
       ))}
     </div>
@@ -555,6 +555,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
           title="Gruplar"
           note={`${d.etiket} toplamı, ₺ ve pay`}
           size="sm"
+          rows={GRUPLAR.length}
           summary={GRUPLAR.map((t) => `${KUME_AD[t.kume]} ${tl(d.toplam[t.kume])}`).join('; ')}
           spec={{ kind: 'opex-bar', share: total, items: GRUPLAR.map((t) => ({ name: KUME_AD[t.kume], value: d.toplam[t.kume], tone: t.tone })).sort((a, b) => b.value - a.value) }}
         />
@@ -563,6 +564,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
           title="Kategoriler"
           note={`${d.etiket} toplamı; renk grubu gösterir`}
           size="lg"
+          rows={kats.length}
           summary={kats.map((k) => `${k.name} ${tl(k.value)}`).join('; ')}
           spec={{ kind: 'opex-bar', share: total, items: kats.map((k) => ({ name: k.name, value: k.value, tone: KUME_TONE[k.kume] })) }}
         />
@@ -893,6 +895,7 @@ function TechVendors({ m, d }: { m: OpexModel; d: Donem }) {
       title="Teknoloji sağlayıcıları"
       note={`${d.etiket} aylık ortalama ₺, hesaplar toplanmış`}
       size="md"
+      rows={tech.length}
       summary={tech.map(([n, v]) => `${n} ${tl(v)}`).join('; ')}
       spec={{ kind: 'opex-bar', items: tech.map(([name, value]) => ({ name, value, tone: 'tech' as const })) }}
     />
@@ -1345,7 +1348,11 @@ function Body() {
       {live.status === 'ready' ? (
         <>
           <LiveStrip live={live} settingsOpen={settings} onRefresh={refreshNow} onSettings={() => setSettings((v) => !v)} />
-          {live.stale ? <p className="opex-live-stale">{live.stale} Son alınan veri gösteriliyor.</p> : null}
+          {live.stale ? (
+            <p className="opex-live-stale" role="status">
+              {live.stale} Son alınan veri gösteriliyor.
+            </p>
+          ) : null}
           {storageNote ? <p className="opex-live-stale">{storageNote}</p> : null}
           {settings ? (
             <div className="opex-settings">

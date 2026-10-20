@@ -591,20 +591,31 @@ function parametreleriKur_(ss) {
 
 /**
  * Kullanıcı kararı (2026-10-20): ayrı Teşvikler sayfası yok; teşvik tablosu hesapta kullanıldığı için Parametreler’in
- * H:P alanına taşınır (değer, formül, biçim, liste ve onay kutularıyla). Taşıma kodlar karşılaştırılarak doğrulanır,
- * sonra eski sayfa silinir. Doğrulama tutmazsa eski sayfa korunur ve kurulum durur.
+ * H:P alanına taşınır (değer, formül, biçim, liste ve onay kutularıyla). Güvenlik: hedef alan tümüyle boş olmalı; eski
+ * sayfada A:I tablosu ve kodun yazdığı K:M sütunları dışında içerik olmamalı; taşınan değer ve formüller kaynakla aynı
+ * olmalı. Bunlardan biri tutmazsa hiçbir şey silinmez, kurulum açıklamayla durur. Tutarsa eski sayfa silinir (dosya
+ * sürüm geçmişinde kalır).
  */
 function tesvikleriTasi_(ss, sh) {
   var eski = ss.getSheetByName(OPEX_KALDIRILAN.tesvikler);
   if (!eski) return false;
   var son = Math.max(eski.getLastRow(), 3);
-  var hedefBas = sh.getRange(3, OPEX_TESVIK_SUTUN).getDisplayValue();
-  if (hedefBas === '') eski.getRange(3, 1, son - 2, OPEX_TESVIK_GENISLIK).copyTo(sh.getRange(3, OPEX_TESVIK_SUTUN));
+  var g = OPEX_TESVIK_GENISLIK;
+  var ekSutun = Math.max(eski.getLastColumn() - g, 0);
+  if (ekSutun > 0) {
+    // J ve N+ boş olmalı (K:M eski hesap sütunları: kod yazardı, yeniden üretilir).
+    var ek = eski.getRange(1, g + 1, son, ekSutun).getValues();
+    var yabanci = ek.some(function (r) { return r.some(function (v, j) { return v !== '' && !(j >= 1 && j <= 3); }); });
+    if (yabanci) throw new Error('Teşvikler sayfasında tablo dışında (J veya N sonrası) içerik var; taşınmadı, sayfa korunuyor. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+  }
+  var hedef = sh.getRange(3, OPEX_TESVIK_SUTUN, son - 2, g);
+  var kaynak = eski.getRange(3, 1, son - 2, g);
+  var hedefBos = hedef.getValues().every(function (r) { return r.every(function (v) { return v === ''; }); });
+  if (hedefBos) kaynak.copyTo(hedef);
   SpreadsheetApp.flush();
-  var kaynak = eski.getRange(3, 1, son - 2, OPEX_TESVIK_GENISLIK).getValues();
-  var tasinan = sh.getRange(3, OPEX_TESVIK_SUTUN, son - 2, OPEX_TESVIK_GENISLIK).getValues();
-  if (JSON.stringify(kaynak) !== JSON.stringify(tasinan)) {
-    throw new Error('Teşvik tablosu Parametreler’e taşınamadı (H:P farklı); Teşvikler sayfası korunuyor. Parametreler H:P’yi boşaltıp Kurulum’u yeniden çalıştırın.');
+  var ayni = JSON.stringify(kaynak.getValues()) === JSON.stringify(hedef.getValues()) && JSON.stringify(kaynak.getFormulas()) === JSON.stringify(hedef.getFormulas());
+  if (!ayni) {
+    throw new Error('Teşvik tablosu Parametreler’e taşınamadı (H:P dolu ya da farklı); Teşvikler sayfası korunuyor. Parametreler H:P’yi boşaltıp Kurulum’u yeniden çalıştırın.');
   }
   ss.deleteSheet(eski);
   return true;
@@ -650,6 +661,12 @@ function tesvikleriKur_(ss) {
   sh.getRange(4, c + 5, alan, 1).setDataValidation(liste_(OpexMotor.SECENEKLER.kapsam));
   sh.getRange(4, c + 6, alan, 1).setDataValidation(liste_(OpexMotor.SECENEKLER.evetHayir));
   onayKutusu_(sh.getRange(4, c + 7, n, 1), true);
+  // Personel → Ek teşvik listesi teşvik kodlarından (taşımayla aynı adımda: eski sayfaya bağlı kalmaz).
+  var personel = opexSayfasi_(ss, 'personel');
+  if (personel) {
+    var kodlar = sh.getRange(4, c, alan, 1);
+    personel.getRange(4, 6, Math.max(veriSatiriSayisi_(personel), 1) + 15, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInRange(kodlar, true).setAllowInvalid(false).build());
+  }
   sh.getRange(4, c + 3, alan, 2).setNumberFormat('#,##0.00##');
   sh.getRange(4, c + 8, alan, 1).setWrap(true).setFontColor(OPEX_STIL.ikincil);
   sh.setColumnWidth(c - 1, 24);
@@ -695,8 +712,9 @@ function personeliKur_(ss) {
   sh.getRange(4, 3, alan, 1).setDataValidation(liste_(s.esas));
   sh.getRange(4, 4, alan, 1).setNumberFormat(OPEX_BICIM.tl);
   sh.getRange(4, 5, alan, 1).setDataValidation(liste_(s.evetHayir));
-  // Ek teşvik: Parametreler’deki teşvik kodlarından (H sütunu).
-  var kodAlani = ss.getSheetByName(OPEX_SAYFA.parametreler).getRange(4, OPEX_TESVIK_SUTUN, 57, 1);
+  // Ek teşvik: Parametreler’deki teşvik kodlarından (H sütunu; satır sayısına göre, ek satır payıyla).
+  var parametre = ss.getSheetByName(OPEX_SAYFA.parametreler);
+  var kodAlani = parametre.getRange(4, OPEX_TESVIK_SUTUN, Math.max(parametre.getLastRow() - 3, 1) + 10, 1);
   sh.getRange(4, 6, alan, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInRange(kodAlani, true).setAllowInvalid(false).build());
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.asgariDestek));
   if (n) onayKutusu_(sh.getRange(4, 8, n, 1), true);

@@ -244,6 +244,8 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await page.keyboard.press('Enter');
     const menu = page.getByRole('menu', { name: 'İstihdam' });
     await expect(menu).toBeVisible();
+    // Menü odağı açıldıktan sonraki karede içeri alır; oklar ondan sonra.
+    await expect.poll(() => page.evaluate(() => !!document.activeElement?.closest('[role="menu"]'))).toBe(true);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
     const odak = await page.evaluate(() => {
@@ -262,16 +264,49 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(tetik).toBeFocused();
   });
 
-  test('başlık alanları sıkışık (1280): rol ≤ 139 px (−%75), diğer sayfalar ≤ 146 px, ana sayfa ≤ 87 px (−%50)', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    const yukseklik = async (path: string) => {
+  /** Önceki başlık yükseklikleri (canlı site, 2026-10-20, 1280 px): kullanıcı kararı rol ≥ %75, diğerleri ≥ %50 az. */
+  const ONCEKI: Record<string, number> = {
+    '': 175, 'arsiv/': 203, 'bcg/': 259, 'buyume-modeli/': 293, 'eylem-plani/': 231, 'giderler/': 233, 'hedefler/': 366,
+    'istihdam/': 203, 'karar-bekleyenler/': 203, 'karar-yetkisi/': 265, 'notlar/': 203, 'parametreler/': 299,
+    'roller/asistan/': 468, 'roller/dijital-pazarlama/': 496, 'roller/ekip-lideri/': 553, 'roller/organizator/': 468,
+    'roller/pazarlamaci/': 468, 'roller/saha-uzmani/': 525, 'roller/segika/': 557,
+  };
+  for (const [path, once] of Object.entries(ONCEKI)) {
+    const rol = path.startsWith('roller/');
+    const sinir = Math.floor(once * (rol ? 0.25 : 0.5));
+    test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
-      return page.locator('.hero').first().evaluate((el) => el.getBoundingClientRect().height);
-    };
-    // Önceki ölçüler (2026-10-20, 1280 px): rol 557, MLM 293, ana sayfa 175.
-    for (const path of ['roller/segika/', 'roller/organizator/', 'roller/saha-uzmani/']) expect(await yukseklik(path), path).toBeLessThanOrEqual(139);
-    for (const path of ['buyume-modeli/', 'istihdam/', 'karar-bekleyenler/']) expect(await yukseklik(path), path).toBeLessThanOrEqual(146);
-    expect(await yukseklik('')).toBeLessThanOrEqual(87);
+      const h = await page.locator('.hero').first().evaluate((el) => el.getBoundingClientRect().height);
+      expect(h).toBeLessThanOrEqual(sinir);
+    });
+  }
+
+  test('JavaScript kapalı: İstihdam menüsünün sayfaları düz bağlantı olarak gezinmede', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto('istihdam/');
+    const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
+    for (const ad of ['Organizasyon', 'Segika', 'Asistan', 'İstihdam takvimi']) await expect(nav.getByRole('link', { name: ad, exact: true })).toBeVisible();
+    await expect(nav.getByRole('button', { name: 'İstihdam' })).toBeHidden();
+    await context.close();
+  });
+
+  test('işaretçiyle açılan menüde oklar odak göstergesi açmaz (görünür odak yalnız Tab ile)', async ({ page }) => {
+    await page.goto('istihdam/');
+    await hydrated(page);
+    await page.getByRole('button', { name: 'İstihdam' }).click();
+    await expect(page.getByRole('menu', { name: 'İstihdam' })).toBeVisible();
+    await page.mouse.move(0, 0);
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    // İşaretçi modunda hiçbir ögede alt çizgi yok; zemin yalnız etkin sayfada (seçili ≠ odak).
+    const ogeler = await page.getByRole('menuitem').evaluateAll((els) =>
+      els.map((el) => ({ deco: getComputedStyle(el).textDecorationLine, bg: getComputedStyle(el).backgroundColor, current: el.getAttribute('aria-current') })),
+    );
+    expect(ogeler.length).toBe(8);
+    expect(ogeler.filter((o) => o.deco.includes('underline'))).toEqual([]);
+    expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
 
   for (const width of [320, 360, 375, 390]) {
@@ -345,6 +380,25 @@ test.describe('etkileşim alanı ve tema', () => {
   });
 });
 
+test.describe('yatay telefon (alçak ekran)', () => {
+  for (const viewport of [{ width: 844, height: 390 }, { width: 667, height: 375 }]) {
+    test(`${viewport.width}×${viewport.height}: İstihdam menüsünün son ögesi görünür alanda ve tıklanır`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('roller/asistan/');
+      await hydrated(page);
+      await page.getByRole('button', { name: 'İstihdam' }).click();
+      const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
+      await son.scrollIntoViewIfNeeded();
+      const box = await son.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      await expect(page.getByRole('button', { name: 'İstihdam' })).toBeInViewport();
+      await son.click();
+      await expect(page).toHaveURL(/\/istihdam\/$/);
+    });
+  }
+});
+
 test.describe('dokunmatik cihaz', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 812 } });
   test('kaba işaretçide kontroller en az 48 CSS px', async ({ page, browserName }) => {
@@ -356,6 +410,11 @@ test.describe('dokunmatik cihaz', () => {
       .locator('.mainnav-link, .pager-link')
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(48);
+    await page.getByRole('button', { name: 'İstihdam' }).tap();
+    await expect(page.getByRole('menu', { name: 'İstihdam' })).toBeVisible();
+    const ogeler = await page.getByRole('menuitem').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+    expect(ogeler.length).toBe(8);
+    expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
   });
 });
 

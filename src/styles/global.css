@@ -274,13 +274,6 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   }
 }
 
-/* Yıl sekmesi alt satırı geniş ekranda tek satır; dar ekranda sarılır (yatay taşma olmaz). */
-@media (min-width: 64em) {
-  .opex-year-sub {
-    white-space: nowrap;
-  }
-}
-
 /* JavaScript açıksa düğme ilk boyamada yer alır (sonradan kayma olmaz). */
 html[data-js] .theme-toggle[hidden] {
   display: inline-flex;
@@ -441,9 +434,23 @@ html[data-js] .theme-toggle[hidden] {
   letter-spacing: var(--tracking-tight);
 }
 
+/* Geniş ekranda üst etiket başlıkla aynı satırda (dikey yer kazanır); açıklama tek satıra sığar. */
+@media (min-width: 48em) {
+  .hero-text {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: var(--space-3);
+  }
+
+  .hero-text > .lead {
+    grid-column: 1 / -1;
+  }
+}
+
 .lead {
   margin: 0;
-  max-width: 72ch;
+  max-width: 110ch;
   color: var(--text-secondary);
   font-size: var(--text-md);
   line-height: var(--leading-body);
@@ -458,25 +465,31 @@ html[data-js] .theme-toggle[hidden] {
 
 @media (min-width: 64em) {
   .hero-role {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 30rem);
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 32rem);
     grid-template-areas: 'head mission' 'facts facts';
     align-items: center;
+    row-gap: var(--space-1);
   }
 }
 
 .hero-role .facts-row {
   grid-area: facts;
+  margin-top: 0;
 }
 
 .hero-role-head {
   grid-area: head;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-3);
 }
 
+.hero-role-head > :not(.display) {
+  flex: none;
+}
+
 .hero-role .display {
+  min-width: 0;
   margin: 0;
   font-size: var(--text-2xl);
 }
@@ -695,9 +708,32 @@ html[data-js] .theme-toggle[hidden] {
 .mainnav-menu {
   border: 0;
   background-color: transparent;
-  font: inherit;
-  font-weight: var(--weight-medium);
+  font-family: inherit;
+  line-height: inherit;
   cursor: pointer;
+}
+
+/* JavaScript yoksa menü yerine düz bağlantılar; JavaScript varsa (head betiği data-js koyar) yalnız menü. */
+.mainnav-nojs-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mainnav-nojs-link[aria-current='page'] {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+html[data-js] .mainnav-nojs,
+html:not([data-js]) .mainnav-menu-li {
+  display: none;
 }
 
 .mainnav-chevron {
@@ -714,6 +750,9 @@ html[data-js] .theme-toggle[hidden] {
 
 .navmenu {
   min-width: 15rem;
+  /* Mantine size ara katmanı en çok yüksekliği görünür alana göre verir; taşan kısım panelin içinde kayar. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-1);
   border: var(--hairline) solid var(--rule);
   border-radius: var(--radius-md);
@@ -902,6 +941,19 @@ html[data-js] .theme-toggle[hidden] {
 }
 
 .chart-canvas[data-size='sm'] { height: var(--chart-h-sm); }
+/* Satır sayısı bilinen grafik: kutu satır başına bir etiket yüksekliğinden kısa olmaz (etiketler binmez). */
+.chart-canvas[data-rows]:not([data-chart-failed]) {
+  min-height: calc(var(--chart-rows) * var(--chart-row-h) + var(--chart-row-pad));
+}
+
+/* Satırlı grafikte dikey iç boşluk küçük: satır yüksekliği etikete gider (--chart-row-pad bu boşluğu sayar). */
+html[data-js] .chart-canvas[data-rows]:not([data-chart-failed]) {
+  padding-block: var(--space-1);
+}
+
+html[data-js] .chart-canvas[data-rows]:not([data-chart-failed]) .chart-host {
+  inset: var(--space-1) var(--space-4);
+}
 .chart-canvas[data-size='lg'] { height: var(--chart-h-lg); }
 .chart-canvas[data-size='xl'] { height: var(--chart-h-xl); }
 .chart-canvas[data-size='xxl'] { height: var(--chart-h-xxl); }
@@ -964,13 +1016,6 @@ html:not([data-js]) .chart-scroll .chart-canvas,
 }
 
 /* ---------- Rol başlığı ---------- */
-.role-hero-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
 /* ---------- İstihdam: işe alım sırası (Mantine Timeline) ---------- */
 .hire-timeline {
   --tl-line-width: 2px;
@@ -1215,6 +1260,28 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   margin-top: var(--space-1);
   color: var(--text-secondary);
   font-size: var(--text-sm);
+}
+
+/* Başlık içindeki sayılar ve araçlar sıkışık (başlık yüksekliği yarıya). */
+.hero .stats {
+  gap: var(--space-2) var(--gap-normal);
+  margin-top: var(--space-2);
+}
+
+.hero .stat {
+  padding-top: 0;
+}
+
+.hero .stat-value {
+  font-size: var(--text-2xl);
+}
+
+.hero .stat-note {
+  margin-top: 0;
+}
+
+.hero .param-toolbar {
+  margin-top: var(--space-2);
 }
 
 /* ---------- Paneller ve notlar ---------- */
@@ -2312,6 +2379,20 @@ html:not([data-js]) .email-btn {
   container-name: opex-chart;
 }
 
+/* Satır yüksekliği etiketin sarılma ihtimaline göre: dar grafikte iki satır, telefonda üç satır. */
+@container opex-chart (width < 600px) {
+  .chart-canvas[data-rows] {
+    --chart-row-h: var(--chart-row-h-wrap2);
+    --chart-row-pad: var(--chart-row-pad-axis);
+  }
+}
+
+@container opex-chart (width < 420px) {
+  .chart-canvas[data-rows] {
+    --chart-row-h: var(--chart-row-h-wrap3);
+  }
+}
+
 @container opex-chart (width < 600px) {
   .chart-canvas[data-kind='opex-stack'] {
     height: var(--chart-h-xl);
@@ -2802,6 +2883,13 @@ html[data-js] .opex-nojs {
   font-weight: var(--weight-semibold);
 }
 
+/* Yıl sekmesi alt satırı geniş ekranda tek satır; dar ekranda sarılır (yatay taşma olmaz). */
+@media (min-width: 64em) {
+  .opex-year-sub {
+    white-space: nowrap;
+  }
+}
+
 .opex-year-sub {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
@@ -2809,12 +2897,16 @@ html[data-js] .opex-nojs {
 }
 
 .opex-year-panel > .section:first-child {
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 /* İlk ekran (masaüstü): özet başlığı sıkışık, gösterge kutuları tek sırada, grafikler alçak. */
 .opex-year-panel > .section:first-child .section-head {
-  padding-top: var(--space-2);
+  padding-top: var(--space-1);
+}
+
+.opex-year-panel > .section:first-child .opex-kpis {
+  margin-top: var(--space-2);
 }
 
 @media (min-width: 64em) {
@@ -2828,10 +2920,18 @@ html[data-js] .opex-nojs {
   }
 }
 
-/* Masaüstü ilk ekran (≥ 1200 px: Kategoriler geniş sütunda tek satır etiketli): iki grafik alçak. */
+/* Masaüstü ilk ekran (≥ 1200 px: Kategoriler geniş sütunda tek satır etiketli): iki grafik alçak, aralıklar dar. */
 @media (min-width: 75em) {
-  [data-page='giderler'] .opex-year-panel > .section:first-child .chart-canvas {
+  [data-page='giderler'] .opex-year-panel > .section:first-child .chart-canvas:not([data-chart-failed]) {
     height: var(--chart-h-xs);
+  }
+
+  [data-page='giderler'] .opex-year-panel > .section:first-child .chart {
+    margin-top: var(--space-4);
+  }
+
+  [data-page='giderler'] .opex-year-panel > .section:first-child .chart figcaption {
+    margin-bottom: var(--space-2);
   }
 }
 

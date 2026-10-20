@@ -158,6 +158,8 @@ function HiringMenu({ current }: { current: string }) {
       offset={4}
       loop
       returnFocus
+      // Alçak ekranda (yatay telefon) panel görünür alana sığar ve kendi içinde kayar; sayfa kaymaz.
+      middlewares={{ flip: true, shift: true, size: { padding: 8 } }}
       transitionProps={{ transition: 'fade', duration, exitDuration: duration, timingFunction: 'var(--motion-ease-standard)' }}
       classNames={{ dropdown: 'navmenu', item: 'navmenu-item' }}
     >
@@ -221,9 +223,17 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
         <nav className="mainnav" aria-label="Ana gezinme">
           <div className="mainnav-rows">
             <ul className="mainnav-list">
-              <li>
+              <li className="mainnav-menu-li">
                 <HiringMenu current={current} />
               </li>
+              {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menü yerine düz bağlantılar: temel deneyim. */}
+              {[...TREE_NAV, HIRING_NAV].map((item) => (
+                <li key={`js-yok-${item.path}`} className="mainnav-nojs">
+                  <a className="mainnav-nojs-link" href={href(item.path)} aria-current={normalizePath(href(item.path)) === current ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
               {COMMON_NAV.map((item) => (
                 <li key={item.path}>
                   <NavItem {...item} current={current} />

@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Request, type Route } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Request, type Route } from '@playwright/test';
 import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_MIN_WAIT_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
 import { buildModel, exampleTohum, reply } from './opex-fixture';
 
@@ -10,6 +10,21 @@ const PATH = 'giderler/';
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbTestDeploymentId_1234567890abcdef/exec';
 const KEY = 'opex_test_anahtari_123';
 const MODEL = buildModel();
+
+/** SVG içindeki dolu metin kutularından 1 px'ten fazla kesişen çiftler (satır kutusu; Firefox'ta Chromium'dan 2 px yüksek). */
+const cakisanEtiketler = (svg: Locator) =>
+  svg.evaluate((el) => {
+    const boxes = [...el.querySelectorAll('text')].filter((t) => (t.textContent ?? '').trim()).map((t) => ({ t: t.textContent, b: t.getBoundingClientRect() }));
+    const out: string[] = [];
+    for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+      const p = boxes[i].b;
+      const q = boxes[j].b;
+      const w = Math.min(p.right, q.right) - Math.max(p.left, q.left);
+      const h = Math.min(p.bottom, q.bottom) - Math.max(p.top, q.top);
+      if (w > 1 && h > 1) out.push(`${boxes[i].t} ↔ ${boxes[j].t}`);
+    }
+    return out;
+  });
 const MODEL_2 = buildModel({ params: { kira_artis_2027: 0.5 }, giderler: undefined });
 const WIDTHS = [320, 360, 375, 390, 768, 1280];
 /** 2026 sekmesinin dönem toplamı (Ekim–Aralık): sayfanın kahraman sayısı. */
@@ -253,7 +268,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(3);
   });
 
-  for (const size of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
+  // Gerçek tarayıcı görünür alanları: 1280×800 ekranda ≈ 1280×720, 1440×900 ekranda ≈ 1440×800 (sekme ve adres çubuğu).
+  for (const size of [{ width: 1280, height: 720 }, { width: 1440, height: 800 }, { width: 1920, height: 960 }]) {
     test(`masaüstü ilk ekran ${size.width}×${size.height}: yıl seçimi, özet kutuları ve iki grafik kaydırmadan görünür`, async ({ page }) => {
       await page.setViewportSize(size);
       await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
@@ -270,6 +286,9 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       await expect(kategori).toBeVisible();
       await expect.poll(() => kategori.textContent()).toContain('Ofis & Lisans');
       expect(await kategori.textContent()).toContain('Faturalar');
+      // Kısa ilk ekran grafiğinde de satırlar etiket yüksekliğinden kısa değil.
+      await page.waitForTimeout(400);
+      expect(await cakisanEtiketler(kategori), 'Kategoriler etiketleri').toEqual([]);
     });
   }
 
@@ -291,6 +310,27 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(yillar.nth(1)).toHaveAttribute('aria-selected', 'true');
     await page.mouse.move(0, 0);
     expect(await stil(1)).toEqual(await stil(0));
+  });
+
+  test('çok ve uzun adlı kategori: kutu satır sayısına göre uzar, etiketler binmez (320, 1024, 1280, 1440)', async ({ page }) => {
+    test.setTimeout(90_000);
+    const cok = buildModel({
+      giderler: Array.from({ length: 16 }, (_, i) => [`Kalem ${i + 1}`, '', i % 2 ? 'Teknoloji' : 'Ofis ve işletme', `Uzun adlı kategori ${i + 1} (deneme)`, 'TRY', 1000 + i * 250, 'Genel', false, true, '', '']),
+    });
+    for (const width of [320, 1024, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.unrouteAll({ behavior: 'ignoreErrors' });
+      await mockScript(page, { ozet: `cok-${width}`, model: cok }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      // Grafik görünür alana gelince çizilir: önce kutu kaydırılır, sonra SVG beklenir.
+      const kutu = page.locator('.chart', { hasText: 'Kategoriler' }).first();
+      await kutu.scrollIntoViewIfNeeded();
+      const svg = kutu.locator('svg');
+      await expect.poll(() => svg.textContent(), { timeout: 10_000 }).toContain('Uzun adlı kategori 16');
+      await page.waitForTimeout(400);
+      expect(await cakisanEtiketler(svg), `${width} px`).toEqual([]);
+    }
   });
 
   test('eski sunucu (bekletmez): istekler 15 sn aralığa döner; sık istek yok', async ({ page }) => {
@@ -412,7 +452,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(Math.abs((await total()) - d.toplam.teknoloji)).toBeLessThan(0.05);
   });
 
-  test('yıl sekmeleri: 2026 Ekim–Aralık (3 ay), 2027 Ocak–Aralık (12 ay); her ay ayrı plan', async ({ page }) => {
+  test('yıl sekmeleri: 2026 Ekim–Aralık, 2027 Ocak–Aralık (dönem toplamıyla); her ay ayrı plan', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
@@ -420,8 +460,10 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const tabs = page.getByRole('tablist', { name: 'Yıl' }).getByRole('tab');
     await expect(tabs).toHaveCount(2);
     await expect(tabs.nth(0)).toContainText('2026');
-    await expect(tabs.nth(0)).toContainText('Ekim – Aralık · 3 ay');
-    await expect(tabs.nth(1)).toContainText('Ocak – Aralık · 12 ay');
+    await expect(tabs.nth(0)).toContainText(`Ekim – Aralık · ${hero26(MODEL)}`);
+    await expect(tabs.nth(1)).toContainText(`Ocak – Aralık · ${lira(donemOf(MODEL, 2027).toplam.toplam)}`);
+    // Ay sayısı özet kutusunda.
+    await expect(page.locator('.opex-hero-note')).toContainText('· 3 ay');
     const plan26 = page.getByRole('region', { name: 'Aylık gider planı · Ekim – Aralık 2026' }).locator('tbody th');
     await expect(plan26).toHaveText(['Ekim 2026', 'Kasım 2026', 'Aralık 2026', 'Dönem toplamı']);
     await tabs.nth(1).click();
@@ -850,7 +892,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
     expect(Math.min(...formHeights)).toBeGreaterThanOrEqual(44);
     await connect(page);
     const heights = await page
-      .locator('.opex-btn, .opex-toggle, .opex-year, .opex-live a, a[data-standalone]')
+      .locator('.opex-btn, .opex-toggle, .opex-year, .opex-icon-btn, a[data-standalone]')
       .evaluateAll((els) => els.filter((el) => el.getClientRects().length).map((el) => [el.textContent?.trim(), el.getBoundingClientRect().height] as const));
     expect(heights.length).toBeGreaterThan(8);
     expect(heights.filter(([, h]) => h < 44)).toEqual([]);

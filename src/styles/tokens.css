@@ -62,7 +62,15 @@
   --radius-pill: 999px;
 
   /* Grafik yükseklikleri ve geniş grafiklerin okunabilir en küçük genişliği (dar ekranda kendi kutusunda kayar) */
-  --chart-h-xs: 12rem;
+  --chart-h-xs: 11rem;
+  /* Kategori satırı: tek satır etiket 20 px; dar grafikte iki satır 44 px, telefonda üç satır 68 px
+     (Firefox satır kutusu Chromium'dan 2 px yüksek). İç pay: kutu dikey boşluğu 2×4 px + ızgara 2×4 px;
+     dar grafikte alttaki değer ekseni etiketi (≈ 28 px) de pay alır. */
+  --chart-row-h: 1.25rem;
+  --chart-row-h-wrap2: 2.75rem;
+  --chart-row-h-wrap3: 4.25rem;
+  --chart-row-pad: 1rem;
+  --chart-row-pad-axis: 3rem;
   --chart-h-sm: 16rem;
   --chart-h-md: 22rem;
   --chart-h-lg: 26rem;
@@ -249,7 +257,7 @@
   --viz-credit: #6250d6;
   --viz-track: #e8e6e0;
 
-  /* Seçili radyo işareti: seçili sekmenin koyu zemininde (#16181a) yeşil, ≥ 3:1 */
+  /* Seçili radyo işareti: sekme yüzeyinde (#ffffff, üzerine gelince #e4e1d8) yeşil, ≥ 3:1 */
   --radio-checked: #0b7a52;
 }
 
@@ -334,6 +342,6 @@
   --viz-credit: #9085e9;
   --viz-track: #2a2f34;
 
-  /* Seçili radyo işareti: koyu temada seçili sekme açık zeminde (#eceeef); koyu yeşil, ≥ 3:1 */
+  /* Seçili radyo işareti: koyu temada sekme yüzeyinde (#1a1d20, üzerine gelince #31363b) açık yeşil, ≥ 3:1 */
   --radio-checked: #2fc48a;
 }

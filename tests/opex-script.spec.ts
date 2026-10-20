@@ -690,6 +690,23 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       expect(yazimlar.slice(ilk).map((y) => `${y.sayfa}!${y.r}:${y.c}`)).toEqual(['Pano!13:1']);
     });
 
+    test('Pano gösterge kutusundaki değer elle değişirse geri yazılır; Pano’ya sığmayan satırlar notla belirtilir', () => {
+      const { ctx, yaz, oku, yazimlar } = yazici();
+      yaz();
+      const dogru = oku('Pano')![4][0];
+      const ss = (ctx.SpreadsheetApp as { getActiveSpreadsheet: () => { getSheetByName: (n: string) => { getRange: (r: number, c: number) => { setValues: (v: unknown[][]) => void } } } }).getActiveSpreadsheet();
+      ss.getSheetByName('Pano').getRange(5, 1).setValues([[1]]);
+      const n = yazimlar.length;
+      (ctx.onEdit as (e: unknown) => void)({ range: { getSheet: () => ({ getName: () => 'Pano', getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => 5, getLastRow: () => 5, getColumn: () => 1, getLastColumn: () => 1, getNumRows: () => 1 } });
+      expect(yazimlar.slice(n).map((y) => `${y.sayfa}!${y.r}:${y.c}`)).toEqual(['Pano!4:1']);
+      expect(oku('Pano')![4][0]).toBe(dogru);
+      // Kişiler bloğu 3 satırla sınırlanırsa (başlık + 1 kişi + not) kalan kişi sayısı yazılır.
+      (ctx.OPEX_PANO as Record<string, { enCok: number }>).kisi.enCok = 3;
+      yaz({ zorla: true });
+      const pano = oku('Pano')!;
+      expect(pano[133][0]).toMatch(/^… \d+ satır daha Pano’ya sığmadı/);
+    });
+
     test('teşvik tablosu Parametreler H:P’den okunur (ayrı Teşvikler sayfası yok); sonuç aynı', () => {
       const eski = loadScript(yeniYerlesim());
       const ayri = (eski.ctx.girdileriOku_ as () => { tesvikler: unknown[][] })().tesvikler;
@@ -705,37 +722,59 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       expect(m.tesvikler.map((t) => t.kod)).toContain('STD-PUAN');
     });
 
-    test('Kurulum: Teşvikler sayfası Parametreler H’ye taşınır, doğrulanır ve silinir; tutmazsa sayfa korunur', () => {
+    test('Kurulum: Teşvikler sayfası Parametreler H’ye taşınır, değer ve formülle doğrulanır, silinir; şüphede sayfa korunur', () => {
       const { ctx } = loadScript(SHEETS);
       vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
-      const kur = (bozuk: boolean) => {
+      type Tablo = unknown[][];
+      const kur = (o: { kaynak?: Tablo; formul?: Tablo; ek?: Tablo; hedefDolu?: boolean; kopyaBozuk?: boolean } = {}) => {
         const silinen: string[] = [];
         const kopya: string[] = [];
-        const kaynak = [['Kod', 'Teşvik'], ['STD-PUAN', 'Genel prim'], ['ENGELLI', 'Engelli']];
-        let hedef: unknown[][] = [];
+        const kaynak = o.kaynak ?? [['Kod', 'Teşvik', '', '', '', '', '', '', ''], ['STD-PUAN', 'Genel prim', '', 0.02, 0.02, '', '', true, ''], ['ENGELLI', 'Engelli', '', 1, 1, '', '', true, '']];
+        const formul = o.formul ?? kaynak.map((r, i) => r.map((_, j) => (i === 1 && j === 3 ? '=IF(p_sektor="İmalat",p_tesvik_puan_imalat,p_tesvik_puan_diger)' : '')));
+        let hedef: Tablo = kaynak.map((r) => r.map(() => ''));
+        if (o.hedefDolu) hedef[2][0] = 'ELLE';
+        let hedefFormul: Tablo = kaynak.map((r) => r.map(() => ''));
+        const ek = o.ek ?? [];
         const eski = {
           getName: () => 'Teşvikler',
           getLastRow: () => 2 + kaynak.length,
-          getRange: () => ({
-            getValues: () => kaynak.map((r) => [...r, ...Array(7).fill('')]),
-            copyTo: () => { kopya.push('kopya'); hedef = kaynak.map((r) => [...r, ...Array(7).fill('')]); if (bozuk) hedef[1][0] = 'BOZUK'; },
-          }),
+          getLastColumn: () => 9 + (ek[0]?.length ?? 0),
+          getRange: (r: number, c: number) =>
+            c > 9
+              ? { getValues: () => Array.from({ length: 2 + kaynak.length }, (_, i) => ek[i] ?? Array(ek[0]?.length ?? 0).fill('')) }
+              : {
+                  getValues: () => kaynak.map((x) => [...x]),
+                  getFormulas: () => formul.map((x) => [...x]),
+                  copyTo: () => {
+                    kopya.push('kopya');
+                    hedef = kaynak.map((x) => [...x]);
+                    hedefFormul = formul.map((x) => [...x]);
+                    if (o.kopyaBozuk) hedefFormul[1][3] = '=IF(p_sektor="İmalat",I5,p_tesvik_puan_diger)';
+                  },
+                },
         };
-        const param = { getRange: () => ({ getDisplayValue: () => (hedef.length ? 'Kod' : ''), getValues: () => hedef }) };
+        const param = { getRange: () => ({ getValues: () => hedef.map((x) => [...x]), getFormulas: () => hedefFormul.map((x) => [...x]) }) };
         const ss = { getSheetByName: (n: string) => (n === 'Teşvikler' ? eski : null), deleteSheet: (sh: { getName: () => string }) => void silinen.push(sh.getName()) };
         (ctx as Record<string, unknown>).SpreadsheetApp = { flush: () => undefined };
         const tasi = ctx.tesvikleriTasi_ as (ss: unknown, sh: unknown) => boolean;
         return { silinen, kopya, calistir: () => tasi(ss, param) };
       };
-      const iyi = kur(false);
+      const iyi = kur();
       expect(iyi.calistir()).toBe(true);
       expect(iyi.kopya).toEqual(['kopya']);
       expect(iyi.silinen).toEqual(['Teşvikler']);
-      const kotu = kur(true);
-      expect(() => kotu.calistir()).toThrow(/taşınamadı/);
-      expect(kotu.silinen, 'doğrulama tutmazsa eski sayfa silinmez').toEqual([]);
+      // Eski K:M (kodun yazdığı hesap sütunları) dolu olabilir: taşınır, silinir.
+      const km = kur({ ek: [['', 'Uygulanan kişi', 'Ekim tutar', '2026 yıllık'], ['', 'Örnek', 100, 1200]] });
+      expect(km.calistir()).toBe(true);
+      for (const [ad, durum, hata] of [
+        ['hedef H:P dolu', kur({ hedefDolu: true }), /H:P dolu ya da farklı/],
+        ['formül kayması', kur({ kopyaBozuk: true }), /taşınamadı/],
+        ['tablo dışında içerik (N)', kur({ ek: [['', '', '', '', 'Notum']] }), /tablo dışında/],
+      ] as const) {
+        expect(() => durum.calistir(), ad).toThrow(hata);
+        expect(durum.silinen, `${ad}: sayfa silinmez`).toEqual([]);
+      }
     });
-
     test('elle değiştirilen kod hücresi (Toplam satırı, Personel K:O) geri yazılır; girdi aynı olsa da', () => {
       const { ctx, yaz, oku, yazimlar } = yazici();
       yaz();

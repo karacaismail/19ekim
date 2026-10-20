@@ -92,7 +92,7 @@ var OpexMotor = (function () {
   /**
    * Teşvik ve destek tanımları. “Standart” olanlar uygun her kişiye parametreyle uygulanır; “Koşullu” olanlar yalnız
    * Personel sayfasında “Ek teşvik” sütununa kodu yazılan kişiye uygulanır. Birlikte uygulanabilirlik ve yürürlük
-   * mali müşavirle doğrulanmalıdır; değerler Teşvikler sayfasında değiştirilebilir.
+   * mali müşavirle doğrulanmalıdır; değerler Parametreler sayfasının teşvik tablosunda (H:P) değiştirilebilir.
    */
   var TESVIK_TURLERI = ['Puan indirimi', 'Aylık tutar', 'Asgari ücret üzerinden işveren payı', 'İşveren payı oranı'];
   var TESVIK_TANIMLARI = [
@@ -685,7 +685,7 @@ var OpexMotor = (function () {
       }
       var tesvik = metin(s.tesvik);
       if (tesvik && !tesvikKodlari[tesvik]) {
-        uyarilar.push('Personel “' + ad + '”: teşvik kodu “' + tesvik + '” Teşvikler sayfasında yok.');
+        uyarilar.push('Personel “' + ad + '”: teşvik kodu “' + tesvik + '” Parametreler’deki teşvik tablosunda yok.');
         tesvik = '';
       }
       var destek = metin(s.asgariDestek) || 'Otomatik';

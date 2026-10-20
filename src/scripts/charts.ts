@@ -733,7 +733,8 @@ function build(spec: ChartSpec, width: number): Opt {
       return {
         ...base(),
         legend: { show: false },
-        grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 8, bottom: 8, containLabel: true },
+        // Dikey pay --chart-row-pad ile aynı (kutu 2×4 px + ızgara 2×4 px); satır yüksekliği etikete kalır.
+        grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 4, bottom: 4, containLabel: true },
         tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${esc(p.name)}<br/>${label(p.value)}` },
         xAxis: { ...valueAxis(narrow), show: narrow },
         // Her kategori adı görünür (ECharts sığmayanı kendiliğinden gizlerdi).

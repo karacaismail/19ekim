@@ -350,7 +350,8 @@ function hesapBloklari_(ss, girdi, modelAl) {
 /** Düzenlenen alan bloğun alanına değiyor mu (blok sütunları; satır: tek satırlık blokta o satır, değilse bloğun altı da). */
 function alanCakisir_(b, alan) {
   if (!alan || alan.sayfa !== b.sayfa) return false;
-  var sonSatir = b.tekSatir ? b.satir : Infinity;
+  // Sınırlı blok (Pano) kendi satırlarında; tek satırlık blok o satırda; diğerleri bloğun altını da kapsar.
+  var sonSatir = b.enCok ? b.satir + b.enCok - 1 : b.tekSatir ? b.satir : Infinity;
   return alan.son >= b.satir && alan.satir <= sonSatir && alan.sonSutun >= b.sutun && alan.sutun <= b.sutun + b.genislik - 1;
 }
 
@@ -409,8 +410,14 @@ function hesaplariYaz_(secenek) {
     var degisen = [];
     bloklar.forEach(function (b) {
       var degerler = blokDegerleri_(b.uret(), b.genislik);
-      // Pano blokları kendi alanında kalır (sonraki bölüm ezilmez).
-      if (b.enCok && degerler.length > b.enCok) degerler = degerler.slice(0, b.enCok);
+      // Pano blokları kendi alanında kalır (sonraki bölüm ezilmez); sığmayan satır sayısı son satırda yazar.
+      if (b.enCok && degerler.length > b.enCok) {
+        var fazla = degerler.length - b.enCok + 1;
+        degerler = degerler.slice(0, b.enCok - 1);
+        var not = ["'… " + fazla + ' satır daha Pano’ya sığmadı (tamamı Giderler sayfasında)'];
+        while (not.length < b.genislik) not.push('');
+        degerler.push(not);
+      }
       // Konum da ize girer: satır eklenip Toplam satırı kayınca aynı değerler yeni yerine yazılır.
       var iz = ozetMetni_(b.satir + ':' + b.sutun + ':' + JSON.stringify(degerler), 16);
       if (izler[b.ad] !== iz || cakisan.indexOf(b.ad) >= 0) degisen.push({ b: b, degerler: degerler, iz: iz });
@@ -654,7 +661,7 @@ function girdileriOku_(sayfalar) {
   var ayrildi = !(tekSayfa && tekSayfa.getName() !== OPEX_SAYFA.teknoloji);
   var ofis = ayrildi ? hesapAlanlariniAyikla_(oku(ss.getSheetByName(OPEX_SAYFA.ofis))) : undefined;
   var personel = hesapAlanlariniAyikla_(oku(opexSayfasi_(ss, 'personel')), OPEX_HESAP_SUTUNLARI.personel);
-  // Parametreler sayfası tek okuma: A:F parametreler, H:P teşvikler (taşınmadıysa eski Teşvikler sayfası).
+  // Parametreler sayfası tek okuma: A:F parametreler, H:P teşvikler (Kurulum taşımadıysa eski Teşvikler sayfası).
   var pv = oku(ss.getSheetByName(OPEX_SAYFA.parametreler));
   var t = OPEX_TESVIK_SUTUN - 1;
   var tasindi = pv.length >= 3 && String((pv[2] || [])[t]).trim() === OpexMotor.BASLIKLAR.tesvikler.kod;
