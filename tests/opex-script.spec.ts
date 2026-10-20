@@ -146,10 +146,12 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(formul).toContain("'Düzenli Giderler'!I1:AL,'Personel Giderleri'!Q1:AT)");
     expect([...(ctx.izgaraBasliklari_ as () => string[])()]).toEqual(IZGARA_BASLIKLARI);
     expect((ctx.personelVarsayilani_ as (r: number, y: number) => string)(5, 2027)).toBe(
-      '=IF($C5="Asgari ücret",ROUND(p_asgari_brut_2027*(1-p_sgk_isci-p_issizlik_isci),2),IF($E5="Hayır",$D5,ROUND($D5*(1+p_zam_orani),2)))',
+      // N(): Tutar boşsa sayı 0 (boş metin “sayı ≥ 0” doğrulamasını bozardı; 17. satırdaki kurulum hatası).
+      '=IF($C5="Asgari ücret",ROUND(p_asgari_brut_2027*(1-p_sgk_isci-p_issizlik_isci),2),IF($E5="Hayır",N($D5),ROUND(N($D5)*(1+p_zam_orani),2)))',
     );
-    expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2026)).toBe('=$F4');
-    expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2027)).toMatch(/^=LET\(p,.*ROUND\(\$F4\*\(1\+IFS\(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF\(p="TRY",p_kur_artis_2027,0\)/);
+    expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2026)).toBe('=N($F4)');
+    expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2027)).toMatch(/^=LET\(p,.*ROUND\(N\(\$F4\)\*\(1\+IFS\(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF\(p="TRY",p_kur_artis_2027,0\)/);
+    expect((ctx.personelVarsayilani_ as (r: number, y: number) => string)(17, 2026)).toBe('=IF($C17="Asgari ücret",ROUND(p_asgari_brut_2026*(1-p_sgk_isci-p_issizlik_isci),2),N($D17))');
   });
 
   test('yeniden adlandırılmış sayfalar okunur (Düzenli Giderler, Personel Giderleri); eski adlar da çalışır', () => {

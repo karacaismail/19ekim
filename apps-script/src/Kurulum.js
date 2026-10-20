@@ -312,7 +312,9 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
         return formuller[r][j] || v === '' ? varsayilan(4 + r, ay < 3 ? 2026 : 2027) : v;
       });
     });
-    // insertCheckboxes tüm değerleri FALSE yapar; işaretler ve tutarlar hemen ardından geri yazılır.
+    // Eski doğrulamalar yazımı reddetmesin diye önce kaldırılır (sayı kuralı aşağıda yeniden konur); insertCheckboxes
+    // tüm değerleri FALSE yapar, işaretler ve tutarlar hemen ardından geri yazılır.
+    blok.clearDataValidations();
     sh.getRangeList(onay.map(function (o) { return o.offset(0, 0, n, 1).getA1Notation(); })).insertCheckboxes();
     blok.setValues(cikti);
   }
@@ -358,16 +360,18 @@ function onaySatiri_(r) {
 
 function personelVarsayilani_(r, yil) {
   var asgari = 'ROUND(p_asgari_brut_' + yil + '*(1-p_sgk_isci-p_issizlik_isci),2)';
-  var tutar = yil === 2026 ? '$D' + r : 'IF($E' + r + '="Hayır",$D' + r + ',ROUND($D' + r + '*(1+p_zam_orani),2))';
+  // N(): Tutar boşsa sayı 0 (boş metin “sayı ≥ 0” doğrulamasını bozar).
+  var d = 'N($D' + r + ')';
+  var tutar = yil === 2026 ? d : 'IF($E' + r + '="Hayır",' + d + ',ROUND(' + d + '*(1+p_zam_orani),2))';
   return '=IF($C' + r + '="Asgari ücret",' + asgari + ',' + tutar + ')';
 }
 
 /** Gider ayının varsayılan tutarı (satırın para biriminde): 2026 Tutar; 2027 artış esasına göre (Kur esaslı dövizde aynı). */
 function giderVarsayilani_(r, yil) {
-  if (yil === 2026) return '=$F' + r;
+  if (yil === 2026) return '=N($F' + r + ')';
   var para = 'IF(OR($E' + r + '="",$E' + r + '="TRY"),"TRY",$E' + r + ')';
   var esas = 'IF($G' + r + '="",IF(' + para + '="TRY","Genel","Kur"),$G' + r + ')';
-  return '=LET(p,' + para + ',a,' + esas + ',ROUND($F' + r + '*(1+IFS(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF(p="TRY",p_kur_artis_2027,0),a="Yok",0,TRUE,p_genel_artis_2027)),2))';
+  return '=LET(p,' + para + ',a,' + esas + ',ROUND(N($F' + r + ')*(1+IFS(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF(p="TRY",p_kur_artis_2027,0),a="Yok",0,TRUE,p_genel_artis_2027)),2))';
 }
 
 /** Yeni sayfa 26 sütunla açılır; hesap blokları daha geniştir. */
