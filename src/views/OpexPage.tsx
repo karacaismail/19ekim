@@ -732,10 +732,12 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         render: (r) => {
           if (r.kind !== 'total' && !etkin(r)?.[i]) {
             return (
-              <span className="opex-month-off">
-                <span aria-hidden="true">—</span>
-                <span className="visually-hidden">yok</span>
-              </span>
+              <Num>
+                <span className="opex-month-off">
+                  <span aria-hidden="true">—</span>
+                  <span className="visually-hidden">yok</span>
+                </span>
+              </Num>
             );
           }
           return (
