@@ -142,8 +142,10 @@ function girdileriOku_() {
   };
   // Giderler ve personel tüm sayfa okunur: motor sütunları başlık adıyla, ızgarayı ay başlıklarıyla bulur
   // (sütun silinse veya yer değişse de doğru okunur).
-  var teknoloji = oku(opexSayfasi_(ss, 'teknoloji'));
-  var ofis = oku(ss.getSheetByName(OPEX_SAYFA.ofis));
+  var tekSayfa = opexSayfasi_(ss, 'teknoloji');
+  var teknoloji = oku(tekSayfa);
+  // Ayırma bitmeden (teknoloji hâlâ eski adlı birleşik sayfa) OFİS okunmaz: ofis satırları iki kez sayılmasın.
+  var ofis = tekSayfa && tekSayfa.getName() !== OPEX_SAYFA.teknoloji ? [] : oku(ss.getSheetByName(OPEX_SAYFA.ofis));
   var personel = oku(opexSayfasi_(ss, 'personel'));
   return {
     parametreler: oku(ss.getSheetByName(OPEX_SAYFA.parametreler), 6),

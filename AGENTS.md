@@ -51,11 +51,13 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     Personel ay ay ₺), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (ikisi de girdi `A:G`, `H` boşluk, ızgara `I:AL`; motorda
     `giderler2` ve `giderler` kaynakları; Küme boşsa sayfanın grubu) ve “Giderler PERSONEL” (girdi `A:I`, hesap `K:O`,
     ızgara `Q:AT`). Eski “Düzenli Giderler” (eski “Bu ay ödendi / Dahil / Fatura / Not” ve hesap sütunları kaldırıldı →
-    ödeme takibi yok, `odeme.takip=false`) Küme’ye göre ikiye ayrılır (`giderSayfalariniAyir_`); eski adlar da okunur.
+    ödeme takibi yok, `odeme.takip=false`) Küme’ye göre ikiye ayrılır (`giderSayfalariniAyir_`: önce değerlerden gizli
+    yedek sekme, kopya geçici adla temizlenir, yarıda kalırsa yeniden çalıştırınca sürer; girdisi dolu “Toplam…” satırında
+    durur); ayırma bitmeden OFİS okunmaz (çift sayım yok); eski adlar da okunur.
     Sayfadaki kalem süzgeci: Hepsi, Ofis, Teknoloji, Personel. Veri ucu sayfanın
     tamamını okur (sütunlar başlıkla, ızgara ay başlıklarıyla bulunur). Son veri satırının altında “Toplam (₺)” satırı:
-    `=OPEX("gider-toplam"|"personel-toplam", …)` motor spill’i (aralık `INDEX(…,ROW()-1)` ile bir üst satırda biter, döngü
-    yok); motor “Toplam…” satırını kalem/kişi saymaz. Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);
+    `=OPEX("gider-toplam"|"personel-toplam", …)` motor spill’i (aralık `OFFSET(…,ROW()-1,…)` ile bir üst satırda biter,
+    döngü yok); motor “Toplam…” satırını kalem/kişi saymaz. Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);
     formül/kod sonucu hücreler mavi `#0000ff`; Pano gösterge kutuları sol hizalı, aralarında zemin boşluğu.
     Aylık ızgara (kullanıcı kararı 2026-10-20: 15 aylık plan = Ekim–Aralık 2026 + 2027’nin 12 ayı): her ay yan yana
     bir onay kutusu (“Eki 2026”; işaretsiz ay = o ay gider yok, bordroda matrah birikmez) ve bir tutar (“Eki 2026 tutar”).

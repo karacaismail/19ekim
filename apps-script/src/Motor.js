@@ -795,6 +795,8 @@ var OpexMotor = (function () {
         };
         giderler.push({
           satir: s.satir,
+          // Satır numarası sayfaya göredir; hangi gider sayfasından geldiği (teknoloji / ofis).
+          kaynak: kaynak.kume,
           kalem: kalem,
           hesap: metin(s.hesap),
           kume: kume,
@@ -1198,7 +1200,7 @@ var OpexMotor = (function () {
     if (ad === 'gider-sutun') {
       cikti.push([m.donem.ayAdi + ' ₺', '2027 ort. ₺']);
       var giderSatir = {};
-      m.giderler.forEach(function (x) { giderSatir[x.satir] = x; });
+      m.giderler.filter(function (x) { return x.kaynak !== 'ofis'; }).forEach(function (x) { giderSatir[x.satir] = x; });
       var sonG = satirlar.length ? satirlar[satirlar.length - 1].satir : baslikSatiri;
       for (var g = baslikSatiri + 1; g <= sonG; g++) {
         var gider = giderSatir[g] || null;
@@ -1229,6 +1231,7 @@ var OpexMotor = (function () {
     TESVIK_TURLERI: TESVIK_TURLERI,
     ENFLASYON_KAYNAGI: ENFLASYON_KAYNAGI,
     hesapla: hesapla,
+    kumeKodu: kumeKodu,
     rapor: rapor,
     erisimAcik: erisimAcik,
     // Testler için iç işlevler

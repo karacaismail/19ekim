@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { expect, test } from '@playwright/test';
+
+const describe = test.describe;
 import { buildInput, exampleTohum, izgara, IZGARA_BASLIKLARI, motor } from './opex-fixture';
 
 const OpexBasliklar = () => motor.BASLIKLAR;
@@ -182,28 +184,84 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(once.model.giderler.map((g) => g.kalem), 'ayırmadan önce').toEqual(['Araç', 'Kira']);
   });
 
-  test('Kurulum: Düzenli Giderler Küme’ye göre Giderler TEKNOLOJİ ve Giderler OFİS’e ayrılır (kopya; satırlar silinir)', () => {
-    const { ctx } = loadScript(SHEETS);
-    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
-    const ayir = ctx.giderSayfalariniAyir_ as (ss: unknown) => boolean;
-    type Sahte = { ad: string; kume: string[]; silinen: number[] };
-    const sayfalar: Record<string, Sahte> = {};
-    const yap = (ad: string, kume: string[]): Sahte => (sayfalar[ad] = { ad, kume, silinen: [] });
-    const sheetOf = (s: Sahte) => ({
-      getName: () => s.ad,
-      setName: (n: string) => { delete sayfalar[s.ad]; s.ad = n; sayfalar[n] = s; return sheetOf(s); },
-      getLastRow: () => 3 + s.kume.length,
-      getRange: (r: number, c: number, nr = 1) => ({ getValues: () => Array.from({ length: nr }, (_, i) => [c === 1 ? (s.kume[r - 4 + i] === 'T' ? 'Toplam (₺)' : `kalem ${r + i}`) : s.kume[r - 4 + i]]) }),
-      deleteRow: (r: number) => void s.silinen.push(r),
-      copyTo: () => sheetOf(yap('Düzenli Giderler kopyası', [...s.kume])),
+  describe('Kurulum: Düzenli Giderler → Giderler TEKNOLOJİ + Giderler OFİS (Küme’ye göre ayırma)', () => {
+    // Sahte tablo: satır = [Kalem, Hesap, Küme, Kategori, Para, Tutar, Artış]; işlemler (ad değişimi, kopya, silme) kaydedilir.
+    type Satir = unknown[];
+    type Sahte = { ad: string; rows: Satir[]; silinen: number[]; gizli: boolean; degerYapistir: boolean };
+    const BAS = ['Kalem', 'Hesap', 'Küme', 'Kategori', 'Para birimi', 'Tutar (aylık)', '2027 artış esası'];
+    const kur = (baslangic: Record<string, Satir[]>) => {
+      const { ctx } = loadScript(SHEETS);
+      vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+      const sayfalar: Record<string, Sahte> = {};
+      const islemler: string[] = [];
+      const yap = (ad: string, rows: Satir[]): Sahte => (sayfalar[ad] = { ad, rows: rows.map((r) => [...r]), silinen: [], gizli: false, degerYapistir: false });
+      const sheetOf = (sh: Sahte): unknown => ({
+        getName: () => sh.ad,
+        setName: (n: string) => { islemler.push(`ad ${sh.ad} → ${n}`); delete sayfalar[sh.ad]; sh.ad = n; sayfalar[n] = sh; return sheetOf(sh); },
+        getLastRow: () => 3 + sh.rows.length,
+        getRange: (r: number, c: number, nr = 1, nc = 1) => ({
+          getDisplayValues: () => [BAS.slice(c - 1, c - 1 + nc)],
+          getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => sh.rows[r - 4 + i]?.[c - 1 + j] ?? '')),
+          getFormulas: () => Array.from({ length: nr }, () => Array.from({ length: nc }, () => '')),
+        }),
+        getDataRange: () => ({ copyTo: () => void (sh.degerYapistir = true) }),
+        hideSheet: () => void (sh.gizli = true),
+        deleteRow: (r: number) => { islemler.push(`sil ${sh.ad} ${r}`); sh.silinen.push(r); sh.rows.splice(r - 4, 1); },
+        copyTo: () => { const k = yap(`${sh.ad} kopyası`, sh.rows); islemler.push(`kopya ${sh.ad}`); return sheetOf(k); },
+      });
+      Object.entries(baslangic).forEach(([ad, rows]) => yap(ad, rows));
+      const ss = {
+        getSheetByName: (n: string) => (sayfalar[n] ? sheetOf(sayfalar[n]) : null),
+        deleteSheet: (sh: { getName: () => string }) => { islemler.push(`sayfa sil ${sh.getName()}`); delete sayfalar[sh.getName()]; },
+      };
+      const ayir = () => (ctx.giderSayfalariniAyir_ as (ss: unknown) => boolean)(ss);
+      const kalemler = (ad: string) => sayfalar[ad]?.rows.map((r) => r[0]);
+      return { ayir, sayfalar, islemler, kalemler };
+    };
+    const T = (ad: string, kume = 'Teknoloji') => [ad, '', kume, 'Yapay Zekâ', 'USD', 100, 'Kur'];
+    const O = (ad: string, kume = 'Ofis ve işletme') => [ad, '', kume, 'Kira', 'TRY', 1000, 'Kira'];
+    const TOPLAM = ['Toplam (₺)', '', '', '', '', '', ''];
+
+    test('Küme’ye göre ayrılır; değerlerden gizli yedek alınır; ikinci kez dokunmaz', () => {
+      const k = kur({ 'Düzenli Giderler': [T('ChatGPT'), T('AWS'), O('Kira'), O('Elektrik'), TOPLAM] });
+      expect(k.ayir()).toBe(true);
+      expect(k.kalemler('Giderler TEKNOLOJİ')).toEqual(['ChatGPT', 'AWS']);
+      expect(k.kalemler('Giderler OFİS')).toEqual(['Kira', 'Elektrik']);
+      const yedek = Object.values(k.sayfalar).find((x) => /^Yedek/.test(x.ad))!;
+      expect(yedek.rows.length, 'yedek tüm satırları taşır').toBe(5);
+      expect([yedek.gizli, yedek.degerYapistir]).toEqual([true, true]);
+      expect(k.ayir(), 'ikinci kez').toBe(false);
     });
-    yap('Düzenli Giderler', ['Teknoloji', 'Teknoloji', 'Ofis ve işletme', 'Ofis ve işletme', 'T']);
-    const ss = { getSheetByName: (n: string) => (sayfalar[n] ? sheetOf(sayfalar[n]) : null) };
-    expect(ayir(ss)).toBe(true);
-    expect(Object.keys(sayfalar).sort()).toEqual(['Giderler OFİS', 'Giderler TEKNOLOJİ']);
-    expect(sayfalar['Giderler TEKNOLOJİ'].silinen, 'ofis satırları ve toplam; alttan üste').toEqual([8, 7, 6]);
-    expect(sayfalar['Giderler OFİS'].silinen, 'teknoloji satırları ve toplam').toEqual([8, 5, 4]);
-    expect(ayir(ss), 'ikinci kez: dokunmaz').toBe(false);
+
+    test('“Toplam…” adlı ama girdisi dolu satır varsa hiçbir şeye dokunmadan durur', () => {
+      const k = kur({ 'Düzenli Giderler': [T('ChatGPT'), ['Toplam bakım sözleşmesi', '', 'Ofis ve işletme', 'Diğer', 'TRY', 500, 'Genel']] });
+      expect(() => k.ayir()).toThrow(/Toplam bakım sözleşmesi/);
+      expect(k.islemler).toEqual([]);
+    });
+
+    test('Küme motorla aynı sınıflanır (İşletme → ofis, boş → teknoloji); Kalem’i boş ama dolu satır tek sayfaya gider', () => {
+      const k = kur({ 'Düzenli Giderler': [T('ChatGPT', ''), O('Aidat', 'Genel işletme'), ['', 'not', 'Ofis ve işletme', '', 'TRY', 50, ''], ['', '', '', '', '', '', '']] });
+      k.ayir();
+      expect(k.kalemler('Giderler TEKNOLOJİ')).toEqual(['ChatGPT', '']);
+      expect(k.kalemler('Giderler OFİS')).toEqual(['Aidat', '', '']);
+      expect(k.sayfalar['Giderler OFİS'].rows[1][1], 'yarım satır yalnız ofiste').toBe('not');
+    });
+
+    test('yarıda kalmış ayırma devam eder: OFİS hazır, kaynak temizlenmemişse yalnız kaynak temizlenip adlandırılır', () => {
+      const k = kur({ 'Düzenli Giderler': [T('ChatGPT'), O('Kira')], 'Giderler OFİS': [O('Kira')] });
+      expect(k.ayir()).toBe(true);
+      expect(k.islemler.filter((x) => x.startsWith('kopya ')), 'yeni kopya yok').toEqual(['kopya Düzenli Giderler']);
+      expect(k.kalemler('Giderler OFİS')).toEqual(['Kira']);
+      expect(k.kalemler('Giderler TEKNOLOJİ')).toEqual(['ChatGPT']);
+    });
+
+    test('elle açılmış boş “Giderler OFİS” silinip ayırma yapılır', () => {
+      const k = kur({ 'Düzenli Giderler': [T('ChatGPT'), O('Kira')], 'Giderler OFİS': [] });
+      expect(k.ayir()).toBe(true);
+      expect(k.islemler).toContain('sayfa sil Giderler OFİS');
+      expect(k.kalemler('Giderler OFİS')).toEqual(['Kira']);
+      expect(k.kalemler('Giderler TEKNOLOJİ')).toEqual(['ChatGPT']);
+    });
   });
 
   test('yeni yerleşim: Düzenli Giderler A:G + boşluk + I:AL ızgara ve Toplam satırı; Personel Q:AT; tüm sayfa okunur', () => {

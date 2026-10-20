@@ -63,7 +63,7 @@ function kurulumAdimlari_(ss) {
   // (gizli eski sütunlar ayırmadan önce kaldırılır).
   var eskiPersonel = opexSayfasi_(ss, 'personel');
   if (eskiPersonel && eskiPersonel.getName() !== OPEX_SAYFA.personel) eskiPersonel.setName(OPEX_SAYFA.personel);
-  var birlesik = !ss.getSheetByName(OPEX_SAYFA.teknoloji) && !ss.getSheetByName(OPEX_SAYFA.ofis) ? opexSayfasi_(ss, 'teknoloji') : null;
+  var birlesik = !ss.getSheetByName(OPEX_SAYFA.teknoloji) ? opexSayfasi_(ss, 'teknoloji') : null;
   if (birlesik) eskiGiderSutunlariniKaldir_(birlesik);
   giderSayfalariniAyir_(ss);
   var sira = [OPEX_SAYFA.pano, OPEX_SAYFA.hepsi, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.personel, OPEX_SAYFA.bordro, OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.hesap];
@@ -650,37 +650,77 @@ var OPEX_GIDER_METNI = {
   },
 };
 
+/** Küme sütunu → 'teknoloji' / 'ofis' (motorla aynı kural; boş ya da tanınmayan teknoloji sayılır). */
 function kumeAdi_(v) {
-  var t = String(v).trim().toLocaleLowerCase('tr-TR');
-  return t === 'teknoloji' ? 'teknoloji' : t.indexOf('ofis') === 0 ? 'ofis' : '';
+  return OpexMotor.kumeKodu(v) === 'ofis' ? 'ofis' : 'teknoloji';
+}
+
+var OPEX_GECICI_OFIS = 'Giderler OFİS (hazırlanıyor)';
+var OPEX_YEDEK = 'Yedek: Düzenli Giderler (2026-10-20)';
+
+/**
+ * Bir gider sayfasının veri satırları: boş (A:G hepsi boş), “Toplam…” satırı ve Küme. Başlıklar beklenen değilse ya da
+ * adı “Toplam” ile başlayan bir satırın girdi sütunlarında elle yazılmış değer varsa hiçbir şeye dokunmadan durur.
+ */
+function giderSatirlari_(sh) {
+  var son = sh.getLastRow();
+  if (son < 4) return [];
+  var b = OpexMotor.BASLIKLAR.giderler;
+  var bas = sh.getRange(3, 1, 1, 7).getDisplayValues()[0];
+  if (bas[0] !== b.kalem || bas[2] !== b.kume) {
+    throw new Error(sh.getName() + ': 3. satır başlıkları beklenen değil (A3 “' + b.kalem + '”, C3 “' + b.kume + '”); ayırma yapılmadı.');
+  }
+  var aralik = sh.getRange(4, 1, son - 3, 7);
+  var f = aralik.getFormulas();
+  return aralik.getValues().map(function (r, i) {
+    var toplam = toplamSatiriMi_(r[0]);
+    if (toplam && r.slice(1).some(function (v, j) { return v !== '' && !f[i][j + 1]; })) {
+      throw new Error(sh.getName() + ': ' + (4 + i) + '. satır “' + r[0] + '” toplam satırı gibi adlandırılmış ama girdisi var; ayırma yapılmadı. Satırı yeniden adlandırın.');
+    }
+    return { satir: 4 + i, bos: r.every(function (v) { return v === ''; }), toplam: toplam, kume: kumeAdi_(r[2]) };
+  });
+}
+
+/** Sayfada yalnız `kalan` kümesinin satırları kalır; öbür kümenin satırları ve toplam satırı alttan üste silinir. */
+function giderSatirlariniTemizle_(sh, satirlar, kalan) {
+  for (var i = satirlar.length - 1; i >= 0; i--) {
+    var s = satirlar[i];
+    if (!s.bos && (s.toplam || s.kume !== kalan)) sh.deleteRow(s.satir);
+  }
 }
 
 /**
  * Kullanıcı kararı (2026-10-20): Düzenli Giderler (teknoloji + ofis birlikte) Küme sütununa göre Giderler TEKNOLOJİ ve
- * Giderler OFİS’e ayrılır. Sayfa yeniden adlandırılır ve kopyalanır (işaretler, elle yazılmış tutarlar, formüller ve
- * biçimler korunur); her sayfadan öbür kümenin satırları ve eski toplam satırı silinir. İki sayfa varsa dokunmaz.
+ * Giderler OFİS’e ayrılır. İşaretler, elle yazılmış tutarlar, formüller ve biçimler kopyayla korunur. Önce değerlerden
+ * gizli bir yedek sekme alınır. Sıra yarıda kesilse de yeniden çalıştırılınca kaldığı yerden sürer: kopya geçici adla
+ * temizlenir, sonra “Giderler OFİS” olur; en son kaynak temizlenip “Giderler TEKNOLOJİ” olur. TEKNOLOJİ varsa dokunmaz.
  */
 function giderSayfalariniAyir_(ss) {
-  if (ss.getSheetByName(OPEX_SAYFA.teknoloji) || ss.getSheetByName(OPEX_SAYFA.ofis)) return false;
+  if (ss.getSheetByName(OPEX_SAYFA.teknoloji)) return false;
   var kaynak = null;
   OPEX_ESKI_AD.teknoloji.forEach(function (ad) { kaynak = kaynak || ss.getSheetByName(ad); });
   if (!kaynak) return false;
-  var tek = kaynak.setName(OPEX_SAYFA.teknoloji);
-  var ofis = tek.copyTo(ss).setName(OPEX_SAYFA.ofis);
-  var temizle = function (sh, kalan) {
-    var son = sh.getLastRow();
-    if (son < 4) return;
-    var ad = sh.getRange(4, 1, son - 3, 1).getValues();
-    var kume = sh.getRange(4, 3, son - 3, 1).getValues();
-    for (var i = ad.length - 1; i >= 0; i--) {
-      var a = String(ad[i][0]).trim();
-      if (a === '') continue;
-      var k = kumeAdi_(kume[i][0]) || 'teknoloji';
-      if (toplamSatiriMi_(a) || k !== kalan) sh.deleteRow(4 + i);
-    }
-  };
-  temizle(tek, 'teknoloji');
-  temizle(ofis, 'ofis');
+  var satirlar = giderSatirlari_(kaynak);
+  if (!ss.getSheetByName(OPEX_YEDEK)) {
+    var yedek = kaynak.copyTo(ss).setName(OPEX_YEDEK);
+    var hepsi = yedek.getDataRange();
+    hepsi.copyTo(hepsi, { contentsOnly: true });
+    yedek.hideSheet();
+  }
+  var ofis = ss.getSheetByName(OPEX_SAYFA.ofis);
+  if (ofis && giderSatirlari_(ofis).every(function (s) { return s.bos; })) {
+    ss.deleteSheet(ofis);
+    ofis = null;
+  }
+  if (!ofis) {
+    var gecici = ss.getSheetByName(OPEX_GECICI_OFIS);
+    if (gecici) ss.deleteSheet(gecici);
+    gecici = kaynak.copyTo(ss).setName(OPEX_GECICI_OFIS);
+    giderSatirlariniTemizle_(gecici, satirlar, 'ofis');
+    gecici.setName(OPEX_SAYFA.ofis);
+  }
+  giderSatirlariniTemizle_(kaynak, giderSatirlari_(kaynak), 'teknoloji');
+  kaynak.setName(OPEX_SAYFA.teknoloji);
   return true;
 }
 
@@ -699,7 +739,7 @@ function giderleriKur_(ss, k) {
   if (n === 0 && typeof OPEX_TOHUM !== 'undefined' && OPEX_TOHUM.giderler && OPEX_TOHUM.giderler.length) {
     // Tohumun eski 11 sütunundan yalnız girdi sütunları (A:G), bu sayfanın kümesi; “Dahil = hayır” satırları alınmaz.
     var tohum = OPEX_TOHUM.giderler
-      .filter(function (r) { return r[8] !== false && (kumeAdi_(r[2]) || 'teknoloji') === k; })
+      .filter(function (r) { return r[8] !== false && kumeAdi_(r[2]) === k; })
       .map(function (r) { return r.slice(0, OPEX_GIRDI_SUTUN[k]); });
     if (tohum.length) sh.getRange(4, 1, tohum.length, OPEX_GIRDI_SUTUN[k]).setValues(tohum);
     n = tohum.length;
@@ -730,25 +770,27 @@ function hepsiKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.hepsi) || ss.insertSheet(OPEX_SAYFA.hepsi);
   sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).forEach(function (p) { p.remove(); });
   sh.clear();
-  sutunGarantile_(sh, 3 + 15 + 1);
+  // Ay sayısı rapor ayından Aralık 2027’ye: en çok 24 ay (+ 3 başlık + toplam).
+  sutunGarantile_(sh, 3 + 24 + 1);
   temelStil_(sh);
   sh.getRange('A1').setValue('Giderler Hepsi: ofis, teknoloji ve personel (ay ay, ₺)').setFontSize(18).setFontWeight('bold');
   sh.getRange('A2').setValue('Kod hesaplar; değişiklik “' + OPEX_SAYFA.ofis + '”, “' + OPEX_SAYFA.teknoloji + '” ve “' + OPEX_SAYFA.personel +
     '” sayfalarından yapılır. Gider: satırın kuruyla ₺, yalnız işaretli aylar; personel: işveren maliyeti (freelancer: fatura).').setFontColor(OPEX_STIL.ikincil);
   sh.setRowHeight(1, 40);
   sh.getRange('A3').setFormula(opexFormulu_('hepsi'));
-  sh.getRange(3, 1, 1, 19).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
-  sh.getRange(3, 4, 1, 16).setHorizontalAlignment('right');
-  sh.getRange(4, 4, 120, 16).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
-  sh.getRange(4, 1, 120, 3).setFontColor(OPEX_STIL.formul);
+  sh.getRange(3, 1, 1, 28).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
+  sh.getRange(3, 4, 1, 25).setHorizontalAlignment('right');
+  sh.getRange(4, 4, 300, 25).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
+  sh.getRange(4, 1, 300, 3).setFontColor(OPEX_STIL.formul);
   sh.setFrozenRows(3);
   sh.setFrozenColumns(2);
   sh.setColumnWidth(1, 110);
   sh.setColumnWidth(2, 260);
   sh.setColumnWidth(3, 170);
-  for (var c = 4; c <= 19; c++) sh.setColumnWidth(c, 120);
+  for (var c = 4; c <= 28; c++) sh.setColumnWidth(c, 120);
+  // Grup ara toplamı ve genel toplam satırları (Ayrıntı boş): kalın, yüzey tonu.
   sh.setConditionalFormatRules([
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=REGEXMATCH($B4,"toplamı$")').setBold(true).setBackground(OPEX_STIL.hesap).setRanges([sh.getRange(4, 1, 120, 19)]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($C4="",REGEXMATCH($B4," toplamı$"))').setBold(true).setBackground(OPEX_STIL.hesap).setRanges([sh.getRange(4, 1, 300, 28)]).build(),
   ]);
   korumaUyari_(sh, 'Giderler Hepsi kodla hesaplanır; değişiklik gider ve personel sayfalarından yapılır.');
   sh.setTabColor(OPEX_STIL.murekkep);
