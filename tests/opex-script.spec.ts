@@ -800,6 +800,49 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       expect(r2.model.kisiler.length).toBe(r.model.kisiler.length);
     });
 
+    test('bekleyen istek: değişiklik görülünce model önbellekten verilir (girdi yeniden okunmaz); erişim kapandıysa veri yok', () => {
+      const onbellek = new Map<string, string>();
+      const acik = yeniYerlesim();
+      acik.Parametreler = buildInput({ params: { erisim: 'Herkese açık' } }).parametreler!;
+      const s = yazici(acik, { onbellek });
+      const ilk = s.post(JSON.stringify({}));
+      expect(ilk.ok).toBe(true);
+      const g = s.ctx as Record<string, unknown>;
+      const oku = g.girdileriOku_ as (x?: unknown) => unknown;
+      let okuma = 0;
+      g.girdileriOku_ = (x?: unknown) => { okuma += 1; return oku(x); };
+      const util = s.ctx.Utilities as { sleep: (ms: number) => void };
+      const uyu = util.sleep;
+      let uyku = 0;
+      const degistir = (params: Record<string, unknown>) => {
+        util.sleep = (ms) => {
+          uyu(ms);
+          uyku += 1;
+          if (uyku === 2) {
+            const ofis = s.sheets['Giderler OFİS'].map((r) => [...r]);
+            ofis[3][5] = Number(ofis[3][5]) + 1000;
+            s.sheets['Giderler OFİS'] = ofis;
+            s.sheets.Parametreler = buildInput({ params }).parametreler!;
+            s.yaz();
+          }
+        };
+      };
+      degistir({ erisim: 'Herkese açık' });
+      const once = okuma;
+      const r = s.post(JSON.stringify({ ozet: ilk.ozet, bekle: true })) as unknown as { ozet: string; bekledi: boolean; model: { giderler: { kalem: string; tl: number }[] } };
+      expect(r.bekledi).toBe(true);
+      expect(r.ozet).not.toBe(ilk.ozet);
+      expect(r.model.giderler.length).toBeGreaterThan(0);
+      // İsteğin başındaki okuma + düzenlemenin (yazım) okuması; değişiklikten sonra yeniden okuma yok.
+      expect(okuma - once).toBe(2);
+      // Erişim “Anahtarla” yapılınca bekleyen anahtarsız istek veri almaz.
+      uyku = 0;
+      degistir({ erisim: 'Anahtarla' });
+      const kapali = s.post(JSON.stringify({ ozet: r.ozet, bekle: true }));
+      expect(kapali).toMatchObject({ ok: false, hata: 'yetki' });
+      expect(kapali.model).toBeUndefined();
+    });
+
     test('okuma sınırı (300 satır) dolarsa sayfanın tüm dolu alanı okunur', () => {
       const sheets = yeniYerlesim();
       const g = sheets['Giderler TEKNOLOJİ'];

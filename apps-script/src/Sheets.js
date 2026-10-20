@@ -153,7 +153,7 @@ var OPEX_MODEL_PARCA = 45000;
  * Hesaplanan modeli (JSON) önbelleğe yazar ve yeni özeti duyurur: bekleyen web isteği değişikliği görünce modeli
  * önbellekten alır (girdileri yeniden okumaz). Önbellek yoksa ya da yazılamazsa istek modeli kendisi hesaplar.
  */
-function modelDuyur_(anahtar, ozet, model) {
+function modelDuyur_(anahtar, ozet, model, acik) {
   var c = onbellek_();
   if (c) {
     try {
@@ -161,7 +161,8 @@ function modelDuyur_(anahtar, ozet, model) {
       var degerler = {};
       var n = Math.ceil(metin.length / OPEX_MODEL_PARCA);
       for (var i = 0; i < n; i++) degerler[OPEX_MODEL_ONBELLEK + '_' + i] = metin.slice(i * OPEX_MODEL_PARCA, (i + 1) * OPEX_MODEL_PARCA);
-      degerler[OPEX_MODEL_ONBELLEK] = JSON.stringify({ anahtar: anahtar, parca: n, uzunluk: metin.length });
+      // Erişim (acik) de saklanır: bekleyen istek modeli girdiyi yeniden okumadan verirken erişimi yeniden denetler.
+      degerler[OPEX_MODEL_ONBELLEK] = JSON.stringify({ anahtar: anahtar, ozet: ozet, acik: !!acik, parca: n, uzunluk: metin.length });
       c.putAll(degerler, 21600);
     } catch (hata) {
       console.log('model önbelleği: ' + hata);
@@ -170,21 +171,27 @@ function modelDuyur_(anahtar, ozet, model) {
   ozetDuyur_(ozet);
 }
 
-/** Önbellekteki model (JSON metni) bu yazım anahtarına aitse; değilse ya da eksikse null. */
-function modelOnbellekten_(anahtar) {
+/** Önbellekteki son model: {bilgi: {anahtar, ozet, acik}, metin} ya da (yoksa, eksikse) null. */
+function onbellektekiModel_() {
   var c = onbellek_();
   if (!c) return null;
   try {
     var bilgi = JSON.parse(c.get(OPEX_MODEL_ONBELLEK) || 'null');
-    if (!bilgi || bilgi.anahtar !== anahtar || !(bilgi.parca > 0)) return null;
+    if (!bilgi || !(bilgi.parca > 0)) return null;
     var adlar = [];
     for (var i = 0; i < bilgi.parca; i++) adlar.push(OPEX_MODEL_ONBELLEK + '_' + i);
     var parcalar = c.getAll(adlar);
     var metin = adlar.map(function (ad) { return parcalar[ad] || ''; }).join('');
-    return metin.length === bilgi.uzunluk ? metin : null;
+    return metin.length === bilgi.uzunluk ? { bilgi: bilgi, metin: metin } : null;
   } catch (hata) {
     return null;
   }
+}
+
+/** Önbellekteki model (JSON metni) bu yazım anahtarına aitse; değilse ya da eksikse null. */
+function modelOnbellekten_(anahtar) {
+  var m = onbellektekiModel_();
+  return m && m.bilgi.anahtar === anahtar ? m.metin : null;
 }
 
 /** Betik kilidi: alınırsa kilit, meşgulse false; kilit hizmeti yoksa null (kilitsiz sürer). */
@@ -363,7 +370,7 @@ function hesaplariYaz_(secenek) {
       if (izler[b.ad] !== iz || cakisan.indexOf(b.ad) >= 0) degisen.push({ b: b, degerler: degerler, iz: iz });
     });
     // Sayfa için model önbelleğe, sonra yeni özet duyurulur: bekleyen istek Sheets yazımını beklemeden modeli alır.
-    modelDuyur_(anahtar, ozet, modelAl());
+    modelDuyur_(anahtar, ozet, modelAl(), OpexMotor.erisimAcik(girdi.parametreler));
     gecen('hesap');
     var props = PropertiesService.getScriptProperties();
     var degisim = degisimKaydi_(p, ozet);
@@ -473,14 +480,8 @@ function doPost(e) {
   var girdi = girdileriOku_();
   var p = ozellikler_();
   // Parametreler → “Sayfa erişimi”: Herkese açık ise anahtar istenmez (kullanıcı kararı); değilse anahtar zorunlu.
-  if (!OpexMotor.erisimAcik(girdi.parametreler)) {
-    var gercek = p[OPEX_ANAHTAR_OZELLIGI];
-    if (!gercek) return json_({ ok: false, hata: 'kurulum', mesaj: 'Erişim anahtarı tanımlı değil; Sheets’te OPEX → Kurulum / onarım çalıştırın.' });
-    // Bekleme yok: anahtar ≈ 244 bit rastgeledir; bekleme yalnız eşzamanlı çalışma kotasını tüketirdi.
-    if (typeof istek.anahtar !== 'string' || !sabitZamanliEsit_(istek.anahtar, gercek)) {
-      return json_({ ok: false, hata: 'yetki', mesaj: 'Bu veri ucu erişim anahtarı istiyor ya da anahtar geçersiz.' });
-    }
-  }
+  var yetkisiz = erisimDenetle_(OpexMotor.erisimAcik(girdi.parametreler), istek, p);
+  if (yetkisiz) return yetkisiz;
   var ozet = ozetAl_(girdi);
   var simdi = new Date();
   // Kur (GOOGLEFINANCE) değişince onEdit tetiklenmez: Sheets hesapları burada yazılır (girdi kilitle yeniden okunur;
@@ -495,14 +496,26 @@ function doPost(e) {
     }
   }
   var bekledi = false;
+  var hazir = null;
   if (istek.bekle === true && istek.ozet && istek.ozet === ozet) {
     var b = degisimiBekle_(ozet, bas);
     bekledi = b.bekledi;
     if (b.degisti) {
       tazele = true;
-      girdi = girdileriOku_();
-      ozet = ozetAl_(girdi);
       simdi = new Date();
+      // Düzenleme modeli önbelleğe koyduysa girdi yeniden okunmaz; erişim o modelin girdisine göre yeniden denetlenir.
+      var son = b.bekledi ? onbellektekiModel_() : null;
+      if (son && son.bilgi.ozet && son.bilgi.anahtar === yazimAnahtari_(son.bilgi.ozet, simdi)) {
+        var kapali = erisimDenetle_(son.bilgi.acik, istek, p);
+        if (kapali) return kapali;
+        ozet = son.bilgi.ozet;
+        hazir = son.metin;
+      } else {
+        girdi = girdileriOku_();
+        ozet = ozetAl_(girdi);
+        var yeniErisim = erisimDenetle_(OpexMotor.erisimAcik(girdi.parametreler), istek, p);
+        if (yeniErisim) return yeniErisim;
+      }
     }
   }
   var degisti = degisimiKaydet_(ozet, tazele ? null : p);
@@ -513,10 +526,22 @@ function doPost(e) {
   }
   temel.tablo = SpreadsheetApp.getActiveSpreadsheet().getUrl();
   // Düzenlemede hesaplanan model önbellekteyse olduğu gibi gönderilir (girdi yeniden hesaplanmaz).
-  var hazir = modelOnbellekten_(yazimAnahtari_(ozet, simdi));
+  hazir = hazir || modelOnbellekten_(yazimAnahtari_(ozet, simdi));
   if (hazir) return ContentService.createTextOutput(JSON.stringify(temel).slice(0, -1) + ',"model":' + hazir + '}').setMimeType(ContentService.MimeType.JSON);
   temel.model = OpexMotor.hesapla(girdi, { simdi: simdi });
   return json_(temel);
+}
+
+/** Erişim denetimi: açık değilse geçerli anahtar ister; uygunsa null, değilse hata yanıtı. */
+function erisimDenetle_(acik, istek, p) {
+  if (acik) return null;
+  var gercek = p[OPEX_ANAHTAR_OZELLIGI];
+  if (!gercek) return json_({ ok: false, hata: 'kurulum', mesaj: 'Erişim anahtarı tanımlı değil; Sheets’te OPEX → Kurulum / onarım çalıştırın.' });
+  // Bekleme yok: anahtar ≈ 244 bit rastgeledir; bekleme yalnız eşzamanlı çalışma kotasını tüketirdi.
+  if (typeof istek.anahtar !== 'string' || !sabitZamanliEsit_(istek.anahtar, gercek)) {
+    return json_({ ok: false, hata: 'yetki', mesaj: 'Bu veri ucu erişim anahtarı istiyor ya da anahtar geçersiz.' });
+  }
+  return null;
 }
 
 function json_(nesne) {
