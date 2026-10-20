@@ -40,9 +40,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
-  - `/giderler/` OPEX (kullanıcı kararı 2026-10-20): üç grup — teknoloji, ofis ve işletme, personel (kalemler tablosu
-    üç grubu süzer; “Tümü” toplamı toplam OPEX); rapor ayından başlayan 12 aylık gider planı (her ay ayrı: 2026 ayları
-    2026, 2027 ayları zamlı 2027 hesabı); bu ayın kalemleri, netten brüte aylık bordro (kümülatif GV, asgari ücret istisnası, SGK tavanı), SGK teşvikleri, 2027 zam
+  - `/giderler/` OPEX (kullanıcı kararı 2026-10-20): özetin yerinde iki büyük yıl sekmesi (APG Tabs) — **2026** (rapor
+    ayından Aralık’a: Ekim–Aralık) ve **2027** (12 ay); altındaki her bölüm seçili yılın dönemine göre (`donemOf`,
+    `kisiDonem`): özet, aylık plan (her ay ayrı), kalemler (üç grup — teknoloji, ofis ve işletme, personel; “Tümü” dönem
+    OPEX’i), personel giderleri, netten brüte aylık bordro (kümülatif GV, asgari ücret istisnası, SGK tavanı), SGK teşvikleri, 2027 zam
     (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
     uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa, görünürken 15 sn’de bir özet sorar (`src/data/opex.ts`).
     Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.

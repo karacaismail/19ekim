@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
-import { OPEX_ENDPOINT, OPEX_POLL_MS, OPEX_STORE_KEY } from '../src/data/opex';
+import { OPEX_ENDPOINT, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
 import { buildModel, reply } from './opex-fixture';
 
 /**
@@ -12,6 +12,8 @@ const KEY = 'opex_test_anahtari_123';
 const MODEL = buildModel();
 const MODEL_2 = buildModel({ params: { kira_artis_2027: 0.5 }, giderler: undefined });
 const WIDTHS = [320, 360, 375, 390, 768, 1280];
+/** 2026 sekmesinin dönem toplamı (Ekim–Aralık): sayfanın kahraman sayısı. */
+const hero26 = (m: typeof MODEL) => lira(donemOf(m, 2026).toplam.toplam);
 const lira = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
 
@@ -92,7 +94,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const server = await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
     await page.goto(PATH);
     await hydrated(page);
-    await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam));
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
     await expect(page.getByRole('heading', { name: 'Google Sheets bağlantısı' })).toHaveCount(0);
     expect(server.requests[0].url()).toBe(OPEX_ENDPOINT);
     expect(server.bodies[0]).toEqual({});
@@ -138,16 +140,17 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(first.headers()['content-type']).toMatch(/^text\/plain/);
     expect(server.keyed()[0]).toEqual({ anahtar: KEY });
     expect(server.requests.every((r) => !r.url().includes(KEY))).toBe(true);
-    await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam));
-    await expect(page.getByRole('heading', { name: 'Ekim 2026 özeti' })).toBeVisible();
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    await expect(page.getByRole('tab', { name: /^2026/ })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('heading', { name: '2026 özeti' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Google Sheets’te aç' })).toHaveAttribute('href', /^https:\/\/docs\.google\.com\/spreadsheets\//);
     // Kalem tablosu: döviz + ₺ karşılığı, ödeme durumu metinle (renk tek başına değil).
-    const table = page.getByRole('region', { name: 'Ekim 2026 kalemleri' });
+    const table = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
     await expect(table).toContainText('Sunucu A');
     await expect(table).toContainText('€50,00');
     await expect(table).toContainText('Tutar girilmedi');
     await expect(table).toContainText('Ödendi');
-    expect(await drawAll(page)).toBe(9);
+    expect(await drawAll(page)).toBe(7);
     expect(errors).toEqual([]);
   });
 
@@ -157,7 +160,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await page.goto(PATH);
     await hydrated(page);
     await connect(page);
-    await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam));
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
 
     await page.clock.runFor(OPEX_POLL_MS + 500);
     await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(2);
@@ -165,10 +168,18 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
 
     const changed = buildModel({ giderler: [['Yeni sunucu', '', 'Teknoloji', 'Sunucu & Bulut', 'TRY', 12345, 'Genel', false, true, '', '']] });
     server.set({ ozet: 'ozet-2', model: changed });
-    await page.clock.runFor(OPEX_POLL_MS + 500);
-    await expect(page.locator('.opex-hero-value')).toHaveText(lira(changed.ozet.buAy.toplam));
+    // Önceki yanıt işlenip yeni zamanlayıcı kurulana kadar sahte saat adım adım ilerletilir (yarış yok).
+    await expect
+      .poll(
+        async () => {
+          await page.clock.runFor(OPEX_POLL_MS + 500);
+          return page.locator('.opex-hero-value').textContent();
+        },
+        { timeout: 20_000 },
+      )
+      .toBe(hero26(changed));
     await expect(page.getByRole('status').filter({ hasText: 'Veriler güncellendi' })).toHaveCount(1);
-    await expect(page.getByRole('region', { name: 'Ekim 2026 kalemleri' })).toContainText('Yeni sunucu');
+    await expect(page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' })).toContainText('Yeni sunucu');
   });
 
   test('görünürlük sık gidip gelse de süren istek iptal edilmez; yavaş yanıt (3 sn) gelir', async ({ page }) => {
@@ -189,7 +200,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
         document.dispatchEvent(new Event('visibilitychange'));
       }, 250);
     });
-    await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam), { timeout: 10_000 });
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL), { timeout: 10_000 });
     expect(count).toBeLessThanOrEqual(2);
   });
 
@@ -249,7 +260,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(stored.session).toContain(ENDPOINT);
   });
 
-  test('kalemler üç grup: Teknoloji, Ofis ve işletme, Personel; Tümü toplamı toplam OPEX', async ({ page }) => {
+  test('kalemler üç grup: Teknoloji, Ofis ve işletme, Personel; Tümü toplamı dönem OPEX’i', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
@@ -257,31 +268,62 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const group = page.getByRole('group', { name: 'Grup süzgeci' });
     const n = { tech: MODEL.giderler.filter((g) => g.kume === 'teknoloji').length, office: MODEL.giderler.filter((g) => g.kume === 'ofis').length, people: MODEL.kisiler.length };
     await expect(group.getByRole('button')).toHaveText([`Tümü (${n.tech + n.office + n.people})`, `Teknoloji (${n.tech})`, `Ofis ve işletme (${n.office})`, `Personel (${n.people})`]);
-    const table = page.getByRole('region', { name: 'Ekim 2026 kalemleri' });
-    const total = () => table.locator('tr[data-tone="total"] td').nth(2);
-    const exact = (v: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)} ₺`;
-    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.toplam));
+    const table = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
+    // Toplam satırı: [Kategori, Tutar, Aylık ₺, 3 ay ₺, Bu ay]; dönem sütunu ≈ dönem grup toplamı (kuruş yuvarlaması).
+    const total = async () => Number((await table.locator('tr[data-tone="total"] td').nth(3).innerText()).replace(/[^\d,]/g, '').replace(',', '.'));
+    const d = donemOf(MODEL, 2026);
+    expect(Math.abs((await total()) - d.toplam.toplam)).toBeLessThan(0.05);
     await group.getByRole('button', { name: /^Personel/ }).click();
     await expect(group.getByRole('button', { name: /^Personel/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(table).toContainText('Örnek Uzman');
     await expect(table).not.toContainText('Sunucu A');
-    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.insan));
+    expect(Math.abs((await total()) - d.toplam.insan)).toBeLessThan(0.05);
     await group.getByRole('button', { name: /^Teknoloji/ }).click();
-    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.teknoloji));
+    await expect(table).not.toContainText('Örnek Uzman');
+    expect(Math.abs((await total()) - d.toplam.teknoloji)).toBeLessThan(0.05);
   });
 
-  test('12 aylık plan: Ekim 2026’dan Eylül 2027’ye her ay ayrı; toplam satırı', async ({ page }) => {
+  test('yıl sekmeleri: 2026 Ekim–Aralık (3 ay), 2027 Ocak–Aralık (12 ay); her ay ayrı plan', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
     await connect(page);
-    const table = page.getByRole('region', { name: 'Aylık gider planı · Ekim 2026 – Eylül 2027' });
-    const heads = table.locator('tbody th');
-    await expect(heads).toHaveCount(13);
-    await expect(heads.nth(0)).toHaveText('Ekim 2026');
-    await expect(heads.nth(3)).toHaveText('Ocak 2027');
-    await expect(heads.nth(12)).toHaveText('12 ay toplamı');
-    await expect(page.locator('.chart-canvas[data-kind="opex-stack"]').first()).toBeVisible();
+    const tabs = page.getByRole('tablist', { name: 'Yıl' }).getByRole('tab');
+    await expect(tabs).toHaveCount(2);
+    await expect(tabs.nth(0)).toContainText('2026');
+    await expect(tabs.nth(0)).toContainText('Ekim – Aralık · 3 ay');
+    await expect(tabs.nth(1)).toContainText('Ocak – Aralık · 12 ay');
+    const plan26 = page.getByRole('region', { name: 'Aylık gider planı · Ekim – Aralık 2026' }).locator('tbody th');
+    await expect(plan26).toHaveText(['Ekim 2026', 'Kasım 2026', 'Aralık 2026', 'Dönem toplamı']);
+    await tabs.nth(1).click();
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'yil-2027');
+    await expect(page.locator('.opex-hero-value')).toHaveText(lira(donemOf(MODEL, 2027).toplam.toplam));
+    const plan27 = page.getByRole('region', { name: 'Aylık gider planı · Ocak – Aralık 2027' }).locator('tbody th');
+    await expect(plan27).toHaveCount(13);
+    await expect(plan27.nth(0)).toHaveText('Ocak 2027');
+    await expect(plan27.nth(12)).toHaveText('Dönem toplamı');
+    await expect(page.getByRole('heading', { name: '2027 varsayımları' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Aylık gider planı · Ekim – Aralık 2026' })).toHaveCount(0);
+  });
+
+  test('yıl sekmeleri klavyeyle: ok tuşu sekmeyi değiştirir ve odağı taşır; tek sekme durağında', async ({ page, browserName }) => {
+    test.skip(browserName === 'webkit', 'not_run: Playwright WebKit Tab ile düğmelere odak vermez');
+    await mockScript(page);
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    const t26 = page.getByRole('tab', { name: /^2026/ });
+    const t27 = page.getByRole('tab', { name: /^2027/ });
+    await expect(t26).toHaveAttribute('tabindex', '0');
+    await expect(t27).toHaveAttribute('tabindex', '-1');
+    await t26.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(t27).toBeFocused();
+    await expect(t27).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Home');
+    await expect(t26).toBeFocused();
+    await expect(t26).toHaveAttribute('aria-selected', 'true');
   });
 
   for (const reduced of [false, true]) {
@@ -306,12 +348,12 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       if (reduced) expect(parseFloat(anim.duration)).toBe(0);
       else expect(anim).toEqual({ name: 'opex-yukleme', duration: '1.4s', easing: 'cubic-bezier(0.65, 0, 0.35, 1)', count: 'infinite', direction: 'alternate' });
       release();
-      await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam));
+      await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
       await expect(loader).toHaveCount(0);
     });
   }
 
-  test('netten brüte: kişi ve yıl seçimi aria-pressed ile anında değişir', async ({ page }) => {
+  test('netten brüte: kişi seçimi aria-pressed ile, yıl sekmeyle değişir', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
@@ -320,9 +362,11 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const uzman = group.getByRole('button', { name: 'Örnek Uzman' });
     await uzman.click();
     await expect(uzman).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('region', { name: 'Örnek Uzman · 2026 aylık bordro' })).toContainText('Yıl toplamı');
-    await page.getByRole('group', { name: 'Yıl' }).getByRole('button', { name: '2027 (zamlı)' }).click();
-    await expect(page.getByRole('region', { name: 'Örnek Uzman · 2027 aylık bordro' })).toBeVisible();
+    const r26 = page.getByRole('region', { name: 'Örnek Uzman · Ekim – Aralık 2026 bordro' });
+    await expect(r26.locator('tbody th')).toHaveText(['Ekim 2026', 'Kasım 2026', 'Aralık 2026', 'Dönem toplamı']);
+    await page.getByRole('tab', { name: /^2027/ }).click();
+    await page.getByRole('group', { name: 'Kişi' }).getByRole('button', { name: 'Örnek Uzman' }).click();
+    await expect(page.getByRole('region', { name: 'Örnek Uzman · Ocak – Aralık 2027 bordro' }).locator('tbody th')).toHaveCount(13);
   });
 });
 
@@ -334,6 +378,8 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       await page.goto(PATH);
       await hydrated(page);
       await connect(page);
+      for (const yil of ['2026', '2027']) {
+      await page.getByRole('tab', { name: new RegExp(`^${yil}`) }).click();
       await drawAll(page);
       const result = await page.evaluate(() => {
         const visible = (el: Element) => {
@@ -374,13 +420,14 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
         }
         return { overflow: document.documentElement.scrollWidth - window.innerWidth, small, light, notRoboto, headerOverflow, chart };
       });
-      expect(result.overflow, 'sayfa yatay taşıyor').toBeLessThanOrEqual(0);
-      expect(result.small, '15 px altı metin').toEqual([]);
+      expect(result.overflow, `${yil}: sayfa yatay taşıyor`).toBeLessThanOrEqual(0);
+      expect(result.small, `${yil}: 15 px altı metin`).toEqual([]);
       expect(result.light).toEqual([]);
-      expect(result.notRoboto, 'Roboto dışı metin').toEqual([]);
+      expect(result.notRoboto, `${yil}: Roboto dışı metin`).toEqual([]);
       expect(result.headerOverflow).toEqual([]);
-      expect(result.chart, 'grafik metni').toEqual([]);
-      expect(await clipped(page), 'kırpılan öğe').toEqual([]);
+      expect(result.chart, `${yil}: grafik metni`).toEqual([]);
+      expect(await clipped(page), `${yil}: kırpılan öğe`).toEqual([]);
+      }
     });
   }
 
@@ -471,7 +518,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
     expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
     // javascript: fatura bağlantısı çizilmez; tablo adı metin olarak gösterir.
     await expect(page.locator('a[href^="javascript:"]')).toHaveCount(0);
-    await expect(page.getByRole('region', { name: 'Ekim 2026 kalemleri' })).toContainText(evil);
+    await expect(page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' })).toContainText(evil);
     expect(errors).toEqual([]);
   });
 
@@ -505,7 +552,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
     expect(Math.min(...formHeights)).toBeGreaterThanOrEqual(44);
     await connect(page);
     const heights = await page
-      .locator('.opex-btn, .opex-toggle, .opex-live a, a[data-standalone]')
+      .locator('.opex-btn, .opex-toggle, .opex-year, .opex-live a, a[data-standalone]')
       .evaluateAll((els) => els.filter((el) => el.getClientRects().length).map((el) => [el.textContent?.trim(), el.getBoundingClientRect().height] as const));
     expect(heights.length).toBeGreaterThan(8);
     expect(heights.filter(([, h]) => h < 44)).toEqual([]);
@@ -534,7 +581,8 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
       await page.goto(PATH);
       await hydrated(page);
       await connect(page);
-      expect(await drawAll(page)).toBe(9);
+      await page.getByRole('tab', { name: /^2027/ }).click();
+      expect(await drawAll(page)).toBe(8);
       const models = await onCharts<{ kind: string; series: [unknown, unknown, unknown][]; state: [unknown, unknown] }[]>(
         page,
         `return charts.map((c) => {

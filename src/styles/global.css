@@ -2448,3 +2448,63 @@ html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-
 html[data-js] .opex-nojs {
   display: none;
 }
+
+/* Yıl sekmeleri: iki büyük düğme (2026 · 2027); seçili olan ters (mürekkep) zeminde */
+.opex-years {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-normal);
+  margin-top: var(--section-gap);
+}
+
+.opex-year {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: var(--space-1);
+  min-height: calc(var(--hit-min) * 2.5);
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.opex-year:hover {
+  background: var(--surface-control-hover);
+}
+
+.opex-year[aria-selected='true'],
+.opex-year[aria-selected='true']:hover {
+  background: var(--text-primary);
+  color: var(--surface-page);
+}
+
+.opex-year-num {
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-year-sub {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Seçili (ters zemin) sekmede odak çizgisi yazı rengindedir: her iki temada karşıtlık korunur. */
+html[data-focus-mode='keyboard'] .opex-year[aria-selected='true']:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.opex-year-panel > .section:first-child {
+  margin-top: var(--space-8);
+}

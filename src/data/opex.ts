@@ -153,30 +153,72 @@ export interface OpexModel {
   uyarilar: string[];
 }
 
-export interface PlanAy extends Kume3 {
-  yil: number;
-  ay: number;
+export type Yil = 2026 | 2027;
+export type YilKey = 'y2026' | 'y2027';
+
+export interface DonemAy extends Kume3 {
+  /** 0–11 */
+  index: number;
   ad: string;
   kisa: string;
 }
 
-/**
- * 12 aylık plan: rapor ayından başlayarak ay ay (2026 ayları 2026 hesabı, 2027 ayları zamlı 2027 hesabı); 2027 sonrası
- * hesaplanmaz. Motor.js → plan ile aynı kural; sayfa eski Apps Script sürümleriyle de çalışsın diye aylık seriden türetilir.
- */
-export function planOf(m: Pick<OpexModel, 'aylik' | 'donem'>): { aylar: PlanAy[]; toplam: Kume3 } {
-  const aylar: PlanAy[] = [];
-  for (let n = 0; n < 12; n++) {
-    const sira = m.donem.ay - 1 + n;
-    const yil = m.donem.yil + Math.floor(sira / 12);
-    if (yil > 2027) break;
-    const a = m.aylik[sira % 12];
-    const k = yil === 2027 ? a.y2027 : a.y2026;
-    aylar.push({ yil, ay: (sira % 12) + 1, ad: `${a.ad} ${yil}`, kisa: `${a.kisa} ${String(yil).slice(2)}`, ...k });
-  }
-  const sum = (f: keyof Kume3) => Math.round(aylar.reduce((t, x) => t + x[f], 0) * 100) / 100;
-  return { aylar, toplam: { teknoloji: sum('teknoloji'), insan: sum('insan'), ofis: sum('ofis'), toplam: sum('toplam') } };
+/** Yıl sekmesinin dönemi: 2026 rapor ayından Aralık’a, 2027 Ocak–Aralık. Her ay ayrı hesaplanmış aylık seriden. */
+export interface Donem {
+  yil: Yil;
+  key: YilKey;
+  /** 0–11 ay indeksleri */
+  aylar: number[];
+  etiket: string;
+  aySayisi: number;
+  seri: DonemAy[];
+  toplam: Kume3;
+  ortalama: Kume3;
 }
+
+const r2 = (v: number) => Math.round(v * 100) / 100;
+const kume = (xs: Kume3[]): Kume3 => ({
+  teknoloji: r2(xs.reduce((t, x) => t + x.teknoloji, 0)),
+  insan: r2(xs.reduce((t, x) => t + x.insan, 0)),
+  ofis: r2(xs.reduce((t, x) => t + x.ofis, 0)),
+  toplam: r2(xs.reduce((t, x) => t + x.toplam, 0)),
+});
+
+export function donemOf(m: Pick<OpexModel, 'aylik' | 'donem'>, yil: Yil): Donem {
+  const bas = yil === 2026 && m.donem.yil === 2026 ? m.donem.ay - 1 : 0;
+  const aylar = Array.from({ length: 12 - bas }, (_, i) => bas + i);
+  const key: YilKey = yil === 2027 ? 'y2027' : 'y2026';
+  const seri = aylar.map((i) => ({ index: i, ad: `${m.aylik[i].ad} ${yil}`, kisa: m.aylik[i].kisa, ...m.aylik[i][key] }));
+  const toplam = kume(seri);
+  const n = aylar.length;
+  const ilk = m.aylik[aylar[0]].ad;
+  const son = m.aylik[aylar[n - 1]].ad;
+  return {
+    yil,
+    key,
+    aylar,
+    etiket: n === 12 ? `Ocak – Aralık ${yil}` : n === 1 ? `${ilk} ${yil}` : `${ilk} – ${son} ${yil}`,
+    aySayisi: n,
+    seri,
+    toplam,
+    ortalama: { teknoloji: r2(toplam.teknoloji / n), insan: r2(toplam.insan / n), ofis: r2(toplam.ofis / n), toplam: r2(toplam.toplam / n) },
+  };
+}
+
+/** Kişinin dönemdeki ayları ve toplamı (bordro: kümülatif matrah Ocak’tan hesaplanmıştır). */
+export function kisiDonem(k: Kisi, d: Donem): { aylar: Satir[]; toplam: Satir } {
+  const aylar = d.aylar.map((i) => k[d.key].aylar[i]);
+  const toplam = { ...aylar[0] } as Satir;
+  for (const f of Object.keys(toplam) as (keyof Satir)[]) {
+    if (f === 'ay') continue;
+    toplam[f] = r2(aylar.reduce((t, s) => t + s[f], 0));
+  }
+  toplam.kumulatifMatrah = aylar[aylar.length - 1].kumulatifMatrah;
+  return { aylar, toplam };
+}
+
+/** Giderin dönemdeki aylık ₺ tutarı (yıl içinde sabit). */
+export const giderAylik = (g: Gider, d: Donem) => (d.yil === 2027 ? g.tl2027 : g.tl);
 
 export interface OpexData {
   model: OpexModel;
