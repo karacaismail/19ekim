@@ -230,6 +230,8 @@ function toplamSatiriKur_(sh, k, n) {
   if (sh.getRange(hedef, 2, 1, OPEX_GIRDI_SUTUN[k] - 1).getValues()[0].some(function (v) { return v !== ''; })) sh.insertRowAfter(hedef - 1);
   sh.getProtections(SpreadsheetApp.ProtectionType.RANGE).forEach(function (p) { if (p.getDescription() === OPEX_TOPLAM_KORUMA) p.remove(); });
   sh.getRange(hedef, ilk, 1, g).clearContent().clearDataValidations();
+  // Toplam satırında girdi açılır listeleri (Küme, Kategori…) görünmesin.
+  sh.getRange(hedef, 2, 1, OPEX_GIRDI_SUTUN[k] - 1).clearContent().clearDataValidations();
   sh.getRange(hedef, 1).setValue('Toplam (₺)').setFontWeight('bold');
   sh.getRange(hedef, ilk).setFormula(toplamFormulu_(k));
   sh.getRange(hedef, ilk, 1, g).setNumberFormat(OPEX_BICIM.tl).setFontWeight('bold').setFontColor(OPEX_STIL.formul).setBackground(OPEX_STIL.hesap);
@@ -384,11 +386,21 @@ function temelStil_(sh) {
   tum.setFontFamily(OPEX_STIL.font).setFontSize(OPEX_STIL.boyut).setFontColor(OPEX_STIL.murekkep).setVerticalAlignment('middle');
 }
 
+/** Açıklama A2’ye; kullanıcı açıklamayı B2’ye taşımışsa (B2 dolu) B2’ye yazılır, A2 boşaltılır (biçimi korunur). */
+function aciklamaYaz_(sh, aciklama) {
+  if (sh.getRange('B2').getValue() !== '') {
+    sh.getRange('A2').clearContent();
+    sh.getRange('B2').setValue(aciklama);
+  } else {
+    sh.getRange('A2').setValue(aciklama).setFontColor(OPEX_STIL.ikincil);
+  }
+}
+
 /** Satır 1 başlık, satır 2 açıklama, satır 3 tablo başlıkları. */
 function girdiBasligi_(sh, baslik, aciklama, basliklar, hesapBasliklari, hesapSutunu) {
   temelStil_(sh);
   sh.getRange('A1').setValue(baslik).setFontSize(18).setFontWeight('bold');
-  sh.getRange('A2').setValue(aciklama).setFontColor(OPEX_STIL.ikincil);
+  aciklamaYaz_(sh, aciklama);
   sh.setRowHeight(1, 40);
   sh.setRowHeight(2, 28);
   var bas = sh.getRange(3, 1, 1, basliklar.length);

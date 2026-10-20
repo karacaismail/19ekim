@@ -255,6 +255,30 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect([...donustur(['x', 'hayır', ''])]).toEqual([true, false, false]);
   });
 
+  test('Kurulum: açıklama kullanıcının taşıdığı B2’ye yazılır (A2 boşaltılır); B2 boşsa A2', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const yaz = ctx.aciklamaYaz_ as (sh: unknown, metin: string) => void;
+    const sahte = (b2: string) => {
+      const hucre: Record<string, unknown> = { A2: 'eski', B2: b2 };
+      const sh = {
+        getRange: (a1: string) => ({
+          getValue: () => hucre[a1] ?? '',
+          setValue(v: unknown) { hucre[a1] = v; return this; },
+          clearContent() { hucre[a1] = ''; return this; },
+          setFontColor() { return this; },
+        }),
+      };
+      return { sh, hucre };
+    };
+    const tasinmis = sahte('kullanıcının açıklaması');
+    yaz(tasinmis.sh, 'yeni açıklama');
+    expect(tasinmis.hucre).toEqual({ A2: '', B2: 'yeni açıklama' });
+    const yerinde = sahte('');
+    yaz(yerinde.sh, 'yeni açıklama');
+    expect(yerinde.hucre).toEqual({ A2: 'yeni açıklama', B2: '' });
+  });
+
   test('onEdit: Düzenli Giderler’de para birimi değişince o satırın tutarları o dövizle biçimlenir', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
