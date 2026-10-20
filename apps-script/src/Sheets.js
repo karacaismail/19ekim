@@ -477,8 +477,11 @@ function doPost(e) {
     return json_({ ok: false, hata: 'istek', mesaj: 'İstek gövdesi JSON değil.' });
   }
   if (!istek || typeof istek !== 'object' || Array.isArray(istek)) return json_({ ok: false, hata: 'istek', mesaj: 'İstek gövdesi nesne olmalı.' });
+  var olcum = {};
+  var adim = function (ad) { olcum[ad] = opexSimdi_() - bas; };
   var girdi = girdileriOku_();
   var p = ozellikler_();
+  adim('oku');
   // Parametreler → “Sayfa erişimi”: Herkese açık ise anahtar istenmez (kullanıcı kararı); değilse anahtar zorunlu.
   var yetkisiz = erisimDenetle_(OpexMotor.erisimAcik(girdi.parametreler), istek, p);
   if (yetkisiz) return yetkisiz;
@@ -494,6 +497,7 @@ function doPost(e) {
     } catch (hata) {
       console.log('doPost hesap yazımı: ' + hata);
     }
+    adim('yaz');
   }
   var bekledi = false;
   var hazir = null;
@@ -518,7 +522,10 @@ function doPost(e) {
       }
     }
   }
+  adim('bekle');
   var degisti = degisimiKaydet_(ozet, tazele ? null : p);
+  // Beklenenden uzun süren istek (bekleme ≈20 sn) adım süreleriyle günlüğe yazılır.
+  if (opexSimdi_() - bas > OPEX_BEKLEME_MS + 5000) console.log('doPost yavaş ' + JSON.stringify(olcum));
   var temel = { ok: true, sema: OpexMotor.SEMA, ozet: ozet, denetlendi: new Date().toISOString(), degisti: degisti, bekledi: bekledi };
   if (istek.ozet && istek.ozet === ozet) {
     temel.degismedi = true;
