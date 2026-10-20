@@ -149,10 +149,12 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   padding-block: var(--space-1);
 }
 
+/* Marka: logo ve altında alt başlık (kullanıcı kararı 2026-10-20); alt başlık logo yazısıyla aynı hizada başlar. */
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
+  --brand-mark-size: 0.7rem;
+  --brand-mark-gap: 0.4rem;
+  display: inline-grid;
+  align-content: center;
   min-height: var(--hit-min);
   color: var(--text-primary);
   text-decoration: none;
@@ -161,26 +163,27 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 .brand-word {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--brand-mark-gap);
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
 }
 
 .brand-word::before {
   content: '';
-  width: 0.7rem;
-  height: 0.7rem;
+  width: var(--brand-mark-size);
+  height: var(--brand-mark-size);
   border-radius: 3px;
   background: var(--accent);
 }
 
-.brand-sub {
-  padding-inline-start: var(--space-3);
-  border-inline-start: var(--hairline) solid var(--rule-strong);
+.brand-tagline {
+  padding-inline-start: calc(var(--brand-mark-size) + var(--brand-mark-gap));
   color: var(--text-secondary);
   font-size: var(--text-sm);
-  line-height: var(--leading-snug);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
 }
 
 .topbar-tools {
@@ -252,10 +255,19 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   transform: translateX(1rem);
 }
 
-/* En dar ekranda (320–360 px) marka alt yazısı gizlenir; “iStoc” ve tema düğmesi tek satırda kalır. */
+/*
+ * En dar ekranda (≤ 23em) üst bant tek satır kalır: marka ile tema düğmesi arası dar, düğme yalnız anahtar + dokunma
+ * hedefi kadar (Giderler’de alt başlık 15 px Roboto ile daha geniştir).
+ */
 @media (max-width: 22.99em) {
-  .brand-sub {
-    display: none;
+  .topbar .wrap {
+    column-gap: var(--space-1);
+  }
+
+  .theme-toggle {
+    min-width: var(--hit-min);
+    padding-inline: 0;
+    justify-content: center;
   }
 }
 
@@ -286,19 +298,6 @@ html[data-js] .theme-toggle[hidden] {
 
   .theme-thumb {
     background-color: ButtonText;
-  }
-}
-
-.plan-date {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
-
-@media (max-width: 37.49em) {
-  .plan-date {
-    display: none;
   }
 }
 
@@ -2266,15 +2265,6 @@ html:not([data-js]) .email-btn {
   color: var(--text-secondary);
 }
 
-.opex-months {
-  font-variant-numeric: tabular-nums;
-}
-
-.opex-months[data-state='part'] {
-  font-weight: var(--weight-semibold);
-}
-
-.opex-months[data-state='none'],
 .opex-month-off {
   color: var(--text-secondary);
 }
@@ -2391,6 +2381,22 @@ html:not([data-js]) .email-btn {
   .chart-canvas[data-rows] {
     --chart-row-h: var(--chart-row-h-wrap3);
   }
+}
+
+/* Açıklamalı yatay grafik (yığın, grup): ilk boyamada açıklama ve eksen payı ayrılır; JS yalnız birkaç px düzeltir. */
+.chart-canvas[data-rows]:is([data-kind='opex-stack-h'], [data-kind='opex-group']) {
+  --chart-row-pad: var(--chart-row-pad-legend);
+}
+
+@container opex-chart (width < 600px) {
+  .chart-canvas[data-rows]:is([data-kind='opex-stack-h'], [data-kind='opex-group']) {
+    --chart-row-pad: var(--chart-row-pad-legend-narrow);
+  }
+}
+
+/* Kısa (sarılmayan) kategori adı: her genişlikte tek satır yüksekliği. */
+.chart-canvas[data-rows][data-short-labels] {
+  --chart-row-h: var(--chart-row-h-short);
 }
 
 @container opex-chart (width < 600px) {
@@ -2787,9 +2793,27 @@ html[data-js] .opex-nojs {
 }
 
 /*
- * Yıl sekmeleri: iki düğme (2026 · 2027), başlığın sağında; iki sekme aynı şablonda (kullanıcı kararı 2026-10-20),
- * seçim radyo işaretiyle (dolu nokta, yeşil) ve kalın rakamla gösterilir.
+ * Yıl sekmeleri: iki düğme (2026 · 2027), plan ve kalemlerin altında, yıla bağlı bölümlerin başında; iki sekme aynı
+ * şablonda (kullanıcı kararı 2026-10-20), seçim radyo işaretiyle (dolu nokta, yeşil) ve kalın rakamla gösterilir.
  */
+.opex-year-bar {
+  display: grid;
+  gap: var(--space-2) var(--gap-normal);
+  align-items: center;
+  margin-top: var(--section-gap);
+}
+
+.opex-year-bar-text {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 64em) {
+  .opex-year-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
+  }
+}
+
 .opex-years {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

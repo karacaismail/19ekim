@@ -84,7 +84,7 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
   { label: 'Organizasyon', path: '/' },
   { label: 'Dijital pazarlama', path: '/roller/dijital-pazarlama/', role: 'dijital-pazarlama', no: 1 },
   { label: 'Masa başı', path: '/roller/pazarlamaci/', role: 'pazarlamaci', no: 2 },
-  { label: 'Saha satış', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 3, also: ['/roller/ekip-lideri/', '/buyume-modeli/'] },
+  { label: 'Saha satış', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 3, also: ['/roller/ekip-lideri/'] },
   { label: 'Organizatör', path: '/roller/organizator/', role: 'organizator', no: 4 },
   { label: 'Segika', path: '/roller/segika/', role: 'segika' },
   { label: 'Asistan', path: '/roller/asistan/', role: 'asistan' },
@@ -93,13 +93,17 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
 /** “İstihdam” menüsünün sonunda (organizasyon ve rollerden sonra): işe alım sırası. */
 export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
 
-export const COMMON_NAV = [
+/** “Pazarlama” açılır menüsü (kullanıcı kararı 2026-10-20). */
+export const MARKETING_NAV = [
   { label: '90 gün hedefleri', path: '/hedefler/' },
   { label: 'Eylem planı', path: '/eylem-plani/' },
   { label: 'MLM ağı', path: '/buyume-modeli/' },
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
   { label: 'Parametreler', path: '/parametreler/' },
+];
+
+export const COMMON_NAV = [
   { label: 'Giderler (OPEX)', path: '/giderler/' },
   { label: 'Notlar', path: '/notlar/' },
 ];

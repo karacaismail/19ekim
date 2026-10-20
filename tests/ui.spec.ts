@@ -282,15 +282,71 @@ test.describe('başlık ve İstihdam menüsü', () => {
     });
   }
 
-  test('JavaScript kapalı: İstihdam menüsünün sayfaları düz bağlantı olarak gezinmede', async ({ browser }) => {
+  test('JavaScript kapalı: İstihdam ve Pazarlama menülerinin sayfaları düz bağlantı olarak gezinmede', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto('istihdam/');
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    for (const ad of ['Organizasyon', 'Segika', 'Asistan', 'İstihdam takvimi']) await expect(nav.getByRole('link', { name: ad, exact: true })).toBeVisible();
+    for (const ad of ['Organizasyon', 'Segika', 'Asistan', 'İstihdam takvimi', '90 gün hedefleri', 'Karar yetkisi', 'Parametreler']) await expect(nav.getByRole('link', { name: ad, exact: true })).toBeVisible();
     await expect(nav.getByRole('button', { name: 'İstihdam' })).toBeHidden();
+    await expect(nav.getByRole('button', { name: 'Pazarlama' })).toBeHidden();
     await context.close();
   });
+
+  // Kullanıcı kararı 2026-10-20: hedefler, eylem planı, MLM ağı, karar sayfaları ve parametreler “Pazarlama” menüsünde.
+  test('Pazarlama menüsü: altı sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
+    await page.goto('karar-yetkisi/');
+    await hydrated(page);
+    const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
+    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, 'Giderler (OPEX)', 'Notlar']);
+    const tetik = page.getByRole('button', { name: 'Pazarlama' });
+    await expect(tetik).toHaveAttribute('data-section', 'true');
+    await expect(page.getByRole('button', { name: 'İstihdam' })).not.toHaveAttribute('data-section', 'true');
+    await tetik.click();
+    const menu = page.getByRole('menu', { name: 'Pazarlama' });
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('menuitem')).toHaveText(['90 gün hedefleri', 'Eylem planı', 'MLM ağı', 'Karar yetkisi', 'Karar bekleyenler', 'Parametreler']);
+    await expect(menu.getByRole('menuitem', { name: 'Karar yetkisi' })).toHaveAttribute('aria-current', 'page');
+    await menu.getByRole('menuitem', { name: 'MLM ağı' }).click();
+    await expect(page).toHaveURL(/\/buyume-modeli\/$/);
+  });
+
+  test('MLM ağı yalnız Pazarlama menüsünde etkin (İstihdam menüsü bölüm saymaz)', async ({ page }) => {
+    await page.goto('buyume-modeli/');
+    await hydrated(page);
+    await expect(page.getByRole('button', { name: 'Pazarlama' })).toHaveAttribute('data-section', 'true');
+    await expect(page.getByRole('button', { name: 'İstihdam' })).not.toHaveAttribute('data-section', 'true');
+  });
+
+  // Giderler’de alt başlık 15 px Roboto (daha geniş): 320 px’te de üst bant tek satır.
+  for (const coarse of [false, true]) {
+    test(`320 px Giderler${coarse ? ' (dokunmatik)' : ''}: üst bant tek satır, tema düğmesi ≥ ${coarse ? 48 : 44} px`, async ({ browser, browserName }) => {
+      test.skip(coarse && browserName === 'firefox', 'Firefox mobil emülasyonu desteklemez');
+      const context = await browser.newContext({ viewport: { width: 320, height: 700 }, ...(coarse ? { hasTouch: true, isMobile: true } : {}) });
+      const page = await context.newPage();
+      await page.goto('giderler/');
+      const [marka, dugme] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox()];
+      expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
+      expect(await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(56);
+      expect(Math.min(dugme!.width, dugme!.height)).toBeGreaterThanOrEqual(coarse ? 48 : 44);
+      await context.close();
+    });
+  }
+
+  // Kullanıcı kararı 2026-10-20: logonun yanındaki yazı yok; altında “Pazarlama & Finansal Planlama”; plan tarihi başlıkta yok.
+  for (const width of [320, 1280]) {
+    test(`${width} px: logo altında alt başlık, plan tarihi yok`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 700 });
+      await page.goto('');
+      const marka = page.locator('.topbar .brand');
+      await expect(marka).toHaveText('iStocPazarlama & Finansal Planlama');
+      await expect(page.locator('.topbar')).not.toContainText('Plan tarihi');
+      await expect(page.locator('.topbar')).not.toContainText('Satış ve Pazarlama Planı');
+      const [kelime, alt] = [await marka.locator('.brand-word').boundingBox(), await marka.locator('.brand-tagline').boundingBox()];
+      expect(alt!.y).toBeGreaterThanOrEqual(kelime!.y + kelime!.height - 1);
+      expect(parseFloat(await marka.locator('.brand-tagline').evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(14);
+    });
+  }
 
   test('işaretçiyle açılan menüde oklar odak göstergesi açmaz (görünür odak yalnız Tab ile)', async ({ page }) => {
     await page.goto('istihdam/');
@@ -366,7 +422,8 @@ test.describe('etkileşim alanı ve tema', () => {
     const heights = await page
       .locator('.mainnav-link, .pager-link, .brand')
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(heights.length).toBeGreaterThan(10);
+    // İstihdam ve Pazarlama tetikleyicileri, Giderler, Notlar, sunum sırası bağlantıları ve marka.
+    expect(heights.length).toBeGreaterThanOrEqual(7);
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
   });
 

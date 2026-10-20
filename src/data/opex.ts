@@ -208,8 +208,12 @@ const kume = (xs: Kume3[]): Kume3 => ({
   toplam: r2(xs.reduce((t, x) => t + x.toplam, 0)),
 });
 
-export function donemOf(m: Pick<OpexModel, 'aylik' | 'donem'>, yil: Yil): Donem {
-  const bas = yil === 2026 && m.donem.yil === 2026 ? m.donem.ay - 1 : 0;
+/** Sheets aylık ızgarasının ilk ayı (0–11): Ekim 2026; ızgara Aralık 2027’de biter (Kurulum.js → izgaraAylari_). */
+export const PLAN_ILK_AY = 9;
+
+/** `ilkAy` verilirse 2026 dönemi o aydan başlar (plan); verilmezse rapor ayından (yıl sekmesi). */
+export function donemOf(m: Pick<OpexModel, 'aylik' | 'donem'>, yil: Yil, ilkAy?: number): Donem {
+  const bas = yil === 2026 ? (ilkAy ?? (m.donem.yil === 2026 ? m.donem.ay - 1 : 0)) : 0;
   const aylar = Array.from({ length: 12 - bas }, (_, i) => bas + i);
   const key: YilKey = yil === 2027 ? 'y2027' : 'y2026';
   const seri = aylar.map((i) => ({ index: i, ad: `${m.aylik[i].ad} ${yil}`, kisa: m.aylik[i].kisa, ...m.aylik[i][key] }));
@@ -224,6 +228,42 @@ export function donemOf(m: Pick<OpexModel, 'aylik' | 'donem'>, yil: Yil): Donem 
     etiket: n === 12 ? `Ocak – Aralık ${yil}` : n === 1 ? `${ilk} ${yil}` : `${ilk} – ${son} ${yil}`,
     aySayisi: n,
     seri,
+    toplam,
+    ortalama: { teknoloji: r2(toplam.teknoloji / n), insan: r2(toplam.insan / n), ofis: r2(toplam.ofis / n), toplam: r2(toplam.toplam / n) },
+  };
+}
+
+/** Planın bir ayı: hangi yılın hangi ayı (`index` 0–11) ve dönem içindeki sırası (`j`). */
+export interface PlanAy extends DonemAy {
+  yil: Yil;
+  key: YilKey;
+  j: number;
+}
+
+/** Yıl ayrımı olmayan plan (kullanıcı kararı 2026-10-20): 2026 döneminin ayları ve ardından 2027’nin 12 ayı. */
+export interface Plan {
+  donemler: Donem[];
+  aylar: PlanAy[];
+  etiket: string;
+  aySayisi: number;
+  toplam: Kume3;
+  ortalama: Kume3;
+}
+
+/** Sayfanın planı: rapor ayından bağımsız, her zaman ızgaranın 15 ayı (Ekim 2026 – Aralık 2027). */
+export function planOfModel(m: Pick<OpexModel, 'aylik' | 'donem'>): Plan {
+  return planOf([donemOf(m, 2026, PLAN_ILK_AY), donemOf(m, 2027)]);
+}
+
+export function planOf(donemler: Donem[]): Plan {
+  const aylar = donemler.flatMap((d) => d.seri.map((a, j) => ({ ...a, yil: d.yil, key: d.key, j })));
+  const toplam = kume(aylar);
+  const n = aylar.length;
+  return {
+    donemler,
+    aylar,
+    etiket: n === 1 ? aylar[0].ad : `${aylar[0].ad} – ${aylar[n - 1].ad}`,
+    aySayisi: n,
     toplam,
     ortalama: { teknoloji: r2(toplam.teknoloji / n), insan: r2(toplam.insan / n), ofis: r2(toplam.ofis / n), toplam: r2(toplam.toplam / n) },
   };
@@ -258,13 +298,6 @@ export function giderDonem(g: Gider, d: Donem): KalemDonem {
     toplam: r2(aylar.reduce((t, v) => t + v, 0)),
     aktif: sayac(d.aylar.map((i) => g.aktif[d.key][i])),
     ozel: sayac(d.aylar.map((i) => g.aktif[d.key][i] && g.ozel[d.key][i])),
-  };
-}
-
-export function kisiAylari(k: Kisi, d: Donem): Pick<KalemDonem, 'aktif' | 'ozel'> {
-  return {
-    aktif: sayac(d.aylar.map((i) => k.aktif[d.key][i])),
-    ozel: sayac(d.aylar.map((i) => k.aktif[d.key][i] && k.ozel[d.key][i])),
   };
 }
 

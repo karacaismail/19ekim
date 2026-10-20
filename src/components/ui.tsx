@@ -152,8 +152,13 @@ export interface Column<T> {
   minWidth?: string;
   nowrap?: boolean;
   rowHeader?: boolean;
+  /** Yatay kaydırmada solda sabit kalır (≥ 48em; dar ekranda alan kaplamasın diye sabit değil). */
+  sticky?: boolean;
   render: (row: T) => ReactNode;
 }
+
+const cellClass = (col: { nowrap?: boolean; sticky?: boolean }) =>
+  [col.nowrap ? 'cell-nowrap' : '', col.sticky ? 'cell-sticky' : ''].filter(Boolean).join(' ') || undefined;
 
 export function DataTable<T>({
   id,
@@ -192,7 +197,7 @@ export function DataTable<T>({
                   <Table.Th
                     key={col.key}
                     scope="col"
-                    className={col.nowrap ? 'cell-nowrap' : undefined}
+                    className={cellClass(col)}
                     style={col.minWidth ? { minWidth: col.minWidth } : undefined}
                   >
                     {col.header}
@@ -205,11 +210,11 @@ export function DataTable<T>({
                 <Table.Tr key={rowKey ? rowKey(row, index) : index} data-tone={rowTone?.(row)}>
                   {columns.map((col) =>
                     col.rowHeader ? (
-                      <Table.Th key={col.key} scope="row" className={col.nowrap ? 'cell-nowrap' : undefined}>
+                      <Table.Th key={col.key} scope="row" className={cellClass(col)}>
                         {col.render(row)}
                       </Table.Th>
                     ) : (
-                      <Table.Td key={col.key} className={col.nowrap ? 'cell-nowrap' : undefined}>
+                      <Table.Td key={col.key} className={cellClass(col)}>
                         {col.render(row)}
                       </Table.Td>
                     ),
@@ -294,6 +299,7 @@ export function Chart({
   size = 'md',
   wide = false,
   rows,
+  shortLabels = false,
 }: {
   id: string;
   spec: ChartSpec;
@@ -304,6 +310,8 @@ export function Chart({
   wide?: boolean;
   /** Kategori satırı sayısı: kutu en az satır başına bir etiket yüksekliği kadar uzar (etiketler üst üste binmez). */
   rows?: number;
+  /** Kategori adları kısa (ay adı gibi) ve hiç sarılmaz: dar ekranda iki/üç satırlık satır yüksekliği verilmez. */
+  shortLabels?: boolean;
 }) {
   const titleId = `${id}-grafik`;
   const host = useRef<HTMLDivElement>(null);
@@ -344,13 +352,13 @@ export function Chart({
     };
   }, [json]);
 
-  useEffect(
-    () => () => {
-      const el = host.current;
+  useEffect(() => {
+    // Ref söküm anında boşalmış olur; kutu kurulumda yakalanır, söküldüğünde grafik ve gözlemcisi bırakılır.
+    const el = host.current;
+    return () => {
       if (el) void import('../scripts/charts').then((mod) => mod.disposeChart(el));
-    },
-    [],
-  );
+    };
+  }, []);
 
   const canvas = (
     <div
@@ -358,6 +366,7 @@ export function Chart({
       data-kind={spec.kind}
       data-size={size}
       data-rows={rows ?? undefined}
+      data-short-labels={rows && shortLabels ? '' : undefined}
       style={rows ? ({ '--chart-rows': rows } as CSSProperties) : undefined}
       data-chart-failed={state === 'failed' ? '' : undefined}
       role="img"

@@ -92,7 +92,7 @@ const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
     <script is:inline>
       (function () {
         document.querySelectorAll('.mainnav-list').forEach(function (list) {
-          var active = list.querySelector('[aria-current="page"]') || list.querySelector('[data-section="true"]');
+          var active = list.querySelector('[aria-current="page"]:not(.mainnav-nojs-link)') || list.querySelector('[data-section="true"]');
           if (!active || list.scrollWidth <= list.clientWidth) return;
           var listBox = list.getBoundingClientRect();
           var box = active.getBoundingClientRect();

@@ -171,8 +171,11 @@ const OPEX_NARROW = 568;
 const labelRoom = (labels: string[]) => Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * FONT_SIZE * 0.6) + 16;
 const categoryLabel = (width: number, share = 0.4): Opt => ({
   ...(axis().axisLabel as Opt),
+  // Uzun ad (kişi, kategori) sözcük arasından sarılır; dar yazı tipi tanımlıysa (Giderler: Roboto Condensed) onunla.
+  ...(token('--font-condensed') ? { fontFamily: token('--font-condensed') } : {}),
   color: token('--text-primary'),
-  width: Math.min(220, Math.floor(width * share)),
+  // Telefonda (≤ 420 px grafik) etiket sütunu en az %42: uzun ad en çok üç satıra sarılır (satır yüksekliği üç satırlık).
+  width: Math.min(220, Math.floor(width * (width < 420 ? Math.max(share, 0.42) : share))),
   overflow: 'break',
 });
 const valueAxis = (narrow: boolean): Opt => ({
@@ -849,13 +852,18 @@ function build(spec: ChartSpec, width: number): Opt {
           run += step.value;
           base0.push(run);
         }
-        bars.push({ value: Math.abs(step.value), itemStyle: { color: viz(step.tone), borderRadius: 0 } });
+        // Sıfır adım (ör. teşvik yok) çubuk çizmez (en küçük çubuk boyu da görünmesin); etiketi “0 ₺”.
+        bars.push({ value: Math.abs(step.value), itemStyle: { color: step.value === 0 ? 'transparent' : viz(step.tone), borderRadius: 0 } });
       }
-      const label = (i: number) => {
+      // Dar grafikte değer kısa yazılır (1,3 Mn ₺); tam tutar ipucunda ve tabloda.
+      const amount = narrow ? shortLira : lira;
+      const label = (i: number, fmt = amount) => {
         const step = spec.steps[i];
-        return step.total ? lira(step.value) : `${step.value >= 0 ? '+' : '−'} ${lira(Math.abs(step.value))}`;
+        if (step.value === 0) return '0 ₺';
+        return step.total ? fmt(step.value) : `${step.value > 0 ? '+' : '−'} ${fmt(Math.abs(step.value))}`;
       };
       const labels = spec.steps.map((_, i) => label(i));
+      const peak = Math.max(0, ...spec.steps.map((s, i) => base0[i] + Math.abs(s.value)));
       return {
         ...base(),
         legend: { show: false },
@@ -865,11 +873,12 @@ function build(spec: ChartSpec, width: number): Opt {
           axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
           formatter: (params: { seriesIndex: number; dataIndex: number; name: string }[]) => {
             const p = params.find((x) => x.seriesIndex === 1) ?? params[0];
-            return p ? `${esc(p.name)}<br/>${label(p.dataIndex)}` : '';
+            return p ? `${esc(p.name)}<br/>${label(p.dataIndex, lira)}` : '';
           },
         },
-        grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 8, bottom: 8, containLabel: true },
-        xAxis: { ...valueAxis(narrow), show: narrow },
+        // Değer etiketi çubuk ucunda: eksen ve ızgara çizgisi gerekmez; ölçek en yüksek ara toplamda biter (boş alan yok).
+        grid: { left: 4, right: labelRoom(labels), top: 4, bottom: 4, containLabel: true },
+        xAxis: { ...valueAxis(narrow), show: false, max: peak || undefined },
         yAxis: { type: 'category', inverse: true, data: spec.steps.map((s) => s.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width) },
         series: [
           { type: 'bar', stack: 'kopru', data: base0, barMaxWidth: 24, silent: true, itemStyle: { color: 'transparent' }, emphasis: { disabled: true } },
@@ -878,7 +887,8 @@ function build(spec: ChartSpec, width: number): Opt {
             stack: 'kopru',
             data: bars,
             barMaxWidth: 24,
-            label: { show: !narrow, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { dataIndex: number }) => label(p.dataIndex) },
+            barMinHeight: 4,
+            label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { dataIndex: number }) => label(p.dataIndex) },
           },
         ],
       };
@@ -950,7 +960,7 @@ const widthOf = (el: HTMLElement) => el.clientWidth;
 
 function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
   const chart = mod.echarts.init(el, undefined, { renderer: 'svg' });
-  const option = finalize(spec, build(spec, widthOf(el)));
+  const option = compose(el, spec, widthOf(el));
   chart.setOption(option);
   if (spec.kind === 'org' || spec.kind === 'gov') {
     // Düğüm bağlantıları rol sayfasına gider; aynı bağlantılar ana gezinmede de vardır.
@@ -968,17 +978,46 @@ function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
     const entry = charts.get(el);
     if (entry && Math.abs(widthOf(el) - entry.width) > 48) {
       entry.width = widthOf(el);
-      chart.setOption(finalize(entry.spec, build(entry.spec, entry.width)), { notMerge: true });
+      chart.setOption(compose(el, entry.spec, entry.width, true), { notMerge: true });
     }
   });
   observer.observe(el);
   charts.set(el, { chart, spec, width: widthOf(el), observer, shape: shapeOf(option) });
 }
 
+/**
+ * Satırlı grafik (`data-rows`): kutu satır başına etiket yüksekliğinden kısa olmaz. Açıklama (legend) satırları ve alttaki
+ * değer ekseni genişliğe göre değişir; payları burada hesaplanıp `--chart-row-pad` olarak kutuya yazılır.
+ */
+function legendPad(spec: ChartSpec, width: number): number | null {
+  const yatay = spec.kind === 'opex-stack-h' || spec.kind === 'opex-group' || (spec.kind === 'opex-stack' && width < OPEX_NARROW);
+  if (!yatay) return null;
+  const names = [...spec.series.map((s) => s.name), ...('line' in spec && spec.line ? [spec.line.name] : [])];
+  // kutu iç boşluğu 2×4 + açıklama + ızgara alt payı + değer ekseni etiketi (satır + boşluk)
+  return 8 + legendTop(names, width) + 4 + FONT_SIZE + 6 + 12;
+}
+
+/**
+ * Seçenek + satır payı. Pay yazı boyutuyla hesaplanır (önce güncellenir). Boyut gözlemcisinin içinden çağrılınca pay bir
+ * sonraki karede yazılır: gözlenen kutu kendi bildirimi sırasında boyut değiştirmez (ResizeObserver döngü hatası olmaz).
+ */
+function compose(el: HTMLElement, spec: ChartSpec, width: number, ertele = false) {
+  FONT_SIZE = fontPx();
+  const canvas = el.closest<HTMLElement>('.chart-canvas[data-rows]');
+  const pad = canvas ? legendPad(spec, width) : null;
+  const uygula = () => {
+    if (canvas && pad !== null) canvas.style.setProperty('--chart-row-pad', `${pad}px`);
+    else canvas?.style.removeProperty('--chart-row-pad');
+  };
+  if (ertele) requestAnimationFrame(uygula);
+  else uygula();
+  return finalize(spec, build(spec, width));
+}
+
 function redrawAll() {
   for (const [el, entry] of charts) {
     entry.width = widthOf(el);
-    entry.chart.setOption(finalize(entry.spec, build(entry.spec, entry.width)), { notMerge: true });
+    entry.chart.setOption(compose(el, entry.spec, entry.width), { notMerge: true });
   }
 }
 
@@ -1004,12 +1043,16 @@ export async function drawChart(el: HTMLElement, spec: ChartSpec) {
     loader = null;
     throw error;
   }
-  // Etiket ölçüleri Outfit ile hesaplansın: yazı tipi yüklenmeden ilk çizim yapılmaz.
-  await document.fonts?.ready;
+  // Etiket ölçüleri sayfanın yazı tipiyle hesaplansın: yazı tipi yüklenmeden ilk çizim yapılmaz. Dar yazı (Giderler)
+  // yalnız grafikte kullanıldığı için kendiliğinden inmez; Türkçe harfleriyle birlikte açıkça yüklenir.
+  const condensed = token('--font-condensed');
+  await Promise.all([document.fonts?.ready, condensed ? document.fonts?.load(`${FONT_SIZE}px ${condensed}`, 'AaĞğİıŞşÜüÖöÇç').catch(() => undefined) : undefined]);
+  // Beklerken kutu kaldırıldıysa (yıl sekmesi değişti) grafik kurulmaz: kopuk öğede örnek ve gözlemci kalmasın.
+  if (!el.isConnected) return;
   const entry = charts.get(el);
   if (entry) {
     entry.width = widthOf(el);
-    const option = finalize(spec, build(spec, entry.width));
+    const option = compose(el, spec, entry.width);
     const shape = shapeOf(option);
     if (entry.spec.kind === spec.kind && entry.shape === shape) entry.chart.setOption(option, { replaceMerge: ['series'] });
     else entry.chart.setOption(option, { notMerge: true });

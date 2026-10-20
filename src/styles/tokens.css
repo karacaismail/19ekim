@@ -69,8 +69,13 @@
   --chart-row-h: 1.25rem;
   --chart-row-h-wrap2: 2.75rem;
   --chart-row-h-wrap3: 4.25rem;
+  /* Sarılmayan kısa ad (ay): tek satır + çubuk payı */
+  --chart-row-h-short: 1.75rem;
   --chart-row-pad: 1rem;
   --chart-row-pad-axis: 3rem;
+  /* Açıklama (legend) + değer ekseni: geniş grafikte tek, dar grafikte ≈ üç açıklama satırı (charts.ts → legendPad düzeltir) */
+  --chart-row-pad-legend: 6.5rem;
+  --chart-row-pad-legend-narrow: 10.5rem;
   --chart-h-sm: 16rem;
   --chart-h-md: 22rem;
   --chart-h-lg: 26rem;
@@ -110,6 +115,8 @@
  */
 :root[data-page='giderler'] {
   --font-sans: 'Roboto Variable', 'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Grafik ad etiketleri (kişi, kategori): dar yazı, uzun ad sığsın (kullanıcı kararı 2026-10-20). */
+  --font-condensed: 'Roboto Condensed Variable', 'Roboto Condensed', 'Roboto Variable', 'Roboto', ui-sans-serif, system-ui, sans-serif;
   --text-sm: 0.9375rem;
   --text-table: 0.9375rem;
 }

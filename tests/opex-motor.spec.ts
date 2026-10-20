@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { donemOf, kisiDonem, type Kisi, type Kume3, type OpexModel, type Satir } from '../src/data/opex';
+import { donemOf, kisiDonem, planOfModel, type Kisi, type Kume3, type OpexModel, type Satir } from '../src/data/opex';
 
 type Plan = { aylar: (Kume3 & { ad: string; kisa: string })[]; toplam: Kume3 };
 import { buildInput, buildModel, exampleTohum, motor, NOW } from './opex-fixture';
@@ -190,6 +190,19 @@ test.describe('OPEX motoru: 12 aylık plan', () => {
     // Rapor yılı 2027 ise 2026 sekmesi tüm yıl.
     expect(donemOf(buildModel({ params: { rapor_yili: 2027, rapor_ayi: 3 } }), 2026).aySayisi).toBe(12);
   });
+
+  // Sayfa planı (kullanıcı kararı 2026-10-20: 15 aylık plan) rapor ayıyla kaymaz: her zaman ızgaranın ayları.
+  for (const params of [{ rapor_yili: 2026, rapor_ayi: 10 }, { rapor_yili: 2026, rapor_ayi: 11 }, { rapor_yili: 2027, rapor_ayi: 1 }]) {
+    test(`sayfa planı ${params.rapor_ayi}/${params.rapor_yili}: Ekim 2026 – Aralık 2027, 15 ay`, () => {
+      const model = buildModel({ params });
+      const p = planOfModel(model);
+      expect(p.aySayisi).toBe(15);
+      expect(p.etiket).toBe('Ekim 2026 – Aralık 2027');
+      expect(p.aylar[0].ad).toBe('Ekim 2026');
+      expect(p.donemler.map((d) => d.aySayisi)).toEqual([3, 12]);
+      close(p.toplam.toplam, p.aylar.reduce((t, a) => t + a.toplam, 0), 0.05);
+    });
+  }
 
   test('Kasım 2027’de başlarsa 2027 sonrası hesaplanmaz (2 ay)', () => {
     const late = buildModel({ params: { rapor_yili: 2027, rapor_ayi: 11 } }) as OpexModel & { plan: Plan };

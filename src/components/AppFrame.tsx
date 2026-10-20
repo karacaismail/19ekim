@@ -1,9 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
-import { meta } from '../data/program';
 import { ModelProvider, useParams } from './ModelContext';
-import { COMMON_NAV, HIRING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { COMMON_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { href, normalizePath } from '../lib/paths';
 
@@ -137,15 +136,21 @@ function useMotionMs(name: string) {
   return ms;
 }
 
+type MenuLink = { label: string; path: string; role?: string; no?: number; also?: string[] };
+
+/** Başlıktaki açılır menüler (kullanıcı kararı 2026-10-20): İstihdam (organizasyon, roller, takvim) ve Pazarlama. */
+const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string }[] = [
+  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV], dividerBefore: HIRING_NAV.path },
+  { label: 'Pazarlama', items: MARKETING_NAV },
+];
+
 /**
- * “İstihdam” açılır menüsü (kullanıcı kararı 2026-10-20): organizasyon şeması, rol sayfaları ve istihdam takvimi.
- * Mantine Menu
- * (erişilebilir menü: oklar, Home/End, Escape, odak tetikleyiciye döner); panel ve tetikleyici markalı. Etkin sayfa
- * menüdeyse tetikleyici seçili görünür, öğe aria-current taşır.
+ * Açılır gezinme menüsü. Mantine Menu (erişilebilir menü: oklar, Home/End, Escape, odak tetikleyiciye döner); panel ve
+ * tetikleyici markalı. Etkin sayfa menüdeyse tetikleyici seçili görünür, öğe aria-current taşır.
  */
-function HiringMenu({ current }: { current: string }) {
+function NavMenu({ label, items: links, dividerBefore, current }: { label: string; items: MenuLink[]; dividerBefore?: string; current: string }) {
   const duration = useMotionMs('--motion-duration-fast');
-  const items = [...TREE_NAV, HIRING_NAV].map((item: { label: string; path: string; role?: string; no?: number; also?: string[] }) => {
+  const items = links.map((item) => {
     const target = normalizePath(href(item.path));
     const exact = target === current;
     const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
@@ -165,13 +170,13 @@ function HiringMenu({ current }: { current: string }) {
     >
       <Menu.Target>
         <button type="button" className="mainnav-link mainnav-menu" data-section={active ? 'true' : undefined}>
-          İstihdam
+          {label}
           <IconChevronDown className="mainnav-chevron" size={16} stroke={2} aria-hidden="true" />
         </button>
       </Menu.Target>
-      <Menu.Dropdown aria-label="İstihdam">
+      <Menu.Dropdown aria-label={label}>
         {items.map((item) => [
-          item.path === HIRING_NAV.path ? <Menu.Divider key="ayrac" className="navmenu-divider" /> : null,
+          item.path === dividerBefore ? <Menu.Divider key="ayrac" className="navmenu-divider" /> : null,
           <Menu.Item
             key={item.path}
             component="a"
@@ -210,12 +215,12 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
       <div className="app">
         <header className="topbar">
           <div className="wrap">
+            {/* Logo altında alt başlık; plan tarihi başlıkta yok (kullanıcı kararı 2026-10-20). */}
             <a className="brand" href={href('/')}>
               <span className="brand-word">iStoc</span>
-              <span className="brand-sub">{meta.shortTitle}</span>
+              <span className="brand-tagline">Pazarlama &amp; Finansal Planlama</span>
             </a>
             <div className="topbar-tools">
-              <p className="plan-date">Plan tarihi: {meta.planDate}</p>
               <ThemeToggle />
             </div>
           </div>
@@ -223,11 +228,13 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
         <nav className="mainnav" aria-label="Ana gezinme">
           <div className="mainnav-rows">
             <ul className="mainnav-list">
-              <li className="mainnav-menu-li">
-                <HiringMenu current={current} />
-              </li>
-              {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menü yerine düz bağlantılar: temel deneyim. */}
-              {[...TREE_NAV, HIRING_NAV].map((item) => (
+              {NAV_MENUS.map((menu) => (
+                <li key={menu.label} className="mainnav-menu-li">
+                  <NavMenu {...menu} current={current} />
+                </li>
+              ))}
+              {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menüler yerine düz bağlantılar: temel deneyim. */}
+              {NAV_MENUS.flatMap((menu) => menu.items).map((item) => (
                 <li key={`js-yok-${item.path}`} className="mainnav-nojs">
                   <a className="mainnav-nojs-link" href={href(item.path)} aria-current={normalizePath(href(item.path)) === current ? 'page' : undefined}>
                     {item.label}

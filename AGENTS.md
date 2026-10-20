@@ -40,11 +40,14 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
-  - `/giderler/` OPEX (kullanıcı kararı 2026-10-20): özetin yerinde iki büyük yıl sekmesi (APG Tabs) — **2026** (rapor
-    ayından Aralık’a: Ekim–Aralık) ve **2027** (12 ay); altındaki her bölüm seçili yılın dönemine göre (`donemOf`,
-    `kisiDonem`): özet, aylık plan (her ay ayrı), kalemler (üç grup — teknoloji, ofis ve işletme, personel; “Tümü” dönem
-    OPEX’i), personel giderleri, netten brüte aylık bordro (kümülatif GV, asgari ücret istisnası, SGK tavanı), SGK teşvikleri, 2027 zam
-    (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
+  - `/giderler/` OPEX (kullanıcı kararı 2026-10-20). Sıra: önce yıl ayrımı olmayan bölümler (`planOfModel`: Sheets ızgarasının 15
+    ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (yatay yığın grafik + 15 ay, yıl toplamları ve genel
+    toplam tablosu) ve kalemler (kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
+    2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
+    sağlayıcıları); sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
+    seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri, netten brüte aylık bordro (kümülatif GV,
+    asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
+    Sheets → Parametreler’de); sayfa sonunda yalnız hesap damgası (zaman, motor sürümü, özet). Veri repoda yoktur: Google Sheets → Apps Script web
     uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa (`src/data/opex.ts`). Canlı bağlantı (kullanıcı kararı
     2026-10-20, “anlık, yalnız değişen değer”): sayfa görünürken bekleyen istek (`bekle: true`, uzun yoklama) gönderir;
     `doPost` önbellekteki özet değişene ya da ≈20 sn dolana kadar bekler, yanıt `bekledi: true` taşır, sayfa hemen yeniden
@@ -84,10 +87,12 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     `p_*` parametrelerle); elle yazılan farklı tutar o aya özeldir, 0 = o ay ödeme yok. Izgarada olmayan ay (Ocak–Eylül
     2026) Ekim’de etkin satır için etkindir; Ekim’de etkin olmayan satır ilk etkin (>0) ayında başlar, öncesi yoktur
     (yeni işe giriş: matrah sıfırdan). Başlıklar metin biçimindedir (tarihe dönmez); motor tarihe dönmüş başlığı da okur. Izgara alanında yabancı
-    içerik varsa Kurulum durur. Motor `aylikTl`/`aktif`/`ozel` üretir; sayfa “Etkin ay” sütunu ve “Ay ay kalemler”
-    tablosuyla gösterir; ızgarasız eski yanıt her ay etkin sayılır (`parseReply → aylariTamamla`). Yıl sekmelerinde seçim
+    içerik varsa Kurulum durur. Motor `aylikTl`/`aktif`/`ozel` üretir; sayfa bunu kalemler tablosunun ay sütunlarında
+    gösterir (— = o ay gider yok, “özel” = o aya ayrı tutar); ızgarasız eski yanıt her ay etkin sayılır (`parseReply → aylariTamamla`). Yıl sekmelerinde seçim
     durumunu sağ üstte 3rem SVG radyo işareti gösterir (seçili yeşil `--radio-checked`, iki temada ≥ 3:1; dar ekranda rakamın
-    üstüne sarılır); odak göstergesi değildir. Yalnız bu sayfa Roboto ve en küçük metin 15 CSS px kullanır (`:root[data-page='giderler']`, BaseLayout `page`).
+    üstüne sarılır); odak göstergesi değildir. Yalnız bu sayfa Roboto ve en küçük metin 15 CSS px kullanır (`:root[data-page='giderler']`, BaseLayout `page`);
+    grafik ad etiketleri (kişi, kategori) Roboto Condensed (`--font-condensed`, `@fontsource-variable/roboto-condensed`,
+    çizimden önce `document.fonts.load` ile yüklenir; uzun ad sözcük arasından sarılır, telefonda etiket sütunu ≥ %42).
   - `/notlar/` basit not ve görev listesi (TickTick benzeri): listeler, ekle, işaretle, düzenle, iki adımlı sil. Varsayılan
     notlar `src/data/notes.ts` (kullanıcının 19 Ekim notları: partner ağı, İK yönetimi); değişiklikler `istoc-plan-notlar`
     anahtarıyla yalnız o tarayıcıda saklanır.
@@ -120,18 +125,23 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
-- Başlık ve gezinme (kullanıcı kararı 2026-10-20): üst bant tek satır (dar ekranda marka alt yazısı ve tema yazısı
-  gizlenir), gezinme tek satır; organizasyon, rol sayfaları ve istihdam takvimi “İstihdam” açılır menüsünde (Mantine
-  Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak ekranda panel kendi
-  içinde kayar; JavaScript yoksa menü yerine düz bağlantılar). Sayfa başlıkları sıkışık (`--text-title`, geniş
+- Başlık ve gezinme (kullanıcı kararı 2026-10-20): üst bantta logo (“iStoc”) ve altında “Pazarlama & Finansal Planlama”,
+  sağda tema düğmesi (dar ekranda yazısı gizlenir); plan tarihi başlıkta yok. Gezinme tek satır: “İstihdam” (organizasyon,
+  rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
+  bekleyenler, parametreler; `MARKETING_NAV`) açılır menüleri, Giderler (OPEX), Notlar. Menüler tek bileşen (`NavMenu`,
+  `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
+  ekranda panel kendi içinde kayar; JavaScript yoksa menüler yerine düz bağlantılar). Sayfa başlıkları sıkışık (`--text-title`, geniş
   ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
   (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
-- Giderler ilk ekranı (kullanıcı kararı 2026-10-20): canlı durum kırıntı satırında küçük şerit (nokta, kısa metin,
-  simge düğmeler); 2026/2027 sekmeleri başlığın sağında, aynı şablonda (seçim radyo noktasıyla); özet kutuları tek
-  sırada; Gruplar ve Kategoriler yan yana alçak (≥ 1200 px). Gerçek tarayıcı alanlarında (1280×720, 1440×800,
-  1920×960) grafikler kaydırmadan görünür (test). Kategori ekseninde her ad yazılır (`interval: 0`); grafik kutusu
-  satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır 20 px, dar grafikte 44 px, telefonda 64 px).
+- Giderler ilk ekranı (kullanıcı kararı 2026-10-20, yıl seçici plan ve kalemlerin altına alındı): canlı durum kırıntı
+  satırında küçük şerit (nokta, kısa metin, simge düğmeler); ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
+  bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Grafikler yatay çubuk (dikey yığın kullanılmaz). Kategori
+  ekseninde her ad yazılır (`interval: 0`); grafik kutusu satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır
+  20 px, dar grafikte 44 px, telefonda 68 px; kısa ad — ay — için `shortLabels` 28 px; iç pay `--chart-row-pad`,
+  açıklama ve değer ekseni payını `charts.ts → legendPad` hesaplar). Netten işveren maliyetine (köprü): tam genişlik,
+  her adımın değeri çubuk ucunda (dar grafikte kısa “1,3 Mn ₺”), değer ekseni yok, ölçek en yüksek ara toplamda biter,
+  küçük adım en az 4 px. Bordro bileşenleri ve köprü tam genişlikte (yan yana yarım genişlikte etiketler gizleniyordu).
 - En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
 
