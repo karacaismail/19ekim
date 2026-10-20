@@ -1,5 +1,5 @@
 /**
- * iStoc OPEX — Google Sheets bağlantısı: özel işlev, menü ve web uygulaması (GitHub Pages veri ucu).
+ * Türksab OPEX — Google Sheets bağlantısı: özel işlev, menü ve web uygulaması (GitHub Pages veri ucu).
  *
  * Web uygulaması: Dağıt → Yeni dağıtım → Web uygulaması; “Şu kullanıcı olarak çalıştır: Ben”, “Erişimi olanlar: Herkes”.
  * Veri yalnız POST gövdesindeki erişim anahtarıyla döner (anahtar adreste taşınmaz). Anahtar Komut dosyası

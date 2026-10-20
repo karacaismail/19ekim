@@ -1,4 +1,4 @@
-# iStoc OPEX — Google Sheets + Apps Script
+# Türksab OPEX — Google Sheets + Apps Script
 
 Giderler sayfasının (<https://karacaismail.github.io/19ekim/giderler/>) veri kaynağı. Google Sheets tek kaynaktır:
 girdiler Sheets’te düzenlenir; aynı Apps Script motoru hem Sheets’teki hesap tablolarını/panoyu hem de sayfanın
@@ -65,7 +65,7 @@ Komutu ajan çalıştırır; Google adımları hesap sahibinin onayını gerekti
    node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js
    ```
 
-2. <https://sheets.new> ile yeni tablo açın (ör. “iStoc OPEX”). Uzantılar → Apps Script → `Kod.gs` içeriğini silip
+2. <https://sheets.new> ile yeni tablo açın (ör. “Türksab OPEX”). Uzantılar → Apps Script → `Kod.gs` içeriğini silip
    `OPEX.gs` içeriğini yapıştırın → Kaydet.
 3. Tabloyu yenileyin → **OPEX** menüsü → **Kurulum / onarım** → izinleri onaylayın (kendi betiğiniz; “doğrulanmadı”
    uyarısında Gelişmiş → devam). Kurulum bitince erişim anahtarı gösterilir.
@@ -79,7 +79,9 @@ Komutu ajan çalıştırır; Google adımları hesap sahibinin onayını gerekti
 Kod değişince paketi yeniden üretip Apps Script’e yapıştırın; ardından Dağıt → Dağıtımları yönet → Düzenle →
 Sürüm: **Yeni sürüm** (adres değişmez). Sheets yapısı için OPEX → Kurulum / onarım (girilen veri korunur; yalnız
 yukarıdaki eski gider sütunları bir kez kaldırılır, kaldırmadan önce “Dahil = hayır” satırlarının bütün ayları işaretsiz
-yapılır). Kurulum hata verirse dil ayarı yine tr_TR’ye döner.
+yapılır). Kurulum hata verirse dil ayarı yine tr_TR’ye döner. Apps Script bir çalıştırmayı 6 dakikada keser: Kurulum
+adımları ~3,5 dakika dolunca durur, ilerlemesini kaydeder ve “Kurulum sürüyor … yeniden çalıştırın” der; yeniden
+çalıştırınca kaldığı adımdan sürer (zamanlanmış görev kurulmaz).
 Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
 Onay kutuları kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir. Satırda en az bir ay işaretliyse boş
 kutu işaretsiz sayılır (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda her ay işaretlidir.

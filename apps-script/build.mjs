@@ -40,7 +40,7 @@ const bolumler = PARCALAR.map((p) => `// ===== ${p} =====\n${readFileSync(resolv
 if (tohum) bolumler.push(`// ===== Tohum (kişisel veri; repoya girmez) =====\n${readFileSync(resolve(process.cwd(), tohum), 'utf8')}`);
 
 const ust = `/**
- * iStoc OPEX — Google Apps Script paketi (${new Date().toISOString().slice(0, 10)}).
+ * Türksab OPEX — Google Apps Script paketi (${new Date().toISOString().slice(0, 10)}).
  * Kaynak: github.com/karacaismail/19ekim → apps-script/. Bu dosyayı düzenlemeyin; kaynaktan yeniden üretin.
  * Kurulum: OPEX menüsü → Kurulum / onarım. Ayrıntı: apps-script/README.md
  */

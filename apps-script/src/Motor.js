@@ -1,5 +1,5 @@
 /**
- * iStoc OPEX motoru: saf hesap. Google Apps Script (V8) ve Node testleri aynı dosyayı çalıştırır.
+ * Türksab OPEX motoru: saf hesap. Google Apps Script (V8) ve Node testleri aynı dosyayı çalıştırır.
  *
  * Girdi: Google Sheets girdi sayfalarının ham değerleri (başlık satırı dahil 2B diziler): Parametreler,
  * Personel, Giderler, Teşvikler. Çıktı: sayfa (GitHub Pages) ve Sheets panosu için tek model.

@@ -1,11 +1,11 @@
 /**
- * iStoc OPEX — Google Sheets kurulumu ve onarımı (OPEX menüsü → Kurulum / onarım).
+ * Türksab OPEX — Google Sheets kurulumu ve onarımı (OPEX menüsü → Kurulum / onarım).
  *
  * Tekrar çalıştırılabilir: girdi sayfalarındaki veriye dokunmaz; eksik sayfa, başlık, parametre, biçim, açılır liste,
  * adlandırılmış aralık, hesap formülü ve pano grafiklerini tamamlar. Boş Personel/Giderler sayfası yalnız
  * `OPEX_TOHUM` tanımlıysa (repo dışındaki Tohum.js) doldurulur.
  *
- * Görsel kimlik: iStoc mürekkep + turuncu; grafik renkleri sayfadaki ECharts paletiyle aynı (mavi, turuncu, aqua, sarı).
+ * Görsel kimlik: mürekkep + turuncu; grafik renkleri sayfadaki ECharts paletiyle aynı (mavi, turuncu, aqua, sarı).
  */
 
 var OPEX_STIL = {
@@ -36,18 +36,91 @@ var OPEX_BICIM = {
   tamsayi: '0',
 };
 
+/** Kurulum adımları (sırayla). Her adım tek başına tekrar çalıştırılabilir. */
+var OPEX_KURULUM_ADIMLARI = [
+  ['sayfalar', function (ss) {
+    // Eski adla duran personel sayfası yeni ada taşınır; Düzenli Giderler Küme’ye göre iki gider sayfasına ayrılır
+    // (gizli eski sütunlar ayırmadan önce kaldırılır).
+    var eskiPersonel = opexSayfasi_(ss, 'personel');
+    if (eskiPersonel && eskiPersonel.getName() !== OPEX_SAYFA.personel) eskiPersonel.setName(OPEX_SAYFA.personel);
+    var birlesik = !ss.getSheetByName(OPEX_SAYFA.teknoloji) ? opexSayfasi_(ss, 'teknoloji') : null;
+    if (birlesik) eskiGiderSutunlariniKaldir_(birlesik);
+    giderSayfalariniAyir_(ss);
+    var sira = [OPEX_SAYFA.pano, OPEX_SAYFA.hepsi, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.personel, OPEX_SAYFA.bordro, OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.hesap];
+    sira.forEach(function (ad, i) {
+      var sh = ss.getSheetByName(ad) || ss.insertSheet(ad, i);
+      ss.setActiveSheet(sh);
+      ss.moveActiveSheet(i + 1);
+    });
+    // Yeni dosyanın boş varsayılan sayfası kaldırılır.
+    ss.getSheets().forEach(function (sh) {
+      if (sira.indexOf(sh.getName()) < 0 && !sh.isSheetHidden() && sh.getLastRow() === 0 && sh.getLastColumn() === 0) ss.deleteSheet(sh);
+    });
+    // Aylık ızgara sütunları formüllerden önce açılır; yoksa OPEX(...) aralığı #REF! olur.
+    OPEX_GIDER_SAYFALARI.concat(['personel']).forEach(function (k) {
+      sutunGarantile_(ss.getSheetByName(OPEX_SAYFA[k]), OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1);
+    });
+  }],
+  ['parametreler', function (ss) { parametreleriKur_(ss); }],
+  ['tesvikler', function (ss) { tesvikleriKur_(ss); }],
+  ['personel', function (ss) { personeliKur_(ss); }],
+  ['ofis', function (ss) { giderleriKur_(ss, 'ofis'); }],
+  ['teknoloji', function (ss) { giderleriKur_(ss, 'teknoloji'); }],
+  ['hepsi', function (ss) { hepsiKur_(ss); }],
+  ['bordro', function (ss) { bordroyuKur_(ss); }],
+  ['hesap', function (ss) { hesabiKur_(ss); }],
+  ['pano', function (ss) { panoyuKur_(ss); }],
+  ['grafikler', function () { SpreadsheetApp.flush(); panoyuCiz(); }],
+];
+var OPEX_KURULUM_OZELLIGI = 'OPEX_KURULUM';
+/** Apps Script bir çalıştırmayı 6 dakikada keser; kurulum ~3,5 dakika dolunca durur, ilerlemesini kaydeder. */
+var OPEX_KURULUM_BUTCE = 3.5 * 60 * 1000;
+
+function opexSimdi_() {
+  return Date.now();
+}
+
+/**
+ * Kurulum / onarım. Adımlar süre bütçesi içinde sırayla çalışır; bütçe dolarsa kalan adım kaydedilir ve Kurulum yeniden
+ * çalıştırılınca oradan sürer (6 saatten eski kayıt yok sayılır). Formüller virgül ayraçlı yazılır: her çalıştırma
+ * en_US ile başlar ve hata olsa da tr_TR ile biter (Sheets formülleri “;” ile gösterir). Zamanlanmış görev kurulmaz.
+ */
 function kurulum() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // Formüller virgül ayraçlı yazılır: önce en_US, en sonda (hata olsa da) tr_TR (Sheets formülleri “;” ile gösterir).
+  var props = PropertiesService.getDocumentProperties();
+  var bas = opexSimdi_();
+  var kayit = {};
+  try {
+    kayit = JSON.parse(props.getProperty(OPEX_KURULUM_OZELLIGI) || '{}');
+  } catch (hata) {
+    kayit = {};
+  }
+  var ilk = kayit.zaman && bas - kayit.zaman < 6 * 3600 * 1000 ? Math.max(0, Math.min(kayit.adim || 0, OPEX_KURULUM_ADIMLARI.length)) : 0;
+  var i = ilk;
   ss.setSpreadsheetLocale('en_US');
   ss.setSpreadsheetTimeZone('Europe/Istanbul');
   SpreadsheetApp.flush();
   try {
-    kurulumAdimlari_(ss);
+    for (; i < OPEX_KURULUM_ADIMLARI.length; i++) {
+      if (i > ilk && opexSimdi_() - bas > OPEX_KURULUM_BUTCE) break;
+      OPEX_KURULUM_ADIMLARI[i][1](ss);
+      props.setProperty(OPEX_KURULUM_OZELLIGI, JSON.stringify({ adim: i + 1, zaman: opexSimdi_() }));
+    }
   } finally {
     ss.setSpreadsheetLocale('tr_TR');
     SpreadsheetApp.flush();
   }
+  if (i < OPEX_KURULUM_ADIMLARI.length) {
+    var mesaj = 'Kurulum sürüyor: ' + i + '/' + OPEX_KURULUM_ADIMLARI.length + ' adım tamam. Kalanlar için OPEX → Kurulum / onarım’ı yeniden çalıştırın.';
+    console.log(mesaj);
+    try {
+      ss.toast(mesaj, 'OPEX', 10);
+    } catch (hata) {
+      // Düzenleyiciden çalıştırılınca bildirim gösterilemeyebilir.
+    }
+    return;
+  }
+  props.deleteProperty(OPEX_KURULUM_OZELLIGI);
   ss.setActiveSheet(ss.getSheetByName(OPEX_SAYFA.pano));
   anahtariSagla_();
   // Düzenleyiciden çalıştırılınca Sheets arayüzü yoktur (getUi hata verir); bilgi OPEX menüsünden de açılır.
@@ -56,41 +129,7 @@ function kurulum() {
   } catch (hata) {
     console.log('Kurulum tamam. Web bağlantısı bilgisi: Sheets → OPEX → Web bağlantısı bilgisi.');
   }
-}
-
-function kurulumAdimlari_(ss) {
-  // Eski adla duran personel sayfası yeni ada taşınır; Düzenli Giderler Küme’ye göre iki gider sayfasına ayrılır
-  // (gizli eski sütunlar ayırmadan önce kaldırılır).
-  var eskiPersonel = opexSayfasi_(ss, 'personel');
-  if (eskiPersonel && eskiPersonel.getName() !== OPEX_SAYFA.personel) eskiPersonel.setName(OPEX_SAYFA.personel);
-  var birlesik = !ss.getSheetByName(OPEX_SAYFA.teknoloji) ? opexSayfasi_(ss, 'teknoloji') : null;
-  if (birlesik) eskiGiderSutunlariniKaldir_(birlesik);
-  giderSayfalariniAyir_(ss);
-  var sira = [OPEX_SAYFA.pano, OPEX_SAYFA.hepsi, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.personel, OPEX_SAYFA.bordro, OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.hesap];
-  sira.forEach(function (ad, i) {
-    var sh = ss.getSheetByName(ad) || ss.insertSheet(ad, i);
-    ss.setActiveSheet(sh);
-    ss.moveActiveSheet(i + 1);
-  });
-  // Yeni dosyanın boş varsayılan sayfası kaldırılır.
-  ss.getSheets().forEach(function (sh) {
-    if (sira.indexOf(sh.getName()) < 0 && sh.getLastRow() === 0 && sh.getLastColumn() === 0) ss.deleteSheet(sh);
-  });
-  // Aylık ızgara sütunları formüllerden önce açılır; yoksa OPEX(...) aralığı #REF! olur.
-  OPEX_GIDER_SAYFALARI.concat(['personel']).forEach(function (k) {
-    sutunGarantile_(ss.getSheetByName(OPEX_SAYFA[k]), OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1);
-  });
-
-  parametreleriKur_(ss);
-  tesvikleriKur_(ss);
-  personeliKur_(ss);
-  OPEX_GIDER_SAYFALARI.forEach(function (k) { giderleriKur_(ss, k); });
-  hepsiKur_(ss);
-  bordroyuKur_(ss);
-  hesabiKur_(ss);
-  panoyuKur_(ss);
-  SpreadsheetApp.flush();
-  panoyuCiz();
+  console.log('Kurulum tamam.');
 }
 
 /* ---------- Ortak yardımcılar ---------- */
@@ -898,7 +937,7 @@ function panoyuKur_(ss) {
   for (var c = 1; c <= sutun; c++) sh.setColumnWidth(c, 112);
   sh.getRange(1, 1, 175, sutun).setBackground(OPEX_STIL.zemin);
 
-  sh.getRange('A1:L1').merge().setValue('iStoc · OPEX panosu').setFontSize(22).setFontWeight('bold');
+  sh.getRange('A1:L1').merge().setValue('Türksab · OPEX panosu').setFontSize(22).setFontWeight('bold');
   sh.getRange('A2:H2').merge().setValue('Teknoloji ve insan kümeleri + ofis/işletme. Google Sheets değişince GitHub Pages sayfası ≈15 sn içinde güncellenir.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange('I2:L2').merge().setFormula('=IF(Hesap!B18>0,"⚠ "&Hesap!B18&" uyarı: Hesap sayfası, Uyarılar sütunu","Uyarı yok")').setFontColor(OPEX_STIL.ikincil).setHorizontalAlignment('right');
   sh.setRowHeight(1, 46);

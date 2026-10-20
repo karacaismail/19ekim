@@ -282,6 +282,43 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(r.model.ozet.odeme.takip, '“Bu ay ödendi” sütunu yok').toBe(false);
   });
 
+  test('Kurulum adım adım ve kaldığı yerden sürer: süre bütçesi dolunca ilerleme kaydedilir, dil her çalıştırmada tr_TR’ye döner', () => {
+    // Apps Script tek çalıştırmayı 6 dakikada keser (kullanıcının tablosunda bir kez oldu); kurulum ~3,5 dakikada durur.
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const g = ctx as Record<string, unknown>;
+    let saat = 0;
+    const yapilan: string[] = [];
+    const diller: string[] = [];
+    const ozellik = new Map<string, string>();
+    g.opexSimdi_ = () => saat;
+    g.PropertiesService = {
+      ...(g.PropertiesService as object),
+      getDocumentProperties: () => ({ getProperty: (k: string) => ozellik.get(k) ?? null, setProperty: (k: string, v: string) => void ozellik.set(k, v), deleteProperty: (k: string) => void ozellik.delete(k) }),
+    };
+    const ss = { setSpreadsheetLocale: (l: string) => void diller.push(l), setSpreadsheetTimeZone: () => undefined, getSheetByName: () => ({}), setActiveSheet: () => undefined, toast: () => undefined };
+    g.SpreadsheetApp = { ...(g.SpreadsheetApp as object), getActiveSpreadsheet: () => ss, flush: () => undefined };
+    g.anahtariSagla_ = () => void yapilan.push('anahtar');
+    g.baglantiBilgisi = () => void yapilan.push('bilgi');
+    const adimlar = g.OPEX_KURULUM_ADIMLARI as [string, (ss: unknown) => void][];
+    adimlar.forEach((a) => (a[1] = () => { yapilan.push(a[0]); saat += 60_000; }));
+    const kurulum = g.kurulum as () => void;
+    kurulum();
+    expect(yapilan, 'ilk çalıştırma: 3,5 dk bütçeyle 4 adım').toEqual(adimlar.slice(0, 4).map((a) => a[0]));
+    expect(diller).toEqual(['en_US', 'tr_TR']);
+    expect(JSON.parse(ozellik.get('OPEX_KURULUM')!).adim).toBe(4);
+    let tur = 1;
+    while (ozellik.has('OPEX_KURULUM') && tur < 10) { kurulum(); tur++; }
+    expect(yapilan.filter((x) => x !== 'anahtar' && x !== 'bilgi'), 'her adım bir kez, sırayla').toEqual(adimlar.map((a) => a[0]));
+    expect(yapilan.slice(-2), 'bitince anahtar ve bağlantı bilgisi').toEqual(['anahtar', 'bilgi']);
+    expect(diller.filter((d) => d === 'tr_TR').length, 'her çalıştırma tr_TR ile biter').toBe(tur);
+    // Eski (6 saatten eski) yarım kayıt yok sayılır; baştan başlar.
+    ozellik.set('OPEX_KURULUM', JSON.stringify({ adim: 5, zaman: saat - 7 * 3600_000 }));
+    yapilan.length = 0;
+    kurulum();
+    expect(yapilan[0]).toBe(adimlar[0][0]);
+  });
+
   test('Kurulum: yeni sayfa adları ve yerleşimle formül; alt toplam ve asgari ücret motordan (özel işlev); döviz biçimi', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
