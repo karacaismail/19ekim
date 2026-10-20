@@ -69,6 +69,8 @@ var OPEX_KURULUM_ADIMLARI = [
   ['hepsi', function (ss) { hepsiKur_(ss); }],
   ['bordro', function (ss) { bordroyuKur_(ss); }],
   ['hesap', function (ss) { hesabiKur_(ss); }],
+  // Hesaplar düz değer yazılır (özel işlev yok); kurulum kilidi tutar.
+  ['hesaplar', function () { hesaplariYaz_({ zorla: true, kilitli: true }); }],
   ['pano', function (ss) { panoyuKur_(ss); }],
   ['grafikler', function () { SpreadsheetApp.flush(); panoyuCiz(); }],
   ['korumalar', function (ss) { ss.getSheets().forEach(korumalariKaldir_); }],
@@ -77,10 +79,6 @@ var OPEX_KURULUM_OZELLIGI = 'OPEX_KURULUM';
 /** Apps Script bir çalıştırmayı 6 dakikada keser; kurulum ~3,5 dakika dolunca durur, ilerlemesini kaydeder. */
 var OPEX_KURULUM_BUTCE = 3.5 * 60 * 1000;
 
-function opexSimdi_() {
-  return Date.now();
-}
-
 /**
  * Kurulum / onarım. Adımlar süre bütçesi içinde sırayla çalışır; bütçe dolarsa kalan adım kaydedilir ve Kurulum yeniden
  * çalıştırılınca oradan sürer (6 saatten eski kayıt yok sayılır). Formüller virgül ayraçlı yazılır: her çalıştırma
@@ -88,6 +86,20 @@ function opexSimdi_() {
  */
 function kurulum() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Kurulum sürerken düzenleme tetikleyicisi hesap yazmaz (aynı betik kilidi).
+  var kilit = kilitAl_(30000);
+  if (kilit === false) {
+    console.log('Hesaplar yazılıyor; Kurulum’u birkaç saniye sonra yeniden çalıştırın.');
+    return;
+  }
+  try {
+    kurulumAdimlari_(ss);
+  } finally {
+    if (kilit) kilit.releaseLock();
+  }
+}
+
+function kurulumAdimlari_(ss) {
   var props = PropertiesService.getDocumentProperties();
   var bas = opexSimdi_();
   var kayit = {};
@@ -145,53 +157,40 @@ function sutunHarfi_(n) {
   return s;
 }
 
-function sayfaAdi_(k) {
-  return "'" + OPEX_SAYFA[k] + "'";
+/**
+ * Net asgari ücret, yerel formül ifadesi (Parametreler’in adlı aralıkları; GV/DV istisnalı asgaride net = brüt − SGK −
+ * işsizlik işçi payı). Asgari ücretlinin Tutar hücresi ve eski =OPEX("asgari-net-…") çağrılarının yerine geçer.
+ */
+function asgariNetIfadesi_(yil) {
+  return 'ROUND(p_asgari_brut_' + yil + '*(1-p_sgk_isci-p_issizlik_isci),2)';
 }
 
-/** Girdi (A’dan) ve ızgara aralıkları (açık uçlu sütun aralığı). */
-function aralik_(k, ilk, son) {
-  return sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1:' + sutunHarfi_(son);
-}
-
-function girdiAraligi_(k) {
-  return aralik_(k, 1, OPEX_GIRDI_SUTUN[k]);
-}
-
-function izgaraAraligi_(k) {
-  return aralik_(k, OPEX_IZGARA[k], OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1);
-}
-
-/** OPEX(...) formülü: tüm girdi aralıkları argümandır, biri değişince yeniden hesaplanır. */
-function opexFormulu_(rapor) {
-  return '=OPEX("' + rapor + '",Parametreler!A1:F,' + girdiAraligi_('personel') + ',' + girdiAraligi_('teknoloji') + ",'Teşvikler'!A1:I," +
-    izgaraAraligi_('teknoloji') + ',' + izgaraAraligi_('personel') + ',' + girdiAraligi_('ofis') + ',' + izgaraAraligi_('ofis') + ')';
-}
-
-/** 1. satırdan formülün bir üst satırına uzanan aralık (OFFSET: kendi çıktısına başvurmaz, araya satır eklenince genişler). */
-function ustAralik_(k, ilk, genislik) {
-  return 'OFFSET(' + sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1,0,0,ROW()-1,' + genislik + ')';
-}
-
-/** Alt toplam satırı: motor (özel işlev) ızgara genişliğinde tek satır döner; döngüsel başvuru yoktur. */
-function toplamFormulu_(k) {
-  var girdi = ustAralik_(k, 1, OPEX_GIRDI_SUTUN[k]);
-  var izgara = ustAralik_(k, OPEX_IZGARA[k], OPEX_IZGARA.genislik);
-  if (k !== 'personel') return '=OPEX("gider-toplam",Parametreler!A1:F,"",' + girdi + ',"",' + izgara + ',"")';
-  return '=OPEX("personel-toplam",Parametreler!A1:F,' + girdi + ',"","","",' + izgara + ')';
-}
-
-/** Asgari ücretlinin Tutar hücresi: motorun hesapladığı net asgari ücret (Parametreler’e bağlı). */
 function asgariNetFormulu_(yil) {
-  return '=OPEX("asgari-net-' + yil + '",Parametreler!A1:F)';
+  return '=' + asgariNetIfadesi_(yil);
+}
+
+/**
+ * Girdi sayfasındaki eski özel işlev çağrıları (=OPEX("asgari-net-2026",…), ör. “× 1,5” ile) aynı değeri veren yerel
+ * ifadeye çevrilir: her değişiklikte “Yükleniyor…” olmaz. Formülün geri kalanı korunur. Çevrilen hücre sayısını döner.
+ */
+function ozelIslevleriCevir_(sh) {
+  if (!sh || sh.getLastRow() < 1) return 0;
+  var formuller = sh.getDataRange().getFormulas();
+  var n = 0;
+  formuller.forEach(function (satir, i) {
+    satir.forEach(function (f, j) {
+      if (!/OPEX\(/i.test(f)) return;
+      var yeni = f.replace(/OPEX\(\s*"asgari-net-(2026|2027)"[^)]*\)/gi, function (_, yil) { return asgariNetIfadesi_(yil); });
+      if (yeni === f) return;
+      sh.getRange(i + 1, j + 1).setFormula(yeni);
+      n += 1;
+    });
+  });
+  return n;
 }
 
 function paraBicimi_(para) {
   return OPEX_PARA_BICIMI[String(para || '').trim().toUpperCase()] || OPEX_PARA_BICIMI.TRY;
-}
-
-function toplamSatiriMi_(v) {
-  return String(v).trim().toLocaleLowerCase('tr-TR').indexOf('toplam') === 0;
 }
 
 /**
@@ -208,24 +207,36 @@ function paraBiciminiUygula_(sh, satir, n) {
   }));
 }
 
-/** Basit tetikleyici: gider sayfalarında Para birimi değişince o satırların tutarları yeni dövizle görünür. */
+/**
+ * Basit tetikleyici: hesaplar düz değer olarak yeniden yazılır (Sheets.js → hesaplariTetikle_); gider sayfalarında Para
+ * birimi değişince o satırların tutarları yeni dövizle görünür.
+ */
 function onEdit(e) {
   try {
-    var r = e && e.range;
-    if (!r) return;
-    var sh = r.getSheet();
-    var ad = sh.getName();
-    var giderSayfasi = OPEX_GIDER_SAYFALARI.some(function (k) { return ad === OPEX_SAYFA[k]; }) || OPEX_ESKI_AD.teknoloji.indexOf(ad) >= 0;
-    if (!giderSayfasi) return;
-    // Yalnız yeni yerleşimde (ızgara I’den başlar); kurulumdan önceki eski yerleşime dokunmaz.
-    if (sh.getRange(3, OPEX_IZGARA.teknoloji).getDisplayValue() !== izgaraBasliklari_()[0]) return;
-    var ilk = Math.max(r.getRow(), 4);
-    var son = r.getRow() + r.getNumRows() - 1;
-    if (son < ilk || r.getColumn() > 5 || r.getLastColumn() < 5) return;
-    paraBiciminiUygula_(sh, ilk, son - ilk + 1);
+    paraBiciminiDuzenle_(e);
   } catch (hata) {
-    console.log('onEdit: ' + hata);
+    console.log('onEdit biçim: ' + hata);
   }
+  try {
+    hesaplariTetikle_(e);
+  } catch (hata) {
+    console.log('onEdit hesap: ' + hata);
+  }
+}
+
+function paraBiciminiDuzenle_(e) {
+  var r = e && e.range;
+  if (!r) return;
+  var sh = r.getSheet();
+  var ad = sh.getName();
+  var giderSayfasi = OPEX_GIDER_SAYFALARI.some(function (k) { return ad === OPEX_SAYFA[k]; }) || OPEX_ESKI_AD.teknoloji.indexOf(ad) >= 0;
+  if (!giderSayfasi) return;
+  // Yalnız yeni yerleşimde (ızgara I’den başlar); kurulumdan önceki eski yerleşime dokunmaz.
+  if (sh.getRange(3, OPEX_IZGARA.teknoloji).getDisplayValue() !== izgaraBasliklari_()[0]) return;
+  var ilk = Math.max(r.getRow(), 4);
+  var son = r.getRow() + r.getNumRows() - 1;
+  if (son < ilk || r.getColumn() > 5 || r.getLastColumn() < 5) return;
+  paraBiciminiUygula_(sh, ilk, son - ilk + 1);
 }
 
 /**
@@ -263,7 +274,7 @@ function eskiGiderSutunlariniKaldir_(sh) {
 
 /**
  * Alt toplam satırı (“Toplam (₺)”): son veri satırının hemen altında; ızgara hücreleri temizlenir (elle yazılmış eski
- * toplamlar dahil), motorun toplam satırı yazılır. Formül sonucu mavi.
+ * toplamlar dahil). Değerleri hesap yazımı (hesaplariYaz_) düz değer olarak yazar; kod sonucu mavi.
  */
 function toplamSatiriKur_(sh, k, n) {
   var hedef = 4 + n;
@@ -276,7 +287,6 @@ function toplamSatiriKur_(sh, k, n) {
   // Toplam satırında girdi açılır listeleri (Küme, Kategori…) görünmesin.
   sh.getRange(hedef, 2, 1, OPEX_GIRDI_SUTUN[k] - 1).clearContent().clearDataValidations();
   sh.getRange(hedef, 1).setValue('Toplam (₺)').setFontWeight('bold');
-  sh.getRange(hedef, ilk).setFormula(toplamFormulu_(k));
   sh.getRange(hedef, ilk, 1, g).setNumberFormat(OPEX_BICIM.tl).setFontWeight('bold').setFontColor(OPEX_STIL.formul).setBackground(OPEX_STIL.hesap);
   sh.getRange(hedef, 1, 1, OPEX_GIRDI_SUTUN[k]).setBackground(OPEX_STIL.hesap);
 }
@@ -501,7 +511,7 @@ function korumalariKaldir_(sh) {
 function parametreleriKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.parametreler);
   var b = OpexMotor.BASLIKLAR.parametreler;
-  girdiBasligi_(sh, 'Parametreler', 'Beyaz hücreler değiştirilebilir. Değişiklik tüm hesaplara, panoya ve sayfaya (≈15 sn) yansır. Oranlar yüzde biçimindedir.', [b.grup, b.ad, b.deger, b.birim, b.anahtar, b.aciklama]);
+  girdiBasligi_(sh, 'Parametreler', 'Beyaz hücreler değiştirilebilir. Değişiklik tüm hesaplara, panoya ve sayfaya birkaç saniyede yansır. Oranlar yüzde biçimindedir.', [b.grup, b.ad, b.deger, b.birim, b.anahtar, b.aciklama]);
 
   // Mevcut anahtarlar (onarımda değerler korunur).
   var son = Math.max(sh.getLastRow(), 3);
@@ -614,7 +624,6 @@ function tesvikleriKur_(ss) {
   onayKutusu_(sh.getRange(4, 8, n, 1), true);
   sh.getRange(4, 4, alan, 2).setNumberFormat('#,##0.00##');
   sh.getRange(4, 9, alan, 1).setWrap(true).setFontColor(OPEX_STIL.ikincil);
-  sh.getRange('K1').setFormula(opexFormulu_('tesvik-sutun'));
   sh.getRange(4, 11, alan, 3).setBackground(OPEX_STIL.hesap).setFontColor(OPEX_STIL.formul);
   sh.getRange(4, 12, alan, 2).setNumberFormat(OPEX_BICIM.tl);
   bantla_(sh, n, 9);
@@ -627,6 +636,7 @@ function tesvikleriKur_(ss) {
 function personeliKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.personel);
   var b = OpexMotor.BASLIKLAR.personel;
+  ozelIslevleriCevir_(sh);
   toplamSatirlariniSil_(sh, 'personel');
   girdiBasligi_(
     sh,
@@ -650,18 +660,17 @@ function personeliKur_(ss) {
   sh.getRange(4, 6, alan, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInRange(ss.getSheetByName(OPEX_SAYFA.tesvikler).getRange('A4:A60'), true).setAllowInvalid(false).build());
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.asgariDestek));
   if (n) onayKutusu_(sh.getRange(4, 8, n, 1), true);
-  // Asgari ücretlinin Tutar hücresi motora bağlanır (net asgari ücret, Parametreler’den); elle yazılmış tutar korunur.
+  // Asgari ücretlinin Tutar hücresi net asgari ücrete bağlanır (yerel formül, Parametreler’den); elle yazılmış tutar korunur.
   if (n) {
     var esasTutar = sh.getRange(4, 3, n, 2);
     var et = esasTutar.getValues();
     var ef = esasTutar.getFormulas();
     et.forEach(function (r, i) {
-      if (String(r[0]).trim() === 'Asgari ücret' && (r[1] === '' || /asgari-net/.test(ef[i][1]))) sh.getRange(4 + i, 4).setFormula(asgariNetFormulu_(2026));
+      if (String(r[0]).trim() === 'Asgari ücret' && (r[1] === '' || /asgari-net|p_asgari_brut_/.test(ef[i][1]))) sh.getRange(4 + i, 4).setFormula(asgariNetFormulu_(2026));
     });
   }
   sh.getRange(4, 9, alan, 1).setFontColor(OPEX_STIL.ikincil).setWrap(true);
-  sh.getRange('K1').setFormula(opexFormulu_('personel-sutun'));
-  // Hesap sütunları formül (kod) sonucudur: mavi.
+  // Hesap sütunları kod sonucudur (hesap yazımı düz değer yazar): mavi.
   sh.getRange(4, 11, alan, 5).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
   bantla_(sh, n, 9);
   var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.personel, n, alan, 'Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok', OPEX_BICIM.tl, personelVarsayilani_);
@@ -767,6 +776,7 @@ function giderSayfalariniAyir_(ss) {
 function giderleriKur_(ss, k) {
   var sh = ss.getSheetByName(OPEX_SAYFA[k]) || ss.insertSheet(OPEX_SAYFA[k]);
   var b = OpexMotor.BASLIKLAR.giderler;
+  ozelIslevleriCevir_(sh);
   toplamSatirlariniSil_(sh, k);
   girdiBasligi_(
     sh,
@@ -823,7 +833,6 @@ function hepsiKur_(ss) {
   sh.getRange('A2').setValue('Kod hesaplar; değişiklik “' + OPEX_SAYFA.ofis + '”, “' + OPEX_SAYFA.teknoloji + '” ve “' + OPEX_SAYFA.personel +
     '” sayfalarından yapılır. Gider: satırın kuruyla ₺, yalnız işaretli aylar; personel: işveren maliyeti (freelancer: fatura).').setFontColor(OPEX_STIL.ikincil);
   sh.setRowHeight(1, 40);
-  sh.getRange('A3').setFormula(opexFormulu_('hepsi'));
   sh.getRange(3, 1, 1, 28).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
   sh.getRange(3, 4, 1, 25).setHorizontalAlignment('right');
   sh.getRange(4, 4, 300, 25).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
@@ -852,8 +861,6 @@ function bordroyuKur_(ss) {
   sh.getRange('A2').setValue('Hesaplanır (düzenlemeyin). Gelir vergisi kümülatif matrahla; asgari ücret GV/DV istisnası ve SGK tavanı uygulanır.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange('A3').setValue('2026').setFontSize(14).setFontWeight('bold');
   sh.getRange('Q3').setValue('2027 (zam ve varsayımlarla)').setFontSize(14).setFontWeight('bold');
-  sh.getRange('A4').setFormula(opexFormulu_('bordro-2026'));
-  sh.getRange('Q4').setFormula(opexFormulu_('bordro-2027'));
   [1, 17].forEach(function (c) {
     sh.getRange(4, c, 1, 15).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
     sh.getRange(5, c + 2, 200, 13).setNumberFormat(OPEX_BICIM.tl);
@@ -875,20 +882,6 @@ function bordroyuKur_(ss) {
 
 /* ---------- Hesap (pano ve grafik verisi) ---------- */
 
-/** Rapor blokları: [rapor, başlangıç sütunu, sütun sayısı, biçimler]. Yan yana durur; satır sayısı değişse de çakışmaz. */
-var OPEX_BLOKLAR = [
-  { rapor: 'kpi', sutun: 1, genislik: 2 },
-  { rapor: 'ozet', sutun: 4, genislik: 7 },
-  { rapor: 'kategori', sutun: 12, genislik: 5 },
-  { rapor: 'aylik', sutun: 18, genislik: 6 },
-  { rapor: 'kisi', sutun: 25, genislik: 10 },
-  { rapor: 'bilesen', sutun: 36, genislik: 5 },
-  { rapor: 'teknoloji', sutun: 42, genislik: 3 },
-  { rapor: 'kopru', sutun: 46, genislik: 2 },
-  { rapor: 'uyari', sutun: 49, genislik: 1 },
-  { rapor: 'plan', sutun: 51, genislik: 5 },
-];
-
 function blok_(rapor) {
   return OPEX_BLOKLAR.filter(function (b) { return b.rapor === rapor; })[0];
 }
@@ -905,28 +898,21 @@ function hesabiKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.hesap);
   sutunGarantile_(sh, 60);
   temelStil_(sh);
+  // Blokların değerlerini hesap yazımı yazar (OPEX_BLOKLAR, Sheets.js).
   OPEX_BLOKLAR.forEach(function (b) {
-    sh.getRange(1, b.sutun).setFormula(opexFormulu_(b.rapor));
     sh.getRange(1, b.sutun, 1, b.genislik).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
     sh.getRange(2, b.sutun + 1, 59, Math.max(b.genislik - 1, 1)).setNumberFormat(OPEX_BICIM.tlYuvarlak);
     for (var i = 0; i < b.genislik; i++) sh.setColumnWidth(b.sutun + i, i === 0 ? 190 : 140);
     if (b.sutun + b.genislik <= sh.getMaxColumns()) sh.setColumnWidth(b.sutun + b.genislik, 24);
   });
-  // Oranlar ve metinler
+  // Oranlar. Metin hücreleri düz metin (@) biçimlenmez: hesap yazımı metni kesme işaretiyle yazar (tarih sanılmaz).
   var kpi = blok_('kpi').sutun + 1;
-  sh.getRange(2, kpi).setNumberFormat('@');
   sh.getRange(10, kpi, 2, 1).setNumberFormat('0.00%');
-  sh.getRange(12, kpi).setNumberFormat('@');
   sh.getRange(13, kpi, 2, 1).setNumberFormat(OPEX_BICIM.kur);
-  sh.getRange(17, kpi).setNumberFormat('@');
   sh.getRange(18, kpi).setNumberFormat('0');
   sh.getRange(2, blok_('ozet').sutun + 6, 10, 1).setNumberFormat('0.0%');
   sh.getRange(2, blok_('kategori').sutun + 4, 40, 1).setNumberFormat('0.0%');
   sh.getRange(2, blok_('kisi').sutun + 9, 40, 1).setNumberFormat('0.0%');
-  ['kisi', 'kategori', 'teknoloji'].forEach(function (r) {
-    var b = blok_(r);
-    sh.getRange(2, b.sutun + 1, 59, r === 'kisi' ? 2 : 1).setNumberFormat('@');
-  });
   sh.setFrozenRows(1);
   korumalariKaldir_(sh);
   sh.setTabColor(OPEX_STIL.cizgi);
@@ -945,7 +931,7 @@ function panoyuKur_(ss) {
   sh.getRange(1, 1, 175, sutun).setBackground(OPEX_STIL.zemin);
 
   sh.getRange('A1:L1').merge().setValue('Türksab · OPEX panosu').setFontSize(22).setFontWeight('bold');
-  sh.getRange('A2:H2').merge().setValue('Teknoloji ve insan kümeleri + ofis/işletme. Google Sheets değişince GitHub Pages sayfası ≈15 sn içinde güncellenir.').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange('A2:H2').merge().setValue('Teknoloji ve insan kümeleri + ofis/işletme. Google Sheets değişince GitHub Pages sayfası birkaç saniyede güncellenir.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange('I2:L2').merge().setFormula('=IF(Hesap!B18>0,"⚠ "&Hesap!B18&" uyarı: Hesap sayfası, Uyarılar sütunu","Uyarı yok")').setFontColor(OPEX_STIL.ikincil).setHorizontalAlignment('right');
   sh.setRowHeight(1, 46);
   sh.setRowHeight(2, 30);

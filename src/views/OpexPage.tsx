@@ -1,11 +1,13 @@
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react';
+import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react';
 import { Checkbox, TextInput } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { Chart, DataTable, FactsRow, Hero, Note, Section, type Column } from '../components/ui';
 import {
   OPEX_ENDPOINT,
+  OPEX_MIN_GAP_MS,
   OPEX_POLL_MS,
   OPEX_TIMEOUT_MS,
+  OPEX_WAIT_TIMEOUT_MS,
   clearConnection,
   defaultConnection,
   isEndpoint,
@@ -50,8 +52,47 @@ const stamp = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric'
 const KUME_TONE: Record<KumeKod, OpexTone> = { teknoloji: 'tech', insan: 'people', ofis: 'office' };
 const KUME_AD: Record<KumeKod, string> = { teknoloji: 'Teknoloji', insan: 'Personel', ofis: 'Ofis ve işletme' };
 
-/** Sağa hizalı, eşit genişlikli rakam (tablo sayıları). */
-const Num = ({ children }: { children: ReactNode }) => <span className="opex-num">{children}</span>;
+/**
+ * Sheets’ten yeni veri gelince değişen değer kısa süre vurgulanır (data-changed; geçiş tokenlarla, hareket azaltmada
+ * anında). Yalnız veri özeti değiştiğinde: süzgeç ya da yıl sekmesi değişince vurgu yok, ilk çizimde yok.
+ */
+const OzetContext = createContext('');
+const CHANGED_HOLD_MS = 1600;
+function useChanged(value: string) {
+  const ozet = useContext(OzetContext);
+  const prev = useRef({ value, ozet });
+  const timer = useRef(0);
+  const [changed, setChanged] = useState(false);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => {
+    const p = prev.current;
+    prev.current = { value, ozet };
+    if (p.value === value || p.ozet === ozet) return;
+    setChanged(true);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setChanged(false), CHANGED_HOLD_MS);
+  }, [value, ozet]);
+  return changed ? '' : undefined;
+}
+
+/** Sağa hizalı, eşit genişlikli rakam (tablo sayıları); değişince vurgulanır. */
+const Num = ({ children }: { children: ReactNode }) => {
+  const changed = useChanged(typeof children === 'string' || typeof children === 'number' ? String(children) : '');
+  return (
+    <span className="opex-num" data-changed={changed}>
+      {children}
+    </span>
+  );
+};
+
+/** Değişince vurgulanan değer paragrafı (dönem toplamı, grup kutuları). */
+function Value({ className, children }: { className: string; children: string }) {
+  return (
+    <p className={className} data-changed={useChanged(children)}>
+      {children}
+    </p>
+  );
+}
 const Dot = ({ tone }: { tone: OpexTone }) => <span className="opex-dot" data-tone={tone} aria-hidden="true" />;
 
 /* ---------- Canlı bağlantı ---------- */
@@ -63,11 +104,14 @@ type Live =
   | { status: 'setup'; error?: string }
   | { status: 'loading' }
   | { status: 'failed'; error: string }
-  | { status: 'ready'; data: OpexData; checked: string; stale?: string };
+  | { status: 'ready'; data: OpexData; checked: string; stale?: string; push?: boolean };
 
 /**
- * Sayfa görünürken OPEX_POLL_MS aralığıyla Apps Script’e sorar; özet değişmediyse yalnız denetim zamanı güncellenir.
- * Sekme gizliyken sormaz; görünür olunca ve ağ geri gelince hemen sorar. Zamanlanmış iş değildir: sayfa kapanınca durur.
+ * Sayfa görünürken Apps Script’e bekleyen istek gönderir: sunucu Sheets değişene ya da ≈20 sn dolana kadar yanıtı
+ * bekletir, yanıt gelince hemen yeniden sorulur (değişiklik birkaç saniyede gelir). Sunucu beklemiyorsa (eski kod) ya da
+ * hata olursa OPEX_POLL_MS aralığıyla sorar. Özet değişmediyse yalnız denetim zamanı güncellenir; değiştiyse yeni model
+ * aynı bileşenlere verilir (sayfa yeniden kurulmaz, yalnız değişen değerler değişir). Sekme gizliyken sormaz; görünür
+ * olunca ve ağ geri gelince hemen sorar. Zamanlanmış iş değildir: sayfa kapanınca durur.
  */
 function useOpexLive() {
   const [conn, setConn] = useState<OpexConnection | null>(null);
@@ -76,6 +120,8 @@ function useOpexLive() {
   const [announce, setAnnounce] = useState('');
   const digest = useRef('');
   const last = useRef<OpexData | null>(null);
+  /** “Şimdi yenile”: bir sonraki istek beklemeden sorar. */
+  const noWait = useRef(false);
 
   useEffect(() => {
     const stored = loadConnection() ?? defaultConnection();
@@ -90,16 +136,21 @@ function useOpexLive() {
     let stopped = false;
     let timer = 0;
     let active: AbortController | null = null;
-    const schedule = () => {
+    const schedule = (ms = OPEX_POLL_MS) => {
       window.clearTimeout(timer);
-      if (!stopped) timer = window.setTimeout(() => void tick(), OPEX_POLL_MS);
+      if (!stopped) timer = window.setTimeout(() => void tick(), ms);
     };
     let retry = false;
+    /** Sunucu yanıtı bekletti (ya da veri geldi): bir sonraki istek hemen (en az OPEX_MIN_GAP_MS arayla). */
+    let soon = false;
+    /** Sunucu bekleyen isteği destekliyor: varsayılan evet; bekletilmeden gelen “değişmedi” (eski kod) hayır yapar. */
+    let pushing = true;
     let lastStart = 0;
     const tick = async () => {
       // Süren istek iptal edilmez: yanıt birkaç saniye sürer, yeni istek onu hiç bitirtmezdi.
       if (stopped || active) return;
       retry = false;
+      soon = false;
       if (document.visibilityState === 'hidden') {
         schedule();
         return;
@@ -107,19 +158,25 @@ function useOpexLive() {
       lastStart = Date.now();
       const own = new AbortController();
       active = own;
+      const wait = !!digest.current && !noWait.current;
+      noWait.current = false;
+      const limit = wait ? OPEX_WAIT_TIMEOUT_MS : OPEX_TIMEOUT_MS;
       let timedOut = false;
       const timeout = window.setTimeout(() => {
         timedOut = true;
         own.abort();
-      }, OPEX_TIMEOUT_MS);
+      }, limit);
       try {
-        const reply = await requestOpex(conn, digest.current, own.signal);
+        const reply = await requestOpex(conn, digest.current, own.signal, wait);
         if (stopped || active !== own) return;
         if (reply.kind === 'data') {
           const changed = !!last.current && last.current.ozet !== reply.data.ozet;
           digest.current = reply.data.ozet;
           last.current = reply.data;
-          setLive({ status: 'ready', data: reply.data, checked: reply.data.denetlendi });
+          // Yeni veri sonrası bekleyen istek hemen açılır; sunucu beklemiyorsa (eski kod) “değişmedi” yanıtı aralığa döner.
+          soon = true;
+          pushing = pushing || reply.bekledi;
+          setLive({ status: 'ready', data: reply.data, checked: reply.data.denetlendi, push: pushing });
           if (changed) {
             const m = reply.data.model;
             setAnnounce(`Veriler güncellendi: ${m.donem.etiket} toplam OPEX ${tl(m.ozet.buAy.toplam)}.`);
@@ -129,7 +186,9 @@ function useOpexLive() {
           if (data) {
             const next = { ...data, degisti: reply.degisti ?? data.degisti, denetlendi: reply.denetlendi };
             last.current = next;
-            setLive({ status: 'ready', data: next, checked: reply.denetlendi });
+            soon = reply.bekledi;
+            pushing = reply.bekledi;
+            setLive({ status: 'ready', data: next, checked: reply.denetlendi, push: pushing });
           } else {
             // Elde veri yokken “değişmedi” gelirse (yarış) özet sıfırlanır ve hemen tüm model istenir.
             digest.current = '';
@@ -145,7 +204,7 @@ function useOpexLive() {
         } else setLive({ status: 'failed', error: reply.message });
       } catch {
         if (stopped || active !== own) return;
-        const message = timedOut ? 'Yanıt 30 sn içinde gelmedi.' : 'İstek kesildi.';
+        const message = timedOut ? `Yanıt ${Math.round(limit / 1000)} sn içinde gelmedi.` : 'İstek kesildi.';
         if (last.current) setLive({ status: 'ready', data: last.current, checked: last.current.denetlendi, stale: message });
         else setLive({ status: 'failed', error: message });
       } finally {
@@ -154,7 +213,8 @@ function useOpexLive() {
         if (retry && !stopped) {
           window.clearTimeout(timer);
           timer = window.setTimeout(() => void tick(), 0);
-        } else schedule();
+        } else if (soon) schedule(Math.max(0, OPEX_MIN_GAP_MS - (Date.now() - lastStart)));
+        else schedule();
       }
     };
     /** Sekme görünür olunca veya ağ dönünce hemen sor; görünürlük sık gidip gelse de en çok OPEX_WAKE_MS’de bir. */
@@ -194,7 +254,10 @@ function useOpexLive() {
       setConn(null);
       setLive({ status: 'setup' });
     },
-    refreshNow: () => setRefresh((n) => n + 1),
+    refreshNow: () => {
+      noWait.current = true;
+      setRefresh((n) => n + 1);
+    },
   };
 }
 
@@ -333,7 +396,7 @@ function LiveBar({ live, storageNote, onRefresh, onSettings }: { live: Extract<L
         <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Canlı'}</span>
         <span className="opex-live-meta">
           Erişim: {live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim {clock(live.checked)} · Sheets’te son değişiklik{' '}
-          {clock(live.data.degisti)} · {OPEX_POLL_MS / 1000} sn’de bir denetlenir
+          {clock(live.data.degisti)} · {live.push ? 'Sheets değişince birkaç saniyede gelir' : `${OPEX_POLL_MS / 1000} sn’de bir denetlenir`}
         </span>
       </p>
       {live.stale ? <p className="opex-live-stale">{live.stale} Son alınan veri gösteriliyor.</p> : null}
@@ -453,7 +516,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
       <div className="opex-kpis">
         <div className="opex-hero" data-edge="top">
           <p className="opex-hero-label">{d.etiket} · toplam OPEX</p>
-          <p className="opex-hero-value">{tl(total)}</p>
+          <Value className="opex-hero-value">{tl(total)}</Value>
           <p className="opex-hero-note">
             Aylık ortalama {tl(d.ortalama.toplam)} · {d.aySayisi} ay
             {d.yil === 2026 && m.donem.yil === 2026 ? ` · ${m.donem.etiket} (bu ay) ${tl(m.ozet.buAy.toplam)}` : ''}
@@ -467,7 +530,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
                 <Dot tone={t.tone} />
                 {KUME_AD[t.kume]}
               </p>
-              <p className="opex-tile-value">{tl(d.toplam[t.kume])}</p>
+              <Value className="opex-tile-value">{tl(d.toplam[t.kume])}</Value>
               <ShareBar ratio={total ? d.toplam[t.kume] / total : 0} tone={t.tone} />
               <p className="opex-tile-note">
                 Payı {pct2(total ? d.toplam[t.kume] / total : 0)} · aylık {tl(d.ortalama[t.kume])} · {t.note}
@@ -1185,7 +1248,7 @@ function Content({ data }: { data: OpexData }) {
   const donemler = useMemo(() => [donemOf(m, 2026), donemOf(m, 2027)], [m]);
   const d = donemler.find((x) => x.yil === yil) ?? donemler[0];
   return (
-    <>
+    <OzetContext.Provider value={data.ozet}>
       {m.uyarilar.length ? (
         <Note title={`Sheets uyarıları (${m.uyarilar.length})`}>
           <ul className="opex-warnings">
@@ -1205,7 +1268,7 @@ function Content({ data }: { data: OpexData }) {
           Hesaplandı: {stamp(m.hesaplandi)} · Motor sürümü {m.surum} · Özet {data.ozet}
         </p>
       </Section>
-    </>
+    </OzetContext.Provider>
   );
 }
 

@@ -45,9 +45,20 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     `kisiDonem`): özet, aylık plan (her ay ayrı), kalemler (üç grup — teknoloji, ofis ve işletme, personel; “Tümü” dönem
     OPEX’i), personel giderleri, netten brüte aylık bordro (kümülatif GV, asgari ücret istisnası, SGK tavanı), SGK teşvikleri, 2027 zam
     (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
-    uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa, görünürken 15 sn’de bir özet sorar (`src/data/opex.ts`).
-    Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.
-    Sayfalar (kullanıcı kararı 2026-10-20): “Giderler Hepsi” (kod hesaplar: `OPEX("hepsi")`, gruplar Ofis / Teknoloji /
+    uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa (`src/data/opex.ts`). Canlı bağlantı (kullanıcı kararı
+    2026-10-20, “anlık, yalnız değişen değer”): sayfa görünürken bekleyen istek (`bekle: true`, uzun yoklama) gönderir;
+    `doPost` önbellekteki özet değişene ya da ≈20 sn dolana kadar bekler, yanıt `bekledi: true` taşır, sayfa hemen yeniden
+    sorar (en az 1,5 sn arayla). Bekletmeyen (eski) sunucuda 15 sn aralık. Yeni model aynı bileşenlere verilir (sayfa
+    yeniden kurulmaz); grafikler `replaceMerge` + sıra kimliğiyle yerinde güncellenir, değişen değer kısa süre
+    `data-changed` ile vurgulanır (yalnız veri özeti değişince; süzgeç/yıl değişince değil).
+    Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`) hesaplanır ve **düz değer** olarak yazılır
+    (kullanıcı kararı 2026-10-20: “Yükleniyor…” olmasın; özel işlev `=OPEX(...)` kurulmaz, eski çağrılar çevrilir):
+    `hesaplariYaz_` (Sheets.js) basit `onEdit` (girdi sayfası; hesaplanan sayfada elle değişiklik geri yazılır), `onOpen`,
+    OPEX → Hesapları yenile, Kurulum `hesaplar` adımı ve kur değişince (GOOGLEFINANCE onEdit tetiklemez) `doPost`’tan
+    çalışır; betik kilidi, girdi kilitle okunur, yalnız içeriği değişen blok yazılır (iz: konum + değer), metin kesme
+    işaretiyle (tarih sanılmaz; Hesap’ta `@` biçimi yok). Kodun yazdığı hücreler (Toplam satırı, Personel `K:O`) girdi
+    özetine girmez. Zamanlanmış/kurulu tetikleyici yoktur. Döviz kuru Parametreler’de canlı GOOGLEFINANCE formülüdür.
+    Sayfalar (kullanıcı kararı 2026-10-20): “Giderler Hepsi” (kod hesaplar: `hepsi` raporu, gruplar Ofis / Teknoloji /
     Personel ay ay ₺), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (ikisi de girdi `A:G`, `H` boşluk, ızgara `I:AL`; motorda
     `giderler2` ve `giderler` kaynakları; grubu sayfa belirler, kurulum Küme sütununu sayfayla eşitler; birleşik eski
     sayfada Küme sütunu) ve “Giderler PERSONEL” (girdi `A:I`, hesap `K:O`,
@@ -60,8 +71,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     “bağlantıya sahip herkes: görüntüleyen” paylaşılır (kullanıcı kararı 2026-10-20).
     Sayfadaki kalem süzgeci: Hepsi, Ofis, Teknoloji, Personel. Veri ucu sayfanın
     tamamını okur (sütunlar başlıkla, ızgara ay başlıklarıyla bulunur). Son veri satırının altında “Toplam (₺)” satırı:
-    `=OPEX("gider-toplam"|"personel-toplam", …)` motor spill’i (aralık `OFFSET(…,ROW()-1,…)` ile bir üst satırda biter,
-    döngü yok); motor “Toplam…” satırını kalem/kişi saymaz. Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);
+    hesap yazımı düz değer yazar (`OpexMotor.kaynakToplami`: yalnız o sayfanın kalemleri); motor “Toplam…” satırını
+    kalem/kişi saymaz. Asgari ücretlinin Tutar’ı yerel formül (`asgariNetFormulu_`). Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);
     formül/kod sonucu hücreler mavi `#0000ff`; Pano gösterge kutuları sol hizalı, aralarında zemin boşluğu.
     Aylık ızgara (kullanıcı kararı 2026-10-20: 15 aylık plan = Ekim–Aralık 2026 + 2027’nin 12 ayı): her ay yan yana
     bir onay kutusu (“Eki 2026”; işaretsiz ay = o ay gider yok, bordroda matrah birikmez) ve bir tutar (“Eki 2026 tutar”).
@@ -159,10 +170,10 @@ Pages yayınından önce çalıştırır.
 
 ## Bilinen sınırlar
 
-- Apps Script (Sheets kurulumu, özel işlev, web uygulaması) CI’da çalışmaz; motor (`tests/opex-motor.spec.ts`) ve veri
+- Apps Script (Sheets kurulumu, hesap yazımı, web uygulaması) CI’da çalışmaz; motor (`tests/opex-motor.spec.ts`) ve veri
   ucu (`tests/opex-script.spec.ts`) Node’da, sayfa sahte yanıtla (`tests/giderler.spec.ts`) denetlenir. Kurulum/Sheets API çağrıları Node
-  testlerinde sahte nesnelerle denetlenir (tip denetimi yok); gerçek Sheets davranışı (kurulum, özel işlev spill’i,
-  koşullu biçim) yalnız canlı tabloda çalıştırılarak doğrulanır.
+  testlerinde sahte nesnelerle denetlenir (tip denetimi yok); gerçek Sheets davranışı (kurulum, basit tetikleyicide
+  kilit/önbellek, kesme işaretli metin, koşullu biçim) yalnız canlı tabloda çalıştırılarak doğrulanır.
 - Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalı; 2027 yasal değerleri (asgari ücret,
   dilimler, destek) varsayımdır ve Parametreler/Teşvikler sayfasında güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).

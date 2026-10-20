@@ -13,7 +13,7 @@ var OpexMotor = (function () {
   'use strict';
 
   var SEMA = 1;
-  var SURUM = '2026-10-20.5';
+  var SURUM = '2026-10-20.6';
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var KISA_AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   var YILLAR = [2026, 2027];
@@ -1119,21 +1119,30 @@ var OpexMotor = (function () {
    */
   function altToplam(m, ad, girdi) {
     var personel = ad === 'personel-toplam';
-    var izgara = ayIzgarasi(girdi && (personel ? girdi.personelAylari : girdi.giderAylari));
-    if (!izgara) return [['']];
+    return [kaynakToplami(m, personel ? 'personel' : null, girdi && (personel ? girdi.personelAylari : girdi.giderAylari))];
+  }
+
+  /**
+   * Bir girdi sayfasının “Toplam (₺)” satırı: `ham` o sayfanın değerleri (ızgara başlıkları dahil), sonuç aynı sütun
+   * sırasında tek satır. `kaynak`: 'personel', 'teknoloji' ya da 'ofis' (yalnız o sayfanın giderleri); null tüm giderler.
+   */
+  function kaynakToplami(m, kaynak, ham) {
+    var izgara = ayIzgarasi(ham);
+    if (!izgara) return [''];
     var genislik = 0;
     izgara.rows.forEach(function (r) { genislik = Math.max(genislik, (r || []).length); });
     var satir = [];
     for (var j = 0; j < genislik; j++) satir.push('');
+    var giderler = m.giderler.filter(function (g) { return !kaynak || g.kaynak === kaynak; });
     izgara.sutunlar.forEach(function (c) {
       if (!c.tutar) return;
       var y = 'y' + c.yil;
-      var toplam = personel
+      var toplam = kaynak === 'personel'
         ? topla(m.kisiler.map(function (k) { return k.aylikTutar[y][c.ay]; }))
-        : topla(m.giderler.map(function (g) { return g.aylikTl[y][c.ay]; }));
+        : topla(giderler.map(function (g) { return g.aylikTl[y][c.ay]; }));
       satir[c.j] = r2(toplam);
     });
-    return [satir];
+    return satir;
   }
 
   /**
@@ -1235,6 +1244,7 @@ var OpexMotor = (function () {
     hesapla: hesapla,
     kumeKodu: kumeKodu,
     rapor: rapor,
+    kaynakToplami: kaynakToplami,
     erisimAcik: erisimAcik,
     // Testler için iç işlevler
     _ic: { vergi: vergi, bordroSatiri: bordroSatiri, nettenBrute: nettenBrute, yilAyari: yilAyari, parametreleriOku: parametreleriOku, tesvikleriOku: tesvikleriOku },

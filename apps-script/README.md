@@ -2,14 +2,21 @@
 
 Giderler sayfasının (<https://karacaismail.github.io/19ekim/giderler/>) veri kaynağı. Google Sheets tek kaynaktır:
 girdiler Sheets’te düzenlenir; aynı Apps Script motoru hem Sheets’teki hesap tablolarını/panoyu hem de sayfanın
-canlı verisini üretir. Sheets değişince sayfa ≈15 sn içinde (sayfa açık ve görünürken) güncellenir.
+canlı verisini üretir. Sheets değişince sayfa birkaç saniyede (sayfa açık ve görünürken) güncellenir; yalnız değişen
+değerler değişir.
+
+**Hesaplar düz değerdir (özel işlev yok).** Bir girdi hücresi değişince basit `onEdit` tetikleyicisi modeli bir kez
+hesaplar ve yalnız içeriği değişen tabloları (Giderler Hepsi, Bordro, Hesap, Personel ve Teşvik hesap sütunları, Toplam
+satırları) yazar; hücre “Yükleniyor…” olmaz, eski değer yenisi gelene kadar görünür. Döviz kuru Parametreler’de canlı
+GOOGLEFINANCE formülüdür; kur değişince hesaplar Sheets açılınca, sayfa veri istediğinde ya da OPEX → Hesapları yenile ile
+yazılır. Zamanlanmış veya kurulu tetikleyici yoktur.
 
 ## Dosyalar
 
 | Dosya | Görev |
 |---|---|
 | `src/Motor.js` | Saf hesap: netten brüte bordro (2026 ücretli tarifesi, kümülatif matrah, asgari ücret GV/DV istisnası, SGK tavanı), teşvikler, 2027 zam ve artışları, raporlar. Node testleri aynı dosyayı çalıştırır. |
-| `src/Sheets.js` | `=OPEX(...)` özel işlevi, OPEX menüsü, web uygulaması (`doGet` sağlık, `doPost` veri). |
+| `src/Sheets.js` | Hesap yazımı (`hesaplariYaz_`, onEdit/onOpen), OPEX menüsü, web uygulaması (`doGet` sağlık, `doPost` veri ve bekleyen istek). Eski formüller için `=OPEX(...)` özel işlevi durur; kurulum kullanmaz. |
 | `src/Kurulum.js` | Sayfaları, biçimleri, açılır listeleri, adlandırılmış aralıkları (`p_<anahtar>`), hesap formüllerini ve pano grafiklerini kurar; tekrar çalıştırılabilir. |
 | `ornek/tohum.ornek.js` | Yalnız kurgusal örnek veri (testler). |
 | `build.mjs` | Tek dosya paketi üretir. |
@@ -27,7 +34,7 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 - **Bordro**: kişi × ay netten brüte tablo, 2026 ve 2027.
 - **Parametreler** (girdi): kur (canlı Google Finance, yedekli), 2026 enflasyonu, 2027 zam esası, bordro oranları, dilimler.
 - **Teşvikler** (girdi): standart (genel prim indirimi, asgari ücret desteği) ve koşullu teşvikler.
-- **Hesap**: pano ve grafik verisi (`=OPEX("kpi"|"ozet"|…)`).
+- **Hesap**: pano ve grafik verisi (kod yazar: `kpi`, `ozet`, … blokları).
 
 Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
 
@@ -37,7 +44,7 @@ ay ay ₺, grup ara toplamları ve genel toplam), “Giderler OFİS” ve “Gid
 Giderleri”, “Personel”) da okunur; Kurulum Düzenli Giderler’i Küme’ye göre iki sayfaya ayırır (işaretler, elle yazılmış
 tutarlar ve formüller korunur) ve eski “Bu ay ödendi / Dahil / Fatura bağlantısı / Not” sütunlarını yalnız beklenen
 içerikle kaldırır. Son
-veri satırının altındaki **Toplam (₺)** satırını kod (özel işlev) hesaplar: giderde satırın kuruyla ₺, yalnız işaretli
+veri satırının altındaki **Toplam (₺)** satırını kod hesaplayıp düz değer yazar: giderde satırın kuruyla ₺, yalnız işaretli
 aylar; personelde yazılan tutarların toplamı. Gider tutarları satırın para birimiyle ($, €, ₺) görünür; para birimi
 değişince biçim kendiliğinden güncellenir. Formül veya kod sonucu olan hücreler mavi yazılır.
 
@@ -85,20 +92,22 @@ adımları ~3,5 dakika dolunca durur, ilerlemesini kaydeder ve “Kurulum sürü
 Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
 Onay kutuları kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir. Satırda en az bir ay işaretliyse boş
 kutu işaretsiz sayılır (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda her ay işaretlidir.
-Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Hiçbir sayfada kilit (koruma) yoktur (kullanıcı kararı 2026-10-20); hesaplanan sayfalar (Pano, Giderler Hepsi, Bordro, Hesap) ve toplam satırları kurulumda yeniden yazılır, elle değiştirmeyin.
+Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Hiçbir sayfada kilit (koruma) yoktur (kullanıcı kararı 2026-10-20); hesaplanan sayfalar (Pano, Giderler Hepsi, Bordro, Hesap) ve toplam satırları kod yazar; Giderler Hepsi, Bordro veya Hesap’ta elle yapılan değişiklik hemen geri yazılır.
 
 ## Erişim
 
 Parametreler → **Sayfa erişimi**: “Herkese açık” ise sayfa veriyi anahtarsız okur ve isimler, ücretler, hesaplar ve
 tutarlar adresi bilen herkese görünür (kullanıcı kararı 2026-10-20, yayındaki tablo böyle). “Anahtarla” seçilirse veri
-ucu erişim anahtarı ister ve sayfa Bağlantı formunu gösterir. Değişiklik ≈15 sn içinde geçerli olur.
+ucu erişim anahtarı ister ve sayfa Bağlantı formunu gösterir. Değişiklik birkaç saniyede geçerli olur.
 
 ## Güvenlik
 
 - Anahtar Komut dosyası özelliklerinde (`OPEX_ERISIM_ANAHTARI`, ≈244 bit rastgele) saklanır; koda, repoya ve adrese
   yazılmaz. Sayfa onu POST gövdesinde (`text/plain`, ön kontrol isteği yok) gönderir; yanlış anahtar veya bozuk gövdede
   veri dönmez (bekleme yok: eşzamanlı çalışma kotasını tüketmesin). Her istek Apps Script kotasından düşer; açık sekme
-  15 sn’de bir küçük “değişmedi” isteği yapar.
+  bekleyen istek gönderir: sunucu Sheets değişene ya da ≈20 sn dolana kadar bekler (önbellek okuması, sayfa okunmaz),
+  sonra sayfa yeniden sorar. Her açık sekme bir Apps Script çalıştırmasını sürekli tutar (eşzamanlı çalıştırma sınırı
+  30); sekme gizliyken sorulmaz.
 - Web uygulaması “Herkes” erişimindedir ama veri döndürmez: `doGet` yalnız sağlık bilgisi, `doPost` anahtar ister.
 - Sayfa anahtarı varsayılan olarak yalnız o sekmede tutar (sessionStorage). “Bu cihazda hatırla” localStorage kullanır;
   `karacaismail.github.io` kökü kullanıcının diğer Pages projeleriyle paylaşıldığından önerilmez (sunum bilgisayarında

@@ -1943,6 +1943,24 @@ html:not([data-js]) .email-btn {
   font-variant-numeric: tabular-nums;
 }
 
+/* Sheets’ten gelen yeni veride yalnız değişen değer kısa süre vurgulanır (iki yönlü geçiş, hareket azaltmada anında). */
+.opex-num,
+.opex-hero-value,
+.opex-tile-value {
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.opex-num[data-changed],
+.opex-hero-value[data-changed],
+.opex-tile-value[data-changed] {
+  background-color: var(--surface-changed);
+}
+
 .opex-dot {
   display: inline-block;
   flex: none;

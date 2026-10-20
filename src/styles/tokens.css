@@ -171,6 +171,8 @@
   --surface-accent: #fff3e3;
   --surface-selected: #fff3e3;
   --surface-break: #efede7;
+  /* Sheets’ten yeni gelen, değişmiş değerin kısa vurgusu */
+  --surface-changed: #ffe2bd;
 
   --text-primary: #16181a;
   --text-secondary: #555a5f;
@@ -259,6 +261,7 @@
   --surface-accent: #2c2010;
   --surface-selected: #2c2010;
   --surface-break: #191c1f;
+  --surface-changed: #3d2a10;
 
   --text-primary: #eceeef;
   --text-secondary: #a8aeb4;

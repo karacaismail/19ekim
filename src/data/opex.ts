@@ -12,9 +12,16 @@ export const OPEX_SCHEMA = 1;
  */
 export const OPEX_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxHXSXT5WN8FgodjphXxkBwCBuZoKPMdN_3amyMgljGOyzpO7ShQohmDx6go-gtPidx/exec';
 
-/** Canlı denetim aralığı: sayfa görünürken bu aralıkla Sheets’teki değişikliği sorar (yalnız özet döner). */
+/**
+ * Canlı bağlantı: sayfa görünürken Apps Script’e bekleyen istek (uzun yoklama) gönderir; sunucu Sheets değişene ya da
+ * ≈20 sn dolana kadar yanıtı bekletir, sayfa yanıt gelince hemen yeniden sorar. Sunucu beklemediyse (eski kod) ya da
+ * hata olduysa OPEX_POLL_MS sonra sorar. İki istek başlangıcı arasında en az OPEX_MIN_GAP_MS olur.
+ */
 export const OPEX_POLL_MS = 15_000;
+export const OPEX_MIN_GAP_MS = 1_500;
 export const OPEX_TIMEOUT_MS = 30_000;
+/** Bekleyen istekte zaman aşımı: sunucu beklemesi (≈20 sn) + okuma ve hesap payı. */
+export const OPEX_WAIT_TIMEOUT_MS = 45_000;
 export const OPEX_STORE_KEY = 'istoc-opex-baglanti';
 
 const ENDPOINT_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[^/\s]+|macros)\/s\/[A-Za-z0-9_-]{20,}\/exec$/;
@@ -266,8 +273,8 @@ export interface OpexData {
 }
 
 export type OpexReply =
-  | { kind: 'data'; data: OpexData }
-  | { kind: 'unchanged'; ozet: string; denetlendi: string; degisti: string | null }
+  | { kind: 'data'; data: OpexData; bekledi: boolean }
+  | { kind: 'unchanged'; ozet: string; denetlendi: string; degisti: string | null; bekledi: boolean }
   | { kind: 'error'; code: 'yetki' | 'kurulum' | 'istek' | 'sema' | 'sunucu'; message: string };
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -309,7 +316,9 @@ export function parseReply(json: unknown): OpexReply {
   const ozet = str(json.ozet);
   const denetlendi = str(json.denetlendi) || new Date().toISOString();
   const degisti = str(json.degisti) || null;
-  if (json.degismedi === true) return { kind: 'unchanged', ozet, denetlendi, degisti };
+  // Sunucu yanıtı bekletti mi (uzun yoklama): yalnız öyleyse sayfa hemen yeniden sorar.
+  const bekledi = json.bekledi === true;
+  if (json.degismedi === true) return { kind: 'unchanged', ozet, denetlendi, degisti, bekledi };
   const m = json.model;
   const ok =
     isObj(m) &&
@@ -354,7 +363,7 @@ export function parseReply(json: unknown): OpexReply {
   if (!ok) return { kind: 'error', code: 'sema', message: 'Yanıt beklenen biçimde değil; Apps Script kodunu güncelleyin.' };
   const tablo = str(json.tablo);
   aylariTamamla(m as unknown as OpexModel);
-  return { kind: 'data', data: { model: m as unknown as OpexModel, ozet, tablo: SHEET_RE.test(tablo) ? tablo : null, denetlendi, degisti } };
+  return { kind: 'data', data: { model: m as unknown as OpexModel, ozet, tablo: SHEET_RE.test(tablo) ? tablo : null, denetlendi, degisti }, bekledi };
 }
 
 /* ---------- Bağlantı (yalnız bu tarayıcıda) ---------- */
@@ -428,14 +437,17 @@ export function clearConnection() {
   }
 }
 
-/** Web uygulamasına tek istek. Anahtar adreste değil, gövdede (text/plain JSON; ön kontrol isteği yok) gider. */
-export async function requestOpex(conn: OpexConnection, lastDigest: string, signal: AbortSignal): Promise<OpexReply> {
+/**
+ * Web uygulamasına tek istek. Anahtar adreste değil, gövdede (text/plain JSON; ön kontrol isteği yok) gider. `wait`:
+ * özet biliniyorsa sunucu değişikliği bekler (uzun yoklama).
+ */
+export async function requestOpex(conn: OpexConnection, lastDigest: string, signal: AbortSignal, wait = false): Promise<OpexReply> {
   let response: Response;
   try {
     response = await fetch(conn.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ anahtar: conn.key || undefined, ozet: lastDigest || undefined }),
+      body: JSON.stringify({ anahtar: conn.key || undefined, ozet: lastDigest || undefined, bekle: wait && lastDigest ? true : undefined }),
       redirect: 'follow',
       cache: 'no-store',
       credentials: 'omit',

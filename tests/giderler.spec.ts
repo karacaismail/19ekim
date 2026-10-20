@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
-import { OPEX_ENDPOINT, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
+import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
 import { buildModel, exampleTohum, reply } from './opex-fixture';
 
 /**
@@ -17,11 +17,12 @@ const hero26 = (m: typeof MODEL) => lira(donemOf(m, 2026).toplam.toplam);
 const lira = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
 
+type Body = { anahtar?: string; ozet?: string; bekle?: boolean };
 interface Server {
   requests: Request[];
-  bodies: { anahtar?: string; ozet?: string }[];
+  bodies: Body[];
   /** Doğru anahtarla gelen istek gövdeleri (sayfanın varsayılan anahtarsız isteği hariç). */
-  keyed: () => { anahtar?: string; ozet?: string }[];
+  keyed: () => Body[];
   set: (next: { ozet: string; model: typeof MODEL } | { error: string; message: string }) => void;
 }
 
@@ -29,28 +30,37 @@ interface Server {
  * Apps Script yanıtını taklit eder: özet aynıysa {degismedi}, değilse tüm model. CORS başlığı gerçek uçtaki gibi.
  * keyed (varsayılan): yalnız KEY ile veri döner, anahtarsız istek “yetki” alır (sayfa formu gösterir).
  * open: Sheets → Sayfa erişimi “Herkese açık”; anahtar gerekmez.
+ * push: yeni sunucu gibi bekleyen isteği (bekle) özet değişene ya da `pushMs` dolana kadar bekletir (bekledi: true);
+ * kapalıyken eski sunucu gibi hemen “değişmedi” döner.
  */
 async function mockScript(
   page: Page,
   initial: { ozet: string; model: typeof MODEL } | { error: string; message: string } = { ozet: 'ozet-1', model: MODEL },
   mode: 'keyed' | 'open' = 'keyed',
+  push: { pushMs: number } | null = null,
 ): Promise<Server> {
   let state = initial;
   const server: Server = { requests: [], bodies: [], keyed: () => server.bodies.filter((b) => b.anahtar === KEY), set: (next) => (state = next) };
   await page.route('https://script.google.com/**', async (route: Route) => {
     const request = route.request();
     server.requests.push(request);
-    const body = JSON.parse(request.postData() ?? '{}') as { anahtar?: string; ozet?: string };
+    const body = JSON.parse(request.postData() ?? '{}') as Body;
     server.bodies.push(body);
+    const bekle = !!push && body.bekle === true && !('error' in state) && body.ozet === state.ozet;
+    if (bekle) {
+      const bitis = Date.now() + push.pushMs;
+      while (Date.now() < bitis && !('error' in state) && body.ozet === state.ozet) await new Promise((r) => setTimeout(r, 50));
+    }
+    const ek = bekle ? { bekledi: true } : {};
     const json =
       'error' in state
         ? { ok: false, hata: state.error, mesaj: state.message }
         : mode === 'keyed' && body.anahtar !== KEY
           ? { ok: false, hata: 'yetki', mesaj: 'Bu veri ucu erişim anahtarı istiyor ya da anahtar geçersiz.' }
           : body.ozet === state.ozet
-          ? { ok: true, sema: 1, ozet: state.ozet, degismedi: true, denetlendi: new Date().toISOString(), degisti: new Date().toISOString() }
-          : reply(state.model, state.ozet);
-    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(json) });
+          ? { ok: true, sema: 1, ozet: state.ozet, degismedi: true, denetlendi: new Date().toISOString(), degisti: new Date().toISOString(), ...ek }
+          : reply(state.model, state.ozet, ek);
+    await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(json) }).catch(() => undefined);
   });
   return server;
 }
@@ -164,7 +174,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
 
     await page.clock.runFor(OPEX_POLL_MS + 500);
     await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(2);
-    expect(server.keyed()[1]).toEqual({ anahtar: KEY, ozet: 'ozet-1' });
+    // Özet bilinince istek sunucudan değişikliği beklemesini ister (uzun yoklama).
+    expect(server.keyed()[1]).toEqual({ anahtar: KEY, ozet: 'ozet-1', bekle: true });
 
     const changed = buildModel({ giderler: [['Yeni sunucu', '', 'Teknoloji', 'Sunucu & Bulut', 'TRY', 12345, 'Genel', false, true, '', '']] });
     server.set({ ozet: 'ozet-2', model: changed });
@@ -180,6 +191,52 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       .toBe(hero26(changed));
     await expect(page.getByRole('status').filter({ hasText: 'Veriler güncellendi' })).toHaveCount(1);
     await expect(page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' })).toContainText('Yeni sunucu');
+  });
+
+  test('bekleyen istek: Sheets değişince sayfa 15 sn beklemeden güncellenir; yalnız değişen değer vurgulanır, sayfa yeniden kurulmaz', async ({ page }) => {
+    const server = await mockScript(page, { ozet: 'ozet-1', model: MODEL }, 'keyed', { pushMs: 20_000 });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    await expect.poll(() => server.keyed().some((b) => b.bekle === true)).toBe(true);
+    await expect(page.locator('.opex-live-meta')).toContainText('Sheets değişince birkaç saniyede gelir');
+    const tile = (ad: string) => page.locator('.opex-tile', { hasText: ad }).locator('.opex-tile-value');
+    const personel = await tile('Personel').textContent();
+    // Yalnız teknolojiye bir kalem eklenir.
+    const changed = buildModel({ giderler: [...exampleTohum.giderler, ['Yeni sunucu', '', 'Teknoloji', 'Sunucu & Bulut', 'TRY', 12345, 'Genel', false, true, '', '']] });
+    // Aynı DOM kalır: kahraman sayısının düğümü değişmez (sayfa yeniden kurulmaz).
+    await page.locator('.opex-hero-value').evaluate((el) => ((window as unknown as { __hero: Element }).__hero = el));
+    const basla = Date.now();
+    server.set({ ozet: 'ozet-2', model: changed });
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(changed), { timeout: 5_000 });
+    expect(Date.now() - basla, 'aralık beklenmedi').toBeLessThan(OPEX_POLL_MS);
+    expect(await page.locator('.opex-hero-value').evaluate((el) => el === (window as unknown as { __hero: Element }).__hero)).toBe(true);
+    await expect(tile('Teknoloji')).toHaveAttribute('data-changed', '');
+    await expect(page.locator('.opex-hero-value')).toHaveAttribute('data-changed', '');
+    await expect(tile('Personel')).toHaveText(personel!);
+    await expect(tile('Personel')).not.toHaveAttribute('data-changed');
+    await expect(tile('Ofis ve işletme')).not.toHaveAttribute('data-changed');
+    await expect(tile('Teknoloji')).not.toHaveAttribute('data-changed', { timeout: 5_000 });
+    // Yıl sekmesi değişince vurgu yok (veri değişmedi).
+    await page.getByRole('tab', { name: /^2027/ }).click();
+    await expect(page.locator('[data-changed]')).toHaveCount(0);
+  });
+
+  test('eski sunucu (bekletmez): istekler 15 sn aralığa döner; sık istek yok', async ({ page }) => {
+    await page.clock.install();
+    const server = await mockScript(page);
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    await page.clock.runFor(OPEX_MIN_GAP_MS + 500);
+    await expect.poll(() => server.keyed().length).toBe(2);
+    await page.clock.runFor(OPEX_POLL_MS - 2_000);
+    expect(server.keyed().length, 'aralık dolmadan yeni istek yok').toBe(2);
+    await expect(page.locator('.opex-live-meta')).toContainText(`${OPEX_POLL_MS / 1000} sn’de bir denetlenir`);
+    await page.clock.runFor(3_000);
+    await expect.poll(() => server.keyed().length).toBe(3);
   });
 
   test('görünürlük sık gidip gelse de süren istek iptal edilmez; yavaş yanıt (3 sn) gelir', async ({ page }) => {
@@ -213,6 +270,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     server.set({ ozet: 'ozet-2', model: MODEL_2 });
     await page.getByRole('button', { name: 'Şimdi yenile' }).click();
     await expect.poll(() => server.keyed().length).toBe(2);
+    expect(server.keyed()[1].bekle, '“Şimdi yenile” beklemeden sorar').toBeUndefined();
     await page.evaluate(() => {
       Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
       document.dispatchEvent(new Event('visibilitychange'));

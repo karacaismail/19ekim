@@ -916,6 +916,10 @@ function applyMotion(options: Opt) {
 /** Piramit: şekil için kademe sırası; etiket ve ipucu gerçek kişi sayısı. */
 function finalize(spec: ChartSpec, options: Opt) {
   applyMotion(options);
+  // Sıra kimliği: veri değişince aynı seri eşleşir ve yeni değere geçer (grafik yeniden kurulmaz).
+  (options.series as Opt[] | undefined)?.forEach((s, i) => {
+    if (s.id === undefined) s.id = `s${i}`;
+  });
   if (spec.kind !== 'piramit') return options;
   const series = (options.series as Opt[])[0];
   series.data = spec.items.map((item, i) => {
@@ -977,7 +981,10 @@ function watchPreferences() {
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', redrawAll);
 }
 
-/** İlk çağrıda grafiği kurar; sonrakilerde aynı grafiği yeni spec ile yeniden çizer. */
+/**
+ * İlk çağrıda grafiği kurar. Sonrakilerde (veri değişti) aynı türde grafik birleştirilerek güncellenir: seriler sıra
+ * kimliğiyle eşleşir, yalnız değişen çubuk/dilim yeni değerine geçer; tür değiştiyse baştan çizilir.
+ */
 export async function drawChart(el: HTMLElement, spec: ChartSpec) {
   loader ??= import('../lib/echarts-setup');
   let mod: EChartsModule;
@@ -991,9 +998,12 @@ export async function drawChart(el: HTMLElement, spec: ChartSpec) {
   await document.fonts?.ready;
   const entry = charts.get(el);
   if (entry) {
+    const sameKind = entry.spec.kind === spec.kind;
     entry.spec = spec;
     entry.width = widthOf(el);
-    entry.chart.setOption(finalize(spec, build(spec, entry.width)), { notMerge: true });
+    const option = finalize(spec, build(spec, entry.width));
+    if (sameKind) entry.chart.setOption(option, { replaceMerge: ['series'] });
+    else entry.chart.setOption(option, { notMerge: true });
     return;
   }
   render(el, mod, spec);
