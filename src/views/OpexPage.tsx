@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { Checkbox, TextInput } from '@mantine/core';
-import { AppFrame } from '../components/AppFrame';
+import { IconExternalLink, IconRefresh, IconSettings } from '@tabler/icons-react';
+import { AppFrame, PAGE_TOOLS_ID } from '../components/AppFrame';
 import { Chart, DataTable, FactsRow, Hero, Note, Section, type Column } from '../components/ui';
 import {
   OPEX_ENDPOINT,
@@ -390,37 +392,39 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
   );
 }
 
-/* ---------- Canlı durum çubuğu ---------- */
+/* ---------- Canlı durum şeridi ---------- */
 
-function LiveBar({ live, storageNote, onRefresh, onSettings }: { live: Extract<Live, { status: 'ready' }>; storageNote: string; onRefresh: () => void; onSettings: () => void }) {
-  const state = live.stale ? 'stale' : 'live';
-  return (
-    <div className="opex-live" data-state={state}>
-      <p className="opex-live-status">
+/**
+ * Canlı durum (kullanıcı kararı 2026-10-20: küçük, başlığın altında): kırıntı satırının sağında tek satır; durum
+ * noktası, kısa metin ve simge düğmeler (erişilebilir adlarıyla). Ayrıntı (erişim, son denetim) ipucunda.
+ */
+function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extract<Live, { status: 'ready' }>; settingsOpen: boolean; onRefresh: () => void; onSettings: () => void }) {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setHost(document.getElementById(PAGE_TOOLS_ID)), []);
+  const detay = `Erişim: ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim ${clock(live.checked)} · Sheets’te son değişiklik ${clock(live.data.degisti)}`;
+  const strip = (
+    <div className="opex-live" data-state={live.stale ? 'stale' : 'live'}>
+      <p className="opex-live-status" title={detay}>
         <span className="opex-live-dot" aria-hidden="true" />
         <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Canlı'}</span>
         <span className="opex-live-meta">
-          Erişim: {live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim {clock(live.checked)} · Sheets’te son değişiklik{' '}
-          {clock(live.data.degisti)} · {live.push ? 'Sheets değişince birkaç saniyede gelir' : `${OPEX_POLL_MS / 1000} sn’de bir denetlenir`}
+          Sheets {clock(live.data.degisti)} · {live.push ? 'anlık' : `${OPEX_POLL_MS / 1000} sn’de bir`}
         </span>
       </p>
-      {live.stale ? <p className="opex-live-stale">{live.stale} Son alınan veri gösteriliyor.</p> : null}
-      {storageNote ? <p className="opex-live-stale">{storageNote}</p> : null}
-      <div className="opex-actions">
-        <button type="button" className="opex-btn" onClick={onRefresh}>
-          Şimdi yenile
-        </button>
-        {live.data.tablo ? (
-          <a className="opex-btn" href={live.data.tablo} target="_blank" rel="noopener noreferrer">
-            Google Sheets’te aç
-          </a>
-        ) : null}
-        <button type="button" className="opex-btn" onClick={onSettings}>
-          Bağlantı
-        </button>
-      </div>
+      <button type="button" className="opex-icon-btn" aria-label="Şimdi yenile" title="Şimdi yenile" onClick={onRefresh}>
+        <IconRefresh size={20} stroke={1.75} aria-hidden="true" />
+      </button>
+      {live.data.tablo ? (
+        <a className="opex-icon-btn" href={live.data.tablo} target="_blank" rel="noopener noreferrer" aria-label="Google Sheets’te aç" title="Google Sheets’te aç">
+          <IconExternalLink size={20} stroke={1.75} aria-hidden="true" />
+        </a>
+      ) : null}
+      <button type="button" className="opex-icon-btn" aria-label="Bağlantı" title="Bağlantı" aria-expanded={settingsOpen ? 'true' : 'false'} onClick={onSettings}>
+        <IconSettings size={20} stroke={1.75} aria-hidden="true" />
+      </button>
     </div>
   );
+  return host ? createPortal(strip, host) : strip;
 }
 
 /* ---------- Seçim düğmeleri (aria-pressed) ---------- */
@@ -475,7 +479,7 @@ function YearTabs({ value, onChange, donemler }: { value: Yil; onChange: (y: Yil
           <span className="opex-year-sub">
             {d.etiket.replace(` ${d.yil}`, '')} · {d.aySayisi} ay
           </span>
-          <span className="opex-year-sub">{tl(d.toplam.toplam)}</span>
+          <span className="opex-year-sub opex-year-total">{tl(d.toplam.toplam)}</span>
         </button>
       ))}
     </div>
@@ -494,10 +498,11 @@ function ShareBar({ ratio, tone }: { ratio: number; tone: OpexTone }) {
   );
 }
 
-const GRUPLAR: { kume: KumeKod; tone: OpexTone; note: string }[] = [
-  { kume: 'teknoloji', tone: 'tech', note: 'Yazılım, yapay zekâ, sunucu, API, AWS vb.' },
-  { kume: 'ofis', tone: 'office', note: 'Kira, faturalar, ofis ihtiyaçları' },
-  { kume: 'insan', tone: 'people', note: 'Bordro işveren maliyeti ve freelancer faturaları' },
+/** Gruplar; tanımları “Kalemler” bölümünün açıklamasında (ilk ekranda kutular kısa kalır). */
+const GRUPLAR: { kume: KumeKod; tone: OpexTone }[] = [
+  { kume: 'teknoloji', tone: 'tech' },
+  { kume: 'ofis', tone: 'office' },
+  { kume: 'insan', tone: 'people' },
 ];
 
 /** Dönemin kategori toplamları: her ayın kendi tutarı (Sheets aylık ızgarası); personel her ayın maliyeti. */
@@ -538,7 +543,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
               <Value className="opex-tile-value">{tl(d.toplam[t.kume])}</Value>
               <ShareBar ratio={total ? d.toplam[t.kume] / total : 0} tone={t.tone} />
               <p className="opex-tile-note">
-                Payı {pct2(total ? d.toplam[t.kume] / total : 0)} · aylık {tl(d.ortalama[t.kume])} · {t.note}
+                Payı {pct2(total ? d.toplam[t.kume] / total : 0)} · aylık {tl(d.ortalama[t.kume])}
               </p>
             </li>
           ))}
@@ -1225,7 +1230,7 @@ function YearPanel({ m, d }: { m: OpexModel; d: Donem }) {
   const no = () => (n += 1);
   return (
     <>
-      <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`} desc={`${d.etiket}: teknoloji, ofis ve işletme, personel.`}>
+      <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`}>
         <Overview m={m} d={d} />
       </Section>
       <Section id={`plan-${d.yil}-bolum`} index={no()} title={`Aylık plan · ${d.etiket}`} desc="Her ayın teknoloji, ofis ve işletme ve personel gideri ayrı hesaplanır.">
@@ -1253,10 +1258,8 @@ function YearPanel({ m, d }: { m: OpexModel; d: Donem }) {
   );
 }
 
-function Content({ data }: { data: OpexData }) {
+function Content({ data, yil, donemler }: { data: OpexData; yil: Yil; donemler: Donem[] }) {
   const m = data.model;
-  const [yil, setYil] = useState<Yil>(m.donem.yil === 2027 ? 2027 : 2026);
-  const donemler = useMemo(() => [donemOf(m, 2026), donemOf(m, 2027)], [m]);
   const d = donemler.find((x) => x.yil === yil) ?? donemler[0];
   return (
     <OzetContext.Provider value={data.ozet}>
@@ -1269,7 +1272,6 @@ function Content({ data }: { data: OpexData }) {
           </ul>
         </Note>
       ) : null}
-      <YearTabs value={yil} onChange={setYil} donemler={donemler} />
       <div id="yil-paneli" role="tabpanel" aria-labelledby={`yil-${yil}`} className="opex-year-panel">
         <YearPanel key={yil} m={m} d={d} />
       </div>
@@ -1287,6 +1289,11 @@ function Body() {
   const { conn, live, announce, connect, disconnect, refreshNow } = useOpexLive();
   const [settings, setSettings] = useState(false);
   const [storageNote, setStorageNote] = useState('');
+  // Yıl seçimi başlıkta (sağda): veri gelince rapor yılı; seçim veri yenilenince korunur.
+  const model = live.status === 'ready' ? live.data.model : null;
+  const [yil, setYil] = useState<Yil | null>(null);
+  const donemler = useMemo(() => (model ? [donemOf(model, 2026), donemOf(model, 2027)] : null), [model]);
+  const seciliYil: Yil = yil ?? (model?.donem.yil === 2027 ? 2027 : 2026);
   const form = (error?: string, cancel?: () => void) => (
     <ConnectForm
       initial={conn}
@@ -1303,7 +1310,7 @@ function Body() {
       <Hero
         eyebrow="Finans · OPEX"
         title="Operasyon giderleri"
-        lead="Üç grup: teknoloji, ofis ve işletme, personel. Veriler Google Sheets’ten canlı gelir; Sheets değişince bu sayfa kendiliğinden güncellenir."
+        aside={donemler ? <YearTabs value={seciliYil} onChange={setYil} donemler={donemler} /> : undefined}
       />
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}
@@ -1337,7 +1344,9 @@ function Body() {
       ) : null}
       {live.status === 'ready' ? (
         <>
-          <LiveBar live={live} storageNote={storageNote} onRefresh={refreshNow} onSettings={() => setSettings((v) => !v)} />
+          <LiveStrip live={live} settingsOpen={settings} onRefresh={refreshNow} onSettings={() => setSettings((v) => !v)} />
+          {live.stale ? <p className="opex-live-stale">{live.stale} Son alınan veri gösteriliyor.</p> : null}
+          {storageNote ? <p className="opex-live-stale">{storageNote}</p> : null}
           {settings ? (
             <div className="opex-settings">
               {form(undefined, () => setSettings(false))}
@@ -1354,7 +1363,7 @@ function Body() {
               </button>
             </div>
           ) : null}
-          <Content data={live.data} />
+          <Content data={live.data} yil={seciliYil} donemler={donemler ?? []} />
         </>
       ) : null}
     </>

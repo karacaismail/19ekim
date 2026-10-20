@@ -139,13 +139,14 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   flex-direction: column;
 }
 
+/* Üst bant sıkışık (kullanıcı kararı 2026-10-20): marka ve araçlar tek satır, gezinme altında tek satır. */
 .topbar .wrap {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding-block: var(--space-3);
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-1);
 }
 
 .brand {
@@ -251,6 +252,35 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   transform: translateX(1rem);
 }
 
+/* En dar ekranda (320–360 px) marka alt yazısı gizlenir; “iStoc” ve tema düğmesi tek satırda kalır. */
+@media (max-width: 22.99em) {
+  .brand-sub {
+    display: none;
+  }
+}
+
+/* Dar ekranda üst bant tek satır: tema düğmesinin yazısı yalnız ekran okuyucuya (düğmenin adı aynı kalır). */
+@media (max-width: 29.99em) {
+  .theme-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* Yıl sekmesi alt satırı geniş ekranda tek satır; dar ekranda sarılır (yatay taşma olmaz). */
+@media (min-width: 64em) {
+  .opex-year-sub {
+    white-space: nowrap;
+  }
+}
+
 /* JavaScript açıksa düğme ilk boyamada yer alır (sonradan kayma olmaz). */
 html[data-js] .theme-toggle[hidden] {
   display: inline-flex;
@@ -321,6 +351,7 @@ html[data-js] .theme-toggle[hidden] {
   padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   text-decoration: none;
   white-space: nowrap;
@@ -372,9 +403,25 @@ html[data-js] .theme-toggle[hidden] {
   max-width: var(--prose-max);
 }
 
-/* ---------- Sayfa başlığı ---------- */
+/* ---------- Sayfa başlığı (kullanıcı kararı 2026-10-20: yükseklik yarıya) ---------- */
 .hero {
-  padding-block: var(--space-10) var(--space-6);
+  padding-block: var(--space-1) var(--space-2);
+}
+
+.hero[data-aside] {
+  display: grid;
+  gap: var(--space-3) var(--gap-normal);
+  align-items: center;
+}
+
+@media (min-width: 64em) {
+  .hero[data-aside] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
+  }
+
+  .hero[data-aside] > :not(.hero-text, .hero-aside) {
+    grid-column: 1 / -1;
+  }
 }
 
 .eyebrow {
@@ -387,9 +434,8 @@ html[data-js] .theme-toggle[hidden] {
 }
 
 .display {
-  margin: var(--space-3) 0 var(--space-4);
-  max-width: 20ch;
-  font-size: var(--text-display);
+  margin: var(--space-1) 0;
+  font-size: var(--text-title);
   line-height: var(--leading-tight);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
@@ -397,10 +443,50 @@ html[data-js] .theme-toggle[hidden] {
 
 .lead {
   margin: 0;
-  max-width: var(--prose-max);
+  max-width: 72ch;
   color: var(--text-secondary);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   line-height: var(--leading-body);
+}
+
+/* Rol başlığı: üstte ad ve görev yan yana (geniş ekranda), altta tam genişlikte bilgiler. */
+.hero-role {
+  display: grid;
+  grid-template-areas: 'head' 'mission' 'facts';
+  gap: var(--space-2) var(--space-8);
+}
+
+@media (min-width: 64em) {
+  .hero-role {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 30rem);
+    grid-template-areas: 'head mission' 'facts facts';
+    align-items: center;
+  }
+}
+
+.hero-role .facts-row {
+  grid-area: facts;
+}
+
+.hero-role-head {
+  grid-area: head;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.hero-role .display {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.hero-role-mission {
+  grid-area: mission;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
 }
 
 .facts-row {
@@ -426,6 +512,28 @@ html[data-js] .theme-toggle[hidden] {
   font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
+}
+
+/* Sıkışık bilgi satırı: etiket ve değer yan yana, öğeler tek akışta sarılır. */
+.facts-row[data-compact] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.facts-row[data-compact] div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-1);
+}
+
+.facts-row[data-compact] dd {
+  margin: 0;
+  font-size: var(--text-sm);
 }
 
 /* ---------- Bölümler ---------- */
@@ -583,12 +691,73 @@ html[data-js] .theme-toggle[hidden] {
   border-radius: var(--radius-lg);
 }
 
-.mainnav-common {
-  border-top: var(--hairline) solid var(--rule);
+/* İstihdam açılır menüsü: tetikleyici gezinme bağlantısıyla aynı; panel markalı yüzeyde (Mantine Menu). */
+.mainnav-menu {
+  border: 0;
+  background-color: transparent;
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
 }
 
-.mainnav-common .mainnav-link {
-  font-size: var(--text-sm);
+.mainnav-chevron {
+  flex: none;
+  transition-property: transform;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.mainnav-menu[aria-expanded='true'] .mainnav-chevron {
+  transform: rotate(180deg);
+}
+
+.navmenu {
+  min-width: 15rem;
+  padding: var(--space-1);
+  border: var(--hairline) solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.navmenu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+/* Odak, seçili durumdan ayrıdır: işaretçi modunda odak arka planı yok; klavye modunda alt çizgi (merkezi kural). */
+.navmenu-item:focus,
+.navmenu-item[data-menu-active] {
+  background-color: transparent;
+}
+
+.navmenu-divider {
+  margin-block: var(--space-1);
+  border-color: var(--rule);
+}
+
+.navmenu-item:hover {
+  background-color: var(--surface-hover);
+}
+
+.navmenu-item[aria-current='page'],
+.navmenu-item[data-section='true'] {
+  background-color: var(--surface-selected);
+  font-weight: var(--weight-semibold);
 }
 
 .tree-no {
@@ -607,13 +776,26 @@ html[data-js] .theme-toggle[hidden] {
   display: none;
 }
 
-/* Ağaç yolu ve sunum sırası */
+/* Ağaç yolu ve sunum sırası; kırıntı satırının sağında sayfa araçları (ör. Giderler canlı durumu) */
+.crumbs-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.page-tools:empty {
+  display: none;
+}
+
 .crumbs ol {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0 var(--space-2);
-  margin: var(--space-6) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   color: var(--text-secondary);
@@ -2034,11 +2216,11 @@ html:not([data-js]) .email-btn {
 .opex-kpis {
   display: grid;
   gap: var(--gap-normal);
-  margin-top: var(--space-6);
+  margin-top: var(--space-3);
 }
 
 .opex-hero {
-  padding: var(--space-5) var(--space-5) var(--space-6);
+  padding: var(--space-3) var(--space-4);
   /* Üst kenarda düz vurgu çizgisi (data-edge="top"): yalnız çizginin değmediği alt köşeler yuvarlak. */
   border-end-start-radius: var(--radius-md);
   border-end-end-radius: var(--radius-md);
@@ -2059,7 +2241,7 @@ html:not([data-js]) .email-btn {
 
 .opex-hero-value {
   margin-top: var(--space-1);
-  font-size: var(--text-display);
+  font-size: var(--text-stat);
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
@@ -2083,7 +2265,7 @@ html:not([data-js]) .email-btn {
 }
 
 .opex-tile {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
 }
@@ -2323,16 +2505,12 @@ html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-
   justify-self: stretch;
 }
 
-/* Canlı durum çubuğu */
+/* Canlı durum şeridi: kırıntı satırının sağında, tek satır; simge düğmeler (kullanıcı kararı 2026-10-20). */
 .opex-live {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3);
-  overflow-wrap: break-word;
-  margin-top: var(--space-8);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-1);
 }
 
 .opex-live p {
@@ -2343,7 +2521,45 @@ html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1) var(--space-3);
+  gap: 0 var(--space-2);
+  margin-inline-end: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.opex-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--hit-min);
+  block-size: var(--hit-min);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.opex-icon-btn:hover,
+.opex-icon-btn[aria-expanded='true'] {
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* Simge düğmede alt çizgi görünmez: klavye odağı simgenin altında düz çubukla (çevrelemez). */
+html[data-focus-mode='keyboard'] .opex-icon-btn:focus-visible {
+  color: var(--text-primary);
+  background-image: linear-gradient(var(--focus-indicator), var(--focus-indicator));
+  background-repeat: no-repeat;
+  background-size: 60% var(--focus-indicator-width);
+  background-position: 50% 88%;
+}
+
+p.opex-live-stale {
+  margin: var(--space-2) 0 0;
 }
 
 .opex-live-dot {
@@ -2489,12 +2705,14 @@ html[data-js] .opex-nojs {
   display: none;
 }
 
-/* Yıl sekmeleri: iki büyük düğme (2026 · 2027); seçili olan ters (mürekkep) zeminde */
+/*
+ * Yıl sekmeleri: iki düğme (2026 · 2027), başlığın sağında; iki sekme aynı şablonda (kullanıcı kararı 2026-10-20),
+ * seçim radyo işaretiyle (dolu nokta, yeşil) ve kalın rakamla gösterilir.
+ */
 .opex-years {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--gap-normal);
-  margin-top: var(--section-gap);
 }
 
 .opex-year {
@@ -2502,9 +2720,9 @@ html[data-js] .opex-nojs {
   /* Üste hizalı: iki sekmede rakam ve radyo işareti aynı çizgide, işaret her zaman sağ üst köşede. */
   align-content: start;
   justify-items: start;
-  gap: var(--space-1);
-  min-height: calc(var(--hit-min) * 2.5);
-  padding: var(--space-4) var(--space-5);
+  gap: 0;
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-3);
   border: 0;
   border-radius: var(--radius-md);
   background: var(--surface-raised);
@@ -2521,10 +2739,8 @@ html[data-js] .opex-nojs {
   background: var(--surface-control-hover);
 }
 
-.opex-year[aria-selected='true'],
-.opex-year[aria-selected='true']:hover {
-  background: var(--text-primary);
-  color: var(--surface-page);
+.opex-year[aria-selected='true'] .opex-year-num {
+  font-weight: var(--weight-bold);
 }
 
 /* Radyo işareti: seçim durumunu gösterir (boş halka / dolu nokta), sağ üst köşede; yazı rengini izler, iki temada da karşıtlık korunur. */
@@ -2575,11 +2791,15 @@ html[data-js] .opex-nojs {
 }
 
 .opex-year-num {
-  font-size: var(--text-display);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   font-variant-numeric: tabular-nums;
+}
+
+.opex-year-total {
+  font-weight: var(--weight-semibold);
 }
 
 .opex-year-sub {
@@ -2588,11 +2808,36 @@ html[data-js] .opex-nojs {
   font-variant-numeric: tabular-nums;
 }
 
-/* Seçili (ters zemin) sekmede odak çizgisi yazı rengindedir: her iki temada karşıtlık korunur. */
-html[data-focus-mode='keyboard'] .opex-year[aria-selected='true']:focus-visible {
-  text-decoration-color: currentColor;
+.opex-year-panel > .section:first-child {
+  margin-top: var(--space-3);
 }
 
-.opex-year-panel > .section:first-child {
-  margin-top: var(--space-8);
+/* İlk ekran (masaüstü): özet başlığı sıkışık, gösterge kutuları tek sırada, grafikler alçak. */
+.opex-year-panel > .section:first-child .section-head {
+  padding-top: var(--space-2);
+}
+
+@media (min-width: 64em) {
+  .opex-kpis {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    align-items: stretch;
+  }
+
+  .opex-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Masaüstü ilk ekran (≥ 1200 px: Kategoriler geniş sütunda tek satır etiketli): iki grafik alçak. */
+@media (min-width: 75em) {
+  [data-page='giderler'] .opex-year-panel > .section:first-child .chart-canvas {
+    height: var(--chart-h-xs);
+  }
+}
+
+/* Gruplar 3, Kategoriler 8 satır: Kategoriler geniş sütunda (değer etiketleri çubuk ucunda, eksen yok). */
+@media (min-width: 64em) {
+  .opex-year-panel > .section:first-child .opex-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
 }

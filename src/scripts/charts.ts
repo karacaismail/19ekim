@@ -736,7 +736,8 @@ function build(spec: ChartSpec, width: number): Opt {
         grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 8, bottom: 8, containLabel: true },
         tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${esc(p.name)}<br/>${label(p.value)}` },
         xAxis: { ...valueAxis(narrow), show: narrow },
-        yAxis: { type: 'category', inverse: true, data: spec.items.map((i) => i.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width) },
+        // Her kategori adı görünür (ECharts sığmayanı kendiliğinden gizlerdi).
+        yAxis: { type: 'category', inverse: true, data: spec.items.map((i) => i.name), ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width), interval: 0 } },
         series: [
           {
             type: 'bar',

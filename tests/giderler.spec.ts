@@ -200,7 +200,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await connect(page);
     await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
     await expect.poll(() => server.keyed().some((b) => b.bekle === true)).toBe(true);
-    await expect(page.locator('.opex-live-meta')).toContainText('Sheets değişince birkaç saniyede gelir');
+    await expect(page.locator('.opex-live-meta')).toContainText('anlık');
     const tile = (ad: string) => page.locator('.opex-tile', { hasText: ad }).locator('.opex-tile-value');
     const personel = await tile('Personel').textContent();
     // Yalnız teknolojiye bir kalem eklenir.
@@ -234,7 +234,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(3);
     expect(server.keyed()[2].bekle).toBeUndefined();
     await expect.poll(() => server.keyed().filter((b) => b.bekle).length, { timeout: 5_000 }).toBe(2);
-    await expect(page.locator('.opex-live-meta')).toContainText('Sheets değişince birkaç saniyede gelir');
+    await expect(page.locator('.opex-live-meta')).toContainText('anlık');
   });
 
   test('“bekledi” deyip hemen dönen yanıt: art arda istek yok, aralığa döner', async ({ page }) => {
@@ -253,6 +253,46 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect.poll(() => server.keyed().length).toBeGreaterThanOrEqual(3);
   });
 
+  for (const size of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
+    test(`masaüstü ilk ekran ${size.width}×${size.height}: yıl seçimi, özet kutuları ve iki grafik kaydırmadan görünür`, async ({ page }) => {
+      await page.setViewportSize(size);
+      await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+      // Canlı durum küçük şerit olarak kırıntı satırında; yıl seçimi başlıkta.
+      await expect(page.locator('.crumbs-row .opex-live')).toBeVisible();
+      await expect(page.locator('.hero .opex-years')).toBeVisible();
+      const alt = await page.locator('.opex-year-panel .opex-grid').first().evaluate((el) => el.getBoundingClientRect().bottom);
+      expect(alt, 'Gruplar ve Kategoriler ilk ekranda').toBeLessThanOrEqual(size.height);
+      // Sekiz kategorinin hepsi yazılı (sığmayan etiket gizlenmez).
+      const kategori = page.locator('.chart', { hasText: 'Kategoriler' }).first().locator('svg');
+      await expect(kategori).toBeVisible();
+      await expect.poll(() => kategori.textContent()).toContain('Ofis & Lisans');
+      expect(await kategori.textContent()).toContain('Faturalar');
+    });
+  }
+
+  test('2026 ve 2027 sekmeleri aynı şablonda; seçim radyo noktasıyla', async ({ page }) => {
+    // Geçişler anında (renk karşılaştırması geçiş ortasında yapılmasın); fare kartların dışında.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const yillar = page.locator('.opex-year');
+    await expect(yillar).toHaveCount(2);
+    const stil = (i: number) => yillar.nth(i).evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, color: getComputedStyle(el).color, h: Math.round(el.getBoundingClientRect().height) }));
+    const [a, b] = [await stil(0), await stil(1)];
+    expect(a).toEqual(b);
+    const nokta = (i: number) => yillar.nth(i).locator('.opex-radio-dot').evaluate((el) => getComputedStyle(el).transform);
+    expect(await nokta(0)).not.toBe(await nokta(1));
+    await yillar.nth(1).click();
+    await expect(yillar.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await page.mouse.move(0, 0);
+    expect(await stil(1)).toEqual(await stil(0));
+  });
+
   test('eski sunucu (bekletmez): istekler 15 sn aralığa döner; sık istek yok', async ({ page }) => {
     await page.clock.install();
     const server = await mockScript(page);
@@ -264,7 +304,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect.poll(() => server.keyed().length).toBe(2);
     await page.clock.runFor(OPEX_POLL_MS - 2_000);
     expect(server.keyed().length, 'aralık dolmadan yeni istek yok').toBe(2);
-    await expect(page.locator('.opex-live-meta')).toContainText(`${OPEX_POLL_MS / 1000} sn’de bir denetlenir`);
+    await expect(page.locator('.opex-live-meta')).toContainText(`${OPEX_POLL_MS / 1000} sn’de bir`);
     await page.clock.runFor(3_000);
     await expect.poll(() => server.keyed().length).toBe(3);
   });

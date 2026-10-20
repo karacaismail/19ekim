@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { MantineProvider, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
+import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
+import { IconChevronDown } from '@tabler/icons-react';
 import { meta } from '../data/program';
 import { ModelProvider, useParams } from './ModelContext';
-import { COMMON_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { COMMON_NAV, HIRING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { href, normalizePath } from '../lib/paths';
 
@@ -64,7 +65,7 @@ function ThemeToggle() {
       <span className="theme-track" aria-hidden="true">
         <span className="theme-thumb" />
       </span>
-      <span>Koyu tema</span>
+      <span className="theme-label">Koyu tema</span>
     </button>
   );
 }
@@ -119,6 +120,76 @@ function NavItem({
   );
 }
 
+/** Hareket süresi tokenı (ms); hareket azaltmada token 0 ms olur. Sunucu çiziminde 0. */
+function useMotionMs(name: string) {
+  const [ms, setMs] = useState(0);
+  useEffect(() => {
+    const read = () => {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const value = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : parseFloat(raw);
+      setMs(Number.isFinite(value) ? value : 0);
+    };
+    read();
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    query.addEventListener('change', read);
+    return () => query.removeEventListener('change', read);
+  }, [name]);
+  return ms;
+}
+
+/**
+ * “İstihdam” açılır menüsü (kullanıcı kararı 2026-10-20): organizasyon şeması, rol sayfaları ve istihdam takvimi.
+ * Mantine Menu
+ * (erişilebilir menü: oklar, Home/End, Escape, odak tetikleyiciye döner); panel ve tetikleyici markalı. Etkin sayfa
+ * menüdeyse tetikleyici seçili görünür, öğe aria-current taşır.
+ */
+function HiringMenu({ current }: { current: string }) {
+  const duration = useMotionMs('--motion-duration-fast');
+  const items = [...TREE_NAV, HIRING_NAV].map((item: { label: string; path: string; role?: string; no?: number; also?: string[] }) => {
+    const target = normalizePath(href(item.path));
+    const exact = target === current;
+    const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
+    return { ...item, exact, inSection };
+  });
+  const active = items.some((i) => i.exact || i.inSection);
+  return (
+    <Menu
+      position="bottom-start"
+      offset={4}
+      loop
+      returnFocus
+      transitionProps={{ transition: 'fade', duration, exitDuration: duration, timingFunction: 'var(--motion-ease-standard)' }}
+      classNames={{ dropdown: 'navmenu', item: 'navmenu-item' }}
+    >
+      <Menu.Target>
+        <button type="button" className="mainnav-link mainnav-menu" data-section={active ? 'true' : undefined}>
+          İstihdam
+          <IconChevronDown className="mainnav-chevron" size={16} stroke={2} aria-hidden="true" />
+        </button>
+      </Menu.Target>
+      <Menu.Dropdown aria-label="İstihdam">
+        {items.map((item) => [
+          item.path === HIRING_NAV.path ? <Menu.Divider key="ayrac" className="navmenu-divider" /> : null,
+          <Menu.Item
+            key={item.path}
+            component="a"
+            href={href(item.path)}
+            data-role={item.role}
+            aria-current={item.exact ? 'page' : undefined}
+            data-section={item.inSection ? 'true' : undefined}
+          >
+            {item.no ? <span className="tree-no">{item.no}</span> : null}
+            {item.label}
+          </Menu.Item>,
+        ])}
+      </Menu.Dropdown>
+    </Menu>
+  );
+}
+
+/** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler canlı durumu, portal ile). */
+export const PAGE_TOOLS_ID = 'sayfa-araclari';
+
 export function AppFrame({ pathname, children, wide = false }: { pathname: string; children: ReactNode; wide?: boolean }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
@@ -149,14 +220,10 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
         </header>
         <nav className="mainnav" aria-label="Ana gezinme">
           <div className="mainnav-rows">
-            <ul className="mainnav-list" aria-label="Ağaçlar">
-              {TREE_NAV.map((item) => (
-                <li key={item.path}>
-                  <NavItem {...item} current={current} />
-                </li>
-              ))}
-            </ul>
-            <ul className="mainnav-list mainnav-common" aria-label="Ortak sayfalar">
+            <ul className="mainnav-list">
+              <li>
+                <HiringMenu current={current} />
+              </li>
               {COMMON_NAV.map((item) => (
                 <li key={item.path}>
                   <NavItem {...item} current={current} />
@@ -169,6 +236,7 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
         <main className="app-main" id="icerik" tabIndex={-1}>
           <div className="wrap" data-wide={wide ? '' : undefined}>
             {stop && stop.crumb.length ? (
+              <div className="crumbs-row">
               <nav aria-label="Ağaç yolu" className="crumbs">
                 <ol>
                   <li>
@@ -185,6 +253,8 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
                   })}
                 </ol>
               </nav>
+              <div className="page-tools" id={PAGE_TOOLS_ID} />
+              </div>
             ) : null}
             {children}
             {prev || next ? (

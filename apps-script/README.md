@@ -6,12 +6,12 @@ canlı verisini üretir. Sheets değişince sayfa birkaç saniyede (sayfa açık
 değerler değişir.
 
 **Hesaplar düz değerdir (özel işlev yok).** Bir girdi hücresi değişince basit `onEdit` tetikleyicisi modeli bir kez
-hesaplar ve yalnız içeriği değişen tabloları (Giderler Hepsi, Bordro, Hesap, Personel ve Teşvik hesap sütunları, Toplam
+hesaplar ve yalnız içeriği değişen tabloları (Pano, Giderler Hepsi, Bordro, Personel hesap sütunları, Toplam
 satırları) yazar; hücre “Yükleniyor…” olmaz, eski değer yenisi gelene kadar görünür. Döviz kuru Parametreler’de canlı
 GOOGLEFINANCE formülüdür; kur değişince hesaplar Sheets açılınca, sayfa veri istediğinde ya da OPEX → Hesapları yenile ile
 yazılır. Zamanlanmış veya kurulu tetikleyici yoktur. Satır ekleyip sildikten sonra (bu işlem düzenleme tetikleyicisini
 çalıştırmaz) hesaplar bir sonraki düzenlemede, Sheets açılınca ya da OPEX → Hesapları yenile ile güncellenir. Kodun
-yazdığı bir hücre (hesap sütunu, Toplam satırı, Giderler Hepsi/Bordro/Hesap) elle değiştirilirse hemen geri yazılır.
+yazdığı bir hücre (hesap sütunu, Toplam satırı, Pano tabloları, Giderler Hepsi/Bordro) elle değiştirilirse hemen geri yazılır.
 
 ## Dosyalar
 
@@ -28,15 +28,18 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 
 ## Sayfalar (Google Sheets)
 
-- **Pano**: KPI kutuları, küme özeti, bordro köprüsü, 8 grafik, kişi tablosu.
+- **Pano**: KPI kutuları, küme özeti, bordro köprüsü, 9 grafik, 12 aylık plan, kişi tablosu, grafik verileri ve
+  uyarılar (hepsini kod yazar).
 - **Giderler Hepsi** (hesaplanır): tüm kalemler ay ay ₺.
 - **Giderler OFİS** (girdi): kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları; aylık ızgara ve “Toplam (₺)”.
 - **Giderler TEKNOLOJİ** (girdi): yazılım, yapay zekâ, sunucu, API, AWS vb.; aylık ızgara ve “Toplam (₺)”.
 - **Giderler PERSONEL** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik; aylık ızgara ve “Toplam (₺)”.
 - **Bordro**: kişi × ay netten brüte tablo, 2026 ve 2027.
 - **Parametreler** (girdi): kur (canlı Google Finance, yedekli), 2026 enflasyonu, 2027 zam esası, bordro oranları, dilimler.
-- **Teşvikler** (girdi): standart (genel prim indirimi, asgari ücret desteği) ve koşullu teşvikler.
-- **Hesap**: pano ve grafik verisi (kod yazar: `kpi`, `ozet`, … blokları).
+- Teşvikler (girdi) **Parametreler `H:P`** alanındadır: standart (genel prim indirimi, asgari ücret desteği) ve
+  koşullu teşvikler. Ayrı Teşvikler ve Hesap sayfası yoktur (kullanıcı kararı 2026-10-20): Kurulum eski Teşvikler
+  tablosunu taşır, kodlarla doğrular ve sayfayı siler; Hesap sayfasını siler. Pano verisi (grafik verileri dahil)
+  doğrudan Pano’ya yazılır. Parametreler’de formül olan hücreler mavidir.
 
 Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
 
@@ -94,7 +97,7 @@ adımları ~3,5 dakika dolunca durur, ilerlemesini kaydeder ve “Kurulum sürü
 Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
 Onay kutuları kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir. Satırda en az bir ay işaretliyse boş
 kutu işaretsiz sayılır (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda her ay işaretlidir.
-Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Hiçbir sayfada kilit (koruma) yoktur (kullanıcı kararı 2026-10-20); hesaplanan sayfalar (Pano, Giderler Hepsi, Bordro, Hesap) ve toplam satırları kod yazar; Giderler Hepsi, Bordro veya Hesap’ta elle yapılan değişiklik hemen geri yazılır.
+Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Hiçbir sayfada kilit (koruma) yoktur (kullanıcı kararı 2026-10-20); hesaplanan sayfalar (Pano, Giderler Hepsi, Bordro) ve toplam satırları kod yazar; bu alanlarda elle yapılan değişiklik hemen geri yazılır.
 
 ## Erişim
 
@@ -115,4 +118,4 @@ ucu erişim anahtarı ister ve sayfa Bağlantı formunu gösterir. Değişiklik 
   `karacaismail.github.io` kökü kullanıcının diğer Pages projeleriyle paylaşıldığından önerilmez (sunum bilgisayarında
   kullanmayın). Daha güçlü yalıtım için ayrı bir alan adı (özel domain) gerekir.
 - Sheets’ten gelen adlar sayfada metin olarak çizilir; grafik ipuçlarında HTML kaçışlanır.
-- Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalıdır; değerler Teşvikler sayfasında değişir.
+- Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalıdır; değerler Parametreler `H:P`’de değişir.

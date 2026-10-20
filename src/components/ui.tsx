@@ -72,26 +72,34 @@ export function TextLink({ to, children, standalone = false }: { to: string; chi
   );
 }
 
-export function Hero({ eyebrow, title, lead, children }: { eyebrow: string; title: string; lead?: string; children?: ReactNode }) {
+/**
+ * Sayfa başlığı: sıkışık (kullanıcı kararı 2026-10-20: yükseklik yarıya). `aside` geniş ekranda başlığın sağında
+ * durur (ör. Giderler yıl seçimi); dar ekranda altına iner.
+ */
+export function Hero({ eyebrow, title, lead, aside, children }: { eyebrow: string; title: string; lead?: string; aside?: ReactNode; children?: ReactNode }) {
   return (
-    <header className="hero">
-      <p className="eyebrow">{eyebrow}</p>
-      <Title order={1} className="display">
-        {title}
-      </Title>
-      {lead ? (
-        <Text component="p" className="lead">
-          {lead}
-        </Text>
-      ) : null}
+    <header className="hero" data-aside={aside ? '' : undefined}>
+      <div className="hero-text">
+        <p className="eyebrow">{eyebrow}</p>
+        <Title order={1} className="display">
+          {title}
+        </Title>
+        {lead ? (
+          <Text component="p" className="lead">
+            {lead}
+          </Text>
+        ) : null}
+      </div>
+      {aside ? <div className="hero-aside">{aside}</div> : null}
       {children}
     </header>
   );
 }
 
-export function FactsRow({ items }: { items: { label: string; value: ReactNode }[] }) {
+/** Bilgi satırı; `compact`: etiket ve değer yan yana, tek akışta (rol sayfası başlığı). */
+export function FactsRow({ items, compact = false }: { items: { label: string; value: ReactNode }[]; compact?: boolean }) {
   return (
-    <dl className="facts-row">
+    <dl className="facts-row" data-compact={compact ? '' : undefined}>
       {items.map((item) => (
         <div key={item.label}>
           <dt>{item.label}</dt>

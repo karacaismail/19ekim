@@ -1,3 +1,4 @@
+import { Title } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import {
   Avatar,
@@ -6,7 +7,6 @@ import {
   FactsRow,
   formatDate,
   Target,
-  Hero,
   KpiGrid,
   Note,
   RoleChip,
@@ -56,23 +56,32 @@ const range = (row: { from: string; to: string }) => `${formatDate(row.from)} �
 const shortDate = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
 const shortRange = (row: { from: string; to: string }) => `${shortDate(row.from)} – ${shortDate(row.to)}`;
 
+/**
+ * Rol başlığı (kullanıcı kararı 2026-10-20: yükseklik ≥ %75 az): üstte solda simge, ad ve durum, sağda görev; altta
+ * tam genişlikte tek akışta bilgiler. Ağaç adı kırıntıda yazdığı için tekrar edilmez.
+ */
 function RoleHero({ role }: { role: Role }) {
   return (
-    <Hero eyebrow={role.tree} title={role.title} lead={role.mission}>
-      <div className="role-hero-meta">
-        <Avatar role={role.slug} large />
+    <header className="hero hero-role">
+      <div className="hero-role-head">
+        <Avatar role={role.slug} />
+        <Title order={1} className="display">
+          {role.title}
+        </Title>
         <StatusChip status={role.startStatus} />
       </div>
+      <p className="hero-role-mission">{role.mission}</p>
       <FactsRow
-        items={[
-          { label: 'Kişi', value: role.count },
-          { label: 'Başlangıç', value: role.start },
-          { label: 'Bağlı olduğu', value: role.reportsTo },
-          { label: 'Ücret modeli', value: role.pay },
-          { label: 'Aranan', value: role.seeks.join(' · ') },
-        ]}
-      />
-    </Hero>
+          compact
+          items={[
+            { label: 'Kişi', value: role.count },
+            { label: 'Başlangıç', value: role.start },
+            { label: 'Bağlı', value: role.reportsTo },
+            { label: 'Ücret', value: role.pay },
+            { label: 'Aranan', value: role.seeks.join(' · ') },
+          ]}
+        />
+    </header>
   );
 }
 

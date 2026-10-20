@@ -19,10 +19,16 @@ var OPEX_SAYFA = {
   teknoloji: 'Giderler TEKNOLOJİ',
   personel: 'Giderler PERSONEL',
   parametreler: 'Parametreler',
-  tesvikler: 'Teşvikler',
   bordro: 'Bordro',
-  hesap: 'Hesap',
 };
+/**
+ * Kaldırılan sayfalar (kullanıcı kararı 2026-10-20): Teşvikler tablosu Parametreler’e taşındı (hesapta kullanılır),
+ * Hesap sayfası kaldırıldı (pano verisi doğrudan Pano’ya yazılır). Kurulum taşır ve siler; o zamana kadar okunur.
+ */
+var OPEX_KALDIRILAN = { tesvikler: 'Teşvikler', hesap: 'Hesap' };
+/** Teşvik tablosu Parametreler’de H sütunundan başlar (A:F parametreler, G boşluk), 9 sütun. */
+var OPEX_TESVIK_SUTUN = 8;
+var OPEX_TESVIK_GENISLIK = 9;
 /**
  * Eski adlar (yeniden adlandırmalar, 2026-10-20): eski adla duran tablo da okunur; kurulum yeni ada taşır. Ayrılmamış
  * “Düzenli Giderler” (teknoloji + ofis birlikte) teknoloji kaynağı olarak okunur, kurulum onu iki sayfaya ayırır.
@@ -57,21 +63,48 @@ var OPEX_BEKLEME_ADIM_MS = 400;
 /** Aylık ızgaranın ilk başlığı (yeni yerleşim): Toplam satırı yalnız bu yerleşimde yazılır. */
 var OPEX_IZGARA_ILK = 'Eki 2026';
 /** Girdi sayfasındaki hesap sütunları (1’den): okunurken girdi sayılmaz. */
-var OPEX_HESAP_SUTUNLARI = { personel: [11, 15], tesvikler: [11, 13] };
+var OPEX_HESAP_SUTUNLARI = { personel: [11, 15] };
 
-/** Hesap sayfası blokları: rapor, başlangıç sütunu, sütun sayısı. Yan yana durur; satır sayısı değişse de çakışmaz. */
-var OPEX_BLOKLAR = [
-  { rapor: 'kpi', sutun: 1, genislik: 2 },
-  { rapor: 'ozet', sutun: 4, genislik: 7 },
-  { rapor: 'kategori', sutun: 12, genislik: 5 },
-  { rapor: 'aylik', sutun: 18, genislik: 6 },
-  { rapor: 'kisi', sutun: 25, genislik: 10 },
-  { rapor: 'bilesen', sutun: 36, genislik: 5 },
-  { rapor: 'teknoloji', sutun: 42, genislik: 3 },
-  { rapor: 'kopru', sutun: 46, genislik: 2 },
-  { rapor: 'uyari', sutun: 49, genislik: 1 },
-  { rapor: 'plan', sutun: 51, genislik: 5 },
-];
+/**
+ * Pano yerleşimi (A:L): kodun yazdığı bloklar (satır, sütun 1’den; enCok: bloğun en çok satırı, altındaki bölüme
+ * taşmaz). Grafikler bu bloklardan çizilir; ayrı hesap sayfası yoktur. Grafikler 25. satırdan 21’er satır arayla iki
+ * sütunda (A, G); 9. grafiğin yanında 12 aylık plan, altta kişiler, grafik verileri ve uyarılar.
+ */
+var OPEX_PANO = {
+  uyariOzet: { satir: 2, sutun: 9, genislik: 1, enCok: 1 },
+  kpi: { satir: 4, sutun: 1, genislik: 12, enCok: 7 },
+  ozet: { satir: 13, sutun: 1, genislik: 7, enCok: 5 },
+  kopru: { satir: 13, sutun: 9, genislik: 2, enCok: 9 },
+  plan: { satir: 109, sutun: 7, genislik: 5, enCok: 14 },
+  kisi: { satir: 132, sutun: 1, genislik: 10, enCok: 41 },
+  kategori: { satir: 177, sutun: 1, genislik: 5, enCok: 41 },
+  aylik: { satir: 177, sutun: 7, genislik: 6, enCok: 13 },
+  bilesen: { satir: 221, sutun: 1, genislik: 5, enCok: 41 },
+  teknoloji: { satir: 221, sutun: 7, genislik: 3, enCok: 41 },
+  uyari: { satir: 265, sutun: 1, genislik: 1, enCok: 30 },
+};
+
+/** Tam sayı, binlik noktalı, ₺ (Pano notları metin olarak yazılır). */
+function tlMetni_(v) {
+  return String(Math.round(Number(v) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ₺';
+}
+
+/** Pano gösterge kutuları (A4:L10): etiket, değer, not satırları; her kutu üç sütun (birleştirilmiş). */
+function panoGostergeleri_(kpi) {
+  var d = {};
+  (kpi || []).slice(1).forEach(function (r) { d[r[0]] = r[1]; });
+  var satir = function (a, b, c, e) { return [a, '', '', b, '', '', c, '', '', e, '', '']; };
+  var kur = (Number(d['EUR/TRY']) || 0).toFixed(4).replace('.', ',');
+  return [
+    satir('Bu ay toplam OPEX', 'Teknoloji', 'Personel', 'Ofis ve işletme'),
+    satir(d['Bu ay toplam OPEX'], d['Teknoloji'], d['Personel'], d['Ofis ve işletme']),
+    satir(d['Rapor dönemi'], 'Yazılım, yapay zekâ, sunucu, API, AWS vb.', 'Bordro işveren maliyeti + freelancer', 'Kira, faturalar, ofis ihtiyaçları'),
+    satir('', '', '', ''),
+    satir('2027 aylık ortalama', '2027 değişim (aylık ort.)', 'Uygulanan 2027 zammı', 'USD/TRY · EUR/TRY'),
+    satir(d['2027 aylık ortalama'], d['2027 değişim'], d['Uygulanan zam'], d['USD/TRY']),
+    satir('2027 yıllık: ' + tlMetni_(d['2027 yıllık OPEX']), '2026 aylık ortalamasına göre', d['Zam esası'], 'EUR/TRY ' + kur),
+  ];
+}
 
 function opexSimdi_() {
   return Date.now();
@@ -283,12 +316,21 @@ function hesapBloklari_(ss, girdi, modelAl) {
   var bordro = ss.getSheetByName(OPEX_SAYFA.bordro);
   ekle('bordro-2026', OPEX_SAYFA.bordro, bordro, 4, 1, 15, rapor('bordro-2026'));
   ekle('bordro-2027', OPEX_SAYFA.bordro, bordro, 4, 17, 15, rapor('bordro-2027'));
-  var hesap = ss.getSheetByName(OPEX_SAYFA.hesap);
-  OPEX_BLOKLAR.forEach(function (b) { ekle('hesap-' + b.rapor, OPEX_SAYFA.hesap, hesap, 1, b.sutun, b.genislik, rapor(b.rapor)); });
+  var pano = ss.getSheetByName(OPEX_SAYFA.pano);
+  var p = OPEX_PANO;
+  var panoBlok = function (ad, uret, tekSatir) {
+    var b = p[ad];
+    if (pano) bloklar.push({ ad: 'pano-' + ad, sayfa: OPEX_SAYFA.pano, sh: pano, satir: b.satir, sutun: b.sutun, genislik: b.genislik, enCok: b.enCok, uret: uret, tekSatir: !!tekSatir });
+  };
+  panoBlok('kpi', function () { return panoGostergeleri_(OpexMotor.rapor(modelAl(), 'kpi', girdi)); }, true);
+  panoBlok('uyariOzet', function () {
+    var n = modelAl().uyarilar.length;
+    return [[n ? '⚠ ' + n + ' uyarı: aşağıda Uyarılar' : 'Uyarı yok']];
+  }, true);
+  ['ozet', 'kopru', 'plan', 'kisi', 'kategori', 'aylik', 'bilesen', 'teknoloji', 'uyari'].forEach(function (ad) { panoBlok(ad, rapor(ad)); });
   var hs = OPEX_HESAP_SUTUNLARI;
   var per = sayfa('personel');
   ekle('personel-sutun', per.ad, per.sh, 1, hs.personel[0], hs.personel[1] - hs.personel[0] + 1, rapor('personel-sutun'));
-  ekle('tesvik-sutun', OPEX_SAYFA.tesvikler, ss.getSheetByName(OPEX_SAYFA.tesvikler), 1, hs.tesvikler[0], hs.tesvikler[1] - hs.tesvikler[0] + 1, rapor('tesvik-sutun'));
   [['personel', girdi.personel], ['teknoloji', girdi.giderler], ['ofis', girdi.giderler2]].forEach(function (x) {
     var k = x[0];
     var rows = x[1] || [];
@@ -320,6 +362,8 @@ function blokYaz_(b, degerler, son) {
   if (degerler.length) b.sh.getRange(b.satir, b.sutun, degerler.length, b.genislik).setValues(degerler);
   if (b.tekSatir) return;
   var bas = b.satir + degerler.length;
+  // Sınırlı blok (Pano) altındaki bölüme dokunmaz.
+  if (b.enCok) son = Math.min(son, b.satir + b.enCok - 1);
   if (son >= bas) b.sh.getRange(bas, b.sutun, son - bas + 1, b.genislik).clearContent();
 }
 
@@ -365,6 +409,8 @@ function hesaplariYaz_(secenek) {
     var degisen = [];
     bloklar.forEach(function (b) {
       var degerler = blokDegerleri_(b.uret(), b.genislik);
+      // Pano blokları kendi alanında kalır (sonraki bölüm ezilmez).
+      if (b.enCok && degerler.length > b.enCok) degerler = degerler.slice(0, b.enCok);
       // Konum da ize girer: satır eklenip Toplam satırı kayınca aynı değerler yeni yerine yazılır.
       var iz = ozetMetni_(b.satir + ':' + b.sutun + ':' + JSON.stringify(degerler), 16);
       if (izler[b.ad] !== iz || cakisan.indexOf(b.ad) >= 0) degisen.push({ b: b, degerler: degerler, iz: iz });
@@ -417,7 +463,7 @@ function hesaplariTetikle_(e) {
   var r = e && e.range;
   if (!r) return null;
   var ad = r.getSheet().getName();
-  var izlenen = [OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.personel, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.hepsi, OPEX_SAYFA.bordro, OPEX_SAYFA.hesap].concat(OPEX_ESKI_AD.teknoloji, OPEX_ESKI_AD.personel);
+  var izlenen = [OPEX_SAYFA.parametreler, OPEX_SAYFA.personel, OPEX_SAYFA.ofis, OPEX_SAYFA.teknoloji, OPEX_SAYFA.hepsi, OPEX_SAYFA.bordro, OPEX_SAYFA.pano, OPEX_KALDIRILAN.tesvikler].concat(OPEX_ESKI_AD.teknoloji, OPEX_ESKI_AD.personel);
   if (izlenen.indexOf(ad) < 0) return null;
   return hesaplariYaz_({ alan: { sayfa: ad, satir: r.getRow(), son: r.getLastRow(), sutun: r.getColumn(), sonSutun: r.getLastColumn() } });
 }
@@ -608,11 +654,15 @@ function girdileriOku_(sayfalar) {
   var ayrildi = !(tekSayfa && tekSayfa.getName() !== OPEX_SAYFA.teknoloji);
   var ofis = ayrildi ? hesapAlanlariniAyikla_(oku(ss.getSheetByName(OPEX_SAYFA.ofis))) : undefined;
   var personel = hesapAlanlariniAyikla_(oku(opexSayfasi_(ss, 'personel')), OPEX_HESAP_SUTUNLARI.personel);
+  // Parametreler sayfası tek okuma: A:F parametreler, H:P teşvikler (taşınmadıysa eski Teşvikler sayfası).
+  var pv = oku(ss.getSheetByName(OPEX_SAYFA.parametreler));
+  var t = OPEX_TESVIK_SUTUN - 1;
+  var tasindi = pv.length >= 3 && String((pv[2] || [])[t]).trim() === OpexMotor.BASLIKLAR.tesvikler.kod;
   return {
-    parametreler: oku(ss.getSheetByName(OPEX_SAYFA.parametreler), 6),
+    parametreler: pv.map(function (r) { return r.slice(0, 6); }),
     personel: personel,
     giderler: teknoloji,
-    tesvikler: oku(ss.getSheetByName(OPEX_SAYFA.tesvikler), 9),
+    tesvikler: tasindi ? pv.map(function (r) { return r.slice(t, t + OPEX_TESVIK_GENISLIK); }) : oku(ss.getSheetByName(OPEX_KALDIRILAN.tesvikler), 9),
     giderAylari: teknoloji,
     personelAylari: personel,
     giderler2: ofis,

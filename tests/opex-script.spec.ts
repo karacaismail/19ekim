@@ -583,7 +583,6 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
         'Giderler PERSONEL': sayfa(Object.values(b.personel), exampleTohum.personel, 16),
         'Giderler Hepsi': [['Giderler Hepsi'], ['Açıklama']],
         Bordro: [['Bordro'], ['Açıklama'], ['2026']],
-        Hesap: [['']],
         Pano: [['Pano']],
       };
     };
@@ -602,11 +601,18 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       const r = yaz();
       expect(r.durum).toBe('yazildi');
       expect(r.yazilan).toEqual(
-        expect.arrayContaining(['hepsi', 'bordro-2026', 'bordro-2027', 'hesap-kpi', 'hesap-plan', 'personel-sutun', 'tesvik-sutun', 'toplam-personel', 'toplam-teknoloji', 'toplam-ofis']),
+        expect.arrayContaining(['hepsi', 'bordro-2026', 'bordro-2027', 'pano-kpi', 'pano-ozet', 'pano-plan', 'pano-kisi', 'pano-kategori', 'pano-uyari', 'personel-sutun', 'toplam-personel', 'toplam-teknoloji', 'toplam-ofis']),
       );
       expect(oku('Giderler Hepsi')![2].slice(0, 4)).toEqual(['Grup', 'Kalem', 'Ayrıntı', expect.stringMatching(/ 202[67]$/)]);
       expect(yazimlar.find((y) => y.sayfa === 'Giderler Hepsi')!.degerler[0].slice(0, 2), 'metin tarih/sayı sanılmasın').toEqual(["'Grup", "'Kalem"]);
-      expect(oku('Hesap')![0].slice(0, 2)).toEqual(['Gösterge', 'Değer']);
+      // Pano: gösterge kutuları (A4:L10), küme özeti A13, grafik verileri (ayrı Hesap sayfası yok).
+      const pano = oku('Pano')!;
+      expect(pano[3][0]).toBe('Bu ay toplam OPEX');
+      expect(typeof pano[4][0]).toBe('number');
+      expect(pano[9][0]).toMatch(/^2027 yıllık: [\d.]+ ₺$/);
+      expect(pano[12].slice(0, 2)).toEqual(['Küme', expect.stringMatching(/ 202[67]$/)]);
+      expect(pano[176].slice(0, 2), 'Kategoriler grafik verisi').toEqual(['Küme', 'Kategori']);
+      expect(pano[1][8]).toMatch(/uyarı/i);
       expect(oku('Bordro')![3].slice(0, 3)).toEqual(['Kişi', 'Ay', 'Brüt']);
       expect(oku('Giderler PERSONEL')![2][10], 'K3: hesap sütunu başlığı').toMatch(/brüt$/);
       // OFİS: kira 60.000 + internet 500 + elektrik (boş) + mutfak 2.000 = 62.500 ₺ (Kasım 2026).
@@ -615,7 +621,7 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       const tek = m.giderler.filter((g) => g.kaynak === 'teknoloji').reduce((a, g) => a + g.aylikTl.y2026[10], 0);
       expect(satir(oku('Giderler TEKNOLOJİ')!, 'Toplam (₺)')[KAS]).toBeCloseTo(tek, 2);
       expect(tek).toBeGreaterThan(0);
-      expect(oku('Pano'), 'Pano’ya yazılmaz (yerel formüller Hesap’tan okur)').toEqual([['Pano']]);
+      expect(oku('Hesap'), 'Hesap sayfası yok').toBeUndefined();
     });
 
     test('girdi değişmediyse yazmaz; değişince yalnız içeriği değişen bloklar; zorla hepsini', () => {
@@ -629,8 +635,8 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       sheets['Giderler OFİS'] = ofis;
       const r = yaz();
       expect(r.durum).toBe('yazildi');
-      expect(r.yazilan).toEqual(expect.arrayContaining(['toplam-ofis', 'hepsi', 'hesap-ozet']));
-      for (const ad of ['bordro-2026', 'bordro-2027', 'personel-sutun', 'tesvik-sutun', 'toplam-teknoloji', 'toplam-personel']) expect(r.yazilan, ad).not.toContain(ad);
+      expect(r.yazilan).toEqual(expect.arrayContaining(['toplam-ofis', 'hepsi', 'pano-ozet']));
+      for (const ad of ['bordro-2026', 'bordro-2027', 'personel-sutun', 'toplam-teknoloji', 'toplam-personel', 'pano-kopru', 'pano-bilesen']) expect(r.yazilan, ad).not.toContain(ad);
       expect(yaz({ zorla: true }).yazilan.length).toBeGreaterThan(r.yazilan.length + 5);
     });
 
@@ -664,22 +670,70 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       expect(yaz().durum).toBe('yazildi');
     });
 
-    test('onEdit: girdi sayfasında yazar; Pano’da yazmaz; hesaplanan sayfada elle değişiklik geri yazılır', () => {
+    test('onEdit: girdi sayfasında yazar; ilgisiz sayfada yazmaz; Pano’da kod hücresi elle değişirse o blok geri yazılır', () => {
       const { ctx, yazimlar } = yazici();
       const duzenle = (ad: string, satir = 5, sutun = 2) =>
         (ctx.onEdit as (e: unknown) => void)({
           range: { getSheet: () => ({ getName: () => ad, getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => satir, getLastRow: () => satir, getColumn: () => sutun, getLastColumn: () => sutun, getNumRows: () => 1 },
         });
-      duzenle('Pano');
+      duzenle('Notlarım');
       expect(yazimlar).toEqual([]);
       duzenle('Giderler OFİS');
       const ilk = yazimlar.length;
       expect(ilk).toBeGreaterThan(10);
       duzenle('Giderler OFİS');
       expect(yazimlar.length, 'girdi aynı ve kod hücresine değmiyor: yazılmaz').toBe(ilk);
-      // Hesaplanan sayfada elle değişiklik (Hesap B5: kpi bloğu): yalnız o blok geri yazılır.
-      duzenle('Hesap');
-      expect(yazimlar.slice(ilk).map((y) => `${y.sayfa}!${y.c}`)).toEqual(['Hesap!1']);
+      duzenle('Pano', 1, 1);
+      expect(yazimlar.length, 'Pano başlığı kod bloğu değil').toBe(ilk);
+      // Pano B14 (küme özeti) elle değişti: yalnız o blok geri yazılır.
+      duzenle('Pano', 14, 2);
+      expect(yazimlar.slice(ilk).map((y) => `${y.sayfa}!${y.r}:${y.c}`)).toEqual(['Pano!13:1']);
+    });
+
+    test('teşvik tablosu Parametreler H:P’den okunur (ayrı Teşvikler sayfası yok); sonuç aynı', () => {
+      const eski = loadScript(yeniYerlesim());
+      const ayri = (eski.ctx.girdileriOku_ as () => { tesvikler: unknown[][] })().tesvikler;
+      const sheets = yeniYerlesim();
+      const tesvik = sheets.Teşvikler;
+      delete sheets.Teşvikler;
+      sheets.Parametreler = sheets.Parametreler.map((r, i) => [...r, ...Array(Math.max(0, 7 - r.length)).fill(''), ...(tesvik[i] ?? [])].map((v, j) => (j < 6 ? r[j] ?? '' : v)));
+      const s = loadScript(sheets);
+      const girdi = (s.ctx.girdileriOku_ as () => { parametreler: unknown[][]; tesvikler: unknown[][] })();
+      expect(girdi.tesvikler.filter((r) => r.some((v) => v !== '')).slice(0, 8)).toEqual(ayri.filter((r) => r.some((v) => v !== '')).slice(0, 8));
+      expect(girdi.parametreler[3].length).toBe(6);
+      const m = (s.ctx.OpexMotor as { hesapla: (g: unknown, o: unknown) => { tesvikler: { kod: string }[] } }).hesapla(girdi, { simdi: new Date() });
+      expect(m.tesvikler.map((t) => t.kod)).toContain('STD-PUAN');
+    });
+
+    test('Kurulum: Teşvikler sayfası Parametreler H’ye taşınır, doğrulanır ve silinir; tutmazsa sayfa korunur', () => {
+      const { ctx } = loadScript(SHEETS);
+      vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+      const kur = (bozuk: boolean) => {
+        const silinen: string[] = [];
+        const kopya: string[] = [];
+        const kaynak = [['Kod', 'Teşvik'], ['STD-PUAN', 'Genel prim'], ['ENGELLI', 'Engelli']];
+        let hedef: unknown[][] = [];
+        const eski = {
+          getName: () => 'Teşvikler',
+          getLastRow: () => 2 + kaynak.length,
+          getRange: () => ({
+            getValues: () => kaynak.map((r) => [...r, ...Array(7).fill('')]),
+            copyTo: () => { kopya.push('kopya'); hedef = kaynak.map((r) => [...r, ...Array(7).fill('')]); if (bozuk) hedef[1][0] = 'BOZUK'; },
+          }),
+        };
+        const param = { getRange: () => ({ getDisplayValue: () => (hedef.length ? 'Kod' : ''), getValues: () => hedef }) };
+        const ss = { getSheetByName: (n: string) => (n === 'Teşvikler' ? eski : null), deleteSheet: (sh: { getName: () => string }) => void silinen.push(sh.getName()) };
+        (ctx as Record<string, unknown>).SpreadsheetApp = { flush: () => undefined };
+        const tasi = ctx.tesvikleriTasi_ as (ss: unknown, sh: unknown) => boolean;
+        return { silinen, kopya, calistir: () => tasi(ss, param) };
+      };
+      const iyi = kur(false);
+      expect(iyi.calistir()).toBe(true);
+      expect(iyi.kopya).toEqual(['kopya']);
+      expect(iyi.silinen).toEqual(['Teşvikler']);
+      const kotu = kur(true);
+      expect(() => kotu.calistir()).toThrow(/taşınamadı/);
+      expect(kotu.silinen, 'doğrulama tutmazsa eski sayfa silinmez').toEqual([]);
     });
 
     test('elle değiştirilen kod hücresi (Toplam satırı, Personel K:O) geri yazılır; girdi aynı olsa da', () => {
@@ -697,7 +751,7 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
           range: { getSheet: () => ({ getName: () => ad, getRange: () => ({ getDisplayValue: () => '' }) }), getRow: () => satir, getLastRow: () => satir, getColumn: () => sutun, getLastColumn: () => sutun, getNumRows: () => 1 },
         });
       duzenle('Giderler OFİS', toplamSatir, KAS + 1);
-      expect(yazimlar.slice(n + 1).map((y) => y.sayfa)).toEqual(['Giderler OFİS']);
+      expect(yazimlar.slice(n).map((y) => y.sayfa), 'yalnız elle değiştirilen Toplam bloğu yazılır').toEqual(['Giderler OFİS']);
       expect(oku('Giderler OFİS')![toplamSatir - 1][KAS]).toBe(dogru);
       duzenle('Giderler PERSONEL', 6, 12);
       expect(yazimlar.at(-1)).toMatchObject({ sayfa: 'Giderler PERSONEL', r: 1, c: 11 });
@@ -857,7 +911,8 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     test('kur değişince (GOOGLEFINANCE, onEdit yok) veri isteği Sheets hesaplarını yazar', () => {
       const s = yazici();
       s.post(JSON.stringify({ anahtar: KEY }));
-      const usd = () => satir(s.oku('Hesap')!, 'USD/TRY')[1];
+      // Pano gösterge kutusu: USD/TRY değeri J9.
+      const usd = () => s.oku('Pano')![8][9];
       expect(usd()).toBe(48.9889);
       s.sheets.Parametreler = buildInput({ params: { kur_usd: 50 } }).parametreler!;
       s.post(JSON.stringify({ anahtar: KEY }));

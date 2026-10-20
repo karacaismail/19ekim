@@ -90,8 +90,10 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
   { label: 'Asistan', path: '/roller/asistan/', role: 'asistan' },
 ];
 
+/** “İstihdam” menüsünün sonunda (organizasyon ve rollerden sonra): işe alım sırası. */
+export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
+
 export const COMMON_NAV = [
-  { label: 'İstihdam takvimi', path: '/istihdam/' },
   { label: '90 gün hedefleri', path: '/hedefler/' },
   { label: 'Eylem planı', path: '/eylem-plani/' },
   { label: 'MLM ağı', path: '/buyume-modeli/' },

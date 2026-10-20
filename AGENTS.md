@@ -51,12 +51,16 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     sorar (en az 1,5 sn arayla). Bekletmeyen (eski) sunucuda 15 sn aralık. Yeni model aynı bileşenlere verilir (sayfa
     yeniden kurulmaz); grafikler `replaceMerge` + sıra kimliğiyle yerinde güncellenir, değişen değer kısa süre
     `data-changed` ile vurgulanır (yalnız veri özeti değişince; süzgeç/yıl değişince değil).
-    Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`) hesaplanır ve **düz değer** olarak yazılır
+    Sheets’teki Pano/Bordro aynı motorla (`apps-script/src/Motor.js`) hesaplanır ve **düz değer** olarak yazılır
     (kullanıcı kararı 2026-10-20: “Yükleniyor…” olmasın; özel işlev `=OPEX(...)` kurulmaz, eski çağrılar çevrilir):
     `hesaplariYaz_` (Sheets.js) basit `onEdit` (girdi sayfası; hesaplanan sayfada elle değişiklik geri yazılır), `onOpen`,
     OPEX → Hesapları yenile, Kurulum `hesaplar` adımı ve kur değişince (GOOGLEFINANCE onEdit tetiklemez) `doPost`’tan
     çalışır; betik kilidi, girdi kilitle okunur, yalnız içeriği değişen blok yazılır (iz: konum + değer), metin kesme
-    işaretiyle (tarih sanılmaz; Hesap’ta `@` biçimi yok). Kodun yazdığı hücreler (Toplam satırı, Personel `K:O`) girdi
+    işaretiyle (tarih sanılmaz; yazılan alanlarda `@` biçimi yok). Kullanıcı kararı 2026-10-20: ayrı **Hesap** ve
+    **Teşvikler** sayfası yok; Pano blokları (gösterge kutuları, küme özeti, köprü, plan, kişiler, grafik verileri,
+    uyarılar; `OPEX_PANO`, en çok satırla sınırlı) doğrudan Pano’ya yazılır, grafikler bunlardan çizilir; teşvik
+    tablosu hesapta kullanıldığı için Parametreler `H:P`’de (`OPEX_TESVIK_SUTUN`; Kurulum taşır, kodlarla doğrular,
+    sonra eski sayfayı siler). Parametreler’de formül olan her hücre mavi. Kodun yazdığı hücreler (Toplam satırı, Personel `K:O`) girdi
     özetine girmez. Zamanlanmış/kurulu tetikleyici yoktur. Döviz kuru Parametreler’de canlı GOOGLEFINANCE formülüdür.
     Sayfalar (kullanıcı kararı 2026-10-20): “Giderler Hepsi” (kod hesaplar: `hepsi` raporu, gruplar Ofis / Teknoloji /
     Personel ay ay ₺), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (ikisi de girdi `A:G`, `H` boşluk, ızgara `I:AL`; motorda
@@ -116,6 +120,15 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
+- Başlık ve gezinme (kullanıcı kararı 2026-10-20): üst bant tek satır (dar ekranda marka alt yazısı ve tema yazısı
+  gizlenir), gezinme tek satır; organizasyon, rol sayfaları ve istihdam takvimi “İstihdam” açılır menüsünde (Mantine
+  Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok). Sayfa başlıkları sıkışık
+  (`--text-title`; 1280 px’te rol ≤ 139 px, diğerleri ≤ 146 px, ana sayfa ≤ 87 px; test). Rol başlığı: ad + durum,
+  sağda görev, altta tek akışta bilgiler. Kırıntı satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
+- Giderler ilk ekranı (kullanıcı kararı 2026-10-20): canlı durum kırıntı satırında küçük şerit (nokta, kısa metin,
+  simge düğmeler); 2026/2027 sekmeleri başlığın sağında, aynı şablonda (seçim radyo noktasıyla); özet kutuları tek
+  sırada; Gruplar ve Kategoriler yan yana alçak (≥ 1200 px). 1280×800 ve 1440×900’de grafikler kaydırmadan görünür
+  (test). Kategori ekseninde her ad yazılır (`interval: 0`).
 - En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
 
@@ -180,7 +193,7 @@ Pages yayınından önce çalıştırır.
   hesaplanan sayfa) o düzenlemede geri yazılır. Bir düzenlemenin hesap yazımı canlıda ≈2–4 sn sürer (Apps Script
   çağrı gecikmesi); bu sırada eski değer görünür.
 - Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalı; 2027 yasal değerleri (asgari ücret,
-  dilimler, destek) varsayımdır ve Parametreler/Teşvikler sayfasında güncellenir. Varsayılan modelde 2027 asgari ücreti
+  dilimler, destek) varsayımdır ve Parametreler sayfasında (teşvikler `H:P`) güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).
 - Giderler sayfasında dokunmatik/kaba işaretçi, yatay telefon ve kısa yükseklik profilleri ayrıca test edilmedi.
 

@@ -214,6 +214,78 @@ test.describe('odak', () => {
   });
 });
 
+test.describe('başlık ve İstihdam menüsü', () => {
+  test('İstihdam menüsü: organizasyon, roller ve istihdam takvimi; etkin sayfa işaretli; Escape kapatır', async ({ page }) => {
+    await page.goto('roller/segika/');
+    await hydrated(page);
+    const tetik = page.getByRole('button', { name: 'İstihdam' });
+    await expect(tetik).toHaveAttribute('data-section', 'true');
+    await tetik.click();
+    const menu = page.getByRole('menu', { name: 'İstihdam' });
+    await expect(menu).toBeVisible();
+    const ogeler = menu.getByRole('menuitem');
+    await expect(ogeler).toHaveText(['Organizasyon', '1Dijital pazarlama', '2Masa başı', '3Saha satış', '4Organizatör', 'Segika', 'Asistan', 'İstihdam takvimi']);
+    await expect(menu.getByRole('menuitem', { name: 'Segika' })).toHaveAttribute('aria-current', 'page');
+    // Panel markalı yüzeyde; ögede çevreleyen halka yok.
+    const panel = await menu.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const yuzey = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--surface-raised').trim());
+    expect(panel).not.toBe('rgba(0, 0, 0, 0)');
+    expect(yuzey).not.toBe('');
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+  });
+
+  test('klavye: Tab ile tetikleyici, Enter açar, oklar ögeler arasında gezer; odak alt çizgiyle (halka yok)', async ({ page }) => {
+    await page.goto('istihdam/');
+    await hydrated(page);
+    const tetik = page.getByRole('button', { name: 'İstihdam' });
+    await page.keyboard.press('Tab');
+    await tetik.focus();
+    await page.keyboard.press('Enter');
+    const menu = page.getByRole('menu', { name: 'İstihdam' });
+    await expect(menu).toBeVisible();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    const odak = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const cs = getComputedStyle(el);
+      return { role: el.getAttribute('role'), text: el.textContent, outline: cs.outlineStyle, outlineWidth: cs.outlineWidth, shadow: cs.boxShadow, deco: cs.textDecorationLine };
+    });
+    expect(odak.role).toBe('menuitem');
+    expect(odak.outline === 'none' || parseFloat(odak.outlineWidth) === 0).toBe(true);
+    expect(odak.shadow).toBe('none');
+    expect(odak.deco).toContain('underline');
+    await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' })).toHaveAttribute('aria-current', 'page');
+    // Escape kapatır, odak tetikleyiciye döner (Safari fareyle tıklanan düğmeye odak vermediği için klavyeyle açılır).
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(tetik).toBeFocused();
+  });
+
+  test('başlık alanları sıkışık (1280): rol ≤ 139 px (−%75), diğer sayfalar ≤ 146 px, ana sayfa ≤ 87 px (−%50)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const yukseklik = async (path: string) => {
+      await page.goto(path);
+      return page.locator('.hero').first().evaluate((el) => el.getBoundingClientRect().height);
+    };
+    // Önceki ölçüler (2026-10-20, 1280 px): rol 557, MLM 293, ana sayfa 175.
+    for (const path of ['roller/segika/', 'roller/organizator/', 'roller/saha-uzmani/']) expect(await yukseklik(path), path).toBeLessThanOrEqual(139);
+    for (const path of ['buyume-modeli/', 'istihdam/', 'karar-bekleyenler/']) expect(await yukseklik(path), path).toBeLessThanOrEqual(146);
+    expect(await yukseklik('')).toBeLessThanOrEqual(87);
+  });
+
+  for (const width of [320, 360, 375, 390]) {
+    test(`${width} px: üst bant tek satır, gezinme tek satır`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 700 });
+      await page.goto('roller/asistan/');
+      const h = await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height);
+      expect(h).toBeLessThanOrEqual(56);
+      const nav = await page.locator('.mainnav').evaluate((el) => el.getBoundingClientRect().height);
+      expect(nav).toBeLessThanOrEqual(60);
+    });
+  }
+});
+
 test.describe('hareket', () => {
   test('tüm geçişler onaylı Cubic eğri ve pozitif süreyle; giriş ve çıkış temel öğede', async ({ page }) => {
     for (const path of ['', 'roller/organizator/', 'istihdam/']) {
