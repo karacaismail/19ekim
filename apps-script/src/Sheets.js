@@ -145,7 +145,8 @@ function girdileriOku_() {
   var tekSayfa = opexSayfasi_(ss, 'teknoloji');
   var teknoloji = oku(tekSayfa);
   // Ayırma bitmeden (teknoloji hâlâ eski adlı birleşik sayfa) OFİS okunmaz: ofis satırları iki kez sayılmasın.
-  var ofis = tekSayfa && tekSayfa.getName() !== OPEX_SAYFA.teknoloji ? [] : oku(ss.getSheetByName(OPEX_SAYFA.ofis));
+  var ayrildi = !(tekSayfa && tekSayfa.getName() !== OPEX_SAYFA.teknoloji);
+  var ofis = ayrildi ? oku(ss.getSheetByName(OPEX_SAYFA.ofis)) : undefined;
   var personel = oku(opexSayfasi_(ss, 'personel'));
   return {
     parametreler: oku(ss.getSheetByName(OPEX_SAYFA.parametreler), 6),

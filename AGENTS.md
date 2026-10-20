@@ -49,7 +49,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.
     Sayfalar (kullanıcı kararı 2026-10-20): “Giderler Hepsi” (kod hesaplar: `OPEX("hepsi")`, gruplar Ofis / Teknoloji /
     Personel ay ay ₺), “Giderler OFİS” ve “Giderler TEKNOLOJİ” (ikisi de girdi `A:G`, `H` boşluk, ızgara `I:AL`; motorda
-    `giderler2` ve `giderler` kaynakları; Küme boşsa sayfanın grubu) ve “Giderler PERSONEL” (girdi `A:I`, hesap `K:O`,
+    `giderler2` ve `giderler` kaynakları; grubu sayfa belirler, kurulum Küme sütununu sayfayla eşitler; birleşik eski
+    sayfada Küme sütunu) ve “Giderler PERSONEL” (girdi `A:I`, hesap `K:O`,
     ızgara `Q:AT`). Eski “Düzenli Giderler” (eski “Bu ay ödendi / Dahil / Fatura / Not” ve hesap sütunları kaldırıldı →
     ödeme takibi yok, `odeme.takip=false`) Küme’ye göre ikiye ayrılır (`giderSayfalariniAyir_`: önce değerlerden gizli
     yedek sekme, kopya geçici adla temizlenir, yarıda kalırsa yeniden çalıştırınca sürer; girdisi dolu “Toplam…” satırında

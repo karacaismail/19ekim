@@ -749,6 +749,8 @@ var OpexMotor = (function () {
       { tablo: girdi && girdi.giderler, aylar: girdi && girdi.giderAylari, kume: 'teknoloji' },
       { tablo: girdi && girdi.giderler2, aylar: girdi && girdi.giderAylari2, kume: 'ofis' },
     ];
+    // Ayrı sayfalar (ikinci kaynak verildiyse) grubu sayfa belirler; birleşik eski sayfada Küme sütunu belirler.
+    var ayriSayfalar = !!(girdi && Array.isArray(girdi.giderler2));
     // “Bu ay ödendi” sütunu kaldırılmışsa ödeme takibi yoktur (sayfa ve pano ödenen/bekleyen göstermez).
     var odemeTakibi = false;
     giderKaynaklari.forEach(function (kaynak) {
@@ -760,7 +762,7 @@ var OpexMotor = (function () {
         var kalem = metin(s.kalem);
         if (!kalem || toplamSatiri(kalem)) return;
         if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
-        var kume = metin(s.kume) === '' ? kaynak.kume : kumeKodu(s.kume);
+        var kume = ayriSayfalar || metin(s.kume) === '' ? kaynak.kume : kumeKodu(s.kume);
         if (!kume) {
           uyarilar.push('Gider “' + kalem + '” kümesi tanınmadı (' + metin(s.kume) + '); ' + KUME_ADI[kaynak.kume] + ' sayıldı.');
           kume = kaynak.kume;

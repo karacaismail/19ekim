@@ -496,6 +496,16 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(mm.ozet.buAy.ofis).toBe(1000);
   });
 
+  test('ayrı gider sayfalarında grubu sayfa belirler (Küme sütunu çelişse de); birleşik eski sayfada Küme sütunu', () => {
+    // Kullanıcı kararı 2026-10-20: Giderler TEKNOLOJİ’deki her kalem teknoloji, Giderler OFİS’teki her kalem ofis.
+    const tek = [['Microsoft 365', 'greatdoers', 'Ofis ve işletme', 'Ofis & Lisans', 'USD', 13.13, 'Kur', false, true, '', '']];
+    const ofis = [['Kira', '', 'Teknoloji', 'Kira', 'TRY', 1000, 'Kira', false, true, '', '']];
+    const ayri = buildModel({ personel: [], giderler: tek, giderler2: ofis });
+    expect(ayri.giderler.map((g) => [g.kalem, g.kume])).toEqual([['Microsoft 365', 'teknoloji'], ['Kira', 'ofis']]);
+    const birlesik = buildModel({ personel: [], giderler: [...tek, ...ofis] });
+    expect(birlesik.giderler.map((g) => g.kume), 'tek sayfa: Küme sütunu').toEqual(['ofis', 'teknoloji']);
+  });
+
   test('“hepsi” raporu: Ofis, Teknoloji, Personel grupları ay ay ₺, grup ara toplamları ve genel toplam', () => {
     const tek = [['Araç', 'bt', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur', false, true, '', '']];
     const ofis = [['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira', false, true, '', '']];

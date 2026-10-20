@@ -785,7 +785,13 @@ function giderleriKur_(ss, k) {
   }
   var alan = Math.max(n, 1) + 20;
   var s = OpexMotor.SECENEKLER;
-  sh.getRange(4, 3, alan, 1).setDataValidation(liste_(s.kume));
+  // Grubu sayfa belirler: Küme sütunu sayfanın grubuyla eşitlenir (çelişki görünmesin).
+  if (n) {
+    var ak = sh.getRange(4, 1, n, 3).getValues();
+    var kume = sh.getRange(4, 3, n, 1);
+    kume.setValues(ak.map(function (r) { return [String(r[0]).trim() === '' || toplamSatiriMi_(r[0]) ? r[2] : OPEX_GIDER_METNI[k].kume]; }));
+  }
+  sh.getRange(4, 3, alan, 1).setDataValidation(liste_([OPEX_GIDER_METNI[k].kume]));
   sh.getRange(4, 4, alan, 1).setDataValidation(liste_(s.kategori, true));
   sh.getRange(4, 5, alan, 1).setDataValidation(liste_(s.para));
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.artis));
@@ -961,7 +967,7 @@ function panoyuKur_(ss) {
   };
   // Hesap!B2… = kpi bloğunun değer sütunu (satır sırası Motor.rapor('kpi') ile aynı).
   kpi(4, 1, 'Bu ay toplam OPEX', '=Hesap!B3', '=Hesap!B2');
-  kpi(4, 4, 'Teknoloji', '=Hesap!B4', 'Yapay zekâ, sunucu, lisans');
+  kpi(4, 4, 'Teknoloji', '=Hesap!B4', 'Yazılım, yapay zekâ, sunucu, API, AWS vb.');
   kpi(4, 7, 'Personel', '=Hesap!B5', 'Bordro işveren maliyeti + freelancer');
   kpi(4, 10, 'Ofis ve işletme', '=Hesap!B6', 'Kira, faturalar, ofis ihtiyaçları');
   kpi(8, 1, '2027 aylık ortalama', '=Hesap!B8', '="2027 yıllık: "&FIXED(Hesap!B9,0)&" ₺"');

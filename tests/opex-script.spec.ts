@@ -176,6 +176,10 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       model: { giderler: { kalem: string }[]; kisiler: unknown[] };
     };
     expect(ayri.model.giderler.map((g) => g.kalem)).toEqual(['Araç', 'Kira']);
+    const ters = loadScript({ ...diger, 'Giderler TEKNOLOJİ': sayfa([['M365', '', 'Ofis ve işletme', 'Lisans', 'USD', 13, 'Kur']]), 'Giderler OFİS': ofis, 'Giderler PERSONEL': SHEETS.Personel }).post(JSON.stringify({ anahtar: KEY })) as unknown as {
+      model: { giderler: { kalem: string; kume: string }[] };
+    };
+    expect(ters.model.giderler.map((g) => g.kume), 'ayrı sayfalarda grubu sayfa belirler').toEqual(['teknoloji', 'ofis']);
     expect(ayri.model.kisiler.length).toBeGreaterThan(0);
     const birlesik = sayfa([['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur'], ['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira']]);
     const once = loadScript({ ...diger, 'Düzenli Giderler': birlesik, 'Personel Giderleri': SHEETS.Personel }).post(JSON.stringify({ anahtar: KEY })) as unknown as {
