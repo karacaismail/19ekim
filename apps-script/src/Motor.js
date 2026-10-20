@@ -250,6 +250,27 @@ var OpexMotor = (function () {
         if (Number.isFinite(n)) sonuc.tutar[c.yil][c.ay] = n;
       } else sonuc.aktif[c.yil][c.ay] = evet(v);
     });
+    // Başlangıç ayı (kullanıcı kararı 2026-10-20: yeni pozisyonlar ilk maaşı 1 Aralık’ta alır): planın ilk ayında etkin
+    // olmayan satır, ilk etkin (işaretli ve 0’dan büyük) ayında başlar; önceki aylar — ızgarada olmayan Ocak–Eylül 2026
+    // dahil — yoktur (bordroda matrah birikmez). Planın ilk ayında etkin satır yıl başından beri vardır.
+    var aylar = [];
+    izgara.sutunlar.forEach(function (c) {
+      var k = c.yil * 12 + c.ay;
+      if (aylar.indexOf(k) < 0) aylar.push(k);
+    });
+    aylar.sort(function (x, y) { return x - y; });
+    var etkin = function (k) {
+      var yil = Math.floor(k / 12);
+      var t = sonuc.tutar[yil][k % 12];
+      return sonuc.aktif[yil][k % 12] && !(t !== null && t <= 0);
+    };
+    var bas = null;
+    for (var i = 0; i < aylar.length && bas === null; i++) if (etkin(aylar[i])) bas = aylar[i];
+    if (bas !== aylar[0]) {
+      [2026, 2027].forEach(function (yil) {
+        for (var ay = 0; ay < 12; ay++) if (bas === null || yil * 12 + ay < bas) sonuc.aktif[yil][ay] = false;
+      });
+    }
     return sonuc;
   }
 

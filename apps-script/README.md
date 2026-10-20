@@ -43,7 +43,10 @@ zam veya artış esasıyla). Bir aya farklı tutar yazmak için hücrenin üzeri
 özel); varsayılana dönmek için hücreyi silip Kurulum’u yeniden çalıştırın. Personelde tutar ücret esasına göre yazılır
 (Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok); giderde satırın para
 biriminde (Para). İşaretsiz ayda bordro satırı sıfırdır ve kümülatif GV matrahı birikmez. Ör. bir kişinin Ekim maaşı ile
-Kasım–Aralık maaşı ayrı yazılabilir; freelancer Ocak–Şubat 2027’de ayrı fatura kesebilir. Yeni satır eklediyseniz
+Kasım–Aralık maaşı ayrı yazılabilir; freelancer Ocak–Şubat 2027’de ayrı fatura kesebilir. **Başlangıç ayı:** planın
+ilk ayında (Ekim 2026) etkin olmayan satır, ilk işaretli ve 0’dan büyük ayında başlar; önceki aylar (Ocak–Eylül 2026
+dahil) yoktur ve bordroda matrah birikmez — ör. 1 Aralık’ta başlayan yeni pozisyonda Ekim/Kasım işaretsiz ya da 0.
+Ekim’de etkin satır yıl başından beri var sayılır. Yeni satır eklediyseniz
 **OPEX → Kurulum / onarım**’ı yeniden çalıştırın: onay kutuları ve formüller yeni satıra da yazılır; mevcut işaret ve
 elle yazılmış tutarlar korunur. Izgara alanında başka içerik varsa kurulum dokunmadan durur ve uyarır.
 

@@ -58,7 +58,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     bir onay kutusu (“Eki 2026”; işaretsiz ay = o ay gider yok, bordroda matrah birikmez) ve bir tutar (“Eki 2026 tutar”).
     Kurulum her satırın tutar hücresine varsayılan formülü yazar (her ayda rakam görünür; 2027 zamlı/artışlı, adlandırılmış
     `p_*` parametrelerle); elle yazılan farklı tutar o aya özeldir, 0 = o ay ödeme yok. Izgarada olmayan ay (Ocak–Eylül
-    2026) varsayılan olarak etkindir. Başlıklar metin biçimindedir (tarihe dönmez); motor tarihe dönmüş başlığı da okur. Izgara alanında yabancı
+    2026) Ekim’de etkin satır için etkindir; Ekim’de etkin olmayan satır ilk etkin (>0) ayında başlar, öncesi yoktur
+    (yeni işe giriş: matrah sıfırdan). Başlıklar metin biçimindedir (tarihe dönmez); motor tarihe dönmüş başlığı da okur. Izgara alanında yabancı
     içerik varsa Kurulum durur. Motor `aylikTl`/`aktif`/`ozel` üretir; sayfa “Etkin ay” sütunu ve “Ay ay kalemler”
     tablosuyla gösterir; ızgarasız eski yanıt her ay etkin sayılır (`parseReply → aylariTamamla`). Yıl sekmelerinde seçim
     durumunu sağ üstte 3rem SVG radyo işareti gösterir (seçili yeşil `--radio-checked`, iki temada ≥ 3:1; dar ekranda rakamın

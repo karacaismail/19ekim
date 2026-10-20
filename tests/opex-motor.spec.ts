@@ -424,6 +424,35 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(buildModel().ozet.odeme.takip, 'sütun varsa takip açık').toBe(true);
   });
 
+  test('yeni işe giriş: planda ilk etkin ay Aralık 2026 ise önceki aylar (Ocak–Kasım) yok; matrah Aralık’ta sıfırdan başlar', () => {
+    // Kullanıcı kararı 2026-10-20: yeni pozisyonlar ilk maaşı 1 Aralık’ta alır (Eki/Kas işaretsiz ya da 0).
+    const mm = buildModel({
+      personel: [NET('Eski çalışan', 35000), NET('Yeni A', 35000), NET('Yeni B', 35000)],
+      giderler: [],
+      personelAylari: [{}, { aktif: { 'Eki 2026': false, 'Kas 2026': false } }, { tutar: { 'Eki 2026': 0, 'Kas 2026': 0 } }],
+    });
+    const [eski, a, b] = mm.kisiler;
+    for (const k of [a, b]) {
+      expect(k.y2026.aylar.slice(0, 11).every((s) => s.maliyet === 0 && s.brut === 0), `${k.ad}: Ocak–Kasım yok`).toBe(true);
+      expect(k.aktif.y2026.slice(0, 11).every((x) => !x)).toBe(true);
+      const ara = k.y2026.aylar[11];
+      close(ara.net, 35000);
+      expect(ara.kumulatifMatrah, 'matrah yalnız Aralık').toBe(ara.gvMatrahi);
+      expect(ara.brut, 'birikmiş matrah yok: brüt daha düşük').toBeLessThan(eski.y2026.aylar[11].brut);
+      close(k.y2027.aylar[0].net, k.tutar2027);
+    }
+    expect(eski.y2026.aylar[0].maliyet, 'Ekim’de çalışan: Ocak’tan beri (değişmedi)').toBeGreaterThan(0);
+    expect(mm.aylik[10].y2026.insan, 'Kasım: yalnız eski çalışan').toBe(eski.y2026.aylar[10].maliyet);
+  });
+
+  test('yeni gider: planda ilk etkin ay Kasım ise Ocak–Ekim 2026 yok (2026 yıllık OPEX’e girmez)', () => {
+    const mm = buildModel({ personel: [], giderler: GIDERLER, giderAylari: [{ aktif: { 'Eki 2026': false } }, {}] });
+    const [kira, arac] = mm.giderler;
+    expect(kira.aylikTl.y2026.slice(0, 10)).toEqual(Array(10).fill(0));
+    expect(kira.aylikTl.y2026.slice(10)).toEqual([1000, 1000]);
+    expect(arac.aylikTl.y2026[0], 'Ekim’de etkin: Ocak’tan beri').toBe(arac.tl);
+  });
+
   test('ızgara yoksa her ay etkin ve varsayılan tutar (eski Sheets kurulumu)', () => {
     for (const g of m.giderler) {
       expect(g.aylikTl.y2026).toEqual(Array(12).fill(g.tl));
