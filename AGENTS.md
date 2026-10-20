@@ -8,7 +8,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 ## Yığın ve mimari
 
 - Astro 7.4.0 (statik), @astrojs/react 7.1.0, React 19.3.1, @mantine/core 9.7.3, @mantine/dates 9.7.3 (dayjs 1.11),
-  ECharts 6.1.0, TypeScript 6.
+  ECharts 6.1.0, TypeScript 6. Giderler sayfası ayrıca @fontsource-variable/roboto 5.3.0 ve Google Apps Script (V8) kullanır.
 - Her sayfa tek bir React ağacıdır (`src/views/*`), `AppFrame` içinde `MantineProvider` + `ModelProvider` ile sunucuda
   çizilir ve `client:load` ile hidrasyon alır. Astro’da React bağlamı sayfa sınırını geçmez; Mantine bileşenleri ve
   `useModel()` her zaman `AppFrame` içinde kalır (sayfa bileşeni yalnız `AppFrame` + içerik bileşenini döndürür).
@@ -40,6 +40,12 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
+  - `/giderler/` OPEX (kullanıcı kararı 2026-10-20): teknoloji ve insan (ücret) kümeleri + ofis/işletme; bu ayın
+    kalemleri, netten brüte aylık bordro (kümülatif GV, asgari ücret istisnası, SGK tavanı), SGK teşvikleri, 2027 zam
+    (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
+    uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa, görünürken 15 sn’de bir özet sorar (`src/data/opex.ts`).
+    Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.
+    Yalnız bu sayfa Roboto ve en küçük metin 15 CSS px kullanır (`:root[data-page='giderler']`, BaseLayout `page`).
   - `/notlar/` basit not ve görev listesi (TickTick benzeri): listeler, ekle, işaretle, düzenle, iki adımlı sil. Varsayılan
     notlar `src/data/notes.ts` (kullanıcının 19 Ekim notları: partner ağı, İK yönetimi); değişiklikler `istoc-plan-notlar`
     anahtarıyla yalnız o tarayıcıda saklanır.
@@ -70,7 +76,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
-- En küçük metin 14 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
+- En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
 
 ## Gizlilik ve yayın
@@ -89,6 +95,16 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - Mesai modeli 4857 sayılı İş Kanunu tavanlarına göre (`workPeriods`, `LEGAL_LIMITS`): Dönem 1 (2 Kasım–30 Ocak)
   haftada 60 sa, Dönem 2 (1 Şubat’tan) haftada 45 sa; yıllık fazla çalışma ≤ 270 sa, günlük ≤ 11 sa. Rol saatleri
   değişirse `tests/data.spec.ts` tavanları denetler.
+- Giderler (OPEX): kişi adları, ücretler, hesap e-postaları ve gider tutarları yalnız Google Sheets’tedir; sayfa onları
+  çalışma anında okur ve hiçbir yere yazmaz. Kullanıcı kararı 2026-10-20: sayfa **herkese açık, anahtarsız** ve bilgiler
+  eksiksiz (Sheets → Parametreler → “Sayfa erişimi: Herkese açık”; “Anahtarla” seçilirse anahtar istenir). Yayındaki
+  veri ucu `src/data/opex.ts → OPEX_ENDPOINT`. Veriler yine repoya yazılmaz (kullanıcı “repoya da yazılsın”ı seçmedi). Anahtar Apps Script
+  Komut dosyası özelliklerinde (`OPEX_ERISIM_ANAHTARI`); koda, repoya ve adrese yazılmaz. İlk kurulum verisi repo
+  dışındaki `../opex-google/Tohum.js`; tohumlu paket `../opex-google/OPEX.gs` (`build.mjs` repo içine yazmayı reddeder,
+  `.gitignore`: `Tohum.js`, `*.gs`). Testler yalnız kurgusal `apps-script/ornek/tohum.ornek.js` ile çalışır; testlerde
+  gerçek tohumdaki tutarlar kullanılmaz. Anahtar varsayılan sessionStorage’da (“Bu cihazda hatırla” localStorage;
+  `karacaismail.github.io` kökü paylaşıldığı için önerilmez). Sheets’ten gelen metin ECharts HTML ipucunda kaçışlanır
+  (`esc`); yeni grafik biçimlendiricileri de kaçışlamalıdır (`tests/giderler.spec.ts` enjeksiyonu reddeder).
 - Lisans henüz seçilmedi; kullanıcının onayı olmadan lisans eklenmez.
 
 ## Komutlar
@@ -101,6 +117,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 | Üretim derlemesi | `npm run build` |
 | Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile) |
 | Hepsi | `npm run verify` |
+| Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
 
 `scripts/check-ui-gates.mjs` şunları reddeder: token dışı hareket, `transition: all`, çevreleyen odak halkası,
 14 px altı yazı, 300 altı yazı ağırlığı (CSS, tokenlar, JS ve satır içi HTML), zorlayıcı kelime bölme, radiuslu öğede iç gölge çubuğu veya renkli vurgu kenarı, eksik kenar
@@ -112,6 +129,14 @@ Karar bekleyenlerde karar veren yalnız İsmail Karaca veya yatırımcıdır; ha
 Pages yayınından önce çalıştırır.
 
 ## Bilinen sınırlar
+
+- Apps Script (Sheets kurulumu, özel işlev, web uygulaması) CI’da çalışmaz; motor (`tests/opex-motor.spec.ts`) ve veri
+  ucu (`tests/opex-script.spec.ts`) Node’da, sayfa sahte yanıtla (`tests/giderler.spec.ts`) denetlenir. Kurulum/Sheets API çağrıları yalnız
+  `@types/google-apps-script` tip denetimiyle doğrulandı; gerçek Google hesabında çalıştırılması kullanıcıdadır.
+- Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalı; 2027 yasal değerleri (asgari ücret,
+  dilimler, destek) varsayımdır ve Parametreler/Teşvikler sayfasında güncellenir. Varsayılan modelde 2027 asgari ücreti
+  şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).
+- Giderler sayfasında dokunmatik/kaba işaretçi, yatay telefon ve kısa yükseklik profilleri ayrıca test edilmedi.
 
 - Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamaz; tablo ve Gantt klavye kaydırması WebKit’te `not_run`.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.

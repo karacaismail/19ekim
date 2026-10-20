@@ -89,6 +89,16 @@
   --motion-delay-none: 0ms;
 }
 
+/*
+ * Giderler (OPEX) sayfası: kullanıcı kararı (2026-10-20) Roboto ve en küçük metin 15 CSS px.
+ * Yalnız bu sayfanın kökünde (data-page) geçerlidir; diğer sayfalar Outfit ve 14 CSS px tabanını korur.
+ */
+:root[data-page='giderler'] {
+  --font-sans: 'Roboto Variable', 'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-sm: 0.9375rem;
+  --text-table: 0.9375rem;
+}
+
 @media (min-width: 22.5em) {
   :root {
     --page-gutter: 0.875rem;
@@ -219,6 +229,15 @@
   --surface-control: #efede7;
   --surface-control-hover: #e4e1d8;
   --accent-hover: #ff9a2e;
+
+  /* Veri görselleştirme: doğrulanmış kategorik palet (sıra sabit; açık yüzey #fff, CVD ΔE ≥ 9,1) */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-total: #343a40;
+  --viz-credit: #6250d6;
+  --viz-track: #e8e6e0;
 }
 
 /* Koyu tema */
@@ -291,4 +310,13 @@
   --surface-control: #262a2e;
   --surface-control-hover: #31363b;
   --accent-hover: #ff9a2e;
+
+  /* Koyu yüzey (#1a1d20) için ayrı seçilmiş adımlar; hepsi ≥ 3:1 */
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-total: #ced4da;
+  --viz-credit: #9085e9;
+  --viz-track: #2a2f34;
 }

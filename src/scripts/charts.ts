@@ -5,7 +5,7 @@
  * easeInOut Cubic (ECharts: cubicInOut); hareket azaltma tercihinde animasyon kapanır. Çubuk ve kutular radiussuzdur.
  * Seçenekler kapsayıcı genişliğine göre kurulur (açıklama satırları, eksen etiket genişliği).
  */
-import type { ChartSpec, ChartTreeNode } from '../lib/chartSpec';
+import type { ChartSpec, ChartTreeNode, OpexTone } from '../lib/chartSpec';
 
 type EChartsModule = typeof import('../lib/echarts-setup');
 type Instance = ReturnType<EChartsModule['echarts']['init']>;
@@ -134,6 +134,45 @@ function axis(): Opt {
 }
 
 const tone = (role: string) => ({ fill: token(`--role-${role}-bg`), line: token(`--role-${role}`), text: token(`--role-${role}-fg`) });
+
+/* ---------- OPEX (Giderler) ---------- */
+
+/** Ton → doğrulanmış kategorik palet tokenı (açık/koyu ayrı adımlar; tokens.css). */
+const VIZ: Record<OpexTone, string> = {
+  tech: '--viz-1',
+  people: '--viz-2',
+  office: '--viz-3',
+  net: '--viz-1',
+  tax: '--viz-2',
+  sgk: '--viz-3',
+  employer: '--viz-4',
+  y2026: '--viz-1',
+  y2027: '--viz-2',
+  total: '--viz-total',
+  credit: '--viz-credit',
+};
+const viz = (t: OpexTone) => token(VIZ[t]);
+/** Sheets’ten gelen ad ve kategori HTML ipucuna kaçışlanarak yazılır (metin, işaretleme değil). */
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+const compact = new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 });
+const shortLira = (v: number) => (v === 0 ? '0' : `${compact.format(v)} ₺`);
+const ratio = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(r * 100)}`;
+/** Bu genişliğin altındaki kapsayıcıda değer etiketleri gizlenir (değer ekseni, ipucu ve tablo taşır); auto yığın yataylaşır. */
+const OPEX_NARROW = 568;
+/** Çubuk ucundaki etiket için sağ pay: en uzun etiketin yaklaşık genişliği (SVG dışına taşmasın). */
+const labelRoom = (labels: string[]) => Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * FONT_SIZE * 0.6) + 16;
+const categoryLabel = (width: number, share = 0.4): Opt => ({
+  ...(axis().axisLabel as Opt),
+  color: token('--text-primary'),
+  width: Math.min(220, Math.floor(width * share)),
+  overflow: 'break',
+});
+const valueAxis = (narrow: boolean): Opt => ({
+  type: 'value',
+  ...axis(),
+  splitNumber: narrow ? 3 : 5,
+  axisLabel: { ...(axis().axisLabel as Opt), formatter: shortLira, hideOverlap: true },
+});
 
 function targetLine(target: number, position = 'insideStartTop'): Opt {
   const strong = token('--accent-strong');
@@ -676,6 +715,162 @@ function build(spec: ChartSpec, width: number): Opt {
                 }
               : undefined,
         })),
+      };
+    }
+
+    case 'opex-bar': {
+      const narrow = width < OPEX_NARROW;
+      const label = (v: number) => (spec.share ? `${lira(v)} · ${ratio(v / spec.share)}` : lira(v));
+      const labels = spec.items.map((i) => label(i.value));
+      return {
+        ...base(),
+        legend: { show: false },
+        grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 8, bottom: 8, containLabel: true },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${esc(p.name)}<br/>${label(p.value)}` },
+        xAxis: { ...valueAxis(narrow), show: narrow },
+        yAxis: { type: 'category', inverse: true, data: spec.items.map((i) => i.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width) },
+        series: [
+          {
+            type: 'bar',
+            barMaxWidth: 24,
+            data: spec.items.map((i) => ({ value: i.value, itemStyle: { color: viz(i.tone), borderRadius: 0 } })),
+            label: { show: !narrow, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => label(p.value) },
+          },
+        ],
+      };
+    }
+
+    case 'opex-stack':
+    case 'opex-stack-h': {
+      const horizontal = spec.kind === 'opex-stack-h' || width < OPEX_NARROW;
+      const narrow = width < OPEX_NARROW;
+      const surface = token('--surface-raised');
+      const names = [...spec.series.map((s) => s.name), ...(spec.line ? [spec.line.name] : [])];
+      const category: Opt = horizontal
+        ? { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.34) }
+        : { type: 'category', data: spec.categories, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } };
+      const series: Opt[] = spec.series.map((s) => ({
+        name: s.name,
+        type: 'bar',
+        stack: 'toplam',
+        data: s.values,
+        barMaxWidth: 24,
+        // 2 px yüzey aralığı: yığın dilimleri çizgi değil boşlukla ayrılır.
+        itemStyle: { color: viz(s.tone), borderRadius: 0, borderColor: surface, borderWidth: 1 },
+      }));
+      if (spec.line) {
+        series.push(
+          horizontal
+            ? {
+                name: spec.line.name,
+                type: 'scatter',
+                data: spec.line.values.map((v, i) => [v, spec.categories[i]]),
+                symbol: 'diamond',
+                symbolSize: 12,
+                itemStyle: { color: text, borderColor: surface, borderWidth: 2 },
+                z: 5,
+              }
+            : {
+                name: spec.line.name,
+                type: 'line',
+                data: spec.line.values,
+                symbolSize: 8,
+                lineStyle: { color: text, width: 2, type: 'dashed' },
+                itemStyle: { color: text, borderColor: surface, borderWidth: 2 },
+                z: 5,
+              },
+        );
+      }
+      return {
+        ...base(),
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'axis',
+          axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
+          valueFormatter: (v: number | number[]) => lira(Array.isArray(v) ? v[0] : v),
+        },
+        legend: { ...(base().legend as Opt), data: names },
+        grid: { left: 4, right: 16, bottom: 4, top: legendTop(names, width), containLabel: true },
+        xAxis: horizontal ? valueAxis(narrow) : category,
+        yAxis: horizontal ? category : valueAxis(narrow),
+        series,
+      };
+    }
+
+    case 'opex-group': {
+      const narrow = width < OPEX_NARROW;
+      const names = spec.series.map((s) => s.name);
+      return {
+        ...base(),
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'axis',
+          axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
+          valueFormatter: (v: number) => lira(v),
+        },
+        legend: { ...(base().legend as Opt), data: names },
+        grid: { left: 4, right: 16, top: legendTop(names, width), bottom: 4, containLabel: true },
+        xAxis: valueAxis(narrow),
+        yAxis: { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.36) },
+        series: spec.series.map((s) => ({
+          name: s.name,
+          type: 'bar',
+          data: s.values,
+          barMaxWidth: 14,
+          barGap: '25%',
+          itemStyle: { color: viz(s.tone), borderRadius: 0 },
+        })),
+      };
+    }
+
+    case 'opex-kopru': {
+      const narrow = width < OPEX_NARROW;
+      const base0: number[] = [];
+      const bars: Opt[] = [];
+      let run = 0;
+      for (const step of spec.steps) {
+        if (step.total) {
+          base0.push(0);
+          run = step.value;
+        } else if (step.value >= 0) {
+          base0.push(run);
+          run += step.value;
+        } else {
+          run += step.value;
+          base0.push(run);
+        }
+        bars.push({ value: Math.abs(step.value), itemStyle: { color: viz(step.tone), borderRadius: 0 } });
+      }
+      const label = (i: number) => {
+        const step = spec.steps[i];
+        return step.total ? lira(step.value) : `${step.value >= 0 ? '+' : '−'} ${lira(Math.abs(step.value))}`;
+      };
+      const labels = spec.steps.map((_, i) => label(i));
+      return {
+        ...base(),
+        legend: { show: false },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'axis',
+          axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
+          formatter: (params: { seriesIndex: number; dataIndex: number; name: string }[]) => {
+            const p = params.find((x) => x.seriesIndex === 1) ?? params[0];
+            return p ? `${esc(p.name)}<br/>${label(p.dataIndex)}` : '';
+          },
+        },
+        grid: { left: 4, right: narrow ? 24 : labelRoom(labels), top: 8, bottom: 8, containLabel: true },
+        xAxis: { ...valueAxis(narrow), show: narrow },
+        yAxis: { type: 'category', inverse: true, data: spec.steps.map((s) => s.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width) },
+        series: [
+          { type: 'bar', stack: 'kopru', data: base0, barMaxWidth: 24, silent: true, itemStyle: { color: 'transparent' }, emphasis: { disabled: true } },
+          {
+            type: 'bar',
+            stack: 'kopru',
+            data: bars,
+            barMaxWidth: 24,
+            label: { show: !narrow, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { dataIndex: number }) => label(p.dataIndex) },
+          },
+        ],
       };
     }
 

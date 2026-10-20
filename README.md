@@ -4,7 +4,8 @@ iStoc için 19 Ekim 2026 tarihli kararların toplantı özeti: kim, ne zaman ba�
 istoc.com’un tarihli eylem planı. Ana sayfa ECharts organizasyon şemasıdır; istihdam takvimi Mantine takvim ve zaman
 çizelgesiyle, eylem planı Gantt ve tabloyla gösterilir. Ayrıca 90 gün hedefleri, karar yetkisi ve kontrol noktaları,
 karar bekleyenler, çok katmanlı pazarlama ağı ve Parametreler sayfaları vardır. Parametreler sayfasında değiştirilen
-tarih, kişi sayısı, ücret, prim, kota ve bütçe tüm sayfalara anında yansır ve tarayıcıda saklanır.
+tarih, kişi sayısı, ücret, prim, kota ve bütçe tüm sayfalara anında yansır ve tarayıcıda saklanır. Giderler (OPEX)
+sayfası verisini Google Sheets’ten Apps Script web uygulamasıyla canlı okur ([apps-script/README.md](apps-script/README.md)).
 
 Yayın: <https://karacaismail.github.io/19ekim/>
 

@@ -22,14 +22,16 @@ import { meta } from '../data/program';
 interface Props {
   title?: string;
   description?: string;
+  /** Sayfaya özgü token kapsamı (ör. giderler: Roboto ve 15 CSS px en küçük metin; tokens.css). */
+  page?: string;
 }
 
-const { title, description = meta.description } = Astro.props;
+const { title, description = meta.description, page } = Astro.props;
 const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
 ---
 
 <!doctype html>
-<html lang="tr" data-mantine-color-scheme="light" data-focus-mode="pointer">
+<html lang="tr" data-mantine-color-scheme="light" data-focus-mode="pointer" data-page={page}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

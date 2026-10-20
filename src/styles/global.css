@@ -1929,3 +1929,418 @@ html:not([data-js]) .email-btn {
     border: 1px solid ButtonText;
   }
 }
+
+/* ---------- Giderler (OPEX) ----------
+ * Sayfa kökü data-page="giderler": Roboto ve en küçük metin 15 CSS px (tokens.css). Renkler --viz-* paletinden;
+ * metin hiçbir zaman seri rengini taşımaz, renkli işaret (nokta, pay çubuğu) metnin yanındadır.
+ */
+.opex-num {
+  display: block;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-dot {
+  display: inline-block;
+  flex: none;
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  border-radius: var(--radius-pill);
+  background: var(--viz-dot, var(--viz-1));
+}
+
+[data-tone='tech'] { --viz-dot: var(--viz-1); }
+[data-tone='people'] { --viz-dot: var(--viz-2); }
+[data-tone='office'] { --viz-dot: var(--viz-3); }
+
+.opex-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.opex-item .opex-dot {
+  transform: translateY(-0.0625rem);
+}
+
+.opex-tag {
+  margin-inline-start: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.opex-state {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.opex-state[data-state='paid'] {
+  background: var(--status-karar-bg);
+  color: var(--status-karar-fg);
+}
+
+.opex-state[data-state='missing'] {
+  background: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+}
+
+/* Özet: kahraman sayı + üç küme kutusu */
+.opex-kpis {
+  display: grid;
+  gap: var(--gap-normal);
+  margin-top: var(--space-6);
+}
+
+.opex-hero {
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  /* Üst kenarda düz vurgu çizgisi (data-edge="top"): yalnız çizginin değmediği alt köşeler yuvarlak. */
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.opex-hero p,
+.opex-tile p {
+  margin: 0;
+}
+
+.opex-hero-label,
+.opex-tile-label {
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.opex-hero-value {
+  margin-top: var(--space-1);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-hero-note,
+.opex-tile-note {
+  margin-top: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.opex-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--gap-normal);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opex-tile {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.opex-tile-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.opex-tile-value {
+  margin-top: var(--space-1);
+  font-size: var(--text-stat);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-share {
+  display: block;
+  inline-size: 100%;
+  block-size: 0.375rem;
+  margin-top: var(--space-3);
+}
+
+.opex-share-track {
+  fill: var(--viz-track);
+}
+
+.opex-share-fill {
+  fill: var(--viz-dot, var(--viz-1));
+}
+
+/* İki grafik yan yana (geniş ekranda) */
+.opex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  gap: 0 var(--gap-normal);
+}
+
+/* Dar grafikte yığın yataylaşır (charts.ts: 568 px host = 600 px figür); daha çok satır için yükseklik artar. */
+[data-page='giderler'] .chart {
+  container-type: inline-size;
+  container-name: opex-chart;
+}
+
+@container opex-chart (width < 600px) {
+  .chart-canvas[data-kind='opex-stack'] {
+    height: var(--chart-h-xl);
+  }
+}
+
+/* Düğmeler, seçimler, form */
+.opex-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.opex-btn,
+.opex-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-control);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.opex-btn:hover,
+.opex-toggle:hover {
+  background: var(--surface-control-hover);
+}
+
+.opex-btn[data-primary] {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.opex-btn[data-primary]:hover {
+  background: var(--accent-hover);
+}
+
+html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
+  text-decoration-color: var(--text-on-accent);
+}
+
+.opex-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+.opex-toggle {
+  font-weight: var(--weight-medium);
+}
+
+.opex-toggle[aria-pressed='true'],
+.opex-toggle[aria-pressed='true']:hover {
+  background: var(--text-primary);
+  color: var(--surface-page);
+  font-weight: var(--weight-semibold);
+}
+
+.opex-controls {
+  display: grid;
+  gap: 0 var(--space-6);
+}
+
+.opex-connect {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  overflow-wrap: break-word;
+  max-width: var(--prose-max);
+  margin-top: var(--space-8);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.opex-connect .block-title {
+  margin: 0;
+}
+
+.opex-connect-lead,
+.opex-connect-note {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.opex-field {
+  min-width: 0;
+}
+
+.opex-field-label {
+  margin-bottom: var(--space-1);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.opex-field-help {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.opex-input {
+  --input-height: var(--hit-min);
+  --input-bd: var(--rule-strong);
+  --input-bd-focus: var(--rule-strong);
+  min-height: var(--hit-min);
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+}
+
+.opex-input:focus {
+  outline: none;
+}
+
+.opex-check-body {
+  align-items: center;
+  min-height: var(--hit-min);
+}
+
+.opex-check-input {
+  cursor: pointer;
+}
+
+.opex-check-input:focus {
+  outline: none;
+}
+
+.opex-check-label {
+  font-size: var(--text-md);
+}
+
+html[data-focus-mode='keyboard'] .opex-field:has(:focus-visible) .opex-field-label,
+html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-label {
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}
+
+.opex-error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+  font-weight: var(--weight-medium);
+}
+
+.opex-steps {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  color: var(--text-secondary);
+}
+
+.opex-steps li + li {
+  margin-top: var(--space-1);
+}
+
+.opex-wait {
+  margin-top: var(--space-8);
+  color: var(--text-secondary);
+}
+
+.opex-failed,
+.opex-settings {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  justify-items: start;
+}
+
+.opex-settings .opex-connect {
+  margin-top: 0;
+  justify-self: stretch;
+}
+
+/* Canlı durum çubuğu */
+.opex-live {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  overflow-wrap: break-word;
+  margin-top: var(--space-8);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.opex-live p {
+  margin: 0;
+}
+
+.opex-live-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.opex-live-dot {
+  flex: none;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--status-karar-fg);
+}
+
+.opex-live[data-state='stale'] .opex-live-dot {
+  background: var(--status-bekliyor-fg);
+}
+
+.opex-live-label {
+  font-weight: var(--weight-semibold);
+}
+
+.opex-live-meta,
+.opex-live-stale,
+.opex-source,
+.opex-empty {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.opex-source {
+  max-width: var(--prose-max);
+  margin: var(--space-4) 0 0;
+}
+
+.opex-param {
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-warnings {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}

@@ -1,0 +1,76 @@
+# iStoc OPEX — Google Sheets + Apps Script
+
+Giderler sayfasının (<https://karacaismail.github.io/19ekim/giderler/>) veri kaynağı. Google Sheets tek kaynaktır:
+girdiler Sheets’te düzenlenir; aynı Apps Script motoru hem Sheets’teki hesap tablolarını/panoyu hem de sayfanın
+canlı verisini üretir. Sheets değişince sayfa ≈15 sn içinde (sayfa açık ve görünürken) güncellenir.
+
+## Dosyalar
+
+| Dosya | Görev |
+|---|---|
+| `src/Motor.js` | Saf hesap: netten brüte bordro (2026 ücretli tarifesi, kümülatif matrah, asgari ücret GV/DV istisnası, SGK tavanı), teşvikler, 2027 zam ve artışları, raporlar. Node testleri aynı dosyayı çalıştırır. |
+| `src/Sheets.js` | `=OPEX(...)` özel işlevi, OPEX menüsü, web uygulaması (`doGet` sağlık, `doPost` veri). |
+| `src/Kurulum.js` | Sayfaları, biçimleri, açılır listeleri, adlandırılmış aralıkları (`p_<anahtar>`), hesap formüllerini ve pano grafiklerini kurar; tekrar çalıştırılabilir. |
+| `ornek/tohum.ornek.js` | Yalnız kurgusal örnek veri (testler). |
+| `build.mjs` | Tek dosya paketi üretir. |
+
+Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerçek ilk veri repo dışındaki
+`../opex-google/Tohum.js` dosyasındadır; tohumlu paket repo içine yazılamaz (`build.mjs` reddeder).
+
+## Sayfalar (Google Sheets)
+
+- **Pano**: KPI kutuları, küme özeti, bordro köprüsü, 8 grafik, kişi tablosu.
+- **Giderler** (girdi): teknoloji ve ofis/işletme kalemleri; para birimi, aylık tutar, 2027 artış esası, “Bu ay ödendi”.
+- **Personel** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik.
+- **Bordro**: kişi × ay netten brüte tablo, 2026 ve 2027.
+- **Parametreler** (girdi): kur (canlı Google Finance, yedekli), 2026 enflasyonu, 2027 zam esası, bordro oranları, dilimler.
+- **Teşvikler** (girdi): standart (genel prim indirimi, asgari ücret desteği) ve koşullu teşvikler.
+- **Hesap**: pano ve grafik verisi (`=OPEX("kpi"|"ozet"|…)`).
+
+Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
+
+## Kurulum (bir kez)
+
+Komutu ajan çalıştırır; Google adımları hesap sahibinin onayını gerektirir.
+
+1. Paketi üretin (repo kökü `site/`):
+
+   ```bash
+   node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js
+   ```
+
+2. <https://sheets.new> ile yeni tablo açın (ör. “iStoc OPEX”). Uzantılar → Apps Script → `Kod.gs` içeriğini silip
+   `OPEX.gs` içeriğini yapıştırın → Kaydet.
+3. Tabloyu yenileyin → **OPEX** menüsü → **Kurulum / onarım** → izinleri onaylayın (kendi betiğiniz; “doğrulanmadı”
+   uyarısında Gelişmiş → devam). Kurulum bitince erişim anahtarı gösterilir.
+4. Apps Script → **Dağıt → Yeni dağıtım → Web uygulaması**: “Şu kullanıcı olarak çalıştır: Ben”, “Erişimi olanlar:
+   Herkes” → Dağıt → `…/exec` adresini kopyalayın. (Tablo özel kalır; veri yalnız anahtarla döner.)
+5. Giderler sayfasında **Bağlantı** alanına adresi ve anahtarı girin. Adres `src/data/opex.ts → OPEX_ENDPOINT`
+   alanına da yazılabilir; o zaman sayfada yalnız anahtar istenir.
+
+## Güncelleme
+
+Kod değişince paketi yeniden üretip Apps Script’e yapıştırın; ardından Dağıt → Dağıtımları yönet → Düzenle →
+Sürüm: **Yeni sürüm** (adres değişmez). Sheets yapısı için OPEX → Kurulum / onarım (veriye dokunmaz).
+Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
+Ay başında: OPEX → “Yeni ay: Bu ay ödendi işaretlerini kaldır” (onaylı).
+Onay kutuları (Dahil, Bu ay ödendi, Etkin) kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir.
+
+## Erişim
+
+Parametreler → **Sayfa erişimi**: “Herkese açık” ise sayfa veriyi anahtarsız okur ve isimler, ücretler, hesaplar ve
+tutarlar adresi bilen herkese görünür (kullanıcı kararı 2026-10-20, yayındaki tablo böyle). “Anahtarla” seçilirse veri
+ucu erişim anahtarı ister ve sayfa Bağlantı formunu gösterir. Değişiklik ≈15 sn içinde geçerli olur.
+
+## Güvenlik
+
+- Anahtar Komut dosyası özelliklerinde (`OPEX_ERISIM_ANAHTARI`, ≈244 bit rastgele) saklanır; koda, repoya ve adrese
+  yazılmaz. Sayfa onu POST gövdesinde (`text/plain`, ön kontrol isteği yok) gönderir; yanlış anahtar veya bozuk gövdede
+  veri dönmez (bekleme yok: eşzamanlı çalışma kotasını tüketmesin). Her istek Apps Script kotasından düşer; açık sekme
+  15 sn’de bir küçük “değişmedi” isteği yapar.
+- Web uygulaması “Herkes” erişimindedir ama veri döndürmez: `doGet` yalnız sağlık bilgisi, `doPost` anahtar ister.
+- Sayfa anahtarı varsayılan olarak yalnız o sekmede tutar (sessionStorage). “Bu cihazda hatırla” localStorage kullanır;
+  `karacaismail.github.io` kökü kullanıcının diğer Pages projeleriyle paylaşıldığından önerilmez (sunum bilgisayarında
+  kullanmayın). Daha güçlü yalıtım için ayrı bir alan adı (özel domain) gerekir.
+- Sheets’ten gelen adlar sayfada metin olarak çizilir; grafik ipuçlarında HTML kaçışlanır.
+- Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalıdır; değerler Teşvikler sayfasında değişir.

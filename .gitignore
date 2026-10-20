@@ -14,3 +14,6 @@ blob-report/
 *.jpeg
 *.heic
 .claude/
+# OPEX: kişisel veri içeren tohum ve Apps Script paketi repoya girmez (repo dışında: ../opex-google/).
+Tohum.js
+*.gs

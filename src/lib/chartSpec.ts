@@ -18,6 +18,9 @@ export interface GanttRow {
   milestone?: boolean;
 }
 
+/** Giderler (OPEX) grafik tonları: renk tokens.css --viz-* tokenlarından okunur (doğrulanmış kategorik palet). */
+export type OpexTone = 'tech' | 'people' | 'office' | 'net' | 'tax' | 'sgk' | 'employer' | 'y2026' | 'y2027' | 'total' | 'credit';
+
 /** Sayfaya gömülen grafik verisi; ECharts seçenekleri istemcide tasarım tokenlarıyla kurulur. */
 export type ChartSpec =
   | { kind: 'org'; root: ChartTreeNode }
@@ -45,4 +48,17 @@ export type ChartSpec =
       shareSplit: number;
       items: { name: string; growth: number; share: number; revenue: number; quadrant: string }[];
     }
-  | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] };
+  | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** OPEX: tek seri yatay çubuk (₺); `share` verilirse etiket payı da gösterir. */
+  | { kind: 'opex-bar'; items: { name: string; value: number; tone: OpexTone }[]; share?: number }
+  /** OPEX: yığılmış çubuk (₺); `line` toplam karşılaştırması. opex-stack: geniş kapsayıcıda dikey, dar kapsayıcıda yatay; opex-stack-h: hep yatay. */
+  | {
+      kind: 'opex-stack' | 'opex-stack-h';
+      categories: string[];
+      series: { name: string; tone: OpexTone; values: number[] }[];
+      line?: { name: string; values: number[] };
+    }
+  /** OPEX: gruplanmış yatay çubuk (ör. kişi başına 2026 ve 2027). */
+  | { kind: 'opex-group'; categories: string[]; series: { name: string; tone: OpexTone; values: number[] }[] }
+  /** OPEX: yatay şelale (netten işveren maliyetine köprü); `total` adımı sıfırdan çizilir. */
+  | { kind: 'opex-kopru'; steps: { name: string; value: number; tone: OpexTone; total?: boolean }[] };

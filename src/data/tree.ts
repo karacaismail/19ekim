@@ -76,6 +76,7 @@ export const SEQUENCE: Stop[] = [
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
+  { path: '/giderler/', label: 'Giderler (OPEX)', crumb: ['Giderler (OPEX)'] },
   { path: '/notlar/', label: 'Notlar', crumb: ['Notlar'] },
 ];
 
@@ -97,5 +98,6 @@ export const COMMON_NAV = [
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
   { label: 'Parametreler', path: '/parametreler/' },
+  { label: 'Giderler (OPEX)', path: '/giderler/' },
   { label: 'Notlar', path: '/notlar/' },
 ];

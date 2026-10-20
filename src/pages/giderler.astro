@@ -1,0 +1,14 @@
+---
+// Yalnız bu sayfa Roboto yükler (kullanıcı kararı 2026-10-20); diğer sayfalar Outfit kullanır.
+import '@fontsource-variable/roboto/wght.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { OpexPage } from '../views/OpexPage';
+---
+
+<BaseLayout
+  title="Giderler (OPEX)"
+  description="Operasyon giderleri: teknoloji ve insan kümeleri, ofis ve işletme; Google Sheets’ten canlı, 2027 düzenli giderleri enflasyon parametreleriyle."
+  page="giderler"
+>
+  <OpexPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

@@ -18,12 +18,21 @@ const PAGES = [
   'bcg/',
   'parametreler/',
   'notlar/',
+  'giderler/',
   'arsiv/',
   'email/',
 ];
 
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'email/'].includes(p));
+// Giderler grafikleri yalnız Sheets bağlantısıyla çizilir; ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/'].includes(p));
+
+/** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
+test.beforeEach(async ({ page }) => {
+  await page.route('https://script.google.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: false, hata: 'yetki', mesaj: 'test' }) }),
+  );
+});
 
 /** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });

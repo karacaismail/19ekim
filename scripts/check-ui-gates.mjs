@@ -12,6 +12,16 @@ const SRC = join(ROOT, 'src');
 const TOKENS = join(SRC, 'styles', 'tokens.css');
 const APPROVED_EASING = /^cubic-bezier\(\s*\.65,\s*0,\s*\.35,\s*1\s*\)$/;
 const MIN_FONT_PX = 14;
+/** Sayfaya özgü en küçük metin ve font (kullanıcı kararı 2026-10-20: Giderler sayfası Roboto, en az 15 CSS px). */
+const PAGE_RULES = { giderler: { minPx: 15, font: /^'Roboto Variable'/ } };
+/** Bu sınıf önekleri yalnız ilgili sayfada kullanılır; yazı boyutu o sayfanın alt sınırına tabidir. */
+const PAGE_PREFIX = { giderler: /\.opex-/ };
+const pageOf = (selector) => {
+  const scoped = selector.match(/\[data-page='([\w-]+)'\]/);
+  if (scoped) return scoped[1];
+  return Object.keys(PAGE_PREFIX).find((page) => PAGE_PREFIX[page].test(selector)) ?? null;
+};
+const minPxFor = (selector) => PAGE_RULES[pageOf(selector)]?.minPx ?? MIN_FONT_PX;
 /** En ince yazı ağırlığı (kullanıcı kararı 2026-10-19). */
 const MIN_FONT_WEIGHT = 300;
 
@@ -121,16 +131,17 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
         }
       }
 
-      // Yazı boyutu
+      // Yazı boyutu (sayfa kapsamlı kurallarda o sayfanın alt sınırı)
+      const minPx = minPxFor(rule.selector);
       if (prop === 'font-size') {
         const px = toPx(value);
-        if (px !== null && px < MIN_FONT_PX) fail(file, `${rule.selector}: font-size ${value} < 14px`);
+        if (px !== null && px < minPx) fail(file, `${rule.selector}: font-size ${value} < ${minPx}px`);
       }
       if (isTokens && /^--text-/.test(prop)) {
         const px = toPx(value);
         const clampMin = value.match(/^clamp\(([\d.]+rem)/);
         const min = px ?? (clampMin ? toPx(clampMin[1]) : null);
-        if (min !== null && min < MIN_FONT_PX) fail(file, `${prop}: ${value} < 14px`);
+        if (min !== null && min < minPx) fail(file, `${rule.selector} ${prop}: ${value} < ${minPx}px`);
       }
 
       // Yazı ağırlığı: 300 altı (100, 200, lighter) yasak; tokenlar dahil.
@@ -150,6 +161,31 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
     if (/:focus-within/.test(rule.selector)) fail(file, `${rule.selector}: :focus-within çerçevesi yasak`);
     if (props.has('transition-property') && !(props.has('transition-duration') && props.has('transition-timing-function'))) {
       fail(file, `${rule.selector}: transition-property, süre ve easing tokenıyla birlikte tanımlanmalı`);
+    }
+  }
+}
+
+// Sayfa kapsamı: kök tokenların sayfadaki etkin değeri (sayfa ezmesi ya da genel değer) alt sınırı aşmalı; font ilk sırada.
+{
+  const tokenRules = parseCss(readFileSync(TOKENS, 'utf8')).filter((r) => r.context.length === 0);
+  const globalText = new Map();
+  for (const r of tokenRules.filter((r) => r.selector === ':root')) {
+    for (const d of declarations(r.body)) if (/^--text-/.test(d.prop)) globalText.set(d.prop, d.value);
+  }
+  for (const [page, rules] of Object.entries(PAGE_RULES)) {
+    const scope = tokenRules.find((r) => r.selector === `:root[data-page='${page}']`);
+    if (!scope) {
+      fail(TOKENS, `:root[data-page='${page}'] token kapsamı yok (font ve en küçük metin)`);
+      continue;
+    }
+    const own = new Map(declarations(scope.body).map((d) => [d.prop, d.value]));
+    const font = own.get('--font-sans') ?? '';
+    if (!rules.font.test(font)) fail(TOKENS, `${page}: --font-sans "${font}" sayfa fontuyla başlamalı`);
+    for (const [prop, value] of new Map([...globalText, ...own])) {
+      const px = toPx(value);
+      const clampMin = value.match(/^clamp\(([\d.]+rem)/);
+      const min = px ?? (clampMin ? toPx(clampMin[1]) : null);
+      if (min !== null && min < rules.minPx) fail(TOKENS, `${page}: ${prop} etkin değeri ${value} < ${rules.minPx}px`);
     }
   }
 }
