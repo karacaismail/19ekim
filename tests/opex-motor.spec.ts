@@ -249,3 +249,139 @@ test.describe('OPEX motoru: Sheets raporları', () => {
     expect(total[14]).toBe((person(m, 'Örnek Uzman').y2026.toplam as Satir).maliyet);
   });
 });
+
+/**
+ * Sheets aylık ızgarası (kullanıcı kararı 2026-10-20): her ay bir onay kutusu (o ay etkin mi) ve bir tutar sütunu
+ * (boş = varsayılan). Ör. bir kişinin Ekim maaşı ile Kasım–Aralık maaşı ayrı; freelancer Ocak–Şubat 2027’de ayrı fatura.
+ */
+test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
+  const r2 = (v: number) => Math.round(v * 100) / 100;
+  const GIDERLER = [
+    ['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira', false, true, '', ''],
+    ['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur', false, true, '', ''],
+  ];
+  const NET = (ad: string, net: number | string, esas = 'Net') => [ad, 'Bordrolu', esas, net, 'Evet', '', 'Otomatik', true, ''];
+  const SERBEST = ['Serbest', 'Freelancer', 'Fatura (KDV dahil)', 72000, 'Evet', '', 'Hayır', true, ''];
+
+  test('gider: işaretsiz ay 0; yazılı tutar o ayın tutarı (satırın para birimi × kur); diğer aylar varsayılan', () => {
+    const mm = buildModel({ personel: [], giderler: GIDERLER, giderAylari: [{ aktif: { 'Kas 2026': false } }, { tutar: { 'Ara 2026': 50, 'Oca 2027': 200 } }] });
+    const [kira, arac] = mm.giderler;
+    const usd = mm.kur.USD.deger;
+    expect(kira.aylikTl.y2026.slice(9)).toEqual([1000, 0, 1000]);
+    expect(kira.aktif.y2026[10]).toBe(false);
+    expect(kira.aylikTl.y2026[0], 'ızgarada olmayan ay (Ocak 2026) varsayılan').toBe(1000);
+    expect(arac.aylikTl.y2026[11]).toBe(r2(50 * usd));
+    expect(arac.ozel.y2026[11]).toBe(true);
+    expect(arac.ozel.y2026[10]).toBe(false);
+    close(arac.aylikTl.y2027[0], 200 * usd * (1 + mm.artis2027.kur));
+    expect(arac.aylikTl.y2027[1], 'boş ay: zamlı 2027 varsayılanı').toBe(arac.tl2027);
+    // Aylık seri, 12 aylık plan ve dönem toplamı ay ay tutarlardan
+    expect(mm.aylik[10].y2026.ofis).toBe(0);
+    expect(mm.aylik[11].y2026.teknoloji).toBe(r2(50 * usd));
+    expect((mm as OpexModel & { plan: Plan }).plan.aylar.map((a) => a.ofis).slice(0, 3)).toEqual([1000, 0, 1000]);
+    const d26 = donemOf(mm, 2026);
+    close(d26.toplam.toplam, 1000 + 0 + 1000 + arac.tl + arac.tl + r2(50 * usd));
+  });
+
+  test('bu ay işaretsiz: bu ay OPEX’i, ödeme özeti ve Giderler’deki hizalı sütun o kalemi saymaz', () => {
+    const input = buildInput({ personel: [], giderler: GIDERLER, giderAylari: [{ aktif: { 'Eki 2026': false } }, {}] });
+    const mm = motor.hesapla(input, { simdi: NOW });
+    expect(mm.ozet.buAy.ofis).toBe(0);
+    expect(mm.ozet.odeme.adetBekleyen).toBe(1);
+    expect(mm.ozet.odeme.bekleyen).toBe(mm.giderler[1].tl);
+    const cols = motor.rapor(mm, 'gider-sutun', input);
+    expect(cols[2]).toEqual(['Ekim ₺', '2027 ort. ₺']);
+    expect(cols[3][0]).toBe(0);
+    expect(cols[4][0]).toBe(mm.giderler[1].tl);
+    expect(motor.rapor(mm, 'teknoloji').slice(1).map((r) => r[0])).toEqual(['Araç']);
+  });
+
+  test('personel: Ekim ile Kasım–Aralık maaşı ayrı (net tutturulur); freelancer Ocak–Şubat 2027 ayrı fatura, Mart yok', () => {
+    const mm = buildModel({
+      personel: [NET('Kişi A', 50000), SERBEST],
+      giderler: [],
+      personelAylari: [{ tutar: { 'Kas 2026': 60000, 'Ara 2026': 60000 } }, { tutar: { 'Oca 2027': 90000, 'Şub 2027': 95000 }, aktif: { 'Mar 2027': false } }],
+    });
+    const [a, s] = mm.kisiler;
+    close(a.y2026.aylar[9].net, 50000);
+    close(a.y2026.aylar[10].net, 60000);
+    close(a.y2026.aylar[11].net, 60000);
+    expect(a.ozel.y2026.slice(9)).toEqual([false, true, true]);
+    close(a.y2027.aylar[0].net, a.tutar2027);
+    expect(s.y2026.aylar[9].fatura).toBe(72000);
+    expect(s.y2027.aylar.slice(0, 4).map((x) => x.fatura)).toEqual([90000, 95000, 0, s.tutar2027]);
+    expect(s.y2027.aylar[2].maliyet).toBe(0);
+    expect(s.aktif.y2027[2]).toBe(false);
+    expect(mm.aylik[2].y2027.insan, 'Mart 2027: yalnız bordrolu').toBe(a.y2027.aylar[2].maliyet);
+  });
+
+  test('bordro: işaretsiz ayda brüt ve maliyet 0, kümülatif matrah birikmez; asgari ücretliye yazılan tutar net sayılır', () => {
+    const mm = buildModel({ personel: [NET('Kişi A', 50000), NET('Asgari', '', 'Asgari ücret')], giderler: [], personelAylari: [{ aktif: { 'Kas 2026': false } }, { tutar: { 'Kas 2026': 40000 } }] });
+    const rows = mm.kisiler[0].y2026.aylar;
+    expect(rows[10].brut).toBe(0);
+    expect(rows[10].maliyet).toBe(0);
+    expect(rows[10].kumulatifMatrah).toBe(rows[9].kumulatifMatrah);
+    close(rows[11].net, 50000);
+    const asgari = mm.kisiler[1].y2026.aylar;
+    expect(asgari[9].brut).toBe(mm.asgari.y2026.brut);
+    close(asgari[10].net, 40000);
+    expect(asgari[11].brut).toBe(mm.asgari.y2026.brut);
+  });
+
+  test('Sheets formülünün yazdığı varsayılan tutar özel sayılmaz; farklı tutar özeldir; 0 yazılan ay ödeme yok', () => {
+    const usd = buildModel({ personel: [], giderler: GIDERLER }).kur.USD.deger;
+    const kira27 = Math.round(1000 * (1 + PARAM.kira_artis_2027) * 100) / 100;
+    const mm = buildModel({
+      personel: [NET('Kişi A', 50000), SERBEST],
+      giderler: GIDERLER,
+      // Formül sonucu: 2026 = Tutar, 2027 kira = Tutar × (1 + kira artışı), Kur esaslı döviz = aynı döviz tutarı
+      giderAylari: [{ tutar: { 'Eki 2026': 1000, 'Oca 2027': kira27 } }, { tutar: { 'Eki 2026': 100, 'Oca 2027': 100, 'Şub 2027': 120 } }],
+      personelAylari: [{ tutar: { 'Eki 2026': 50000, 'Kas 2026': 0 } }, { tutar: { 'Oca 2027': Math.round(72000 * (1 + PARAM.zam_orani) * 100) / 100 } }],
+    });
+    const [kira, arac] = mm.giderler;
+    expect([kira.ozel.y2026[9], kira.ozel.y2027[0], arac.ozel.y2026[9], arac.ozel.y2027[0]]).toEqual([false, false, false, false]);
+    expect(kira.aylikTl.y2027[0]).toBe(kira.tl2027);
+    expect(arac.ozel.y2027[1]).toBe(true);
+    expect(arac.aylikTl.y2027[1]).toBe(Math.round(120 * usd * (1 + mm.artis2027.kur) * 100) / 100);
+    const [a, s] = mm.kisiler;
+    expect(a.ozel.y2026[9]).toBe(false);
+    expect(a.ozel.y2026[10]).toBe(true);
+    expect(a.y2026.aylar[10].maliyet, '0 yazılan ay').toBe(0);
+    expect(a.y2026.aylar[10].kumulatifMatrah).toBe(a.y2026.aylar[9].kumulatifMatrah);
+    expect(s.ozel.y2027[0]).toBe(false);
+    expect(s.y2027.aylar[0].fatura).toBe(s.tutar2027);
+  });
+
+  test('brüt esaslı kişide ay tutarı brüttür; 2027 asgari ücretlide yazılan tutar net, varsayılan o yılın asgarisi', () => {
+    const mm = buildModel({
+      personel: [NET('Brütlü', 60000, 'Brüt'), NET('Asgari', '', 'Asgari ücret')],
+      giderler: [],
+      personelAylari: [{ tutar: { 'Ara 2026': 65000 } }, { tutar: { 'Şub 2027': 41000, 'Oca 2027': buildModel().asgari.y2027.net } }],
+    });
+    const [b, asg] = mm.kisiler;
+    expect(b.y2026.aylar[10].brut).toBe(60000);
+    expect(b.y2026.aylar[11].brut).toBe(65000);
+    expect(asg.y2027.aylar[0].brut, 'asgari net yazılırsa tam asgari brüt').toBe(mm.asgari.y2027.brut);
+    expect(asg.ozel.y2027[0]).toBe(false);
+    close(asg.y2027.aylar[1].net, 41000);
+    expect(asg.ozel.y2027[1]).toBe(true);
+  });
+
+  test('Sheets başlığı tarihe çevirmişse (Mar 2027) o ayın onay kutusu yine okunur; büyük-küçük harf fark etmez', async () => {
+    const { izgara, IZGARA_BASLIKLARI } = await import('./opex-fixture');
+    const basliklar = IZGARA_BASLIKLARI.map((h) => (h === 'Mar 2027' ? new Date(2027, 2, 1) : h === 'Nis 2027' ? 'nis 2027' : h));
+    const input = buildInput({ personel: [], giderler: GIDERLER });
+    input.giderAylari = izgara([{ aktif: { 'Mar 2027': false, 'Nis 2027': false } }, {}], basliklar);
+    const mm = motor.hesapla(input, { simdi: NOW });
+    expect(mm.giderler[0].aylikTl.y2027.slice(1, 5)).toEqual([mm.giderler[0].tl2027, 0, 0, mm.giderler[0].tl2027]);
+  });
+
+  test('ızgara yoksa her ay etkin ve varsayılan tutar (eski Sheets kurulumu)', () => {
+    for (const g of m.giderler) {
+      expect(g.aylikTl.y2026).toEqual(Array(12).fill(g.tl));
+      expect(g.aylikTl.y2027).toEqual(Array(12).fill(g.tl2027));
+      expect([...g.aktif.y2026, ...g.aktif.y2027].every(Boolean)).toBe(true);
+    }
+    for (const k of m.kisiler) expect([...k.ozel.y2026, ...k.ozel.y2027].some(Boolean)).toBe(false);
+  });
+});

@@ -55,6 +55,9 @@ function kurulum() {
   ss.getSheets().forEach(function (sh) {
     if (sira.indexOf(sh.getName()) < 0 && sh.getLastRow() === 0 && sh.getLastColumn() === 0) ss.deleteSheet(sh);
   });
+  // Aylık ızgara sütunları formüllerden önce açılır; yoksa OPEX(...) aralığı #REF! olur.
+  sutunGarantile_(ss.getSheetByName(OPEX_SAYFA.giderler), OPEX_IZGARA.giderler + OPEX_IZGARA.genislik - 1);
+  sutunGarantile_(ss.getSheetByName(OPEX_SAYFA.personel), OPEX_IZGARA.personel + OPEX_IZGARA.genislik - 1);
 
   parametreleriKur_(ss);
   tesvikleriKur_(ss);
@@ -92,7 +95,105 @@ function sutunHarfi_(n) {
 
 /** OPEX(...) formülü: tüm girdi aralıkları argümandır, biri değişince yeniden hesaplanır. */
 function opexFormulu_(rapor) {
-  return '=OPEX("' + rapor + '",Parametreler!A1:F,Personel!A1:I,Giderler!A1:K,\'Teşvikler\'!A1:I)';
+  var izgara = function (ad, ilk) {
+    return ad + '!' + sutunHarfi_(ilk) + '1:' + sutunHarfi_(ilk + OPEX_IZGARA.genislik - 1);
+  };
+  return '=OPEX("' + rapor + '",Parametreler!A1:F,Personel!A1:I,Giderler!A1:K,\'Teşvikler\'!A1:I,' +
+    izgara('Giderler', OPEX_IZGARA.giderler) + ',' + izgara('Personel', OPEX_IZGARA.personel) + ')';
+}
+
+/** Aylık ızgaranın ayları: 15 aylık plan, Ekim 2026 → Aralık 2027 (kullanıcı kararı; OPEX_IZGARA.genislik = 15 × 2). */
+function izgaraAylari_() {
+  var aylar = [];
+  for (var i = 9; i < 24; i++) aylar.push(OpexMotor.AYLAR[i % 12].slice(0, 3) + ' ' + (2026 + Math.floor(i / 12)));
+  return aylar;
+}
+
+/** Izgara başlıkları: her ay yan yana “Eki 2026” (onay kutusu) ve “Eki 2026 tutar”. */
+function izgaraBasliklari_() {
+  var b = [];
+  izgaraAylari_().forEach(function (a) { b.push(a, a + ' tutar'); });
+  return b;
+}
+
+/**
+ * Aylık ızgara: her ay bir onay kutusu (işaretsiz = o ay gider yok) ve bir tutar hücresi. Tutar hücresi boşsa ya da
+ * formülse varsayılan formülü alır (her satırda her ay rakam görünür; 2027 ayları zamlı/artışlı); elle yazılmış tutar ve
+ * işaretler korunur, boş onay kutusu işaretli olur. Izgara alanında başka içerik varsa dokunmadan durur.
+ * `varsayilan(satir, yil)` o satırın varsayılan formülünü (en_US yazımıyla) döner. Koşullu biçim kurallarını döner.
+ */
+function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan) {
+  var basliklar = izgaraBasliklari_();
+  var g = basliklar.length;
+  var mevcut = sh.getRange(3, ilk, 1, g).getDisplayValues()[0];
+  var yabanci = mevcut.filter(function (h, j) { return h !== '' && h !== basliklar[j]; });
+  var bos = mevcut.every(function (h) { return h === ''; });
+  var veriVar = n && sh.getRange(4, ilk, n, g).getValues().some(function (r) { return r.some(function (v) { return v !== ''; }); });
+  if (yabanci.length || (bos && veriVar)) {
+    throw new Error(sh.getName() + ': ' + sutunHarfi_(ilk) + ':' + sutunHarfi_(ilk + g - 1) + ' aylık ızgara alanında başka içerik var (' +
+      (yabanci[0] || 'başlıksız veri') + '). Taşıyın veya silin, sonra Kurulum’u yeniden çalıştırın.');
+  }
+  sh.getRange(2, ilk).setValue('Ay ay: onay kutusu = o ay etkin (işaretsiz ayda gider yok). Tutar: formül varsayılandır; üzerine yazılan tutar o aya özeldir (' + tutarAciklama + ').').setFontColor(OPEX_STIL.ikincil);
+  // Metin biçimi: “Mar 2027”, “May 2027” gibi başlıklar tarihe çevrilmez.
+  sh.getRange(3, ilk, 1, g).setNumberFormat('@').setValues([basliklar])
+    .setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true).setHorizontalAlignment('center');
+  var onay = [];
+  var tutar = [];
+  for (var j = 0; j < g; j += 2) {
+    onay.push(sh.getRange(4, ilk + j, alan, 1));
+    tutar.push(sh.getRange(4, ilk + j + 1, alan, 1));
+  }
+  if (n) {
+    var blok = sh.getRange(4, ilk, n, g);
+    var degerler = blok.getValues();
+    var formuller = blok.getFormulas();
+    var cikti = degerler.map(function (satir, r) {
+      return satir.map(function (v, j) {
+        var ay = Math.floor(j / 2);
+        if (j % 2 === 0) {
+          if (v === true || v === false) return v;
+          var t = String(v).trim().toLocaleLowerCase('tr-TR');
+          return t === '' ? true : t === 'evet' || t === 'true' || t === 'doğru' || t === 'dogru' || t === 'x' || t === '✓' || t === '1';
+        }
+        return formuller[r][j] || v === '' ? varsayilan(4 + r, ay < 3 ? 2026 : 2027) : v;
+      });
+    });
+    // insertCheckboxes tüm değerleri FALSE yapar; işaretler ve tutarlar hemen ardından geri yazılır.
+    sh.getRangeList(onay.map(function (o) { return o.offset(0, 0, n, 1).getA1Notation(); })).insertCheckboxes();
+    blok.setValues(cikti);
+  }
+  var sayiKurali = SpreadsheetApp.newDataValidation().requireNumberGreaterThanOrEqual(0).setAllowInvalid(false).build();
+  tutar.forEach(function (t) { t.setDataValidation(sayiKurali); });
+  sh.getRangeList(tutar.map(function (t) { return t.getA1Notation(); })).setNumberFormat(tutarBicimi);
+  for (var k = 0; k < g; k += 2) {
+    sh.setColumnWidth(ilk + k, 76);
+    sh.setColumnWidth(ilk + k + 1, 118);
+  }
+  sh.setColumnWidth(ilk - 1, 24);
+  var h = sutunHarfi_(ilk);
+  return [
+    // Yalnız açıkça işaretsiz (FALSE) ay grileşir; boş hücre gri değil, uyarı rengindedir (motor boşu etkin sayar).
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(onay).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(tutar).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",' + h + '4="")').setBackground(OPEX_STIL.uyari).setRanges(onay).build(),
+    // Elle yazılmış (formül olmayan) tutar: o aya özel.
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",' + sutunHarfi_(ilk + 1) + '4<>"",NOT(ISFORMULA(' + sutunHarfi_(ilk + 1) + '4)))').setBackground(OPEX_STIL.vurguYuzey).setRanges(tutar).build(),
+  ];
+}
+
+/** Personel ayının varsayılan tutarı: ücret esasına göre (asgari ücretlide o yılın net asgarisi), 2027’de zamlı. */
+function personelVarsayilani_(r, yil) {
+  var asgari = 'ROUND(p_asgari_brut_' + yil + '*(1-p_sgk_isci-p_issizlik_isci),2)';
+  var tutar = yil === 2026 ? '$D' + r : 'IF($E' + r + '="Hayır",$D' + r + ',ROUND($D' + r + '*(1+p_zam_orani),2))';
+  return '=IF($C' + r + '="Asgari ücret",' + asgari + ',' + tutar + ')';
+}
+
+/** Gider ayının varsayılan tutarı (satırın para biriminde): 2026 Tutar; 2027 artış esasına göre (Kur esaslı dövizde aynı). */
+function giderVarsayilani_(r, yil) {
+  if (yil === 2026) return '=$F' + r;
+  var para = 'IF(OR($E' + r + '="",$E' + r + '="TRY"),"TRY",$E' + r + ')';
+  var esas = 'IF($G' + r + '="",IF(' + para + '="TRY","Genel","Kur"),$G' + r + ')';
+  return '=LET(p,' + para + ',a,' + esas + ',ROUND($F' + r + '*(1+IFS(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF(p="TRY",p_kur_artis_2027,0),a="Yok",0,TRUE,p_genel_artis_2027)),2))';
 }
 
 /** Yeni sayfa 26 sütunla açılır; hesap blokları daha geniştir. */
@@ -315,10 +416,11 @@ function personeliKur_(ss) {
   sh.getRange('K1').setFormula(opexFormulu_('personel-sutun'));
   sh.getRange(4, 11, alan, 5).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl);
   bantla_(sh, n, 9);
+  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.personel, n, alan, 'Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok', OPEX_BICIM.tl, personelVarsayilani_);
   var rules = [
     SpreadsheetApp.newConditionalFormatRule().setGradientMinpoint('#ffffff').setGradientMaxpoint('#fbd3c2').setRanges([sh.getRange(4, 12, alan, 1)]).build(),
     SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",$C4<>"Asgari ücret",OR($D4="",$D4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 4, alan, 1)]).build(),
-  ];
+  ].concat(izgaraKurallari);
   sh.setConditionalFormatRules(rules);
   [230, 120, 170, 150, 100, 150, 170, 80, 280, 24, 150, 150, 170, 150, 170].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
   sh.setFrozenColumns(1);
@@ -358,10 +460,11 @@ function giderleriKur_(ss) {
   sh.getRange('M1').setFormula(opexFormulu_('gider-sutun'));
   sh.getRange(4, 13, alan, 2).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl);
   bantla_(sh, n, 11);
+  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.giderler, n, alan, 'satırın para biriminde, Para sütunu', '#,##0.00', giderVarsayilani_);
   var rules = [
     SpreadsheetApp.newConditionalFormatRule().setGradientMinpoint('#ffffff').setGradientMaxpoint('#cde2fb').setRanges([sh.getRange(4, 13, alan, 1)]).build(),
     SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",OR($F4="",$F4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 6, alan, 1)]).build(),
-  ];
+  ].concat(izgaraKurallari);
   sh.setConditionalFormatRules(rules);
   [230, 230, 150, 160, 100, 130, 130, 100, 80, 200, 260, 24, 150, 150].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
   sh.setFrozenColumns(1);

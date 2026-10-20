@@ -745,6 +745,9 @@ html[data-js] .theme-toggle[hidden] {
 .chart-host {
   position: absolute;
   inset: var(--space-4);
+  /* İpucu (confine) zaten kutuda kalır; WebKit kayma geçişinden kalan eski konumu sayfa genişliğine katmasın. */
+  overflow: hidden;
+  overflow: clip;
 }
 
 .chart-canvas[data-chart-failed] .chart-host,
@@ -1990,6 +1993,25 @@ html:not([data-js]) .email-btn {
   color: var(--status-bekliyor-fg);
 }
 
+/* Sheets aylık ızgarası: o ay işaretsiz (gider yok) ve kısmi etkin kalemler */
+.opex-state[data-state='off'] {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.opex-months {
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-months[data-state='part'] {
+  font-weight: var(--weight-semibold);
+}
+
+.opex-months[data-state='none'],
+.opex-month-off {
+  color: var(--text-secondary);
+}
+
 /* Özet: kahraman sayı + üç küme kutusu */
 .opex-kpis {
   display: grid;
@@ -2459,7 +2481,8 @@ html[data-js] .opex-nojs {
 
 .opex-year {
   display: grid;
-  align-content: center;
+  /* Üste hizalı: iki sekmede rakam ve radyo işareti aynı çizgide, işaret her zaman sağ üst köşede. */
+  align-content: start;
   justify-items: start;
   gap: var(--space-1);
   min-height: calc(var(--hit-min) * 2.5);
@@ -2484,6 +2507,53 @@ html[data-js] .opex-nojs {
 .opex-year[aria-selected='true']:hover {
   background: var(--text-primary);
   color: var(--surface-page);
+}
+
+/* Radyo işareti: seçim durumunu gösterir (boş halka / dolu nokta), sağ üst köşede; yazı rengini izler, iki temada da karşıtlık korunur. */
+/*
+ * Rakam solda, radyo işareti sağ üstte. Yan yana sığmazsa (dar ekran, büyük kök yazı) işaret rakamın üstüne sarılır
+ * (wrap-reverse) ve yine sağ üst köşede kalır; rakam küçülmez, çakışma olmaz.
+ */
+.opex-year-head {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+  justify-self: stretch;
+}
+
+.opex-radio {
+  flex: none;
+  margin-inline-start: auto;
+  width: var(--radio-size);
+  height: var(--radio-size);
+  transition-property: color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.opex-radio-ring {
+  fill: none;
+  stroke: currentColor;
+}
+
+.opex-radio-dot {
+  fill: currentColor;
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition-property: transform;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.opex-year[aria-selected='true'] .opex-radio {
+  color: var(--radio-checked);
+}
+
+.opex-year[aria-selected='true'] .opex-radio-dot {
+  transform: scale(1);
 }
 
 .opex-year-num {

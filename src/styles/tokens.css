@@ -73,6 +73,8 @@
   --bar-width: 4px;
   /* Kenar sistemi: düz vurgu çizgisi kalınlığı (kavisli kenar yasak) */
   --edge-width: 3px;
+  /* Radyo işareti (seçim durumu simgesi; odak göstergesi değildir). Kullanıcı kararı 2026-10-20: sağ üstte, 2× büyük, seçili yeşil. */
+  --radio-size: 3rem;
 
   /* Zaman çizelgesi ölçeği: 1 dakika = 1.15 CSS px; kısa bloklar için en küçük yükseklik */
   --minute: 1.15px;
@@ -241,6 +243,9 @@
   --viz-total: #343a40;
   --viz-credit: #6250d6;
   --viz-track: #e8e6e0;
+
+  /* Seçili radyo işareti: seçili sekmenin koyu zemininde (#16181a) yeşil, ≥ 3:1 */
+  --radio-checked: #1baf7a;
 }
 
 /* Koyu tema */
@@ -322,4 +327,7 @@
   --viz-total: #ced4da;
   --viz-credit: #9085e9;
   --viz-track: #2a2f34;
+
+  /* Seçili radyo işareti: koyu temada seçili sekme açık zeminde (#eceeef); koyu yeşil, ≥ 3:1 */
+  --radio-checked: #0a6e50;
 }

@@ -13,6 +13,8 @@ export interface Girdi {
   personel?: Table;
   giderler?: Table;
   tesvikler?: Table;
+  giderAylari?: Table;
+  personelAylari?: Table;
 }
 interface ParamDef {
   grup: string;
@@ -64,7 +66,31 @@ export function paramRows(change: Record<string, unknown> = {}): Table {
   return motor.PARAMETRE_TANIMLARI.map((t) => [t.grup, t.ad, t.anahtar in change ? change[t.anahtar] : t.deger, t.birim, t.anahtar, t.aciklama]);
 }
 
-export function buildInput(opts: { params?: Record<string, unknown>; personel?: Table; giderler?: Table; title?: boolean } = {}): Girdi {
+const KISA = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+/** Sheets aylık ızgarasının ayları (Kurulum: 15 aylık plan, Ekim 2026 → Aralık 2027). */
+export const IZGARA_AYLARI = [...KISA.slice(9).map((a) => `${a} 2026`), ...KISA.map((a) => `${a} 2027`)];
+/** Izgara başlıkları: her ay yan yana onay kutusu ve tutar (Kurulum.izgaraBasliklari_ ile aynı). */
+export const IZGARA_BASLIKLARI = IZGARA_AYLARI.flatMap((a) => [a, `${a} tutar`]);
+export interface IzgaraSatiri {
+  /** Ay → işaret (yazılmayan ay işaretli). */
+  aktif?: Record<string, boolean>;
+  /** Ay → o ayın tutarı (yazılmayan ay boş = varsayılan). */
+  tutar?: Record<string, number>;
+}
+
+/** Aylık ızgara (Giderler P:AS / Personel Q:AT): 3. satır başlık; n. eleman girdinin n. veri satırıyla aynı satırda. */
+export function izgara(satirlar: IzgaraSatiri[], basliklar: unknown[] = IZGARA_BASLIKLARI): Table {
+  return [
+    [''],
+    ['Ay ay: onay kutusu = o ay etkin.'],
+    basliklar,
+    ...satirlar.map((x) => IZGARA_AYLARI.flatMap((a) => [x.aktif?.[a] ?? true, x.tutar?.[a] ?? ''])),
+  ];
+}
+
+export function buildInput(
+  opts: { params?: Record<string, unknown>; personel?: Table; giderler?: Table; title?: boolean; giderAylari?: IzgaraSatiri[]; personelAylari?: IzgaraSatiri[] } = {},
+): Girdi {
   const b = motor.BASLIKLAR;
   const title = opts.title ?? true;
   return {
@@ -76,6 +102,8 @@ export function buildInput(opts: { params?: Record<string, unknown>; personel?: 
       motor.TESVIK_TANIMLARI.map((t) => [t.kod, t.ad, t.tur, t.deger2026, t.deger2027, t.kapsam, t.birlikte, t.etkin, t.kosul]),
       title,
     ),
+    ...(opts.giderAylari ? { giderAylari: izgara(opts.giderAylari) } : {}),
+    ...(opts.personelAylari ? { personelAylari: izgara(opts.personelAylari) } : {}),
   };
 }
 

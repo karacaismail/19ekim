@@ -29,6 +29,17 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 
 Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
 
+**Aylık ızgara** (15 aylık plan: Ekim–Aralık 2026 + 2027’nin 12 ayı; Giderler `P:AS`, Personel `Q:AT`): her ay
+yan yana iki sütun vardır. “Eki 2026” onay kutusu o ay satırın gider sayılıp sayılmadığını, “Eki 2026 tutar” o ayın
+tutarını belirler. Kurulum tutar hücrelerine varsayılan formülü yazar; her satırda her ay rakam görünür (2026: Tutar; 2027:
+zam veya artış esasıyla). Bir aya farklı tutar yazmak için hücrenin üzerine yazın (turuncu zemin = elle yazılmış, o aya
+özel); varsayılana dönmek için hücreyi silip Kurulum’u yeniden çalıştırın. Personelde tutar ücret esasına göre yazılır
+(Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok); giderde satırın para
+biriminde (Para). İşaretsiz ayda bordro satırı sıfırdır ve kümülatif GV matrahı birikmez. Ör. bir kişinin Ekim maaşı ile
+Kasım–Aralık maaşı ayrı yazılabilir; freelancer Ocak–Şubat 2027’de ayrı fatura kesebilir. Yeni satır eklediyseniz
+**OPEX → Kurulum / onarım**’ı yeniden çalıştırın: onay kutuları ve formüller yeni satıra da yazılır; mevcut işaret ve
+elle yazılmış tutarlar korunur. Izgara alanında başka içerik varsa kurulum dokunmadan durur ve uyarır.
+
 ## Kurulum (bir kez)
 
 Komutu ajan çalıştırır; Google adımları hesap sahibinin onayını gerektirir.

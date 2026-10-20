@@ -75,6 +75,14 @@ export interface Kisi {
   not: string;
   y2026: KisiYili;
   y2027: KisiYili;
+  /** Sheets aylık ızgarası: o ay etkin mi, tutar o aya özel mi (12’şer ay). */
+  aktif: YilAylari<boolean>;
+  ozel: YilAylari<boolean>;
+}
+
+export interface YilAylari<T> {
+  y2026: T[];
+  y2027: T[];
 }
 
 export interface Gider {
@@ -93,6 +101,10 @@ export interface Gider {
   eksik: boolean;
   fatura: string;
   not: string;
+  /** Her ayın ₺ tutarı (işaretsiz ay 0; özel tutar varsa o tutar). */
+  aylikTl: YilAylari<number>;
+  aktif: YilAylari<boolean>;
+  ozel: YilAylari<boolean>;
 }
 
 export interface Tesvik {
@@ -217,8 +229,32 @@ export function kisiDonem(k: Kisi, d: Donem): { aylar: Satir[]; toplam: Satir } 
   return { aylar, toplam };
 }
 
-/** Giderin dönemdeki aylık ₺ tutarı (yıl içinde sabit). */
-export const giderAylik = (g: Gider, d: Donem) => (d.yil === 2027 ? g.tl2027 : g.tl);
+/** Kalemin dönemdeki ayları: her ayın ₺ tutarı, etkin ve özel tutarlı ay sayısı. */
+export interface KalemDonem {
+  aylar: number[];
+  toplam: number;
+  aktif: number;
+  ozel: number;
+}
+
+const sayac = (xs: boolean[]) => xs.filter(Boolean).length;
+
+export function giderDonem(g: Gider, d: Donem): KalemDonem {
+  const aylar = d.aylar.map((i) => g.aylikTl[d.key][i]);
+  return {
+    aylar,
+    toplam: r2(aylar.reduce((t, v) => t + v, 0)),
+    aktif: sayac(d.aylar.map((i) => g.aktif[d.key][i])),
+    ozel: sayac(d.aylar.map((i) => g.aktif[d.key][i] && g.ozel[d.key][i])),
+  };
+}
+
+export function kisiAylari(k: Kisi, d: Donem): Pick<KalemDonem, 'aktif' | 'ozel'> {
+  return {
+    aktif: sayac(d.aylar.map((i) => k.aktif[d.key][i])),
+    ozel: sayac(d.aylar.map((i) => k.aktif[d.key][i] && k.ozel[d.key][i])),
+  };
+}
 
 export interface OpexData {
   model: OpexModel;
@@ -240,6 +276,24 @@ const hasMonths = (y: unknown) => isObj(y) && Array.isArray(y.aylar) && y.aylar.
 const isRate = (v: unknown) => isObj(v) && isNum(v.deger) && v.deger > 0;
 const isWage = (v: unknown) => isObj(v) && isNum(v.brut) && isNum(v.net) && isNum(v.tavan);
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
+const ayDizisi = <T>(v: unknown, ok: (x: unknown) => x is T): v is T[] => Array.isArray(v) && v.length === 12 && v.every(ok);
+const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
+const yilAylari = <T>(v: unknown, ok: (x: unknown) => x is T, yedek: YilAylari<T>): YilAylari<T> =>
+  isObj(v) && ayDizisi(v.y2026, ok) && ayDizisi(v.y2027, ok) ? { y2026: v.y2026, y2027: v.y2027 } : yedek;
+const hepsi = <T>(x: T): YilAylari<T> => ({ y2026: Array<T>(12).fill(x), y2027: Array<T>(12).fill(x) });
+
+/** Aylık ızgarası olmayan (eski) Apps Script yanıtı: her ay etkin, varsayılan tutar. */
+function aylariTamamla(m: OpexModel) {
+  for (const g of m.giderler) {
+    g.aylikTl = yilAylari(g.aylikTl, isNum, { y2026: Array(12).fill(g.tl), y2027: Array(12).fill(g.tl2027) });
+    g.aktif = yilAylari(g.aktif, isBool, hepsi(true));
+    g.ozel = yilAylari(g.ozel, isBool, hepsi(false));
+  }
+  for (const k of m.kisiler) {
+    k.aktif = yilAylari(k.aktif, isBool, hepsi(true));
+    k.ozel = yilAylari(k.ozel, isBool, hepsi(false));
+  }
+}
 
 /** Yanıtı çalışma anında doğrular; beklenmeyen biçim sayfayı bozmaz, hata olarak döner. */
 export function parseReply(json: unknown): OpexReply {
@@ -298,6 +352,7 @@ export function parseReply(json: unknown): OpexReply {
     isObj(m.artis2027);
   if (!ok) return { kind: 'error', code: 'sema', message: 'Yanıt beklenen biçimde değil; Apps Script kodunu güncelleyin.' };
   const tablo = str(json.tablo);
+  aylariTamamla(m as unknown as OpexModel);
   return { kind: 'data', data: { model: m as unknown as OpexModel, ozet, tablo: SHEET_RE.test(tablo) ? tablo : null, denetlendi, degisti } };
 }
 

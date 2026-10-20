@@ -98,7 +98,8 @@ function base(): Opt {
       hideDelay: 0,
       // İpucu grafik kutusunda kalır ve uzun metni sarar (dar ekranda dışarı taşmaz).
       confine: true,
-      extraCssText: `transition-timing-function: ${token('--motion-ease-standard')}; box-shadow: none; white-space: normal; max-width: min(22rem, 80vw);`,
+      // Genişlik grafik kutusunu aşmaz (yüzde: kapsayıcı .chart-host); kutu taşanı kırptığı için ipucu tam görünür kalır.
+      extraCssText: `transition-timing-function: ${token('--motion-ease-standard')}; box-shadow: none; white-space: normal; max-width: min(22rem, 100%);`,
       axisPointer: {
         animation: !reduced,
         animationDurationUpdate: d,

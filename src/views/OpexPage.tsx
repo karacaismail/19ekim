@@ -10,7 +10,8 @@ import {
   defaultConnection,
   isEndpoint,
   donemOf,
-  giderAylik,
+  giderDonem,
+  kisiAylari,
   kisiDonem,
   loadConnection,
   requestOpex,
@@ -22,6 +23,7 @@ import {
   type OpexData,
   type Donem,
   type DonemAy,
+  type KalemDonem,
   type Kume3,
   type OpexModel,
   type Parametre,
@@ -36,6 +38,8 @@ import { tl, tlExact } from '../lib/format';
 
 const pct2 = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(r * 100)}`;
 const signed = (r: number) => `${r > 0 ? '+' : r < 0 ? '−' : ''}${pct2(Math.abs(r))}`;
+/** Değişim oranı; önceki değer 0 ise (ör. tüm kalemleri işaretsiz ay) “—”. */
+const change = (now: number, before: number) => (before ? signed(now / before - 1) : '—');
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const rate = (value: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value)} ₺`;
@@ -393,7 +397,13 @@ function YearTabs({ value, onChange, donemler }: { value: Yil; onChange: (y: Yil
           onClick={() => onChange(d.yil)}
           onKeyDown={move}
         >
-          <span className="opex-year-num">{d.yil}</span>
+          <span className="opex-year-head">
+            <span className="opex-year-num">{d.yil}</span>
+            <svg className="opex-radio" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle className="opex-radio-ring" cx="12" cy="12" r="10" strokeWidth="2" />
+              <circle className="opex-radio-dot" cx="12" cy="12" r="6" />
+            </svg>
+          </span>
           <span className="opex-year-sub">
             {d.etiket.replace(` ${d.yil}`, '')} · {d.aySayisi} ay
           </span>
@@ -422,14 +432,14 @@ const GRUPLAR: { kume: KumeKod; tone: OpexTone; note: string }[] = [
   { kume: 'insan', tone: 'people', note: 'Bordro işveren maliyeti ve freelancer faturaları' },
 ];
 
-/** Dönemin kategori toplamları: giderler aylık × ay; personel her ayın maliyeti. */
+/** Dönemin kategori toplamları: her ayın kendi tutarı (Sheets aylık ızgarası); personel her ayın maliyeti. */
 function kategoriler(m: OpexModel, d: Donem) {
   const map = new Map<string, { kume: KumeKod; value: number }>();
   const add = (kume: KumeKod, name: string, v: number) => {
     const cur = map.get(name);
     map.set(name, { kume, value: (cur?.value ?? 0) + v });
   };
-  for (const g of m.giderler) add(g.kume, g.kategori, giderAylik(g, d) * d.aySayisi);
+  for (const g of m.giderler) add(g.kume, g.kategori, giderDonem(g, d).toplam);
   for (const k of m.kisiler) add('insan', k.tur === 'Freelancer' ? 'Freelancer (fatura)' : 'Bordrolu personel', kisiDonem(k, d).toplam.maliyet);
   return [...map.entries()].map(([name, x]) => ({ name, ...x })).sort((a, b) => b.value - a.value);
 }
@@ -447,7 +457,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
           <p className="opex-hero-note">
             Aylık ortalama {tl(d.ortalama.toplam)} · {d.aySayisi} ay
             {d.yil === 2026 && m.donem.yil === 2026 ? ` · ${m.donem.etiket} (bu ay) ${tl(m.ozet.buAy.toplam)}` : ''}
-            {onceki ? ` · 2026 (${onceki.etiket.replace(' 2026', '')}) aylık ortalamasına göre ${signed(d.ortalama.toplam / onceki.ortalama.toplam - 1)}` : ''}
+            {onceki ? ` · 2026 (${onceki.etiket.replace(' 2026', '')}) aylık ortalamasına göre ${change(d.ortalama.toplam, onceki.ortalama.toplam)}` : ''}
           </p>
         </div>
         <ul className="opex-tiles">
@@ -492,7 +502,7 @@ type PlanRow = { kind: 'ay'; a: DonemAy; onceki: Kume3 | null } | { kind: 'total
 
 function Plan({ m, d }: { m: OpexModel; d: Donem }) {
   const enYuksek = d.seri.reduce((a, b) => (b.toplam > a.toplam ? b : a));
-  const gecis = d.yil === 2027 ? d.seri[0].toplam / m.aylik[11].y2026.toplam - 1 : null;
+  const gecis = d.yil === 2027 ? change(d.seri[0].toplam, m.aylik[11].y2026.toplam) : null;
   const rows: PlanRow[] = [
     ...d.seri.map((a, i) => ({ kind: 'ay' as const, a, onceki: i ? d.seri[i - 1] : d.yil === 2027 ? m.aylik[11].y2026 : null })),
     { kind: 'total', a: { ...d.toplam, ad: 'Dönem toplamı' } },
@@ -504,7 +514,7 @@ function Plan({ m, d }: { m: OpexModel; d: Donem }) {
     tutar('Ofis ve işletme', 'ofis'),
     tutar('Personel', 'insan'),
     tutar('Toplam', 'toplam'),
-    { key: 'degisim', header: <Num>Önceki aya göre</Num>, nowrap: true, render: (r) => <Num>{r.kind === 'ay' && r.onceki ? signed(r.a.toplam / r.onceki.toplam - 1) : '—'}</Num> },
+    { key: 'degisim', header: <Num>Önceki aya göre</Num>, nowrap: true, render: (r) => <Num>{r.kind === 'ay' && r.onceki ? change(r.a.toplam, r.onceki.toplam) : '—'}</Num> },
   ];
   return (
     <>
@@ -513,7 +523,7 @@ function Plan({ m, d }: { m: OpexModel; d: Donem }) {
           { label: `Dönem toplamı (${d.aySayisi} ay)`, value: tl(d.toplam.toplam) },
           { label: 'Aylık ortalama', value: tl(d.ortalama.toplam) },
           { label: 'En yüksek ay', value: `${enYuksek.ad} · ${tl(enYuksek.toplam)}` },
-          ...(gecis !== null ? [{ label: 'Aralık 2026 → Ocak 2027', value: signed(gecis) }] : []),
+          ...(gecis !== null ? [{ label: 'Aralık 2026 → Ocak 2027', value: gecis }] : []),
         ]}
       />
       <Chart
@@ -548,10 +558,11 @@ function Plan({ m, d }: { m: OpexModel; d: Donem }) {
   );
 }
 
+type AyBilgi = Pick<KalemDonem, 'aktif' | 'ozel'>;
 type KalemRow =
-  | { kind: 'gider'; g: Gider; aylik: number; donem: number }
-  | { kind: 'kisi'; k: Kisi; tutar: number; aylik: number; donem: number }
-  | { kind: 'total'; label: string; aylik: number; donem: number };
+  | { kind: 'gider'; g: Gider; ay: KalemDonem; aylik: number; donem: number }
+  | { kind: 'kisi'; k: Kisi; ay: AyBilgi & { aylar: (number | null)[] }; tutar: number; aylik: number; donem: number }
+  | { kind: 'total'; label: string; aylar: number[]; aylik: number; donem: number };
 type KalemFiltre = 'tumu' | KumeKod;
 
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
@@ -561,18 +572,34 @@ const ARTIS: Record<Gider['artis'], string> = { Kur: 'kur', Kira: 'kira', Genel:
 function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
   const [filter, setFilter] = useState<KalemFiltre>('tumu');
   const all: KalemRow[] = [
-    ...m.giderler.map((g) => ({ kind: 'gider' as const, g, aylik: giderAylik(g, d), donem: giderAylik(g, d) * d.aySayisi })),
+    ...m.giderler.map((g) => {
+      const ay = giderDonem(g, d);
+      return { kind: 'gider' as const, g, ay, aylik: ay.toplam / d.aySayisi, donem: ay.toplam };
+    }),
     ...m.kisiler.map((k) => {
-      const t = kisiDonem(k, d).toplam.maliyet;
-      return { kind: 'kisi' as const, k, tutar: d.yil === 2027 ? k.tutar2027 : k.tutar, aylik: t / d.aySayisi, donem: t };
+      const kd = kisiDonem(k, d);
+      const aylar = d.aylar.map((i, j) => (k.aktif[d.key][i] ? kd.aylar[j].maliyet : null));
+      return { kind: 'kisi' as const, k, ay: { ...kisiAylari(k, d), aylar }, tutar: d.yil === 2027 ? k.tutar2027 : k.tutar, aylik: kd.toplam.maliyet / d.aySayisi, donem: kd.toplam.maliyet };
     }),
   ];
   const kumeOf = (r: KalemRow): KumeKod | null => (r.kind === 'gider' ? r.g.kume : r.kind === 'kisi' ? 'insan' : null);
   const items = all.filter((r) => filter === 'tumu' || kumeOf(r) === filter);
+  const ayDegeri = (r: KalemRow, j: number) => (r.kind === 'gider' ? r.ay.aylar[j] : r.kind === 'kisi' ? (r.ay.aylar[j] ?? 0) : r.aylar[j]);
   const rows: KalemRow[] = [
     ...items,
-    { kind: 'total', label: `Toplam · ${items.length} kalem`, aylik: items.reduce((t, r) => t + r.aylik, 0), donem: items.reduce((t, r) => t + r.donem, 0) },
+    {
+      kind: 'total',
+      label: `Toplam · ${items.length} kalem`,
+      aylar: d.aylar.map((_, j) => items.reduce((t, r) => t + ayDegeri(r, j), 0)),
+      aylik: items.reduce((t, r) => t + r.aylik, 0),
+      donem: items.reduce((t, r) => t + r.donem, 0),
+    },
   ];
+  const buAy = m.donem.yil === d.yil ? m.donem.ay - 1 : -1;
+  const etkin = (r: KalemRow) => (r.kind === 'gider' ? r.g.aktif[d.key] : r.kind === 'kisi' ? r.k.aktif[d.key] : null);
+  const ozelMi = (r: KalemRow, i: number) => (r.kind === 'gider' ? r.g.ozel[d.key][i] : r.kind === 'kisi' ? r.k.ozel[d.key][i] : false);
+  const kalemAdi = (r: KalemRow) =>
+    r.kind === 'total' ? r.label : r.kind === 'kisi' ? r.k.ad : r.g.hesap ? `${r.g.kalem} · ${r.g.hesap}` : r.g.kalem;
   const columns: Column<KalemRow>[] = [
     {
       key: 'kalem',
@@ -631,13 +658,27 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         ),
     },
     {
+      key: 'aylar',
+      header: 'Etkin ay',
+      nowrap: true,
+      render: (r) =>
+        r.kind === 'total' ? (
+          ''
+        ) : (
+          <span className="opex-months" data-state={r.ay.aktif === d.aySayisi ? 'full' : r.ay.aktif ? 'part' : 'none'}>
+            {r.ay.aktif}/{d.aySayisi} ay
+            {r.ay.ozel ? <span className="cell-sub">{r.ay.ozel} ay özel tutar</span> : null}
+          </span>
+        ),
+    },
+    {
       key: 'aylik',
-      header: <Num>Aylık ₺</Num>,
+      header: <Num>Aylık ort. ₺</Num>,
       nowrap: true,
       render: (r) => (
         <Num>
           {tlExact(r.aylik)}
-          {r.kind === 'kisi' ? <span className="cell-sub">{r.k.tur === 'Freelancer' ? 'fatura' : 'işveren maliyeti, ort.'}</span> : null}
+          {r.kind === 'kisi' ? <span className="cell-sub">{r.k.tur === 'Freelancer' ? 'fatura' : 'işveren maliyeti'}</span> : null}
         </Num>
       ),
     },
@@ -648,9 +689,11 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
           header: 'Bu ay',
           nowrap: true,
           render: (r) =>
-            r.kind === 'gider' ? (
-              <span className="opex-state" data-state={r.g.eksik ? 'missing' : r.g.odendi ? 'paid' : 'due'}>
-                {r.g.eksik ? 'Tutar girilmedi' : r.g.odendi ? 'Ödendi' : 'Bekliyor'}
+            r.kind !== 'total' && buAy >= 0 && !etkin(r)?.[buAy] ? (
+              <span className="opex-state" data-state="off">Bu ay yok</span>
+            ) : r.kind === 'gider' ? (
+              <span className="opex-state" data-state={r.g.eksik && !r.g.ozel[d.key][buAy] ? 'missing' : r.g.odendi ? 'paid' : 'due'}>
+                {r.g.eksik && !r.g.ozel[d.key][buAy] ? 'Tutar girilmedi' : r.g.odendi ? 'Ödendi' : 'Bekliyor'}
               </span>
             ) : r.kind === 'kisi' ? (
               <span className="opex-state">{r.k.tur === 'Freelancer' ? 'Fatura' : 'Bordro'}</span>
@@ -673,6 +716,39 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
         },
   ];
   const count = (k: KumeKod) => all.filter((r) => kumeOf(r) === k).length;
+  // Ay ay kalemler: Sheets aylık ızgarasındaki onay kutusu (etkin ay) ve özel tutarlar.
+  const ayColumns: Column<KalemRow>[] = [
+    { key: 'kalem', header: 'Kalem', rowHeader: true, minWidth: '13rem', render: (r) => kalemAdi(r) },
+    ...d.aylar.map(
+      (i, j): Column<KalemRow> => ({
+        key: `ay-${i}`,
+        header: (
+          <Num>
+            <span aria-hidden="true">{d.seri[j].kisa}</span>
+            <span className="visually-hidden">{d.seri[j].ad}</span>
+          </Num>
+        ),
+        nowrap: true,
+        render: (r) => {
+          if (r.kind !== 'total' && !etkin(r)?.[i]) {
+            return (
+              <span className="opex-month-off">
+                <span aria-hidden="true">—</span>
+                <span className="visually-hidden">yok</span>
+              </span>
+            );
+          }
+          return (
+            <Num>
+              {tl(ayDegeri(r, j))}
+              {ozelMi(r, i) ? <span className="cell-sub">özel</span> : null}
+            </Num>
+          );
+        },
+      }),
+    ),
+    { key: 'donem', header: <Num>Toplam</Num>, nowrap: true, render: (r) => <Num>{tl(r.donem)}</Num> },
+  ];
   return (
     <>
       <FactsRow
@@ -704,8 +780,16 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
       <DataTable
         id={`kalemler-${d.yil}`}
         title={`${d.etiket} kalemleri`}
-        note="Döviz kalemleri Parametreler’deki kurla ₺’ye çevrilir. Personel satırlarında aylık ₺ dönemin ortalama işveren maliyetidir (freelancer: fatura); bordro ayrıntısı aşağıda."
+        note="Döviz kalemleri Parametreler’deki kurla ₺’ye çevrilir. Etkin ay ve özel tutarlar Sheets’teki aylık sütunlardan gelir. Personel satırlarında aylık ortalama dönemin işveren maliyetidir (freelancer: fatura); bordro ayrıntısı aşağıda."
         columns={columns}
+        rows={rows}
+        rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
+      />
+      <DataTable
+        id={`kalem-aylari-${d.yil}`}
+        title={`Ay ay kalemler · ${d.etiket}`}
+        note="Her ayın kendi tutarı, ₺. — : Sheets’te o ayın onay kutusu işaretsiz (gider yok). “özel”: o aya varsayılandan farklı tutar yazılmış; diğer aylar varsayılan tutardır (2027’de zamlı/artışlı)."
+        columns={ayColumns}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
       />
@@ -715,13 +799,13 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
 
 function TechVendors({ m, d }: { m: OpexModel; d: Donem }) {
   const map = new Map<string, number>();
-  for (const g of m.giderler.filter((x) => x.kume === 'teknoloji')) map.set(g.kalem, (map.get(g.kalem) ?? 0) + giderAylik(g, d));
+  for (const g of m.giderler.filter((x) => x.kume === 'teknoloji')) map.set(g.kalem, (map.get(g.kalem) ?? 0) + giderDonem(g, d).toplam / d.aySayisi);
   const tech = [...map.entries()].sort((a, b) => b[1] - a[1]);
   return (
     <Chart
       id={`teknoloji-${d.yil}`}
       title="Teknoloji sağlayıcıları"
-      note={`${d.yil} aylık ₺, hesaplar toplanmış`}
+      note={`${d.etiket} aylık ortalama ₺, hesaplar toplanmış`}
       size="md"
       summary={tech.map(([n, v]) => `${n} ${tl(v)}`).join('; ')}
       spec={{ kind: 'opex-bar', items: tech.map(([name, value]) => ({ name, value, tone: 'tech' as const })) }}

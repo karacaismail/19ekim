@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Request, type Route } from '@playwright/test';
 import { OPEX_ENDPOINT, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf } from '../src/data/opex';
-import { buildModel, reply } from './opex-fixture';
+import { buildModel, exampleTohum, reply } from './opex-fixture';
 
 /**
  * Giderler (OPEX): Google Apps Script web uygulaması sahte yanıtla (kurgusal örnek tohumdan motorun gerçek çıktısı).
@@ -269,8 +269,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const n = { tech: MODEL.giderler.filter((g) => g.kume === 'teknoloji').length, office: MODEL.giderler.filter((g) => g.kume === 'ofis').length, people: MODEL.kisiler.length };
     await expect(group.getByRole('button')).toHaveText([`Tümü (${n.tech + n.office + n.people})`, `Teknoloji (${n.tech})`, `Ofis ve işletme (${n.office})`, `Personel (${n.people})`]);
     const table = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
-    // Toplam satırı: [Kategori, Tutar, Aylık ₺, 3 ay ₺, Bu ay]; dönem sütunu ≈ dönem grup toplamı (kuruş yuvarlaması).
-    const total = async () => Number((await table.locator('tr[data-tone="total"] td').nth(3).innerText()).replace(/[^\d,]/g, '').replace(',', '.'));
+    // Toplam satırı: [Kategori, Tutar, Etkin ay, Aylık ort. ₺, 3 ay ₺, Bu ay]; dönem sütunu ≈ dönem grup toplamı (kuruş yuvarlaması).
+    const total = async () => Number((await table.locator('tr[data-tone="total"] td').nth(4).innerText()).replace(/[^\d,]/g, '').replace(',', '.'));
     const d = donemOf(MODEL, 2026);
     expect(Math.abs((await total()) - d.toplam.toplam)).toBeLessThan(0.05);
     await group.getByRole('button', { name: /^Personel/ }).click();
@@ -353,6 +353,131 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     });
   }
 
+  // Kullanıcı kararı 2026-10-20: radyo işareti sağ üstte, 2× büyük (3rem), seçili olan yeşil.
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`yıl sekmelerinde radyo işareti (${scheme}): sağ üstte, 48 px, seçili yeşil dolu nokta; rakamla çakışmaz; ≥ 3:1`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await mockScript(page);
+      await page.goto(PATH);
+      await hydrated(page);
+      await connect(page);
+      const dot = (yil: string) => page.locator(`#yil-${yil} .opex-radio-dot`).evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+      const state = (yil: string) =>
+        page.locator(`#yil-${yil}`).evaluate((tab) => {
+          const svg = tab.querySelector<SVGSVGElement>('svg.opex-radio')!;
+          const lum = (rgb: string) => {
+            const [r, g, b] = (rgb.match(/[\d.]+/g) ?? []).slice(0, 3).map((x) => Number(x) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          };
+          const stroke = getComputedStyle(svg.querySelector('.opex-radio-ring')!).stroke;
+          const [a, b] = [lum(stroke), lum(getComputedStyle(tab).backgroundColor)].sort((x, y) => y - x);
+          const t = tab.getBoundingClientRect();
+          const r = svg.getBoundingClientRect();
+          const n = tab.querySelector('.opex-year-num')!.getBoundingClientRect();
+          const cs = getComputedStyle(tab);
+          const overlap = Math.min(r.right, n.right) > Math.max(r.left, n.left) && Math.min(r.bottom, n.bottom) > Math.max(r.top, n.top);
+          return {
+            hidden: svg.getAttribute('aria-hidden'),
+            ratio: (a + 0.05) / (b + 0.05),
+            stroke,
+            size: Math.round(r.width),
+            right: Math.round(t.right - r.right - parseFloat(cs.paddingRight)),
+            top: Math.round(r.top - t.top - parseFloat(cs.paddingTop)),
+            overlap,
+          };
+        });
+      const green = await page.evaluate(() => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--radio-checked)';
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+      });
+      expect(green).toMatch(/^rgb\(\d+, (1[0-9]{2}|[7-9]\d), \d+\)$/);
+      for (const width of [320, 360, 390, 1280]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const yil of ['2026', '2027']) {
+          const st = await state(yil);
+          expect(st.hidden, 'işaret ekran okuyucuya ayrıca okunmaz (seçim aria-selected ile)').toBe('true');
+          expect(st.size, `${width} px ${yil}: 2× (48 px)`).toBe(48);
+          expect([st.right, st.top], `${width} px ${yil}: sağ üst köşe (iç boşlukta)`).toEqual([0, 0]);
+          expect(st.overlap, `${width} px ${yil}: rakamla çakışma`).toBe(false);
+          expect(st.ratio, `${width} px ${yil}: halka karşıtlığı`).toBeGreaterThanOrEqual(3);
+        }
+      }
+      await expect.poll(() => dot('2026')).toBe(1);
+      await expect.poll(() => dot('2027')).toBe(0);
+      await expect.poll(async () => (await state('2026')).stroke).toBe(green);
+      expect((await state('2027')).stroke).not.toBe(green);
+      await page.getByRole('tab', { name: /^2027/ }).click();
+      await expect.poll(() => dot('2027')).toBe(1);
+      await expect.poll(() => dot('2026')).toBe(0);
+      await expect.poll(async () => (await state('2027')).stroke).toBe(green);
+      expect((await state('2027')).ratio).toBeGreaterThanOrEqual(3);
+    });
+  }
+
+  test('Sheets aylık ızgarası: işaretsiz ay “—”, ayrı tutar “özel”; etkin ay sayısı ve toplamlar ay ay', async ({ page }) => {
+    // Ofis kirası Kasım 2026’da işaretsiz; Örnek Serbest A Kasım 2026’da 70.000 ₺ ayrı fatura.
+    const grid = buildModel({
+      giderAylari: exampleTohum.giderler.map((r) => (r[0] === 'Ofis kirası' ? { aktif: { 'Kas 2026': false } } : {})),
+      personelAylari: exampleTohum.personel.map((r) => (r[0] === 'Örnek Serbest A' ? { tutar: { 'Kas 2026': 70000 } } : {})),
+    });
+    await mockScript(page, { ozet: 'izgara', model: grid });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    const d = donemOf(grid, 2026);
+    expect(d.toplam.toplam).not.toBe(donemOf(MODEL, 2026).toplam.toplam);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(grid));
+    const months = page.getByRole('region', { name: 'Ay ay kalemler · Ekim – Aralık 2026' });
+    await expect(months.locator('thead th')).toHaveText(['Kalem', /^EkiEkim 2026$/, /^KasKasım 2026$/, /^AraAralık 2026$/, 'Toplam']);
+    await expect(months.locator('thead th [aria-hidden="true"]')).toHaveText(['Eki', 'Kas', 'Ara']);
+    const row = (t: ReturnType<Page['getByRole']>, name: string) => t.locator('tbody tr').filter({ has: page.locator('th', { hasText: new RegExp(`^${name}`) }) });
+    const kira = row(months, 'Ofis kirası').locator('td');
+    await expect(kira.nth(0)).toHaveText(lira(60000));
+    await expect(kira.nth(1)).toContainText('—');
+    await expect(kira.nth(3)).toHaveText(lira(120000));
+    const serbest = row(months, 'Örnek Serbest A').locator('td');
+    await expect(serbest.nth(1)).toContainText(lira(70000));
+    await expect(serbest.nth(1)).toContainText('özel');
+    await expect(serbest.nth(0)).not.toContainText('özel');
+    await expect(months.locator('tr[data-tone="total"] td').last()).toHaveText(lira(d.toplam.toplam));
+    const items = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
+    await expect(row(items, 'Ofis kirası').locator('td').nth(2)).toHaveText('2/3 ay');
+    await expect(row(items, 'Örnek Serbest A').locator('td').nth(2)).toContainText('3/3 ay');
+    await expect(row(items, 'Örnek Serbest A').locator('td').nth(2)).toContainText('1 ay özel tutar');
+    // Plan: Kasım’da ofis kirası yok
+    await expect(page.getByRole('region', { name: 'Aylık gider planı · Ekim – Aralık 2026' }).locator('tbody tr').nth(1).locator('td').nth(1)).toHaveText(lira(d.seri[1].ofis));
+  });
+
+  test('tüm kalemleri işaretsiz ay: değişim “—”, sayfada ∞ veya NaN yok', async ({ page }) => {
+    const kapali = { aktif: { 'Kas 2026': false } };
+    const zero = buildModel({ giderAylari: exampleTohum.giderler.map(() => kapali), personelAylari: exampleTohum.personel.map(() => kapali) });
+    expect(donemOf(zero, 2026).seri[1].toplam).toBe(0);
+    await mockScript(page, { ozet: 'sifir', model: zero });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    const plan = page.getByRole('region', { name: 'Aylık gider planı · Ekim – Aralık 2026' });
+    await expect(plan.locator('tbody tr').nth(2).locator('td').last()).toHaveText('—');
+    expect(await page.locator('.app-main').innerText()).not.toMatch(/∞|NaN|Infinity/);
+  });
+
+  test('aylık ızgarasız eski Apps Script yanıtı: her ay etkin, varsayılan tutar; sayfa bozulmaz', async ({ page }) => {
+    const old = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;
+    for (const g of old.giderler) for (const f of ['aylikTl', 'aktif', 'ozel'] as const) delete (g as Partial<typeof g>)[f];
+    for (const k of old.kisiler) for (const f of ['aktif', 'ozel'] as const) delete (k as Partial<typeof k>)[f];
+    await mockScript(page, { ozet: 'eski', model: old });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
+    const items = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
+    await expect(items.locator('tbody tr').first().locator('td').nth(2)).toHaveText('3/3 ay');
+  });
+
   test('netten brüte: kişi seçimi aria-pressed ile, yıl sekmeyle değişir', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
@@ -428,6 +553,37 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       expect(result.chart, `${yil}: grafik metni`).toEqual([]);
       expect(await clipped(page), `${yil}: kırpılan öğe`).toEqual([]);
       }
+    });
+  }
+
+  for (const width of [320, 768]) {
+    test(`${width} px: grafik ipucu grafik kutusunda kalır (kırpılmaz, taşmaz)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await mockScript(page);
+      await page.goto(PATH);
+      await hydrated(page);
+      await connect(page);
+      await drawAll(page);
+      const hosts = page.locator('.chart-host');
+      let shown = 0;
+      for (let i = 0; i < (await hosts.count()); i++) {
+        const host = hosts.nth(i);
+        await host.scrollIntoViewIfNeeded();
+        const box = (await host.boundingBox())!;
+        await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.5);
+        await page.waitForTimeout(400);
+        const r = await host.evaluate((h) => {
+          const tip = [...h.querySelectorAll<HTMLElement>(':scope > div')].find((d) => d.style.zIndex === '9999999');
+          if (!tip || getComputedStyle(tip).display === 'none' || getComputedStyle(tip).visibility === 'hidden' || Number(getComputedStyle(tip).opacity) === 0) return null;
+          const a = tip.getBoundingClientRect();
+          const b = h.getBoundingClientRect();
+          return { inside: a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1, a: [a.left, a.right, a.top, a.bottom].map(Math.round), b: [b.left, b.right, b.top, b.bottom].map(Math.round) };
+        });
+        if (!r) continue;
+        shown++;
+        expect(r.inside, `grafik ${i}: ipucu ${r.a} kutu ${r.b}`).toBe(true);
+      }
+      expect(shown, 'en az bir ipucu açıldı').toBeGreaterThan(2);
     });
   }
 

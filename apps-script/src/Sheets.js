@@ -15,6 +15,8 @@ var OPEX_SAYFA = {
   bordro: 'Bordro',
   hesap: 'Hesap',
 };
+/** Aylık ızgara: ilk sütun (Giderler P, Personel Q); 15 aylık plan (Ekim 2026 → Aralık 2027), her ay yan yana onay kutusu + tutar (30 sütun). */
+var OPEX_IZGARA = { giderler: 16, personel: 17, genislik: 30 };
 var OPEX_ANAHTAR_OZELLIGI = 'OPEX_ERISIM_ANAHTARI';
 var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
 
@@ -27,11 +29,13 @@ var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
  * @param {A1:I200} personel Personel!A:I
  * @param {A1:K400} giderler Giderler!A:K
  * @param {A1:I100} tesvikler 'Teşvikler'!A:I
+ * @param {P1:AS400} giderAylari Giderler aylık ızgarası (ay ay etkin / tutar)
+ * @param {Q1:AT200} personelAylari Personel aylık ızgarası (ay ay etkin / tutar)
  * @return Tablo (ilk satır başlık)
  * @customfunction
  */
-function OPEX(rapor, parametreler, personel, giderler, tesvikler) {
-  var girdi = { parametreler: parametreler, personel: personel, giderler: giderler, tesvikler: tesvikler };
+function OPEX(rapor, parametreler, personel, giderler, tesvikler, giderAylari, personelAylari) {
+  var girdi = { parametreler: parametreler, personel: personel, giderler: giderler, tesvikler: tesvikler, giderAylari: giderAylari, personelAylari: personelAylari };
   var model = OpexMotor.hesapla(girdi, { simdi: new Date() });
   return OpexMotor.rapor(model, String(rapor || ''), girdi);
 }
@@ -105,17 +109,20 @@ function sabitZamanliEsit_(a, b) {
 /** Girdi sayfalarının ham değerleri (motorun beklediği biçim). */
 function girdileriOku_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var oku = function (ad, sutun) {
+  var oku = function (ad, sutun, ilk) {
     var sh = ss.getSheetByName(ad);
     if (!sh) return [];
     var son = Math.max(sh.getLastRow(), 1);
-    return sh.getRange(1, 1, son, sutun).getValues();
+    if (ilk && sh.getMaxColumns() < ilk + sutun - 1) return [];
+    return sh.getRange(1, ilk || 1, son, sutun).getValues();
   };
   return {
     parametreler: oku(OPEX_SAYFA.parametreler, 6),
     personel: oku(OPEX_SAYFA.personel, 9),
     giderler: oku(OPEX_SAYFA.giderler, 11),
     tesvikler: oku(OPEX_SAYFA.tesvikler, 9),
+    giderAylari: oku(OPEX_SAYFA.giderler, OPEX_IZGARA.genislik, OPEX_IZGARA.giderler),
+    personelAylari: oku(OPEX_SAYFA.personel, OPEX_IZGARA.genislik, OPEX_IZGARA.personel),
   };
 }
 
