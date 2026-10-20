@@ -171,6 +171,28 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(page.getByRole('region', { name: 'Ekim 2026 kalemleri' })).toContainText('Yeni sunucu');
   });
 
+  test('görünürlük sık gidip gelse de süren istek iptal edilmez; yavaş yanıt (3 sn) gelir', async ({ page }) => {
+    let count = 0;
+    await page.route('https://script.google.com/**', async (route) => {
+      count += 1;
+      await new Promise((r) => setTimeout(r, 3000));
+      await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(MODEL, 'yavas')) }).catch(() => undefined);
+    });
+    await page.goto(PATH);
+    await hydrated(page);
+    // Bazı ortamlarda (gömülü tarayıcı, resim içinde resim) sekme saniyede birkaç kez gizli/görünür olur.
+    await page.evaluate(() => {
+      let hidden = false;
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (hidden ? 'hidden' : 'visible') });
+      window.setInterval(() => {
+        hidden = !hidden;
+        document.dispatchEvent(new Event('visibilitychange'));
+      }, 250);
+    });
+    await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam), { timeout: 10_000 });
+    expect(count).toBeLessThanOrEqual(2);
+  });
+
   test('“Şimdi yenile” hemen sorar; sekme gizliyken sormaz', async ({ page }) => {
     await page.clock.install();
     const server = await mockScript(page);

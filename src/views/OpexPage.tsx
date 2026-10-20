@@ -47,6 +47,8 @@ const Dot = ({ tone }: { tone: OpexTone }) => <span className="opex-dot" data-to
 
 /* ---------- Canlı bağlantı ---------- */
 
+const OPEX_WAKE_MS = 5_000;
+
 type Live =
   | { status: 'init' }
   | { status: 'setup'; error?: string }
@@ -84,14 +86,16 @@ function useOpexLive() {
       if (!stopped) timer = window.setTimeout(() => void tick(), OPEX_POLL_MS);
     };
     let retry = false;
+    let lastStart = 0;
     const tick = async () => {
-      if (stopped) return;
+      // Süren istek iptal edilmez: yanıt birkaç saniye sürer, yeni istek onu hiç bitirtmezdi.
+      if (stopped || active) return;
       retry = false;
       if (document.visibilityState === 'hidden') {
         schedule();
         return;
       }
-      active?.abort();
+      lastStart = Date.now();
       const own = new AbortController();
       active = own;
       let timedOut = false;
@@ -144,8 +148,9 @@ function useOpexLive() {
         } else schedule();
       }
     };
+    /** Sekme görünür olunca veya ağ dönünce hemen sor; görünürlük sık gidip gelse de en çok OPEX_WAKE_MS’de bir. */
     const wake = () => {
-      if (document.visibilityState !== 'visible' || stopped) return;
+      if (document.visibilityState !== 'visible' || stopped || active || Date.now() - lastStart < OPEX_WAKE_MS) return;
       window.clearTimeout(timer);
       void tick();
     };
