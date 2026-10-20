@@ -36,8 +36,8 @@ var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
 /**
  * OPEX raporu (tablo) üretir. Girdi aralıkları argüman olarak verilir; biri değişince rapor yeniden hesaplanır.
  *
- * @param {string} rapor kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, bordro-2026, bordro-2027,
- *   personel-sutun, gider-sutun, tesvik-sutun, uyari
+ * @param {string} rapor kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027,
+ *   personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, asgari-net-2026, asgari-net-2027, uyari
  * @param {A1:F200} parametreler Parametreler!A:F
  * @param {A1:I200} personel 'Personel Giderleri'!A:I
  * @param {A1:G400} giderler 'Düzenli Giderler'!A:G

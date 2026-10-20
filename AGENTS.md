@@ -151,8 +151,9 @@ Pages yayınından önce çalıştırır.
 ## Bilinen sınırlar
 
 - Apps Script (Sheets kurulumu, özel işlev, web uygulaması) CI’da çalışmaz; motor (`tests/opex-motor.spec.ts`) ve veri
-  ucu (`tests/opex-script.spec.ts`) Node’da, sayfa sahte yanıtla (`tests/giderler.spec.ts`) denetlenir. Kurulum/Sheets API çağrıları yalnız
-  `@types/google-apps-script` tip denetimiyle doğrulandı; gerçek Google hesabında çalıştırılması kullanıcıdadır.
+  ucu (`tests/opex-script.spec.ts`) Node’da, sayfa sahte yanıtla (`tests/giderler.spec.ts`) denetlenir. Kurulum/Sheets API çağrıları Node
+  testlerinde sahte nesnelerle denetlenir (tip denetimi yok); gerçek Sheets davranışı (kurulum, özel işlev spill’i,
+  koşullu biçim) yalnız canlı tabloda çalıştırılarak doğrulanır.
 - Teşvik koşulları ve birlikte uygulanabilirlik mali müşavirle doğrulanmalı; 2027 yasal değerleri (asgari ücret,
   dilimler, destek) varsayımdır ve Parametreler/Teşvikler sayfasında güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).

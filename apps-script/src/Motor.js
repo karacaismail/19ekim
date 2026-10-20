@@ -13,7 +13,7 @@ var OpexMotor = (function () {
   'use strict';
 
   var SEMA = 1;
-  var SURUM = '2026-10-20.4';
+  var SURUM = '2026-10-20.5';
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var KISA_AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   var YILLAR = [2026, 2027];
@@ -242,6 +242,10 @@ var OpexMotor = (function () {
     var sonuc = { aktif: { 2026: dolu(true), 2027: dolu(true) }, tutar: { 2026: dolu(null), 2027: dolu(null) } };
     if (!izgara) return sonuc;
     var r = izgara.rows[satir - 1] || [];
+    // Satırda açıkça doldurulmuş onay kutusu varsa boş kutu işaretsizdir (kullanıcı ayları tek tek seçmiştir);
+    // hiç doldurulmamış satırda her ay etkindir.
+    var acik = izgara.sutunlar.some(function (c) { return !c.tutar && metin(r[c.j]) !== ''; });
+    if (acik) izgara.sutunlar.forEach(function (c) { if (!c.tutar) sonuc.aktif[c.yil][c.ay] = false; });
     izgara.sutunlar.forEach(function (c) {
       var v = r[c.j];
       if (metin(v) === '') return;
@@ -670,9 +674,15 @@ var OpexMotor = (function () {
       if (SECENEKLER.esas.indexOf(esas) < 0) esas = tur === 'Freelancer' ? 'Fatura (KDV dahil)' : 'Net';
       if (tur === 'Freelancer') esas = 'Fatura (KDV dahil)';
       var tutar = sayi(s.tutar);
+      var pa = satirAylari(ayP, s.satir);
+      // Tutar boş ama ay ay tutar yazılmışsa kişi yalnız o aylarda vardır.
+      var ayTutari = [2026, 2027].some(function (y) { return pa.tutar[y].some(function (v) { return v !== null && v > 0; }); });
       if (esas !== 'Asgari ücret' && !(tutar > 0)) {
-        uyarilar.push('Personel “' + ad + '” için tutar yok; hesaba katılmadı.');
-        return;
+        if (!ayTutari) {
+          uyarilar.push('Personel “' + ad + '” için tutar yok; Tutar sütununa veya ay sütunlarına net/brüt/fatura tutarını yazın.');
+          return;
+        }
+        tutar = 0;
       }
       var tesvik = metin(s.tesvik);
       if (tesvik && !tesvikKodlari[tesvik]) {
@@ -694,7 +704,6 @@ var OpexMotor = (function () {
       var tutar27 = esas === 'Asgari ücret' ? cfg[2027].asgariNet : kisi.zam ? r2(tutar * (1 + p.zam_orani)) : tutar;
       // Aylık ızgara: işaretsiz ay pasif; varsayılandan farklı yazılan tutar o ayın tutarı (özel); 0 yazılan ay ödeme yok;
       // boş ya da varsayılana eşit (Sheets formülü) ay varsayılan (2027’de zamlı, asgari ücretlide o yılın asgarisi).
-      var pa = satirAylari(ayP, s.satir);
       var kisiOzel = { 2026: [], 2027: [] };
       var kisiTutar = { 2026: [], 2027: [] };
       var aylikTutar = function (yil, varsayilan) {
@@ -704,10 +713,9 @@ var OpexMotor = (function () {
           var v = pa.tutar[yil][i];
           var ozel = on && farkli(v, deger);
           kisiOzel[yil][i] = ozel;
-          kisiTutar[yil][i] = !on ? 0 : ozel ? Math.max(v, 0) : deger;
-          if (!on || (ozel && v <= 0)) return null;
-          if (ozel) return v;
-          return asgari ? 'asgari' : deger;
+          var ayTutar = !on ? null : ozel ? (v > 0 ? v : null) : asgari ? 'asgari' : deger > 0 ? deger : null;
+          kisiTutar[yil][i] = ayTutar === null ? 0 : ayTutar === 'asgari' ? deger : ayTutar;
+          return ayTutar;
         });
       };
       var y26 = kisiYili(kisi, aylikTutar(2026, tutar), cfg[2026], p);

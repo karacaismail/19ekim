@@ -20,8 +20,8 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 ## Sayfalar (Google Sheets)
 
 - **Pano**: KPI kutuları, küme özeti, bordro köprüsü, 8 grafik, kişi tablosu.
-- **Giderler** (girdi): teknoloji ve ofis/işletme kalemleri; para birimi, aylık tutar, 2027 artış esası, “Bu ay ödendi”.
-- **Personel** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik.
+- **Düzenli Giderler** (girdi): teknoloji ve ofis/işletme kalemleri; para birimi, aylık tutar, 2027 artış esası; aylık ızgara ve “Toplam (₺)”.
+- **Personel Giderleri** (girdi): Bordrolu (Net / Brüt / Asgari ücret) ve Freelancer (KDV dahil fatura); 2027 zam, ek teşvik; aylık ızgara ve “Toplam (₺)”.
 - **Bordro**: kişi × ay netten brüte tablo, 2026 ve 2027.
 - **Parametreler** (girdi): kur (canlı Google Finance, yedekli), 2026 enflasyonu, 2027 zam esası, bordro oranları, dilimler.
 - **Teşvikler** (girdi): standart (genel prim indirimi, asgari ücret desteği) ve koşullu teşvikler.
@@ -72,10 +72,13 @@ Komutu ajan çalıştırır; Google adımları hesap sahibinin onayını gerekti
 ## Güncelleme
 
 Kod değişince paketi yeniden üretip Apps Script’e yapıştırın; ardından Dağıt → Dağıtımları yönet → Düzenle →
-Sürüm: **Yeni sürüm** (adres değişmez). Sheets yapısı için OPEX → Kurulum / onarım (veriye dokunmaz).
+Sürüm: **Yeni sürüm** (adres değişmez). Sheets yapısı için OPEX → Kurulum / onarım (girilen veri korunur; yalnız
+yukarıdaki eski gider sütunları bir kez kaldırılır, kaldırmadan önce “Dahil = hayır” satırlarının bütün ayları işaretsiz
+yapılır). Kurulum hata verirse dil ayarı yine tr_TR’ye döner.
 Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
-Ay başında: OPEX → “Yeni ay: Bu ay ödendi işaretlerini kaldır” (onaylı).
-Onay kutuları (Dahil, Bu ay ödendi, Etkin) kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir.
+Onay kutuları kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir. Satırda en az bir ay işaretliyse boş
+kutu işaretsiz sayılır (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda her ay işaretlidir.
+Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Toplam satırı uyarı korumalıdır.
 
 ## Erişim
 

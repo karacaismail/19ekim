@@ -35,20 +35,30 @@ var OPEX_BICIM = {
   sayi: '#,##0.##',
   tamsayi: '0',
 };
-var OPEX_SUTUN = {
-  parametreler: 6,
-  personel: 9,
-  giderler: 11,
-  tesvikler: 9,
-};
 
 function kurulum() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // Formüller virgül ayraçlı yazılır: önce en_US, en sonda tr_TR (Sheets formülleri “;” ile gösterir).
+  // Formüller virgül ayraçlı yazılır: önce en_US, en sonda (hata olsa da) tr_TR (Sheets formülleri “;” ile gösterir).
   ss.setSpreadsheetLocale('en_US');
   ss.setSpreadsheetTimeZone('Europe/Istanbul');
   SpreadsheetApp.flush();
+  try {
+    kurulumAdimlari_(ss);
+  } finally {
+    ss.setSpreadsheetLocale('tr_TR');
+    SpreadsheetApp.flush();
+  }
+  ss.setActiveSheet(ss.getSheetByName(OPEX_SAYFA.pano));
+  anahtariSagla_();
+  // Düzenleyiciden çalıştırılınca Sheets arayüzü yoktur (getUi hata verir); bilgi OPEX menüsünden de açılır.
+  try {
+    baglantiBilgisi();
+  } catch (hata) {
+    console.log('Kurulum tamam. Web bağlantısı bilgisi: Sheets → OPEX → Web bağlantısı bilgisi.');
+  }
+}
 
+function kurulumAdimlari_(ss) {
   // Eski adla duran sayfa yeni ada taşınır (Giderler → Düzenli Giderler, Personel → Personel Giderleri).
   Object.keys(OPEX_ESKI_AD).forEach(function (k) {
     var eski = ss.getSheetByName(OPEX_ESKI_AD[k]);
@@ -79,17 +89,6 @@ function kurulum() {
   panoyuKur_(ss);
   SpreadsheetApp.flush();
   panoyuCiz();
-
-  ss.setSpreadsheetLocale('tr_TR');
-  SpreadsheetApp.flush();
-  ss.setActiveSheet(ss.getSheetByName(OPEX_SAYFA.pano));
-  anahtariSagla_();
-  // Düzenleyiciden çalıştırılınca Sheets arayüzü yoktur (getUi hata verir); bilgi OPEX menüsünden de açılır.
-  try {
-    baglantiBilgisi();
-  } catch (hata) {
-    console.log('Kurulum tamam. Web bağlantısı bilgisi: Sheets → OPEX → Web bağlantısı bilgisi.');
-  }
 }
 
 /* ---------- Ortak yardımcılar ---------- */
@@ -108,18 +107,17 @@ function sayfaAdi_(k) {
   return "'" + OPEX_SAYFA[k] + "'";
 }
 
-/** Girdi (A’dan) ve ızgara aralıkları; `sonSatir` verilirse formülün bir üst satırında biter (alt toplam satırı). */
-function aralik_(k, ilk, son, sonSatir) {
-  var sol = sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1:';
-  return sonSatir ? sol + 'INDEX(' + sayfaAdi_(k) + '!' + sutunHarfi_(son) + ':' + sutunHarfi_(son) + ',ROW()-1)' : sol + sutunHarfi_(son);
+/** Girdi (A’dan) ve ızgara aralıkları (açık uçlu sütun aralığı). */
+function aralik_(k, ilk, son) {
+  return sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1:' + sutunHarfi_(son);
 }
 
-function girdiAraligi_(k, ustSatir) {
-  return aralik_(k, 1, OPEX_GIRDI_SUTUN[k], ustSatir);
+function girdiAraligi_(k) {
+  return aralik_(k, 1, OPEX_GIRDI_SUTUN[k]);
 }
 
-function izgaraAraligi_(k, ustSatir) {
-  return aralik_(k, OPEX_IZGARA[k], OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1, ustSatir);
+function izgaraAraligi_(k) {
+  return aralik_(k, OPEX_IZGARA[k], OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1);
 }
 
 /** OPEX(...) formülü: tüm girdi aralıkları argümandır, biri değişince yeniden hesaplanır. */
@@ -128,15 +126,17 @@ function opexFormulu_(rapor) {
     izgaraAraligi_('giderler') + ',' + izgaraAraligi_('personel') + ')';
 }
 
-/**
- * Alt toplam satırı: motor (özel işlev) ızgara genişliğinde tek satır döner; aralıklar formülün bir üst satırında biter,
- * böylece toplam kendi çıktısını okumaz (döngü yok) ve araya satır eklenince kendiliğinden genişler.
- */
+/** 1. satırdan formülün bir üst satırına uzanan aralık (OFFSET: kendi çıktısına başvurmaz, araya satır eklenince genişler). */
+function ustAralik_(k, ilk, genislik) {
+  return 'OFFSET(' + sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1,0,0,ROW()-1,' + genislik + ')';
+}
+
+/** Alt toplam satırı: motor (özel işlev) ızgara genişliğinde tek satır döner; döngüsel başvuru yoktur. */
 function toplamFormulu_(k) {
-  if (k === 'giderler') {
-    return '=OPEX("gider-toplam",Parametreler!A1:F,"",' + girdiAraligi_('giderler', true) + ',"",' + izgaraAraligi_('giderler', true) + ',"")';
-  }
-  return '=OPEX("personel-toplam",Parametreler!A1:F,' + girdiAraligi_('personel', true) + ',"","","",' + izgaraAraligi_('personel', true) + ')';
+  var girdi = ustAralik_(k, 1, OPEX_GIRDI_SUTUN[k]);
+  var izgara = ustAralik_(k, OPEX_IZGARA[k], OPEX_IZGARA.genislik);
+  if (k === 'giderler') return '=OPEX("gider-toplam",Parametreler!A1:F,"",' + girdi + ',"",' + izgara + ',"")';
+  return '=OPEX("personel-toplam",Parametreler!A1:F,' + girdi + ',"","","",' + izgara + ')';
 }
 
 /** Asgari ücretlinin Tutar hücresi: motorun hesapladığı net asgari ücret (Parametreler’e bağlı). */
@@ -174,6 +174,8 @@ function onEdit(e) {
     var sh = r.getSheet();
     var ad = sh.getName();
     if (ad !== OPEX_SAYFA.giderler && ad !== OPEX_ESKI_AD.giderler) return;
+    // Yalnız yeni yerleşimde (ızgara I’den başlar); kurulumdan önceki eski yerleşime dokunmaz.
+    if (sh.getRange(3, OPEX_IZGARA.giderler).getDisplayValue() !== izgaraBasliklari_()[0]) return;
     var ilk = Math.max(r.getRow(), 4);
     var son = r.getRow() + r.getNumRows() - 1;
     if (son < ilk || r.getColumn() > 5 || r.getLastColumn() < 5) return;
@@ -195,9 +197,22 @@ function eskiGiderSutunlariniKaldir_(sh) {
   if (h[0] !== b.odendi) return false;
   var beklenen = [b.odendi, b.dahil, b.fatura, b.not, ''];
   var hesap = sh.getRange(1, 13).getFormula();
-  var uygun = beklenen.every(function (x, i) { return h[i] === x; }) && (hesap === '' || /gider-sutun/.test(hesap));
+  var n = Math.max(sh.getLastRow() - 3, 0);
+  var bosluk = !n || sh.getRange(4, 12, n, 1).getValues().every(function (r) { return r[0] === ''; });
+  var uygun = beklenen.every(function (x, i) { return h[i] === x; }) && (hesap === '' || /gider-sutun/.test(hesap)) && bosluk;
   if (!uygun) {
-    throw new Error(sh.getName() + ': H:N beklenen eski sütunlar değil (' + h.join(' | ') + '); dokunulmadı. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+    throw new Error(sh.getName() + ': H:N beklenen eski sütunlar değil (' + h.join(' | ') + (bosluk ? '' : '; L sütununda veri var') + '); dokunulmadı. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+  }
+  // “Dahil = hayır” satırı hariç kalmalı: Dahil sütunu silinmeden önce o satırın bütün ay kutuları işaretsiz yapılır
+  // (eski ızgara P’den başlar; tutar hücrelerindeki formüller korunur).
+  if (n) {
+    sh.getRange(4, 9, n, 1).getValues().forEach(function (r, i) {
+      var v = r[0];
+      if (!(v === false || String(v).trim().toLocaleLowerCase('tr-TR') === 'hayır')) return;
+      var hucre = sh.getRange(4 + i, 16, 1, OPEX_IZGARA.genislik);
+      var f = hucre.getFormulas()[0];
+      hucre.setValues([hucre.getValues()[0].map(function (x, j) { return j % 2 === 0 ? false : f[j] || x; })]);
+    });
   }
   sh.deleteColumns(8, 7);
   return true;
@@ -211,19 +226,37 @@ function toplamSatiriKur_(sh, k, n) {
   var hedef = 4 + n;
   var ilk = OPEX_IZGARA[k];
   var g = OPEX_IZGARA.genislik;
+  // Son veri satırının altında girdi sütunlarında içerik varsa toplam için yeni satır açılır (içerik silinmez).
+  if (sh.getRange(hedef, 2, 1, OPEX_GIRDI_SUTUN[k] - 1).getValues()[0].some(function (v) { return v !== ''; })) sh.insertRowAfter(hedef - 1);
+  sh.getProtections(SpreadsheetApp.ProtectionType.RANGE).forEach(function (p) { if (p.getDescription() === OPEX_TOPLAM_KORUMA) p.remove(); });
   sh.getRange(hedef, ilk, 1, g).clearContent().clearDataValidations();
   sh.getRange(hedef, 1).setValue('Toplam (₺)').setFontWeight('bold');
   sh.getRange(hedef, ilk).setFormula(toplamFormulu_(k));
   sh.getRange(hedef, ilk, 1, g).setNumberFormat(OPEX_BICIM.tl).setFontWeight('bold').setFontColor(OPEX_STIL.formul).setBackground(OPEX_STIL.hesap);
   sh.getRange(hedef, 1, 1, OPEX_GIRDI_SUTUN[k]).setBackground(OPEX_STIL.hesap);
+  // Toplam satırına yazılırsa uyarır (üzerine kalem yazılırsa toplamlar kalem sayılırdı).
+  sh.getRange(hedef, 1, 1, ilk + g - 1).protect().setDescription(OPEX_TOPLAM_KORUMA).setWarningOnly(true);
 }
 
-/** Eski “Toplam” satırları silinir (kurulum toplamı her zaman son veri satırının altına yeniden yazar). */
-function toplamSatirlariniSil_(sh) {
+var OPEX_TOPLAM_KORUMA = 'OPEX toplam satırı (kod hesaplar)';
+
+/**
+ * Eski “Toplam” satırları silinir (kurulum toplamı her zaman son veri satırının altına yeniden yazar). Girdi
+ * sütunlarında elle yazılmış değer olan “Toplam” satırına dokunulmaz; kurulum durur.
+ */
+function toplamSatirlariniSil_(sh, k) {
   var son = sh.getLastRow();
   if (son < 4) return;
   var a = sh.getRange(4, 1, son - 3, 1).getValues();
-  for (var i = a.length - 1; i >= 0; i--) if (toplamSatiriMi_(a[i][0])) sh.deleteRow(4 + i);
+  for (var i = a.length - 1; i >= 0; i--) {
+    if (!toplamSatiriMi_(a[i][0])) continue;
+    var girdi = sh.getRange(4 + i, 2, 1, OPEX_GIRDI_SUTUN[k] - 1);
+    var f = girdi.getFormulas()[0];
+    if (girdi.getValues()[0].some(function (v, j) { return v !== '' && !f[j]; })) {
+      throw new Error(sh.getName() + ': ' + (4 + i) + '. satır “' + a[i][0] + '” ama girdi sütunlarında değer var; dokunulmadı. Satırı yeniden adlandırın veya temizleyin.');
+    }
+    sh.deleteRow(4 + i);
+  }
 }
 
 /** Aylık ızgaranın ayları: 15 aylık plan, Ekim 2026 → Aralık 2027 (kullanıcı kararı; OPEX_IZGARA.genislik = 15 × 2). */
@@ -272,13 +305,10 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
     var degerler = blok.getValues();
     var formuller = blok.getFormulas();
     var cikti = degerler.map(function (satir, r) {
+      var onaylar = onaySatiri_(satir.filter(function (_, j) { return j % 2 === 0; }));
       return satir.map(function (v, j) {
         var ay = Math.floor(j / 2);
-        if (j % 2 === 0) {
-          if (v === true || v === false) return v;
-          var t = String(v).trim().toLocaleLowerCase('tr-TR');
-          return t === '' ? true : t === 'evet' || t === 'true' || t === 'doğru' || t === 'dogru' || t === 'x' || t === '✓' || t === '1';
-        }
+        if (j % 2 === 0) return onaylar[ay];
         return formuller[r][j] || v === '' ? varsayilan(4 + r, ay < 3 ? 2026 : 2027) : v;
       });
     });
@@ -312,6 +342,20 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
 }
 
 /** Personel ayının varsayılan tutarı: ücret esasına göre (asgari ücretlide o yılın net asgarisi), 2027’de zamlı. */
+/**
+ * Bir satırın onay kutusu değerleri: metinler (evet, x, ✓…) mantıksal değere çevrilir. Satırda açıkça doldurulmuş kutu
+ * varsa boş kutu işaretsiz olur (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda hepsi işaretli.
+ */
+function onaySatiri_(r) {
+  var acik = r.some(function (v) { return v === true || v === false || String(v).trim() !== ''; });
+  return r.map(function (v) {
+    if (v === true || v === false) return v;
+    var t = String(v).trim().toLocaleLowerCase('tr-TR');
+    if (t === '') return !acik;
+    return t === 'evet' || t === 'true' || t === 'doğru' || t === 'dogru' || t === 'x' || t === '✓' || t === '1';
+  });
+}
+
 function personelVarsayilani_(r, yil) {
   var asgari = 'ROUND(p_asgari_brut_' + yil + '*(1-p_sgk_isci-p_issizlik_isci),2)';
   var tutar = yil === 2026 ? '$D' + r : 'IF($E' + r + '="Hayır",$D' + r + ',ROUND($D' + r + '*(1+p_zam_orani),2))';
@@ -524,7 +568,7 @@ function tesvikleriKur_(ss) {
 function personeliKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.personel);
   var b = OpexMotor.BASLIKLAR.personel;
-  toplamSatirlariniSil_(sh);
+  toplamSatirlariniSil_(sh, 'personel');
   girdiBasligi_(
     sh,
     'Personel ve ücret giderleri',
@@ -553,7 +597,7 @@ function personeliKur_(ss) {
     var et = esasTutar.getValues();
     var ef = esasTutar.getFormulas();
     et.forEach(function (r, i) {
-      if (String(r[0]).trim() === 'Asgari ücret' && (r[1] === '' || ef[i][1])) sh.getRange(4 + i, 4).setFormula(asgariNetFormulu_(2026));
+      if (String(r[0]).trim() === 'Asgari ücret' && (r[1] === '' || /asgari-net/.test(ef[i][1]))) sh.getRange(4 + i, 4).setFormula(asgariNetFormulu_(2026));
     });
   }
   sh.getRange(4, 9, alan, 1).setFontColor(OPEX_STIL.ikincil).setWrap(true);
@@ -579,7 +623,7 @@ function personeliKur_(ss) {
 function giderleriKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.giderler);
   var b = OpexMotor.BASLIKLAR.giderler;
-  toplamSatirlariniSil_(sh);
+  toplamSatirlariniSil_(sh, 'giderler');
   girdiBasligi_(
     sh,
     'Düzenli giderler: teknoloji, ofis ve işletme (aylık)',

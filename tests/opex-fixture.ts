@@ -72,8 +72,8 @@ export const IZGARA_AYLARI = [...KISA.slice(9).map((a) => `${a} 2026`), ...KISA.
 /** Izgara başlıkları: her ay yan yana onay kutusu ve tutar (Kurulum.izgaraBasliklari_ ile aynı). */
 export const IZGARA_BASLIKLARI = IZGARA_AYLARI.flatMap((a) => [a, `${a} tutar`]);
 export interface IzgaraSatiri {
-  /** Ay → işaret (yazılmayan ay işaretli). */
-  aktif?: Record<string, boolean>;
+  /** Ay → işaret (yazılmayan ay işaretli; '' = boş hücre). */
+  aktif?: Record<string, boolean | ''>;
   /** Ay → o ayın tutarı (yazılmayan ay boş = varsayılan). */
   tutar?: Record<string, number>;
 }

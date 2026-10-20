@@ -445,6 +445,37 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(mm.aylik[10].y2026.insan, 'Kasım: yalnız eski çalışan').toBe(eski.y2026.aylar[10].maliyet);
   });
 
+  test('satırda açık işaret varsa boş onay kutusu yok sayılır: Eki–Oca boş, Şub+ işaretli → Şubat 2027’de başlar', () => {
+    // Kullanıcı kararı 2026-10-20: iki yeni pozisyon ilk maaşı 1 Şubat 2027’de alır (Eki 2026 – Oca 2027 kutuları boş).
+    const bos = { 'Eki 2026': '', 'Kas 2026': '', 'Ara 2026': '', 'Oca 2027': '' } as const;
+    const mm = buildModel({ personel: [NET('Şubatta', 40000), NET('Hiç işaretsiz', 40000)], giderler: [], personelAylari: [{ aktif: { ...bos } }, {}] });
+    const tumBos = Object.fromEntries((Object.keys(bos) as string[]).map((a) => [a, '']));
+    expect(tumBos).toBeTruthy();
+    const [s, h] = mm.kisiler;
+    expect(s.y2026.aylar.every((x) => x.maliyet === 0), 'Şubatta: 2026 yok').toBe(true);
+    expect(s.y2027.aylar[0].maliyet, 'Ocak 2027 yok').toBe(0);
+    close(s.y2027.aylar[1].net, s.tutar2027);
+    expect(s.aktif.y2027.slice(0, 2)).toEqual([false, true]);
+    expect(h.y2026.aylar[9].maliyet, 'açık işaret yoksa her ay etkin').toBeGreaterThan(0);
+  });
+
+  test('tamamen boş onay kutulu satır etkin; Tutar boş ama ay tutarı yazılı kişi yalnız o aylarda', () => {
+    const tumBos = Object.fromEntries(['Eki 2026', 'Kas 2026', 'Ara 2026', ...['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'].map((a) => `${a} 2027`)].map((a) => [a, ''])) as Record<string, ''>;
+    const mm = buildModel({
+      personel: [NET('Boş kutular', 30000), NET('Yalnız ay tutarı', '')],
+      giderler: [],
+      personelAylari: [{ aktif: tumBos }, { tutar: { 'Şub 2027': 40000, 'Mar 2027': 41000 } }],
+    });
+    expect(mm.uyarilar).toEqual([]);
+    const [b, y] = mm.kisiler;
+    close(b.y2026.aylar[9].net, 30000);
+    expect(y.y2026.aylar.every((x) => x.maliyet === 0)).toBe(true);
+    expect(y.y2027.aylar[0].maliyet).toBe(0);
+    close(y.y2027.aylar[1].net, 40000);
+    close(y.y2027.aylar[2].net, 41000);
+    expect(y.y2027.aylar[3].maliyet, 'tutar yazılmayan ay yok').toBe(0);
+  });
+
   test('yeni gider: planda ilk etkin ay Kasım ise Ocak–Ekim 2026 yok (2026 yıllık OPEX’e girmez)', () => {
     const mm = buildModel({ personel: [], giderler: GIDERLER, giderAylari: [{ aktif: { 'Eki 2026': false } }, {}] });
     const [kira, arac] = mm.giderler;
