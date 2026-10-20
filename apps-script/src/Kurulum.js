@@ -162,7 +162,7 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
     sh.getRangeList(onay.map(function (o) { return o.offset(0, 0, n, 1).getA1Notation(); })).insertCheckboxes();
     blok.setValues(cikti);
   }
-  var sayiKurali = SpreadsheetApp.newDataValidation().requireNumberGreaterThanOrEqual(0).setAllowInvalid(false).build();
+  var sayiKurali = SpreadsheetApp.newDataValidation().requireNumberGreaterThanOrEqualTo(0).setAllowInvalid(false).build();
   tutar.forEach(function (t) { t.setDataValidation(sayiKurali); });
   sh.getRangeList(tutar.map(function (t) { return t.getA1Notation(); })).setNumberFormat(tutarBicimi);
   for (var k = 0; k < g; k += 2) {
