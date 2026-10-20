@@ -20,8 +20,12 @@ var OPEX_STIL = {
   vurgu: '#ff8600',
   vurguYuzey: '#fff3e3',
   uyari: '#fde8e8',
+  // Formül (veya kod) sonucu olan hücrelerin yazı rengi (kullanıcı kararı 2026-10-20: Sheets “mavi” #0000ff).
+  formul: '#0000ff',
   seri: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100'],
 };
+/** Gider tutarı satırın para birimiyle görünür (kullanıcı kararı 2026-10-20). */
+var OPEX_PARA_BICIMI = { USD: '[$$]#,##0.00', EUR: '[$€]#,##0.00', TRY: '#,##0.00 "₺"' };
 var OPEX_BICIM = {
   tl: '#,##0.00 "₺"',
   tlYuvarlak: '#,##0 "₺"',
@@ -45,6 +49,11 @@ function kurulum() {
   ss.setSpreadsheetTimeZone('Europe/Istanbul');
   SpreadsheetApp.flush();
 
+  // Eski adla duran sayfa yeni ada taşınır (Giderler → Düzenli Giderler, Personel → Personel Giderleri).
+  Object.keys(OPEX_ESKI_AD).forEach(function (k) {
+    var eski = ss.getSheetByName(OPEX_ESKI_AD[k]);
+    if (eski && !ss.getSheetByName(OPEX_SAYFA[k])) eski.setName(OPEX_SAYFA[k]);
+  });
   var sira = [OPEX_SAYFA.pano, OPEX_SAYFA.giderler, OPEX_SAYFA.personel, OPEX_SAYFA.bordro, OPEX_SAYFA.parametreler, OPEX_SAYFA.tesvikler, OPEX_SAYFA.hesap];
   sira.forEach(function (ad, i) {
     var sh = ss.getSheetByName(ad) || ss.insertSheet(ad, i);
@@ -55,6 +64,8 @@ function kurulum() {
   ss.getSheets().forEach(function (sh) {
     if (sira.indexOf(sh.getName()) < 0 && sh.getLastRow() === 0 && sh.getLastColumn() === 0) ss.deleteSheet(sh);
   });
+  // Gizli eski sütunlar (Bu ay ödendi, Dahil, Fatura, Not, hesap) formüller yazılmadan önce kaldırılır.
+  eskiGiderSutunlariniKaldir_(ss.getSheetByName(OPEX_SAYFA.giderler));
   // Aylık ızgara sütunları formüllerden önce açılır; yoksa OPEX(...) aralığı #REF! olur.
   sutunGarantile_(ss.getSheetByName(OPEX_SAYFA.giderler), OPEX_IZGARA.giderler + OPEX_IZGARA.genislik - 1);
   sutunGarantile_(ss.getSheetByName(OPEX_SAYFA.personel), OPEX_IZGARA.personel + OPEX_IZGARA.genislik - 1);
@@ -93,13 +104,126 @@ function sutunHarfi_(n) {
   return s;
 }
 
+function sayfaAdi_(k) {
+  return "'" + OPEX_SAYFA[k] + "'";
+}
+
+/** Girdi (A’dan) ve ızgara aralıkları; `sonSatir` verilirse formülün bir üst satırında biter (alt toplam satırı). */
+function aralik_(k, ilk, son, sonSatir) {
+  var sol = sayfaAdi_(k) + '!' + sutunHarfi_(ilk) + '1:';
+  return sonSatir ? sol + 'INDEX(' + sayfaAdi_(k) + '!' + sutunHarfi_(son) + ':' + sutunHarfi_(son) + ',ROW()-1)' : sol + sutunHarfi_(son);
+}
+
+function girdiAraligi_(k, ustSatir) {
+  return aralik_(k, 1, OPEX_GIRDI_SUTUN[k], ustSatir);
+}
+
+function izgaraAraligi_(k, ustSatir) {
+  return aralik_(k, OPEX_IZGARA[k], OPEX_IZGARA[k] + OPEX_IZGARA.genislik - 1, ustSatir);
+}
+
 /** OPEX(...) formülü: tüm girdi aralıkları argümandır, biri değişince yeniden hesaplanır. */
 function opexFormulu_(rapor) {
-  var izgara = function (ad, ilk) {
-    return ad + '!' + sutunHarfi_(ilk) + '1:' + sutunHarfi_(ilk + OPEX_IZGARA.genislik - 1);
-  };
-  return '=OPEX("' + rapor + '",Parametreler!A1:F,Personel!A1:I,Giderler!A1:K,\'Teşvikler\'!A1:I,' +
-    izgara('Giderler', OPEX_IZGARA.giderler) + ',' + izgara('Personel', OPEX_IZGARA.personel) + ')';
+  return '=OPEX("' + rapor + '",Parametreler!A1:F,' + girdiAraligi_('personel') + ',' + girdiAraligi_('giderler') + ",'Teşvikler'!A1:I," +
+    izgaraAraligi_('giderler') + ',' + izgaraAraligi_('personel') + ')';
+}
+
+/**
+ * Alt toplam satırı: motor (özel işlev) ızgara genişliğinde tek satır döner; aralıklar formülün bir üst satırında biter,
+ * böylece toplam kendi çıktısını okumaz (döngü yok) ve araya satır eklenince kendiliğinden genişler.
+ */
+function toplamFormulu_(k) {
+  if (k === 'giderler') {
+    return '=OPEX("gider-toplam",Parametreler!A1:F,"",' + girdiAraligi_('giderler', true) + ',"",' + izgaraAraligi_('giderler', true) + ',"")';
+  }
+  return '=OPEX("personel-toplam",Parametreler!A1:F,' + girdiAraligi_('personel', true) + ',"","","",' + izgaraAraligi_('personel', true) + ')';
+}
+
+/** Asgari ücretlinin Tutar hücresi: motorun hesapladığı net asgari ücret (Parametreler’e bağlı). */
+function asgariNetFormulu_(yil) {
+  return '=OPEX("asgari-net-' + yil + '",Parametreler!A1:F)';
+}
+
+function paraBicimi_(para) {
+  return OPEX_PARA_BICIMI[String(para || '').trim().toUpperCase()] || OPEX_PARA_BICIMI.TRY;
+}
+
+function toplamSatiriMi_(v) {
+  return String(v).trim().toLocaleLowerCase('tr-TR').indexOf('toplam') === 0;
+}
+
+/**
+ * Düzenli Giderler: tutar hücreleri (Tutar ve ay tutarları) satırın para birimiyle biçimlenir; onay kutusu sütunlarına
+ * dokunulmaz.
+ */
+function paraBiciminiUygula_(sh, satir, n) {
+  if (!(n > 0)) return;
+  var paralar = sh.getRange(satir, 5, n, 1).getValues();
+  sh.getRange(satir, 6, n, 1).setNumberFormats(paralar.map(function (r) { return [paraBicimi_(r[0])]; }));
+  var blok = sh.getRange(satir, OPEX_IZGARA.giderler, n, OPEX_IZGARA.genislik);
+  blok.setNumberFormats(blok.getNumberFormats().map(function (r, i) {
+    return r.map(function (f, j) { return j % 2 === 1 ? paraBicimi_(paralar[i][0]) : f; });
+  }));
+}
+
+/** Basit tetikleyici: Düzenli Giderler’de Para birimi değişince o satırların tutarları yeni dövizle görünür. */
+function onEdit(e) {
+  try {
+    var r = e && e.range;
+    if (!r) return;
+    var sh = r.getSheet();
+    var ad = sh.getName();
+    if (ad !== OPEX_SAYFA.giderler && ad !== OPEX_ESKI_AD.giderler) return;
+    var ilk = Math.max(r.getRow(), 4);
+    var son = r.getRow() + r.getNumRows() - 1;
+    if (son < ilk || r.getColumn() > 5 || r.getLastColumn() < 5) return;
+    paraBiciminiUygula_(sh, ilk, son - ilk + 1);
+  } catch (hata) {
+    console.log('onEdit: ' + hata);
+  }
+}
+
+/**
+ * Kullanıcı kararı (2026-10-20): Düzenli Giderler’de gizlenmiş H:N sütunları (Bu ay ödendi, Dahil, Fatura bağlantısı,
+ * Not, boşluk, eski hesap sütunları) kaldırılır. Yalnız beklenen başlıklar görülürse siler; zaten kaldırılmışsa dokunmaz;
+ * başka içerik varsa durur. Motor bu sütunları başlık adıyla, isteğe bağlı okur.
+ */
+function eskiGiderSutunlariniKaldir_(sh) {
+  if (!sh || sh.getMaxColumns() < 14) return false;
+  var b = OpexMotor.BASLIKLAR.giderler;
+  var h = sh.getRange(3, 8, 1, 7).getDisplayValues()[0];
+  if (h[0] !== b.odendi) return false;
+  var beklenen = [b.odendi, b.dahil, b.fatura, b.not, ''];
+  var hesap = sh.getRange(1, 13).getFormula();
+  var uygun = beklenen.every(function (x, i) { return h[i] === x; }) && (hesap === '' || /gider-sutun/.test(hesap));
+  if (!uygun) {
+    throw new Error(sh.getName() + ': H:N beklenen eski sütunlar değil (' + h.join(' | ') + '); dokunulmadı. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+  }
+  sh.deleteColumns(8, 7);
+  return true;
+}
+
+/**
+ * Alt toplam satırı (“Toplam (₺)”): son veri satırının hemen altında; ızgara hücreleri temizlenir (elle yazılmış eski
+ * toplamlar dahil), motorun toplam satırı yazılır. Formül sonucu mavi.
+ */
+function toplamSatiriKur_(sh, k, n) {
+  var hedef = 4 + n;
+  var ilk = OPEX_IZGARA[k];
+  var g = OPEX_IZGARA.genislik;
+  sh.getRange(hedef, ilk, 1, g).clearContent().clearDataValidations();
+  sh.getRange(hedef, 1).setValue('Toplam (₺)').setFontWeight('bold');
+  sh.getRange(hedef, ilk).setFormula(toplamFormulu_(k));
+  sh.getRange(hedef, ilk, 1, g).setNumberFormat(OPEX_BICIM.tl).setFontWeight('bold').setFontColor(OPEX_STIL.formul).setBackground(OPEX_STIL.hesap);
+  sh.getRange(hedef, 1, 1, OPEX_GIRDI_SUTUN[k]).setBackground(OPEX_STIL.hesap);
+}
+
+/** Eski “Toplam” satırları silinir (kurulum toplamı her zaman son veri satırının altına yeniden yazar). */
+function toplamSatirlariniSil_(sh) {
+  var son = sh.getLastRow();
+  if (son < 4) return;
+  var a = sh.getRange(4, 1, son - 3, 1).getValues();
+  for (var i = a.length - 1; i >= 0; i--) if (toplamSatiriMi_(a[i][0])) sh.deleteRow(4 + i);
 }
 
 /** Aylık ızgaranın ayları: 15 aylık plan, Ekim 2026 → Aralık 2027 (kullanıcı kararı; OPEX_IZGARA.genislik = 15 × 2). */
@@ -171,13 +295,19 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
   }
   sh.setColumnWidth(ilk - 1, 24);
   var h = sutunHarfi_(ilk);
+  var t = sutunHarfi_(ilk + 1);
+  // Veri satırı: A dolu ve “Toplam” değil (alt toplam satırı kendi biçimini taşır).
+  var veri = '$A4<>"",LEFT(LOWER($A4),6)<>"toplam"';
+  var kural = function (f) { return SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied(f); };
   return [
     // Yalnız açıkça işaretsiz (FALSE) ay grileşir; boş hücre gri değil, uyarı rengindedir (motor boşu etkin sayar).
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(onay).build(),
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(tutar).build(),
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",' + h + '4="")').setBackground(OPEX_STIL.uyari).setRanges(onay).build(),
-    // Elle yazılmış (formül olmayan) tutar: o aya özel.
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",' + sutunHarfi_(ilk + 1) + '4<>"",NOT(ISFORMULA(' + sutunHarfi_(ilk + 1) + '4)))').setBackground(OPEX_STIL.vurguYuzey).setRanges(tutar).build(),
+    kural('=AND(' + veri + ',ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(onay).build(),
+    kural('=AND(' + veri + ',ISLOGICAL(' + h + '4),' + h + '4=FALSE)').setBackground('#e6e3dc').setFontColor(OPEX_STIL.ikincil).setRanges(tutar).build(),
+    kural('=AND(' + veri + ',' + h + '4="")').setBackground(OPEX_STIL.uyari).setRanges(onay).build(),
+    // Elle yazılmış (formül olmayan) tutar: o aya özel (turuncu zemin, siyah yazı).
+    kural('=AND(' + veri + ',' + t + '4<>"",NOT(ISFORMULA(' + t + '4)))').setBackground(OPEX_STIL.vurguYuzey).setRanges(tutar).build(),
+    // Formülle gelen tutar mavi yazılır.
+    kural('=ISFORMULA(' + t + '4)').setFontColor(OPEX_STIL.formul).setRanges(tutar).build(),
   ];
 }
 
@@ -237,7 +367,7 @@ function veriSatiriSayisi_(sh) {
   if (son < 4) return 0;
   var ilk = sh.getRange(4, 1, son - 3, 1).getValues();
   var n = 0;
-  ilk.forEach(function (r, i) { if (String(r[0]).trim() !== '') n = i + 1; });
+  ilk.forEach(function (r, i) { if (String(r[0]).trim() !== '' && !toplamSatiriMi_(r[0])) n = i + 1; });
   return n;
 }
 
@@ -330,6 +460,10 @@ function parametreleriKur_(ss) {
   var kaynak = mevcut.enflasyon_kaynak;
   if (kaynak) sh.getRange(kaynak, 3).setWrap(true).setFontWeight('normal');
   [180, 260, 170, 70, 170, 520].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
+  // Formüllü parametre değerleri mavi; elle yazılan değer (formül silinince) siyah kalır.
+  sh.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=ISFORMULA($C4)').setFontColor(OPEX_STIL.formul).setRanges([sh.getRange(4, 3, sonSatir - 3, 1)]).build(),
+  ]);
   sh.setFrozenColumns(2);
   sh.setTabColor(OPEX_STIL.ikincil);
 }
@@ -378,7 +512,7 @@ function tesvikleriKur_(ss) {
   sh.getRange(4, 4, alan, 2).setNumberFormat('#,##0.00##');
   sh.getRange(4, 9, alan, 1).setWrap(true).setFontColor(OPEX_STIL.ikincil);
   sh.getRange('K1').setFormula(opexFormulu_('tesvik-sutun'));
-  sh.getRange(4, 11, alan, 3).setBackground(OPEX_STIL.hesap);
+  sh.getRange(4, 11, alan, 3).setBackground(OPEX_STIL.hesap).setFontColor(OPEX_STIL.formul);
   sh.getRange(4, 12, alan, 2).setNumberFormat(OPEX_BICIM.tl);
   bantla_(sh, n, 9);
   [150, 300, 260, 120, 120, 110, 130, 80, 520, 24, 220, 140, 140].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
@@ -390,6 +524,7 @@ function tesvikleriKur_(ss) {
 function personeliKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.personel);
   var b = OpexMotor.BASLIKLAR.personel;
+  toplamSatirlariniSil_(sh);
   girdiBasligi_(
     sh,
     'Personel ve ücret giderleri',
@@ -412,14 +547,26 @@ function personeliKur_(ss) {
   sh.getRange(4, 6, alan, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInRange(ss.getSheetByName(OPEX_SAYFA.tesvikler).getRange('A4:A60'), true).setAllowInvalid(false).build());
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.asgariDestek));
   if (n) onayKutusu_(sh.getRange(4, 8, n, 1), true);
+  // Asgari ücretlinin Tutar hücresi motora bağlanır (net asgari ücret, Parametreler’den); elle yazılmış tutar korunur.
+  if (n) {
+    var esasTutar = sh.getRange(4, 3, n, 2);
+    var et = esasTutar.getValues();
+    var ef = esasTutar.getFormulas();
+    et.forEach(function (r, i) {
+      if (String(r[0]).trim() === 'Asgari ücret' && (r[1] === '' || ef[i][1])) sh.getRange(4 + i, 4).setFormula(asgariNetFormulu_(2026));
+    });
+  }
   sh.getRange(4, 9, alan, 1).setFontColor(OPEX_STIL.ikincil).setWrap(true);
   sh.getRange('K1').setFormula(opexFormulu_('personel-sutun'));
-  sh.getRange(4, 11, alan, 5).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl);
+  // Hesap sütunları formül (kod) sonucudur: mavi.
+  sh.getRange(4, 11, alan, 5).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
   bantla_(sh, n, 9);
   var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.personel, n, alan, 'Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok', OPEX_BICIM.tl, personelVarsayilani_);
+  toplamSatiriKur_(sh, 'personel', n);
   var rules = [
     SpreadsheetApp.newConditionalFormatRule().setGradientMinpoint('#ffffff').setGradientMaxpoint('#fbd3c2').setRanges([sh.getRange(4, 12, alan, 1)]).build(),
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",$C4<>"Asgari ücret",OR($D4="",$D4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 4, alan, 1)]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",LEFT(LOWER($A4),6)<>"toplam",$C4<>"Asgari ücret",OR($D4="",$D4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 4, alan, 1)]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=ISFORMULA($D4)').setFontColor(OPEX_STIL.formul).setRanges([sh.getRange(4, 4, alan, 1)]).build(),
   ].concat(izgaraKurallari);
   sh.setConditionalFormatRules(rules);
   [230, 120, 170, 150, 100, 150, 170, 80, 280, 24, 150, 150, 170, 150, 170].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
@@ -432,41 +579,35 @@ function personeliKur_(ss) {
 function giderleriKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.giderler);
   var b = OpexMotor.BASLIKLAR.giderler;
+  toplamSatirlariniSil_(sh);
   girdiBasligi_(
     sh,
-    'Giderler: teknoloji, ofis ve işletme (aylık)',
-    'Döviz kalemleri Parametreler → USD/EUR kuruyla ₺’ye çevrilir. 2027 artış esası: Kur, Kira, Genel veya Yok. Personel giderleri Personel sayfasındadır.',
-    [b.kalem, b.hesap, b.kume, b.kategori, b.para, b.tutar, b.artis, b.odendi, b.dahil, b.fatura, b.not],
-    2,
-    13,
+    'Düzenli giderler: teknoloji, ofis ve işletme (aylık)',
+    'Döviz kalemleri Parametreler → USD/EUR kuruyla ₺’ye çevrilir. 2027 artış esası: Kur, Kira, Genel veya Yok. Personel giderleri “' + OPEX_SAYFA.personel + '” sayfasındadır.',
+    [b.kalem, b.hesap, b.kume, b.kategori, b.para, b.tutar, b.artis],
   );
   var n = veriSatiriSayisi_(sh);
   if (n === 0 && typeof OPEX_TOHUM !== 'undefined' && OPEX_TOHUM.giderler && OPEX_TOHUM.giderler.length) {
-    sh.getRange(4, 1, OPEX_TOHUM.giderler.length, 11).setValues(OPEX_TOHUM.giderler);
-    n = OPEX_TOHUM.giderler.length;
+    // Tohumun eski 11 sütunundan yalnız girdi sütunları (A:G); “Dahil = hayır” satırları alınmaz.
+    var tohum = OPEX_TOHUM.giderler.filter(function (r) { return r[8] !== false; }).map(function (r) { return r.slice(0, OPEX_GIRDI_SUTUN.giderler); });
+    sh.getRange(4, 1, tohum.length, OPEX_GIRDI_SUTUN.giderler).setValues(tohum);
+    n = tohum.length;
   }
   var alan = Math.max(n, 1) + 20;
   var s = OpexMotor.SECENEKLER;
   sh.getRange(4, 3, alan, 1).setDataValidation(liste_(s.kume));
   sh.getRange(4, 4, alan, 1).setDataValidation(liste_(s.kategori, true));
   sh.getRange(4, 5, alan, 1).setDataValidation(liste_(s.para));
-  sh.getRange(4, 6, alan, 1).setNumberFormat('#,##0.00');
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.artis));
-  if (n) {
-    onayKutusu_(sh.getRange(4, 8, n, 1), false);
-    onayKutusu_(sh.getRange(4, 9, n, 1), true);
-  }
-  sh.getRange(4, 11, alan, 1).setFontColor(OPEX_STIL.ikincil).setWrap(true);
-  sh.getRange('M1').setFormula(opexFormulu_('gider-sutun'));
-  sh.getRange(4, 13, alan, 2).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl);
-  bantla_(sh, n, 11);
+  bantla_(sh, n, OPEX_GIRDI_SUTUN.giderler);
   var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.giderler, n, alan, 'satırın para biriminde, Para sütunu', '#,##0.00', giderVarsayilani_);
+  paraBiciminiUygula_(sh, 4, n);
+  toplamSatiriKur_(sh, 'giderler', n);
   var rules = [
-    SpreadsheetApp.newConditionalFormatRule().setGradientMinpoint('#ffffff').setGradientMaxpoint('#cde2fb').setRanges([sh.getRange(4, 13, alan, 1)]).build(),
-    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",OR($F4="",$F4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 6, alan, 1)]).build(),
+    SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A4<>"",LEFT(LOWER($A4),6)<>"toplam",OR($F4="",$F4=0))').setBackground(OPEX_STIL.uyari).setRanges([sh.getRange(4, 6, alan, 1)]).build(),
   ].concat(izgaraKurallari);
   sh.setConditionalFormatRules(rules);
-  [230, 230, 150, 160, 100, 130, 130, 100, 80, 200, 260, 24, 150, 150].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
+  [230, 230, 150, 160, 110, 140, 140].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
   sh.setFrozenColumns(1);
   sh.setTabColor(OPEX_STIL.seri[0]);
 }
@@ -579,15 +720,21 @@ function panoyuKur_(ss) {
   sh.setRowHeight(1, 46);
   sh.setRowHeight(2, 30);
 
+  /*
+   * Gösterge kutusu: etiket, değer ve açıklama aynı sol hizada (hangi rakamın hangi kümeye ait olduğu tek bakışta);
+   * kutular arasında zemin renginde boşluk (kenarlık vurgu değil, aralıktır). Değer formül sonucu: mavi.
+   */
   var kpi = function (satir, sutunBas, etiket, formul, not, bicim) {
     var genis = 3;
-    sh.getRange(satir, sutunBas, 3, genis).setBackground(OPEX_STIL.yuzey);
-    sh.getRange(satir, sutunBas, 1, genis).merge().setValue(etiket).setFontColor(OPEX_STIL.ikincil);
-    sh.getRange(satir + 1, sutunBas, 1, genis).merge().setFormula(formul).setFontSize(22).setFontWeight('bold').setNumberFormat(bicim || OPEX_BICIM.tlYuvarlak);
-    var n = sh.getRange(satir + 2, sutunBas, 1, genis).merge().setFontColor(OPEX_STIL.ikincil);
+    var kutu = sh.getRange(satir, sutunBas, 3, genis);
+    kutu.setBackground(OPEX_STIL.yuzey).setHorizontalAlignment('left').setVerticalAlignment('middle');
+    sh.getRange(satir, sutunBas, 1, genis).merge().setValue(etiket).setFontColor(OPEX_STIL.ikincil).setFontWeight('bold');
+    sh.getRange(satir + 1, sutunBas, 1, genis).merge().setFormula(formul).setFontSize(22).setFontWeight('bold')
+      .setFontColor(OPEX_STIL.formul).setNumberFormat(bicim || OPEX_BICIM.tlYuvarlak).setHorizontalAlignment('left');
+    var n = sh.getRange(satir + 2, sutunBas, 1, genis).merge().setFontColor(OPEX_STIL.ikincil).setVerticalAlignment('top');
     if (/^=/.test(not)) n.setFormula(not);
     else n.setValue(not);
-    sh.getRange(satir, sutunBas, 1, genis).setBorder(true, null, null, null, null, null, OPEX_STIL.vurgu, SpreadsheetApp.BorderStyle.SOLID_THICK);
+    kutu.setBorder(true, true, true, true, null, null, OPEX_STIL.zemin, SpreadsheetApp.BorderStyle.SOLID_THICK);
   };
   // Hesap!B2… = kpi bloğunun değer sütunu (satır sırası Motor.rapor('kpi') ile aynı).
   kpi(4, 1, 'Bu ay toplam OPEX', '=Hesap!B3', '=Hesap!B2');
@@ -598,11 +745,14 @@ function panoyuKur_(ss) {
   kpi(8, 4, '2027 değişim (aylık ort.)', '=Hesap!B10', '2026 aylık ortalamasına göre', '+0.0%;-0.0%;0.0%');
   kpi(8, 7, 'Uygulanan 2027 zammı', '=Hesap!B11', '=Hesap!B12', '0.00%');
   kpi(8, 10, 'USD/TRY · EUR/TRY', '=Hesap!B13', '="EUR/TRY "&FIXED(Hesap!B14,4)', '#,##0.0000');
+  [4, 8].forEach(function (r) { sh.setRowHeight(r, 30); });
   [5, 9].forEach(function (r) { sh.setRowHeight(r, 44); });
+  [6, 10].forEach(function (r) { sh.setRowHeight(r, 30); });
 
   sh.getRange('A12').setValue('Küme özeti').setFontSize(14).setFontWeight('bold');
   sh.getRange('A13').setFormula('=ARRAYFORMULA(Hesap!' + blokAraligi_('ozet', 0, 7, 5) + ')');
   sh.getRange('A13:G13').setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
+  sh.getRange('B13:G13').setHorizontalAlignment('right');
   sh.getRange('A14:G17').setBackground(OPEX_STIL.yuzey);
   sh.getRange('B14:F17').setNumberFormat(OPEX_BICIM.tlYuvarlak);
   sh.getRange('G14:G17').setNumberFormat('+0.0%;-0.0%;0.0%');
@@ -611,6 +761,7 @@ function panoyuKur_(ss) {
   sh.getRange('I12').setValue('Bordro köprüsü (bu ay)').setFontSize(14).setFontWeight('bold');
   sh.getRange('I13').setFormula('=ARRAYFORMULA(Hesap!' + blokAraligi_('kopru', 0, 2, 9) + ')');
   sh.getRange('I13:J13').setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff');
+  sh.getRange('J13').setHorizontalAlignment('right');
   sh.getRange('I14:J21').setBackground(OPEX_STIL.yuzey);
   sh.getRange('J14:J21').setNumberFormat(OPEX_BICIM.tlYuvarlak);
   sh.getRange('I18:J18').setFontWeight('bold');
@@ -623,6 +774,7 @@ function panoyuKur_(ss) {
   sh.getRange(planSatir - 1, 7).setValue('12 aylık plan').setFontSize(14).setFontWeight('bold');
   sh.getRange(planSatir, 7).setFormula('=ARRAYFORMULA(Hesap!' + blokAraligi_('plan', 0, 5, 14) + ')');
   sh.getRange(planSatir, 7, 1, 5).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
+  sh.getRange(planSatir, 8, 1, 4).setHorizontalAlignment('right');
   sh.getRange(planSatir + 1, 7, 13, 5).setBackground(OPEX_STIL.yuzey);
   sh.getRange(planSatir + 1, 8, 13, 4).setNumberFormat(OPEX_BICIM.tlYuvarlak);
   sh.getRange(planSatir + 13, 7, 1, 5).setFontWeight('bold');
@@ -633,6 +785,7 @@ function panoyuKur_(ss) {
   var son = sutunHarfi_(b.sutun + b.genislik - 1);
   sh.getRange(kisiSatir + 1, 1).setFormula('=FILTER(Hesap!' + bas + '1:' + son + '60,Hesap!' + bas + '1:' + bas + '60<>"")');
   sh.getRange(kisiSatir + 1, 1, 1, 10).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
+  sh.getRange(kisiSatir + 1, 4, 1, 7).setHorizontalAlignment('right');
   sh.getRange(kisiSatir + 2, 1, 30, 10).setBackground(OPEX_STIL.yuzey);
   sh.getRange(kisiSatir + 2, 4, 30, 6).setNumberFormat(OPEX_BICIM.tlYuvarlak);
   sh.getRange(kisiSatir + 2, 10, 30, 1).setNumberFormat('0.0%');

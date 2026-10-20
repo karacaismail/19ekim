@@ -596,6 +596,7 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
     },
   ];
   const buAy = m.donem.yil === d.yil ? m.donem.ay - 1 : -1;
+  const odemeTakibi = m.ozet.odeme.takip !== false;
   const etkin = (r: KalemRow) => (r.kind === 'gider' ? r.g.aktif[d.key] : r.kind === 'kisi' ? r.k.aktif[d.key] : null);
   const ozelMi = (r: KalemRow, i: number) => (r.kind === 'gider' ? r.g.ozel[d.key][i] : r.kind === 'kisi' ? r.k.ozel[d.key][i] : false);
   const kalemAdi = (r: KalemRow) =>
@@ -692,9 +693,15 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
             r.kind !== 'total' && buAy >= 0 && !etkin(r)?.[buAy] ? (
               <span className="opex-state" data-state="off">Bu ay yok</span>
             ) : r.kind === 'gider' ? (
-              <span className="opex-state" data-state={r.g.eksik && !r.g.ozel[d.key][buAy] ? 'missing' : r.g.odendi ? 'paid' : 'due'}>
-                {r.g.eksik && !r.g.ozel[d.key][buAy] ? 'Tutar girilmedi' : r.g.odendi ? 'Ödendi' : 'Bekliyor'}
-              </span>
+              r.g.eksik && !r.g.ozel[d.key][buAy] ? (
+                <span className="opex-state" data-state="missing">Tutar girilmedi</span>
+              ) : odemeTakibi ? (
+                <span className="opex-state" data-state={r.g.odendi ? 'paid' : 'due'}>
+                  {r.g.odendi ? 'Ödendi' : 'Bekliyor'}
+                </span>
+              ) : (
+                <span className="opex-state">Bu ay var</span>
+              )
             ) : r.kind === 'kisi' ? (
               <span className="opex-state">{r.k.tur === 'Freelancer' ? 'Fatura' : 'Bordro'}</span>
             ) : (
@@ -755,7 +762,7 @@ function Expenses({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <FactsRow
         items={[
-          ...(d.yil === 2026
+          ...(d.yil === 2026 && odemeTakibi
             ? [
                 { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} · ${m.ozet.odeme.adetOdenen} kalem` },
                 { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} · ${m.ozet.odeme.adetBekleyen} kalem` },

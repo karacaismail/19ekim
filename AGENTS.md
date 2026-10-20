@@ -47,8 +47,14 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     (enflasyon parametresi; “2027 zam: Hayır” olan hariç) ve artışlar. Veri repoda yoktur: Google Sheets → Apps Script web
     uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa, görünürken 15 sn’de bir özet sorar (`src/data/opex.ts`).
     Sheets’teki Pano/Bordro/Hesap aynı motorla (`apps-script/src/Motor.js`, `=OPEX(...)` özel işlevi) hesaplanır.
-    Aylık ızgara (kullanıcı kararı 2026-10-20: 15 aylık plan = Ekim–Aralık 2026 + 2027’nin 12 ayı): Giderler `P:AS`,
-    Personel `Q:AT` — her ay yan yana
+    Sayfa adları (kullanıcı kararı 2026-10-20): “Düzenli Giderler” (girdi `A:G`, `H` boşluk, ızgara `I:AL`; eski “Bu ay
+    ödendi / Dahil / Fatura / Not” ve hesap sütunları kaldırıldı → ödeme takibi yok, `odeme.takip=false`) ve “Personel
+    Giderleri” (girdi `A:I`, hesap `K:O`, ızgara `Q:AT`); eski adlar da okunur, kurulum yeni ada taşır. Veri ucu sayfanın
+    tamamını okur (sütunlar başlıkla, ızgara ay başlıklarıyla bulunur). Son veri satırının altında “Toplam (₺)” satırı:
+    `=OPEX("gider-toplam"|"personel-toplam", …)` motor spill’i (aralık `INDEX(…,ROW()-1)` ile bir üst satırda biter, döngü
+    yok); motor “Toplam…” satırını kalem/kişi saymaz. Gider tutarları satırın dövizinde görünür (`paraBicimi_`, `onEdit`);
+    formül/kod sonucu hücreler mavi `#0000ff`; Pano gösterge kutuları sol hizalı, aralarında zemin boşluğu.
+    Aylık ızgara (kullanıcı kararı 2026-10-20: 15 aylık plan = Ekim–Aralık 2026 + 2027’nin 12 ayı): her ay yan yana
     bir onay kutusu (“Eki 2026”; işaretsiz ay = o ay gider yok, bordroda matrah birikmez) ve bir tutar (“Eki 2026 tutar”).
     Kurulum her satırın tutar hücresine varsayılan formülü yazar (her ayda rakam görünür; 2027 zamlı/artışlı, adlandırılmış
     `p_*` parametrelerle); elle yazılan farklı tutar o aya özeldir, 0 = o ay ödeme yok. Izgarada olmayan ay (Ocak–Eylül

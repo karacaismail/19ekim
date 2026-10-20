@@ -465,6 +465,19 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(await page.locator('.app-main').innerText()).not.toMatch(/∞|NaN|Infinity/);
   });
 
+  test('“Bu ay ödendi” sütunu kaldırılınca ödenen/bekleyen gösterilmez; durum “Bu ay var” / “Bu ay yok”', async ({ page }) => {
+    const takipsiz = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;
+    takipsiz.ozet.odeme = { ...takipsiz.ozet.odeme, takip: false };
+    await mockScript(page, { ozet: 'takipsiz', model: takipsiz });
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    await expect(page.getByText('Bu ay ödenen (teknoloji, ofis)')).toHaveCount(0);
+    const items = page.getByRole('region', { name: 'Ekim – Aralık 2026 kalemleri' });
+    await expect(items.locator('.opex-state').filter({ hasText: /^(Ödendi|Bekliyor)$/ })).toHaveCount(0);
+    await expect(items.locator('.opex-state', { hasText: 'Bu ay var' }).first()).toBeVisible();
+  });
+
   test('aylık ızgarasız eski Apps Script yanıtı: her ay etkin, varsayılan tutar; sayfa bozulmaz', async ({ page }) => {
     const old = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;
     for (const g of old.giderler) for (const f of ['aylikTl', 'aktif', 'ozel'] as const) delete (g as Partial<typeof g>)[f];

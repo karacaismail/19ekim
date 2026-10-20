@@ -8,15 +8,28 @@
 
 var OPEX_SAYFA = {
   pano: 'Pano',
-  giderler: 'Giderler',
-  personel: 'Personel',
+  giderler: 'Düzenli Giderler',
+  personel: 'Personel Giderleri',
   parametreler: 'Parametreler',
   tesvikler: 'Teşvikler',
   bordro: 'Bordro',
   hesap: 'Hesap',
 };
-/** Aylık ızgara: ilk sütun (Giderler P, Personel Q); 15 aylık plan (Ekim 2026 → Aralık 2027), her ay yan yana onay kutusu + tutar (30 sütun). */
-var OPEX_IZGARA = { giderler: 16, personel: 17, genislik: 30 };
+/** Kullanıcı sayfaları yeniden adlandırdı (2026-10-20); eski adla duran tablo da okunur ve kurulumda yeni ada taşınır. */
+var OPEX_ESKI_AD = { giderler: 'Giderler', personel: 'Personel' };
+
+/**
+ * Aylık ızgara: ilk sütun (Düzenli Giderler I — A:G girdi, H boşluk; Personel Giderleri Q — A:I girdi, K:O hesap);
+ * 15 aylık plan (Ekim 2026 → Aralık 2027), her ay yan yana onay kutusu + tutar (30 sütun).
+ */
+var OPEX_IZGARA = { giderler: 9, personel: 17, genislik: 30 };
+/** Girdi sütun sayısı (A’dan): Düzenli Giderler A:G, Personel Giderleri A:I. */
+var OPEX_GIRDI_SUTUN = { giderler: 7, personel: 9 };
+
+/** Sayfa: yeni adıyla, yoksa eski adıyla. */
+function opexSayfasi_(ss, anahtar) {
+  return ss.getSheetByName(OPEX_SAYFA[anahtar]) || (OPEX_ESKI_AD[anahtar] ? ss.getSheetByName(OPEX_ESKI_AD[anahtar]) : null);
+}
 var OPEX_ANAHTAR_OZELLIGI = 'OPEX_ERISIM_ANAHTARI';
 var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
 
@@ -26,10 +39,10 @@ var OPEX_DEGISIM_OZELLIGI = 'OPEX_SON_DEGISIM';
  * @param {string} rapor kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, bordro-2026, bordro-2027,
  *   personel-sutun, gider-sutun, tesvik-sutun, uyari
  * @param {A1:F200} parametreler Parametreler!A:F
- * @param {A1:I200} personel Personel!A:I
- * @param {A1:K400} giderler Giderler!A:K
+ * @param {A1:I200} personel 'Personel Giderleri'!A:I
+ * @param {A1:G400} giderler 'Düzenli Giderler'!A:G
  * @param {A1:I100} tesvikler 'Teşvikler'!A:I
- * @param {P1:AS400} giderAylari Giderler aylık ızgarası (ay ay etkin / tutar)
+ * @param {I1:AL400} giderAylari Düzenli Giderler aylık ızgarası (ay ay etkin / tutar)
  * @param {Q1:AT200} personelAylari Personel aylık ızgarası (ay ay etkin / tutar)
  * @return Tablo (ilk satır başlık)
  * @customfunction
@@ -48,8 +61,6 @@ function onOpen() {
     .addSeparator()
     .addItem('Web bağlantısı bilgisi', 'baglantiBilgisi')
     .addItem('Yeni erişim anahtarı üret', 'anahtariYenile')
-    .addSeparator()
-    .addItem('Yeni ay: “Bu ay ödendi” işaretlerini kaldır', 'odemeleriSifirla')
     .addToUi();
 }
 
@@ -109,20 +120,22 @@ function sabitZamanliEsit_(a, b) {
 /** Girdi sayfalarının ham değerleri (motorun beklediği biçim). */
 function girdileriOku_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var oku = function (ad, sutun, ilk) {
-    var sh = ss.getSheetByName(ad);
+  var oku = function (sh, sutun) {
     if (!sh) return [];
     var son = Math.max(sh.getLastRow(), 1);
-    if (ilk && sh.getMaxColumns() < ilk + sutun - 1) return [];
-    return sh.getRange(1, ilk || 1, son, sutun).getValues();
+    return sh.getRange(1, 1, son, sutun || Math.max(sh.getLastColumn(), 1)).getValues();
   };
+  // Giderler ve personel tüm sayfa okunur: motor sütunları başlık adıyla, ızgarayı ay başlıklarıyla bulur
+  // (sütun silinse veya yer değişse de doğru okunur).
+  var gider = oku(opexSayfasi_(ss, 'giderler'));
+  var personel = oku(opexSayfasi_(ss, 'personel'));
   return {
-    parametreler: oku(OPEX_SAYFA.parametreler, 6),
-    personel: oku(OPEX_SAYFA.personel, 9),
-    giderler: oku(OPEX_SAYFA.giderler, 11),
-    tesvikler: oku(OPEX_SAYFA.tesvikler, 9),
-    giderAylari: oku(OPEX_SAYFA.giderler, OPEX_IZGARA.genislik, OPEX_IZGARA.giderler),
-    personelAylari: oku(OPEX_SAYFA.personel, OPEX_IZGARA.genislik, OPEX_IZGARA.personel),
+    parametreler: oku(ss.getSheetByName(OPEX_SAYFA.parametreler), 6),
+    personel: personel,
+    giderler: gider,
+    tesvikler: oku(ss.getSheetByName(OPEX_SAYFA.tesvikler), 9),
+    giderAylari: gider,
+    personelAylari: personel,
   };
 }
 
@@ -185,19 +198,6 @@ function baglantiBilgisi() {
   SpreadsheetApp.getUi().showModalDialog(html, 'OPEX web bağlantısı');
 }
 
-/** Ay başında Giderler → “Bu ay ödendi” sütununu temizler (onaylı). */
-function odemeleriSifirla() {
-  var ui = SpreadsheetApp.getUi();
-  var cevap = ui.alert('Yeni ay', 'Giderler sayfasındaki tüm “Bu ay ödendi” işaretleri kaldırılsın mı?', ui.ButtonSet.YES_NO);
-  if (cevap !== ui.Button.YES) return;
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(OPEX_SAYFA.giderler);
-  var basliklar = sh.getRange(3, 1, 1, sh.getLastColumn()).getValues()[0];
-  var sutun = basliklar.indexOf(OpexMotor.BASLIKLAR.giderler.odendi) + 1;
-  var son = sh.getLastRow();
-  if (sutun < 1 || son < 4) return;
-  var aralik = sh.getRange(4, sutun, son - 3, 1);
-  aralik.setValues(aralik.getValues().map(function (r) { return [r[0] === '' ? '' : false]; }));
-}
 
 function anahtariYenile() {
   var ui = SpreadsheetApp.getUi();

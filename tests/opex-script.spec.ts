@@ -3,7 +3,9 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { expect, test } from '@playwright/test';
-import { buildInput, exampleTohum, izgara, IZGARA_BASLIKLARI } from './opex-fixture';
+import { buildInput, exampleTohum, izgara, IZGARA_BASLIKLARI, motor } from './opex-fixture';
+
+const OpexBasliklar = () => motor.BASLIKLAR;
 
 /**
  * Apps Script web uygulaması (apps-script/src/Sheets.js) Node’da, Google hizmetleri taklit edilerek: erişim anahtarı,
@@ -31,7 +33,9 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY) {
     const table = sheets[name];
     if (!table) return null;
     return {
+      getName: () => name,
       getLastRow: () => table.length,
+      getLastColumn: () => Math.max(1, ...table.map((r) => r.length)),
       getMaxColumns: () => Math.max(26, ...table.map((r) => r.length)),
       getRange: (r: number, c: number, nr: number, nc: number) => ({
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => table[r - 1 + i]?.[c - 1 + j] ?? '')),
@@ -139,13 +143,106 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
     const formul = (ctx.opexFormulu_ as (r: string) => string)('kpi');
-    expect(formul).toBe('=OPEX("kpi",Parametreler!A1:F,Personel!A1:I,Giderler!A1:K,\'Teşvikler\'!A1:I,Giderler!P1:AS,Personel!Q1:AT)');
+    expect(formul).toContain("'Düzenli Giderler'!I1:AL,'Personel Giderleri'!Q1:AT)");
     expect([...(ctx.izgaraBasliklari_ as () => string[])()]).toEqual(IZGARA_BASLIKLARI);
     expect((ctx.personelVarsayilani_ as (r: number, y: number) => string)(5, 2027)).toBe(
       '=IF($C5="Asgari ücret",ROUND(p_asgari_brut_2027*(1-p_sgk_isci-p_issizlik_isci),2),IF($E5="Hayır",$D5,ROUND($D5*(1+p_zam_orani),2)))',
     );
     expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2026)).toBe('=$F4');
     expect((ctx.giderVarsayilani_ as (r: number, y: number) => string)(4, 2027)).toMatch(/^=LET\(p,.*ROUND\(\$F4\*\(1\+IFS\(a="Kira",p_kira_artis_2027,a="Genel",p_genel_artis_2027,a="Kur",IF\(p="TRY",p_kur_artis_2027,0\)/);
+  });
+
+  test('yeniden adlandırılmış sayfalar okunur (Düzenli Giderler, Personel Giderleri); eski adlar da çalışır', () => {
+    const yeni = { Parametreler: SHEETS.Parametreler, 'Personel Giderleri': SHEETS.Personel, 'Düzenli Giderler': SHEETS.Giderler, Teşvikler: SHEETS.Teşvikler };
+    const a = loadScript(yeni).post(JSON.stringify({ anahtar: KEY })) as unknown as { model: { giderler: unknown[]; kisiler: unknown[] } };
+    const b = loadScript(SHEETS).post(JSON.stringify({ anahtar: KEY })) as unknown as { model: { giderler: unknown[]; kisiler: unknown[] } };
+    expect(a.model.giderler.length).toBe(exampleTohum.giderler.filter((r) => r[8] !== false).length);
+    expect(a.model.kisiler.length).toBe(b.model.kisiler.length);
+    expect(a.model.kisiler.length).toBeGreaterThan(0);
+  });
+
+  test('yeni yerleşim: Düzenli Giderler A:G + boşluk + I:AL ızgara ve Toplam satırı; Personel Q:AT; tüm sayfa okunur', () => {
+    const b = OpexBasliklar();
+    const giderBas = [b.giderler.kalem, b.giderler.hesap, b.giderler.kume, b.giderler.kategori, b.giderler.para, b.giderler.tutar, b.giderler.artis];
+    const satirlar = [
+      ['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira'],
+      ['Araç', '', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur'],
+    ];
+    const grid = izgara([{ aktif: { 'Kas 2026': false } }, {}]);
+    const sheet = [['Başlık'], ['Açıklama'], [...giderBas, ''], ...satirlar.map((r) => [...r, ''])].map((r, i) => [...r, ...(grid[i] ?? [])]);
+    sheet.push(['Toplam (₺)', '', '', '', '', '', '', '', '', 123]);
+    const { Giderler: _eski, ...digerleri } = SHEETS;
+    const sheets: Record<string, Table> = { ...digerleri, 'Düzenli Giderler': sheet };
+    const r = loadScript(sheets).post(JSON.stringify({ anahtar: KEY })) as unknown as { model: { giderler: { kalem: string; aylikTl: { y2026: number[] } }[]; ozet: { odeme: { takip: boolean } } } };
+    expect(r.model.giderler.map((g) => g.kalem)).toEqual(['Kira', 'Araç']);
+    expect(r.model.giderler[0].aylikTl.y2026.slice(9)).toEqual([1000, 0, 1000]);
+    expect(r.model.ozet.odeme.takip, '“Bu ay ödendi” sütunu yok').toBe(false);
+  });
+
+  test('Kurulum: yeni sayfa adları ve yerleşimle formül; alt toplam ve asgari ücret motordan (özel işlev); döviz biçimi', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const f = ctx as Record<string, (...a: unknown[]) => string>;
+    expect(f.opexFormulu_('kpi')).toBe(
+      "=OPEX(\"kpi\",Parametreler!A1:F,'Personel Giderleri'!A1:I,'Düzenli Giderler'!A1:G,'Teşvikler'!A1:I,'Düzenli Giderler'!I1:AL,'Personel Giderleri'!Q1:AT)",
+    );
+    // Alt toplam satırı: motor (özel işlev) hesaplar; aralık formülün bir üst satırında biter (döngüsel başvuru yok).
+    expect(f.toplamFormulu_('giderler')).toBe(
+      "=OPEX(\"gider-toplam\",Parametreler!A1:F,\"\",'Düzenli Giderler'!A1:INDEX('Düzenli Giderler'!G:G,ROW()-1),\"\",'Düzenli Giderler'!I1:INDEX('Düzenli Giderler'!AL:AL,ROW()-1),\"\")",
+    );
+    expect(f.toplamFormulu_('personel')).toBe(
+      "=OPEX(\"personel-toplam\",Parametreler!A1:F,'Personel Giderleri'!A1:INDEX('Personel Giderleri'!I:I,ROW()-1),\"\",\"\",\"\",'Personel Giderleri'!Q1:INDEX('Personel Giderleri'!AT:AT,ROW()-1))",
+    );
+    expect(f.asgariNetFormulu_(2027)).toBe('=OPEX("asgari-net-2027",Parametreler!A1:F)');
+    expect([f.paraBicimi_('USD'), f.paraBicimi_('eur'), f.paraBicimi_('TRY'), f.paraBicimi_('')]).toEqual(['[$$]#,##0.00', '[$€]#,##0.00', '#,##0.00 "₺"', '#,##0.00 "₺"']);
+  });
+
+  test('Kurulum: gizli eski sütunlar (H:N — Bu ay ödendi, Dahil, Fatura, Not, boşluk, hesap) yalnız beklenen içerikle kaldırılır', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const kaldir = ctx.eskiGiderSutunlariniKaldir_ as (sh: unknown) => boolean;
+    const sahte = (h: string[], m1: string) => {
+      const silinen: number[][] = [];
+      const sh = {
+        getName: () => 'Düzenli Giderler',
+        getMaxColumns: () => 45,
+        getRange: (r: number, c: number, nr = 1, nc = 1) => ({
+          getDisplayValues: () => [Array.from({ length: nc }, (_, j) => (r === 3 ? h[c - 1 + j] ?? '' : ''))],
+          getFormula: () => (r === 1 && c === 13 ? m1 : ''),
+        }),
+        deleteColumns: (c: number, n: number) => void silinen.push([c, n]),
+      };
+      return { sh, silinen };
+    };
+    const ESKI = ['Kalem', 'Hesap', 'Küme', 'Kategori', 'Para birimi', 'Tutar (aylık)', '2027 artış esası', 'Bu ay ödendi', 'Dahil', 'Fatura bağlantısı', 'Not', '', 'Ekim ₺', '2027 ort. ₺', '', 'Eki 2026'];
+    const eski = sahte(ESKI, '=OPEX("gider-sutun",Parametreler!A1:F)');
+    expect(kaldir(eski.sh)).toBe(true);
+    expect(eski.silinen).toEqual([[8, 7]]);
+    const yeni = sahte([...ESKI.slice(0, 7), '', 'Eki 2026', 'Eki 2026 tutar'], '');
+    expect(kaldir(yeni.sh), 'zaten kaldırılmış: dokunmaz').toBe(false);
+    expect(yeni.silinen).toEqual([]);
+    const yabanci = sahte([...ESKI.slice(0, 11), 'Benim notum', ...ESKI.slice(12)], '=OPEX("gider-sutun")');
+    expect(() => kaldir(yabanci.sh)).toThrow(/beklenen eski sütunlar/);
+    expect(yabanci.silinen).toEqual([]);
+  });
+
+  test('onEdit: Düzenli Giderler’de para birimi değişince o satırın tutarları o dövizle biçimlenir', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const bicimler: { r: number; c: number; f: string[][] }[] = [];
+    const sh = {
+      getName: () => 'Düzenli Giderler',
+      getRange: (r: number, c: number, nr = 1, nc = 1) => ({
+        getValues: () => Array.from({ length: nr }, () => Array.from({ length: nc }, () => (c === 5 ? 'EUR' : ''))),
+        getNumberFormats: () => Array.from({ length: nr }, () => Array.from({ length: nc }, () => 'General')),
+        setNumberFormats: (f: string[][]) => void bicimler.push({ r, c, f }),
+      }),
+    };
+    (ctx.onEdit as (e: unknown) => void)({ range: { getSheet: () => sh, getRow: () => 7, getColumn: () => 5, getLastColumn: () => 5, getNumRows: () => 1 } });
+    expect(bicimler.find((b) => b.c === 6)?.f).toEqual([['[$€]#,##0.00']]);
+    const izgara = bicimler.find((b) => b.c === 9)!.f[0];
+    expect(izgara.filter((_, j) => j % 2 === 1).every((x) => x === '[$€]#,##0.00')).toBe(true);
+    expect(izgara.filter((_, j) => j % 2 === 0).every((x) => x === 'General'), 'onay kutusu sütunları değişmez').toBe(true);
   });
 
   test('doGet yalnız sağlık bilgisi verir; anahtar üretimi 64 onaltılık hane', () => {

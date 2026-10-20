@@ -29,7 +29,14 @@ Kişisel veri (ad, ücret, hesap e-postaları, tutarlar) bu repoda yoktur. Gerç
 
 Gri sütunlar hesaplanır; beyaz hücreler düzenlenir.
 
-**Aylık ızgara** (15 aylık plan: Ekim–Aralık 2026 + 2027’nin 12 ayı; Giderler `P:AS`, Personel `Q:AT`): her ay
+**Sayfa adları ve yerleşim:** “Düzenli Giderler” (girdi `A:G`, ızgara `I:AL`) ve “Personel Giderleri” (girdi `A:I`,
+hesap `K:O`, ızgara `Q:AT`). Eski adlar (“Giderler”, “Personel”) da okunur; Kurulum yeni ada taşır ve Düzenli
+Giderler’deki eski “Bu ay ödendi / Dahil / Fatura bağlantısı / Not” sütunlarını yalnız beklenen içerikle kaldırır. Son
+veri satırının altındaki **Toplam (₺)** satırını kod (özel işlev) hesaplar: giderde satırın kuruyla ₺, yalnız işaretli
+aylar; personelde yazılan tutarların toplamı. Gider tutarları satırın para birimiyle ($, €, ₺) görünür; para birimi
+değişince biçim kendiliğinden güncellenir. Formül veya kod sonucu olan hücreler mavi yazılır.
+
+**Aylık ızgara** (15 aylık plan: Ekim–Aralık 2026 + 2027’nin 12 ayı): her ay
 yan yana iki sütun vardır. “Eki 2026” onay kutusu o ay satırın gider sayılıp sayılmadığını, “Eki 2026 tutar” o ayın
 tutarını belirler. Kurulum tutar hücrelerine varsayılan formülü yazar; her satırda her ay rakam görünür (2026: Tutar; 2027:
 zam veya artış esasıyla). Bir aya farklı tutar yazmak için hücrenin üzerine yazın (turuncu zemin = elle yazılmış, o aya

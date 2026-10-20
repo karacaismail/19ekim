@@ -13,7 +13,7 @@ var OpexMotor = (function () {
   'use strict';
 
   var SEMA = 1;
-  var SURUM = '2026-10-20.3';
+  var SURUM = '2026-10-20.4';
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var KISA_AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   var YILLAR = [2026, 2027];
@@ -227,6 +227,11 @@ var OpexMotor = (function () {
     return null;
   }
 
+  /** Alt toplam satırı (ilk sütun “Toplam …”) kalem/kişi değildir. */
+  function toplamSatiri(ad) {
+    return metin(ad).toLocaleLowerCase('tr-TR').indexOf('toplam') === 0;
+  }
+
   /** Ayın tutarı varsayılandan farklı mı (Sheets formülü varsayılanı yazar; elle yazılan farklı tutar özeldir). */
   function farkli(v, varsayilan) {
     return v !== null && Math.abs(v - varsayilan) > 0.005;
@@ -273,8 +278,9 @@ var OpexMotor = (function () {
         });
         if (!bos) sonuc.push(nesne);
       }
-      // Hizalı hesap sütunları (Sheets) başlığın sayfadaki satırını bilmelidir.
+      // Hizalı hesap sütunları (Sheets) başlığın sayfadaki satırını bilmelidir; isteğe bağlı sütunların varlığı da.
       sonuc.baslikSatiri = b + 1;
+      sonuc.sutunlar = sutun;
       return sonuc;
     }
     if (rows.length) uyarilar.push(ad + ' sayfasında başlık satırı bulunamadı (' + zorunlu.map(function (k) { return '“' + basliklar[k] + '”'; }).join(', ') + ').');
@@ -634,7 +640,7 @@ var OpexMotor = (function () {
     var gorulenAd = {};
     (girdi && girdi.personel ? tabloyuOku(girdi.personel, 'personel', uyarilar) || [] : []).forEach(function (s) {
       var ad = metin(s.ad);
-      if (!ad) return;
+      if (!ad || toplamSatiri(ad)) return;
       if (gorulenAd[ad]) uyarilar.push('Personel “' + ad + '” birden çok satırda (' + gorulenAd[ad] + ' ve ' + s.satir + '); ayırt etmek için adı değiştirin.');
       gorulenAd[ad] = gorulenAd[ad] || s.satir;
       if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
@@ -669,6 +675,7 @@ var OpexMotor = (function () {
       // boş ya da varsayılana eşit (Sheets formülü) ay varsayılan (2027’de zamlı, asgari ücretlide o yılın asgarisi).
       var pa = satirAylari(ayP, s.satir);
       var kisiOzel = { 2026: [], 2027: [] };
+      var kisiTutar = { 2026: [], 2027: [] };
       var aylikTutar = function (yil, varsayilan) {
         var asgari = esas === 'Asgari ücret';
         var deger = asgari ? cfg[yil].asgariNet : varsayilan;
@@ -676,6 +683,7 @@ var OpexMotor = (function () {
           var v = pa.tutar[yil][i];
           var ozel = on && farkli(v, deger);
           kisiOzel[yil][i] = ozel;
+          kisiTutar[yil][i] = !on ? 0 : ozel ? Math.max(v, 0) : deger;
           if (!on || (ozel && v <= 0)) return null;
           if (ozel) return v;
           return asgari ? 'asgari' : deger;
@@ -697,6 +705,8 @@ var OpexMotor = (function () {
         not: kisi.not,
         aktif: { y2026: pa.aktif[2026], y2027: pa.aktif[2027] },
         ozel: { y2026: kisiOzel[2026], y2027: kisiOzel[2027] },
+        // Ayın yazılan (veya varsayılan) tutarı: ücret esasına göre net/brüt/fatura; işaretsiz ay 0.
+        aylikTutar: { y2026: kisiTutar[2026], y2027: kisiTutar[2027] },
         y2026: { aylar: y26.aylar, toplam: y26.toplam, tesvikler: y26.tesvikler },
         y2027: { aylar: y27.aylar, toplam: y27.toplam, tesvikler: y27.tesvikler },
       });
@@ -705,9 +715,12 @@ var OpexMotor = (function () {
     // Giderler
     var artisOrani = { Kur: p.kur_artis_2027, Kira: p.kira_artis_2027, Genel: p.genel_artis_2027, Yok: 0 };
     var giderler = [];
-    (girdi && girdi.giderler ? tabloyuOku(girdi.giderler, 'giderler', uyarilar) || [] : []).forEach(function (s) {
+    var giderTablosu = girdi && girdi.giderler ? tabloyuOku(girdi.giderler, 'giderler', uyarilar) : null;
+    // “Bu ay ödendi” sütunu kaldırılmışsa ödeme takibi yoktur (sayfa ve pano ödenen/bekleyen göstermez).
+    var odemeTakibi = !!(giderTablosu && giderTablosu.sutunlar && giderTablosu.sutunlar.odendi >= 0);
+    (giderTablosu || []).forEach(function (s) {
       var kalem = metin(s.kalem);
-      if (!kalem) return;
+      if (!kalem || toplamSatiri(kalem)) return;
       if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
       var kume = kumeKodu(s.kume);
       if (!kume) {
@@ -881,6 +894,7 @@ var OpexMotor = (function () {
         yil2027: yil27,
         degisim: aylikOrt26.toplam ? aylikOrt27.toplam / aylikOrt26.toplam - 1 : 0,
         odeme: {
+          takip: odemeTakibi,
           odenen: r2(topla(odenen.map(function (g) { return g.aylikTl[yilAnahtar][ayIdx]; }))),
           bekleyen: r2(topla(bekleyen.map(function (g) { return g.aylikTl[yilAnahtar][ayIdx]; }))),
           adetOdenen: odenen.length,
@@ -952,8 +966,8 @@ var OpexMotor = (function () {
           ['Zam esası', m.zam.esas],
           ['USD/TRY', m.kur.USD.deger],
           ['EUR/TRY', m.kur.EUR.deger],
-          ['Bu ay ödenen', m.ozet.odeme.odenen],
-          ['Bu ay bekleyen', m.ozet.odeme.bekleyen],
+          ['Bu ay ödenen', m.ozet.odeme.takip === false ? '—' : m.ozet.odeme.odenen],
+          ['Bu ay bekleyen', m.ozet.odeme.takip === false ? '—' : m.ozet.odeme.bekleyen],
           ['Hesaplandı', m.hesaplandi],
           ['Uyarı sayısı', m.uyarilar.length],
         ];
@@ -1041,11 +1055,40 @@ var OpexMotor = (function () {
           m.plan.aylar.map(function (a) { return [a.ad, a.teknoloji, a.ofis, a.insan, a.toplam]; }),
           [[m.plan.aylar.length + ' ay toplamı', m.plan.toplam.teknoloji, m.plan.toplam.ofis, m.plan.toplam.insan, m.plan.toplam.toplam]],
         );
+      case 'gider-toplam':
+      case 'personel-toplam':
+        return altToplam(m, ad, girdi);
+      case 'asgari-net-2026':
+      case 'asgari-net-2027':
+        return [[m.asgari[ad === 'asgari-net-2027' ? 'y2027' : 'y2026'].net]];
       case 'uyari':
         return [['Uyarılar']].concat(m.uyarilar.length ? m.uyarilar.map(function (u) { return [u]; }) : [['Uyarı yok.']]);
       default:
-        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, uyari.']];
+        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, asgari-net-2026, asgari-net-2027, uyari.']];
     }
+  }
+
+  /**
+   * Aylık ızgaranın alt toplam satırı (tek satır, ızgara genişliğinde): her “… tutar” sütununa o ayın toplamı.
+   * Gider: ₺ (satırın kuru, işaretli ay, özel tutar; sayfadaki toplamlarla aynı). Personel: yazılan tutarların toplamı.
+   */
+  function altToplam(m, ad, girdi) {
+    var personel = ad === 'personel-toplam';
+    var izgara = ayIzgarasi(girdi && (personel ? girdi.personelAylari : girdi.giderAylari));
+    if (!izgara) return [['']];
+    var genislik = 0;
+    izgara.rows.forEach(function (r) { genislik = Math.max(genislik, (r || []).length); });
+    var satir = [];
+    for (var j = 0; j < genislik; j++) satir.push('');
+    izgara.sutunlar.forEach(function (c) {
+      if (!c.tutar) return;
+      var y = 'y' + c.yil;
+      var toplam = personel
+        ? topla(m.kisiler.map(function (k) { return k.aylikTutar[y][c.ay]; }))
+        : topla(m.giderler.map(function (g) { return g.aylikTl[y][c.ay]; }));
+      satir[c.j] = r2(toplam);
+    });
+    return [satir];
   }
 
   /** Girdi sayfasının satırlarıyla hizalı hesap sütunları (aynı satır numarası). */

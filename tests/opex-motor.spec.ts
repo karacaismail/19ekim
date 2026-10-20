@@ -376,6 +376,54 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(mm.giderler[0].aylikTl.y2027.slice(1, 5)).toEqual([mm.giderler[0].tl2027, 0, 0, mm.giderler[0].tl2027]);
   });
 
+  test('Toplam satırı (A: “Toplam (₺)”) kalem veya kişi sayılmaz; uyarı vermez', () => {
+    const mm = buildModel({
+      personel: [NET('Kişi A', 50000), ['Toplam (₺)', '', '', '', '', '', '', '', '']],
+      giderler: [...GIDERLER, ['Toplam (₺)', '', '', '', '', '', '', '', '', '', '']],
+    });
+    expect(mm.giderler.map((g) => g.kalem)).toEqual(['Kira', 'Araç']);
+    expect(mm.kisiler.map((k) => k.ad)).toEqual(['Kişi A']);
+    expect(mm.uyarilar).toEqual([]);
+  });
+
+  test('alt toplam raporları: ızgara sütunlarıyla hizalı; gider ₺ (kur, işaretli ay), personel yazılan tutar', () => {
+    const input = buildInput({
+      personel: [NET('Kişi A', 50000), SERBEST, NET('Asgari', '', 'Asgari ücret')],
+      giderler: GIDERLER,
+      giderAylari: [{ aktif: { 'Kas 2026': false } }, { tutar: { 'Oca 2027': 150 } }],
+      personelAylari: [{ tutar: { 'Kas 2026': 60000 } }, { aktif: { 'Ara 2026': false } }, {}],
+    });
+    const mm = motor.hesapla(input, { simdi: NOW });
+    const g = motor.rapor(mm, 'gider-toplam', input);
+    expect(g.length).toBe(1);
+    expect(g[0].length, 'ızgara genişliği kadar').toBe(input.giderAylari![2].length);
+    const [kira, arac] = mm.giderler;
+    const kolon = (h: string) => (input.giderAylari![2] as string[]).indexOf(h);
+    expect(g[0][kolon('Eki 2026')], 'onay kutusu sütunu boş').toBe('');
+    expect(g[0][kolon('Eki 2026 tutar')]).toBe(Math.round((kira.aylikTl.y2026[9] + arac.aylikTl.y2026[9]) * 100) / 100);
+    expect(g[0][kolon('Kas 2026 tutar')]).toBe(arac.aylikTl.y2026[10]);
+    expect(g[0][kolon('Oca 2027 tutar')]).toBe(Math.round((kira.aylikTl.y2027[0] + arac.aylikTl.y2027[0]) * 100) / 100);
+    const p = motor.rapor(mm, 'personel-toplam', input);
+    const pk = (h: string) => (input.personelAylari![2] as string[]).indexOf(h);
+    const asgariNet = mm.asgari.y2026.net;
+    expect(p[0][pk('Eki 2026 tutar')]).toBe(Math.round((50000 + 72000 + asgariNet) * 100) / 100);
+    expect(p[0][pk('Kas 2026 tutar')]).toBe(Math.round((60000 + 72000 + asgariNet) * 100) / 100);
+    expect(p[0][pk('Ara 2026 tutar')], 'freelancer Aralık işaretsiz').toBe(Math.round((50000 + asgariNet) * 100) / 100);
+    expect(motor.rapor(mm, 'asgari-net-2027')).toEqual([[mm.asgari.y2027.net]]);
+  });
+
+  test('“Bu ay ödendi” sütunu yoksa ödeme takibi kapalı; Sheets göstergesinde “—”', () => {
+    const b = motor.BASLIKLAR.giderler;
+    const input = buildInput({ personel: [], giderler: [] });
+    input.giderler = [['Başlık'], ['Açıklama'], [b.kalem, b.hesap, b.kume, b.kategori, b.para, b.tutar, b.artis], ['Kira', '', 'Ofis ve işletme', 'Kira', 'TRY', 1000, 'Kira']];
+    const mm = motor.hesapla(input, { simdi: NOW });
+    expect(mm.giderler).toHaveLength(1);
+    expect(mm.ozet.odeme.takip).toBe(false);
+    const kpi = motor.rapor(mm, 'kpi');
+    expect(kpi.find((r) => r[0] === 'Bu ay ödenen')?.[1]).toBe('—');
+    expect(buildModel().ozet.odeme.takip, 'sütun varsa takip açık').toBe(true);
+  });
+
   test('ızgara yoksa her ay etkin ve varsayılan tutar (eski Sheets kurulumu)', () => {
     for (const g of m.giderler) {
       expect(g.aylikTl.y2026).toEqual(Array(12).fill(g.tl));

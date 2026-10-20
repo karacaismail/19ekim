@@ -152,7 +152,8 @@ export interface OpexModel {
     yil2026: Kume3;
     yil2027: Kume3;
     degisim: number;
-    odeme: { odenen: number; bekleyen: number; adetOdenen: number; adetBekleyen: number };
+    /** takip: Sheets’te “Bu ay ödendi” sütunu var mı (yoksa ödenen/bekleyen gösterilmez; eski yanıtta yok = var). */
+    odeme: { takip?: boolean; odenen: number; bekleyen: number; adetOdenen: number; adetBekleyen: number };
   };
   kumeler: { kod: KumeKod; ad: string }[];
   kategoriler: { kume: KumeKod; kategori: string; buAy: number; aylik2027: number }[];
