@@ -78,6 +78,7 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
         return { getValues: () => Array.from({ length: Math.max(son, 1) }, (_, i) => Array.from({ length: genislik }, (_, j) => t[i]?.[j] ?? '')) };
       },
       getMaxColumns: () => Math.max(26, ...oku(name)!.map((r) => r.length)),
+      getMaxRows: () => Math.max(1000, oku(name)!.length),
       getRange: (r: number, c: number, nr = 1, nc = 1) => ({
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => oku(name)![r - 1 + i]?.[c - 1 + j] ?? '')),
         setValues: (v: unknown[][]) => {
@@ -124,7 +125,18 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
   };
   if (hizmet.onbellek) {
     const c = hizmet.onbellek;
-    ctx.CacheService = { getScriptCache: () => ({ get: (k: string) => c.get(k) ?? null, put: (k: string, v: string) => void c.set(k, v) }) };
+    ctx.CacheService = {
+      getScriptCache: () => ({
+        get: (k: string) => c.get(k) ?? null,
+        put: (k: string, v: string) => void c.set(k, v),
+        getAll: (ks: string[]) => Object.fromEntries(ks.filter((k) => c.has(k)).map((k) => [k, c.get(k)!])),
+        putAll: (o: Record<string, string>) => Object.entries(o).forEach(([k, v]) => {
+          // Apps Script: değer başına en çok 100 KB.
+          if (Buffer.byteLength(v, 'utf8') > 100 * 1024) throw new Error('Argument too large');
+          c.set(k, v);
+        }),
+      }),
+    };
   }
   if (hizmet.mesgul) {
     const mesgul = hizmet.mesgul;
@@ -767,6 +779,36 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
       const gecen = (g.opexSimdi_ as () => number)() - once;
       expect(gecen).toBeGreaterThanOrEqual(20000);
       expect(gecen).toBeLessThan(20000 + 1000);
+    });
+
+    test('düzenlemede hesaplanan model önbellekten gönderilir (parçalı, 100 KB sınırı); veri isteği yeniden hesaplamaz', () => {
+      const onbellek = new Map<string, string>();
+      const s = yazici(yeniYerlesim(), { onbellek });
+      s.yaz();
+      expect(Number(JSON.parse(onbellek.get('opex_model')!).parca)).toBeGreaterThanOrEqual(1);
+      const motor = s.ctx.OpexMotor as { hesapla: (...a: unknown[]) => unknown };
+      const asil = motor.hesapla;
+      let hesap = 0;
+      motor.hesapla = (...a: unknown[]) => { hesap += 1; return asil(...a); };
+      const r = s.post(JSON.stringify({ anahtar: KEY })) as unknown as { model: { kisiler: { ad: string }[] }; ozet: string };
+      expect(hesap, 'model önbellekten').toBe(0);
+      expect(r.model.kisiler.map((k) => k.ad)).toContain('Örnek Uzman');
+      // Önbellek boşalınca (Apps Script atabilir) istek modeli kendisi hesaplar.
+      onbellek.delete('opex_model_0');
+      const r2 = s.post(JSON.stringify({ anahtar: KEY })) as unknown as { model: { kisiler: unknown[] } };
+      expect(hesap).toBe(1);
+      expect(r2.model.kisiler.length).toBe(r.model.kisiler.length);
+    });
+
+    test('okuma sınırı (300 satır) dolarsa sayfanın tüm dolu alanı okunur', () => {
+      const sheets = yeniYerlesim();
+      const g = sheets['Giderler TEKNOLOJİ'];
+      const toplam = g.pop()!;
+      while (g.length < 340) g.push(['Ek kalem ' + g.length, '', 'Teknoloji', 'Yapay Zekâ', 'TRY', 1, 'Genel']);
+      g.push(toplam);
+      const s = yazici(sheets);
+      const girdi = (s.ctx.girdileriOku_ as () => { giderler: unknown[][] })();
+      expect(girdi.giderler.length).toBe(341);
     });
 
     test('kur değişince (GOOGLEFINANCE, onEdit yok) veri isteği Sheets hesaplarını yazar', () => {

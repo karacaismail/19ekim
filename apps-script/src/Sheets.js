@@ -145,6 +145,48 @@ function ozetDuyur_(ozet) {
   }
 }
 
+/** Model önbellekte parçalı (değer başına sınır 100 KB; parça ≤ 45 000 karakter, UTF-8’de en çok 90 KB). */
+var OPEX_MODEL_ONBELLEK = 'opex_model';
+var OPEX_MODEL_PARCA = 45000;
+
+/**
+ * Hesaplanan modeli (JSON) önbelleğe yazar ve yeni özeti duyurur: bekleyen web isteği değişikliği görünce modeli
+ * önbellekten alır (girdileri yeniden okumaz). Önbellek yoksa ya da yazılamazsa istek modeli kendisi hesaplar.
+ */
+function modelDuyur_(anahtar, ozet, model) {
+  var c = onbellek_();
+  if (c) {
+    try {
+      var metin = JSON.stringify(model);
+      var degerler = {};
+      var n = Math.ceil(metin.length / OPEX_MODEL_PARCA);
+      for (var i = 0; i < n; i++) degerler[OPEX_MODEL_ONBELLEK + '_' + i] = metin.slice(i * OPEX_MODEL_PARCA, (i + 1) * OPEX_MODEL_PARCA);
+      degerler[OPEX_MODEL_ONBELLEK] = JSON.stringify({ anahtar: anahtar, parca: n, uzunluk: metin.length });
+      c.putAll(degerler, 21600);
+    } catch (hata) {
+      console.log('model önbelleği: ' + hata);
+    }
+  }
+  ozetDuyur_(ozet);
+}
+
+/** Önbellekteki model (JSON metni) bu yazım anahtarına aitse; değilse ya da eksikse null. */
+function modelOnbellekten_(anahtar) {
+  var c = onbellek_();
+  if (!c) return null;
+  try {
+    var bilgi = JSON.parse(c.get(OPEX_MODEL_ONBELLEK) || 'null');
+    if (!bilgi || bilgi.anahtar !== anahtar || !(bilgi.parca > 0)) return null;
+    var adlar = [];
+    for (var i = 0; i < bilgi.parca; i++) adlar.push(OPEX_MODEL_ONBELLEK + '_' + i);
+    var parcalar = c.getAll(adlar);
+    var metin = adlar.map(function (ad) { return parcalar[ad] || ''; }).join('');
+    return metin.length === bilgi.uzunluk ? metin : null;
+  } catch (hata) {
+    return null;
+  }
+}
+
 /** Betik kilidi: alınırsa kilit, meşgulse false; kilit hizmeti yoksa null (kilitsiz sürer). */
 function kilitAl_(ms) {
   var kilit;
@@ -298,7 +340,6 @@ function hesaplariYaz_(secenek) {
     var simdi = new Date();
     var girdi = girdileriOku_(sayfalar);
     var ozet = ozetAl_(girdi);
-    ozetDuyur_(ozet);
     gecen('oku');
     var p = ozellikler_();
     var kayit = jsonOzellik_(p, OPEX_YAZIM_OZELLIGI);
@@ -308,7 +349,10 @@ function hesaplariYaz_(secenek) {
     var modelAl = function () { return model || (model = OpexMotor.hesapla(girdi, { simdi: simdi })); };
     var bloklar = hesapBloklari_(sayfalar, girdi, modelAl);
     var cakisan = bloklar.filter(function (b) { return alanCakisir_(b, s.alan); }).map(function (b) { return b.ad; });
-    if (!zorla && kayit.anahtar === anahtar && !cakisan.length) return { durum: 'guncel', yazilan: [] };
+    if (!zorla && kayit.anahtar === anahtar && !cakisan.length) {
+      ozetDuyur_(ozet);
+      return { durum: 'guncel', yazilan: [] };
+    }
     var izler = zorla ? {} : kayit.izler || {};
     // Önce değişen bloklar ve sayfaların son satırı (okumalar), sonra yalnız yazımlar.
     var degisen = [];
@@ -318,6 +362,8 @@ function hesaplariYaz_(secenek) {
       var iz = ozetMetni_(b.satir + ':' + b.sutun + ':' + JSON.stringify(degerler), 16);
       if (izler[b.ad] !== iz || cakisan.indexOf(b.ad) >= 0) degisen.push({ b: b, degerler: degerler, iz: iz });
     });
+    // Sayfa için model önbelleğe, sonra yeni özet duyurulur: bekleyen istek Sheets yazımını beklemeden modeli alır.
+    modelDuyur_(anahtar, ozet, modelAl());
     gecen('hesap');
     var props = PropertiesService.getScriptProperties();
     var degisim = degisimKaydi_(p, ozet);
@@ -327,21 +373,26 @@ function hesaplariYaz_(secenek) {
       var once = {};
       Object.keys(izler).forEach(function (ad) { once[ad] = izler[ad]; });
       degisen.forEach(function (x) { delete once[x.b.ad]; });
-      ilkKayit[OPEX_YAZIM_OZELLIGI] = JSON.stringify({ anahtar: null, izler: once, yaziyor: true, zaman: simdi.toISOString() });
+      ilkKayit[OPEX_YAZIM_OZELLIGI] = JSON.stringify({ anahtar: null, izler: once, yukseklik: kayit.yukseklik || {}, yaziyor: true, zaman: simdi.toISOString() });
     }
     if (Object.keys(ilkKayit).length) props.setProperties(ilkKayit);
+    // Kısalan bloğun altı temizlenir: önceki yükseklik kayıtlıysa ondan, değilse sayfanın son dolu satırından (okuma).
+    var yukseklik = zorla ? {} : kayit.yukseklik || {};
     var sonSatir = {};
     degisen.forEach(function (x) {
-      if (!x.b.tekSatir && !Object.prototype.hasOwnProperty.call(sonSatir, x.b.sayfa)) sonSatir[x.b.sayfa] = x.b.sh.getLastRow();
+      if (x.b.tekSatir || yukseklik[x.b.ad] !== undefined || Object.prototype.hasOwnProperty.call(sonSatir, x.b.sayfa)) return;
+      sonSatir[x.b.sayfa] = x.b.sh.getLastRow();
     });
     degisen.forEach(function (x) {
-      blokYaz_(x.b, x.degerler, sonSatir[x.b.sayfa] || 0);
+      var onceki = yukseklik[x.b.ad];
+      blokYaz_(x.b, x.degerler, onceki !== undefined ? x.b.satir + onceki - 1 : sonSatir[x.b.sayfa] || 0);
       izler[x.b.ad] = x.iz;
+      yukseklik[x.b.ad] = x.degerler.length;
     });
     // Kilit bırakılmadan yazımlar tamamlanır (sonraki çalıştırma yeni değerleri okur).
     if (degisen.length) SpreadsheetApp.flush();
     gecen('yaz');
-    props.setProperty(OPEX_YAZIM_OZELLIGI, JSON.stringify({ anahtar: anahtar, izler: izler, zaman: simdi.toISOString() }));
+    props.setProperty(OPEX_YAZIM_OZELLIGI, JSON.stringify({ anahtar: anahtar, izler: izler, yukseklik: yukseklik, zaman: simdi.toISOString() }));
     var yazilan = degisen.map(function (x) { return x.b.ad; });
     gecen('son');
     console.log('hesap yazımı ' + JSON.stringify({ ms: sure, bloklar: yazilan }));
@@ -461,6 +512,9 @@ function doPost(e) {
     return json_(temel);
   }
   temel.tablo = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+  // Düzenlemede hesaplanan model önbellekteyse olduğu gibi gönderilir (girdi yeniden hesaplanmaz).
+  var hazir = modelOnbellekten_(yazimAnahtari_(ozet, simdi));
+  if (hazir) return ContentService.createTextOutput(JSON.stringify(temel).slice(0, -1) + ',"model":' + hazir + '}').setMimeType(ContentService.MimeType.JSON);
   temel.model = OpexMotor.hesapla(girdi, { simdi: simdi });
   return json_(temel);
 }
@@ -488,15 +542,32 @@ function hesapAlanlariniAyikla_(rows, sutunlar) {
   });
 }
 
+/** Girdi okuması en çok bu kadar satır (açık aralık); dolarsa sayfanın tüm dolu alanı okunur. */
+var OPEX_OKUMA_SATIR = 300;
+
+/**
+ * Sayfanın değerleri, sondaki boş satırlar atılır. Açık aralıkla tek çağrı (ölçüm 2026-10-20: dolu alanı bulan
+ * getDataRange sayfa başına 200–970 ms, açık aralık ≈100–150 ms). `sutun`: okunacak sütun sayısı (yoksa tüm sütunlar).
+ */
+function sayfaDegerleri_(sh, sutun) {
+  if (!sh) return [];
+  var enCok = sh.getMaxRows();
+  var satir = Math.min(enCok, OPEX_OKUMA_SATIR);
+  var v = sh.getRange(1, 1, Math.max(satir, 1), sutun || sh.getMaxColumns()).getValues();
+  var son = v.length;
+  var bos = function (x) { return x === '' || x === null; };
+  while (son > 1 && v[son - 1].every(bos)) son--;
+  if (son === satir && satir < enCok) {
+    v = sh.getDataRange().getValues();
+    return sutun ? v.map(function (r) { return r.slice(0, sutun); }) : v;
+  }
+  return v.slice(0, son);
+}
+
 /** Girdi sayfalarının ham değerleri (motorun beklediği biçim). */
 function girdileriOku_(sayfalar) {
   var ss = sayfalar || sayfaHaritasi_(SpreadsheetApp.getActiveSpreadsheet());
-  // Sayfa başına tek okuma (dolu alan): her Sheets çağrısı bir gidiş-dönüştür.
-  var oku = function (sh, sutun) {
-    if (!sh) return [];
-    var v = sh.getDataRange().getValues();
-    return sutun ? v.map(function (r) { return r.slice(0, sutun); }) : v;
-  };
+  var oku = function (sh, sutun) { return sayfaDegerleri_(sh, sutun); };
   // Giderler ve personel tüm sayfa okunur: motor sütunları başlık adıyla, ızgarayı ay başlıklarıyla bulur
   // (sütun silinse veya yer değişse de doğru okunur).
   var tekSayfa = opexSayfasi_(ss, 'teknoloji');
