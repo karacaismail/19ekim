@@ -535,6 +535,19 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(yerinde.hucre).toEqual({ A2: 'yeni açıklama', B2: '' });
   });
 
+  test('Parametreler biçimi: yıl binlik ayraçsız tam sayı, diğer türler kendi biçiminde', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const bicim = ctx.parametreBicimi_ as (t: unknown) => string;
+    const tanim = (anahtar: string) => motor.PARAMETRE_TANIMLARI.find((t: { anahtar: string }) => t.anahtar === anahtar);
+    expect(bicim(tanim('rapor_yili'))).toBe('0');
+    expect(bicim(tanim('rapor_ayi'))).toBe('#,##0.##');
+    expect(bicim(tanim('kur_usd'))).toBe('#,##0.0000 "₺"');
+    expect(bicim(tanim('zam_orani'))).toBe('0.00%');
+    expect(bicim(tanim('damga'))).toBe('0.000%');
+    expect(bicim(tanim('zam_esasi'))).toBe('@');
+  });
+
   test('onEdit: Düzenli Giderler’de para birimi değişince o satırın tutarları o dövizle biçimlenir', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);

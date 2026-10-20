@@ -518,6 +518,15 @@ function korumalariKaldir_(sh) {
 
 /* ---------- Parametreler ---------- */
 
+/** Parametre Değer hücresinin sayı biçimi. Yıl binlik ayraçsız (tr_TR’de “2.026” değil “2026”). */
+function parametreBicimi_(t) {
+  if (t.tur === 'oran') return t.anahtar === 'damga' ? OPEX_BICIM.binde : OPEX_BICIM.oran;
+  if (t.tur === 'tutar') return OPEX_BICIM.tl;
+  if (t.tur === 'kur') return OPEX_BICIM.kur;
+  if (t.tur === 'sayi') return t.birim === 'yıl' ? OPEX_BICIM.tamsayi : OPEX_BICIM.sayi;
+  return '@';
+}
+
 function parametreleriKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.parametreler);
   var b = OpexMotor.BASLIKLAR.parametreler;
@@ -562,8 +571,7 @@ function parametreleriKur_(ss) {
     if (adlar[ad]) adlar[ad].setRange(sh.getRange(r, 3));
     else ss.setNamedRange(ad, sh.getRange(r, 3));
     var hucre = sh.getRange(r, 3);
-    var bicim = t.tur === 'oran' ? (t.anahtar === 'damga' ? OPEX_BICIM.binde : OPEX_BICIM.oran) : t.tur === 'tutar' ? OPEX_BICIM.tl : t.tur === 'kur' ? OPEX_BICIM.kur : t.tur === 'sayi' ? OPEX_BICIM.sayi : '@';
-    hucre.setNumberFormat(bicim).setFontWeight('bold').setHorizontalAlignment(t.tur === 'metin' || t.tur === 'liste' ? 'left' : 'right');
+    hucre.setNumberFormat(parametreBicimi_(t)).setFontWeight('bold').setHorizontalAlignment(t.tur === 'metin' || t.tur === 'liste' ? 'left' : 'right');
     if (t.tur === 'liste') hucre.setDataValidation(liste_(t.secenekler));
     if (t.formul) hucre.setBackground(OPEX_STIL.hesap);
   });
