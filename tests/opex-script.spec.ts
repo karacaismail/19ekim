@@ -69,6 +69,14 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
         return 0;
       },
       getLastColumn: () => Math.max(1, ...oku(name)!.map((r) => r.length)),
+      // Dolu alan (A1’den son dolu satır ve sütuna), Sheets gibi dikdörtgen ve boşlar ''.
+      getDataRange: () => {
+        const t = oku(name)!;
+        let son = 0;
+        t.forEach((r, i) => { if (dolu(r)) son = i + 1; });
+        const genislik = Math.max(1, ...t.slice(0, son).map((r) => r.reduce((n, v, j) => (v !== '' && v !== undefined ? j + 1 : n), 0)));
+        return { getValues: () => Array.from({ length: Math.max(son, 1) }, (_, i) => Array.from({ length: genislik }, (_, j) => t[i]?.[j] ?? '')) };
+      },
       getMaxColumns: () => Math.max(26, ...oku(name)!.map((r) => r.length)),
       getRange: (r: number, c: number, nr = 1, nc = 1) => ({
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => oku(name)![r - 1 + i]?.[c - 1 + j] ?? '')),
@@ -96,7 +104,7 @@ function loadScript(sheets: Record<string, Table>, key: string | null = KEY, hiz
   const ctx: Record<string, unknown> = {
     console: { log: () => undefined },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k: string) => props.get(k) ?? null, setProperty: (k: string, v: string) => void props.set(k, v) }) },
-    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: sheet, getUrl: () => 'https://docs.google.com/spreadsheets/d/ornek/edit' }) },
+    SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: sheet, getUrl: () => 'https://docs.google.com/spreadsheets/d/ornek/edit' }), flush: () => undefined },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: (s: string) => ({ body: s, setMimeType() { return this; } }) },
     Utilities: {
       DigestAlgorithm: { SHA_256: 'sha256' },

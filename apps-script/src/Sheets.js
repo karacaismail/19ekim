@@ -221,14 +221,15 @@ function hesapBloklari_(ss, girdi, model) {
   return bloklar;
 }
 
-/** Bloğu yazar; blok kısaldıysa altındaki eski satırlar (yalnız bloğun sütunları) temizlenir. */
-function blokYaz_(b, degerler, sonSatir) {
-  var ad = b.sh.getName();
-  if (!Object.prototype.hasOwnProperty.call(sonSatir, ad)) sonSatir[ad] = b.sh.getLastRow();
+/**
+ * Bloğu yazar; blok kısaldıysa altındaki eski satırlar (yalnız bloğun sütunları) temizlenir. `son`: sayfanın yazımdan
+ * önceki son dolu satırı (okumalar yazımlardan önce yapılır: araya okuma girmeyince Sheets yazımları toplu gönderir).
+ */
+function blokYaz_(b, degerler, son) {
   if (degerler.length) b.sh.getRange(b.satir, b.sutun, degerler.length, b.genislik).setValues(degerler);
   if (b.tekSatir) return;
   var bas = b.satir + degerler.length;
-  if (sonSatir[ad] >= bas) b.sh.getRange(bas, b.sutun, sonSatir[ad] - bas + 1, b.genislik).clearContent();
+  if (son >= bas) b.sh.getRange(bas, b.sutun, son - bas + 1, b.genislik).clearContent();
 }
 
 /**
@@ -238,32 +239,48 @@ function blokYaz_(b, degerler, sonSatir) {
  */
 function hesaplariYaz_(secenek) {
   var s = secenek || {};
+  var sure = { bas: opexSimdi_() };
+  var gecen = function (ad) { sure[ad] = opexSimdi_() - sure.bas; };
   var kilit = s.kilitli ? null : kilitAl_(s.bekleme === undefined ? 20000 : s.bekleme);
   if (kilit === false) return { durum: 'mesgul', yazilan: [] };
   try {
+    gecen('kilit');
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var simdi = new Date();
     var girdi = girdileriOku_();
     var ozet = ozetAl_(girdi);
     ozetDuyur_(ozet);
+    gecen('oku');
     var anahtar = yazimAnahtari_(ozet, simdi);
     var kayit = yazimKaydi_();
     if (!s.zorla && kayit.anahtar === anahtar) return { durum: 'guncel', yazilan: [] };
     var model = OpexMotor.hesapla(girdi, { simdi: simdi });
     var izler = s.zorla ? {} : kayit.izler || {};
-    var sonSatir = {};
-    var yazilan = [];
+    // Önce değişen bloklar ve sayfaların son satırı (okumalar), sonra yalnız yazımlar.
+    var degisen = [];
     hesapBloklari_(ss, girdi, model).forEach(function (b) {
       var degerler = blokDegerleri_(b.uret(), b.genislik);
       // Konum da ize girer: satır eklenip Toplam satırı kayınca aynı değerler yeni yerine yazılır.
       var iz = ozetMetni_(b.satir + ':' + b.sutun + ':' + JSON.stringify(degerler), 16);
-      if (izler[b.ad] === iz) return;
-      blokYaz_(b, degerler, sonSatir);
-      izler[b.ad] = iz;
-      yazilan.push(b.ad);
+      if (izler[b.ad] !== iz) degisen.push({ b: b, degerler: degerler, iz: iz });
     });
+    gecen('hesap');
+    var sonSatir = {};
+    degisen.forEach(function (x) {
+      var ad = x.b.sh.getName();
+      if (!x.b.tekSatir && !Object.prototype.hasOwnProperty.call(sonSatir, ad)) sonSatir[ad] = x.b.sh.getLastRow();
+    });
+    degisen.forEach(function (x) {
+      blokYaz_(x.b, x.degerler, sonSatir[x.b.sh.getName()] || 0);
+      izler[x.b.ad] = x.iz;
+    });
+    SpreadsheetApp.flush();
+    gecen('yaz');
     PropertiesService.getScriptProperties().setProperty(OPEX_YAZIM_OZELLIGI, JSON.stringify({ anahtar: anahtar, izler: izler, zaman: simdi.toISOString() }));
     degisimiKaydet_(ozet);
+    var yazilan = degisen.map(function (x) { return x.b.ad; });
+    gecen('son');
+    console.log('hesap yazımı ' + JSON.stringify({ ms: sure, bloklar: yazilan }));
     return { durum: 'yazildi', yazilan: yazilan };
   } finally {
     if (kilit) kilit.releaseLock();
@@ -397,10 +414,11 @@ function hesapAlanlariniAyikla_(rows, sutunlar) {
 /** Girdi sayfalarının ham değerleri (motorun beklediği biçim). */
 function girdileriOku_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Sayfa başına tek okuma (dolu alan): her Sheets çağrısı bir gidiş-dönüştür.
   var oku = function (sh, sutun) {
     if (!sh) return [];
-    var son = Math.max(sh.getLastRow(), 1);
-    return sh.getRange(1, 1, son, sutun || Math.max(sh.getLastColumn(), 1)).getValues();
+    var v = sh.getDataRange().getValues();
+    return sutun ? v.map(function (r) { return r.slice(0, sutun); }) : v;
   };
   // Giderler ve personel tüm sayfa okunur: motor sütunları başlık adıyla, ızgarayı ay başlıklarıyla bulur
   // (sütun silinse veya yer değişse de doğru okunur).
