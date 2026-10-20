@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Kisi, OpexModel, Satir } from '../src/data/opex';
+import { planOf, type Kisi, type OpexModel, type Satir } from '../src/data/opex';
 import { buildInput, buildModel, exampleTohum, motor, NOW } from './opex-fixture';
 
 /**
@@ -155,8 +155,30 @@ test.describe('OPEX motoru: 2027 ve parametreler', () => {
   });
 });
 
+test.describe('OPEX motoru: 12 aylık plan', () => {
+  test('Ekim 2026’dan başlar: Eki–Ara 2026, Oca–Eyl 2027; her ay kendi yılının aylık hesabı', () => {
+    const plan = (m as OpexModel & { plan: ReturnType<typeof planOf> }).plan;
+    expect(plan.aylar.map((a) => a.ad)).toEqual([
+      'Ekim 2026', 'Kasım 2026', 'Aralık 2026', 'Ocak 2027', 'Şubat 2027', 'Mart 2027',
+      'Nisan 2027', 'Mayıs 2027', 'Haziran 2027', 'Temmuz 2027', 'Ağustos 2027', 'Eylül 2027',
+    ]);
+    expect(plan.aylar[0].toplam).toBe(m.aylik[9].y2026.toplam);
+    expect(plan.aylar[3].insan).toBe(m.aylik[0].y2027.insan);
+    expect(plan.aylar[11].kisa).toBe('Eyl 27');
+    close(plan.toplam.toplam, plan.aylar.reduce((t, a) => t + a.toplam, 0), 0.05);
+    // Sayfanın türetimi motorla aynı (eski Apps Script sürümünde de doğru plan).
+    expect(planOf(m)).toEqual(plan);
+  });
+
+  test('Kasım 2027’de başlarsa 2027 sonrası hesaplanmaz (2 ay)', () => {
+    const late = buildModel({ params: { rapor_yili: 2027, rapor_ayi: 11 } }) as OpexModel & { plan: ReturnType<typeof planOf> };
+    expect(late.plan.aylar.map((a) => a.ad)).toEqual(['Kasım 2027', 'Aralık 2027']);
+    expect(motor.rapor(late, 'plan').at(-1)?.[0]).toBe('2 ay toplamı');
+  });
+});
+
 test.describe('OPEX motoru: Sheets raporları', () => {
-  const REPORTS = ['kpi', 'ozet', 'kategori', 'aylik', 'kisi', 'bilesen', 'teknoloji', 'kopru', 'bordro-2026', 'bordro-2027', 'uyari'];
+  const REPORTS = ['kpi', 'ozet', 'kategori', 'aylik', 'kisi', 'bilesen', 'teknoloji', 'kopru', 'plan', 'bordro-2026', 'bordro-2027', 'uyari'];
 
   test('her rapor dikdörtgen tablo (her satır başlık kadar sütun)', () => {
     for (const ad of REPORTS) {

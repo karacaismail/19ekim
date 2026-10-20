@@ -2344,3 +2344,107 @@ html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-
   margin: 0;
   padding-inline-start: var(--space-5);
 }
+
+/* Yükleyici: belirgin kart, gidip gelen belirsiz çubuk (döngü tokenı, simetrik eğri) ve sayfa iskeleti */
+.opex-loader {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.opex-loader-head {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.opex-loader-head p {
+  margin: 0;
+}
+
+.opex-loader-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.opex-loader-meta {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-loader-bar {
+  position: relative;
+  overflow: hidden;
+  block-size: 0.5rem;
+  background: var(--viz-track);
+}
+
+.opex-loader-bar > span {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 40%;
+  background: var(--accent);
+  animation-name: opex-yukleme;
+  animation-duration: var(--motion-duration-loop);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes opex-yukleme {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(150%);
+  }
+}
+
+.opex-skeleton,
+.opex-skel-row {
+  display: grid;
+  gap: var(--gap-normal);
+}
+
+.opex-skel-row {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.opex-skel-row-wide {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+}
+
+.opex-skel {
+  display: block;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.opex-skel-hero {
+  block-size: 7rem;
+}
+
+.opex-skel-tile {
+  block-size: 6.5rem;
+}
+
+.opex-skel-chart {
+  block-size: 12rem;
+}
+
+/* JavaScript yoksa yükleyici yerine açıklama (BaseLayout kökte data-js koyar). */
+.opex-nojs {
+  margin-top: var(--space-8);
+  color: var(--text-secondary);
+}
+
+html[data-js] .opex-nojs {
+  display: none;
+}

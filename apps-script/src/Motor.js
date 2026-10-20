@@ -13,7 +13,7 @@ var OpexMotor = (function () {
   'use strict';
 
   var SEMA = 1;
-  var SURUM = '2026-10-20.1';
+  var SURUM = '2026-10-20.2';
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var KISA_AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   var YILLAR = [2026, 2027];
@@ -21,7 +21,7 @@ var OpexMotor = (function () {
   /** Kümeler: OPEX'i besleyen iki ana küme (teknoloji, insan) ve ofis/işletme giderleri. */
   var KUMELER = [
     { kod: 'teknoloji', ad: 'Teknoloji' },
-    { kod: 'insan', ad: 'İnsan (ücret)' },
+    { kod: 'insan', ad: 'Personel' },
     { kod: 'ofis', ad: 'Ofis ve işletme' },
   ];
 
@@ -33,7 +33,7 @@ var OpexMotor = (function () {
    * tur: oran (kesir, %29,73 = 0,2973), tutar (₺), kur, sayi, metin, liste.
    */
   var PARAMETRE_TANIMLARI = [
-    { grup: 'Dönem', ad: 'Rapor yılı', anahtar: 'rapor_yili', deger: 2026, birim: 'yıl', tur: 'sayi', aciklama: '“Bu ay” görünümünün yılı (2026 veya 2027).' },
+    { grup: 'Dönem', ad: 'Rapor yılı', anahtar: 'rapor_yili', deger: 2026, birim: 'yıl', tur: 'sayi', formul: '=YEAR(TODAY())', aciklama: '“Bu ay” ve 12 aylık planın başlangıç yılı; hesap 2026 ve 2027’yi kapsar.' },
     { grup: 'Dönem', ad: 'Rapor ayı', anahtar: 'rapor_ayi', deger: 10, birim: 'ay', tur: 'sayi', formul: '=MONTH(TODAY())', aciklama: 'Varsayılan bugünün ayı; sabit bir ay için 1–12 yazın.' },
 
     { grup: 'Döviz', ad: 'USD/TRY', anahtar: 'kur_usd', deger: 48.9889, birim: '₺', tur: 'kur', formul: '=IFERROR(GOOGLEFINANCE("CURRENCY:USDTRY"),p_kur_usd_yedek)', aciklama: 'Canlı kur (Google Finance); okunamazsa yedek kur.' },
@@ -693,6 +693,17 @@ var OpexMotor = (function () {
     var yilAnahtar = p.rapor_yili === 2027 ? 'y2027' : 'y2026';
     var buAy = aylik[ayIdx][yilAnahtar];
 
+    // 12 aylık plan: rapor ayından başlayarak ay ay (2027 ayları zamlı 2027 hesabı); 2027 sonrası hesaplanmaz.
+    var plan = [];
+    for (var n = 0; n < 12; n++) {
+      var sira = p.rapor_ayi - 1 + n;
+      var planYil = p.rapor_yili + Math.floor(sira / 12);
+      if (planYil > 2027) break;
+      var planAy = sira % 12;
+      var pk = aylik[planAy][planYil === 2027 ? 'y2027' : 'y2026'];
+      plan.push({ yil: planYil, ay: planAy + 1, ad: AYLAR[planAy] + ' ' + planYil, kisa: KISA_AYLAR[planAy] + ' ' + String(planYil).slice(2), teknoloji: pk.teknoloji, insan: pk.insan, ofis: pk.ofis, toplam: pk.toplam });
+    }
+
     // Kategoriler (bu ay ve 2027 aylık ortalama)
     var kategoriler = [];
     var kategoriEkle = function (kume, kategori, buAyTutar, tutar27) {
@@ -782,6 +793,7 @@ var OpexMotor = (function () {
           adetBekleyen: bekleyen.length,
         },
       },
+      plan: { aylar: plan, toplam: yilKume(plan.map(function (x) { return { k: x }; }), 'k') },
       kumeler: KUMELER,
       kategoriler: kategoriler,
       aylik: aylik,
@@ -821,7 +833,7 @@ var OpexMotor = (function () {
 
   /* ---------- Sheets raporları (özel işlev OPEX) ---------- */
 
-  var KUME_ADI = { teknoloji: 'Teknoloji', insan: 'İnsan (ücret)', ofis: 'Ofis ve işletme' };
+  var KUME_ADI = { teknoloji: 'Teknoloji', insan: 'Personel', ofis: 'Ofis ve işletme' };
 
   /** Sheets hücrelerine yayılan 2B tablolar. Başlık satırı ilk satırdır. */
   function rapor(model, ad, girdi) {
@@ -836,7 +848,7 @@ var OpexMotor = (function () {
           ['Rapor dönemi', bu],
           ['Bu ay toplam OPEX', m.ozet.buAy.toplam],
           ['Teknoloji', m.ozet.buAy.teknoloji],
-          ['İnsan (ücret)', m.ozet.buAy.insan],
+          ['Personel', m.ozet.buAy.insan],
           ['Ofis ve işletme', m.ozet.buAy.ofis],
           ['2026 yıllık OPEX', m.ozet.yil2026.toplam],
           ['2027 aylık ortalama', m.ozet.aylikOrt2027.toplam],
@@ -866,7 +878,7 @@ var OpexMotor = (function () {
           }),
         );
       case 'aylik':
-        return [['Ay', 'Teknoloji 2026', 'İnsan 2026', 'Ofis 2026', 'Toplam 2026', 'Toplam 2027']].concat(
+        return [['Ay', 'Teknoloji 2026', 'Personel 2026', 'Ofis 2026', 'Toplam 2026', 'Toplam 2027']].concat(
           m.aylik.map(function (a) {
             return [a.kisa, a.y2026.teknoloji, a.y2026.insan, a.y2026.ofis, a.y2026.toplam, a.y2027.toplam];
           }),
@@ -930,10 +942,15 @@ var OpexMotor = (function () {
       case 'gider-sutun':
       case 'tesvik-sutun':
         return hizaliSutunlar(m, ad, girdi);
+      case 'plan':
+        return [['Ay', 'Teknoloji', 'Ofis ve işletme', 'Personel', 'Toplam']].concat(
+          m.plan.aylar.map(function (a) { return [a.ad, a.teknoloji, a.ofis, a.insan, a.toplam]; }),
+          [[m.plan.aylar.length + ' ay toplamı', m.plan.toplam.teknoloji, m.plan.toplam.ofis, m.plan.toplam.insan, m.plan.toplam.toplam]],
+        );
       case 'uyari':
         return [['Uyarılar']].concat(m.uyarilar.length ? m.uyarilar.map(function (u) { return [u]; }) : [['Uyarı yok.']]);
       default:
-        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, uyari.']];
+        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, uyari.']];
     }
   }
 

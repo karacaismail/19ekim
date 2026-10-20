@@ -147,7 +147,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(table).toContainText('€50,00');
     await expect(table).toContainText('Tutar girilmedi');
     await expect(table).toContainText('Ödendi');
-    expect(await drawAll(page)).toBe(8);
+    expect(await drawAll(page)).toBe(9);
     expect(errors).toEqual([]);
   });
 
@@ -226,6 +226,68 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(stored.local).toBeNull();
     expect(stored.session).toContain(ENDPOINT);
   });
+
+  test('kalemler üç grup: Teknoloji, Ofis ve işletme, Personel; Tümü toplamı toplam OPEX', async ({ page }) => {
+    await mockScript(page);
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    const group = page.getByRole('group', { name: 'Grup süzgeci' });
+    const n = { tech: MODEL.giderler.filter((g) => g.kume === 'teknoloji').length, office: MODEL.giderler.filter((g) => g.kume === 'ofis').length, people: MODEL.kisiler.length };
+    await expect(group.getByRole('button')).toHaveText([`Tümü (${n.tech + n.office + n.people})`, `Teknoloji (${n.tech})`, `Ofis ve işletme (${n.office})`, `Personel (${n.people})`]);
+    const table = page.getByRole('region', { name: 'Ekim 2026 kalemleri' });
+    const total = () => table.locator('tr[data-tone="total"] td').nth(2);
+    const exact = (v: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)} ₺`;
+    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.toplam));
+    await group.getByRole('button', { name: /^Personel/ }).click();
+    await expect(group.getByRole('button', { name: /^Personel/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(table).toContainText('Örnek Uzman');
+    await expect(table).not.toContainText('Sunucu A');
+    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.insan));
+    await group.getByRole('button', { name: /^Teknoloji/ }).click();
+    await expect(total()).toHaveText(exact(MODEL.ozet.buAy.teknoloji));
+  });
+
+  test('12 aylık plan: Ekim 2026’dan Eylül 2027’ye her ay ayrı; toplam satırı', async ({ page }) => {
+    await mockScript(page);
+    await page.goto(PATH);
+    await hydrated(page);
+    await connect(page);
+    const table = page.getByRole('region', { name: 'Aylık gider planı · Ekim 2026 – Eylül 2027' });
+    const heads = table.locator('tbody th');
+    await expect(heads).toHaveCount(13);
+    await expect(heads.nth(0)).toHaveText('Ekim 2026');
+    await expect(heads.nth(3)).toHaveText('Ocak 2027');
+    await expect(heads.nth(12)).toHaveText('12 ay toplamı');
+    await expect(page.locator('.chart-canvas[data-kind="opex-stack"]').first()).toBeVisible();
+  });
+
+  for (const reduced of [false, true]) {
+    test(`belirgin yükleyici${reduced ? ' (hareket azaltma: durağan)' : ''}: yanıt gelene kadar başlık, süre ve gidip gelen çubuk`, async ({ page }) => {
+      if (reduced) await page.emulateMedia({ reducedMotion: 'reduce' });
+      let release: () => void = () => undefined;
+      const gate = new Promise<void>((r) => (release = r));
+      await page.route('https://script.google.com/**', async (route) => {
+        await gate;
+        await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(MODEL, 'yavas')) });
+      });
+      await page.goto(PATH);
+      await hydrated(page);
+      const loader = page.locator('.opex-loader');
+      await expect(loader).toBeVisible();
+      await expect(page.getByRole('status').filter({ hasText: 'Google Sheets’ten veriler alınıyor' })).toBeVisible();
+      await expect(loader.locator('.opex-loader-meta')).toContainText(/\d+ sn/);
+      const anim = await loader.locator('.opex-loader-bar > span').evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { name: cs.animationName, duration: cs.animationDuration, easing: cs.animationTimingFunction, count: cs.animationIterationCount, direction: cs.animationDirection };
+      });
+      if (reduced) expect(parseFloat(anim.duration)).toBe(0);
+      else expect(anim).toEqual({ name: 'opex-yukleme', duration: '1.4s', easing: 'cubic-bezier(0.65, 0, 0.35, 1)', count: 'infinite', direction: 'alternate' });
+      release();
+      await expect(page.locator('.opex-hero-value')).toHaveText(lira(MODEL.ozet.buAy.toplam));
+      await expect(loader).toHaveCount(0);
+    });
+  }
 
   test('netten brüte: kişi ve yıl seçimi aria-pressed ile anında değişir', async ({ page }) => {
     await mockScript(page);
@@ -450,7 +512,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
       await page.goto(PATH);
       await hydrated(page);
       await connect(page);
-      expect(await drawAll(page)).toBe(8);
+      expect(await drawAll(page)).toBe(9);
       const models = await onCharts<{ kind: string; series: [unknown, unknown, unknown][]; state: [unknown, unknown] }[]>(
         page,
         `return charts.map((c) => {

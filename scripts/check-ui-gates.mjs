@@ -104,8 +104,12 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
       if (prop.startsWith('--motion-duration') && !isTokens) fail(file, `${prop} yalnız tokens.css içinde tanımlanır`);
       if (prop.startsWith('--motion-duration') && isTokens && !inReducedMotion) {
         const ms = Number(value.replace('ms', ''));
-        if (!(ms >= 120 && ms <= 320)) fail(file, `${prop}: ${value} — normal süre 120–320 ms aralığında olmalı`);
+        // Tek belgeli istisna: belirsiz süreli yükleme döngüsü (gidip gelen, simetrik eğri) 800–2000 ms.
+        const [min, max] = prop === '--motion-duration-loop' ? [800, 2000] : [120, 320];
+        if (!(ms >= min && ms <= max)) fail(file, `${prop}: ${value} — süre ${min}–${max} ms aralığında olmalı`);
       }
+      // Döngü tokenı yalnız sonsuz, gidip gelen yükleme animasyonunda kullanılır (geçişte değil).
+      if (/^transition/.test(prop) && /--motion-duration-loop/.test(value)) fail(file, `${rule.selector}: döngü süresi geçişte kullanılamaz`);
       if (prop === '--motion-ease-standard' && !APPROVED_EASING.test(value)) fail(file, `${prop}: ${value} — onaylı Cubic eğri değil`);
 
       // Odak
@@ -159,6 +163,12 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
     }
 
     if (/:focus-within/.test(rule.selector)) fail(file, `${rule.selector}: :focus-within çerçevesi yasak`);
+    if (decls.some((d) => d.prop === 'animation-duration' && /--motion-duration-loop/.test(d.value))) {
+      const get = (p) => decls.find((d) => d.prop === p)?.value;
+      if (get('animation-iteration-count') !== 'infinite' || get('animation-direction') !== 'alternate' || get('animation-timing-function') !== 'var(--motion-ease-standard)') {
+        fail(file, `${rule.selector}: döngü animasyonu infinite + alternate + simetrik eğri tokenıyla tanımlanmalı`);
+      }
+    }
     if (props.has('transition-property') && !(props.has('transition-duration') && props.has('transition-timing-function'))) {
       fail(file, `${rule.selector}: transition-property, süre ve easing tokenıyla birlikte tanımlanmalı`);
     }

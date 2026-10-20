@@ -153,6 +153,31 @@ export interface OpexModel {
   uyarilar: string[];
 }
 
+export interface PlanAy extends Kume3 {
+  yil: number;
+  ay: number;
+  ad: string;
+  kisa: string;
+}
+
+/**
+ * 12 aylık plan: rapor ayından başlayarak ay ay (2026 ayları 2026 hesabı, 2027 ayları zamlı 2027 hesabı); 2027 sonrası
+ * hesaplanmaz. Motor.js → plan ile aynı kural; sayfa eski Apps Script sürümleriyle de çalışsın diye aylık seriden türetilir.
+ */
+export function planOf(m: Pick<OpexModel, 'aylik' | 'donem'>): { aylar: PlanAy[]; toplam: Kume3 } {
+  const aylar: PlanAy[] = [];
+  for (let n = 0; n < 12; n++) {
+    const sira = m.donem.ay - 1 + n;
+    const yil = m.donem.yil + Math.floor(sira / 12);
+    if (yil > 2027) break;
+    const a = m.aylik[sira % 12];
+    const k = yil === 2027 ? a.y2027 : a.y2026;
+    aylar.push({ yil, ay: (sira % 12) + 1, ad: `${a.ad} ${yil}`, kisa: `${a.kisa} ${String(yil).slice(2)}`, ...k });
+  }
+  const sum = (f: keyof Kume3) => Math.round(aylar.reduce((t, x) => t + x[f], 0) * 100) / 100;
+  return { aylar, toplam: { teknoloji: sum('teknoloji'), insan: sum('insan'), ofis: sum('ofis'), toplam: sum('toplam') } };
+}
+
 export interface OpexData {
   model: OpexModel;
   ozet: string;

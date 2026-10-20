@@ -86,6 +86,8 @@
   --motion-ease-standard: cubic-bezier(.65, 0, .35, 1);
   --motion-duration-fast: 160ms;
   --motion-duration-base: 240ms;
+  /* Yalnız belirsiz süreli yükleme göstergesi (sürekli, gidip gelen): aynı simetrik eğri; kapı 800–2000 ms ile sınırlar. */
+  --motion-duration-loop: 1400ms;
   --motion-delay-none: 0ms;
 }
 
@@ -151,6 +153,7 @@
   :root {
     --motion-duration-fast: 0ms;
     --motion-duration-base: 0ms;
+    --motion-duration-loop: 0ms;
   }
 }
 

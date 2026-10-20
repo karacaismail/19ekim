@@ -220,7 +220,7 @@ function parametreleriKur_(ss) {
     var r = mevcut[t.anahtar];
     if (!t.formul || !r || eklenecek.indexOf(t) >= 0) return;
     var hucre = sh.getRange(r, 3);
-    if (hucre.getFormula()) hucre.setFormula(t.formul);
+    if (hucre.getFormula() || hucre.getValue() === t.deger) hucre.setFormula(t.formul);
   });
 
   var sonSatir = Math.max(sh.getLastRow(), 4);
@@ -412,6 +412,7 @@ var OPEX_BLOKLAR = [
   { rapor: 'teknoloji', sutun: 42, genislik: 3 },
   { rapor: 'kopru', sutun: 46, genislik: 2 },
   { rapor: 'uyari', sutun: 49, genislik: 1 },
+  { rapor: 'plan', sutun: 51, genislik: 5 },
 ];
 
 function blok_(rapor) {
@@ -428,7 +429,7 @@ function blokAraligi_(rapor, ilkSutun, sutunSayisi, satirSayisi) {
 
 function hesabiKur_(ss) {
   var sh = ss.getSheetByName(OPEX_SAYFA.hesap);
-  sutunGarantile_(sh, 52);
+  sutunGarantile_(sh, 60);
   temelStil_(sh);
   OPEX_BLOKLAR.forEach(function (b) {
     sh.getRange(1, b.sutun).setFormula(opexFormulu_(b.rapor));
@@ -467,7 +468,7 @@ function panoyuKur_(ss) {
   sh.setHiddenGridlines(true);
   var sutun = 12;
   for (var c = 1; c <= sutun; c++) sh.setColumnWidth(c, 112);
-  sh.getRange(1, 1, 140, sutun).setBackground(OPEX_STIL.zemin);
+  sh.getRange(1, 1, 175, sutun).setBackground(OPEX_STIL.zemin);
 
   sh.getRange('A1:L1').merge().setValue('iStoc · OPEX panosu').setFontSize(22).setFontWeight('bold');
   sh.getRange('A2:H2').merge().setValue('Teknoloji ve insan kümeleri + ofis/işletme. Google Sheets değişince GitHub Pages sayfası ≈15 sn içinde güncellenir.').setFontColor(OPEX_STIL.ikincil);
@@ -488,7 +489,7 @@ function panoyuKur_(ss) {
   // Hesap!B2… = kpi bloğunun değer sütunu (satır sırası Motor.rapor('kpi') ile aynı).
   kpi(4, 1, 'Bu ay toplam OPEX', '=Hesap!B3', '=Hesap!B2');
   kpi(4, 4, 'Teknoloji', '=Hesap!B4', 'Yapay zekâ, sunucu, lisans');
-  kpi(4, 7, 'İnsan (ücret)', '=Hesap!B5', 'Bordro işveren maliyeti + freelancer');
+  kpi(4, 7, 'Personel', '=Hesap!B5', 'Bordro işveren maliyeti + freelancer');
   kpi(4, 10, 'Ofis ve işletme', '=Hesap!B6', 'Kira, faturalar, ofis ihtiyaçları');
   kpi(8, 1, '2027 aylık ortalama', '=Hesap!B8', '="2027 yıllık: "&FIXED(Hesap!B9,0)&" ₺"');
   kpi(8, 4, '2027 değişim (aylık ort.)', '=Hesap!B10', '2026 aylık ortalamasına göre', '+0.0%;-0.0%;0.0%');
@@ -514,7 +515,15 @@ function panoyuKur_(ss) {
   sh.setColumnWidth(9, 200);
 
   sh.getRange('A24').setValue('Grafikler').setFontSize(14).setFontWeight('bold');
-  var kisiSatir = 24 + 4 * 21 + 2;
+  // 12 aylık plan tablosu: 9. grafiğin (plan) yanında.
+  var planSatir = 25 + 4 * 21;
+  sh.getRange(planSatir - 1, 7).setValue('12 aylık plan').setFontSize(14).setFontWeight('bold');
+  sh.getRange(planSatir, 7).setFormula('=ARRAYFORMULA(Hesap!' + blokAraligi_('plan', 0, 5, 14) + ')');
+  sh.getRange(planSatir, 7, 1, 5).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
+  sh.getRange(planSatir + 1, 7, 13, 5).setBackground(OPEX_STIL.yuzey);
+  sh.getRange(planSatir + 1, 8, 13, 4).setNumberFormat(OPEX_BICIM.tlYuvarlak);
+  sh.getRange(planSatir + 13, 7, 1, 5).setFontWeight('bold');
+  var kisiSatir = 24 + 5 * 21 + 2;
   sh.getRange(kisiSatir, 1).setValue('Kişiler: bu ay ve 2027').setFontSize(14).setFontWeight('bold');
   var b = blok_('kisi');
   var bas = sutunHarfi_(b.sutun);
@@ -588,4 +597,5 @@ function panoyuCiz() {
     ),
   );
   ekle(7, ortak(sh.newChart().setChartType(Charts.ChartType.BAR).addRange(aralik('teknoloji', 0, 1, 25)).addRange(aralik('teknoloji', 2, 1, 25)).setMergeStrategy(Charts.ChartMergeStrategy.MERGE_COLUMNS), 'Teknoloji sağlayıcıları (bu ay, ₺)', [OPEX_STIL.seri[0]]).setOption('legend', { position: 'none' }));
+  ekle(8, ortak(sh.newChart().setChartType(Charts.ChartType.COLUMN).addRange(aralik('plan', 0, 4, 13)), '12 aylık plan (ay ay, ₺)', [OPEX_STIL.seri[0], OPEX_STIL.seri[2], OPEX_STIL.seri[1]]).setOption('isStacked', true));
 }
