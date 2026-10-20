@@ -71,6 +71,7 @@ var OPEX_KURULUM_ADIMLARI = [
   ['hesap', function (ss) { hesabiKur_(ss); }],
   ['pano', function (ss) { panoyuKur_(ss); }],
   ['grafikler', function () { SpreadsheetApp.flush(); panoyuCiz(); }],
+  ['korumalar', function (ss) { ss.getSheets().forEach(korumalariKaldir_); }],
 ];
 var OPEX_KURULUM_OZELLIGI = 'OPEX_KURULUM';
 /** Apps Script bir çalıştırmayı 6 dakikada keser; kurulum ~3,5 dakika dolunca durur, ilerlemesini kaydeder. */
@@ -278,8 +279,6 @@ function toplamSatiriKur_(sh, k, n) {
   sh.getRange(hedef, ilk).setFormula(toplamFormulu_(k));
   sh.getRange(hedef, ilk, 1, g).setNumberFormat(OPEX_BICIM.tl).setFontWeight('bold').setFontColor(OPEX_STIL.formul).setBackground(OPEX_STIL.hesap);
   sh.getRange(hedef, 1, 1, OPEX_GIRDI_SUTUN[k]).setBackground(OPEX_STIL.hesap);
-  // Toplam satırına yazılırsa uyarır (üzerine kalem yazılırsa toplamlar kalem sayılırdı).
-  sh.getRange(hedef, 1, 1, ilk + g - 1).protect().setDescription(OPEX_TOPLAM_KORUMA).setWarningOnly(true);
 }
 
 var OPEX_TOPLAM_KORUMA = 'OPEX toplam satırı (kod hesaplar)';
@@ -490,9 +489,11 @@ function onayKutusu_(aralik, bosIse) {
   aralik.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
 }
 
-function korumaUyari_(sh, aciklama) {
-  sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).forEach(function (p) { p.remove(); });
-  sh.protect().setDescription(aciklama).setWarningOnly(true);
+/** Kullanıcı kararı (2026-10-20): kilit yok; sayfa ve aralık korumaları kaldırılır (hesaplanan sayfalar dahil). */
+function korumalariKaldir_(sh) {
+  [SpreadsheetApp.ProtectionType.SHEET, SpreadsheetApp.ProtectionType.RANGE].forEach(function (tur) {
+    sh.getProtections(tur).forEach(function (p) { p.remove(); });
+  });
 }
 
 /* ---------- Parametreler ---------- */
@@ -837,7 +838,7 @@ function hepsiKur_(ss) {
   sh.setConditionalFormatRules([
     SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($C4="",REGEXMATCH($B4," toplamı$"))').setBold(true).setBackground(OPEX_STIL.hesap).setRanges([sh.getRange(4, 1, 300, 28)]).build(),
   ]);
-  korumaUyari_(sh, 'Giderler Hepsi kodla hesaplanır; değişiklik gider ve personel sayfalarından yapılır.');
+  korumalariKaldir_(sh);
   sh.setTabColor(OPEX_STIL.murekkep);
 }
 
@@ -868,7 +869,7 @@ function bordroyuKur_(ss) {
   sh.setConditionalFormatRules(rules);
   sh.setFrozenRows(4);
   sh.setRowHeight(4, 36);
-  korumaUyari_(sh, 'Bordro hesaplanır; değişiklik Personel ve Parametreler sayfasından yapılır.');
+  korumalariKaldir_(sh);
   sh.setTabColor(OPEX_STIL.seri[1]);
 }
 
@@ -927,7 +928,7 @@ function hesabiKur_(ss) {
     sh.getRange(2, b.sutun + 1, 59, r === 'kisi' ? 2 : 1).setNumberFormat('@');
   });
   sh.setFrozenRows(1);
-  korumaUyari_(sh, 'Pano ve grafik verisi; hesaplanır.');
+  korumalariKaldir_(sh);
   sh.setTabColor(OPEX_STIL.cizgi);
 }
 
@@ -1019,7 +1020,7 @@ function panoyuKur_(ss) {
   sh.getRange(kisiSatir + 2, 4, 30, 6).setNumberFormat(OPEX_BICIM.tlYuvarlak);
   sh.getRange(kisiSatir + 2, 10, 30, 1).setNumberFormat('0.0%');
   sh.setRowHeight(kisiSatir + 1, 40);
-  korumaUyari_(sh, 'Pano hesaplanır; değişiklik girdi sayfalarından yapılır.');
+  korumalariKaldir_(sh);
   sh.setTabColor(OPEX_STIL.vurgu);
 }
 

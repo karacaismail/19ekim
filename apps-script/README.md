@@ -85,7 +85,7 @@ adımları ~3,5 dakika dolunca durur, ilerlemesini kaydeder ve “Kurulum sürü
 Anahtarı değiştirmek: OPEX → Yeni erişim anahtarı üret (eski anahtar geçersiz olur; düzenli yenilemek önerilir).
 Onay kutuları kurulum ve onarımda korunur; “Evet” gibi metinler kutuya çevrilir. Satırda en az bir ay işaretliyse boş
 kutu işaretsiz sayılır (ör. Şubat’ta başlayan kişide Ekim–Ocak boş); hiç doldurulmamış satırda her ay işaretlidir.
-Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Toplam satırı uyarı korumalıdır.
+Tutar boş ama ay tutarı yazılmış kişi yalnız o aylarda hesaplanır. Hiçbir sayfada kilit (koruma) yoktur (kullanıcı kararı 2026-10-20); hesaplanan sayfalar (Pano, Giderler Hepsi, Bordro, Hesap) ve toplam satırları kurulumda yeniden yazılır, elle değiştirmeyin.
 
 ## Erişim
 

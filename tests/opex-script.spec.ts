@@ -323,6 +323,23 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(yapilan[0]).toBe(adimlar[0][0]);
   });
 
+  test('Kurulum: kilit yok — son adım tüm sayfalardaki sayfa ve aralık korumalarını kaldırır (kullanıcı kararı 2026-10-20)', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const adimlar = ctx.OPEX_KURULUM_ADIMLARI as [string, (ss: unknown) => void][];
+    expect(adimlar[adimlar.length - 1][0]).toBe('korumalar');
+    const kaldirilan: string[] = [];
+    const sayfa = (ad: string) => ({
+      getName: () => ad,
+      getProtections: (tur: string) => [{ remove: () => void kaldirilan.push(`${ad}:${tur}`) }],
+    });
+    (ctx as Record<string, unknown>).SpreadsheetApp = { ProtectionType: { SHEET: 'SHEET', RANGE: 'RANGE' } };
+    adimlar[adimlar.length - 1][1]({ getSheets: () => [sayfa('Pano'), sayfa('Hesap')] });
+    expect(kaldirilan).toEqual(['Pano:SHEET', 'Pano:RANGE', 'Hesap:SHEET', 'Hesap:RANGE']);
+    const kod = file('../apps-script/src/Kurulum.js');
+    expect(kod.match(/\.protect\(/g), 'kurulum hiçbir yerde koruma eklemez').toBeNull();
+  });
+
   test('Kurulum: yeni sayfa adları ve yerleşimle formül; alt toplam ve asgari ücret motordan (özel işlev); döviz biçimi', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
