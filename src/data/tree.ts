@@ -81,14 +81,17 @@ export const SEQUENCE: Stop[] = [
   { path: '/notlar/', label: 'Notlar', crumb: ['Notlar'] },
 ];
 
+/**
+ * “İstihdam” menüsü (kullanıcı kararı 2026-10-21): öğeler 1–7 sıralı numaralı; roller işe alınacak pozisyon adıyla.
+ */
 export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: number; also?: string[] }[] = [
-  { label: 'Organizasyon', path: '/' },
-  { label: 'Dijital pazarlama', path: '/roller/dijital-pazarlama/', role: 'dijital-pazarlama', no: 1 },
-  { label: 'Masa başı', path: '/roller/pazarlamaci/', role: 'pazarlamaci', no: 2 },
-  { label: 'Saha satış', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 3, also: ['/roller/ekip-lideri/'] },
-  { label: 'Organizatör', path: '/roller/organizator/', role: 'organizator', no: 4 },
-  { label: 'Segika', path: '/roller/segika/', role: 'segika' },
-  { label: 'Asistan', path: '/roller/asistan/', role: 'asistan' },
+  { label: 'Organizasyon', path: '/', no: 1 },
+  { label: 'Dijital pazarlama uzmanı', path: '/roller/dijital-pazarlama/', role: 'dijital-pazarlama', no: 2 },
+  { label: 'İstoç Pazarlama CRM uzmanı', path: '/roller/pazarlamaci/', role: 'pazarlamaci', no: 3 },
+  { label: 'Saha satış uzmanı', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 4, also: ['/roller/ekip-lideri/'] },
+  { label: 'Organizatör', path: '/roller/organizator/', role: 'organizator', no: 5 },
+  { label: 'Segika CRM', path: '/roller/segika/', role: 'segika', no: 6 },
+  { label: 'Asistan', path: '/roller/asistan/', role: 'asistan', no: 7 },
 ];
 
 /** “İstihdam” menüsünün sonunda (organizasyon ve rollerden sonra): işe alım sırası. */

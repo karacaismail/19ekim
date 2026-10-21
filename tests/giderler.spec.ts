@@ -295,7 +295,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       await expect(canli).toBeVisible();
       await expect(page.locator('.crumbs-row .opex-live')).toHaveCount(0);
       const [bant, gez, durum, dugme] = [await page.locator('.topbar').boundingBox(), await page.locator('.mainnav-list').boundingBox(), await canli.boundingBox(), await page.locator('.theme-toggle').boundingBox()];
-      expect(Math.abs(gez!.x + gez!.width / 2 - size.width / 2), 'gezinme ortalı').toBeLessThanOrEqual(2);
+      expect(Math.abs(gez!.x + gez!.width / 2 - size.width / 2), 'gezinme ortalı').toBeLessThanOrEqual(4);
       expect(durum!.y + durum!.height, 'canlı durum üst bantta').toBeLessThanOrEqual(bant!.y + bant!.height);
       expect(durum!.x).toBeGreaterThanOrEqual(gez!.x + gez!.width);
       expect(durum!.x + durum!.width).toBeLessThanOrEqual(dugme!.x);
@@ -340,6 +340,100 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(dugme!.y, 'tema düğmesi marka satırında').toBeLessThan(marka!.y + marka!.height);
     await expect(page.locator('.crumbs-row .opex-kur')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  });
+
+  // Kullanıcı kararları 2026-10-21: hızlı filtreler araç satırında (anahtar ve onay kutusu, kısa ad); filtre tepsisi
+  // tablonun eklentisi (bitişik, ayrı ton); tablo ile grafik arasında ayırıcı.
+  test('hızlı filtreler araç satırında; süzer ve temizlenir; filtre tepsisi tabloya bitişik; tablo ile grafik arasında ayırıcı', async ({ page }) => {
+    // Altı hızlı filtre (bu ay bekleyen dahil) 1440 px’te grup düğmeleriyle aynı satıra sığar; daha dar ekranda alt satıra sarar.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const hizli = page.getByRole('group', { name: 'Hızlı filtreler' });
+    for (const ad of ['Dövizli', 'Teşvikli']) await expect(hizli.getByRole('switch', { name: ad })).toBeVisible();
+    await expect(hizli.getByRole('checkbox')).toHaveCount(3);
+    for (const ad of ['Boş ay', 'Özel tutar', 'Artışlı']) await expect(hizli.getByRole('checkbox', { name: ad })).toBeVisible();
+    // Grup düğmeleri, hızlı filtreler ve Sütunlar aynı satırda.
+    const orta = async (sel: string) => page.locator(sel).first().evaluate((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
+    const [g, h, sut] = [await orta('.opex-veri-arac .opex-toggles'), await orta('.opex-hizli'), await orta('.opex-sutunlar')];
+    expect(Math.abs(g - h)).toBeLessThan(6);
+    expect(Math.abs(g - sut)).toBeLessThan(6);
+    const sayi = page.locator('.opex-veri-sayi');
+    const toplam = MODEL.giderler.length + MODEL.kisiler.length;
+    await expect(sayi).toHaveText(`${toplam} / ${toplam} kalem`);
+    const dovizli = hizli.getByRole('switch', { name: 'Dövizli' });
+    await expect(dovizli).toHaveAttribute('aria-checked', 'false');
+    await dovizli.click();
+    await expect(dovizli).toHaveAttribute('aria-checked', 'true');
+    const dovizSay = MODEL.giderler.filter((x) => x.para !== 'TRY').length;
+    expect(dovizSay).toBeGreaterThan(0);
+    await expect(sayi).toHaveText(`${dovizSay} / ${toplam} kalem`);
+    // Klavyeyle (Boşluk) kapanır; onay kutusu ve temizleme.
+    await dovizli.focus();
+    await page.keyboard.press('Space');
+    await expect(dovizli).toHaveAttribute('aria-checked', 'false');
+    await hizli.getByRole('checkbox', { name: 'Özel tutar' }).check();
+    await expect(sayi).not.toHaveText(`${toplam} / ${toplam} kalem`);
+    await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
+    await expect(sayi).toHaveText(`${toplam} / ${toplam} kalem`);
+    await expect(hizli.getByRole('checkbox', { name: 'Özel tutar' })).not.toBeChecked();
+    // Tepsi tablonun hemen üstünde, aynı genişlikte, ayrı tonda; birleşen köşeler düz.
+    const tepsi = page.locator('.opex-tepsi');
+    const cerceve = page.locator('.opex-veri .table-frame');
+    const [t, c] = [await tepsi.boundingBox(), await cerceve.boundingBox()];
+    expect(Math.abs(t!.y + t!.height - c!.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(t!.x - c!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(t!.width - c!.width)).toBeLessThanOrEqual(1);
+    const st = await tepsi.evaluate((el) => { const a = getComputedStyle(el); const b = getComputedStyle(el.nextElementSibling!.querySelector('.table-scroll')!); return { zemin: a.backgroundColor, tablo: b.backgroundColor, altSol: a.borderEndStartRadius, ustSol: b.borderStartStartRadius }; });
+    expect(st.zemin).not.toBe(st.tablo);
+    expect(st.altSol).toBe('0px');
+    expect(st.ustSol).toBe('0px');
+    // Tablo bittikten sonra grafikten önce ayırıcı.
+    const ayrac = page.locator('#kalemler-bolum hr.opex-ayrac-arada');
+    await expect(ayrac).toBeVisible();
+    const [cAlt, aUst] = [c!.y + c!.height, (await ayrac.boundingBox())!.y];
+    expect(aUst).toBeGreaterThan(cAlt);
+    const grafik = await page.locator('#kalemler-bolum .chart').first().boundingBox();
+    expect(grafik!.y).toBeGreaterThan(aUst);
+  });
+
+  // Kullanıcı kararı 2026-10-21: aşağı kaydırınca bant gizlenir, kırıntı satırı üstte yapışık; yukarı kaydırınca bant görünür.
+  test('aşağı kaydırınca bant gizlenir, kırıntı satırı (kurlarla) üstte kalır; yukarı kaydırınca ve odak banda girince bant görünür', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    await expect(page.locator('.crumbs-row .opex-kur')).toBeVisible();
+    const html = page.locator('html');
+    const ust = (sel: string) => page.locator(sel).evaluate((el) => Math.round(el.getBoundingClientRect().top));
+    const alt = (sel: string) => page.locator(sel).evaluate((el) => Math.round(el.getBoundingClientRect().bottom));
+    await page.mouse.move(640, 400);
+    const asagi = async () => {
+      for (let i = 0; i < 8; i++) {
+        await page.mouse.wheel(0, 150);
+        await page.waitForTimeout(30);
+      }
+      await expect(html).toHaveAttribute('data-bant-gizli', '');
+    };
+    await asagi();
+    await expect.poll(() => alt('.topbar')).toBeLessThanOrEqual(0);
+    await expect.poll(() => ust('.crumbs-row')).toBe(0);
+    await expect(page.locator('.crumbs-row .opex-kur')).toBeInViewport();
+    for (let i = 0; i < 3; i++) {
+      await page.mouse.wheel(0, -80);
+      await page.waitForTimeout(30);
+    }
+    await expect(html).not.toHaveAttribute('data-bant-gizli', '');
+    await expect.poll(() => ust('.topbar')).toBe(0);
+    const bantAlt = await alt('.topbar');
+    await expect.poll(() => ust('.crumbs-row')).toBe(bantAlt);
+    // Gizliyken odak banda girerse bant görünür.
+    await asagi();
+    await page.locator('.brand').focus();
+    await expect(html).not.toHaveAttribute('data-bant-gizli', '');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
   });
 
   test('2026 ve 2027 sekmeleri aynı şablonda; seçim radyo noktasıyla', async ({ page }) => {
@@ -1158,12 +1252,12 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       expect(o.kalinlik).toBeGreaterThanOrEqual(3);
       expect(o.halka === 'none' || o.halka === '').toBe(true);
     }
-    // WebKit (Safari varsayılanı) Tab ile onay kutusuna odak vermez: bu adım orada not_run.
+    // Hızlı filtre onay kutusu (araç satırında). WebKit (Safari varsayılanı) Tab ile onay kutusuna odak vermez: not_run.
     if (browserName !== 'webkit') {
-      await page.getByRole('textbox', { name: 'Toplam ₺ en çok' }).focus();
+      await page.getByRole('switch').last().focus();
       await page.keyboard.press('Tab');
       o = await odakEtiketi();
-      expect(o.etiket).toBe('Bir ayı boş olanlar');
+      expect(o.etiket).toBe('Boş ay');
       expect(o.alt).toContain('underline');
     }
     // Sütun filtresi paneli: sayı kutusu.

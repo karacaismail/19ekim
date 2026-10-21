@@ -153,6 +153,57 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   .topbar {
     position: sticky;
     top: 0;
+    transition-property: transform;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  /* Aşağı kaydırınca bant gizlenir, yukarı kaydırınca görünür (AppFrame; kullanıcı kararı 2026-10-21). */
+  html[data-bant-gizli] .topbar {
+    transform: translateY(-100%);
+  }
+
+  /*
+   * Kırıntı satırı (sayfa başlığı, Giderler kurları) üstte yapışık: bant görünürken onun altında, gizliyken en üstte.
+   * Zemin tam genişlikte (geniş tablo altından kayarken yanlarda görünmez); kaydırılınca alt çizgi belirir.
+   */
+  .crumbs-row {
+    position: sticky;
+    top: var(--bant-h, 0px);
+    z-index: 15;
+    background-color: var(--surface-page);
+    box-shadow: 0 0 0 100vmax var(--surface-page);
+    clip-path: inset(0 -100vmax);
+    transition-property: top;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  html[data-bant-gizli] .crumbs-row {
+    top: 0;
+  }
+
+  /* Alt çizgi tam genişlikte (gölgeyle; sayfa taşmasına katılmaz), yalnız kaydırılınca görünür. */
+  .crumbs-row::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: var(--hairline);
+    background-color: var(--rule);
+    box-shadow: 0 0 0 100vmax var(--rule);
+    clip-path: inset(0 -100vmax);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  html[data-kaydirildi] .crumbs-row::after {
+    opacity: 1;
   }
 }
 
@@ -326,6 +377,30 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   }
 }
 
+/*
+ * Tema değişimi (kullanıcı kararı 2026-10-21): sayfa çapraz solmayla yumuşak geçer (simetrik easeInOut, tema süresi).
+ * Anahtar anlık görüntüyle değil canlı görünür: topu kendi geçişiyle kayar, iz rengi yumuşak değişir.
+ */
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: var(--motion-duration-theme);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+}
+
+html[data-tema-gecis] .theme-toggle {
+  view-transition-name: tema-anahtari;
+}
+
+::view-transition-old(tema-anahtari) {
+  display: none;
+}
+
+::view-transition-new(tema-anahtari) {
+  animation-name: none;
+}
+
 /* Görünür yazı olmadığından klavye odağı anahtarın altında düz çubukla (alt çizgi gizli yazıya düşerdi). */
 html[data-focus-mode='keyboard'] .theme-toggle:focus-visible {
   background-image: linear-gradient(var(--focus-indicator), var(--focus-indicator));
@@ -409,6 +484,20 @@ html[data-js] .theme-toggle[hidden] {
   }
 }
 
+/*
+ * Bant araçları varken (Giderler canlı durumu) 64–80em arasında marka, gezinme ve araçlar tek satıra sığmaz: gezinme
+ * tablet düzenindeki gibi kendi satırına iner (kaymaz, kesilmez).
+ */
+@media (min-width: 64em) and (max-width: 79.99em) {
+  .topbar .wrap:has(.header-tools:not(:empty)) {
+    display: flex;
+  }
+
+  .topbar .wrap:has(.header-tools:not(:empty)) .mainnav {
+    order: 3;
+  }
+}
+
 .mainnav-list {
   list-style: none;
   margin: 0;
@@ -423,6 +512,21 @@ html[data-js] .theme-toggle[hidden] {
 }
 
 .mainnav-list > li {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+/* Öğeler arasında ince dikey ayırıcı ve öğe simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin). */
+.mainnav-list > li + li::before {
+  content: '';
+  inline-size: var(--hairline);
+  block-size: 1.25rem;
+  margin-inline-end: var(--space-1);
+  background-color: var(--rule-strong);
+}
+
+.mainnav-icon {
   flex: none;
 }
 
@@ -431,7 +535,7 @@ html[data-js] .theme-toggle[hidden] {
   align-items: center;
   gap: var(--space-2);
   min-height: var(--hit-min);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
   font-size: var(--text-sm);
@@ -463,6 +567,11 @@ html[data-js] .theme-toggle[hidden] {
   height: 0.4rem;
   border-radius: 50%;
   background: var(--accent);
+}
+
+/* Simgeli öğede etkinlik seçili zemin ve kalın yazıyla görünür; nokta yok (simgeyle yan yana kalabalık). */
+.mainnav-link:has(.mainnav-icon)::before {
+  display: none;
 }
 
 .app-main {
@@ -925,6 +1034,13 @@ html:not([data-js]) .giris-form {
   border-color: var(--rule);
 }
 
+/* Numara (veya nokta) ile yazı arasında güvenli boşluk (kullanıcı kararı 2026-10-21); ikisi öğenin etiket kutusunda. */
+.navmenu-item-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .navmenu-item:hover {
   background-color: var(--surface-hover);
 }
@@ -937,14 +1053,33 @@ html:not([data-js]) .giris-form {
 
 .tree-no {
   display: inline-grid;
+  flex: none;
   place-items: center;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
-  background: var(--tone-bg);
-  color: var(--tone-fg);
+  /* Rolü olmayan öğe (ör. Organizasyon) nötr rozet */
+  background: var(--tone-bg, var(--surface-sunken));
+  color: var(--tone-fg, var(--text-secondary));
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
+}
+
+/* Numarasız menü öğesi: aynı sade nokta, fazla belirgin değil; rozetle aynı genişlikte (yazılar hizalı). */
+.navmenu-bullet {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.navmenu-bullet::before {
+  content: '';
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: var(--rule-strong);
 }
 
 .mainnav-link[data-role]::before {
@@ -2473,6 +2608,10 @@ html:not([data-js]) .email-btn {
   border-block-start: var(--hairline) solid var(--rule);
 }
 
+.opex-ayrac-arada {
+  margin-block: var(--space-8) 0;
+}
+
 .opex-veri-arac,
 .opex-veri-durum {
   display: flex;
@@ -2484,6 +2623,126 @@ html:not([data-js]) .email-btn {
 
 .opex-veri-arac .opex-toggles {
   margin: 0;
+}
+
+/*
+ * Filtre tepsisi (kullanıcı kararı 2026-10-21): tablonun eklentisi gibi görünür — tablonun hemen üstüne bitişik, ayrı
+ * tonda (çökük yüzey), üst köşeleri yuvarlak; tablonun üst köşeleri düz, aralarında boşluk yok.
+ */
+.opex-tepsi {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background-color: var(--surface-sunken);
+}
+
+.opex-tepsi .opex-filtreler,
+.opex-tepsi .opex-filtreler-baslik,
+.opex-tepsi .table-hint {
+  margin: 0;
+}
+
+/* Tepsinin çökük zemininde düğmeler yükseltilmiş yüzeyde (açık temada kontrol rengi zeminle aynıydı). */
+.opex-tepsi :is(.opex-btn, .opex-toggle):not([data-primary], [aria-pressed='true']) {
+  background-color: var(--surface-raised);
+}
+
+.opex-tepsi :is(.opex-btn, .opex-toggle):not([data-primary], [aria-pressed='true']):hover {
+  background-color: var(--surface-control-hover);
+}
+
+.opex-tepsi + .table-frame > .table-scroll {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.opex-veri-arac {
+  justify-content: flex-start;
+}
+
+.opex-sutunlar {
+  margin-inline-start: auto;
+}
+
+/* Hızlı filtreler: kısa adlı anahtarlar ve onay kutuları grup düğmelerinin yanında. */
+.opex-hizli {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+}
+
+/* Araç satırı sığsın: tepsi içinde grup düğmeleri daha dar iç boşluklu. */
+.opex-tepsi .opex-veri-arac {
+  column-gap: var(--space-3);
+}
+
+.opex-tepsi .opex-toggle {
+  padding-inline: var(--space-3);
+}
+
+.opex-anahtar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.opex-anahtar-iz {
+  position: relative;
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: 1.25rem;
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--toggle-track-off);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.opex-anahtar-top {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.1875rem;
+  inline-size: 0.8125rem;
+  block-size: 0.8125rem;
+  border-radius: 50%;
+  background-color: var(--toggle-thumb-off);
+  transform: translateY(-50%);
+  transition-property: transform, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.opex-anahtar[aria-checked='true'] .opex-anahtar-iz {
+  background-color: var(--toggle-track-on);
+}
+
+.opex-anahtar[aria-checked='true'] .opex-anahtar-top {
+  background-color: var(--toggle-thumb-on);
+  transform: translate(1rem, -50%);
+}
+
+@media (forced-colors: active) {
+  .opex-anahtar-iz {
+    border: 1px solid ButtonText;
+  }
+
+  .opex-anahtar-top {
+    background-color: ButtonText;
+  }
 }
 
 .opex-filtreler-baslik {
@@ -2530,11 +2789,6 @@ html:not([data-js]) .email-btn {
 .opex-select-ok {
   flex: none;
   color: var(--text-secondary);
-}
-
-.opex-filter-checks {
-  display: grid;
-  align-content: end;
 }
 
 .opex-veri-sayi {

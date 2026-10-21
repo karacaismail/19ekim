@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
 import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
-import { IconChevronDown, IconMoon, IconSun } from '@tabler/icons-react';
+import { IconChevronDown, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
@@ -45,7 +45,8 @@ const themeManager: MantineColorSchemeManager = {
 
 /** Durum anında güncellenir: aria-pressed kök öğedeki şemayı izler. JavaScript yoksa düğme gizli kalır. */
 function ThemeToggle() {
-  const { setColorScheme } = useMantineColorScheme();
+  // Mantine şema değişiminde geçişleri varsayılan olarak kapatır; anahtarın kayması ve renk geçişi korunur.
+  const { setColorScheme } = useMantineColorScheme({ keepTransitions: true });
   const [dark, setDark] = useState(false);
   useEffect(() => {
     const root = document.documentElement;
@@ -62,7 +63,20 @@ function ThemeToggle() {
       data-theme-toggle
       aria-pressed={dark ? 'true' : 'false'}
       hidden
-      onClick={() => setColorScheme(dark ? 'light' : 'dark')}
+      onClick={() => {
+        // Kullanıcı kararı 2026-10-21: tema ani değişmez; sayfa simetrik easeInOut eğrisiyle yumuşak geçer (görünüm
+        // geçişi, çapraz solma). Destek yoksa veya hareket azaltılmışsa anında değişir; anahtar yine kendi geçişiyle kayar.
+        const degistir = () => setColorScheme(dark ? 'light' : 'dark');
+        // Anlamsal durum (aria-pressed) anında; görsel geçiş ardından başlar.
+        setDark(!dark);
+        const root = document.documentElement;
+        if (!('startViewTransition' in document) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          degistir();
+          return;
+        }
+        root.setAttribute('data-tema-gecis', '');
+        document.startViewTransition(degistir).finished.finally(() => root.removeAttribute('data-tema-gecis'));
+      }}
     >
       {/*
         Kullanıcı kararı 2026-10-21: görünür yazı yok (adı ekran okuyucuya); büyük anahtar. Simge izin boş tarafında:
@@ -96,6 +110,9 @@ function ParamsNotice() {
   );
 }
 
+/** Üst gezinme öğelerinin simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
+const COMMON_ICONS: Record<string, Icon> = { '/giderler/': IconReceipt2, '/notlar/': IconNotes };
+
 function NavItem({
   label,
   path,
@@ -114,6 +131,7 @@ function NavItem({
   const target = normalizePath(href(path));
   const exact = target === current;
   const inSection = !exact && also.some((p) => normalizePath(href(p)) === current);
+  const Simge = COMMON_ICONS[path];
   return (
     <a
       className="mainnav-link"
@@ -123,6 +141,7 @@ function NavItem({
       data-section={inSection ? 'true' : undefined}
     >
       {no ? <span className="tree-no">{no}</span> : null}
+      {Simge ? <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" /> : null}
       {label}
     </a>
   );
@@ -148,16 +167,16 @@ function useMotionMs(name: string) {
 type MenuLink = { label: string; path: string; role?: string; no?: number; also?: string[] };
 
 /** Başlıktaki açılır menüler (kullanıcı kararı 2026-10-20): İstihdam (organizasyon, roller, takvim) ve Pazarlama. */
-const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string }[] = [
-  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV], dividerBefore: HIRING_NAV.path },
-  { label: 'Pazarlama', items: MARKETING_NAV },
+const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon }[] = [
+  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV], dividerBefore: HIRING_NAV.path, icon: IconUsersGroup },
+  { label: 'Pazarlama', items: MARKETING_NAV, icon: IconSpeakerphone },
 ];
 
 /**
  * Açılır gezinme menüsü. Mantine Menu (erişilebilir menü: oklar, Home/End, Escape, odak tetikleyiciye döner); panel ve
  * tetikleyici markalı. Etkin sayfa menüdeyse tetikleyici seçili görünür, öğe aria-current taşır.
  */
-function NavMenu({ label, items: links, dividerBefore, current }: { label: string; items: MenuLink[]; dividerBefore?: string; current: string }) {
+function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon; current: string }) {
   const duration = useMotionMs('--motion-duration-fast');
   const items = links.map((item) => {
     const target = normalizePath(href(item.path));
@@ -175,10 +194,11 @@ function NavMenu({ label, items: links, dividerBefore, current }: { label: strin
       // Alçak ekranda (yatay telefon) panel görünür alana sığar ve kendi içinde kayar; sayfa kaymaz.
       middlewares={{ flip: true, shift: true, size: { padding: 8 } }}
       transitionProps={{ transition: 'fade', duration, exitDuration: duration, timingFunction: 'var(--motion-ease-standard)' }}
-      classNames={{ dropdown: 'navmenu', item: 'navmenu-item' }}
+      classNames={{ dropdown: 'navmenu', item: 'navmenu-item', itemLabel: 'navmenu-item-label' }}
     >
       <Menu.Target>
         <button type="button" className="mainnav-link mainnav-menu" data-section={active ? 'true' : undefined}>
+          <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" />
           {label}
           <IconChevronDown className="mainnav-chevron" size={16} stroke={2} aria-hidden="true" />
         </button>
@@ -194,7 +214,8 @@ function NavMenu({ label, items: links, dividerBefore, current }: { label: strin
             aria-current={item.exact ? 'page' : undefined}
             data-section={item.inSection ? 'true' : undefined}
           >
-            {item.no ? <span className="tree-no">{item.no}</span> : null}
+            {/* Numarasız öğede aynı sade nokta (numara rozetiyle aynı genişlikte; yazılar hizalı). */}
+            {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
             {item.label}
           </Menu.Item>,
         ])}
@@ -242,6 +263,50 @@ export function AppFrame({
       const box = active.getBoundingClientRect();
       if (box.left < listBox.left || box.right > listBox.right) list.scrollLeft += box.left - listBox.left - (listBox.width - box.width) / 2;
     });
+  }, [girisli]);
+
+  // Kullanıcı kararı 2026-10-21: aşağı kaydırınca üst bant gizlenir, kırıntı satırı üstte yapışık kalır; yukarı
+  // kaydırınca (veya odak banda girince) bant görünür. Yalnız bandın yapışık olduğu ekranlarda etkilidir (CSS).
+  useEffect(() => {
+    if (!girisli) return;
+    const root = document.documentElement;
+    const bant = document.querySelector<HTMLElement>('.topbar');
+    if (!bant) return;
+    const olc = () => root.style.setProperty('--bant-h', `${bant.offsetHeight}px`);
+    olc();
+    const gozlem = new ResizeObserver(olc);
+    gozlem.observe(bant);
+    let son = window.scrollY;
+    let bekliyor = false;
+    const guncelle = () => {
+      bekliyor = false;
+      const y = window.scrollY;
+      root.toggleAttribute('data-kaydirildi', y > bant.offsetHeight);
+      if (y <= bant.offsetHeight) {
+        root.removeAttribute('data-bant-gizli');
+        son = y;
+        return;
+      }
+      // Küçük titreşimler (dokunmatik, ivmeli kaydırma) yön değiştirmez.
+      if (Math.abs(y - son) < 8) return;
+      root.toggleAttribute('data-bant-gizli', y > son && !bant.contains(document.activeElement));
+      son = y;
+    };
+    const kaydir = () => {
+      if (bekliyor) return;
+      bekliyor = true;
+      requestAnimationFrame(guncelle);
+    };
+    const odak = () => root.removeAttribute('data-bant-gizli');
+    window.addEventListener('scroll', kaydir, { passive: true });
+    bant.addEventListener('focusin', odak);
+    return () => {
+      window.removeEventListener('scroll', kaydir);
+      bant.removeEventListener('focusin', odak);
+      gozlem.disconnect();
+      root.removeAttribute('data-bant-gizli');
+      root.removeAttribute('data-kaydirildi');
+    };
   }, [girisli]);
 
   return (

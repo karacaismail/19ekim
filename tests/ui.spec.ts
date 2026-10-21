@@ -232,8 +232,22 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const menu = page.getByRole('menu', { name: 'İstihdam' });
     await expect(menu).toBeVisible();
     const ogeler = menu.getByRole('menuitem');
-    await expect(ogeler).toHaveText(['Organizasyon', '1Dijital pazarlama', '2Masa başı', '3Saha satış', '4Organizatör', 'Segika', 'Asistan', 'İstihdam takvimi']);
-    await expect(menu.getByRole('menuitem', { name: 'Segika' })).toHaveAttribute('aria-current', 'page');
+    // Kullanıcı kararı 2026-10-21: 1–7 sıralı numara, roller pozisyon adıyla; numarasız öğede aynı sade nokta.
+    await expect(ogeler).toHaveText(['1Organizasyon', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi']);
+    await expect(menu.getByRole('menuitem', { name: 'Segika CRM' })).toHaveAttribute('aria-current', 'page');
+    await expect(menu.locator('.tree-no')).toHaveCount(7);
+    await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' }).locator('.navmenu-bullet')).toHaveCount(1);
+    // Numara ile yazı arasında güvenli boşluk (≥ 12 px); numaralı ve noktalı öğelerde yazılar hizalı.
+    // Numara rozeti (veya nokta) ile ardındaki yazı arasındaki boşluk.
+    const bosluk = await menu.getByRole('menuitem', { name: 'Segika CRM' }).evaluate((el) => {
+      const isaret = el.querySelector('.tree-no')!;
+      const r = document.createRange();
+      r.selectNodeContents(isaret.nextSibling!);
+      return r.getBoundingClientRect().left - isaret.getBoundingClientRect().right;
+    });
+    expect(bosluk).toBeGreaterThanOrEqual(11.5);
+    const yaziSol = async (ad: string) => menu.getByRole('menuitem', { name: ad }).evaluate((el) => { const isaret = el.querySelector('.tree-no, .navmenu-bullet')!; const r = document.createRange(); r.selectNodeContents(isaret.nextSibling!); return Math.round(r.getBoundingClientRect().left); });
+    expect(await yaziSol('İstihdam takvimi')).toBe(await yaziSol('Asistan'));
     // Panel markalı yüzeyde; ögede çevreleyen halka yok.
     const panel = await menu.evaluate((el) => getComputedStyle(el).backgroundColor);
     const yuzey = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--surface-raised').trim());
@@ -295,6 +309,51 @@ test.describe('başlık ve İstihdam menüsü', () => {
   }
 
   // Kullanıcı kararı 2026-10-20: hedefler, eylem planı, MLM ağı, karar sayfaları ve parametreler “Pazarlama” menüsünde.
+  // Kullanıcı kararı 2026-10-21: tema ani değişmez (“şimşek çakar gibi değil”): sayfa görünüm geçişiyle (destek varsa)
+  // yumuşak geçer, anahtar topu kayar; hareket azaltmada anında.
+  test('tema değişimi yumuşak: görünüm geçişi ve kayan anahtar; hareket azaltmada anında', async ({ page }) => {
+    await page.goto('hedefler/');
+    await icerik(page);
+    await hydrated(page);
+    const sure = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--motion-duration-theme').trim());
+    expect(sure.endsWith('ms') ? parseFloat(sure) : parseFloat(sure) * 1000).toBe(320);
+    const izle = () =>
+      page.evaluate(() => {
+        const w = window as unknown as { __gecis: boolean };
+        w.__gecis = false;
+        new MutationObserver(() => {
+          if (document.documentElement.hasAttribute('data-tema-gecis')) w.__gecis = true;
+        }).observe(document.documentElement, { attributes: true });
+      });
+    await izle();
+    const vt = await page.evaluate(() => 'startViewTransition' in document);
+    const sema = () => page.locator('html').getAttribute('data-mantine-color-scheme');
+    const once = await sema();
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    // Mantine şema değişiminde geçişleri kapatmaz: anahtar topu süreyle kayar.
+    expect(parseFloat(await page.locator('.theme-thumb').evaluate((el) => getComputedStyle(el).transitionDuration))).toBeGreaterThan(0);
+    await expect.poll(sema).not.toBe(once);
+    if (vt) expect(await page.evaluate(() => (window as unknown as { __gecis: boolean }).__gecis)).toBe(true);
+    await expect(page.locator('html')).not.toHaveAttribute('data-tema-gecis', '');
+    // Hareket azaltmada görünüm geçişi yok, değişim anında.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await izle();
+    const sonra = await sema();
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await expect.poll(sema).not.toBe(sonra);
+    expect(await page.evaluate(() => (window as unknown as { __gecis: boolean }).__gecis)).toBe(false);
+  });
+
+  // Kullanıcı kararı 2026-10-21: üst gezinme öğeleri ayırt edilsin, menü olduğu anlaşılsın — simge ve ince ayırıcı.
+  test('üst gezinme: her öğede simge, öğeler arasında ince dikey ayırıcı', async ({ page }) => {
+    await page.goto('hedefler/');
+    await icerik(page);
+    const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
+    await expect(nav.locator('.mainnav-link .mainnav-icon')).toHaveCount(4);
+    const ayiricilar = await nav.locator('.mainnav-list > li').evaluateAll((lis) => lis.map((li) => { const b = getComputedStyle(li, '::before'); return b.content !== 'none' && parseFloat(b.width) > 0 && parseFloat(b.height) > 0; }));
+    expect(ayiricilar).toEqual([false, true, true, true]);
+  });
+
   test('Pazarlama menüsü: altı sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
     await page.goto('karar-yetkisi/');
     await icerik(page);
@@ -705,13 +764,15 @@ test.describe('tema düğmesi', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-    expect(await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('dark');
+    // Renk şeması görünüm geçişinin ilk karesinde uygulanır (anlamsal durum, aria-pressed, anında).
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('dark');
     await page.reload();
     await hydrated(page);
     expect(await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('dark');
     await expect(page.locator('[data-theme-toggle]')).toHaveAttribute('aria-pressed', 'true');
     await page.locator('[data-theme-toggle]').click();
-    expect(await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('light');
+    await expect(page.locator('[data-theme-toggle]')).toHaveAttribute('aria-pressed', 'false');
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'))).toBe('light');
     const box = await page.locator('[data-theme-toggle]').boundingBox();
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
   });

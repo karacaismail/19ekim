@@ -159,13 +159,29 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`; Giderler döviz kurları), üst bantta tema düğmesinin solunda
   bant araçları yeri (`HEADER_TOOLS_ID`; Giderler canlı durumu). Bant araçları telefonda (< 48em) gezinmenin altında
   kendi satırında (marka ile tema düğmesi ilk satırda kalır), tablette ilk satırda; ≥ 64em’de üç sütunlu ızgaranın sağ
-  sütununda (yan sütunlar `minmax(max-content, 1fr)`: sığdıkça gezinme tam ortada, sığmazsa üst üste binmez).
+  sütununda (yan sütunlar `minmax(max-content, 1fr)`: sığdıkça gezinme tam ortada, sığmazsa üst üste binmez); bant
+  araçları varken 64–80em’de gezinme kendi satırına iner.
+- Kullanıcı kararları 2026-10-21 (başlık ve menü): üst gezinme öğelerinde simge (`mainnav-icon`; İstihdam, Pazarlama,
+  Giderler, Notlar) ve aralarında ince dikey ayırıcı; simgeli etkin öğede nokta yok. İstihdam menüsü 1–7 sıralı
+  numaralı, roller pozisyon adıyla (Organizasyon, Dijital pazarlama uzmanı, İstoç Pazarlama CRM uzmanı, Saha satış
+  uzmanı, Organizatör, Segika CRM, Asistan; `TREE_NAV`); numarasız öğelerde aynı sade nokta (`navmenu-bullet`, rozet
+  genişliğinde, yazılar hizalı); numara ile yazı arası `--space-3` (Mantine öğe etiketinde, `navmenu-item-label`).
+  Bant yapışıkken (≥ 48em ve ≥ 40em yükseklik) aşağı kaydırınca gizlenir, yukarı kaydırınca veya odak banda girince
+  görünür (`data-bant-gizli`, `--bant-h`, AppFrame); kırıntı satırı (sayfa başlığı, Giderler kurları) üstte yapışık,
+  zemini tam genişlikte, kaydırılınca tam genişlikte alt çizgi. Tema değişimi ani değil: görünüm geçişiyle çapraz
+  solma (`--motion-duration-theme` 320 ms, simetrik eğri), anahtar canlı kalır ve kayar (Mantine `keepTransitions`);
+  `aria-pressed` anında; görünüm geçişi yoksa veya hareket azaltılmışsa anında değişir.
 - Giderler ilk ekranı (kullanıcı kararı 2026-10-20, yıl seçici plan ve kalemlerin altına alındı): canlı durum küçük
   şerit (nokta, kısa metin, simge düğmeler), kullanıcı kararı 2026-10-21 ile üst bantta tema düğmesinin solunda;
   gezinme ortalı kalsın diye ≥ 64em’de “Sheets ss:dd:ss · anlık” yazısı görünmez (ipucunda ve ekran okuyucuda), tablette
   görünür, telefonda düğmeler tek satırda ve en dar ekranda “Sheets” sözcüğü gizli. Döviz kurları (USD/TRY, EUR/TRY)
   kırıntı satırının sağında, başlık hizasında (`.opex-kur`); Kalemler veri tablosunun üstünde başlık ve açıklama yok
-  (kalıcı), yalnız ayırıcı (`.opex-ayrac`; tablonun adı bölgede `aria-label`); ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
+  (kalıcı), yalnız ayırıcı (`.opex-ayrac`; tablonun adı bölgede `aria-label`); tablo ile Teknoloji sağlayıcıları grafiği
+  arasında ayırıcı (`.opex-ayrac-arada`). Filtre tepsisi (`.opex-tepsi`) tablonun eklentisi: hemen üstüne bitişik,
+  çökük yüzeyde, birleşen köşeler düz; içindeki düğmeler yükseltilmiş yüzeyde. Araç satırında grup düğmeleri, hızlı
+  filtreler (`HIZLI`: anahtar — Dövizli, Teşvikli, Bekleyen [bu ay ödeme takibi varken]; onay kutusu — Boş ay, Özel
+  tutar, Artışlı; kısa ad, açıklama ipucunda; anahtar `role="switch"`, `Anahtar`) ve Sütunlar; dar ekranda sarar;
+  ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
   bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Aylık plan grafiği masaüstünde dikey ve alçak
   (`opex-stack`, 16rem, her ay yazılı), telefonda (grafik < 600 px) yatay ve satır sayısına göre; diğer grafikler yatay
   çubuk. Kategori ekseninde her ad yazılır (`interval: 0`); etiket sütunu adlar sığıyorsa en uzun ad kadar (ECharts

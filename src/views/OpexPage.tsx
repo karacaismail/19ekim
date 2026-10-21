@@ -664,6 +664,8 @@ interface Kalem {
   yillar: number[];
   donem: number;
   artis: string;
+  /** 2027 artışı veya zam oranı sıfırdan büyük (hızlı filtre “Artışlı”). */
+  artar: boolean;
   /** Plan dönemi bordro ayrıntısı (bordrolu); freelancer için fatura KDV’si. */
   brut: number | null;
   kesinti: number | null;
@@ -673,6 +675,40 @@ interface Kalem {
 }
 
 type KalemFiltre = 'tumu' | KumeKod;
+
+/**
+ * Hızlı filtreler (kullanıcı kararı 2026-10-21): araç satırında, mümkün olduğunca kısa adlı; durum süzgeçleri anahtar,
+ * özellik süzgeçleri onay kutusu. Açıklama ipucunda.
+ */
+type HizliKod = 'doviz' | 'tesvik' | 'bekleyen' | 'bos' | 'ozel' | 'artar';
+const HIZLI: { kod: HizliKod; ad: string; tip: 'anahtar' | 'kutu'; aciklama: string }[] = [
+  { kod: 'doviz', ad: 'Dövizli', tip: 'anahtar', aciklama: 'USD veya EUR ile ödenen kalemler' },
+  { kod: 'tesvik', ad: 'Teşvikli', tip: 'anahtar', aciklama: 'İşveren teşviki düşülen personel' },
+  { kod: 'bekleyen', ad: 'Bekleyen', tip: 'anahtar', aciklama: 'Bu ay ödemesi bekleyen kalemler' },
+  { kod: 'bos', ad: 'Boş ay', tip: 'kutu', aciklama: 'En az bir ayı boş (gider yok) olanlar' },
+  { kod: 'ozel', ad: 'Özel tutar', tip: 'kutu', aciklama: 'En az bir aya ayrı tutar yazılmış olanlar' },
+  { kod: 'artar', ad: 'Artışlı', tip: 'kutu', aciklama: '2027 artışı veya zammı olanlar' },
+];
+const HIZLI_KOSUL: Record<HizliKod, (r: Kalem) => boolean> = {
+  doviz: (r) => r.para !== 'TRY',
+  tesvik: (r) => (r.tesvik ?? 0) > 0,
+  bekleyen: (r) => r.durum?.kod === 'due',
+  bos: (r) => r.aylar.some((v) => v === null),
+  ozel: (r) => r.ozel.some(Boolean),
+  artar: (r) => r.artar,
+};
+
+/** Hızlı filtre anahtarı (role="switch"): iz ve top tokenlarla; yazı görünür, klavye odağı yazının alt çizgisi. */
+function Anahtar({ ad, acik, title, onChange }: { ad: string; acik: boolean; title: string; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={acik} className="opex-anahtar" title={title} onClick={() => onChange(!acik)}>
+      <span className="opex-anahtar-iz" aria-hidden="true">
+        <span className="opex-anahtar-top" />
+      </span>
+      {ad}
+    </button>
+  );
+}
 type SutunGrubu = 'ay' | 'yil' | 'personel';
 interface Sutun {
   id: string;
@@ -890,8 +926,8 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
   const enCok = hamSayi(enCokHam);
   const [turSec, setTurSec] = useState<string[]>([]);
   const [paraSec, setParaSec] = useState<string[]>([]);
-  const [kismi, setKismi] = useState(false);
-  const [ozelli, setOzelli] = useState(false);
+  // Hızlı filtreler (kullanıcı kararı 2026-10-21): araç satırında kısa adlı anahtarlar ve onay kutuları.
+  const [hizli, setHizli] = useState<HizliKod[]>([]);
   const [gizli, setGizli] = useState<SutunGrubu[]>([]);
 
   // “Bu ay”: rapor ayı (Sheets’teki onay kutusu ve ödeme durumu).
@@ -933,6 +969,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         yillar,
         donem: r2(yillar.reduce((t, v) => t + v, 0)),
         artis: `${ARTIS[g.artis]} ${g.artisOrani ? signed(g.artisOrani) : '%0'}`,
+        artar: g.artisOrani > 0,
         brut: null,
         kesinti: null,
         isveren: null,
@@ -964,6 +1001,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         yillar,
         donem: r2(yillar.reduce((t, v) => t + v, 0)),
         artis: k.zamOrani ? `zam ${signed(k.zamOrani)}` : 'zam yok',
+        artar: k.zamOrani > 0,
         brut: bordrolu ? top((s) => s.brut) : null,
         kesinti: bordrolu ? top((s) => s.gv + s.dv + s.sgkIsci + s.issizlikIsci) : null,
         isveren: bordrolu ? top((s) => s.sgkIsveren + s.issizlikIsveren - s.tesvik) : null,
@@ -1143,8 +1181,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         const s = sutunHarita.get(id);
         if (s && !kolonUyar(f, (s.liste ?? s.metin)(r), s.deger(r))) return false;
       }
-      if (kismi && !r.aylar.some((v) => v === null)) return false;
-      if (ozelli && !r.ozel.some(Boolean)) return false;
+      for (const h of hizli) if (!HIZLI_KOSUL[h](r)) return false;
       for (const [id, q] of Object.entries(arama)) {
         const s = sutunHarita.get(id);
         if (s && !aramaUyar(q, s.deger(r), s.metin(r))) return false;
@@ -1207,8 +1244,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     setArtisSec([]);
     setEnAz('');
     setEnCok('');
-    setKismi(false);
-    setOzelli(false);
+    setHizli([]);
   };
   const filtreVar =
     grupSec !== 'tumu' || sirala !== null || Object.values(arama).some((q) => q.trim()) ||
@@ -1216,8 +1252,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     kategoriSec.length + durumSec.length + turSec.length + paraSec.length + artisSec.length > 0 ||
     enAz !== '' ||
     enCok !== '' ||
-    kismi ||
-    ozelli;
+    hizli.length > 0;
   const siraDegistir = (id: string) => setSirala((s) => (!s || s.id !== id ? { id, yon: 'asc' } : s.yon === 'asc' ? { id, yon: 'desc' } : null));
   const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
   const tabloAdi = `Kalemler · ${p.etiket}`;
@@ -1236,91 +1271,111 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         {/* Kullanıcı kararı 2026-10-21: tablonun üstünde başlık ve açıklama yok (kalıcı); yalnız ayırıcı. Tablonun
             adı ekran okuyucuya bölgede (aria-label). */}
         <hr className="opex-ayrac" />
-        <div className="opex-veri-arac">
-          <Toggles
-            label="Grup süzgeci"
-            value={grupSec}
-            onChange={setGrupSec}
-            options={[
-              { value: 'tumu', label: `Hepsi (${all.length})` },
-              { value: 'ofis', label: `Ofis (${kumeSay('ofis')})` },
-              { value: 'teknoloji', label: `Teknoloji (${kumeSay('teknoloji')})` },
-              { value: 'insan', label: `Personel (${kumeSay('insan')})` },
-            ]}
-          />
-          {/* Sütun grupları: gerçek onay kutuları (durum ekran okuyucuya duyurulur); Escape kapatır, odak düğmeye döner. */}
-          <Popover position="bottom-end" trapFocus returnFocus middlewares={{ flip: true, shift: true, size: { padding: 8 } }} classNames={{ dropdown: 'navmenu opex-sutun-panel' }}>
-            <Popover.Target>
-              <button type="button" className="opex-btn">
-                Sütunlar
-              </button>
-            </Popover.Target>
-            <Popover.Dropdown>
-              {SUTUN_GRUPLARI.map((g) => (
-                <Checkbox
-                  key={g.id}
-                  label={g.ad}
-                  checked={!gizli.includes(g.id)}
-                  onChange={(e) => {
-                    const acik = e.currentTarget.checked;
-                    setGizli((xs) => (acik ? xs.filter((x) => x !== g.id) : [...xs, g.id]));
-                    if (!acik) {
-                      // Gizlenen sütunun filtresi görünmeden çalışmaya devam etmesin: filtre, arama ve sıralama kalkar.
-                      const ids = new Set(sutunlar.filter((x) => x.grup === g.id).map((x) => x.id));
-                      const ayikla = <T,>(o: Record<string, T>) => Object.fromEntries(Object.entries(o).filter(([id]) => !ids.has(id)));
-                      setKolon(ayikla);
-                      setArama(ayikla);
-                      setSirala((x) => (x && ids.has(x.id) ? null : x));
-                    }
-                  }}
-                  classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }}
-                />
-              ))}
-            </Popover.Dropdown>
-          </Popover>
-        </div>
-        {/* Tablo filtreleri (kullanıcı kararı 2026-10-21): sütun filtrelerinden ayrı, tüm tabloya uygulanır. */}
-        <h4 className="opex-filtreler-baslik" id="tablo-filtreleri">
-          Tablo filtreleri
-        </h4>
-        <div className="opex-filtreler" role="group" aria-labelledby="tablo-filtreleri">
-          {coklu('Kategori', [...katRenk.keys()], kategoriSec, setKategoriSec)}
-          {buAyVar ? coklu('Bu ay', secenek(all.map((r) => r.durum?.ad ?? '').filter(Boolean)), durumSec, setDurumSec) : null}
-          {coklu('Tür', ['Gider', 'Bordrolu', 'Freelancer'], turSec, setTurSec)}
-          {coklu('Para birimi', secenek(all.map((r) => r.para)), paraSec, setParaSec)}
-          {coklu('2027 artışı', ARTIS_SECENEK, artisSec, setArtisSec)}
-          <NumberInput
-            label="Toplam ₺ en az"
-            value={enAzHam}
-            onChange={setEnAz}
-            {...SAYI_KUTUSU}
-            classNames={{ root: 'opex-filter', label: 'opex-field-label', input: 'opex-input' }}
-          />
-          <NumberInput
-            label="Toplam ₺ en çok"
-            value={enCokHam}
-            onChange={setEnCok}
-            {...SAYI_KUTUSU}
-            classNames={{ root: 'opex-filter', label: 'opex-field-label', input: 'opex-input' }}
-          />
-          <div className="opex-filter opex-filter-checks">
-            <Checkbox label="Bir ayı boş olanlar" checked={kismi} onChange={(e) => setKismi(e.currentTarget.checked)} classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }} />
-            <Checkbox label="Özel tutarlı olanlar" checked={ozelli} onChange={(e) => setOzelli(e.currentTarget.checked)} classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }} />
+        {/*
+          Filtre tepsisi (kullanıcı kararı 2026-10-21): tablonun eklentisi gibi, hemen üstüne bitişik ve ayrı tonda
+          (tablonun içinde değil). Üst satırda grup, hızlı filtreler ve sütunlar.
+        */}
+        <div className="opex-tepsi">
+          <div className="opex-veri-arac">
+            <Toggles
+              label="Grup süzgeci"
+              value={grupSec}
+              onChange={setGrupSec}
+              options={[
+                { value: 'tumu', label: `Hepsi (${all.length})` },
+                { value: 'ofis', label: `Ofis (${kumeSay('ofis')})` },
+                { value: 'teknoloji', label: `Teknoloji (${kumeSay('teknoloji')})` },
+                { value: 'insan', label: `Personel (${kumeSay('insan')})` },
+              ]}
+            />
+            <div className="opex-hizli" role="group" aria-label="Hızlı filtreler">
+              {HIZLI.filter((h) => h.kod !== 'bekleyen' || (buAyVar && odemeTakibi)).map((h) => {
+                const acik = hizli.includes(h.kod);
+                const degis = (v: boolean) => setHizli((xs) => (v ? [...xs, h.kod] : xs.filter((x) => x !== h.kod)));
+                return h.tip === 'anahtar' ? (
+                  <Anahtar key={h.kod} ad={h.ad} acik={acik} title={h.aciklama} onChange={degis} />
+                ) : (
+                  <Checkbox
+                    key={h.kod}
+                    label={h.ad}
+                    title={h.aciklama}
+                    checked={acik}
+                    onChange={(e) => degis(e.currentTarget.checked)}
+                    classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }}
+                  />
+                );
+              })}
+            </div>
+            {/* Sütun grupları: gerçek onay kutuları (durum ekran okuyucuya duyurulur); Escape kapatır, odak düğmeye döner. */}
+            <Popover position="bottom-end" trapFocus returnFocus middlewares={{ flip: true, shift: true, size: { padding: 8 } }} classNames={{ dropdown: 'navmenu opex-sutun-panel' }}>
+              <Popover.Target>
+                <button type="button" className="opex-btn opex-sutunlar">
+                  Sütunlar
+                </button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                {SUTUN_GRUPLARI.map((g) => (
+                  <Checkbox
+                    key={g.id}
+                    label={g.ad}
+                    checked={!gizli.includes(g.id)}
+                    onChange={(e) => {
+                      const acik = e.currentTarget.checked;
+                      setGizli((xs) => (acik ? xs.filter((x) => x !== g.id) : [...xs, g.id]));
+                      if (!acik) {
+                        // Gizlenen sütunun filtresi görünmeden çalışmaya devam etmesin: filtre, arama ve sıralama kalkar.
+                        const ids = new Set(sutunlar.filter((x) => x.grup === g.id).map((x) => x.id));
+                        const ayikla = <T,>(o: Record<string, T>) => Object.fromEntries(Object.entries(o).filter(([id]) => !ids.has(id)));
+                        setKolon(ayikla);
+                        setArama(ayikla);
+                        setSirala((x) => (x && ids.has(x.id) ? null : x));
+                      }
+                    }}
+                    classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }}
+                  />
+                ))}
+              </Popover.Dropdown>
+            </Popover>
           </div>
+          {/* Tablo filtreleri (kullanıcı kararı 2026-10-21): sütun filtrelerinden ayrı, tüm tabloya uygulanır. */}
+          <h4 className="opex-filtreler-baslik" id="tablo-filtreleri">
+            Tablo filtreleri
+          </h4>
+          <div className="opex-filtreler" role="group" aria-labelledby="tablo-filtreleri">
+            {coklu('Kategori', [...katRenk.keys()], kategoriSec, setKategoriSec)}
+            {buAyVar ? coklu('Bu ay', secenek(all.map((r) => r.durum?.ad ?? '').filter(Boolean)), durumSec, setDurumSec) : null}
+            {coklu('Tür', ['Gider', 'Bordrolu', 'Freelancer'], turSec, setTurSec)}
+            {coklu('Para birimi', secenek(all.map((r) => r.para)), paraSec, setParaSec)}
+            {coklu('2027 artışı', ARTIS_SECENEK, artisSec, setArtisSec)}
+            <NumberInput
+              label="Toplam ₺ en az"
+              value={enAzHam}
+              onChange={setEnAz}
+              {...SAYI_KUTUSU}
+              classNames={{ root: 'opex-filter', label: 'opex-field-label', input: 'opex-input' }}
+            />
+            <NumberInput
+              label="Toplam ₺ en çok"
+              value={enCokHam}
+              onChange={setEnCok}
+              {...SAYI_KUTUSU}
+              classNames={{ root: 'opex-filter', label: 'opex-field-label', input: 'opex-input' }}
+            />
+          </div>
+          <div className="opex-veri-durum">
+            <p className="opex-veri-sayi" role="status" aria-live="polite">
+              {suzulmus.length} / {all.length} kalem
+            </p>
+            {filtreVar ? (
+              <button type="button" className="opex-btn" onClick={temizle}>
+                Filtreleri temizle
+              </button>
+            ) : null}
+          </div>
+          <span className="table-hint" aria-hidden="true">
+            Tabloyu yatay kaydırabilirsiniz.
+          </span>
         </div>
-        <div className="opex-veri-durum">
-          <p className="opex-veri-sayi" role="status" aria-live="polite">
-            {suzulmus.length} / {all.length} kalem
-          </p>
-          {filtreVar ? (
-            <button type="button" className="opex-btn" onClick={temizle}>
-              Filtreleri temizle
-            </button>
-          ) : null}
-        </div>
-        <span className="table-hint" aria-hidden="true">
-          Tabloyu yatay kaydırabilirsiniz.
-        </span>
         <div className="table-frame">
           <div
             className="table-scroll"
@@ -1744,6 +1799,8 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
       </Section>
       <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Üç grup: ofis (kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları), teknoloji (yazılım, yapay zekâ, sunucu, API, AWS vb.), personel (bordro ve freelancer).">
         <KalemTablosu m={m} p={p} />
+        {/* Tablo ile grafik arasında ayırıcı (kullanıcı kararı 2026-10-21). */}
+        <hr className="opex-ayrac opex-ayrac-arada" />
         <TechVendors m={m} p={p} />
       </Section>
       <div className="opex-year-bar">
