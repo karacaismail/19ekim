@@ -15,6 +15,9 @@
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
   --text-2xl: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
+  /* Kırıntılar ve kırıntıdaki sayfa başlığı (kullanıcı kararı 2026-10-21: kırıntı ≈ %13 büyük, başlık ≈ %15 küçük) */
+  --text-crumb: 1rem;
+  --text-crumb-title: clamp(1.3rem, 1.05rem + 0.95vw, 1.7rem);
   --text-display: clamp(2rem, 1.35rem + 2.8vw, 3.5rem);
   /* Sayfa başlığı (hero): sıkışık, tek satıra yakın */
   --text-title: clamp(1.75rem, 1.45rem + 1.2vw, 2.4rem);
@@ -122,6 +125,7 @@
   --font-condensed: 'Roboto Condensed Variable', 'Roboto Condensed', 'Roboto Variable', 'Roboto', ui-sans-serif, system-ui, sans-serif;
   --text-sm: 0.9375rem;
   --text-table: 0.9375rem;
+  --text-crumb: 1.0625rem;
 }
 
 @media (min-width: 22.5em) {

@@ -201,8 +201,10 @@ function NavMenu({ label, items: links, dividerBefore, current }: { label: strin
   );
 }
 
-/** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler canlı durumu, portal ile). */
+/** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler döviz kurları, portal ile). */
 export const PAGE_TOOLS_ID = 'sayfa-araclari';
+/** Üst bantta tema düğmesinin solundaki sayfa araçları yeri (ör. Giderler canlı durumu; kullanıcı kararı 2026-10-21). */
+export const HEADER_TOOLS_ID = 'bant-araclari';
 
 export function AppFrame({
   pathname,
@@ -266,6 +268,7 @@ export function AppFrame({
               </ul>
             </nav>
             <div className="topbar-tools">
+              <div className="header-tools" id={HEADER_TOOLS_ID} />
               <ThemeToggle />
             </div>
           </div>

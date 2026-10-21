@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useId, useMemo, useRef, useState,
 import { createPortal } from 'react-dom';
 import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
-import { AppFrame, PAGE_TOOLS_ID } from '../components/AppFrame';
+import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
 import { Chart, DataTable, FactsRow, Note, Section, type Column } from '../components/ui';
 import {
   OPEX_ENDPOINT,
@@ -395,20 +395,22 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
 /* ---------- Canlı durum şeridi ---------- */
 
 /**
- * Canlı durum (kullanıcı kararı 2026-10-20: küçük, başlığın altında): kırıntı satırının sağında tek satır; durum
- * noktası, kısa metin ve simge düğmeler (erişilebilir adlarıyla). Ayrıntı (erişim, son denetim) ipucunda.
+ * Canlı durum (kullanıcı kararı 2026-10-21: üst bantta, tema düğmesinin solunda): tek satır; durum noktası, kısa
+ * metin ve simge düğmeler (erişilebilir adlarıyla). Ayrıntı (erişim, son denetim) ipucunda.
  */
 function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extract<Live, { status: 'ready' }>; settingsOpen: boolean; onRefresh: () => void; onSettings: () => void }) {
   // Yalnız istemcide (veri gelince) çizilir: hedef ilk çizimde bulunur, şerit gövdede bir an görünmez.
-  const [host] = useState<HTMLElement | null>(() => document.getElementById(PAGE_TOOLS_ID));
-  const detay = `Erişim: ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim ${clock(live.checked)} · Sheets’te son değişiklik ${clock(live.data.degisti)}`;
+  const [host] = useState<HTMLElement | null>(() => document.getElementById(HEADER_TOOLS_ID));
+  const guncelleme = live.push ? 'anlık' : `${OPEX_POLL_MS / 1000} sn’de bir`;
+  const detay = `Erişim: ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim ${clock(live.checked)} · Sheets’te son değişiklik ${clock(live.data.degisti)} · Güncelleme ${guncelleme}`;
   const strip = (
     <div className="opex-live" data-state={live.stale ? 'stale' : 'live'}>
       <p className="opex-live-status" title={detay}>
         <span className="opex-live-dot" aria-hidden="true" />
         <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Canlı'}</span>
         <span className="opex-live-meta">
-          Sheets {clock(live.data.degisti)} · {live.push ? 'anlık' : `${OPEX_POLL_MS / 1000} sn’de bir`}
+          <span className="opex-live-kaynak">Sheets </span>
+          {clock(live.data.degisti)} · {guncelleme}
         </span>
         <span className="visually-hidden"> · {detay}</span>
       </p>
@@ -426,6 +428,27 @@ function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extrac
     </div>
   );
   return host ? createPortal(strip, host) : strip;
+}
+
+/**
+ * Döviz kurları (kullanıcı kararı 2026-10-21): kırıntı satırının sağında, sayfa başlığı hizasında. Yalnız istemcide
+ * (veri gelince) çizilir; hedef yoksa yerinde görünür.
+ */
+function Kurlar({ m }: { m: OpexModel }) {
+  const [host] = useState<HTMLElement | null>(() => document.getElementById(PAGE_TOOLS_ID));
+  const liste = (
+    <dl className="opex-kur" aria-label="Döviz kurları">
+      {(['USD', 'EUR'] as const).map((k) => (
+        <div key={k}>
+          <dt>{k}/TRY</dt>
+          <dd>
+            {rate(m.kur[k].deger)} <span className="opex-kur-kaynak">({m.kur[k].kaynak})</span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+  return host ? createPortal(liste, host) : liste;
 }
 
 /* ---------- Seçim düğmeleri (aria-pressed) ---------- */
@@ -1197,28 +1220,22 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     ozelli;
   const siraDegistir = (id: string) => setSirala((s) => (!s || s.id !== id ? { id, yon: 'asc' } : s.yon === 'asc' ? { id, yon: 'desc' } : null));
   const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
-  const titleId = 'kalemler-tablo';
+  const tabloAdi = `Kalemler · ${p.etiket}`;
   return (
     <>
-      <FactsRow
-        items={[
-          ...(buAyVar && odemeTakibi
-            ? [
-                { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} · ${m.ozet.odeme.adetOdenen} kalem` },
-                { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} · ${m.ozet.odeme.adetBekleyen} kalem` },
-              ]
-            : []),
-          { label: 'USD/TRY', value: `${rate(m.kur.USD.deger)} (${m.kur.USD.kaynak})` },
-          { label: 'EUR/TRY', value: `${rate(m.kur.EUR.deger)} (${m.kur.EUR.kaynak})` },
-        ]}
-      />
+      {/* Döviz kurları kırıntı satırında (Kurlar); burada yalnız bu ayın ödeme durumu. */}
+      {buAyVar && odemeTakibi ? (
+        <FactsRow
+          items={[
+            { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} · ${m.ozet.odeme.adetOdenen} kalem` },
+            { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} · ${m.ozet.odeme.adetBekleyen} kalem` },
+          ]}
+        />
+      ) : null}
       <div className="table-block opex-veri">
-        <h3 className="block-title" id={titleId}>
-          {`Kalemler · ${p.etiket}`}
-        </h3>
-        <p className="table-note">
-          Ay sütunları o ayın ₺ tutarı; —: o ay gider yok (Sheets’te işaretsiz), “özel”: o aya ayrı tutar yazılmış. Personel ayrıntıları plan dönemi toplamıdır. Tablo filtreleri tüm tabloya, başlıktaki huni yalnız o sütuna uygulanır; başlığa tıklayınca sıralanır; sütun aramasında “&gt;50000”, “&lt;=1.000” gibi sayı koşulu da yazılabilir.
-        </p>
+        {/* Kullanıcı kararı 2026-10-21: tablonun üstünde başlık ve açıklama yok (kalıcı); yalnız ayırıcı. Tablonun
+            adı ekran okuyucuya bölgede (aria-label). */}
+        <hr className="opex-ayrac" />
         <div className="opex-veri-arac">
           <Toggles
             label="Grup süzgeci"
@@ -1308,7 +1325,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
           <div
             className="table-scroll"
             role="region"
-            aria-labelledby={titleId}
+            aria-label={tabloAdi}
             tabIndex={0}
             // Yatay kaydırılınca sabit sütunun kenar gölgesi (yeniden çizim yok: öznitelik ve sütun genişliği değişkeni).
             onScroll={(e) => {
@@ -1712,6 +1729,7 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
   const p = useMemo(() => planOfModel(m), [m]);
   return (
     <OzetContext.Provider value={data.ozet}>
+      <Kurlar m={m} />
       {m.uyarilar.length ? (
         <Note title={`Sheets uyarıları (${m.uyarilar.length})`}>
           <ul className="opex-warnings">

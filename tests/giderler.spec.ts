@@ -289,8 +289,27 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       await page.goto(PATH);
       await hydrated(page);
       await expect(page.locator('.opex-hero-value')).toHaveText(hero26(MODEL));
-      // Canlı durum küçük şerit olarak kırıntı satırında; başlıkta yıl seçimi yok.
-      await expect(page.locator('.crumbs-row .opex-live')).toBeVisible();
+      // Kullanıcı kararı 2026-10-21: canlı durum üst bantta (tema düğmesinin solunda), gezinme ortalı kalır; döviz
+      // kurları kırıntı satırının sağında; Kalemler tablosunun üstünde başlık ve açıklama yok, yalnız ayırıcı.
+      const canli = page.locator('.topbar .opex-live');
+      await expect(canli).toBeVisible();
+      await expect(page.locator('.crumbs-row .opex-live')).toHaveCount(0);
+      const [bant, gez, durum, dugme] = [await page.locator('.topbar').boundingBox(), await page.locator('.mainnav-list').boundingBox(), await canli.boundingBox(), await page.locator('.theme-toggle').boundingBox()];
+      expect(Math.abs(gez!.x + gez!.width / 2 - size.width / 2), 'gezinme ortalı').toBeLessThanOrEqual(2);
+      expect(durum!.y + durum!.height, 'canlı durum üst bantta').toBeLessThanOrEqual(bant!.y + bant!.height);
+      expect(durum!.x).toBeGreaterThanOrEqual(gez!.x + gez!.width);
+      expect(durum!.x + durum!.width).toBeLessThanOrEqual(dugme!.x);
+      expect(bant!.height, 'bant tek satır').toBeLessThan(70);
+      const kur = page.locator('.crumbs-row .opex-kur');
+      await expect(kur.locator('dt')).toHaveText(['USD/TRY', 'EUR/TRY']);
+      const [kurKutu, baslik] = [await kur.boundingBox(), await page.locator('.crumbs-title').boundingBox()];
+      expect(kurKutu!.y, 'kurlar başlık satırında').toBeLessThan(baslik!.y + baslik!.height);
+      await expect(page.locator('.facts-row dt', { hasText: /USD\/TRY|EUR\/TRY/ })).toHaveCount(0);
+      await expect(page.locator('.opex-veri hr.opex-ayrac')).toBeVisible();
+      await expect(page.locator('.opex-veri .block-title, .opex-veri .table-note')).toHaveCount(0);
+      await expect(page.getByRole('heading', { name: KALEMLER })).toHaveCount(0);
+      await expect(page.getByRole('region', { name: KALEMLER })).toBeVisible();
+      // Başlıkta yıl seçimi yok.
       await expect(page.locator('.hero .opex-years')).toHaveCount(0);
       // Plan grafiği kaydırmadan başlar.
       const plan = page.locator('.chart', { hasText: 'Aylık plan' }).first();
@@ -306,6 +325,22 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
       await expect(page.getByRole('region', { name: 'Parametreler (Google Sheets)' })).toHaveCount(0);
     });
   }
+
+  test('320 px: canlı durum bantta gezinmenin altında; simge düğmeler tek satırda; kurlar kırıntı satırında; yatay taşma yok', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const canli = page.locator('.topbar .opex-live');
+    await expect(canli).toBeVisible();
+    const ustler = await canli.locator('.opex-icon-btn').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+    expect(new Set(ustler).size, 'düğmeler tek satırda').toBe(1);
+    const [gez, durum, dugme, marka] = [await page.locator('.mainnav').boundingBox(), await canli.boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.brand').boundingBox()];
+    expect(durum!.y).toBeGreaterThanOrEqual(gez!.y + gez!.height - 1);
+    expect(dugme!.y, 'tema düğmesi marka satırında').toBeLessThan(marka!.y + marka!.height);
+    await expect(page.locator('.crumbs-row .opex-kur')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  });
 
   test('2026 ve 2027 sekmeleri aynı şablonda; seçim radyo noktasıyla', async ({ page }) => {
     // Geçişler anında (renk karşılaştırması geçiş ortasında yapılmasın); fare kartların dışında.

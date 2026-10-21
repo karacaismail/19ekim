@@ -146,8 +146,9 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   logo · gezinme · tema düğmesi), dar ekranda logonun altında güvenli ortalamayla (`safe center`), dar ekranda logonun altında kendi satırında
   (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
   açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
-  `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-2xl`; Giderler: 19 Ekim › Finans › OpEx ›
-  Operasyonel Giderler, ayrı başlık alanı yok). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
+  `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-crumb-title`; Giderler: 19 Ekim › Finans › OpEx ›
+  Operasyonel Giderler, ayrı başlık alanı yok). Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`:
+  1rem, Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
   (dar ekranda açıklama başlığın altında). Gezinme tek satır: “İstihdam” (organizasyon,
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
   bekleyenler, parametreler; `MARKETING_NAV`) açılır menüleri, Giderler (OPEX), Notlar. Menüler tek bileşen (`NavMenu`,
@@ -155,9 +156,16 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   ekranda panel kendi içinde kayar; JavaScript yoksa menüler yerine düz bağlantılar). Sayfa başlıkları sıkışık (`--text-title`, geniş
   ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
   (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
-  satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
-- Giderler ilk ekranı (kullanıcı kararı 2026-10-20, yıl seçici plan ve kalemlerin altına alındı): canlı durum kırıntı
-  satırında küçük şerit (nokta, kısa metin, simge düğmeler); ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
+  satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`; Giderler döviz kurları), üst bantta tema düğmesinin solunda
+  bant araçları yeri (`HEADER_TOOLS_ID`; Giderler canlı durumu). Bant araçları telefonda (< 48em) gezinmenin altında
+  kendi satırında (marka ile tema düğmesi ilk satırda kalır), tablette ilk satırda; ≥ 64em’de üç sütunlu ızgaranın sağ
+  sütununda (yan sütunlar `minmax(max-content, 1fr)`: sığdıkça gezinme tam ortada, sığmazsa üst üste binmez).
+- Giderler ilk ekranı (kullanıcı kararı 2026-10-20, yıl seçici plan ve kalemlerin altına alındı): canlı durum küçük
+  şerit (nokta, kısa metin, simge düğmeler), kullanıcı kararı 2026-10-21 ile üst bantta tema düğmesinin solunda;
+  gezinme ortalı kalsın diye ≥ 64em’de “Sheets ss:dd:ss · anlık” yazısı görünmez (ipucunda ve ekran okuyucuda), tablette
+  görünür, telefonda düğmeler tek satırda ve en dar ekranda “Sheets” sözcüğü gizli. Döviz kurları (USD/TRY, EUR/TRY)
+  kırıntı satırının sağında, başlık hizasında (`.opex-kur`); Kalemler veri tablosunun üstünde başlık ve açıklama yok
+  (kalıcı), yalnız ayırıcı (`.opex-ayrac`; tablonun adı bölgede `aria-label`); ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
   bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Aylık plan grafiği masaüstünde dikey ve alçak
   (`opex-stack`, 16rem, her ay yazılı), telefonda (grafik < 600 px) yatay ve satır sayısına göre; diğer grafikler yatay
   çubuk. Kategori ekseninde her ad yazılır (`interval: 0`); etiket sütunu adlar sığıyorsa en uzun ad kadar (ECharts

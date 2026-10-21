@@ -491,6 +491,11 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(h1).toHaveText('Operasyonel Giderler');
     const [baslik, kirinti] = [await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), await page.locator('.crumbs a').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize))];
     expect(baslik).toBeGreaterThan(kirinti * 1.4);
+    // Kullanıcı kararları 2026-10-21: kırıntılar %10–20 büyük (Giderler 15 → 17 px), başlık %10–20 küçük (32 → ≈ 27 px).
+    expect(kirinti).toBeGreaterThanOrEqual(15 * 1.1);
+    expect(kirinti).toBeLessThanOrEqual(15 * 1.2);
+    expect(baslik).toBeGreaterThanOrEqual(32 * 0.8);
+    expect(baslik).toBeLessThanOrEqual(32 * 0.9);
     // Kırıntılar ve başlık aynı satırda.
     const ilk = await page.locator('.crumbs li').first().boundingBox();
     const son = await page.locator('.crumbs li').last().boundingBox();
