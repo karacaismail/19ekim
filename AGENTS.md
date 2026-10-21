@@ -137,7 +137,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   veya grafik yüklenemezse görünür yedek metindir.
 - Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (Türksab yazı imi “TURKS/AB”, eğik çizgi
   kırmızı `--brand-slash`, ekran okuyucuya “Türksab”; kullanıcı kararı 2026-10-21) ve altında “Pazarlama & Finansal
-  Planlama”; ≥ 64em gezinme aynı satırda logo ile tema düğmesi arasında, dar ekranda logonun altında kendi satırında
+  Planlama”; ≥ 64em gezinme aynı satırda, başlığın tam ortasında (üç sütunlu ızgara:
+  logo · gezinme · tema düğmesi), dar ekranda logonun altında güvenli ortalamayla (`safe center`), dar ekranda logonun altında kendi satırında
   (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
   açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
   `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-2xl`; Giderler: 19 Ekim › Finans › OpEx ›

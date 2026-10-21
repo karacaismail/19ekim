@@ -381,6 +381,16 @@ test.describe('başlık ve İstihdam menüsü', () => {
       expect(nav!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
       expect(nav!.height).toBeLessThanOrEqual(60);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+      // Sığıyorsa ortalı; sığmıyorsa ilk öğe kesilmez (güvenli ortalama).
+      const ilk = await page.locator('.mainnav-list > li').first().boundingBox();
+      expect(ilk!.x).toBeGreaterThanOrEqual(nav!.x - 1);
+      if (width >= 768) {
+        const liste = await page.locator('.mainnav-list').evaluate((el) => {
+          const lis = [...el.children].filter((c) => (c as HTMLElement).offsetParent !== null).map((c) => c.getBoundingClientRect());
+          return { sol: Math.min(...lis.map((b) => b.left)), sag: Math.max(...lis.map((b) => b.right)) };
+        });
+        expect(Math.abs((liste.sol + liste.sag) / 2 - width / 2)).toBeLessThan(8);
+      }
     });
   }
 
@@ -393,6 +403,9 @@ test.describe('başlık ve İstihdam menüsü', () => {
       expect(dugme!.x).toBeGreaterThan(nav!.x);
       expect(Math.abs(nav!.y + nav!.height / 2 - (marka!.y + marka!.height / 2))).toBeLessThan(8);
       expect(await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(64);
+      // Gezinme başlığın tam ortasında (kullanıcı kararı 2026-10-21).
+      const liste = await page.locator('.mainnav-list').boundingBox();
+      expect(Math.abs(liste!.x + liste!.width / 2 - 640)).toBeLessThan(8);
     });
   }
 
