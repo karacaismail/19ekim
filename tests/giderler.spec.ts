@@ -809,23 +809,32 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     }
   });
 
-  test('netten işveren maliyetine: her genişlikte adım değerleri yazılı, değer ekseni yok (320, 1280)', async ({ page }) => {
+  // Kullanıcı kararı 2026-10-21: köprü yerine tek yığılmış çubuk; parçaların tutarı ve payı açıklamada.
+  test('netten işveren maliyetine: tek yığılmış çubuk, 5 parça; açıklamada tutar ve pay (toplam %100), toplam notta (320, 1280)', async ({ page }) => {
     for (const width of [320, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.unrouteAll({ behavior: 'ignoreErrors' });
-      await mockScript(page, { ozet: `kopru-${width}`, model: MODEL }, 'open');
+      await mockScript(page, { ozet: `bilesim-${width}`, model: MODEL }, 'open');
       await page.goto(PATH);
       await hydrated(page);
       const kutu = page.locator('.chart', { hasText: 'Netten işveren maliyetine' }).first();
+      await expect(kutu.locator('.chart-canvas')).toHaveAttribute('data-kind', 'opex-bilesim');
+      await expect(kutu).toContainText('işveren maliyeti');
       await kutu.scrollIntoViewIfNeeded();
       const svg = kutu.locator('svg');
       await expect(svg).toBeVisible({ timeout: 10_000 });
       await page.waitForTimeout(400);
-      const metin = await svg.locator('text').allTextContents();
-      // 8 adımın 8 değeri (6 artı/eksi adım + 2 ara toplam) çubuk ucunda; eksen etiketi (0, 1 Mn ₺ …) yok.
-      expect(metin.filter((t) => /^[+−] .+₺$/.test(t.trim())), `${width} px`).toHaveLength(6);
-      expect(metin.filter((t) => /₺$/.test(t.trim())), `${width} px`).toHaveLength(8);
-      expect(metin.filter((t) => t.trim() === '0'), `${width} px`).toEqual([]);
+      const metin = (await svg.locator('text').allTextContents()).map((t) => t.trim()).filter(Boolean);
+      // Dar grafikte açıklama satırları sözcük arasından sarılır (ayrı metin düğümleri): birleştirilip sayılır.
+      const hepsi = metin.join(' ');
+      expect(hepsi, `${width} px`).toMatch(/^Net ücret /);
+      const paylar = [...hepsi.matchAll(/%([\d,]+)/g)].map((x) => Number(x[1].replace(',', '.')));
+      // Sayılar satır sonunda bölünmez (“%56,” / “5)” gibi).
+      expect(metin.filter((t) => /[,%]$/.test(t)), `${width} px`).toEqual([]);
+      expect(paylar, `${width} px`).toHaveLength(5);
+      expect(Math.abs(paylar.reduce((a, b) => a + b, 0) - 100), `${width} px payların toplamı`).toBeLessThan(0.6);
+      // Değer ekseni yok (0, 1 Mn ₺ …).
+      expect(metin.filter((t) => t === '0'), `${width} px`).toEqual([]);
       expect(await cakisanEtiketler(svg), `${width} px`).toEqual([]);
     }
   });
@@ -845,7 +854,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
   });
 
   // Kullanıcı bildirimi 2026-10-21: üzerine gelince gri vurgu bandı çubuğu örtüyordu.
-  test('grafik üzerine gelince vurgu bandı çubuğu örtmez (köprü ve kategoriler)', async ({ page }) => {
+  test('grafik üzerine gelince vurgu bandı çubuğu örtmez (bileşim ve kategoriler)', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await mockScript(page, { ozet: 'hover', model: MODEL }, 'open');
     await page.goto(PATH);
@@ -859,7 +868,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       const cubuklar = await kutu.locator('svg').evaluate((svg) =>
         [...svg.querySelectorAll('path')]
           .map((p) => ({ fill: p.getAttribute('fill') ?? '', b: p.getBoundingClientRect() }))
-          .filter((x) => x.b.width > 8 && x.b.height > 8 && x.b.height < 40 && x.fill && x.fill !== 'none' && x.fill !== 'transparent' && !/^rgba\(.*,\s*0\)$/.test(x.fill))
+          .filter((x) => x.b.width > 8 && x.b.height > 8 && x.b.height < 60 && x.fill && x.fill !== 'none' && x.fill !== 'transparent' && !/^rgba\(.*,\s*0\)$/.test(x.fill))
           .slice(0, 4)
           .map((x) => ({ x: x.b.left + x.b.width / 2, y: x.b.top + x.b.height / 2, fill: x.fill })),
       );
@@ -1192,6 +1201,39 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await expect(sayac).toHaveText(`${hepsi} / ${hepsi} kalem`);
   });
 
+  // Kullanıcı kararları 2026-10-21: arama kutusunun üstünde ve altında eşit boşluk; sabit sütun kaydırılınca kenar gölgesi.
+  test('kalemler veri tablosu: arama kutusu boşlukları eşit; yatay kaydırınca sabit Kalem sütununda kenar çizgisi ve gölge', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockScript(page, { ozet: 'sabit', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const tablo = page.getByRole('region', { name: KALEMLER });
+    const kutu = tablo.getByRole('searchbox', { name: 'Kalem sütununda ara' });
+    const [hucre, input] = [await kutu.locator('xpath=ancestor::td[1]').boundingBox(), await kutu.boundingBox()];
+    const ust = input!.y - hucre!.y;
+    const alt = hucre!.y + hucre!.height - (input!.y + input!.height);
+    expect(Math.abs(ust - alt), `üst ${ust}, alt ${alt}`).toBeLessThanOrEqual(2);
+    // Gölge, kaymayan çerçevedeki katman (birleşik kenarlıklı hücre box-shadow çizmez): görünürlüğü ve yeri ölçülür.
+    const golge = () =>
+      tablo.evaluate((el) => {
+        const cs = getComputedStyle(el.parentElement!, '::after');
+        const sabit = el.querySelector('thead th.cell-sticky')!.getBoundingClientRect().width;
+        // Katman görünür ve sabit sütunun sağ kenarında.
+        return cs.content !== 'none' && cs.opacity === '1' && Math.abs(parseFloat(cs.left) - sabit) < 2 ? 'var' : 'none';
+      });
+    expect(await golge()).toBe('none');
+    await tablo.evaluate((el) => {
+      el.scrollLeft = 400;
+      el.dispatchEvent(new Event('scroll'));
+    });
+    await expect.poll(golge).toBe('var');
+    await tablo.evaluate((el) => {
+      el.scrollLeft = 0;
+      el.dispatchEvent(new Event('scroll'));
+    });
+    await expect.poll(golge).toBe('none');
+  });
+
   test('kalemler veri tablosu 375 px: sayfa taşmaz, tablo kendi kutusunda kayar; filtreler tek sütun', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockScript(page, { ozet: 'veri-375', model: MODEL }, 'open');
@@ -1207,20 +1249,17 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     expect(new Set(filtreler).size).toBe(1);
   });
 
-  test('teşvik yoksa köprüde sıfır adım “0 ₺”, “+ 0” veya görünür çubuk yok', async ({ page }) => {
+  test('teşvik yoksa bileşim notunda teşvik yok; işveren payı tam', async ({ page }) => {
     const tesviksiz = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;
     for (const k of tesviksiz.kisiler) for (const s of [...k.y2026.aylar, ...k.y2027.aylar]) s.tesvik = 0;
     await mockScript(page, { ozet: 'tesviksiz', model: tesviksiz }, 'open');
     await page.goto(PATH);
     await hydrated(page);
     const kutu = page.locator('.chart', { hasText: 'Netten işveren maliyetine' }).first();
+    await expect(kutu.locator('figcaption, .chart-note').first()).not.toContainText('teşvik');
     await kutu.scrollIntoViewIfNeeded();
-    const svg = kutu.locator('svg');
-    await expect(svg).toBeVisible({ timeout: 10_000 });
-    await page.waitForTimeout(400);
-    const metin = (await svg.locator('text').allTextContents()).map((t) => t.trim());
-    expect(metin).toContain('0 ₺');
-    expect(metin.filter((t) => /^[+−] 0( ₺)?$/.test(t))).toEqual([]);
+    await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+    await expect.poll(() => kutu.locator('svg').textContent()).toContain('İşveren payı (teşvik sonrası)');
   });
 
   test('genişlik değişince (1280 → 375 → 1280) grafikler yeniden ölçülür; sayfada hata yok', async ({ page }) => {
@@ -1472,7 +1511,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
            return { kind: c.kind, series, state: [o.stateAnimation.easing, o.stateAnimation.duration] };
          });`,
       );
-      expect(new Set(models.map((x) => x.kind))).toEqual(new Set(['opex-bar', 'opex-stack', 'opex-stack-h', 'opex-group', 'opex-kopru']));
+      expect(new Set(models.map((x) => x.kind))).toEqual(new Set(['opex-bar', 'opex-stack', 'opex-stack-h', 'opex-group', 'opex-bilesim']));
       for (const m of models) {
         for (const [animation, easing, duration] of m.series) {
           if (reduced) expect(animation, m.kind).toBe(false);

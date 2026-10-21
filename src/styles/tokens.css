@@ -277,6 +277,10 @@
   --pill-cat-8-bg: #e3e7ec;
   --pill-cat-8-fg: #37424f;
 
+  /* Sabit sütunun kaydırılırken sağ kenarı: ince çizgi + yumuşak gölge */
+  --sticky-shadow: rgb(22 24 26 / 0.14);
+  /* Türksab logosundaki kırmızı eğik çizgi (zeminde ≥ 3:1) */
+  --brand-slash: #d4111e;
   /* Açık temada iz beyaz (kullanıcı kararı 2026-10-21), sınırı nötr ince çizgi */
   --toggle-track-off: #ffffff;
   --toggle-thumb-off: #555a5f;
@@ -363,6 +367,8 @@
   --status-oneri-fg: #ffc285;
   --status-bekliyor-bg: #331616;
   --status-bekliyor-fg: #ffb3b3;
+  --brand-slash: #ff5a5a;
+  --sticky-shadow: rgb(0 0 0 / 0.55);
   --pill-var-bg: #1c3828;
   --pill-var-fg: #a4e2bb;
   --pill-off-bg: #2a2f34;

@@ -1305,7 +1305,19 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
           Tabloyu yatay kaydırabilirsiniz.
         </span>
         <div className="table-frame">
-          <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0}>
+          <div
+            className="table-scroll"
+            role="region"
+            aria-labelledby={titleId}
+            tabIndex={0}
+            // Yatay kaydırılınca sabit sütunun kenar gölgesi (yeniden çizim yok: öznitelik ve sütun genişliği değişkeni).
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              el.toggleAttribute('data-kaydi', el.scrollLeft > 0);
+              const sabit = el.querySelector<HTMLElement>('thead th.cell-sticky');
+              if (sabit) el.parentElement?.style.setProperty('--sabit-genislik', `${sabit.getBoundingClientRect().width}px`);
+            }}
+          >
             <Table className="data-table opex-veri-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
               <Table.Thead>
                 <Table.Tr>
@@ -1436,15 +1448,13 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
   const free = per.filter((x) => x.k.tur === 'Freelancer');
   const b = { ...total } as Satir;
   for (const f of Object.keys(b) as (keyof Satir)[]) b[f] = sum(f, staff);
-  const kopru: { name: string; value: number; tone: OpexTone; total?: boolean }[] = [
-    { name: 'Net ücretler', value: b.net, tone: 'net' },
+  // İşveren maliyetinin parçaları (kullanıcı kararı 2026-10-21: tek yığılmış çubuk): net + vergiler + işçi SGK = brüt; + işveren payı (teşvik sonrası).
+  const bilesim: { name: string; value: number; tone: OpexTone }[] = [
+    { name: 'Net ücret', value: b.net, tone: 'net' },
     { name: 'Gelir vergisi', value: b.gv, tone: 'tax' },
     { name: 'Damga vergisi', value: b.dv, tone: 'tax' },
     { name: 'SGK ve işsizlik (işçi)', value: b.sgkIsci + b.issizlikIsci, tone: 'sgk' },
-    { name: 'Brüt ücretler', value: b.brut, tone: 'total', total: true },
-    { name: 'SGK ve işsizlik (işveren)', value: b.sgkIsveren + b.issizlikIsveren, tone: 'employer' },
-    { name: 'Teşvik ve destekler', value: -b.tesvik, tone: 'credit' },
-    { name: 'İşveren maliyeti', value: b.maliyet, tone: 'total', total: true },
+    { name: 'İşveren payı (teşvik sonrası)', value: b.sgkIsveren + b.issizlikIsveren - b.tesvik, tone: 'employer' },
   ];
   return (
     <>
@@ -1477,13 +1487,14 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
         }}
       />
       <Chart
-        id={`bordro-kopru-${d.yil}`}
+        id={`bordro-bilesim-${d.yil}`}
         title="Netten işveren maliyetine"
-        note={`${d.etiket}, bordrolu toplam`}
-        size="lg"
-        rows={kopru.length}
-        summary={`Net ücretler ${tl(b.net)}; gelir vergisi ${tl(b.gv)}, damga ${tl(b.dv)} ve işçi SGK ${tl(b.sgkIsci + b.issizlikIsci)} eklenince brüt ${tl(b.brut)}; işveren SGK ${tl(b.sgkIsveren + b.issizlikIsveren)} eklenip teşvik ${tl(b.tesvik)} düşülünce işveren maliyeti ${tl(b.maliyet)}.`}
-        spec={{ kind: 'opex-kopru', steps: kopru }}
+        note={`${d.etiket}, bordrolu toplam · işveren maliyeti ${tl(b.maliyet)} (brüt ${tl(b.brut)})${b.tesvik ? ` · teşvik −${tl(b.tesvik)} düşüldü` : ''}`}
+        size="sm"
+        rows={1}
+        shortLabels
+        summary={`İşveren maliyeti ${tl(b.maliyet)}: net ücret ${tl(b.net)}, gelir vergisi ${tl(b.gv)}, damga vergisi ${tl(b.dv)}, işçi SGK ve işsizlik ${tl(b.sgkIsci + b.issizlikIsci)} (brüt ${tl(b.brut)}), işveren payı ${tl(b.sgkIsveren + b.issizlikIsveren - b.tesvik)} (teşvik ${tl(b.tesvik)} düşüldü).`}
+        spec={{ kind: 'opex-bilesim', total: { name: 'İşveren maliyeti', value: b.maliyet }, parts: bilesim }}
       />
     </>
   );

@@ -61,4 +61,5 @@ export type ChartSpec =
   /** OPEX: gruplanmış yatay çubuk (ör. kişi başına 2026 ve 2027). */
   | { kind: 'opex-group'; categories: string[]; series: { name: string; tone: OpexTone; values: number[] }[] }
   /** OPEX: yatay şelale (netten işveren maliyetine köprü); `total` adımı sıfırdan çizilir. */
-  | { kind: 'opex-kopru'; steps: { name: string; value: number; tone: OpexTone; total?: boolean }[] };
+  /** OPEX: tek yığılmış yatay çubuk — bir toplamın parçaları (ör. işveren maliyeti); tutar ve pay açıklamada. */
+  | { kind: 'opex-bilesim'; total: { name: string; value: number }; parts: { name: string; value: number; tone: OpexTone }[] };

@@ -233,9 +233,14 @@ export function AppFrame({
         <header className="topbar">
           <div className="wrap">
             {/* Logo altında alt başlık; plan tarihi başlıkta yok (kullanıcı kararı 2026-10-20). */}
-            <a className="brand" href={href('/')}>
-              <span className="brand-word">iStoc</span>
-              <span className="brand-tagline">Pazarlama &amp; Finansal Planlama</span>
+            {/* Logo (kullanıcı kararı 2026-10-21): Türksab yazı imi “TURKS/AB”, eğik çizgi kırmızı; adı ekran okuyucuya “Türksab”. */}
+            <a className="brand" href={href('/')} aria-label="Türksab · Pazarlama & Finansal Planlama">
+              <span className="brand-word" aria-hidden="true">
+                TURKS<span className="brand-slash">/</span>AB
+              </span>
+              <span className="brand-tagline" aria-hidden="true">
+                Pazarlama &amp; Finansal Planlama
+              </span>
             </a>
             {/* Gezinme (kullanıcı kararı 2026-10-21): geniş ekranda üst satırda, dar ekranda markanın altında. */}
             <nav className="mainnav" aria-label="Ana gezinme">

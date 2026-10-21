@@ -135,7 +135,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
-- Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (“iStoc”) ve altında “Pazarlama & Finansal
+- Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (Türksab yazı imi “TURKS/AB”, eğik çizgi
+  kırmızı `--brand-slash`, ekran okuyucuya “Türksab”; kullanıcı kararı 2026-10-21) ve altında “Pazarlama & Finansal
   Planlama”; ≥ 64em gezinme aynı satırda logo ile tema düğmesi arasında, dar ekranda logonun altında kendi satırında
   (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
   açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
@@ -156,9 +157,11 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   çubuk. Kategori ekseninde her ad yazılır (`interval: 0`); etiket sütunu adlar sığıyorsa en uzun ad kadar (ECharts
   ölçer), sığmıyorsa üst sınırda ve ad sarılır; grafik kutusu satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır
   20 px, dar grafikte 44 px, telefonda 68 px; kısa ad — ay — için `shortLabels` 28 px; iç pay `--chart-row-pad`,
-  açıklama ve değer ekseni payını `charts.ts → legendPad` hesaplar). Netten işveren maliyetine (köprü): tam genişlik,
-  her adımın değeri çubuk ucunda (dar grafikte kısa “1,3 Mn ₺”), değer ekseni yok, ölçek en yüksek ara toplamda biter,
-  küçük adım en az 4 px. Grafik vurgu bandı (axisPointer gölgesi) çubukların arkasında (`z: 0`). Kalemler tablosundaki
+  açıklama ve değer ekseni payını `charts.ts → legendPad` hesaplar). Netten işveren maliyetine (kullanıcı kararı 2026-10-21: köprü
+  yerine tek yığılmış çubuk, `opex-bilesim`): işveren maliyetinin parçaları soldan sağa (net, gelir ve damga vergisi,
+  işçi SGK, işveren payı teşvik sonrası), tutar ve pay açıklamada (dar grafikte iki satır, sayı bölünmez), toplam ve
+  teşvik notta. Sabit Kalem sütunu yatay kaydırılınca sağ kenarında ince çizgi ve yumuşak gölge (kaymayan çerçevede tek
+  katman, `--sabit-genislik`; birleşik kenarlıklı hücre gölge çizmez); sütun arama kutusunun üstü ve altı eşit boşluklu. Grafik vurgu bandı (axisPointer gölgesi) çubukların arkasında (`z: 0`). Kalemler tablosundaki
   durum etiketleri tam yuvarlak hap (`.opex-state`), her durum ayrı pastel zemin (`--pill-*`: var, off, paid, due,
   missing, bordro, fatura; iki temada yazı ≥ 6,7:1). Kategori sütunu da hap (`.opex-pill`): 8 pastel çift
   (`--pill-cat-1…8`), kategoriye ilk görünüş sırasıyla, süzgeçten bağımsız. Bordro bileşenleri ve köprü tam genişlikte (yan yana yarım genişlikte etiketler gizleniyordu).

@@ -340,7 +340,11 @@ test.describe('başlık ve İstihdam menüsü', () => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('');
       const marka = page.locator('.topbar .brand');
-      await expect(marka).toHaveText('iStocPazarlama & Finansal Planlama');
+      // Logo (kullanıcı kararı 2026-10-21): Türksab “TURKS/AB”, eğik çizgi kırmızı; ekran okuyucuya “Türksab”.
+      await expect(marka).toHaveText('TURKS/ABPazarlama & Finansal Planlama');
+      await expect(page.getByRole('link', { name: 'Türksab · Pazarlama & Finansal Planlama' })).toBeVisible();
+      const [cizgi, yazi] = await marka.evaluate((el) => [getComputedStyle(el.querySelector('.brand-slash')!).color, getComputedStyle(el.querySelector('.brand-word')!).color]);
+      expect(cizgi).not.toBe(yazi);
       await expect(page.locator('.topbar')).not.toContainText('Plan tarihi');
       await expect(page.locator('.topbar')).not.toContainText('Satış ve Pazarlama Planı');
       const [kelime, alt] = [await marka.locator('.brand-word').boundingBox(), await marka.locator('.brand-tagline').boundingBox()];

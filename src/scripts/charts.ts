@@ -859,61 +859,45 @@ function build(spec: ChartSpec, width: number): Opt {
       };
     }
 
-    case 'opex-kopru': {
+    case 'opex-bilesim': {
+      // Kullanıcı kararı 2026-10-21: köprü yerine tek yığılmış çubuk; parçalar soldan sağa, ölçek toplamda biter.
       const narrow = width < OPEX_NARROW;
-      const base0: number[] = [];
-      const bars: Opt[] = [];
-      let run = 0;
-      for (const step of spec.steps) {
-        if (step.total) {
-          base0.push(0);
-          run = step.value;
-        } else if (step.value >= 0) {
-          base0.push(run);
-          run += step.value;
-        } else {
-          run += step.value;
-          base0.push(run);
-        }
-        // Sıfır adım (ör. teşvik yok) çubuk çizmez (en küçük çubuk boyu da görünmesin); etiketi “0 ₺”.
-        bars.push({ value: Math.abs(step.value), itemStyle: { color: step.value === 0 ? 'transparent' : viz(step.tone), borderRadius: 0 } });
-      }
-      // Dar grafikte değer kısa yazılır (1,3 Mn ₺); tam tutar ipucunda ve tabloda.
-      const amount = narrow ? shortLira : lira;
-      const label = (i: number, fmt = amount) => {
-        const step = spec.steps[i];
-        if (step.value === 0) return '0 ₺';
-        return step.total ? fmt(step.value) : `${step.value > 0 ? '+' : '−'} ${fmt(Math.abs(step.value))}`;
-      };
-      const labels = spec.steps.map((_, i) => label(i));
-      const peak = Math.max(0, ...spec.steps.map((s, i) => base0[i] + Math.abs(s.value)));
+      const surface = token('--surface-raised');
+      const toplam = spec.total.value;
+      const adlar = bilesimAdlari(spec, width);
       return {
         ...base(),
-        legend: { show: false },
+        legend: {
+          ...(base().legend as Opt),
+          data: adlar,
+          ...(narrow
+            ? {
+                orient: 'vertical',
+                itemGap: 12,
+                textStyle: { ...((base().legend as Opt).textStyle as Opt), width: bilesimMetinGenisligi(width), overflow: 'break', lineHeight: FONT_SIZE + 6 },
+              }
+            : {}),
+        },
         tooltip: {
           ...(base().tooltip as Opt),
-          trigger: 'axis',
-          axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
-          formatter: (params: { seriesIndex: number; dataIndex: number; name: string }[]) => {
-            const p = params.find((x) => x.seriesIndex === 1) ?? params[0];
-            return p ? `${esc(p.name)}<br/>${label(p.dataIndex, lira)}` : '';
+          trigger: 'item',
+          formatter: (p: { seriesIndex: number }) => {
+            const x = spec.parts[p.seriesIndex];
+            return x ? `${esc(x.name)}<br/>${lira(x.value)} · ${ratio(toplam ? x.value / toplam : 0)}` : '';
           },
         },
-        // Değer etiketi çubuk ucunda: eksen ve ızgara çizgisi gerekmez; ölçek en yüksek ara toplamda biter (boş alan yok).
-        grid: { left: 4, right: labelRoom(labels), top: 4, bottom: 4, containLabel: true },
-        xAxis: { ...valueAxis(narrow), show: false, max: peak || undefined },
-        yAxis: { type: 'category', inverse: true, data: spec.steps.map((s) => s.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.4, spec.steps.map((s) => s.name)) },
-        series: [
-          { type: 'bar', stack: 'kopru', data: base0, barMaxWidth: 24, silent: true, itemStyle: { color: 'transparent' }, emphasis: { disabled: true } },
-          {
-            type: 'bar',
-            stack: 'kopru',
-            data: bars,
-            barMaxWidth: 24,
-            barMinHeight: 4,
-            label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { dataIndex: number }) => label(p.dataIndex) },
-          },
-        ],
+        grid: { left: 4, right: 4, top: bilesimUst(adlar, width), bottom: 4, containLabel: false },
+        xAxis: { ...valueAxis(narrow), show: false, max: toplam || undefined },
+        yAxis: { type: 'category', data: [spec.total.name], show: false },
+        series: spec.parts.map((x, i) => ({
+          name: adlar[i],
+          type: 'bar',
+          stack: 'bilesim',
+          data: [Math.max(0, x.value)],
+          barMaxWidth: 48,
+          // Dilimler 1 px yüzey aralığıyla ayrılır (çizgi değil boşluk).
+          itemStyle: { color: viz(x.tone), borderRadius: 0, borderColor: surface, borderWidth: 1 },
+        })),
       };
     }
 
@@ -1010,10 +994,31 @@ function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
 }
 
 /**
+ * Bileşim açıklamasının yüksekliği. Dar grafikte açıklama alt alta (her parça bir satır) ve uzun satır sözcük arasından
+ * sarılır (telefonda grafik genişliğini aşmasın); geniş grafikte yan yana.
+ */
+const bilesimMetinGenisligi = (width: number) => Math.max(120, width - 48);
+function bilesimUst(adlar: string[], width: number) {
+  if (width >= OPEX_NARROW) return legendTop(adlar, width);
+  const satir = adlar.reduce((t, a) => t + a.split('\n').reduce((u, l) => u + Math.ceil((l.length * FONT_SIZE * 0.56) / bilesimMetinGenisligi(width)), 0), 0);
+  return satir * (FONT_SIZE + 6) + adlar.length * 12 + 16;
+}
+
+/** Bileşim grafiği açıklaması: parça adı, tutarı ve toplamdaki payı (küçük parça çubukta okunmaz; değeri burada). */
+function bilesimAdlari(spec: Extract<ChartSpec, { kind: 'opex-bilesim' }>, width: number) {
+  const toplam = spec.total.value;
+  const pay = (v: number) => ratio(toplam ? v / toplam : 0);
+  // Dar grafikte iki satır: ad, altında tutar ve pay (sayı satır sonunda bölünmez).
+  return spec.parts.map((x) => (width < OPEX_NARROW ? `${x.name}\n${shortLira(x.value)} · ${pay(x.value)}` : `${x.name} · ${lira(x.value)} (${pay(x.value)})`));
+}
+
+/**
  * Satırlı grafik (`data-rows`): kutu satır başına etiket yüksekliğinden kısa olmaz. Açıklama (legend) satırları ve alttaki
  * değer ekseni genişliğe göre değişir; payları burada hesaplanıp `--chart-row-pad` olarak kutuya yazılır.
  */
 function legendPad(spec: ChartSpec, width: number): number | null {
+  // Bileşim: açıklama + tek çubuk (48 px) payı; değer ekseni yok.
+  if (spec.kind === 'opex-bilesim') return 8 + bilesimUst(bilesimAdlari(spec, width), width) + 4 + 48;
   const yatay = spec.kind === 'opex-stack-h' || spec.kind === 'opex-group' || (spec.kind === 'opex-stack' && width < OPEX_NARROW);
   if (!yatay) return null;
   const names = [...spec.series.map((s) => s.name), ...('line' in spec && spec.line ? [spec.line.name] : [])];

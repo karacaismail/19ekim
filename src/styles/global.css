@@ -165,10 +165,8 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   padding-block: var(--space-1);
 }
 
-/* Marka: logo ve altında alt başlık (kullanıcı kararı 2026-10-20); alt başlık logo yazısıyla aynı hizada başlar. */
+/* Marka (kullanıcı kararı 2026-10-21): Türksab yazı imi “TURKS/AB” (eğik çizgi kırmızı) ve altında alt başlık. */
 .brand {
-  --brand-mark-size: 0.7rem;
-  --brand-mark-gap: 0.4rem;
   display: inline-grid;
   align-content: center;
   min-height: var(--hit-min);
@@ -177,25 +175,17 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 }
 
 .brand-word {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--brand-mark-gap);
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: 0.02em;
 }
 
-.brand-word::before {
-  content: '';
-  width: var(--brand-mark-size);
-  height: var(--brand-mark-size);
-  border-radius: 3px;
-  background: var(--accent);
+.brand-slash {
+  color: var(--brand-slash);
 }
 
 .brand-tagline {
-  padding-inline-start: calc(var(--brand-mark-size) + var(--brand-mark-gap));
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
@@ -2491,8 +2481,36 @@ html:not([data-js]) .email-btn {
 }
 
 .opex-search-row td {
-  padding-block: 0 var(--space-2);
-  vertical-align: top;
+  /* Kutunun üstünde ve altında eşit boşluk (kullanıcı kararı 2026-10-21). */
+  padding-block: var(--space-2);
+  vertical-align: middle;
+}
+
+/*
+ * Sabit Kalem sütunu: tablo yatay kaydırılınca içerik altından geçerken sağ kenarda ince ayırıcı ve yumuşak gölge
+ * (kullanıcı kararı 2026-10-21); kaydırma yokken görünmez. Kaymayan çerçevede tek katman, sütun genişliği
+ * `--sabit-genislik` (kaydırmada ölçülür): hücre taşmaz, birleşik kenarlıklı hücrenin gölge çizmemesi sorun olmaz.
+ */
+@media (min-width: 48em) {
+  .opex-veri .table-frame::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: var(--sabit-genislik, 0);
+    z-index: 2;
+    inline-size: var(--space-3);
+    border-inline-start: var(--hairline) solid var(--rule-strong);
+    background: linear-gradient(to right, var(--sticky-shadow), transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition-property: opacity;
+    transition-duration: var(--motion-duration-fast);
+    transition-timing-function: var(--motion-ease-standard);
+  }
+
+  .opex-veri .table-frame:has(> .table-scroll[data-kaydi])::after {
+    opacity: 1;
+  }
 }
 
 .opex-col-search {
