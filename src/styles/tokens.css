@@ -90,7 +90,7 @@
   /* Kenar sistemi: düz vurgu çizgisi kalınlığı (kavisli kenar yasak) */
   --edge-width: 3px;
   /* Radyo işareti (seçim durumu simgesi; odak göstergesi değildir). Kullanıcı kararı 2026-10-20: sağ üstte, 2× büyük, seçili yeşil. */
-  --radio-size: 3rem;
+  --radio-size: 2.125rem; /* kullanıcı kararı 2026-10-21: 3rem’den ≈ %30 küçük */
 
   /* Zaman çizelgesi ölçeği: 1 dakika = 1.15 CSS px; kısa bloklar için en küçük yükseklik */
   --minute: 1.15px;

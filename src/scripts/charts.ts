@@ -108,6 +108,8 @@ function base(): Opt {
       // Genişlik grafik kutusunu aşmaz (yüzde: kapsayıcı .chart-host); kutu taşanı kırptığı için ipucu tam görünür kalır.
       extraCssText: `transition-timing-function: ${token('--motion-ease-standard')}; box-shadow: none; white-space: normal; max-width: min(22rem, 100%);`,
       axisPointer: {
+        // Vurgu bandı (gölge) çubukların arkasında: ECharts varsayılanı (z 50) opak bantla çubuğu örtüyordu.
+        z: 0,
         animation: !reduced,
         animationDurationUpdate: d,
         animationEasingUpdate: 'cubicInOut',

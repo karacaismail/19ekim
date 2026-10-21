@@ -90,7 +90,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     (yeni işe giriş: matrah sıfırdan). Başlıklar metin biçimindedir (tarihe dönmez); motor tarihe dönmüş başlığı da okur. Izgara alanında yabancı
     içerik varsa Kurulum durur. Motor `aylikTl`/`aktif`/`ozel` üretir; sayfa bunu kalemler tablosunun ay sütunlarında
     gösterir (— = o ay gider yok, “özel” = o aya ayrı tutar); ızgarasız eski yanıt her ay etkin sayılır (`parseReply → aylariTamamla`). Yıl sekmelerinde seçim
-    durumunu sağ üstte 3rem SVG radyo işareti gösterir (seçili yeşil `--radio-checked`, iki temada ≥ 3:1; dar ekranda rakamın
+    durumunu sağ üstte 2.125rem SVG radyo işareti gösterir (2026-10-21: 3rem’den ≈ %30 küçük) (seçili yeşil `--radio-checked`, iki temada ≥ 3:1; dar ekranda rakamın
     üstüne sarılır); odak göstergesi değildir. Yalnız bu sayfa Roboto ve en küçük metin 15 CSS px kullanır (`:root[data-page='giderler']`, BaseLayout `page`);
     grafik ad etiketleri (kişi, kategori) Roboto Condensed (`--font-condensed`, `@fontsource-variable/roboto-condensed`,
     çizimden önce `document.fonts.load` ile yüklenir; uzun ad sözcük arasından sarılır, telefonda etiket sütunu ≥ %42).

@@ -545,9 +545,9 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     });
   }
 
-  // Kullanıcı kararı 2026-10-20: radyo işareti sağ üstte, 2× büyük (3rem), seçili olan yeşil.
+  // Kullanıcı kararları: radyo işareti sağ üstte, seçili olan yeşil (2026-10-20); boyut 3rem’den ≈ %30 küçük, 2.125rem (2026-10-21).
   for (const scheme of ['light', 'dark'] as const) {
-    test(`yıl sekmelerinde radyo işareti (${scheme}): sağ üstte, 48 px, seçili yeşil dolu nokta; rakamla çakışmaz; ≥ 3:1`, async ({ page }) => {
+    test(`yıl sekmelerinde radyo işareti (${scheme}): sağ üstte, 34 px, seçili yeşil dolu nokta; rakamla çakışmaz; ≥ 3:1`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
       await mockScript(page);
       await page.goto(PATH);
@@ -592,7 +592,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
         for (const yil of ['2026', '2027']) {
           const st = await state(yil);
           expect(st.hidden, 'işaret ekran okuyucuya ayrıca okunmaz (seçim aria-selected ile)').toBe('true');
-          expect(st.size, `${width} px ${yil}: 2× (48 px)`).toBe(48);
+          expect(st.size, `${width} px ${yil}: 2.125rem (34 px)`).toBe(34);
           expect([st.right, st.top], `${width} px ${yil}: sağ üst köşe (iç boşlukta)`).toEqual([0, 0]);
           expect(st.overlap, `${width} px ${yil}: rakamla çakışma`).toBe(false);
           expect(st.ratio, `${width} px ${yil}: halka karşıtlığı`).toBeGreaterThanOrEqual(3);
@@ -833,6 +833,49 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     expect(basliklar.filter((b) => / ’2[67]/.test(b))).toHaveLength(15);
     // Yıl sekmesi rapor yılını açar; 2026 sekmesi tüm yıl (önceki davranış).
     await expect(page.getByRole('tab', { name: /^2027/ })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  // Kullanıcı bildirimi 2026-10-21: üzerine gelince gri vurgu bandı çubuğu örtüyordu.
+  test('grafik üzerine gelince vurgu bandı çubuğu örtmez (köprü ve kategoriler)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockScript(page, { ozet: 'hover', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    for (const ad of ['Netten işveren maliyetine', 'Kategoriler']) {
+      const kutu = page.locator('.chart', { hasText: ad }).first();
+      await kutu.scrollIntoViewIfNeeded();
+      await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+      await page.waitForTimeout(400);
+      // Renkli çubukların ortası ve oradaki en üstteki öğenin dolgusu (üzerine gelmeden önce).
+      const cubuklar = await kutu.locator('svg').evaluate((svg) =>
+        [...svg.querySelectorAll('path')]
+          .map((p) => ({ fill: p.getAttribute('fill') ?? '', b: p.getBoundingClientRect() }))
+          .filter((x) => x.b.width > 8 && x.b.height > 8 && x.b.height < 40 && x.fill && x.fill !== 'none' && x.fill !== 'transparent' && !/^rgba\(.*,\s*0\)$/.test(x.fill))
+          .slice(0, 4)
+          .map((x) => ({ x: x.b.left + x.b.width / 2, y: x.b.top + x.b.height / 2, fill: x.fill })),
+      );
+      expect(cubuklar.length, ad).toBeGreaterThan(0);
+      for (const c of cubuklar) {
+        await page.mouse.move(c.x, c.y);
+        await page.waitForTimeout(150);
+        // Üstteki öğe çubuğun kendisi (vurgu rengi biraz açılabilir), gri vurgu bandı değil.
+        const fark = await page.evaluate(
+          ([x, y, fill]) => {
+            const rgb = (c: string) => {
+              const ctx = document.createElement('canvas').getContext('2d')!;
+              ctx.fillStyle = c;
+              ctx.fillRect(0, 0, 1, 1);
+              return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3);
+            };
+            const ust = document.elementFromPoint(x as number, y as number)?.getAttribute('fill') ?? '';
+            const [a, b] = [rgb(ust || 'transparent'), rgb(fill as string)];
+            return Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+          },
+          [c.x, c.y, c.fill],
+        );
+        expect(fark, `${ad}: üzerine gelince çubuk görünür (renk farkı)`).toBeLessThan(40);
+      }
+    }
   });
 
   test('teşvik yoksa köprüde sıfır adım “0 ₺”, “+ 0” veya görünür çubuk yok', async ({ page }) => {
