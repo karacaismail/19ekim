@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
-import { IconChevronDown } from '@tabler/icons-react';
+import { IconChevronDown, IconMoon, IconSun } from '@tabler/icons-react';
 import { ModelProvider, useParams } from './ModelContext';
 import { COMMON_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
@@ -61,7 +61,13 @@ function ThemeToggle() {
       hidden
       onClick={() => setColorScheme(dark ? 'light' : 'dark')}
     >
+      {/*
+        Kullanıcı kararı 2026-10-21: görünür yazı yok (adı ekran okuyucuya); büyük anahtar. Simge izin boş tarafında:
+        koyu temada turuncu izde güneş, açık temada beyaz izde ay.
+      */}
       <span className="theme-track" aria-hidden="true">
+        <IconSun className="theme-icon theme-icon-sun" size={16} stroke={2} />
+        <IconMoon className="theme-icon theme-icon-moon" size={16} stroke={2} />
         <span className="theme-thumb" />
       </span>
       <span className="theme-label">Koyu tema</span>
@@ -197,7 +203,18 @@ function NavMenu({ label, items: links, dividerBefore, current }: { label: strin
 /** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler canlı durumu, portal ile). */
 export const PAGE_TOOLS_ID = 'sayfa-araclari';
 
-export function AppFrame({ pathname, children, wide = false }: { pathname: string; children: ReactNode; wide?: boolean }) {
+export function AppFrame({
+  pathname,
+  children,
+  wide = false,
+  titleInCrumbs = false,
+}: {
+  pathname: string;
+  children: ReactNode;
+  wide?: boolean;
+  /** Son kırıntı sayfanın başlığıdır (h1, büyük): ayrı başlık alanı yok (kullanıcı kararı 2026-10-21, Giderler). */
+  titleInCrumbs?: boolean;
+}) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
   const stop = index >= 0 ? SEQUENCE[index] : null;
@@ -220,35 +237,34 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
               <span className="brand-word">iStoc</span>
               <span className="brand-tagline">Pazarlama &amp; Finansal Planlama</span>
             </a>
+            {/* Gezinme (kullanıcı kararı 2026-10-21): geniş ekranda üst satırda, dar ekranda markanın altında. */}
+            <nav className="mainnav" aria-label="Ana gezinme">
+              <ul className="mainnav-list">
+                {NAV_MENUS.map((menu) => (
+                  <li key={menu.label} className="mainnav-menu-li">
+                    <NavMenu {...menu} current={current} />
+                  </li>
+                ))}
+                {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menüler yerine düz bağlantılar: temel deneyim. */}
+                {NAV_MENUS.flatMap((menu) => menu.items).map((item) => (
+                  <li key={`js-yok-${item.path}`} className="mainnav-nojs">
+                    <a className="mainnav-nojs-link" href={href(item.path)} aria-current={normalizePath(href(item.path)) === current ? 'page' : undefined}>
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+                {COMMON_NAV.map((item) => (
+                  <li key={item.path}>
+                    <NavItem {...item} current={current} />
+                  </li>
+                ))}
+              </ul>
+            </nav>
             <div className="topbar-tools">
               <ThemeToggle />
             </div>
           </div>
         </header>
-        <nav className="mainnav" aria-label="Ana gezinme">
-          <div className="mainnav-rows">
-            <ul className="mainnav-list">
-              {NAV_MENUS.map((menu) => (
-                <li key={menu.label} className="mainnav-menu-li">
-                  <NavMenu {...menu} current={current} />
-                </li>
-              ))}
-              {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menüler yerine düz bağlantılar: temel deneyim. */}
-              {NAV_MENUS.flatMap((menu) => menu.items).map((item) => (
-                <li key={`js-yok-${item.path}`} className="mainnav-nojs">
-                  <a className="mainnav-nojs-link" href={href(item.path)} aria-current={normalizePath(href(item.path)) === current ? 'page' : undefined}>
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-              {COMMON_NAV.map((item) => (
-                <li key={item.path}>
-                  <NavItem {...item} current={current} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        </nav>
         <ParamsNotice />
         <main className="app-main" id="icerik" tabIndex={-1}>
           <div className="wrap" data-wide={wide ? '' : undefined}>
@@ -257,14 +273,14 @@ export function AppFrame({ pathname, children, wide = false }: { pathname: strin
               <nav aria-label="Ağaç yolu" className="crumbs">
                 <ol>
                   <li>
-                    <a href={href('/')}>İsmail Karaca</a>
+                    <a href={href('/')}>19 Ekim</a>
                   </li>
                   {stop.crumb.map((c, i) => {
                     const last = i === stop.crumb.length - 1;
                     const path = last ? undefined : crumbPath(c);
                     return (
                       <li key={c} aria-current={last ? 'page' : undefined}>
-                        {path ? <a href={href(path)}>{c}</a> : c}
+                        {last && titleInCrumbs ? <h1 className="crumbs-title">{c}</h1> : path ? <a href={href(path)}>{c}</a> : c}
                       </li>
                     );
                   })}

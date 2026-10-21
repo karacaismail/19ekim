@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Checkbox, TextInput } from '@mantine/core';
 import { IconExternalLink, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, PAGE_TOOLS_ID } from '../components/AppFrame';
-import { Chart, DataTable, FactsRow, Hero, Note, Section, type Column } from '../components/ui';
+import { Chart, DataTable, FactsRow, Note, Section, type Column } from '../components/ui';
 import {
   OPEX_ENDPOINT,
   OPEX_MIN_GAP_MS,
@@ -573,8 +573,6 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
   );
 }
 
-type PlanRow = { kind: 'ay'; a: PlanAy; onceki: Kume3 | null } | { kind: 'total'; a: Kume3 & { ad: string } };
-
 /** Kısa ay adı ve yıl (“Eki ’26”): iki yılın aynı adlı ayları karışmaz. */
 const ayKisa = (a: PlanAy) => `${a.kisa} ’${String(a.yil).slice(2)}`;
 
@@ -582,20 +580,7 @@ const ayKisa = (a: PlanAy) => `${a.kisa} ’${String(a.yil).slice(2)}`;
 function Plan({ p }: { p: Plan }) {
   const enYuksek = p.aylar.reduce((a, b) => (b.toplam > a.toplam ? b : a));
   const sinir = p.aylar.findIndex((a, i) => i > 0 && a.yil !== p.aylar[i - 1].yil);
-  const rows: PlanRow[] = [
-    ...p.aylar.map((a, i) => ({ kind: 'ay' as const, a, onceki: i ? p.aylar[i - 1] : null })),
-    ...p.donemler.map((d) => ({ kind: 'total' as const, a: { ...d.toplam, ad: `${d.yil} toplamı (${d.aySayisi} ay)` } })),
-    { kind: 'total', a: { ...p.toplam, ad: `Toplam (${p.aySayisi} ay)` } },
-  ];
-  const tutar = (label: string, f: keyof Kume3): Column<PlanRow> => ({ key: f, header: <Num>{label}</Num>, nowrap: true, render: (r) => <Num>{tl(r.a[f])}</Num> });
-  const columns: Column<PlanRow>[] = [
-    { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (r) => r.a.ad },
-    tutar('Teknoloji', 'teknoloji'),
-    tutar('Ofis ve işletme', 'ofis'),
-    tutar('Personel', 'insan'),
-    tutar('Toplam', 'toplam'),
-    { key: 'degisim', header: <Num>Önceki aya göre</Num>, nowrap: true, render: (r) => <Num>{r.kind === 'ay' && r.onceki ? change(r.a.toplam, r.onceki.toplam) : '—'}</Num> },
-  ];
+  // Ay ay grup toplamları ve önceki aya göre değişim kalemler tablosunun alt satırlarında (kullanıcı kararı 2026-10-21).
   return (
     <>
       <FactsRow
@@ -610,12 +595,13 @@ function Plan({ p }: { p: Plan }) {
         id="plan"
         title="Aylık plan"
         note={`${p.etiket}, gruplara göre aylık gider`}
-        size="lg"
+        // Kullanıcı kararı 2026-10-20: masaüstünde dikey ve alçak; telefonda (dar grafik) yatay, satır sayısına göre.
+        size="sm"
         rows={p.aySayisi}
         shortLabels
         summary={p.aylar.map((a) => `${a.ad} ${tl(a.toplam)}`).join('; ')}
         spec={{
-          kind: 'opex-stack-h',
+          kind: 'opex-stack',
           categories: p.aylar.map(ayKisa),
           series: [
             { name: 'Teknoloji', tone: 'tech', values: p.aylar.map((a) => a.teknoloji) },
@@ -623,14 +609,6 @@ function Plan({ p }: { p: Plan }) {
             { name: 'Personel', tone: 'people', values: p.aylar.map((a) => a.insan) },
           ],
         }}
-      />
-      <DataTable
-        id="plan"
-        title={`Aylık gider planı · ${p.etiket}`}
-        note="Her ay ayrı hesaplanır: 2027’de zam, kira ve genel artış uygulanır; bordroda gelir vergisi yıl içinde kümülatif matrahla ay ay değişir."
-        columns={columns}
-        rows={rows}
-        rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
       />
     </>
   );
@@ -640,9 +618,12 @@ function Plan({ p }: { p: Plan }) {
 type KalemRow =
   | { kind: 'gider'; g: Gider; aylar: number[]; yillar: number[]; donem: number }
   | { kind: 'kisi'; k: Kisi; aylar: (number | null)[]; yillar: number[]; donem: number }
-  | { kind: 'total'; label: string; aylar: number[]; yillar: number[]; donem: number };
-/** Kalem satırının kalıcı anahtarı: kaynak sayfa + Sheets satırı (+ ad); kişi Sheets satırıyla. */
-const kalemKey = (r: KalemRow) => (r.kind === 'gider' ? `g:${r.g.kaynak ?? ''}:${r.g.satir}:${r.g.kalem}` : r.kind === 'kisi' ? `k:${r.k.satir}` : `t:${r.label}`);
+  | { kind: 'grup'; kume: KumeKod; tone: OpexTone; label: string; aylar: number[]; yillar: number[]; donem: number }
+  | { kind: 'total'; label: string; aylar: number[]; yillar: number[]; donem: number }
+  | { kind: 'degisim'; label: string; oranlar: string[] };
+/** Kalem satırının kalıcı anahtarı: kaynak sayfa + Sheets satırı (+ ad); kişi Sheets satırıyla; alt satırlar adıyla. */
+const kalemKey = (r: KalemRow) =>
+  r.kind === 'gider' ? `g:${r.g.kaynak ?? ''}:${r.g.satir}:${r.g.kalem}` : r.kind === 'kisi' ? `k:${r.k.satir}` : r.kind === 'grup' ? `grup:${r.kume}` : `t:${r.label}`;
 type KalemFiltre = 'tumu' | KumeKod;
 
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
@@ -670,17 +651,19 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
   ];
   const kumeOf = (r: KalemRow): KumeKod | null => (r.kind === 'gider' ? r.g.kume : r.kind === 'kisi' ? 'insan' : null);
   const items = all.filter((r) => filter === 'tumu' || kumeOf(r) === filter);
-  const ayDegeri = (r: KalemRow, x: number) => r.aylar[x] ?? 0;
-  const rows: KalemRow[] = [
-    ...items,
-    {
-      kind: 'total',
-      label: `Toplam · ${items.length} kalem`,
-      aylar: p.aylar.map((_, x) => items.reduce((t, r) => t + ayDegeri(r, x), 0)),
-      yillar: p.donemler.map((_, y) => items.reduce((t, r) => t + r.yillar[y], 0)),
-      donem: items.reduce((t, r) => t + r.donem, 0),
-    },
-  ];
+  const ayDegeri = (r: KalemRow, x: number) => (r.kind === 'degisim' ? 0 : (r.aylar[x] ?? 0));
+  const yilDegeri = (r: KalemRow, y: number) => (r.kind === 'degisim' ? 0 : r.yillar[y]);
+  const topla = (xs: KalemRow[]) => ({
+    aylar: p.aylar.map((_, x) => xs.reduce((t, r) => t + ayDegeri(r, x), 0)),
+    yillar: p.donemler.map((_, y) => xs.reduce((t, r) => t + yilDegeri(r, y), 0)),
+    donem: xs.reduce((t, r) => t + (r.kind === 'degisim' ? 0 : r.donem), 0),
+  });
+  const toplam = { kind: 'total' as const, label: `Toplam · ${items.length} kalem`, ...topla(items) };
+  // Aylık plan (eski ayrı tablo): grup ara toplamları yalnız “Hepsi”de (tek grupta toplamla aynı olurdu); her ay önceki aya göre.
+  const gruplar: KalemRow[] =
+    filter === 'tumu' ? GRUPLAR.map((t) => ({ kind: 'grup' as const, kume: t.kume, tone: t.tone, label: KUME_AD[t.kume], ...topla(items.filter((r) => kumeOf(r) === t.kume)) })) : [];
+  const degisim: KalemRow = { kind: 'degisim', label: 'Önceki aya göre', oranlar: toplam.aylar.map((v, x) => (x ? change(v, toplam.aylar[x - 1]) : '—')) };
+  const rows: KalemRow[] = [...items, ...gruplar, toplam, degisim];
   // “Bu ay”: rapor ayı (Sheets’teki onay kutusu ve ödeme durumu).
   const buAy = m.donem.ay - 1;
   const buAyKey = m.donem.yil === 2027 ? 'y2027' : 'y2026';
@@ -696,8 +679,13 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
       sticky: true,
       minWidth: '15rem',
       render: (r) =>
-        r.kind === 'total' ? (
+        r.kind === 'total' || r.kind === 'degisim' ? (
           r.label
+        ) : r.kind === 'grup' ? (
+          <span className="opex-item">
+            <Dot tone={r.tone} />
+            <span>{r.label}</span>
+          </span>
         ) : r.kind === 'kisi' ? (
           <span className="opex-item">
             <Dot tone="people" />
@@ -785,6 +773,7 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
         ),
         nowrap: true,
         render: (r) => {
+          if (r.kind === 'degisim') return <Num>{r.oranlar[x]}</Num>;
           if (r.kind !== 'total' && !etkin(r, a.key, a.index)) {
             return (
               <Num>
@@ -805,9 +794,9 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
       }),
     ),
     ...p.donemler.map(
-      (d, y): Column<KalemRow> => ({ key: `yil-${d.yil}`, header: <Num>{`${d.yil} ₺`}</Num>, nowrap: true, render: (r) => <Num>{tlExact(r.yillar[y])}</Num> }),
+      (d, y): Column<KalemRow> => ({ key: `yil-${d.yil}`, header: <Num>{`${d.yil} ₺`}</Num>, nowrap: true, render: (r) => (r.kind === 'degisim' ? '' : <Num>{tlExact(r.yillar[y])}</Num>) }),
     ),
-    { key: 'donem', header: <Num>Toplam ₺</Num>, nowrap: true, render: (r) => <Num>{tlExact(r.donem)}</Num> },
+    { key: 'donem', header: <Num>Toplam ₺</Num>, nowrap: true, render: (r) => (r.kind === 'degisim' ? '' : <Num>{tlExact(r.donem)}</Num>) },
     ...(p.donemler.some((d) => d.yil === 2027)
       ? [
           {
@@ -849,7 +838,7 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
       <DataTable
         id="kalemler"
         title={`Kalemler · ${p.etiket}`}
-        note="Ay sütunları o ayın ₺ tutarı; —: o ay gider yok (Sheets’te işaretsiz), “özel”: o aya ayrı tutar yazılmış. Döviz kurla ₺’ye çevrilir; personelde işveren maliyeti (freelancer: fatura)."
+        note="Ay sütunları o ayın ₺ tutarı; —: o ay gider yok (Sheets’te işaretsiz), “özel”: o aya ayrı tutar yazılmış. Altta grup toplamları ve önceki aya göre değişim. Döviz kurla ₺’ye çevrilir; personelde işveren maliyeti (freelancer: fatura); 2027’de zam, kira ve genel artış uygulanır."
         columns={columns}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
@@ -1268,7 +1257,6 @@ function Body() {
   );
   return (
     <>
-      <Hero eyebrow="Finans · OPEX" title="Operasyon giderleri" />
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}
       </p>
@@ -1333,7 +1321,8 @@ function Body() {
 
 export function OpexPage({ pathname }: { pathname: string }) {
   return (
-    <AppFrame pathname={pathname}>
+    // Sayfa başlığı kırıntıda: 19 Ekim › Finans › OpEx › Operasyonel Giderler (ayrı başlık alanı yok).
+    <AppFrame pathname={pathname} titleInCrumbs>
       <Body />
     </AppFrame>
   );

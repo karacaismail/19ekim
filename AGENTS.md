@@ -43,7 +43,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/giderler/` OPEX (kullanıcı kararı 2026-10-20). Sıra: önce yıl ayrımı olmayan bölümler (`planOfModel`: Sheets ızgarasının 15
     ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (yatay yığın grafik + 15 ay, yıl toplamları ve genel
     toplam tablosu) ve kalemler (kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
-    2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
+    2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; altta — eski aylık gider planı tablosu — grup ara toplamları (yalnız
+    “Hepsi”), toplam ve önceki aya göre değişim; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
     sağlayıcıları); sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
     seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri, netten brüte aylık bordro (kümülatif GV,
     asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
@@ -125,8 +126,13 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
-- Başlık ve gezinme (kullanıcı kararı 2026-10-20): üst bantta logo (“iStoc”) ve altında “Pazarlama & Finansal Planlama”,
-  sağda tema düğmesi (dar ekranda yazısı gizlenir); plan tarihi başlıkta yok. Gezinme tek satır: “İstihdam” (organizasyon,
+- Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (“iStoc”) ve altında “Pazarlama & Finansal
+  Planlama”; ≥ 64em gezinme aynı satırda logo ile tema düğmesi arasında, dar ekranda logonun altında kendi satırında
+  (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
+  açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
+  `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-2xl`; Giderler: 19 Ekim › Finans › OpEx ›
+  Operasyonel Giderler, ayrı başlık alanı yok). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
+  (dar ekranda açıklama başlığın altında). Gezinme tek satır: “İstihdam” (organizasyon,
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
   bekleyenler, parametreler; `MARKETING_NAV`) açılır menüleri, Giderler (OPEX), Notlar. Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
@@ -136,8 +142,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`).
 - Giderler ilk ekranı (kullanıcı kararı 2026-10-20, yıl seçici plan ve kalemlerin altına alındı): canlı durum kırıntı
   satırında küçük şerit (nokta, kısa metin, simge düğmeler); ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
-  bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Grafikler yatay çubuk (dikey yığın kullanılmaz). Kategori
-  ekseninde her ad yazılır (`interval: 0`); grafik kutusu satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır
+  bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Aylık plan grafiği masaüstünde dikey ve alçak
+  (`opex-stack`, 16rem, her ay yazılı), telefonda (grafik < 600 px) yatay ve satır sayısına göre; diğer grafikler yatay
+  çubuk. Kategori ekseninde her ad yazılır (`interval: 0`); etiket sütunu adlar sığıyorsa en uzun ad kadar (ECharts
+  ölçer), sığmıyorsa üst sınırda ve ad sarılır; grafik kutusu satır sayısına göre uzar (`rows`, `--chart-row-h*`: tek satır
   20 px, dar grafikte 44 px, telefonda 68 px; kısa ad — ay — için `shortLabels` 28 px; iç pay `--chart-row-pad`,
   açıklama ve değer ekseni payını `charts.ts → legendPad` hesaplar). Netten işveren maliyetine (köprü): tam genişlik,
   her adımın değeri çubuk ucunda (dar grafikte kısa “1,3 Mn ₺”), değer ekseni yok, ölçek en yüksek ara toplamda biter,

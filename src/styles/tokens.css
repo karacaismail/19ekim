@@ -245,7 +245,8 @@
   --status-bekliyor-bg: #fde8e8;
   --status-bekliyor-fg: #9b1c1c;
 
-  --toggle-track-off: #e2dfd7;
+  /* Açık temada iz beyaz (kullanıcı kararı 2026-10-21), sınırı nötr ince çizgi */
+  --toggle-track-off: #ffffff;
   --toggle-thumb-off: #555a5f;
   --toggle-track-on: #ff8600;
   --toggle-thumb-on: #16181a;

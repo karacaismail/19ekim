@@ -76,7 +76,8 @@ export const SEQUENCE: Stop[] = [
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
-  { path: '/giderler/', label: 'Giderler (OPEX)', crumb: ['Giderler (OPEX)'] },
+  // Son kırıntı sayfa başlığıdır (AppFrame titleInCrumbs; kullanıcı kararı 2026-10-21).
+  { path: '/giderler/', label: 'Giderler (OPEX)', crumb: ['Finans', 'OpEx', 'Operasyonel Giderler'] },
   { path: '/notlar/', label: 'Notlar', crumb: ['Notlar'] },
 ];
 

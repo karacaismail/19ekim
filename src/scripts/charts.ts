@@ -169,15 +169,35 @@ const ratio = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractio
 const OPEX_NARROW = 568;
 /** Çubuk ucundaki etiket için sağ pay: en uzun etiketin yaklaşık genişliği (SVG dışına taşmasın). */
 const labelRoom = (labels: string[]) => Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * FONT_SIZE * 0.6) + 16;
-const categoryLabel = (width: number, share = 0.4): Opt => ({
-  ...(axis().axisLabel as Opt),
-  // Uzun ad (kişi, kategori) sözcük arasından sarılır; dar yazı tipi tanımlıysa (Giderler: Roboto Condensed) onunla.
-  ...(token('--font-condensed') ? { fontFamily: token('--font-condensed') } : {}),
-  color: token('--text-primary'),
-  // Telefonda (≤ 420 px grafik) etiket sütunu en az %42: uzun ad en çok üç satıra sarılır (satır yüksekliği üç satırlık).
-  width: Math.min(220, Math.floor(width * (width < 420 ? Math.max(share, 0.42) : share))),
-  overflow: 'break',
-});
+let olcer: CanvasRenderingContext2D | null = null;
+/** Metnin piksel genişliği (grafik yazı tipiyle; yazı tipi çizimden önce yüklenir). Ölçülemezse null. */
+function metinGenisligi(text: string, font: string) {
+  olcer ??= document.createElement('canvas').getContext('2d');
+  if (!olcer) return null;
+  olcer.font = font;
+  return olcer.measureText(text).width;
+}
+
+/**
+ * Kategori ekseni etiketi. Bütün adlar üst sınıra sığıyorsa genişlik verilmez: sütunu ECharts kendi ölçümüyle en uzun ad
+ * kadar ayırır (kısa ad — ay — çubuklara yer bırakır, motorlar arası ölçüm farkı satır kırdırmaz). Sığmayan uzun ad varsa
+ * sütun üst sınırdadır ve ad sözcük arasından sarılır.
+ */
+const categoryLabel = (width: number, share = 0.4, names: string[] = []): Opt => {
+  // Dar yazı tipi tanımlıysa (Giderler: Roboto Condensed) onunla.
+  const condensed = token('--font-condensed');
+  const family = condensed || token('--font-sans');
+  // Telefonda (≤ 420 px grafik) üst sınır en az %42: uzun ad en çok üç satıra sarılır (satır yüksekliği üç satırlık).
+  const cap = Math.min(220, Math.floor(width * (width < 420 ? Math.max(share, 0.42) : share)));
+  const widths = names.map((n) => metinGenisligi(n, `${FONT_SIZE}px ${family}`));
+  const sigar = widths.length > 0 && widths.every((w) => w !== null && w + FONT_SIZE <= cap);
+  return {
+    ...(axis().axisLabel as Opt),
+    ...(condensed ? { fontFamily: condensed } : {}),
+    color: token('--text-primary'),
+    ...(sigar ? {} : { width: cap, overflow: 'break' }),
+  };
+};
 const valueAxis = (narrow: boolean): Opt => ({
   type: 'value',
   ...axis(),
@@ -741,7 +761,7 @@ function build(spec: ChartSpec, width: number): Opt {
         tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: (p: { name: string; value: number }) => `${esc(p.name)}<br/>${label(p.value)}` },
         xAxis: { ...valueAxis(narrow), show: narrow },
         // Her kategori adı görünür (ECharts sığmayanı kendiliğinden gizlerdi).
-        yAxis: { type: 'category', inverse: true, data: spec.items.map((i) => i.name), ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width), interval: 0 } },
+        yAxis: { type: 'category', inverse: true, data: spec.items.map((i) => i.name), ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width, 0.4, spec.items.map((i) => i.name)), interval: 0 } },
         series: [
           {
             type: 'bar',
@@ -760,8 +780,9 @@ function build(spec: ChartSpec, width: number): Opt {
       const surface = token('--surface-raised');
       const names = [...spec.series.map((s) => s.name), ...(spec.line ? [spec.line.name] : [])];
       const category: Opt = horizontal
-        ? { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.34) }
-        : { type: 'category', data: spec.categories, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } };
+        ? { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.34, spec.categories) }
+        : // Dikey: her ay yazılır (ECharts kendiliğinden atlardı); sığmayan dar genişlikte yalnız çakışan etiket gizlenir.
+          { type: 'category', data: spec.categories, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), interval: 0, hideOverlap: true } };
       const series: Opt[] = spec.series.map((s) => ({
         name: s.name,
         type: 'bar',
@@ -824,7 +845,7 @@ function build(spec: ChartSpec, width: number): Opt {
         legend: { ...(base().legend as Opt), data: names },
         grid: { left: 4, right: 16, top: legendTop(names, width), bottom: 4, containLabel: true },
         xAxis: valueAxis(narrow),
-        yAxis: { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.36) },
+        yAxis: { type: 'category', inverse: true, data: spec.categories, ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.36, spec.categories) },
         series: spec.series.map((s) => ({
           name: s.name,
           type: 'bar',
@@ -879,7 +900,7 @@ function build(spec: ChartSpec, width: number): Opt {
         // Değer etiketi çubuk ucunda: eksen ve ızgara çizgisi gerekmez; ölçek en yüksek ara toplamda biter (boş alan yok).
         grid: { left: 4, right: labelRoom(labels), top: 4, bottom: 4, containLabel: true },
         xAxis: { ...valueAxis(narrow), show: false, max: peak || undefined },
-        yAxis: { type: 'category', inverse: true, data: spec.steps.map((s) => s.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width) },
+        yAxis: { type: 'category', inverse: true, data: spec.steps.map((s) => s.name), ...axis(), axisLine: { show: false }, axisLabel: categoryLabel(width, 0.4, spec.steps.map((s) => s.name)) },
         series: [
           { type: 'bar', stack: 'kopru', data: base0, barMaxWidth: 24, silent: true, itemStyle: { color: 'transparent' }, emphasis: { disabled: true } },
           {

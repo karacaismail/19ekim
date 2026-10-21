@@ -32,7 +32,9 @@ const hero26 = (m: typeof MODEL) => lira(donemOf(m, 2026).toplam.toplam);
 /** Yıl ayrımı olmayan plan (Ekim 2026 – Aralık 2027): birleşik kalemler tablosu ve aylık plan bu etiketi taşır. */
 const planEtiket = (m: typeof MODEL) => planOfModel(m).etiket;
 const KALEMLER = `Kalemler · ${planEtiket(MODEL)}`;
-const PLAN = `Aylık gider planı · ${planEtiket(MODEL)}`;
+/** Kalemler tablosunun alt satırları (kullanıcı kararı 2026-10-21: aylık gider planı tablosu kalemlerle birleşti). */
+const ALT_SATIRLAR = ['Teknoloji', 'Ofis ve işletme', 'Personel', /^Toplam · \d+ kalem$/, 'Önceki aya göre'];
+const altSatir = (region: Locator, ad: string) => region.locator('tbody tr').filter({ has: region.page().locator('th', { hasText: new RegExp(`^${ad}`) }) });
 /** Tablo gövdesinde başlığı verilen sütunun td sırası (satır başlığı th sayılmaz). */
 const sutun = (region: Locator, header: string | RegExp) =>
   region.locator('thead th').evaluateAll((ths, h) => {
@@ -480,18 +482,21 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(tabs.nth(1)).toContainText(`Ocak – Aralık · ${lira(donemOf(MODEL, 2027).toplam.toplam)}`);
     // Ay sayısı özet kutusunda.
     await expect(page.locator('.opex-hero-note')).toContainText('· 3 ay');
-    // Plan yıl ayrımı olmadan: 2026’nın 3 ayı + 2027’nin 12 ayı, yıl toplamları ve genel toplam.
-    const ay27 = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'].map((a) => `${a} 2027`);
-    const planSatir = ['Ekim 2026', 'Kasım 2026', 'Aralık 2026', ...ay27, '2026 toplamı (3 ay)', '2027 toplamı (12 ay)', 'Toplam (15 ay)'];
-    const plan = page.getByRole('region', { name: PLAN }).locator('tbody th');
-    await expect(plan).toHaveText(planSatir);
+    // Plan yıl ayrımı olmadan ve ayrı tablo değil: kalemler tablosunun 15 ay sütunu + alt satırlarda grup toplamları,
+    // toplam ve önceki aya göre değişim.
+    await expect(page.getByRole('region', { name: /^Aylık gider planı/ })).toHaveCount(0);
+    const kalemler = page.getByRole('region', { name: KALEMLER });
+    const altlar = async () => (await kalemler.locator('tbody th').allTextContents()).slice(-5);
+    const beklenen = (xs: string[]) => xs.forEach((x, i) => (typeof ALT_SATIRLAR[i] === 'string' ? expect(x).toBe(ALT_SATIRLAR[i]) : expect(x).toMatch(ALT_SATIRLAR[i])));
+    beklenen(await altlar());
     await tabs.nth(1).click();
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'yil-2027');
     await expect(page.locator('.opex-hero-value')).toHaveText(lira(donemOf(MODEL, 2027).toplam.toplam));
     await expect(page.getByRole('heading', { name: '2027 varsayımları' })).toBeVisible();
-    // Plan yıl seçiminden bağımsız: aynı 15 ay.
-    await expect(page.getByRole('region', { name: PLAN }).locator('tbody th')).toHaveText(planSatir);
+    // Plan ve kalemler yıl seçiminden bağımsız: aynı 15 ay ve aynı alt satırlar.
+    beklenen(await altlar());
+    expect((await kalemler.locator('thead th').allTextContents()).filter((b) => / ’2[67]/.test(b))).toHaveLength(15);
   });
 
   test('yıl sekmeleri klavyeyle: ok tuşu sekmeyi değiştirir ve odağı taşır; tek sekme durağında', async ({ page, browserName }) => {
@@ -644,7 +649,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     // “Etkin ay” sütunu yok: ay hücreleri gösterir.
     expect(basliklar).not.toContain('Etkin ay');
     // Plan: Kasım’da ofis kirası yok
-    await expect(page.getByRole('region', { name: `Aylık gider planı · ${planEtiket(grid)}` }).locator('tbody tr').nth(1).locator('td').nth(1)).toHaveText(lira(d.seri[1].ofis));
+    const ofisKasim = Number((await altSatir(items, 'Ofis ve işletme').locator('td').nth(eki + 1).innerText()).replace(/[^\d]/g, ''));
+    expect(Math.abs(ofisKasim - d.seri[1].ofis)).toBeLessThanOrEqual(1);
   });
 
   test('tüm kalemleri işaretsiz ay: değişim “—”, sayfada ∞ veya NaN yok', async ({ page }) => {
@@ -655,8 +661,9 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await page.goto(PATH);
     await hydrated(page);
     await connect(page);
-    const plan = page.getByRole('region', { name: `Aylık gider planı · ${planEtiket(zero)}` });
-    await expect(plan.locator('tbody tr').nth(2).locator('td').last()).toHaveText('—');
+    // Kasım toplamı 0: Aralık’ın önceki aya göre değişimi “—”.
+    const items = page.getByRole('region', { name: `Kalemler · ${planEtiket(zero)}` });
+    await expect(altSatir(items, 'Önceki aya göre').locator('td').nth(await sutun(items, 'Ara ’26Aralık 2026'))).toHaveText('—');
     expect(await page.locator('.app-main').innerText()).not.toMatch(/∞|NaN|Infinity/);
   });
 
@@ -819,8 +826,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await mockScript(page, { ozet: 'ocak-2027', model: ocak }, 'open');
     await page.goto(PATH);
     await hydrated(page);
-    await expect(page.getByRole('region', { name: PLAN }).locator('tbody th')).toHaveCount(18);
-    await expect(page.getByRole('region', { name: PLAN }).locator('tbody th').first()).toHaveText('Ekim 2026');
+    await expect(page.getByRole('region', { name: KALEMLER }).locator('thead th').nth(4)).toHaveText('Eki ’26Ekim 2026');
     const items = page.getByRole('region', { name: KALEMLER });
     const basliklar = await items.locator('thead th').allTextContents();
     expect(basliklar).toContain('Bu ay');
@@ -868,22 +874,39 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     expect(await cakisanEtiketler(plan.locator('svg'))).toEqual([]);
   });
 
-  test('aylık plan ve kişi bordrosu yatay çubuk; ay adları kısa olduğundan telefonda tek satır yüksekliği', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await mockScript(page, { ozet: 'yatay', model: MODEL }, 'open');
-    await page.goto(PATH);
-    await hydrated(page);
-    const plan = page.locator('.chart', { hasText: 'Aylık plan' }).first().locator('.chart-canvas');
-    await expect(plan).toHaveAttribute('data-kind', 'opex-stack-h');
-    await expect(plan).toHaveAttribute('data-short-labels', '');
-    await expect(page.locator('.chart', { hasText: ': aylık bordro' }).first().locator('.chart-canvas')).toHaveAttribute('data-kind', 'opex-stack-h');
-    await expect(page.locator('.chart-canvas[data-kind="opex-stack"]')).toHaveCount(0);
-    await plan.scrollIntoViewIfNeeded();
-    await expect(plan.locator('svg')).toBeVisible({ timeout: 10_000 });
-    // 15 satır × 28 px + açıklama ve eksen payı: üç satırlık (68 px) satır yüksekliği verilmez.
-    expect(await plan.evaluate((el) => el.getBoundingClientRect().height)).toBeLessThan(15 * 44);
-    expect(await cakisanEtiketler(plan.locator('svg'))).toEqual([]);
-  });
+  // Kullanıcı kararı 2026-10-20: aylık plan masaüstünde dikey ve az yer kaplar, telefonda yatay; kişi bordrosu yatay.
+  for (const [width, height, dikey] of [[1280, 800, true], [375, 812, false]] as const) {
+    test(`aylık plan ${width} px: ${dikey ? 'dikey, alçak, 15 ayın hepsi yazılı' : 'yatay, ay başına tek satır'}; kişi bordrosu yatay`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await mockScript(page, { ozet: `plan-${width}`, model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const plan = page.locator('.chart', { hasText: 'Aylık plan' }).first().locator('.chart-canvas');
+      await expect(plan).toHaveAttribute('data-kind', 'opex-stack');
+      await plan.scrollIntoViewIfNeeded();
+      await expect.poll(() => plan.locator('svg text').allTextContents(), { timeout: 10_000 }).toContain('Ara ’27');
+      await page.waitForTimeout(400);
+      const aylar = await plan.locator('svg text').evaluateAll((els) =>
+        els.filter((t) => /’2[67]$/.test(t.textContent ?? '')).map((t) => ({ x: t.getBoundingClientRect().left, y: t.getBoundingClientRect().top })),
+      );
+      expect(aylar).toHaveLength(15);
+      const [a, b] = aylar;
+      const yukseklik = await plan.evaluate((el) => el.getBoundingClientRect().height);
+      if (dikey) {
+        // Ay etiketleri yan yana (dikey çubuk); kutu alçak (16rem).
+        expect(Math.abs(b.y - a.y)).toBeLessThan(2);
+        expect(b.x).toBeGreaterThan(a.x);
+        expect(yukseklik).toBeLessThanOrEqual(260);
+      } else {
+        // Ay etiketleri alt alta (yatay çubuk); ay başına tek satır yüksekliği (üç satırlık 68 px değil).
+        expect(b.y - a.y).toBeGreaterThan(20);
+        expect(Math.abs(b.x - a.x)).toBeLessThan(10);
+        expect(yukseklik).toBeLessThan(15 * 44);
+      }
+      expect(await cakisanEtiketler(plan.locator('svg'))).toEqual([]);
+      await expect(page.locator('.chart', { hasText: ': aylık bordro' }).first().locator('.chart-canvas')).toHaveAttribute('data-kind', 'opex-stack-h');
+    });
+  }
 
   for (const width of [320, 768]) {
     test(`${width} px: grafik ipucu grafik kutusunda kalır (kırpılmaz, taşmaz)`, async ({ page }) => {
@@ -1077,8 +1100,7 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
            return { kind: c.kind, series, state: [o.stateAnimation.easing, o.stateAnimation.duration] };
          });`,
       );
-      // Dikey yığın yok (kullanıcı kararı 2026-10-20: yatay çubuklar).
-      expect(new Set(models.map((x) => x.kind))).toEqual(new Set(['opex-bar', 'opex-stack-h', 'opex-group', 'opex-kopru']));
+      expect(new Set(models.map((x) => x.kind))).toEqual(new Set(['opex-bar', 'opex-stack', 'opex-stack-h', 'opex-group', 'opex-kopru']));
       for (const m of models) {
         for (const [animation, easing, duration] of m.series) {
           if (reduced) expect(animation, m.kind).toBe(false);

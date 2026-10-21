@@ -277,7 +277,9 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
-      const h = await page.locator('.hero').first().evaluate((el) => el.getBoundingClientRect().height);
+      // Giderler’de ayrı başlık alanı yok: başlık kırıntı satırında (kullanıcı kararı 2026-10-21).
+      const kutu = (await page.locator('.hero').count()) ? '.hero' : '.crumbs-row';
+      const h = await page.locator(kutu).first().evaluate((el) => el.getBoundingClientRect().height);
       expect(h).toBeLessThanOrEqual(sinir);
     });
   }
@@ -327,7 +329,6 @@ test.describe('başlık ve İstihdam menüsü', () => {
       await page.goto('giderler/');
       const [marka, dugme] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox()];
       expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
-      expect(await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(56);
       expect(Math.min(dugme!.width, dugme!.height)).toBeGreaterThanOrEqual(coarse ? 48 : 44);
       await context.close();
     });
@@ -365,16 +366,93 @@ test.describe('başlık ve İstihdam menüsü', () => {
     expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
 
-  for (const width of [320, 360, 375, 390]) {
-    test(`${width} px: üst bant tek satır, gezinme tek satır`, async ({ page }) => {
+  // Kullanıcı kararı 2026-10-21: geniş ekranda gezinme üst satırda (logo ile tema düğmesi arasında); dar ekranda
+  // logonun altında kendi satırında.
+  for (const width of [320, 360, 375, 390, 768]) {
+    test(`${width} px: marka ve tema düğmesi tek satır, gezinme altında tek satır`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
-      const h = await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height);
-      expect(h).toBeLessThanOrEqual(56);
-      const nav = await page.locator('.mainnav').evaluate((el) => el.getBoundingClientRect().height);
-      expect(nav).toBeLessThanOrEqual(60);
+      const [marka, dugme, nav] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.mainnav').boundingBox()];
+      expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
+      expect(nav!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
+      expect(nav!.height).toBeLessThanOrEqual(60);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     });
   }
+
+  for (const path of ['', 'giderler/']) {
+    test(`1280 px /${path}: logo, gezinme ve tema düğmesi tek satırda; bant alçak`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(path);
+      const [marka, nav, dugme] = [await page.locator('.brand').boundingBox(), await page.locator('.mainnav').boundingBox(), await page.locator('.theme-toggle').boundingBox()];
+      expect(nav!.x).toBeGreaterThan(marka!.x + marka!.width);
+      expect(dugme!.x).toBeGreaterThan(nav!.x);
+      expect(Math.abs(nav!.y + nav!.height / 2 - (marka!.y + marka!.height / 2))).toBeLessThan(8);
+      expect(await page.locator('.topbar').evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(64);
+    });
+  }
+
+  // Kullanıcı kararı 2026-10-21: “Koyu tema” yazısı görünmez (düğmenin adı kalır); anahtar büyük; simge izin boş
+  // tarafında — açık temada beyaz izde ay (topuz solda), koyu temada turuncu izde güneş (topuz sağda).
+  test('tema anahtarı: görünür yazı yok; açıkta beyaz izde ay, koyuda turuncu izde güneş, simge topuzun karşısında', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+    await page.goto('');
+    await hydrated(page);
+    const dugme = page.getByRole('button', { name: 'Koyu tema' });
+    await expect(dugme).toHaveAttribute('aria-pressed', 'false');
+    expect(await page.locator('.theme-label').evaluate((el) => el.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    const iz = await page.locator('.theme-track').boundingBox();
+    expect(iz!.width).toBeGreaterThanOrEqual(56);
+    expect(iz!.height).toBeGreaterThanOrEqual(32);
+    const durum = () =>
+      page.evaluate(() => {
+        const q = (s: string) => document.querySelector(s)!;
+        const x = (s: string) => q(s).getBoundingClientRect().left + q(s).getBoundingClientRect().width / 2;
+        return {
+          gunes: getComputedStyle(q('.theme-icon-sun')).opacity,
+          ay: getComputedStyle(q('.theme-icon-moon')).opacity,
+          iz: getComputedStyle(q('.theme-track')).backgroundColor,
+          simgeSagda: x(getComputedStyle(q('.theme-icon-sun')).opacity === '1' ? '.theme-icon-sun' : '.theme-icon-moon') > x('.theme-thumb'),
+        };
+      });
+    await expect.poll(durum).toEqual({ gunes: '0', ay: '1', iz: 'rgb(255, 255, 255)', simgeSagda: true });
+    await dugme.click();
+    await expect(dugme).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(durum).toEqual({ gunes: '1', ay: '0', iz: 'rgb(255, 134, 0)', simgeSagda: false });
+  });
+
+  // Kullanıcı kararı 2026-10-21: bölüm başlığı ve açıklaması geniş ekranda tek satırda; dar ekranda açıklama altta.
+  for (const [width, tekSatir] of [[1280, true], [375, false]] as const) {
+    test(`${width} px: bölüm başlığı ve açıklaması ${tekSatir ? 'tek satırda' : 'alt alta'}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('roller/segika/');
+      const bas = page.locator('.section-head').filter({ has: page.locator('.section-desc') }).first();
+      const [t, d] = [await bas.locator('.section-title').boundingBox(), await bas.locator('.section-desc').boundingBox()];
+      if (tekSatir) {
+        expect(Math.abs(d!.y - t!.y)).toBeLessThan(16);
+        expect(d!.x).toBeGreaterThan(t!.x + t!.width);
+      } else expect(d!.y).toBeGreaterThanOrEqual(t!.y + t!.height - 1);
+    });
+  }
+
+  // Kullanıcı kararı 2026-10-21: kırıntı “19 Ekim” ile başlar; Giderler’de son kırıntı sayfa başlığıdır (h1, büyük).
+  test('kırıntı: 19 Ekim ile başlar; Giderler’de başlık kırıntıda (tek h1, diğer kırıntılardan büyük)', async ({ page }) => {
+    await page.goto('roller/segika/');
+    await expect(page.locator('.crumbs li').first()).toHaveText('19 Ekim');
+    await expect(page.locator('.crumbs')).not.toContainText('İsmail Karaca');
+    await page.goto('giderler/');
+    await expect(page.locator('.crumbs li')).toHaveText(['19 Ekim', /Finans/, /OpEx/, /Operasyonel Giderler/]);
+    await expect(page.locator('h1')).toHaveCount(1);
+    const h1 = page.locator('.crumbs li[aria-current="page"] h1');
+    await expect(h1).toHaveText('Operasyonel Giderler');
+    const [baslik, kirinti] = [await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), await page.locator('.crumbs a').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize))];
+    expect(baslik).toBeGreaterThan(kirinti * 1.4);
+    // Kırıntılar ve başlık aynı satırda.
+    const ilk = await page.locator('.crumbs li').first().boundingBox();
+    const son = await page.locator('.crumbs li').last().boundingBox();
+    expect(son!.y).toBeLessThan(ilk!.y + ilk!.height);
+    await expect(page.locator('.hero')).toHaveCount(0);
+  });
 });
 
 test.describe('hareket', () => {

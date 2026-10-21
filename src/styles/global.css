@@ -139,7 +139,23 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   flex-direction: column;
 }
 
-/* Üst bant sıkışık (kullanıcı kararı 2026-10-20): marka ve araçlar tek satır, gezinme altında tek satır. */
+/*
+ * Üst bant (kullanıcı kararı 2026-10-21): geniş ekranda (≥ 64em) marka, gezinme ve tema düğmesi tek satırda; dar
+ * ekranda gezinme markanın altında kendi satırında. Bant geniş ekranda üstte sabit.
+ */
+.topbar {
+  z-index: 20;
+  background: var(--surface-page);
+  border-bottom: var(--hairline) solid var(--rule);
+}
+
+@media (min-width: 48em) and (min-height: 40em) {
+  .topbar {
+    position: sticky;
+    top: 0;
+  }
+}
+
 .topbar .wrap {
   display: flex;
   flex-wrap: wrap;
@@ -192,12 +208,24 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   gap: var(--space-4);
 }
 
+/*
+ * Tema anahtarı (kullanıcı kararı 2026-10-21): görünür yazı yok, büyük anahtar; simge izin boş tarafında — koyu temada
+ * turuncu izde solda güneş, açık temada beyaz izde sağda ay.
+ */
 .theme-toggle {
+  --switch-w: 3.5rem;
+  --switch-h: 2rem;
+  --switch-pad: 0.1875rem;
+  --switch-thumb: calc(var(--switch-h) - 2 * var(--switch-pad) - 2 * var(--hairline));
+  --switch-icon: 1rem;
+  --switch-empty: calc(var(--switch-w) - 2 * var(--hairline) - var(--switch-thumb) - 2 * var(--switch-pad));
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  min-width: var(--hit-min);
   min-height: var(--hit-min);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   border: 0;
   border-radius: var(--radius-pill);
   background-color: transparent;
@@ -222,11 +250,13 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 .theme-track {
   position: relative;
   flex: none;
-  width: 2.5rem;
-  height: 1.5rem;
+  box-sizing: border-box;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  border: var(--hairline) solid var(--rule-strong);
   border-radius: var(--radius-pill);
   background-color: var(--toggle-track-off);
-  transition-property: background-color;
+  transition-property: background-color, border-color;
   transition-duration: var(--motion-duration-base);
   transition-timing-function: var(--motion-ease-standard);
   transition-delay: var(--motion-delay-none);
@@ -234,10 +264,10 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 
 .theme-thumb {
   position: absolute;
-  top: 0.1875rem;
-  left: 0.1875rem;
-  width: 1.125rem;
-  height: 1.125rem;
+  top: var(--switch-pad);
+  left: var(--switch-pad);
+  width: var(--switch-thumb);
+  height: var(--switch-thumb);
   border-radius: 50%;
   background-color: var(--toggle-thumb-off);
   transition-property: transform, background-color;
@@ -247,12 +277,46 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 }
 
 .theme-toggle[aria-pressed='true'] .theme-track {
+  border-color: transparent;
   background-color: var(--toggle-track-on);
 }
 
 .theme-toggle[aria-pressed='true'] .theme-thumb {
   background-color: var(--toggle-thumb-on);
-  transform: translateX(1rem);
+  transform: translateX(calc(var(--switch-w) - var(--switch-h)));
+}
+
+/* Simge izin boş tarafının ortasında (topuzun karşısında). */
+.theme-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
+  width: var(--switch-icon);
+  height: var(--switch-icon);
+  transition-property: opacity;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.theme-icon-sun {
+  left: calc(var(--switch-pad) + (var(--switch-empty) - var(--switch-icon)) / 2);
+  color: var(--toggle-thumb-on);
+  opacity: 0;
+}
+
+.theme-icon-moon {
+  right: calc(var(--switch-pad) + (var(--switch-empty) - var(--switch-icon)) / 2);
+  color: var(--toggle-thumb-off);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-icon-sun {
+  opacity: 1;
+}
+
+.theme-toggle[aria-pressed='true'] .theme-icon-moon {
+  opacity: 0;
 }
 
 /*
@@ -265,25 +329,21 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   }
 
   .theme-toggle {
-    min-width: var(--hit-min);
     padding-inline: 0;
-    justify-content: center;
   }
 }
 
-/* Dar ekranda üst bant tek satır: tema düğmesinin yazısı yalnız ekran okuyucuya (düğmenin adı aynı kalır). */
-@media (max-width: 29.99em) {
-  .theme-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
+/* Tema düğmesinin yazısı yalnız ekran okuyucuya (düğmenin adı “Koyu tema”; görünür yazı yok). */
+.theme-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* JavaScript açıksa düğme ilk boyamada yer alır (sonradan kayma olmaz). */
@@ -302,22 +362,16 @@ html[data-js] .theme-toggle[hidden] {
 }
 
 .mainnav {
-  z-index: 20;
-  background: var(--surface-page);
-  border-bottom: var(--hairline) solid var(--rule);
+  order: 3;
+  flex: 1 0 100%;
+  min-width: 0;
 }
 
-@media (min-width: 48em) and (min-height: 40em) {
+@media (min-width: 64em) {
   .mainnav {
-    position: sticky;
-    top: 0;
+    order: 0;
+    flex: 1 1 auto;
   }
-}
-
-.mainnav-rows {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: 0 var(--page-gutter);
 }
 
 .mainnav-list {
@@ -594,6 +648,19 @@ html[data-js] .theme-toggle[hidden] {
   }
 }
 
+/* Geniş ekranda başlık ve açıklama tek satırda (kullanıcı kararı 2026-10-21): numara · başlık · açıklama. */
+@media (min-width: 64em) {
+  .section-head {
+    grid-template-columns: 4rem fit-content(60%) minmax(0, 1fr);
+    column-gap: var(--space-5);
+  }
+
+  .section-head .section-desc {
+    grid-column: 3;
+    margin: 0;
+  }
+}
+
 .block-title {
   margin: 0 0 var(--space-3);
   font-size: var(--text-lg);
@@ -858,6 +925,20 @@ html:not([data-js]) .mainnav-menu-li {
 .crumbs li[aria-current='page'] {
   color: var(--text-primary);
   font-weight: var(--weight-semibold);
+}
+
+/* Son kırıntı aynı zamanda sayfa başlığı (h1): diğer kırıntılardan büyük (kullanıcı kararı 2026-10-21). */
+.crumbs-title {
+  display: inline;
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.crumbs ol:has(.crumbs-title) {
+  align-items: baseline;
 }
 
 .pager {
@@ -2399,9 +2480,23 @@ html:not([data-js]) .email-btn {
   --chart-row-h: var(--chart-row-h-short);
 }
 
+/*
+ * Aylık plan (opex-stack): geniş grafikte dikey ve alçak (data-size); satır yüksekliği yalnız dar grafikte, çubuklar
+ * yataya döndüğünde uygulanır (charts.ts: 568 px kutu = 600 px grafik).
+ */
+.chart-canvas[data-rows][data-kind='opex-stack']:not([data-chart-failed]) {
+  min-height: 0;
+}
+
 @container opex-chart (width < 600px) {
   .chart-canvas[data-kind='opex-stack'] {
     height: var(--chart-h-xl);
+  }
+
+  .chart-canvas[data-rows][data-kind='opex-stack']:not([data-chart-failed]) {
+    --chart-row-pad: var(--chart-row-pad-legend-narrow);
+    height: auto;
+    min-height: calc(var(--chart-rows) * var(--chart-row-h) + var(--chart-row-pad));
   }
 }
 
