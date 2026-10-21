@@ -2556,9 +2556,32 @@ html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
   box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
 }
 
+/*
+ * Alt toplamlar kalem satırlarından belirgin ayrı (kullanıcı kararı 2026-10-21): üstte kalın koyu ayırıcı, blokta
+ * gövdeden farklı zemin; “Toplam” satırı kendi vurgu zeminini korur.
+ */
 .opex-veri-table tfoot th,
 .opex-veri-table tfoot td {
+  background-color: var(--surface-sunken);
   font-weight: var(--weight-semibold);
+}
+
+/* Sabit Kalem hücresi de aynı zemini alır (kendi zemini daha baskın). */
+.opex-veri-table tfoot .cell-sticky {
+  background-color: var(--surface-sunken);
+}
+
+/* Kalın ayırıcı her hücrenin zemininde: sabit hücre dahil tek çizgi (birleşik kenarlık hizası kaymaz, zemin örtmez). */
+.opex-veri-table tfoot tr:first-child > * {
+  background-image: linear-gradient(var(--text-primary), var(--text-primary));
+  background-repeat: no-repeat;
+  background-size: 100% 2px;
+  background-position: top;
+}
+
+.opex-veri-table tfoot tr[data-tone='total'] > *,
+.opex-veri-table tfoot tr[data-tone='total'] > .cell-sticky {
+  background-color: var(--surface-accent);
 }
 
 .opex-veri-bos {

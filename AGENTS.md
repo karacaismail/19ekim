@@ -49,7 +49,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     sütun filtrelerinden ayrı; seçimler yalnız onay kutulu `SecimKutusu`, kutuda hap/etiket yok, özet “Hepsi” / değer /
     “N seçili”): grup, kategori, bu ay, tür, para birimi, 2027 artışı, Toplam ₺ aralığı, boş aylı ve
     özel tutarlı kalemler; ikisi birlikte uygulanır;
-    “Sütunlar” panelinde ay, yıl ve personel sütun grupları gizlenir; alt satırlar — `tfoot` — süzülmüş satırlardan; eski
+    “Sütunlar” panelinde ay, yıl ve personel sütun grupları gizlenir; alt satırlar — `tfoot` — süzülmüş satırlardan, gövdeden
+    belirgin ayrı (kalın koyu ayırıcı, farklı zemin); eski
     personel tablosunun brüt, kesinti, işveren payı, teşvik ve fatura KDV’si plan dönemi toplamı olarak sütunlarda;
     kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
     2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; altta — eski aylık gider planı tablosu — grup ara toplamları (birden çok

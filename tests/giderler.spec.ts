@@ -1234,6 +1234,33 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await expect.poll(golge).toBe('none');
   });
 
+  // Kullanıcı kararı 2026-10-21: alt toplamlar gövdeden belirgin ayrı (kalın ayırıcı, farklı zemin).
+  test('kalemler veri tablosu: alt toplamlar gövdeden ayrı — kalın ayırıcı ve farklı zemin', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockScript(page, { ozet: 'alt', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const tablo = page.getByRole('region', { name: KALEMLER });
+    const st = await tablo.evaluate((el) => {
+      const ilkAlt = el.querySelector('tfoot tr')!;
+      const govde = el.querySelector('tbody tr td')!;
+      const alt = ilkAlt.querySelector('td')!;
+      const sabit = ilkAlt.querySelector('th.cell-sticky')!;
+      return {
+        cizgi: getComputedStyle(alt).backgroundImage.includes('linear-gradient') ? parseFloat(getComputedStyle(alt).backgroundSize.split(' ')[1]) : 0,
+        govde: getComputedStyle(govde).backgroundColor,
+        alt: getComputedStyle(alt).backgroundColor,
+        sabit: getComputedStyle(sabit).backgroundColor,
+        sabitCizgi: getComputedStyle(sabit).backgroundImage,
+      };
+    });
+    expect(st.cizgi).toBeGreaterThanOrEqual(2);
+    expect(st.alt).not.toBe(st.govde);
+    // Sabit Kalem hücresi de aynı zeminde ve üstünde çizgi (zemini çizgiyi örtmez).
+    expect(st.sabit).toBe(st.alt);
+    expect(st.sabitCizgi).toContain('linear-gradient');
+  });
+
   test('kalemler veri tablosu 375 px: sayfa taşmaz, tablo kendi kutusunda kayar; filtreler tek sütun', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockScript(page, { ozet: 'veri-375', model: MODEL }, 'open');
