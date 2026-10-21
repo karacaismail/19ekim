@@ -4,12 +4,12 @@ import { RolePage } from '../../views/RolePage';
 import { BASE_ROLES } from '../../data/roles';
 
 export function getStaticPaths() {
-  return BASE_ROLES.map((role) => ({ params: { slug: role.slug }, props: { title: role.title, mission: role.mission } }));
+  return BASE_ROLES.map((role) => ({ params: { slug: role.slug }, props: { title: role.title } }));
 }
 
-const { title, mission } = Astro.props;
+const { title } = Astro.props;
 ---
 
-<BaseLayout title={title} description={mission}>
+<BaseLayout title={title}>
   <RolePage client:load pathname={Astro.url.pathname} slug={Astro.params.slug as string} />
 </BaseLayout>

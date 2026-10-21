@@ -36,6 +36,8 @@ test.beforeEach(async ({ page }) => {
 
 /** Astro adası hidrasyonu bitince etkileşim React’e ulaşır. */
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+/** Giriş kapısı: içerik hidrasyondan sonra çizilir (statik HTML'de yalnız form); alt bilgi içerikle birlikte gelir. */
+const icerik = (page: Page) => page.waitForSelector('.app-footer', { state: 'attached' });
 
 const WIDTHS = [320, 360, 375, 390, 768, 1280];
 const APPROVED_EASING = 'cubic-bezier(0.65, 0, 0.35, 1)';
@@ -84,6 +86,7 @@ test.describe('yerleşim ve okunabilirlik', () => {
       await page.setViewportSize({ width, height: 800 });
       for (const path of PAGES) {
         await page.goto(path);
+        await icerik(page);
         const result = await audit(page);
         expect(result.overflow, `${path} sayfası yatay taşıyor`).toBeLessThanOrEqual(0);
         expect(result.small, `${path} 14 px altı metin`).toEqual([]);
@@ -105,6 +108,7 @@ test.describe('yerleşim ve okunabilirlik', () => {
     );
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('eylem-plani/');
+    await icerik(page);
     for (const selector of ['.table-scroll:not(.chart-scroll)', '.chart-scroll']) {
       const region = page.locator(selector).first();
       const widths = await region.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
@@ -150,6 +154,7 @@ test.describe('odak', () => {
   test('işaretçi modunda başlar; yalnız Tab açar; çevre halkası yok; tek kenar gösterge var', async ({ page, browserName }) => {
     const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
     await page.goto('eylem-plani/');
+    await icerik(page);
     const mode = () => page.evaluate(() => document.documentElement.dataset.focusMode);
     expect(await mode()).toBe('pointer');
     await page.keyboard.press('ArrowDown');
@@ -187,6 +192,7 @@ test.describe('odak', () => {
 
   test('fareyle tıklanan bölgede gösterge veya halka görünmez', async ({ page }) => {
     await page.goto('roller/pazarlamaci/');
+    await icerik(page);
     const region = page.locator('.table-scroll').first();
     await region.click();
     const state = await focusState(page);
@@ -200,6 +206,7 @@ test.describe('odak', () => {
     test.skip(browserName !== 'chromium', 'forced-colors emülasyonu yalnız Chromium’da');
     await page.emulateMedia({ forcedColors: 'active' });
     await page.goto('');
+    await icerik(page);
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     const keyboard = await focusState(page);
@@ -217,6 +224,7 @@ test.describe('odak', () => {
 test.describe('başlık ve İstihdam menüsü', () => {
   test('İstihdam menüsü: organizasyon, roller ve istihdam takvimi; etkin sayfa işaretli; Escape kapatır', async ({ page }) => {
     await page.goto('roller/segika/');
+    await icerik(page);
     await hydrated(page);
     const tetik = page.getByRole('button', { name: 'İstihdam' });
     await expect(tetik).toHaveAttribute('data-section', 'true');
@@ -237,6 +245,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
 
   test('klavye: Tab ile tetikleyici, Enter açar, oklar ögeler arasında gezer; odak alt çizgiyle (halka yok)', async ({ page }) => {
     await page.goto('istihdam/');
+    await icerik(page);
     await hydrated(page);
     const tetik = page.getByRole('button', { name: 'İstihdam' });
     await page.keyboard.press('Tab');
@@ -277,6 +286,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
+      await icerik(page);
       // Giderler’de ayrı başlık alanı yok: başlık kırıntı satırında (kullanıcı kararı 2026-10-21).
       const kutu = (await page.locator('.hero').count()) ? '.hero' : '.crumbs-row';
       const h = await page.locator(kutu).first().evaluate((el) => el.getBoundingClientRect().height);
@@ -284,20 +294,10 @@ test.describe('başlık ve İstihdam menüsü', () => {
     });
   }
 
-  test('JavaScript kapalı: İstihdam ve Pazarlama menülerinin sayfaları düz bağlantı olarak gezinmede', async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false });
-    const page = await context.newPage();
-    await page.goto('istihdam/');
-    const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    for (const ad of ['Organizasyon', 'Segika', 'Asistan', 'İstihdam takvimi', '90 gün hedefleri', 'Karar yetkisi', 'Parametreler']) await expect(nav.getByRole('link', { name: ad, exact: true })).toBeVisible();
-    await expect(nav.getByRole('button', { name: 'İstihdam' })).toBeHidden();
-    await expect(nav.getByRole('button', { name: 'Pazarlama' })).toBeHidden();
-    await context.close();
-  });
-
   // Kullanıcı kararı 2026-10-20: hedefler, eylem planı, MLM ağı, karar sayfaları ve parametreler “Pazarlama” menüsünde.
   test('Pazarlama menüsü: altı sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
     await page.goto('karar-yetkisi/');
+    await icerik(page);
     await hydrated(page);
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
     await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, 'Giderler (OPEX)', 'Notlar']);
@@ -315,6 +315,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
 
   test('MLM ağı yalnız Pazarlama menüsünde etkin (İstihdam menüsü bölüm saymaz)', async ({ page }) => {
     await page.goto('buyume-modeli/');
+    await icerik(page);
     await hydrated(page);
     await expect(page.getByRole('button', { name: 'Pazarlama' })).toHaveAttribute('data-section', 'true');
     await expect(page.getByRole('button', { name: 'İstihdam' })).not.toHaveAttribute('data-section', 'true');
@@ -327,6 +328,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const context = await browser.newContext({ viewport: { width: 320, height: 700 }, ...(coarse ? { hasTouch: true, isMobile: true } : {}) });
       const page = await context.newPage();
       await page.goto('giderler/');
+      await icerik(page);
       const [marka, dugme] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox()];
       expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
       expect(Math.min(dugme!.width, dugme!.height)).toBeGreaterThanOrEqual(coarse ? 48 : 44);
@@ -339,6 +341,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`${width} px: logo altında alt başlık, plan tarihi yok`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('');
+      await icerik(page);
       const marka = page.locator('.topbar .brand');
       // Logo (kullanıcı kararı 2026-10-21): Türksab “TURKS/AB” orijinaline göre çizilmiş SVG; ekran okuyucuya “Türksab”.
       await expect(marka).toHaveText('Pazarlama & Finansal Planlama');
@@ -363,6 +366,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
 
   test('işaretçiyle açılan menüde oklar odak göstergesi açmaz (görünür odak yalnız Tab ile)', async ({ page }) => {
     await page.goto('istihdam/');
+    await icerik(page);
     await hydrated(page);
     await page.getByRole('button', { name: 'İstihdam' }).click();
     await expect(page.getByRole('menu', { name: 'İstihdam' })).toBeVisible();
@@ -384,6 +388,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`${width} px: marka ve tema düğmesi tek satır, gezinme altında tek satır`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
+      await icerik(page);
       const [marka, dugme, nav] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.mainnav').boundingBox()];
       expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
       expect(nav!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
@@ -406,6 +411,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`1280 px /${path}: logo, gezinme ve tema düğmesi tek satırda; bant alçak`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
+      await icerik(page);
       const [marka, nav, dugme] = [await page.locator('.brand').boundingBox(), await page.locator('.mainnav').boundingBox(), await page.locator('.theme-toggle').boundingBox()];
       expect(nav!.x).toBeGreaterThan(marka!.x + marka!.width);
       expect(dugme!.x).toBeGreaterThan(nav!.x);
@@ -422,6 +428,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   test('tema anahtarı: görünür yazı yok; açıkta beyaz izde ay, koyuda turuncu izde güneş, simge topuzun karşısında', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     await page.goto('');
+    await icerik(page);
     await hydrated(page);
     const dugme = page.getByRole('button', { name: 'Koyu tema' });
     await expect(dugme).toHaveAttribute('aria-pressed', 'false');
@@ -451,6 +458,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test(`${width} px: bölüm başlığı ve açıklaması ${tekSatir ? 'tek satırda' : 'alt alta'}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto('roller/segika/');
+      await icerik(page);
       const bas = page.locator('.section-head').filter({ has: page.locator('.section-desc') }).first();
       const [t, d] = [await bas.locator('.section-title').boundingBox(), await bas.locator('.section-desc').boundingBox()];
       if (tekSatir) {
@@ -465,6 +473,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     test.skip(browserName === 'webkit', 'not_run: Playwright WebKit Tab ile düğmelere odak vermez');
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('');
+    await icerik(page);
     await hydrated(page);
     await page.getByRole('link', { name: 'Notlar', exact: true }).focus();
     await page.keyboard.press('Tab');
@@ -482,9 +491,11 @@ test.describe('başlık ve İstihdam menüsü', () => {
   // Kullanıcı kararı 2026-10-21: kırıntı “19 Ekim” ile başlar; Giderler’de son kırıntı sayfa başlığıdır (h1, büyük).
   test('kırıntı: 19 Ekim ile başlar; Giderler’de başlık kırıntıda (tek h1, diğer kırıntılardan büyük)', async ({ page }) => {
     await page.goto('roller/segika/');
+    await icerik(page);
     await expect(page.locator('.crumbs li').first()).toHaveText('19 Ekim');
     await expect(page.locator('.crumbs')).not.toContainText('İsmail Karaca');
     await page.goto('giderler/');
+    await icerik(page);
     await expect(page.locator('.crumbs li')).toHaveText(['19 Ekim', /Finans/, /OpEx/, /Operasyonel Giderler/]);
     await expect(page.locator('h1')).toHaveCount(1);
     const h1 = page.locator('.crumbs li[aria-current="page"] h1');
@@ -508,6 +519,7 @@ test.describe('hareket', () => {
   test('tüm geçişler onaylı Cubic eğri ve pozitif süreyle; giriş ve çıkış temel öğede', async ({ page }) => {
     for (const path of ['', 'roller/organizator/', 'istihdam/']) {
       await page.goto(path);
+      await icerik(page);
       const offenders = await page.evaluate((approved) => {
         const out: string[] = [];
         for (const el of document.querySelectorAll('*')) {
@@ -532,6 +544,7 @@ test.describe('hareket', () => {
   test('hareket azaltma tercihinde süreler sıfırlanır', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('');
+    await icerik(page);
     const durations = await page.evaluate(() =>
       [...document.querySelectorAll('.mainnav-link, .pager-link, .text-link')].map(
         (el) => getComputedStyle(el).transitionDuration,
@@ -546,6 +559,7 @@ test.describe('etkileşim alanı ve tema', () => {
   test('bağımsız kontroller en az 44 CSS px', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('roller/asistan/');
+    await icerik(page);
     const heights = await page
       .locator('.mainnav-link, .pager-link, .brand')
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
@@ -557,6 +571,7 @@ test.describe('etkileşim alanı ve tema', () => {
   test('koyu tema işletim sistemi tercihini izler', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('');
+    await icerik(page);
     const scheme = await page.evaluate(() => document.documentElement.getAttribute('data-mantine-color-scheme'));
     expect(scheme).toBe('dark');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
@@ -569,6 +584,7 @@ test.describe('yatay telefon (alçak ekran)', () => {
     test(`${viewport.width}×${viewport.height}: İstihdam menüsünün son ögesi görünür alanda ve tıklanır`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto('roller/asistan/');
+      await icerik(page);
       await hydrated(page);
       await page.getByRole('button', { name: 'İstihdam' }).click();
       const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
@@ -588,6 +604,7 @@ test.describe('dokunmatik cihaz', () => {
   test('kaba işaretçide kontroller en az 48 CSS px', async ({ page, browserName }) => {
     test.skip(browserName === 'firefox', 'Firefox mobil emülasyonu desteklemez');
     await page.goto('roller/organizator/');
+    await icerik(page);
     const coarse = await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches);
     test.skip(!coarse, 'Bu motor kaba işaretçi emüle etmiyor');
     const heights = await page
@@ -606,6 +623,7 @@ test.describe('kenar sistemi (kavisli vurgu kenarı yasak)', () => {
   test('tüm sayfalarda çizgi yalnız düz; değdiği köşeler radiussuz, diğer radiuslar korunur', async ({ page }) => {
     for (const path of PAGES) {
       await page.goto(path);
+      await icerik(page);
       const result = await page.evaluate(() => {
         const bad: string[] = [];
         const name = (el: Element) => `${el.tagName.toLowerCase()}.${el.className}`;
@@ -680,6 +698,7 @@ test.describe('tema düğmesi', () => {
   test('açık/koyu geçişi anında, kalıcı ve aria-pressed ile', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('');
+    await icerik(page);
     await hydrated(page);
     const toggle = page.locator('[data-theme-toggle]');
     await expect(toggle).toBeVisible();
@@ -703,6 +722,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
     await page.setViewportSize({ width: 320, height: 700 });
     for (const path of ['', 'roller/ekip-lideri/', 'istihdam/', 'buyume-modeli/']) {
       await page.goto(path);
+      await icerik(page);
       const heights = await page
         .locator('.text-link[data-standalone], .crumbs a, .pager-link')
         .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
@@ -713,6 +733,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
 
   test('takvim ve zaman çizelgesi: Mantine bileşenleri, metin en az 14 px', async ({ page }) => {
     await page.goto('istihdam/');
+    await icerik(page);
     await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(8);
     await expect(page.locator('.cal')).toHaveCount(4);
     expect(await page.locator('.cal-day[data-event]').count()).toBe(11);
@@ -730,6 +751,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
     page.on('pageerror', (e) => errors.push(e.message));
     for (const path of CHART_PAGES) {
       await page.goto(path);
+      await icerik(page);
       const canvases = page.locator('.chart-canvas');
       const count = await canvases.count();
       expect(count, path).toBeGreaterThan(0);
@@ -754,6 +776,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
       await page.setViewportSize({ width, height: 800 });
       for (const path of CHART_PAGES) {
         await page.goto(path);
+        await icerik(page);
         const canvases = page.locator('.chart-canvas');
         for (let i = 0; i < (await canvases.count()); i++) {
           await canvases.nth(i).scrollIntoViewIfNeeded();
@@ -825,6 +848,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
   test('grafik hareketi: seri, işaret çizgisi, durum ve işaretçi simetrik cubicInOut, 120–320 ms', async ({ page }) => {
     for (const path of ['hedefler/', 'karar-yetkisi/', 'roller/organizator/', 'buyume-modeli/']) {
       await page.goto(path);
+      await icerik(page);
       const canvases = page.locator('.chart-canvas');
       for (let i = 0; i < (await canvases.count()); i++) {
         await canvases.nth(i).scrollIntoViewIfNeeded();
@@ -849,6 +873,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
   test('grafik hareketi: hareket azaltma tercihinde kapalı', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('hedefler/');
+    await icerik(page);
     await page.locator('.chart-canvas').first().scrollIntoViewIfNeeded();
     await expect(page.locator('.chart-canvas svg').first()).toBeVisible({ timeout: 10_000 });
     const charts = await chartMotion(page);
@@ -862,6 +887,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
 test.describe('parametreler', () => {
   test('değişiklik tarayıcıya kaydedilir, tüm sayfalara yansır ve varsayılana dönülür', async ({ page }) => {
     await page.goto('parametreler/');
+    await icerik(page);
     await hydrated(page);
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
@@ -871,16 +897,19 @@ test.describe('parametreler', () => {
     await expect(page.locator('.params-notice')).toBeVisible();
 
     await page.goto('karar-bekleyenler/');
+    await icerik(page);
     await hydrated(page);
     await expect(page.getByText('70.000 ₺ maaş / ay').first()).toBeVisible();
     await expect(page.getByText('Kota: ay içinde 140.000 ₺ satış', { exact: false }).first()).toBeVisible();
     await expect(page.locator('.params-notice')).toBeVisible();
 
     await page.goto('roller/saha-uzmani/');
+    await icerik(page);
     await hydrated(page);
     await expect(page.locator('.facts-row')).toContainText('70.000 ₺ maaş');
 
     await page.goto('parametreler/');
+    await icerik(page);
     await hydrated(page);
     const reset = page.locator('.param-reset');
     await reset.click();
@@ -888,6 +917,7 @@ test.describe('parametreler', () => {
     await reset.click();
     await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
     await page.goto('karar-bekleyenler/');
+    await icerik(page);
     await hydrated(page);
     await expect(page.getByText('60.000 ₺ maaş / ay').first()).toBeVisible();
     await expect(page.locator('.params-notice')).toHaveCount(0);
@@ -895,9 +925,11 @@ test.describe('parametreler', () => {
 
   test('tarih parametresi takvimi ve kontrol tarihlerini kaydırır', async ({ page }) => {
     await page.goto('parametreler/');
+    await icerik(page);
     await hydrated(page);
     await page.evaluate(() => localStorage.setItem('istoc-plan-parametreler', JSON.stringify({ startDate: '2026-11-15' })));
     await page.goto('karar-yetkisi/');
+    await icerik(page);
     await hydrated(page);
     await expect(page.locator('.data-table').first()).toContainText('13 Ocak');
     await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
@@ -906,6 +938,7 @@ test.describe('parametreler', () => {
   test('klavye odağı: alan etiketi altı çizili; çevreleyen halka yok', async ({ page, browserName }) => {
     const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
     await page.goto('parametreler/');
+    await icerik(page);
     await hydrated(page);
     await page.getByLabel('Program başlangıcı').focus();
     await page.keyboard.press(tab);
@@ -934,6 +967,7 @@ test.describe('parametreler', () => {
 test.describe('BCG eğitimi', () => {
   test('dört kutu matrisi, nakit döngüsü ve örnek balon matrisi Türkçe; matris yerleşimi klasik', async ({ page }) => {
     await page.goto('bcg/');
+    await icerik(page);
     const cells = page.locator('.bcg-cell');
     await expect(cells).toHaveCount(4);
     expect(await cells.locator('.bcg-name').allTextContents()).toEqual(['Yıldız', 'Soru işareti', 'Nakit ineği', 'Köpek']);
@@ -962,6 +996,7 @@ test.describe('BCG eğitimi', () => {
     );
     const tab = 'Tab';
     await page.goto('bcg/');
+    await icerik(page);
     const first = page.locator('.quiz-item').first();
     await first.locator('summary').click();
     await expect(first.locator('.quiz-answer')).toBeVisible();
@@ -988,6 +1023,7 @@ test.describe('BCG eğitimi', () => {
 test.describe('notlar', () => {
   test('not eklenir, işaretlenir, düzenlenir, silinir ve tarayıcıda saklanır', async ({ page }) => {
     await page.goto('notlar/');
+    await icerik(page);
     await hydrated(page);
     await page.evaluate(() => localStorage.removeItem('istoc-plan-notlar'));
     await page.reload();
@@ -1038,6 +1074,7 @@ test.describe('notlar', () => {
   test('klavye: not kutusu odakta metnin altı çizili; çevreleyen halka yok', async ({ page, browserName }) => {
     const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
     await page.goto('notlar/');
+    await icerik(page);
     await hydrated(page);
     await page.locator('.note-check-input').first().focus();
     await page.keyboard.press(tab);

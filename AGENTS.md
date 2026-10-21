@@ -21,8 +21,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - `/parametreler/` değerleri düzenler; değişiklik anında tüm sayfaların modeline yansır ve `localStorage`
   (`istoc-plan-parametreler`, yalnız varsayılandan farklı anahtarlar) içinde saklanır. Yayındaki site herkes için
   varsayılanları gösterir; değişiklik varsa her sayfada not görünür. Varsayılanı kalıcı değiştirmek için `params.ts`.
-- İstemci JavaScript’i: React adaları, `BaseLayout.astro` içindeki satır içi betikler (ilk renk şeması, merkezi klavye
-  odak modu, gezinme şeridi) ve grafikler. `Chart` bileşeni ECharts’ı (`src/scripts/charts.ts` → `echarts-setup.ts`)
+- İstemci JavaScript’i: React adaları, `BaseLayout.astro` içindeki satır içi betikler (ilk renk şeması, giriş işareti,
+  merkezi klavye odak modu) ve grafikler; gezinme şeridinde etkin bağlantıyı görünür alana getirme `AppFrame`’de. `Chart` bileşeni ECharts’ı (`src/scripts/charts.ts` → `echarts-setup.ts`)
   yalnız grafik görünür olunca dinamik yükler; spec değişince aynı grafiği yeniden çizer. İstihdam, arşiv ve
   Parametreler sayfaları ECharts indirmez. Tema düğmesi Mantine `colorSchemeManager` ile `istoc-plan-tema` anahtarını
   kullanır.
@@ -153,7 +153,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
   bekleyenler, parametreler; `MARKETING_NAV`) açılır menüleri, Giderler (OPEX), Notlar. Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
-  ekranda panel kendi içinde kayar; JavaScript yoksa menüler yerine düz bağlantılar). Sayfa başlıkları sıkışık (`--text-title`, geniş
+  ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık (`--text-title`, geniş
   ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
   (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`; Giderler döviz kurları), üst bantta tema düğmesinin solunda
@@ -208,6 +208,19 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   gerçek tohumdaki tutarlar kullanılmaz. Anahtar varsayılan sessionStorage’da (“Bu cihazda hatırla” localStorage;
   `karacaismail.github.io` kökü paylaşıldığı için önerilmez). Sheets’ten gelen metin ECharts HTML ipucunda kaçışlanır
   (`esc`); yeni grafik biçimlendiricileri de kaçışlamalıdır (`tests/giderler.spec.ts` enjeksiyonu reddeder).
+- Giriş kapısı (kullanıcı kararı 2026-10-21; `src/lib/giris.ts`, `src/components/Giris.tsx`): sunucusuz, çok basit;
+  yalnız robotlara ve rastgele ziyaretçilere karşı. Giriş yoksa `AppFrame` gezinme, sayfa içeriği ve alt bilgiyi çizmez;
+  statik HTML’de yalnız marka, tema düğmesi ve giriş formu vardır; sayfa açıklaması tüm sayfalarda geneldir (veri
+  taşımaz), `noindex, nofollow`. Kullanıcı adı büyük/küçük harf ve Türkçe karakterden bağımsız (`kullaniciAdiNormal`:
+  “turksab”, “TURKSAB”, “Türksab”, “TürksAB” …). **Parola repoya, koda, belgeye yazılmaz**; yalnız SHA-256 özeti
+  (`GIRIS_OZETI`) karşılaştırılır; parola değişirse özet `19ekim:turksab:<parola>` metninden yeniden hesaplanır. Giriş
+  localStorage’da (`turksab-giris`) kalır, başka sekmeye yansır; alt bilgide “Çıkış yap”. Girişliyken ilk boyamada
+  formu head betiği gizler (`html[data-giris]`). Form alanlarının `name`’i yok ve düğme hidrasyona kadar kapalı (parola
+  adres çubuğuna düşmez); JavaScript yoksa form yerine not. **Sınır:** tarayıcı paketleri (`/_astro/*.js`), herkese açık
+  repo ve Giderler’in Sheets/Apps Script ucu veriyi kapıdan bağımsız taşır; kapı gerçek erişim denetimi değildir. Kısa
+  sayısal parola özetten saniyeler içinde bulunabilir ve kayıtlı özet aynı zamanda giriş işaretidir; parola başka yerde
+  kullanılmamalı. Giriş süresizdir (çıkışa kadar). `GIRIS_PAROLA` CI sırrı yapılırsa hata izleri/HTML raporu yazılan
+  parolayı içerebilir.
 - Lisans henüz seçilmedi; kullanıcının onayı olmadan lisans eklenmez.
 
 ## Komutlar
@@ -218,7 +231,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 | Tip, Astro ve UI kapısı | `npm run check` (`astro check` + `scripts/check-ui-gates.mjs`) |
 | Yalnız UI kapısı | `npm run gates` |
 | Üretim derlemesi | `npm run build` |
-| Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile) |
+| Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
 | Hepsi | `npm run verify` |
 | Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
 

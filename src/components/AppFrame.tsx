@@ -1,10 +1,12 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
 import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { IconChevronDown, IconMoon, IconSun } from '@tabler/icons-react';
 import { BrandMark } from './BrandMark';
+import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
 import { COMMON_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
+import { useGiris } from '../lib/giris';
 import { href, normalizePath } from '../lib/paths';
 
 const THEME_KEY = 'istoc-plan-tema';
@@ -225,6 +227,22 @@ export function AppFrame({
   const next = index >= 0 && index < SEQUENCE.length - 1 ? SEQUENCE[index + 1] : null;
   // Ara kırıntı, tek kırıntılı sayfanın etiketiyse o sayfaya bağlanır (ör. Ağaç 3 → saha ekibi).
   const crumbPath = (label: string) => SEQUENCE.find((s) => s.crumb.length === 1 && s.crumb[0] === label)?.path;
+  // Giriş kapısı (kullanıcı kararı 2026-10-21): giriş yoksa gezinme, sayfa içeriği ve alt bilgi çizilmez; statik
+  // HTML'de yalnız giriş formu bulunur.
+  const girisli = useGiris();
+
+  // Dar ekranda yatay gezinme şeridinde etkin bağlantı görünür alana gelir (animasyonsuz, boyamadan önce). Gezinme
+  // girişten sonra çizildiğinden sayfa betiği yerine burada.
+  useLayoutEffect(() => {
+    if (!girisli) return;
+    document.querySelectorAll<HTMLElement>('.mainnav-list').forEach((list) => {
+      const active = list.querySelector<HTMLElement>('[aria-current="page"]') ?? list.querySelector<HTMLElement>('[data-section="true"]');
+      if (!active || list.scrollWidth <= list.clientWidth) return;
+      const listBox = list.getBoundingClientRect();
+      const box = active.getBoundingClientRect();
+      if (box.left < listBox.left || box.right > listBox.right) list.scrollLeft += box.left - listBox.left - (listBox.width - box.width) / 2;
+    });
+  }, [girisli]);
 
   return (
     <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="auto" colorSchemeManager={themeManager}>
@@ -245,93 +263,96 @@ export function AppFrame({
               </span>
             </a>
             {/* Gezinme (kullanıcı kararı 2026-10-21): geniş ekranda üst satırda, dar ekranda markanın altında. */}
-            <nav className="mainnav" aria-label="Ana gezinme">
-              <ul className="mainnav-list">
-                {NAV_MENUS.map((menu) => (
-                  <li key={menu.label} className="mainnav-menu-li">
-                    <NavMenu {...menu} current={current} />
-                  </li>
-                ))}
-                {/* JavaScript yoksa (veya hidrasyondan önce bozulursa) menüler yerine düz bağlantılar: temel deneyim. */}
-                {NAV_MENUS.flatMap((menu) => menu.items).map((item) => (
-                  <li key={`js-yok-${item.path}`} className="mainnav-nojs">
-                    <a className="mainnav-nojs-link" href={href(item.path)} aria-current={normalizePath(href(item.path)) === current ? 'page' : undefined}>
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-                {COMMON_NAV.map((item) => (
-                  <li key={item.path}>
-                    <NavItem {...item} current={current} />
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            {girisli ? (
+              <nav className="mainnav" aria-label="Ana gezinme">
+                <ul className="mainnav-list">
+                  {NAV_MENUS.map((menu) => (
+                    <li key={menu.label} className="mainnav-menu-li">
+                      <NavMenu {...menu} current={current} />
+                    </li>
+                  ))}
+                  {COMMON_NAV.map((item) => (
+                    <li key={item.path}>
+                      <NavItem {...item} current={current} />
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ) : null}
             <div className="topbar-tools">
               <div className="header-tools" id={HEADER_TOOLS_ID} />
               <ThemeToggle />
             </div>
           </div>
         </header>
-        <ParamsNotice />
+        {girisli ? <ParamsNotice /> : null}
         <main className="app-main" id="icerik" tabIndex={-1}>
-          <div className="wrap" data-wide={wide ? '' : undefined}>
-            {stop && stop.crumb.length ? (
-              <div className="crumbs-row">
-              <nav aria-label="Ağaç yolu" className="crumbs">
-                <ol>
-                  <li>
-                    <a href={href('/')}>19 Ekim</a>
-                  </li>
-                  {stop.crumb.map((c, i) => {
-                    const last = i === stop.crumb.length - 1;
-                    const path = last ? undefined : crumbPath(c);
-                    return (
-                      <li key={c} aria-current={last ? 'page' : undefined}>
-                        {last && titleInCrumbs ? <h1 className="crumbs-title">{c}</h1> : path ? <a href={href(path)}>{c}</a> : c}
+          <div className="wrap" data-wide={wide && girisli ? '' : undefined}>
+            {!girisli ? (
+              <GirisEkrani />
+            ) : (
+              <>
+                {stop && stop.crumb.length ? (
+                  <div className="crumbs-row">
+                  <nav aria-label="Ağaç yolu" className="crumbs">
+                    <ol>
+                      <li>
+                        <a href={href('/')}>19 Ekim</a>
                       </li>
-                    );
-                  })}
-                </ol>
-              </nav>
-              <div className="page-tools" id={PAGE_TOOLS_ID} />
-              </div>
-            ) : null}
-            {children}
-            {prev || next ? (
-              <nav aria-label="Sunum sırası" className="pager">
-                {prev ? (
-                  <a className="pager-link" href={href(prev.path)} rel="prev">
-                    <span className="pager-dir">← Önceki</span>
-                    <span className="pager-label">{prev.label}</span>
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {next ? (
-                  <a className="pager-link pager-next" href={href(next.path)} rel="next">
-                    <span className="pager-dir">Sonraki →</span>
-                    <span className="pager-label">{next.label}</span>
-                  </a>
+                      {stop.crumb.map((c, i) => {
+                        const last = i === stop.crumb.length - 1;
+                        const path = last ? undefined : crumbPath(c);
+                        return (
+                          <li key={c} aria-current={last ? 'page' : undefined}>
+                            {last && titleInCrumbs ? <h1 className="crumbs-title">{c}</h1> : path ? <a href={href(path)}>{c}</a> : c}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </nav>
+                  <div className="page-tools" id={PAGE_TOOLS_ID} />
+                  </div>
                 ) : null}
-              </nav>
-            ) : null}
+                {children}
+                {prev || next ? (
+                  <nav aria-label="Sunum sırası" className="pager">
+                    {prev ? (
+                      <a className="pager-link" href={href(prev.path)} rel="prev">
+                        <span className="pager-dir">← Önceki</span>
+                        <span className="pager-label">{prev.label}</span>
+                      </a>
+                    ) : (
+                      <span />
+                    )}
+                    {next ? (
+                      <a className="pager-link pager-next" href={href(next.path)} rel="next">
+                        <span className="pager-dir">Sonraki →</span>
+                        <span className="pager-label">{next.label}</span>
+                      </a>
+                    ) : null}
+                  </nav>
+                ) : null}
+              </>
+            )}
           </div>
         </main>
-        <footer className="app-footer">
-          <div className="wrap">
-            <p>
-              19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
-              2. haftanın sonunda gerçek veriyle kalibre edilir. Tutarlar kesinleşen kararlardır; Parametreler sayfasında
-              değiştirilen değerler yalnız o tarayıcıda saklanır.
-            </p>
-            <p>
-              <a className="text-link" data-standalone="" href={href('/arsiv/')}>
-                Arşiv: tahtadan karara
-              </a>
-            </p>
-          </div>
-        </footer>
+        {girisli ? (
+          <footer className="app-footer">
+            <div className="wrap">
+              <p>
+                19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
+                2. haftanın sonunda gerçek veriyle kalibre edilir. Tutarlar kesinleşen kararlardır; Parametreler sayfasında
+                değiştirilen değerler yalnız o tarayıcıda saklanır.
+              </p>
+              <p className="footer-links">
+                <a className="text-link" data-standalone="" href={href('/arsiv/')}>
+                  Arşiv: tahtadan karara
+                </a>
+                <CikisDugmesi />
+              </p>
+            </div>
+          </footer>
+        ) : null}
       </div>
       </ModelProvider>
     </MantineProvider>

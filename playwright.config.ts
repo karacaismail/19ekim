@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { GIRIS_ANAHTARI, GIRIS_OZETI } from './src/lib/giris';
 
 const PORT = 4322;
 
@@ -13,6 +14,8 @@ export default defineConfig({
     locale: 'tr-TR',
     timezoneId: 'Europe/Istanbul',
     trace: 'retain-on-failure',
+    // Giriş kapısı: testler girişli tarayıcıyla başlar (kayıtlı özet; parola yok). Kapı testleri boş durumla çalışır.
+    storageState: { cookies: [], origins: [{ origin: `http://127.0.0.1:${PORT}`, localStorage: [{ name: GIRIS_ANAHTARI, value: GIRIS_OZETI }] }] },
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

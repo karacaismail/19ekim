@@ -19,15 +19,17 @@ import '@mantine/dates/styles.layer.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import { meta } from '../data/program';
+import { GIRIS_ANAHTARI, GIRIS_OZETI } from '../lib/giris';
 
 interface Props {
   title?: string;
-  description?: string;
   /** Sayfaya özgü token kapsamı (ör. giderler: Roboto ve 15 CSS px en küçük metin; tokens.css). */
   page?: string;
 }
 
-const { title, description = meta.description, page } = Astro.props;
+const { title, page } = Astro.props;
+// Giriş kapısı (kullanıcı kararı 2026-10-21): statik HTML'de veri yok; açıklama tüm sayfalarda genel.
+const description = 'Türksab pazarlama ve finansal planlama. Görmek için giriş gerekir.';
 const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
 ---
 
@@ -38,7 +40,7 @@ const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
-    <meta name="robots" content="noindex" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>{pageTitle}</title>
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <!-- Renk şeması: kayıtlı tercih (tema düğmesi) yoksa işletim sistemi tercihini izler. -->
@@ -62,6 +64,17 @@ const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
         apply();
         query.addEventListener('change', apply);
       })();
+    </script>
+    <!--
+      Giriş kapısı (src/lib/giris.ts): girişli tarayıcıda ilk boyamada giriş formu görünmez (hidrasyona kadar bir an
+      formun yanıp sönmesi yok). İçerik yine yalnız hidrasyondan sonra çizilir.
+    -->
+    <script is:inline define:vars={{ girisAnahtari: GIRIS_ANAHTARI, girisOzeti: GIRIS_OZETI }}>
+      try {
+        if (localStorage.getItem(girisAnahtari) === girisOzeti) document.documentElement.setAttribute('data-giris', '');
+      } catch (error) {
+        /* Depolama kapalı: form görünür, giriş bu sayfada geçerli olur. */
+      }
     </script>
     <!--
       Merkezi klavye odak modu: işaretçi modunda başlar; yalnız Tab ve Shift+Tab açar.
@@ -88,19 +101,6 @@ const pageTitle = title ? `${title} · ${meta.siteTitle}` : meta.siteTitle;
   </head>
   <body>
     <slot />
-    <!-- Dar ekranda yatay gezinme şeritlerinde etkin bağlantıyı görünür alana getirir (animasyonsuz). -->
-    <script is:inline>
-      (function () {
-        document.querySelectorAll('.mainnav-list').forEach(function (list) {
-          var active = list.querySelector('[aria-current="page"]:not(.mainnav-nojs-link)') || list.querySelector('[data-section="true"]');
-          if (!active || list.scrollWidth <= list.clientWidth) return;
-          var listBox = list.getBoundingClientRect();
-          var box = active.getBoundingClientRect();
-          if (box.left < listBox.left || box.right > listBox.right) {
-            list.scrollLeft += box.left - listBox.left - (listBox.width - box.width) / 2;
-          }
-        });
-      })();
-    </script>
+    <!-- Dar ekranda gezinme şeridinde etkin bağlantıyı görünür alana getirme AppFrame'de (gezinme girişten sonra çizilir). -->
   </body>
 </html>
