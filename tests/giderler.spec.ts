@@ -991,9 +991,12 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     expect(adlar.every((a) => a.toLocaleLowerCase('tr-TR').includes('örnek'))).toBe(true);
     await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
     // Tür filtresi (çoklu seçim): yalnız bordrolu; personel ayrıntıları dolu, gider satırı yok.
-    await page.getByRole('combobox', { name: 'Tür' }).click();
-    await page.getByRole('option', { name: 'Bordrolu' }).click();
+    await page.getByRole('button', { name: /^Tür:/ }).click();
+    await page.getByRole('checkbox', { name: 'Bordrolu', exact: true }).check();
     await page.keyboard.press('Escape');
+    // Kutuda hap/etiket yok: yalnız kısa özet (kullanıcı kararı 2026-10-21).
+    await expect(page.getByRole('button', { name: 'Tür: Bordrolu' })).toBeVisible();
+    await expect(page.locator('.opex-filtreler .mantine-Pill-root, .opex-filtreler [class*="Pill"]')).toHaveCount(0);
     const bordrolu = MODEL.kisiler.filter((k) => k.tur === 'Bordrolu').length;
     await expect(sayac).toHaveText(`${bordrolu} / ${toplamKalem} kalem`);
     const brut = await tablo.locator('tbody tr').first().locator('td').nth(await sutun(tablo, 'Brüt')).innerText();
@@ -1071,8 +1074,8 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
     // Tablo filtresi (panel) ve sütun filtresi (huni) ayrı; ikisi birlikte uygulanır.
     await expect(page.getByRole('group', { name: 'Tablo filtreleri' })).toBeVisible();
-    await page.getByRole('combobox', { name: 'Kategori' }).click();
-    await page.getByRole('option', { name: kategori }).click();
+    await page.getByRole('button', { name: /^Kategori:/ }).click();
+    await page.getByRole('checkbox', { name: kategori, exact: true }).check();
     await page.keyboard.press('Escape');
     await expect(sayac).toHaveText(`${beklenen} / ${hepsi} kalem`);
     const katToplam = (await sayilar(toplamSutun)) as number[];
@@ -1100,14 +1103,17 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
         const cs = etiket ? getComputedStyle(etiket) : null;
         return { etiket: etiket?.textContent ?? '', alt: cs?.textDecorationLine ?? '', kalinlik: parseFloat(cs?.textDecorationThickness ?? '0'), halka: getComputedStyle(el).outlineStyle };
       });
-    // Tablo filtreleri: çoklu seçim ve onay kutusu.
-    await page.getByRole('combobox', { name: 'Kategori' }).focus();
-    await page.keyboard.press('Tab');
-    let o = await odakEtiketi();
-    expect(o.etiket).toBe('Bu ay');
-    expect(o.alt).toContain('underline');
-    expect(o.kalinlik).toBeGreaterThanOrEqual(3);
-    expect(o.halka === 'none' || o.halka === '').toBe(true);
+    // Tablo filtreleri: seçim kutusu (düğme) ve onay kutusu. WebKit Tab ile düğmeye odak vermez: orada not_run.
+    let o = { etiket: '', alt: '', kalinlik: 0, halka: '' };
+    if (browserName !== 'webkit') {
+      await page.getByRole('button', { name: /^Kategori:/ }).focus();
+      await page.keyboard.press('Tab');
+      o = await odakEtiketi();
+      expect(o.etiket).toBe('Bu ay');
+      expect(o.alt).toContain('underline');
+      expect(o.kalinlik).toBeGreaterThanOrEqual(3);
+      expect(o.halka === 'none' || o.halka === '').toBe(true);
+    }
     // WebKit (Safari varsayılanı) Tab ile onay kutusuna odak vermez: bu adım orada not_run.
     if (browserName !== 'webkit') {
       await page.getByRole('textbox', { name: 'Toplam ₺ en çok' }).focus();
@@ -1162,6 +1168,28 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     // Türkçe büyük I: “insta” → “Instagram reklam”.
     await page.getByRole('searchbox', { name: 'Kalem sütununda ara' }).fill('insta');
     await expect(tablo.locator('tbody th')).toHaveText([/^Instagram reklam/]);
+  });
+
+  test('tablo filtresi seçimi yalnız onay kutusu: kutuda hap yok, özet “Hepsi” / değer / “N seçili”; Temizle', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockScript(page, { ozet: 'secim', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const sayac = page.locator('.opex-veri-sayi');
+    const hepsi = MODEL.giderler.length + MODEL.kisiler.length;
+    await expect(page.getByRole('button', { name: 'Kategori: Hepsi' })).toBeVisible();
+    await page.getByRole('button', { name: 'Kategori: Hepsi' }).click();
+    const [a, b] = [...new Set(MODEL.giderler.map((g) => g.kategori))];
+    await page.getByRole('checkbox', { name: a, exact: true }).check();
+    await expect(page.getByRole('button', { name: `Kategori: ${a}` })).toBeVisible();
+    await page.getByRole('checkbox', { name: b, exact: true }).check();
+    await expect(page.getByRole('button', { name: 'Kategori: 2 seçili' })).toBeVisible();
+    const n = MODEL.giderler.filter((g) => g.kategori === a || g.kategori === b).length;
+    await expect(sayac).toHaveText(`${n} / ${hepsi} kalem`);
+    await expect(page.locator('.opex-filtreler [class*="Pill"]')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Temizle', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Kategori: Hepsi' })).toBeVisible();
+    await expect(sayac).toHaveText(`${hepsi} / ${hepsi} kalem`);
   });
 
   test('kalemler veri tablosu 375 px: sayfa taşmaz, tablo kendi kutusunda kayar; filtreler tek sütun', async ({ page }) => {

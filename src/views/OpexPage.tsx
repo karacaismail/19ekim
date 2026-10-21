@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Checkbox, MultiSelect, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
-import { IconArrowDown, IconArrowUp, IconArrowsSort, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
+import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
+import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, PAGE_TOOLS_ID } from '../components/AppFrame';
 import { Chart, DataTable, FactsRow, Note, Section, type Column } from '../components/ui';
 import {
@@ -779,6 +779,51 @@ function KolonFiltresi({ ad, tur, secenekler, deger, onChange }: { ad: string; t
   );
 }
 
+/**
+ * Tablo filtresi seçimi (kullanıcı kararı 2026-10-21): yalnız onay kutuları, kutuda hap/etiket yok. Kapalıyken kısa özet
+ * (“Hepsi”, tek seçimde değerin kendisi, birden çokta “3 seçili”); açılınca onay kutulu liste ve “Temizle”.
+ */
+function SecimKutusu({ label, data, value, onChange }: { label: string; data: string[]; value: string[]; onChange: (v: string[]) => void }) {
+  const id = useId();
+  const ozet = value.length === 0 ? 'Hepsi' : value.length === 1 ? value[0] : `${value.length} seçili`;
+  return (
+    <div className="opex-filter">
+      <span className="opex-field-label" id={`${id}-etiket`}>
+        {label}
+      </span>
+      <Popover position="bottom-start" trapFocus returnFocus middlewares={{ flip: true, shift: true, size: { padding: 8 } }} classNames={{ dropdown: 'navmenu opex-kolon-panel' }}>
+        <Popover.Target>
+          <button type="button" className="opex-input opex-select" aria-label={`${label}: ${ozet}`} data-active={value.length ? '' : undefined}>
+            <span className="opex-select-ozet">{ozet}</span>
+            <IconChevronDown className="opex-select-ok" size={16} stroke={2} aria-hidden="true" />
+          </button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <div className="opex-kolon-liste" role="group" aria-labelledby={`${id}-etiket`}>
+            {data.map((v) => (
+              <Checkbox
+                key={v}
+                label={v}
+                checked={value.includes(v)}
+                onChange={(e) => {
+                  const acik = e.currentTarget.checked;
+                  onChange(acik ? [...value, v] : value.filter((x) => x !== v));
+                }}
+                classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }}
+              />
+            ))}
+          </div>
+          {value.length ? (
+            <button type="button" className="opex-btn" onClick={() => onChange([])}>
+              Temizle
+            </button>
+          ) : null}
+        </Popover.Dropdown>
+      </Popover>
+    </div>
+  );
+}
+
 type AltSatir = { tur: 'grup'; kume: KumeKod; ad: string; aylar: number[]; yillar: number[]; donem: number } | { tur: 'toplam'; ad: string; aylar: number[]; yillar: number[]; donem: number } | { tur: 'degisim'; ad: string; oranlar: string[] };
 
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
@@ -1151,20 +1196,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     kismi ||
     ozelli;
   const siraDegistir = (id: string) => setSirala((s) => (!s || s.id !== id ? { id, yon: 'asc' } : s.yon === 'asc' ? { id, yon: 'desc' } : null));
-  const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => (
-    <MultiSelect
-      label={label}
-      data={data}
-      value={value}
-      onChange={onChange}
-      placeholder={value.length ? undefined : 'Hepsi'}
-      searchable
-      clearable
-      hidePickedOptions={false}
-      comboboxProps={{ middlewares: { flip: true, shift: true, size: { padding: 8 } }, transitionProps: { duration: 0 } }}
-      classNames={{ root: 'opex-filter', label: 'opex-field-label', input: 'opex-input opex-filter-input', dropdown: 'navmenu', option: 'navmenu-item', pill: 'opex-filter-pill' }}
-    />
-  );
+  const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
   const titleId = 'kalemler-tablo';
   return (
     <>

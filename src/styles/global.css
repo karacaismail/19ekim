@@ -2368,15 +2368,33 @@ html:not([data-js]) .email-btn {
   min-width: 0;
 }
 
-.opex-filter-input {
-  height: auto;
+/* Onay kutulu seçim kutusu: giriş görünümünde düğme; özet solda, ok sağda. */
+.opex-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0 var(--space-3);
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  text-align: start;
+  cursor: pointer;
 }
 
-.opex-filter-pill {
-  border-radius: var(--radius-pill);
-  background: var(--surface-control);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
+.opex-select[data-active] {
+  font-weight: var(--weight-semibold);
+}
+
+.opex-select-ozet {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opex-select-ok {
+  flex: none;
+  color: var(--text-secondary);
 }
 
 .opex-filter-checks {
