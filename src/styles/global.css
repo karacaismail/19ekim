@@ -2321,6 +2321,142 @@ html:not([data-js]) .email-btn {
 }
 
 /*
+ * Kalemler veri tablosu (kullanıcı kararı 2026-10-21): sayfa genişliğinin %90’ı (dar ekranda içerik genişliği), araç
+ * satırı, filtreler, sıralama düğmeleri ve sütun arama kutuları.
+ */
+.opex-veri {
+  --veri-genislik: max(100%, 90vw);
+  width: var(--veri-genislik);
+  margin-inline-start: calc((100% - var(--veri-genislik)) / 2);
+}
+
+.opex-veri-arac,
+.opex-veri-durum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.opex-veri-arac .opex-toggles {
+  margin: 0;
+}
+
+.opex-filtreler {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin-block: var(--space-4);
+}
+
+.opex-filter {
+  min-width: 0;
+}
+
+.opex-filter-input {
+  height: auto;
+}
+
+.opex-filter-pill {
+  border-radius: var(--radius-pill);
+  background: var(--surface-control);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.opex-filter-checks {
+  display: grid;
+  align-content: end;
+}
+
+.opex-veri-sayi {
+  margin: 0;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.opex-sutun-panel {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Açılır listede ok tuşuyla gelinen seçenek (etkin öğe): zemin ve alt çizgi, çevreleyen halka yok. */
+.navmenu-item[data-combobox-selected] {
+  background-color: var(--surface-hover);
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}
+
+/* Sıralama düğmesi başlığın kendisi: başlık metni ve yön simgesi; sayı sütunlarında sağa yaslı. */
+.opex-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.opex-veri-table th[data-num] .opex-sort {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.opex-sort-icon {
+  flex: none;
+  color: var(--text-primary);
+}
+
+.opex-sort-icon[data-idle] {
+  color: var(--text-secondary);
+}
+
+.opex-search-row td {
+  padding-block: 0 var(--space-2);
+  vertical-align: top;
+}
+
+.opex-col-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 5rem;
+  min-height: var(--hit-min);
+  padding: 0 var(--space-2);
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.opex-col-search:focus {
+  outline: none;
+}
+
+/* Klavye odağı: çevrelemeyen tek gösterge, iç sol çubuk (merkezi odak sistemi). */
+html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
+.opex-veri-table tfoot th,
+.opex-veri-table tfoot td {
+  font-weight: var(--weight-semibold);
+}
+
+.opex-veri-bos {
+  color: var(--text-secondary);
+}
+
+/*
  * Hap (kullanıcı kararı 2026-10-21): tam yuvarlak, pastel zemin; durumlar ve kategoriler ayrı renkte (renk tek başına
  * anlam taşımaz: metin yazılı).
  */

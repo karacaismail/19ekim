@@ -34,7 +34,7 @@ const planEtiket = (m: typeof MODEL) => planOfModel(m).etiket;
 const KALEMLER = `Kalemler · ${planEtiket(MODEL)}`;
 /** Kalemler tablosunun alt satırları (kullanıcı kararı 2026-10-21: aylık gider planı tablosu kalemlerle birleşti). */
 const ALT_SATIRLAR = ['Teknoloji', 'Ofis ve işletme', 'Personel', /^Toplam · \d+ kalem$/, 'Önceki aya göre'];
-const altSatir = (region: Locator, ad: string) => region.locator('tbody tr').filter({ has: region.page().locator('th', { hasText: new RegExp(`^${ad}`) }) });
+const altSatir = (region: Locator, ad: string) => region.locator('tfoot tr').filter({ has: region.page().locator('th', { hasText: new RegExp(`^${ad}`) }) });
 /** Tablo gövdesinde başlığı verilen sütunun td sırası (satır başlığı th sayılmaz). */
 const sutun = (region: Locator, header: string | RegExp) =>
   region.locator('thead th').evaluateAll((ths, h) => {
@@ -494,7 +494,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     // toplam ve önceki aya göre değişim.
     await expect(page.getByRole('region', { name: /^Aylık gider planı/ })).toHaveCount(0);
     const kalemler = page.getByRole('region', { name: KALEMLER });
-    const altlar = async () => (await kalemler.locator('tbody th').allTextContents()).slice(-5);
+    const altlar = async () => (await kalemler.locator('tfoot th').allTextContents()).slice(-5);
     const beklenen = (xs: string[]) => xs.forEach((x, i) => (typeof ALT_SATIRLAR[i] === 'string' ? expect(x).toBe(ALT_SATIRLAR[i]) : expect(x).toMatch(ALT_SATIRLAR[i])));
     beklenen(await altlar());
     await tabs.nth(1).click();
@@ -637,8 +637,9 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(basliklar.slice(0, 4)).toEqual(['Kalem', 'Kategori', 'Tutar', 'Bu ay']);
     expect(basliklar.slice(4, 7)).toEqual(['Eki ’26Ekim 2026', 'Kas ’26Kasım 2026', 'Ara ’26Aralık 2026']);
     expect(basliklar[7]).toBe('Oca ’27Ocak 2027');
-    expect(basliklar.slice(-4)).toEqual(['2026 ₺', '2027 ₺', 'Toplam ₺', '2027 artışı']);
-    expect(basliklar).toHaveLength(4 + 15 + 4);
+    // Yıl toplamları, 2027 artışı ve personel ayrıntıları (eski personel tablosu; kullanıcı kararı 2026-10-21).
+    expect(basliklar.slice(-9)).toEqual(['2026 ₺', '2027 ₺', 'Toplam ₺', '2027 artışı', 'Brüt', 'Kesintiler (işçi)', 'İşveren payı', 'Teşvik', 'Fatura KDV’si']);
+    expect(basliklar).toHaveLength(4 + 15 + 9);
     const row = (t: ReturnType<Page['getByRole']>, name: string) => t.locator('tbody tr').filter({ has: page.locator('th', { hasText: new RegExp(`^${name}`) }) });
     const eki = await sutun(items, 'Eki ’26Ekim 2026');
     const kira = row(items, 'Ofis kirası').locator('td');
@@ -939,6 +940,92 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       }
     });
   }
+
+  // Kullanıcı kararı 2026-10-21: kalemler ve personel tek veri tablosu; sıralama, sütun araması, somut filtreler; %90 genişlik.
+  test('kalemler veri tablosu: sıralama, sütun araması (metin ve sayı koşulu), filtreler, sütun grupları, toplamlar süzülmüş satırlardan', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await mockScript(page, { ozet: 'veri', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    const tablo = page.getByRole('region', { name: KALEMLER });
+    const sayac = page.locator('.opex-veri-sayi');
+    const toplamKalem = MODEL.giderler.length + MODEL.kisiler.length;
+    await expect(sayac).toHaveText(`${toplamKalem} / ${toplamKalem} kalem`);
+    // Genişlik: sayfanın %90’ı, ortalı; sayfa yatay taşmaz.
+    const kutu = await page.locator('.opex-veri').boundingBox();
+    expect(Math.abs(kutu!.width - 1280 * 0.9)).toBeLessThan(20);
+    expect(Math.abs(kutu!.x + kutu!.width / 2 - 640)).toBeLessThan(20);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const toplamSutun = await sutun(tablo, 'Toplam ₺');
+    const toplamlar = async () =>
+      (await tablo.locator('tbody tr').evaluateAll((trs, i) => trs.map((tr) => tr.querySelectorAll('td')[i]?.textContent ?? ''), toplamSutun)).map((t) => Number(t.replace(/[^\d,]/g, '').replace(',', '.')));
+    // Sıralama: Toplam ₺ başlığı → artan, tekrar → azalan; aria-sort güncellenir.
+    const baslik = tablo.locator('thead th', { hasText: /^Toplam ₺$/ });
+    await baslik.getByRole('button').click();
+    await expect(baslik).toHaveAttribute('aria-sort', 'ascending');
+    let t = await toplamlar();
+    expect(t).toEqual([...t].sort((a, b) => a - b));
+    await baslik.getByRole('button').click();
+    await expect(baslik).toHaveAttribute('aria-sort', 'descending');
+    t = await toplamlar();
+    expect(t).toEqual([...t].sort((a, b) => b - a));
+    // Sayı koşullu sütun araması.
+    const esik = t[Math.floor(t.length / 2)];
+    await page.getByRole('searchbox', { name: 'Toplam ₺ sütununda ara' }).fill(`>${Math.floor(esik)}`);
+    t = await toplamlar();
+    expect(t.length).toBeGreaterThan(0);
+    expect(t.every((v) => v > Math.floor(esik))).toBe(true);
+    await expect(sayac).toHaveText(`${t.length} / ${toplamKalem} kalem`);
+    // Alt toplam süzülmüş satırların toplamı.
+    const alt = Number((await altSatir(tablo, 'Toplam').locator('td').nth(toplamSutun).innerText()).replace(/[^\d,]/g, '').replace(',', '.'));
+    expect(Math.abs(alt - t.reduce((a, b) => a + b, 0))).toBeLessThan(0.05 * t.length + 0.05);
+    // Temizle: her şey geri.
+    await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
+    await expect(sayac).toHaveText(`${toplamKalem} / ${toplamKalem} kalem`);
+    await expect(baslik).toHaveAttribute('aria-sort', 'none');
+    // Metin araması (Kalem sütunu).
+    await page.getByRole('searchbox', { name: 'Kalem sütununda ara' }).fill('örnek');
+    const adlar = await tablo.locator('tbody th').allTextContents();
+    expect(adlar.length).toBeGreaterThan(0);
+    expect(adlar.every((a) => a.toLocaleLowerCase('tr-TR').includes('örnek'))).toBe(true);
+    await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
+    // Tür filtresi (çoklu seçim): yalnız bordrolu; personel ayrıntıları dolu, gider satırı yok.
+    await page.getByRole('combobox', { name: 'Tür' }).click();
+    await page.getByRole('option', { name: 'Bordrolu' }).click();
+    await page.keyboard.press('Escape');
+    const bordrolu = MODEL.kisiler.filter((k) => k.tur === 'Bordrolu').length;
+    await expect(sayac).toHaveText(`${bordrolu} / ${toplamKalem} kalem`);
+    const brut = await tablo.locator('tbody tr').first().locator('td').nth(await sutun(tablo, 'Brüt')).innerText();
+    expect(brut).toMatch(/₺/);
+    // Tek grup listelenince grup ara toplamı yok: yalnız toplam ve önceki aya göre.
+    await expect(tablo.locator('tfoot th')).toHaveText([/^Toplam · \d+ kalem$/, 'Önceki aya göre']);
+    await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
+    // Sütun grupları: ay sütunları gizlenir ve geri gelir.
+    await page.getByRole('button', { name: 'Sütunlar' }).click();
+    const ayKutusu = page.getByRole('checkbox', { name: /Ay sütunları/ });
+    await expect(ayKutusu).toBeChecked();
+    await ayKutusu.uncheck();
+    await expect(tablo.locator('thead th', { hasText: 'Eki ’26' })).toHaveCount(0);
+    await ayKutusu.check();
+    await page.keyboard.press('Escape');
+    await expect(ayKutusu).toBeHidden();
+    await expect(tablo.locator('thead th', { hasText: 'Eki ’26' })).toHaveCount(1);
+  });
+
+  test('kalemler veri tablosu 375 px: sayfa taşmaz, tablo kendi kutusunda kayar; filtreler tek sütun', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockScript(page, { ozet: 'veri-375', model: MODEL }, 'open');
+    await page.goto(PATH);
+    await hydrated(page);
+    await expect(page.locator('.opex-veri')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const scroll = page.getByRole('region', { name: KALEMLER });
+    expect(await scroll.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+    // Görünen filtre öğeleri (çoklu seçimin gizli form alanı sayılmaz) aynı sol hizada: tek sütun.
+    const filtreler = await page.locator('.opex-filtreler > .opex-filter').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)));
+    expect(filtreler.length).toBeGreaterThanOrEqual(7);
+    expect(new Set(filtreler).size).toBe(1);
+  });
 
   test('teşvik yoksa köprüde sıfır adım “0 ₺”, “+ 0” veya görünür çubuk yok', async ({ page }) => {
     const tesviksiz = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;

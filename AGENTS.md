@@ -41,12 +41,17 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
   - `/giderler/` OPEX (kullanıcı kararı 2026-10-20). Sıra: önce yıl ayrımı olmayan bölümler (`planOfModel`: Sheets ızgarasının 15
-    ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (yatay yığın grafik + 15 ay, yıl toplamları ve genel
-    toplam tablosu) ve kalemler (kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
-    2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; altta — eski aylık gider planı tablosu — grup ara toplamları (yalnız
-    “Hepsi”), toplam ve önceki aya göre değişim; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
+    ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (özet ve yığın grafik; ay ay
+    toplamlar kalemler tablosunun alt satırlarında) ve kalemler (veri tablosu `KalemTablosu`, kullanıcı kararı 2026-10-21: sayfanın %90’ı genişlikte;
+    başlıktan sıralama — `aria-sort` —, her sütunda arama — metin veya “>50000”, “<=1.000” sayı koşulu —, somut filtreler:
+    grup, kategori, bu ay durumu, tür, para birimi, 2027 artışı, Toplam ₺ aralığı, boş aylı ve özel tutarlı kalemler;
+    “Sütunlar” panelinde ay, yıl ve personel sütun grupları gizlenir; alt satırlar — `tfoot` — süzülmüş satırlardan; eski
+    personel tablosunun brüt, kesinti, işveren payı, teşvik ve fatura KDV’si plan dönemi toplamı olarak sütunlarda;
+    kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
+    2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; altta — eski aylık gider planı tablosu — grup ara toplamları (birden çok
+    grup listelenirken), toplam ve önceki aya göre değişim; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
     sağlayıcıları); sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
-    seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri, netten brüte aylık bordro (kümülatif GV,
+    seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri (özet ve bordro grafikleri; kişi tablosu kalemlerde), netten brüte aylık bordro (kümülatif GV,
     asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
     Sheets → Parametreler’de); sayfa sonunda yalnız hesap damgası (zaman, motor sürümü, özet). Veri repoda yoktur: Google Sheets → Apps Script web
     uygulaması (`apps-script/`, POST + erişim anahtarı) → sayfa (`src/data/opex.ts`). Canlı bağlantı (kullanıcı kararı
