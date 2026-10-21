@@ -244,6 +244,38 @@
   --status-oneri-fg: #8f4300;
   --status-bekliyor-bg: #fde8e8;
   --status-bekliyor-fg: #9b1c1c;
+  /* Giderler durum hapları (kullanıcı kararı 2026-10-21): her durum ayrı pastel zemin; yazı ≥ 6,7:1 */
+  --pill-var-bg: #ddf3e4;
+  --pill-var-fg: #185c34;
+  --pill-off-bg: #ecebe7;
+  --pill-off-fg: #4a4f55;
+  --pill-paid-bg: #d6f0ee;
+  --pill-paid-fg: #0f5a52;
+  --pill-due-bg: #fcecc4;
+  --pill-due-fg: #6a4800;
+  --pill-missing-bg: #fde0e0;
+  --pill-missing-fg: #8f1d1d;
+  --pill-bordro-bg: #dce7fb;
+  --pill-bordro-fg: #1b4b8f;
+  --pill-fatura-bg: #ebe2f9;
+  --pill-fatura-fg: #55308c;
+  /* Kategori hapları: 8 pastel çift, kategoriye ilk görünüş sırasıyla (yazı ≥ 6,4:1) */
+  --pill-cat-1-bg: #ddf3e4;
+  --pill-cat-1-fg: #185c34;
+  --pill-cat-2-bg: #dce7fb;
+  --pill-cat-2-fg: #1b4b8f;
+  --pill-cat-3-bg: #ebe2f9;
+  --pill-cat-3-fg: #55308c;
+  --pill-cat-4-bg: #fcecc4;
+  --pill-cat-4-fg: #6a4800;
+  --pill-cat-5-bg: #fbe1ec;
+  --pill-cat-5-fg: #8a1c4a;
+  --pill-cat-6-bg: #d6f0ee;
+  --pill-cat-6-fg: #0f5a52;
+  --pill-cat-7-bg: #fde6d6;
+  --pill-cat-7-fg: #8a3b0b;
+  --pill-cat-8-bg: #e3e7ec;
+  --pill-cat-8-fg: #37424f;
 
   /* Açık temada iz beyaz (kullanıcı kararı 2026-10-21), sınırı nötr ince çizgi */
   --toggle-track-off: #ffffff;
@@ -331,6 +363,36 @@
   --status-oneri-fg: #ffc285;
   --status-bekliyor-bg: #331616;
   --status-bekliyor-fg: #ffb3b3;
+  --pill-var-bg: #1c3828;
+  --pill-var-fg: #a4e2bb;
+  --pill-off-bg: #2a2f34;
+  --pill-off-fg: #b8bec4;
+  --pill-paid-bg: #143834;
+  --pill-paid-fg: #9cdfd5;
+  --pill-due-bg: #3a2e12;
+  --pill-due-fg: #f2d089;
+  --pill-missing-bg: #3f1e1e;
+  --pill-missing-fg: #f5b4b4;
+  --pill-bordro-bg: #1b2d49;
+  --pill-bordro-fg: #a8c6f4;
+  --pill-fatura-bg: #2f2447;
+  --pill-fatura-fg: #cfb9f3;
+  --pill-cat-1-bg: #1c3828;
+  --pill-cat-1-fg: #a4e2bb;
+  --pill-cat-2-bg: #1b2d49;
+  --pill-cat-2-fg: #a8c6f4;
+  --pill-cat-3-bg: #2f2447;
+  --pill-cat-3-fg: #cfb9f3;
+  --pill-cat-4-bg: #3a2e12;
+  --pill-cat-4-fg: #f2d089;
+  --pill-cat-5-bg: #3f1e2e;
+  --pill-cat-5-fg: #f5b4cf;
+  --pill-cat-6-bg: #143834;
+  --pill-cat-6-fg: #9cdfd5;
+  --pill-cat-7-bg: #3f2617;
+  --pill-cat-7-fg: #f6c09c;
+  --pill-cat-8-bg: #262d35;
+  --pill-cat-8-fg: #c4ccd6;
 
   --toggle-track-off: #2a2f34;
   --toggle-thumb-off: #a8aeb4;

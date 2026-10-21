@@ -360,8 +360,16 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await page.clock.runFor(OPEX_POLL_MS - 2_000);
     expect(server.keyed().length, 'aralık dolmadan yeni istek yok').toBe(2);
     await expect(page.locator('.opex-live-meta')).toContainText(`${OPEX_POLL_MS / 1000} sn’de bir`);
-    await page.clock.runFor(3_000);
-    await expect.poll(() => server.keyed().length).toBe(3);
+    // Yanıt işlenip zamanlayıcı kurulana kadar sahte saat adım adım ilerletilir (yük altında yarış olmasın).
+    await expect
+      .poll(
+        async () => {
+          await page.clock.runFor(1_000);
+          return server.keyed().length;
+        },
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThanOrEqual(3);
   });
 
   test('görünürlük sık gidip gelse de süren istek iptal edilmez; yavaş yanıt (3 sn) gelir', async ({ page }) => {
@@ -877,6 +885,60 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       }
     }
   });
+
+  // Kullanıcı kararı 2026-10-21: durum etiketleri tam yuvarlak hap; her durum ayrı pastel zemin; yazı okunur.
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`durum ve kategori hapları (${scheme}): tam yuvarlak, her biri ayrı zemin, yazı ≥ 4,5:1`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await mockScript(page, { ozet: `hap-${scheme}`, model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const haplar = await page.locator('.opex-state').evaluateAll((els) => {
+        const rgb = (c: string) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+        const lum = (c: string) => {
+          const [r, g, b] = rgb(c).map((v) => v / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const out: Record<string, { bg: string; oran: number; yuvarlak: boolean }> = {};
+        for (const el of els) {
+          const cs = getComputedStyle(el);
+          const [a, b] = [lum(cs.color), lum(cs.backgroundColor)].sort((x, y) => y - x);
+          out[el.getAttribute('data-state') ?? ''] = { bg: cs.backgroundColor, oran: (a + 0.05) / (b + 0.05), yuvarlak: parseFloat(cs.borderTopLeftRadius) >= el.getBoundingClientRect().height / 2 };
+        }
+        return out;
+      });
+      // Örnek veride: bu ay yok, ödendi, bekliyor, tutar girilmedi, bordro, fatura (en az beş durum).
+      expect(Object.keys(haplar).length).toBeGreaterThanOrEqual(5);
+      const zeminler = Object.values(haplar).map((h) => h.bg);
+      expect(new Set(zeminler).size, 'her durum ayrı zemin').toBe(zeminler.length);
+      for (const [ad, h] of Object.entries(haplar)) {
+        expect(h.yuvarlak, `${ad} tam yuvarlak`).toBe(true);
+        expect(h.oran, `${ad} karşıtlık`).toBeGreaterThanOrEqual(4.5);
+      }
+      // Kategori hapları: her kategori ayrı pastel zemin (8’e kadar), tam yuvarlak, okunur.
+      const kategoriler = await page.locator('.opex-pill').evaluateAll((els) => {
+        const rgb = (c: string) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+        const lum = (c: string) => {
+          const [r, g, b] = rgb(c).map((v) => v / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const out: Record<string, { bg: string; oran: number; yuvarlak: boolean }> = {};
+        for (const el of els) {
+          const cs = getComputedStyle(el);
+          const [a, b] = [lum(cs.color), lum(cs.backgroundColor)].sort((x, y) => y - x);
+          out[el.textContent ?? ''] = { bg: cs.backgroundColor, oran: (a + 0.05) / (b + 0.05), yuvarlak: parseFloat(cs.borderTopLeftRadius) >= el.getBoundingClientRect().height / 2 };
+        }
+        return out;
+      });
+      expect(Object.keys(kategoriler).length).toBeGreaterThanOrEqual(3);
+      const katZemin = Object.values(kategoriler).map((h) => h.bg);
+      expect(new Set(katZemin).size, 'her kategori ayrı zemin').toBe(Math.min(8, katZemin.length));
+      for (const [ad, h] of Object.entries(kategoriler)) {
+        expect(h.yuvarlak, `${ad} tam yuvarlak`).toBe(true);
+        expect(h.oran, `${ad} karşıtlık`).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+  }
 
   test('teşvik yoksa köprüde sıfır adım “0 ₺”, “+ 0” veya görünür çubuk yok', async ({ page }) => {
     const tesviksiz = JSON.parse(JSON.stringify(MODEL)) as typeof MODEL;

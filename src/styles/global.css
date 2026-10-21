@@ -2320,30 +2320,91 @@ html:not([data-js]) .email-btn {
   font-weight: var(--weight-regular);
 }
 
-.opex-state {
+/*
+ * Hap (kullanıcı kararı 2026-10-21): tam yuvarlak, pastel zemin; durumlar ve kategoriler ayrı renkte (renk tek başına
+ * anlam taşımaz: metin yazılı).
+ */
+.opex-state,
+.opex-pill {
   display: inline-block;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunken);
-  color: var(--text-primary);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--pill-var-bg);
+  color: var(--pill-var-fg);
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
+  line-height: 1.75;
+  white-space: nowrap;
+}
+
+.opex-pill[data-cat='1'] {
+  background: var(--pill-cat-1-bg);
+  color: var(--pill-cat-1-fg);
+}
+
+.opex-pill[data-cat='2'] {
+  background: var(--pill-cat-2-bg);
+  color: var(--pill-cat-2-fg);
+}
+
+.opex-pill[data-cat='3'] {
+  background: var(--pill-cat-3-bg);
+  color: var(--pill-cat-3-fg);
+}
+
+.opex-pill[data-cat='4'] {
+  background: var(--pill-cat-4-bg);
+  color: var(--pill-cat-4-fg);
+}
+
+.opex-pill[data-cat='5'] {
+  background: var(--pill-cat-5-bg);
+  color: var(--pill-cat-5-fg);
+}
+
+.opex-pill[data-cat='6'] {
+  background: var(--pill-cat-6-bg);
+  color: var(--pill-cat-6-fg);
+}
+
+.opex-pill[data-cat='7'] {
+  background: var(--pill-cat-7-bg);
+  color: var(--pill-cat-7-fg);
+}
+
+.opex-pill[data-cat='8'] {
+  background: var(--pill-cat-8-bg);
+  color: var(--pill-cat-8-fg);
+}
+
+.opex-state[data-state='off'] {
+  background: var(--pill-off-bg);
+  color: var(--pill-off-fg);
 }
 
 .opex-state[data-state='paid'] {
-  background: var(--status-karar-bg);
-  color: var(--status-karar-fg);
+  background: var(--pill-paid-bg);
+  color: var(--pill-paid-fg);
+}
+
+.opex-state[data-state='due'] {
+  background: var(--pill-due-bg);
+  color: var(--pill-due-fg);
 }
 
 .opex-state[data-state='missing'] {
-  background: var(--status-bekliyor-bg);
-  color: var(--status-bekliyor-fg);
+  background: var(--pill-missing-bg);
+  color: var(--pill-missing-fg);
 }
 
-/* Sheets aylık ızgarası: o ay işaretsiz (gider yok) ve kısmi etkin kalemler */
-.opex-state[data-state='off'] {
-  background: transparent;
-  color: var(--text-secondary);
+.opex-state[data-state='bordro'] {
+  background: var(--pill-bordro-bg);
+  color: var(--pill-bordro-fg);
+}
+
+.opex-state[data-state='fatura'] {
+  background: var(--pill-fatura-bg);
+  color: var(--pill-fatura-fg);
 }
 
 .opex-month-off {

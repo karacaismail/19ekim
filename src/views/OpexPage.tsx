@@ -669,6 +669,13 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
   const buAyKey = m.donem.yil === 2027 ? 'y2027' : 'y2026';
   const buAyVar = p.aylar.some((a) => a.key === buAyKey && a.index === buAy);
   const odemeTakibi = m.ozet.odeme.takip !== false;
+  // Kategori hapı rengi: kategorinin ilk görünüş sırasıyla 8 pastel çiftten biri (süzgeç değişse de aynı kalır).
+  const kategoriAdi = (r: KalemRow) => (r.kind === 'gider' ? r.g.kategori : r.kind === 'kisi' ? (r.k.tur === 'Freelancer' ? 'Freelancer (fatura)' : 'Bordrolu personel') : '');
+  const katRenk = new Map<string, number>();
+  for (const r of all) {
+    const ad = kategoriAdi(r);
+    if (ad && !katRenk.has(ad)) katRenk.set(ad, (katRenk.size % 8) + 1);
+  }
   const etkin = (r: KalemRow, key: YilKey, i: number) => (r.kind === 'gider' ? r.g.aktif[key][i] : r.kind === 'kisi' ? r.k.aktif[key][i] : true);
   const ozelMi = (r: KalemRow, a: PlanAy) => (r.kind === 'gider' ? r.g.ozel[a.key][a.index] : r.kind === 'kisi' ? r.k.ozel[a.key][a.index] : false);
   const columns: Column<KalemRow>[] = [
@@ -716,7 +723,16 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
       key: 'kategori',
       header: 'Kategori',
       minWidth: '9rem',
-      render: (r) => (r.kind === 'gider' ? r.g.kategori : r.kind === 'kisi' ? (r.k.tur === 'Freelancer' ? 'Freelancer (fatura)' : 'Bordrolu personel') : ''),
+      render: (r) => {
+        const ad = kategoriAdi(r);
+        return ad ? (
+          <span className="opex-pill" data-cat={katRenk.get(ad)}>
+            {ad}
+          </span>
+        ) : (
+          ''
+        );
+      },
     },
     {
       key: 'tutar',
@@ -751,10 +767,10 @@ function Expenses({ m, p }: { m: OpexModel; p: Plan }) {
                     {r.g.odendi ? 'Ödendi' : 'Bekliyor'}
                   </span>
                 ) : (
-                  <span className="opex-state">Bu ay var</span>
+                  <span className="opex-state" data-state="var">Bu ay var</span>
                 )
               ) : r.kind === 'kisi' ? (
-                <span className="opex-state">{r.k.tur === 'Freelancer' ? 'Fatura' : 'Bordro'}</span>
+                <span className="opex-state" data-state={r.k.tur === 'Freelancer' ? 'fatura' : 'bordro'}>{r.k.tur === 'Freelancer' ? 'Fatura' : 'Bordro'}</span>
               ) : (
                 ''
               ),

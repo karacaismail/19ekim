@@ -149,7 +149,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   20 px, dar grafikte 44 px, telefonda 68 px; kısa ad — ay — için `shortLabels` 28 px; iç pay `--chart-row-pad`,
   açıklama ve değer ekseni payını `charts.ts → legendPad` hesaplar). Netten işveren maliyetine (köprü): tam genişlik,
   her adımın değeri çubuk ucunda (dar grafikte kısa “1,3 Mn ₺”), değer ekseni yok, ölçek en yüksek ara toplamda biter,
-  küçük adım en az 4 px. Bordro bileşenleri ve köprü tam genişlikte (yan yana yarım genişlikte etiketler gizleniyordu).
+  küçük adım en az 4 px. Grafik vurgu bandı (axisPointer gölgesi) çubukların arkasında (`z: 0`). Kalemler tablosundaki
+  durum etiketleri tam yuvarlak hap (`.opex-state`), her durum ayrı pastel zemin (`--pill-*`: var, off, paid, due,
+  missing, bordro, fatura; iki temada yazı ≥ 6,7:1). Kategori sütunu da hap (`.opex-pill`): 8 pastel çift
+  (`--pill-cat-1…8`), kategoriye ilk görünüş sırasıyla, süzgeçten bağımsız. Bordro bileşenleri ve köprü tam genişlikte (yan yana yarım genişlikte etiketler gizleniyordu).
 - En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
 
