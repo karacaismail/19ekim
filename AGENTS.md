@@ -43,8 +43,11 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/giderler/` OPEX (kullanıcı kararı 2026-10-20). Sıra: önce yıl ayrımı olmayan bölümler (`planOfModel`: Sheets ızgarasının 15
     ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (özet ve yığın grafik; ay ay
     toplamlar kalemler tablosunun alt satırlarında) ve kalemler (veri tablosu `KalemTablosu`, kullanıcı kararı 2026-10-21: sayfanın %90’ı genişlikte;
-    başlıktan sıralama — `aria-sort` —, her sütunda arama — metin veya “>50000”, “<=1.000” sayı koşulu —, somut filtreler:
-    grup, kategori, bu ay durumu, tür, para birimi, 2027 artışı, Toplam ₺ aralığı, boş aylı ve özel tutarlı kalemler;
+    başlıktan sıralama — `aria-sort` —, her sütunda arama — metin veya “>50000”, “<=1.000” sayı koşulu —, her sütunda filtre
+    (başlıktaki huni, `KolonFiltresi`: metin sütunlarında sayılı değer listesi — içinde arama, Tümü / Hiçbiri —, sayı
+    sütunlarında en az / en çok ve boş “—” olanlar), ayrıca tablo filtreleri paneli (kullanıcı kararı:
+    sütun filtrelerinden ayrı): grup, kategori, bu ay, tür, para birimi, 2027 artışı, Toplam ₺ aralığı, boş aylı ve
+    özel tutarlı kalemler; ikisi birlikte uygulanır;
     “Sütunlar” panelinde ay, yıl ve personel sütun grupları gizlenir; alt satırlar — `tfoot` — süzülmüş satırlardan; eski
     personel tablosunun brüt, kesinti, işveren payı, teşvik ve fatura KDV’si plan dönemi toplamı olarak sütunlarda;
     kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·

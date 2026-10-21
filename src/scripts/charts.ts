@@ -999,7 +999,8 @@ function render(el: HTMLElement, mod: EChartsModule, spec: ChartSpec) {
     chart.resize();
     // Genişlik belirgin değişince açıklama satırları ve etiket genişlikleri yeniden hesaplanır.
     const entry = charts.get(el);
-    if (entry && Math.abs(widthOf(el) - entry.width) > 48) {
+    // Dar/geniş eşiği geçilince de (yön ve satır payı değişir) yeniden kurulur; yavaş yeniden boyutlandırmada kalmaz.
+    if (entry && (Math.abs(widthOf(el) - entry.width) > 48 || widthOf(el) < OPEX_NARROW !== entry.width < OPEX_NARROW)) {
       entry.width = widthOf(el);
       chart.setOption(compose(el, entry.spec, entry.width, true), { notMerge: true });
     }

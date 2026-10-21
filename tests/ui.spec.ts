@@ -435,6 +435,25 @@ test.describe('başlık ve İstihdam menüsü', () => {
     });
   }
 
+  // İnceleme bulgusu 2026-10-21: görünür yazısı olmayan tema anahtarında klavye odağı anahtarın altında düz çubuk.
+  test('tema anahtarı klavyeyle odaklanınca altında düz odak çubuğu görünür; halka yok', async ({ page, browserName }) => {
+    test.skip(browserName === 'webkit', 'not_run: Playwright WebKit Tab ile düğmelere odak vermez');
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('');
+    await hydrated(page);
+    await page.getByRole('link', { name: 'Notlar', exact: true }).focus();
+    await page.keyboard.press('Tab');
+    const st = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const cs = getComputedStyle(el);
+      return { tema: el.classList.contains('theme-toggle'), bg: cs.backgroundImage, boy: cs.backgroundSize, halka: cs.outlineStyle };
+    });
+    expect(st.tema).toBe(true);
+    expect(st.bg).toContain('linear-gradient');
+    expect(st.boy).toMatch(/^56px 3px$/);
+    expect(st.halka).toBe('none');
+  });
+
   // Kullanıcı kararı 2026-10-21: kırıntı “19 Ekim” ile başlar; Giderler’de son kırıntı sayfa başlığıdır (h1, büyük).
   test('kırıntı: 19 Ekim ile başlar; Giderler’de başlık kırıntıda (tek h1, diğer kırıntılardan büyük)', async ({ page }) => {
     await page.goto('roller/segika/');

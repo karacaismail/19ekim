@@ -333,6 +333,14 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   }
 }
 
+/* Görünür yazı olmadığından klavye odağı anahtarın altında düz çubukla (alt çizgi gizli yazıya düşerdi). */
+html[data-focus-mode='keyboard'] .theme-toggle:focus-visible {
+  background-image: linear-gradient(var(--focus-indicator), var(--focus-indicator));
+  background-repeat: no-repeat;
+  background-size: var(--switch-w) var(--focus-indicator-width);
+  background-position: 50% 100%;
+}
+
 /* Tema düğmesinin yazısı yalnız ekran okuyucuya (düğmenin adı “Koyu tema”; görünür yazı yok). */
 .theme-label {
   position: absolute;
@@ -2343,11 +2351,17 @@ html:not([data-js]) .email-btn {
   margin: 0;
 }
 
+.opex-filtreler-baslik {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
 .opex-filtreler {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   gap: var(--space-3) var(--space-4);
-  margin-block: var(--space-4);
+  margin-block: var(--space-2) var(--space-4);
 }
 
 .opex-filter {
@@ -2410,6 +2424,45 @@ html:not([data-js]) .email-btn {
   justify-content: flex-end;
 }
 
+/* Başlık hücresi: sıralama düğmesi ve sütun filtresi (huni) yan yana. */
+.opex-th {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.opex-veri-table th[data-num] .opex-th {
+  justify-content: flex-end;
+}
+
+.opex-veri-table th[data-num] .opex-th .opex-sort {
+  width: auto;
+}
+
+/* Etkin filtre: dolu huni, vurgu renginde (renk tek başına değil: simge de dolu). */
+.opex-filter-btn[data-active] {
+  color: var(--accent-strong);
+}
+
+.opex-kolon-panel {
+  display: grid;
+  gap: var(--space-3);
+  width: min(20rem, calc(100vw - 2 * var(--space-4)));
+  padding: var(--space-3);
+}
+
+.opex-kolon-dugmeler {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.opex-kolon-liste {
+  display: grid;
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .opex-sort-icon {
   flex: none;
   color: var(--text-primary);
@@ -2442,8 +2495,10 @@ html:not([data-js]) .email-btn {
   outline: none;
 }
 
-/* Klavye odağı: çevrelemeyen tek gösterge, iç sol çubuk (merkezi odak sistemi). */
+/* Klavye odağı: çevrelemeyen tek gösterge, iç sol çubuk; çubuğun değdiği köşeler o an radiussuz (kavisli kenar yok). */
 html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
   box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
 }
 
@@ -2840,7 +2895,9 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
 }
 
 html[data-focus-mode='keyboard'] .opex-field:has(:focus-visible) .opex-field-label,
-html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-label {
+html[data-focus-mode='keyboard'] .opex-remember:has(:focus-visible) .opex-check-label,
+html[data-focus-mode='keyboard'] .opex-filter:has(:focus-visible) .opex-field-label,
+html[data-focus-mode='keyboard'] .opex-check:has(:focus-visible) .opex-check-label {
   text-decoration-line: underline;
   text-decoration-color: var(--focus-indicator);
   text-decoration-thickness: var(--focus-indicator-width);
