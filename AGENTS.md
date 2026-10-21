@@ -109,6 +109,25 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     anahtarıyla yalnız o tarayıcıda saklanır.
   - `/bcg/` genel BCG matrisi eğitimi (Türkçe; kullanıcı kararı 2026-10-19: iStoc’a uygulanmaz; menüde ve sunum sırasında yok, yalnız adresle açılır): eksenler, dört kutu ve
     nakit döngüsü, stratejiler, adımlar, kurgusal çalışılmış örnek (balon matrisi), hatalar, sınırlar, alıştırmalar (`src/data/bcg.ts`).
+  - `/applet/` ücret ve performans applet’leri (kullanıcı kararı 2026-10-21; menüde ve sunum sırasında yok, yalnız adresle
+    açılır, BCG gibi): fatura kesen serbest çalışan ağı için meslekten bağımsız 17 örnek model, iki motor — rütbe (sabit
+    ücret: katalog, rütbe matrisi, kademe serisi, iş değerleme, taban ücret zinciri, band içi konum), zam (liyakat
+    matrisi, yıllık zam, terfi kapısı, kademe adımları), efor (performans karnesi, sprint skoru, prim eğrisi, şirket ×
+    takım × birey, kâr paylaşımı) ve denetim (yapı denetimi, toplam hedef nakit). Kullanıcı kısıtı: yasal çerçeve
+    yazılmaz, yalnız global gerçek örnekler (GitLab, Buffer, 37signals, Codacy, Mercer, WTW, Hay, SFIA, GS, Mondragon)
+    “Dayanak” satırında. İlke: sabit oran performansla düşmez; düşük performansın karşılığı prim sıfır. Tutarlar baz
+    birimin katıdır (varsayılan Parametreler’deki net asgari ücret; brüt veya özel birim/döviz seçilebilir); kişiler
+    kurgusal (Kişi A…). Hesaplar saf işlevlerde `src/data/applet.ts` (`tests/applet-model.spec.ts`); durum
+    `src/lib/appletStore.ts` (dilim başına abonelik, yalnız varsayılandan farklı dilimler `turksab-applet` anahtarıyla bu
+    tarayıcıda; “Örnek değerlere dön” iki adımlı). Katalog (meslek, uzmanlık, seviye seti) tüm applet’leri besler.
+    Kullanıcı kararı 2026-10-21: bir anda tek applet görünür (sekme gibi; diğerleri çizilmez). ≥ 64em solda yapışık,
+    motorlara göre gruplu yan menü (`nav` “Applet’ler”, bağlantı + `aria-current`, numara rozeti; bant gizlenince
+    üste kayar), dar ekranda gruplu seçim + Önceki/Sonraki; altında sunum sayfalarındaki gibi önceki/sonraki. Her
+    applet’in adresi `#<id>` (derin bağlantı, geri/ileri; #’siz adres ilk applet); menüden seçilince odak panele taşınır.
+    Form parçaları `src/components/appletKit.tsx`: açılır seçim Mantine Select (markalı panel `navmenu`, açılma/kapanma
+    hareket tokenıyla; `Combobox.layer.css` BaseLayout’ta), anahtar `role="switch"`. Tablo hücresindeki etiketsiz
+    alanın klavye odağı sol kenarda düz çubuk (değdiği köşeler o an radiussuz), etiketsiz onay kutusunda kutunun altında
+    düz çizgi; etiketli alanda etiketin alt çizgisi.
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).

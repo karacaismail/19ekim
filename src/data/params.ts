@@ -29,6 +29,7 @@ export const DEFAULT_PARAMS = {
   softwareCount: 4,
   /* Ücret */
   minWage: 28_075.5,
+  minWageGross: 33_030,
   costFactor: 2,
   sahaSalary: 60_000,
   masaMultiplier: 1.25,
@@ -121,6 +122,7 @@ export const PARAM_GROUPS: ParamGroup[] = [
     desc: 'İşveren maliyeti = maaş × maliyet çarpanı (SGK, yemek, bilgisayar, vergi ve diğerleri).',
     fields: [
       { key: 'minWage', label: 'Asgari ücret (net, aylık)', kind: 'money', unit: '₺', min: 0, step: 0.5, help: '2026: net 28.075,50 ₺ (brüt 33.030 ₺); Ocak 2027 artışı açıklanınca güncellenir' },
+      { key: 'minWageGross', label: 'Asgari ücret (brüt, aylık)', kind: 'money', unit: '₺', min: 0, step: 0.5, help: '2026: brüt 33.030 ₺; ücret applet’lerinde baz birim seçeneği' },
       { key: 'costFactor', label: 'İşveren maliyeti çarpanı', kind: 'multiplier', unit: '× maaş', min: 1, step: 0.05 },
       { key: 'sahaSalary', label: 'Saha satış maaşı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000 },
       { key: 'masaMultiplier', label: 'Masa başı (CRM)', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },

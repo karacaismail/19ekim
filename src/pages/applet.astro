@@ -1,0 +1,10 @@
+---
+// Açılır seçim (Mantine Select) yalnız bu sayfada; stili yalnız bu sayfanın paketine girer.
+import '@mantine/core/styles/Combobox.layer.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AppletPage } from '../views/AppletPage';
+---
+
+<BaseLayout title="Ücret ve performans applet’leri">
+  <AppletPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

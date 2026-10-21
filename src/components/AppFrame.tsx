@@ -148,7 +148,7 @@ function NavItem({
 }
 
 /** Hareket süresi tokenı (ms); hareket azaltmada token 0 ms olur. Sunucu çiziminde 0. */
-function useMotionMs(name: string) {
+export function useMotionMs(name: string) {
   const [ms, setMs] = useState(0);
   useEffect(() => {
     const read = () => {

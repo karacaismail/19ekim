@@ -3823,3 +3823,658 @@ html[data-js] .opex-nojs {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   }
 }
+
+/* ---------- Ücret ve performans applet’leri (/applet/) ----------
+ * Girdiler Parametreler alanlarını (param-*) kullanır; tablo hücresindeki alanlar etiketsizdir (aria-label).
+ * Seçim düğmeleri ve anahtarlar tam, nötr kenarlıklı; seçili durum zemin ve yazı ağırlığıyla (renkli kenar yok).
+ */
+.applet-dayanak {
+  margin: var(--space-3) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+}
+
+.applet-dayanak-ad {
+  margin-inline-end: var(--space-1);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.applet-not {
+  margin: var(--space-2) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+}
+
+.applet-ara-baslik {
+  margin-top: var(--space-10);
+}
+
+.applet-girdiler-blok {
+  margin-top: var(--space-6);
+}
+
+.applet-girdiler-blok > .block-title {
+  margin-bottom: var(--space-1);
+}
+
+.applet-girdiler {
+  display: grid;
+  gap: var(--space-5) var(--gap-normal);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  margin-top: var(--space-3);
+  align-items: start;
+}
+
+@media (min-width: 48em) {
+  .applet-girdiler {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+}
+
+.applet-araclar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.applet-ozet {
+  margin-top: var(--space-6);
+}
+
+.applet-ozet .stat-value {
+  font-size: var(--text-2xl);
+  font-variant-numeric: tabular-nums;
+}
+
+.applet-ozet .stat-value .chip,
+.applet-ozet .stat-note .chip {
+  font-size: var(--text-md);
+  letter-spacing: normal;
+  white-space: normal;
+}
+
+/* Tablo hücresindeki alan: okunabilir en küçük genişlik; sütun daralınca tablo kayar. Geniş sütunda alan uzamaz. */
+.data-table .applet-hucre {
+  min-width: 5.5rem;
+  max-width: 9rem;
+}
+
+.data-table .applet-metin {
+  min-width: 11rem;
+  max-width: 18rem;
+}
+
+/* Hücredeki seçim: seçenek adı (ör. “İnsan kaynakları”) okun yanında kesilmesin. */
+.data-table .applet-hucre-secim {
+  min-width: 12rem;
+  max-width: 17rem;
+}
+
+/* Girdili tablolarda satır içeriği ortalı hizada (metin ile alan aynı satırda). */
+.applet-sayfa .data-table tbody th,
+.applet-sayfa .data-table tbody td {
+  vertical-align: middle;
+}
+
+/* Girdi kenarlığı ve zemini (Mantine varsayılanı 100 ms ease yerine) hareket tokenlarıyla değişir. */
+.param-input {
+  transition-property: border-color, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-select {
+  cursor: pointer;
+}
+
+.applet-liste {
+  min-width: 12rem;
+  max-height: min(22rem, 60dvh);
+}
+
+.applet-secenek {
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.applet-secenek[data-checked] {
+  background-color: var(--surface-selected);
+  font-weight: var(--weight-semibold);
+}
+
+/* Anahtar (role="switch") */
+.applet-anahtar-alan {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.applet-anahtar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  text-align: start;
+  cursor: pointer;
+}
+
+.applet-anahtar-iz {
+  position: relative;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 1.5rem;
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--toggle-track-off);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-anahtar-top {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.1875rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  background-color: var(--toggle-thumb-off);
+  transform: translateY(-50%);
+  transition-property: transform, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-anahtar[aria-checked='true'] .applet-anahtar-iz {
+  background-color: var(--toggle-track-on);
+}
+
+.applet-anahtar[aria-checked='true'] .applet-anahtar-top {
+  background-color: var(--toggle-thumb-on);
+  transform: translate(1.25rem, -50%);
+}
+
+html[data-focus-mode='keyboard'] .applet-anahtar:focus-visible .applet-anahtar-ad,
+html[data-focus-mode='keyboard'] .applet-onay:has(:focus-visible) .applet-onay-ad {
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}
+
+@media (forced-colors: active) {
+  .applet-anahtar-iz {
+    border: 1px solid ButtonText;
+  }
+
+  .applet-anahtar-top {
+    background-color: ButtonText;
+  }
+}
+
+/* Onay kutusu: etiketsiz tablo hücresinde klavye odağı hücrenin satır başlığına değil kutunun altına çizilir. */
+.applet-onay-govde {
+  align-items: center;
+  min-height: var(--hit-min);
+}
+
+.applet-onay-kutu {
+  /* Mantine gri kenarı (≈ 1,5:1) yerine tokenlı, ≥ 3:1 sınır; işaretliyken vurgu dolgusu. */
+  border-color: var(--text-primary);
+  background-color: var(--surface-raised);
+  cursor: pointer;
+  transition-property: border-color, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-onay-kutu:focus {
+  outline: none;
+}
+
+.applet-onay-kutu:checked {
+  background-color: var(--accent);
+}
+
+.applet-onay-ikon {
+  color: var(--text-on-accent);
+  transition-property: transform, opacity;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+/* Etiketsiz onay kutusu: kutuyu saran alan tıklanabilir (44, kaba işaretçide 48 CSS px). */
+.applet-onay-alan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--hit-min);
+  min-block-size: var(--hit-min);
+  cursor: pointer;
+}
+
+/* Klavye odağında kutunun altında düz çizgi (çevrelemez; seçili dolgudan ayrı). Yalnız etiketsiz kutuda. */
+.applet-onay {
+  position: relative;
+}
+
+html[data-focus-mode='keyboard'] .applet-onay-alan .applet-onay:has(:focus-visible)::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: var(--space-1);
+  inline-size: 1.25rem;
+  block-size: var(--focus-indicator-width);
+  background: var(--focus-indicator);
+}
+
+/* Etiketsiz tablo hücresi alanı: klavye odağında sol kenarda düz çubuk; çubuğun değdiği köşeler o an radiussuz. */
+html[data-focus-mode='keyboard'] .applet-hucre .param-input:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.applet-onay-ad {
+  font-size: var(--text-md);
+}
+
+/* Ön ayar ve görünüm düğmeleri */
+.applet-dugmeler {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+.applet-araclar > .applet-dugmeler {
+  margin-top: 0;
+}
+
+.applet-dugmeler-ad {
+  font-weight: var(--weight-semibold);
+}
+
+.applet-dugmeler-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.applet-dugme,
+.applet-eylem {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-4);
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-dugme:hover,
+.applet-eylem:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+}
+
+.applet-dugme[aria-pressed='true'] {
+  background-color: var(--surface-selected);
+  font-weight: var(--weight-semibold);
+}
+
+.applet-eylem:disabled {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.applet-eylem[data-armed] {
+  background-color: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+}
+
+/* Payın yazısı ve çubuğu yan yana (çubuk tek başına bilgi taşımaz). */
+.applet-pay {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(6rem, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Oran çubuğu ve band çizgisi: yalnız şekil; değer yazısı hücrede */
+.applet-cubuk {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 6rem;
+  block-size: 0.5rem;
+}
+
+.applet-cubuk-iz {
+  fill: var(--viz-track);
+}
+
+.applet-cubuk-dolgu {
+  fill: var(--accent);
+}
+
+.applet-cubuk-dolgu[data-ton='iyi'] {
+  fill: var(--viz-3);
+}
+
+.applet-cubuk-dolgu[data-ton='uyari'] {
+  fill: var(--viz-4);
+}
+
+.applet-cubuk-dolgu[data-ton='kotu'] {
+  fill: var(--viz-2);
+}
+
+.applet-cubuk-dolgu[data-ton='notr'] {
+  fill: var(--text-secondary);
+}
+
+.applet-band {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 8rem;
+  block-size: 0.875rem;
+}
+
+.applet-band-iz {
+  fill: var(--viz-track);
+}
+
+.applet-band-aralik {
+  fill: var(--viz-1);
+  fill-opacity: 0.4;
+}
+
+.applet-band-orta {
+  stroke: var(--viz-1);
+  stroke-width: 1.5;
+}
+
+.applet-band-isaret[data-tur='mevcut'] {
+  stroke: var(--text-primary);
+  stroke-width: 3;
+}
+
+.applet-band-isaret[data-tur='hedef'] {
+  stroke: var(--accent-strong);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+}
+
+/* Prim eğrisi */
+.applet-egri {
+  margin: var(--space-8) 0 0;
+}
+
+.applet-egri figcaption {
+  margin: 0 0 var(--space-3);
+}
+
+.applet-egri-alan {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.applet-egri-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.applet-egri-svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 14rem;
+}
+
+.applet-egri-x {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.applet-egri-zemin {
+  fill: var(--surface-sunken);
+}
+
+.applet-egri-hedef {
+  stroke: var(--rule-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.applet-egri-cizgi {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.applet-egri-simdi {
+  stroke: var(--text-primary);
+  stroke-width: 1.5;
+}
+
+/*
+ * Applet seçimi (kullanıcı kararı 2026-10-21): bir anda tek applet görünür. Geniş ekranda (≥ 64em) solda yapışık,
+ * motorlara göre gruplu yan menü; dar ekranda gruplu seçim ve önceki/sonraki. Seçili öğe zemin, yazı ağırlığı ve dolu
+ * numara rozetiyle (renkli kenar yok).
+ */
+.applet-duzen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.applet-icerik {
+  min-width: 0;
+}
+
+.applet-panel {
+  min-width: 0;
+}
+
+.applet-panel > .section {
+  margin-top: 0;
+}
+
+/* Menüden geçince odak panele taşınır; klavye modunda sol kenarda düz çubuk (panelin köşesi yok). */
+html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
+.applet-gezgin {
+  display: none;
+}
+
+.applet-gezgin-grup + .applet-gezgin-grup {
+  margin-top: var(--space-5);
+}
+
+.applet-gezgin-baslik {
+  margin: 0 0 var(--space-2);
+  padding-inline: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  line-height: var(--leading-snug);
+  text-transform: uppercase;
+}
+
+.applet-gezgin-liste {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.applet-gezgin-oge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--hit-min);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  text-decoration: none;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-gezgin-oge:hover {
+  background-color: var(--surface-hover);
+}
+
+.applet-gezgin-oge[aria-current='true'] {
+  background-color: var(--surface-selected);
+  font-weight: var(--weight-semibold);
+}
+
+.applet-gezgin-no {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: 50%;
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.applet-gezgin-oge[aria-current='true'] .applet-gezgin-no {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.applet-secici {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-raised);
+}
+
+.applet-secici-oklar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.applet-ok {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.applet-secenek-grup {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+@media (min-width: 40em) {
+  .applet-secici {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .applet-secici-oklar {
+    padding-top: calc(var(--text-md) * var(--leading-snug) + var(--space-1));
+  }
+}
+
+@media (min-width: 64em) {
+  .applet-duzen {
+    grid-template-columns: 17rem minmax(0, 1fr);
+    gap: var(--space-10);
+    align-items: start;
+  }
+
+  .applet-secici {
+    display: none;
+  }
+
+  .applet-gezgin {
+    display: block;
+    padding: var(--space-4) var(--space-3);
+    border-radius: var(--radius-lg);
+    background-color: var(--surface-raised);
+  }
+}
+
+/* Yan menü yapışık: bant görünürken onun altında, gizliyken en üstte; uzun menü kendi içinde kayar. */
+@media (min-width: 64em) and (min-height: 40em) {
+  .applet-gezgin {
+    position: sticky;
+    top: calc(var(--bant-h, 0px) + var(--space-4));
+    max-height: calc(100dvh - var(--bant-h, 0px) - var(--space-8));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    transition-property: top, max-height;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  html[data-bant-gizli] .applet-gezgin {
+    top: var(--space-4);
+    max-height: calc(100dvh - var(--space-8));
+  }
+}

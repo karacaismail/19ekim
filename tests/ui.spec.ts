@@ -16,6 +16,7 @@ const PAGES = [
   'roller/asistan/',
   'roller/segika/',
   'bcg/',
+  'applet/',
   'parametreler/',
   'notlar/',
   'giderler/',
@@ -25,7 +26,7 @@ const PAGES = [
 
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
 // Giderler grafikleri yalnız Sheets bağlantısıyla çizilir; ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/'].includes(p));
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/'].includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
 test.beforeEach(async ({ page }) => {
@@ -576,7 +577,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
 
 test.describe('hareket', () => {
   test('tüm geçişler onaylı Cubic eğri ve pozitif süreyle; giriş ve çıkış temel öğede', async ({ page }) => {
-    for (const path of ['', 'roller/organizator/', 'istihdam/']) {
+    for (const path of ['', 'roller/organizator/', 'istihdam/', 'applet/', 'applet/#terfi-kapisi']) {
       await page.goto(path);
       await icerik(page);
       const offenders = await page.evaluate((approved) => {
