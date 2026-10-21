@@ -136,8 +136,12 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kutusunda kalır (`confine`). Grafik yüklenemezse kutu küçülür ve “Grafik yüklenemedi” + özet görünür.
 - Grafiklerin ekran okuyucu metni kapsayıcıdaki Türkçe özettir (`role="img"`); ECharts `aria` kapalıdır. Özet, JS yoksa
   veya grafik yüklenemezse görünür yedek metindir.
-- Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (Türksab yazı imi “TURKS/AB”, eğik çizgi
-  kırmızı `--brand-slash`, ekran okuyucuya “Türksab”; kullanıcı kararı 2026-10-21) ve altında “Pazarlama & Finansal
+- Başlık ve gezinme (kullanıcı kararları 2026-10-20/21): üst bantta logo (Türksab yazı imi “TURKS/AB”, ekran okuyucuya
+  “Türksab”; kullanıcı kararı 2026-10-21). Logo metin değil, turksab.com logosu ölçülerek çizilmiş SVG’dir
+  (`BrandMark.tsx`): harfler Roboto 900 dış hatları (orijinal gövde kalınlığı büyük harf yüksekliğinin ≈ %24’ü), her harf
+  orijinaldeki ağırlık merkezinde; kırmızı eğik çizgi kalın paralelkenar (yatay kalınlık ≈ %24, eğim ≈ %35, renk
+  `--brand-slash`, açık temada orijinalin #fe0000’ı). Boyut `--brand-mark-h` (büyük harf yüksekliği); “/” karakteri veya
+  site fontuyla yazı imi kullanılmaz (ince ve orijinale aykırı) ve altında “Pazarlama & Finansal
   Planlama”; ≥ 64em gezinme aynı satırda, başlığın tam ortasında (üç sütunlu ızgara:
   logo · gezinme · tema düğmesi), dar ekranda logonun altında güvenli ortalamayla (`safe center`), dar ekranda logonun altında kendi satırında
   (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —

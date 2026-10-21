@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { IconChevronDown, IconMoon, IconSun } from '@tabler/icons-react';
+import { BrandMark } from './BrandMark';
 import { ModelProvider, useParams } from './ModelContext';
 import { COMMON_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
@@ -233,11 +234,10 @@ export function AppFrame({
         <header className="topbar">
           <div className="wrap">
             {/* Logo altında alt başlık; plan tarihi başlıkta yok (kullanıcı kararı 2026-10-20). */}
-            {/* Logo (kullanıcı kararı 2026-10-21): Türksab yazı imi “TURKS/AB”, eğik çizgi kırmızı; adı ekran okuyucuya “Türksab”. */}
+            {/* Logo (kullanıcı kararı 2026-10-21): Türksab yazı imi “TURKS/AB”, orijinaline göre çizilmiş SVG (kalın kırmızı
+                eğik çizgi, ağır grotesk harfler); adı ekran okuyucuya “Türksab”. */}
             <a className="brand" href={href('/')} aria-label="Türksab · Pazarlama & Finansal Planlama">
-              <span className="brand-word" aria-hidden="true">
-                TURKS<span className="brand-slash">/</span>AB
-              </span>
+              <BrandMark />
               <span className="brand-tagline" aria-hidden="true">
                 Pazarlama &amp; Finansal Planlama
               </span>

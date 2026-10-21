@@ -340,15 +340,23 @@ test.describe('başlık ve İstihdam menüsü', () => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('');
       const marka = page.locator('.topbar .brand');
-      // Logo (kullanıcı kararı 2026-10-21): Türksab “TURKS/AB”, eğik çizgi kırmızı; ekran okuyucuya “Türksab”.
-      await expect(marka).toHaveText('TURKS/ABPazarlama & Finansal Planlama');
+      // Logo (kullanıcı kararı 2026-10-21): Türksab “TURKS/AB” orijinaline göre çizilmiş SVG; ekran okuyucuya “Türksab”.
+      await expect(marka).toHaveText('Pazarlama & Finansal Planlama');
       await expect(page.getByRole('link', { name: 'Türksab · Pazarlama & Finansal Planlama' })).toBeVisible();
-      const [cizgi, yazi] = await marka.evaluate((el) => [getComputedStyle(el.querySelector('.brand-slash')!).color, getComputedStyle(el.querySelector('.brand-word')!).color]);
-      expect(cizgi).not.toBe(yazi);
+      const logo = marka.locator('svg.brand-mark');
+      await expect(logo).toHaveAttribute('aria-hidden', 'true');
+      const [harf, cizgi] = await logo.evaluate((el) => [getComputedStyle(el.querySelector('.brand-mark-letters')!).fill, getComputedStyle(el.querySelector('.brand-mark-slash')!).fill]);
+      expect(cizgi).not.toBe(harf);
+      // Orijinal gibi kalın paralelkenar: yatay kalınlık büyük harf yüksekliğinin ≈ %24'ü, eğim ≈ %35'i
+      // (kutu genişliği / yükseklik ≈ 0,60); logo oranı viewBox'tan (≈ 7,31), harf yüksekliği ≥ 16 px.
+      const [kutu, egik] = [await logo.boundingBox(), await logo.locator('.brand-mark-slash').boundingBox()];
+      expect(egik!.width / egik!.height).toBeCloseTo(0.6, 1);
+      expect(kutu!.width / kutu!.height).toBeCloseTo(2662 / 364, 1);
+      expect(kutu!.height).toBeGreaterThanOrEqual(16);
       await expect(page.locator('.topbar')).not.toContainText('Plan tarihi');
       await expect(page.locator('.topbar')).not.toContainText('Satış ve Pazarlama Planı');
-      const [kelime, alt] = [await marka.locator('.brand-word').boundingBox(), await marka.locator('.brand-tagline').boundingBox()];
-      expect(alt!.y).toBeGreaterThanOrEqual(kelime!.y + kelime!.height - 1);
+      const alt = await marka.locator('.brand-tagline').boundingBox();
+      expect(alt!.y).toBeGreaterThanOrEqual(kutu!.y + kutu!.height - 1);
       expect(parseFloat(await marka.locator('.brand-tagline').evaluate((el) => getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(14);
     });
   }

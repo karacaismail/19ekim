@@ -169,20 +169,23 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 .brand {
   display: inline-grid;
   align-content: center;
+  justify-items: start;
+  row-gap: var(--space-1);
   min-height: var(--hit-min);
   color: var(--text-primary);
   text-decoration: none;
 }
 
-.brand-word {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
-  letter-spacing: 0.02em;
+/* SVG yazı imi (BrandMark): yükseklik = büyük harf yüksekliği; harfler metin rengi, eğik çizgi kırmızı. */
+.brand-mark {
+  display: block;
+  block-size: var(--brand-mark-h);
+  inline-size: auto;
+  fill: currentColor;
 }
 
-.brand-slash {
-  color: var(--brand-slash);
+.brand-mark-slash {
+  fill: var(--brand-slash);
 }
 
 .brand-tagline {
