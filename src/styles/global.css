@@ -3602,29 +3602,49 @@ html[data-js] .opex-nojs {
 /*
  * Yıl sekmeleri: iki düğme (2026 · 2027), plan ve kalemlerin altında, yıla bağlı bölümlerin başında; iki sekme aynı
  * şablonda (kullanıcı kararı 2026-10-20), seçim radyo işaretiyle (dolu nokta, yeşil) ve kalın rakamla gösterilir.
+ *
+ * Yıl kümesi (kullanıcı kararı 2026-10-21): sekmeler ve yıla göre değişen bölümler tek küme. Seçili sekme panelle aynı
+ * zeminde (çökük yüzey) ve ona bitişik (klasör sekmesi); seçili olmayan sekme yükseltilmiş yüzeyde, kenarlıklı, boş
+ * radyo halkasıyla açıkça seçilebilir; üzerine gelince zemini değişir.
  */
-.opex-year-bar {
-  display: grid;
-  gap: var(--space-2) var(--gap-normal);
-  align-items: center;
+.opex-yil-kume {
   margin-top: var(--section-gap);
 }
 
-.opex-year-bar-text {
-  margin: 0;
-  color: var(--text-secondary);
+.opex-year-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0 var(--space-4);
 }
 
-@media (min-width: 64em) {
-  .opex-year-bar {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
-  }
+.opex-year-bar-text {
+  margin: 0 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
 
 .opex-years {
   display: grid;
+  flex: 1 1 100%;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gap-normal);
+  align-items: end;
+  gap: var(--space-2);
+}
+
+@media (min-width: 48em) {
+  .opex-years {
+    flex: none;
+    grid-template-columns: repeat(2, minmax(0, 15rem));
+  }
+}
+
+/* Dar ekranda açıklama sekmelerin üstünde: seçili sekme ile panel arasına girmez. */
+@media (max-width: 47.99em) {
+  .opex-year-bar-text {
+    order: -1;
+    margin-bottom: var(--space-2);
+  }
 }
 
 .opex-year {
@@ -3634,21 +3654,52 @@ html[data-js] .opex-nojs {
   justify-items: start;
   gap: 0;
   min-height: var(--hit-min);
+  margin-bottom: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border: 0;
+  border: var(--hairline) solid var(--rule-strong);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition-property: background-color, color;
+  transition-property: background-color, border-color, color;
   transition-duration: var(--motion-duration-base);
   transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
 }
 
 .opex-year:hover {
   background: var(--surface-control-hover);
+}
+
+/* Seçili sekme panele bitişik: alt köşeler düz, panelle aynı zemin, kenarlık yok; panel sekmenin altından başlar. */
+.opex-year[aria-selected='true'],
+.opex-year[aria-selected='true']:hover {
+  margin-bottom: 0;
+  padding-bottom: calc(2 * var(--space-2));
+  border-color: transparent;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  background: var(--surface-sunken);
+  cursor: default;
+}
+
+.opex-year-panel {
+  padding: var(--space-3) var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+/* İlk sekme seçiliyken panelin sol üst köşesi sekmeyle birleşir. */
+.opex-yil-kume:has(.opex-year:first-child[aria-selected='true']) .opex-year-panel {
+  border-start-start-radius: 0;
+}
+
+@media (min-width: 48em) {
+  .opex-year-panel {
+    padding-inline: var(--space-5);
+  }
 }
 
 .opex-year[aria-selected='true'] .opex-year-num {

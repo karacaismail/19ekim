@@ -436,6 +436,45 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
   });
 
+  // Kullanıcı kararı 2026-10-21: yıl sekmeleri ve yıla göre değişen bölümler tek küme; seçili sekme panele bitişik ve
+  // aynı zeminde, seçili olmayan sekme kenarlıklı ve farklı zeminde (açıkça seçilebilir).
+  for (const width of [390, 1280]) {
+    test(`${width} px yıl kümesi: seçili sekme panele bitişik ve aynı zeminde; diğer sekme açıkça seçilebilir`, async ({ page }) => {
+      // Renkler geçiş ortasında ölçülmesin.
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.setViewportSize({ width, height: 900 });
+      await mockScript(page, { ozet: 'acik', model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const kume = page.locator('.opex-yil-kume');
+      await expect(kume.getByRole('tablist', { name: 'Yıl' })).toBeVisible();
+      await expect(kume.getByRole('tabpanel')).toBeVisible();
+      for (const yil of [2026, 2027]) {
+        await kume.getByRole('tab', { name: new RegExp(String(yil)) }).click();
+        await page.mouse.move(0, 0);
+        const secili = kume.getByRole('tab', { selected: true });
+        const diger = kume.locator('.opex-year[aria-selected="false"]');
+        const panel = kume.getByRole('tabpanel');
+        const [s, d, p] = [await secili.boundingBox(), await diger.boundingBox(), await panel.boundingBox()];
+        expect(Math.abs(s!.y + s!.height - p!.y), 'seçili sekme panele bitişik').toBeLessThanOrEqual(1);
+        expect(d!.y + d!.height, 'diğer sekme panele değmez').toBeLessThan(p!.y - 2);
+        const st = await page.evaluate(() => {
+          const cs = (el: Element) => getComputedStyle(el);
+          const sec = document.querySelector('.opex-year[aria-selected="true"]')!;
+          const dig = document.querySelector('.opex-year[aria-selected="false"]')!;
+          const pan = document.querySelector('.opex-year-panel')!;
+          return { sec: cs(sec).backgroundColor, dig: cs(dig).backgroundColor, digKenar: cs(dig).borderTopWidth, digStil: cs(dig).borderTopStyle, pan: cs(pan).backgroundColor, sayfa: cs(document.body).backgroundColor };
+        });
+        expect(st.sec).toBe(st.pan);
+        expect(st.dig).not.toBe(st.pan);
+        expect(st.pan).not.toBe(st.sayfa);
+        expect(parseFloat(st.digKenar)).toBeGreaterThan(0);
+        expect(st.digStil).toBe('solid');
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    });
+  }
+
   test('2026 ve 2027 sekmeleri aynı şablonda; seçim radyo noktasıyla', async ({ page }) => {
     // Geçişler anında (renk karşılaştırması geçiş ortasında yapılmasın); fare kartların dışında.
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -445,15 +484,19 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await hydrated(page);
     const yillar = page.locator('.opex-year');
     await expect(yillar).toHaveCount(2);
-    const stil = (i: number) => yillar.nth(i).evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, color: getComputedStyle(el).color, h: Math.round(el.getBoundingClientRect().height) }));
-    const [a, b] = [await stil(0), await stil(1)];
-    expect(a).toEqual(b);
+    // Aynı şablon: seçili ve seçili olmayan görünüm iki sekmede birebir aynı; seçim değişince yer değiştirir
+    // (kullanıcı kararı 2026-10-21: seçili sekme panelle birleşir, diğeri açıkça seçilebilir — ikisi bilerek farklı).
+    const stil = (i: number) => yillar.nth(i).evaluate((el) => { const cs = getComputedStyle(el); return { bg: cs.backgroundColor, color: cs.color, kenar: cs.borderTopColor, h: Math.round(el.getBoundingClientRect().height + parseFloat(cs.marginBottom)) }; });
+    const [seciliOnce, digerOnce] = [await stil(0), await stil(1)];
+    expect(seciliOnce.bg).not.toBe(digerOnce.bg);
+    expect(seciliOnce.h).toBe(digerOnce.h);
     const nokta = (i: number) => yillar.nth(i).locator('.opex-radio-dot').evaluate((el) => getComputedStyle(el).transform);
     expect(await nokta(0)).not.toBe(await nokta(1));
     await yillar.nth(1).click();
     await expect(yillar.nth(1)).toHaveAttribute('aria-selected', 'true');
     await page.mouse.move(0, 0);
-    expect(await stil(1)).toEqual(await stil(0));
+    expect(await stil(1)).toEqual(seciliOnce);
+    expect(await stil(0)).toEqual(digerOnce);
   });
 
   test('çok ve uzun adlı kategori: kutu satır sayısına göre uzar, etiketler binmez (320, 1024, 1280, 1440)', async ({ page }) => {
@@ -710,8 +753,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
             ratio: (a + 0.05) / (b + 0.05),
             stroke,
             size: Math.round(r.width),
-            right: Math.round(t.right - r.right - parseFloat(cs.paddingRight)),
-            top: Math.round(r.top - t.top - parseFloat(cs.paddingTop)),
+            right: Math.round(t.right - r.right - parseFloat(cs.paddingRight) - parseFloat(cs.borderRightWidth)),
+            top: Math.round(r.top - t.top - parseFloat(cs.paddingTop) - parseFloat(cs.borderTopWidth)),
             overlap,
           };
         });

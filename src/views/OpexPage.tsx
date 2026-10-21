@@ -1803,12 +1803,18 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
         <hr className="opex-ayrac opex-ayrac-arada" />
         <TechVendors m={m} p={p} />
       </Section>
-      <div className="opex-year-bar">
-        <p className="opex-year-bar-text">Aşağıdaki bölümler seçili yılı gösterir.</p>
-        <YearTabs value={d.yil} onChange={onYil} donemler={donemler} />
-      </div>
-      <div id="yil-paneli" role="tabpanel" aria-labelledby={`yil-${d.yil}`} className="opex-year-panel">
-        <YearPanel key={d.yil} m={m} d={d} start={3} />
+      {/*
+        Yıl kümesi (kullanıcı kararı 2026-10-21): yıl sekmeleri ve yıla göre değişen bölümler tek küme; seçili sekme
+        panele bitişik ve aynı zeminde, seçili olmayan sekme açıkça seçilebilir görünür.
+      */}
+      <div className="opex-yil-kume">
+        <div className="opex-year-bar">
+          <YearTabs value={d.yil} onChange={onYil} donemler={donemler} />
+          <p className="opex-year-bar-text">Aşağıdaki bölümler seçili yılı gösterir.</p>
+        </div>
+        <div id="yil-paneli" role="tabpanel" aria-labelledby={`yil-${d.yil}`} className="opex-year-panel">
+          <YearPanel key={d.yil} m={m} d={d} start={3} />
+        </div>
       </div>
       <p className="opex-source">
         Hesaplandı: {stamp(m.hesaplandi)} · Motor sürümü {m.surum} · Özet {data.ozet}

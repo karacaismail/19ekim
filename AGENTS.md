@@ -180,7 +180,11 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   arasında ayırıcı (`.opex-ayrac-arada`). Filtre tepsisi (`.opex-tepsi`) tablonun eklentisi: hemen üstüne bitişik,
   çökük yüzeyde, birleşen köşeler düz; içindeki düğmeler yükseltilmiş yüzeyde. Araç satırında grup düğmeleri, hızlı
   filtreler (`HIZLI`: anahtar — Dövizli, Teşvikli, Bekleyen [bu ay ödeme takibi varken]; onay kutusu — Boş ay, Özel
-  tutar, Artışlı; kısa ad, açıklama ipucunda; anahtar `role="switch"`, `Anahtar`) ve Sütunlar; dar ekranda sarar;
+  tutar, Artışlı; kısa ad, açıklama ipucunda; anahtar `role="switch"`, `Anahtar`) ve Sütunlar; dar ekranda sarar.
+  Yıl kümesi (kullanıcı kararı 2026-10-21, `.opex-yil-kume`): 2026/2027 sekmeleri ve yıla göre değişen bölümler
+  (`#yil-paneli`) tek küme; panel çökük yüzeyde, seçili sekme panelle aynı zeminde ve ona bitişik (klasör sekmesi),
+  seçili olmayan sekme yükseltilmiş yüzeyde, kenarlıklı, boş halkayla açıkça seçilebilir; iki sekme aynı şablon
+  (seçim değişince görünümler yer değiştirir); dar ekranda açıklama sekmelerin üstünde;
   ilk ekranda 15 aylık plan; 2026/2027 sekmeleri yıl
   bölümlerinin başında, aynı şablonda (seçim radyo noktasıyla). Aylık plan grafiği masaüstünde dikey ve alçak
   (`opex-stack`, 16rem, her ay yazılı), telefonda (grafik < 600 px) yatay ve satır sayısına göre; diğer grafikler yatay
