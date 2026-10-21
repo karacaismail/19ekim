@@ -163,7 +163,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   araçları varken 64–80em’de gezinme kendi satırına iner.
 - Kullanıcı kararları 2026-10-21 (başlık ve menü): üst gezinme öğelerinde simge (`mainnav-icon`; İstihdam, Pazarlama,
   Giderler, Notlar) ve aralarında ince dikey ayırıcı; simgeli etkin öğede nokta yok. İstihdam menüsü 1–7 sıralı
-  numaralı, roller pozisyon adıyla (Organizasyon, Dijital pazarlama uzmanı, İstoç Pazarlama CRM uzmanı, Saha satış
+  numaralı, roller pozisyon adıyla (Organizasyon şeması — şema sayfası, pozisyon değil —, Dijital pazarlama uzmanı, İstoç Pazarlama CRM uzmanı, Saha satış
   uzmanı, Organizatör, Segika CRM, Asistan; `TREE_NAV`); numarasız öğelerde aynı sade nokta (`navmenu-bullet`, rozet
   genişliğinde, yazılar hizalı); numara ile yazı arası `--space-3` (Mantine öğe etiketinde, `navmenu-item-label`).
   Bant yapışıkken (≥ 48em ve ≥ 40em yükseklik) aşağı kaydırınca gizlenir, yukarı kaydırınca veya odak banda girince

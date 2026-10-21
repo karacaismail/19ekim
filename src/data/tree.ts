@@ -85,7 +85,7 @@ export const SEQUENCE: Stop[] = [
  * “İstihdam” menüsü (kullanıcı kararı 2026-10-21): öğeler 1–7 sıralı numaralı; roller işe alınacak pozisyon adıyla.
  */
 export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: number; also?: string[] }[] = [
-  { label: 'Organizasyon', path: '/', no: 1 },
+  { label: 'Organizasyon şeması', path: '/', no: 1 },
   { label: 'Dijital pazarlama uzmanı', path: '/roller/dijital-pazarlama/', role: 'dijital-pazarlama', no: 2 },
   { label: 'İstoç Pazarlama CRM uzmanı', path: '/roller/pazarlamaci/', role: 'pazarlamaci', no: 3 },
   { label: 'Saha satış uzmanı', path: '/roller/saha-uzmani/', role: 'saha-uzmani', no: 4, also: ['/roller/ekip-lideri/'] },
