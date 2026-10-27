@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Timeline } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
-import { Chart, DataTable, Hero, Note, Section, Stats } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
+import { Chart, DataTable, Note, Section, Stats } from '../components/ui';
 import {
   GATE_STEPS,
   type Action,
@@ -754,10 +755,10 @@ function Icerik() {
 
   return (
     <>
-      <Hero
-        eyebrow="Pazarlama"
+      <PageHeader
         title="İş ortaklığı programı"
-        lead={`İki marka, iki 90 günlük program: ${longDate(pt.dates.t0)} – ${longDate(pt.dates.end)}. Sayılar başlangıç tasarımıdır; 14. günde gerçek veriyle yeniden yazılır.`}
+        purpose="İki marka için iki ayrı 90 günlük program; sayılar başlangıç tasarımıdır ve 14. günde gerçek veriyle yeniden yazılır."
+        meta={[{ label: 'Dönem', value: `${longDate(pt.dates.t0)} – ${longDate(pt.dates.end)}` }]}
       />
       <div className="ortak-kume">
         <ProgramSekmeleri programs={pt.programs} value={konum.program} onChange={(id) => go({ program: id, section: konum.section })} />

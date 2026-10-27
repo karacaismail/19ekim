@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 847 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 904 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -108,6 +108,16 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   ECharts verisiyle 320 px listesini karşılaştırır.
 - **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
   çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
+- **Sayfa başlığı tek kalıptır.** Her sayfanın tek h1’i kırıntı satırının son öğesidir (“19 Ekim › Gelir planı”); altında
+  bir cümlelik amaç ve dönem/kaynak satırı (`PageHeader`). Ayrı “hero”, turuncu üst etiket ve uzun giriş metni yok; bölüm
+  başlığında numara yalnız sıra anlamlıysa (araç sayfalarında yok), üst çizgi ince.
+- **Parametreler görev gruplarında.** `/parametreler/` alanları kapalı gruplar hâlinde gelir (başlıkta “n alan · k
+  değişiklik”), arama kutusu etiket/yardım/grup adında arar ve eşleşen grupları açar; değişiklik özeti varsayılan → yeni
+  değeri, grubu ve “alana git / bu alanı geri al” düğmelerini verir; “Varsayılanlara dön” kapsamını onaydan önce yazar
+  ve “Geri al” sunar; kayıt yazımı gerçeği söyler (“bu tarayıcıda kaydedildi ss:dd:ss” ya da “kaydedilemedi”).
+- **Önce sonuç, sonra ayar, sonra veri.** Gelir planı ve nakit akışında seçili senaryonun ana sonucu (`ResultSummary`:
+  değer + dönem + kıyas + durum) sayfa başlığının hemen altındadır ve 320×480’de kaydırmadan görünür; kritik risk
+  (“kapanmıyor”, “sıfırın üstüne çıkmıyor”) alt bölümlere ya da accordion’a gömülmez.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 
@@ -176,7 +186,9 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Rol görevleri, KPI | `src/data/roles.ts`, `src/data/program.ts` |
 | Dijital pazarlama planı | `src/data/digital.ts` |
 | Organizasyon şeması | `src/data/tree.ts` |
-| Başlık, gezinme (şerit ve dar ekran çekmecesi), tema | `src/components/AppFrame.tsx` |
+| Gezinme (şerit ve dar ekran çekmecesi), tema, sunum sırası | `src/components/AppFrame.tsx` |
+| Sayfa başlığı (kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) | `src/components/PageHeader.tsx` |
+| Ana sonuç bloğu (gelir planı fon ihtiyacı, nakit akışı açık tavanı; dönem, kıyas, durum) | `src/components/ResultSummary.tsx` |
 | Tablo / kayıt görünümü (dar ekran), grafik kutusu ve dar ekran eşdeğerleri (ajanda, hiyerarşi, değerler), seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart` → `grafikEsdegeri`, `Choice`) |
 | UX sözleşmesi, kabul senaryoları, istisna kayıtları | `docs/ux.md`, AGENTS.md → “UX yeniden tasarım sözleşmesi” |
 | Renk, boşluk, yazı, hareket | `src/styles/tokens.css` (sadece burası) |

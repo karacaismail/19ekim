@@ -19,14 +19,14 @@ test.describe('gelir planı', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gelir planı');
-    await expect(page.locator('.hero .lead')).toContainText('19 Ekim 2026 – Aralık 2027');
-    await expect(page.locator('.hero .lead')).toContainText('İlk satış 6 Kasım 2026');
-    // Kurucu sayfanın başında (ilk bölümden önce), yapışkan özet kurucunun hemen altında.
+    // Dönem ve ilk satış tek PageHeader’ın dönem satırında (ux.md M03, P6.1).
+    await expect(page.locator('.page-meta')).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(page.locator('.page-meta')).toContainText('6 Kasım 2026');
+    // ux.md §5.4 sırası (P6.2, M05): amaç → bağlam/senaryo ve ana sonuç (yapışkan özet + sonuç bloğu) → eylem (kurucu) →
+    // destekleyici veri (bölümler). Kurucu ilk bölümden önce kalır (kullanıcı kararı 2026-10-27).
     const sira = await page.evaluate(() => {
-      const k = document.querySelector('.kurucu')!.getBoundingClientRect().top;
-      const y = document.querySelector('.yapiskan')!.getBoundingClientRect().top;
-      const s = document.querySelector('.section')!.getBoundingClientRect().top;
-      return k < y && y < s;
+      const ust = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top;
+      return ust('.yapiskan') <= ust('.sonuc') && ust('.sonuc') < ust('.kurucu') && ust('.kurucu') < ust('.section');
     });
     expect(sira).toBe(true);
     await expect(page.locator('.section')).toHaveCount(9);
@@ -108,6 +108,70 @@ test.describe('gelir planı', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.getByRole('group', { name: 'Senaryo' }).first().getByRole('button', { name: 'İyimser' })).toHaveAttribute('aria-pressed', 'true');
+    await page.evaluate(() => {
+      localStorage.removeItem('istoc-plan-senaryo');
+      localStorage.removeItem('istoc-plan-senaryo-secenekler');
+    });
+  });
+
+  /*
+   * ux.md M05 ResultSummary (P6.2, kullanıcı kararı 2026-10-27): seçili senaryonun ana sonucu (en çok fon ihtiyacı) dönem,
+   * birim ve kıyas temeliyle ilk ekranda (320×480); başabaş durumu (kritik risk) accordion’a gizlenmez; yapışkan özetle aynı
+   * kaynaktan (aynı değer), tek yapışkan özet.
+   */
+  test('ana sonuç (M05): fon ihtiyacı 320×480 ilk ekranda; dönem, birim, kıyas; risk gizli değil; yapışkan özetle tek kaynak', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const sonuc = page.locator('.sonuc');
+    await expect(sonuc).toHaveCount(1);
+    await expect(page.locator('.yapiskan')).toHaveCount(1);
+    const deger = sonuc.locator('.sonuc-deger');
+    await expect(deger).toContainText('₺');
+    const kutu = await deger.evaluate((el) => el.getBoundingClientRect());
+    expect(kutu.top, 'ana sonuç ilk ekranda').toBeGreaterThanOrEqual(0);
+    expect(kutu.bottom, 'ana sonuç kaydırmadan tam görünür').toBeLessThanOrEqual(480);
+    await expect(sonuc.locator('.sonuc-etiket')).toContainText('Fon ihtiyacı');
+    await expect(sonuc.locator('.sonuc-donem')).toContainText('19 Ekim 2026 – Aralık 2027');
+    // Kıyas temeli: hazır senaryolar aynı ölçüyle; seçili olan işaretli.
+    const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
+    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Medyan/, /İyimser/]);
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Medyan');
+    // Durum görünür (accordion/gizli kapsayıcı içinde değil) ve veriyle tutarlı: başabaş varsa tarih, yoksa eğilim/kapanmıyor.
+    const durum = sonuc.locator('.sonuc-durum');
+    await expect(durum).toBeVisible();
+    expect(await durum.evaluate((el) => !!el.closest('[hidden], .kayit-panel, details'))).toBe(false);
+    // Ton ile metin tutarlı: iyi = başabaş tarihi; uyarı = eğilimle ≈ tarih; risk = kapanmıyor (sürdürülebilir değil).
+    const tutarli = async () => {
+      const ton = await durum.getAttribute('data-ton');
+      const metin = (await durum.textContent()) ?? '';
+      expect(ton).toMatch(/^(iyi|uyari|risk)$/);
+      expect(metin).toMatch(ton === 'iyi' ? /Aylık başabaş \d/ : ton === 'uyari' ? /≈/ : /Kapanmıyor.*sürdürülebilir değil/);
+    };
+    await tutarli();
+    // Tek kaynak: yapışkan özetin “Fon ihtiyacı” çipi ile ana sonuç aynı değer.
+    const cip = page.locator('.yapiskan-cip', { hasText: 'Fon ihtiyacı' }).locator('.yapiskan-deger');
+    expect((await cip.textContent())?.trim()).toBe((await deger.textContent())?.trim());
+    // Senaryo değişince sonuç ve kıyas işareti değişir; riskli seçeneklerde durum riske döner ve yine gizlenmez.
+    const kurucu = page.locator('.kurucu');
+    await kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Kötümser' }).click();
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Kötümser');
+    const acici = kurucu.getByRole('button', { name: /Ayrıntılı seçenekler/ });
+    if ((await acici.getAttribute('aria-expanded')) === 'false') await acici.click();
+    const secenekler = kurucu.getByRole('group', { name: 'Ayrıntılı seçenekler' });
+    // Riskli seçenekler (ek sabit gider, düşük elde tutma, reklamsız): sonuç ve durum anında değişir, durum yine görünür
+    // ve tonuyla tutarlı; özel senaryo kıyasa dördüncü satır olarak girer; şerit ile blok aynı değeri taşır.
+    const onceki = (await deger.textContent())?.trim();
+    await secenekler.getByRole('group', { name: 'Ek sabit gider' }).getByRole('button', { name: '+500 bin ₺ / ay' }).click();
+    await secenekler.getByRole('group', { name: 'Aylık elde tutma' }).getByRole('button', { name: '%60', exact: true }).click();
+    await secenekler.getByRole('group', { name: 'Satıcı kazanım reklamı' }).getByRole('button', { name: 'Yok' }).click();
+    await expect(deger).not.toHaveText(onceki ?? '');
+    await expect(durum).toBeVisible();
+    await tutarli();
+    await expect(kiyas).toHaveCount(4);
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText(/^Özel/);
+    expect((await page.locator('.yapiskan-cip', { hasText: 'Fon ihtiyacı' }).locator('.yapiskan-deger').textContent())?.trim()).toBe((await deger.textContent())?.trim());
     await page.evaluate(() => {
       localStorage.removeItem('istoc-plan-senaryo');
       localStorage.removeItem('istoc-plan-senaryo-secenekler');

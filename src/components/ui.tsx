@@ -74,30 +74,6 @@ export function TextLink({ to, children, standalone = false }: { to: string; chi
   );
 }
 
-/**
- * Sayfa başlığı: sıkışık (kullanıcı kararı 2026-10-20: yükseklik yarıya). `aside` geniş ekranda başlığın sağında
- * durur (ör. Giderler yıl seçimi); dar ekranda altına iner.
- */
-export function Hero({ eyebrow, title, lead, aside, children }: { eyebrow: string; title: string; lead?: string; aside?: ReactNode; children?: ReactNode }) {
-  return (
-    <header className="hero" data-aside={aside ? '' : undefined}>
-      <div className="hero-text">
-        <p className="eyebrow">{eyebrow}</p>
-        <Title order={1} className="display">
-          {title}
-        </Title>
-        {lead ? (
-          <Text component="p" className="lead">
-            {lead}
-          </Text>
-        ) : null}
-      </div>
-      {aside ? <div className="hero-aside">{aside}</div> : null}
-      {children}
-    </header>
-  );
-}
-
 /** Bilgi satırı; `compact`: etiket ve değer yan yana, tek akışta (rol sayfası başlığı). */
 export function FactsRow({ items, compact = false }: { items: { label: string; value: ReactNode }[]; compact?: boolean }) {
   return (
@@ -112,6 +88,11 @@ export function FactsRow({ items, compact = false }: { items: { label: string; v
   );
 }
 
+/**
+ * Bölüm başlığı (ux.md §3/§5.4, P6.1): tek ana başlık + açıklama; üst çizgi hairline, numara ikincil renkte ve yalnız
+ * sıralama anlamlıysa (sunum/anlatım sırası: roller, hedefler, gelir planı, BCG, applet…). Araç sayfalarında
+ * (Parametreler grupları, nakit akışı) `index` verilmez.
+ */
 export function Section({
   id,
   index,
@@ -121,7 +102,8 @@ export function Section({
   children,
 }: {
   id: string;
-  index: number | string;
+  /** Sıra numarası; yalnız bölümlerin sırası anlamlıysa verilir. */
+  index?: number | string;
   title: string;
   desc?: ReactNode;
   /** Bölüm başındaki araç satırı (senaryo seçici, görünüm): başlık bloğunun hemen altında. */
@@ -130,10 +112,12 @@ export function Section({
 }) {
   return (
     <section className="section" id={id} aria-labelledby={`${id}-baslik`}>
-      <div className="section-head">
-        <span className="section-index" aria-hidden="true">
-          {typeof index === 'number' ? String(index).padStart(2, '0') : index}
-        </span>
+      <div className="section-head" data-index={index === undefined ? undefined : ''}>
+        {index === undefined ? null : (
+          <span className="section-index" aria-hidden="true">
+            {typeof index === 'number' ? String(index).padStart(2, '0') : index}
+          </span>
+        )}
         <Title order={2} className="section-title" id={`${id}-baslik`}>
           {title}
         </Title>

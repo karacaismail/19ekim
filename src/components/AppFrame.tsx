@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { Drawer, MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconMenu2, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
@@ -6,6 +6,7 @@ import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
 import { APPLET_NAV, COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { FrameContext } from '../lib/frame';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { useGiris } from '../lib/giris';
 import { useMotionMs } from '../lib/motion';
@@ -294,8 +295,8 @@ function CekmeceGezinme({ current }: { current: string }) {
   );
 }
 
-/** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler döviz kurları, portal ile). */
-export const PAGE_TOOLS_ID = 'sayfa-araclari';
+/** Kırıntı satırı ve sayfa başlığı artık `PageHeader`’dadır (ux.md M03); araç yeri kimliği oradan yeniden dışa aktarılır. */
+export { PAGE_TOOLS_ID } from './PageHeader';
 /** Üst bantta tema düğmesinin solundaki sayfa araçları yeri (ör. Giderler canlı durumu; kullanıcı kararı 2026-10-21). */
 export const HEADER_TOOLS_ID = 'bant-araclari';
 
@@ -303,21 +304,18 @@ export function AppFrame({
   pathname,
   children,
   wide = false,
-  titleInCrumbs = false,
 }: {
   pathname: string;
   children: ReactNode;
   wide?: boolean;
-  /** Son kırıntı sayfanın başlığıdır (h1, büyük): ayrı başlık alanı yok (kullanıcı kararı 2026-10-21, Giderler). */
-  titleInCrumbs?: boolean;
 }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
   const stop = index >= 0 ? SEQUENCE[index] : null;
   const prev = index > 0 ? SEQUENCE[index - 1] : null;
   const next = index >= 0 && index < SEQUENCE.length - 1 ? SEQUENCE[index + 1] : null;
-  // Ara kırıntı, tek kırıntılı sayfanın etiketiyse o sayfaya bağlanır (ör. Ağaç 3 → saha ekibi).
-  const crumbPath = (label: string) => SEQUENCE.find((s) => s.crumb.length === 1 && s.crumb[0] === label)?.path;
+  // Sayfa başlığı ve kırıntılar içerikteki `PageHeader`’da (ux.md M03, kullanıcı kararı 2026-10-27); yol bağlamla verilir.
+  const frame = useMemo(() => ({ pathname: current }), [current]);
   // Giriş kapısı (kullanıcı kararı 2026-10-21): giriş yoksa gezinme, sayfa içeriği ve alt bilgi çizilmez; statik
   // HTML'de yalnız giriş formu bulunur.
   const girisli = useGiris();
@@ -385,6 +383,7 @@ export function AppFrame({
   return (
     <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="auto" colorSchemeManager={themeManager}>
       <ModelProvider>
+      <FrameContext.Provider value={frame}>
       <a className="skip-link" href="#icerik">
         İçeriğe geç
       </a>
@@ -432,27 +431,6 @@ export function AppFrame({
               <GirisEkrani />
             ) : (
               <>
-                {stop && stop.crumb.length ? (
-                  <div className="crumbs-row">
-                  <nav aria-label="Ağaç yolu" className="crumbs">
-                    <ol>
-                      <li>
-                        <a href={href('/')}>19 Ekim</a>
-                      </li>
-                      {stop.crumb.map((c, i) => {
-                        const last = i === stop.crumb.length - 1;
-                        const path = last ? undefined : crumbPath(c);
-                        return (
-                          <li key={c} aria-current={last ? 'page' : undefined}>
-                            {last && titleInCrumbs ? <h1 className="crumbs-title">{c}</h1> : path ? <a href={href(path)}>{c}</a> : c}
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </nav>
-                  <div className="page-tools" id={PAGE_TOOLS_ID} />
-                  </div>
-                ) : null}
                 {children}
                 {prev || next ? (
                   <nav aria-label="Sunum sırası" className="pager">
@@ -494,6 +472,7 @@ export function AppFrame({
           </footer>
         ) : null}
       </div>
+      </FrameContext.Provider>
       </ModelProvider>
     </MantineProvider>
   );

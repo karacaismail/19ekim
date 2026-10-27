@@ -2,7 +2,8 @@ import { Component, useEffect, useRef, useState, type ComponentType, type MouseE
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { AppFrame } from '../components/AppFrame';
 import { useParams } from '../components/ModelContext';
-import { DataTable, Hero, Note, Section } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
+import { DataTable, Note, Section } from '../components/ui';
 import { Anahtar, Araclar, BandCizgi, Cubuk, Dayanak, Dugmeler, DurumHapi, Eylem, Girdiler, Metin, Onay, Ozet, Sayi, Secim, type SecimVerisi } from '../components/appletKit';
 import {
   APPLETLER,
@@ -1575,13 +1576,16 @@ function AppletIcerik() {
 
   return (
     <div className="applet-sayfa">
-      <Hero
-        eyebrow="İK modelleri"
+      <PageHeader
         title="Ücret ve performans applet’leri"
-        lead="Rütbe (sabit ücret) ve efor (zam, performans, prim) için 17 örnek model. Meslekten bağımsızdır: katalogdaki meslek, uzmanlık ve seviyeleri değiştirince bütün applet’ler yeniden hesaplanır. Tutarlar baz birimin katıdır; kişiler kurgusaldır. Değişiklikler yalnız bu tarayıcıda saklanır."
+        purpose="Rütbe (sabit ücret) ve efor (zam, performans, prim) için 17 örnek İK modeli; katalogdaki meslek, uzmanlık ve seviyeler değişince bütün applet’ler yeniden hesaplanır."
+        meta={[
+          { label: 'Kapsam', value: 'Meslekten bağımsız; tutarlar baz birimin katı; kişiler kurgusal' },
+          { label: 'Kayıt', value: 'Yalnız bu tarayıcı' },
+        ]}
       >
         <AppletAraclari />
-      </Hero>
+      </PageHeader>
       <Note title="Tasarım ilkesi">
         <p>
           Fatura kesen serbest çalışan ağı için iki motor ayrı tutulur. Rütbe motoru sabit oranı belirler ve performansla düşmez; efor motoru

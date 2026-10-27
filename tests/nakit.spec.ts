@@ -228,6 +228,50 @@ test.describe('nakit akış tablosu', () => {
     await expect(ilk).toHaveAttribute('aria-expanded', 'true');
   });
 
+  /*
+   * ux.md M05 ResultSummary (P6.2, kullanıcı kararı 2026-10-27): nakit açığı tavanı — dönem, birim ve üç senaryo kıyasıyla —
+   * Özet bölümünden önce, 320×480’de ilk ekranda; durum (nakit ne zaman sıfırın altına iner, toparlanır mı) gizlenmez;
+   * seçici değişince güncellenir; değer özet kutusu ve karşılaştırma tablosuyla aynı (tek kaynak).
+   */
+  test('ana sonuç (M05): nakit açığı tavanı özet bölümünden önce; dönem, birim, üç senaryo kıyası; seçiciyle değişir; 320×480 ilk ekranda', async ({ page }) => {
+    await acikUc(page);
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
+    const sonuc = page.locator('.sonuc');
+    await expect(sonuc).toHaveCount(1);
+    expect(await page.evaluate(() => document.querySelector('.sonuc')!.getBoundingClientRect().top < document.querySelector('#ozet')!.getBoundingClientRect().top)).toBe(true);
+    const deger = sonuc.locator('.sonuc-deger');
+    await expect(deger).toContainText('₺');
+    const kutu = await deger.evaluate((el) => el.getBoundingClientRect());
+    expect(kutu.bottom, 'ana sonuç kaydırmadan tam görünür').toBeLessThanOrEqual(480);
+    await expect(sonuc.locator('.sonuc-etiket')).toContainText('Nakit açığı tavanı');
+    await expect(sonuc.locator('.sonuc-donem')).toContainText('Ekim 2026 – Aralık 2027');
+    await expect(sonuc.locator('.sonuc-durum')).toBeVisible();
+    // Ton değerle tutarlı: açık 0 ₺ ise iyi, değilse uyarı (toparlanıyor) ya da risk (dönem içinde toparlanmıyor).
+    const ton = await sonuc.locator('.sonuc-durum').getAttribute('data-ton');
+    expect(ton).toBe((await deger.textContent())?.trim() === '0 ₺' ? 'iyi' : ton === 'risk' ? 'risk' : 'uyari');
+    if (ton !== 'iyi') await expect(sonuc.locator('.sonuc-durum')).toContainText(/en düşük noktasına iner|sıfırın altına iner/);
+    await expect(sonuc.locator('.sonuc-kaynak')).toContainText('Sheets');
+    const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
+    await expect(kiyas).toHaveCount(3);
+    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Medyan/, /İyimser/]);
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Medyan');
+    // Tek kaynak: özet kutusu ve karşılaştırma tablosundaki seçili satır aynı değer.
+    const t = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').trim();
+    const kutuDeger = t(await page.locator('.stat', { hasText: 'Nakit açığı tavanı' }).locator('.stat-value').textContent());
+    expect(t(await deger.textContent())).toBe(kutuDeger);
+    expect(t(await kiyas.nth(1).locator('dd').textContent())).toBe(kutuDeger);
+    // Sonuç bloğundaki seçici senaryoyu değiştirir: işaret ve değer kötümsere döner.
+    await sonuc.getByRole('group', { name: 'Senaryo' }).getByRole('button', { name: 'Kötümser' }).click();
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Kötümser');
+    await expect(deger).toHaveText(t(await kiyas.nth(0).locator('dd').textContent()));
+    await expect(page.locator('.stat', { hasText: 'Nakit açığı tavanı' }).locator('.stat-value')).toHaveText(t(await deger.textContent()));
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-senaryo'));
+  });
+
   test('Sheets okunamazsa tablo plan kalemleriyle kalır ve Giderler sayfasına yönlendirir', async ({ page }) => {
     await page.route('https://script.google.com/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: false, hata: 'yetki', mesaj: 'test' }) }),
@@ -237,6 +281,8 @@ test.describe('nakit akış tablosu', () => {
     await hydrated(page);
     await expect(page.locator('.nakit-kaynak')).toContainText('erişim anahtarı', { timeout: 10_000 });
     await expect(page.locator('.nakit-kaynak').getByRole('link', { name: 'Giderler sayfası' })).toHaveAttribute('href', /\/giderler\/$/);
+    // Ana sonuç eksik Sheets verisini tam plan gibi göstermez (ux.md §9).
+    await expect(page.locator('.sonuc-kaynak')).toContainText('okunamadı');
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     await expect(page.locator('.data-table tbody th', { hasText: 'Bordrolu personel' })).toHaveCount(0);
     await expect(page.locator('.data-table tbody th', { hasText: 'Meta reklamları' })).toHaveCount(1);

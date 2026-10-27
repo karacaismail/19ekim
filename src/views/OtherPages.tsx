@@ -6,7 +6,6 @@ import {
   Chart,
   DataTable,
   formatDate,
-  Hero,
   Note,
   RoleChip,
   Section,
@@ -15,6 +14,7 @@ import {
   Target,
   TextLink,
 } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
 import { boardMapping, type BoardRow } from '../data/archive';
 import type { CrmStage, GovNode, OpenDecision, PayRule, WorkPeriod } from '../data/program';
 import { ROLE_LABELS } from '../data/roles';
@@ -52,7 +52,7 @@ function HiringContent() {
   const byDate = new Map(calendarEvents.map((e) => [e.date, e]));
   return (
     <>
-      <Hero eyebrow="Ortak" title="İstihdam takvimi" lead="Kim, hangi sırayla, hangi tarihte başlıyor." />
+      <PageHeader title="İstihdam takvimi" purpose="Kim, hangi sırayla, hangi tarihte başlıyor." />
 
       <Section id="sira" index={1} title="İşe alım sırası">
         <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
@@ -196,9 +196,13 @@ function GoalsContent() {
 
   return (
     <>
-      <Hero eyebrow="Ortak" title="90 gün hedefleri" lead={`${longDate(dates.start)} – ${longDate(dates.day90)}. Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder; bazıları ilk aydan sonra bırakabilir.`}>
+      <PageHeader
+        title="90 gün hedefleri"
+        purpose={`Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder; bazıları ilk aydan sonra bırakabilir.`}
+        meta={[{ label: 'Dönem', value: `${longDate(dates.start)} – ${longDate(dates.day90)}` }]}
+      >
         <Stats items={targets} />
-      </Hero>
+      </PageHeader>
 
       <Section
         id="kopru"
@@ -315,7 +319,7 @@ function PlanContent() {
   const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action} · Hedef: ${r.target}`, milestone: r.milestone }));
   return (
     <>
-      <Hero eyebrow="Ortak" title="Eylem planı" lead={`istoc.com genel planı: ${formatDate(start)} – ${formatDate(end)}. Her satır tarihli bir eylem ve ölçülebilir hedef.`} />
+      <PageHeader title="Eylem planı" purpose="istoc.com genel planı: her satır tarihli bir eylem ve ölçülebilir hedef." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
 
       <Section id="gantt" index={1} title="Gantt şeması" desc={`Kesikli çizgiler: 60. gün (${shortDate(dates.day60)}) ve 90. gün (${shortDate(dates.day90)}) kontrolleri.`}>
         <Chart
@@ -365,7 +369,7 @@ function AuthorityContent() {
 
   return (
     <>
-      <Hero eyebrow="Ortak" title="Karar yetkisi ve kontrol noktaları" lead="Kim neye karar verir; hangi tarihte hangi eşik ölçülür." />
+      <PageHeader title="Karar yetkisi ve kontrol noktaları" purpose="Kim neye karar verir; hangi tarihte hangi eşik ölçülür." />
 
       <Section id="yetki" index={1} title="Karar yetkisi">
         <Chart
@@ -429,7 +433,7 @@ function PendingContent() {
   const monthlyOvertime = Math.round((p1.overtimePerWeek * 52) / 12);
   return (
     <>
-      <Hero eyebrow="Ortak" title="Karar bekleyenler" lead={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim 2026’da kesinleşti.`} />
+      <PageHeader title="Karar bekleyenler" purpose={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim 2026’da kesinleşti.`} />
 
       <Section id="bekleyen" index={1} title="Bekleyen kararlar">
         <Chart
@@ -599,11 +603,7 @@ function GrowthContent() {
 
   return (
     <>
-      <Hero
-        eyebrow="Ağaç 3 · Saha satış"
-        title="Çok katmanlı pazarlama ağı (MLM)"
-        lead="Doğrudan satış modeli: bağımsız satış temsilcileri Meta reklamlarıyla bulunur; kazanç yalnız gerçek satıştan doğar."
-      />
+      <PageHeader title="Çok katmanlı pazarlama ağı (MLM)" purpose="Doğrudan satış modeli: bağımsız satış temsilcileri Meta reklamlarıyla bulunur; kazanç yalnız gerçek satıştan doğar." />
 
       <Section id="kademe" index={1} title="Kademeler" desc={`${longDate(dates.day90)} hedefi.`}>
         <Chart
@@ -662,7 +662,7 @@ function GrowthContent() {
 export function ArchivePage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
-      <Hero eyebrow="Arşiv" title="Tahtadan karara" lead="19 Ekim tahta notlarının plandaki karşılığı. Toplantı için gerekli değil; kayıt amaçlı." />
+      <PageHeader title="Tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığı; toplantı için gerekli değil, kayıt amaçlı." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
       <DataTable<BoardRow>
         id="tahta"
         title="Tahta notu → karar → sayfa"
@@ -680,7 +680,7 @@ export function ArchivePage({ pathname }: { pathname: string }) {
 export function NotFoundPage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
-      <Hero eyebrow="404" title="Sayfa bulunamadı" lead="Aradığınız sayfa taşınmış veya kaldırılmış olabilir." />
+      <PageHeader title="Sayfa bulunamadı" purpose="Aradığınız sayfa taşınmış veya kaldırılmış olabilir." />
       <p>
         <TextLink to="/" standalone>
           Organizasyon şemasına dön

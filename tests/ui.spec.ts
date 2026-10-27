@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { PARAM_GROUPS } from '../src/data/params';
 
 const PAGES = [
   '',
@@ -746,7 +747,13 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(tetik).toBeFocused();
   });
 
-  /** Önceki başlık yükseklikleri (canlı site, 2026-10-20, 1280 px): kullanıcı kararı rol ≥ %75, diğerleri ≥ %50 az. */
+  /**
+   * Önceki başlık yükseklikleri (canlı site, 2026-10-20, 1280 px; yalnız hero kutusu, üstündeki kırıntı satırı hariç):
+   * kullanıcı kararı rol ≥ %75, diğerleri ≥ %50 az. Tek PageHeader (kullanıcı kararı 2026-10-27, ux.md M03, P6.1) başlığı
+   * kırıntı satırına taşıdı; ölçülen kutu artık kırıntı satırı + amaç/dönem satırıdır. Aynı ölçekte kıyas için eski
+   * değere o günkü kırıntı satırı eklenir (`.crumbs a` 44 px dokunma yüksekliği, commit 7b408ae).
+   */
+  const KIRINTI_SATIRI = 44;
   const ONCEKI: Record<string, number> = {
     '': 175, 'arsiv/': 203, 'bcg/': 259, 'buyume-modeli/': 293, 'eylem-plani/': 231, 'giderler/': 233, 'hedefler/': 366,
     'istihdam/': 203, 'karar-bekleyenler/': 203, 'karar-yetkisi/': 265, 'notlar/': 203, 'parametreler/': 299,
@@ -755,15 +762,19 @@ test.describe('başlık ve İstihdam menüsü', () => {
   };
   for (const [path, once] of Object.entries(ONCEKI)) {
     const rol = path.startsWith('roller/');
-    const sinir = Math.floor(once * (rol ? 0.25 : 0.5));
-    test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
+    const sinir = Math.floor((once + KIRINTI_SATIRI) * (rol ? 0.25 : 0.5));
+    test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once} + kırıntı ${KIRINTI_SATIRI}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
       await icerik(page);
-      // Giderler’de ayrı başlık alanı yok: başlık kırıntı satırında (kullanıcı kararı 2026-10-21).
-      const kutu = (await page.locator('.hero').count()) ? '.hero' : '.crumbs-row';
-      const h = await page.locator(kutu).first().evaluate((el) => el.getBoundingClientRect().height);
-      expect(h).toBeLessThanOrEqual(sinir);
+      // Tek PageHeader (kullanıcı kararı 2026-10-27, ux.md M03): kırıntı satırı (h1) ve altındaki amaç/dönem satırı
+      // birlikte ölçülür — eski hero ölçüsünden daha geniş kapsam, aynı sınır. Giderler’de yalnız kırıntı satırı.
+      const olcu = await page.locator('[data-page-header]').evaluateAll((els) => {
+        const kutular = els.map((el) => el.getBoundingClientRect());
+        return { n: kutular.length, h: Math.max(...kutular.map((b) => b.bottom)) - Math.min(...kutular.map((b) => b.top)) };
+      });
+      expect(olcu.n).toBeGreaterThanOrEqual(1);
+      expect(olcu.h).toBeLessThanOrEqual(sinir);
     });
   }
 
@@ -1062,6 +1073,117 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const son = await page.locator('.crumbs li').last().boundingBox();
     expect(son!.y).toBeLessThan(ilk!.y + ilk!.height);
     await expect(page.locator('.hero')).toHaveCount(0);
+  });
+});
+
+/*
+ * ux.md P6.1 (kullanıcı kararı 2026-10-27, §3 ve §5.4; M03 PageHeader): sayfa başlığı tek kalıp. Her sayfada tek h1,
+ * kırıntı satırının son öğesidir (Giderler kararı 2026-10-21 sayfa geneline yayıldı); altında bir cümlelik amaç ve
+ * dönem/kaynak satırı. Eski hero (turuncu üst etiket + büyük başlık + uzun açıklama) ve kırıntı-başlık ikiliği yok.
+ * Bölüm başlığı: tek ana başlık + açıklama; kalın üst çizgi ve turuncu numara yok; numara yalnız sıralama anlamlıysa.
+ */
+test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 PageHeader; P6.1)', () => {
+  const ORNEK = ['', 'gelir-plani/', 'nakit-akisi/', 'giderler/', 'parametreler/', 'roller/saha-uzmani/', 'buyume-modeli/', 'bcg/', 'notlar/', 'partnership/', 'applet/'];
+  for (const path of ORNEK) {
+    test(`/${path}: tek h1 kırıntı satırında; hero ve üst etiket yok; amaç bir cümle; sıra kırıntı → amaç → içerik`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 480 });
+      await page.goto(path);
+      await icerik(page);
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('.crumbs-row h1.crumbs-title')).toHaveCount(1);
+      await expect(page.locator('.hero, .eyebrow, .display, .lead')).toHaveCount(0);
+      // Kırıntılı sayfada h1 son kırıntıdır (aria-current="page"); kırıntısız sayfada (ana sayfa, BCG, applet) tek başına.
+      const kirintili = !['', 'bcg/', 'applet/'].includes(path);
+      await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveCount(kirintili ? 1 : 0);
+      await expect(page.locator('.crumbs')).toHaveCount(kirintili ? 1 : 0);
+      // Amaç: tek paragraf, en çok bir cümle (rol görevi veridir — src/data değişmez — muaf).
+      const amac = page.locator('.page-purpose');
+      await expect(page.locator('[data-page-header]')).toHaveCount((await amac.count()) || (await page.locator('.page-intro').count()) ? 2 : 1);
+      expect(await amac.count()).toBeLessThanOrEqual(1);
+      if ((await amac.count()) && !path.startsWith('roller/')) {
+        const text = ((await amac.textContent()) ?? '').trim();
+        expect(text.length, 'amaç boş değil').toBeGreaterThan(10);
+        // Cümle sonu: nokta/ünlem/soru işaretinden sonra büyük harfle yeni cümle ya da metin sonu (“14. günde” sıra sayısı değil).
+        expect((text.match(/[.!?](?=\s+[A-ZÇĞİÖŞÜ“]|\s*$)/g) ?? []).length, `bir cümle: "${text}"`).toBeLessThanOrEqual(1);
+      }
+      // Sıra: kırıntı satırı → amaç/dönem satırı → ilk içerik; başlık kutusu 320 px’te taşmaz.
+      const sira = await page.evaluate(() => {
+        const kutular = [...document.querySelectorAll<HTMLElement>('[data-page-header]')].map((el) => el.getBoundingClientRect());
+        const kirinti = document.querySelector('.crumbs-row')!.getBoundingClientRect();
+        const intro = document.querySelector('.page-intro')?.getBoundingClientRect() ?? null;
+        const son = [...document.querySelectorAll<HTMLElement>('[data-page-header]')].pop()!;
+        let sonraki = son.nextElementSibling;
+        while (sonraki && !(sonraki.getClientRects().length && sonraki.getBoundingClientRect().height > 0)) sonraki = sonraki.nextElementSibling;
+        return {
+          kutu: kutular.length,
+          introAltta: intro ? intro.top >= kirinti.bottom - 1 : true,
+          icerikAltta: sonraki ? sonraki.getBoundingClientRect().top >= (intro ?? kirinti).bottom - 1 : true,
+          tasma: Math.max(...kutular.map((b) => b.right)) <= window.innerWidth,
+        };
+      });
+      expect(sira.kutu).toBeGreaterThanOrEqual(1);
+      expect(sira.introAltta).toBe(true);
+      expect(sira.icerikAltta).toBe(true);
+      expect(sira.tasma).toBe(true);
+    });
+  }
+
+  test('dönem/kaynak satırı: gelir planı (dönem, ilk satış, paket) ve nakit akışı (dönem, kaynak) etiketli; h1 kırıntıdan büyük', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Gelir planı');
+    const meta = page.locator('.page-meta');
+    // Paket fiyatı başlıkta değil (P6.2: ana sonuç 320×480 ilk ekranda kalsın; fiyat “Fiyat” bölümünde).
+    await expect(meta.locator('dt')).toHaveText(['Dönem', 'İlk satış']);
+    await expect(meta).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(meta).toContainText('6 Kasım 2026');
+    const [baslik, kirinti] = [
+      await page.locator('h1').evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+      await page.locator('.crumbs a').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+    ];
+    expect(baslik).toBeGreaterThan(kirinti * 1.4);
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Nakit akış tablosu');
+    await expect(page.locator('.page-meta dt')).toHaveText(['Dönem', 'Kaynak']);
+    await expect(page.locator('.page-meta')).toContainText('Ekim 2026 – Aralık 2027');
+    // Rol sayfası: simge, ad ve durum aynı kırıntı öğesinde; görev amaç satırında; bilgiler dönem satırında.
+    await page.goto('roller/saha-uzmani/');
+    await icerik(page);
+    const son = page.locator('.crumbs li[aria-current="page"]');
+    await expect(son.locator('.avatar')).toHaveCount(1);
+    await expect(son.locator('.chip')).toHaveCount(1);
+    await expect(page.locator('.page-purpose')).toContainText('İstoç’ta');
+    await expect(page.locator('.page-meta dt')).toHaveText(['Kişi', 'Başlangıç', 'Bağlı', 'Ücret', 'Aranan']);
+  });
+
+  test('bölüm başlığı: hairline üst çizgi, numara ikincil renkte ve yalnız sıralı sayfalarda (parametreler ve nakit akışında yok)', async ({ page }) => {
+    await page.goto('roller/dijital-pazarlama/');
+    await icerik(page);
+    const heads = page.locator('.section-head');
+    expect(await heads.count()).toBeGreaterThanOrEqual(5);
+    const st = await heads.first().evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const idx = el.querySelector<HTMLElement>('.section-index');
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--text-secondary)';
+      el.appendChild(probe);
+      const ikincil = getComputedStyle(probe).color;
+      probe.remove();
+      return { cizgi: parseFloat(cs.borderTopWidth), numara: idx ? getComputedStyle(idx).color : null, ikincil, boyut: idx ? parseFloat(getComputedStyle(idx).fontSize) : 0 };
+    });
+    expect(st.cizgi, 'kalın üst çizgi yok (en çok hairline)').toBeLessThanOrEqual(1);
+    expect(st.numara, 'numara turuncu değil, ikincil metin rengi').toBe(st.ikincil);
+    expect(st.boyut).toBeGreaterThanOrEqual(14);
+    const numaralar = await page.locator('.section-index').allTextContents();
+    expect(numaralar).toEqual(numaralar.map((_, i) => String(i + 1).padStart(2, '0')));
+    for (const path of ['parametreler/', 'nakit-akisi/']) {
+      await page.goto(path);
+      await icerik(page);
+      expect(await page.locator('.section-head').count()).toBeGreaterThan(0);
+      await expect(page.locator('.section-index')).toHaveCount(0);
+      await expect(page.locator('.section-title').first()).toBeVisible();
+    }
   });
 });
 
@@ -1503,6 +1625,8 @@ test.describe('parametreler', () => {
     await page.goto('parametreler/');
     await icerik(page);
     await hydrated(page);
+    // P6.3: gruplar kapalı gelir; alan grubunu açarak erişilir.
+    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
     await expect(salary).toHaveValue(/70\.000/);
@@ -1554,6 +1678,9 @@ test.describe('parametreler', () => {
     await page.goto('parametreler/');
     await icerik(page);
     await hydrated(page);
+    await page.locator('.pgrup h2 button', { hasText: 'Takvim' }).click();
+    // Panel açılış geçişi bitmeden odak verilemez: alan görünür olunca.
+    await expect(page.getByLabel('Program başlangıcı')).toBeVisible();
     await page.getByLabel('Program başlangıcı').focus();
     await page.keyboard.press(tab);
     const state = await page.evaluate(() => {
@@ -1575,6 +1702,166 @@ test.describe('parametreler', () => {
     expect(new Set(state.border).size, 'odakta kenarlık rengi değişmez, tek renk').toBe(1);
     expect(state.underline).toContain('underline');
     expect(state.thickness).toBeGreaterThanOrEqual(3);
+  });
+});
+
+/*
+ * ux.md P6.3 (kullanıcı kararı 2026-10-27, §3 “parametre grupları çok alan”, §9 /parametreler/, M13 ParameterGroup, M23
+ * ReviewAndReset, UX-14/15): göreve göre aranabilir ve daraltılabilir gruplar; değişiklik özeti (alan, grup, varsayılan →
+ * yeni, alana git, tek alanı geri al); “bu tarayıcıda kaydedildi / kaydedilemedi” açık yazım; “varsayılana dön” kapsamı
+ * görünür ve geri alınabilir. 320 px’te belge yüksekliği ve görünür girdi sayısı ölçülür (önce 12.683 px, 61 girdi).
+ */
+test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve sıfırlama kapsamı (ux.md M13/M23, UX-14/15; P6.3)', () => {
+  const alanSayisi = PARAM_GROUPS.reduce((t, g) => t + g.fields.length, 0);
+  const gorunurGirdi = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.param-field .param-input')].filter((el) => el.getClientRects().length).length);
+
+  test('320×480: gruplar kapalı gelir, belge kısa; grup açılır; arama alanları ve grupları süzer, sonuç sayısı duyurulur', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    // Gruplar: her PARAM_GROUP bir açılır grup (h2 içinde düğme, aria-expanded, panel region); hepsi kapalı.
+    const gruplar = page.locator('.pgrup');
+    await expect(gruplar).toHaveCount(PARAM_GROUPS.length);
+    for (const g of PARAM_GROUPS) await expect(page.locator('.pgrup').filter({ has: page.locator('h2 button', { hasText: g.title }) })).toHaveCount(1);
+    const dugmeler = page.locator('.pgrup h2 button');
+    await expect(dugmeler).toHaveCount(PARAM_GROUPS.length);
+    for (const b of await dugmeler.all()) await expect(b).toHaveAttribute('aria-expanded', 'false');
+    expect(await gorunurGirdi(page), 'kapalı gruplarda görünür girdi yok').toBe(0);
+    const yukseklik = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(yukseklik, 'belge yüksekliği 320 px (önce 12.683)').toBeLessThan(4_000);
+    // Grup başlığında alan sayısı; dokunma hedefi ≥ 44 px; açılınca yalnız o grubun alanları görünür, panel region.
+    const ucret = PARAM_GROUPS.find((g) => g.id === 'ucret')!;
+    const ucretDugme = page.locator('.pgrup h2 button', { hasText: ucret.title });
+    await expect(ucretDugme).toContainText(`${ucret.fields.length} alan`);
+    expect((await ucretDugme.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await ucretDugme.click();
+    await expect(ucretDugme).toHaveAttribute('aria-expanded', 'true');
+    const panelId = await ucretDugme.getAttribute('aria-controls');
+    await expect(page.locator(`#${panelId}`)).toHaveAttribute('role', 'region');
+    await expect(page.locator(`#${panelId}`)).toContainText(ucret.desc);
+    // Panel açılış geçişi bitince alanlar görünür olur; yük altında tek seferlik sayım erken olabilir (birleştirme QA’sı).
+    await expect.poll(() => gorunurGirdi(page), { message: 'açık gruptaki görünür girdi sayısı' }).toBe(ucret.fields.length);
+    await expect(page.getByLabel('Saha satış maaşı')).toBeVisible();
+    // Arama: etiket, yardım ya da grup adıyla eşleşen alanlar; eşleşmeyen grup ve alanlar gizli; sayı aria-live ile.
+    const ara = page.getByRole('searchbox', { name: 'Parametre ara' });
+    await ara.fill('maaş');
+    const eslesen = PARAM_GROUPS.map((g) => ({ g, f: g.fields.filter((d) => `${d.label} ${d.help ?? ''} ${d.unit ?? ''} ${g.title}`.toLocaleLowerCase('tr-TR').includes('maaş')) })).filter((x) => x.f.length);
+    const beklenen = eslesen.reduce((t, x) => t + x.f.length, 0);
+    expect(beklenen).toBeGreaterThan(3);
+    await expect(page.locator('.param-ara-sonuc')).toContainText(`${beklenen} alan`);
+    await expect(page.locator('.param-ara-sonuc')).toHaveAttribute('aria-live', 'polite');
+    await expect(page.locator('.pgrup:visible')).toHaveCount(eslesen.length);
+    expect(await gorunurGirdi(page)).toBe(beklenen);
+    for (const b of await page.locator('.pgrup:visible h2 button').all()) await expect(b).toHaveAttribute('aria-expanded', 'true');
+    await ara.fill('xyzqq');
+    await expect(page.locator('.param-ara-sonuc')).toContainText('0 alan');
+    await expect(page.locator('.pgrup:visible')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Aramayı temizle' }).click();
+    await expect(ara).toHaveValue('');
+    await expect(page.locator('.pgrup')).toHaveCount(PARAM_GROUPS.length);
+    expect(alanSayisi).toBeGreaterThan(50);
+  });
+
+  test('değişiklik özeti: alan, grup, varsayılan → yeni; alana git; tek alanı geri al; “bu tarayıcıda kaydedildi” saat ile', async ({ page }) => {
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
+    await expect(page.locator('.param-degisiklikler')).toHaveCount(0);
+    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    const salary = page.getByLabel('Saha satış maaşı');
+    await salary.fill('70000');
+    await salary.blur();
+    const ozet = page.locator('.param-degisiklikler');
+    await expect(ozet).toBeVisible();
+    const satir = ozet.locator('li');
+    await expect(satir).toHaveCount(1);
+    await expect(satir.first()).toContainText('Saha satış maaşı');
+    await expect(satir.first()).toContainText('Ücret');
+    await expect(satir.first()).toContainText('50.000 ₺');
+    await expect(satir.first()).toContainText('70.000 ₺');
+    await expect(satir.first()).toContainText('→');
+    // Kayıt yazımı: nereye, ne zaman; “Kaydedildi” yalnız gerçekten yapılan tarayıcı kaydı için.
+    const durum = page.locator('.param-status');
+    await expect(durum).toContainText('1 değer varsayılandan farklı');
+    await expect(durum).toContainText(/bu tarayıcıda kaydedildi \d{2}:\d{2}:\d{2}/);
+    await expect(durum).toContainText('yerel depolama');
+    // Grup kapatılıp özetten “alana git”: grup açılır, alan odaklanır.
+    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await expect(salary).toBeHidden();
+    await satir.first().getByRole('button', { name: /Alana git/ }).click();
+    await expect(salary).toBeVisible();
+    await expect(salary).toBeFocused();
+    // Tek alanı geri al: yalnız o alan varsayılana döner.
+    await page.locator('.pgrup h2 button', { hasText: 'Prim ve kota' }).click();
+    const prim = page.getByLabel('Satış başına prim');
+    await prim.fill('3000');
+    await prim.blur();
+    await expect(satir).toHaveCount(2);
+    await expect(page.locator('.pgrup h2 button', { hasText: 'Prim ve kota' })).toContainText('1 değişiklik');
+    await satir.filter({ hasText: 'Saha satış maaşı' }).getByRole('button', { name: /Bu alanı geri al/ }).click();
+    await expect(satir).toHaveCount(1);
+    await expect(satir.first()).toContainText('Satış başına prim');
+    await expect(salary).toHaveValue(/50\.000/);
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
+  });
+
+  test('varsayılana dön (UX-14): kapsam onaydan önce yazılı (kaç alan, yalnız bu tarayıcı, neler değişmez); geri al; iki adım', async ({ page }) => {
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    const salary = page.getByLabel('Saha satış maaşı');
+    await salary.fill('70000');
+    await salary.blur();
+    const reset = page.locator('.param-reset');
+    await expect(page.locator('.param-reset-kapsam')).toHaveCount(0);
+    await reset.click();
+    await expect(reset).toHaveText('Emin misiniz? Tekrar basın');
+    const kapsam = page.locator('.param-reset-kapsam');
+    await expect(kapsam).toBeVisible();
+    await expect(kapsam).toContainText('1 alan');
+    await expect(kapsam).toContainText('yalnız bu tarayıcı');
+    await expect(kapsam).toContainText(/senaryo seçenekleri|notlar|tema/);
+    await reset.click();
+    await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
+    await expect(salary).toHaveValue(/50\.000/);
+    // Geri al: önceki değerler geri gelir (bu tarayıcıda yeniden kaydedilir).
+    const geriAl = page.getByRole('button', { name: 'Geri al' });
+    await expect(geriAl).toBeVisible();
+    await geriAl.click();
+    await expect(salary).toHaveValue(/70\.000/);
+    await expect(page.locator('.param-status')).toContainText('1 değer varsayılandan farklı');
+    await reset.click();
+    await reset.click();
+    await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
+  });
+
+  test('tarayıcı depolaması kapalı (UX-15): “kaydedilemedi”, oturum içi geçerlilik; “kaydedildi” yalanı yok', async ({ page }) => {
+    await page.addInitScript(() => {
+      const asil = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k: string, v: string) {
+        if (k === 'istoc-plan-parametreler') throw new Error('depolama kapalı');
+        return asil.call(this, k, v);
+      };
+    });
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    const salary = page.getByLabel('Saha satış maaşı');
+    await salary.fill('70000');
+    await salary.blur();
+    const durum = page.locator('.param-status');
+    await expect(durum).toContainText('kaydedilemedi');
+    await expect(durum).toContainText(/yalnız bu sekme|bu sayfa açıkken/);
+    await expect(durum).not.toContainText(/(^|[^e])kaydedildi/);
+    await expect(durum).toContainText('1 değer varsayılandan farklı');
+    // Değişiklik yine uygulanır (oturum içi geçerli): özet ve not görünür.
+    await expect(page.locator('.param-degisiklikler li')).toHaveCount(1);
+    await expect(page.locator('.params-notice')).toBeVisible();
   });
 });
 

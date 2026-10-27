@@ -21,6 +21,20 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - `/parametreler/` değerleri düzenler; değişiklik anında tüm sayfaların modeline yansır ve `localStorage`
   (`istoc-plan-parametreler`, yalnız varsayılandan farklı anahtarlar) içinde saklanır. Yayındaki site herkes için
   varsayılanları gösterir; değişiklik varsa her sayfada not görünür. Varsayılanı kalıcı değiştirmek için `params.ts`.
+  **Sayfa düzeni (kullanıcı kararı 2026-10-27, ux.md §3/§9, M13 ParameterGroup, M23 ReviewAndReset, UX-14/15; paket
+  P6.3):** başlık (amaç; Kayıt: yalnız bu tarayıcı · Yayın: varsayılanlar) → kayıt durumu (`.param-status`:
+  “N değer varsayılandan farklı; bu tarayıcıda kaydedildi ss:dd:ss (yerel depolama)”, önceki oturumdan geliyorsa
+  “kayıtlı”, depolama kapalıysa “Bu tarayıcıda kaydedilemedi (depolama kapalı): değişiklikler yalnız bu sekme açıkken
+  geçerli” — “kaydedildi” yalnız gerçekten yapılan kayıt için) ve **varsayılana dön** (iki adım; onay basılınca kapsam
+  yazılır `.param-reset-kapsam`: kaç alan, yalnız bu tarayıcı, senaryo seçenekleri / notlar / tema değişmez; uygulanınca
+  **Geri al** düğmesi önceki değerleri geri getirir — `ModelContext.restore` —, bir sonraki değişikliğe kadar) →
+  **değişiklik özeti** (`.param-degisiklikler`: alan · grup, varsayılan → yeni, “Alana git” grubu açıp alanı odaklar,
+  “Bu alanı geri al”) → **arama** (`role="search"`, “Parametre ara”: etiket, yardım, birim ve grup adında; eşleşen
+  gruplar açılır, eşleşmeyenler gizlenir; sonuç sayısı `aria-live`) → **görev grupları** (`PARAM_GROUPS` → Mantine
+  `Accordion`, h2 içinde düğme, `aria-expanded`, panel `region`; başlıkta “n alan · k değişiklik”; hepsi kapalı gelir,
+  açılışta değiştirilmiş alanı olan gruplar açık; panelde grup açıklaması ve `fieldset`) → Türetilen değerler. Grup
+  numarası yok. 320×480’de belge 12.683 px’ten ≈ 2.000 px’e indi, kapalı grupta görünür girdi yok
+  (`ui.spec.ts → parametreler: görev grupları…`).
 - İstemci JavaScript’i: React adaları, `BaseLayout.astro` içindeki satır içi betikler (ilk renk şeması, giriş işareti,
   merkezi klavye odak modu) ve grafikler; gezinme şeridinde etkin bağlantıyı görünür alana getirme `AppFrame`’de. `Chart` bileşeni ECharts’ı (`src/scripts/charts.ts` → `echarts-setup.ts`)
   yalnız grafik görünür olunca dinamik yükler; spec değişince aynı grafiği yeniden çizer. İstihdam, arşiv ve
@@ -186,7 +200,13 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     sponsor/ekip lideri payı modellenmez (varsayımlar bölümünde yazılı). Testler: `tests/nakit.spec.ts` (sahte Sheets
     yanıtı, anahtar, senaryo seçici ve karşılaştırma, üst üste görünüm, menü, 320/390/1280, grafik) ve
     `tests/data.spec.ts` (girişler senaryo serileriyle aynı, Sheets kategori toplamları = aylık toplamlar, nakit zinciri,
-    senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi).
+    senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi). **Ana sonuç** (P6.2, M05; `ResultSummary`):
+    sayfa başlığının altında, Özet bölümünden önce — “Sonuç · [senaryo]”, dönem, **nakit açığı tavanı** (₺) ve
+    açıklaması, durum (iyi: hiç negatife düşmüyor; uyarı: en düşük ay + toparlanma ayı + gereken ek nakit; risk: dönem
+    sonuna kadar sıfırın üstüne çıkmıyor), ardından senaryo seçici (eylem), üç senaryoda aynı ölçü (seçili işaretli),
+    ikincil göstergeler (en düşük nakit, toparlanma, dönem sonu nakit, 15 ay net) ve kaynak satırı (Sheets okunamadıysa
+    “yalnız plan kalemleri … tablo eksiktir”: eksik veri tam plan gibi görünmez). Değer özet kutusu ve karşılaştırma
+    tablosuyla aynıdır (`nakit.spec.ts → ana sonuç`); 320×480’de kaydırmadan görünür.
   - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
     sırasında da). **UX-first yeniden kurulum (kullanıcı kararı 2026-10-27: “seçenekleri en başta seçeyim, kalan tüm veri
     tek seferde değişsin; hazır seçenek kümeleri; seçili senaryonun özeti kaydırırken üstte sabit; enterprise olgunluk”):**
@@ -198,10 +218,19 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     gider, satış primi; bir seçenek değişince senaryo “Özel: temel + n değişiklik” olur; “Seçenekleri sıfırla”;
     “Bağlantıyı kopyala”). **Tek durum** `useScenarioOptions` (temel senaryo `istoc-plan-senaryo` nakit akışı ve istihdam
     takvimiyle ortak; seçenekler `istoc-plan-senaryo-secenekler`; adres çubuğu `?senaryo=…&kapasite=…&eksaha=…`
-    paylaşılabilir bağlantı, açılışta adres > saklanan > varsayılan; `history.replaceState`). Kurucunun altında
+    paylaşılabilir bağlantı, açılışta adres > saklanan > varsayılan; `history.replaceState`). **Ana sonuç** (kullanıcı kararı 2026-10-27, ux.md §5.4/M05, paket P6.2;
+    `ResultSummary`, `src/components/ResultSummary.tsx`, `.sonuc`): sayfa başlığının hemen altında, kurucudan **önce**
+    (sıra: amaç → bağlam/senaryo + sonuç → eylem → veri; seçenek değişince şerit ve blok anında değişir) — başında
     **yapışkan özet** (`YapiskanOzet`, `.yapiskan`: `position: sticky`, geniş ekranda `--bant-h` altında; `role="status"`
     `aria-live`; senaryo adı rol tonunda + 100 aktif, ciro hedefi, ufuk sonu gelir, başabaş, geri ödeme, fon ihtiyacı
-    çipleri; dar ekranda yatay kayar). Bütün bölümler, tablolar ve grafikler bu tek durumdan `computeBreakeven`
+    çipleri; dar ekranda yatay kayar; `.wrap` içinde doğrudan durur, bloğun içine alınmaz), altında blok: “Sonuç ·
+    [senaryo hapı]”, dönem (19 Ekim 2026 – Aralık 2027 · 15 ay), öncelikli değer **en çok fon ihtiyacı** (₺, sol kenar
+    senaryo tonu) ve açıklaması (en düşük ay, ufuk gelir/gider/net, gider kaynağı), **durum** (`.sonuc-durum[data-ton]`:
+    iyi = aylık başabaş tarihi + geri ödeme; uyarı = eğilimle ≈ tarih; risk = “Kapanmıyor… sürdürülebilir değil”) —
+    kritik risk hiçbir zaman gizlenmez —, kıyas (hazır senaryolarda aynı ölçü, seçili işaretli; özel senaryo dördüncü
+    satır), ikincil göstergeler (şeritteki çiplerle aynı dizi: tek kaynak). 320×480’de değer kaydırmadan tam görünür
+    (`gelir.spec.ts → ana sonuç`); bu yüzden başlıkta Paket satırı yok (fiyat “Fiyat” bölümünde). Kurucu sonucun
+    altındadır (kullanıcı kararı 2026-10-27 “seçenekler en başta” korunur: ilk bölümden önce). Bütün bölümler, tablolar ve grafikler bu tek durumdan `computeBreakeven`
     (`inputsOf`) ile hesaplanır; bölüm/tablo/grafik çubuklarında seçici değil senaryo etiketi (`.araclar-etiket`) ve
     görünüm anahtarları (`ModSecimi`, Eksen) vardır. **Takvim** (kullanıcı kararı 2026-10-27): tüm senaryolar
     `simStartDate` (19 Ekim 2026) ile başlar, `firstSaleDate` (6 Kasım 2026) öncesi satışa bağlı gelir 0 ₺ (`saleFactor`:
@@ -347,17 +376,28 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   Giderler) ve Notlar = 20 bağlantı; etkin sayfa `aria-current`, bölümü `data-section`. Kabuk `useMediaQuery('(min-width:
   48em)')` ile seçilir; şerit ve çekmece aynı anda mount edilmez. Testler `tests/ui.spec.ts` (320–390 px çekmece,
   768 px şerit, dokunmatik 48 px, 667×375 alçak ekran), `tests/giderler.spec.ts` (canlı durum Menü düğmesinin altında). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
-  açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
-  `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-crumb-title`; Giderler: 19 Ekim › Finans › OpEx ›
-  Operasyonel Giderler, ayrı başlık alanı yok). Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`:
-  1rem, Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
-  (dar ekranda açıklama başlığın altında). Gezinme tek satır: “İstihdam” (organizasyon,
+  açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. **Sayfa başlığı tek kalıp (kullanıcı kararı 2026-10-27, ux.md §3/§5.4, M03; paket P6.1):**
+  `PageHeader` (`src/components/PageHeader.tsx`) kırıntı satırını ve başlığı birlikte çizer — kırıntı “19 Ekim” ile
+  başlar, son kırıntı sayfanın **tek h1**’idir (`.crumbs-title`, `--text-crumb-title`; Giderler için verilen 2026-10-21
+  kararı — 19 Ekim › Finans › OpEx › Operasyonel Giderler, ayrı başlık alanı yok — sayfa geneline yayıldı; eski hero,
+  turuncu üst etiket ve `AppFrame titleInCrumbs` kalktı). Altında **bir cümlelik amaç** (`purpose`, `.page-purpose`) ve
+  **dönem/kaynak satırı** (`meta`, `.page-meta`: Dönem, İlk satış, Paket, Kaynak, Kayıt…); ≥ 48em’de sığarsa amaç ve dönem
+  satırı yan yana. Rol sayfasında simge + ad + durum hapı aynı kırıntı öğesinde, görev (`role.mission`, veri) amaç
+  satırında, kişi/başlangıç/bağlı/ücret/aranan dönem satırında. SEQUENCE dışı sayfalarda (BCG, applet, e-posta, arşiv,
+  404) ve ana sayfada kırıntı yolu yok, h1 satırda tek başına. Giderler’de amaç satırı yok (ilk ekran kararı 2026-10-21).
+  Kırıntı satırı `.wrap` içinde doğrudan durur (yapışkan kalması için ayrı kapsayıcı yok); iki kutu `data-page-header`
+  taşır ve testler ikisini birlikte ölçer. Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`: 1rem,
+  Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). **Bölüm başlığı** (ux.md §3, P6.1):
+  tek ana başlık + açıklama; üst çizgi hairline (`--rule`; kalın mürekkep çizgisi yok), numara ikincil renkte
+  (`--text-secondary`) ve yalnız sırası anlamlı bölümlerde (`Section index` isteğe bağlı; Parametreler grupları ve nakit
+  akışı bölümleri numarasız); ≥ 64em’de tek satır: [numara ·] başlık · açıklama (dar ekranda açıklama başlığın altında).
+  Gezinme tek satır: “İstihdam” (organizasyon,
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
   bekleyenler, parametreler; `MARKETING_NAV`) ve Giderler (OPEX, nakit akış tablosu; `FINANCE_NAV`, kullanıcı kararı 2026-10-27) açılır menüleri, Notlar. Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
-  ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık (`--text-title`, geniş
-  ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
-  (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
+  ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık: her sayfa için önceki
+  yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az (`tests/ui.spec.ts → ONCEKI`, 1280 px; 2026-10-27’den beri kırıntı
+  satırı + amaç/dönem satırı birlikte ölçülür ve eski hero değerine o günkü 44 px kırıntı satırı eklenir). Kırıntı
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`; Giderler döviz kurları), üst bantta tema düğmesinin solunda
   bant araçları yeri (`HEADER_TOOLS_ID`; Giderler canlı durumu). Bant araçları telefonda (< 48em) gezinmenin altında
   kendi satırında (marka ile tema düğmesi ilk satırda kalır), tablette ilk satırda; ≥ 64em’de üç sütunlu ızgaranın sağ
@@ -436,7 +476,9 @@ bunu denetler.
 | P3 Gezinme: < 48em’de yatay kayan şerit yerine tam gezinme çekmecesi (Drawer) | §3, M01/M02 | **Tamam** (2026-10-27) | `ui.spec.ts` çekmece testleri (320–390, dokunmatik, 667×375); `giderler.spec.ts` 320 px |
 | P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | **Tamam** (2026-10-27) | `giderler.spec.ts → kalemler kayıt listesi` (320/390, panel, 1280 ↔ 320 eşdeğerlik, kapsam, özet kayıtları), 375 px; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz |
 | P5 Grafiklerin dar ekran eşdeğeri (Gantt/son tarih → ajanda, şema → dikey hiyerarşi, BCG → değerler) | §8.1, M20/M21, UX-29/30 | **Tamam** (2026-10-27) | `ui.spec.ts → grafiklerin dar ekran eşdeğeri` (320/390’da hiçbir sayfada `.chart-scroll` yok; hiyerarşi ↔ ECharts ağacı, ajanda ↔ Gantt spec’i, son tarih ve BCG eşdeğerliği; kabuk geçişi; 768 px tablet kaydırma), genişlik denetimi `chartScroll = 0`; `partnership.spec.ts` (Takvim: dar ekranda 12 grafik + 2 ajanda) |
-| P6 Sayfa başlığı/hiyerarşi (`PageHeader`, `ResultSummary`), parametre grupları, durum sözleşmeleri | §3, §5, §9 | Bekliyor | — |
+| P6.1 Sayfa başlığı tek kalıp (`PageHeader`: kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) ve bölüm başlığı sadeleşmesi (hairline, numara yalnız sıralı bölümlerde) | §3, §5.4, M03 | **Tamam** (2026-10-27) | `ui.spec.ts → sayfa başlığı ve bölüm başlığı` (320), `ONCEKI` (1280, kırıntı satırı dahil), kırıntı testi; `gelir.spec.ts` dönem satırı |
+| P6.2 `ResultSummary` (M05): gelir planı (en çok fon ihtiyacı, başabaş durumu) ve nakit akışında (nakit açığı tavanı) seçili senaryonun ana sonucu dönem, birim ve kıyasla 320×480 ilk ekranda; durum/risk gizlenmez; yapışkan özet şerit olarak bloğun başında (tek kaynak); gelirde sonuç kurucudan önce (§5.4 sırası) | §5.4, §5.15, §9, M05 | **Tamam** (2026-10-27) | `gelir.spec.ts → ana sonuç` (320×480, kıyas, risk, tek kaynak) ve sıra testi; `nakit.spec.ts → ana sonuç` (özet kutusu ve tabloyla aynı değer, seçici, kaynak uyarısı) |
+| P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13; kapalı gelir, arama grupları açar), değişiklik özeti (alan · grup, varsayılan → yeni, alana git, tek alanı geri al), “bu tarayıcıda kaydedildi/kaydedilemedi” açık yazımı (UX-15), “varsayılana dön” kapsamı onaydan önce + geri al (UX-14) | §3, §9, M13/M23, UX-14/15 | **Tamam** (2026-10-27) | `ui.spec.ts → parametreler: görev grupları…` (320×480 belge yüksekliği ve görünür girdi, arama, özet, kapsam + geri al, depolama kapalı); eski parametre testleri grupları açarak sürer |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,
