@@ -8,6 +8,8 @@ import { DEFAULT_PARAMS, type Params } from './params';
 import { makeCashflow } from './cashflow';
 import { makePartnership } from './partnership';
 import { makeRevenue } from './revenue';
+import { makeDigitalStrategy } from './digitalStrategy';
+import { makeStaffing } from './staffing';
 import { makeProgram } from './program';
 import { getRole, makeRoles } from './roles';
 import { makeOrg } from './tree';
@@ -28,6 +30,8 @@ export function buildModel(p: Params) {
     partnership: makePartnership(p, program),
     cashflow: makeCashflow(p, program, revenue),
     revenue,
+    staffing: makeStaffing(p, program, revenue),
+    digitalStrategy: makeDigitalStrategy(p, program, revenue),
   };
 }
 

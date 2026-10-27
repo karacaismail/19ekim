@@ -1797,6 +1797,18 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   block-size: var(--edge-width);
 }
 
+/* Alt kenar çizgisi (araç çubuğu altındaki içeriğe bağlanır): çizginin değdiği alt köşeler düz. */
+[data-edge='bottom'] {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+[data-edge='bottom']::after {
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: var(--edge-width);
+}
+
 /* ---------- Parametreler ---------- */
 .param-toolbar {
   display: flex;
@@ -4640,7 +4652,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   align-items: center;
   gap: var(--space-2);
   min-height: var(--hit-min);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
@@ -5060,16 +5072,28 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   margin-top: var(--space-4);
 }
 
-.gelir-zaman-araclar {
+.araclar.gelir-zaman-araclar {
   margin-top: var(--space-8);
 }
 
-/* ---------- Seçim grupları: senaryo (kötümser · medyan · iyimser), grafik modu, başabaş filtreleri ---------- */
+/* ---------- Seçim grupları: senaryo (kötümser · medyan · iyimser), grafik modu, başabaş filtreleri ----------
+ * Segmentli anahtar: seçenekler tek zemin (iz) üzerinde; seçili olanın altında kayan topuz (ölçülen konum/genişlik).
+ */
 .secim {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1) var(--space-2);
+  gap: var(--space-2) var(--space-3);
+  max-width: 100%;
+}
+
+/* Seçimin görünür açıklaması (ipucu yerine: dokunmada hover yok). */
+.secim-not {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
 
 .secim-etiket {
@@ -5081,14 +5105,46 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   text-transform: uppercase;
 }
 
+.secim-iz {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-control);
+}
+
+/* Kayan topuz: konum ve boyut ölçümle; geçiş hareket tokenlarıyla. */
+.secim-top {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 0;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  transition-property: transform, width, height;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.secim-top[data-role] {
+  background: var(--tone-bg);
+}
+
 .secim-dugme {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-3);
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--surface-control);
+  background: transparent;
   color: var(--text-primary);
   font: inherit;
   font-weight: var(--weight-medium);
@@ -5106,34 +5162,79 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 
 .secim-dugme[aria-pressed='true'],
 .secim-dugme[aria-pressed='true']:hover {
-  background: var(--text-primary);
+  background: transparent;
   color: var(--surface-page);
   font-weight: var(--weight-semibold);
   cursor: default;
 }
 
-/* Rol tonlu seçenek (senaryolar): seçili düğme senaryonun zemin ve yazı rengi. */
+/* Rol tonlu seçenek (senaryolar): topuz senaryonun zemin, yazı senaryonun yazı rengi. */
 .secim-dugme[data-role][aria-pressed='true'],
 .secim-dugme[data-role][aria-pressed='true']:hover {
-  background: var(--tone-bg);
   color: var(--tone-fg);
 }
 
-/* Bölüm başındaki araç satırı: senaryo seçici ve grafik modu yan yana, dar ekranda alt alta. */
-.secim-sira {
+/* Topuz ölçülmeden önce (sunucu çizimi, ilk kare) seçili düğme topuz görünümünü kendisi taşır. */
+.secim-iz:not([data-olculdu]) .secim-dugme[aria-pressed='true'] {
+  background: var(--text-primary);
+}
+
+.secim-iz:not([data-olculdu]) .secim-dugme[data-role][aria-pressed='true'] {
+  background: var(--tone-bg);
+}
+
+/* Araç çubuğu: seçiciler yükseltilmiş zeminde; üst köşeler yuvarlak, altta seçili senaryonun tonunda çizgi; altındaki
+   içerik bitişik (bağlı ve bağımlı görünür). */
+.araclar {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-6);
-  margin-top: var(--space-4);
+  align-items: flex-start;
+  gap: var(--space-4) var(--space-8);
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5) calc(var(--space-4) + var(--edge-width));
+  border-start-start-radius: var(--radius-md);
+  border-start-end-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.chart > .araclar {
+  margin: var(--space-2) 0 0;
+}
+
+.araclar + .chart-canvas {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.table-block > .araclar {
+  margin: 0;
+}
+
+.araclar ~ .table-frame .table-scroll {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+/* Çubuğun altındaki içerik bağlı kalır ama nefes alır: çizgi ile içerik arasında açık alan. */
+.araclar + .stats,
+.araclar + .gelir-hedefler,
+.araclar + .filtreler,
+.araclar + .gelir-zaman,
+.araclar + .hire-timeline {
+  margin-top: var(--space-5);
+}
+
+.araclar + .chart-canvas {
+  padding-top: var(--space-5);
 }
 
 /* Başabaş filtreleri: çok seçenekli ızgara; dar ekranda tek sütun. */
 .filtreler {
   display: grid;
-  gap: var(--space-3) var(--space-6);
+  gap: var(--space-5) var(--space-8);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  margin-top: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-6);
   border-radius: var(--radius-md);
   background: var(--surface-raised);
 }
@@ -5144,19 +5245,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 
 .filtreler .secim-etiket {
   flex-basis: 100%;
-  margin: 0;
-}
-
-/* Tablo ve grafik başındaki araç satırı (başlığın altında, içeriğin üstünde). */
-.blok-araclar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-6);
-  margin: 0 0 var(--space-3);
-}
-
-.chart > .blok-araclar {
-  margin-top: var(--space-2);
+  margin: 0 0 var(--space-1);
 }
 
 /* Seçili senaryonun satırı (karşılaştırma tabloları). */

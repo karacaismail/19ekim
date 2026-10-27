@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
-import { ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
+import { Araclar, ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
 import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { buildCashflow, type CashLine, type Cashflow } from '../data/cashflow';
 import { tl } from '../lib/format';
@@ -75,6 +75,12 @@ function Icerik() {
           ? 'Sheets verisi okunamadı: veri ucu erişim anahtarı istiyor. Anahtarı Giderler sayfasında girin; tablo şimdilik yalnız plan kalemlerini gösterir.'
           : `Sheets verisi okunamadı (${durum.message}); tablo yalnız plan kalemlerini gösterir.`;
   const secici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} />;
+  const cubuk = (extra?: React.ReactNode) => (
+    <Araclar role={sc.role}>
+      {secici}
+      {extra}
+    </Araclar>
+  );
   const karsilastirma = m.cashflow.senaryolar.map((s) => ({ s, cf: hepsi[s.id] }));
 
   return (
@@ -83,8 +89,8 @@ function Icerik() {
         id="ozet"
         index={1}
         title="Özet"
-        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan, çıkışlar Sheets’teki gider planından; satış primi de senaryoya göre.`}
-        tools={secici}
+        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan, çıkışlar Sheets’teki gider planından; satış primi ve satıcı kazanım reklamı plan kalemleridir.`}
+        tools={cubuk()}
       >
         <Stats
           items={[
@@ -108,7 +114,7 @@ function Icerik() {
           id="senaryo-karsilastirma"
           title="Üç senaryo: 15 ayın özeti"
           note="Aynı Sheets giderleri; girişler ve satış primi senaryoya göre. Seçili senaryo vurgulanır."
-          tools={secici}
+          tools={cubuk()}
           columns={[
             { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof karsilastirma)[number]) => <RoleChip role={x.s.role} label={x.s.name} /> },
             { key: 'g', header: 'Nakit girişi', nowrap: true, render: (x) => tl(x.cf.toplam.giris) },
@@ -130,7 +136,7 @@ function Icerik() {
         index={2}
         title="Aylık nakit akışı"
         desc="Basit görünüm dört satır; ayrıntılı görünüm giriş ve çıkış kalemlerini, dönem başı nakdi ekler. Grafik seçili senaryoyu ya da üç senaryonun dönem sonu nakdini üst üste gösterir."
-        tools={secici}
+        tools={cubuk()}
       >
         <div className="nakit-araclar">
           <Anahtar ad="Ayrıntılı görünüm" acik={ayrintili} onChange={setAyrintili} />
@@ -144,12 +150,7 @@ function Icerik() {
               ? `${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}; en düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}); dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`
               : karsilastirma.map((x) => `${x.s.name}: en düşük ${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa}), ${son.kisa} sonu ${tl(x.cf.donemSonu[x.cf.donemSonu.length - 1])}`).join('; ')
           }
-          tools={
-            <>
-              {secici}
-              <ModSecimi value={mod} onChange={setMod} />
-            </>
-          }
+          tools={cubuk(<ModSecimi value={mod} onChange={setMod} />)}
           spec={
             mod === 'secili'
               ? { kind: 'nakit-ay', months: cf.aylar.map((a) => a.kisa), inflow: cf.giris, outflow: cf.cikis, balance: cf.donemSonu }
@@ -160,7 +161,7 @@ function Icerik() {
         <DataTable<Satir>
           id="nakit"
           title={`${ayrintili ? 'Ayrıntılı nakit akış tablosu' : 'Nakit akış tablosu'} (${sc.name.toLocaleLowerCase('tr-TR')})`}
-          tools={secici}
+          tools={cubuk()}
           columns={[
             {
               key: 'ad',

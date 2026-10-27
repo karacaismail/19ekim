@@ -98,6 +98,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(satirlar.first().locator('th')).toContainText('Abonelik: ilk ödemeler');
     await expect(satirlar.locator('th', { hasText: 'Bordrolu personel' })).toHaveCount(1);
     await expect(satirlar.locator('th', { hasText: 'Meta reklamları' })).toHaveCount(1);
+    await expect(satirlar.locator('th', { hasText: 'Satıcı kazanım reklamı' })).toHaveCount(1);
     // Ayrıntılı satırların toplam sütunu: kalem toplamları ara toplamı verir (ilk ay sütunu).
     const sayi = (s: string) => (s.trim() === '—' ? 0 : Number(s.replace(/[^\d-]/g, '')));
     const hucreler = async (ad: string) => satirlar.filter({ has: page.locator('th', { hasText: new RegExp(`^${ad}`) }) }).locator('td').allTextContents();

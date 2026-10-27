@@ -14,7 +14,8 @@ import type { ScenarioId } from '../lib/scenario';
 import type { OpexModel } from './opex';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { simulate, type RevMonth, type Revenue, type Sim, type SimInputs } from './revenue';
+import { digitalSplit, simulate, type RevMonth, type Revenue, type Sim, type SimInputs } from './revenue';
+import { staffCosts } from './staffing';
 
 export type GiderKaynak = 'sheets' | 'plan';
 
@@ -27,6 +28,10 @@ export interface BreakevenFilters {
   priceEur: number;
   /** Ayın ilk günü; ufuk dışı = ikinci saha gelmez */
   secondSahaIso: string;
+  /** İkinciyle aynı ay başlayan ek saha personeli */
+  extraSaha: number;
+  /** Satıcı kazanım reklam bütçesi: parametrenin katı (0 = reklam yok) */
+  dijitalBudgetFactor: number;
   kaynak: GiderKaynak;
   /** Ek sabit gider, ₺ / ay */
   ekSabit: number;
@@ -41,6 +46,8 @@ export const defaultFilters = (p: Params): BreakevenFilters => ({
   annualShare: p.annualShare / 100,
   priceEur: p.subscriptionEur,
   secondSahaIso: p.secondSahaDate,
+  extraSaha: 0,
+  dijitalBudgetFactor: 1,
   kaynak: 'sheets',
   ekSabit: 0,
   primDahil: true,
@@ -110,6 +117,9 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
   const metaAylik = r2((p.metaWeekly * 52) / 12);
   const metaStart = monthNo(monthStart(p.metaStartDate));
   const meta = (m: RevMonth) => (monthNo(m.iso) >= metaStart ? metaAylik : 0);
+  const budget = r2(p.dijitalAdBudgetMonthly * f.dijitalBudgetFactor);
+  const reklam = digitalSplit(p, months, budget).butce;
+  const staff = { secondSahaIso: f.secondSahaIso, extraSaha: f.extraSaha, dijitalBudget: budget };
   if (f.kaynak === 'sheets' && opex) {
     const buAy = (iso: string) => {
       const ay = Number(iso.slice(5, 7));
@@ -119,34 +129,23 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
       if (yil === '2027' && row) return row.y2027.toplam;
       return opex.ozet.aylikOrt2027.toplam;
     };
+    // Sheets’te tek saha personeli vardır; ikinci saha, ek saha ve satıcı kazanım reklamı plan kadrosundan eklenir.
+    const t0 = monthNo(months[0].iso);
+    const sahaT = monthNo(monthStart(f.secondSahaIso)) - t0;
+    const sahaEk = r2(p.sahaSalary * p.costFactor * (1 + f.extraSaha));
     return {
-      values: months.map((m) => r2(buAy(m.iso) + meta(m) + f.ekSabit)),
+      values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + (m.t >= sahaT ? sahaEk : 0) + f.ekSabit)),
       kaynak: 'sheets',
       fallback: false,
-      note: 'Sabit giderler Google Sheets’ten (Giderler sayfasıyla aynı canlı veri; bordrolu personel teşvik düşülmüş işveren maliyeti, teknoloji ve ofis kalemleri); 2028 ayları 2027 ortalamasıyla; Meta reklamları plan parametresinden eklenir (Sheets’te yok).',
+      note: `Sabit giderler Google Sheets’ten (Giderler sayfasıyla aynı canlı veri; bordrolu personel teşvik düşülmüş işveren maliyeti, teknoloji ve ofis kalemleri); 2028 ayları 2027 ortalamasıyla. Sheets’te olmayanlar eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay) ve ikinci (ve ek) saha personelinin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}) seçilen aydan itibaren.`,
     };
   }
-  const cost = (s: number) => s * p.costFactor;
-  const t0 = monthNo(months[0].iso);
-  const at = (iso: string) => monthNo(monthStart(iso)) - t0;
-  const startT = at(p.startDate);
-  const decT = at(p.decStartDate);
-  const saha2T = at(f.secondSahaIso);
-  const dijT = at(p.asistanCount ? p.startDate : p.dijitalAltDate);
-  const s = prog.salaries;
-  const values = months.map((m) => {
-    let v = 0;
-    if (m.t >= startT) v += cost(s.saha) + p.masaCount * cost(s.masa) + p.asistanCount * cost(s.asistan) + p.aiToolsMonthly;
-    if (m.t >= saha2T) v += cost(s.saha);
-    if (m.t >= decT) v += p.organizatorCount * cost(s.organizator);
-    if (m.t >= dijT) v += p.dijitalCount * cost(s.dijital);
-    return r2(v + meta(m) + f.ekSabit);
-  });
+  const kadro = staffCosts(p, prog, months, staff);
   return {
-    values,
+    values: months.map((m) => r2(kadro[m.t] + p.aiToolsMonthly + meta(m) + reklam[m.t] + f.ekSabit)),
     kaynak: 'plan',
     fallback: f.kaynak === 'sheets',
-    note: `Sabit giderler plan kadrosundan: gelir planı kadrosunun işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}: 1 saha, ikinci saha seçilen aydan, ${p.masaCount} CRM masa başı, ${p.organizatorCount} organizatör Aralık’tan, ${p.dijitalCount} dijital pazarlama, ${p.asistanCount} asistan), YZ araçları tavanı ve Meta reklamları. Ofis, yazılım ekibi ve Segika kadrosu bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,
+    note: `Sabit giderler plan kadrosundan: kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}; ikinci ve ek saha seçilen aydan, organizatör ve ekip lideri Aralık’tan), YZ araçları tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay). Ofis ve yazılım ekibi bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,
   };
 }
 
@@ -160,6 +159,8 @@ export function computeBreakeven(p: Params, prog: ProgramModel, rev: Revenue, sc
     annualShare: f.annualShare,
     priceEur: f.priceEur,
     secondSahaIso: f.secondSahaIso,
+    extraSaha: f.extraSaha,
+    dijitalBudget: r2(p.dijitalAdBudgetMonthly * f.dijitalBudgetFactor),
   });
   const sim = simulate(p, prog, months, inputs);
   const fixed = fixedCosts(p, prog, months, f, opex);

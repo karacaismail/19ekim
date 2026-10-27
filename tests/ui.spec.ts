@@ -698,7 +698,9 @@ test.describe('kenar sistemi (kavisli vurgu kenarı yasak)', () => {
           const corners =
             el.dataset.edge === 'start'
               ? [cs.borderStartStartRadius, cs.borderEndStartRadius]
-              : [cs.borderStartStartRadius, cs.borderStartEndRadius];
+              : el.dataset.edge === 'bottom'
+                ? [cs.borderEndStartRadius, cs.borderEndEndRadius]
+                : [cs.borderStartStartRadius, cs.borderStartEndRadius];
           if (corners.some((c) => px(c) !== 0)) bad.push(`${name(el)}: köşe ${corners.join(' ')}`);
           if (getComputedStyle(el, '::after').content === 'none') bad.push(`${name(el)}: çizgi yok`);
           // Koşulluluk: kartta çizginin değmediği karşı köşe yuvarlak kalır.

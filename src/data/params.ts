@@ -59,6 +59,13 @@ export const DEFAULT_PARAMS = {
   annualShare: 20,
   pessimisticFactor: 60,
   pessimisticRetention: 50,
+  /* Dijital pazarlama stratejisi (kullanıcı kararı 2026-10-27: gider → gelir paradigması): satıcı kazanım reklamı ve organik içerik */
+  dijitalAdBudgetMonthly: 30_000,
+  dijitalCostPerLead: 600,
+  dijitalLeadToActive: 8,
+  dijitalAdStartDate: '2026-12-01',
+  dijitalOrganicActivesMonthly: 2,
+  dijitalOrganicStartDate: '2027-01-01',
   /* Nakit akışı (kullanıcı kararı 2026-10-27: nakit akış tablosu) */
   openingCash: 0,
   investmentAmount: 0,
@@ -179,6 +186,19 @@ export const PARAM_GROUPS: ParamGroup[] = [
       { key: 'annualShare', label: 'Yıllık peşin ödeyen yeni satıcı payı', kind: 'percent', unit: '%', min: 0, max: 100, help: '3.990 € / yıl (10 ay ücreti); kalanı aylık 399 €' },
       { key: 'pessimisticFactor', label: 'Kötümser senaryo: kapasite çarpanı', kind: 'percent', unit: '%', min: 10, max: 100 },
       { key: 'pessimisticRetention', label: 'Kötümser senaryo: aylık elde tutma', kind: 'percent', unit: '%', min: 0, max: 100 },
+    ],
+  },
+  {
+    id: 'dijital',
+    title: 'Dijital pazarlama: gider → gelir',
+    desc: 'Satıcı kazanım reklamı (bütçe ÷ kayıt maliyeti × dönüşüm = aylık yeni aktif satıcı; ilk ay %50, ikinci ay %75) ve organik içerik (dijital pazarlama uzmanının video hattı). Meta işe alım reklamı ayrıdır (Bütçe grubu).',
+    fields: [
+      { key: 'dijitalAdBudgetMonthly', label: 'Satıcı kazanım reklam bütçesi', kind: 'money', unit: '₺ / ay', min: 0, step: 5_000, help: 'Meta + Google Arama; 0 = reklam yok' },
+      { key: 'dijitalCostPerLead', label: 'Kayıt başına reklam maliyeti', kind: 'money', unit: '₺ / kayıt', min: 1, step: 50, help: 'Form dolduran toptancı (B2B lead)' },
+      { key: 'dijitalLeadToActive', label: 'Kayıttan ilk ödemeye dönüşüm', kind: 'percent', unit: '%', min: 0, max: 100, help: 'CRM takibiyle (arama + WhatsApp); saha ziyaretinden düşük' },
+      { key: 'dijitalAdStartDate', label: 'Reklam başlangıcı', kind: 'date', help: 'Ölçüm (pixel, UTM, CRM kaynak alanı) kurulduktan sonra; ayın ilk günü' },
+      { key: 'dijitalOrganicActivesMonthly', label: 'Organik içerik: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Günde 3 video ve haftada 10 CRM talebi düzeyinde' },
+      { key: 'dijitalOrganicStartDate', label: 'Organik içerik başlangıcı', kind: 'date', help: 'İçerik hattı tam hızda (Ocak: günde 3 video); ayın ilk günü' },
     ],
   },
   {

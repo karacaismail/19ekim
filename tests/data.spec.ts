@@ -5,6 +5,8 @@ import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
 import { DEFAULT_NOTES } from '../src/data/notes';
 import { computeBreakeven, defaultFilters, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
+import { makeStaffing, staffingSheet } from '../src/data/staffing';
+import { adCapacity, digitalSplit } from '../src/data/revenue';
 import { buildCashflow } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
@@ -470,6 +472,15 @@ test.describe('gelir planı', () => {
     expect(saha2.values.slice(0, 4)).toEqual([0, 0, 4, 6]);
     const org = r.sources.find((x) => x.id === 'org')!;
     expect(org.values.slice(0, 3)).toEqual([0, 3, 4.5]);
+    expect(r.sources.map((x) => x.id)).toEqual(['saha1', 'saha2', 'crm', 'org', 'dijital', 'rep']);
+    // Dijital kanal: reklam Aralık’tan (bütçe ÷ kayıt maliyeti × dönüşüm = 4 / ay; rampa), organik Ocak’tan (2 / ay; rampa).
+    const dij = r.sources.find((x) => x.id === 'dijital')!;
+    expect(adCapacity(DEFAULT_PARAMS, DEFAULT_PARAMS.dijitalAdBudgetMonthly)).toBeCloseTo(4, 5);
+    expect(dij.values.slice(0, 4)).toEqual([0, 2, 4, 5.5]);
+    const parca = digitalSplit(DEFAULT_PARAMS, r.months, DEFAULT_PARAMS.dijitalAdBudgetMonthly);
+    expect(parca.kayit[1]).toBeCloseTo(25, 5);
+    expect(parca.butce[0]).toBe(0);
+    expect(parca.butce[1]).toBe(DEFAULT_PARAMS.dijitalAdBudgetMonthly);
     for (const x of r.series) {
       for (let t = 0; t < 18; t++) {
         expect(x.gelir[t], `${x.scenario.id} ay ${t}`).toBeCloseTo(x.yillik[t] * m.ANNUAL_TRY + x.aylikOdeyen[t] * m.SUBSCRIPTION_TRY, 0);
@@ -524,11 +535,22 @@ test.describe('başabaş', () => {
     const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan' }, null);
     expect(be.kaynak).toBe('plan');
     expect(be.fallback).toBe(false);
-    // Kasım 2026: 1 saha, 1 CRM masa başı, asistan, dijital pazarlama, YZ araçları, Meta.
-    expect(be.sabit[0]).toBeCloseTo(cost(m.salaries.saha) + cost(m.salaries.masa) + cost(m.salaries.asistan) + cost(m.salaries.dijital) + DEFAULT_PARAMS.aiToolsMonthly + meta, 0);
-    // Aralık: organizatör; Ocak: ikinci saha personeli (parametre).
-    expect(be.sabit[1]).toBeCloseTo(be.sabit[0] + cost(m.salaries.organizator), 0);
+    // Kasım 2026: 1 saha, 1 CRM masa başı, Segika CRM, asistan, dijital pazarlama, YZ araçları, Meta (reklam Aralık’tan).
+    expect(be.sabit[0]).toBeCloseTo(cost(m.salaries.saha) + cost(m.salaries.masa) + cost(m.salaries.segika) + cost(m.salaries.asistan) + cost(m.salaries.dijital) + DEFAULT_PARAMS.aiToolsMonthly + meta, 0);
+    // Aralık: organizatör, ekip lideri farkı ve satıcı kazanım reklamı; Ocak: ikinci saha personeli (parametre).
+    expect(be.sabit[1]).toBeCloseTo(be.sabit[0] + cost(m.salaries.organizator) + cost(DEFAULT_PARAMS.leadUplift) + DEFAULT_PARAMS.dijitalAdBudgetMonthly, 0);
     expect(be.sabit[2]).toBeCloseTo(be.sabit[1] + cost(m.salaries.saha), 0);
+    // Ek saha personeli ve reklam bütçesi hem gideri hem geliri değiştirir; ikinci saha gelmezse ikisi de düşer.
+    const ek = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan', extraSaha: 2 }, null);
+    expect(ek.sabit[2]).toBeCloseTo(be.sabit[2] + 2 * cost(m.salaries.saha), 0);
+    expect(ek.toplam.gelir).toBeGreaterThan(be.toplam.gelir);
+    expect(ek.sim.kumAktif[17]).toBeGreaterThan(be.sim.kumAktif[17]);
+    const reklamsiz = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan', dijitalBudgetFactor: 0 }, null);
+    expect(reklamsiz.sabit[1]).toBeCloseTo(be.sabit[1] - DEFAULT_PARAMS.dijitalAdBudgetMonthly, 0);
+    expect(reklamsiz.toplam.gelir).toBeLessThan(be.toplam.gelir);
+    const gelmez = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan', secondSahaIso: '2099-01-01' }, null);
+    expect(gelmez.sabit[2]).toBeCloseTo(be.sabit[2] - cost(m.salaries.saha), 0);
+    expect(gelmez.toplam.gelir).toBeLessThan(be.toplam.gelir);
     for (let t = 0; t < 18; t++) {
       expect(be.prim[t]).toBeCloseTo(be.sim.yeniAktif[t] * DEFAULT_PARAMS.commission, 1);
       expect(be.gider[t]).toBeCloseTo(be.sabit[t] + be.prim[t], 1);
@@ -545,9 +567,15 @@ test.describe('başabaş', () => {
     const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', f, opex);
     expect(be.kaynak).toBe('sheets');
     expect(be.fallback).toBe(false);
+    // Sheets’te olmayanlar eklenir: reklam bütçesi Aralık’tan, ikinci saha personelinin işveren maliyeti Ocak’tan.
+    const reklam = DEFAULT_PARAMS.dijitalAdBudgetMonthly;
+    const saha2 = DEFAULT_PARAMS.sahaSalary * DEFAULT_PARAMS.costFactor;
     expect(be.sabit[0]).toBeCloseTo(opex.aylik.find((x) => x.ay === 11)!.y2026.toplam + meta, 0);
-    expect(be.sabit[2]).toBeCloseTo(opex.aylik.find((x) => x.ay === 1)!.y2027.toplam + meta, 0);
-    expect(be.sabit[14]).toBeCloseTo(opex.ozet.aylikOrt2027.toplam + meta, 0);
+    expect(be.sabit[1]).toBeCloseTo(opex.aylik.find((x) => x.ay === 12)!.y2026.toplam + meta + reklam, 0);
+    expect(be.sabit[2]).toBeCloseTo(opex.aylik.find((x) => x.ay === 1)!.y2027.toplam + meta + reklam + saha2, 0);
+    expect(be.sabit[14]).toBeCloseTo(opex.ozet.aylikOrt2027.toplam + meta + reklam + saha2, 0);
+    const gelmez = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, secondSahaIso: '2099-01-01' }, opex);
+    expect(gelmez.sabit[2]).toBeCloseTo(be.sabit[2] - saha2, 0);
     const ek = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, ekSabit: 250_000 }, opex);
     expect(ek.sabit[0]).toBeCloseTo(be.sabit[0] + 250_000, 0);
     const yok = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', f, null);
@@ -607,5 +635,88 @@ test.describe('başabaş', () => {
         if (j) expect(key(grid[i][j]) <= key(grid[i][j - 1]), `elde tutma ${i},${j}`).toBe(true);
       }
     }
+  });
+});
+
+/* ---------- İstihdam planı × senaryo (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('istihdam planı: görev, gider, gelir katkısı', () => {
+  const m = buildModel(DEFAULT_PARAMS);
+  const st = m.staffing;
+
+  test('on rol; doğrudan katkılar 18 ay gelire toplanır; dolaylı roller katkısız ama giderli; iyimser ≥ medyan ≥ kötümser', () => {
+    expect(st.roles.map((r) => r.id)).toEqual(['saha1', 'saha2', 'crm', 'org', 'dijital', 'reklam', 'asistan', 'segika', 'lider', 'rep']);
+    for (const sn of st.senaryolar) {
+      const dogrudan = sn.rows.filter((x) => x.dogrudan);
+      expect(dogrudan.map((x) => x.role.id)).toEqual(['saha1', 'saha2', 'crm', 'org', 'dijital', 'reklam', 'rep']);
+      // Model kaynaklarda doğrusal: katkıların toplamı 18 ay gelire eşittir (aylık kuruş yuvarlaması: binde birden az sapma).
+      expect(Math.abs(sn.toplam.katki - sn.toplam.gelir) / sn.toplam.gelir).toBeLessThan(0.001);
+      expect(sn.toplam.gelir).toBeCloseTo(m.revenue.byId[sn.scenario.id].kumulatif[17], -1);
+      for (const x of dogrudan) expect(x.katki, x.role.id).toBeGreaterThan(0);
+      for (const x of sn.rows.filter((r) => !r.dogrudan)) {
+        expect(x.katki).toBe(0);
+        expect(x.gider).toBeGreaterThan(0);
+        expect(x.net).toBe(-x.gider);
+      }
+      const saha1 = sn.rows.find((x) => x.role.id === 'saha1')!;
+      expect(saha1.gider).toBeCloseTo(DEFAULT_PARAMS.sahaSalary * DEFAULT_PARAMS.costFactor * 18, 0);
+      expect(saha1.aktif).toBeCloseTo((4 + 6 + 8 * 16) * sn.scenario.factor, 1);
+      const reklam = sn.rows.find((x) => x.role.id === 'reklam')!;
+      expect(reklam.gider).toBeCloseTo(DEFAULT_PARAMS.dijitalAdBudgetMonthly * 17, 0);
+      const rep = sn.rows.find((x) => x.role.id === 'rep')!;
+      expect(rep.gider).toBeCloseTo(rep.aktif * DEFAULT_PARAMS.commission, 0);
+    }
+    expect(st.byId.kotumser.toplam.katki).toBeLessThan(st.byId.medyan.toplam.katki);
+    expect(st.byId.medyan.toplam.katki).toBeLessThan(st.byId.iyimser.toplam.katki);
+    expect(st.byId.kotumser.toplam.gider).toBeLessThanOrEqual(st.byId.medyan.toplam.gider);
+  });
+
+  test('ek saha ve reklam bütçesi girdileri tabloyu değiştirir; Sheets tablosu başlık + 10 rol + toplam', () => {
+    const ek = makeStaffing(DEFAULT_PARAMS, m, m.revenue, { extraSaha: 1 });
+    expect(ek.roles.map((r) => r.id)).toContain('sahaEk');
+    expect(ek.byId.medyan.toplam.gelir).toBeGreaterThan(st.byId.medyan.toplam.gelir);
+    const reklamsiz = makeStaffing(DEFAULT_PARAMS, m, m.revenue, { dijitalBudget: 0 });
+    expect(reklamsiz.byId.medyan.rows.find((x) => x.role.id === 'reklam')!.katki).toBe(0);
+    expect(reklamsiz.byId.medyan.rows.find((x) => x.role.id === 'dijital')!.katki).toBeCloseTo(st.byId.medyan.rows.find((x) => x.role.id === 'dijital')!.katki, -1);
+    const sheet = staffingSheet(st, 18);
+    expect(sheet.length).toBe(12);
+    expect(sheet[0].length).toBe(8 + 3 * 4);
+    expect(sheet[0][0]).toBe('Rol');
+    expect(sheet[11][0]).toBe('Toplam');
+    expect(sheet[1][0]).toBe('Saha satış uzmanı (1.)');
+  });
+});
+
+/* ---------- Dijital pazarlama stratejisi (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('dijital pazarlama stratejisi: gider → gelir', () => {
+  const m = buildModel(DEFAULT_PARAMS);
+  const d = m.digitalStrategy;
+
+  test('zincir, kademeler ve karar kuralı tutarlı; bütçe kademesi arttıkça kayıt ve gider orantılı, katkı artan', () => {
+    expect(d.kanallar.length).toBe(6);
+    expect(d.takvim.length).toBe(4);
+    expect(d.kurallar.length).toBeGreaterThanOrEqual(4);
+    expect(d.tierBudgets[0]).toBe(0);
+    expect(d.tierBudgets).toContain(DEFAULT_PARAMS.dijitalAdBudgetMonthly);
+    const z = d.zincir(m.revenue.byId.medyan.scenario);
+    expect(z.kayit).toBeCloseTo(DEFAULT_PARAMS.dijitalAdBudgetMonthly / DEFAULT_PARAMS.dijitalCostPerLead, 5);
+    expect(z.aktif).toBeCloseTo(z.kayit * (DEFAULT_PARAMS.dijitalLeadToActive / 100), 5);
+    expect(z.cac).toBeCloseTo(DEFAULT_PARAMS.dijitalAdBudgetMonthly / z.aktif, 1);
+    expect(z.ltv).toBeCloseTo(0.8 * (m.SUBSCRIPTION_TRY / 0.3) + 0.2 * m.ANNUAL_TRY, 0);
+    for (const sn of d.byScenario) {
+      const t = sn.tiers;
+      expect(t[0].kayit).toBe(0);
+      expect(t[0].katki).toBe(0);
+      for (let i = 1; i < t.length; i++) {
+        expect(t[i].kayit).toBeGreaterThan(t[i - 1].kayit);
+        expect(t[i].katki).toBeGreaterThan(t[i - 1].katki);
+        expect(t[i].gider).toBeCloseTo(t[i].butce * 12, 0);
+        // Kayıt ve gider bütçeyle orantılı: CAC kademeden bağımsız.
+        expect(t[i].cac).toBeCloseTo(t[1].cac!, 0);
+      }
+    }
+    expect(d.byId.kotumser.ltv).toBeLessThan(d.byId.medyan.ltv);
+    expect(d.byId.kotumser.tiers[2].katki).toBeLessThan(d.byId.medyan.tiers[2].katki);
   });
 });

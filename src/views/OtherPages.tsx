@@ -20,7 +20,10 @@ import type { CrmStage, GovNode, OpenDecision, PayRule, WorkPeriod } from '../da
 import { ROLE_LABELS } from '../data/roles';
 import type { RoleKey } from '../data/types';
 import { useModel } from '../components/ModelContext';
+import { Araclar, SenaryoSecimi } from '../components/Senaryo';
+import type { StaffResult } from '../data/staffing';
 import { addDays, longDate, monthStart, nextMonth } from '../lib/dates';
+import { useScenario } from '../lib/scenario';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
 const lira = (value: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(value))} ₺`;
@@ -37,6 +40,10 @@ const monthTitle = (iso: string) =>
 function HiringContent() {
   const m = useModel();
   const { calendarEvents, hiringOrder } = m;
+  const [sid, setSid] = useScenario();
+  const st = m.staffing.byId[sid];
+  const sc = st.scenario;
+  const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
   /** Takvim ayları: ilk olaydan son olaya. */
   const CALENDAR_MONTHS: string[] = [];
   for (let month = monthStart(calendarEvents[0].date); month <= calendarEvents[calendarEvents.length - 1].date; month = nextMonth(month)) CALENDAR_MONTHS.push(month);
@@ -112,6 +119,53 @@ function HiringContent() {
             );
           })}
         </div>
+      </Section>
+
+      <Section
+        id="katki"
+        index={3}
+        title="Görev, gider ve gelir katkısı (senaryo)"
+        desc="İstihdam planı gelir planına yedirilmiştir (kullanıcı kararı 2026-10-27): her rolün görevi, işveren maliyeti ve seçili senaryoda 18 ayda gelire katkısı. Katkı, gelir planı simülasyonunda o kaynak olmasaydı kaybedilecek gelirdir; dolaylı rollerin katkısı modellenmez. Seçim gelir planı ve nakit akış tablosuyla ortaktır."
+        tools={
+          <Araclar role={sc.role}>
+            <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
+          </Araclar>
+        }
+      >
+        <Stats
+          items={[
+            { label: 'Kadro gideri, 18 ay', value: lira(st.toplam.gider), note: `${sc.name} · maaşlı roller + reklam bütçesi + temsilci primi` },
+            { label: 'Gelire katkı, 18 ay', value: lira(st.toplam.katki), note: `${sc.name} · kaynakların toplamı` },
+            { label: 'Net (katkı − gider)', value: lira(st.toplam.net), note: 'Ofis, yazılım ekibi ve YZ araçları hariç' },
+          ]}
+        />
+        <DataTable
+          id="istihdam-katki"
+          title={`Rol, görev, gider ve gelire katkı, 18 ay (${sc.name.toLocaleLowerCase('tr-TR')})`}
+          tools={
+            <Araclar role={sc.role}>
+              <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
+            </Araclar>
+          }
+          columns={[
+            { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: StaffResult) => <RoleChip role={x.role.role} label={x.role.name} /> },
+            { key: 'g', header: 'Görev', minWidth: '20rem', render: (x) => x.role.gorev },
+            { key: 'y', header: 'Gelire katkı yolu', minWidth: '16rem', render: (x) => x.role.katkiYolu },
+            { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => kisaTarih(x.role.startIso) },
+            { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${lira(m.params.commission)} / satış` : lira(x.role.maliyet)) },
+            { key: 'c', header: '18 ay gider', nowrap: true, render: (x) => lira(x.gider) },
+            { key: 'k', header: 'Gelire katkı', nowrap: true, render: (x) => (x.dogrudan ? lira(x.katki) : 'Dolaylı') },
+            { key: 'n', header: 'Net', nowrap: true, render: (x) => lira(x.net) },
+          ]}
+          rows={st.rows}
+          rowKey={(x) => x.role.id}
+          rowTone={(x) => (x.dogrudan ? undefined : 'total')}
+        />
+        <p>
+          <TextLink to="/gelir-plani/#kadro" standalone>
+            Gelir planında kadro, dijital strateji ve başabaş
+          </TextLink>
+        </p>
       </Section>
     </>
   );

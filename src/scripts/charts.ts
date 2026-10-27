@@ -764,7 +764,7 @@ function build(spec: ChartSpec, width: number): Opt {
         legend: { ...(base().legend as Opt), data: names },
         grid: { left: 4, right: labelRoom(labels), top: legendTop(names, width), bottom: 4, containLabel: true },
         xAxis: { type: 'value', ...axis(), minInterval: 1, splitNumber: width < OPEX_NARROW ? 3 : 5, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
-        yAxis: { type: 'category', inverse: true, data: spec.steps, ...axis(), axisLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), color: text, interval: 0 } },
+        yAxis: { type: 'category', inverse: true, data: spec.steps, ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width, 0.4, spec.steps), interval: 0 } },
         series: spec.series.map((s) => ({
           name: s.name,
           type: 'bar',

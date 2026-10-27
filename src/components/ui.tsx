@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Anchor, Badge, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
@@ -141,7 +141,7 @@ export function Section({
           </Text>
         ) : null}
       </div>
-      {tools ? <div className="secim-sira">{tools}</div> : null}
+      {tools}
       {children}
     </section>
   );
@@ -192,7 +192,7 @@ export function DataTable<T>({
         {title}
       </h3>
       {note ? <p className="table-note">{note}</p> : null}
-      {tools ? <div className="blok-araclar">{tools}</div> : null}
+      {tools}
       <span className="table-hint" aria-hidden="true">
         Tabloyu yatay kaydırabilirsiniz.
       </span>
@@ -400,7 +400,7 @@ export function Chart({
         </span>
         {note ? <span className="chart-note">{note}</span> : null}
       </figcaption>
-      {tools ? <div className="blok-araclar">{tools}</div> : null}
+      {tools}
       {wide ? (
         <span className="table-hint" aria-hidden="true">
           Grafiği yatay kaydırabilirsiniz.
@@ -419,25 +419,56 @@ export function Chart({
   );
 }
 
-/* ---------- Seçim grupları (senaryo, grafik modu, başabaş filtreleri) ---------- */
+/* ---------- Seçim grupları (senaryo, grafik modu, başabaş filtreleri) ----------
+ * Segmentli anahtar (kullanıcı kararı 2026-10-27): seçenekler tek zemin (iz) üzerinde; seçili olanın altında kayan
+ * topuz (ölçülen konum ve genişlik; hareket tokenlarıyla). Düğmeler aria-pressed; sunucu çiziminde topuz ölçülmeden
+ * seçili düğme aynı görünümü CSS’le alır. Rol tonlu seçenekte topuz o tonda.
+ */
 
 export interface ChoiceOption<T extends string> {
   id: T;
   name: string;
   role?: RoleKey;
-  title?: string;
 }
 
-/** Basılı düğme grubu (aria-pressed): etiket + seçenekler; rol tonu varsa seçili düğme o tonda. */
-export function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: ChoiceOption<T>[]; onChange: (id: T) => void }) {
+interface Thumb {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export function Choice<T extends string>({ label, value, options, note, onChange }: { label: string; value: T; options: ChoiceOption<T>[]; /** Görünür açıklama (ipucu yerine; dokunmada hover yoktur) */ note?: string; onChange: (id: T) => void }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<Thumb | null>(null);
+  const selected = options.find((o) => o.id === value);
+  useLayoutEffect(() => {
+    const el = track.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const btn = el.querySelector<HTMLElement>('[aria-pressed="true"]');
+      const next = btn ? { x: btn.offsetLeft, y: btn.offsetTop, w: btn.offsetWidth, h: btn.offsetHeight } : null;
+      setThumb((old) => (old && next && old.x === next.x && old.y === next.y && old.w === next.w && old.h === next.h ? old : next));
+    };
+    measure();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [value, options.length]);
   return (
     <div className="secim" role="group" aria-label={label}>
       <span className="secim-etiket">{label}</span>
-      {options.map((o) => (
-        <button key={o.id} type="button" className="secim-dugme" data-role={o.role} aria-pressed={o.id === value} title={o.title} onClick={() => onChange(o.id)}>
-          {o.name}
-        </button>
-      ))}
+      <div className="secim-iz" ref={track} data-olculdu={thumb ? '' : undefined}>
+        {thumb ? (
+          <span className="secim-top" aria-hidden="true" data-role={selected?.role} style={{ transform: `translate(${thumb.x}px, ${thumb.y}px)`, width: thumb.w, height: thumb.h }} />
+        ) : null}
+        {options.map((o) => (
+          <button key={o.id} type="button" className="secim-dugme" data-role={o.role} aria-pressed={o.id === value} onClick={() => onChange(o.id)}>
+            {o.name}
+          </button>
+        ))}
+      </div>
+      {note ? <p className="secim-not">{note}</p> : null}
     </div>
   );
 }
