@@ -1335,6 +1335,8 @@ test.describe('parametreler', () => {
     await icerik(page);
     await hydrated(page);
     await page.locator('.pgrup h2 button', { hasText: 'Takvim' }).click();
+    // Panel açılış geçişi bitmeden odak verilemez: alan görünür olunca.
+    await expect(page.getByLabel('Program başlangıcı')).toBeVisible();
     await page.getByLabel('Program başlangıcı').focus();
     await page.keyboard.press(tab);
     const state = await page.evaluate(() => {
