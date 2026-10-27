@@ -788,7 +788,8 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
     await icerik(page);
     await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Gelir planı');
     const meta = page.locator('.page-meta');
-    await expect(meta.locator('dt')).toHaveText(['Dönem', 'İlk satış', 'Paket']);
+    // Paket fiyatı başlıkta değil (P6.2: ana sonuç 320×480 ilk ekranda kalsın; fiyat “Fiyat” bölümünde).
+    await expect(meta.locator('dt')).toHaveText(['Dönem', 'İlk satış']);
     await expect(meta).toContainText('19 Ekim 2026 – Aralık 2027');
     await expect(meta).toContainText('6 Kasım 2026');
     const [baslik, kirinti] = [

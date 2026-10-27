@@ -104,6 +104,9 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
 - **Sayfa başlığı tek kalıptır.** Her sayfanın tek h1’i kırıntı satırının son öğesidir (“19 Ekim › Gelir planı”); altında
   bir cümlelik amaç ve dönem/kaynak satırı (`PageHeader`). Ayrı “hero”, turuncu üst etiket ve uzun giriş metni yok; bölüm
   başlığında numara yalnız sıra anlamlıysa (araç sayfalarında yok), üst çizgi ince.
+- **Önce sonuç, sonra ayar, sonra veri.** Gelir planı ve nakit akışında seçili senaryonun ana sonucu (`ResultSummary`:
+  değer + dönem + kıyas + durum) sayfa başlığının hemen altındadır ve 320×480’de kaydırmadan görünür; kritik risk
+  (“kapanmıyor”, “sıfırın üstüne çıkmıyor”) alt bölümlere ya da accordion’a gömülmez.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 
@@ -174,6 +177,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Organizasyon şeması | `src/data/tree.ts` |
 | Gezinme (şerit ve dar ekran çekmecesi), tema, sunum sırası | `src/components/AppFrame.tsx` |
 | Sayfa başlığı (kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) | `src/components/PageHeader.tsx` |
+| Ana sonuç bloğu (gelir planı fon ihtiyacı, nakit akışı açık tavanı; dönem, kıyas, durum) | `src/components/ResultSummary.tsx` |
 | Tablo / kayıt görünümü (dar ekran), grafik kutusu, seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart`, `Choice`) |
 | UX sözleşmesi, kabul senaryoları, istisna kayıtları | `docs/ux.md`, AGENTS.md → “UX yeniden tasarım sözleşmesi” |
 | Renk, boşluk, yazı, hareket | `src/styles/tokens.css` (sadece burası) |

@@ -172,7 +172,13 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     sponsor/ekip lideri payı modellenmez (varsayımlar bölümünde yazılı). Testler: `tests/nakit.spec.ts` (sahte Sheets
     yanıtı, anahtar, senaryo seçici ve karşılaştırma, üst üste görünüm, menü, 320/390/1280, grafik) ve
     `tests/data.spec.ts` (girişler senaryo serileriyle aynı, Sheets kategori toplamları = aylık toplamlar, nakit zinciri,
-    senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi).
+    senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi). **Ana sonuç** (P6.2, M05; `ResultSummary`):
+    sayfa başlığının altında, Özet bölümünden önce — “Sonuç · [senaryo]”, dönem, **nakit açığı tavanı** (₺) ve
+    açıklaması, durum (iyi: hiç negatife düşmüyor; uyarı: en düşük ay + toparlanma ayı + gereken ek nakit; risk: dönem
+    sonuna kadar sıfırın üstüne çıkmıyor), ardından senaryo seçici (eylem), üç senaryoda aynı ölçü (seçili işaretli),
+    ikincil göstergeler (en düşük nakit, toparlanma, dönem sonu nakit, 15 ay net) ve kaynak satırı (Sheets okunamadıysa
+    “yalnız plan kalemleri … tablo eksiktir”: eksik veri tam plan gibi görünmez). Değer özet kutusu ve karşılaştırma
+    tablosuyla aynıdır (`nakit.spec.ts → ana sonuç`); 320×480’de kaydırmadan görünür.
   - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
     sırasında da). **UX-first yeniden kurulum (kullanıcı kararı 2026-10-27: “seçenekleri en başta seçeyim, kalan tüm veri
     tek seferde değişsin; hazır seçenek kümeleri; seçili senaryonun özeti kaydırırken üstte sabit; enterprise olgunluk”):**
@@ -184,10 +190,19 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     gider, satış primi; bir seçenek değişince senaryo “Özel: temel + n değişiklik” olur; “Seçenekleri sıfırla”;
     “Bağlantıyı kopyala”). **Tek durum** `useScenarioOptions` (temel senaryo `istoc-plan-senaryo` nakit akışı ve istihdam
     takvimiyle ortak; seçenekler `istoc-plan-senaryo-secenekler`; adres çubuğu `?senaryo=…&kapasite=…&eksaha=…`
-    paylaşılabilir bağlantı, açılışta adres > saklanan > varsayılan; `history.replaceState`). Kurucunun altında
+    paylaşılabilir bağlantı, açılışta adres > saklanan > varsayılan; `history.replaceState`). **Ana sonuç** (kullanıcı kararı 2026-10-27, ux.md §5.4/M05, paket P6.2;
+    `ResultSummary`, `src/components/ResultSummary.tsx`, `.sonuc`): sayfa başlığının hemen altında, kurucudan **önce**
+    (sıra: amaç → bağlam/senaryo + sonuç → eylem → veri; seçenek değişince şerit ve blok anında değişir) — başında
     **yapışkan özet** (`YapiskanOzet`, `.yapiskan`: `position: sticky`, geniş ekranda `--bant-h` altında; `role="status"`
     `aria-live`; senaryo adı rol tonunda + 100 aktif, ciro hedefi, ufuk sonu gelir, başabaş, geri ödeme, fon ihtiyacı
-    çipleri; dar ekranda yatay kayar). Bütün bölümler, tablolar ve grafikler bu tek durumdan `computeBreakeven`
+    çipleri; dar ekranda yatay kayar; `.wrap` içinde doğrudan durur, bloğun içine alınmaz), altında blok: “Sonuç ·
+    [senaryo hapı]”, dönem (19 Ekim 2026 – Aralık 2027 · 15 ay), öncelikli değer **en çok fon ihtiyacı** (₺, sol kenar
+    senaryo tonu) ve açıklaması (en düşük ay, ufuk gelir/gider/net, gider kaynağı), **durum** (`.sonuc-durum[data-ton]`:
+    iyi = aylık başabaş tarihi + geri ödeme; uyarı = eğilimle ≈ tarih; risk = “Kapanmıyor… sürdürülebilir değil”) —
+    kritik risk hiçbir zaman gizlenmez —, kıyas (hazır senaryolarda aynı ölçü, seçili işaretli; özel senaryo dördüncü
+    satır), ikincil göstergeler (şeritteki çiplerle aynı dizi: tek kaynak). 320×480’de değer kaydırmadan tam görünür
+    (`gelir.spec.ts → ana sonuç`); bu yüzden başlıkta Paket satırı yok (fiyat “Fiyat” bölümünde). Kurucu sonucun
+    altındadır (kullanıcı kararı 2026-10-27 “seçenekler en başta” korunur: ilk bölümden önce). Bütün bölümler, tablolar ve grafikler bu tek durumdan `computeBreakeven`
     (`inputsOf`) ile hesaplanır; bölüm/tablo/grafik çubuklarında seçici değil senaryo etiketi (`.araclar-etiket`) ve
     görünüm anahtarları (`ModSecimi`, Eksen) vardır. **Takvim** (kullanıcı kararı 2026-10-27): tüm senaryolar
     `simStartDate` (19 Ekim 2026) ile başlar, `firstSaleDate` (6 Kasım 2026) öncesi satışa bağlı gelir 0 ₺ (`saleFactor`:
@@ -419,7 +434,7 @@ bunu denetler.
 | P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | Bekliyor | — |
 | P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
 | P6.1 Sayfa başlığı tek kalıp (`PageHeader`: kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) ve bölüm başlığı sadeleşmesi (hairline, numara yalnız sıralı bölümlerde) | §3, §5.4, M03 | **Tamam** (2026-10-27) | `ui.spec.ts → sayfa başlığı ve bölüm başlığı` (320), `ONCEKI` (1280, kırıntı satırı dahil), kırıntı testi; `gelir.spec.ts` dönem satırı |
-| P6.2 `ResultSummary` (M05): gelir planı ve nakit akışında seçili senaryonun ana sonucu (dönem, birim, kıyas) ilk ekranda; kritik risk gizlenmez; yapışkan özetle tek kaynak | §5.4, §5.15, §9, M05 | Bekliyor | — |
+| P6.2 `ResultSummary` (M05): gelir planı (en çok fon ihtiyacı, başabaş durumu) ve nakit akışında (nakit açığı tavanı) seçili senaryonun ana sonucu dönem, birim ve kıyasla 320×480 ilk ekranda; durum/risk gizlenmez; yapışkan özet şerit olarak bloğun başında (tek kaynak); gelirde sonuç kurucudan önce (§5.4 sırası) | §5.4, §5.15, §9, M05 | **Tamam** (2026-10-27) | `gelir.spec.ts → ana sonuç` (320×480, kıyas, risk, tek kaynak) ve sıra testi; `nakit.spec.ts → ana sonuç` (özet kutusu ve tabloyla aynı değer, seçici, kaynak uyarısı) |
 | P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13), değişiklik özeti, “bu tarayıcıda kaydedildi” ve “varsayılana dön” kapsamı (UX-14/15) | §3, §9, M13/M23 | Bekliyor | — |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli

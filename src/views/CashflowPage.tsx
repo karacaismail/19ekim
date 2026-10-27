@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
+import { ResultSummary } from '../components/ResultSummary';
 import { Araclar, ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
 import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { buildCashflow, type CashLine, type Cashflow } from '../data/cashflow';
@@ -83,16 +84,47 @@ function Icerik() {
     </Araclar>
   );
   const karsilastirma = m.cashflow.senaryolar.map((s) => ({ s, cf: hepsi[s.id] }));
+  const acikYaz = (x: Cashflow) => (x.acik ? tl(x.acik) : '0 ₺');
+  /* Ana sonuç (ux.md M05, P6.2): nakit açığı tavanı, dönem, üç senaryo kıyası; durum (negatife iniş / toparlanma) görünür. */
+  const sonucDurum = cf.acik
+    ? cf.toparlanma
+      ? { ton: 'uyari' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} ile en düşük noktasına iner; ${cf.toparlanma.ad} itibarıyla kalıcı olarak sıfırın üstüne çıkar. O güne kadar ${tl(cf.acik)} ek nakit gerekir.` }
+      : { ton: 'risk' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda sıfırın altına iner ve ${son.ad} sonuna kadar sıfırın üstüne çıkmaz: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
+    : { ton: 'iyi' as const, metin: `Dönem sonu nakit hiçbir ay sıfırın altına düşmüyor (en düşük ${tl(cf.enDusuk.deger)}, ${cf.enDusuk.ay.ad} sonu); ek nakit gerekmez.` };
 
   return (
     <>
       <PageHeader
         title="Nakit akış tablosu"
-        purpose={`Seçili senaryoda ${cf.aylar.length} ayın nakit girişleri, çıkışları, net akışı ve dönem sonu nakdi; nakit açığı tavanı ek nakit ihtiyacını gösterir.`}
+        purpose={`${cf.aylar.length} ayın nakit girişleri, çıkışları, net akışı ve dönem sonu nakdi; nakit açığı tavanı ek nakit ihtiyacını gösterir.`}
         meta={[
           { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
-          { label: 'Kaynak', value: 'Girişler gelir planının seçili senaryosundan, çıkışlar Google Sheets gider planından' },
+          { label: 'Kaynak', value: 'Girişler gelir planı senaryosu · çıkışlar Google Sheets' },
         ]}
+      />
+      <ResultSummary
+        baslik="Sonuç"
+        senaryo={{ ad: sc.name, role: sc.role }}
+        donem={`${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay`}
+        ana={{
+          etiket: 'Nakit açığı tavanı',
+          deger: acikYaz(cf),
+          aciklama: 'Dönem sonu nakdi hiçbir ay sıfırın altına düşürmeyen en küçük ek nakit; yatırım girişi ve başlangıç nakdi parametresi bunu değiştirir.',
+        }}
+        durum={sonucDurum}
+        tools={secici}
+        kiyas={{ temel: 'Aynı Sheets giderleriyle üç senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
+        ikincil={[
+          { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} · ${cf.enDusuk.ay.kisa}` },
+          { etiket: 'Toparlanma', deger: cf.toparlanma ? (cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : cf.toparlanma.kisa) : 'Dönem içinde yok' },
+          { etiket: `Dönem sonu nakit (${son.kisa})`, deger: tl(cf.donemSonu[cf.donemSonu.length - 1]) },
+          { etiket: `Net nakit akışı, ${cf.aylar.length} ay`, deger: tl(cf.toplam.net) },
+        ]}
+        kaynak={
+          cf.sheets
+            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu.'
+            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu.'
+        }
       />
       <Section
         id="ozet"

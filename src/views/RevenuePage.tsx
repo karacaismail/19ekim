@@ -5,6 +5,7 @@ import { useModel } from '../components/ModelContext';
 import { Araclar, ModSecimi, type Mod } from '../components/Senaryo';
 import { SenaryoKurucu, YapiskanOzet } from '../components/SenaryoKurucu';
 import { PageHeader } from '../components/PageHeader';
+import { ResultSummary } from '../components/ResultSummary';
 import { Chart, Choice, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../data/breakeven';
 import { buildSources, simulate, sure, type Milestone, type SimInputs } from '../data/revenue';
@@ -220,28 +221,48 @@ function Icerik() {
       ['Rol', 'Görev', 'Gelire katkı yolu', 'Başlangıç', 'Aylık maliyet (₺)', `${H} ay gider (₺)`, 'Yeni aktif', 'Gelire katkı (₺)', 'Net (₺)', 'Katkı ÷ gider'],
       ...st.rows.map((x) => [x.role.name, x.role.gorev, x.role.katkiYolu, x.role.startIso, x.role.maliyet, Math.round(x.gider), Math.round(x.aktif * 10) / 10, x.dogrudan ? Math.round(x.katki) : '', Math.round(x.net), x.oran ?? '']),
     ]);
+  const fon = tl(Math.min(0, be.enDusuk.deger));
   const ozet = [
     { etiket: `${int(params.activeTarget)} aktif`, deger: kisaGun(aktif100.date) },
     { etiket: tl(params.ciroTarget), deger: kisaGun(gelir3m.date) },
     { etiket: `${son} sonu gelir`, deger: tl(sim.kumulatif[H - 1]) },
     { etiket: 'Başabaş', deger: tarihYaz(be.ongoru.nokta) },
     { etiket: 'Geri ödeme', deger: tarihYaz(be.ongoru.geriOdeme) },
-    { etiket: 'Fon ihtiyacı', deger: tl(Math.min(0, be.enDusuk.deger)) },
+    { etiket: 'Fon ihtiyacı', deger: fon },
   ];
+  /* Ana sonuç (ux.md M05, P6.2): yapışkan özetle aynı değerler; durum başabaş öngörüsünden (kritik risk gizlenmez). */
+  const sonucDurum = be.nokta
+    ? { ton: 'iyi' as const, metin: `Aylık başabaş ${longDate(be.nokta.date)}; geri ödeme ${tarihYaz(be.ongoru.geriOdeme)}.` }
+    : be.ongoru.nokta
+      ? { ton: 'uyari' as const, metin: `${son} sonuna kadar aylık başabaş yok; son 6 ayın eğilimiyle ≈ ${longDate(be.ongoru.nokta.date)} (aylık açık ${tl(-be.ongoru.sonNet)}, her ay ${tl(be.ongoru.egim)} daralıyor).` }
+      : { ton: 'risk' as const, metin: `Kapanmıyor: ${son} sonuna kadar gelir gideri geçmiyor ve açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}); bu seçeneklerle sürdürülebilir değil.` };
+  const sonucKiyas = ustUste.map((x) => ({ ad: x.name, role: x.role, deger: tl(Math.min(0, x.be.enDusuk.deger)), secili: x.name === senaryoAdi }));
 
   return (
     <>
       <PageHeader
         title="Gelir planı"
-        purpose={`${int(params.activeTarget)} aktif satıcı, ${int(params.memberTarget)} üye ve ${tl(params.ciroTarget)} kümülatif gelir mevcut kadroyla ne zaman gelir; kadronun gelire katkısı, dijital pazarlama stratejisi ve başabaş.`}
+        purpose={`${int(params.activeTarget)} aktif satıcı, ${int(params.memberTarget)} üye ve ${tl(params.ciroTarget)} gelir mevcut kadroyla ne zaman gelir; kadro katkısı, dijital strateji ve başabaş.`}
         meta={[
           { label: 'Dönem', value: `${r.labels.start} – ${r.labels.end}` },
-          { label: 'İlk satış', value: `${r.labels.firstSale} (o güne kadar satışa bağlı gelir 0 ₺)` },
-          { label: 'Paket', value: `${m.SUBSCRIPTION_EUR} € / ay ya da ${int(m.SUBSCRIPTION_EUR * params.annualMonths)} € / yıl` },
+          { label: 'İlk satış', value: r.labels.firstSale },
         ]}
       />
+      <ResultSummary
+        baslik="Sonuç"
+        senaryo={{ ad: senaryoAdi, role: senaryoRol }}
+        donem={`${r.labels.start} – ${r.labels.end} · ${H} ay`}
+        ana={{
+          etiket: 'Fon ihtiyacı (en çok)',
+          deger: fon,
+          aciklama: `Kümülatif netin en düşük noktası ${months[be.enDusuk.t].ad}; ${H} ayda gelir ${tl(be.toplam.gelir)}, gider ${tl(be.toplam.gider)}, net ${tl(be.toplam.net)} (gider kaynağı: ${be.kaynak === 'sheets' ? 'Sheets' : 'plan kadrosu'}).`,
+        }}
+        durum={sonucDurum}
+        kiyas={{ temel: 'Aynı ölçü hazır senaryolarda (en çok fon ihtiyacı)', satirlar: sonucKiyas }}
+        ikincil={ozet.slice(0, 5)}
+        strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} />}
+      />
       <SenaryoKurucu p={params} state={state} sahaGrowthDefault={sc.sahaGrowthEvery} retentionDefault={sc.retention} factorDefault={sc.factor} />
-      <YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} />
 
       <Section
         id="hedefler"

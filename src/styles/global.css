@@ -5638,6 +5638,182 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Ana sonuç (ux.md M05 ResultSummary; kullanıcı kararı 2026-10-27, P6.2) ----------
+ * Seçili senaryonun karar sonucu: bağlam (senaryo, dönem) → öncelikli değer → durum/risk (her zaman görünür) → eylem →
+ * kıyas → ikincil göstergeler → kaynak. Yapışkan özet şeridi bloğun önünde durur; blok yükseltilmiş yüzeyde.
+ */
+.sonuc {
+  margin-top: var(--space-3);
+}
+
+.yapiskan + .sonuc {
+  margin-top: 0;
+}
+
+/* Şerit başlığın hemen altındayken (sonuç kurucudan önce) boşluk dar: ana sonuç 320×480 ilk ekranda kalır. */
+.page-intro + .yapiskan {
+  margin-top: var(--space-3);
+}
+
+.sonuc-govde {
+  padding: var(--space-1) var(--space-4) var(--space-5);
+  border-radius: var(--radius-surface);
+  background: var(--surface-raised);
+}
+
+.sonuc-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+/* Başlık ve senaryo hapı aynı satırda (320 px’te de): erişilebilir ad “Sonuç Medyan”. */
+.sonuc-baslik {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  font-weight: var(--weight-semibold);
+}
+
+.sonuc-donem {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+@media (min-width: 48em) {
+  .sonuc-donem {
+    flex: 0 1 auto;
+    margin-inline-start: auto;
+  }
+}
+
+/* Öncelikli sonuç: sol kenarda senaryo tonunda düz çizgi (kenar sistemi), büyük tabular değer. */
+.sonuc-ana {
+  margin-top: var(--space-1);
+  padding-inline-start: var(--space-4);
+}
+
+.sonuc-etiket {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+}
+
+.sonuc-deger {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-stat);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.sonuc-aciklama {
+  margin: var(--space-1) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+/* Durum: iyi / uyarı / risk; durum hapı renkleriyle, metin ≥ 14 px, hiçbir zaman gizlenmez. */
+.sonuc-durum {
+  margin: var(--space-3) 0 0;
+  max-width: var(--prose-max);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-surface);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+}
+
+.sonuc-durum[data-ton='iyi'] {
+  background: var(--status-karar-bg);
+  color: var(--status-karar-fg);
+}
+
+.sonuc-durum[data-ton='uyari'] {
+  background: var(--status-oneri-bg);
+  color: var(--status-oneri-fg);
+}
+
+.sonuc-durum[data-ton='risk'] {
+  background: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+}
+
+.sonuc-araclar {
+  margin-top: var(--space-3);
+}
+
+.sonuc-kiyas {
+  margin-top: var(--space-4);
+}
+
+.sonuc-kiyas-temel {
+  margin: 0 0 var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.sonuc-kiyas dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+}
+
+.sonuc-kiyas dl > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-surface);
+}
+
+/* Seçili senaryo: kendi tonunun zemini (hap ile aynı dil), köşesiz. */
+.sonuc-kiyas dl > div[data-secili] {
+  background: var(--tone-bg, var(--surface-control));
+  color: var(--tone-fg, var(--text-primary));
+}
+
+.sonuc-kiyas dt {
+  color: inherit;
+  font-size: var(--text-sm);
+}
+
+.sonuc-kiyas dl > div:not([data-secili]) dt {
+  color: var(--text-secondary);
+}
+
+.sonuc-kiyas dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.sonuc .sonuc-ikincil {
+  margin-top: var(--space-4);
+  line-height: var(--leading-snug);
+}
+
+.sonuc-kaynak {
+  margin: var(--space-3) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
 /* Araç çubuğundaki senaryo etiketi (seçici yerine; seçim üstteki kurucuda). */
 .araclar-etiket {
   align-self: center;
