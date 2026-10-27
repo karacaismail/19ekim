@@ -171,6 +171,8 @@ const ratio = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractio
 const OPEX_NARROW = 568;
 /** Çubuk ucundaki etiket için sağ pay: en uzun etiketin yaklaşık genişliği (SVG dışına taşmasın). */
 const labelRoom = (labels: string[]) => Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * FONT_SIZE * 0.6) + 16;
+/** Kategori ekseninde son etiketin yarısı sağa taşar: ızgaranın sağında o kadar yer (CI yazı tipi daha geniş olabilir). */
+const tailRoom = (labels: string[]) => Math.max(16, Math.ceil(labelRoom(labels.slice(-1)) / 2) + 8);
 let olcer: CanvasRenderingContext2D | null = null;
 /** Metnin piksel genişliği (grafik yazı tipiyle; yazı tipi çizimden önce yüklenir). Ölçülemezse null. */
 function metinGenisligi(text: string, font: string) {
@@ -454,10 +456,10 @@ function build(spec: ChartSpec, width: number): Opt {
       const cumulative = spec.first.map((f, i) => (running += f + spec.renew[i]));
       return {
         ...base(),
-        grid: { ...grid, top: legendTop(['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'], width) },
+        grid: { ...grid, right: tailRoom(spec.months), top: legendTop(['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'], width) },
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
         legend: { ...(base().legend as Opt), data: ['İlk ödemeler', 'Yenilemeler', 'Kümülatif ciro'] },
-        xAxis: { type: 'category', data: spec.months, ...axis(), splitLine: { show: false } },
+        xAxis: { type: 'category', data: spec.months, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
         yAxis: { type: 'value', ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
         series: [
           { name: 'İlk ödemeler', type: 'bar', stack: 'a', data: spec.first, barMaxWidth: 64, itemStyle: { color: accent, borderRadius: 0 } },
@@ -786,7 +788,7 @@ function build(spec: ChartSpec, width: number): Opt {
       const strong = token('--accent-strong');
       return {
         ...base(),
-        grid: { ...grid, top: legendTop(names, width) },
+        grid: { ...grid, right: tailRoom(spec.labels), top: legendTop(names, width) },
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
@@ -811,7 +813,7 @@ function build(spec: ChartSpec, width: number): Opt {
       const names = spec.series.map((x) => x.name);
       return {
         ...base(),
-        grid: { ...grid, top: legendTop(names, width) },
+        grid: { ...grid, right: tailRoom(spec.labels), top: legendTop(names, width) },
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(Math.round(v * 10) / 10)} ${spec.unit}` },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
@@ -857,7 +859,7 @@ function build(spec: ChartSpec, width: number): Opt {
       const align = t === null ? 'center' : t > n * 0.75 ? 'right' : t < n * 0.25 ? 'left' : 'center';
       return {
         ...base(),
-        grid: { ...grid, right: 24, top: legendTop(names, width) },
+        grid: { ...grid, right: Math.max(24, tailRoom(spec.labels)), top: legendTop(names, width) },
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
