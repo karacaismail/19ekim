@@ -186,7 +186,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     dokunmada hover yoktur —, seçimin açıklaması görünür not `.secim-not`; iz, düğme ve çubuk açık alanlı: kullanıcı
     kararı 2026-10-27 “clear space önemli”) ve anahtar **araç
     çubuğunda** durur (`Araclar`, `.araclar`: yükseltilmiş zemin, üst köşeler yuvarlak, altta seçili senaryonun tonunda
-    çizgi `data-edge="bottom"` — kenar sistemi: alt köşeler düz —, altındaki grafik kutusu/tablo/kartlar bitişik:
+    çizgi `data-edge="bottom"` — kenar sistemi: alt köşeler düz; `scripts/check-ui-gates.mjs` `EDGE_CORNERS` bu türü tanır —, altındaki grafik kutusu/tablo/kartlar bitişik:
     kullanıcı kararı 2026-10-27 “tek zemin, kayarak geçen, wrapper içinde, altındaki bölüme bağlı”). `Section`, `Chart`
     ve `DataTable` `tools` düğümünü olduğu gibi çizer; sayfa `Araclar` ile sarar. Seçim `useScenario`
     (`src/lib/scenario.ts`: localStorage `istoc-plan-senaryo`, varsayılan medyan, nakit akış tablosu ve istihdam

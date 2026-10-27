@@ -204,6 +204,8 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
 const EDGE_CORNERS = {
   start: ['border-start-start-radius', 'border-end-start-radius'],
   top: ['border-start-start-radius', 'border-start-end-radius'],
+  // Araç çubuğu (senaryo anahtarı) altındaki içeriğe bağlanır: çizgi altta, alt köşeler düz (kullanıcı kararı 2026-10-27).
+  bottom: ['border-end-start-radius', 'border-end-end-radius'],
 };
 const globalCss = join(SRC, 'styles', 'global.css');
 const edgeRules = parseCss(readFileSync(globalCss, 'utf8'));
