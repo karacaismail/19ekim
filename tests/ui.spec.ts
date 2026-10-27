@@ -238,7 +238,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu).toBeVisible();
     const ogeler = menu.getByRole('menuitem');
     // Kullanıcı kararı 2026-10-21: 1–7 sıralı numara, roller pozisyon adıyla; numarasız öğede aynı sade nokta.
-    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi']);
+    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Applet']);
     await expect(menu.getByRole('menuitem', { name: 'Segika CRM' })).toHaveAttribute('aria-current', 'page');
     await expect(menu.locator('.tree-no')).toHaveCount(7);
     await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' }).locator('.navmenu-bullet')).toHaveCount(1);
@@ -260,6 +260,21 @@ test.describe('başlık ve İstihdam menüsü', () => {
     expect(yuzey).not.toBe('');
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
+  });
+
+  test('Applet bağlantısı açılır; applet alt bölümündeyken İstihdam ve Applet etkin kalır', async ({ page }) => {
+    await page.goto('istihdam/');
+    await icerik(page);
+    await page.getByRole('button', { name: 'İstihdam' }).click();
+    await page.getByRole('menuitem', { name: 'Applet', exact: true }).click();
+    await expect(page).toHaveURL(/\/applet\/$/);
+    await expect(page.locator('section#katalog')).toBeVisible();
+    await page.goto('applet/#is-degerleme');
+    await icerik(page);
+    const tetik = page.getByRole('button', { name: 'İstihdam' });
+    await expect(tetik).toHaveAttribute('data-section', 'true');
+    await tetik.click();
+    await expect(page.getByRole('menuitem', { name: 'Applet', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('klavye: Tab ile tetikleyici, Enter açar, oklar ögeler arasında gezer; odak alt çizgiyle (halka yok)', async ({ page }) => {
@@ -441,7 +456,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const ogeler = await page.getByRole('menuitem').evaluateAll((els) =>
       els.map((el) => ({ deco: getComputedStyle(el).textDecorationLine, bg: getComputedStyle(el).backgroundColor, current: el.getAttribute('aria-current') })),
     );
-    expect(ogeler.length).toBe(8);
+    expect(ogeler.length).toBe(9);
     expect(ogeler.filter((o) => o.deco.includes('underline'))).toEqual([]);
     expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
@@ -651,14 +666,14 @@ test.describe('yatay telefon (alçak ekran)', () => {
       await icerik(page);
       await hydrated(page);
       await page.getByRole('button', { name: 'İstihdam' }).click();
-      const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
+      const son = page.getByRole('menuitem', { name: 'Applet', exact: true });
       await son.scrollIntoViewIfNeeded();
       const box = await son.boundingBox();
       expect(box).not.toBeNull();
       expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
       await expect(page.getByRole('button', { name: 'İstihdam' })).toBeInViewport();
       await son.click();
-      await expect(page).toHaveURL(/\/istihdam\/$/);
+      await expect(page).toHaveURL(/\/applet\/$/);
     });
   }
 });
@@ -678,7 +693,7 @@ test.describe('dokunmatik cihaz', () => {
     await page.getByRole('button', { name: 'İstihdam' }).tap();
     await expect(page.getByRole('menu', { name: 'İstihdam' })).toBeVisible();
     const ogeler = await page.getByRole('menuitem').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(8);
+    expect(ogeler.length).toBe(9);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
   });
 });

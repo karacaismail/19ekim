@@ -109,8 +109,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     anahtarıyla yalnız o tarayıcıda saklanır.
   - `/bcg/` genel BCG matrisi eğitimi (Türkçe; kullanıcı kararı 2026-10-19: iStoc’a uygulanmaz; menüde ve sunum sırasında yok, yalnız adresle açılır): eksenler, dört kutu ve
     nakit döngüsü, stratejiler, adımlar, kurgusal çalışılmış örnek (balon matrisi), hatalar, sınırlar, alıştırmalar (`src/data/bcg.ts`).
-  - `/applet/` ücret ve performans applet’leri (kullanıcı kararı 2026-10-21; menüde ve sunum sırasında yok, yalnız adresle
-    açılır, BCG gibi): fatura kesen serbest çalışan ağı için meslekten bağımsız 17 örnek model, iki motor — rütbe (sabit
+  - `/applet/` ücret ve performans applet’leri (kullanıcı kararı 2026-10-27: İstihdam menüsünde takvimden sonra
+    numarasız “Applet” öğesi; `APPLET_NAV`; sunum sırasında yok): fatura kesen serbest çalışan ağı için meslekten bağımsız 17 örnek model, iki motor — rütbe (sabit
     ücret: katalog, rütbe matrisi, kademe serisi, iş değerleme, taban ücret zinciri, band içi konum), zam (liyakat
     matrisi, yıllık zam, terfi kapısı, kademe adımları), efor (performans karnesi, sprint skoru, prim eğrisi, şirket ×
     takım × birey, kâr paylaşımı) ve denetim (yapı denetimi, toplam hedef nakit). Kullanıcı kısıtı: yasal çerçeve

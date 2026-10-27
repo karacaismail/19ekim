@@ -99,8 +99,9 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
   { label: 'Asistan', path: '/roller/asistan/', role: 'asistan', no: 7 },
 ];
 
-/** “İstihdam” menüsünün sonunda (organizasyon ve rollerden sonra): işe alım sırası. */
+/** “İstihdam” menüsünün alt bölümü: takvim ve ücret/performans modelleri. */
 export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
+export const APPLET_NAV = { label: 'Applet', path: '/applet/' };
 
 /** “Pazarlama” açılır menüsü (kullanıcı kararı 2026-10-20). */
 export const MARKETING_NAV = [
