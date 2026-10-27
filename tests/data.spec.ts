@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
 import { DEFAULT_NOTES } from '../src/data/notes';
+import { computeBreakeven, defaultFilters, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
 import { buildCashflow } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
@@ -104,13 +105,15 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
     expect(JSON.stringify([m.openDecisions, m.decisions])).not.toMatch(/30K|90K|500K/);
   });
 
-  test('ücret: maliyet = maaş × 2; saha kotası kendi maliyeti; asgari ücret çarpanları', () => {
-    expect(m.quota).toBe(120_000);
-    expect(m.salaries.masa).toBeCloseTo(28_075.5 * 1.25);
+  test('ücret: maliyet = maaş × 2; saha kotası kendi maliyeti; net maaşlar (2026-10-27) ve asgari ücret çarpanları', () => {
+    expect(m.quota).toBe(100_000);
+    expect(m.salaries.saha).toBe(50_000);
+    expect(m.salaries.masa).toBe(35_000);
+    expect(m.salaries.segika).toBe(35_000);
+    expect(m.salaries.organizator).toBe(50_000);
     expect(m.salaries.asistan).toBeCloseTo(28_075.5 * 1.5);
     expect(m.salaries.dijital).toBeCloseTo(28_075.5 * 1.25);
-    expect(m.salaries.organizator).toBeCloseTo(28_075.5 * 2);
-    expect(m.salaries.segika).toBeCloseTo(m.salaries.masa);
+    expect(m.payRules[7].fixed).toContain('50.000 ₺ maaş / ay (net)');
     expect(m.payRules.map((r) => r.role)).toEqual(['saha-uzmani', 'ekip-lideri', 'ekip-lideri', 'pazarlamaci', 'segika', 'dijital-pazarlama', 'asistan', 'organizator']);
     expect(m.maxPayout).toBe(3_250);
   });
@@ -201,10 +204,12 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
     expect(x.salaries.lead).toBe(80_000);
   });
 
-  test('asgari ücret değişince bağlı maaşlar ve maliyetler değişir', () => {
+  test('asgari ücret değişince çarpanlı maaşlar değişir; net maaşlar sabit kalır', () => {
     const x = withParams({ minWage: 30_000 });
-    expect(x.salaries.organizator).toBe(60_000);
-    expect(x.role('organizator').pay).toContain('60.000 ₺');
+    expect(x.salaries.dijital).toBe(37_500);
+    expect(x.role('dijital-pazarlama').pay).toContain('37.500 ₺');
+    expect(x.salaries.organizator).toBe(50_000);
+    expect(x.role('organizator').pay).toContain('50.000 ₺ maaş (net)');
     expect(x.staffCost90).toBeGreaterThan(m.staffCost90);
   });
 
@@ -362,23 +367,34 @@ test.describe('nakit akış tablosu', () => {
   const m = buildModel(DEFAULT_PARAMS);
   const opex = buildOpex();
 
-  test('15 ay; ilk 90 günün satıcı-ayları hedefler sayfasıyla aynı; sonrası parametre', () => {
+  test('15 ay; girişler gelir planının senaryo serilerinden (Ekim boş); prim senaryonun yeni aktifine göre', () => {
     const plan = m.cashflow;
     expect(plan.aylar.length).toBe(15);
     expect(plan.aylar[0].iso).toBe('2026-10-01');
     expect(plan.aylar[14].iso).toBe('2027-12-01');
-    const pay = m.payments(m.planRetention);
-    // Program Kasım’da başlar: Ekim 0; Kasım, Aralık, Ocak hedefler sayfasının aylık ödeyen satıcı sayısı.
-    expect(plan.yeniAktif[0]).toBe(0);
-    for (let i = 0; i < 3; i++) expect(plan.yeniAktif[i + 1] + plan.yenileme[i + 1]).toBeCloseTo(pay.monthly[i], 1);
-    expect(plan.yeniAktif[4]).toBe(DEFAULT_PARAMS.newActiveMonthly);
-    expect(plan.ilkOdeme[1]).toBeCloseTo(m.NEW_ACTIVE[0] * m.SUBSCRIPTION_TRY, 1);
+    expect(plan.senaryolar.map((s) => s.id)).toEqual(['kotumser', 'medyan', 'iyimser']);
+    for (const x of m.revenue.series) {
+      const s = plan.seri[x.scenario.id];
+      expect(s.yeniAktif[0]).toBe(0);
+      expect(s.ilkOdeme[0]).toBe(0);
+      for (let i = 1; i < 15; i++) {
+        expect(s.yeniAktif[i], `${x.scenario.id} ay ${i}`).toBeCloseTo(x.yeniAktif[i - 1], 2);
+        expect(s.ilkOdeme[i]).toBeCloseTo(x.ilkOdeme[i - 1], 1);
+        expect(s.yenilemeTl[i]).toBeCloseTo(x.yenileme[i - 1], 1);
+        expect(s.prim[i]).toBeCloseTo(s.yeniAktif[i] * DEFAULT_PARAMS.commission, 1);
+      }
+    }
+    const top = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+    expect(top(plan.seri.kotumser.ilkOdeme)).toBeLessThan(top(plan.seri.medyan.ilkOdeme));
+    expect(top(plan.seri.medyan.ilkOdeme)).toBeLessThan(top(plan.seri.iyimser.ilkOdeme));
+    expect(plan.abonelikTl).toBeCloseTo(m.SUBSCRIPTION_TRY, 2);
     expect(plan.meta[0]).toBeCloseTo((DEFAULT_PARAMS.metaWeekly * 52) / 12, 1);
     expect(plan.yatirim.every((v) => v === 0)).toBe(true);
   });
 
-  test('Sheets çıkışları kategori bazında ay toplamlarını tutar; dönem sonu nakit zinciri doğru', () => {
+  test('Sheets çıkışları kategori bazında ay toplamlarını tutar; nakit zinciri doğru; senaryo yalnız girişleri ve primi değiştirir', () => {
     const cf = buildCashflow(m.cashflow, opex);
+    expect(cf.senaryo).toBe('medyan');
     expect(cf.sheets).toBe(true);
     for (const [i, ay] of cf.aylar.entries()) {
       const sheets = cf.cikislar.filter((l) => l.kaynak === 'sheets').reduce((t, l) => t + l.aylar[i], 0);
@@ -390,6 +406,17 @@ test.describe('nakit akış tablosu', () => {
     }
     expect(cf.donemBasi[0]).toBe(DEFAULT_PARAMS.openingCash);
     expect(cf.acik).toBe(Math.max(0, -Math.min(...cf.donemSonu)));
+    const k = buildCashflow(m.cashflow, opex, 'kotumser');
+    const iy = buildCashflow(m.cashflow, opex, 'iyimser');
+    expect(k.toplam.giris).toBeLessThan(cf.toplam.giris);
+    expect(cf.toplam.giris).toBeLessThan(iy.toplam.giris);
+    const sheetsOf = (x: typeof cf) => x.cikislar.filter((l) => l.kaynak === 'sheets').map((l) => l.toplam);
+    expect(sheetsOf(k)).toEqual(sheetsOf(cf));
+    expect(k.cikislar.find((l) => l.ad.startsWith('Satış primi'))!.toplam).toBeLessThan(cf.cikislar.find((l) => l.ad.startsWith('Satış primi'))!.toplam);
+    expect(k.enDusuk.deger).toBeLessThanOrEqual(cf.enDusuk.deger);
+    expect(cf.enDusuk.deger).toBeLessThanOrEqual(iy.enDusuk.deger);
+    // Toparlanma: negatife düşen nakit sıfırın üstüne çıktığı ay (varsa) en düşük aydan sonradır.
+    if (cf.enDusuk.deger < 0 && cf.toparlanma) expect(cf.toparlanma.iso > cf.enDusuk.ay.iso).toBe(true);
   });
 
   test('yatırım girişi ve başlangıç nakdi dönem sonu nakdi kaydırır; dönem dışı yatırım tabloya girmez', () => {
@@ -413,10 +440,26 @@ test.describe('nakit akış tablosu', () => {
 test.describe('gelir planı', () => {
   const m = buildModel(DEFAULT_PARAMS);
   const r = m.revenue;
-  const real = r.byId.gercekci;
+  const real = r.byId.medyan;
   const pess = r.byId.kotumser;
   const opt = r.byId.iyimser;
   const ms = (x: typeof real, id: string) => x.milestones.find((k) => k.id === id)!;
+
+  test('senaryolar kötümser · medyan · iyimser (kullanıcı kararı 2026-10-27); her senaryonun hunisi ve yıllık etkisi var', () => {
+    expect(r.scenarios.map((s) => s.id)).toEqual(['kotumser', 'medyan', 'iyimser']);
+    expect(r.scenarios.map((s) => s.name)).toEqual(['Kötümser', 'Medyan', 'İyimser']);
+    expect(r.byId.medyan.scenario.factor).toBe(1);
+    expect(r.byId.medyan.scenario.retention).toBeCloseTo(DEFAULT_PARAMS.planRetention / 100, 5);
+    expect(r.byId.kotumser.scenario.factor).toBeCloseTo(DEFAULT_PARAMS.pessimisticFactor / 100, 5);
+    for (const s of r.scenarios) {
+      const f = r.funnels[s.id].map((x) => x.value);
+      expect(f).toEqual([...f].sort((a, b) => b - a));
+      expect(f[0]).toBe(DEFAULT_PARAMS.memberTarget);
+      expect(f[1]).toBe(DEFAULT_PARAMS.activeTarget);
+      expect(r.monthlyOnly[s.id].kum12).toBeLessThanOrEqual(r.byId[s.id].kumulatif[11]);
+    }
+    expect(r.funnels.kotumser[4].value).toBeLessThan(r.funnels.medyan[4].value);
+  });
 
   test('18 ay; kapasite rampası ve ikinci saha; gelir formülü; kümülatifler artan', () => {
     expect(r.months.length).toBe(18);
@@ -430,6 +473,7 @@ test.describe('gelir planı', () => {
     for (const x of r.series) {
       for (let t = 0; t < 18; t++) {
         expect(x.gelir[t], `${x.scenario.id} ay ${t}`).toBeCloseTo(x.yillik[t] * m.ANNUAL_TRY + x.aylikOdeyen[t] * m.SUBSCRIPTION_TRY, 0);
+        expect(x.gelir[t]).toBeCloseTo(x.ilkOdeme[t] + x.yenileme[t], 0);
         if (t) {
           expect(x.kumulatif[t]).toBeGreaterThanOrEqual(x.kumulatif[t - 1]);
           expect(x.kumAktif[t]).toBeGreaterThanOrEqual(x.kumAktif[t - 1]);
@@ -441,7 +485,7 @@ test.describe('gelir planı', () => {
     expect(real.kumulatif[11]).toBeLessThan(opt.kumulatif[11]);
   });
 
-  test('hedef zinciri sıralı; kötümser tarihler gerçekçiden geç; 100 aktif 90 günden sonra', () => {
+  test('hedef zinciri sıralı; kötümser tarihler medyandan geç; 100 aktif 90 günden sonra', () => {
     const order = real.milestones.map((k) => k.days ?? Infinity);
     expect(order.slice().sort((a, b) => a - b)).toEqual(order);
     expect(ms(real, 'aktif100').days!).toBeGreaterThan(90);
@@ -451,18 +495,117 @@ test.describe('gelir planı', () => {
       if (k.days !== null && p.days !== null) expect(p.days, k.id).toBeGreaterThanOrEqual(k.days);
     }
     expect(r.need90).toBe(Math.ceil(DEFAULT_PARAMS.activeTarget / 3));
-    expect(r.funnel.map((f) => f.value)).toEqual([...r.funnel.map((f) => f.value)].sort((a, b) => b - a));
     expect(r.pricing[0].tl).toBeCloseTo(m.SUBSCRIPTION_TRY, 2);
     expect(r.pricing[1].tl).toBeCloseTo(m.ANNUAL_TRY, 2);
   });
 
   test('parametre: ikinci saha erken gelince 100 aktif erken; yıllık payı kümülatifi öne çeker', () => {
     const early = buildModel({ ...DEFAULT_PARAMS, secondSahaDate: '2026-12-01' }).revenue;
-    expect(ms(early.byId.gercekci, 'aktif100').days!).toBeLessThan(ms(real, 'aktif100').days!);
+    expect(ms(early.byId.medyan, 'aktif100').days!).toBeLessThan(ms(real, 'aktif100').days!);
     const yillik = buildModel({ ...DEFAULT_PARAMS, annualShare: 60 }).revenue;
-    expect(yillik.byId.gercekci.kumulatif[2]).toBeGreaterThan(real.kumulatif[2]);
-    const sifir = buildModel({ ...DEFAULT_PARAMS, annualShare: 0 }).revenue.byId.gercekci;
+    expect(yillik.byId.medyan.kumulatif[2]).toBeGreaterThan(real.kumulatif[2]);
+    const sifir = buildModel({ ...DEFAULT_PARAMS, annualShare: 0 }).revenue.byId.medyan;
     expect(sifir.yillik.every((v) => v === 0)).toBe(true);
     expect(sifir.aylikOdeyen[0]).toBeCloseTo(sifir.yeniAktif[0], 2);
+  });
+});
+
+/* ---------- Başabaş (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('başabaş', () => {
+  const m = buildModel(DEFAULT_PARAMS);
+  const r = m.revenue;
+  const opex = buildOpex();
+  const f = defaultFilters(DEFAULT_PARAMS);
+  const cost = (s: number) => s * DEFAULT_PARAMS.costFactor;
+  const meta = (DEFAULT_PARAMS.metaWeekly * 52) / 12;
+
+  test('plan kadrosu: sabit gider kadro + YZ + Meta ay ay büyür; prim yeni aktif × prim; net ve kümülatif tutarlı; gelir medyanla aynı', () => {
+    const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan' }, null);
+    expect(be.kaynak).toBe('plan');
+    expect(be.fallback).toBe(false);
+    // Kasım 2026: 1 saha, 1 CRM masa başı, asistan, dijital pazarlama, YZ araçları, Meta.
+    expect(be.sabit[0]).toBeCloseTo(cost(m.salaries.saha) + cost(m.salaries.masa) + cost(m.salaries.asistan) + cost(m.salaries.dijital) + DEFAULT_PARAMS.aiToolsMonthly + meta, 0);
+    // Aralık: organizatör; Ocak: ikinci saha personeli (parametre).
+    expect(be.sabit[1]).toBeCloseTo(be.sabit[0] + cost(m.salaries.organizator), 0);
+    expect(be.sabit[2]).toBeCloseTo(be.sabit[1] + cost(m.salaries.saha), 0);
+    for (let t = 0; t < 18; t++) {
+      expect(be.prim[t]).toBeCloseTo(be.sim.yeniAktif[t] * DEFAULT_PARAMS.commission, 1);
+      expect(be.gider[t]).toBeCloseTo(be.sabit[t] + be.prim[t], 1);
+      expect(be.net[t]).toBeCloseTo(be.gelir[t] - be.gider[t], 1);
+      if (t) expect(be.kumNet[t]).toBeCloseTo(be.kumNet[t - 1] + be.net[t], 1);
+    }
+    expect(be.gelir).toEqual(r.byId.medyan.gelir);
+    const primsiz = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan', primDahil: false }, null);
+    expect(primsiz.prim.every((v) => v === 0)).toBe(true);
+    expect(primsiz.adet.degisken).toBe(0);
+  });
+
+  test('Sheets kaynağı: sabit gider = Sheets ay toplamı + Meta; 2028 ayları 2027 ortalaması; Sheets yoksa plana düşer', () => {
+    const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', f, opex);
+    expect(be.kaynak).toBe('sheets');
+    expect(be.fallback).toBe(false);
+    expect(be.sabit[0]).toBeCloseTo(opex.aylik.find((x) => x.ay === 11)!.y2026.toplam + meta, 0);
+    expect(be.sabit[2]).toBeCloseTo(opex.aylik.find((x) => x.ay === 1)!.y2027.toplam + meta, 0);
+    expect(be.sabit[14]).toBeCloseTo(opex.ozet.aylikOrt2027.toplam + meta, 0);
+    const ek = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, ekSabit: 250_000 }, opex);
+    expect(ek.sabit[0]).toBeCloseTo(be.sabit[0] + 250_000, 0);
+    const yok = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', f, null);
+    expect(yok.kaynak).toBe('plan');
+    expect(yok.fallback).toBe(true);
+  });
+
+  test('kesişimler: başabaş ayında gelir ≥ gider, önceki ayda değil; geri ödeme kümülatif ≥ 0; ek sabit gider geciktirir; iyimser ≤ medyan ≤ kötümser', () => {
+    const plan = { ...f, kaynak: 'plan' as const };
+    const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', plan, null);
+    expect(be.nokta).not.toBeNull();
+    const t = Math.ceil(be.nokta!.t);
+    expect(be.gelir[t]).toBeGreaterThanOrEqual(be.gider[t]);
+    if (t) expect(be.gelir[t - 1]).toBeLessThan(be.gider[t - 1]);
+    expect(be.nokta!.date >= r.months[Math.floor(be.nokta!.t)].iso).toBe(true);
+    if (be.geriOdeme) {
+      const g = Math.ceil(be.geriOdeme.t);
+      expect(be.kumNet[g]).toBeGreaterThanOrEqual(0);
+      if (g) expect(be.kumNet[g - 1]).toBeLessThan(0);
+      expect(be.geriOdeme.t).toBeGreaterThanOrEqual(be.nokta!.t);
+    }
+    expect(be.enDusuk.deger).toBe(Math.min(...be.kumNet));
+    const agir = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...plan, ekSabit: 500_000 }, null);
+    if (agir.nokta) expect(agir.nokta.t).toBeGreaterThan(be.nokta!.t);
+    const ay = (sid: 'kotumser' | 'medyan' | 'iyimser') => computeBreakeven(DEFAULT_PARAMS, m, r, sid, plan, null).nokta?.t ?? 99;
+    expect(ay('iyimser')).toBeLessThanOrEqual(ay('medyan'));
+    expect(ay('medyan')).toBeLessThanOrEqual(ay('kotumser'));
+    // Filtre senaryoyu ezer: kötümser senaryoda tam kapasite ve %70 elde tutma = medyan sonucu.
+    const ezilmis = computeBreakeven(DEFAULT_PARAMS, m, r, 'kotumser', { ...plan, factor: 1, retention: DEFAULT_PARAMS.planRetention / 100 }, null);
+    expect(ezilmis.nokta?.t).toBeCloseTo(be.nokta!.t, 6);
+  });
+
+  test('başabaş noktası (adet): gelir ve gider doğruları noktada kesişir; ulaşma ayı ödeyen satıcıdan; duyarlılık 4 × 5 ve tekdüze', () => {
+    const be = computeBreakeven(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan' }, null);
+    const a = be.adet;
+    expect(a.gelirBirim).toBeCloseTo(0.8 * m.SUBSCRIPTION_TRY + (0.2 * m.ANNUAL_TRY) / 12, 1);
+    expect(a.degisken).toBeCloseTo((1 - DEFAULT_PARAMS.planRetention / 100) * DEFAULT_PARAMS.commission, 1);
+    expect(a.sabit).toBeCloseTo(be.sabit.slice(6).reduce((x, y) => x + y, 0) / 12, 0);
+    expect(a.nokta).not.toBeNull();
+    // Nokta bir ondalığa yuvarlanır: fark en çok 0,05 satıcının katkı payı.
+    expect(Math.abs(a.nokta! * a.gelirBirim - (a.sabit + a.nokta! * a.degisken))).toBeLessThanOrEqual(0.05 * (a.gelirBirim - a.degisken) + 1);
+    expect(a.n.length).toBe(25);
+    expect(a.n[24]).toBeGreaterThanOrEqual(a.nokta!);
+    expect(a.gelir[24]).toBeCloseTo(a.n[24] * a.gelirBirim, 0);
+    expect(a.gider[0]).toBeCloseTo(a.sabit, 1);
+    if (a.ulasir) {
+      const t = Math.ceil(a.ulasir.t);
+      expect(be.sim.odeyen[t]).toBeGreaterThanOrEqual(a.nokta!);
+    }
+    const grid = sensitivity(DEFAULT_PARAMS, m, r, 'medyan', { ...f, kaynak: 'plan' }, null);
+    expect(grid.length).toBe(SENS_FACTORS.length);
+    for (const row of grid) expect(row.length).toBe(SENS_RETENTIONS.length);
+    const key = (d: string | null) => d ?? '9999';
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        if (i) expect(key(grid[i][j]) <= key(grid[i - 1][j]), `kapasite ${i},${j}`).toBe(true);
+        if (j) expect(key(grid[i][j]) <= key(grid[i][j - 1]), `elde tutma ${i},${j}`).toBe(true);
+      }
+    }
   });
 });

@@ -152,36 +152,67 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     yalnız Notlar —, sunum sırasında Giderler’den sonra, kırıntı “Finans › Nakit akış tablosu”, başlık kırıntıda). Klasik
     düzen: nakit girişleri, nakit çıkışları, net nakit akışı, dönem başı ve dönem sonu nakit; Sheets ızgarasının 15 ayı
     (Ekim 2026 – Aralık 2027, `CASH_MONTHS`). İki kaynak: **çıkışlar** Google Sheets’ten (sayfa açılınca tek istek,
-    `requestOpex`; Giderler’deki canlı yoklama yok) kategori bazında — kalemlerin `aylikTl` toplamı, bordrolu personel
-    `maliyet` (teşvik düşülmüş), freelancer faturaları — artı plan parametrelerinden Meta reklam bütçesi ve satış primi
-    (her yeni aktif satıcı için prim: üst sınır); **girişler** sitenin parametrelerinden: abonelik (€ × kur), ilk 90 günün
-    aylık yeni aktif satıcıları (hedefler sayfasının `NEW_ACTIVE`’i, aynı ödeyen satıcı-ay zinciri), sonrasında
-    `newActiveMonthly`, yenilemeler plan senaryosu elde tutma oranıyla, yatırım girişi (`investmentAmount`,
-    `investmentDate`) ve başlangıç nakdi (`openingCash`; Parametreler → “Nakit akışı” grubu). Veri
-    `src/data/cashflow.ts` → `makeCashflow(params, program)` (model üzerinden) + `buildCashflow(plan, opexModel | null)`
-    (Sheets yoksa yalnız plan kalemleri; durum notu Giderler sayfasına bağlar). Basit görünüm dört satır; “Ayrıntılı
+    `useOpexOnce` (`src/lib/useOpex.ts`) → `requestOpex`; Giderler’deki canlı yoklama yok) kategori bazında — kalemlerin
+    `aylikTl` toplamı, bordrolu personel `maliyet` (teşvik düşülmüş), freelancer faturaları — artı plan parametrelerinden
+    Meta reklam bütçesi ve satış primi (seçili senaryonun yeni aktif satıcısı × prim: üst sınır); **girişler** gelir
+    planının senaryo serilerinden (kullanıcı kararı 2026-10-27: kötümser · medyan · iyimser her yerde): ilk ödemeler
+    (aylık + yıllık peşin) ve yenilemeler aynı simülasyondan, Ekim 2026 boş (program Kasım’da başlar); yatırım girişi
+    (`investmentAmount`, `investmentDate`) ve başlangıç nakdi (`openingCash`; Parametreler → “Nakit akışı” grubu). Veri
+    `src/data/cashflow.ts` → `makeCashflow(params, program, revenue)` (model gelir planını önce kurar; `seri[senaryo]`) +
+    `buildCashflow(plan, opexModel | null, senaryo = 'medyan')` (Sheets yoksa yalnız plan kalemleri; durum notu Giderler
+    sayfasına bağlar; `toparlanma`: negatife düşen nakdin sıfırın üstüne çıktığı ay). Senaryo seçici (`SenaryoSecimi`,
+    `src/components/Senaryo.tsx`; `useScenario` → localStorage `istoc-plan-senaryo`, gelir planıyla ortak) özet,
+    karşılaştırma tablosu, grafik ve tablo başında; “Üç senaryo: 15 ayın özeti” tablosu (seçili satır
+    `data-tone="secili"`); grafik görünümü `ModSecimi`: seçili senaryo (`nakit-ay`) ya da üçü üst üste (`kumulatif-tl`:
+    üç senaryonun dönem sonu nakdi, sıfır çizgisi; seçili olmayanlar kesikli). Basit görünüm dört satır; “Ayrıntılı
     görünüm” anahtarı (`role="switch"`, `.nakit-anahtar`) kalemleri, ara toplamları ve dönem başı nakdi açar; Kalem sütunu
     sabit. Özet: 15 ay toplam giriş/çıkış/net, en düşük nakit ve ayı, nakit açığı tavanı (dönem sonu nakdi sıfırın
-    altına düşürmeyen en küçük ek nakit). Grafik `nakit-ay` (yeni tür: geniş ekranda dikey giriş/çıkış çubukları + dönem
-    sonu nakit çizgisi; dar ekranda yatay çubuk + işaret; dar ekranda kutu `--chart-h-xxl`). KDV, SGK/vergi ödeme
-    gecikmesi ve sponsor/ekip lideri payı modellenmez (varsayımlar bölümünde yazılı). Testler: `tests/nakit.spec.ts`
-    (sahte Sheets yanıtı, anahtar, menü, 320/390/1280, grafik) ve `tests/data.spec.ts` (satıcı-ay zinciri hedeflerle aynı,
-    Sheets kategori toplamları = aylık toplamlar, nakit zinciri, yatırım/başlangıç nakdi).
+    altına düşürmeyen en küçük ek nakit). Grafik `nakit-ay` (geniş ekranda dikey giriş/çıkış çubukları + dönem sonu
+    nakit çizgisi; dar ekranda yatay çubuk + işaret; dar ekranda kutu `--chart-h-xxl`). KDV, SGK/vergi ödeme gecikmesi ve
+    sponsor/ekip lideri payı modellenmez (varsayımlar bölümünde yazılı). Testler: `tests/nakit.spec.ts` (sahte Sheets
+    yanıtı, anahtar, senaryo seçici ve karşılaştırma, üst üste görünüm, menü, 320/390/1280, grafik) ve
+    `tests/data.spec.ts` (girişler senaryo serileriyle aynı, Sheets kategori toplamları = aylık toplamlar, nakit zinciri,
+    senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi).
   - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
     sırasında da). Hedefler sayfası 90 günde 100 aktif satıcıyı hedef koyar; bu sayfa aynı hedefe kadro kapasitesinden
     bakar: 1 saha personeli (ikincisi “sistem oturunca”, `secondSahaDate`), 1 CRM masa başı, organizatör (Aralık’tan) ve
     bağımsız temsilciler (ayda 2 yeni, en çok 10, temsilci başına 1 ilk ödeme) ayda kaç yeni aktif satıcı getirir
     (`sahaActivesMonthly`, `crmActivesMonthly`, `organizatorActivesMonthly`; her kişinin ilk ayı %50, ikinci ayı %75).
-    Üç senaryo: kötümser (`pessimisticFactor`, `pessimisticRetention`), gerçekçi (plan elde tutma), iyimser (%130, +10
-    puan). Hedef zinciri (ilk 10 → 50 → 100 aktif → 500 üye → 1 M₺ → ciro hedefi → 200 aktif): tarih (ay içinde doğrusal),
-    başlangıçtan ve önceki hedeften süre (`sure`: gün, hafta, ay), o ayın geliri, kümülatif, kötümser tarih. Gelir = yıllık
-    peşin ödeyenler (`annualShare`) × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret; aktif satıcı = ilk ödeme
-    (hedefler sayfasıyla aynı tanım), “ödemeye devam eden” ayrı. Parametreler → “Gelir planı” grubu. Veri
-    `src/data/revenue.ts` → `makeRevenue(params, program)` (18 ay ufuk). Görünüm: büyük sayılı hedef kartları
-    (`.gelir-hedef`, üst kenar rol tonunda, numara), Mantine `Timeline`, `kaynak-ay` (kaynak × ay), `gelir-ay`
-    (ilk ödemeler, yenilemeler, kümülatif, hedef çizgisi), `kumulatif-tl` (yeni tür: senaryo çizgileri ₺, hedef çizgisi),
-    `huni` (üye → aktif → 3./6./12. ayda devam eden). Testler: `tests/gelir.spec.ts`, `tests/data.spec.ts` (rampa,
-    gelir formülü, hedef sırası, kötümser ≥ gerçekçi, 100 aktif > 90 gün, parametre etkileri).
+    Üç senaryo (kullanıcı kararı 2026-10-27, adları sabit): **kötümser** (`pessimisticFactor`, `pessimisticRetention`),
+    **medyan** (tam kapasite, plan elde tutma), **iyimser** (%130, +10 puan). Senaryo her bölümün (`Section` `tools`),
+    her tablonun ve her grafiğin başında seçilir (`SenaryoSecimi`; `useScenario`, `src/lib/scenario.ts`: localStorage
+    `istoc-plan-senaryo`, varsayılan medyan, nakit akış tablosuyla ortak, `storage` olayıyla sekmeler arası); hero
+    istatistikleri, hedef kartları (diğer iki senaryonun tarihi kartta), zaman çizelgesi, tablolar ve notlar seçili
+    senaryoyu anlatır. Grafik görünümü (`ModSecimi`: seçili senaryo / üçü üst üste): kaynak × ay ↔ `seri-cizgi` (üç
+    senaryonun aylık yeni aktifi), `gelir-ay` ↔ `grup-ay` (aylık gelir yan yana; tablo da üç senaryonun aylık/kümülatif
+    sütunlarına döner), `huni` ↔ `hedef-adim` (kademeler × senaryo); “Üç senaryo üst üste” bölümü her zaman üst üste
+    (`kumulatif-tl` kümülatif gelir + hedef çizgisi, `seri-cizgi` ödemeye devam eden; seçili olmayan senaryolar kesikli,
+    tabloda seçili satır vurgulu). Hedef zinciri (ilk 10 → 50 → 100 aktif → 500 üye → 1 M₺ → ciro hedefi → 200 aktif):
+    tarih (ay içinde doğrusal), başlangıçtan ve önceki hedeften süre (`sure`: gün, hafta, ay), o ayın geliri, kümülatif.
+    Gelir = yıllık peşin ödeyenler (`annualShare`) × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret; aktif satıcı =
+    ilk ödeme (hedefler sayfasıyla aynı tanım), “ödemeye devam eden” ayrı. Parametreler → “Gelir planı” grubu. Veri
+    `src/data/revenue.ts` → `makeRevenue(params, program)` (18 ay ufuk; `simulate(params, program, months, inputs)`
+    serbest girdili simülasyon: kapasite çarpanı, elde tutma, yıllık payı, € ücret, ikinci saha ayı; `funnels`,
+    `monthlyOnly`, `first3` senaryo başına; `inputsFor`). **Başabaş** bölümü (kullanıcı kararı 2026-10-27: “çok
+    ayrıntılı, çok koşullu; üstünde filtreler”): `src/data/breakeven.ts` → `computeBreakeven(params, program, revenue,
+    senaryo, filtreler, opexModel | null)`; filtreler sayfa durumudur (parametre değil): senaryo, kapasite çarpanı
+    (senaryonun / %60–130), elde tutma (senaryonun / %50–90), yıllık peşin payı, aylık ücret (€), ikinci saha ayı
+    (“Gelmez” dahil), gider kaynağı (Sheets canlı — `useOpexOnce`, 2028 ayları 2027 ortalaması, Meta eklenir — ya da plan
+    kadrosu: gelir planı kadrosunun işveren maliyeti + YZ araçları + Meta; Sheets okunamazsa plana düşer, not söyler), ek
+    sabit gider, satış primi dahil/hariç; “Varsayılana dön”. Çıktılar: aylık başabaş (gelir ≥ gider ilk ay; `crossing`
+    kesirli ay + tarih), geri ödeme (kümülatif net ≥ 0), en çok fon ihtiyacı (en düşük kümülatif net), klasik başabaş
+    noktası (adet: kararlı dönem sabit gideri / (satıcı başına karışık aylık gelir − (1 − elde tutma) × prim) ve ulaşma
+    ayı), duyarlılık ızgarası (`sensitivity`: `SENS_FACTORS` × `SENS_RETENTIONS` → başabaş tarihi). Grafikler `basabas`
+    (aylık gelir/gider çizgileri; kesişim ayında kesikli dikey çizgi + etiketli işaret — etiket tepeye yakınsa altta,
+    kenara yakınsa içe hizalı), `kumulatif-tl` (sıfır çizgisi; seçili / üçü üst üste), `basabas-adet` (yatay eksen ödeyen
+    satıcı adedi; gelir ve sabit + değişken gider doğruları). Görünüm: büyük sayılı hedef kartları (`.gelir-hedef`, üst
+    kenar rol tonunda, numara), Mantine `Timeline`, seçim grupları `.secim` / `.secim-dugme` (`aria-pressed`; seçili
+    senaryo rol tonunda), `.secim-sira` (bölüm araç satırı), `.blok-araclar` (tablo/grafik araç satırı; `Chart` ve
+    `DataTable` `tools`), `.filtreler` (ızgara). Testler: `tests/gelir.spec.ts` (sekiz bölüm, sekiz grafik, seçici her
+    bölüm/tablo/grafikte, seçim sayfa geneli + saklama + nakit akışına yansıma, üst üste görünümleri, başabaş filtreleri
+    ve sonuçları, 320 px), `tests/data.spec.ts` (rampa, gelir formülü, hedef sırası, kötümser ≥ medyan, 100 aktif > 90
+    gün, parametre etkileri, senaryo adları; başabaş: plan/Sheets gider kaynakları, kesişimler, filtre ezme, adet
+    noktası, duyarlılık tekdüze).
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).
@@ -280,10 +311,11 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
   tutarları yazılmaz. Kullanıcının açıkça siteye eklettiği değerler: İsmail Karaca adı, haftalık 5.000 ₺ Meta reklam
   bütçesi, 90 gün ≥ 3.000.000 ₺ ciro hedefi, aktif satıcı aboneliği 399 € / ay.
-  19 Ekim 2026 kararlarıyla ayrıca: işveren maliyeti = maaş × 2, saha satış maaşı 60.000 ₺, saha kotası (prim eşiği)
-  aylık 120.000 ₺ satış, satış başına prim 2.500 ₺, sponsor payı 500 ₺, ekip lideri liderlik farkı 10.000 ₺ ve ekip payı
-  250 ₺, yapay zekâ araç bütçesi aylık en çok 7.500 ₺; asgari ücret (net, 2026: 28.075,50 ₺) çarpanları: masa başı ve
-  Segika 1,25, dijital 1,25, asistan 1,5, organizatör 2. Yatırımcının adı yazılmaz (rol: “Yatırımcı”). Tahtadaki
+  19 Ekim 2026 kararlarıyla ayrıca: işveren maliyeti = maaş × 2, satış başına prim 2.500 ₺, sponsor payı 500 ₺, ekip
+  lideri liderlik farkı 10.000 ₺ ve ekip payı 250 ₺, yapay zekâ araç bütçesi aylık en çok 7.500 ₺. Maaşlar (net,
+  kullanıcı kararı 2026-10-27; 19 Ekim’deki 60.000 ₺ ve çarpanların yerine): saha satış 50.000 ₺ (kota = maaş × 2 =
+  100.000 ₺), organizatör 50.000 ₺, masa başı (CRM iStoç) 35.000 ₺, Segika masa başı 35.000 ₺; asgari ücret (net,
+  2026: 28.075,50 ₺) çarpanı yalnız dijital 1,25 ve asistan 1,5 için sürer. Yatırımcının adı yazılmaz (rol: “Yatırımcı”). Tahtadaki
   “Pazarlama çözümleri 30K / 90K / 500K” notu yalnız değerlendirmeydi; kullanıcı kararıyla yok sayılır, sitede yer almaz.
   Kur yalnız oran olarak (≈ 55,31 ₺/€) tutulur; kaynağındaki toplam tutarlar yazılmaz.
 - Asistan kararı netleşmemiştir; asistansız senaryoda dijital pazarlama 1 Ocak 2027’de başlar. Bu koşul kişi adı

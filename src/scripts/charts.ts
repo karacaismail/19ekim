@@ -778,16 +778,19 @@ function build(spec: ChartSpec, width: number): Opt {
     }
 
     case 'kumulatif-tl': {
-      // Senaryo çizgileri (₺): kümülatif gelir; hedef kesikli yatay çizgi. Dar ekranda ay etiketleri seyrelir (hideOverlap).
+      // Senaryo çizgileri (₺); isteğe bağlı yatay kesikli çizgi (hedef ya da sıfır). Dar ekranda ay etiketleri seyrelir.
       const names = spec.series.map((x) => x.name);
-      const maxV = Math.max(spec.target * 1.15, ...spec.series.flatMap((x) => x.values));
+      const all = spec.series.flatMap((x) => x.values);
+      const maxV = Math.max((spec.target ?? 0) * 1.15, ...all, 1);
+      const minV = Math.min(0, ...all);
+      const strong = token('--accent-strong');
       return {
         ...base(),
         grid: { ...grid, top: legendTop(names, width) },
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
-        yAxis: { type: 'value', max: Math.ceil(maxV / 1_000_000) * 1_000_000, ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        yAxis: { type: 'value', max: Math.ceil(maxV / 1_000_000) * 1_000_000, min: Math.floor(minV / 1_000_000) * 1_000_000, ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
         series: spec.series.map((x, i) => ({
           name: x.name,
           type: 'line',
@@ -795,8 +798,140 @@ function build(spec: ChartSpec, width: number): Opt {
           symbol: 'none',
           lineStyle: { color: token(`--role-${x.role}`), width: 2, type: x.dashed ? 'dashed' : 'solid' },
           itemStyle: { color: token(`--role-${x.role}`) },
-          markLine: i === 0 ? targetLine(spec.target, 'insideEndTop') : undefined,
+          markLine:
+            i === 0 && spec.target !== undefined
+              ? { symbol: 'none', silent: true, data: [{ yAxis: spec.target }], lineStyle: { color: strong, type: 'dashed', width: 2 }, label: { formatter: spec.targetLabel ?? `Hedef ${lira(spec.target)}`, color: strong, fontSize: FONT_SIZE, position: 'insideEndTop' } }
+              : undefined,
         })),
+      };
+    }
+
+    case 'seri-cizgi': {
+      // Adet çizgileri (senaryo üst üste): kesişen ve ayrışan eğriler; tam sayı ekseni.
+      const names = spec.series.map((x) => x.name);
+      return {
+        ...base(),
+        grid: { ...grid, top: legendTop(names, width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(Math.round(v * 10) / 10)} ${spec.unit}` },
+        legend: { ...(base().legend as Opt), data: names },
+        xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
+        yAxis: { type: 'value', minInterval: 1, ...axis() },
+        series: spec.series.map((x) => ({
+          name: x.name,
+          type: 'line',
+          data: x.values,
+          symbolSize: 6,
+          lineStyle: { color: token(`--role-${x.role}`), width: 2, type: x.dashed ? 'dashed' : 'solid' },
+          itemStyle: { color: token(`--role-${x.role}`) },
+        })),
+      };
+    }
+
+    case 'grup-ay': {
+      // ₺ gruplanmış çubuk: senaryolar yan yana; dar ekranda yatay (kategori satırları).
+      const narrow = width < OPEX_NARROW;
+      const names = spec.series.map((x) => x.name);
+      const category: Opt = narrow
+        ? { type: 'category', inverse: true, data: spec.months, ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width, 0.3, spec.months), interval: 0 } }
+        : { type: 'category', data: spec.months, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), interval: 0, hideOverlap: true } };
+      return {
+        ...base(),
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' }, valueFormatter: (v: number) => lira(v) },
+        legend: { ...(base().legend as Opt), data: names },
+        grid: { left: 4, right: 16, bottom: 4, top: legendTop(names, width), containLabel: true },
+        xAxis: narrow ? valueAxis(narrow) : category,
+        yAxis: narrow ? category : valueAxis(narrow),
+        series: spec.series.map((x) => ({ name: x.name, type: 'bar', data: x.values, barMaxWidth: 14, barGap: '20%', itemStyle: { color: token(`--role-${x.role}`), borderRadius: 0 } })),
+      };
+    }
+
+    case 'basabas': {
+      // Aylık başabaş: gelir ve gider çizgileri kesişir; kesişim ayında dikey kesikli çizgi ve etiketli işaret.
+      // Etiket işaretin üstünde (tepeye yakınsa altında), kenara yakınsa içe hizalı: SVG dışına taşmaz, lejantla çakışmaz.
+      const names = ['Aylık gelir', 'Aylık gider'];
+      const strong = token('--accent-strong');
+      const n = spec.labels.length;
+      const t = spec.nokta === null ? null : Math.min(n - 1, Math.max(0, Math.round(spec.nokta)));
+      const maxY = Math.max(...spec.gelir, ...spec.gider, 1);
+      const labelPos = t !== null && Math.max(spec.gelir[t], spec.gider[t]) > maxY * 0.75 ? 'bottom' : 'top';
+      const align = t === null ? 'center' : t > n * 0.75 ? 'right' : t < n * 0.25 ? 'left' : 'center';
+      return {
+        ...base(),
+        grid: { ...grid, right: 24, top: legendTop(names, width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
+        legend: { ...(base().legend as Opt), data: names },
+        xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
+        yAxis: { type: 'value', ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        series: [
+          {
+            name: names[0],
+            type: 'line',
+            data: spec.gelir,
+            symbolSize: 6,
+            lineStyle: { color: token('--viz-3'), width: 2 },
+            itemStyle: { color: token('--viz-3') },
+            markLine: t === null ? undefined : { symbol: 'none', silent: true, data: [{ xAxis: spec.labels[t] }], lineStyle: { color: strong, type: 'dashed', width: 2 }, label: { show: false } },
+            markPoint:
+              t === null
+                ? undefined
+                : {
+                    symbol: 'circle',
+                    symbolSize: 14,
+                    itemStyle: { color: strong, borderColor: token('--surface-raised'), borderWidth: 2 },
+                    label: { show: true, position: labelPos, distance: 10, align, formatter: spec.noktaLabel, color: strong, fontSize: FONT_SIZE, fontWeight: 600 },
+                    data: [{ coord: [spec.labels[t], spec.gelir[t]] }],
+                  },
+          },
+          { name: names[1], type: 'line', data: spec.gider, symbolSize: 6, lineStyle: { color: token('--viz-2'), width: 2 }, itemStyle: { color: token('--viz-2') } },
+        ],
+      };
+    }
+
+    case 'basabas-adet': {
+      // Klasik başabaş noktası: yatay eksen ödeyen satıcı adedi; gelir doğrusu ile sabit + değişken gider doğrusu kesişir.
+      const names = ['Aylık gelir', 'Aylık toplam gider'];
+      const strong = token('--accent-strong');
+      const last = spec.n.length - 1;
+      const nMax = spec.n[last] || 1;
+      const slope = spec.gelir[last] / nMax;
+      const maxY = Math.max(...spec.gelir, ...spec.gider, 1);
+      const yAt = spec.nokta === null ? 0 : spec.nokta * slope;
+      const labelPos = yAt > maxY * 0.75 ? 'bottom' : 'top';
+      const align = spec.nokta === null ? 'center' : spec.nokta > nMax * 0.75 ? 'right' : spec.nokta < nMax * 0.25 ? 'left' : 'center';
+      return {
+        ...base(),
+        grid: { ...grid, right: 24, top: legendTop(names, width) },
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'axis',
+          formatter: (ps: { axisValue: number; seriesName: string; value: number[] }[]) =>
+            `${number.format(ps[0].axisValue)} ${spec.unit}<br/>${ps.map((x) => `${x.seriesName}: ${lira(x.value[1])}`).join('<br/>')}`,
+        },
+        legend: { ...(base().legend as Opt), data: names },
+        xAxis: { type: 'value', max: nMax, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
+        yAxis: { type: 'value', ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        series: [
+          {
+            name: names[0],
+            type: 'line',
+            data: spec.n.map((k, i) => [k, spec.gelir[i]]),
+            symbol: 'none',
+            lineStyle: { color: token('--viz-3'), width: 2 },
+            itemStyle: { color: token('--viz-3') },
+            markLine: spec.nokta === null ? undefined : { symbol: 'none', silent: true, data: [{ xAxis: spec.nokta }], lineStyle: { color: strong, type: 'dashed', width: 2 }, label: { show: false } },
+            markPoint:
+              spec.nokta === null
+                ? undefined
+                : {
+                    symbol: 'circle',
+                    symbolSize: 14,
+                    itemStyle: { color: strong, borderColor: token('--surface-raised'), borderWidth: 2 },
+                    label: { show: true, position: labelPos, distance: 10, align, formatter: spec.noktaLabel, color: strong, fontSize: FONT_SIZE, fontWeight: 600 },
+                    data: [{ coord: [spec.nokta, yAt] }],
+                  },
+          },
+          { name: names[1], type: 'line', data: spec.n.map((k, i) => [k, spec.gider[i]]), symbol: 'none', lineStyle: { color: token('--viz-2'), width: 2 }, itemStyle: { color: token('--viz-2') } },
+        ],
       };
     }
 
@@ -1017,6 +1152,7 @@ function applyMotion(options: Opt) {
     Object.assign(series, m);
     if (series.markLine) Object.assign(series.markLine as Opt, m);
     if (series.markArea) Object.assign(series.markArea as Opt, m);
+    if (series.markPoint) Object.assign(series.markPoint as Opt, m);
   }
   return options;
 }

@@ -31,12 +31,13 @@ export const DEFAULT_PARAMS = {
   minWage: 28_075.5,
   minWageGross: 33_030,
   costFactor: 2,
-  sahaSalary: 60_000,
-  masaMultiplier: 1.25,
-  segikaMultiplier: 1.25,
+  /* Kullanıcı kararı 2026-10-27: saha, organizatör, masa başı ve Segika net ₺ (19 Ekim: 60.000 ve asgari ücret çarpanları) */
+  sahaSalary: 50_000,
+  masaSalary: 35_000,
+  segikaSalary: 35_000,
+  organizatorSalary: 50_000,
   dijitalMultiplier: 1.25,
   asistanMultiplier: 1.5,
-  organizatorMultiplier: 2,
   leadUplift: 10_000,
   /* Prim */
   commission: 2_500,
@@ -62,7 +63,6 @@ export const DEFAULT_PARAMS = {
   openingCash: 0,
   investmentAmount: 0,
   investmentDate: '2026-11-01',
-  newActiveMonthly: 50,
 };
 
 export type Params = typeof DEFAULT_PARAMS;
@@ -138,11 +138,11 @@ export const PARAM_GROUPS: ParamGroup[] = [
       { key: 'minWageGross', label: 'Asgari ücret (brüt, aylık)', kind: 'money', unit: '₺', min: 0, step: 0.5, help: '2026: brüt 33.030 ₺; ücret applet’lerinde baz birim seçeneği' },
       { key: 'costFactor', label: 'İşveren maliyeti çarpanı', kind: 'multiplier', unit: '× maaş', min: 1, step: 0.05 },
       { key: 'sahaSalary', label: 'Saha satış maaşı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000 },
-      { key: 'masaMultiplier', label: 'Masa başı (CRM)', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },
-      { key: 'segikaMultiplier', label: 'Segika masa başı (CRM)', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },
+      { key: 'masaSalary', label: 'Masa başı (CRM) maaşı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000, help: 'Net; kullanıcı kararı 2026-10-27' },
+      { key: 'segikaSalary', label: 'Segika masa başı (CRM) maaşı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000, help: 'Net; kullanıcı kararı 2026-10-27' },
       { key: 'dijitalMultiplier', label: 'Dijital pazarlama', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },
       { key: 'asistanMultiplier', label: 'Asistan', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },
-      { key: 'organizatorMultiplier', label: 'Organizatör', kind: 'multiplier', unit: '× asgari ücret', min: 0, step: 0.05 },
+      { key: 'organizatorSalary', label: 'Organizatör maaşı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000, help: 'Net; kullanıcı kararı 2026-10-27' },
       { key: 'leadUplift', label: 'Ekip lideri liderlik farkı', kind: 'money', unit: '₺ / ay', min: 0, step: 1_000 },
     ],
   },
@@ -184,12 +184,11 @@ export const PARAM_GROUPS: ParamGroup[] = [
   {
     id: 'nakit',
     title: 'Nakit akışı',
-    desc: 'Nakit akış tablosu: başlangıç nakdi, yatırım girişi ve 90 gün sonrası satıcı kazanımı. Giderler Sheets’ten gelir.',
+    desc: 'Nakit akış tablosu: başlangıç nakdi ve yatırım girişi. Girişler gelir planı senaryosundan, giderler Sheets’ten gelir.',
     fields: [
       { key: 'openingCash', label: 'Başlangıç nakdi (Ekim 2026)', kind: 'money', unit: '₺', min: 0, step: 100_000 },
       { key: 'investmentAmount', label: 'Yatırım girişi', kind: 'money', unit: '₺', min: 0, step: 500_000, help: '0 = yatırım yok; tablo nakit açığını gösterir' },
       { key: 'investmentDate', label: 'Yatırım girişi ayı', kind: 'date', help: 'Ayın ilk günü yazılır; Ekim 2026 – Aralık 2027 dışıysa tabloya girmez' },
-      { key: 'newActiveMonthly', label: '90 gün sonrası aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Ocak 2027’den sonraki her ay; elde tutma plan senaryosuyla' },
     ],
   },
   {

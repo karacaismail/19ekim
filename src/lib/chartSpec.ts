@@ -51,8 +51,16 @@ export type ChartSpec =
   | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
   /** Geçit hedefleri (iş ortaklığı): adım (gün) × seri; yatay gruplanmış çubuk, değer etiketi çubuğun ucunda. */
   | { kind: 'hedef-adim'; steps: string[]; series: { name: string; role: RoleKey; values: number[] }[] }
-  /** Kümülatif ₺ senaryoları: ay × seri (çizgi) ve yatay hedef çizgisi (₺ biçimi; `cumulative` saat içindir). */
-  | { kind: 'kumulatif-tl'; labels: string[]; target: number; targetLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** Kümülatif ₺ senaryoları: ay × seri (çizgi); isteğe bağlı yatay çizgi (hedef, sıfır) ve etiketi (₺ biçimi). */
+  | { kind: 'kumulatif-tl'; labels: string[]; target?: number; targetLabel?: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** Adet çizgileri (senaryo üst üste): ay × seri; tam sayı ekseni. */
+  | { kind: 'seri-cizgi'; labels: string[]; unit: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** ₺ gruplanmış çubuk (senaryo üst üste): geniş ekranda dikey, dar ekranda yatay. */
+  | { kind: 'grup-ay'; months: string[]; series: { name: string; role: RoleKey; values: number[] }[] }
+  /** Başabaş: aylık gelir ve gider çizgileri; kesişim ayı dikey kesikli çizgi ve işaret. `nokta` ay sırası (kesirli) ya da null. */
+  | { kind: 'basabas'; labels: string[]; gelir: number[]; gider: number[]; nokta: number | null; noktaLabel: string }
+  /** Başabaş noktası (adet): yatay eksen ödeyen satıcı adedi; gelir ve toplam gider doğruları, kesişim işareti. */
+  | { kind: 'basabas-adet'; unit: string; n: number[]; gelir: number[]; gider: number[]; nokta: number | null; noktaLabel: string }
   /** Nakit akışı: ay × giriş/çıkış gruplanmış çubuk ve dönem sonu nakit (geniş: dikey + çizgi; dar: yatay + işaret). */
   | { kind: 'nakit-ay'; months: string[]; inflow: number[]; outflow: number[]; balance: number[] }
   /** OPEX: tek seri yatay çubuk (₺); `share` verilirse etiket payı da gösterir. */

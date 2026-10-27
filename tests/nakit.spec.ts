@@ -2,8 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 import { buildModel, reply } from './opex-fixture';
 
 /**
- * Nakit akış tablosu (/nakit-akisi/): Sheets sahte yanıtla (kurgusal örnek tohum), girişler plan parametrelerinden.
- * Basit/ayrıntılı anahtar, Giderler menüsü, grafik ve dar ekran.
+ * Nakit akış tablosu (/nakit-akisi/): Sheets sahte yanıtla (kurgusal örnek tohum), girişler gelir planının seçili
+ * senaryosundan (kötümser · medyan · iyimser; gelir planıyla ortak). Basit/ayrıntılı anahtar, senaryo seçici, üç senaryo
+ * karşılaştırması, “üçü üst üste” grafik görünümü, Giderler menüsü ve dar ekran.
  */
 const MODEL = buildModel();
 const icerik = (page: Page) => page.waitForSelector('.app-footer', { state: 'attached' });
@@ -81,7 +82,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(menu.getByRole('menuitem', { name: 'Nakit akış tablosu' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
 
-    const tablo = page.locator('.data-table');
+    const tablo = page.locator('.table-block:has(#nakit-tablo) .data-table');
     const satirlar = tablo.locator('tbody tr');
     await expect(satirlar).toHaveCount(4);
     await expect(satirlar.locator('th')).toHaveText(['Nakit girişleri', 'Nakit çıkışları', 'Net nakit akışı', 'Dönem sonu nakit']);
@@ -113,6 +114,41 @@ test.describe('nakit akış tablosu', () => {
     await expect(satirlar).toHaveCount(4);
   });
 
+  test('senaryo seçici özet, tablo ve grafik başında; kötümserde giriş azalır; karşılaştırma tablosu seçiliyi vurgular; “üçü üst üste” grafiği değiştirir', async ({ page }) => {
+    await acikUc(page);
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
+    const seciciler = page.getByRole('group', { name: 'Senaryo' });
+    expect(await seciciler.count()).toBeGreaterThanOrEqual(5);
+    for (const g of await seciciler.all()) await expect(g.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+    const sayi = (s: string) => Number(s.replace(/[^\d-]/g, ''));
+    const giris = page.locator('.stat').first().locator('.stat-value');
+    const medyan = sayi((await giris.textContent()) ?? '0');
+    const karsilastirma = page.locator('.table-block:has(#senaryo-karsilastirma-tablo) tbody tr');
+    await expect(karsilastirma).toHaveCount(3);
+    await expect(karsilastirma.locator('th')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
+    await expect(karsilastirma.nth(1)).toHaveAttribute('data-tone', 'secili');
+    await seciciler.last().getByRole('button', { name: 'Kötümser' }).click();
+    for (const g of await seciciler.all()) await expect(g.getByRole('button', { name: 'Kötümser' })).toHaveAttribute('aria-pressed', 'true');
+    const kotumser = sayi((await giris.textContent()) ?? '0');
+    expect(kotumser).toBeLessThan(medyan);
+    await expect(karsilastirma.nth(0)).toHaveAttribute('data-tone', 'secili');
+    await expect(page.locator('#nakit-tablo')).toContainText('kötümser');
+    expect(await page.evaluate(() => localStorage.getItem('istoc-plan-senaryo'))).toBe('kotumser');
+    // Karşılaştırma satırındaki giriş toplamı özetle aynı.
+    const satirGiris = sayi((await karsilastirma.nth(0).locator('td').first().textContent()) ?? '0');
+    expect(satirGiris).toBe(kotumser);
+    // Üçü üst üste: tek grafik kutusu, türü değişir.
+    const canvas = page.locator('.chart-canvas');
+    await expect(canvas).toHaveAttribute('data-kind', 'nakit-ay');
+    await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üçü üst üste' }).click();
+    await expect(canvas).toHaveAttribute('data-kind', 'kumulatif-tl');
+    await expect(canvas.locator('svg')).toBeVisible({ timeout: 10_000 });
+    await expect(canvas).toHaveCount(1);
+  });
+
   for (const width of [320, 390, 1280]) {
     test(`${width} px: taşma yok, metin ≥ 14 px, grafik kesilmez (basit ve ayrıntılı)`, async ({ page }) => {
       await acikUc(page);
@@ -129,8 +165,13 @@ test.describe('nakit akış tablosu', () => {
         expect(d.headerOverflow).toEqual([]);
       }
       expect(await grafik(page), `${width}px grafik`).toEqual([]);
+      await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üçü üst üste' }).click();
+      await expect(page.locator('.chart-canvas')).toHaveAttribute('data-kind', 'kumulatif-tl');
+      expect(await grafik(page), `${width}px üst üste grafik`).toEqual([]);
       const hit = await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).evaluate((el) => el.getBoundingClientRect().height);
       expect(hit).toBeGreaterThanOrEqual(44);
+      const dugme = await page.locator('.secim-dugme').evaluateAll((els) => Math.min(...els.map((el) => el.getBoundingClientRect().height)));
+      expect(dugme).toBeGreaterThanOrEqual(44);
     });
   }
 
@@ -146,5 +187,6 @@ test.describe('nakit akış tablosu', () => {
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     await expect(page.locator('.data-table tbody th', { hasText: 'Bordrolu personel' })).toHaveCount(0);
     await expect(page.locator('.data-table tbody th', { hasText: 'Meta reklamları' })).toHaveCount(1);
+    await expect(page.locator('.table-block:has(#senaryo-karsilastirma-tablo) tbody tr')).toHaveCount(3);
   });
 });

@@ -1,56 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
-import { Chart, DataTable, Note, Section, Stats, TextLink } from '../components/ui';
+import { ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
+import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { buildCashflow, type CashLine, type Cashflow } from '../data/cashflow';
-import { defaultConnection, loadConnection, OPEX_TIMEOUT_MS, requestOpex, type OpexModel } from '../data/opex';
 import { tl } from '../lib/format';
+import { useScenario, type ScenarioId } from '../lib/scenario';
+import { useOpexOnce } from '../lib/useOpex';
 
 /**
  * Nakit akış tablosu (kullanıcı kararı 2026-10-27): Giderler menüsünde; klasik düzen (girişler, çıkışlar, net, dönem başı
  * ve dönem sonu nakit), 15 ay (Ekim 2026 – Aralık 2027). Çıkışlar Sheets’ten (sayfa açılınca tek istek; Giderler
- * sayfasıyla aynı veri ucu), girişler sitenin parametrelerinden. Basit görünüm dört satır; “Ayrıntılı” anahtarı
- * (role="switch") kalemleri açar.
+ * sayfasıyla aynı veri ucu), girişler gelir planının seçili senaryosundan (kötümser · medyan · iyimser; seçim gelir planı
+ * sayfasıyla ortak). Basit görünüm dört satır; “Ayrıntılı” anahtarı (role="switch") kalemleri açar; “Üçü üst üste”
+ * görünümü üç senaryonun dönem sonu nakdini aynı eksene koyar.
  */
-
-type Durum =
-  | { status: 'loading' }
-  | { status: 'ready'; model: OpexModel; denetlendi: string }
-  | { status: 'setup'; message: string }
-  | { status: 'failed'; message: string };
-
-/** Sheets verisini bir kez okur (Giderler’deki canlı yoklama yok; sayfa yenilenince yeniden okunur). */
-function useOpexOnce(): Durum {
-  const [durum, setDurum] = useState<Durum>({ status: 'loading' });
-  useEffect(() => {
-    const conn = loadConnection() ?? defaultConnection();
-    if (!conn) {
-      setDurum({ status: 'setup', message: 'Veri ucu tanımlı değil.' });
-      return undefined;
-    }
-    let stopped = false;
-    const ctrl = new AbortController();
-    const timer = window.setTimeout(() => ctrl.abort(), OPEX_TIMEOUT_MS);
-    requestOpex(conn, '', ctrl.signal)
-      .then((reply) => {
-        if (stopped) return;
-        if (reply.kind === 'data') setDurum({ status: 'ready', model: reply.data.model, denetlendi: reply.data.denetlendi });
-        else if (reply.kind === 'error' && (reply.code === 'yetki' || reply.code === 'kurulum')) setDurum({ status: 'setup', message: reply.message });
-        else if (reply.kind === 'error') setDurum({ status: 'failed', message: reply.message });
-        else setDurum({ status: 'failed', message: 'Sunucu veri yerine “değişmedi” döndürdü; sayfayı yenileyin.' });
-      })
-      .catch(() => {
-        if (!stopped) setDurum({ status: 'failed', message: `Yanıt ${Math.round(OPEX_TIMEOUT_MS / 1000)} sn içinde gelmedi.` });
-      })
-      .finally(() => window.clearTimeout(timer));
-    return () => {
-      stopped = true;
-      window.clearTimeout(timer);
-      ctrl.abort();
-    };
-  }, []);
-  return durum;
-}
 
 /** Ayrıntı anahtarı (role="switch"): iz ve top tokenlarla; klavye odağı yazının alt çizgisi. */
 function Anahtar({ ad, acik, onChange }: { ad: string; acik: boolean; onChange: (v: boolean) => void }) {
@@ -92,9 +56,13 @@ const para = (v: number) => (v === 0 ? '—' : tl(v));
 function Icerik() {
   const m = useModel();
   const durum = useOpexOnce();
+  const [sid, setSid] = useScenario();
   const [ayrintili, setAyrintili] = useState(false);
+  const [mod, setMod] = useState<Mod>('secili');
   const opex = durum.status === 'ready' ? durum.model : null;
-  const cf = useMemo(() => buildCashflow(m.cashflow, opex), [m, opex]);
+  const hepsi = useMemo(() => Object.fromEntries(m.cashflow.senaryolar.map((s) => [s.id, buildCashflow(m.cashflow, opex, s.id)])) as Record<ScenarioId, Cashflow>, [m, opex]);
+  const cf = hepsi[sid];
+  const sc = m.cashflow.senaryolar.find((s) => s.id === sid)!;
   const rows = satirlar(cf, ayrintili);
   const ilk = cf.aylar[0];
   const son = cf.aylar[cf.aylar.length - 1];
@@ -106,15 +74,23 @@ function Icerik() {
         : durum.status === 'setup'
           ? 'Sheets verisi okunamadı: veri ucu erişim anahtarı istiyor. Anahtarı Giderler sayfasında girin; tablo şimdilik yalnız plan kalemlerini gösterir.'
           : `Sheets verisi okunamadı (${durum.message}); tablo yalnız plan kalemlerini gösterir.`;
+  const secici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} />;
+  const karsilastirma = m.cashflow.senaryolar.map((s) => ({ s, cf: hepsi[s.id] }));
 
   return (
     <>
-      <Section id="ozet" index={1} title="Özet" desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler plan parametrelerinden, çıkışlar Sheets’teki gider planından.`}>
+      <Section
+        id="ozet"
+        index={1}
+        title="Özet"
+        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan, çıkışlar Sheets’teki gider planından; satış primi de senaryoya göre.`}
+        tools={secici}
+      >
         <Stats
           items={[
-            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: '15 ay toplamı' },
+            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `${sc.name} · 15 ay toplamı` },
             { label: 'Nakit çıkışı', value: tl(cf.toplam.cikis), note: cf.sheets ? 'Sheets + plan kalemleri' : 'Yalnız plan kalemleri' },
-            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: '15 ay toplamı' },
+            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `${sc.name} · 15 ay toplamı` },
             { label: 'En düşük nakit', value: tl(cf.enDusuk.deger), note: `${cf.enDusuk.ay.ad} sonu` },
             { label: 'Nakit açığı tavanı', value: cf.acik ? tl(cf.acik) : '0 ₺', note: cf.acik ? 'Dönem sonu nakdi sıfırın altına düşürmeyen en küçük ek nakit' : 'Dönem sonu nakit hiç negatife düşmüyor' },
           ]}
@@ -128,23 +104,63 @@ function Icerik() {
             </>
           ) : null}
         </p>
+        <DataTable
+          id="senaryo-karsilastirma"
+          title="Üç senaryo: 15 ayın özeti"
+          note="Aynı Sheets giderleri; girişler ve satış primi senaryoya göre. Seçili senaryo vurgulanır."
+          tools={secici}
+          columns={[
+            { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof karsilastirma)[number]) => <RoleChip role={x.s.role} label={x.s.name} /> },
+            { key: 'g', header: 'Nakit girişi', nowrap: true, render: (x) => tl(x.cf.toplam.giris) },
+            { key: 'c', header: 'Nakit çıkışı', nowrap: true, render: (x) => tl(x.cf.toplam.cikis) },
+            { key: 'net', header: 'Net', nowrap: true, render: (x) => tl(x.cf.toplam.net) },
+            { key: 'd', header: 'En düşük nakit', nowrap: true, render: (x) => `${tl(x.cf.enDusuk.deger)} · ${x.cf.enDusuk.ay.kisa}` },
+            { key: 'a', header: 'Nakit açığı tavanı', nowrap: true, render: (x) => (x.cf.acik ? tl(x.cf.acik) : '0 ₺') },
+            { key: 't', header: 'Toparlanma', nowrap: true, render: (x) => (x.cf.toparlanma ? (x.cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : x.cf.toparlanma.kisa) : 'Dönem içinde yok') },
+            { key: 's', header: 'Dönem sonu (Ara 2027)', nowrap: true, render: (x) => tl(x.cf.donemSonu[x.cf.donemSonu.length - 1]) },
+          ]}
+          rows={karsilastirma}
+          rowKey={(x) => x.s.id}
+          rowTone={(x) => (x.s.id === sid ? 'secili' : undefined)}
+        />
       </Section>
 
-      <Section id="tablo" index={2} title="Aylık nakit akışı" desc="Basit görünüm dört satır; ayrıntılı görünüm giriş ve çıkış kalemlerini, dönem başı nakdi ekler.">
+      <Section
+        id="tablo"
+        index={2}
+        title="Aylık nakit akışı"
+        desc="Basit görünüm dört satır; ayrıntılı görünüm giriş ve çıkış kalemlerini, dönem başı nakdi ekler. Grafik seçili senaryoyu ya da üç senaryonun dönem sonu nakdini üst üste gösterir."
+        tools={secici}
+      >
         <div className="nakit-araclar">
           <Anahtar ad="Ayrıntılı görünüm" acik={ayrintili} onChange={setAyrintili} />
         </div>
         <Chart
           id="nakit-ay"
-          title="Giriş, çıkış ve dönem sonu nakit"
-          note="Çubuklar aylık giriş ve çıkış; işaret dönem sonu nakit (negatifse nakit açığı)."
-          summary={`${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}; en düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}); dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`}
-          spec={{ kind: 'nakit-ay', months: cf.aylar.map((a) => a.kisa), inflow: cf.giris, outflow: cf.cikis, balance: cf.donemSonu }}
+          title={mod === 'secili' ? `Giriş, çıkış ve dönem sonu nakit (${sc.name.toLocaleLowerCase('tr-TR')})` : 'Dönem sonu nakit: üç senaryo üst üste'}
+          note={mod === 'secili' ? 'Çubuklar aylık giriş ve çıkış; işaret dönem sonu nakit (negatifse nakit açığı).' : 'Sıfır çizgisinin altı nakit açığı; eğriler elde tutma ve kapasite farkıyla ayrışır.'}
+          summary={
+            mod === 'secili'
+              ? `${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}; en düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}); dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`
+              : karsilastirma.map((x) => `${x.s.name}: en düşük ${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa}), ${son.kisa} sonu ${tl(x.cf.donemSonu[x.cf.donemSonu.length - 1])}`).join('; ')
+          }
+          tools={
+            <>
+              {secici}
+              <ModSecimi value={mod} onChange={setMod} />
+            </>
+          }
+          spec={
+            mod === 'secili'
+              ? { kind: 'nakit-ay', months: cf.aylar.map((a) => a.kisa), inflow: cf.giris, outflow: cf.cikis, balance: cf.donemSonu }
+              : { kind: 'kumulatif-tl', labels: cf.aylar.map((a) => a.kisa), target: 0, targetLabel: 'Sıfır', series: karsilastirma.map((x) => ({ name: x.s.name, role: x.s.role, values: x.cf.donemSonu, dashed: x.s.id !== sid })) }
+          }
           size="lg"
         />
         <DataTable<Satir>
           id="nakit"
-          title={ayrintili ? 'Ayrıntılı nakit akış tablosu' : 'Nakit akış tablosu'}
+          title={`${ayrintili ? 'Ayrıntılı nakit akış tablosu' : 'Nakit akış tablosu'} (${sc.name.toLocaleLowerCase('tr-TR')})`}
+          tools={secici}
           columns={[
             {
               key: 'ad',
@@ -177,7 +193,8 @@ function Icerik() {
         <Note title="Okuma">
           <p>
             Dönem sonu nakit = dönem başı nakit + net nakit akışı. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir; yatırım
-            girişi ve başlangıç nakdi parametresi bunu değiştirir. Tutarlar ₺, kuruş yuvarlanır; “—” sıfır demektir.
+            girişi ve başlangıç nakdi parametresi bunu değiştirir. Senaryo seçimi girişleri ve satış primini değiştirir; Sheets giderleri üç senaryoda aynıdır. Tutarlar ₺, kuruş
+            yuvarlanır; “—” sıfır demektir.
           </p>
         </Note>
       </Section>

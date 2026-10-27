@@ -15,6 +15,8 @@ import { makeOrg } from './tree';
 export function buildModel(p: Params) {
   const program = makeProgram(p);
   const roles = makeRoles(p, program);
+  // Gelir planı önce kurulur: nakit akış tablosunun girişleri senaryo serilerinden gelir.
+  const revenue = makeRevenue(p, program);
   return {
     params: p,
     ...program,
@@ -24,8 +26,8 @@ export function buildModel(p: Params) {
     growth: makeGrowth(p, program),
     org: makeOrg(p, roles),
     partnership: makePartnership(p, program),
-    cashflow: makeCashflow(p, program),
-    revenue: makeRevenue(p, program),
+    cashflow: makeCashflow(p, program, revenue),
+    revenue,
   };
 }
 

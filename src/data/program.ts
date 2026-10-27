@@ -252,11 +252,11 @@ export function makeProgram(p: Params) {
   const salaries = {
     saha: p.sahaSalary,
     lead: p.sahaSalary + p.leadUplift,
-    masa: p.minWage * p.masaMultiplier,
-    segika: p.minWage * p.segikaMultiplier,
+    masa: p.masaSalary,
+    segika: p.segikaSalary,
     dijital: p.minWage * p.dijitalMultiplier,
     asistan: p.minWage * p.asistanMultiplier,
-    organizator: p.minWage * p.organizatorMultiplier,
+    organizator: p.organizatorSalary,
   };
   const cost = (salary: number) => salary * p.costFactor;
   /** Saha kotası: ay içinde kendi işveren maliyeti kadar satış; sonrasında her satış prim doğurur. */
@@ -277,11 +277,12 @@ export function makeProgram(p: Params) {
   const sahaCost90 = cost((p.sahaCount * 3 + p.sahaDecCount * decMonths) * p.sahaSalary);
   const maxPayout = p.commission + p.sponsorShare + p.leadTeamShare;
 
-  const sgk = (who: string, role: RoleKey, salary: number, multiplier: number): PayRule => ({
+  /** Çarpan verilirse asgari ücret çarpanı yazılır; verilmezse net ₺ karar (kullanıcı kararı 2026-10-27). */
+  const sgk = (who: string, role: RoleKey, salary: number, multiplier?: number): PayRule => ({
     who,
     role,
     status: 'SGK’lı çalışan',
-    fixed: `${tl(salary)} maaş / ay (${times(multiplier)} asgari ücret)`,
+    fixed: multiplier ? `${tl(salary)} maaş / ay (${times(multiplier)} asgari ücret)` : `${tl(salary)} maaş / ay (net)`,
     cost: `${tl(cost(salary))} / ay`,
     commission: 'Yok (yalnız maaş)',
   });
@@ -311,11 +312,11 @@ export function makeProgram(p: Params) {
       cost: '0 ₺ sabit',
       commission: `İlk satıştan itibaren satış başına ${tl(p.commission)}; getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} sponsor payı (tek seviye)`,
     },
-    sgk('Masa başı (CRM)', 'pazarlamaci', salaries.masa, p.masaMultiplier),
-    sgk('Segika masa başı (CRM)', 'segika', salaries.segika, p.segikaMultiplier),
+    sgk('Masa başı (CRM)', 'pazarlamaci', salaries.masa),
+    sgk('Segika masa başı (CRM)', 'segika', salaries.segika),
     sgk('Dijital pazarlama', 'dijital-pazarlama', salaries.dijital, p.dijitalMultiplier),
     sgk('Asistan', 'asistan', salaries.asistan, p.asistanMultiplier),
-    sgk('Organizatör', 'organizator', salaries.organizator, p.organizatorMultiplier),
+    sgk('Organizatör', 'organizator', salaries.organizator),
   ];
 
   /* Takvim */
@@ -455,7 +456,7 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Diğer rollerin maaşları',
-      decision: `Asgari ücret (net ${tlExact(p.minWage)}) çarpanıyla: masa başı ${times(p.masaMultiplier)} = ${tl(salaries.masa)}, Segika ${times(p.segikaMultiplier)} = ${tl(salaries.segika)}, dijital ${times(p.dijitalMultiplier)} = ${tl(salaries.dijital)}, asistan ${times(p.asistanMultiplier)} = ${tl(salaries.asistan)}, organizatör ${times(p.organizatorMultiplier)} = ${tl(salaries.organizator)}.`,
+      decision: `Net maaş (kullanıcı kararı 27 Ekim 2026): masa başı ${tl(salaries.masa)}, Segika ${tl(salaries.segika)}, organizatör ${tl(salaries.organizator)}. Asgari ücret (net ${tlExact(p.minWage)}) çarpanıyla: dijital ${times(p.dijitalMultiplier)} = ${tl(salaries.dijital)}, asistan ${times(p.asistanMultiplier)} = ${tl(salaries.asistan)}.`,
     },
     {
       topic: 'CRM aracı ve aşamaları',

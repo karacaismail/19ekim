@@ -985,7 +985,7 @@ test.describe('parametreler', () => {
     await page.goto('karar-bekleyenler/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.getByText('60.000 ₺ maaş / ay').first()).toBeVisible();
+    await expect(page.getByText('50.000 ₺ maaş / ay').first()).toBeVisible();
     await expect(page.locator('.params-notice')).toHaveCount(0);
   });
 

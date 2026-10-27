@@ -16,10 +16,12 @@ bağımsız modül vardır:
 - **Giderler (OPEX)**: veri repoda değil, Google Sheets’te. Apps Script web uygulaması sayfaya canlı veri verir; aynı
   hesap motoru (`apps-script/src/Motor.js`) hem Sheets’teki panoyu hem sayfayı besler.
 - **Applet’ler** (`/applet/`): ücret ve performans modelleri, menüde yok, yalnız adresle açılır.
-- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): kadro kapasitesinden hedef zinciri, üç senaryo, aylık ve
-  kümülatif gelir. Veri `src/data/revenue.ts`; parametreler “Gelir planı” grubunda.
-- **Nakit akış tablosu** (`/nakit-akisi/`, Giderler menüsünde): çıkışlar Sheets’ten canlı, girişler sitenin
-  parametrelerinden; basit/ayrıntılı anahtar. Veri `src/data/cashflow.ts`.
+- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): kadro kapasitesinden hedef zinciri, üç senaryo (kötümser ·
+  medyan · iyimser; her bölümün, tablonun ve grafiğin başında seçilir, bazı grafikler “üçü üst üste”), aylık ve
+  kümülatif gelir, başabaş (üstünde filtreler). Veri `src/data/revenue.ts` ve `src/data/breakeven.ts`; parametreler
+  “Gelir planı” grubunda; seçili senaryo `src/lib/scenario.ts` ile nakit akış tablosuyla ortak.
+- **Nakit akış tablosu** (`/nakit-akisi/`, Giderler menüsünde): çıkışlar Sheets’ten canlı, girişler gelir planının
+  seçili senaryosundan; basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
   geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
 
@@ -52,7 +54,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 742 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 784 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -125,7 +127,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 
 1. Siteyi yerelde aç: `npm run dev`, giriş yap, değişmesini istediğin şeyi **sayfada** göster (ekran görüntüsü
    veya sayfa + bölüm adı).
-2. İsteği bir cümlede, karar olarak yaz: “Saha satış maaşı 60.000 yerine 65.000 olsun”, “Giderler tablosunda
+2. İsteği bir cümlede, karar olarak yaz: “Saha satış maaşı 50.000 yerine 55.000 olsun”, “Giderler tablosunda
    kategori sütunu en başa gelsin”. Nasıl yapılacağını değil, ne olacağını söyle.
 3. Ajan değişikliği yapınca üç şeyi iste: `npm run verify` sonucu, 320 px ekran görüntüsü, AGENTS.md’de güncellenen
    satır. Üçü yoksa iş bitmemiştir.
@@ -158,5 +160,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Sheets kurulumu | `apps-script/src/Kurulum.js`, `apps-script/README.md` |
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
 | İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |
-| Nakit akış tablosu | `src/data/cashflow.ts` (girişler, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
-| Gelir planı | `src/data/revenue.ts` (kapasite, senaryolar, hedef zinciri), `src/views/RevenuePage.tsx` |
+| Nakit akış tablosu | `src/data/cashflow.ts` (senaryo girişleri, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
+| Gelir planı | `src/data/revenue.ts` (kapasite, `simulate`, senaryolar, hedef zinciri), `src/views/RevenuePage.tsx` |
+| Başabaş | `src/data/breakeven.ts` (filtreler, gider kaynakları, kesişimler, adet noktası, duyarlılık); gelir planı sayfasının bölümü |
+| Senaryo seçimi | `src/lib/scenario.ts` (`useScenario`, localStorage `istoc-plan-senaryo`), `src/components/Senaryo.tsx` (`SenaryoSecimi`, `ModSecimi`) |

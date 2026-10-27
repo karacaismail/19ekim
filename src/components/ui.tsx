@@ -115,12 +115,15 @@ export function Section({
   index,
   title,
   desc,
+  tools,
   children,
 }: {
   id: string;
   index: number | string;
   title: string;
   desc?: ReactNode;
+  /** Bölüm başındaki araç satırı (senaryo seçici, görünüm): başlık bloğunun hemen altında. */
+  tools?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -138,6 +141,7 @@ export function Section({
           </Text>
         ) : null}
       </div>
+      {tools ? <div className="secim-sira">{tools}</div> : null}
       {children}
     </section>
   );
@@ -164,6 +168,7 @@ export function DataTable<T>({
   id,
   title,
   note,
+  tools,
   columns,
   rows,
   rowTone,
@@ -172,6 +177,8 @@ export function DataTable<T>({
   id: string;
   title: string;
   note?: ReactNode;
+  /** Tablo başındaki araç satırı (senaryo seçici, görünüm). */
+  tools?: ReactNode;
   columns: Column<T>[];
   rows: T[];
   rowTone?: (row: T) => string | undefined;
@@ -185,6 +192,7 @@ export function DataTable<T>({
         {title}
       </h3>
       {note ? <p className="table-note">{note}</p> : null}
+      {tools ? <div className="blok-araclar">{tools}</div> : null}
       <span className="table-hint" aria-hidden="true">
         Tabloyu yatay kaydırabilirsiniz.
       </span>
@@ -296,6 +304,7 @@ export function Chart({
   title,
   note,
   summary,
+  tools,
   size = 'md',
   wide = false,
   rows,
@@ -306,6 +315,8 @@ export function Chart({
   title: string;
   note?: string;
   summary: string;
+  /** Grafik başındaki araç satırı (senaryo seçici, görünüm): başlığın altında, çizimin üstünde. */
+  tools?: ReactNode;
   size?: ChartSize;
   wide?: boolean;
   /** Kategori satırı sayısı: kutu en az satır başına bir etiket yüksekliği kadar uzar (etiketler üst üste binmez). */
@@ -389,6 +400,7 @@ export function Chart({
         </span>
         {note ? <span className="chart-note">{note}</span> : null}
       </figcaption>
+      {tools ? <div className="blok-araclar">{tools}</div> : null}
       {wide ? (
         <span className="table-hint" aria-hidden="true">
           Grafiği yatay kaydırabilirsiniz.
@@ -404,5 +416,28 @@ export function Chart({
         canvas
       )}
     </figure>
+  );
+}
+
+/* ---------- Seçim grupları (senaryo, grafik modu, başabaş filtreleri) ---------- */
+
+export interface ChoiceOption<T extends string> {
+  id: T;
+  name: string;
+  role?: RoleKey;
+  title?: string;
+}
+
+/** Basılı düğme grubu (aria-pressed): etiket + seçenekler; rol tonu varsa seçili düğme o tonda. */
+export function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: ChoiceOption<T>[]; onChange: (id: T) => void }) {
+  return (
+    <div className="secim" role="group" aria-label={label}>
+      <span className="secim-etiket">{label}</span>
+      {options.map((o) => (
+        <button key={o.id} type="button" className="secim-dugme" data-role={o.role} aria-pressed={o.id === value} title={o.title} onClick={() => onChange(o.id)}>
+          {o.name}
+        </button>
+      ))}
+    </div>
   );
 }

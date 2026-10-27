@@ -146,7 +146,7 @@ const saha: Role = {
   count: '3 kişi (2’si 1 Kasım, 1’i 1 Aralık; sonra ağla büyür)',
   start: '1 Kasım 2026 (3. kişi 1 Aralık)',
   startStatus: 'karar',
-  pay: '60.000 ₺ maaş · ay içinde 120.000 ₺ satıştan sonra satış başına 2.500 ₺ prim',
+  pay: 'Maaş · kota üstü satış başına prim',
   reportsTo: 'İsmail Karaca; 1 Aralık’tan ekip lideri',
   seeks: ['Satış dili', 'Hırslı'],
   mission: 'İstoç’ta randevulu ve çat kapı ziyaretle satıcıyı kaydeder, 48 saatte onboard eder, aboneliğe çevirir ve yeniletir.',
@@ -201,7 +201,7 @@ const ekipLideri: Role = {
   count: '1 kişi (içeriden)',
   start: '1 Aralık 2026',
   startStatus: 'karar',
-  pay: '70.000 ₺ maaş (saha + 10.000 ₺ liderlik farkı) · ekibin her satışından 250 ₺ · kendi satışı saha kuralıyla',
+  pay: 'Saha maaşı + liderlik farkı · ekibin her satışından pay',
   reportsTo: 'İsmail Karaca',
   seeks: ['Cevval', 'Kasım KPI’larında üst sırada'],
   mission: '1 Kasım’da başlayanlar arasından seçilir; ekibi koçlar ve çok katmanlı pazarlama ağını yönetir.',
@@ -409,7 +409,7 @@ export function makeRoles(p: Params, prog: Program): Role[] {
   const person = (n: number) => `${n} kişi`;
   const start = longDate(p.startDate);
   const dec = longDate(p.decStartDate);
-  const salaryText = (salary: number, multiplier: number) => `${tl(salary)} maaş (${times(multiplier)} asgari ücret)`;
+  const salaryText = (salary: number, multiplier?: number) => (multiplier ? `${tl(salary)} maaş (${times(multiplier)} asgari ücret)` : `${tl(salary)} maaş (net)`);
 
   const shift = (r: Role, delta: number): Role => ({
     ...r,
@@ -451,7 +451,7 @@ export function makeRoles(p: Params, prog: Program): Role[] {
     ...shift(organizator, d2),
     count: person(p.organizatorCount),
     start: dec,
-    pay: salaryText(salaries.organizator, p.organizatorMultiplier),
+    pay: salaryText(salaries.organizator),
     ramp: { ...organizator.ramp, months: orgMonths },
   };
   orgRole = setKpi(orgRole, 'Eğitimden kayıt', `${Math.round(orgRow.kayit[1] / 4)} → ${Math.round(orgRow.kayit[2] / 4)}`);
@@ -466,12 +466,12 @@ export function makeRoles(p: Params, prog: Program): Role[] {
       start: `${start} (asistan yoksa ${longDate(p.dijitalAltDate)})`,
       pay: salaryText(salaries.dijital, p.dijitalMultiplier),
     },
-    setKpi({ ...shift(pazarlamaci, d1), count: person(p.masaCount), start, pay: salaryText(salaries.masa, p.masaMultiplier) }, 'Uzaktan aktif satıcı', int(sum(masaRow.aktif))),
+    setKpi({ ...shift(pazarlamaci, d1), count: person(p.masaCount), start, pay: salaryText(salaries.masa) }, 'Uzaktan aktif satıcı', int(sum(masaRow.aktif))),
     sahaRole,
     leadRole,
     orgRole,
     { ...shift(asistan, d1), count: person(p.asistanCount), start: `${start} (onay bekliyor)`, pay: salaryText(salaries.asistan, p.asistanMultiplier) },
-    { ...shift(segika, d1), count: person(p.segikaCount), start, pay: salaryText(salaries.segika, p.segikaMultiplier) },
+    { ...shift(segika, d1), count: person(p.segikaCount), start, pay: salaryText(salaries.segika) },
   ];
 }
 
