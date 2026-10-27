@@ -104,6 +104,10 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
 - **Sayfa başlığı tek kalıptır.** Her sayfanın tek h1’i kırıntı satırının son öğesidir (“19 Ekim › Gelir planı”); altında
   bir cümlelik amaç ve dönem/kaynak satırı (`PageHeader`). Ayrı “hero”, turuncu üst etiket ve uzun giriş metni yok; bölüm
   başlığında numara yalnız sıra anlamlıysa (araç sayfalarında yok), üst çizgi ince.
+- **Parametreler görev gruplarında.** `/parametreler/` alanları kapalı gruplar hâlinde gelir (başlıkta “n alan · k
+  değişiklik”), arama kutusu etiket/yardım/grup adında arar ve eşleşen grupları açar; değişiklik özeti varsayılan → yeni
+  değeri, grubu ve “alana git / bu alanı geri al” düğmelerini verir; “Varsayılanlara dön” kapsamını onaydan önce yazar
+  ve “Geri al” sunar; kayıt yazımı gerçeği söyler (“bu tarayıcıda kaydedildi ss:dd:ss” ya da “kaydedilemedi”).
 - **Önce sonuç, sonra ayar, sonra veri.** Gelir planı ve nakit akışında seçili senaryonun ana sonucu (`ResultSummary`:
   değer + dönem + kıyas + durum) sayfa başlığının hemen altındadır ve 320×480’de kaydırmadan görünür; kritik risk
   (“kapanmıyor”, “sıfırın üstüne çıkmıyor”) alt bölümlere ya da accordion’a gömülmez.

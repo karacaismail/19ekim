@@ -21,6 +21,20 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - `/parametreler/` değerleri düzenler; değişiklik anında tüm sayfaların modeline yansır ve `localStorage`
   (`istoc-plan-parametreler`, yalnız varsayılandan farklı anahtarlar) içinde saklanır. Yayındaki site herkes için
   varsayılanları gösterir; değişiklik varsa her sayfada not görünür. Varsayılanı kalıcı değiştirmek için `params.ts`.
+  **Sayfa düzeni (kullanıcı kararı 2026-10-27, ux.md §3/§9, M13 ParameterGroup, M23 ReviewAndReset, UX-14/15; paket
+  P6.3):** başlık (amaç; Kayıt: yalnız bu tarayıcı · Yayın: varsayılanlar) → kayıt durumu (`.param-status`:
+  “N değer varsayılandan farklı; bu tarayıcıda kaydedildi ss:dd:ss (yerel depolama)”, önceki oturumdan geliyorsa
+  “kayıtlı”, depolama kapalıysa “Bu tarayıcıda kaydedilemedi (depolama kapalı): değişiklikler yalnız bu sekme açıkken
+  geçerli” — “kaydedildi” yalnız gerçekten yapılan kayıt için) ve **varsayılana dön** (iki adım; onay basılınca kapsam
+  yazılır `.param-reset-kapsam`: kaç alan, yalnız bu tarayıcı, senaryo seçenekleri / notlar / tema değişmez; uygulanınca
+  **Geri al** düğmesi önceki değerleri geri getirir — `ModelContext.restore` —, bir sonraki değişikliğe kadar) →
+  **değişiklik özeti** (`.param-degisiklikler`: alan · grup, varsayılan → yeni, “Alana git” grubu açıp alanı odaklar,
+  “Bu alanı geri al”) → **arama** (`role="search"`, “Parametre ara”: etiket, yardım, birim ve grup adında; eşleşen
+  gruplar açılır, eşleşmeyenler gizlenir; sonuç sayısı `aria-live`) → **görev grupları** (`PARAM_GROUPS` → Mantine
+  `Accordion`, h2 içinde düğme, `aria-expanded`, panel `region`; başlıkta “n alan · k değişiklik”; hepsi kapalı gelir,
+  açılışta değiştirilmiş alanı olan gruplar açık; panelde grup açıklaması ve `fieldset`) → Türetilen değerler. Grup
+  numarası yok. 320×480’de belge 12.683 px’ten ≈ 2.000 px’e indi, kapalı grupta görünür girdi yok
+  (`ui.spec.ts → parametreler: görev grupları…`).
 - İstemci JavaScript’i: React adaları, `BaseLayout.astro` içindeki satır içi betikler (ilk renk şeması, giriş işareti,
   merkezi klavye odak modu) ve grafikler; gezinme şeridinde etkin bağlantıyı görünür alana getirme `AppFrame`’de. `Chart` bileşeni ECharts’ı (`src/scripts/charts.ts` → `echarts-setup.ts`)
   yalnız grafik görünür olunca dinamik yükler; spec değişince aynı grafiği yeniden çizer. İstihdam, arşiv ve
@@ -435,7 +449,7 @@ bunu denetler.
 | P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
 | P6.1 Sayfa başlığı tek kalıp (`PageHeader`: kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) ve bölüm başlığı sadeleşmesi (hairline, numara yalnız sıralı bölümlerde) | §3, §5.4, M03 | **Tamam** (2026-10-27) | `ui.spec.ts → sayfa başlığı ve bölüm başlığı` (320), `ONCEKI` (1280, kırıntı satırı dahil), kırıntı testi; `gelir.spec.ts` dönem satırı |
 | P6.2 `ResultSummary` (M05): gelir planı (en çok fon ihtiyacı, başabaş durumu) ve nakit akışında (nakit açığı tavanı) seçili senaryonun ana sonucu dönem, birim ve kıyasla 320×480 ilk ekranda; durum/risk gizlenmez; yapışkan özet şerit olarak bloğun başında (tek kaynak); gelirde sonuç kurucudan önce (§5.4 sırası) | §5.4, §5.15, §9, M05 | **Tamam** (2026-10-27) | `gelir.spec.ts → ana sonuç` (320×480, kıyas, risk, tek kaynak) ve sıra testi; `nakit.spec.ts → ana sonuç` (özet kutusu ve tabloyla aynı değer, seçici, kaynak uyarısı) |
-| P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13), değişiklik özeti, “bu tarayıcıda kaydedildi” ve “varsayılana dön” kapsamı (UX-14/15) | §3, §9, M13/M23 | Bekliyor | — |
+| P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13; kapalı gelir, arama grupları açar), değişiklik özeti (alan · grup, varsayılan → yeni, alana git, tek alanı geri al), “bu tarayıcıda kaydedildi/kaydedilemedi” açık yazımı (UX-15), “varsayılana dön” kapsamı onaydan önce + geri al (UX-14) | §3, §9, M13/M23, UX-14/15 | **Tamam** (2026-10-27) | `ui.spec.ts → parametreler: görev grupları…` (320×480 belge yüksekliği ve görünür girdi, arama, özet, kapsam + geri al, depolama kapalı); eski parametre testleri grupları açarak sürer |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,

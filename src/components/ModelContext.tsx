@@ -11,6 +11,8 @@ interface ModelState {
   saved: Date | false | null;
   setParam: <K extends keyof Params>(key: K, value: Params[K]) => void;
   reset: () => void;
+  /** Bütün parametreleri verilen kümeye getirir (ör. sıfırlamayı geri alma); tarayıcıya kaydeder. */
+  restore: (next: Params) => void;
 }
 
 const Ctx = createContext<ModelState | null>(null);
@@ -52,11 +54,12 @@ export function ModelProvider({ children }: { children: ReactNode }) {
   );
 
   const reset = useCallback(() => update(DEFAULT_PARAMS), [update]);
+  const restore = useCallback((next: Params) => update(next), [update]);
 
   const model = useMemo(() => (params === DEFAULT_PARAMS ? DEFAULT_MODEL : buildModel(params)), [params]);
   const value = useMemo(
-    () => ({ model, params, changed: changedKeys(params).length, saved, setParam, reset }),
-    [model, params, saved, setParam, reset],
+    () => ({ model, params, changed: changedKeys(params).length, saved, setParam, reset, restore }),
+    [model, params, saved, setParam, reset, restore],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
