@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { Accordion, Anchor, Badge, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
@@ -156,7 +156,9 @@ export function Section({
  * açılan panelde bütün diğer alanlar dl/dt/dd ile etiketli; birden çok kayıt açık kalabilir, açık kayıtlar kimlikle
  * (rowKey) saklanır. Geniş alanda semantik tablo (yalnız ≥ 48em’de gerekirse kendi kutusunda kayar). Kayıt ekseni:
  * 'satir' (satır = kayıt; varsayılan) ya da 'sutun' (ay sütunları: sütun = kayıt, satırlar alan; özet son satır — §8.5
- * PeriodExplorer). Yatay kaydırma ipucu kaldırıldı (dar ekranda kayan tablo yok).
+ * PeriodExplorer). Yatay kaydırma ipucu kaldırıldı (dar ekranda kayan tablo yok). Kabuk seçimi (`useKabuk`) ve kayıt
+ * listesi (`KayitListesi`) dışa açıktır: Giderler kalemler tablosu (OpexPage → KalemTablosu) kendi süzgeç/sıra
+ * durumuyla aynı kalıbı kullanır.
  */
 
 export interface Column<T> {
@@ -196,12 +198,114 @@ function sutunMinPx(minWidth: string | undefined, root: number) {
 
 export type KayitEkseni = 'satir' | 'sutun';
 
-interface Kayit {
+/** Kayıt görünümündeki bir kayıt: başlık (kayıt adı), tek özet alan ve açılan paneldeki etiketli alanlar. */
+export interface Kayit {
+  /** Kalıcı kimlik (Accordion değeri ve panel id’si; sıra indeksi kimlik olamaz): yalnız harf, rakam, tire, alt çizgi. */
   key: string;
   title: ReactNode;
   tone?: string;
   summary?: { label: ReactNode; value: ReactNode };
   fields: { key: string; label: ReactNode; value: ReactNode }[];
+}
+
+/**
+ * Kabuk seçimi (M08 AdaptiveDataView): kapsayıcı 48em’den darsa ve sütunların okunabilir toplam genişliği sığmıyorsa —
+ * ya da tablo ölçülünce taşıyorsa (güvenlik ağı) — 'kayit', yoksa 'tablo'. Kapsayıcı boyamadan önce ölçülür, yeniden
+ * boyutlanınca izlenir. Süzgeç, sıra, arama ve açık kayıt durumu çağıranın elindedir: kabuk değişince kaybolmaz
+ * (ux.md §8.3). İki kabuk aynı anda mount edilmez.
+ */
+export function useKabuk(sarmal: RefObject<HTMLElement | null>, kaydiran: RefObject<HTMLElement | null>, minWidths: (string | undefined)[]): 'tablo' | 'kayit' {
+  const [genislik, setGenislik] = useState<number | null>(null);
+  const [tasma, setTasma] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = sarmal.current;
+    if (!el) return undefined;
+    const olc = () => setGenislik(el.clientWidth);
+    olc();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(olc);
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [sarmal]);
+  const root = rootPx();
+  const minToplam = minWidths.reduce((toplam, w) => toplam + sutunMinPx(w, root), 0);
+  const dar = genislik !== null && genislik < KAYIT_EM * root;
+  const mod: 'tablo' | 'kayit' = dar && (genislik < minToplam || (tasma !== null && genislik < tasma)) ? 'kayit' : 'tablo';
+  useLayoutEffect(() => {
+    if (mod !== 'tablo' || !dar) return;
+    const el = kaydiran.current;
+    if (el && el.scrollWidth > el.clientWidth + 1) setTasma(el.scrollWidth);
+  });
+  return mod;
+}
+
+/**
+ * Kayıt listesi (M09 RecordAccordion): Mantine Accordion, birden çok kayıt açık kalabilir (süre `--motion-duration-base`,
+ * eğri `--motion-ease-standard`). Her kayıt başlığı h4 içinde düğme (aria-expanded, aria-controls → role="region" panel):
+ * kayıt adı + tek özet alan; açılan panelde alanlar dl/dt/dd ile etiketli. Açık kayıtlar çağıranın durumudur (`acik`:
+ * kayıt kimlikleri). Erişilebilir ad: `labelledBy` (başlık id’si) ya da `label`.
+ */
+export function KayitListesi({
+  kayitlar,
+  acik,
+  onChange,
+  className,
+  label,
+  labelledBy,
+}: {
+  kayitlar: Kayit[];
+  acik: string[];
+  onChange: (acik: string[]) => void;
+  className?: string;
+  label?: string;
+  labelledBy?: string;
+}) {
+  const sure = useMotionMs('--motion-duration-base');
+  return (
+    <div className={['kayitlar-sarmal', className].filter(Boolean).join(' ')} role="group" aria-label={label} aria-labelledby={labelledBy}>
+      <Accordion
+        multiple
+        value={acik}
+        onChange={onChange}
+        order={4}
+        transitionDuration={sure}
+        classNames={{
+          root: 'kayitlar',
+          item: 'kayit',
+          itemTitle: 'kayit-h',
+          control: 'kayit-baslik',
+          label: 'kayit-etiket',
+          chevron: 'kayit-ok',
+          panel: 'kayit-panel',
+          content: 'kayit-icerik',
+        }}
+      >
+        {kayitlar.map((k) => (
+          <Accordion.Item key={k.key} value={k.key} data-tone={k.tone}>
+            <Accordion.Control>
+              <span className="kayit-ad">{k.title}</span>
+              {k.summary ? (
+                <span className="kayit-ozet">
+                  <span className="kayit-ozet-etiket">{k.summary.label}</span>
+                  <span className="kayit-ozet-deger">{k.summary.value}</span>
+                </span>
+              ) : null}
+            </Accordion.Control>
+            {/* Collapse zamanlama eğrisi hareket tokenından (Panel bunu Collapse’a aktarır; tipinde yok). */}
+            <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+              <dl className="kayit-alanlar">
+                {k.fields.map((f) => (
+                  <div key={f.key}>
+                    <dt>{f.label}</dt>
+                    <dd>{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion>
+    </div>
+  );
 }
 
 export function DataTable<T>({
@@ -231,33 +335,8 @@ export function DataTable<T>({
   const titleId = `${id}-tablo`;
   const sarmal = useRef<HTMLDivElement>(null);
   const kaydiran = useRef<HTMLDivElement>(null);
-  const [genislik, setGenislik] = useState<number | null>(null);
-  const [tasma, setTasma] = useState<number | null>(null);
   const [acik, setAcik] = useState<string[]>([]);
-  const sure = useMotionMs('--motion-duration-base');
-
-  // Kapsayıcı genişliği (boyamadan önce ölçülür; yeniden boyutlanınca izlenir).
-  useLayoutEffect(() => {
-    const el = sarmal.current;
-    if (!el) return undefined;
-    const olc = () => setGenislik(el.clientWidth);
-    olc();
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(olc);
-    ro?.observe(el);
-    return () => ro?.disconnect();
-  }, []);
-
-  const root = rootPx();
-  const minToplam = columns.reduce((toplam, col) => toplam + sutunMinPx(col.minWidth, root), 0);
-  const dar = genislik !== null && genislik < KAYIT_EM * root;
-  const mod: 'tablo' | 'kayit' = dar && (genislik < minToplam || (tasma !== null && genislik < tasma)) ? 'kayit' : 'tablo';
-
-  // Güvenlik ağı: tablo kabuğu dar alanda yine de taşıyorsa gerekli genişlik ezberlenir ve kayıt listesine geçilir.
-  useLayoutEffect(() => {
-    if (mod !== 'tablo' || !dar) return;
-    const el = kaydiran.current;
-    if (el && el.scrollWidth > el.clientWidth + 1) setTasma(el.scrollWidth);
-  });
+  const mod = useKabuk(sarmal, kaydiran, columns.map((c) => c.minWidth));
 
   const keyOf = (row: T, index: number) => (rowKey ? rowKey(row, index) : String(index));
   const baslikSutunu = columns.find((c) => c.rowHeader) ?? columns[0];
@@ -314,50 +393,7 @@ export function DataTable<T>({
           ))}
         </dl>
       ) : mod === 'kayit' ? (
-        <div className="kayitlar-sarmal" role="group" aria-labelledby={titleId}>
-          <Accordion
-            multiple
-            value={acik}
-            onChange={setAcik}
-            order={4}
-            transitionDuration={sure}
-            classNames={{
-              root: 'kayitlar',
-              item: 'kayit',
-              itemTitle: 'kayit-h',
-              control: 'kayit-baslik',
-              label: 'kayit-etiket',
-              chevron: 'kayit-ok',
-              panel: 'kayit-panel',
-              content: 'kayit-icerik',
-            }}
-          >
-            {kayitlar.map((k) => (
-              <Accordion.Item key={k.key} value={k.key} data-tone={k.tone}>
-                <Accordion.Control>
-                  <span className="kayit-ad">{k.title}</span>
-                  {k.summary ? (
-                    <span className="kayit-ozet">
-                      <span className="kayit-ozet-etiket">{k.summary.label}</span>
-                      <span className="kayit-ozet-deger">{k.summary.value}</span>
-                    </span>
-                  ) : null}
-                </Accordion.Control>
-                {/* Collapse zamanlama eğrisi hareket tokenından (Panel bunu Collapse’a aktarır; tipinde yok). */}
-                <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
-                  <dl className="kayit-alanlar">
-                    {k.fields.map((f) => (
-                      <div key={f.key}>
-                        <dt>{f.label}</dt>
-                        <dd>{f.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </Accordion.Panel>
-              </Accordion.Item>
-            ))}
-          </Accordion>
-        </div>
+        <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} />
       ) : (
         <div className="table-frame">
           <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0} ref={kaydiran}>

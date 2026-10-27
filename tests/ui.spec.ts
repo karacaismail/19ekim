@@ -82,10 +82,10 @@ async function audit(page: Page) {
       hasContent: !!r.querySelector(r.classList.contains('chart-scroll') ? '.chart-canvas' : 'table'),
     }));
     // ux.md §8 (UX-01): dar ekranda olağan iş tablosu yatay kaydırmaz; kayıt listesine (RecordAccordion) dönüşür.
-    // Kayıtlı istisnalar (AGENTS.md → istisna kaydı): geniş grafikler (.chart-scroll, §8.7) ve Giderler kalemler
-    // tablosu (.opex-veri; ayrı pakette dönüştürülür).
+    // Tek kayıtlı istisna (AGENTS.md → istisna kaydı): geniş grafikler (.chart-scroll, §8.7). Giderler kalemler
+    // tablosu P4 ile kayıt listesi oldu; dışlanmaz (veri bağlıyken giderler.spec.ts ayrıca denetler).
     const tableOverflow = [...document.querySelectorAll<HTMLElement>('.table-scroll:not(.chart-scroll)')]
-      .filter((r) => !r.closest('.opex-veri') && r.scrollWidth > r.clientWidth + 1)
+      .filter((r) => r.scrollWidth > r.clientWidth + 1)
       .map((r) => document.getElementById(r.getAttribute('aria-labelledby') ?? '')?.textContent?.trim() ?? r.getAttribute('aria-label') ?? '?');
     // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık h4 içinde düğme (aria-expanded, aria-controls → panel),
     // alanlar dl/dt/dd ile etiketli, hedef alanı en az 44 CSS px.

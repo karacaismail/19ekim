@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 805 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 820 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -98,7 +98,9 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
 - **Tablo dar ekranda kaymaz, kayıt listesine dönüşür.** Ortak `DataTable` 48em altında (sütunlar sığmıyorsa) her satırı
   bir kayıt yapar: başlıkta ad + tek özet alan, açılınca bütün alanlar etiketli (`dl`). Ay sütunlu tablolarda
   (`kayit="sutun"`) her ay bir kayıttır. Aynı veri, iki kabuk; test 1280 px tablosuyla 320 px listesini karşılaştırır.
-  Giderler kalemler tablosu ve geniş grafikler (Gantt, şemalar) kayıtlı istisnadır: kendi kutusunda kayar.
+  Giderler kalemler tablosu da aynı kalıbı kullanır (`useKabuk` + `KayitListesi`; başlıkta kalem adı + rapor ayı tutarı,
+  panelde etiketli alanlar, alt satırlar özet kayıtları). Yalnız geniş grafikler (Gantt, şemalar) kayıtlı istisnadır:
+  kendi kutusunda kayar.
 - **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
   çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
