@@ -14,7 +14,8 @@ import {
 } from '@tabler/icons-react';
 import { ROLE_LABELS } from '../data/roles';
 import type { Kpi, RoleKey, Status } from '../data/types';
-import type { ChartSpec } from '../lib/chartSpec';
+import type { ChartSpec, ChartTreeNode, GanttRow } from '../lib/chartSpec';
+import { monthName } from '../lib/dates';
 import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
 
@@ -194,6 +195,21 @@ function sutunMinPx(minWidth: string | undefined, root: number) {
   const m = minWidth?.match(/^([\d.]+)(rem|em|px)$/);
   if (!m) return SUTUN_MIN_REM * root;
   return m[2] === 'px' ? Number(m[1]) : Number(m[1]) * root;
+}
+
+/** Kapsayıcı genişliği (px): boyamadan önce ölçülür, yeniden boyutlanınca izlenir; sunucuda ve ilk çizimde null. */
+function useKapsayiciGenisligi(ref: RefObject<HTMLElement | null>) {
+  const [genislik, setGenislik] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const olc = () => setGenislik(el.clientWidth);
+    olc();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(olc);
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [ref]);
+  return genislik;
 }
 
 export type KayitEkseni = 'satir' | 'sutun';
@@ -494,7 +510,11 @@ export function Note({ title, children }: { title: string; children: ReactNode }
 /* ---------- Grafik ----------
  * ECharts yalnız grafik görünür olunca yüklenir (src/scripts/charts.ts, ayrı paket). Spec değişince (ör. Parametreler)
  * aynı grafik yeniden çizilir. Çizilene kadar ve çizilemezse Türkçe özet görünür; ekran okuyucu metni de bu özettir.
- * Geniş grafikler (`wide`) dar ekranda kendi kapsayıcısında yatay kayar; sayfa taşmaz.
+ * Geniş grafikler (`wide`; ux.md §8.1, M19/M20/M21 — P5, kullanıcı kararı 2026-10-27): kabuk DataTable kalıbıyla
+ * seçilir — kapsayıcı 48em’den darsa ECharts yerine aynı spec’ten eşdeğer liste çizilir (Gantt ve son tarih → tarihli
+ * ajanda, organizasyon/karar yetkisi → dikey hiyerarşi, BCG → kutuya göre değerler); iki kabuk aynı anda mount edilmez,
+ * ölçülmeden hiçbiri mount edilmez. Geniş kapsayıcıda ECharts; kapsayıcıdan geniş grafik (tablet) yalnız kendi
+ * kutusunda kayar (`.chart-scroll`, klavye: ok tuşları). Dar ekranda yatay kaydırma yoktur.
  */
 export type ChartSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 
@@ -518,6 +538,7 @@ export function Chart({
   /** Grafik başındaki araç satırı (senaryo seçici, görünüm): başlığın altında, çizimin üstünde. */
   tools?: ReactNode;
   size?: ChartSize;
+  /** Geniş grafik: dar kapsayıcıda eşdeğer liste, geniş kapsayıcıda gerekirse kendi kutusunda kayan ECharts. */
   wide?: boolean;
   /** Kategori satırı sayısı: kutu en az satır başına bir etiket yüksekliği kadar uzar (etiketler üst üste binmez). */
   rows?: number;
@@ -525,14 +546,21 @@ export function Chart({
   shortLabels?: boolean;
 }) {
   const titleId = `${id}-grafik`;
+  const figur = useRef<HTMLElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const seen = useRef(false);
   const [state, setState] = useState<'idle' | 'ready' | 'failed'>('idle');
   const json = JSON.stringify(spec);
+  const genislik = useKapsayiciGenisligi(figur);
+  // Kabuk: geniş olmayan grafik hep ECharts; geniş grafik ölçülünce dar kapsayıcıda eşdeğer, geniş kapsayıcıda ECharts.
+  const kabuk: 'grafik' | 'esdeger' | null = !wide ? 'grafik' : genislik === null ? null : genislik < KAYIT_EM * rootPx() ? 'esdeger' : 'grafik';
+  const esdeger = kabuk === 'esdeger' ? grafikEsdegeri(spec, titleId) : null;
+  // Eşdeğeri olmayan tür dar kapsayıcıda da ECharts’tır (kaydırmasız, kapsayıcı genişliğinde).
+  const kutuVar = kabuk === 'grafik' || (kabuk === 'esdeger' && esdeger === null);
 
   useEffect(() => {
     const el = host.current;
-    if (!el) return undefined;
+    if (!kutuVar || !el) return undefined;
     let cancelled = false;
     let observer: IntersectionObserver | null = null;
     const draw = () => {
@@ -561,17 +589,20 @@ export function Chart({
       cancelled = true;
       observer?.disconnect();
     };
-  }, [json]);
+  }, [json, kutuVar]);
 
   useEffect(() => {
-    // Ref söküm anında boşalmış olur; kutu kurulumda yakalanır, söküldüğünde grafik ve gözlemcisi bırakılır.
+    // Kutu sökülünce (kabuk değişti ya da bileşen kalktı) grafik örneği ve gözlemcisi bırakılır; kutu yeniden kurulunca
+    // çizime kadar özet görünür.
     const el = host.current;
+    if (!kutuVar || !el) return undefined;
     return () => {
-      if (el) void import('../scripts/charts').then((mod) => mod.disposeChart(el));
+      void import('../scripts/charts').then((mod) => mod.disposeChart(el));
+      setState('idle');
     };
-  }, []);
+  }, [kutuVar]);
 
-  const canvas = (
+  const kutu = kutuVar ? (
     <div
       className="chart-canvas"
       data-kind={spec.kind}
@@ -591,9 +622,9 @@ export function Chart({
         </p>
       )}
     </div>
-  );
+  ) : null;
   return (
-    <figure className="chart" aria-labelledby={titleId}>
+    <figure className="chart" aria-labelledby={titleId} ref={figur} data-kabuk={kabuk ?? undefined}>
       <figcaption>
         <span className="chart-title" id={titleId}>
           {title}
@@ -601,21 +632,223 @@ export function Chart({
         {note ? <span className="chart-note">{note}</span> : null}
       </figcaption>
       {tools}
-      {wide ? (
-        <span className="table-hint" aria-hidden="true">
-          Grafiği yatay kaydırabilirsiniz.
-        </span>
-      ) : null}
-      {wide ? (
-        <div className="table-frame">
-          <div className="table-scroll chart-scroll" role="region" aria-labelledby={titleId} tabIndex={0}>
-            {canvas}
+      {esdeger ??
+        (wide && kabuk === 'grafik' ? (
+          <div className="table-frame">
+            <div className="table-scroll chart-scroll" role="region" aria-labelledby={titleId} tabIndex={0}>
+              {kutu}
+            </div>
           </div>
-        </div>
-      ) : (
-        canvas
-      )}
+        ) : (
+          kutu
+        ))}
     </figure>
+  );
+}
+
+/* ---------- Grafiklerin dar ekran eşdeğeri (ux.md §8.1; M20 HierarchyExplorer, M21 TimelineExplorer; UX-29/30) ----------
+ * Aynı spec, ikinci hesap yok. Ajanda: görevler başlangıç tarihine göre (aynı günde önce kontrol noktası, sonra spec
+ * sırası); ay değişince yıl taşıyan ay başlığı; kontrol noktaları (Gantt’ın kesikli çizgileri) kesikli ayraç olarak araya
+ * girer; her maddede tarih aralığı, sorumlu çipi ve kilometre taşı; açıklama açılır panelde (kayıt sözleşmesi: h4 içinde
+ * düğme, dl ile etiketli alanlar). Açıklaması olmayan tek tarihli maddeler (son tarih grafikleri) düz listedir.
+ * Hiyerarşi: iç içe ul — alt düğümler üst düğümün li’si içinde; rol tonlu kutu, bağlantılı düğüm rol sayfasına gider.
+ * Değerler: BCG ürünleri kutularına göre, sayılar grafiğin ipucuyla aynı biçimde.
+ */
+const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(`${iso}T00:00:00`));
+const ayBasligi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
+const sayi = new Intl.NumberFormat('tr-TR');
+
+function grafikEsdegeri(spec: ChartSpec, titleId: string): ReactNode | null {
+  switch (spec.kind) {
+    case 'gantt':
+      return <Ajanda titleId={titleId} rows={spec.rows} marks={spec.marks} />;
+    case 'deadlines':
+      return <Ajanda titleId={titleId} rows={spec.items.map((i) => ({ name: i.name, from: i.date, to: i.date, role: i.role, text: '' }))} marks={[]} />;
+    case 'org':
+    case 'gov':
+      return <Hiyerarsi titleId={titleId} root={spec.root} />;
+    case 'bcg-num':
+      return <Degerler titleId={titleId} spec={spec} />;
+    default:
+      return null;
+  }
+}
+
+type AjandaMadde = { tarih: string; sira: number } & ({ tur: 'gorev'; key: string; row: GanttRow } | { tur: 'isaret'; key: string; label: string });
+
+function Ajanda({ titleId, rows, marks }: { titleId: string; rows: GanttRow[]; marks: { date: string; label: string }[] }) {
+  const [acik, setAcik] = useState<string[]>([]);
+  const sure = useMotionMs('--motion-duration-base');
+  // Açıklaması olmayan tek tarihli maddeler: düz liste (açılır panel gereksiz).
+  const duz = rows.every((r) => !r.text && r.from === r.to);
+  const maddeler: AjandaMadde[] = [
+    ...rows.map((row, i) => ({ tur: 'gorev' as const, key: `g${i}`, tarih: row.from, sira: i, row })),
+    ...marks.map((m, i) => ({ tur: 'isaret' as const, key: `i${i}`, tarih: m.date, sira: i, label: m.label })),
+  ].sort((a, b) => a.tarih.localeCompare(b.tarih) || (a.tur === b.tur ? a.sira - b.sira : a.tur === 'isaret' ? -1 : 1));
+  const icerik: ReactNode[] = [];
+  let ay = '';
+  for (const m of maddeler) {
+    if (m.tarih.slice(0, 7) !== ay) {
+      ay = m.tarih.slice(0, 7);
+      icerik.push(
+        <p key={`ay-${ay}`} className="ajanda-ay">
+          {ayBasligi(m.tarih)}
+        </p>,
+      );
+    }
+    if (m.tur === 'isaret') {
+      icerik.push(
+        <p key={m.key} className="ajanda-isaret">
+          {m.label} · {kisaTarih(m.tarih)}
+        </p>,
+      );
+      continue;
+    }
+    const r = m.row;
+    const ust = (
+      <span className="kayit-ozet ajanda-ust">
+        <span className="ajanda-tarih">
+          <time dateTime={r.from}>{kisaTarih(r.from)}</time>
+          {duz ? null : (
+            <>
+              {' – '}
+              <time dateTime={r.to}>{kisaTarih(r.to)}</time>
+            </>
+          )}
+        </span>
+        <RoleChip role={r.role} />
+        {r.milestone ? <span className="ajanda-kilometre">Kilometre taşı</span> : null}
+      </span>
+    );
+    if (duz) {
+      icerik.push(
+        <div key={m.key} className="kayit-duz ajanda-madde">
+          {ust}
+          <span className="kayit-ad">{r.name}</span>
+        </div>,
+      );
+      continue;
+    }
+    icerik.push(
+      <Accordion.Item key={m.key} value={m.key} className="ajanda-madde">
+        <Accordion.Control>
+          {ust}
+          <span className="kayit-ad">{r.name}</span>
+        </Accordion.Control>
+        {/* Collapse zamanlama eğrisi hareket tokenından (Panel bunu Collapse’a aktarır; tipinde yok). */}
+        <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+          <dl className="kayit-alanlar">
+            <div>
+              <dt>Tarih</dt>
+              <dd>
+                {formatDate(r.from)} – {formatDate(r.to)}
+              </dd>
+            </div>
+            <div>
+              <dt>Sorumlu</dt>
+              <dd>{ROLE_LABELS[r.role]}</dd>
+            </div>
+            <div>
+              <dt>Açıklama</dt>
+              <dd>{r.text}</dd>
+            </div>
+          </dl>
+        </Accordion.Panel>
+      </Accordion.Item>,
+    );
+  }
+  return (
+    <div className="kayitlar-sarmal ajanda" role="group" aria-labelledby={titleId} data-tur={duz ? 'tarih' : 'gorev'}>
+      {duz ? (
+        <div className="kayitlar">{icerik}</div>
+      ) : (
+        <Accordion
+          multiple
+          value={acik}
+          onChange={setAcik}
+          order={4}
+          transitionDuration={sure}
+          classNames={{
+            root: 'kayitlar',
+            item: 'kayit',
+            itemTitle: 'kayit-h',
+            control: 'kayit-baslik',
+            label: 'kayit-etiket',
+            chevron: 'kayit-ok',
+            panel: 'kayit-panel',
+            content: 'kayit-icerik',
+          }}
+        >
+          {icerik}
+        </Accordion>
+      )}
+    </div>
+  );
+}
+
+function Hiyerarsi({ titleId, root }: { titleId: string; root: ChartTreeNode }) {
+  return (
+    <ul className="hiyerarsi" aria-labelledby={titleId}>
+      <HiyerarsiDugum node={root} />
+    </ul>
+  );
+}
+
+function HiyerarsiDugum({ node }: { node: ChartTreeNode }) {
+  const icerik = (
+    <>
+      <span className="hiyerarsi-ad">{node.name}</span>
+      {node.sub ? <span className="hiyerarsi-alt">{node.sub}</span> : null}
+    </>
+  );
+  return (
+    <li className="hiyerarsi-dugum" data-role={node.role}>
+      {node.href ? (
+        <a className="hiyerarsi-kutu" href={node.href} data-edge="start">
+          {icerik}
+        </a>
+      ) : (
+        <span className="hiyerarsi-kutu" data-edge="start">
+          {icerik}
+        </span>
+      )}
+      {node.children?.length ? (
+        <ul className="hiyerarsi-dallar">
+          {node.children.map((c, i) => (
+            <HiyerarsiDugum key={`${i}-${c.name}`} node={c} />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
+
+function Degerler({ titleId, spec }: { titleId: string; spec: Extract<ChartSpec, { kind: 'bcg-num' }> }) {
+  return (
+    <ul className="degerler" aria-labelledby={titleId}>
+      {spec.quadrants.map((q) => {
+        const urunler = spec.items.filter((i) => i.quadrant === q.key);
+        return (
+          <li key={q.key} className="degerler-kutu">
+            <p className="degerler-kutu-ad">{q.name}</p>
+            {urunler.length ? (
+              <ul className="degerler-liste">
+                {urunler.map((i) => (
+                  <li key={i.name} className="degerler-madde">
+                    <span className="kayit-ad">{i.name}</span>
+                    <span className="degerler-sayilar">
+                      Pazar büyümesi %{sayi.format(i.growth)} · Göreli pay {sayi.format(i.share)}× · Ciro {sayi.format(i.revenue)} milyon ₺
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="degerler-bos">Bu kutuda ürün yok.</p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

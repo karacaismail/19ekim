@@ -82,11 +82,13 @@ async function audit(page: Page) {
       hasContent: !!r.querySelector(r.classList.contains('chart-scroll') ? '.chart-canvas' : 'table'),
     }));
     // ux.md §8 (UX-01): dar ekranda olağan iş tablosu yatay kaydırmaz; kayıt listesine (RecordAccordion) dönüşür.
-    // Tek kayıtlı istisna (AGENTS.md → istisna kaydı): geniş grafikler (.chart-scroll, §8.7). Giderler kalemler
-    // tablosu P4 ile kayıt listesi oldu; dışlanmaz (veri bağlıyken giderler.spec.ts ayrıca denetler).
+    // Giderler kalemler tablosu P4 ile kayıt listesi oldu; dışlanmaz (veri bağlıyken giderler.spec.ts ayrıca denetler).
+    // Geniş grafikler (.chart-scroll) yalnız ≥ 48em’de kendi kutusunda kayabilir (tablet); dar ekranda P5 ile
+    // (ux.md §8.1, M20/M21) eşdeğer liste çizilir, bu yüzden .chart-scroll sayısı ayrıca döndürülür.
     const tableOverflow = [...document.querySelectorAll<HTMLElement>('.table-scroll:not(.chart-scroll)')]
       .filter((r) => r.scrollWidth > r.clientWidth + 1)
       .map((r) => document.getElementById(r.getAttribute('aria-labelledby') ?? '')?.textContent?.trim() ?? r.getAttribute('aria-label') ?? '?');
+    const chartScroll = document.querySelectorAll('.chart-scroll').length;
     // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık h4 içinde düğme (aria-expanded, aria-controls → panel),
     // alanlar dl/dt/dd ile etiketli, hedef alanı en az 44 CSS px.
     const records = [...document.querySelectorAll<HTMLElement>('.kayit')].map((k) => {
@@ -101,7 +103,7 @@ async function audit(page: Page) {
         hit: btn ? btn.getBoundingClientRect().height : 0,
       };
     });
-    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, records };
+    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, chartScroll, records };
   });
 }
 
@@ -124,6 +126,8 @@ test.describe('yerleşim ve okunabilirlik', () => {
         }
         // Dar ekranda (< 48em) olağan tablo yatay kaydırmaz (ux.md §8, UX-01); kayıt görünümü sözleşmeye uyar.
         if (width < 768) expect(result.tableOverflow, `${path} dar ekranda tablo yatay kayıyor`).toEqual([]);
+        // P5 (ux.md §8.1, UX-29/30): dar ekranda geniş grafik de kaymaz; yerinde ajanda / hiyerarşi / değer listesi vardır.
+        if (width < 768) expect(result.chartScroll, `${path} dar ekranda grafik kaydırma bölgesi (.chart-scroll)`).toBe(0);
         for (const record of result.records) {
           expect(record, `${path} kayıt başlığı`).toMatchObject({ button: true, panel: true });
           expect(['true', 'false'], `${path} kayıt aria-expanded`).toContain(record.expanded);
@@ -136,24 +140,21 @@ test.describe('yerleşim ve okunabilirlik', () => {
   }
 
   // Kullanıcı kararı 2026-10-27 (docs/ux.md §1.3, §8.1): eski “tablo dar ekranda kendi içinde kayar” kabulü kalktı.
-  // Olağan iş tablosu 320 px’te kayıt listesidir; yalnız geniş Gantt/şema grafikleri §8.7 istisna kaydıyla kayar.
-  test('320 px: tablo kayıt listesine dönüşür (yatay kaydırma yok); geniş Gantt tek kayıtlı istisna olarak klavyeyle kayar', async ({ page, browserName }) => {
+  // P5 (ux.md §8.1 “Gantt → tarihli ajanda”, §8.7) ile geniş Gantt’ın Y-01 istisnası da dar ekranda kapandı: 320 px’te
+  // sayfada hiçbir yatay kaydırma bölgesi yoktur. Eski “geniş Gantt tek kayıtlı istisna olarak klavyeyle kayar” kabulü bu
+  // gerekçeyle yeniden yazıldı; ECharts Gantt’ının kendi kutusunda klavyeyle kayması ≥ 48em’de (768 px testi) denetlenir.
+  test('320 px: tablo kayıt listesine, Gantt tarihli ajandaya dönüşür; sayfada yatay kaydırma bölgesi yok', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('eylem-plani/');
     await icerik(page);
-    await expect(page.locator('.table-scroll:not(.chart-scroll)')).toHaveCount(0);
-    await expect(page.locator('.kayitlar').first().locator('.kayit').first()).toBeVisible();
-    expect((await audit(page)).tableOverflow).toEqual([]);
-    if (browserName !== 'webkit') {
-      // not_run WebKit: Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamıyor; gerçek Safari’de elle doğrulanmalı.
-      const region = page.locator('.chart-scroll').first();
-      const widths = await region.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
-      expect(widths.scroll, 'Gantt istisnası').toBeGreaterThan(widths.client);
-      await region.focus();
-      for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight');
-      await expect.poll(() => region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-    }
-    expect((await audit(page)).overflow).toBeLessThanOrEqual(0);
+    await expect(page.locator('.table-scroll')).toHaveCount(0);
+    await expect(page.locator('.chart-scroll')).toHaveCount(0);
+    await expect(page.locator('.ajanda .ajanda-madde').first()).toBeVisible();
+    await expect(page.locator('.table-block .kayitlar').first().locator('.kayit').first()).toBeVisible();
+    const sonuc = await audit(page);
+    expect(sonuc.tableOverflow).toEqual([]);
+    expect(sonuc.chartScroll).toBe(0);
+    expect(sonuc.overflow).toBeLessThanOrEqual(0);
   });
 });
 
@@ -233,6 +234,334 @@ test.describe('uyarlanır veri görünümü (ux.md §8, M08/M09)', () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await expect(blok.locator('table')).toBeVisible();
     expect(await tabloKayitlari(blok)).toEqual(tablo);
+  });
+});
+
+/**
+ * Çizilen grafiğin ECharts seçeneğini tarayıcıda okur ve `sec` ile düz veriye indirger (seçenek işlev içerir, olduğu gibi
+ * dönmez). Aynı modül örneği kullanılır (chartMotion gibi); `sec` kapanım kullanmaz, metin olarak taşınır.
+ */
+async function grafikSecenegi<T>(page: Page, index: number, sec: (option: Record<string, any>) => T): Promise<T | null> {
+  return page.evaluate(
+    async ({ i, kod }) => {
+      const url = performance.getEntriesByType('resource').map((e) => e.name).find((n) => n.includes('echarts-setup'));
+      if (!url) return null;
+      const { echarts } = await import(url);
+      const host = document.querySelectorAll<HTMLElement>('.chart-canvas .chart-host')[i];
+      const inst = host ? echarts.getInstanceByDom(host) : null;
+      if (!inst) return null;
+      const indirge = new Function(`return (${kod});`)() as (o: unknown) => T;
+      return indirge(inst.getOption());
+    },
+    { i: index, kod: sec.toString() },
+  );
+}
+
+/** Gantt seçeneği: görevler (ad, tarih aralığı etiketi, açıklama) ve işaret çizgisi etiketleri (kontrol noktaları). */
+const ganttVerisi = (page: Page, index = 0) =>
+  grafikSecenegi(page, index, (o) => ({
+    rows: (o.series[1].data as { name: string; range: string; text: string }[]).map((d) => ({ name: d.name, range: d.range, text: d.text })),
+    marks: (o.series[1].markLine.data as { label: { formatter: string } }[]).map((m) => m.label.formatter),
+  }));
+
+/** Ağaç seçeneği: düğümler derinlik öncelikli sırayla (ad, alt satır, bağlantı, derinlik). */
+const agacVerisi = (page: Page, index = 0) =>
+  grafikSecenegi(page, index, (o) => {
+    const out: { name: string; sub: string; href: string; depth: number }[] = [];
+    type D = { name: string; sub?: string; value?: string; children?: D[] };
+    const gez = (n: D, depth: number) => {
+      out.push({ name: n.name, sub: n.sub ?? '', href: n.value ?? '', depth });
+      for (const c of n.children ?? []) gez(c, depth + 1);
+    };
+    gez(o.series[0].data[0] as D, 0);
+    return out;
+  });
+
+/** Son tarih (deadlines) seçeneği: ad ve tarih etiketi. */
+const sonTarihVerisi = (page: Page, index = 0) =>
+  grafikSecenegi(page, index, (o) => (o.series[0].data as { name: string; label: { formatter: string } }[]).map((d) => ({ name: d.name, date: d.label.formatter })));
+
+/** BCG seçeneği: ürün ve kutusu. */
+const bcgVerisi = (page: Page, index = 0) =>
+  grafikSecenegi(page, index, (o) => ({
+    items: (o.series[0].data as { name: string; quadrant: string }[]).map((d) => ({ name: d.name, quadrant: d.quadrant })),
+    quadrants: (o.series[0].markArea.data as { name: string }[][]).map((a) => a[0].name),
+  }));
+
+/** Ajandayı okur: maddeler (ad, tarih metni, ilk ISO tarih, rol, açıklama), ay başlıkları, işaretler ve belge sırası. */
+async function ajandaOku(ajanda: ReturnType<Page['locator']>) {
+  return ajanda.evaluate((el) => {
+    const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    return {
+      maddeler: [...el.querySelectorAll('.ajanda-madde')].map((m) => ({
+        name: t(m.querySelector('.kayit-ad')),
+        range: t(m.querySelector('.ajanda-tarih')),
+        from: m.querySelector('time')?.getAttribute('datetime') ?? '',
+        role: m.querySelector('.chip[data-role]')?.getAttribute('data-role') ?? '',
+        text: t([...m.querySelectorAll('dl.kayit-alanlar > div')].find((d) => t(d.querySelector('dt')) === 'Açıklama')?.querySelector('dd')),
+      })),
+      aylar: [...el.querySelectorAll('.ajanda-ay')].map(t),
+      isaretler: [...el.querySelectorAll('.ajanda-isaret')].map(t),
+      sira: [...el.querySelectorAll('.ajanda-ay, .ajanda-isaret, .ajanda-madde')].map((n) => (n.classList.contains('ajanda-ay') ? 'ay' : n.classList.contains('ajanda-isaret') ? 'isaret' : 'madde')),
+    };
+  });
+}
+
+const adaGore = <T extends { name: string; range?: string }>(xs: T[]) => [...xs].sort((a, b) => `${a.name}|${a.range ?? ''}`.localeCompare(`${b.name}|${b.range ?? ''}`, 'tr'));
+
+/*
+ * P5 (ux.md §8.1, M19 ChartPanel / M20 HierarchyExplorer / M21 TimelineExplorer; UX-29, UX-30): geniş grafikler dar
+ * ekranda (< 48em) kaymaz; `Chart` kapsayıcıyı ölçer ve aynı spec’ten eşdeğer listeyi çizer — Gantt ve son tarih
+ * grafikleri tarihli ajanda, organizasyon ve karar yetkisi şemaları dikey hiyerarşi, BCG örnek matrisi kutuya göre
+ * değer listesi. İki kabuk aynı anda mount edilmez; ≥ 48em’de ECharts aynen (sığmazsa yalnız kendi kutusunda kayar).
+ */
+test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-30; P5)', () => {
+  /** Geniş grafikli sayfalar ve dar ekranda beklenen eşdeğer kabuk sayısı. */
+  const GENIS: { path: string; esdeger: string; n: number }[] = [
+    { path: '', esdeger: '.hiyerarsi', n: 1 },
+    { path: 'karar-yetkisi/', esdeger: '.hiyerarsi', n: 1 },
+    { path: 'eylem-plani/', esdeger: '.ajanda', n: 1 },
+    { path: 'roller/organizator/', esdeger: '.ajanda', n: 1 },
+    // Entegrasyon tarihleri (deadlines) + 90 günlük plan (gantt)
+    { path: 'roller/dijital-pazarlama/', esdeger: '.ajanda', n: 2 },
+    { path: 'karar-bekleyenler/', esdeger: '.ajanda', n: 1 },
+    { path: 'bcg/', esdeger: '.degerler', n: 1 },
+    { path: 'partnership/#segika-takvim', esdeger: '.ajanda', n: 1 },
+  ];
+
+  for (const width of [320, 390]) {
+    test(`${width} px: hiçbir sayfada .chart-scroll yok; geniş grafiğin yerinde eşdeğer liste, grafik kutusu onunla birlikte mount edilmez`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 480 });
+      for (const path of PAGES) {
+        await page.goto(path);
+        await icerik(page);
+        await expect(page.locator('.chart-scroll'), `${path}`).toHaveCount(0);
+      }
+      for (const g of GENIS) {
+        await page.goto(g.path);
+        await icerik(page);
+        await hydrated(page);
+        await expect(page.locator(g.esdeger), g.path).toHaveCount(g.n);
+        await expect(page.locator('.chart[data-kabuk="esdeger"]'), g.path).toHaveCount(g.n);
+        await expect(page.locator('.chart[data-kabuk="esdeger"] .chart-canvas'), g.path).toHaveCount(0);
+        await expect(page.locator('.chart[data-kabuk="esdeger"] .table-hint'), g.path).toHaveCount(0);
+        expect((await audit(page)).overflow, `${g.path} yatay taşma`).toBeLessThanOrEqual(0);
+      }
+    });
+  }
+
+  test('organizasyon ve karar yetkisi: 320 px dikey hiyerarşi 1280 px ECharts ağacıyla aynı düğümleri aynı derinlikte taşır; geniş ekrana dönüşte ağaç yeniden çizilir', async ({ page }) => {
+    for (const path of ['', 'karar-yetkisi/']) {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(path);
+      await icerik(page);
+      await hydrated(page);
+      const kutu = page.locator('.chart-canvas').first();
+      await kutu.scrollIntoViewIfNeeded();
+      await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+      const agac = await agacVerisi(page, 0);
+      expect(agac, `${path} ECharts ağacı`).not.toBeNull();
+      expect(agac!.length, path).toBeGreaterThan(5);
+
+      await page.setViewportSize({ width: 320, height: 480 });
+      const liste = page.locator('.hiyerarsi');
+      await expect(liste, path).toHaveCount(1);
+      // Eşdeğer çizilen figürde grafik kutusu yok (sayfadaki öbür, dar olmayan grafikler ECharts kalır).
+      await expect(page.locator('.chart:has(.hiyerarsi) .chart-canvas'), `${path}: iki kabuk aynı anda`).toHaveCount(0);
+      const dugumler = await liste.evaluate((ul) => {
+        const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+        return [...ul.querySelectorAll('.hiyerarsi-dugum')].map((li) => {
+          let depth = 0;
+          for (let p = li.parentElement; p && p !== ul; p = p.parentElement) if (p.classList.contains('hiyerarsi-dallar')) depth += 1;
+          return { name: t(li.querySelector(':scope > .hiyerarsi-kutu .hiyerarsi-ad')), sub: t(li.querySelector(':scope > .hiyerarsi-kutu .hiyerarsi-alt')), href: li.querySelector(':scope > a.hiyerarsi-kutu')?.getAttribute('href') ?? '', depth };
+        });
+      });
+      expect(dugumler, `${path}: hiyerarşi ↔ ağaç`).toEqual(agac);
+      // Üst/alt ilişki belge yapısında: alt düğümler üst düğümün li’si içindeki iç listede.
+      const icice = await liste.evaluate((ul) => [...ul.querySelectorAll('.hiyerarsi-dallar')].every((d) => d.parentElement?.classList.contains('hiyerarsi-dugum')));
+      expect(icice, path).toBe(true);
+      // Her düğüm rol tonlu kutu, en az 44 px.
+      const yukseklikler = await liste.locator('.hiyerarsi-kutu').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+      expect(Math.min(...yukseklikler), `${path} kutu yüksekliği`).toBeGreaterThanOrEqual(44);
+      expect(await liste.locator('.hiyerarsi-dugum:not([data-role])').count(), `${path} rolsüz düğüm`).toBe(0);
+
+      // Geniş ekrana dönüş: liste kalkar, ECharts ağacı yeniden çizilir (söküm/kurulum döngüsü sızdırmaz).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await expect(liste).toHaveCount(0);
+      await expect(page.locator(`.chart-canvas[data-kind="${path ? 'gov' : 'org'}"] svg`)).toBeVisible({ timeout: 10_000 });
+    }
+  });
+
+  test('320 px organizasyon: her kutu rol sayfasına bağlanır (UX-29); ekip liderinin altında bağımsız temsilciler; Enter ile rol sayfası açılır', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('');
+    await icerik(page);
+    await hydrated(page);
+    const liste = page.locator('.hiyerarsi');
+    const baglantilar = liste.locator('a.hiyerarsi-kutu');
+    expect(await baglantilar.count()).toBeGreaterThanOrEqual(7);
+    for (const h of await baglantilar.evaluateAll((els) => els.map((e) => e.getAttribute('href') ?? ''))) expect(h).toMatch(/\/(roller\/[a-z-]+|buyume-modeli)\/$/);
+    const lider = await liste.evaluate((ul) => {
+      const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+      const li = [...ul.querySelectorAll('.hiyerarsi-dugum')].find((d) => t(d.querySelector(':scope > .hiyerarsi-kutu .hiyerarsi-ad')) === 'Ekip lideri');
+      return li ? [...li.querySelectorAll(':scope > .hiyerarsi-dallar .hiyerarsi-ad')].map(t) : null;
+    });
+    expect(lider).toEqual(['Bağımsız temsilciler']);
+    const asistan = liste.locator('a.hiyerarsi-kutu', { hasText: 'Asistan' }).first();
+    await asistan.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/roller\/asistan\/$/);
+  });
+
+  test('eylem planı: 320 px ajanda 1280 px Gantt spec’iyle aynı görevleri ve kontrol noktalarını taşır; tarih sırası, ay başlıkları, sorumlu çipi; kayıt Enter ile açılır, hedef ≥ 44 px (UX-30)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('eylem-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kutu = page.locator('.chart-canvas').first();
+    await kutu.scrollIntoViewIfNeeded();
+    await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const gantt = await ganttVerisi(page, 0);
+    expect(gantt).not.toBeNull();
+    expect(gantt!.rows.length).toBeGreaterThan(10);
+    expect(gantt!.marks).toEqual(['Başlangıç', '60. gün', '90. gün']);
+
+    await page.setViewportSize({ width: 320, height: 480 });
+    const ajanda = page.locator('.ajanda');
+    await expect(ajanda).toHaveCount(1);
+    await expect(page.locator('.chart-canvas')).toHaveCount(0);
+    const okunan = await ajandaOku(ajanda);
+    expect(adaGore(okunan.maddeler.map(({ name, range, text }) => ({ name, range, text })))).toEqual(adaGore(gantt!.rows));
+    // Tarih sırası (başlangıca göre), kontrol noktaları tarihlerine göre araya girer, ay başlıkları yıl taşır.
+    expect(okunan.maddeler.map((m) => m.from)).toEqual([...okunan.maddeler.map((m) => m.from)].sort());
+    expect(okunan.isaretler.map((i) => i.split(' · ')[0])).toEqual(gantt!.marks);
+    expect(okunan.aylar.length).toBeGreaterThanOrEqual(3);
+    for (const ay of okunan.aylar) expect(ay).toMatch(/^[A-ZÇĞİÖŞÜ][a-zçğıöşü]+ 20\d\d$/);
+    expect(okunan.sira[0]).toBe('ay');
+    // Her maddede sorumlu çipi (rol) ve tarih aralığı.
+    for (const m of okunan.maddeler) {
+      expect(m.role, m.name).not.toBe('');
+      expect(m.range, m.name).toMatch(/ – /);
+    }
+    // Kayıt sözleşmesi: h4 içinde düğme, Enter açar (Açıklama + Tarih + Sorumlu), Space kapatır, hedef ≥ 44 px.
+    const madde = ajanda.locator('.ajanda-madde').first();
+    const dugme = madde.locator('h4 button');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    expect((await dugme.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await dugme.focus();
+    await page.keyboard.press('Enter');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+    const panel = page.locator(`#${await dugme.getAttribute('aria-controls')}`);
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('dl.kayit-alanlar dt')).toHaveText(['Tarih', 'Sorumlu', 'Açıklama']);
+    await page.keyboard.press('Space');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    expect((await audit(page)).overflow).toBeLessThanOrEqual(0);
+  });
+
+  test('rol sayfaları: 320 px’te rol Gantt’ı ve dijital pazarlamanın entegrasyon tarihleri ajandadır; son tarih ajandası düz liste (düğmesiz), ECharts verisiyle aynı', async ({ page }) => {
+    // Organizatör: rol Gantt’ı (adımlar) → açılır ajanda.
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('roller/organizator/');
+    await icerik(page);
+    await hydrated(page);
+    const rolAjanda = page.locator('.ajanda');
+    await expect(rolAjanda).toHaveCount(1);
+    const adimlar = await ajandaOku(rolAjanda);
+    expect(adimlar.maddeler.length).toBeGreaterThan(1);
+    expect(adimlar.maddeler.map((m) => m.name)).toEqual(adimlar.maddeler.map((_, i) => `${i + 1}. adım`));
+    expect(await rolAjanda.locator('h4 button').count()).toBe(adimlar.maddeler.length);
+
+    // Dijital pazarlama: 1280’de son tarih grafiği (deadlines) ECharts; 320’de düz ajanda — aynı ad ve tarihler.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('roller/dijital-pazarlama/');
+    await icerik(page);
+    await hydrated(page);
+    const kutu = page.locator('.chart-canvas[data-kind="deadlines"]');
+    await kutu.scrollIntoViewIfNeeded();
+    await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const sonTarih = await sonTarihVerisi(page, 0);
+    expect(sonTarih).not.toBeNull();
+    await page.setViewportSize({ width: 320, height: 480 });
+    const ajandalar = page.locator('.ajanda');
+    await expect(ajandalar).toHaveCount(2);
+    const duz = ajandalar.first();
+    await expect(duz).toHaveAttribute('data-tur', 'tarih');
+    expect(await duz.locator('button').count()).toBe(0);
+    const okunan = await ajandaOku(duz);
+    expect(okunan.maddeler.map((m) => ({ name: m.name, date: m.range }))).toEqual(sonTarih!);
+    expect(okunan.maddeler.map((m) => m.from)).toEqual([...okunan.maddeler.map((m) => m.from)].sort());
+    // 90 günlük plan Gantt’ı: açılır ajanda, 60. ve 90. gün işaretleri.
+    const plan = ajandalar.nth(1);
+    await expect(plan).toHaveAttribute('data-tur', 'gorev');
+    expect((await ajandaOku(plan)).isaretler.map((i) => i.split(' · ')[0])).toEqual(['60. gün', '90. gün']);
+  });
+
+  test('karar bekleyenler ve BCG: 320 px’te son tarih ajandası ve kutuya göre değer listesi ECharts verisiyle aynı', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('karar-bekleyenler/');
+    await icerik(page);
+    await hydrated(page);
+    const kutu = page.locator('.chart-canvas[data-kind="deadlines"]');
+    await kutu.scrollIntoViewIfNeeded();
+    await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const sonTarih = await sonTarihVerisi(page, 0);
+    expect(sonTarih!.length).toBeGreaterThan(0);
+    await page.setViewportSize({ width: 320, height: 480 });
+    const ajanda = page.locator('.ajanda');
+    await expect(ajanda).toHaveCount(1);
+    const okunan = await ajandaOku(ajanda);
+    expect(okunan.maddeler.map((m) => ({ name: m.name, date: m.range }))).toEqual(sonTarih!);
+    for (const m of okunan.maddeler) expect(m.role, m.name).not.toBe('');
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('bcg/');
+    await icerik(page);
+    await hydrated(page);
+    const matris = page.locator('.chart-canvas[data-kind="bcg-num"]');
+    await matris.scrollIntoViewIfNeeded();
+    await expect(matris.locator('svg')).toBeVisible({ timeout: 10_000 });
+    const sira = await page.locator('.chart-canvas').evaluateAll((els) => els.findIndex((el) => (el as HTMLElement).dataset.kind === 'bcg-num'));
+    const bcg = await bcgVerisi(page, sira);
+    expect(bcg!.items.length).toBeGreaterThan(3);
+    await page.setViewportSize({ width: 320, height: 480 });
+    const degerler = page.locator('.degerler');
+    await expect(degerler).toHaveCount(1);
+    const kutular = await degerler.evaluate((ul) => {
+      const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+      return [...ul.querySelectorAll('.degerler-kutu')].map((k) => ({ name: t(k.querySelector('.degerler-kutu-ad')), items: [...k.querySelectorAll('.degerler-madde .kayit-ad')].map(t) }));
+    });
+    expect(kutular.map((k) => k.name).sort()).toEqual([...bcg!.quadrants].sort());
+    expect(kutular.flatMap((k) => k.items).sort()).toEqual(bcg!.items.map((i) => i.name).sort());
+    // Her ürün kendi kutusunda; sayılar madde içinde (büyüme, göreli pay, ciro).
+    const kutuAdi = (key: string) => bcg!.quadrants[['yildiz', 'soru', 'inek', 'kopek'].indexOf(key)];
+    for (const i of bcg!.items) expect(kutular.find((k) => k.items.includes(i.name))?.name, i.name).toBe(kutuAdi(i.quadrant));
+    for (const s of await degerler.locator('.degerler-sayilar').allTextContents()) expect(s).toMatch(/Pazar büyümesi .* Göreli pay .* Ciro .* milyon ₺/);
+  });
+
+  test('kabuk kapsayıcıya göre: 768 px’te (kapsayıcı 48em’den dar) ajanda; 900 px’te ECharts Gantt kendi kutusunda, klavyeyle kayar (ux.md §8.7, Y-01 daraltıldı)', async ({ page, browserName }) => {
+    // Dikey tablet: sayfa kenar boşlukları düşülünce kapsayıcı 48em’den dardır → DataTable gibi dar kabuk.
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto('eylem-plani/');
+    await icerik(page);
+    await expect(page.locator('.ajanda')).toHaveCount(1);
+    await expect(page.locator('.chart-scroll')).toHaveCount(0);
+    expect((await audit(page)).overflow).toBeLessThanOrEqual(0);
+    // Yatay tablet / dar masaüstü: kapsayıcı ≥ 48em → ECharts; Gantt asgari genişliğinden darsa yalnız kendi kutusunda kayar.
+    await page.setViewportSize({ width: 900, height: 700 });
+    await expect(page.locator('.ajanda')).toHaveCount(0);
+    const region = page.locator('.chart-scroll').first();
+    await region.scrollIntoViewIfNeeded();
+    await expect(region.locator('.chart-canvas svg')).toBeVisible({ timeout: 10_000 });
+    const widths = await region.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+    expect(widths.scroll, 'Gantt kendi kutusunda kayar').toBeGreaterThan(widths.client);
+    expect((await audit(page)).overflow).toBeLessThanOrEqual(0);
+    if (browserName !== 'webkit') {
+      // not_run WebKit: Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamıyor; gerçek Safari’de elle doğrulanmalı.
+      await region.focus();
+      for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight');
+      await expect.poll(() => region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    }
   });
 });
 

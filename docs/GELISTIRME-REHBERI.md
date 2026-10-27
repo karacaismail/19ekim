@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 823 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 847 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -99,8 +99,13 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   bir kayıt yapar: başlıkta ad + tek özet alan, açılınca bütün alanlar etiketli (`dl`). Ay sütunlu tablolarda
   (`kayit="sutun"`) her ay bir kayıttır. Aynı veri, iki kabuk; test 1280 px tablosuyla 320 px listesini karşılaştırır.
   Giderler kalemler tablosu da aynı kalıbı kullanır (`useKabuk` + `KayitListesi`; başlıkta kalem adı + rapor ayı tutarı,
-  panelde etiketli alanlar, alt satırlar özet kayıtları). Yalnız geniş grafikler (Gantt, şemalar) kayıtlı istisnadır:
-  kendi kutusunda kayar.
+  panelde etiketli alanlar, alt satırlar özet kayıtları).
+- **Geniş grafik dar ekranda kaymaz, eşdeğer listeye dönüşür (P5, 27 Ekim 2026).** `Chart wide` 48em altında ECharts
+  yerine aynı veriden liste çizer: Gantt ve son tarih grafikleri tarihli ajanda (tarih sırası, ay başlıkları, kontrol
+  noktaları, sorumlu, açılır açıklama), organizasyon ve karar yetkisi şemaları iç içe dikey hiyerarşi (rol sayfasına
+  bağlantı), BCG örnek matrisi kutuya göre değer listesi. Ölçü kapsayıcıdır: 320/390 px’te (ve 768 px dikey tablette)
+  hiçbir sayfada `.chart-scroll` yoktur; kapsayıcı 48em’den genişse ECharts, gerekirse kendi kutusunda kayar. Test 1280 px
+  ECharts verisiyle 320 px listesini karşılaştırır.
 - **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
   çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
@@ -172,7 +177,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Dijital pazarlama planı | `src/data/digital.ts` |
 | Organizasyon şeması | `src/data/tree.ts` |
 | Başlık, gezinme (şerit ve dar ekran çekmecesi), tema | `src/components/AppFrame.tsx` |
-| Tablo / kayıt görünümü (dar ekran), grafik kutusu, seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart`, `Choice`) |
+| Tablo / kayıt görünümü (dar ekran), grafik kutusu ve dar ekran eşdeğerleri (ajanda, hiyerarşi, değerler), seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart` → `grafikEsdegeri`, `Choice`) |
 | UX sözleşmesi, kabul senaryoları, istisna kayıtları | `docs/ux.md`, AGENTS.md → “UX yeniden tasarım sözleşmesi” |
 | Renk, boşluk, yazı, hareket | `src/styles/tokens.css` (sadece burası) |
 | Giderler sayfası | `src/views/OpexPage.tsx`, veri ucu `src/data/opex.ts` |

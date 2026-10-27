@@ -2077,6 +2077,146 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   font-weight: var(--weight-regular);
 }
 
+/* ---------- Grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21; P5) ----------
+ * Geniş grafik (Gantt, son tarih, organizasyon/karar yetkisi şeması, BCG) 48em’den dar kapsayıcıda kaymaz: `Chart` aynı
+ * spec’ten eşdeğer listeyi çizer (ui.tsx → grafikEsdegeri). Ajanda kayıt listesinin görünümünü paylaşır (tarih sırası,
+ * ay başlıkları, kesikli kontrol noktası ayracı); hiyerarşi iç içe liste ve rol tonlu kutular; değerler kutuya göre ürün
+ * listesi. Taban 320×480: tek sütun, dokunma hedefi ≥ 44 px, sıkı boşluk; dolgu iç içe birikmez.
+ */
+.chart[data-kabuk='esdeger'] figcaption {
+  margin-bottom: var(--space-1);
+}
+
+.ajanda-ay {
+  margin: var(--space-4) 0 var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.ajanda .kayitlar > .ajanda-ay:first-child {
+  margin-top: var(--space-2);
+}
+
+/* Kontrol noktası (Gantt’ın kesikli çizgisi): tarih sırasında araya giren kesikli ayraç ve etiketi. */
+.ajanda-isaret {
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  border-top: var(--hairline) dashed var(--rule-strong);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.ajanda-ust {
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.ajanda-tarih {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ajanda-kilometre {
+  color: var(--text-secondary);
+}
+
+.ajanda .kayit-duz {
+  padding: var(--space-2) 0;
+}
+
+/* Hiyerarşi: dallar üst düğümün altında içe girer; düz dikey çizgi üst/alt ilişkiyi gösterir, kaydırma yok. */
+.hiyerarsi,
+.hiyerarsi-dallar {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hiyerarsi {
+  margin-top: var(--space-2);
+}
+
+.hiyerarsi-dugum {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.hiyerarsi-dallar {
+  margin-inline-start: var(--space-3);
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--hairline) solid var(--rule-strong);
+}
+
+.hiyerarsi-kutu {
+  display: grid;
+  gap: var(--space-1);
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-3);
+  padding-inline-start: calc(var(--space-3) + var(--edge-width));
+  border-radius: var(--radius-surface);
+  background: var(--tone-bg, var(--surface-raised));
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+a.hiyerarsi-kutu:hover .hiyerarsi-ad {
+  text-decoration: underline;
+}
+
+.hiyerarsi-ad {
+  font-weight: var(--weight-semibold);
+}
+
+.hiyerarsi-alt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Değerler (BCG): kutuya göre ürünler; sayılar grafiğin ipucuyla aynı biçimde. */
+.degerler,
+.degerler-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.degerler {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.degerler-kutu {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-surface);
+  background: var(--surface-raised);
+}
+
+.degerler-kutu-ad {
+  margin: 0 0 var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.degerler-madde {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.degerler-sayilar,
+.degerler-bos {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- Kenar sistemi ----------
  * Vurgu çizgisi yalnız buradan, daima düz çizilir. Çizginin değdiği iki köşe her durumda radiussuzdur;
  * köşe sözleşmesi (ux.md §6.3, 2026-10-27) ile yüzeylerin bütün köşeleri zaten 0, hap ve anahtar dışında kavis yok.

@@ -285,9 +285,21 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).
-- Geniş grafikler (organizasyon, karar yetkisi, Gantt) dar ekranda kendi kaydırma bölgesinde kayar; en küçük
-  genişlikler `--chart-*-min` tokenlarındadır. Bu, ux.md §8.7’ye göre kayıtlı bir istisnadır (bkz. “UX yeniden tasarım
-  sözleşmesi” → istisna kaydı); olağan iş tabloları dar ekranda **kaymaz**, kayıt listesine dönüşür.
+- Geniş grafikler (`Chart wide`: organizasyon ve karar yetkisi şemaları, Gantt’lar, son tarih grafikleri, BCG örnek
+  matrisi) dar ekranda (< 48em) **kaymaz** (P5, kullanıcı kararı 2026-10-27, ux.md §8.1, M20/M21): `Chart` kapsayıcıyı
+  `DataTable` kalıbıyla ölçer ve aynı spec’ten eşdeğer listeyi çizer — ikinci bir hesap yok; iki kabuk aynı anda mount
+  edilmez, ölçülmeden hiçbiri mount edilmez (`figure.chart[data-kabuk="grafik" | "esdeger"]`). Eşdeğerler
+  (`src/components/ui.tsx → grafikEsdegeri`): `gantt` ve `deadlines` → **tarihli ajanda** (`Ajanda`, `.ajanda`: görevler
+  başlangıç tarihine göre, ay başlıkları yıl taşır, kontrol noktaları — Gantt’ın kesikli çizgileri — kesikli ayraç olarak
+  araya girer, her maddede tarih aralığı + sorumlu çipi + kilometre taşı, açıklama açılır panelde (kayıt sözleşmesi: h4
+  içinde düğme, `dl` alanları Tarih · Sorumlu · Açıklama); açıklaması olmayan tek tarihli maddeler düz liste
+  `data-tur="tarih"`); `org` ve `gov` → **dikey hiyerarşi** (`Hiyerarsi`, `.hiyerarsi`: iç içe `ul`, alt düğümler üst
+  düğümün `li`’si içinde, rol tonlu kutu `data-edge="start"`, bağlantılı düğüm rol sayfasına gider, ≥ 44 px); `bcg-num` →
+  **kutuya göre değerler** (`Degerler`, `.degerler`). Ölçü kapsayıcıdır (DataTable gibi): 768 px dikey tablette sayfa
+  kenar boşlukları düşülünce kapsayıcı 48em’den dardır, eşdeğer liste çizilir; kapsayıcı ≥ 48em’de (≈ ≥ 850 px görünüm)
+  ECharts aynen, grafik asgari genişliğinden darsa yalnız kendi kutusunda kayar (`.chart-scroll`, `role="region"`, ok
+  tuşları); en küçük genişlikler `--chart-*-min` tokenlarındadır. “Grafiği yatay kaydırabilirsiniz” notu kaldırıldı. Olağan iş tabloları da dar ekranda kaymaz, kayıt
+  listesine dönüşür.
 
 ## Tasarım kuralları (kaynakta uygulanmış)
 
@@ -423,7 +435,7 @@ bunu denetler.
 | P2 Uyarlanır veri görünümü: `DataTable` kayıt listesi (RecordAccordion, PeriodExplorer ekseni) | §8.1–8.6, UX-01/02/03/07 | **Tamam** (2026-10-27) | `ui.spec.ts → uyarlanır veri görünümü`, 320–390 px kayan tablo yok; `nakit.spec.ts`; `gelir.spec.ts` |
 | P3 Gezinme: < 48em’de yatay kayan şerit yerine tam gezinme çekmecesi (Drawer) | §3, M01/M02 | **Tamam** (2026-10-27) | `ui.spec.ts` çekmece testleri (320–390, dokunmatik, 667×375); `giderler.spec.ts` 320 px |
 | P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | **Tamam** (2026-10-27) | `giderler.spec.ts → kalemler kayıt listesi` (320/390, panel, 1280 ↔ 320 eşdeğerlik, kapsam, özet kayıtları), 375 px; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz |
-| P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
+| P5 Grafiklerin dar ekran eşdeğeri (Gantt/son tarih → ajanda, şema → dikey hiyerarşi, BCG → değerler) | §8.1, M20/M21, UX-29/30 | **Tamam** (2026-10-27) | `ui.spec.ts → grafiklerin dar ekran eşdeğeri` (320/390’da hiçbir sayfada `.chart-scroll` yok; hiyerarşi ↔ ECharts ağacı, ajanda ↔ Gantt spec’i, son tarih ve BCG eşdeğerliği; kabuk geçişi; 768 px tablet kaydırma), genişlik denetimi `chartScroll = 0`; `partnership.spec.ts` (Takvim: dar ekranda 12 grafik + 2 ajanda) |
 | P6 Sayfa başlığı/hiyerarşi (`PageHeader`, `ResultSummary`), parametre grupları, durum sözleşmeleri | §3, §5, §9 | Bekliyor | — |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
@@ -434,12 +446,13 @@ tema anahtarı, `Anahtar` role="switch" bileşenleri) — ikili durum gösterges
 işareti (rol noktası, menü noktası, legend/durum noktası ≤ 16 px) — semantik çizim geometrisi; sözde öğe ya da `.opex-dot`
 / `.opex-live-dot`. Başka yüzey (avatar, numara rozeti, kart, sekme, düğme) kayıtsızdır ve köşelidir.
 
-**Yatay kaydırma istisna kaydı** (ux.md §8.7): **Y-01** geniş grafikler (`Chart wide`: organizasyon şeması, karar
-yetkisi şeması, Gantt’lar; `.chart-scroll`) — iki boyutlu şema/zaman çizelgesi başka düzende aynı ilişkiyi vermiyor;
-mobil eşdeğer erişim: Gantt’ın tablosu aynı sayfada kayıt listesi, şemanın rol sayfaları menüde; klavye ile kayar
-(`role="region"`, `tabIndex=0`, ok tuşları), görünür “Grafiği yatay kaydırabilirsiniz” notu; P5 tamamlanınca yeniden
-değerlendirilir. (Y-02 Giderler kalemler tablosu istisnası P4 ile 2026-10-27’de kapandı: tablo 48em altında kayıt
-listesidir; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz.)
+**Yatay kaydırma istisna kaydı** (ux.md §8.7): **Y-01 (daraltıldı, P5 2026-10-27)** geniş grafikler (`Chart wide`;
+`.chart-scroll`) — yalnız kapsayıcı **≥ 48em** iken (≈ ≥ 850 px görünüm; yatay tablet / dar masaüstü), grafik asgari
+genişliğinden dar kapsayıcıda ECharts grafiği (Gantt, şemalar) kendi kutusunda kayar (`role="region"`, `tabIndex=0`, ok
+tuşları; `ui.spec.ts` 900 px testi). Dar kapsayıcıda (< 48em; 768 px dikey tablet dahil) istisna yoktur: her geniş grafiğin yerinde aynı spec’ten eşdeğer liste çizilir (ajanda / hiyerarşi / değerler; yukarıda), 320 ve
+390 px’te hiçbir sayfada `.chart-scroll` bulunmaz (`ui.spec.ts` genişlik denetimi ve eşdeğer testleri). Eski kayıt (“iki
+boyutlu şema başka düzende aynı ilişkiyi vermiyor”, görünür “Grafiği yatay kaydırabilirsiniz” notu) kapandı. **Y-02** Giderler kalemler tablosu istisnası P4 ile 2026-10-27’de kapandı: tablo 48em altında kayıt
+listesidir; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz.
 
 ## Gizlilik ve yayın
 
@@ -493,6 +506,7 @@ listesidir; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz.)
 | Üretim derlemesi | `npm run build` |
 | Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
 | Hepsi | `npm run verify` |
+| Paralel çalışma ağacında test | `PW_PORT=4333 npm test` — aynı makinede ikinci bir worktree test koşuyorsa port çakışmasın: `reuseExistingServer` komşu ağacın 4322 sunucusunu (başka bir `dist`) kullanır ve yanlış paketi test eder (`playwright.config.ts`) |
 | Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
 
 `scripts/check-ui-gates.mjs` şunları reddeder: token dışı hareket, `transition: all`, çevreleyen odak halkası,

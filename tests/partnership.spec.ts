@@ -167,6 +167,7 @@ test.describe('iş ortaklığı programı', () => {
     test(`${width} px: her programın her bölümünde taşma yok, metin ≥ 14 px, hedefler ≥ 44 px, grafikler kesilmez`, async ({ page }) => {
       await page.setViewportSize({ width, height: width < 400 ? 480 : 800 });
       let charts = 0;
+      let ajandalar = 0;
       for (const program of PROGRAMS) {
         for (const section of SECTIONS) {
           await bolum(page, program, section);
@@ -184,11 +185,17 @@ test.describe('iş ortaklığı programı', () => {
           }
           const g = await grafikler(page);
           charts += g.count;
+          ajandalar += await page.locator('.ajanda').count();
           expect(g.problems, `${width}px ${program}/${section}`).toEqual([]);
+          // P5 (ux.md §8.1): geniş grafik dar ekranda kaymaz.
+          await expect(page.locator('.chart-scroll'), `${width}px ${program}/${section}`).toHaveCount(width < 768 ? 0 : section === 'takvim' ? 1 : 0);
         }
       }
-      // Kime, Program, Ölçüm, Takvim ve Risk bölümlerinde grafik var: 2 program × (1 + 2 + 2 + 1 + 1).
-      expect(charts).toBe(14);
+      // Kime, Program, Ölçüm, Takvim ve Risk bölümlerinde grafik var: 2 program × (1 + 2 + 2 + 1 + 1). P5 (ux.md §8.1,
+      // M21): Takvim’deki geniş Gantt 48em altında ECharts değil tarihli ajandadır — 320/390’da 12 grafik + 2 ajanda,
+      // 1280’de 14 grafik (eski sabit 14 kabulü bu gerekçeyle yazıldı).
+      expect(charts).toBe(width < 768 ? 12 : 14);
+      expect(ajandalar).toBe(width < 768 ? 2 : 0);
     });
   }
 
