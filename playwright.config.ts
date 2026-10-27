@@ -1,7 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import { GIRIS_ANAHTARI, GIRIS_OZETI } from './src/lib/giris';
 
-const PORT = 4322;
+// Paralel çalışma ağaçları (worktree) aynı makinede test koşarken aynı portu paylaşmasın: `PW_PORT=4333 npm test`.
+// Aksi hâlde `reuseExistingServer` komşu ağacın sunucusunu (başka bir dist) kullanır ve yanlış paketi test eder.
+const PORT = Number(process.env.PW_PORT ?? 4322);
 
 export default defineConfig({
   testDir: 'tests',
