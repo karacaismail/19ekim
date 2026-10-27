@@ -348,7 +348,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu).toBeVisible();
     const ogeler = menu.getByRole('menuitem');
     // Kullanıcı kararı 2026-10-21: 1–7 sıralı numara, roller pozisyon adıyla; numarasız öğede aynı sade nokta.
-    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi']);
+    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Applet']);
     await expect(menu.getByRole('menuitem', { name: 'Segika CRM' })).toHaveAttribute('aria-current', 'page');
     await expect(menu.locator('.tree-no')).toHaveCount(7);
     await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' }).locator('.navmenu-bullet')).toHaveCount(1);
@@ -370,6 +370,21 @@ test.describe('başlık ve İstihdam menüsü', () => {
     expect(yuzey).not.toBe('');
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
+  });
+
+  test('Applet bağlantısı açılır; applet alt bölümündeyken İstihdam ve Applet etkin kalır', async ({ page }) => {
+    await page.goto('istihdam/');
+    await icerik(page);
+    await page.getByRole('button', { name: 'İstihdam' }).click();
+    await page.getByRole('menuitem', { name: 'Applet', exact: true }).click();
+    await expect(page).toHaveURL(/\/applet\/$/);
+    await expect(page.locator('section#katalog')).toBeVisible();
+    await page.goto('applet/#is-degerleme');
+    await icerik(page);
+    const tetik = page.getByRole('button', { name: 'İstihdam' });
+    await expect(tetik).toHaveAttribute('data-section', 'true');
+    await tetik.click();
+    await expect(page.getByRole('menuitem', { name: 'Applet', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('klavye: Tab ile tetikleyici, Enter açar, oklar ögeler arasında gezer; odak alt çizgiyle (halka yok)', async ({ page }) => {
@@ -551,7 +566,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const ogeler = await page.getByRole('menuitem').evaluateAll((els) =>
       els.map((el) => ({ deco: getComputedStyle(el).textDecorationLine, bg: getComputedStyle(el).backgroundColor, current: el.getAttribute('aria-current') })),
     );
-    expect(ogeler.length).toBe(8);
+    expect(ogeler.length).toBe(9);
     expect(ogeler.filter((o) => o.deco.includes('underline'))).toEqual([]);
     expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
@@ -561,7 +576,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   // işaretli, Escape kapatır, odak düğmeye döner. 48em’den itibaren şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst
   // satırda, ortalı).
   for (const width of [320, 360, 375, 390]) {
-    test(`${width} px: gezinme çekmecede — şerit yok, 19 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
+    test(`${width} px: gezinme çekmecede — şerit yok, 20 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
       await icerik(page);
@@ -579,7 +594,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const cekmece = page.getByRole('dialog', { name: 'Menü' });
       await expect(cekmece).toBeVisible();
       const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
-      await expect(nav.getByRole('link')).toHaveCount(19);
+      await expect(nav.getByRole('link')).toHaveCount(20);
       await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
       await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Giderler']);
       await expect(nav.locator('.tree-no')).toHaveCount(7);
@@ -776,9 +791,9 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.getByRole('button', { name: 'Menü', exact: true }).click();
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
-    await expect(cekmece.getByRole('link')).toHaveCount(19);
+    await expect(cekmece.getByRole('link')).toHaveCount(20);
     const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(linkler.length).toBe(19);
+    expect(linkler.length).toBe(20);
     expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
@@ -794,21 +809,21 @@ test.describe('etkileşim alanı ve tema', () => {
 });
 
 test.describe('yatay telefon (alçak ekran)', () => {
-  test('844×390: İstihdam menüsünün son ögesi görünür alanda ve tıklanır', async ({ page }) => {
+  test('844×390: İstihdam menüsünün son ögesi (Applet) görünür alanda ve tıklanır', async ({ page }) => {
     const viewport = { width: 844, height: 390 };
     await page.setViewportSize(viewport);
     await page.goto('roller/asistan/');
     await icerik(page);
     await hydrated(page);
     await page.getByRole('button', { name: 'İstihdam' }).click();
-    const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
+    const son = page.getByRole('menuitem', { name: 'Applet', exact: true });
     await son.scrollIntoViewIfNeeded();
     const box = await son.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
     await expect(page.getByRole('button', { name: 'İstihdam' })).toBeInViewport();
     await son.click();
-    await expect(page).toHaveURL(/\/istihdam\/$/);
+    await expect(page).toHaveURL(/\/applet\/$/);
   });
 
   // < 48em: çekmece; alçak ekranda gövde kendi içinde kayar, son bağlantı erişilir ve tıklanır (ux.md §8.6).
@@ -849,7 +864,7 @@ test.describe('dokunmatik cihaz', () => {
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
     const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(19);
+    expect(ogeler.length).toBe(20);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
     expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });

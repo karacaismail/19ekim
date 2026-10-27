@@ -5,7 +5,7 @@ import { IconChevronDown, IconMenu2, IconMoon, IconNotes, IconReceipt2, IconSpea
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
-import { COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { APPLET_NAV, COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { useGiris } from '../lib/giris';
 import { useMotionMs } from '../lib/motion';
@@ -164,7 +164,7 @@ function durumOf(item: MenuLink, current: string) {
 
 /** Başlıktaki açılır menüler (kullanıcı kararı 2026-10-20): İstihdam (organizasyon, roller, takvim) ve Pazarlama. */
 const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon }[] = [
-  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV], dividerBefore: HIRING_NAV.path, icon: IconUsersGroup },
+  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV, APPLET_NAV], dividerBefore: HIRING_NAV.path, icon: IconUsersGroup },
   { label: 'Pazarlama', items: MARKETING_NAV, icon: IconSpeakerphone },
   // Kullanıcı kararı 2026-10-27: Giderler bir menü; OPEX ve nakit akış tablosu.
   { label: 'Giderler', items: FINANCE_NAV, icon: IconReceipt2 },
