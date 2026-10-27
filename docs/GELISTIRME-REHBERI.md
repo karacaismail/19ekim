@@ -163,7 +163,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
 | İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |
 | Nakit akış tablosu | `src/data/cashflow.ts` (senaryo girişleri, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
-| Gelir planı | `src/data/revenue.ts` (kapasite, `simulate`, senaryolar, hedef zinciri), `src/views/RevenuePage.tsx` |
+| Gelir planı | `src/data/revenue.ts` (kapasite, `simulate`, senaryolar, büyüme modeli: kur, temsilci ağı, reklam ölçeği, saha büyümesi; 24 ay), `src/views/RevenuePage.tsx` |
 | Başabaş | `src/data/breakeven.ts` (filtreler, gider kaynakları, kesişimler, adet noktası, duyarlılık, filtre etkisi); gelir planı sayfasının bölümü |
 | İstihdam planı × senaryo | `src/data/staffing.ts` (rol, görev, maliyet, ayıklamayla gelire katkı; Sheets tablosu); gelir planı 2. bölüm ve `/istihdam/` 3. bölüm |
 | Dijital pazarlama stratejisi | `src/data/digitalStrategy.ts` (kanallar, bütçe → kayıt → aktif → gelir zinciri, kademeler, LTV ÷ CAC kuralı); gelir planı 3. bölüm |

@@ -199,10 +199,19 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     başlangıçtan ve önceki hedeften süre (`sure`), o ayın geliri, kümülatif. Gelir = yıllık peşin ödeyenler
     (`annualShare`) × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret; aktif satıcı = ilk ödeme (hedefler
     sayfasıyla aynı tanım), “ödemeye devam eden” ayrı. Veri `src/data/revenue.ts` → `makeRevenue(params, program)`
-    (18 ay ufuk; `simulate(params, program, months, inputs)` serbest girdili simülasyon: kapasite çarpanı, elde tutma,
-    yıllık payı, € ücret, ikinci saha ayı, `extraSaha`, `dijitalBudget`, `exclude` kaynak ayıklama; `buildSources`,
-    `digitalSplit`, `adCapacity`; `funnels`, `monthlyOnly`, `first3` senaryo başına; `inputsFor`). Kaynaklar: saha1,
-    saha2, (sahaEk), crm, org, dijital (reklam + organik tek kaynak), rep.
+    (`HORIZON` 24 ay — kullanıcı kararı 2026-10-27: 2026, 2027, 2028 görünsün; `simulate(params, program, months,
+    inputs)` serbest girdili simülasyon: kapasite çarpanı, elde tutma, yıllık payı, € ücret, ikinci saha ayı,
+    `extraSaha`, `dijitalBudget`, `dijitalScale`, `fxGrowth`, `sahaGrowthEvery`, `exclude` kaynak ayıklama;
+    `buildSources(p, prog, months, inputs)`, `adSchedule`, `priceSeries`, `growthHires`, `adCapacity`, `ltvOf`;
+    `funnels`, `monthlyOnly`, `first3` senaryo başına; `inputsFor`, `sourcesFor(sc)`). Kaynaklar: saha1, saha2,
+    (sahaEk), (sahaBuyume), crm, org, dijital (reklam + organik tek kaynak), rep.
+    **Büyüme modeli** (kullanıcı kararı 2026-10-27: “gelirin artmadığı işletme batar; ya ileri ya geri”, düz çizgi
+    yok): ₺ fiyat kurla her ay bileşik büyür (`eurTryGrowth` %/yıl; € sabit), temsilci ağı her ay `repPerMonth` büyür
+    (`repCap`’e kadar), satıcı kazanım reklam bütçesi LTV ÷ CAC ≥ 3 ise her 3 ayda ×1,5 ölçeklenir (`SCALE_RULE`,
+    tavan `dijitalScaleMax`; kayıt ve aktif bütçeyle orantılı), kârlı senaryolarda ikinci sahadan sonra periyodik ek
+    saha personeli gelir (`Scenario.sahaGrowthEvery`: kötümser 0, medyan 6, iyimser 4; üst sınır `sahaMaxCount`; kaynak
+    `sahaBuyume`, kadro tablosunda “Büyüme” satırı). Parametreler → “Büyüme” grubu. Nakit akışında reklam satırı
+    senaryonun ölçeklenmiş bütçesidir (`CashSeries.reklam`).
     **Kadro: görev, gider, gelir katkısı** (kullanıcı kararı 2026-10-27: istihdam planı görevlerine göre giderler ve
     gelirler senaryolara yedirilir): `src/data/staffing.ts` → `makeStaffing(params, program, revenue, girdi?)`;
     `staffRoles` on rol (saha 1, saha 2, [ek saha], CRM, organizatör, dijital pazarlama uzmanı, satıcı kazanım reklamı,
@@ -232,11 +241,17 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     personelinin işveren maliyeti seçilen aydan eklenir (kullanıcı geri bildirimi 2026-10-27: “ikinci saha seçince gider
     çizgisi değişmiyordu”) — ya da plan kadrosu: `staffCosts` + YZ + Meta + reklam; Sheets okunamazsa plana düşer), ek
     sabit gider, satış primi; “Varsayılana dön”. Çıktılar: aylık başabaş (`crossing`), geri ödeme, en çok fon ihtiyacı,
-    klasik başabaş noktası (adet) ve ulaşma ayı, duyarlılık ızgarası (`sensitivity`), **filtrelerin etkisi** tablosu
-    (varsayılan girdilere göre 18 ay gelir/gider/net, yeni aktif, başabaş, geri ödeme, fon ihtiyacı farkı: bir saha
+    klasik başabaş noktası (adet) ve ulaşma ayı, duyarlılık ızgarası (`sensitivity`), **öngörü** (`ongoru`: ufuk
+    içinde kesişim yoksa son 6 ayın en küçük kareler eğimiyle tahmini başabaş tarihi ve son ayın netiyle geri ödeme
+    tarihi; `yon` ileri/geri/sabit — “Ufukta yok” yazılmaz, kullanıcı kararı 2026-10-27: ya “≈ tarih” ya “Kapanmıyor:
+    aylık açık X, büyüyor/daralmıyor, sürdürülebilir değil”), ek filtreler reklam ölçeklenmesi, kur artışı, saha
+    büyümesi (`inputsOf(p, rev, senaryo, f)` filtreleri simülasyon girdisine çevirir), **filtrelerin etkisi** tablosu
+    (varsayılan girdilere göre ufuk (24 ay) gelir/gider/net, yeni aktif, başabaş, geri ödeme, fon ihtiyacı farkı: bir saha
     personeli gideri ve kapasiteyi birlikte değiştirir). Grafikler `basabas`, `kumulatif-tl` (sıfır çizgisi; seçili /
     üçü üst üste), `basabas-adet` (etiketler `markPoint`; `MarkPointComponent` `src/lib/echarts-setup.ts`’de kayıtlı —
-    kayıtsız bileşen sessizce çizilmez). Görünüm: hedef kartları (`.gelir-hedef`), Mantine `Timeline`, `.secim*`,
+    kayıtsız bileşen sessizce çizilmez). Aylık gelir/gider grafiğinin çubuğunda sağda **Eksen** anahtarı (kullanıcı
+    kararı 2026-10-27): Aylık ↔ Kümülatif (`basabas` spec `names`; kümülatif eğriler kesişince geri ödeme
+    işaretlenir); `.araclar > .secim + .secim` sağa yaslanır. Görünüm: hedef kartları (`.gelir-hedef`), Mantine `Timeline`, `.secim*`,
     `.araclar`, `.filtreler`. Testler: `tests/gelir.spec.ts` (dokuz bölüm, on grafik, seçici her bölüm/tablo/grafikte,
     segmentli topuz konumu ve hareketi, araç çubuğu kenarı, seçim sayfa geneli + saklama + nakit akışı ve istihdam
     takvimine yansıma, üst üste görünümleri, başabaş filtreleri ve filtre etkisi, dijital strateji ve kadro katkısı,
