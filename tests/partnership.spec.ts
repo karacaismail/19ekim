@@ -176,6 +176,12 @@ test.describe('iş ortaklığı programı', () => {
           expect(d.light, `${program}/${section} ince yazı`).toEqual([]);
           expect(d.headerOverflow, `${program}/${section} başlık hücresi`).toEqual([]);
           expect(Math.min(...d.hits), `${program}/${section} dokunma hedefi`).toBeGreaterThanOrEqual(44);
+          if (section === 'takvim') {
+            // Geçit kartları: renkli üst çizginin değdiği köşeler düz (kenar sistemi).
+            const koseler = await page.locator('.ortak-gecit').evaluateAll((els) => els.map((el) => [getComputedStyle(el).borderTopLeftRadius, getComputedStyle(el).borderTopRightRadius]));
+            expect(koseler.length).toBe(4);
+            for (const k of koseler) expect(k, `${program} geçit köşesi`).toEqual(['0px', '0px']);
+          }
           const g = await grafikler(page);
           charts += g.count;
           expect(g.problems, `${width}px ${program}/${section}`).toEqual([]);

@@ -51,6 +51,10 @@ export type ChartSpec =
   | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
   /** Geçit hedefleri (iş ortaklığı): adım (gün) × seri; yatay gruplanmış çubuk, değer etiketi çubuğun ucunda. */
   | { kind: 'hedef-adim'; steps: string[]; series: { name: string; role: RoleKey; values: number[] }[] }
+  /** Kümülatif ₺ senaryoları: ay × seri (çizgi) ve yatay hedef çizgisi (₺ biçimi; `cumulative` saat içindir). */
+  | { kind: 'kumulatif-tl'; labels: string[]; target: number; targetLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** Nakit akışı: ay × giriş/çıkış gruplanmış çubuk ve dönem sonu nakit (geniş: dikey + çizgi; dar: yatay + işaret). */
+  | { kind: 'nakit-ay'; months: string[]; inflow: number[]; outflow: number[]; balance: number[] }
   /** OPEX: tek seri yatay çubuk (₺); `share` verilirse etiket payı da gösterir. */
   | { kind: 'opex-bar'; items: { name: string; value: number; tone: OpexTone }[]; share?: number }
   /** OPEX: yığılmış çubuk (₺); `line` toplam karşılaştırması. opex-stack: geniş kapsayıcıda dikey, dar kapsayıcıda yatay; opex-stack-h: hep yatay. */

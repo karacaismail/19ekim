@@ -4,10 +4,12 @@ import { expect, test } from '@playwright/test';
 import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
 import { DEFAULT_NOTES } from '../src/data/notes';
+import { buildCashflow } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
 import { addDays, shiftText } from '../src/lib/dates';
+import { buildModel as buildOpex } from './opex-fixture';
 
 const m = buildModel(DEFAULT_PARAMS);
 const { roles } = m;
@@ -351,5 +353,116 @@ test.describe('iş ortaklığı programı', () => {
     for (const banned of ['Rumelt', 'Drucker', 'Thiel', 'Kotler', 'Osterwalder', 'Dunford', 'Byron', 'Geoffrey', 'Nagle', 'Reichheld', 'Lincoln Murphy', 'Andrew Chen', 'Helmer', 'Fitzpatrick', 'Goldratt', 'Eric Ries', 'Mom Test', 'Bullseye', 'Lafley', 'Binet']) {
       expect(text, banned).not.toContain(banned);
     }
+  });
+});
+
+/* ---------- Nakit akış tablosu (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('nakit akış tablosu', () => {
+  const m = buildModel(DEFAULT_PARAMS);
+  const opex = buildOpex();
+
+  test('15 ay; ilk 90 günün satıcı-ayları hedefler sayfasıyla aynı; sonrası parametre', () => {
+    const plan = m.cashflow;
+    expect(plan.aylar.length).toBe(15);
+    expect(plan.aylar[0].iso).toBe('2026-10-01');
+    expect(plan.aylar[14].iso).toBe('2027-12-01');
+    const pay = m.payments(m.planRetention);
+    // Program Kasım’da başlar: Ekim 0; Kasım, Aralık, Ocak hedefler sayfasının aylık ödeyen satıcı sayısı.
+    expect(plan.yeniAktif[0]).toBe(0);
+    for (let i = 0; i < 3; i++) expect(plan.yeniAktif[i + 1] + plan.yenileme[i + 1]).toBeCloseTo(pay.monthly[i], 1);
+    expect(plan.yeniAktif[4]).toBe(DEFAULT_PARAMS.newActiveMonthly);
+    expect(plan.ilkOdeme[1]).toBeCloseTo(m.NEW_ACTIVE[0] * m.SUBSCRIPTION_TRY, 1);
+    expect(plan.meta[0]).toBeCloseTo((DEFAULT_PARAMS.metaWeekly * 52) / 12, 1);
+    expect(plan.yatirim.every((v) => v === 0)).toBe(true);
+  });
+
+  test('Sheets çıkışları kategori bazında ay toplamlarını tutar; dönem sonu nakit zinciri doğru', () => {
+    const cf = buildCashflow(m.cashflow, opex);
+    expect(cf.sheets).toBe(true);
+    for (const [i, ay] of cf.aylar.entries()) {
+      const sheets = cf.cikislar.filter((l) => l.kaynak === 'sheets').reduce((t, l) => t + l.aylar[i], 0);
+      expect(sheets, ay.ad).toBeCloseTo(opex.aylik[ay.index][ay.key].toplam, 0);
+      expect(cf.cikis[i], ay.ad).toBeCloseTo(sheets + cf.cikislar.filter((l) => l.kaynak === 'plan').reduce((t, l) => t + l.aylar[i], 0), 0);
+      expect(cf.net[i]).toBeCloseTo(cf.giris[i] - cf.cikis[i], 1);
+      expect(cf.donemSonu[i]).toBeCloseTo(cf.donemBasi[i] + cf.net[i], 1);
+      if (i) expect(cf.donemBasi[i]).toBe(cf.donemSonu[i - 1]);
+    }
+    expect(cf.donemBasi[0]).toBe(DEFAULT_PARAMS.openingCash);
+    expect(cf.acik).toBe(Math.max(0, -Math.min(...cf.donemSonu)));
+  });
+
+  test('yatırım girişi ve başlangıç nakdi dönem sonu nakdi kaydırır; dönem dışı yatırım tabloya girmez', () => {
+    const base = buildCashflow(m.cashflow, opex);
+    const x = buildModel({ ...DEFAULT_PARAMS, openingCash: 1_000_000, investmentAmount: 5_000_000, investmentDate: '2026-12-01' });
+    const cf = buildCashflow(x.cashflow, opex);
+    expect(cf.donemBasi[0]).toBe(1_000_000);
+    expect(cf.girisler.find((l) => l.ad === 'Yatırım girişi')?.aylar[2]).toBe(5_000_000);
+    expect(cf.donemSonu[14]).toBeCloseTo(base.donemSonu[14] + 6_000_000, 0);
+    const y = buildModel({ ...DEFAULT_PARAMS, investmentAmount: 5_000_000, investmentDate: '2028-03-01' });
+    expect(y.cashflow.yatirim.every((v) => v === 0)).toBe(true);
+    expect(y.cashflow.varsayimlar.some((v) => v.includes('dönemi dışında'))).toBe(true);
+    const z = buildCashflow(m.cashflow, null);
+    expect(z.sheets).toBe(false);
+    expect(z.cikislar.every((l) => l.kaynak === 'plan')).toBe(true);
+  });
+});
+
+/* ---------- Gelir planı (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('gelir planı', () => {
+  const m = buildModel(DEFAULT_PARAMS);
+  const r = m.revenue;
+  const real = r.byId.gercekci;
+  const pess = r.byId.kotumser;
+  const opt = r.byId.iyimser;
+  const ms = (x: typeof real, id: string) => x.milestones.find((k) => k.id === id)!;
+
+  test('18 ay; kapasite rampası ve ikinci saha; gelir formülü; kümülatifler artan', () => {
+    expect(r.months.length).toBe(18);
+    expect(r.months[0].iso).toBe('2026-11-01');
+    const saha1 = r.sources.find((x) => x.id === 'saha1')!;
+    expect(saha1.values.slice(0, 3)).toEqual([4, 6, 8]);
+    const saha2 = r.sources.find((x) => x.id === 'saha2')!;
+    expect(saha2.values.slice(0, 4)).toEqual([0, 0, 4, 6]);
+    const org = r.sources.find((x) => x.id === 'org')!;
+    expect(org.values.slice(0, 3)).toEqual([0, 3, 4.5]);
+    for (const x of r.series) {
+      for (let t = 0; t < 18; t++) {
+        expect(x.gelir[t], `${x.scenario.id} ay ${t}`).toBeCloseTo(x.yillik[t] * m.ANNUAL_TRY + x.aylikOdeyen[t] * m.SUBSCRIPTION_TRY, 0);
+        if (t) {
+          expect(x.kumulatif[t]).toBeGreaterThanOrEqual(x.kumulatif[t - 1]);
+          expect(x.kumAktif[t]).toBeGreaterThanOrEqual(x.kumAktif[t - 1]);
+        }
+      }
+      expect(x.kayit[5]).toBeCloseTo(x.yeniAktif[5] * r.ratio, 1);
+    }
+    expect(pess.kumulatif[11]).toBeLessThan(real.kumulatif[11]);
+    expect(real.kumulatif[11]).toBeLessThan(opt.kumulatif[11]);
+  });
+
+  test('hedef zinciri sıralı; kötümser tarihler gerçekçiden geç; 100 aktif 90 günden sonra', () => {
+    const order = real.milestones.map((k) => k.days ?? Infinity);
+    expect(order.slice().sort((a, b) => a - b)).toEqual(order);
+    expect(ms(real, 'aktif100').days!).toBeGreaterThan(90);
+    expect(ms(real, 'gelir3m').date).not.toBeNull();
+    for (const k of real.milestones) {
+      const p = ms(pess, k.id);
+      if (k.days !== null && p.days !== null) expect(p.days, k.id).toBeGreaterThanOrEqual(k.days);
+    }
+    expect(r.need90).toBe(Math.ceil(DEFAULT_PARAMS.activeTarget / 3));
+    expect(r.funnel.map((f) => f.value)).toEqual([...r.funnel.map((f) => f.value)].sort((a, b) => b - a));
+    expect(r.pricing[0].tl).toBeCloseTo(m.SUBSCRIPTION_TRY, 2);
+    expect(r.pricing[1].tl).toBeCloseTo(m.ANNUAL_TRY, 2);
+  });
+
+  test('parametre: ikinci saha erken gelince 100 aktif erken; yıllık payı kümülatifi öne çeker', () => {
+    const early = buildModel({ ...DEFAULT_PARAMS, secondSahaDate: '2026-12-01' }).revenue;
+    expect(ms(early.byId.gercekci, 'aktif100').days!).toBeLessThan(ms(real, 'aktif100').days!);
+    const yillik = buildModel({ ...DEFAULT_PARAMS, annualShare: 60 }).revenue;
+    expect(yillik.byId.gercekci.kumulatif[2]).toBeGreaterThan(real.kumulatif[2]);
+    const sifir = buildModel({ ...DEFAULT_PARAMS, annualShare: 0 }).revenue.byId.gercekci;
+    expect(sifir.yillik.every((v) => v === 0)).toBe(true);
+    expect(sifir.aylikOdeyen[0]).toBeCloseTo(sifir.yeniAktif[0], 2);
   });
 });

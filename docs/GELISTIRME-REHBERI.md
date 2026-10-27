@@ -10,12 +10,16 @@ bir yapay zekâ ajanının (Codex, Claude, Cursor…) on dakikada doğru zihin m
 site; GitHub Pages’te yayında: <https://karacaismail.github.io/19ekim/>.
 
 Sayfalar bir sunum sırası izler (`SEQUENCE`): organizasyon şeması → rol sayfaları → istihdam takvimi → 90 gün
-hedefleri → eylem planı → iş ortaklığı programı → karar yetkisi → karar bekleyenler → parametreler. Ayrıca iki büyük
+hedefleri → gelir planı → eylem planı → iş ortaklığı programı → karar yetkisi → karar bekleyenler → parametreler. Ayrıca iki büyük
 bağımsız modül vardır:
 
 - **Giderler (OPEX)**: veri repoda değil, Google Sheets’te. Apps Script web uygulaması sayfaya canlı veri verir; aynı
   hesap motoru (`apps-script/src/Motor.js`) hem Sheets’teki panoyu hem sayfayı besler.
 - **Applet’ler** (`/applet/`): ücret ve performans modelleri, menüde yok, yalnız adresle açılır.
+- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): kadro kapasitesinden hedef zinciri, üç senaryo, aylık ve
+  kümülatif gelir. Veri `src/data/revenue.ts`; parametreler “Gelir planı” grubunda.
+- **Nakit akış tablosu** (`/nakit-akisi/`, Giderler menüsünde): çıkışlar Sheets’ten canlı, girişler sitenin
+  parametrelerinden; basit/ayrıntılı anahtar. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
   geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
 
@@ -154,3 +158,5 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Sheets kurulumu | `apps-script/src/Kurulum.js`, `apps-script/README.md` |
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
 | İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |
+| Nakit akış tablosu | `src/data/cashflow.ts` (girişler, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
+| Gelir planı | `src/data/revenue.ts` (kapasite, senaryolar, hedef zinciri), `src/views/RevenuePage.tsx` |

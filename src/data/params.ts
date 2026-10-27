@@ -50,6 +50,19 @@ export const DEFAULT_PARAMS = {
   activeRepsWeekly: 0.5,
   /* Mesai */
   overtimeCap: 270,
+  /* Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesi, ikinci saha, yıllık peşin payı, kötümser senaryo */
+  sahaActivesMonthly: 8,
+  crmActivesMonthly: 4,
+  organizatorActivesMonthly: 6,
+  secondSahaDate: '2027-01-01',
+  annualShare: 20,
+  pessimisticFactor: 60,
+  pessimisticRetention: 50,
+  /* Nakit akışı (kullanıcı kararı 2026-10-27: nakit akış tablosu) */
+  openingCash: 0,
+  investmentAmount: 0,
+  investmentDate: '2026-11-01',
+  newActiveMonthly: 50,
 };
 
 export type Params = typeof DEFAULT_PARAMS;
@@ -152,6 +165,31 @@ export const PARAM_GROUPS: ParamGroup[] = [
       { key: 'aiToolsMonthly', label: 'Yapay zekâ ve otomasyon araçları (tavan)', kind: 'money', unit: '₺ / ay', min: 0, step: 500 },
       { key: 'applicationsWeekly', label: 'Başvuru (en fazla)', kind: 'count', unit: '/ hafta', min: 0 },
       { key: 'activeRepsWeekly', label: 'Aktif kalan temsilci', kind: 'number', unit: '/ hafta', min: 0, step: 0.1 },
+    ],
+  },
+  {
+    id: 'gelir',
+    title: 'Gelir planı',
+    desc: 'Kadro kapasitesi (tam kapasitede kişi başına aylık yeni aktif satıcı; ilk ay %50, ikinci ay %75), ikinci saha personelinin başlangıcı, yıllık peşin ödeyen payı ve kötümser senaryo.',
+    fields: [
+      { key: 'sahaActivesMonthly', label: 'Saha personeli: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay / kişi', min: 0, help: 'Günde ≈ 8 ziyaret → haftada ≈ 10 kayıt → ayda 8 ilk ödeme' },
+      { key: 'crmActivesMonthly', label: 'CRM masa başı: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Günde ≈ 40 arama + 100 e-posta → haftada ≈ 5 kayıt' },
+      { key: 'organizatorActivesMonthly', label: 'Organizatör: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Ayda 2 etkinlik × ≈ 25 katılımcı → ≈ 30 kayıt' },
+      { key: 'secondSahaDate', label: 'İkinci saha personelinin başlangıcı (sistem oturunca)', kind: 'date', help: 'Ayın ilk günü yazılır' },
+      { key: 'annualShare', label: 'Yıllık peşin ödeyen yeni satıcı payı', kind: 'percent', unit: '%', min: 0, max: 100, help: '3.990 € / yıl (10 ay ücreti); kalanı aylık 399 €' },
+      { key: 'pessimisticFactor', label: 'Kötümser senaryo: kapasite çarpanı', kind: 'percent', unit: '%', min: 10, max: 100 },
+      { key: 'pessimisticRetention', label: 'Kötümser senaryo: aylık elde tutma', kind: 'percent', unit: '%', min: 0, max: 100 },
+    ],
+  },
+  {
+    id: 'nakit',
+    title: 'Nakit akışı',
+    desc: 'Nakit akış tablosu: başlangıç nakdi, yatırım girişi ve 90 gün sonrası satıcı kazanımı. Giderler Sheets’ten gelir.',
+    fields: [
+      { key: 'openingCash', label: 'Başlangıç nakdi (Ekim 2026)', kind: 'money', unit: '₺', min: 0, step: 100_000 },
+      { key: 'investmentAmount', label: 'Yatırım girişi', kind: 'money', unit: '₺', min: 0, step: 500_000, help: '0 = yatırım yok; tablo nakit açığını gösterir' },
+      { key: 'investmentDate', label: 'Yatırım girişi ayı', kind: 'date', help: 'Ayın ilk günü yazılır; Ekim 2026 – Aralık 2027 dışıysa tabloya girmez' },
+      { key: 'newActiveMonthly', label: '90 gün sonrası aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Ocak 2027’den sonraki her ay; elde tutma plan senaryosuyla' },
     ],
   },
   {

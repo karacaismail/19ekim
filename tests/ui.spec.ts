@@ -4,6 +4,7 @@ const PAGES = [
   '',
   'istihdam/',
   'hedefler/',
+  'gelir-plani/',
   'eylem-plani/',
   'karar-yetkisi/',
   'karar-bekleyenler/',
@@ -21,6 +22,7 @@ const PAGES = [
   'parametreler/',
   'notlar/',
   'giderler/',
+  'nakit-akisi/',
   'arsiv/',
   'email/',
 ];
@@ -28,7 +30,7 @@ const PAGES = [
 /** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
 // Giderler grafikleri yalnız Sheets bağlantısıyla çizilir; ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
 // İş ortaklığı sayfasının grafikleri sekmelerde (bir anda tek bölüm çizilir); her sekme ayrı testte (partnership.spec.ts) denetlenir.
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'partnership/'].includes(p));
+const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'nakit-akisi/', 'email/', 'applet/', 'partnership/'].includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
 test.beforeEach(async ({ page }) => {
@@ -357,19 +359,19 @@ test.describe('başlık ve İstihdam menüsü', () => {
     expect(ayiricilar).toEqual([false, true, true, true]);
   });
 
-  test('Pazarlama menüsü: yedi sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
+  test('Pazarlama menüsü: sekiz sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
     await page.goto('karar-yetkisi/');
     await icerik(page);
     await hydrated(page);
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, 'Giderler (OPEX)', 'Notlar']);
+    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, /^Giderler/, 'Notlar']);
     const tetik = page.getByRole('button', { name: 'Pazarlama' });
     await expect(tetik).toHaveAttribute('data-section', 'true');
     await expect(page.getByRole('button', { name: 'İstihdam' })).not.toHaveAttribute('data-section', 'true');
     await tetik.click();
     const menu = page.getByRole('menu', { name: 'Pazarlama' });
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole('menuitem')).toHaveText(['90 gün hedefleri', 'Eylem planı', 'MLM ağı', 'İş ortaklığı', 'Karar yetkisi', 'Karar bekleyenler', 'Parametreler']);
+    await expect(menu.getByRole('menuitem')).toHaveText(['90 gün hedefleri', 'Gelir planı', 'Eylem planı', 'MLM ağı', 'İş ortaklığı', 'Karar yetkisi', 'Karar bekleyenler', 'Parametreler']);
     await expect(menu.getByRole('menuitem', { name: 'Karar yetkisi' })).toHaveAttribute('aria-current', 'page');
     await menu.getByRole('menuitem', { name: 'MLM ağı' }).click();
     await expect(page).toHaveURL(/\/buyume-modeli\/$/);

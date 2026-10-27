@@ -4,7 +4,7 @@ import { IconChevronDown, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, I
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
-import { COMMON_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { useGiris } from '../lib/giris';
 import { href, normalizePath } from '../lib/paths';
@@ -111,7 +111,7 @@ function ParamsNotice() {
 }
 
 /** Üst gezinme öğelerinin simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
-const COMMON_ICONS: Record<string, Icon> = { '/giderler/': IconReceipt2, '/notlar/': IconNotes };
+const COMMON_ICONS: Record<string, Icon> = { '/notlar/': IconNotes };
 
 function NavItem({
   label,
@@ -170,6 +170,8 @@ type MenuLink = { label: string; path: string; role?: string; no?: number; also?
 const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon }[] = [
   { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV], dividerBefore: HIRING_NAV.path, icon: IconUsersGroup },
   { label: 'Pazarlama', items: MARKETING_NAV, icon: IconSpeakerphone },
+  // Kullanıcı kararı 2026-10-27: Giderler bir menü; OPEX ve nakit akış tablosu.
+  { label: 'Giderler', items: FINANCE_NAV, icon: IconReceipt2 },
 ];
 
 /**

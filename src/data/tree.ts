@@ -72,6 +72,8 @@ export const SEQUENCE: Stop[] = [
   { path: '/roller/asistan/', label: 'Kurmay · Asistan', crumb: ['Kurmay · Asistan'] },
   { path: '/istihdam/', label: 'İstihdam takvimi', crumb: ['İstihdam takvimi'] },
   { path: '/hedefler/', label: '90 gün hedefleri', crumb: ['90 gün hedefleri'] },
+  // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.
+  { path: '/gelir-plani/', label: 'Gelir planı', crumb: ['Gelir planı'] },
   { path: '/eylem-plani/', label: 'Eylem planı', crumb: ['Eylem planı'] },
   // İş ortaklığı programı (kullanıcı kararı 2026-10-27): Segika ve iStoc, iki ana sekme; adres /partnership/.
   { path: '/partnership/', label: 'İş ortaklığı programı', crumb: ['İş ortaklığı programı'] },
@@ -80,6 +82,7 @@ export const SEQUENCE: Stop[] = [
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
   // Son kırıntı sayfa başlığıdır (AppFrame titleInCrumbs; kullanıcı kararı 2026-10-21).
   { path: '/giderler/', label: 'Giderler (OPEX)', crumb: ['Finans', 'OpEx', 'Operasyonel Giderler'] },
+  { path: '/nakit-akisi/', label: 'Nakit akış tablosu', crumb: ['Finans', 'Nakit akış tablosu'] },
   { path: '/notlar/', label: 'Notlar', crumb: ['Notlar'] },
 ];
 
@@ -102,6 +105,7 @@ export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
 /** “Pazarlama” açılır menüsü (kullanıcı kararı 2026-10-20). */
 export const MARKETING_NAV = [
   { label: '90 gün hedefleri', path: '/hedefler/' },
+  { label: 'Gelir planı', path: '/gelir-plani/' },
   { label: 'Eylem planı', path: '/eylem-plani/' },
   { label: 'MLM ağı', path: '/buyume-modeli/' },
   { label: 'İş ortaklığı', path: '/partnership/' },
@@ -110,7 +114,10 @@ export const MARKETING_NAV = [
   { label: 'Parametreler', path: '/parametreler/' },
 ];
 
-export const COMMON_NAV = [
+/** “Giderler” açılır menüsü (kullanıcı kararı 2026-10-27): OPEX ve nakit akış tablosu. */
+export const FINANCE_NAV = [
   { label: 'Giderler (OPEX)', path: '/giderler/' },
-  { label: 'Notlar', path: '/notlar/' },
+  { label: 'Nakit akış tablosu', path: '/nakit-akisi/' },
 ];
+
+export const COMMON_NAV = [{ label: 'Notlar', path: '/notlar/' }];

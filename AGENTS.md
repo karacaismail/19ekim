@@ -147,6 +147,41 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     aşama, `hire-*` sınıfları). Stil `.ortak-*` (global.css). Testler: her programın her bölümü 320/390/1280 px’te
     taşma, 14 px, 44 px hedef ve grafik metni; sekme/adres/klavye; veri tutarlılığı (huni azalan, geçit hedefleri
     artan, puan kartları 100, kapasite 52 ve 83 saat/hafta, takvim bitişik, tarih kayması).
+  - `/nakit-akisi/` nakit akış tablosu (kullanıcı kararı 2026-10-27; “Giderler” açılır menüsünde — kullanıcı kararı
+    2026-10-27: üst gezinmede Giderler artık bir menüdür, `FINANCE_NAV`: Giderler (OPEX), Nakit akış tablosu; `COMMON_NAV`
+    yalnız Notlar —, sunum sırasında Giderler’den sonra, kırıntı “Finans › Nakit akış tablosu”, başlık kırıntıda). Klasik
+    düzen: nakit girişleri, nakit çıkışları, net nakit akışı, dönem başı ve dönem sonu nakit; Sheets ızgarasının 15 ayı
+    (Ekim 2026 – Aralık 2027, `CASH_MONTHS`). İki kaynak: **çıkışlar** Google Sheets’ten (sayfa açılınca tek istek,
+    `requestOpex`; Giderler’deki canlı yoklama yok) kategori bazında — kalemlerin `aylikTl` toplamı, bordrolu personel
+    `maliyet` (teşvik düşülmüş), freelancer faturaları — artı plan parametrelerinden Meta reklam bütçesi ve satış primi
+    (her yeni aktif satıcı için prim: üst sınır); **girişler** sitenin parametrelerinden: abonelik (€ × kur), ilk 90 günün
+    aylık yeni aktif satıcıları (hedefler sayfasının `NEW_ACTIVE`’i, aynı ödeyen satıcı-ay zinciri), sonrasında
+    `newActiveMonthly`, yenilemeler plan senaryosu elde tutma oranıyla, yatırım girişi (`investmentAmount`,
+    `investmentDate`) ve başlangıç nakdi (`openingCash`; Parametreler → “Nakit akışı” grubu). Veri
+    `src/data/cashflow.ts` → `makeCashflow(params, program)` (model üzerinden) + `buildCashflow(plan, opexModel | null)`
+    (Sheets yoksa yalnız plan kalemleri; durum notu Giderler sayfasına bağlar). Basit görünüm dört satır; “Ayrıntılı
+    görünüm” anahtarı (`role="switch"`, `.nakit-anahtar`) kalemleri, ara toplamları ve dönem başı nakdi açar; Kalem sütunu
+    sabit. Özet: 15 ay toplam giriş/çıkış/net, en düşük nakit ve ayı, nakit açığı tavanı (dönem sonu nakdi sıfırın
+    altına düşürmeyen en küçük ek nakit). Grafik `nakit-ay` (yeni tür: geniş ekranda dikey giriş/çıkış çubukları + dönem
+    sonu nakit çizgisi; dar ekranda yatay çubuk + işaret; dar ekranda kutu `--chart-h-xxl`). KDV, SGK/vergi ödeme
+    gecikmesi ve sponsor/ekip lideri payı modellenmez (varsayımlar bölümünde yazılı). Testler: `tests/nakit.spec.ts`
+    (sahte Sheets yanıtı, anahtar, menü, 320/390/1280, grafik) ve `tests/data.spec.ts` (satıcı-ay zinciri hedeflerle aynı,
+    Sheets kategori toplamları = aylık toplamlar, nakit zinciri, yatırım/başlangıç nakdi).
+  - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
+    sırasında da). Hedefler sayfası 90 günde 100 aktif satıcıyı hedef koyar; bu sayfa aynı hedefe kadro kapasitesinden
+    bakar: 1 saha personeli (ikincisi “sistem oturunca”, `secondSahaDate`), 1 CRM masa başı, organizatör (Aralık’tan) ve
+    bağımsız temsilciler (ayda 2 yeni, en çok 10, temsilci başına 1 ilk ödeme) ayda kaç yeni aktif satıcı getirir
+    (`sahaActivesMonthly`, `crmActivesMonthly`, `organizatorActivesMonthly`; her kişinin ilk ayı %50, ikinci ayı %75).
+    Üç senaryo: kötümser (`pessimisticFactor`, `pessimisticRetention`), gerçekçi (plan elde tutma), iyimser (%130, +10
+    puan). Hedef zinciri (ilk 10 → 50 → 100 aktif → 500 üye → 1 M₺ → ciro hedefi → 200 aktif): tarih (ay içinde doğrusal),
+    başlangıçtan ve önceki hedeften süre (`sure`: gün, hafta, ay), o ayın geliri, kümülatif, kötümser tarih. Gelir = yıllık
+    peşin ödeyenler (`annualShare`) × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret; aktif satıcı = ilk ödeme
+    (hedefler sayfasıyla aynı tanım), “ödemeye devam eden” ayrı. Parametreler → “Gelir planı” grubu. Veri
+    `src/data/revenue.ts` → `makeRevenue(params, program)` (18 ay ufuk). Görünüm: büyük sayılı hedef kartları
+    (`.gelir-hedef`, üst kenar rol tonunda, numara), Mantine `Timeline`, `kaynak-ay` (kaynak × ay), `gelir-ay`
+    (ilk ödemeler, yenilemeler, kümülatif, hedef çizgisi), `kumulatif-tl` (yeni tür: senaryo çizgileri ₺, hedef çizgisi),
+    `huni` (üye → aktif → 3./6./12. ayda devam eden). Testler: `tests/gelir.spec.ts`, `tests/data.spec.ts` (rampa,
+    gelir formülü, hedef sırası, kötümser ≥ gerçekçi, 100 aktif > 90 gün, parametre etkileri).
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).
@@ -189,7 +224,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   1rem, Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
   (dar ekranda açıklama başlığın altında). Gezinme tek satır: “İstihdam” (organizasyon,
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
-  bekleyenler, parametreler; `MARKETING_NAV`) açılır menüleri, Giderler (OPEX), Notlar. Menüler tek bileşen (`NavMenu`,
+  bekleyenler, parametreler; `MARKETING_NAV`) ve Giderler (OPEX, nakit akış tablosu; `FINANCE_NAV`, kullanıcı kararı 2026-10-27) açılır menüleri, Notlar. Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
   ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık (`--text-title`, geniş
   ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az

@@ -777,6 +777,62 @@ function build(spec: ChartSpec, width: number): Opt {
       };
     }
 
+    case 'kumulatif-tl': {
+      // Senaryo çizgileri (₺): kümülatif gelir; hedef kesikli yatay çizgi. Dar ekranda ay etiketleri seyrelir (hideOverlap).
+      const names = spec.series.map((x) => x.name);
+      const maxV = Math.max(spec.target * 1.15, ...spec.series.flatMap((x) => x.values));
+      return {
+        ...base(),
+        grid: { ...grid, top: legendTop(names, width) },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => lira(v) },
+        legend: { ...(base().legend as Opt), data: names },
+        xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
+        yAxis: { type: 'value', max: Math.ceil(maxV / 1_000_000) * 1_000_000, ...axis(), axisLabel: { ...(axis().axisLabel as Opt), formatter: millions } },
+        series: spec.series.map((x, i) => ({
+          name: x.name,
+          type: 'line',
+          data: x.values,
+          symbol: 'none',
+          lineStyle: { color: token(`--role-${x.role}`), width: 2, type: x.dashed ? 'dashed' : 'solid' },
+          itemStyle: { color: token(`--role-${x.role}`) },
+          markLine: i === 0 ? targetLine(spec.target, 'insideEndTop') : undefined,
+        })),
+      };
+    }
+
+    case 'nakit-ay': {
+      // Nakit akışı: giriş ve çıkış yan yana çubuk, dönem sonu nakit çizgi (geniş) ya da işaret (dar, yatay). Negatif nakit
+      // değer ekseninde görünür; tutarlar ipucunda, tablo sayfada.
+      const narrow = width < OPEX_NARROW;
+      const surface = token('--surface-raised');
+      const names = ['Nakit girişi', 'Nakit çıkışı', 'Dönem sonu nakit'];
+      const category: Opt = narrow
+        ? { type: 'category', inverse: true, data: spec.months, ...axis(), axisLine: { show: false }, axisLabel: { ...categoryLabel(width, 0.3, spec.months), interval: 0 } }
+        : { type: 'category', data: spec.months, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), interval: 0, hideOverlap: true } };
+      const value: Opt = valueAxis(narrow);
+      const series: Opt[] = [
+        { name: names[0], type: 'bar', data: spec.inflow, barMaxWidth: 16, barGap: '20%', itemStyle: { color: token('--viz-3'), borderRadius: 0 } },
+        { name: names[1], type: 'bar', data: spec.outflow, barMaxWidth: 16, itemStyle: { color: token('--viz-2'), borderRadius: 0 } },
+        narrow
+          ? { name: names[2], type: 'scatter', data: spec.balance.map((v, i) => [v, spec.months[i]]), symbol: 'diamond', symbolSize: 12, itemStyle: { color: text, borderColor: surface, borderWidth: 2 }, z: 5 }
+          : { name: names[2], type: 'line', data: spec.balance, symbolSize: 8, lineStyle: { color: text, width: 2 }, itemStyle: { color: text, borderColor: surface, borderWidth: 2 }, z: 5 },
+      ];
+      return {
+        ...base(),
+        tooltip: {
+          ...(base().tooltip as Opt),
+          trigger: 'axis',
+          axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' },
+          valueFormatter: (v: number | number[]) => lira(Array.isArray(v) ? v[0] : v),
+        },
+        legend: { ...(base().legend as Opt), data: names },
+        grid: { left: 4, right: 16, bottom: 4, top: legendTop(names, width), containLabel: true },
+        xAxis: narrow ? value : category,
+        yAxis: narrow ? category : value,
+        series,
+      };
+    }
+
     case 'opex-bar': {
       const narrow = width < OPEX_NARROW;
       const label = (v: number) => (spec.share ? `${lira(v)} · ${ratio(v / spec.share)}` : lira(v));

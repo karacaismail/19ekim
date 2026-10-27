@@ -4769,7 +4769,9 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   display: flex;
   flex-direction: column;
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
+  /* Üst kenar renkli çizgi (kenar sistemi): üst köşeler düz, yalnız alt köşeler yuvarlak. */
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
   background: var(--surface-raised);
 }
 
@@ -4862,4 +4864,198 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   grid-column: -2;
   align-items: flex-end;
   text-align: end;
+}
+
+/* ---------- Nakit akış tablosu (/nakit-akisi/; kullanıcı kararı 2026-10-27) ---------- */
+.nakit-kaynak {
+  margin: var(--space-4) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.nakit-araclar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-4);
+}
+
+/* Ayrıntı anahtarı: Giderler hızlı filtre anahtarıyla aynı dil (iz, top, tokenlar). */
+.nakit-anahtar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.nakit-anahtar-iz {
+  position: relative;
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: 1.25rem;
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--toggle-track-off);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.nakit-anahtar-top {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.1875rem;
+  inline-size: 0.8125rem;
+  block-size: 0.8125rem;
+  border-radius: 50%;
+  background-color: var(--toggle-thumb-off);
+  transform: translateY(-50%);
+  transition-property: transform, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.nakit-anahtar[aria-checked='true'] .nakit-anahtar-iz {
+  background-color: var(--toggle-track-on);
+}
+
+.nakit-anahtar[aria-checked='true'] .nakit-anahtar-top {
+  background-color: var(--toggle-thumb-on);
+  transform: translate(1rem, -50%);
+}
+
+@media (forced-colors: active) {
+  .nakit-anahtar-iz {
+    border: 1px solid ButtonText;
+  }
+
+  .nakit-anahtar-top {
+    background-color: ButtonText;
+  }
+}
+
+/* Tablo satırları: kalemler girintili; toplam, net ve dönem sonu satırları belirgin. */
+.nakit-kalem {
+  display: block;
+}
+
+.nakit-kalem[data-ton='kalem'][data-kaynak] {
+  padding-inline-start: var(--space-3);
+  font-weight: var(--weight-regular);
+}
+
+.data-table tr[data-tone='net'] > *,
+.data-table tr[data-tone='nakit'] > * {
+  font-weight: var(--weight-semibold);
+}
+
+.data-table tr[data-tone='nakit'] > * {
+  background-color: var(--surface-selected);
+}
+
+/* Dar grafikte (yatay, 15 ay satır satır) kutu uzar; geniş grafikte alçak. */
+@media (max-width: 37.49em) {
+  .chart-canvas[data-kind='nakit-ay'] {
+    height: var(--chart-h-xxl);
+  }
+}
+
+/* ---------- Gelir planı (/gelir-plani/; kullanıcı kararı 2026-10-27) ---------- */
+/* Hedef kartları: büyük sayı, rol tonunda üst kenar (kenar sistemi) ve numara; görsel bellek için. */
+.gelir-hedefler {
+  display: grid;
+  gap: var(--gap-normal);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  margin-top: var(--space-6);
+}
+
+.gelir-hedef {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-5);
+  /* Üst kenar renkli çizgi (kenar sistemi): çizginin değdiği üst köşeler düz, yalnız alt köşeler yuvarlak. */
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.gelir-hedef-no {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-end: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gelir-hedef-sayi {
+  margin: 0;
+  padding-inline-end: 2.5rem;
+  font-size: var(--text-stat);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.gelir-hedef-ad {
+  margin: var(--space-1) 0 0;
+  color: var(--tone-fg);
+  font-weight: var(--weight-semibold);
+}
+
+.gelir-hedef-tarih {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.gelir-hedef-bilgi {
+  display: grid;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+
+.gelir-hedef-bilgi > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding-top: var(--space-1);
+}
+
+.gelir-hedef-bilgi dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.gelir-hedef-bilgi dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.gelir-zaman {
+  margin-top: var(--space-8);
 }
