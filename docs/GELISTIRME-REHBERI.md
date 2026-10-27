@@ -101,6 +101,9 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   Giderler kalemler tablosu ve geniş grafikler (Gantt, şemalar) kayıtlı istisnadır: kendi kutusunda kayar.
 - **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
   çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
+- **Sayfa başlığı tek kalıptır.** Her sayfanın tek h1’i kırıntı satırının son öğesidir (“19 Ekim › Gelir planı”); altında
+  bir cümlelik amaç ve dönem/kaynak satırı (`PageHeader`). Ayrı “hero”, turuncu üst etiket ve uzun giriş metni yok; bölüm
+  başlığında numara yalnız sıra anlamlıysa (araç sayfalarında yok), üst çizgi ince.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 
@@ -169,7 +172,8 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Rol görevleri, KPI | `src/data/roles.ts`, `src/data/program.ts` |
 | Dijital pazarlama planı | `src/data/digital.ts` |
 | Organizasyon şeması | `src/data/tree.ts` |
-| Başlık, gezinme (şerit ve dar ekran çekmecesi), tema | `src/components/AppFrame.tsx` |
+| Gezinme (şerit ve dar ekran çekmecesi), tema, sunum sırası | `src/components/AppFrame.tsx` |
+| Sayfa başlığı (kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) | `src/components/PageHeader.tsx` |
 | Tablo / kayıt görünümü (dar ekran), grafik kutusu, seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart`, `Choice`) |
 | UX sözleşmesi, kabul senaryoları, istisna kayıtları | `docs/ux.md`, AGENTS.md → “UX yeniden tasarım sözleşmesi” |
 | Renk, boşluk, yazı, hareket | `src/styles/tokens.css` (sadece burası) |

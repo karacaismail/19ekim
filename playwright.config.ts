@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import { GIRIS_ANAHTARI, GIRIS_OZETI } from './src/lib/giris';
 
-const PORT = 4322;
+// Aynı makinede birden çok çalışma kopyası (worktree) test koşarken sunucular çakışmasın: `PW_PORT` ile ayrı port.
+const PORT = Number(process.env.PW_PORT ?? 4322);
 
 export default defineConfig({
   testDir: 'tests',

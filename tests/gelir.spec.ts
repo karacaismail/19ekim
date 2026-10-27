@@ -19,8 +19,9 @@ test.describe('gelir planı', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gelir planı');
-    await expect(page.locator('.hero .lead')).toContainText('19 Ekim 2026 – Aralık 2027');
-    await expect(page.locator('.hero .lead')).toContainText('İlk satış 6 Kasım 2026');
+    // Dönem ve ilk satış tek PageHeader’ın dönem satırında (ux.md M03, P6.1).
+    await expect(page.locator('.page-meta')).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(page.locator('.page-meta')).toContainText('6 Kasım 2026');
     // Kurucu sayfanın başında (ilk bölümden önce), yapışkan özet kurucunun hemen altında.
     const sira = await page.evaluate(() => {
       const k = document.querySelector('.kurucu')!.getBoundingClientRect().top;

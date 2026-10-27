@@ -4,7 +4,8 @@ import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { Araclar, ModSecimi, type Mod } from '../components/Senaryo';
 import { SenaryoKurucu, YapiskanOzet } from '../components/SenaryoKurucu';
-import { Chart, Choice, DataTable, Hero, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
+import { Chart, Choice, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../data/breakeven';
 import { buildSources, simulate, sure, type Milestone, type SimInputs } from '../data/revenue';
 import { makeStaffing, staffScenario, type StaffResult } from '../data/staffing';
@@ -230,10 +231,14 @@ function Icerik() {
 
   return (
     <>
-      <Hero
-        eyebrow="Pazarlama"
+      <PageHeader
         title="Gelir planı"
-        lead={`${r.labels.start} – ${r.labels.end}: ${int(params.activeTarget)} aktif satıcı, ${int(params.memberTarget)} üye ve ${tl(params.ciroTarget)} kümülatif gelir mevcut kadroyla ne zaman gelir; kadronun gelire katkısı, dijital pazarlama stratejisi ve başabaş. İlk satış ${r.labels.firstSale}; o güne kadar satışa bağlı gelir 0 ₺. Paket ${m.SUBSCRIPTION_EUR} € / ay ya da ${m.SUBSCRIPTION_EUR * params.annualMonths} € / yıl.`}
+        purpose={`${int(params.activeTarget)} aktif satıcı, ${int(params.memberTarget)} üye ve ${tl(params.ciroTarget)} kümülatif gelir mevcut kadroyla ne zaman gelir; kadronun gelire katkısı, dijital pazarlama stratejisi ve başabaş.`}
+        meta={[
+          { label: 'Dönem', value: `${r.labels.start} – ${r.labels.end}` },
+          { label: 'İlk satış', value: `${r.labels.firstSale} (o güne kadar satışa bağlı gelir 0 ₺)` },
+          { label: 'Paket', value: `${m.SUBSCRIPTION_EUR} € / ay ya da ${int(m.SUBSCRIPTION_EUR * params.annualMonths)} € / yıl` },
+        ]}
       />
       <SenaryoKurucu p={params} state={state} sahaGrowthDefault={sc.sahaGrowthEvery} retentionDefault={sc.retention} factorDefault={sc.factor} />
       <YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} />

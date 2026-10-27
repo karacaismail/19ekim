@@ -18,9 +18,6 @@
   /* Kırıntılar ve kırıntıdaki sayfa başlığı (kullanıcı kararı 2026-10-21: kırıntı ≈ %13 büyük, başlık ≈ %15 küçük) */
   --text-crumb: 1rem;
   --text-crumb-title: clamp(1.3rem, 1.05rem + 0.95vw, 1.7rem);
-  --text-display: clamp(2rem, 1.35rem + 2.8vw, 3.5rem);
-  /* Sayfa başlığı (hero): sıkışık, tek satıra yakın */
-  --text-title: clamp(1.75rem, 1.45rem + 1.2vw, 2.4rem);
   --text-stat: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
   --leading-tight: 1.1;
   --leading-snug: 1.3;

@@ -321,17 +321,28 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   Giderler) ve Notlar = 19 bağlantı; etkin sayfa `aria-current`, bölümü `data-section`. Kabuk `useMediaQuery('(min-width:
   48em)')` ile seçilir; şerit ve çekmece aynı anda mount edilmez. Testler `tests/ui.spec.ts` (320–390 px çekmece,
   768 px şerit, dokunmatik 48 px, 667×375 alçak ekran), `tests/giderler.spec.ts` (canlı durum Menü düğmesinin altında). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
-  açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
-  `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-crumb-title`; Giderler: 19 Ekim › Finans › OpEx ›
-  Operasyonel Giderler, ayrı başlık alanı yok). Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`:
-  1rem, Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). Bölüm başlığı ≥ 64em’de tek satır: numara · başlık · açıklama
-  (dar ekranda açıklama başlığın altında). Gezinme tek satır: “İstihdam” (organizasyon,
+  açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. **Sayfa başlığı tek kalıp (kullanıcı kararı 2026-10-27, ux.md §3/§5.4, M03; paket P6.1):**
+  `PageHeader` (`src/components/PageHeader.tsx`) kırıntı satırını ve başlığı birlikte çizer — kırıntı “19 Ekim” ile
+  başlar, son kırıntı sayfanın **tek h1**’idir (`.crumbs-title`, `--text-crumb-title`; Giderler için verilen 2026-10-21
+  kararı — 19 Ekim › Finans › OpEx › Operasyonel Giderler, ayrı başlık alanı yok — sayfa geneline yayıldı; eski hero,
+  turuncu üst etiket ve `AppFrame titleInCrumbs` kalktı). Altında **bir cümlelik amaç** (`purpose`, `.page-purpose`) ve
+  **dönem/kaynak satırı** (`meta`, `.page-meta`: Dönem, İlk satış, Paket, Kaynak, Kayıt…); ≥ 48em’de sığarsa amaç ve dönem
+  satırı yan yana. Rol sayfasında simge + ad + durum hapı aynı kırıntı öğesinde, görev (`role.mission`, veri) amaç
+  satırında, kişi/başlangıç/bağlı/ücret/aranan dönem satırında. SEQUENCE dışı sayfalarda (BCG, applet, e-posta, arşiv,
+  404) ve ana sayfada kırıntı yolu yok, h1 satırda tek başına. Giderler’de amaç satırı yok (ilk ekran kararı 2026-10-21).
+  Kırıntı satırı `.wrap` içinde doğrudan durur (yapışkan kalması için ayrı kapsayıcı yok); iki kutu `data-page-header`
+  taşır ve testler ikisini birlikte ölçer. Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`: 1rem,
+  Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). **Bölüm başlığı** (ux.md §3, P6.1):
+  tek ana başlık + açıklama; üst çizgi hairline (`--rule`; kalın mürekkep çizgisi yok), numara ikincil renkte
+  (`--text-secondary`) ve yalnız sırası anlamlı bölümlerde (`Section index` isteğe bağlı; Parametreler grupları ve nakit
+  akışı bölümleri numarasız); ≥ 64em’de tek satır: [numara ·] başlık · açıklama (dar ekranda açıklama başlığın altında).
+  Gezinme tek satır: “İstihdam” (organizasyon,
   rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
   bekleyenler, parametreler; `MARKETING_NAV`) ve Giderler (OPEX, nakit akış tablosu; `FINANCE_NAV`, kullanıcı kararı 2026-10-27) açılır menüleri, Notlar. Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
-  ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık (`--text-title`, geniş
-  ekranda üst etiket başlıkla aynı satırda): her sayfa için önceki yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az
-  (`tests/ui.spec.ts → ONCEKI`, 1280 px). Rol başlığı: ad + durum, sağda görev, altta tek akışta bilgiler. Kırıntı
+  ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık: her sayfa için önceki
+  yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az (`tests/ui.spec.ts → ONCEKI`, 1280 px; 2026-10-27’den beri kırıntı
+  satırı + amaç/dönem satırı birlikte ölçülür ve eski hero değerine o günkü 44 px kırıntı satırı eklenir). Kırıntı
   satırının sağında sayfa araçları yeri (`PAGE_TOOLS_ID`; Giderler döviz kurları), üst bantta tema düğmesinin solunda
   bant araçları yeri (`HEADER_TOOLS_ID`; Giderler canlı durumu). Bant araçları telefonda (< 48em) gezinmenin altında
   kendi satırında (marka ile tema düğmesi ilk satırda kalır), tablette ilk satırda; ≥ 64em’de üç sütunlu ızgaranın sağ
@@ -407,7 +418,9 @@ bunu denetler.
 | P3 Gezinme: < 48em’de yatay kayan şerit yerine tam gezinme çekmecesi (Drawer) | §3, M01/M02 | **Tamam** (2026-10-27) | `ui.spec.ts` çekmece testleri (320–390, dokunmatik, 667×375); `giderler.spec.ts` 320 px |
 | P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | Bekliyor | — |
 | P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
-| P6 Sayfa başlığı/hiyerarşi (`PageHeader`, `ResultSummary`), parametre grupları, durum sözleşmeleri | §3, §5, §9 | Bekliyor | — |
+| P6.1 Sayfa başlığı tek kalıp (`PageHeader`: kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) ve bölüm başlığı sadeleşmesi (hairline, numara yalnız sıralı bölümlerde) | §3, §5.4, M03 | **Tamam** (2026-10-27) | `ui.spec.ts → sayfa başlığı ve bölüm başlığı` (320), `ONCEKI` (1280, kırıntı satırı dahil), kırıntı testi; `gelir.spec.ts` dönem satırı |
+| P6.2 `ResultSummary` (M05): gelir planı ve nakit akışında seçili senaryonun ana sonucu (dönem, birim, kıyas) ilk ekranda; kritik risk gizlenmez; yapışkan özetle tek kaynak | §5.4, §5.15, §9, M05 | Bekliyor | — |
+| P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13), değişiklik özeti, “bu tarayıcıda kaydedildi” ve “varsayılana dön” kapsamı (UX-14/15) | §3, §9, M13/M23 | Bekliyor | — |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,

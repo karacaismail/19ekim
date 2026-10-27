@@ -1,6 +1,7 @@
 import { IconArrowRight, IconCoin, IconDog, IconQuestionMark, IconStar } from '@tabler/icons-react';
 import { AppFrame } from '../components/AppFrame';
-import { Chart, DataTable, Hero, Note, Section } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
+import { Chart, DataTable, Note, Section } from '../components/ui';
 import {
   AXES,
   EXAMPLE,
@@ -102,10 +103,13 @@ function BcgContent() {
   const cow = rows.filter((r) => r.quadrant === 'inek').reduce((sum, r) => sum + r.revenue, 0);
   return (
     <>
-      <Hero
-        eyebrow="Eğitim"
+      <PageHeader
         title="BCG matrisi"
-        lead="Boston Consulting Group’un 1970’te geliştirdiği büyüme–pay matrisi. Bir şirketin ürünlerini iki soruyla dört kutuya ayırır ve her ürün için “yatırım mı, nakit mi, çıkış mı?” kararını kolaylaştırır. Okuma süresi yaklaşık 10 dakika."
+        purpose="Büyüme–pay matrisi bir şirketin ürünlerini iki soruyla dört kutuya ayırır ve her ürün için “yatırım mı, nakit mi, çıkış mı?” kararını kolaylaştırır."
+        meta={[
+          { label: 'Kaynak', value: 'Boston Consulting Group, 1970' },
+          { label: 'Okuma', value: 'Yaklaşık 10 dakika' },
+        ]}
       />
 
       <Section id="ne-ise-yarar" index={1} title="Ne işe yarar?">

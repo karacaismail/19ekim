@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ClipboardEvent as ReactClipboardEvent } from 'react';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { AppFrame } from '../components/AppFrame';
-import { Hero } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
 import { buildEmailHtml, buildEmailText, EMAIL_SUBJECT, wrapEmailHtml } from '../data/email';
 
 const HTML = buildEmailHtml();
@@ -149,7 +149,7 @@ function EmailContent() {
 
   return (
     <>
-      <Hero eyebrow="E-posta" title="Görüşme özeti" lead="Konuyu ve iletiyi ayrı ayrı kopyalayıp Apple Mail’de yeni iletiye yapıştırın." />
+      <PageHeader title="Görüşme özeti" purpose="Konuyu ve iletiyi ayrı ayrı kopyalayıp Apple Mail’de yeni iletiye yapıştırın." />
       <div className="email">
         <div className="email-compose">
           <section className="email-step" aria-labelledby="email-konu">

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
+import { PageHeader } from '../components/PageHeader';
 import { Chart, DataTable, FactsRow, Note, Section, type Column } from '../components/ui';
 import {
   OPEX_ENDPOINT,
@@ -1845,6 +1846,9 @@ function Body() {
   );
   return (
     <>
+      {/* Sayfa başlığı kırıntıda: 19 Ekim › Finans › OpEx › Operasyonel Giderler; ilk ekran yoğunluğu için amaç satırı yok
+          (kullanıcı kararı 2026-10-21). Araç yeri (kurlar) bu satırda. */}
+      <PageHeader title="Operasyonel Giderler" />
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}
       </p>
@@ -1909,8 +1913,7 @@ function Body() {
 
 export function OpexPage({ pathname }: { pathname: string }) {
   return (
-    // Sayfa başlığı kırıntıda: 19 Ekim › Finans › OpEx › Operasyonel Giderler (ayrı başlık alanı yok).
-    <AppFrame pathname={pathname} titleInCrumbs>
+    <AppFrame pathname={pathname}>
       <Body />
     </AppFrame>
   );

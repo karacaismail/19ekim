@@ -4,7 +4,8 @@ import { NumberInput } from '@mantine/core';
 import { DateInput, DatesProvider } from '@mantine/dates';
 import { AppFrame } from '../components/AppFrame';
 import { useModel, useParams } from '../components/ModelContext';
-import { DataTable, Hero, Note, Section } from '../components/ui';
+import { DataTable, Note, Section } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type ParamDef, type Params } from '../data/params';
 import { longDate } from '../lib/dates';
 import { int, num, pct, times, tl, tlExact } from '../lib/format';
@@ -144,24 +145,27 @@ function Derived() {
 function ParamsContent() {
   return (
     <DatesProvider settings={{ locale: 'tr', firstDayOfWeek: 1 }}>
-      <Hero
-        eyebrow="Ortak"
+      <PageHeader
         title="Parametreler"
-        lead="Karar verilen tarih, kişi sayısı, ücret, prim, kota, bütçe ve hedefler. Burada değiştirilen değer tüm sayfalara anında yansır ve bu tarayıcıda saklanır."
+        purpose="Karar verilen tarih, kişi sayısı, ücret, prim, kota, bütçe ve hedefler; burada değiştirilen değer tüm sayfalara anında yansır."
+        meta={[
+          { label: 'Kayıt', value: 'Yalnız bu tarayıcı (yerel depolama)' },
+          { label: 'Yayın', value: 'Herkese varsayılan değerler' },
+        ]}
       >
         <div className="param-toolbar">
           <SaveStatus />
           <ResetButton />
         </div>
-      </Hero>
+      </PageHeader>
       <Note title="Kapsam">
         <p>
           Değerler yalnız bu tarayıcıda saklanır (yerel depolama). Yayındaki site başkaları için varsayılanları gösterir; varsayılanı
           kalıcı değiştirmek için kaynaktaki parametre dosyası güncellenir.
         </p>
       </Note>
-      {PARAM_GROUPS.map((group, i) => (
-        <Section key={group.id} id={group.id} index={i + 1} title={group.title} desc={group.desc}>
+      {PARAM_GROUPS.map((group) => (
+        <Section key={group.id} id={group.id} title={group.title} desc={group.desc}>
           <div className="param-grid">
             {group.fields.map((def) => (
               <Field key={def.key} def={def} />
@@ -169,7 +173,7 @@ function ParamsContent() {
           </div>
         </Section>
       ))}
-      <Section id="turetilen" index={PARAM_GROUPS.length + 1} title="Türetilen değerler">
+      <Section id="turetilen" title="Türetilen değerler">
         <Derived />
       </Section>
     </DatesProvider>

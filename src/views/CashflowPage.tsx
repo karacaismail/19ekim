@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
+import { PageHeader } from '../components/PageHeader';
 import { Araclar, ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
 import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { buildCashflow, type CashLine, type Cashflow } from '../data/cashflow';
@@ -85,9 +86,16 @@ function Icerik() {
 
   return (
     <>
+      <PageHeader
+        title="Nakit akış tablosu"
+        purpose={`Seçili senaryoda ${cf.aylar.length} ayın nakit girişleri, çıkışları, net akışı ve dönem sonu nakdi; nakit açığı tavanı ek nakit ihtiyacını gösterir.`}
+        meta={[
+          { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
+          { label: 'Kaynak', value: 'Girişler gelir planının seçili senaryosundan, çıkışlar Google Sheets gider planından' },
+        ]}
+      />
       <Section
         id="ozet"
-        index={1}
         title="Özet"
         desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan, çıkışlar Sheets’teki gider planından; satış primi ve satıcı kazanım reklamı plan kalemleridir.`}
         tools={cubuk()}
@@ -133,7 +141,6 @@ function Icerik() {
 
       <Section
         id="tablo"
-        index={2}
         title="Aylık nakit akışı"
         desc="Basit görünüm dört satır; ayrıntılı görünüm giriş ve çıkış kalemlerini, dönem başı nakdi ekler. Grafik seçili senaryoyu ya da üç senaryonun dönem sonu nakdini üst üste gösterir."
         tools={cubuk()}
@@ -186,7 +193,7 @@ function Icerik() {
         />
       </Section>
 
-      <Section id="varsayimlar" index={3} title="Varsayımlar ve kaynaklar" desc="Her satırın nereden geldiği; parametreler Parametreler sayfasında değiştirilir, tablo anında yeniden hesaplanır.">
+      <Section id="varsayimlar" title="Varsayımlar ve kaynaklar" desc="Her satırın nereden geldiği; parametreler Parametreler sayfasında değiştirilir, tablo anında yeniden hesaplanır.">
         <ul className="bullets">
           {m.cashflow.varsayimlar.map((v) => (
             <li key={v}>{v}</li>
@@ -206,7 +213,7 @@ function Icerik() {
 
 export function CashflowPage({ pathname }: { pathname: string }) {
   return (
-    <AppFrame pathname={pathname} titleInCrumbs>
+    <AppFrame pathname={pathname}>
       <Icerik />
     </AppFrame>
   );

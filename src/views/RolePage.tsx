@@ -1,10 +1,9 @@
-import { Title } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
+import { PageHeader } from '../components/PageHeader';
 import {
   Avatar,
   Chart,
   DataTable,
-  FactsRow,
   formatDate,
   Target,
   KpiGrid,
@@ -57,31 +56,25 @@ const shortDate = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'nume
 const shortRange = (row: { from: string; to: string }) => `${shortDate(row.from)} – ${shortDate(row.to)}`;
 
 /**
- * Rol başlığı (kullanıcı kararı 2026-10-20: yükseklik ≥ %75 az): üstte solda simge, ad ve durum, sağda görev; altta
- * tam genişlikte tek akışta bilgiler. Ağaç adı kırıntıda yazdığı için tekrar edilmez.
+ * Rol başlığı: tek PageHeader (ux.md M03; kullanıcı kararı 2026-10-20 — yükseklik ≥ %75 az — korunur). Kırıntı
+ * öğesinde simge, ad ve durum; amaç satırında görev (veri: `role.mission`); dönem satırında kişi, başlangıç, bağlı,
+ * ücret ve aranan nitelikler. Ağacın adı sunum sırası etiketlerinde ve organizasyon şemasında kalır.
  */
 function RoleHero({ role }: { role: Role }) {
   return (
-    <header className="hero hero-role">
-      <div className="hero-role-head">
-        <Avatar role={role.slug} />
-        <Title order={1} className="display">
-          {role.title}
-        </Title>
-        <StatusChip status={role.startStatus} />
-      </div>
-      <p className="hero-role-mission">{role.mission}</p>
-      <FactsRow
-          compact
-          items={[
-            { label: 'Kişi', value: role.count },
-            { label: 'Başlangıç', value: role.start },
-            { label: 'Bağlı', value: role.reportsTo },
-            { label: 'Ücret', value: role.pay },
-            { label: 'Aranan', value: role.seeks.join(' · ') },
-          ]}
-        />
-    </header>
+    <PageHeader
+      title={role.title}
+      icon={<Avatar role={role.slug} />}
+      badge={<StatusChip status={role.startStatus} />}
+      purpose={role.mission}
+      meta={[
+        { label: 'Kişi', value: role.count },
+        { label: 'Başlangıç', value: role.start },
+        { label: 'Bağlı', value: role.reportsTo },
+        { label: 'Ücret', value: role.pay },
+        { label: 'Aranan', value: role.seeks.join(' · ') },
+      ]}
+    />
   );
 }
 

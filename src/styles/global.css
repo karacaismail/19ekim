@@ -651,110 +651,60 @@ html:not([data-js]) .giris-form {
   display: none;
 }
 
-/* ---------- Sayfa başlığı (kullanıcı kararı 2026-10-20: yükseklik yarıya) ---------- */
-.hero {
-  padding-block: var(--space-1) var(--space-2);
+/* ---------- Sayfa başlığı (ux.md M03 PageHeader; kullanıcı kararı 2026-10-27) ----------
+ * Tek kalıp: kırıntı satırının son öğesi h1’dir (.crumbs-title; stil kırıntı bölümünde), altında bir cümlelik amaç ve
+ * dönem/kaynak satırı (.page-intro). Eski hero (üst etiket, büyük başlık) yok; yükseklik sıkışık (kullanıcı kararı
+ * 2026-10-20: yarıya).
+ */
+.page-intro {
+  margin-top: 0;
 }
 
-.hero[data-aside] {
-  display: grid;
-  gap: var(--space-3) var(--gap-normal);
-  align-items: center;
-}
-
-@media (min-width: 64em) {
-  .hero[data-aside] {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
-  }
-
-  .hero[data-aside] > :not(.hero-text, .hero-aside) {
-    grid-column: 1 / -1;
-  }
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--accent-strong);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-}
-
-.display {
-  margin: var(--space-1) 0;
-  font-size: var(--text-title);
-  line-height: var(--leading-tight);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tight);
-}
-
-/* Geniş ekranda üst etiket başlıkla aynı satırda (dikey yer kazanır); açıklama tek satıra sığar. */
-@media (min-width: 48em) {
-  .hero-text {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: baseline;
-    column-gap: var(--space-3);
-  }
-
-  .hero-text > .lead {
-    grid-column: 1 / -1;
-  }
-}
-
-.lead {
+.page-purpose {
   margin: 0;
   max-width: 110ch;
   color: var(--text-secondary);
   font-size: var(--text-md);
-  line-height: var(--leading-body);
+  line-height: var(--leading-snug);
 }
 
-/* Rol başlığı: üstte ad ve görev yan yana (geniş ekranda), altta tam genişlikte bilgiler. */
-.hero-role {
-  display: grid;
-  grid-template-areas: 'head' 'mission' 'facts';
-  gap: var(--space-2) var(--space-8);
+.page-intro > .page-meta {
+  margin-top: var(--space-1);
+  line-height: var(--leading-snug);
 }
 
-@media (min-width: 64em) {
-  .hero-role {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 32rem);
-    grid-template-areas: 'head mission' 'facts facts';
-    align-items: center;
-    row-gap: var(--space-1);
+/* Geniş ekranda amaç ve dönem satırı sığıyorsa yan yana (başlık yüksekliği sıkışık); sığmazsa alt alta. */
+@media (min-width: 48em) {
+  .page-intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-8);
+  }
+
+  .page-intro > .page-purpose {
+    flex: 1 1 32rem;
+  }
+
+  /* Dönem satırı doğal genişliğinde sığıyorsa amacın yanında; sığmıyorsa (rol bilgileri) kendi satırında. */
+  .page-intro > .page-meta {
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin-top: 0;
+  }
+
+  .page-intro > :not(.page-purpose, .page-meta) {
+    flex: 1 0 100%;
   }
 }
 
-.hero-role .facts-row {
-  grid-area: facts;
-  margin-top: 0;
-}
-
-.hero-role-head {
-  grid-area: head;
-  display: flex;
+/* Rol sayfası: simge, ad ve durum aynı kırıntı öğesinde. */
+.crumbs-title-row {
+  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
-.hero-role-head > :not(.display) {
-  flex: none;
-}
-
-.hero-role .display {
-  min-width: 0;
-  margin: 0;
-  font-size: var(--text-2xl);
-}
-
-.hero-role-mission {
-  grid-area: mission;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
+  gap: var(--space-1) var(--space-3);
+  vertical-align: middle;
 }
 
 .facts-row {
@@ -804,7 +754,10 @@ html:not([data-js]) .giris-form {
   font-size: var(--text-sm);
 }
 
-/* ---------- Bölümler ---------- */
+/* ---------- Bölümler ----------
+ * Bölüm başlığı (ux.md §3/§5.4, P6.1): tek ana başlık + açıklama. Üst çizgi hairline (kalın mürekkep çizgisi yok),
+ * numara ikincil renkte (turuncu değil) ve yalnız sırası anlamlı bölümlerde (`data-index`).
+ */
 .section {
   margin-top: var(--section-gap);
 }
@@ -814,13 +767,13 @@ html:not([data-js]) .giris-form {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   padding-top: var(--space-4);
-  border-top: 2px solid var(--text-primary);
+  border-top: var(--hairline) solid var(--rule);
 }
 
 .section-index {
-  color: var(--accent-strong);
+  color: var(--text-secondary);
   font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--tracking-label);
 }
@@ -840,26 +793,34 @@ html:not([data-js]) .giris-form {
 }
 
 @media (min-width: 48em) {
-  .section-head {
+  .section-head[data-index] {
     grid-template-columns: 4rem minmax(0, 1fr);
     align-items: baseline;
   }
 
-  .section-head .section-desc {
+  .section-head[data-index] .section-desc {
     grid-column: 2;
   }
 }
 
-/* Geniş ekranda başlık ve açıklama tek satırda (kullanıcı kararı 2026-10-21): numara · başlık · açıklama. */
+/* Geniş ekranda başlık ve açıklama tek satırda (kullanıcı kararı 2026-10-21): [numara ·] başlık · açıklama. */
 @media (min-width: 64em) {
   .section-head {
-    grid-template-columns: 4rem fit-content(60%) minmax(0, 1fr);
+    grid-template-columns: fit-content(60%) minmax(0, 1fr);
     column-gap: var(--space-5);
+    align-items: baseline;
+  }
+
+  .section-head[data-index] {
+    grid-template-columns: 4rem fit-content(60%) minmax(0, 1fr);
   }
 
   .section-head .section-desc {
-    grid-column: 3;
     margin: 0;
+  }
+
+  .section-head[data-index] .section-desc {
+    grid-column: 3;
   }
 }
 
@@ -1741,25 +1702,25 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   font-size: var(--text-sm);
 }
 
-/* Başlık içindeki sayılar ve araçlar sıkışık (başlık yüksekliği yarıya). */
-.hero .stats {
+/* Başlık altındaki sayılar ve araçlar sıkışık (başlık yüksekliği yarıya). */
+.page-intro .stats {
   gap: var(--space-2) var(--gap-normal);
   margin-top: var(--space-2);
 }
 
-.hero .stat {
+.page-intro .stat {
   padding-top: 0;
 }
 
-.hero .stat-value {
+.page-intro .stat-value {
   font-size: var(--text-2xl);
 }
 
-.hero .stat-note {
+.page-intro .stat-note {
   margin-top: 0;
 }
 
-.hero .param-toolbar {
+.page-intro .param-toolbar {
   margin-top: var(--space-2);
 }
 

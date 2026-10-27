@@ -1,5 +1,6 @@
 import { AppFrame } from '../components/AppFrame';
-import { Chart, Hero } from '../components/ui';
+import { Chart } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
 import type { OrgNode } from '../data/tree';
 import { useModel } from '../components/ModelContext';
 import type { ChartTreeNode } from '../lib/chartSpec';
@@ -20,7 +21,7 @@ function OrgChart() {
   const ORG = useModel().org;
   return (
     <>
-      <Hero eyebrow="iStoc · istoc.com" title="Organizasyon şeması" />
+      <PageHeader title="Organizasyon şeması" purpose="istoc.com satış ve pazarlama organizasyonu: kim kime bağlı; her kutu bir rol sayfasına açılır." />
       <Chart
         id="organizasyon"
         title="İsmail Karaca → kurmay → dört ağaç"

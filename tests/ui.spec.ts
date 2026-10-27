@@ -402,7 +402,13 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(tetik).toBeFocused();
   });
 
-  /** Önceki başlık yükseklikleri (canlı site, 2026-10-20, 1280 px): kullanıcı kararı rol ≥ %75, diğerleri ≥ %50 az. */
+  /**
+   * Önceki başlık yükseklikleri (canlı site, 2026-10-20, 1280 px; yalnız hero kutusu, üstündeki kırıntı satırı hariç):
+   * kullanıcı kararı rol ≥ %75, diğerleri ≥ %50 az. Tek PageHeader (kullanıcı kararı 2026-10-27, ux.md M03, P6.1) başlığı
+   * kırıntı satırına taşıdı; ölçülen kutu artık kırıntı satırı + amaç/dönem satırıdır. Aynı ölçekte kıyas için eski
+   * değere o günkü kırıntı satırı eklenir (`.crumbs a` 44 px dokunma yüksekliği, commit 7b408ae).
+   */
+  const KIRINTI_SATIRI = 44;
   const ONCEKI: Record<string, number> = {
     '': 175, 'arsiv/': 203, 'bcg/': 259, 'buyume-modeli/': 293, 'eylem-plani/': 231, 'giderler/': 233, 'hedefler/': 366,
     'istihdam/': 203, 'karar-bekleyenler/': 203, 'karar-yetkisi/': 265, 'notlar/': 203, 'parametreler/': 299,
@@ -411,15 +417,19 @@ test.describe('başlık ve İstihdam menüsü', () => {
   };
   for (const [path, once] of Object.entries(ONCEKI)) {
     const rol = path.startsWith('roller/');
-    const sinir = Math.floor(once * (rol ? 0.25 : 0.5));
-    test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
+    const sinir = Math.floor((once + KIRINTI_SATIRI) * (rol ? 0.25 : 0.5));
+    test(`başlık sıkışık (1280): /${path} ≤ ${sinir} px (önce ${once} + kırıntı ${KIRINTI_SATIRI}, ${rol ? '−%75' : '−%50'})`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
       await icerik(page);
-      // Giderler’de ayrı başlık alanı yok: başlık kırıntı satırında (kullanıcı kararı 2026-10-21).
-      const kutu = (await page.locator('.hero').count()) ? '.hero' : '.crumbs-row';
-      const h = await page.locator(kutu).first().evaluate((el) => el.getBoundingClientRect().height);
-      expect(h).toBeLessThanOrEqual(sinir);
+      // Tek PageHeader (kullanıcı kararı 2026-10-27, ux.md M03): kırıntı satırı (h1) ve altındaki amaç/dönem satırı
+      // birlikte ölçülür — eski hero ölçüsünden daha geniş kapsam, aynı sınır. Giderler’de yalnız kırıntı satırı.
+      const olcu = await page.locator('[data-page-header]').evaluateAll((els) => {
+        const kutular = els.map((el) => el.getBoundingClientRect());
+        return { n: kutular.length, h: Math.max(...kutular.map((b) => b.bottom)) - Math.min(...kutular.map((b) => b.top)) };
+      });
+      expect(olcu.n).toBeGreaterThanOrEqual(1);
+      expect(olcu.h).toBeLessThanOrEqual(sinir);
     });
   }
 
@@ -718,6 +728,116 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const son = await page.locator('.crumbs li').last().boundingBox();
     expect(son!.y).toBeLessThan(ilk!.y + ilk!.height);
     await expect(page.locator('.hero')).toHaveCount(0);
+  });
+});
+
+/*
+ * ux.md P6.1 (kullanıcı kararı 2026-10-27, §3 ve §5.4; M03 PageHeader): sayfa başlığı tek kalıp. Her sayfada tek h1,
+ * kırıntı satırının son öğesidir (Giderler kararı 2026-10-21 sayfa geneline yayıldı); altında bir cümlelik amaç ve
+ * dönem/kaynak satırı. Eski hero (turuncu üst etiket + büyük başlık + uzun açıklama) ve kırıntı-başlık ikiliği yok.
+ * Bölüm başlığı: tek ana başlık + açıklama; kalın üst çizgi ve turuncu numara yok; numara yalnız sıralama anlamlıysa.
+ */
+test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 PageHeader; P6.1)', () => {
+  const ORNEK = ['', 'gelir-plani/', 'nakit-akisi/', 'giderler/', 'parametreler/', 'roller/saha-uzmani/', 'buyume-modeli/', 'bcg/', 'notlar/', 'partnership/', 'applet/'];
+  for (const path of ORNEK) {
+    test(`/${path}: tek h1 kırıntı satırında; hero ve üst etiket yok; amaç bir cümle; sıra kırıntı → amaç → içerik`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 480 });
+      await page.goto(path);
+      await icerik(page);
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('.crumbs-row h1.crumbs-title')).toHaveCount(1);
+      await expect(page.locator('.hero, .eyebrow, .display, .lead')).toHaveCount(0);
+      // Kırıntılı sayfada h1 son kırıntıdır (aria-current="page"); kırıntısız sayfada (ana sayfa, BCG, applet) tek başına.
+      const kirintili = !['', 'bcg/', 'applet/'].includes(path);
+      await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveCount(kirintili ? 1 : 0);
+      await expect(page.locator('.crumbs')).toHaveCount(kirintili ? 1 : 0);
+      // Amaç: tek paragraf, en çok bir cümle (rol görevi veridir — src/data değişmez — muaf).
+      const amac = page.locator('.page-purpose');
+      await expect(page.locator('[data-page-header]')).toHaveCount((await amac.count()) || (await page.locator('.page-intro').count()) ? 2 : 1);
+      expect(await amac.count()).toBeLessThanOrEqual(1);
+      if ((await amac.count()) && !path.startsWith('roller/')) {
+        const text = ((await amac.textContent()) ?? '').trim();
+        expect(text.length, 'amaç boş değil').toBeGreaterThan(10);
+        // Cümle sonu: nokta/ünlem/soru işaretinden sonra büyük harfle yeni cümle ya da metin sonu (“14. günde” sıra sayısı değil).
+        expect((text.match(/[.!?](?=\s+[A-ZÇĞİÖŞÜ“]|\s*$)/g) ?? []).length, `bir cümle: "${text}"`).toBeLessThanOrEqual(1);
+      }
+      // Sıra: kırıntı satırı → amaç/dönem satırı → ilk içerik; başlık kutusu 320 px’te taşmaz.
+      const sira = await page.evaluate(() => {
+        const kutular = [...document.querySelectorAll<HTMLElement>('[data-page-header]')].map((el) => el.getBoundingClientRect());
+        const kirinti = document.querySelector('.crumbs-row')!.getBoundingClientRect();
+        const intro = document.querySelector('.page-intro')?.getBoundingClientRect() ?? null;
+        const son = [...document.querySelectorAll<HTMLElement>('[data-page-header]')].pop()!;
+        let sonraki = son.nextElementSibling;
+        while (sonraki && !(sonraki.getClientRects().length && sonraki.getBoundingClientRect().height > 0)) sonraki = sonraki.nextElementSibling;
+        return {
+          kutu: kutular.length,
+          introAltta: intro ? intro.top >= kirinti.bottom - 1 : true,
+          icerikAltta: sonraki ? sonraki.getBoundingClientRect().top >= (intro ?? kirinti).bottom - 1 : true,
+          tasma: Math.max(...kutular.map((b) => b.right)) <= window.innerWidth,
+        };
+      });
+      expect(sira.kutu).toBeGreaterThanOrEqual(1);
+      expect(sira.introAltta).toBe(true);
+      expect(sira.icerikAltta).toBe(true);
+      expect(sira.tasma).toBe(true);
+    });
+  }
+
+  test('dönem/kaynak satırı: gelir planı (dönem, ilk satış, paket) ve nakit akışı (dönem, kaynak) etiketli; h1 kırıntıdan büyük', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Gelir planı');
+    const meta = page.locator('.page-meta');
+    await expect(meta.locator('dt')).toHaveText(['Dönem', 'İlk satış', 'Paket']);
+    await expect(meta).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(meta).toContainText('6 Kasım 2026');
+    const [baslik, kirinti] = [
+      await page.locator('h1').evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+      await page.locator('.crumbs a').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+    ];
+    expect(baslik).toBeGreaterThan(kirinti * 1.4);
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Nakit akış tablosu');
+    await expect(page.locator('.page-meta dt')).toHaveText(['Dönem', 'Kaynak']);
+    await expect(page.locator('.page-meta')).toContainText('Ekim 2026 – Aralık 2027');
+    // Rol sayfası: simge, ad ve durum aynı kırıntı öğesinde; görev amaç satırında; bilgiler dönem satırında.
+    await page.goto('roller/saha-uzmani/');
+    await icerik(page);
+    const son = page.locator('.crumbs li[aria-current="page"]');
+    await expect(son.locator('.avatar')).toHaveCount(1);
+    await expect(son.locator('.chip')).toHaveCount(1);
+    await expect(page.locator('.page-purpose')).toContainText('İstoç’ta');
+    await expect(page.locator('.page-meta dt')).toHaveText(['Kişi', 'Başlangıç', 'Bağlı', 'Ücret', 'Aranan']);
+  });
+
+  test('bölüm başlığı: hairline üst çizgi, numara ikincil renkte ve yalnız sıralı sayfalarda (parametreler ve nakit akışında yok)', async ({ page }) => {
+    await page.goto('roller/dijital-pazarlama/');
+    await icerik(page);
+    const heads = page.locator('.section-head');
+    expect(await heads.count()).toBeGreaterThanOrEqual(5);
+    const st = await heads.first().evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const idx = el.querySelector<HTMLElement>('.section-index');
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--text-secondary)';
+      el.appendChild(probe);
+      const ikincil = getComputedStyle(probe).color;
+      probe.remove();
+      return { cizgi: parseFloat(cs.borderTopWidth), numara: idx ? getComputedStyle(idx).color : null, ikincil, boyut: idx ? parseFloat(getComputedStyle(idx).fontSize) : 0 };
+    });
+    expect(st.cizgi, 'kalın üst çizgi yok (en çok hairline)').toBeLessThanOrEqual(1);
+    expect(st.numara, 'numara turuncu değil, ikincil metin rengi').toBe(st.ikincil);
+    expect(st.boyut).toBeGreaterThanOrEqual(14);
+    const numaralar = await page.locator('.section-index').allTextContents();
+    expect(numaralar).toEqual(numaralar.map((_, i) => String(i + 1).padStart(2, '0')));
+    for (const path of ['parametreler/', 'nakit-akisi/']) {
+      await page.goto(path);
+      await icerik(page);
+      expect(await page.locator('.section-head').count()).toBeGreaterThan(0);
+      await expect(page.locator('.section-index')).toHaveCount(0);
+      await expect(page.locator('.section-title').first()).toBeVisible();
+    }
   });
 });
 

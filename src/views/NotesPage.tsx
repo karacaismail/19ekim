@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Checkbox, TextInput } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
-import { Hero } from '../components/ui';
+import { PageHeader } from '../components/PageHeader';
 import { clearNotes, DEFAULT_NOTES, INBOX, loadNotes, newId, saveNotes, today, type Note, type NotesState } from '../data/notes';
 
 const ALL = 'tumu';
@@ -182,7 +182,7 @@ function NotesContent() {
 
   return (
     <>
-      <Hero eyebrow="Ortak" title="Notlar" lead="Basit not ve görev listesi. Notlar bu tarayıcıda saklanır; ekle, işaretle, düzenle, sil." />
+      <PageHeader title="Notlar" purpose="Basit not ve görev listesi: ekle, işaretle, düzenle, sil." meta={[{ label: 'Kayıt', value: 'Yalnız bu tarayıcı' }]} />
       <div className="notes">
         <nav className="note-lists" aria-label="Listeler">
           <ul>
