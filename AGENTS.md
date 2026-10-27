@@ -174,37 +174,47 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     `tests/data.spec.ts` (girişler senaryo serileriyle aynı, Sheets kategori toplamları = aylık toplamlar, nakit zinciri,
     senaryo yalnız giriş ve primi değiştirir, yatırım/başlangıç nakdi).
   - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
-    sırasında da). Hedefler sayfası 90 günde 100 aktif satıcıyı hedef koyar; bu sayfa aynı hedefe kadro kapasitesinden
-    bakar: 1 saha personeli (ikincisi “sistem oturunca”, `secondSahaDate`), 1 CRM masa başı, organizatör (Aralık’tan),
-    dijital pazarlama (satıcı kazanım reklamı + organik içerik) ve bağımsız temsilciler (ayda 2 yeni, en çok 10, temsilci
-    başına 1 ilk ödeme) ayda kaç yeni aktif satıcı getirir (`sahaActivesMonthly`, `crmActivesMonthly`,
-    `organizatorActivesMonthly`; her kişinin ilk ayı %50, ikinci ayı %75). Üç senaryo (kullanıcı kararı 2026-10-27, adları
-    sabit): **kötümser** (`pessimisticFactor`, `pessimisticRetention`), **medyan** (tam kapasite, plan elde tutma),
-    **iyimser** (%130, +10 puan). Senaryo her bölümün, her tablonun ve her grafiğin başındaki **segmentli anahtarla**
-    seçilir (`Choice`: tek iz `.secim-iz`, seçili düğmenin altında ölçülerek kayan topuz `.secim-top` — hareket
-    tokenlarıyla —, rol tonlu; sunucu çiziminde topuz ölçülmeden seçili düğme aynı görünümü alır; `title` ipucu yok —
-    dokunmada hover yoktur —, seçimin açıklaması görünür not `.secim-not`; iz, düğme ve çubuk açık alanlı: kullanıcı
-    kararı 2026-10-27 “clear space önemli”) ve anahtar **araç
-    çubuğunda** durur (`Araclar`, `.araclar`: yükseltilmiş zemin, üst köşeler yuvarlak, altta seçili senaryonun tonunda
-    çizgi `data-edge="bottom"` — kenar sistemi: alt köşeler düz; `scripts/check-ui-gates.mjs` `EDGE_CORNERS` bu türü tanır —, altındaki grafik kutusu/tablo/kartlar bitişik:
-    kullanıcı kararı 2026-10-27 “tek zemin, kayarak geçen, wrapper içinde, altındaki bölüme bağlı”). `Section`, `Chart`
-    ve `DataTable` `tools` düğümünü olduğu gibi çizer; sayfa `Araclar` ile sarar. Seçim `useScenario`
-    (`src/lib/scenario.ts`: localStorage `istoc-plan-senaryo`, varsayılan medyan, nakit akış tablosu ve istihdam
-    takvimiyle ortak, `storage` olayıyla sekmeler arası). Hero istatistikleri, hedef kartları (diğer iki senaryonun
-    tarihi kartta), zaman çizelgesi, tablolar ve notlar seçili senaryoyu anlatır. Grafik görünümü (`ModSecimi`: seçili
-    senaryo / üçü üst üste): kaynak × ay ↔ `seri-cizgi`, `gelir-ay` ↔ `grup-ay` (tablo da üç senaryonun sütunlarına
-    döner), `huni` ↔ `hedef-adim`; “Üç senaryo üst üste” bölümü her zaman üst üste (`kumulatif-tl` + hedef çizgisi,
-    `seri-cizgi` ödemeye devam eden; seçili olmayanlar kesikli, tabloda seçili satır `data-tone="secili"`). Hedef
-    zinciri (ilk 10 → 50 → 100 aktif → 500 üye → 1 M₺ → ciro hedefi → 200 aktif): tarih (ay içinde doğrusal),
-    başlangıçtan ve önceki hedeften süre (`sure`), o ayın geliri, kümülatif. Gelir = yıllık peşin ödeyenler
-    (`annualShare`) × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret; aktif satıcı = ilk ödeme (hedefler
-    sayfasıyla aynı tanım), “ödemeye devam eden” ayrı. Veri `src/data/revenue.ts` → `makeRevenue(params, program)`
-    (`HORIZON` 24 ay — kullanıcı kararı 2026-10-27: 2026, 2027, 2028 görünsün; `simulate(params, program, months,
-    inputs)` serbest girdili simülasyon: kapasite çarpanı, elde tutma, yıllık payı, € ücret, ikinci saha ayı,
-    `extraSaha`, `dijitalBudget`, `dijitalScale`, `fxGrowth`, `sahaGrowthEvery`, `exclude` kaynak ayıklama;
-    `buildSources(p, prog, months, inputs)`, `adSchedule`, `priceSeries`, `growthHires`, `adCapacity`, `ltvOf`;
-    `funnels`, `monthlyOnly`, `first3` senaryo başına; `inputsFor`, `sourcesFor(sc)`). Kaynaklar: saha1, saha2,
-    (sahaEk), (sahaBuyume), crm, org, dijital (reklam + organik tek kaynak), rep.
+    sırasında da). **UX-first yeniden kurulum (kullanıcı kararı 2026-10-27: “seçenekleri en başta seçeyim, kalan tüm veri
+    tek seferde değişsin; hazır seçenek kümeleri; seçili senaryonun özeti kaydırırken üstte sabit; enterprise olgunluk”):**
+    sayfanın başında **senaryo kurucu** (`src/components/SenaryoKurucu.tsx`: hazır senaryolar — kötümser · medyan ·
+    iyimser ve dört örnek bileşim saha ağırlıklı / dijital ağırlıklı / tutumlu / yatırımlı büyüme (`presetsOf`,
+    `src/lib/scenarioOptions.ts`) — tek dokunuşla tüm seçenekleri kurar; “ayrıntılı seçenekler” ızgarası (geniş ekranda
+    açık, dar ekranda kapalı gelir; `aria-expanded`): kapasite çarpanı, elde tutma, yıllık peşin payı, aylık ücret, ikinci
+    saha ayı, ek saha, saha büyümesi, satıcı kazanım reklamı, reklam ölçeklenmesi, kur artışı, gider kaynağı, ek sabit
+    gider, satış primi; bir seçenek değişince senaryo “Özel: temel + n değişiklik” olur; “Seçenekleri sıfırla”;
+    “Bağlantıyı kopyala”). **Tek durum** `useScenarioOptions` (temel senaryo `istoc-plan-senaryo` nakit akışı ve istihdam
+    takvimiyle ortak; seçenekler `istoc-plan-senaryo-secenekler`; adres çubuğu `?senaryo=…&kapasite=…&eksaha=…`
+    paylaşılabilir bağlantı, açılışta adres > saklanan > varsayılan; `history.replaceState`). Kurucunun altında
+    **yapışkan özet** (`YapiskanOzet`, `.yapiskan`: `position: sticky`, geniş ekranda `--bant-h` altında; `role="status"`
+    `aria-live`; senaryo adı rol tonunda + 100 aktif, ciro hedefi, ufuk sonu gelir, başabaş, geri ödeme, fon ihtiyacı
+    çipleri; dar ekranda yatay kayar). Bütün bölümler, tablolar ve grafikler bu tek durumdan `computeBreakeven`
+    (`inputsOf`) ile hesaplanır; bölüm/tablo/grafik çubuklarında seçici değil senaryo etiketi (`.araclar-etiket`) ve
+    görünüm anahtarları (`ModSecimi`, Eksen) vardır. **Takvim** (kullanıcı kararı 2026-10-27): tüm senaryolar
+    `simStartDate` (19 Ekim 2026) ile başlar, `firstSaleDate` (6 Kasım 2026) öncesi satışa bağlı gelir 0 ₺ (`saleFactor`:
+    o ay kalan gün oranı), ufuk `simEndDate` ayı sonu (Aralık 2027): `horizonOf` = 15 ay, nakit akış tablosuyla aynı
+    ızgara; hedef günleri 19 Ekim’den; “Ufuk dışında” yerine “2027 sonuna kadar değil”. CSV dışa aktarma
+    (`src/lib/csv.ts`, noktalı virgül, BOM): aylık tablo ve kadro tablosu. Hedefler sayfası 90 günde 100 aktif satıcıyı
+    hedef koyar; bu sayfa aynı hedefe kadro kapasitesinden bakar: 1 saha personeli (ikincisi “sistem oturunca”,
+    `secondSahaDate`), 1 CRM masa başı, organizatör (Aralık’tan), dijital pazarlama (satıcı kazanım reklamı + organik
+    içerik) ve bağımsız temsilciler (ayda `repPerMonth` yeni, en çok `repCap`) ayda kaç yeni aktif satıcı getirir
+    (`sahaActivesMonthly`, `crmActivesMonthly`, `organizatorActivesMonthly`; her kişinin ilk ayı %50, ikinci ayı %75,
+    kendi başlangıç ayından). Üç temel senaryo (adları sabit): **kötümser** (`pessimisticFactor`,
+    `pessimisticRetention`, büyüme yok), **medyan** (tam kapasite, plan elde tutma, her 6 ayda +1 saha), **iyimser**
+    (%130, +10 puan, her 4 ayda +1 saha). Segmentli anahtar `Choice` (tek iz, ölçülerek kayan topuz, rol tonlu, `title`
+    yok, görünür not) ve araç çubuğu `Araclar` (`data-edge="bottom"`, alt köşeler düz, `check-ui-gates` tanır).
+    Grafik görünümü (`ModSecimi`: seçili / hazır senaryolar üst üste — kötümser, medyan, iyimser kendi seçenekleriyle,
+    özel senaryo dördüncü eğri): kaynak × ay ↔ `seri-cizgi`, `gelir-ay` ↔ `grup-ay`, `huni` ↔ `hedef-adim`; “Hazır
+    senaryolar üst üste” bölümü (`kumulatif-tl` + hedef çizgisi, `seri-cizgi` ödemeye devam eden; seçili olmayanlar
+    kesikli, tabloda seçili satır `data-tone="secili"`). Hedef zinciri (ilk 10 → 50 → 100 aktif → 500 üye → 1 M₺ → ciro
+    hedefi → 200 aktif): tarih (ay içinde doğrusal), başlangıçtan ve önceki hedeften süre (`sure`), o ayın geliri,
+    kümülatif, hazır senaryoların tarihi kartta. Gelir = yıllık peşin ödeyenler (`annualShare`) × yıllık ücret + aylık
+    ödeyen satıcı-ay × aylık ücret (o ayın ₺ fiyatıyla); aktif satıcı = ilk ödeme (hedefler sayfasıyla aynı tanım),
+    “ödemeye devam eden” ayrı. Veri `src/data/revenue.ts` → `makeRevenue(params, program)` (`revMonths(params)`;
+    `simulate(params, program, months, inputs)` serbest girdili simülasyon: kapasite çarpanı, elde tutma, yıllık payı, €
+    ücret, ikinci saha ayı, `extraSaha`, `dijitalBudget`, `dijitalScale`, `fxGrowth`, `sahaGrowthEvery`, `exclude`
+    kaynak ayıklama; `buildSources(p, prog, months, inputs)`, `adSchedule`, `priceSeries`, `growthHires`,
+    `adCapacity`, `ltvOf`; `funnels`, `monthlyOnly`, `first3` senaryo başına; `inputsFor`, `sourcesFor(sc)`).
+    Kaynaklar: saha1, saha2, (sahaEk), (sahaBuyume), crm, org, dijital (reklam + organik tek kaynak), rep.
     **Büyüme modeli** (kullanıcı kararı 2026-10-27: “gelirin artmadığı işletme batar; ya ileri ya geri”, düz çizgi
     yok): ₺ fiyat kurla her ay bileşik büyür (`eurTryGrowth` %/yıl; € sabit), temsilci ağı her ay `repPerMonth` büyür
     (`repCap`’e kadar), satıcı kazanım reklam bütçesi LTV ÷ CAC ≥ 3 ise her 3 ayda ×1,5 ölçeklenir (`SCALE_RULE`,

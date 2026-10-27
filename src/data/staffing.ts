@@ -9,7 +9,7 @@ import { longDate, monthStart } from '../lib/dates';
 import type { ScenarioId } from '../lib/scenario';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { adCapacity, adSchedule, buildSources, growthHires, simulate, type RevMonth, type Revenue, type Scenario, type SimInputs } from './revenue';
+import { adCapacity, adSchedule, buildSources, growthHires, saleFactor, simulate, type RevMonth, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
 
 export interface StaffRole {
@@ -272,6 +272,8 @@ export function staffScenario(p: Params, prog: ProgramModel, rev: Revenue, sc: S
   const sources = buildSources(p, prog, months, base);
   const src = (id: string) => sources.find((x) => x.id === id);
   const parts = adSchedule(p, months, base);
+  const satis = saleFactor(p, months);
+  const topla = (xs: number[]) => r2(xs.reduce((a, b, t) => a + b * satis[t], 0) * base.factor);
   const rows: StaffResult[] = staffRoles(p, prog, months, base).map((role) => {
     let gider = sum(roleMonthly(role, months));
     let katki = 0;
@@ -280,17 +282,17 @@ export function staffScenario(p: Params, prog: ProgramModel, rev: Revenue, sc: S
     if (role.katki.kind === 'source') {
       katki = r2(without({ exclude: [role.katki.id] }));
       const x = src(role.katki.id);
-      aktif = x ? r2(x.values.reduce((a, b) => a + b, 0) * base.factor) : 0;
+      aktif = x ? topla(x.values) : 0;
     } else if (role.katki.kind === 'reklam') {
       katki = reklamKatki;
-      aktif = r2(parts.reklam.reduce((a, b) => a + b, 0) * base.factor);
+      aktif = topla(parts.reklam);
     } else if (role.katki.kind === 'organik') {
       katki = r2(dijitalKatki - reklamKatki);
-      aktif = r2(parts.organik.reduce((a, b) => a + b, 0) * base.factor);
+      aktif = topla(parts.organik);
     } else if (role.katki.kind === 'rep') {
       katki = r2(without({ exclude: ['rep'] }));
       const x = src('rep');
-      aktif = x ? r2(x.values.reduce((a, b) => a + b, 0) * base.factor) : 0;
+      aktif = x ? topla(x.values) : 0;
       gider = r2(aktif * p.commission);
     } else {
       dogrudan = false;

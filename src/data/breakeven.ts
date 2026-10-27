@@ -177,8 +177,9 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
     };
   }
   const kadro = staffCosts(p, prog, months, inputs);
+  const startT = monthNo(monthStart(prog.dates.start)) - monthNo(months[0].iso);
   return {
-    values: months.map((m) => r2(kadro[m.t] + p.aiToolsMonthly + meta(m) + reklam[m.t] + f.ekSabit)),
+    values: months.map((m) => r2(kadro[m.t] + (m.t >= startT ? p.aiToolsMonthly : 0) + meta(m) + reklam[m.t] + f.ekSabit)),
     kaynak: 'plan',
     fallback: f.kaynak === 'sheets',
     note: `Sabit giderler plan kadrosundan: kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}; ikinci, ek ve büyüme saha personeli başladıkları aydan, organizatör ve ekip lideri Aralık’tan), YZ araçları tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay başlangıç; kural tutuyorsa ölçeklenir). Ofis ve yazılım ekibi bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,

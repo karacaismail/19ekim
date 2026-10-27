@@ -16,12 +16,12 @@ bağımsız modül vardır:
 - **Giderler (OPEX)**: veri repoda değil, Google Sheets’te. Apps Script web uygulaması sayfaya canlı veri verir; aynı
   hesap motoru (`apps-script/src/Motor.js`) hem Sheets’teki panoyu hem sayfayı besler.
 - **Applet’ler** (`/applet/`): ücret ve performans modelleri, menüde yok, yalnız adresle açılır.
-- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): kadro kapasitesinden hedef zinciri, üç senaryo (kötümser ·
-  medyan · iyimser; her bölümün, tablonun ve grafiğin başındaki segmentli anahtarla seçilir, bazı grafikler “üçü üst
-  üste”), kadronun görev/gider/gelir katkısı, dijital pazarlama stratejisi (gider → gelir), aylık ve kümülatif gelir,
-  başabaş (üstünde filtreler). Veri `src/data/revenue.ts`, `src/data/staffing.ts`, `src/data/digitalStrategy.ts`,
-  `src/data/breakeven.ts`; parametreler “Gelir planı” ve “Dijital pazarlama” gruplarında; seçili senaryo
-  `src/lib/scenario.ts` ile nakit akış tablosu ve istihdam takvimiyle ortak.
+- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): sayfanın başında senaryo kurucu (hazır senaryolar + ayrıntılı
+  seçenekler; tek durum, adres çubuğunda paylaşılabilir) ve kaydırırken üstte kalan yapışkan özet; kadro kapasitesinden
+  hedef zinciri, kadronun görev/gider/gelir katkısı, dijital pazarlama stratejisi (gider → gelir), aylık ve kümülatif
+  gelir, hazır senaryolar üst üste, başabaş (öngörülü). Takvim 19 Ekim 2026 → Aralık 2027, ilk satış 6 Kasım. Veri
+  `src/data/revenue.ts`, `src/data/staffing.ts`, `src/data/digitalStrategy.ts`, `src/data/breakeven.ts`; durum
+  `src/lib/scenarioOptions.ts`; temel senaryo `src/lib/scenario.ts` ile nakit akış tablosu ve istihdam takvimiyle ortak.
 - **Nakit akış tablosu** (`/nakit-akisi/`, Giderler menüsünde): çıkışlar Sheets’ten canlı, girişler gelir planının
   seçili senaryosundan; basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
@@ -167,4 +167,4 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Başabaş | `src/data/breakeven.ts` (filtreler, gider kaynakları, kesişimler, adet noktası, duyarlılık, filtre etkisi); gelir planı sayfasının bölümü |
 | İstihdam planı × senaryo | `src/data/staffing.ts` (rol, görev, maliyet, ayıklamayla gelire katkı; Sheets tablosu); gelir planı 2. bölüm ve `/istihdam/` 3. bölüm |
 | Dijital pazarlama stratejisi | `src/data/digitalStrategy.ts` (kanallar, bütçe → kayıt → aktif → gelir zinciri, kademeler, LTV ÷ CAC kuralı); gelir planı 3. bölüm |
-| Senaryo seçimi | `src/lib/scenario.ts` (`useScenario`, localStorage `istoc-plan-senaryo`), `src/components/Senaryo.tsx` (`SenaryoSecimi`, `ModSecimi`) |
+| Senaryo seçimi | `src/lib/scenario.ts` (`useScenario`, localStorage `istoc-plan-senaryo`), `src/lib/scenarioOptions.ts` (hazır kümeler, seçenekler, adres çubuğu), `src/components/SenaryoKurucu.tsx` (kurucu, yapışkan özet), `src/components/Senaryo.tsx` (`SenaryoSecimi`, `ModSecimi`, `Araclar`) |

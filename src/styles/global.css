@@ -5272,3 +5272,131 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
     height: var(--chart-h-xxl);
   }
 }
+
+/* ---------- Senaryo kurucu ve yapışkan özet (gelir planı; kullanıcı kararı 2026-10-27, UX-first) ---------- */
+.kurucu {
+  margin-top: var(--space-6);
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.kurucu-bas {
+  margin-bottom: var(--space-4);
+}
+
+.kurucu-baslik {
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  font-weight: var(--weight-semibold);
+}
+
+.kurucu-aciklama {
+  margin: var(--space-2) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+}
+
+.kurucu-araclar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.kurucu-dugme {
+  background: var(--surface-control);
+}
+
+.kurucu-dugme[disabled] {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.kurucu > .filtreler {
+  margin-top: var(--space-5);
+  padding: var(--space-5) 0 0;
+  border-top: var(--hairline) solid var(--rule-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+.kurucu > .filtreler[hidden] {
+  display: none;
+}
+
+/* Yapışkan özet: kaydırırken üstte sabit; dar ekranda çipler yatay kayar, sayfa taşmaz. */
+.yapiskan {
+  position: sticky;
+  top: 0;
+  z-index: 14;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-5);
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--rule-strong);
+  background: var(--surface-page);
+}
+
+@media (min-width: 48em) and (min-height: 40em) {
+  .yapiskan {
+    top: var(--bant-h, 0px);
+  }
+}
+
+.yapiskan-ad {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--tone-bg, var(--surface-control));
+  color: var(--tone-fg, var(--text-primary));
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.yapiskan-cipler {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--space-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--space-1);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.yapiskan-cip {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+.yapiskan-etiket {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.yapiskan-deger {
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Araç çubuğundaki senaryo etiketi (seçici yerine; seçim üstteki kurucuda). */
+.araclar-etiket {
+  align-self: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.araclar > .araclar-etiket + .secim {
+  margin-inline-start: auto;
+}

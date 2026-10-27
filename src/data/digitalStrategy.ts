@@ -9,7 +9,7 @@ import { longDate, monthStart } from '../lib/dates';
 import type { ScenarioId } from '../lib/scenario';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { adCapacity, adSchedule, ltvOf, SCALE_RULE, simulate, type Revenue, type Scenario } from './revenue';
+import { adCapacity, adSchedule, ltvOf, SCALE_RULE, simulate, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
 
 export interface Channel {
@@ -86,8 +86,8 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   ];
 
   const tierBudgets = [...new Set([0, 15_000, 30_000, 60_000, 120_000, p.dijitalAdBudgetMonthly])].sort((a, b) => a - b);
-  const byScenario: TierScenario[] = rev.scenarios.map((sc) => {
-    const base = rev.inputsFor(sc);
+  /** Verilen girdilerle (senaryo ya da seçenekler) bütçe kademeleri. */
+  const tiersFor = (sc: Scenario, base: SimInputs): TierScenario => {
     const ltv = ltvOf(p, base);
     const sifir = sum(simulate(p, prog, months, { ...base, dijitalBudget: 0 }).gelir.slice(adT, adT + WINDOW));
     const tiers = tierBudgets.map((butce): TierResult => {
@@ -95,27 +95,30 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
       const sim = simulate(p, prog, months, girdi);
       const d = adSchedule(p, months, girdi);
       const kayit = win(d.kayit);
-      const aktif = r2(win(d.reklam) * sc.factor);
+      const aktif = r2(win(d.reklam) * base.factor);
       const gider = win(d.butce);
       const katki = r2(sum(sim.gelir.slice(adT, adT + WINDOW)) - sifir);
       const cac = aktif > 0 ? r2(gider / aktif) : null;
       return { butce, kayit, aktif, gider, katki, net: r2(katki - gider), cac, ltvCac: cac ? r2(ltv / cac) : null };
     });
     return { scenario: sc, ltv, tiers };
-  });
+  };
+  const byScenario: TierScenario[] = rev.scenarios.map((sc) => tiersFor(sc, rev.inputsFor(sc)));
   const byId = Object.fromEntries(byScenario.map((x) => [x.scenario.id, x])) as Record<ScenarioId, TierScenario>;
 
-  /** Zincir (paradigma) seçili bütçe için: aylık tam hız değerleri (ölçek öncesi) ve ölçek kuralının sonucu. */
-  const zincir = (sc: Scenario) => {
-    const kayit = p.dijitalCostPerLead > 0 ? p.dijitalAdBudgetMonthly / p.dijitalCostPerLead : 0;
-    const aktif = adCapacity(p, p.dijitalAdBudgetMonthly) * sc.factor;
-    const cac = aktif > 0 ? p.dijitalAdBudgetMonthly / aktif : null;
-    const d = adSchedule(p, months, rev.inputsFor(sc));
+  /** Zincir (paradigma) verilen girdilerle: aylık tam hız değerleri (ölçek öncesi) ve ölçek kuralının sonucu. */
+  const zincir = (sc: Scenario, base: SimInputs = rev.inputsFor(sc)) => {
+    const butce = base.dijitalBudget;
+    const kayit = p.dijitalCostPerLead > 0 ? butce / p.dijitalCostPerLead : 0;
+    const aktif = adCapacity(p, butce) * base.factor;
+    const cac = aktif > 0 ? butce / aktif : null;
+    const d = adSchedule(p, months, base);
+    const ltv = ltvOf(p, base);
     const sonCarpan = d.carpan[d.carpan.length - 1] || 1;
-    return { butce: p.dijitalAdBudgetMonthly, kayit: r2(kayit), aktif: r2(aktif), cac: cac === null ? null : r2(cac), ltv: byId[sc.id].ltv, ltvCac: cac ? r2(byId[sc.id].ltv / cac) : null, olcek: d.scales, sonCarpan, sonButce: d.butce[d.butce.length - 1] };
+    return { butce, kayit: r2(kayit), aktif: r2(aktif), cac: cac === null ? null : r2(cac), ltv, ltvCac: cac ? r2(ltv / cac) : null, olcek: d.scales, sonCarpan, sonButce: d.butce[d.butce.length - 1] };
   };
 
-  return { kanallar, kpis, takvim, kurallar, tierBudgets, byScenario, byId, zincir, window: WINDOW, adStart: longDate(monthStart(p.dijitalAdStartDate)), rule: SCALE_RULE };
+  return { kanallar, kpis, takvim, kurallar, tierBudgets, byScenario, byId, tiersFor, zincir, window: WINDOW, adStart: longDate(monthStart(p.dijitalAdStartDate)), rule: SCALE_RULE };
 }
 
 export type DigitalStrategy = ReturnType<typeof makeDigitalStrategy>;

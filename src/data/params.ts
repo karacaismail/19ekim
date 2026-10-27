@@ -51,6 +51,10 @@ export const DEFAULT_PARAMS = {
   activeRepsWeekly: 0.5,
   /* Mesai */
   overtimeCap: 270,
+  /* Simülasyon takvimi (kullanıcı kararı 2026-10-27): senaryolar 19 Ekim 2026’da başlar, ilk satış 6 Kasım, ufuk 2027 sonu */
+  simStartDate: '2026-10-19',
+  firstSaleDate: '2026-11-06',
+  simEndDate: '2027-12-31',
   /* Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesi, ikinci saha, yıllık peşin payı, kötümser senaryo */
   sahaActivesMonthly: 8,
   crmActivesMonthly: 4,
@@ -185,6 +189,9 @@ export const PARAM_GROUPS: ParamGroup[] = [
     title: 'Gelir planı',
     desc: 'Kadro kapasitesi (tam kapasitede kişi başına aylık yeni aktif satıcı; ilk ay %50, ikinci ay %75), ikinci saha personelinin başlangıcı, yıllık peşin ödeyen payı ve kötümser senaryo.',
     fields: [
+      { key: 'simStartDate', label: 'Senaryo başlangıcı', kind: 'date', help: 'Tüm senaryolar, tablolar ve grafikler bu tarihten başlar (kullanıcı kararı: 19 Ekim 2026)' },
+      { key: 'firstSaleDate', label: 'İlk satış', kind: 'date', help: 'Bu tarihe kadar satışa bağlı gelir 0 ₺; o ay kalan gün oranıyla' },
+      { key: 'simEndDate', label: 'Ufuk sonu', kind: 'date', help: 'Senaryolar bu ayın sonuna kadar sürer (kullanıcı kararı: 2027 sonu)' },
       { key: 'sahaActivesMonthly', label: 'Saha personeli: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay / kişi', min: 0, help: 'Günde ≈ 8 ziyaret → haftada ≈ 10 kayıt → ayda 8 ilk ödeme' },
       { key: 'crmActivesMonthly', label: 'CRM masa başı: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Günde ≈ 40 arama + 100 e-posta → haftada ≈ 5 kayıt' },
       { key: 'organizatorActivesMonthly', label: 'Organizatör: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Ayda 2 etkinlik × ≈ 25 katılımcı → ≈ 30 kayıt' },
