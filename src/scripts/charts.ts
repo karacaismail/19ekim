@@ -341,16 +341,19 @@ function build(spec: ChartSpec, width: number): Opt {
             },
             data: spec.rows.map((r) => {
               const t = tone(r.role);
+              const span = (ms(spec.end) - start) / DAY;
               const days = (ms(r.to) - ms(r.from)) / DAY + 1;
-              // Kısa çubukta tarih etiketi çubuğun sağına taşınır (sığmayan metin kesilmez).
-              const short = days / ((ms(spec.end) - start) / DAY) < 0.16;
+              // Kısa çubukta tarih etiketi çubuğun sağına taşınır (sığmayan metin kesilmez); eksenin sonuna yakın biten
+              // kısa çubukta (ör. 13. hafta) etiket sola alınır, SVG dışına taşmaz.
+              const short = days / span < 0.16;
+              const late = (ms(r.to) - start) / DAY > span * 0.8;
               return {
                 value: days,
                 name: r.name,
                 text: r.text,
                 range: `${shortDate(ms(r.from))} – ${shortDate(ms(r.to))}`,
                 itemStyle: { color: t.fill, borderColor: t.line, borderWidth: r.milestone ? 3 : 2, borderRadius: 0 },
-                label: short ? { position: 'right', color: text } : { color: t.text },
+                label: short ? { position: late ? 'left' : 'right', color: text } : { color: t.text },
               };
             }),
             markLine: {
@@ -747,6 +750,29 @@ function build(spec: ChartSpec, width: number): Opt {
                   label: { formatter: spec.capLabel, color: token('--accent-strong'), fontSize: FONT_SIZE, position: 'insideStartTop' },
                 }
               : undefined,
+        })),
+      };
+    }
+
+    case 'hedef-adim': {
+      // Geçit hedefleri: yatay gruplanmış çubuk (dar ekranda adım adları sarılmaz); değer çubuğun ucunda, açıklama üstte.
+      const names = spec.series.map((s) => s.name);
+      const labels = spec.series.flatMap((s) => s.values.map((v) => number.format(v)));
+      return {
+        ...base(),
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' } },
+        legend: { ...(base().legend as Opt), data: names },
+        grid: { left: 4, right: labelRoom(labels), top: legendTop(names, width), bottom: 4, containLabel: true },
+        xAxis: { type: 'value', ...axis(), minInterval: 1, splitNumber: width < OPEX_NARROW ? 3 : 5, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
+        yAxis: { type: 'category', inverse: true, data: spec.steps, ...axis(), axisLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), color: text, interval: 0 } },
+        series: spec.series.map((s) => ({
+          name: s.name,
+          type: 'bar',
+          data: s.values,
+          barMaxWidth: 16,
+          barGap: '30%',
+          itemStyle: { color: token(`--role-${s.role}`), borderRadius: 0 },
+          label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => number.format(p.value) },
         })),
       };
     }

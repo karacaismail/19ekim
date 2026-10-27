@@ -128,6 +128,25 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     hareket tokenıyla; `Combobox.layer.css` BaseLayout’ta), anahtar `role="switch"`. Tablo hücresindeki etiketsiz
     alanın klavye odağı sol kenarda düz çubuk (değdiği köşeler o an radiussuz), etiketsiz onay kutusunda kutunun altında
     düz çizgi; etiketli alanda etiketin alt çizgisi.
+  - `/partnership/` iş ortaklığı programı (kullanıcı kararı 2026-10-27; adres İngilizce `partnership`, Pazarlama
+    menüsünde “İş ortaklığı”, sunum sırasında Eylem planı ile Karar yetkisi arasında): Segika ve iStoc için iki ayrı
+    90 günlük program; iki ana sekme (APG tablist, Giderler yıl sekmesi kalıbı: seçili sekme panele bitişik, radyo
+    işareti) ve her programda sekiz bölüm sekmesi (Özet, Teşhis, Kime, Program, Kanal, Ölçüm, Takvim, Risk; yatay
+    şerit, dar ekranda kayar, geniş ekranda sarılır). Bir anda tek program ve tek bölüm çizilir; adres
+    `#<program>-<bölüm>` (derin bağlantı, geri/ileri; #’siz adres Segika · Özet); bölüm sonunda önceki/sonraki,
+    programın sonunda diğer programın Özet’i. Veri `src/data/partnership.ts` → `makePartnership(params, program)`
+    (model üzerinden; tarihler program başlangıcından kayar: T0 = ilk iş günü, 13 hafta, geçitler 14/30/60/90. gün =
+    `startDate + 13`, `dates.day30/60/90`). İçerik dört kaynak araştırmanın (Segika ve iStoc için Claude ve ChatGPT
+    web araştırmaları, 27 Ekim 2026) sentezidir; akademik atıf, kaynakça, düşünür adı ve bağlantı YOK
+    (`tests/data.spec.ts` ve `tests/partnership.spec.ts` reddeder). Sayılar başlangıç tasarımıdır (14. günde gerçek
+    veriyle yazılır); tutar örnekleri yalnız hesap yöntemini gösterir, gerçek tarife değildir; Segika liste fiyatı ve
+    hacmi kamuya açık siteden. Grafikler: `mix` (ilk dalga ortak karması), `chain` (Segika: başvurudan yenilemeye;
+    iStoc: likidite oyun kitabı), `opex-bilesim` (ekonomi örneği), `huni`, `hedef-adim` (yeni tür: geçit hedefleri,
+    yatay gruplanmış çubuk, değer etiketi uçta), `gantt` (iş paketleri; geçit işaretleri; eksen sonuna yakın biten
+    kısa çubukta tarih etiketi solda) ve `pay` (kapasite; `Capacity.short` kısa etiket); Mantine `Timeline` (beş
+    aşama, `hire-*` sınıfları). Stil `.ortak-*` (global.css). Testler: her programın her bölümü 320/390/1280 px’te
+    taşma, 14 px, 44 px hedef ve grafik metni; sekme/adres/klavye; veri tutarlılığı (huni azalan, geçit hedefleri
+    artan, puan kartları 100, kapasite 52 ve 83 saat/hafta, takvim bitişik, tarih kayması).
 - `SEQUENCE` sunum sırasını ve önceki/sonraki gezinmesini belirler. İçerik `src/data/*` içindedir; görünümler veriyi
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).

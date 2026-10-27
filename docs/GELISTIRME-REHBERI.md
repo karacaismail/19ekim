@@ -10,12 +10,14 @@ bir yapay zekâ ajanının (Codex, Claude, Cursor…) on dakikada doğru zihin m
 site; GitHub Pages’te yayında: <https://karacaismail.github.io/19ekim/>.
 
 Sayfalar bir sunum sırası izler (`SEQUENCE`): organizasyon şeması → rol sayfaları → istihdam takvimi → 90 gün
-hedefleri → eylem planı → büyüme modeli → karar yetkisi → karar bekleyenler → parametreler. Ayrıca iki büyük
+hedefleri → eylem planı → iş ortaklığı programı → karar yetkisi → karar bekleyenler → parametreler. Ayrıca iki büyük
 bağımsız modül vardır:
 
 - **Giderler (OPEX)**: veri repoda değil, Google Sheets’te. Apps Script web uygulaması sayfaya canlı veri verir; aynı
   hesap motoru (`apps-script/src/Motor.js`) hem Sheets’teki panoyu hem sayfayı besler.
 - **Applet’ler** (`/applet/`): ücret ve performans modelleri, menüde yok, yalnız adresle açılır.
+- **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
+  geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
 
 Site bir **giriş kapısı** arkasındadır (kullanıcı adı `turksab`, parola repoda yok). Kapı robotlara karşıdır, gerçek
 erişim denetimi değildir; bunu güvenlik önlemi sanıp üzerine bir şey inşa etmeyin.
@@ -46,7 +48,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 278 test | Testler girişli başlar |
+| Test | Playwright (Chromium, Firefox, WebKit), 742 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -151,3 +153,4 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Bordro ve teşvik hesabı | `apps-script/src/Motor.js` + `tests/opex-motor.spec.ts` |
 | Sheets kurulumu | `apps-script/src/Kurulum.js`, `apps-script/README.md` |
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
+| İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |

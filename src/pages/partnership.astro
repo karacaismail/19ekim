@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { PartnershipPage } from '../views/PartnershipPage';
+---
+
+<BaseLayout title="İş ortaklığı programı">
+  <PartnershipPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

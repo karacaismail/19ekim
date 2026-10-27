@@ -293,3 +293,63 @@ test.describe('bağlantılar', () => {
     expect(broken).toEqual([]);
   });
 });
+
+/* ---------- İş ortaklığı programı (kullanıcı kararı 2026-10-27) ---------- */
+
+test.describe('iş ortaklığı programı', () => {
+  const pt = buildModel(DEFAULT_PARAMS).partnership;
+
+  test('iki program; huni azalan; geçit hedefleri artan; puan kartları 100; kapasite toplamları', () => {
+    expect(pt.programs.map((p) => p.id)).toEqual(['segika', 'istoc']);
+    for (const p of pt.programs) {
+      const f = p.funnel.items.map((i) => i.value);
+      for (let i = 1; i < f.length; i++) expect(f[i], `${p.id} huni`).toBeLessThan(f[i - 1]);
+      for (const s of p.gateSeries) {
+        expect(s.values.length).toBe(3);
+        for (let i = 1; i < s.values.length; i++) expect(s.values[i], `${p.id} ${s.name}`).toBeGreaterThanOrEqual(s.values[i - 1]);
+      }
+      expect(p.gates.map((g) => g.day)).toEqual([14, 30, 60, 90]);
+      expect(p.gates.map((g) => g.date)).toEqual([pt.dates.day14, pt.dates.day30, pt.dates.day60, pt.dates.day90]);
+      expect(p.kpis.length, `${p.id} gösterge`).toBe(10);
+      expect(p.partnerScorecard.rows.reduce((a, r) => a + r.points, 0), `${p.id} ortak puan kartı`).toBe(100);
+      if (p.cellScorecard) expect(p.cellScorecard.rows.reduce((a, r) => a + r.points, 0), `${p.id} hücre puan kartı`).toBe(100);
+      expect(p.headline.length).toBeGreaterThanOrEqual(6);
+      expect(p.phases.map((ph) => ph.no)).toEqual([1, 2, 3, 4, 5]);
+    }
+    expect(pt.byId.segika.capacity.reduce((a, c) => a + c.hours, 0)).toBe(52);
+    expect(pt.byId.istoc.capacity.reduce((a, c) => a + c.hours, 0)).toBe(83);
+  });
+
+  test('13 hafta: aşamalar bitişik, iş paketleri takvim içinde, geçitler sırayla', () => {
+    expect(addDays(pt.dates.t0, 90)).toBe(pt.dates.end);
+    expect(pt.dates.day14 < pt.dates.day30 && pt.dates.day30 < pt.dates.day60 && pt.dates.day60 < pt.dates.day90).toBe(true);
+    for (const p of pt.programs) {
+      expect(p.phases[0].from).toBe(pt.dates.t0);
+      expect(p.phases[p.phases.length - 1].to).toBe(pt.dates.end);
+      for (let i = 1; i < p.phases.length; i++) expect(p.phases[i].from, `${p.id} aşama ${i + 1}`).toBe(addDays(p.phases[i - 1].to, 1));
+      for (const w of p.work) {
+        expect(w.from <= w.to, `${p.id} ${w.name}`).toBe(true);
+        expect(w.from >= pt.dates.t0 && w.to <= pt.dates.end, `${p.id} ${w.name} takvim dışı`).toBe(true);
+      }
+      expect(p.work.filter((w) => w.milestone).length, `${p.id} kilometre taşı`).toBeGreaterThan(0);
+    }
+  });
+
+  test('program başlangıcı kayınca takvim, geçitler ve metindeki tarihler kayar', () => {
+    const shifted = buildModel({ ...DEFAULT_PARAMS, startDate: addDays(DEFAULT_PARAMS.startDate, 14) }).partnership;
+    expect(shifted.dates.t0).toBe(addDays(pt.dates.t0, 14));
+    expect(shifted.dates.day90).toBe(addDays(pt.dates.day90, 14));
+    expect(shifted.byId.istoc.work[0].from).toBe(addDays(pt.byId.istoc.work[0].from, 14));
+    expect(shifted.byId.segika.gates[0].date).toBe(addDays(pt.byId.segika.gates[0].date, 14));
+    expect(shifted.byId.segika.headline[0].note).not.toBe(pt.byId.segika.headline[0].note);
+  });
+
+  test('atıf, kaynakça, bağlantı ve düşünür adı yok', () => {
+    const text = JSON.stringify(pt.programs);
+    expect(text).not.toMatch(/https?:\/\//);
+    expect(text).not.toMatch(/www\./);
+    for (const banned of ['Rumelt', 'Drucker', 'Thiel', 'Kotler', 'Osterwalder', 'Dunford', 'Byron', 'Geoffrey', 'Nagle', 'Reichheld', 'Lincoln Murphy', 'Andrew Chen', 'Helmer', 'Fitzpatrick', 'Goldratt', 'Eric Ries', 'Mom Test', 'Bullseye', 'Lafley', 'Binet']) {
+      expect(text, banned).not.toContain(banned);
+    }
+  });
+});

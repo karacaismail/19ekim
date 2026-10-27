@@ -73,6 +73,8 @@ export const SEQUENCE: Stop[] = [
   { path: '/istihdam/', label: 'İstihdam takvimi', crumb: ['İstihdam takvimi'] },
   { path: '/hedefler/', label: '90 gün hedefleri', crumb: ['90 gün hedefleri'] },
   { path: '/eylem-plani/', label: 'Eylem planı', crumb: ['Eylem planı'] },
+  // İş ortaklığı programı (kullanıcı kararı 2026-10-27): Segika ve iStoc, iki ana sekme; adres /partnership/.
+  { path: '/partnership/', label: 'İş ortaklığı programı', crumb: ['İş ortaklığı programı'] },
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
@@ -102,6 +104,7 @@ export const MARKETING_NAV = [
   { label: '90 gün hedefleri', path: '/hedefler/' },
   { label: 'Eylem planı', path: '/eylem-plani/' },
   { label: 'MLM ağı', path: '/buyume-modeli/' },
+  { label: 'İş ortaklığı', path: '/partnership/' },
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
   { label: 'Parametreler', path: '/parametreler/' },

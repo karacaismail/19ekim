@@ -5,6 +5,7 @@
 import { makeDigital } from './digital';
 import { makeGrowth } from './growth';
 import { DEFAULT_PARAMS, type Params } from './params';
+import { makePartnership } from './partnership';
 import { makeProgram } from './program';
 import { getRole, makeRoles } from './roles';
 import { makeOrg } from './tree';
@@ -20,6 +21,7 @@ export function buildModel(p: Params) {
     digital: makeDigital(p),
     growth: makeGrowth(p, program),
     org: makeOrg(p, roles),
+    partnership: makePartnership(p, program),
   };
 }
 

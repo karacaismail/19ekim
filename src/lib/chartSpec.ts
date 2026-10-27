@@ -49,6 +49,8 @@ export type ChartSpec =
       items: { name: string; growth: number; share: number; revenue: number; quadrant: string }[];
     }
   | { kind: 'cumulative'; labels: string[]; unit: string; cap: number; capLabel: string; series: { name: string; role: RoleKey; values: number[]; dashed?: boolean }[] }
+  /** Geçit hedefleri (iş ortaklığı): adım (gün) × seri; yatay gruplanmış çubuk, değer etiketi çubuğun ucunda. */
+  | { kind: 'hedef-adim'; steps: string[]; series: { name: string; role: RoleKey; values: number[] }[] }
   /** OPEX: tek seri yatay çubuk (₺); `share` verilirse etiket payı da gösterir. */
   | { kind: 'opex-bar'; items: { name: string; value: number; tone: OpexTone }[]; share?: number }
   /** OPEX: yığılmış çubuk (₺); `line` toplam karşılaştırması. opex-stack: geniş kapsayıcıda dikey, dar kapsayıcıda yatay; opex-stack-h: hep yatay. */
