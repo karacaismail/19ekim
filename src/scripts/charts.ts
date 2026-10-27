@@ -848,7 +848,7 @@ function build(spec: ChartSpec, width: number): Opt {
     case 'basabas': {
       // Aylık başabaş: gelir ve gider çizgileri kesişir; kesişim ayında dikey kesikli çizgi ve etiketli işaret.
       // Etiket işaretin üstünde (tepeye yakınsa altında), kenara yakınsa içe hizalı: SVG dışına taşmaz, lejantla çakışmaz.
-      const names = ['Aylık gelir', 'Aylık gider'];
+      const names = spec.names ?? ['Aylık gelir', 'Aylık gider'];
       const strong = token('--accent-strong');
       const n = spec.labels.length;
       const t = spec.nokta === null ? null : Math.min(n - 1, Math.max(0, Math.round(spec.nokta)));

@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('gelir planı', () => {
-  test('menüde ve sunum sırasında; yedi hedef kartı, zaman çizelgesi, altı kaynak, üç senaryo, on grafik, dokuz bölüm', async ({ page }) => {
+  test('menüde ve sunum sırasında; yedi hedef kartı, zaman çizelgesi, yedi kaynak (medyan), üç senaryo, on grafik, dokuz bölüm', async ({ page }) => {
     await page.goto('gelir-plani/');
     await icerik(page);
     await hydrated(page);
@@ -30,7 +30,7 @@ test.describe('gelir planı', () => {
     await expect(page.locator('.gelir-hedef').first().locator('.gelir-hedef-bilgi dt')).toHaveText(['Başlangıçtan', 'Önceki hedeften', 'O ayın geliri', 'Kümülatif gelir', 'Kötümser', 'İyimser']);
     await expect(page.locator('.gelir-zaman .hire-item')).toHaveCount(7);
     await expect(page.locator('#kaynak-tablo')).toHaveText('Kaynak, başlangıç, düzen, kapasite');
-    await expect(page.locator('.data-table').first().locator('tbody tr')).toHaveCount(6);
+    await expect(page.locator('.data-table').first().locator('tbody tr')).toHaveCount(7);
     await expect(page.locator('#senaryolar-tablo')).toBeVisible();
     await expect(page.locator('.chart-canvas')).toHaveCount(10);
     // Hedef zinciri: 100 aktif, plan tarihinden (30 Ocak 2027) sonra.
@@ -145,7 +145,7 @@ test.describe('gelir planı', () => {
     const bolum = page.locator('#basabas');
     await bolum.scrollIntoViewIfNeeded();
     const filtreler = bolum.getByRole('group', { name: 'Başabaş filtreleri' });
-    await expect(filtreler.getByRole('group')).toHaveText([/^Senaryo/, /^Kapasite çarpanı/, /^Aylık elde tutma/, /^Yıllık peşin payı/, /^Aylık ücret/, /^İkinci saha personeli/, /^Ek saha personeli/, /^Satıcı kazanım reklamı/, /^Gider kaynağı/, /^Ek sabit gider/, /^Satış primi/, /^Filtreler/]);
+    await expect(filtreler.getByRole('group')).toHaveText([/^Senaryo/, /^Kapasite çarpanı/, /^Aylık elde tutma/, /^Yıllık peşin payı/, /^Aylık ücret/, /^İkinci saha personeli/, /^Ek saha personeli/, /^Satıcı kazanım reklamı/, /^Reklam ölçeklenmesi/, /^Kur artışı/, /^Saha büyümesi/, /^Gider kaynağı/, /^Ek sabit gider/, /^Satış primi/, /^Filtreler/]);
     // Filtreler bölümün başında: ilk grafikten önce.
     const sira = await bolum.evaluate((el) => {
       const f = el.querySelector('.filtreler')!.getBoundingClientRect().top;
@@ -157,6 +157,16 @@ test.describe('gelir planı', () => {
     await expect(bolum.locator('.chart-canvas').nth(0)).toHaveAttribute('data-kind', 'basabas');
     await expect(bolum.locator('.chart-canvas').nth(1)).toHaveAttribute('data-kind', 'kumulatif-tl');
     await expect(bolum.locator('.chart-canvas').nth(2)).toHaveAttribute('data-kind', 'basabas-adet');
+    // “Ufukta yok” yazılmaz: başabaş ya tarih, ya eğilimle ≈ tarih, ya “Kapanmıyor” (kullanıcı kararı 2026-10-27).
+    await expect(bolum).not.toContainText('Ufukta yok');
+    // Eksen anahtarı grafiğin çubuğunda sağda: aylık ↔ kümülatif (seri adları değişir).
+    const eksen = bolum.locator('.chart').first().getByRole('group', { name: 'Eksen' });
+    await expect(eksen.getByRole('button', { name: 'Aylık' })).toHaveAttribute('aria-pressed', 'true');
+    const konum = await eksen.evaluate((el) => { const bar = el.closest('.araclar')!.getBoundingClientRect(); const r = el.getBoundingClientRect(); return { right: bar.right - r.right, left: r.left - bar.left }; });
+    expect(konum.right).toBeLessThan(konum.left);
+    await eksen.getByRole('button', { name: 'Kümülatif' }).click();
+    await expect(bolum.locator('.chart').first().locator('.chart-title')).toContainText('Kümülatif gelir ve gider');
+    await eksen.getByRole('button', { name: 'Aylık' }).click();
     await expect(bolum.locator('#basabas-aylar-tablo')).toBeVisible();
     await expect(bolum.locator('#duyarlilik-tablo')).toBeVisible();
     await expect(bolum.locator('#filtre-etkisi-tablo')).toBeVisible();
@@ -164,17 +174,17 @@ test.describe('gelir planı', () => {
     const etki = bolum.locator('.table-block:has(#filtre-etkisi-tablo) tbody tr');
     await expect(etki).toHaveCount(7);
     await filtreler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '+2 kişi' }).click();
-    await expect(etki.filter({ hasText: '18 ay gider' }).locator('td').nth(2)).toHaveText(/^\+/);
+    await expect(etki.filter({ hasText: '24 ay gider' }).locator('td').nth(2)).toHaveText(/^\+/);
     await expect(etki.filter({ hasText: 'yeni aktif satıcı' }).locator('td').nth(2)).toHaveText(/^\+/);
-    await expect(etki.filter({ hasText: '18 ay gelir' }).locator('td').nth(2)).toHaveText(/^\+/);
+    await expect(etki.filter({ hasText: '24 ay gelir' }).locator('td').nth(2)).toHaveText(/^\+/);
     // Reklam bütçesi “Yok”: gelir ve gider birlikte düşer.
     await filtreler.getByRole('group', { name: 'Satıcı kazanım reklamı' }).getByRole('button', { name: 'Yok' }).click();
     await filtreler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: 'Yok' }).click();
-    await expect(etki.filter({ hasText: '18 ay gider' }).locator('td').nth(2)).toHaveText(/^−/);
-    await expect(etki.filter({ hasText: '18 ay gelir' }).locator('td').nth(2)).toHaveText(/^−/);
+    await expect(etki.filter({ hasText: '24 ay gider' }).locator('td').nth(2)).toHaveText(/^−/);
+    await expect(etki.filter({ hasText: '24 ay gelir' }).locator('td').nth(2)).toHaveText(/^−/);
     await filtreler.getByRole('button', { name: 'Varsayılana dön' }).click();
-    await expect(etki.filter({ hasText: '18 ay gider' }).locator('td').nth(2)).toHaveText('—');
-    await expect(bolum.locator('.table-block:has(#basabas-aylar-tablo) tbody tr')).toHaveCount(18);
+    await expect(etki.filter({ hasText: '24 ay gider' }).locator('td').nth(2)).toHaveText('—');
+    await expect(bolum.locator('.table-block:has(#basabas-aylar-tablo) tbody tr')).toHaveCount(24);
     await expect(bolum.locator('.table-block:has(#duyarlilik-tablo) tbody tr')).toHaveCount(4);
     // Sheets sahte yanıt boş: gider kaynağı plana düşer ve not bunu söyler.
     await expect(bolum.locator('.kaynak-notu')).toContainText('plan kadrosu', { timeout: 10_000 });
@@ -211,7 +221,8 @@ test.describe('gelir planı', () => {
     await expect(dij.locator('.chart-canvas')).toHaveAttribute('data-kind', 'hedef-adim');
     const kadro = page.locator('#kadro');
     const katki = kadro.locator('.table-block:has(#katki-tablo) tbody tr');
-    await expect(katki).toHaveCount(10);
+    await expect(katki).toHaveCount(11);
+    await expect(katki.filter({ hasText: 'Büyüme: saha personeli' })).toHaveCount(1);
     await expect(katki.filter({ hasText: 'Yönetici asistanı' })).toHaveAttribute('data-tone', 'total');
     await expect(katki.filter({ hasText: 'Yönetici asistanı' }).locator('td', { hasText: /^Dolaylı$/ })).toHaveCount(1);
     await expect(katki.first().locator('th')).toContainText('Saha satış uzmanı');
@@ -223,7 +234,7 @@ test.describe('gelir planı', () => {
     await page.goto('istihdam/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.locator('#katki .table-block:has(#istihdam-katki-tablo) tbody tr')).toHaveCount(10);
+    await expect(page.locator('#katki .table-block:has(#istihdam-katki-tablo) tbody tr')).toHaveCount(11);
     await expect(page.locator('#katki').getByRole('group', { name: 'Senaryo' }).first().getByRole('button', { name: 'İyimser' })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#istihdam-katki-tablo')).toContainText('iyimser');
     await page.evaluate(() => localStorage.removeItem('istoc-plan-senaryo'));

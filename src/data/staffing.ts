@@ -1,15 +1,15 @@
 /**
  * İstihdam planı × senaryo (kullanıcı kararı 2026-10-27): her rolün görevi, işveren maliyeti ve gelire katkısı
- * kötümser · medyan · iyimser senaryolara yedirilir. Katkı = gelir planı simülasyonunda o kaynak olmasaydı 18 ayda
+ * kötümser · medyan · iyimser senaryolara yedirilir. Katkı = gelir planı simülasyonunda o kaynak olmasaydı ufuk boyunca
  * kaybedilecek gelir (ayıklama; model kaynaklarda doğrusaldır, katkılar toplama eşittir). Doğrudan kaynağı olmayan roller
- * (asistan, Segika CRM, ekip lideri) “dolaylı” ya da “katkı yok” diye yazılır; maliyetleri yine kadro gideridir.
- * Aynı rol maliyetleri başabaşın “plan kadrosu” gider kaynağını besler (src/data/breakeven.ts).
+ * (asistan, Segika CRM, ekip lideri) “dolaylı” diye yazılır; maliyetleri yine kadro gideridir. Büyüme kuralıyla gelen
+ * saha personeli (medyan/iyimser) ayrı satırdır. Aynı rol maliyetleri başabaşın “plan kadrosu” gider kaynağını besler.
  */
 import { longDate, monthStart } from '../lib/dates';
 import type { ScenarioId } from '../lib/scenario';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { adCapacity, buildSources, digitalSplit, simulate, type RevMonth, type Revenue, type Scenario } from './revenue';
+import { adCapacity, adSchedule, buildSources, growthHires, simulate, type RevMonth, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
 
 export interface StaffRole {
@@ -25,29 +25,28 @@ export interface StaffRole {
   katkiYolu: string;
   /** Aylık net maaş (₺); maaşsız satırlarda null */
   maas: number | null;
-  /** Aylık sabit maliyet (₺): işveren maliyeti ya da reklam bütçesi */
+  /** Aylık sabit maliyet (₺): işveren maliyeti ya da başlangıç reklam bütçesi */
   maliyet: number;
   startIso: string;
+  /** Ay ay maliyet (kademeli başlangıç ya da ölçeklenen bütçe); yoksa `maliyet` başlangıçtan itibaren */
+  monthly?: number[];
   /** Katkı ölçümü: ayıklanacak kaynak, reklam bütçesi, organik içerik, temsilci primi ya da yok */
   katki: { kind: 'source'; id: string } | { kind: 'reklam' } | { kind: 'organik' } | { kind: 'rep' } | { kind: 'yok' };
-}
-
-export interface StaffInputs {
-  secondSahaIso: string;
-  extraSaha: number;
-  dijitalBudget: number;
 }
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
 const monthNo = (iso: string) => Number(iso.slice(0, 4)) * 12 + Number(iso.slice(5, 7)) - 1;
 
-/** Kadro satırları: görev, maliyet, başlangıç, katkı yolu (gelir planı kadrosu). */
-export function staffRoles(p: Params, prog: ProgramModel, inp: StaffInputs): StaffRole[] {
+/** Kadro satırları: görev, maliyet, başlangıç, katkı yolu (gelir planı kadrosu; girdiler senaryo ya da filtre). */
+export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], inp: SimInputs): StaffRole[] {
   const s = prog.salaries;
   const cost = (salary: number) => r2(salary * p.costFactor);
   const dijitalStart = p.asistanCount ? p.startDate : p.dijitalAltDate;
   const kap = adCapacity(p, inp.dijitalBudget);
   const kayit = p.dijitalCostPerLead > 0 ? inp.dijitalBudget / p.dijitalCostPerLead : 0;
+  const ad = adSchedule(p, months, inp);
+  const hires = growthHires(p, months, inp);
+  const t0 = monthNo(months[0].iso);
   const rows: StaffRole[] = [
     {
       id: 'saha1',
@@ -89,6 +88,24 @@ export function staffRoles(p: Params, prog: ProgramModel, inp: StaffInputs): Sta
             maliyet: r2(cost(s.saha) * inp.extraSaha),
             startIso: monthStart(inp.secondSahaIso),
             katki: { kind: 'source' as const, id: 'sahaEk' },
+          },
+        ]
+      : []),
+    ...(hires.length
+      ? [
+          {
+            id: 'sahaBuyume',
+            name: `Büyüme: saha personeli (+${hires.length}, her ${inp.sahaGrowthEvery} ayda)`,
+            short: `Büyüme saha +${hires.length}`,
+            role: 'yatirimci' as RoleKey,
+            count: hires.length,
+            gorev: `Büyüme kuralı: ikinci saha personelinden sonra her ${inp.sahaGrowthEvery} ayda +1 saha personeli (${hires.map((t) => months[t].kisa).join(', ')}); üst sınır ${p.sahaMaxCount}.`,
+            katkiYolu: `Kişi başına ayda ${p.sahaActivesMonthly} yeni aktif satıcı; kötümser senaryoda bu satır yoktur.`,
+            maas: p.sahaSalary,
+            maliyet: cost(s.saha),
+            startIso: months[hires[0]].iso,
+            monthly: months.map((m) => r2(hires.filter((h) => m.t >= h).length * cost(s.saha))),
+            katki: { kind: 'source' as const, id: 'sahaBuyume' },
           },
         ]
       : []),
@@ -137,11 +154,12 @@ export function staffRoles(p: Params, prog: ProgramModel, inp: StaffInputs): Sta
       short: 'Reklam',
       role: 'dijital-pazarlama',
       count: 0,
-      gorev: 'Lead formu ve arama reklamları; yeniden pazarlama; kayıtlar CRM’e düşer.',
-      katkiYolu: `Ayda ${inp.dijitalBudget.toLocaleString('tr-TR')} ₺ → ≈ ${Math.round(kayit)} kayıt → ≈ ${kap.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ilk ödeme (tam hızda).`,
+      gorev: 'Lead formu ve arama reklamları; yeniden pazarlama; kayıtlar CRM’e düşer. Bütçe LTV ÷ CAC kuralıyla ölçeklenir.',
+      katkiYolu: `Ayda ${inp.dijitalBudget.toLocaleString('tr-TR')} ₺ → ≈ ${Math.round(kayit)} kayıt → ≈ ${kap.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ilk ödeme (tam hızda, ölçek öncesi)${ad.scales ? `; kural tutuyor, bütçe ${p.dijitalScaleMax}× tavana kadar büyür` : ''}.`,
       maas: null,
       maliyet: inp.dijitalBudget,
       startIso: monthStart(p.dijitalAdStartDate),
+      monthly: ad.butce,
       katki: { kind: 'reklam' },
     },
     {
@@ -189,37 +207,45 @@ export function staffRoles(p: Params, prog: ProgramModel, inp: StaffInputs): Sta
       short: 'Temsilciler',
       role: 'yazilim',
       count: 0,
-      gorev: 'Kendi çevresinden satıcı getirir; sponsor zinciri; hizmet faturasıyla prim.',
-      katkiYolu: `Satış başına ${p.commission.toLocaleString('tr-TR')} ₺ prim (değişken gider); ayda 2 yeni temsilci, en çok 10.`,
+      gorev: 'Kendi çevresinden satıcı getirir; sponsor zinciri; hizmet faturasıyla prim. Ağ her ay büyür.',
+      katkiYolu: `Satış başına ${p.commission.toLocaleString('tr-TR')} ₺ prim (değişken gider); ayda ${p.repPerMonth} yeni temsilci, en çok ${p.repCap}.`,
       maas: null,
       maliyet: 0,
       startIso: monthStart(p.decStartDate),
       katki: { kind: 'rep' },
     },
   ];
+  void t0;
   return rows;
 }
 
-/** Rolün ay ay sabit maliyeti (başlangıçtan itibaren). */
+/** Rolün ay ay sabit maliyeti (başlangıçtan itibaren ya da verilen dizi). */
 export function roleMonthly(role: StaffRole, months: RevMonth[]): number[] {
+  if (role.monthly) return role.monthly;
   const t0 = monthNo(months[0].iso);
   const startT = monthNo(role.startIso) - t0;
   return months.map((m) => (m.t >= startT ? role.maliyet : 0));
 }
 
 /** Plan kadrosu: maaşlı rollerin ay ay işveren maliyeti toplamı (reklam ve temsilci hariç). */
-export function staffCosts(p: Params, prog: ProgramModel, months: RevMonth[], inp: StaffInputs): number[] {
-  const rows = staffRoles(p, prog, inp).filter((r) => r.maas !== null);
+export function staffCosts(p: Params, prog: ProgramModel, months: RevMonth[], inp: SimInputs): number[] {
+  const rows = staffRoles(p, prog, months, inp).filter((r) => r.maas !== null);
+  return months.map((m) => r2(rows.reduce((t, r) => t + roleMonthly(r, months)[m.t], 0)));
+}
+
+/** Sheets’te olmayan saha kişileri (ikinci, ek, büyüme): ay ay işveren maliyeti. */
+export function addedSahaCosts(p: Params, prog: ProgramModel, months: RevMonth[], inp: SimInputs): number[] {
+  const rows = staffRoles(p, prog, months, inp).filter((r) => ['saha2', 'sahaEk', 'sahaBuyume'].includes(r.id));
   return months.map((m) => r2(rows.reduce((t, r) => t + roleMonthly(r, months)[m.t], 0)));
 }
 
 export interface StaffResult {
   role: StaffRole;
-  /** 18 ay sabit gider (reklam: bütçe; temsilciler: prim) */
+  /** Ufuk boyunca sabit gider (reklam: ölçeklenmiş bütçe; temsilciler: prim) */
   gider: number;
-  /** 18 ayda yeni aktif satıcı (senaryo çarpanıyla) */
+  /** Ufukta yeni aktif satıcı (senaryo çarpanıyla) */
   aktif: number;
-  /** 18 ay gelire katkı (ayıklama) */
+  /** Ufuk boyunca gelire katkı (ayıklama) */
   katki: number;
   net: number;
   /** Katkı ÷ gider; gider 0 ise null */
@@ -234,21 +260,20 @@ export interface StaffScenario {
 }
 
 /** Senaryo için kadro × katkı tablosu. */
-export function staffScenario(p: Params, prog: ProgramModel, rev: Revenue, sc: Scenario, inp: StaffInputs): StaffScenario {
+export function staffScenario(p: Params, prog: ProgramModel, rev: Revenue, sc: Scenario, override: Partial<SimInputs> = {}): StaffScenario {
   const months = rev.months;
-  const base = rev.inputsFor(sc, { secondSahaIso: inp.secondSahaIso, extraSaha: inp.extraSaha, dijitalBudget: inp.dijitalBudget });
+  const base = rev.inputsFor(sc, override);
   const sum = (xs: number[]) => r2(xs.reduce((a, b) => a + b, 0));
   const sim = simulate(p, prog, months, base);
   const gelir = sum(sim.gelir);
-  const without = (override: Partial<typeof base>) => gelir - sum(simulate(p, prog, months, { ...base, ...override }).gelir);
+  const without = (o: Partial<SimInputs>) => gelir - sum(simulate(p, prog, months, { ...base, ...o }).gelir);
   const reklamKatki = r2(without({ dijitalBudget: 0 }));
   const dijitalKatki = r2(without({ exclude: ['dijital'] }));
-  const sources = buildSources(p, prog, months, inp.secondSahaIso, inp.extraSaha, inp.dijitalBudget);
+  const sources = buildSources(p, prog, months, base);
   const src = (id: string) => sources.find((x) => x.id === id);
-  const parts = digitalSplit(p, months, inp.dijitalBudget);
-  const rows: StaffResult[] = staffRoles(p, prog, inp).map((role) => {
-    const months18 = roleMonthly(role, months);
-    let gider = sum(months18);
+  const parts = adSchedule(p, months, base);
+  const rows: StaffResult[] = staffRoles(p, prog, months, base).map((role) => {
+    let gider = sum(roleMonthly(role, months));
     let katki = 0;
     let aktif = 0;
     let dogrudan = true;
@@ -279,28 +304,34 @@ export function staffScenario(p: Params, prog: ProgramModel, rev: Revenue, sc: S
 }
 
 /** Üç senaryo birden. */
-export function makeStaffing(p: Params, prog: ProgramModel, rev: Revenue, inp?: Partial<StaffInputs>) {
-  const girdi: StaffInputs = { secondSahaIso: p.secondSahaDate, extraSaha: 0, dijitalBudget: p.dijitalAdBudgetMonthly, ...inp };
-  const senaryolar = rev.scenarios.map((sc) => staffScenario(p, prog, rev, sc, girdi));
+export function makeStaffing(p: Params, prog: ProgramModel, rev: Revenue, override: Partial<SimInputs> = {}) {
+  const senaryolar = rev.scenarios.map((sc) => staffScenario(p, prog, rev, sc, override));
   const byId = Object.fromEntries(senaryolar.map((x) => [x.scenario.id, x])) as Record<ScenarioId, StaffScenario>;
-  return { girdi, senaryolar, byId, roles: staffRoles(p, prog, girdi) };
+  return { override, senaryolar, byId, horizon: rev.months.length };
 }
 
 export type Staffing = ReturnType<typeof makeStaffing>;
 
-/** Google Sheets için düz tablo: rol, görev, başlangıç, maaş, maliyet, 18 ay gider, katkı yolu ve üç senaryonun katkısı/neti. */
-export function staffingSheet(st: Staffing, horizonMonths: number): (string | number)[][] {
-  const head = ['Rol', 'Kişi', 'Görev', 'Gelire katkı yolu', 'Başlangıç', 'Aylık net maaş (₺)', 'Aylık sabit maliyet (₺)', `${horizonMonths} ay gider (₺)`];
+/** Google Sheets için düz tablo: rol, görev, başlangıç, maaş, maliyet, ufuk gideri, katkı yolu ve üç senaryonun katkısı/neti (medyan satır listesi). */
+export function staffingSheet(st: Staffing): (string | number)[][] {
+  const H = st.horizon;
+  const head = ['Rol', 'Kişi', 'Görev', 'Gelire katkı yolu', 'Başlangıç', 'Aylık net maaş (₺)', 'Aylık sabit maliyet (₺)', `${H} ay gider (medyan, ₺)`];
   for (const s of st.senaryolar) head.push(`${s.scenario.name}: yeni aktif`, `${s.scenario.name}: gelire katkı (₺)`, `${s.scenario.name}: net (₺)`, `${s.scenario.name}: katkı ÷ gider`);
-  const rows = st.roles.map((role, i) => {
-    const row: (string | number)[] = [role.name, role.count, role.gorev, role.katkiYolu, role.startIso, role.maas ?? '', role.maliyet, st.senaryolar[1].rows[i].gider];
+  const medyan = st.byId.medyan;
+  const rows = medyan.rows.map((mr) => {
+    const role = mr.role;
+    const row: (string | number)[] = [role.name, role.count, role.gorev, role.katkiYolu, role.startIso, role.maas ?? '', role.maliyet, Math.round(mr.gider)];
     for (const s of st.senaryolar) {
-      const r = s.rows[i];
+      const r = s.rows.find((x) => x.role.id === role.id);
+      if (!r) {
+        row.push('', '', '', '');
+        continue;
+      }
       row.push(Math.round(r.aktif * 10) / 10, Math.round(r.katki), Math.round(r.net), r.oran === null ? '' : r.oran);
     }
     return row;
   });
-  const toplam: (string | number)[] = ['Toplam', '', '', '', '', '', '', st.senaryolar[1].toplam.gider];
+  const toplam: (string | number)[] = ['Toplam', '', '', '', '', '', '', Math.round(medyan.toplam.gider)];
   for (const s of st.senaryolar) toplam.push('', Math.round(s.toplam.katki), Math.round(s.toplam.net), s.toplam.gider ? Math.round((s.toplam.katki / s.toplam.gider) * 100) / 100 : '');
   return [head, ...rows, toplam];
 }

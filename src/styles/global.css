@@ -5197,6 +5197,11 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   background: var(--surface-raised);
 }
 
+/* İkinci seçim grubu (görünüm, eksen) çubuğun sağına yaslanır (kullanıcı kararı 2026-10-27: anahtar grafiğin sağ tarafında). */
+.araclar > .secim + .secim {
+  margin-inline-start: auto;
+}
+
 .chart > .araclar {
   margin: var(--space-2) 0 0;
 }

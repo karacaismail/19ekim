@@ -58,7 +58,7 @@ export type ChartSpec =
   /** ₺ gruplanmış çubuk (senaryo üst üste): geniş ekranda dikey, dar ekranda yatay. */
   | { kind: 'grup-ay'; months: string[]; series: { name: string; role: RoleKey; values: number[] }[] }
   /** Başabaş: aylık gelir ve gider çizgileri; kesişim ayı dikey kesikli çizgi ve işaret. `nokta` ay sırası (kesirli) ya da null. */
-  | { kind: 'basabas'; labels: string[]; gelir: number[]; gider: number[]; nokta: number | null; noktaLabel: string }
+  | { kind: 'basabas'; labels: string[]; gelir: number[]; gider: number[]; nokta: number | null; noktaLabel: string; /** Seri adları (varsayılan aylık gelir/gider; kümülatif görünümde kümülatif) */ names?: [string, string] }
   /** Başabaş noktası (adet): yatay eksen ödeyen satıcı adedi; gelir ve toplam gider doğruları, kesişim işareti. */
   | { kind: 'basabas-adet'; unit: string; n: number[]; gelir: number[]; gider: number[]; nokta: number | null; noktaLabel: string }
   /** Nakit akışı: ay × giriş/çıkış gruplanmış çubuk ve dönem sonu nakit (geniş: dikey + çizgi; dar: yatay + işaret). */

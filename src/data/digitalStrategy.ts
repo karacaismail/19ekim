@@ -9,7 +9,7 @@ import { longDate, monthStart } from '../lib/dates';
 import type { ScenarioId } from '../lib/scenario';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { adCapacity, digitalSplit, simulate, type Revenue, type Scenario } from './revenue';
+import { adCapacity, adSchedule, ltvOf, SCALE_RULE, simulate, type Revenue, type Scenario } from './revenue';
 import type { RoleKey } from './types';
 
 export interface Channel {
@@ -51,7 +51,6 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   const t0 = Number(months[0].iso.slice(0, 4)) * 12 + Number(months[0].iso.slice(5, 7)) - 1;
   const adT = Math.max(0, Number(p.dijitalAdStartDate.slice(0, 4)) * 12 + Number(p.dijitalAdStartDate.slice(5, 7)) - 1 - t0);
   const win = (xs: number[]) => sum(xs.slice(adT, adT + WINDOW));
-  const s = p.annualShare / 100;
 
   const kanallar: Channel[] = [
     { kanal: 'Meta lead formu (Instagram + Facebook)', amac: 'İstoç ve çevresindeki toptancı/üreticiden kayıt; konum ve ilgi hedefleme; yeniden pazarlama', role: 'dijital-pazarlama', olcum: 'Kayıt maliyeti (CPL), kayıt → ilk ödeme dönüşümü; UTM + CRM kaynak alanı', baslangic: longDate(monthStart(p.dijitalAdStartDate)) },
@@ -75,13 +74,13 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
     { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'GTM, GA4, Metrica, Meta Pixel + Conversions API, UTM standardı, CRM kaynak alanı; kayıt sayfası ve lead formu; WhatsApp dizisi', olcut: 'Ölçüm 8/8 yayında; kaynağı boş kayıt %0' },
     { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile Meta + Google; 3 reklam seti; öğrenme ayı (kapasite %50)`, olcut: `CPL ≤ ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺, dönüşüm ≥ %${p.dijitalLeadToActive}` },
     { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'İçerik makinesi', is: 'Günde 3 video, %80 otomatik paylaşım, altı içerik sütunu; organik kayıt hattı CRM’de', olcut: 'Haftada 10 organik talep; organik aktif ayda ' + p.dijitalOrganicActivesMonthly },
-    { ay: longDate(prog.dates.day90), adim: 'Ölçek kararı', is: 'LTV ÷ CAC ile bütçe kararı: ≥ 3 ise bütçe +%50 (en çok 4×); 1,5–3 koru; < 1,5 durdur, dönüşümü düzelt', olcut: '90. gün değerlendirmesi' },
+    { ay: longDate(prog.dates.day90), adim: 'Ölçek kararı', is: `LTV ÷ CAC ile bütçe kararı: ≥ ${SCALE_RULE.threshold} ise bütçe ×${SCALE_RULE.step.toLocaleString('tr-TR')} (en çok ${p.dijitalScaleMax}×); 1,5–3 koru; < 1,5 durdur, dönüşümü düzelt`, olcut: '90. gün değerlendirmesi' },
   ];
 
   const kurallar = [
     'Her reklam ve paylaşım UTM taşır; CRM’de kaynağı boş kayıt kabul edilmez (ölçülmeyen kanal bütçe almaz).',
     'Bütçe aylık, kademeli: test → ölçek; bir kademe ancak önceki ayın CPL ve dönüşüm hedefi tutmuşsa açılır.',
-    'LTV ÷ CAC ≥ 3 → bütçe +%50 (parametrenin en çok 4 katı); 1,5–3 → koru ve dönüşümü iyileştir; < 1,5 → durdur, kayıt sayfasını ve CRM dizisini düzelt.',
+    `LTV ÷ CAC ≥ ${SCALE_RULE.threshold} → bütçe her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')} (başlangıcın en çok ${p.dijitalScaleMax} katı; simülasyon bu kuralı uygular); 1,5–3 → koru ve dönüşümü iyileştir; < 1,5 → durdur, kayıt sayfasını ve CRM dizisini düzelt.`,
     'Organik içerik reklamın yerine değil yanına: reklam hızlı ve pahalı, içerik yavaş ve ucuz; ikisi de CRM’e aynı aşamalarla girer.',
     'Elde tutma dijital işin yarısıdır: aylık değer raporu ve yenileme çağrısı olmadan kazanılan satıcı erir.',
   ];
@@ -89,11 +88,12 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   const tierBudgets = [...new Set([0, 15_000, 30_000, 60_000, 120_000, p.dijitalAdBudgetMonthly])].sort((a, b) => a - b);
   const byScenario: TierScenario[] = rev.scenarios.map((sc) => {
     const base = rev.inputsFor(sc);
-    const ltv = r2((1 - s) * (prog.SUBSCRIPTION_TRY / Math.max(0.05, 1 - sc.retention)) + s * prog.ANNUAL_TRY);
+    const ltv = ltvOf(p, base);
     const sifir = sum(simulate(p, prog, months, { ...base, dijitalBudget: 0 }).gelir.slice(adT, adT + WINDOW));
     const tiers = tierBudgets.map((butce): TierResult => {
-      const sim = simulate(p, prog, months, { ...base, dijitalBudget: butce });
-      const d = digitalSplit(p, months, butce);
+      const girdi = { ...base, dijitalBudget: butce };
+      const sim = simulate(p, prog, months, girdi);
+      const d = adSchedule(p, months, girdi);
       const kayit = win(d.kayit);
       const aktif = r2(win(d.reklam) * sc.factor);
       const gider = win(d.butce);
@@ -105,15 +105,17 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   });
   const byId = Object.fromEntries(byScenario.map((x) => [x.scenario.id, x])) as Record<ScenarioId, TierScenario>;
 
-  /** Zincir (paradigma) seçili bütçe için: aylık tam hız değerleri. */
+  /** Zincir (paradigma) seçili bütçe için: aylık tam hız değerleri (ölçek öncesi) ve ölçek kuralının sonucu. */
   const zincir = (sc: Scenario) => {
     const kayit = p.dijitalCostPerLead > 0 ? p.dijitalAdBudgetMonthly / p.dijitalCostPerLead : 0;
     const aktif = adCapacity(p, p.dijitalAdBudgetMonthly) * sc.factor;
     const cac = aktif > 0 ? p.dijitalAdBudgetMonthly / aktif : null;
-    return { butce: p.dijitalAdBudgetMonthly, kayit: r2(kayit), aktif: r2(aktif), cac: cac === null ? null : r2(cac), ltv: byId[sc.id].ltv, ltvCac: cac ? r2(byId[sc.id].ltv / cac) : null };
+    const d = adSchedule(p, months, rev.inputsFor(sc));
+    const sonCarpan = d.carpan[d.carpan.length - 1] || 1;
+    return { butce: p.dijitalAdBudgetMonthly, kayit: r2(kayit), aktif: r2(aktif), cac: cac === null ? null : r2(cac), ltv: byId[sc.id].ltv, ltvCac: cac ? r2(byId[sc.id].ltv / cac) : null, olcek: d.scales, sonCarpan, sonButce: d.butce[d.butce.length - 1] };
   };
 
-  return { kanallar, kpis, takvim, kurallar, tierBudgets, byScenario, byId, zincir, window: WINDOW, adStart: longDate(monthStart(p.dijitalAdStartDate)) };
+  return { kanallar, kpis, takvim, kurallar, tierBudgets, byScenario, byId, zincir, window: WINDOW, adStart: longDate(monthStart(p.dijitalAdStartDate)), rule: SCALE_RULE };
 }
 
 export type DigitalStrategy = ReturnType<typeof makeDigitalStrategy>;

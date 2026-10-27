@@ -15,7 +15,7 @@ import type { ScenarioId } from '../lib/scenario';
 import type { OpexModel, YilKey } from './opex';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { digitalSplit, type Revenue, type Scenario } from './revenue';
+import type { Revenue, Scenario } from './revenue';
 
 export interface CashMonth {
   /** Ayın ilk günü (ISO) */
@@ -54,6 +54,8 @@ export interface CashSeries {
   ilkOdeme: number[];
   yenilemeTl: number[];
   prim: number[];
+  /** Satıcı kazanım reklam bütçesi (senaryoya göre ölçeklenir; Sheets’te yok) */
+  reklam: number[];
 }
 
 export interface CashPlan {
@@ -64,8 +66,6 @@ export interface CashPlan {
   senaryolar: Scenario[];
   seri: Record<ScenarioId, CashSeries>;
   meta: number[];
-  /** Satıcı kazanım reklam bütçesi (dijital pazarlama stratejisi; Sheets’te yok) */
-  dijitalReklam: number[];
   yatirim: number[];
   baslangicNakit: number;
   /** Plan girdileri (kalem tanımı ve kaynak), tabloda varsayımlar olarak listelenir. */
@@ -91,6 +91,7 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
         ilkOdeme: pick(x.ilkOdeme),
         yenilemeTl: pick(x.yenileme),
         prim: pick(x.yeniAktif).map((n) => r2(n * p.commission)),
+        reklam: pick(x.butce),
       } satisfies CashSeries,
     ]),
   ) as Record<ScenarioId, CashSeries>;
@@ -108,15 +109,14 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
     senaryolar: rev.scenarios,
     seri,
     meta: aylar.map((m) => (monthNo(m.iso) >= metaStart ? metaAylik : 0)),
-    dijitalReklam: pick(digitalSplit(p, rev.months, p.dijitalAdBudgetMonthly).butce),
     yatirim: aylar.map((m) => (monthNo(m.iso) === yatirimAy ? p.investmentAmount : 0)),
     baslangicNakit: p.openingCash,
     varsayimlar: [
       `Abonelik geliri: aktif satıcı başına ayda ${prog.SUBSCRIPTION_EUR} € × ${p.eurTry.toLocaleString('tr-TR')} ₺/€ (${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺); yeni satıcıların %${p.annualShare}’i yıllık peşin öder (${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺, ${p.annualMonths} ay ücreti). Ödeme aynı ay tahsil edilir, KDV ayrıca modellenmez.`,
       `Yeni aktif satıcı ve yenilemeler gelir planı sayfasının senaryo simülasyonundan gelir (kadro kapasitesi × senaryo çarpanı; elde tutma senaryonun oranı): kötümser ${kotumser.desc.toLocaleLowerCase('tr-TR')}; medyan ${medyan.desc.toLocaleLowerCase('tr-TR')}; iyimser ${iyimser.desc.toLocaleLowerCase('tr-TR')}. Seçili senaryo iki sayfada ortaktır ve bu tarayıcıda saklanır.`,
-      `Program ${monthName(rev.months[0].iso)} ${rev.months[0].iso.slice(0, 4)}’te başlar: Ekim 2026’da giriş yoktur; gelir planı ufku (${rev.months.length} ay) tablonun 15 ayını kapsar.`,
+      `Program ${monthName(rev.months[0].iso)} ${rev.months[0].iso.slice(0, 4)}’te başlar: Ekim 2026’da giriş yoktur; gelir planı ufku (${rev.months.length} ay) tablonun 15 ayını kapsar. ₺ fiyat kurla büyür (yılda %${p.eurTryGrowth}).`,
       `Meta reklamları: haftada ${p.metaWeekly.toLocaleString('tr-TR')} ₺ (ayda ≈ ${metaAylik.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺), ${monthName(monthStart(p.metaStartDate))} ${p.metaStartDate.slice(0, 4)} ayından itibaren tam ay; Sheets’te bu kalem yoktur.`,
-      `Satıcı kazanım reklamı (dijital pazarlama stratejisi): ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺, ${monthName(monthStart(p.dijitalAdStartDate))} ${p.dijitalAdStartDate.slice(0, 4)} ayından itibaren; getirdiği satıcılar girişlerin içindedir. Sheets’te bu kalem de yoktur.`,
+      `Satıcı kazanım reklamı (dijital pazarlama stratejisi): ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ başlangıç, ${monthName(monthStart(p.dijitalAdStartDate))} ${p.dijitalAdStartDate.slice(0, 4)} ayından itibaren; LTV ÷ CAC kuralı tutarsa her 3 ayda ×1,5 (en çok ${p.dijitalScaleMax}×), senaryoya göre; getirdiği satıcılar girişlerin içindedir. Sheets’te bu kalem de yoktur.`,
       `Satış primi: her yeni aktif satıcı için ${p.commission.toLocaleString('tr-TR')} ₺ üst sınır, seçili senaryonun yeni aktif satıcısıyla (kota üstü satış ve temsilci satışları prim doğurur; sponsor ve ekip lideri payı dahil değil).`,
       yatirimIcerde
         ? `Yatırım girişi: ${p.investmentAmount.toLocaleString('tr-TR')} ₺, ${monthName(monthStart(p.investmentDate))} ${p.investmentDate.slice(0, 4)} (parametre); başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺.`
@@ -187,7 +187,7 @@ export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: S
   const cikislar: CashLine[] = [
     ...(opex ? sheetsLines(opex, aylar) : []),
     line('Meta reklamları (plan)', 'plan', plan.meta),
-    line('Satıcı kazanım reklamı (plan)', 'plan', plan.dijitalReklam),
+    line('Satıcı kazanım reklamı (plan)', 'plan', s.reklam),
     line('Satış primi (plan, en çok)', 'plan', s.prim),
   ];
   const giris = aylar.map((_, i) => sum(girisler.map((l) => l.aylar[i])));

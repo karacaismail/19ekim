@@ -66,6 +66,12 @@ export const DEFAULT_PARAMS = {
   dijitalAdStartDate: '2026-12-01',
   dijitalOrganicActivesMonthly: 2,
   dijitalOrganicStartDate: '2027-01-01',
+  /* Büyüme (kullanıcı kararı 2026-10-27: “ya ileri ya geri”; gelir düz çizgi olamaz): kur, temsilci ağı, reklam ölçeği, saha büyümesi */
+  eurTryGrowth: 25,
+  repPerMonth: 2,
+  repCap: 24,
+  sahaMaxCount: 5,
+  dijitalScaleMax: 4,
   /* Nakit akışı (kullanıcı kararı 2026-10-27: nakit akış tablosu) */
   openingCash: 0,
   investmentAmount: 0,
@@ -199,6 +205,18 @@ export const PARAM_GROUPS: ParamGroup[] = [
       { key: 'dijitalAdStartDate', label: 'Reklam başlangıcı', kind: 'date', help: 'Ölçüm (pixel, UTM, CRM kaynak alanı) kurulduktan sonra; ayın ilk günü' },
       { key: 'dijitalOrganicActivesMonthly', label: 'Organik içerik: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Günde 3 video ve haftada 10 CRM talebi düzeyinde' },
       { key: 'dijitalOrganicStartDate', label: 'Organik içerik başlangıcı', kind: 'date', help: 'İçerik hattı tam hızda (Ocak: günde 3 video); ayın ilk günü' },
+    ],
+  },
+  {
+    id: 'buyume',
+    title: 'Büyüme',
+    desc: 'Gelir planı zamanla büyür ya da küçülür, düz çizgi olmaz (kullanıcı kararı 2026-10-27): ₺ fiyat kurla büyür, temsilci ağı her ay genişler, reklam bütçesi LTV ÷ CAC kuralıyla ölçeklenir, kârlı senaryolarda saha kadrosu periyodik büyür (kötümser senaryoda büyüme yok).',
+    fields: [
+      { key: 'eurTryGrowth', label: 'Kur artışı (₺/€, yıllık)', kind: 'percent', unit: '% / yıl', min: 0, max: 200, help: '€ fiyat sabit; ₺ karşılığı her ay bileşik büyür. 2026 TÜFE ≈ %30' },
+      { key: 'repPerMonth', label: 'Temsilci ağı: her ay eklenen temsilci', kind: 'count', unit: 'kişi / ay', min: 0 },
+      { key: 'repCap', label: 'Temsilci ağı: üst sınır', kind: 'count', unit: 'temsilci', min: 0 },
+      { key: 'sahaMaxCount', label: 'Saha personeli üst sınırı (büyüme kuralıyla)', kind: 'count', unit: 'kişi', min: 1, help: 'İlk iki saha personeli dahil; medyan her 6 ayda, iyimser her 4 ayda +1' },
+      { key: 'dijitalScaleMax', label: 'Reklam bütçesi ölçek tavanı', kind: 'multiplier', unit: '× başlangıç', min: 1, step: 0.5, help: 'LTV ÷ CAC ≥ 3 ise her 3 ayda ×1,5' },
     ],
   },
   {

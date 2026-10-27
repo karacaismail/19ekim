@@ -14,8 +14,8 @@ import type { ScenarioId } from '../lib/scenario';
 import type { OpexModel } from './opex';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import { digitalSplit, simulate, type RevMonth, type Revenue, type Sim, type SimInputs } from './revenue';
-import { staffCosts } from './staffing';
+import { adSchedule, simulate, type RevMonth, type Revenue, type Sim, type SimInputs } from './revenue';
+import { addedSahaCosts, staffCosts } from './staffing';
 
 export type GiderKaynak = 'sheets' | 'plan';
 
@@ -32,6 +32,12 @@ export interface BreakevenFilters {
   extraSaha: number;
   /** Satıcı kazanım reklam bütçesi: parametrenin katı (0 = reklam yok) */
   dijitalBudgetFactor: number;
+  /** Reklam ölçeklenmesi (LTV ÷ CAC kuralı) açık mı */
+  dijitalScale: boolean;
+  /** Yıllık kur artışı 0–1; null = parametre */
+  fxGrowth: number | null;
+  /** Saha büyüme kuralı (her N ayda +1); null = senaryonun */
+  sahaGrowthEvery: number | null;
   kaynak: GiderKaynak;
   /** Ek sabit gider, ₺ / ay */
   ekSabit: number;
@@ -48,6 +54,9 @@ export const defaultFilters = (p: Params): BreakevenFilters => ({
   secondSahaIso: p.secondSahaDate,
   extraSaha: 0,
   dijitalBudgetFactor: 1,
+  dijitalScale: true,
+  fxGrowth: null,
+  sahaGrowthEvery: null,
   kaynak: 'sheets',
   ekSabit: 0,
   primDahil: true,
@@ -77,8 +86,21 @@ export interface Breakeven {
   kumNet: number[];
   nokta: Kesisim | null;
   geriOdeme: Kesisim | null;
+  /** Ufuk içinde kesişim yoksa son 6 ayın eğilimiyle öngörü (kullanıcı kararı 2026-10-27: “ufukta yok” yetmez; ya ileri ya geri) */
+  ongoru: {
+    /** Son ayın net sonucu (gelir − gider) */
+    sonNet: number;
+    /** Aylık net sonucun son 6 aydaki eğimi (₺ / ay) */
+    egim: number;
+    /** Eğilimle aylık başabaş tarihi; eğilim kapanmıyorsa null */
+    nokta: Kesisim | null;
+    /** Son ayın net sonucuyla kümülatif açığın kapanacağı tarih; null = kapanmıyor */
+    geriOdeme: Kesisim | null;
+    /** 'ileri' (açık daralıyor), 'geri' (açık büyüyor), 'sabit' */
+    yon: 'ileri' | 'geri' | 'sabit';
+  };
   enDusuk: { deger: number; t: number };
-  /** 18 ay toplamları */
+  /** Ufuk toplamları */
   toplam: { gelir: number; gider: number; net: number };
   adet: {
     /** Ödeyen satıcı başına aylık gelir (yıllık peşin payıyla karışık) */
@@ -112,14 +134,30 @@ export function crossing(months: RevMonth[], d: number[]): Kesisim | null {
   return { t: t - 1 + frac, date: addDays(iso, days) };
 }
 
+/** Filtrelerden simülasyon girdileri (senaryo değerleri yerine filtre değerleri). */
+export function inputsOf(p: Params, rev: Revenue, scenario: ScenarioId, f: BreakevenFilters): SimInputs {
+  const sc = rev.byId[scenario].scenario;
+  return rev.inputsFor(sc, {
+    factor: f.factor ?? sc.factor,
+    retention: f.retention ?? sc.retention,
+    annualShare: f.annualShare,
+    priceEur: f.priceEur,
+    secondSahaIso: f.secondSahaIso,
+    extraSaha: f.extraSaha,
+    dijitalBudget: r2(p.dijitalAdBudgetMonthly * f.dijitalBudgetFactor),
+    dijitalScale: f.dijitalScale,
+    fxGrowth: f.fxGrowth ?? p.eurTryGrowth / 100,
+    sahaGrowthEvery: f.sahaGrowthEvery ?? sc.sahaGrowthEvery,
+  });
+}
+
 /** Sabit giderler (prim hariç) ay ay: Sheets ya da plan kadrosu. Sheets istendi ama yoksa plan (fallback). */
-export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f: BreakevenFilters, opex: OpexModel | null): { values: number[]; kaynak: GiderKaynak; fallback: boolean; note: string } {
+export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f: BreakevenFilters, inputs: SimInputs, opex: OpexModel | null): { values: number[]; kaynak: GiderKaynak; fallback: boolean; note: string } {
   const metaAylik = r2((p.metaWeekly * 52) / 12);
   const metaStart = monthNo(monthStart(p.metaStartDate));
   const meta = (m: RevMonth) => (monthNo(m.iso) >= metaStart ? metaAylik : 0);
-  const budget = r2(p.dijitalAdBudgetMonthly * f.dijitalBudgetFactor);
-  const reklam = digitalSplit(p, months, budget).butce;
-  const staff = { secondSahaIso: f.secondSahaIso, extraSaha: f.extraSaha, dijitalBudget: budget };
+  const reklam = adSchedule(p, months, inputs).butce;
+  const budget = inputs.dijitalBudget;
   if (f.kaynak === 'sheets' && opex) {
     const buAy = (iso: string) => {
       const ay = Number(iso.slice(5, 7));
@@ -129,41 +167,58 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
       if (yil === '2027' && row) return row.y2027.toplam;
       return opex.ozet.aylikOrt2027.toplam;
     };
-    // Sheets’te tek saha personeli vardır; ikinci saha, ek saha ve satıcı kazanım reklamı plan kadrosundan eklenir.
-    const t0 = monthNo(months[0].iso);
-    const sahaT = monthNo(monthStart(f.secondSahaIso)) - t0;
-    const sahaEk = r2(p.sahaSalary * p.costFactor * (1 + f.extraSaha));
+    // Sheets’te tek saha personeli vardır; ikinci saha, ek saha, büyüme kadrosu ve satıcı kazanım reklamı plan kadrosundan eklenir.
+    const sahaEk = addedSahaCosts(p, prog, months, inputs);
     return {
-      values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + (m.t >= sahaT ? sahaEk : 0) + f.ekSabit)),
+      values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + sahaEk[m.t] + f.ekSabit)),
       kaynak: 'sheets',
       fallback: false,
-      note: `Sabit giderler Google Sheets’ten (Giderler sayfasıyla aynı canlı veri; bordrolu personel teşvik düşülmüş işveren maliyeti, teknoloji ve ofis kalemleri); 2028 ayları 2027 ortalamasıyla. Sheets’te olmayanlar eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay) ve ikinci (ve ek) saha personelinin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}) seçilen aydan itibaren.`,
+      note: `Sabit giderler Google Sheets’ten (Giderler sayfasıyla aynı canlı veri; bordrolu personel teşvik düşülmüş işveren maliyeti, teknoloji ve ofis kalemleri); 2028 ayları 2027 ortalamasıyla. Sheets’te olmayanlar eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay başlangıç; kural tutuyorsa ölçeklenir) ve ikinci, ek ve büyüme saha personelinin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}) başladıkları aydan itibaren.`,
     };
   }
-  const kadro = staffCosts(p, prog, months, staff);
+  const kadro = staffCosts(p, prog, months, inputs);
   return {
     values: months.map((m) => r2(kadro[m.t] + p.aiToolsMonthly + meta(m) + reklam[m.t] + f.ekSabit)),
     kaynak: 'plan',
     fallback: f.kaynak === 'sheets',
-    note: `Sabit giderler plan kadrosundan: kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}; ikinci ve ek saha seçilen aydan, organizatör ve ekip lideri Aralık’tan), YZ araçları tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay). Ofis ve yazılım ekibi bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,
+    note: `Sabit giderler plan kadrosundan: kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}; ikinci, ek ve büyüme saha personeli başladıkları aydan, organizatör ve ekip lideri Aralık’tan), YZ araçları tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay başlangıç; kural tutuyorsa ölçeklenir). Ofis ve yazılım ekibi bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,
   };
+}
+
+/** Son `n` ayın en küçük kareler eğimi (₺ / ay). */
+function slope(xs: number[], n = 6): number {
+  const ys = xs.slice(-n);
+  const k = ys.length;
+  if (k < 2) return 0;
+  const mx = (k - 1) / 2;
+  const my = ys.reduce((a, b) => a + b, 0) / k;
+  let num = 0;
+  let den = 0;
+  ys.forEach((y, i) => {
+    num += (i - mx) * (y - my);
+    den += (i - mx) ** 2;
+  });
+  return den ? num / den : 0;
+}
+
+/** Ufuk sonundan `k` ay sonrası (kesirli) için tarih ve kesirli ay sırası. */
+function sonra(months: RevMonth[], k: number): Kesisim {
+  const last = months.length - 1;
+  const iso = months[last].iso;
+  let cursor = iso;
+  const whole = Math.floor(k);
+  for (let i = 0; i < whole; i++) cursor = nextMonth(cursor);
+  const frac = k - whole;
+  const days = Math.min(daysInMonth(cursor) - 1, Math.max(0, Math.round(frac * daysInMonth(cursor))));
+  return { t: last + k, date: addDays(cursor, days) };
 }
 
 /** Seçili senaryo ve filtrelerle başabaş hesabı. */
 export function computeBreakeven(p: Params, prog: ProgramModel, rev: Revenue, scenario: ScenarioId, f: BreakevenFilters, opex: OpexModel | null): Breakeven {
-  const sc = rev.byId[scenario].scenario;
   const months = rev.months;
-  const inputs = rev.inputsFor(sc, {
-    factor: f.factor ?? sc.factor,
-    retention: f.retention ?? sc.retention,
-    annualShare: f.annualShare,
-    priceEur: f.priceEur,
-    secondSahaIso: f.secondSahaIso,
-    extraSaha: f.extraSaha,
-    dijitalBudget: r2(p.dijitalAdBudgetMonthly * f.dijitalBudgetFactor),
-  });
+  const inputs = inputsOf(p, rev, scenario, f);
   const sim = simulate(p, prog, months, inputs);
-  const fixed = fixedCosts(p, prog, months, f, opex);
+  const fixed = fixedCosts(p, prog, months, f, inputs, opex);
   const prim = sim.yeniAktif.map((n) => (f.primDahil ? r2(n * p.commission) : 0));
   const gider = months.map((_, t) => r2(fixed.values[t] + prim[t]));
   const gelir = sim.gelir;
@@ -173,8 +228,17 @@ export function computeBreakeven(p: Params, prog: ProgramModel, rev: Revenue, sc
   const nokta = crossing(months, months.map((_, t) => gider[t] - gelir[t]));
   const geriOdeme = crossing(months, kumNet.map((v) => -v));
   const minT = kumNet.reduce((best, v, i) => (v < kumNet[best] ? i : best), 0);
-  // Klasik başabaş noktası: kararlı dönem sabit gideri (son 12 ay ortalaması), satıcı başına karışık aylık gelir.
-  const gelirBirim = r2((1 - inputs.annualShare) * sim.abonelikTl + (inputs.annualShare * sim.yillikTl) / 12);
+  // Öngörü: ufuk içinde kesişim yoksa son 6 ayın eğilimi (ya ileri ya geri).
+  const sonNet = net[net.length - 1];
+  const egim = r2(slope(net));
+  const yon: 'ileri' | 'geri' | 'sabit' = Math.abs(egim) < 1 ? 'sabit' : egim > 0 ? 'ileri' : 'geri';
+  const ongoruNokta = nokta ? nokta : sonNet < 0 && egim > 0 ? sonra(months, -sonNet / egim) : null;
+  const sonKum = kumNet[kumNet.length - 1];
+  const ongoruGeri = geriOdeme ? geriOdeme : sonKum < 0 && sonNet > 0 ? sonra(months, -sonKum / sonNet) : sonKum < 0 && egim > 0 && sonNet <= 0 ? null : null;
+  const ongoru = { sonNet, egim, nokta: ongoruNokta, geriOdeme: ongoruGeri, yon };
+  // Klasik başabaş noktası: kararlı dönem sabit gideri ve fiyatı (son 12 ay ortalaması), satıcı başına karışık aylık gelir.
+  const sonFiyat = (xs: number[]) => avg(xs.slice(Math.max(0, months.length - 12)));
+  const gelirBirim = r2((1 - inputs.annualShare) * sonFiyat(sim.fiyat.abonelik) + (inputs.annualShare * sonFiyat(sim.fiyat.yillik)) / 12);
   const degisken = f.primDahil ? r2((1 - inputs.retention) * p.commission) : 0;
   const sabit = r2(avg(fixed.values.slice(Math.max(0, months.length - 12))));
   const birimKar = gelirBirim - degisken;
@@ -200,6 +264,7 @@ export function computeBreakeven(p: Params, prog: ProgramModel, rev: Revenue, sc
     kumNet,
     nokta,
     geriOdeme,
+    ongoru,
     enDusuk: { deger: kumNet[minT], t: minT },
     toplam: { gelir: sum(gelir), gider: sum(gider), net: sum(net) },
     adet: {

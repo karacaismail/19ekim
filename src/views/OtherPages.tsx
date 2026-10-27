@@ -43,6 +43,7 @@ function HiringContent() {
   const [sid, setSid] = useScenario();
   const st = m.staffing.byId[sid];
   const sc = st.scenario;
+  const H = m.staffing.horizon;
   const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
   /** Takvim ayları: ilk olaydan son olaya. */
   const CALENDAR_MONTHS: string[] = [];
@@ -125,7 +126,7 @@ function HiringContent() {
         id="katki"
         index={3}
         title="Görev, gider ve gelir katkısı (senaryo)"
-        desc="İstihdam planı gelir planına yedirilmiştir (kullanıcı kararı 2026-10-27): her rolün görevi, işveren maliyeti ve seçili senaryoda 18 ayda gelire katkısı. Katkı, gelir planı simülasyonunda o kaynak olmasaydı kaybedilecek gelirdir; dolaylı rollerin katkısı modellenmez. Seçim gelir planı ve nakit akış tablosuyla ortaktır."
+        desc={`İstihdam planı gelir planına yedirilmiştir (kullanıcı kararı 2026-10-27): her rolün görevi, işveren maliyeti ve seçili senaryoda ${H} ayda gelire katkısı. Katkı, gelir planı simülasyonunda o kaynak olmasaydı kaybedilecek gelirdir; dolaylı rollerin katkısı modellenmez. Seçim gelir planı ve nakit akış tablosuyla ortaktır.`}
         tools={
           <Araclar role={sc.role}>
             <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
@@ -134,14 +135,14 @@ function HiringContent() {
       >
         <Stats
           items={[
-            { label: 'Kadro gideri, 18 ay', value: lira(st.toplam.gider), note: `${sc.name} · maaşlı roller + reklam bütçesi + temsilci primi` },
-            { label: 'Gelire katkı, 18 ay', value: lira(st.toplam.katki), note: `${sc.name} · kaynakların toplamı` },
+            { label: `Kadro gideri, ${H} ay`, value: lira(st.toplam.gider), note: `${sc.name} · maaşlı roller + reklam bütçesi + temsilci primi` },
+            { label: `Gelire katkı, ${H} ay`, value: lira(st.toplam.katki), note: `${sc.name} · kaynakların toplamı` },
             { label: 'Net (katkı − gider)', value: lira(st.toplam.net), note: 'Ofis, yazılım ekibi ve YZ araçları hariç' },
           ]}
         />
         <DataTable
           id="istihdam-katki"
-          title={`Rol, görev, gider ve gelire katkı, 18 ay (${sc.name.toLocaleLowerCase('tr-TR')})`}
+          title={`Rol, görev, gider ve gelire katkı, ${H} ay (${sc.name.toLocaleLowerCase('tr-TR')})`}
           tools={
             <Araclar role={sc.role}>
               <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
@@ -153,7 +154,7 @@ function HiringContent() {
             { key: 'y', header: 'Gelire katkı yolu', minWidth: '16rem', render: (x) => x.role.katkiYolu },
             { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => kisaTarih(x.role.startIso) },
             { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${lira(m.params.commission)} / satış` : lira(x.role.maliyet)) },
-            { key: 'c', header: '18 ay gider', nowrap: true, render: (x) => lira(x.gider) },
+            { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => lira(x.gider) },
             { key: 'k', header: 'Gelire katkı', nowrap: true, render: (x) => (x.dogrudan ? lira(x.katki) : 'Dolaylı') },
             { key: 'n', header: 'Net', nowrap: true, render: (x) => lira(x.net) },
           ]}
