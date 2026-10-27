@@ -98,7 +98,7 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   align-items: center;
   min-height: var(--hit-min);
   padding: 0 var(--space-4);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background: var(--accent);
   color: var(--text-on-accent);
   font-weight: var(--weight-semibold);
@@ -271,7 +271,7 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   min-height: var(--hit-min);
   padding: 0 var(--space-2);
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background-color: transparent;
   color: var(--text-primary);
   font: inherit;
@@ -298,7 +298,7 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   width: var(--switch-w);
   height: var(--switch-h);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-track-off);
   transition-property: background-color, border-color;
   transition-duration: var(--motion-duration-base);
@@ -312,7 +312,7 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
   left: var(--switch-pad);
   width: var(--switch-thumb);
   height: var(--switch-thumb);
-  border-radius: 50%;
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-thumb-off);
   transition-property: transform, background-color;
   transition-duration: var(--motion-duration-base);
@@ -536,7 +536,7 @@ html[data-js] .theme-toggle[hidden] {
   gap: var(--space-2);
   min-height: var(--hit-min);
   padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
@@ -961,7 +961,7 @@ html:not([data-js]) .giris-form {
   flex: none;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--tone-bg);
   color: var(--tone-fg);
 }
@@ -969,7 +969,7 @@ html:not([data-js]) .giris-form {
 .avatar-lg {
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
 }
 
 /* İstihdam açılır menüsü: tetikleyici gezinme bağlantısıyla aynı; panel markalı yüzeyde (Mantine Menu). */
@@ -1000,7 +1000,7 @@ html:not([data-js]) .giris-form {
   overscroll-behavior: contain;
   padding: var(--space-1);
   border: var(--hairline) solid var(--rule);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-overlay);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
 }
@@ -1011,7 +1011,7 @@ html:not([data-js]) .giris-form {
   gap: var(--space-2);
   min-height: var(--hit-min);
   padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background-color: transparent;
   color: var(--text-primary);
   font-size: var(--text-md);
@@ -1057,7 +1057,7 @@ html:not([data-js]) .giris-form {
   place-items: center;
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 50%;
+  border-radius: var(--radius-surface);
   /* Rolü olmayan öğe (ör. Organizasyon) nötr rozet */
   background: var(--tone-bg, var(--surface-sunken));
   color: var(--tone-fg, var(--text-secondary));
@@ -1084,6 +1084,134 @@ html:not([data-js]) .giris-form {
 
 .mainnav-link[data-role]::before {
   display: none;
+}
+
+/* ---------- Gezinme çekmecesi (ux.md §3, M01/M02; kullanıcı kararı 2026-10-27) ----------
+ * Taban dar ekrandır: markanın altında “Menü” düğmesi (ilk satırda marka ve tema düğmesi kalır), tam gezinme sağdan
+ * açılan çekmecede. 48em’den itibaren AppFrame şeridi çizer, çekmece hiç mount edilmez.
+ */
+.cekmece-satir {
+  order: 3;
+  flex: 1 0 100%;
+  display: flex;
+}
+
+.cekmece-tetik {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  margin-inline-start: calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.cekmece-tetik:hover,
+.cekmece-tetik[aria-expanded='true'] {
+  background-color: var(--surface-hover);
+}
+
+.cekmece {
+  color: var(--text-primary);
+  background-color: var(--surface-page);
+  border-inline-start: var(--hairline) solid var(--rule);
+}
+
+.cekmece-ust {
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--page-gutter);
+  background-color: var(--surface-page);
+  border-bottom: var(--hairline) solid var(--rule);
+}
+
+.cekmece-baslik {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.cekmece-kapat {
+  min-width: var(--hit-min);
+  min-height: var(--hit-min);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.cekmece-kapat:hover {
+  background-color: var(--surface-hover);
+}
+
+/* Simge düğmesinde metin alt çizgisi görünmez: klavye odağı sol kenarda düz çubuk. */
+html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
+.cekmece-govde {
+  padding: var(--space-2) var(--page-gutter) var(--space-6);
+}
+
+.cekmece-grup + .cekmece-grup,
+.cekmece-grup + .cekmece-liste-ortak {
+  margin-top: var(--space-4);
+}
+
+.cekmece-grup-ad {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-1);
+  min-height: var(--space-8);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.cekmece-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cekmece-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--hit-min);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.cekmece-link:hover {
+  background-color: var(--surface-hover);
+}
+
+.cekmece-link[aria-current='page'],
+.cekmece-link[data-section='true'] {
+  background-color: var(--surface-selected);
+  font-weight: var(--weight-semibold);
 }
 
 /* Ağaç yolu ve sunum sırası; kırıntı satırının sağında sayfa araçları (ör. Giderler canlı durumu) */
@@ -1232,7 +1360,7 @@ html:not([data-js]) .giris-form {
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background-color: var(--surface-raised);
   color: var(--text-primary);
   text-decoration: none;
@@ -1287,7 +1415,7 @@ html:not([data-js]) .giris-form {
   position: relative;
   height: var(--chart-h-md);
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -1435,7 +1563,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
 
 .cal {
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -1459,7 +1587,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   width: 100%;
   min-width: 2.25rem;
   height: 2.5rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   color: var(--text-primary);
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
@@ -1496,7 +1624,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   width: 0.75rem;
   height: 0.75rem;
   margin-top: 0.35rem;
-  border-radius: var(--radius-pill);
+  border-radius: 50%;
   background: var(--tone);
 }
 
@@ -1541,7 +1669,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -1647,7 +1775,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   margin-top: var(--space-6);
   max-width: var(--prose-max);
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-accent);
 }
 
@@ -1679,7 +1807,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background-color: var(--surface-raised);
   scrollbar-width: thin;
 }
@@ -1759,9 +1887,171 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   }
 }
 
+/* ---------- Kayıt görünümü (ux.md §8.2, M09 RecordAccordion) ----------
+ * Dar alanda tablo yerine kayıt listesi (ui.tsx → DataTable kabuk seçimi); taban dar ekrandır, geniş ekranda aynı veri
+ * semantik tablodur. Başlık düğmesi tüm satır genişliğinde hedef (≥ 44 px), ok sağda; alanlar dl/dt/dd iki sütun;
+ * sayılar tablo rakamlarıyla. Kritik tutar kesilmez (Mantine etiketinin ellipsis’i kapatılır).
+ */
+.kayitlar-sarmal {
+  margin-top: var(--space-2);
+}
+
+.kayitlar {
+  border-top: var(--hairline) solid var(--rule-strong);
+}
+
+.kayit {
+  border-bottom: var(--hairline) solid var(--rule);
+}
+
+.kayit-h {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+}
+
+.kayit-baslik {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.kayit-baslik:hover {
+  background-color: var(--surface-hover);
+}
+
+.kayit-etiket {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.kayit-ad {
+  min-width: 0;
+  font-weight: var(--weight-semibold);
+}
+
+/* Kayıt adı ya da alan değeri hap ise (rol, durum) dar alanda sarılır; tutar ve ad kesilmez. */
+.kayit-ad .chip,
+.kayit-alanlar .chip,
+.kayit-ozet .chip {
+  white-space: normal;
+}
+
+.kayit-ozet {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.kayit-ozet-etiket {
+  color: var(--text-secondary);
+}
+
+.kayit-ozet-deger {
+  font-variant-numeric: tabular-nums;
+}
+
+.kayit-ok {
+  flex: none;
+  color: var(--text-secondary);
+  transition-property: transform;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.kayit-icerik {
+  padding: 0 0 var(--space-3);
+}
+
+.kayit-alanlar {
+  display: grid;
+  margin: 0;
+}
+
+.kayit-alanlar > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 2fr) minmax(0, 3fr);
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.kayit-alanlar dt {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.kayit-alanlar dd {
+  margin: 0;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tek veri sütunlu tablo: düz tanım listesi (açılır panel yok). */
+.kayitlar-duz {
+  margin: var(--space-2) 0 0;
+  border-top: var(--hairline) solid var(--rule-strong);
+}
+
+.kayit-duz {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--rule);
+}
+
+.kayit-duz .kayit-ad {
+  margin: 0;
+}
+
+.kayit-duz .kayit-ozet {
+  margin: 0;
+}
+
+.kayit-duz[data-tone='total'] {
+  background-color: var(--surface-accent);
+}
+
+.kayit[data-tone='total'] .kayit-baslik,
+.kayit[data-tone='net'] .kayit-baslik,
+.kayit[data-tone='nakit'] .kayit-baslik {
+  background-color: var(--surface-accent);
+}
+
+.kayit[data-tone='secili'] .kayit-baslik {
+  background-color: var(--surface-selected);
+}
+
 /* ---------- Kenar sistemi ----------
- * Vurgu çizgisi yalnız buradan, daima düz çizilir. Çizginin değdiği iki köşe radiussuz olur;
- * öğenin diğer köşeleri ve projedeki bütün diğer radiuslar korunur (kavisli kenar yasağı).
+ * Vurgu çizgisi yalnız buradan, daima düz çizilir. Çizginin değdiği iki köşe her durumda radiussuzdur;
+ * köşe sözleşmesi (ux.md §6.3, 2026-10-27) ile yüzeylerin bütün köşeleri zaten 0, hap ve anahtar dışında kavis yok.
  * Kullanım: data-edge="start" | "top". Renk: --edge-color (varsayılan rol tonu, yoksa vurgu).
  */
 [data-edge] {
@@ -1827,7 +2117,7 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   min-height: var(--hit-min);
   padding: 0 var(--space-4);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
@@ -1921,7 +2211,7 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
 }
 
 .quiz-item {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -1986,7 +2276,7 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
   min-height: var(--hit-min);
   padding: 0 var(--space-3);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: transparent;
   color: var(--text-primary);
   font: inherit;
@@ -2062,7 +2352,7 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
   min-height: var(--hit-min);
   padding: 0 var(--space-3);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: transparent;
   color: var(--text-link);
   font: inherit;
@@ -2115,7 +2405,7 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
   gap: var(--space-1) var(--space-3);
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -2282,7 +2572,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   gap: var(--space-1);
   min-height: 11rem;
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--tone-bg);
   color: var(--tone-fg);
 }
@@ -2293,7 +2583,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   width: 2.75rem;
   height: 2.75rem;
   margin-bottom: var(--space-2);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   color: var(--tone);
 }
@@ -2334,7 +2624,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -2369,7 +2659,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
 }
 
 .email-compose {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
 }
@@ -2414,7 +2704,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   place-items: center;
   width: 1.75em;
   height: 1.75em;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface-accent);
   color: var(--accent-strong);
   letter-spacing: 0;
@@ -2444,7 +2734,7 @@ html[data-focus-mode='keyboard'] .note-row:has(.note-check-input:focus-visible) 
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-5);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-control);
   color: var(--text-primary);
   font: inherit;
@@ -2559,7 +2849,7 @@ html:not([data-js]) .email-btn {
 .opex-num,
 .opex-hero-value,
 .opex-tile-value {
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background-color: transparent;
   transition-property: background-color;
   transition-duration: var(--motion-duration-base);
@@ -2578,7 +2868,7 @@ html:not([data-js]) .email-btn {
   flex: none;
   inline-size: 0.625rem;
   block-size: 0.625rem;
-  border-radius: var(--radius-pill);
+  border-radius: 50%;
   background: var(--viz-dot, var(--viz-1));
 }
 
@@ -2645,7 +2935,7 @@ html:not([data-js]) .email-btn {
   display: grid;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4) var(--space-4);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: var(--radius-surface) var(--radius-surface) 0 0;
   background-color: var(--surface-sunken);
 }
 
@@ -2715,7 +3005,7 @@ html:not([data-js]) .email-btn {
   inline-size: 2.25rem;
   block-size: 1.25rem;
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-track-off);
   transition-property: background-color;
   transition-duration: var(--motion-duration-fast);
@@ -2729,7 +3019,7 @@ html:not([data-js]) .email-btn {
   inset-inline-start: 0.1875rem;
   inline-size: 0.8125rem;
   block-size: 0.8125rem;
-  border-radius: 50%;
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-thumb-off);
   transform: translateY(-50%);
   transition-property: transform, background-color;
@@ -2783,7 +3073,7 @@ html:not([data-js]) .email-btn {
   width: 100%;
   padding: 0 var(--space-3);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   text-align: start;
   cursor: pointer;
 }
@@ -2931,7 +3221,7 @@ html:not([data-js]) .email-btn {
   min-height: var(--hit-min);
   padding: 0 var(--space-2);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background: var(--surface-page);
   color: var(--text-primary);
   font: inherit;
@@ -3082,8 +3372,8 @@ html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
 .opex-hero {
   padding: var(--space-3) var(--space-4);
   /* Üst kenarda düz vurgu çizgisi (data-edge="top"): yalnız çizginin değmediği alt köşeler yuvarlak. */
-  border-end-start-radius: var(--radius-md);
-  border-end-end-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-surface);
+  border-end-end-radius: var(--radius-surface);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
 }
@@ -3126,7 +3416,7 @@ html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
 
 .opex-tile {
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -3237,7 +3527,7 @@ html[data-focus-mode='keyboard'] .opex-col-search:focus-visible {
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-control);
   color: var(--text-primary);
   font: inherit;
@@ -3300,7 +3590,7 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
   max-width: var(--prose-max);
   margin-top: var(--space-8);
   padding: var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
 }
@@ -3377,7 +3667,7 @@ html[data-focus-mode='keyboard'] .opex-check:has(:focus-visible) .opex-check-lab
 .opex-error {
   margin: 0;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--status-bekliyor-bg);
   color: var(--status-bekliyor-fg);
   font-weight: var(--weight-medium);
@@ -3439,7 +3729,7 @@ html[data-focus-mode='keyboard'] .opex-check:has(:focus-visible) .opex-check-lab
   block-size: var(--hit-min);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background-color: transparent;
   color: var(--text-secondary);
   cursor: pointer;
@@ -3472,7 +3762,7 @@ p.opex-live-stale {
   flex: none;
   inline-size: 0.75rem;
   block-size: 0.75rem;
-  border-radius: var(--radius-pill);
+  border-radius: 50%;
   background: var(--status-karar-fg);
 }
 
@@ -3513,7 +3803,7 @@ p.opex-live-stale {
   gap: var(--space-5);
   margin-top: var(--space-8);
   padding: var(--space-6) var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
 }
@@ -3585,7 +3875,7 @@ p.opex-live-stale {
 
 .opex-skel {
   display: block;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-sunken);
 }
 
@@ -3669,7 +3959,7 @@ html[data-js] .opex-nojs {
   margin-bottom: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
@@ -3699,7 +3989,7 @@ html[data-js] .opex-nojs {
 
 .opex-year-panel {
   padding: var(--space-3) var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-sunken);
 }
 
@@ -3985,7 +4275,7 @@ html[data-js] .opex-nojs {
   inline-size: 2.75rem;
   block-size: 1.5rem;
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-track-off);
   transition-property: background-color;
   transition-duration: var(--motion-duration-fast);
@@ -3999,7 +4289,7 @@ html[data-js] .opex-nojs {
   inset-inline-start: 0.1875rem;
   inline-size: 1rem;
   block-size: 1rem;
-  border-radius: 50%;
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-thumb-off);
   transform: translateY(-50%);
   transition-property: transform, background-color;
@@ -4130,7 +4420,7 @@ html[data-focus-mode='keyboard'] .applet-hucre .param-input:focus-visible {
   min-height: var(--hit-min);
   padding: 0 var(--space-4);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background-color: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
@@ -4251,7 +4541,7 @@ html[data-focus-mode='keyboard'] .applet-hucre .param-input:focus-visible {
   grid-template-rows: auto auto;
   gap: var(--space-1) var(--space-2);
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -4364,7 +4654,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   gap: var(--space-3);
   min-height: var(--hit-min);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   background-color: transparent;
   color: var(--text-primary);
   font-weight: var(--weight-medium);
@@ -4391,7 +4681,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   place-items: center;
   inline-size: 1.75rem;
   block-size: 1.75rem;
-  border-radius: 50%;
+  border-radius: var(--radius-surface);
   background-color: var(--surface-sunken);
   color: var(--text-secondary);
   font-size: var(--text-sm);
@@ -4414,7 +4704,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   gap: var(--space-3);
   margin-bottom: var(--space-8);
   padding: var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background-color: var(--surface-raised);
 }
 
@@ -4465,7 +4755,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   .applet-gezgin {
     display: block;
     padding: var(--space-4) var(--space-3);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-surface);
     background-color: var(--surface-raised);
   }
 }
@@ -4523,7 +4813,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   margin-bottom: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
@@ -4613,7 +4903,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 
 .ortak-panel {
   padding: var(--space-2) var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-sunken);
 }
 
@@ -4654,7 +4944,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-secondary);
   font: inherit;
@@ -4688,7 +4978,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   min-width: 1.5rem;
   height: 1.5rem;
   padding: 0 var(--space-1);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface-control);
   color: var(--text-secondary);
   font-size: var(--text-sm);
@@ -4746,7 +5036,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 
 .ortak-kart {
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -4782,8 +5072,8 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   flex-direction: column;
   padding: var(--space-4) var(--space-5);
   /* Üst kenar renkli çizgi (kenar sistemi): üst köşeler düz, yalnız alt köşeler yuvarlak. */
-  border-end-start-radius: var(--radius-md);
-  border-end-end-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-surface);
+  border-end-end-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -4856,7 +5146,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   min-height: var(--hit-min);
   padding: var(--space-3) var(--space-4);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
   color: var(--text-primary);
   font: inherit;
@@ -4915,7 +5205,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   inline-size: 2.25rem;
   block-size: 1.25rem;
   border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-track-off);
   transition-property: background-color;
   transition-duration: var(--motion-duration-fast);
@@ -4929,7 +5219,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   inset-inline-start: 0.1875rem;
   inline-size: 0.8125rem;
   block-size: 0.8125rem;
-  border-radius: 50%;
+  border-radius: var(--radius-switch);
   background-color: var(--toggle-thumb-off);
   transform: translateY(-50%);
   transition-property: transform, background-color;
@@ -4998,8 +5288,8 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   flex-direction: column;
   padding: var(--space-4) var(--space-5);
   /* Üst kenar renkli çizgi (kenar sistemi): çizginin değdiği üst köşeler düz, yalnız alt köşeler yuvarlak. */
-  border-end-start-radius: var(--radius-md);
-  border-end-end-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-surface);
+  border-end-end-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -5012,7 +5302,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   width: 2rem;
   height: 2rem;
   margin: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-surface);
   background: var(--tone-bg);
   color: var(--tone-fg);
   font-weight: var(--weight-bold);
@@ -5113,7 +5403,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   gap: var(--space-1);
   max-width: 100%;
   padding: var(--space-2);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--surface-control);
 }
 
@@ -5123,7 +5413,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   inset-block-start: 0;
   inset-inline-start: 0;
   z-index: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: var(--text-primary);
   transition-property: transform, width, height;
   transition-duration: var(--motion-duration-fast);
@@ -5143,7 +5433,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   min-height: var(--hit-min);
   padding: var(--space-2) var(--space-3);
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-primary);
   font: inherit;
@@ -5192,8 +5482,8 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   gap: var(--space-4) var(--space-8);
   margin-top: var(--space-5);
   padding: var(--space-4) var(--space-5) calc(var(--space-4) + var(--edge-width));
-  border-start-start-radius: var(--radius-md);
-  border-start-end-radius: var(--radius-md);
+  border-start-start-radius: var(--radius-surface);
+  border-start-end-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -5240,7 +5530,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   margin-top: var(--space-5);
   padding: var(--space-5) var(--space-5) var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 
@@ -5277,7 +5567,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 .kurucu {
   margin-top: var(--space-6);
   padding: var(--space-5) var(--space-5) var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
 

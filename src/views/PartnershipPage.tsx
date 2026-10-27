@@ -436,7 +436,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
   return (
     <>
       <Section id={`${p.id}-asama`} index={`${no}.1`} title="İlk 90 gün: beş aşama" desc={`${longDate(dates.t0)} – ${longDate(dates.end)}; hafta 1 ilk iş günüdür. Her aşamanın çıktısı ve sahibi yazılı.`}>
-        <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
+        <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
           {p.phases.map((ph) => (
             <Timeline.Item
               key={ph.no}

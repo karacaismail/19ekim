@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 784 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 805 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -88,7 +88,21 @@ sabit sayı görürseniz o bir hatadır, düzeltme fırsatıdır.
 - çevreleyen odak halkası (odak tek kenarla gösterilir: alt çizgi ya da sol çubuk);
 - 14 px altı yazı (Giderler’de 15 px) ve 300 altı yazı ağırlığı;
 - kavisli köşeye değen renkli vurgu kenarı (yalnız `[data-edge]` sistemi);
-- hareket: `cubic-bezier(.65, 0, .35, 1)`, 120–320 ms; tek istisna Giderler yükleyicisi.
+- hareket: `cubic-bezier(.65, 0, .35, 1)`, 120–320 ms; tek istisna Giderler yükleyicisi;
+- **köşe sözleşmesi (27 Ekim 2026, `docs/ux.md` §6.3):** yüzey, kontrol ve kaplama köşeleri 0; yalnız hap (kısa durum
+  etiketi) ve anahtar (iz + topuz) yuvarlak, yazısız nokta işareti 50 %. Yeni bir yuvarlak yüzey istisna kaydı ister
+  (AGENTS.md → köşe istisna kaydı); `radius="xl"` gibi yerel kaçış kapıda düşer.
+
+**UX sözleşmesi (`docs/ux.md`).** 27 Ekim 2026’da bağımsız bir UX eleştirisi kabul edildi ve paketler hâlinde
+uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıdır:
+- **Tablo dar ekranda kaymaz, kayıt listesine dönüşür.** Ortak `DataTable` 48em altında (sütunlar sığmıyorsa) her satırı
+  bir kayıt yapar: başlıkta ad + tek özet alan, açılınca bütün alanlar etiketli (`dl`). Ay sütunlu tablolarda
+  (`kayit="sutun"`) her ay bir kayıttır. Aynı veri, iki kabuk; test 1280 px tablosuyla 320 px listesini karşılaştırır.
+  Giderler kalemler tablosu ve geniş grafikler (Gantt, şemalar) kayıtlı istisnadır: kendi kutusunda kayar.
+- **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
+  çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
+- **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
+  en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 
 **Dar ekran tabandır.** Önce 320 px genişlik ve 320×480 ekran için yazılır, geniş ekran onun üzerine eklenir. Testler
 320 ve 390 px’te her grafiği görünür alana getirip kesilme, taşma ve çakışma arar. “Masaüstünde güzel, telefonda
@@ -155,7 +169,9 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Rol görevleri, KPI | `src/data/roles.ts`, `src/data/program.ts` |
 | Dijital pazarlama planı | `src/data/digital.ts` |
 | Organizasyon şeması | `src/data/tree.ts` |
-| Başlık, gezinme, tema | `src/components/AppFrame.tsx` |
+| Başlık, gezinme (şerit ve dar ekran çekmecesi), tema | `src/components/AppFrame.tsx` |
+| Tablo / kayıt görünümü (dar ekran), grafik kutusu, seçim anahtarı | `src/components/ui.tsx` (`DataTable`, `Chart`, `Choice`) |
+| UX sözleşmesi, kabul senaryoları, istisna kayıtları | `docs/ux.md`, AGENTS.md → “UX yeniden tasarım sözleşmesi” |
 | Renk, boşluk, yazı, hareket | `src/styles/tokens.css` (sadece burası) |
 | Giderler sayfası | `src/views/OpexPage.tsx`, veri ucu `src/data/opex.ts` |
 | Bordro ve teşvik hesabı | `apps-script/src/Motor.js` + `tests/opex-motor.spec.ts` |

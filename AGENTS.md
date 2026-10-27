@@ -272,15 +272,25 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   çizer. Tarih, hedef ve sayı değişiklikleri veriden yapılır; `tests/data.spec.ts` sayıların her yerde tutarlı olduğunu
   denetler (600 kayıt / 100 aktif, 136 satıcı-ay, kontrol noktaları, temsilci ve saha sayıları).
 - Geniş grafikler (organizasyon, karar yetkisi, Gantt) dar ekranda kendi kaydırma bölgesinde kayar; en küçük
-  genişlikler `--chart-*-min` tokenlarındadır.
+  genişlikler `--chart-*-min` tokenlarındadır. Bu, ux.md §8.7’ye göre kayıtlı bir istisnadır (bkz. “UX yeniden tasarım
+  sözleşmesi” → istisna kaydı); olağan iş tabloları dar ekranda **kaymaz**, kayıt listesine dönüşür.
 
 ## Tasarım kuralları (kaynakta uygulanmış)
 
 - Tek token kaynağı `src/styles/tokens.css`; bileşenler sabit renk, yazı boyutu veya hareket değeri yazmaz.
 - Marka: iStoc turuncusu `#FF8600` + mürekkep; varsayılan font Outfit; açık ve koyu tema, tema düğmesiyle seçilir.
-- **Kavisli vurgu kenarı yasak.** Renkli vurgu çizgisi yalnız `[data-edge="start" | "top"]` kenar sistemiyle çizilir.
-  Kural, çizgiyi düz pseudo-element olarak çizer ve yalnız çizginin değdiği iki köşeyi radiussuz yapar; diğer köşeler
-  ve diğer bileşenlerin radiusu korunur. Vurgu için önce gölge (`--shadow-soft`) kullanılır.
+- **Kavisli vurgu kenarı yasak.** Renkli vurgu çizgisi yalnız `[data-edge="start" | "top" | "bottom"]` kenar sistemiyle
+  çizilir; kural çizgiyi düz pseudo-element olarak çizer, değdiği iki köşe her durumda radiussuzdur. Vurgu için önce gölge
+  (`--shadow-soft`) kullanılır.
+- **Köşe sözleşmesi (kullanıcı kararı 2026-10-27, `docs/ux.md` §6.3):** yüzey, kontrol ve kaplama köşeleri 0
+  (`--radius-surface`, `--radius-control`, `--radius-overlay`; Mantine `theme.radius` xs–lg bunlara bağlı,
+  `defaultRadius` md). Yalnız **hap** (kısa durum etiketi: `.chip`, `.opex-state`, `.opex-pill`, `.yapiskan-ad`,
+  `.bcg-flow-chip`, `.ortak-bolum-program`) `--radius-pill`, **anahtar** izi ve topuzu (`.theme-track/thumb`,
+  `.*-anahtar-iz/top`) `--radius-switch`, yazısız **nokta işareti** (sözde öğe, `.opex-dot`, `.opex-live-dot`) `50%`
+  kullanır. Eski “diğer radiuslar korunur” kabulü kalktı (ux.md §1.3): numara rozetleri, avatarlar, segmentli anahtar,
+  gezinme öğeleri, sekmeler ve kartlar köşelidir; Mantine `Timeline` `radius={0}`. Başka yüzey için köşe istisna kaydı
+  (aşağıdaki sözleşme bölümü) ve kullanıcı onayı gerekir; kapı (`check-ui-gates`) kaynağı, `tests/ui.spec.ts → köşe
+  sözleşmesi` hesaplanmış stilleri 320 ve 1280 px’te denetler.
 - Odak: çevreleyen halka yok; yalnız Tab/Shift+Tab görünür odak modunu açar; gösterge tek kenardır (metin alt çizgisi
   veya düz sol çubuk). Tablo bölgelerinde çubuk `.table-frame` üzerinde çizilir.
 - Hareket: `--motion-ease-standard: cubic-bezier(.65, 0, .35, 1)`, süre 120–320 ms; tek belgeli istisna
@@ -302,8 +312,15 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   `--brand-slash`, açık temada orijinalin #fe0000’ı). Boyut `--brand-mark-h` (büyük harf yüksekliği); “/” karakteri veya
   site fontuyla yazı imi kullanılmaz (ince ve orijinale aykırı) ve altında “Pazarlama & Finansal
   Planlama”; ≥ 64em gezinme aynı satırda, başlığın tam ortasında (üç sütunlu ızgara:
-  logo · gezinme · tema düğmesi), dar ekranda logonun altında güvenli ortalamayla (`safe center`), dar ekranda logonun altında kendi satırında
-  (bant ≥ 48em üstte sabit). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
+  logo · gezinme · tema düğmesi), 48–64em logonun altında güvenli ortalamayla (`safe center`) kendi satırında
+  (bant ≥ 48em üstte sabit). **Dar ekranda (< 48em; kullanıcı kararı 2026-10-27, ux.md §3, M01/M02) yatay kayan şerit
+  yok:** markanın altında “Menü” düğmesi (`.cekmece-tetik`, `aria-haspopup="dialog"`), tam gezinme sağdan açılan
+  çekmecede (`CekmeceGezinme`, Mantine `Drawer`: `size="min(20rem, 100%)"`, odak tuzağı, Escape, kapanınca odak
+  düğmeye döner, sayfa kaydırması kilitli; süre `--motion-duration-base`, eğri hareket tokenı; stil `.cekmece*`,
+  BaseLayout `Overlay/ModalBase/CloseButton/Drawer.layer.css`). İçerik üç grup (İstihdam 1–7 + takvim, Pazarlama,
+  Giderler) ve Notlar = 19 bağlantı; etkin sayfa `aria-current`, bölümü `data-section`. Kabuk `useMediaQuery('(min-width:
+  48em)')` ile seçilir; şerit ve çekmece aynı anda mount edilmez. Testler `tests/ui.spec.ts` (320–390 px çekmece,
+  768 px şerit, dokunmatik 48 px, 667×375 alçak ekran), `tests/giderler.spec.ts` (canlı durum Menü düğmesinin altında). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
   açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. Kırıntı “19 Ekim” ile başlar;
   `AppFrame titleInCrumbs` ile son kırıntı sayfa başlığıdır (h1, `--text-crumb-title`; Giderler: 19 Ekim › Finans › OpEx ›
   Operasyonel Giderler, ayrı başlık alanı yok). Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`:
@@ -358,8 +375,54 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   durum etiketleri tam yuvarlak hap (`.opex-state`), her durum ayrı pastel zemin (`--pill-*`: var, off, paid, due,
   missing, bordro, fatura; iki temada yazı ≥ 6,7:1). Kategori sütunu da hap (`.opex-pill`): 8 pastel çift
   (`--pill-cat-1…8`), kategoriye ilk görünüş sırasıyla, süzgeçten bağımsız. Bordro bileşenleri ve köprü tam genişlikte (yan yana yarım genişlikte etiketler gizleniyordu).
-- En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); tablolar kendi kapsayıcılarında kayar; sayfa yatay taşmaz;
+- En küçük metin 14 CSS px, Giderler sayfasında 15 CSS px (grafik SVG metinleri dahil); en ince yazı ağırlığı 300 (kullanıcı kararı 2026-10-19); sayfa yatay taşmaz;
   bağımsız kontrol ve bağlantılar en az 44 CSS px (kaba işaretçide 48).
+- **Uyarlanır veri görünümü (kullanıcı kararı 2026-10-27, ux.md §8; M08 `AdaptiveDataView` + M09 `RecordAccordion`):**
+  ortak `DataTable` (`src/components/ui.tsx`) aynı sütun/satır modelini iki kabukta sunar, iki kabuk aynı anda mount
+  edilmez. Taban dar ekrandır: kapsayıcı 48em’den darsa ve sütunların okunabilir toplam genişliği (`Column.minWidth`,
+  yoksa 7rem) sığmıyorsa — ya da tablo ölçülünce taşıyorsa (güvenlik ağı) — **kayıt listesi** çizilir: Mantine
+  `Accordion` (`multiple`, `order={4}`, süre `--motion-duration-base`, eğri `--motion-ease-standard`); her kayıt başlığı
+  h4 içinde düğme (`aria-expanded`, `aria-controls` → `role="region"` panel), içinde kayıt adı (`.kayit-ad`, satır başlığı
+  sütunu) ve tek özet alan (`.kayit-ozet`: `Column.summary` ya da ilk veri sütunu); açılan panelde diğer alanlar
+  `dl.kayit-alanlar` (dt = sütun başlığı ya da `Column.label`, dd = hücre). Birden çok kayıt açık kalabilir; açık
+  kayıtlar `rowKey` kimliğiyle saklanır (kabuk değişince kaybolmaz). Kayıt ekseni `kayit="sutun"` ay sütunlu tablolarda
+  (nakit akış tablosu, hedefler kaynak × ay): sütun = kayıt, satırlar alan, özet son satır (dönem sonu / toplam) — ux.md
+  §8.5 PeriodExplorer. Geniş alanda semantik tablo; yalnız ≥ 48em’de gerekirse kendi kutusunda kayar (sabit Kalem
+  sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. Giderler kalemler tablosu (`KalemTablosu`, `.opex-veri`)
+  henüz kendi veri ızgarasındadır (kayıtlı istisna, sonraki paket). Testler: `tests/ui.spec.ts` (320/360/375/390’da
+  kayan tablo yok, kayıt sözleşmesi, Enter/Space/Tab, 1280 ↔ 320 bilgi eşdeğerliği), `tests/nakit.spec.ts` (ay başına
+  kayıt, 15 ay + Toplam, tablo ile aynı değerler), `tests/gelir.spec.ts` (320 px kadro kayıtları).
+
+## UX yeniden tasarım sözleşmesi (docs/ux.md, kullanıcı kararı 2026-10-27)
+
+Bağımsız (Codex) UX eleştirisi `docs/ux.md` içindedir; kullanıcı 2026-10-27’de “risk almadan, TDD-first, verileri
+koruyarak uygula” kararı verdi. Uygulama paketler hâlinde, her paket önce kırmızı test (RED), sonra en küçük uygulama
+(GREEN), tam yerel QA ve yayın. Veri modeli (`src/data/*`) ve hesaplar hiçbir pakette değişmez; `tests/data.spec.ts`
+bunu denetler.
+
+| Paket | ux.md | Durum | Kanıt |
+|---|---|---|---|
+| P1 Köşe sözleşmesi: radius tokenları, Mantine ölçeği, hap/anahtar/nokta istisnaları | §6.3, UX-26 | **Tamam** (2026-10-27) | `check-ui-gates` köşe kuralı; `ui.spec.ts → köşe sözleşmesi` (320, 1280) |
+| P2 Uyarlanır veri görünümü: `DataTable` kayıt listesi (RecordAccordion, PeriodExplorer ekseni) | §8.1–8.6, UX-01/02/03/07 | **Tamam** (2026-10-27) | `ui.spec.ts → uyarlanır veri görünümü`, 320–390 px kayan tablo yok; `nakit.spec.ts`; `gelir.spec.ts` |
+| P3 Gezinme: < 48em’de yatay kayan şerit yerine tam gezinme çekmecesi (Drawer) | §3, M01/M02 | **Tamam** (2026-10-27) | `ui.spec.ts` çekmece testleri (320–390, dokunmatik, 667×375); `giderler.spec.ts` 320 px |
+| P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | Bekliyor | — |
+| P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
+| P6 Sayfa başlığı/hiyerarşi (`PageHeader`, `ResultSummary`), parametre grupları, durum sözleşmeleri | §3, §5, §9 | Bekliyor | — |
+
+**Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
+durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,
+`.opex-pill`, `.yapiskan-ad`, `.bcg-flow-chip`, `.ortak-bolum-program`) — kısa durum/kategori etiketi, pill şekli etiketi
+eylemden ayırır; yalnız metin etiketi; onay ux.md §1.1; kapı + tarayıcı testi. **K-02** anahtar izi/topuzu (`Switch`:
+tema anahtarı, `Anahtar` role="switch" bileşenleri) — ikili durum göstergesi; onay ux.md §1.1. **K-03** yazısız nokta
+işareti (rol noktası, menü noktası, legend/durum noktası ≤ 16 px) — semantik çizim geometrisi; sözde öğe ya da `.opex-dot`
+/ `.opex-live-dot`. Başka yüzey (avatar, numara rozeti, kart, sekme, düğme) kayıtsızdır ve köşelidir.
+
+**Yatay kaydırma istisna kaydı** (ux.md §8.7): **Y-01** geniş grafikler (`Chart wide`: organizasyon şeması, karar
+yetkisi şeması, Gantt’lar; `.chart-scroll`) — iki boyutlu şema/zaman çizelgesi başka düzende aynı ilişkiyi vermiyor;
+mobil eşdeğer erişim: Gantt’ın tablosu aynı sayfada kayıt listesi, şemanın rol sayfaları menüde; klavye ile kayar
+(`role="region"`, `tabIndex=0`, ok tuşları), görünür “Grafiği yatay kaydırabilirsiniz” notu; P5 tamamlanınca yeniden
+değerlendirilir. **Y-02** Giderler kalemler tablosu (`.opex-veri .table-scroll`) — sıralama/filtre/sabit sütunlu veri
+ızgarası; P4’e kadar kayar; `ui.spec.ts` dar ekran denetimi bu bölgeyi açıkça dışlar.
 
 ## Gizlilik ve yayın
 
@@ -416,8 +479,9 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 | Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
 
 `scripts/check-ui-gates.mjs` şunları reddeder: token dışı hareket, `transition: all`, çevreleyen odak halkası,
-14 px altı yazı, 300 altı yazı ağırlığı (CSS, tokenlar, JS ve satır içi HTML), zorlayıcı kelime bölme, radiuslu öğede iç gölge çubuğu veya renkli vurgu kenarı, eksik kenar
-sistemi köşe sıfırlaması ve JS içinde sabit easing/süre. Kenarlık rengi ve kalınlığı (kısaltma ve uzun biçimler)
+14 px altı yazı, 300 altı yazı ağırlığı (CSS, tokenlar, JS ve satır içi HTML), zorlayıcı kelime bölme, iç gölge çubuğu veya renkli vurgu kenarı, eksik kenar
+sistemi köşe sıfırlaması, JS içinde sabit easing/süre ve **köşe sözleşmesi dışı radius** (yüzeyde 0 dışı değer; `--radius-pill` yalnız hap,
+`--radius-switch` yalnız anahtar, `50%` yalnız nokta seçicilerinde; `--radius-sm/md/lg` gibi tanımsız token; Mantine `radius=` yalnız `{0}`). Kenarlık rengi ve kalınlığı (kısaltma ve uzun biçimler)
 yalnız nötr tokenlarla yazılır: `--rule`, `--rule-strong`, `--hairline`, `--text-primary`. Tarayıcı testi ayrıca tüm sayfalarda yuvarlak köşeye değen
 tek kenarlıkları, dört kenarlı kutuda farklı renkli tek kenarı ve yuvarlak öğe kenarındaki sözde öğe çubuklarını
 reddeder. 320 ve 390 px’te her grafik görünür alana getirilip SVG metinlerinde kesilme (…), taşma ve çakışma aranır.

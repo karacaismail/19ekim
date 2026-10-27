@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Checkbox, NumberInput, Select, TextInput } from '@mantine/core';
-import { useMotionMs } from './AppFrame';
+import { useMotionMs } from '../lib/motion';
 import { yuvarla, type Durum } from '../data/applet';
 
 /**

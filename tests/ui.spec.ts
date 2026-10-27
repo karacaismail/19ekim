@@ -81,7 +81,27 @@ async function audit(page: Page) {
       // Kaydırılan bölge ya bir tablo ya da geniş bir grafik taşır.
       hasContent: !!r.querySelector(r.classList.contains('chart-scroll') ? '.chart-canvas' : 'table'),
     }));
-    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions };
+    // ux.md §8 (UX-01): dar ekranda olağan iş tablosu yatay kaydırmaz; kayıt listesine (RecordAccordion) dönüşür.
+    // Kayıtlı istisnalar (AGENTS.md → istisna kaydı): geniş grafikler (.chart-scroll, §8.7) ve Giderler kalemler
+    // tablosu (.opex-veri; ayrı pakette dönüştürülür).
+    const tableOverflow = [...document.querySelectorAll<HTMLElement>('.table-scroll:not(.chart-scroll)')]
+      .filter((r) => !r.closest('.opex-veri') && r.scrollWidth > r.clientWidth + 1)
+      .map((r) => document.getElementById(r.getAttribute('aria-labelledby') ?? '')?.textContent?.trim() ?? r.getAttribute('aria-label') ?? '?');
+    // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık h4 içinde düğme (aria-expanded, aria-controls → panel),
+    // alanlar dl/dt/dd ile etiketli, hedef alanı en az 44 CSS px.
+    const records = [...document.querySelectorAll<HTMLElement>('.kayit')].map((k) => {
+      const btn = k.querySelector<HTMLButtonElement>('h4 button');
+      const controls = btn?.getAttribute('aria-controls') ?? '';
+      return {
+        button: !!btn,
+        expanded: btn?.getAttribute('aria-expanded') ?? null,
+        panel: !!(controls && document.getElementById(controls)),
+        dt: k.querySelectorAll('dl.kayit-alanlar dt').length,
+        dd: k.querySelectorAll('dl.kayit-alanlar dd').length,
+        hit: btn ? btn.getBoundingClientRect().height : 0,
+      };
+    });
+    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, records };
   });
 }
 
@@ -102,27 +122,117 @@ test.describe('yerleşim ve okunabilirlik', () => {
           expect(region, `${path} kaydırma bölgesi`).toMatchObject({ role: 'region', tabindex: '0', hasContent: true });
           expect(region.label.length, `${path} tablo bölgesi etiketi`).toBeGreaterThan(0);
         }
+        // Dar ekranda (< 48em) olağan tablo yatay kaydırmaz (ux.md §8, UX-01); kayıt görünümü sözleşmeye uyar.
+        if (width < 768) expect(result.tableOverflow, `${path} dar ekranda tablo yatay kayıyor`).toEqual([]);
+        for (const record of result.records) {
+          expect(record, `${path} kayıt başlığı`).toMatchObject({ button: true, panel: true });
+          expect(['true', 'false'], `${path} kayıt aria-expanded`).toContain(record.expanded);
+          expect(record.dt, `${path} kayıt alanları`).toBeGreaterThan(0);
+          expect(record.dd, `${path} kayıt alan değerleri`).toBe(record.dt);
+          expect(record.hit, `${path} kayıt başlığı hedef alanı`).toBeGreaterThanOrEqual(44);
+        }
       }
     });
   }
 
-  test('320 px: geniş tablo ve Gantt kendi kapsayıcısında klavyeyle kayar', async ({ page, browserName }) => {
-    test.skip(
-      browserName === 'webkit',
-      'not_run: Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamıyor (sayfa kaydırmada da aynı); gerçek Safari’de elle doğrulanmalı',
-    );
+  // Kullanıcı kararı 2026-10-27 (docs/ux.md §1.3, §8.1): eski “tablo dar ekranda kendi içinde kayar” kabulü kalktı.
+  // Olağan iş tablosu 320 px’te kayıt listesidir; yalnız geniş Gantt/şema grafikleri §8.7 istisna kaydıyla kayar.
+  test('320 px: tablo kayıt listesine dönüşür (yatay kaydırma yok); geniş Gantt tek kayıtlı istisna olarak klavyeyle kayar', async ({ page, browserName }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('eylem-plani/');
     await icerik(page);
-    for (const selector of ['.table-scroll:not(.chart-scroll)', '.chart-scroll']) {
-      const region = page.locator(selector).first();
+    await expect(page.locator('.table-scroll:not(.chart-scroll)')).toHaveCount(0);
+    await expect(page.locator('.kayitlar').first().locator('.kayit').first()).toBeVisible();
+    expect((await audit(page)).tableOverflow).toEqual([]);
+    if (browserName !== 'webkit') {
+      // not_run WebKit: Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamıyor; gerçek Safari’de elle doğrulanmalı.
+      const region = page.locator('.chart-scroll').first();
       const widths = await region.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
-      expect(widths.scroll, selector).toBeGreaterThan(widths.client);
+      expect(widths.scroll, 'Gantt istisnası').toBeGreaterThan(widths.client);
       await region.focus();
       for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight');
-      await expect.poll(() => region.evaluate((el) => el.scrollLeft), { message: selector }).toBeGreaterThan(0);
+      await expect.poll(() => region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
     }
     expect((await audit(page)).overflow).toBeLessThanOrEqual(0);
+  });
+});
+
+/** Tablo gövdesini kayıt/alan listesine çevirir: satır başlığı kayıt adı, diğer sütunlar [başlık, değer] çiftleri. */
+async function tabloKayitlari(blok: ReturnType<Page['locator']>) {
+  return blok.evaluate((el) => {
+    const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    const headers = [...el.querySelectorAll('thead th')].map(t);
+    return [...el.querySelectorAll('tbody tr')].map((tr) => {
+      const cells = [...tr.children];
+      const rhi = Math.max(0, cells.findIndex((c) => c.tagName === 'TH'));
+      return { title: t(cells[rhi]), fields: headers.map((h, i) => [h, t(cells[i])] as [string, string]).filter((_, i) => i !== rhi) };
+    });
+  });
+}
+
+/** Kayıt listesini okur: başlıktaki özet alanı ilk alan, ardından açık/kapalı panelin dl çiftleri. */
+async function kayitListesi(blok: ReturnType<Page['locator']>) {
+  return blok.evaluate((el) => {
+    const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    return [...el.querySelectorAll('.kayit')].map((k) => {
+      const ozet = k.querySelector('.kayit-ozet');
+      const fields: [string, string][] = ozet ? [[t(ozet.querySelector('.kayit-ozet-etiket')), t(ozet.querySelector('.kayit-ozet-deger'))]] : [];
+      for (const div of k.querySelectorAll('dl.kayit-alanlar > div')) fields.push([t(div.querySelector('dt')), t(div.querySelector('dd'))]);
+      return { title: t(k.querySelector('.kayit-ad')), fields };
+    });
+  });
+}
+
+test.describe('uyarlanır veri görünümü (ux.md §8, M08/M09)', () => {
+  test('320 px eylem planı: kayıt başlığı h4 içinde düğme; Enter/Space açar kapatır; kapalı panele Tab gitmez; alanlar dl ile etiketli (UX-01, UX-07)', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto('eylem-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kayit = page.locator('.table-block').first().locator('.kayit').first();
+    const dugme = kayit.locator('h4 button');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    const panelId = await dugme.getAttribute('aria-controls');
+    expect(panelId).toBeTruthy();
+    const panel = page.locator(`#${panelId}`);
+    await expect(panel).toBeHidden();
+    await dugme.focus();
+    await page.keyboard.press('Enter');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute('role', 'region');
+    const dts = panel.locator('dl.kayit-alanlar dt');
+    expect(await dts.count()).toBeGreaterThan(0);
+    for (const etiket of await dts.allTextContents()) expect(etiket.trim().length).toBeGreaterThan(0);
+    expect(await panel.locator('dl.kayit-alanlar dd').count()).toBe(await dts.count());
+    await page.keyboard.press('Space');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    await expect(dugme).toBeFocused();
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate((id) => !!document.activeElement?.closest(`#${id}`), panelId)).toBe(false);
+    expect((await dugme.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // Klavye modunda görünür, çevrelemeyen odak göstergesi; halka yok.
+    await dugme.focus();
+    const odak = await dugme.evaluate((el) => ({ outline: getComputedStyle(el).outlineStyle, width: getComputedStyle(el).outlineWidth, deco: getComputedStyle(el).textDecorationLine }));
+    expect(odak.outline === 'none' || parseFloat(odak.width) === 0).toBe(true);
+  });
+
+  test('bilgi eşdeğerliği: 1280 px tablo ile 320 px kayıt listesi aynı alan adlarını, değerleri ve sırayı taşır (UX-02)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('eylem-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const blok = page.locator('.table-block').first();
+    await expect(blok.locator('table')).toBeVisible();
+    const tablo = await tabloKayitlari(blok);
+    expect(tablo.length).toBeGreaterThan(1);
+    await page.setViewportSize({ width: 320, height: 700 });
+    await expect(blok.locator('.kayit')).toHaveCount(tablo.length);
+    expect(await kayitListesi(blok)).toEqual(tablo);
+    // Geniş ekrana dönüşte tablo geri gelir; aynı veri.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(blok.locator('table')).toBeVisible();
+    expect(await tabloKayitlari(blok)).toEqual(tablo);
   });
 });
 
@@ -446,30 +556,62 @@ test.describe('başlık ve İstihdam menüsü', () => {
     expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
 
-  // Kullanıcı kararı 2026-10-21: geniş ekranda gezinme üst satırda (logo ile tema düğmesi arasında); dar ekranda
-  // logonun altında kendi satırında.
-  for (const width of [320, 360, 375, 390, 768]) {
-    test(`${width} px: marka ve tema düğmesi tek satır, gezinme altında tek satır`, async ({ page }) => {
+  // Kullanıcı kararı 2026-10-27 (docs/ux.md §3, M01/M02): dar ekranda (< 48em) yatay kayan gezinme şeridi yok; marka ve
+  // tema düğmesi ilk satırda, altında “Menü” düğmesi, tam gezinme sağdan açılan çekmecede (Mantine Drawer): etkin sayfa
+  // işaretli, Escape kapatır, odak düğmeye döner. 48em’den itibaren şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst
+  // satırda, ortalı).
+  for (const width of [320, 360, 375, 390]) {
+    test(`${width} px: gezinme çekmecede — şerit yok, 19 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
       await icerik(page);
-      const [marka, dugme, nav] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.mainnav').boundingBox()];
+      await hydrated(page);
+      await expect(page.locator('.mainnav')).toHaveCount(0);
+      const tetik = page.getByRole('button', { name: 'Menü', exact: true });
+      const [marka, dugme, t] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox(), await tetik.boundingBox()];
       expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
-      expect(nav!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
-      expect(nav!.height).toBeLessThanOrEqual(60);
+      expect(t!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
+      expect(Math.min(t!.width, t!.height)).toBeGreaterThanOrEqual(44);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-      // Sığıyorsa ortalı; sığmıyorsa ilk öğe kesilmez (güvenli ortalama).
-      const ilk = await page.locator('.mainnav-list > li').first().boundingBox();
-      expect(ilk!.x).toBeGreaterThanOrEqual(nav!.x - 1);
-      if (width >= 768) {
-        const liste = await page.locator('.mainnav-list').evaluate((el) => {
-          const lis = [...el.children].filter((c) => (c as HTMLElement).offsetParent !== null).map((c) => c.getBoundingClientRect());
-          return { sol: Math.min(...lis.map((b) => b.left)), sag: Math.max(...lis.map((b) => b.right)) };
-        });
-        expect(Math.abs((liste.sol + liste.sag) / 2 - width / 2)).toBeLessThan(8);
-      }
+      // Klavyeyle açılır (Safari fareyle tıklanan düğmeye odak vermez; odak dönüşü ancak odaklı düğmeye olur).
+      await tetik.focus();
+      await page.keyboard.press('Enter');
+      const cekmece = page.getByRole('dialog', { name: 'Menü' });
+      await expect(cekmece).toBeVisible();
+      const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
+      await expect(nav.getByRole('link')).toHaveCount(19);
+      await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
+      await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Giderler']);
+      await expect(nav.locator('.tree-no')).toHaveCount(7);
+      const yukseklikler = await nav.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+      expect(Math.min(...yukseklikler)).toBeGreaterThanOrEqual(44);
+      expect((await cekmece.boundingBox())!.width).toBeLessThanOrEqual(width + 1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+      await page.keyboard.press('Escape');
+      await expect(cekmece).toBeHidden();
+      await expect(tetik).toBeFocused();
     });
   }
+
+  test('768 px: marka ve tema düğmesi tek satır, gezinme şeridi altında tek satır ve ortalı; çekmece düğmesi yok', async ({ page }) => {
+    const width = 768;
+    await page.setViewportSize({ width, height: 700 });
+    await page.goto('roller/asistan/');
+    await icerik(page);
+    await expect(page.locator('.cekmece-tetik')).toHaveCount(0);
+    const [marka, dugme, nav] = [await page.locator('.brand').boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.mainnav').boundingBox()];
+    expect(Math.abs(marka!.y - dugme!.y)).toBeLessThan(8);
+    expect(nav!.y).toBeGreaterThanOrEqual(marka!.y + marka!.height - 1);
+    expect(nav!.height).toBeLessThanOrEqual(60);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const ilk = await page.locator('.mainnav-list > li').first().boundingBox();
+    expect(ilk!.x).toBeGreaterThanOrEqual(nav!.x - 1);
+    const liste = await page.locator('.mainnav-list').evaluate((el) => {
+      const lis = [...el.children].filter((c) => (c as HTMLElement).offsetParent !== null).map((c) => c.getBoundingClientRect());
+      return { sol: Math.min(...lis.map((b) => b.left)), sag: Math.max(...lis.map((b) => b.right)) };
+    });
+    expect(Math.abs((liste.sol + liste.sag) / 2 - width / 2)).toBeLessThan(8);
+  });
 
   for (const path of ['', 'giderler/']) {
     test(`1280 px /${path}: logo, gezinme ve tema düğmesi tek satırda; bant alçak`, async ({ page }) => {
@@ -624,12 +766,20 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('roller/asistan/');
     await icerik(page);
+    await hydrated(page);
     const heights = await page
-      .locator('.mainnav-link, .pager-link, .brand')
+      .locator('.cekmece-tetik, .pager-link, .brand')
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    // İstihdam ve Pazarlama tetikleyicileri, Giderler, Notlar, sunum sırası bağlantıları ve marka.
-    expect(heights.length).toBeGreaterThanOrEqual(7);
+    // Menü düğmesi, sunum sırası bağlantıları ve marka; çekmecedeki bağlantılar açılınca.
+    expect(heights.length).toBeGreaterThanOrEqual(4);
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+    await page.getByRole('button', { name: 'Menü', exact: true }).click();
+    const cekmece = page.getByRole('dialog', { name: 'Menü' });
+    await expect(cekmece).toBeVisible();
+    await expect(cekmece.getByRole('link')).toHaveCount(19);
+    const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+    expect(linkler.length).toBe(19);
+    expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
   test('koyu tema işletim sistemi tercihini izler', async ({ page }) => {
@@ -644,23 +794,42 @@ test.describe('etkileşim alanı ve tema', () => {
 });
 
 test.describe('yatay telefon (alçak ekran)', () => {
-  for (const viewport of [{ width: 844, height: 390 }, { width: 667, height: 375 }]) {
-    test(`${viewport.width}×${viewport.height}: İstihdam menüsünün son ögesi görünür alanda ve tıklanır`, async ({ page }) => {
-      await page.setViewportSize(viewport);
-      await page.goto('roller/asistan/');
-      await icerik(page);
-      await hydrated(page);
-      await page.getByRole('button', { name: 'İstihdam' }).click();
-      const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
-      await son.scrollIntoViewIfNeeded();
-      const box = await son.boundingBox();
-      expect(box).not.toBeNull();
-      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
-      await expect(page.getByRole('button', { name: 'İstihdam' })).toBeInViewport();
-      await son.click();
-      await expect(page).toHaveURL(/\/istihdam\/$/);
-    });
-  }
+  test('844×390: İstihdam menüsünün son ögesi görünür alanda ve tıklanır', async ({ page }) => {
+    const viewport = { width: 844, height: 390 };
+    await page.setViewportSize(viewport);
+    await page.goto('roller/asistan/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('button', { name: 'İstihdam' }).click();
+    const son = page.getByRole('menuitem', { name: 'İstihdam takvimi' });
+    await son.scrollIntoViewIfNeeded();
+    const box = await son.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+    await expect(page.getByRole('button', { name: 'İstihdam' })).toBeInViewport();
+    await son.click();
+    await expect(page).toHaveURL(/\/istihdam\/$/);
+  });
+
+  // < 48em: çekmece; alçak ekranda gövde kendi içinde kayar, son bağlantı erişilir ve tıklanır (ux.md §8.6).
+  test('667×375: çekmecenin son bağlantısı kaydırılarak görünür alana gelir ve tıklanır', async ({ page }) => {
+    const viewport = { width: 667, height: 375 };
+    await page.setViewportSize(viewport);
+    await page.goto('roller/asistan/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('button', { name: 'Menü', exact: true }).click();
+    const cekmece = page.getByRole('dialog', { name: 'Menü' });
+    const son = cekmece.getByRole('link', { name: 'Notlar' });
+    await son.scrollIntoViewIfNeeded();
+    const box = await son.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+    const takvim = cekmece.getByRole('link', { name: 'İstihdam takvimi' });
+    await takvim.scrollIntoViewIfNeeded();
+    await takvim.click();
+    await expect(page).toHaveURL(/\/istihdam\/$/);
+  });
 });
 
 test.describe('dokunmatik cihaz', () => {
@@ -671,15 +840,18 @@ test.describe('dokunmatik cihaz', () => {
     await icerik(page);
     const coarse = await page.evaluate(() => matchMedia('(any-pointer: coarse)').matches);
     test.skip(!coarse, 'Bu motor kaba işaretçi emüle etmiyor');
+    await hydrated(page);
     const heights = await page
-      .locator('.mainnav-link, .pager-link')
+      .locator('.cekmece-tetik, .pager-link')
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(48);
-    await page.getByRole('button', { name: 'İstihdam' }).tap();
-    await expect(page.getByRole('menu', { name: 'İstihdam' })).toBeVisible();
-    const ogeler = await page.getByRole('menuitem').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(8);
+    await page.getByRole('button', { name: 'Menü', exact: true }).tap();
+    const cekmece = page.getByRole('dialog', { name: 'Menü' });
+    await expect(cekmece).toBeVisible();
+    const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+    expect(ogeler.length).toBe(19);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
+    expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });
 });
 
@@ -703,8 +875,6 @@ test.describe('kenar sistemi (kavisli vurgu kenarı yasak)', () => {
                 : [cs.borderStartStartRadius, cs.borderStartEndRadius];
           if (corners.some((c) => px(c) !== 0)) bad.push(`${name(el)}: köşe ${corners.join(' ')}`);
           if (getComputedStyle(el, '::after').content === 'none') bad.push(`${name(el)}: çizgi yok`);
-          // Koşulluluk: kartta çizginin değmediği karşı köşe yuvarlak kalır.
-          if (el.matches('.kpi') && px(cs.borderEndEndRadius) === 0) bad.push(`${name(el)}: karşı köşe de radiussuz`);
         }
         for (const el of document.querySelectorAll<HTMLElement>('body *')) {
           const cs = getComputedStyle(el);
@@ -750,14 +920,46 @@ test.describe('kenar sistemi (kavisli vurgu kenarı yasak)', () => {
             }
           }
         }
-        const rounded = [...document.querySelectorAll<HTMLElement>('.chip, .kpi, .cal, .chart-canvas, .table-scroll, .note, .pager-link, .email-compose, .email-btn')]
-          .filter((el) => parseFloat(getComputedStyle(el).borderEndEndRadius) > 0).length;
-        return { bad, rounded };
+        return { bad };
       });
       expect(result.bad, path).toEqual([]);
-      expect(result.rounded, `${path}: diğer radiuslar korunmalı`).toBeGreaterThan(0);
     }
   });
+});
+
+/**
+ * Köşe sözleşmesi (kullanıcı kararı 2026-10-27, docs/ux.md §6.3, UX-26): yüzey, kontrol ve kaplama radiusu 0. Yalnız hap
+ * (kısa durum etiketi), anahtar (ikili durum: iz ve topuz) ve yazısız nokta işareti yuvarlaktır; SVG iç geometrisi
+ * (grafik noktası, logo) yüzey değildir. Eski “diğer radiuslar korunur” kabulünün yerini alır (§1.3).
+ */
+test.describe('köşe sözleşmesi (ux.md §6.3)', () => {
+  for (const width of [320, 1280]) {
+    test(`${width} px: yüzeylerde radius 0; yalnız hap, anahtar ve nokta işareti yuvarlak`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      for (const path of PAGES) {
+        await page.goto(path);
+        await icerik(page);
+        const bad = await page.evaluate(() => {
+          const PILL = '.chip, .opex-state, .opex-pill, .yapiskan-ad, .bcg-flow-chip, .ortak-bolum-program';
+          const SWITCH = '.theme-track, .theme-thumb, [role="switch"] *';
+          const out: string[] = [];
+          for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+            if (!el.getClientRects().length || el.closest('svg')) continue;
+            const cs = getComputedStyle(el);
+            const radii = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomLeftRadius, cs.borderBottomRightRadius].map((r) => parseFloat(r) || 0);
+            if (!radii.some((r) => r > 0)) continue;
+            if (el.matches(PILL) || el.matches(SWITCH)) continue;
+            const box = el.getBoundingClientRect();
+            const nokta = !el.textContent?.trim() && el.children.length === 0 && Math.abs(box.width - box.height) < 1 && box.width <= 16;
+            if (nokta) continue;
+            out.push(`${el.tagName.toLowerCase()}.${el.className}: ${radii.join(' ')}`);
+          }
+          return [...new Set(out)].slice(0, 12);
+        });
+        expect(bad, `${path}: yüzeyde radius`).toEqual([]);
+      }
+    });
+  }
 });
 
 test.describe('tema düğmesi', () => {

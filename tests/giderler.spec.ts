@@ -335,7 +335,8 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(canli).toBeVisible();
     const ustler = await canli.locator('.opex-icon-btn').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
     expect(new Set(ustler).size, 'düğmeler tek satırda').toBe(1);
-    const [gez, durum, dugme, marka] = [await page.locator('.mainnav').boundingBox(), await canli.boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.brand').boundingBox()];
+    // Dar ekranda gezinme çekmecede (2026-10-27): canlı durum marka satırının ve Menü düğmesinin altında kendi satırında.
+    const [gez, durum, dugme, marka] = [await page.locator('.cekmece-tetik').boundingBox(), await canli.boundingBox(), await page.locator('.theme-toggle').boundingBox(), await page.locator('.brand').boundingBox()];
     expect(durum!.y).toBeGreaterThanOrEqual(gez!.y + gez!.height - 1);
     expect(dugme!.y, 'tema düğmesi marka satırında').toBeLessThan(marka!.y + marka!.height);
     await expect(page.locator('.crumbs-row .opex-kur')).toBeVisible();
@@ -1640,7 +1641,8 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
     expect(errors).toEqual([]);
   });
 
-  test('bağlı durumda kenar sistemi: düz çizginin değdiği köşeler radiussuz, karşı köşeler yuvarlak', async ({ page }) => {
+  // Köşe sözleşmesi (kullanıcı kararı 2026-10-27, docs/ux.md §6.3): bütün köşeler 0; eski “karşı köşeler yuvarlak” kabulü kalktı.
+  test('bağlı durumda kenar sistemi: düz çizgi var, değdiği köşeler radiussuz', async ({ page }) => {
     await mockScript(page);
     await page.goto(PATH);
     await hydrated(page);
@@ -1653,7 +1655,6 @@ test.describe('Giderler: güvenlik, kenar, etkileşim alanı ve hareket', () => 
         const touched = el.dataset.edge === 'start' ? [cs.borderStartStartRadius, cs.borderEndStartRadius] : [cs.borderStartStartRadius, cs.borderStartEndRadius];
         if (touched.some((c) => px(c) !== 0)) out.push(`${el.className}: çizgi köşesi ${touched.join(' ')}`);
         if (getComputedStyle(el, '::after').content === 'none') out.push(`${el.className}: çizgi yok`);
-        if (el.matches('.opex-hero') && px(cs.borderEndEndRadius) === 0) out.push(`${el.className}: karşı köşe radiussuz`);
       }
       return out;
     });

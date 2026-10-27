@@ -1,12 +1,14 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
-import { MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
-import { IconChevronDown, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
+import { Drawer, MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
+import { IconChevronDown, IconMenu2, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
 import { COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { useGiris } from '../lib/giris';
+import { useMotionMs } from '../lib/motion';
 import { href, normalizePath } from '../lib/paths';
 
 const THEME_KEY = 'istoc-plan-tema';
@@ -147,24 +149,18 @@ function NavItem({
   );
 }
 
-/** Hareket süresi tokenı (ms); hareket azaltmada token 0 ms olur. Sunucu çiziminde 0. */
-export function useMotionMs(name: string) {
-  const [ms, setMs] = useState(0);
-  useEffect(() => {
-    const read = () => {
-      const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      const value = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : parseFloat(raw);
-      setMs(Number.isFinite(value) ? value : 0);
-    };
-    read();
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    query.addEventListener('change', read);
-    return () => query.removeEventListener('change', read);
-  }, [name]);
-  return ms;
-}
+// Hareket süresi kancası `src/lib/motion.ts`’te; eski içe aktarımlar için buradan da verilir.
+export { useMotionMs };
 
 type MenuLink = { label: string; path: string; role?: string; no?: number; also?: string[] };
+
+/** Bağlantının etkin sayfaya göre durumu: tam eşleşme (aria-current) ya da bölümü (data-section). */
+function durumOf(item: MenuLink, current: string) {
+  const target = normalizePath(href(item.path));
+  const exact = target === current;
+  const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
+  return { ...item, exact, inSection };
+}
 
 /** Başlıktaki açılır menüler (kullanıcı kararı 2026-10-20): İstihdam (organizasyon, roller, takvim) ve Pazarlama. */
 const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon }[] = [
@@ -180,12 +176,7 @@ const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; ico
  */
 function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon; current: string }) {
   const duration = useMotionMs('--motion-duration-fast');
-  const items = links.map((item) => {
-    const target = normalizePath(href(item.path));
-    const exact = target === current;
-    const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
-    return { ...item, exact, inSection };
-  });
+  const items = links.map((item) => durumOf(item, current));
   const active = items.some((i) => i.exact || i.inSection);
   return (
     <Menu
@@ -226,6 +217,83 @@ function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: {
   );
 }
 
+/** Dar ekranda (< 48em) gezinmenin kabuğu değişir: şerit yerine çekmece (AppFrame yalnız birini çizer). */
+const GENIS_GEZINME = '(min-width: 48em)';
+
+/**
+ * Dar ekran gezinmesi (kullanıcı kararı 2026-10-27, docs/ux.md §3, M01/M02): yatay kayan şerit yerine markanın altında
+ * “Menü” düğmesi ve sağdan açılan çekmece (Mantine Drawer: odak tuzağı, Escape, kapanınca odak düğmeye döner, sayfa
+ * kaydırması kilitli). İçerik tam gezinmedir: üç grup (İstihdam 1–7 + takvim, Pazarlama, Giderler) ve Notlar; etkin sayfa
+ * aria-current, bölümü data-section. Süre ve eğri hareket tokenlarından.
+ */
+function CekmeceGezinme({ current }: { current: string }) {
+  const [acik, setAcik] = useState(false);
+  const sure = useMotionMs('--motion-duration-base');
+  return (
+    <>
+      {/* Kendi satırında (marka satırının altında); sığsa da ilk satıra çıkmaz — yerleşim her genişlikte aynı. */}
+      <div className="cekmece-satir">
+        <button type="button" className="cekmece-tetik" aria-haspopup="dialog" aria-expanded={acik} onClick={() => setAcik(true)}>
+          <IconMenu2 className="mainnav-icon" size={20} stroke={1.75} aria-hidden="true" />
+          Menü
+        </button>
+      </div>
+      <Drawer
+        opened={acik}
+        onClose={() => setAcik(false)}
+        title="Menü"
+        position="right"
+        size="min(20rem, 100%)"
+        transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }}
+        overlayProps={{ backgroundOpacity: 0.45 }}
+        closeButtonProps={{ 'aria-label': 'Menüyü kapat', size: 'xl' }}
+        classNames={{ content: 'cekmece', header: 'cekmece-ust', title: 'cekmece-baslik', body: 'cekmece-govde', close: 'cekmece-kapat' }}
+      >
+        <nav className="cekmece-nav" aria-label="Ana gezinme">
+          {NAV_MENUS.map((menu) => {
+            const Simge = menu.icon;
+            return (
+              <div key={menu.label} className="cekmece-grup">
+                <p className="cekmece-grup-ad">
+                  <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" />
+                  {menu.label}
+                </p>
+                <ul className="cekmece-liste">
+                  {menu.items.map((link) => {
+                    const item = durumOf(link, current);
+                    return (
+                      <li key={item.path}>
+                        <a className="cekmece-link" href={href(item.path)} data-role={item.role} aria-current={item.exact ? 'page' : undefined} data-section={item.inSection ? 'true' : undefined}>
+                          {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
+                          {item.label}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+          <ul className="cekmece-liste cekmece-liste-ortak">
+            {COMMON_NAV.map((link) => {
+              const item = durumOf(link, current);
+              const Simge = COMMON_ICONS[item.path];
+              return (
+                <li key={item.path}>
+                  <a className="cekmece-link" href={href(item.path)} aria-current={item.exact ? 'page' : undefined}>
+                    {Simge ? <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" /> : <span className="navmenu-bullet" aria-hidden="true" />}
+                    {item.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </Drawer>
+    </>
+  );
+}
+
 /** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler döviz kurları, portal ile). */
 export const PAGE_TOOLS_ID = 'sayfa-araclari';
 /** Üst bantta tema düğmesinin solundaki sayfa araçları yeri (ör. Giderler canlı durumu; kullanıcı kararı 2026-10-21). */
@@ -253,11 +321,14 @@ export function AppFrame({
   // Giriş kapısı (kullanıcı kararı 2026-10-21): giriş yoksa gezinme, sayfa içeriği ve alt bilgi çizilmez; statik
   // HTML'de yalnız giriş formu bulunur.
   const girisli = useGiris();
+  // Gezinme kabuğu (kullanıcı kararı 2026-10-27): ≥ 48em şerit, altında çekmece. İçerik yalnız istemcide çizildiğinden
+  // ilk değer gerçek pencereden okunur; iki kabuk aynı anda mount edilmez.
+  const genis = useMediaQuery(GENIS_GEZINME, true, { getInitialValueInEffect: false });
 
-  // Dar ekranda yatay gezinme şeridinde etkin bağlantı görünür alana gelir (animasyonsuz, boyamadan önce). Gezinme
-  // girişten sonra çizildiğinden sayfa betiği yerine burada.
+  // Tablet şeridinde (48–64em) etkin bağlantı görünür alana gelir (animasyonsuz, boyamadan önce). Gezinme girişten
+  // sonra çizildiğinden sayfa betiği yerine burada.
   useLayoutEffect(() => {
-    if (!girisli) return;
+    if (!girisli || !genis) return;
     document.querySelectorAll<HTMLElement>('.mainnav-list').forEach((list) => {
       const active = list.querySelector<HTMLElement>('[aria-current="page"]') ?? list.querySelector<HTMLElement>('[data-section="true"]');
       if (!active || list.scrollWidth <= list.clientWidth) return;
@@ -265,7 +336,7 @@ export function AppFrame({
       const box = active.getBoundingClientRect();
       if (box.left < listBox.left || box.right > listBox.right) list.scrollLeft += box.left - listBox.left - (listBox.width - box.width) / 2;
     });
-  }, [girisli]);
+  }, [girisli, genis]);
 
   // Kullanıcı kararı 2026-10-21: aşağı kaydırınca üst bant gizlenir, kırıntı satırı üstte yapışık kalır; yukarı
   // kaydırınca (veya odak banda girince) bant görünür. Yalnız bandın yapışık olduğu ekranlarda etkilidir (CSS).
@@ -329,8 +400,9 @@ export function AppFrame({
                 Pazarlama &amp; Finansal Planlama
               </span>
             </a>
-            {/* Gezinme (kullanıcı kararı 2026-10-21): geniş ekranda üst satırda, dar ekranda markanın altında. */}
-            {girisli ? (
+            {/* Gezinme: ≥ 48em şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst satırda); dar ekranda çekmece
+                (kullanıcı kararı 2026-10-27, ux.md §3). */}
+            {girisli && genis ? (
               <nav className="mainnav" aria-label="Ana gezinme">
                 <ul className="mainnav-list">
                   {NAV_MENUS.map((menu) => (
@@ -348,6 +420,7 @@ export function AppFrame({
             ) : null}
             <div className="topbar-tools">
               <div className="header-tools" id={HEADER_TOOLS_ID} />
+              {girisli && !genis ? <CekmeceGezinme current={current} /> : null}
               <ThemeToggle />
             </div>
           </div>

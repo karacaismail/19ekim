@@ -36,11 +36,12 @@ export const theme = createTheme({
     lg: 'var(--text-lg)',
     xl: 'var(--text-xl)',
   },
+  // Köşe sözleşmesi (ux.md §6.3): Mantine ölçeği tokenlara bağlı — yüzey ve kontrol 0; xl yalnız hap (Badge) için.
   radius: {
-    xs: 'var(--radius-sm)',
-    sm: 'var(--radius-sm)',
-    md: 'var(--radius-md)',
-    lg: 'var(--radius-lg)',
+    xs: 'var(--radius-control)',
+    sm: 'var(--radius-control)',
+    md: 'var(--radius-surface)',
+    lg: 'var(--radius-surface)',
     xl: 'var(--radius-pill)',
   },
   defaultRadius: 'md',

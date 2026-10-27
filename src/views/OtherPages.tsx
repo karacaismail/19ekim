@@ -55,7 +55,7 @@ function HiringContent() {
       <Hero eyebrow="Ortak" title="İstihdam takvimi" lead="Kim, hangi sırayla, hangi tarihte başlıyor." />
 
       <Section id="sira" index={1} title="İşe alım sırası">
-        <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
+        <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
           {hiringOrder.map((h) => (
             <Timeline.Item
               key={h.no}
@@ -275,6 +275,7 @@ function GoalsContent() {
         <DataTable
           id="kaynak"
           title="Kaynak × ay (kayıt / yeni aktif)"
+          kayit="sutun"
           columns={[
             { key: 's', header: 'Kaynak', minWidth: '15rem', rowHeader: true, render: (t: (typeof targetPlan)[number]) => t.source },
             ...MONTHS.map((m, i) => ({ key: m, header: m, nowrap: true, render: (t: (typeof targetPlan)[number]) => `${t.kayit[i]} / ${t.aktif[i]}` })),

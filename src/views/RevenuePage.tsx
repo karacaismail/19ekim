@@ -258,7 +258,7 @@ function Icerik() {
           </p>
         </Note>
         <Araclar role={senaryoRol}>{etiket}</Araclar>
-        <Timeline className="hire-timeline gelir-zaman" bulletSize={44} lineWidth={2} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
+        <Timeline className="hire-timeline gelir-zaman" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
           {sim.milestones.map((ms, i) => (
             <Timeline.Item
               key={ms.id}

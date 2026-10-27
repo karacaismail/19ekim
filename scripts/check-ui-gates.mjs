@@ -24,6 +24,17 @@ const pageOf = (selector) => {
 const minPxFor = (selector) => PAGE_RULES[pageOf(selector)]?.minPx ?? MIN_FONT_PX;
 /** En ince yazı ağırlığı (kullanıcı kararı 2026-10-19). */
 const MIN_FONT_WEIGHT = 300;
+/**
+ * Köşe sözleşmesi (kullanıcı kararı 2026-10-27, docs/ux.md §6.3): yüzey, kontrol ve kaplama radiusu 0 (`--radius-surface`,
+ * `--radius-control`, `--radius-overlay`). Yalnız hap (kısa durum etiketi) `--radius-pill`, anahtar izi/topuzu
+ * `--radius-switch`, yazısız nokta işareti (sözde öğe) `50%` kullanır. Başka seçici veya değer istisna kaydı ister
+ * (AGENTS.md → köşe istisna kaydı); kayıtsız radius kapıda düşer (UX-26).
+ */
+const RADIUS_PROP = /^border(-(top|bottom|start|end)-(left|right|start|end))?-radius$/;
+const RADIUS_ZERO_TOKENS = ['--radius-surface', '--radius-control', '--radius-overlay'];
+const PILL_SELECTOR = /\.(chip|opex-state|opex-pill|yapiskan-ad|bcg-flow-chip|ortak-bolum-program)\b/;
+const SWITCH_SELECTOR = /\.(theme-(track|thumb)|(opex|applet|nakit)-anahtar-(iz|top))\b/;
+const DOT_SELECTOR = /::before$|\.(opex-dot|opex-live-dot)$/;
 
 const errors = [];
 const fail = (file, msg) => errors.push(`${relative(ROOT, file)}: ${msg}`);
@@ -160,6 +171,24 @@ for (const file of files.filter((f) => f.endsWith('.css'))) {
       if ((prop === 'word-break' && value === 'break-all') || (prop === 'overflow-wrap' && value === 'anywhere')) {
         fail(file, `${rule.selector}: "${prop}: ${value}" yasak`);
       }
+
+      // Köşe sözleşmesi (ux.md §6.3): yüzeylerde 0; hap, anahtar ve nokta işareti kayıtlı seçicilerde.
+      if (RADIUS_PROP.test(prop)) {
+        for (const part of value.split(/\s+/).filter(Boolean)) {
+          if (part === '0' || part === 'inherit' || RADIUS_ZERO_TOKENS.some((t) => part === `var(${t})`)) continue;
+          if (part === 'var(--radius-pill)' && PILL_SELECTOR.test(rule.selector)) continue;
+          if (part === 'var(--radius-switch)' && SWITCH_SELECTOR.test(rule.selector)) continue;
+          if (part === '50%' && DOT_SELECTOR.test(rule.selector)) continue;
+          fail(file, `${rule.selector}: "${prop}: ${value}" — yüzey radiusu yasak (ux.md §6.3); hap/anahtar/nokta dışı köşe istisna kaydı ister`);
+        }
+      }
+      if (isTokens && /^--radius-/.test(prop)) {
+        if (RADIUS_ZERO_TOKENS.includes(prop)) {
+          if (value !== '0') fail(file, `${prop}: ${value} — yüzey, kontrol ve kaplama radiusu 0 olmalı (ux.md §6.3)`);
+        } else if (prop !== '--radius-pill' && prop !== '--radius-switch') {
+          fail(file, `${prop}: tanımsız köşe tokenı; yalnız surface/control/overlay (0), pill ve switch`);
+        }
+      }
     }
 
     if (/:focus-within/.test(rule.selector)) fail(file, `${rule.selector}: :focus-within çerçevesi yasak`);
@@ -230,6 +259,10 @@ for (const file of files.filter((f) => /\.(tsx|ts|astro)$/.test(f))) {
     for (const value of values) {
       if (!(value in EDGE_CORNERS)) fail(file, `bilinmeyen kenar türü data-edge="${value}"`);
     }
+  }
+  // Mantine `radius` özelliği yalnız 0 olabilir (tema ölçeği zaten tokenlara bağlı; yerel kaçış yok — ux.md §6.3).
+  for (const m of code.matchAll(/\bradius=(\{[^}]*\}|"[^"]*")/g)) {
+    if (m[1] !== '{0}') fail(file, `radius=${m[1]}: Mantine radius yalnız {0} olabilir (ux.md §6.3)`);
   }
   // JS/TSX ve satır içi HTML (e-posta) içinde de yazı ağırlığı 300 altına inmez.
   for (const m of code.matchAll(/font-?[wW]eight\s*:\s*['"]?(\d{3})\b/g)) {

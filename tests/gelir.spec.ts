@@ -216,5 +216,12 @@ test.describe('gelir planı', () => {
     expect(d.secenekGizli).toBe(true);
     await page.locator('.kurucu').getByRole('button', { name: /Ayrıntılı seçenekler/ }).click();
     await expect(page.locator('#kurucu-secenekler')).toBeVisible();
+    // ux.md §8 (UX-01): çok sütunlu tablolar 320 px’te kayıt listesi; yatay kayan tablo bölgesi yok.
+    await expect(page.locator('.table-scroll:not(.chart-scroll)')).toHaveCount(0);
+    expect(await page.locator('.kayitlar').count()).toBeGreaterThan(5);
+    // Kadro katkı tablosu: her rol bir kayıt (on bir rol); başlıkta rol adı.
+    const kadro = page.locator('.table-block:has(#katki-tablo) .kayit');
+    await expect(kadro).toHaveCount(11);
+    await expect(page.locator('.table-block:has(#katki-tablo) .kayit-ad')).toHaveCount(11);
   });
 });

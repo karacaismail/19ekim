@@ -177,7 +177,8 @@ test.describe('applet sayfası', () => {
     expect(alan.shadow).toMatch(/inset/);
     expect(alan.shadow).toMatch(/3px 0px 0px 0px/);
     expect(parseFloat(alan.sol)).toBe(0);
-    expect(parseFloat(alan.sag)).toBeGreaterThan(0);
+    // Köşe sözleşmesi (ux.md §6.3, 2026-10-27): alanın bütün köşeleri 0; eski “karşı köşe yuvarlak kalır” kabulü kalktı.
+    expect(parseFloat(alan.sag)).toBe(0);
 
     await page.goto('applet/#terfi-kapisi');
     await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');

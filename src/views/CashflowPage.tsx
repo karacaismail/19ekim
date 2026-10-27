@@ -162,6 +162,7 @@ function Icerik() {
           id="nakit"
           title={`${ayrintili ? 'Ayrıntılı nakit akış tablosu' : 'Nakit akış tablosu'} (${sc.name.toLocaleLowerCase('tr-TR')})`}
           tools={cubuk()}
+          kayit="sutun"
           columns={[
             {
               key: 'ad',

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { Anchor, Badge, Table, Text, Title } from '@mantine/core';
+import { Accordion, Anchor, Badge, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
   IconCode,
@@ -15,6 +15,7 @@ import {
 import { ROLE_LABELS } from '../data/roles';
 import type { Kpi, RoleKey, Status } from '../data/types';
 import type { ChartSpec } from '../lib/chartSpec';
+import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
 
 const STATUS_LABELS: Record<Status, string> = {
@@ -147,22 +148,61 @@ export function Section({
   );
 }
 
-/* ---------- Tablolar ---------- */
+/* ---------- Tablolar ----------
+ * Uyarlanır veri görünümü (kullanıcı kararı 2026-10-27, docs/ux.md §8: M08 AdaptiveDataView + M09 RecordAccordion).
+ * Aynı sütun/satır modeli iki kabukta sunulur; iki kabuk aynı anda mount edilmez. Taban dar ekrandır: kapsayıcı 48em’den
+ * darsa ve sütunların okunabilir toplam genişliği sığmıyorsa (ya da tablo ölçülünce taşıyorsa) KAYIT LİSTESİ çizilir —
+ * her kayıt başlığı h4 içinde düğme (aria-expanded, aria-controls → role="region" panel): kayıt adı + tek özet alan;
+ * açılan panelde bütün diğer alanlar dl/dt/dd ile etiketli; birden çok kayıt açık kalabilir, açık kayıtlar kimlikle
+ * (rowKey) saklanır. Geniş alanda semantik tablo (yalnız ≥ 48em’de gerekirse kendi kutusunda kayar). Kayıt ekseni:
+ * 'satir' (satır = kayıt; varsayılan) ya da 'sutun' (ay sütunları: sütun = kayıt, satırlar alan; özet son satır — §8.5
+ * PeriodExplorer). Yatay kaydırma ipucu kaldırıldı (dar ekranda kayan tablo yok).
+ */
 
 export interface Column<T> {
   key: string;
   header: ReactNode;
-  /** Okunabilir en küçük sütun genişliği; ekran daralınca sütun değil tablo kayar. */
+  /** Kayıt görünümünde alan adı (başlık JSX ise düz metin karşılığı); yoksa başlık kullanılır. */
+  label?: ReactNode;
+  /** Okunabilir en küçük sütun genişliği (rem/px); kabuk seçiminde sütunların toplamı kapsayıcıyla karşılaştırılır. */
   minWidth?: string;
   nowrap?: boolean;
   rowHeader?: boolean;
-  /** Yatay kaydırmada solda sabit kalır (≥ 48em; dar ekranda alan kaplamasın diye sabit değil). */
+  /** Yatay kaydırmada solda sabit kalır (≥ 48em; dar ekranda tablo yerine kayıt listesi vardır). */
   sticky?: boolean;
+  /** Kayıt görünümünde başlıkta gösterilen tek özet alan; yoksa ilk veri sütunu. */
+  summary?: boolean;
   render: (row: T) => ReactNode;
 }
 
 const cellClass = (col: { nowrap?: boolean; sticky?: boolean }) =>
   [col.nowrap ? 'cell-nowrap' : '', col.sticky ? 'cell-sticky' : ''].filter(Boolean).join(' ') || undefined;
+
+/** Kabuk seçimi sınırı (em): bunun altında kayıt listesi tabandır. CSS’teki tablet kırılımıyla aynı. */
+const KAYIT_EM = 48;
+/** Belirtilmemiş sütun için okunabilir en küçük genişlik (rem). */
+const SUTUN_MIN_REM = 7;
+
+function rootPx() {
+  if (typeof document === 'undefined') return 16;
+  return parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+}
+
+function sutunMinPx(minWidth: string | undefined, root: number) {
+  const m = minWidth?.match(/^([\d.]+)(rem|em|px)$/);
+  if (!m) return SUTUN_MIN_REM * root;
+  return m[2] === 'px' ? Number(m[1]) : Number(m[1]) * root;
+}
+
+export type KayitEkseni = 'satir' | 'sutun';
+
+interface Kayit {
+  key: string;
+  title: ReactNode;
+  tone?: string;
+  summary?: { label: ReactNode; value: ReactNode };
+  fields: { key: string; label: ReactNode; value: ReactNode }[];
+}
 
 export function DataTable<T>({
   id,
@@ -173,6 +213,7 @@ export function DataTable<T>({
   rows,
   rowTone,
   rowKey,
+  kayit = 'satir',
 }: {
   id: string;
   title: string;
@@ -182,57 +223,180 @@ export function DataTable<T>({
   columns: Column<T>[];
   rows: T[];
   rowTone?: (row: T) => string | undefined;
-  /** Satırın kalıcı anahtarı (veri güncellenince satır kayarsa hücreler yanlış satıra eşlenmesin); yoksa sıra. */
+  /** Satırın kalıcı anahtarı (veri güncellenince satır kayarsa hücreler yanlış satıra eşlenmesin; açık kayıt kimliği); yoksa sıra. */
   rowKey?: (row: T, index: number) => string;
+  /** Kayıt görünümünün ekseni: satır = kayıt (varsayılan) ya da sütun = kayıt (ay sütunlu tablolar). */
+  kayit?: KayitEkseni;
 }) {
   const titleId = `${id}-tablo`;
+  const sarmal = useRef<HTMLDivElement>(null);
+  const kaydiran = useRef<HTMLDivElement>(null);
+  const [genislik, setGenislik] = useState<number | null>(null);
+  const [tasma, setTasma] = useState<number | null>(null);
+  const [acik, setAcik] = useState<string[]>([]);
+  const sure = useMotionMs('--motion-duration-base');
+
+  // Kapsayıcı genişliği (boyamadan önce ölçülür; yeniden boyutlanınca izlenir).
+  useLayoutEffect(() => {
+    const el = sarmal.current;
+    if (!el) return undefined;
+    const olc = () => setGenislik(el.clientWidth);
+    olc();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(olc);
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, []);
+
+  const root = rootPx();
+  const minToplam = columns.reduce((toplam, col) => toplam + sutunMinPx(col.minWidth, root), 0);
+  const dar = genislik !== null && genislik < KAYIT_EM * root;
+  const mod: 'tablo' | 'kayit' = dar && (genislik < minToplam || (tasma !== null && genislik < tasma)) ? 'kayit' : 'tablo';
+
+  // Güvenlik ağı: tablo kabuğu dar alanda yine de taşıyorsa gerekli genişlik ezberlenir ve kayıt listesine geçilir.
+  useLayoutEffect(() => {
+    if (mod !== 'tablo' || !dar) return;
+    const el = kaydiran.current;
+    if (el && el.scrollWidth > el.clientWidth + 1) setTasma(el.scrollWidth);
+  });
+
+  const keyOf = (row: T, index: number) => (rowKey ? rowKey(row, index) : String(index));
+  const baslikSutunu = columns.find((c) => c.rowHeader) ?? columns[0];
+  const veriSutunlari = columns.filter((c) => c !== baslikSutunu);
+  const etiket = (c: Column<T>) => c.label ?? c.header;
+
+  let kayitlar: Kayit[] = [];
+  if (mod === 'kayit') {
+    if (kayit === 'sutun') {
+      // Sütun = kayıt (ay); satırlar alan; özet son satır (dönem sonu / toplam).
+      const ozetSatir = rows.length ? rows[rows.length - 1] : undefined;
+      const alanSatirlari = rows.slice(0, -1);
+      kayitlar = veriSutunlari.map((c) => ({
+        key: c.key,
+        title: etiket(c),
+        summary: ozetSatir ? { label: baslikSutunu.render(ozetSatir), value: c.render(ozetSatir) } : undefined,
+        fields: alanSatirlari.map((r, i) => ({ key: keyOf(r, i), label: baslikSutunu.render(r), value: c.render(r) })),
+      }));
+    } else {
+      const ozetSutunu = veriSutunlari.find((c) => c.summary) ?? veriSutunlari[0];
+      const alanSutunlari = veriSutunlari.filter((c) => c !== ozetSutunu);
+      kayitlar = rows.map((r, i) => ({
+        key: keyOf(r, i),
+        title: baslikSutunu.render(r),
+        tone: rowTone?.(r),
+        summary: ozetSutunu ? { label: etiket(ozetSutunu), value: ozetSutunu.render(r) } : undefined,
+        fields: alanSutunlari.map((c) => ({ key: c.key, label: etiket(c), value: c.render(r) })),
+      }));
+    }
+  }
+
   return (
-    <div className="table-block">
+    <div className="table-block" ref={sarmal} data-kabuk={mod}>
       <h3 className="block-title" id={titleId}>
         {title}
       </h3>
       {note ? <p className="table-note">{note}</p> : null}
       {tools}
-      <span className="table-hint" aria-hidden="true">
-        Tabloyu yatay kaydırabilirsiniz.
-      </span>
-      <div className="table-frame">
-        <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0}>
-          <Table className="data-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
-            <Table.Thead>
-              <Table.Tr>
-                {columns.map((col) => (
-                  <Table.Th
-                    key={col.key}
-                    scope="col"
-                    className={cellClass(col)}
-                    style={col.minWidth ? { minWidth: col.minWidth } : undefined}
-                  >
-                    {col.header}
-                  </Table.Th>
-                ))}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {rows.map((row, index) => (
-                <Table.Tr key={rowKey ? rowKey(row, index) : index} data-tone={rowTone?.(row)}>
-                  {columns.map((col) =>
-                    col.rowHeader ? (
-                      <Table.Th key={col.key} scope="row" className={cellClass(col)}>
-                        {col.render(row)}
-                      </Table.Th>
-                    ) : (
-                      <Table.Td key={col.key} className={cellClass(col)}>
-                        {col.render(row)}
-                      </Table.Td>
-                    ),
-                  )}
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+      {mod === 'kayit' && kayitlar.every((k) => k.fields.length === 0) ? (
+        /* Tek veri sütunu (ad → değer): açılır panel gereksiz; düz tanım listesi (başlık sütunu etiket olarak). */
+        <dl className="kayitlar-duz" aria-labelledby={titleId}>
+          {kayitlar.map((k) => (
+            <div key={k.key} className="kayit-duz" data-tone={k.tone}>
+              <dt className="kayit-ad">{k.title}</dt>
+              <dd className="kayit-ozet">
+                {k.summary ? (
+                  <>
+                    <span className="kayit-ozet-etiket">{k.summary.label}</span>
+                    <span className="kayit-ozet-deger">{k.summary.value}</span>
+                  </>
+                ) : null}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : mod === 'kayit' ? (
+        <div className="kayitlar-sarmal" role="group" aria-labelledby={titleId}>
+          <Accordion
+            multiple
+            value={acik}
+            onChange={setAcik}
+            order={4}
+            transitionDuration={sure}
+            classNames={{
+              root: 'kayitlar',
+              item: 'kayit',
+              itemTitle: 'kayit-h',
+              control: 'kayit-baslik',
+              label: 'kayit-etiket',
+              chevron: 'kayit-ok',
+              panel: 'kayit-panel',
+              content: 'kayit-icerik',
+            }}
+          >
+            {kayitlar.map((k) => (
+              <Accordion.Item key={k.key} value={k.key} data-tone={k.tone}>
+                <Accordion.Control>
+                  <span className="kayit-ad">{k.title}</span>
+                  {k.summary ? (
+                    <span className="kayit-ozet">
+                      <span className="kayit-ozet-etiket">{k.summary.label}</span>
+                      <span className="kayit-ozet-deger">{k.summary.value}</span>
+                    </span>
+                  ) : null}
+                </Accordion.Control>
+                {/* Collapse zamanlama eğrisi hareket tokenından (Panel bunu Collapse’a aktarır; tipinde yok). */}
+                <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+                  <dl className="kayit-alanlar">
+                    {k.fields.map((f) => (
+                      <div key={f.key}>
+                        <dt>{f.label}</dt>
+                        <dd>{f.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </Accordion>
         </div>
-      </div>
+      ) : (
+        <div className="table-frame">
+          <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0} ref={kaydiran}>
+            <Table className="data-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
+              <Table.Thead>
+                <Table.Tr>
+                  {columns.map((col) => (
+                    <Table.Th
+                      key={col.key}
+                      scope="col"
+                      className={cellClass(col)}
+                      style={col.minWidth ? { minWidth: col.minWidth } : undefined}
+                    >
+                      {col.header}
+                    </Table.Th>
+                  ))}
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {rows.map((row, index) => (
+                  <Table.Tr key={keyOf(row, index)} data-tone={rowTone?.(row)}>
+                    {columns.map((col) =>
+                      col.rowHeader ? (
+                        <Table.Th key={col.key} scope="row" className={cellClass(col)}>
+                          {col.render(row)}
+                        </Table.Th>
+                      ) : (
+                        <Table.Td key={col.key} className={cellClass(col)}>
+                          {col.render(row)}
+                        </Table.Td>
+                      ),
+                    )}
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

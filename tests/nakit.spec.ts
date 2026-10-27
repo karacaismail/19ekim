@@ -176,6 +176,58 @@ test.describe('nakit akış tablosu', () => {
     });
   }
 
+  // ux.md §8.5 (PeriodExplorer, UX-03): 320 px’te 15 ay yatay uzatılmaz; her ay bir kayıttır (kayıt ekseni sütun).
+  // Başlıkta ayın adı ve dönem sonu nakit; açılan panelde kalemler etiketli; Toplam sütunu da bir kayıt. Değerler 1280
+  // px tablosuyla aynı (bilgi eşdeğerliği, UX-02).
+  test('320 px: aylık tablo ay başına kayıt; 15 ay + Toplam; özet dönem sonu nakit; alanlar 1280 px tablosuyla aynı', async ({ page }) => {
+    await acikUc(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
+    const blok = page.locator('.table-block:has(#nakit-tablo)');
+    const t = (s: string) => s.replace(/\s+/g, ' ').trim();
+    const tablo = await blok.evaluate((el) => {
+      const txt = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+      return {
+        headers: [...el.querySelectorAll('thead th')].map(txt),
+        rows: [...el.querySelectorAll('tbody tr')].map((tr) => [...tr.children].map(txt)),
+      };
+    });
+    expect(tablo.headers.length).toBe(17); // Kalem + 15 ay + Toplam
+    await page.setViewportSize({ width: 320, height: 480 });
+    await expect(blok.locator('.table-scroll')).toHaveCount(0);
+    const kayitlar = blok.locator('.kayit');
+    await expect(kayitlar).toHaveCount(16);
+    await expect(kayitlar.first().locator('.kayit-ad')).toHaveText(tablo.headers[1]);
+    await expect(kayitlar.last().locator('.kayit-ad')).toHaveText('Toplam');
+    // Özet: son satır (dönem sonu nakit); alanlar: diğer satırlar aynı sırayla.
+    const son = tablo.rows[tablo.rows.length - 1];
+    await expect(kayitlar.first().locator('.kayit-ozet-etiket')).toHaveText(t(son[0]));
+    await expect(kayitlar.first().locator('.kayit-ozet-deger')).toHaveText(t(son[1]));
+    const beklenen = tablo.headers.slice(1).map((ay, c) => ({ title: ay, fields: [[son[0], son[c + 1]], ...tablo.rows.slice(0, -1).map((r) => [r[0], r[c + 1]])] }));
+    const okunan = await kayitlar.evaluateAll((els) =>
+      els.map((k) => {
+        const txt = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+        const fields = [[txt(k.querySelector('.kayit-ozet-etiket')), txt(k.querySelector('.kayit-ozet-deger'))]];
+        for (const div of k.querySelectorAll('dl.kayit-alanlar > div')) fields.push([txt(div.querySelector('dt')), txt(div.querySelector('dd'))]);
+        return { title: txt(k.querySelector('.kayit-ad')), fields };
+      }),
+    );
+    expect(okunan).toEqual(beklenen);
+    // Bir ay açılır: panel region, alanlar görünür; ayrıntılı görünüm kayıt sayısını değil alan sayısını artırır.
+    const ilk = kayitlar.first().locator('h4 button');
+    await ilk.click();
+    await expect(ilk).toHaveAttribute('aria-expanded', 'true');
+    await expect(kayitlar.first().locator('dl.kayit-alanlar')).toBeVisible();
+    const basit = await kayitlar.first().locator('dl.kayit-alanlar dt').count();
+    await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
+    await expect(kayitlar).toHaveCount(16);
+    expect(await kayitlar.first().locator('dl.kayit-alanlar dt').count()).toBeGreaterThan(basit);
+    await expect(ilk).toHaveAttribute('aria-expanded', 'true');
+  });
+
   test('Sheets okunamazsa tablo plan kalemleriyle kalır ve Giderler sayfasına yönlendirir', async ({ page }) => {
     await page.route('https://script.google.com/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: false, hata: 'yetki', mesaj: 'test' }) }),

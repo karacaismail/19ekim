@@ -61,11 +61,14 @@
   /* Türksab logosu: büyük harf yüksekliği (genişlik viewBox oranından) */
   --brand-mark-h: 1.0625rem;
 
-  /* Köşe, çizgi */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  /* Köşe sözleşmesi (kullanıcı kararı 2026-10-27, docs/ux.md §6.3): yüzey, kontrol ve kaplama köşeleri 0 — sakin,
+     köşeli iş çalışma alanı. Yalnız hap (kısa durum etiketi) ve anahtar (ikili durum: iz ve topuz) yuvarlaktır; yazısız
+     nokta işareti sözde öğede 50% çizilir. Başka yüzey için istisna kaydı gerekir (AGENTS.md); kapı ve tarayıcı testi denetler. */
+  --radius-surface: 0;
+  --radius-control: 0;
+  --radius-overlay: 0;
   --radius-pill: 999px;
+  --radius-switch: 999px;
 
   /* Grafik yükseklikleri ve geniş grafiklerin okunabilir en küçük genişliği (dar ekranda kendi kutusunda kayar) */
   --chart-h-xs: 11rem;
