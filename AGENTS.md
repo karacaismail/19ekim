@@ -55,7 +55,21 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     kalem bilgisi ve ay ay tutarlar tek tabloda: Kalem · Kategori · Tutar · Bu ay · 15 ay ·
     2026 ₺ · 2027 ₺ · Toplam ₺ · 2027 artışı; altta — eski aylık gider planı tablosu — grup ara toplamları (birden çok
     grup listelenirken), toplam ve önceki aya göre değişim; Kalem sütunu ≥ 48em’de kaydırırken sabit; üç grup süzgeci; teknoloji
-    sağlayıcıları); sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
+    sağlayıcıları). **48em altında kalemler kayıt listesidir** (P4, kullanıcı kararı 2026-10-27; ux.md §8.2 “320 px kayıt
+    örneği: gider kalemi”): aynı süzülmüş, sıralı satır ve görünen sütun modeli — kabuk `useKabuk`, liste `KayitListesi`
+    (`src/components/ui.tsx`), iki kabuk aynı anda mount edilmez, `.opex-veri[data-kabuk]`. Her kalem bir kayıt
+    (`.opex-kayitlar .kayit`): başlıkta kalem adı + **seçili ay** tutarı — seçili ay rapor ayıdır (“Bu ay”); ay alanları
+    gizliyse ya da rapor ayı ızgara dışındaysa Toplam ₺ —; açılan panelde Kategori, Tür, Tutar (kaynak para birimi), Bu
+    ay, 2027 artışı, Toplam ₺, yıl toplamları, 15 ay (— = o ay gider yok), uygulanabilen personel alanları (— olanlar
+    sunulmaz) ve “Faturayı aç” bağlantısı (başlık düğmesinin içinde bağlantı olmaz). Alt satırlar listenin sonunda özet
+    kayıtları (`.opex-kayitlar-ozet`: grup ara toplamları, Toplam · n kalem `data-tone="total"`, Önceki aya göre; kalın
+    koyu ayırıcı, gövdeden ayrı zemin). Tepsi (grup, hızlı filtreler, tablo filtreleri, Sütunlar, sayaç, Filtreleri
+    temizle) iki kabukta ortak; kayıt kabuğunda ayrıca “Kalem ara” kutusu (Kalem sütunu aramasıyla aynı durum). Süzgeç
+    kalemleri azaltınca durum satırında kapsam notu `.opex-veri-kapsam` “Süzülmüş toplam … (n kalem) · Genel toplam …
+    (m kalem)” (dönem toplamı, iki kabukta; UX-12); boş sonuçta “Bu filtrelerle kalem yok.” ve Filtreleri temizle
+    (UX-13). Açık kayıtlar kalıcı kimlikle saklanır (`kimlik`: id güvenli anahtar); kabuk değişince süzgeç, sıra, arama
+    ve açık kayıtlar korunur (UX-02). Sıralama ve sütun filtreleri/aramaları yalnız tablo başlığındadır (dar ekranda
+    yalnız durum korunur; bilinen sınır). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı; sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
     seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri (özet ve bordro grafikleri; kişi tablosu kalemlerde), netten brüte aylık bordro (kümülatif GV,
     asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
     Sheets → Parametreler’de); sayfa sonunda yalnız hesap damgası (zaman, motor sürümü, özet). Veri repoda yoktur: Google Sheets → Apps Script web
@@ -388,10 +402,13 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   kayıtlar `rowKey` kimliğiyle saklanır (kabuk değişince kaybolmaz). Kayıt ekseni `kayit="sutun"` ay sütunlu tablolarda
   (nakit akış tablosu, hedefler kaynak × ay): sütun = kayıt, satırlar alan, özet son satır (dönem sonu / toplam) — ux.md
   §8.5 PeriodExplorer. Geniş alanda semantik tablo; yalnız ≥ 48em’de gerekirse kendi kutusunda kayar (sabit Kalem
-  sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. Giderler kalemler tablosu (`KalemTablosu`, `.opex-veri`)
-  henüz kendi veri ızgarasındadır (kayıtlı istisna, sonraki paket). Testler: `tests/ui.spec.ts` (320/360/375/390’da
-  kayan tablo yok, kayıt sözleşmesi, Enter/Space/Tab, 1280 ↔ 320 bilgi eşdeğerliği), `tests/nakit.spec.ts` (ay başına
-  kayıt, 15 ay + Toplam, tablo ile aynı değerler), `tests/gelir.spec.ts` (320 px kadro kayıtları).
+  sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. Kabuk seçimi (`useKabuk`) ve kayıt listesi (`KayitListesi`,
+  `Kayit` modeli) dışa açıktır: Giderler kalemler tablosu (`KalemTablosu`, `.opex-veri`) kendi süzgeç/sıra/sütun
+  durumuyla aynı kalıbı kullanır (P4; davranış `/giderler/` maddesinde). Testler: `tests/ui.spec.ts` (320/360/375/390’da
+  kayan tablo yok — `.opex-veri` dışlanmaz —, kayıt sözleşmesi, Enter/Space/Tab, 1280 ↔ 320 bilgi eşdeğerliği),
+  `tests/nakit.spec.ts` (ay başına kayıt, 15 ay + Toplam, tablo ile aynı değerler), `tests/gelir.spec.ts` (320 px kadro
+  kayıtları), `tests/giderler.spec.ts → kalemler kayıt listesi` (320/390 kayıt sözleşmesi ve özet kayıtları, panel
+  alanları, 1280 ↔ 320 süzgeç/sıra eşdeğerliği ve açık kayıt korunumu, kapsam notu, Sütunlar, boş sonuç; 375 px).
 
 ## UX yeniden tasarım sözleşmesi (docs/ux.md, kullanıcı kararı 2026-10-27)
 
@@ -405,7 +422,7 @@ bunu denetler.
 | P1 Köşe sözleşmesi: radius tokenları, Mantine ölçeği, hap/anahtar/nokta istisnaları | §6.3, UX-26 | **Tamam** (2026-10-27) | `check-ui-gates` köşe kuralı; `ui.spec.ts → köşe sözleşmesi` (320, 1280) |
 | P2 Uyarlanır veri görünümü: `DataTable` kayıt listesi (RecordAccordion, PeriodExplorer ekseni) | §8.1–8.6, UX-01/02/03/07 | **Tamam** (2026-10-27) | `ui.spec.ts → uyarlanır veri görünümü`, 320–390 px kayan tablo yok; `nakit.spec.ts`; `gelir.spec.ts` |
 | P3 Gezinme: < 48em’de yatay kayan şerit yerine tam gezinme çekmecesi (Drawer) | §3, M01/M02 | **Tamam** (2026-10-27) | `ui.spec.ts` çekmece testleri (320–390, dokunmatik, 667×375); `giderler.spec.ts` 320 px |
-| P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | Bekliyor | — |
+| P4 Giderler kalemler tablosu (`.opex-veri`) kayıt/filtre görünümü | §8.2 örnek, M08/M12 | **Tamam** (2026-10-27) | `giderler.spec.ts → kalemler kayıt listesi` (320/390, panel, 1280 ↔ 320 eşdeğerlik, kapsam, özet kayıtları), 375 px; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz |
 | P5 Grafiklerin dar ekran eşdeğeri (Gantt → ajanda, şema → dikey hiyerarşi) | §8.1, M20/M21, UX-29/30 | Bekliyor | — |
 | P6 Sayfa başlığı/hiyerarşi (`PageHeader`, `ResultSummary`), parametre grupları, durum sözleşmeleri | §3, §5, §9 | Bekliyor | — |
 
@@ -421,8 +438,8 @@ işareti (rol noktası, menü noktası, legend/durum noktası ≤ 16 px) — sem
 yetkisi şeması, Gantt’lar; `.chart-scroll`) — iki boyutlu şema/zaman çizelgesi başka düzende aynı ilişkiyi vermiyor;
 mobil eşdeğer erişim: Gantt’ın tablosu aynı sayfada kayıt listesi, şemanın rol sayfaları menüde; klavye ile kayar
 (`role="region"`, `tabIndex=0`, ok tuşları), görünür “Grafiği yatay kaydırabilirsiniz” notu; P5 tamamlanınca yeniden
-değerlendirilir. **Y-02** Giderler kalemler tablosu (`.opex-veri .table-scroll`) — sıralama/filtre/sabit sütunlu veri
-ızgarası; P4’e kadar kayar; `ui.spec.ts` dar ekran denetimi bu bölgeyi açıkça dışlar.
+değerlendirilir. (Y-02 Giderler kalemler tablosu istisnası P4 ile 2026-10-27’de kapandı: tablo 48em altında kayıt
+listesidir; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz.)
 
 ## Gizlilik ve yayın
 
@@ -503,6 +520,8 @@ Pages yayınından önce çalıştırır.
   dilimler, destek) varsayımdır ve Parametreler sayfasında (teşvikler `H:P`) güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).
 - Giderler sayfasında dokunmatik/kaba işaretçi, yatay telefon ve kısa yükseklik profilleri ayrıca test edilmedi.
+- Giderler kalemleri kayıt kabuğunda (< 48em) sıralama ve sütun filtreleri/aramaları için kontrol yok (durum korunur;
+  tepsi filtreleri ve “Kalem ara” var). Dar ekran sıralama seçici sonraki paket.
 
 - Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamaz; tablo ve Gantt klavye kaydırması WebKit’te `not_run`.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.

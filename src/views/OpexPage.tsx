@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
-import { Chart, DataTable, FactsRow, Note, Section, type Column } from '../components/ui';
+import { Chart, DataTable, FactsRow, KayitListesi, Note, Section, useKabuk, type Column, type Kayit } from '../components/ui';
 import {
   OPEX_ENDPOINT,
   OPEX_MIN_GAP_MS,
@@ -929,6 +929,10 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
   // Hızlı filtreler (kullanıcı kararı 2026-10-21): araç satırında kısa adlı anahtarlar ve onay kutuları.
   const [hizli, setHizli] = useState<HizliKod[]>([]);
   const [gizli, setGizli] = useState<SutunGrubu[]>([]);
+  // Kabuk (ux.md §8.3, P4): süzgeç, sıra, arama, sütun ve açık kayıt durumu kabuğun dışında; 48em altında kayıt listesi.
+  const sarmal = useRef<HTMLDivElement>(null);
+  const kaydiran = useRef<HTMLDivElement>(null);
+  const [acik, setAcik] = useState<string[]>([]);
 
   // “Bu ay”: rapor ayı (Sheets’teki onay kutusu ve ödeme durumu).
   const buAy = m.donem.ay - 1;
@@ -1028,6 +1032,25 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         {sub ? <span className="cell-sub">{sub}</span> : null}
       </Num>
     );
+  const faturaUrl = (r: Kalem) => (r.g && /^https:\/\//.test(r.g.fatura) ? r.g.fatura : null);
+  /** Kalem adı: küme noktası, ad, hesap etiketi; tabloda fatura bağlantısı satır içinde, kayıt başlığında yok (düğme içinde bağlantı olmaz, ux.md §8.2). */
+  const kalemAdi = (r: Kalem, baglanti: boolean) => (
+    <span className="opex-item">
+      <Dot tone={KUME_TONE[r.kume]} />
+      <span>
+        {r.ad}
+        {r.etiket ? <span className="opex-tag">{r.etiket}</span> : null}
+        {baglanti && faturaUrl(r) ? (
+          <>
+            {' '}
+            <a className="text-link" href={faturaUrl(r)!} target="_blank" rel="noopener noreferrer">
+              fatura
+            </a>
+          </>
+        ) : null}
+      </span>
+    </span>
+  );
   const sutunlar: Sutun[] = [
     {
       id: 'kalem',
@@ -1038,23 +1061,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
       deger: (r) => r.ad,
       metin: (r) => `${r.ad} ${r.etiket}`,
       liste: (r) => r.ad,
-      hucre: (r) => (
-        <span className="opex-item">
-          <Dot tone={KUME_TONE[r.kume]} />
-          <span>
-            {r.ad}
-            {r.etiket ? <span className="opex-tag">{r.etiket}</span> : null}
-            {r.g && /^https:\/\//.test(r.g.fatura) ? (
-              <>
-                {' '}
-                <a className="text-link" href={r.g.fatura} target="_blank" rel="noopener noreferrer">
-                  fatura
-                </a>
-              </>
-            ) : null}
-          </span>
-        </span>
-      ),
+      hucre: (r) => kalemAdi(r, true),
     },
     {
       id: 'kategori',
@@ -1152,6 +1159,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
   ];
   const gorunen = sutunlar.filter((s) => !s.grup || !gizli.includes(s.grup));
   const sutunHarita = new Map(sutunlar.map((s) => [s.id, s]));
+  const mod = useKabuk(sarmal, kaydiran, gorunen.map((s) => s.minWidth));
 
   const kumeSay = (k: KumeKod) => all.filter((r) => r.kume === k).length;
   const secenek = (xs: string[]) => [...new Set(xs)].sort((a, b) => a.localeCompare(b, 'tr'));
@@ -1231,6 +1239,66 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     if (s.id === 'donem') return para(a.donem);
     return '';
   };
+  const genel = topla(all);
+
+  /*
+   * Kayıt kabuğu (ux.md §8.2 “320 px kayıt örneği: gider kalemi”, P4): aynı sütun/satır modeli (süzülmüş, sıralı, görünen
+   * sütunlar) kayıt listesine çevrilir. Başlık: kalem adı + seçili ay — rapor ayı (“Bu ay”) ızgaradaysa ve ay alanları
+   * gizli değilse o ayın tutarı, yoksa dönem toplamı. Panel: Kategori, Tür, Tutar (kaynak para birimi), Bu ay, 2027
+   * artışı, Toplam ₺, yıl toplamları, 15 ay, uygulanabilen personel alanları, fatura bağlantısı. Alt satırlar özet
+   * kayıtları olarak listenin sonunda. Kayıt kimliği kalıcı anahtardan (id güvenli), sıra indeksi değil.
+   */
+  const kimlik = (anahtar: string) => anahtar.replace(/[^A-Za-z0-9-]/g, (c) => `_${c.codePointAt(0)!.toString(16)}`);
+  const kalemSutun = sutunHarita.get('kalem')!;
+  const ozetSutun = sutunHarita.get(buAyVar && !gizli.includes('ay') ? `ay-${buAyKey}-${buAy}` : 'donem')!;
+  const alanSutunlari = [
+    ...['kategori', 'tutar', 'durum', 'artis', 'donem'].map((id) => sutunHarita.get(id)),
+    ...sutunlar.filter((s) => s.grup === 'yil' && s.id !== 'artis'),
+    ...sutunlar.filter((s) => s.grup === 'ay'),
+    ...sutunlar.filter((s) => s.grup === 'personel'),
+  ].filter((s): s is Sutun => !!s && gorunen.includes(s));
+  const kayitlar: Kayit[] =
+    mod === 'kayit'
+      ? suzulmus.map((r) => ({
+          key: kimlik(r.key),
+          title: kalemAdi(r, false),
+          summary: { label: ozetSutun.ad, value: ozetSutun.hucre(r) },
+          fields: [
+            ...alanSutunlari.flatMap((s) => {
+              // Uygulanamayan personel alanı (—) sunulmaz; ay “—” (o ay gider yok) bilgidir, kalır.
+              if (s.grup === 'personel' && s.deger(r) === null) return [];
+              const alan = { key: s.id, label: s.ad, value: s.hucre(r) };
+              return s.id === 'kategori' ? [alan, { key: 'tur', label: 'Tür', value: r.tur }] : [alan];
+            }),
+            ...(faturaUrl(r)
+              ? [
+                  {
+                    key: 'fatura',
+                    label: 'Fatura',
+                    value: (
+                      <a className="text-link" data-standalone="" href={faturaUrl(r)!} target="_blank" rel="noopener noreferrer">
+                        Faturayı aç
+                      </a>
+                    ),
+                  },
+                ]
+              : []),
+          ],
+        }))
+      : [];
+  const ozetKayitlar: Kayit[] =
+    mod === 'kayit'
+      ? altlar.map((a) => {
+          const ozet = altHucre(a, ozetSutun);
+          return {
+            key: a.tur === 'grup' ? `alt-grup-${a.kume}` : `alt-${a.tur}`,
+            title: altHucre(a, kalemSutun),
+            tone: a.tur === 'toplam' ? 'total' : 'ozet',
+            summary: ozet === '' ? undefined : { label: ozetSutun.ad, value: ozet },
+            fields: alanSutunlari.map((s) => ({ key: s.id, label: s.ad, value: altHucre(a, s) })).filter((f) => f.value !== ''),
+          };
+        })
+      : [];
 
   const temizle = () => {
     setGrupSec('tumu');
@@ -1267,7 +1335,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
           ]}
         />
       ) : null}
-      <div className="table-block opex-veri">
+      <div className="table-block opex-veri" ref={sarmal} data-kabuk={mod}>
         {/* Kullanıcı kararı 2026-10-21: tablonun üstünde başlık ve açıklama yok (kalıcı); yalnız ayırıcı. Tablonun
             adı ekran okuyucuya bölgede (aria-label). */}
         <hr className="opex-ayrac" />
@@ -1371,124 +1439,153 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
                 Filtreleri temizle
               </button>
             ) : null}
+            {/* Kapsam (UX-12): süzgeç kalemleri azaltınca süzülmüş ve genel dönem toplamı birlikte, iki kabukta da. */}
+            {suzulmus.length !== all.length ? (
+              <p className="opex-veri-kapsam">
+                Süzülmüş toplam {tl(toplam.donem)} ({suzulmus.length} kalem) · Genel toplam {tl(genel.donem)} ({all.length} kalem)
+              </p>
+            ) : null}
           </div>
-          <span className="table-hint" aria-hidden="true">
-            Tabloyu yatay kaydırabilirsiniz.
-          </span>
         </div>
-        <div className="table-frame">
-          <div
-            className="table-scroll"
-            role="region"
-            aria-label={tabloAdi}
-            tabIndex={0}
-            // Yatay kaydırılınca sabit sütunun kenar gölgesi (yeniden çizim yok: öznitelik ve sütun genişliği değişkeni).
-            onScroll={(e) => {
-              const el = e.currentTarget;
-              el.toggleAttribute('data-kaydi', el.scrollLeft > 0);
-              const sabit = el.querySelector<HTMLElement>('thead th.cell-sticky');
-              if (sabit) el.parentElement?.style.setProperty('--sabit-genislik', `${sabit.getBoundingClientRect().width}px`);
-            }}
-          >
-            <Table className="data-table opex-veri-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
-              <Table.Thead>
-                <Table.Tr>
-                  {gorunen.map((s) => {
-                    const yon = sirala?.id === s.id ? sirala.yon : null;
-                    return (
-                      <Table.Th
-                        key={s.id}
-                        scope="col"
-                        className={[s.sabit ? 'cell-sticky' : '', 'cell-nowrap'].filter(Boolean).join(' ')}
-                        style={s.minWidth ? { minWidth: s.minWidth } : undefined}
-                        aria-sort={yon === 'asc' ? 'ascending' : yon === 'desc' ? 'descending' : undefined}
-                        data-num={s.sayi ? '' : undefined}
-                      >
-                        <span className="opex-th">
-                          <button type="button" className="opex-sort" onClick={() => siraDegistir(s.id)}>
-                            {s.baslik}
-                            {yon === 'asc' ? <IconArrowUp className="opex-sort-icon" size={16} aria-hidden="true" /> : yon === 'desc' ? <IconArrowDown className="opex-sort-icon" size={16} aria-hidden="true" /> : <IconArrowsSort className="opex-sort-icon" data-idle="" size={16} aria-hidden="true" />}
-                          </button>
-                          <KolonFiltresi
-                            ad={s.ad}
-                            tur={s.sayi ? 'aralik' : 'liste'}
-                            secenekler={s.sayi ? [] : secenekler(s)}
-                            deger={kolon[s.id]}
-                            onChange={(f) =>
-                              setKolon((k) => {
-                                const { [s.id]: _eski, ...kalan } = k;
-                                return f ? { ...kalan, [s.id]: f } : kalan;
-                              })
-                            }
-                          />
-                        </span>
-                      </Table.Th>
-                    );
-                  })}
-                </Table.Tr>
-                <Table.Tr className="opex-search-row">
-                  {gorunen.map((s) => (
-                    <Table.Td key={s.id} className={s.sabit ? 'cell-sticky' : undefined}>
-                      <input
-                        type="search"
-                        className="opex-col-search"
-                        aria-label={`${s.ad} sütununda ara`}
-                        placeholder={s.id === 'tutar' ? '₺: >, <, =' : s.sayi ? '>, <, =' : 'Ara'}
-                        value={arama[s.id] ?? ''}
-                        onChange={(e) => {
-                          const v = e.currentTarget.value;
-                          setArama((a) => ({ ...a, [s.id]: v }));
-                        }}
-                      />
-                    </Table.Td>
-                  ))}
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {suzulmus.length ? (
-                  suzulmus.map((r) => (
-                    <Table.Tr key={r.key}>
+        {mod === 'kayit' ? (
+          <>
+            {/* Kayıt kabuğu: kalem araması Kalem sütunu aramasıyla aynı durum; kalemler, sonra alt satırlar özet kayıtları. */}
+            <div className="opex-kayit-arac">
+              <input
+                type="search"
+                className="opex-col-search"
+                aria-label="Kalem ara"
+                placeholder="Kalem ara"
+                value={arama.kalem ?? ''}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setArama((a) => ({ ...a, kalem: v }));
+                }}
+              />
+            </div>
+            {suzulmus.length ? (
+              <KayitListesi className="opex-kayitlar" label={tabloAdi} kayitlar={kayitlar} acik={acik} onChange={setAcik} />
+            ) : (
+              <p className="opex-kayit-bos">Bu filtrelerle kalem yok.</p>
+            )}
+            <KayitListesi className="opex-kayitlar-ozet kayitlar-ozet" label={`Toplamlar · ${p.etiket}`} kayitlar={ozetKayitlar} acik={acik} onChange={setAcik} />
+          </>
+        ) : (
+          <div className="table-frame">
+            <div
+              className="table-scroll"
+              role="region"
+              aria-label={tabloAdi}
+              tabIndex={0}
+              ref={kaydiran}
+              // Yatay kaydırılınca sabit sütunun kenar gölgesi (yeniden çizim yok: öznitelik ve sütun genişliği değişkeni).
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                el.toggleAttribute('data-kaydi', el.scrollLeft > 0);
+                const sabit = el.querySelector<HTMLElement>('thead th.cell-sticky');
+                if (sabit) el.parentElement?.style.setProperty('--sabit-genislik', `${sabit.getBoundingClientRect().width}px`);
+              }}
+            >
+              <Table className="data-table opex-veri-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
+                <Table.Thead>
+                  <Table.Tr>
+                    {gorunen.map((s) => {
+                      const yon = sirala?.id === s.id ? sirala.yon : null;
+                      return (
+                        <Table.Th
+                          key={s.id}
+                          scope="col"
+                          className={[s.sabit ? 'cell-sticky' : '', 'cell-nowrap'].filter(Boolean).join(' ')}
+                          style={s.minWidth ? { minWidth: s.minWidth } : undefined}
+                          aria-sort={yon === 'asc' ? 'ascending' : yon === 'desc' ? 'descending' : undefined}
+                          data-num={s.sayi ? '' : undefined}
+                        >
+                          <span className="opex-th">
+                            <button type="button" className="opex-sort" onClick={() => siraDegistir(s.id)}>
+                              {s.baslik}
+                              {yon === 'asc' ? <IconArrowUp className="opex-sort-icon" size={16} aria-hidden="true" /> : yon === 'desc' ? <IconArrowDown className="opex-sort-icon" size={16} aria-hidden="true" /> : <IconArrowsSort className="opex-sort-icon" data-idle="" size={16} aria-hidden="true" />}
+                            </button>
+                            <KolonFiltresi
+                              ad={s.ad}
+                              tur={s.sayi ? 'aralik' : 'liste'}
+                              secenekler={s.sayi ? [] : secenekler(s)}
+                              deger={kolon[s.id]}
+                              onChange={(f) =>
+                                setKolon((k) => {
+                                  const { [s.id]: _eski, ...kalan } = k;
+                                  return f ? { ...kalan, [s.id]: f } : kalan;
+                                })
+                              }
+                            />
+                          </span>
+                        </Table.Th>
+                      );
+                    })}
+                  </Table.Tr>
+                  <Table.Tr className="opex-search-row">
+                    {gorunen.map((s) => (
+                      <Table.Td key={s.id} className={s.sabit ? 'cell-sticky' : undefined}>
+                        <input
+                          type="search"
+                          className="opex-col-search"
+                          aria-label={`${s.ad} sütununda ara`}
+                          placeholder={s.id === 'tutar' ? '₺: >, <, =' : s.sayi ? '>, <, =' : 'Ara'}
+                          value={arama[s.id] ?? ''}
+                          onChange={(e) => {
+                            const v = e.currentTarget.value;
+                            setArama((a) => ({ ...a, [s.id]: v }));
+                          }}
+                        />
+                      </Table.Td>
+                    ))}
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {suzulmus.length ? (
+                    suzulmus.map((r) => (
+                      <Table.Tr key={r.key}>
+                        {gorunen.map((s) =>
+                          s.id === 'kalem' ? (
+                            <Table.Th key={s.id} scope="row" className="cell-sticky">
+                              {s.hucre(r)}
+                            </Table.Th>
+                          ) : (
+                            <Table.Td key={s.id} className="cell-nowrap">
+                              {s.hucre(r)}
+                            </Table.Td>
+                          ),
+                        )}
+                      </Table.Tr>
+                    ))
+                  ) : (
+                    <Table.Tr>
+                      <Table.Td colSpan={gorunen.length} className="opex-veri-bos">
+                        Bu filtrelerle kalem yok.
+                      </Table.Td>
+                    </Table.Tr>
+                  )}
+                </Table.Tbody>
+                <Table.Tfoot>
+                  {altlar.map((a) => (
+                    <Table.Tr key={a.tur === 'grup' ? `grup:${a.kume}` : a.tur} data-tone={a.tur === 'toplam' ? 'total' : undefined}>
                       {gorunen.map((s) =>
                         s.id === 'kalem' ? (
                           <Table.Th key={s.id} scope="row" className="cell-sticky">
-                            {s.hucre(r)}
+                            {altHucre(a, s)}
                           </Table.Th>
                         ) : (
                           <Table.Td key={s.id} className="cell-nowrap">
-                            {s.hucre(r)}
+                            {altHucre(a, s)}
                           </Table.Td>
                         ),
                       )}
                     </Table.Tr>
-                  ))
-                ) : (
-                  <Table.Tr>
-                    <Table.Td colSpan={gorunen.length} className="opex-veri-bos">
-                      Bu filtrelerle kalem yok.
-                    </Table.Td>
-                  </Table.Tr>
-                )}
-              </Table.Tbody>
-              <Table.Tfoot>
-                {altlar.map((a) => (
-                  <Table.Tr key={a.tur === 'grup' ? `grup:${a.kume}` : a.tur} data-tone={a.tur === 'toplam' ? 'total' : undefined}>
-                    {gorunen.map((s) =>
-                      s.id === 'kalem' ? (
-                        <Table.Th key={s.id} scope="row" className="cell-sticky">
-                          {altHucre(a, s)}
-                        </Table.Th>
-                      ) : (
-                        <Table.Td key={s.id} className="cell-nowrap">
-                          {altHucre(a, s)}
-                        </Table.Td>
-                      ),
-                    )}
-                  </Table.Tr>
-                ))}
-              </Table.Tfoot>
-            </Table>
+                  ))}
+                </Table.Tfoot>
+              </Table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

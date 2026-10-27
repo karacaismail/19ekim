@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page, type Request, type Route } from '@playwright/test';
-import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_MIN_WAIT_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf, planOfModel } from '../src/data/opex';
+import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_MIN_WAIT_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf, giderDonem, kisiDonem, planOfModel } from '../src/data/opex';
 import { buildModel, exampleTohum, reply } from './opex-fixture';
 
 /**
@@ -1434,19 +1434,252 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     expect(st.sabitCizgi).toContain('linear-gradient');
   });
 
-  test('kalemler veri tablosu 375 px: sayfa taşmaz, tablo kendi kutusunda kayar; filtreler tek sütun', async ({ page }) => {
+  // ux.md §8.2 “320 px kayıt örneği: gider kalemi” (P4, kullanıcı kararı 2026-10-27): kalemler tablosu 48em altında
+  // yatay kayan ızgara değil kayıt listesidir — başlıkta kalem adı + seçili ay (rapor ayı) tutarı, açılan panelde
+  // etiketli alanlar, alt satırlar listenin sonunda özet kayıtları; süzgeç, sıra ve sütun durumu iki kabukta ortak
+  // (tek görünüm modeli, §8.3). Eski “tablo kendi kutusunda kayar” kabulü (Y-02 istisnası, 2026-10-21) bu paketle
+  // kalktı; 375 px testi buna göre yeniden yazıldı (sessizce silinmedi).
+  test('kalemler 375 px: sayfa taşmaz; kayan tablo yok, kayıt listesi; filtreler tek sütun', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockScript(page, { ozet: 'veri-375', model: MODEL }, 'open');
     await page.goto(PATH);
     await hydrated(page);
     await expect(page.locator('.opex-veri')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-    const scroll = page.getByRole('region', { name: KALEMLER });
-    expect(await scroll.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+    await expect(page.locator('.opex-veri .table-scroll')).toHaveCount(0);
+    await expect(page.locator('.opex-veri .opex-kayitlar .kayit').first()).toBeVisible();
     // Görünen filtre öğeleri (çoklu seçimin gizli form alanı sayılmaz) aynı sol hizada: tek sütun.
     const filtreler = await page.locator('.opex-filtreler > .opex-filter').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)));
     expect(filtreler.length).toBeGreaterThanOrEqual(7);
     expect(new Set(filtreler).size).toBe(1);
+  });
+
+  test.describe('kalemler kayıt listesi (ux.md §8.2 örneği, P4)', () => {
+    const KAYIT = '.opex-veri .opex-kayitlar .kayit';
+    const OZET_KAYIT = '.opex-veri .opex-kayitlar-ozet .kayit';
+    const HEPSI = MODEL.giderler.length + MODEL.kisiler.length;
+    const TEKNOLOJI = MODEL.giderler.filter((g) => g.kume === 'teknoloji').length;
+    /** Öğenin metni: boşluklar tek, kenarlar kırpılmış (textContent; ekran okuyucu ekleri tabloyla aynı). */
+    const yazi = (l: Locator) => l.evaluate((e) => (e.textContent ?? '').replace(/\s+/g, ' ').trim());
+    const yazilar = (l: Locator) => l.evaluateAll((els) => els.map((e) => (e.textContent ?? '').replace(/\s+/g, ' ').trim()));
+    const kayitBul = (page: Page, ad: string) => page.locator(KAYIT).filter({ has: page.locator('.kayit-ad', { hasText: new RegExp(`^${ad}`) }) });
+    const paneli = async (kayit: Locator) => kayit.page().locator(`[id="${await kayit.locator('h4 button').getAttribute('aria-controls')}"]`);
+    /** Açık panelin dl çiftleri [etiket, değer]. */
+    const alanlar = (panel: Locator) =>
+      panel.locator('dl.kayit-alanlar > div').evaluateAll((divs) =>
+        divs.map((d) => {
+          const t = (n: Element | null) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+          return [t(d.querySelector('dt')), t(d.querySelector('dd'))] as [string, string];
+        }),
+      );
+    const sayi = (s: string) => Number(s.replace(/[^\d,]/g, '').replace(',', '.'));
+
+    for (const width of [320, 390]) {
+      test(`${width} px: kayan tablo yok; her kalem h4 düğmeli kayıt — ad + seçili ay (rapor ayı) tutarı; hedef ≥ 44 px; kaydırma ipucu yok; sayfa taşmaz, kırpılan öğe yok`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 700 });
+        await mockScript(page, { ozet: `kayit-${width}`, model: MODEL }, 'open');
+        await page.goto(PATH);
+        await hydrated(page);
+        const blok = page.locator('.opex-veri');
+        await expect(blok).toBeVisible();
+        await expect(blok.locator('.table-scroll')).toHaveCount(0);
+        await expect(blok.locator('table')).toHaveCount(0);
+        await expect(blok.locator('.table-hint')).toHaveCount(0);
+        const kayitlar = page.locator(KAYIT);
+        await expect(kayitlar).toHaveCount(HEPSI);
+        // Kayıt sözleşmesi (M09): başlık h4 içinde düğme, aria-expanded, panel var, hedef ≥ 44 px, düğme içinde bağlantı yok.
+        const durum = await kayitlar.evaluateAll((els) =>
+          els.map((k) => {
+            const b = k.querySelector<HTMLButtonElement>('h4 button');
+            const c = b?.getAttribute('aria-controls') ?? '';
+            return { dugme: !!b, acik: b?.getAttribute('aria-expanded'), panel: !!(c && document.getElementById(c)), yukseklik: b ? b.getBoundingClientRect().height : 0, icKontrol: !!b?.querySelector('a, button, input') };
+          }),
+        );
+        for (const k of durum) {
+          expect(k).toMatchObject({ dugme: true, acik: 'false', panel: true, icKontrol: false });
+          expect(k.yukseklik).toBeGreaterThanOrEqual(44);
+        }
+        // Başlık: kalem adı + seçili ay (rapor ayı Ekim 2026) tutarı.
+        const kira = kayitBul(page, 'Ofis kirası');
+        await expect(kira.locator('.kayit-ad')).toContainText('Ofis kirası');
+        await expect(kira.locator('.kayit-ozet-etiket')).toHaveText('Ekim 2026');
+        await expect(kira.locator('.kayit-ozet-deger')).toHaveText(lira(60000));
+        // Alt satırlar listenin sonunda özet kayıtları (kalemlerin altında).
+        const ozetler = page.locator(OZET_KAYIT);
+        expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual(['Teknoloji', 'Ofis ve işletme', 'Personel', `Toplam · ${HEPSI} kalem`, 'Önceki aya göre']);
+        const [sonKalem, ilkOzet] = [await kayitlar.last().boundingBox(), await ozetler.first().boundingBox()];
+        expect(ilkOzet!.y).toBeGreaterThanOrEqual(sonKalem!.y + sonKalem!.height - 1);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+        expect(await clipped(page)).toEqual([]);
+      });
+    }
+
+    test('320 px: açılan panel — Kategori, Tür, Tutar (kaynak para birimi), Bu ay, 2027 artışı, Toplam ₺, yıl toplamları ve 15 ay etiketli dl; personel alanları yalnız personelde; fatura bağlantısı panelde; Enter/Space, kapalı panele Tab yok', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await mockScript(page, { ozet: 'panel', model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const aylar = planOfModel(MODEL).aylar.map((a) => a.ad);
+      expect(aylar).toHaveLength(15);
+      const kira = kayitBul(page, 'Ofis kirası');
+      const dugme = kira.locator('h4 button');
+      await dugme.focus();
+      await page.keyboard.press('Enter');
+      await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+      const panel = await paneli(kira);
+      await expect(panel).toBeVisible();
+      await expect(panel).toHaveAttribute('role', 'region');
+      const alan = await alanlar(panel);
+      const etiketler = alan.map(([dt]) => dt);
+      expect(etiketler.slice(0, 8)).toEqual(['Kategori', 'Tür', 'Tutar', 'Bu ay', '2027 artışı', 'Toplam ₺', '2026 ₺', '2027 ₺']);
+      expect(etiketler.slice(8)).toEqual(aylar);
+      for (const [, dd] of alan) expect(dd.length).toBeGreaterThan(0);
+      const deger = Object.fromEntries(alan);
+      expect(deger['Kategori']).toBe('Kira');
+      expect(deger['Tür']).toBe('Gider');
+      expect(deger['Tutar']).toMatch(/60\.000,00/);
+      expect(deger['Bu ay']).toBe('Bekliyor'); // örnek tohumda ödeme takibi var; kira bu ay ödenmemiş
+      expect(deger['2027 artışı']).toMatch(/^kira /);
+      expect(deger['Ekim 2026']).toBe(lira(60000));
+      expect(deger['2026 ₺']).toBe('180.000,00 ₺');
+      expect(Math.abs(sayi(deger['Toplam ₺']) - sayi(deger['2026 ₺']) - sayi(deger['2027 ₺']))).toBeLessThan(0.05);
+      // Klavye (UX-07): Space kapatır, odak düğmede kalır; kapalı panele Tab gitmez.
+      await page.keyboard.press('Space');
+      await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+      await expect(dugme).toBeFocused();
+      await page.keyboard.press('Tab');
+      expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(false);
+      // Personel kaydı: Tür Bordrolu; brüt, kesinti, işveren payı ve teşvik alanları var; fatura KDV’si (uygulanamaz) yok.
+      const yonetici = kayitBul(page, 'Örnek Yönetici');
+      await yonetici.locator('h4 button').click();
+      const yAlan = Object.fromEntries(await alanlar(await paneli(yonetici)));
+      expect(yAlan['Tür']).toBe('Bordrolu');
+      expect(yAlan['Kategori']).toBe('Bordrolu personel');
+      for (const ad of ['Brüt', 'Kesintiler (işçi)', 'İşveren payı', 'Teşvik']) expect(yAlan[ad], ad).toMatch(/₺/);
+      expect(yAlan).not.toHaveProperty('Fatura KDV’si');
+      // Fatura bağlantısı başlık düğmesinin içinde değil (§8.2), panelde ayrı alan; bağımsız bağlantı ≥ 44 px.
+      const aracA = kayitBul(page, 'Yapay zekâ aracı A');
+      await expect(aracA.locator('h4 button a')).toHaveCount(0);
+      await aracA.locator('h4 button').click();
+      const link = aracA.locator('dl.kayit-alanlar a[href="https://example.com/fatura-a"]');
+      await expect(link).toBeVisible();
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    });
+
+    test('süzgeç ve sıra eşdeğerliği: 1280 px tablosu ile 320 px kayıtları aynı süzgeçte aynı kalemleri, sırayı ve değerleri taşır; kabuk değişince süzgeç, sıra ve açık kayıtlar korunur (UX-02)', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await mockScript(page, { ozet: 'esdeger', model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const tablo = page.getByRole('region', { name: KALEMLER });
+      const sayac = page.locator('.opex-veri-sayi');
+      // Süzgeç: Teknoloji grubu; sıra: Toplam ₺ azalan.
+      await page.getByRole('button', { name: /^Teknoloji \(\d+\)$/ }).click();
+      const baslik = tablo.locator('thead th', { hasText: /^Toplam ₺$/ });
+      await baslik.getByRole('button', { name: 'Toplam ₺', exact: true }).click();
+      await baslik.getByRole('button', { name: 'Toplam ₺', exact: true }).click();
+      await expect(baslik).toHaveAttribute('aria-sort', 'descending');
+      await expect(sayac).toHaveText(`${TEKNOLOJI} / ${HEPSI} kalem`);
+      /** Tablo satırları: ad ve sütun → değer (ay başlığının tam adı; “fatura” bağlantısı ad sayılmaz). */
+      const tabloSatirlari = () =>
+        tablo.evaluate((el) => {
+          const t = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+          const basliklar = [...el.querySelectorAll('thead tr:first-child th')].map((th) => t(th.querySelector('.visually-hidden') ?? th));
+          return [...el.querySelectorAll('tbody tr')].map((tr) => {
+            const hucreler = [...tr.children];
+            return { ad: t(hucreler[0]).replace(/\s*fatura$/, ''), alan: Object.fromEntries(basliklar.slice(1).map((b, i) => [b, t(hucreler[i + 1])])) as Record<string, string> };
+          });
+        });
+      const satirlar = await tabloSatirlari();
+      expect(satirlar).toHaveLength(TEKNOLOJI);
+      // Dar ekran: aynı süzgeç ve sıra, aynı kalemler aynı sırada; her sütun aynı etiket ve değerle kayıtta.
+      await page.setViewportSize({ width: 320, height: 700 });
+      const kayitlar = page.locator(KAYIT);
+      await expect(kayitlar).toHaveCount(TEKNOLOJI);
+      await expect(sayac).toHaveText(`${TEKNOLOJI} / ${HEPSI} kalem`);
+      expect(await yazilar(kayitlar.locator('.kayit-ad'))).toEqual(satirlar.map((s) => s.ad));
+      for (let i = 0; i < satirlar.length; i++) {
+        const k = kayitlar.nth(i);
+        await k.locator('h4 button').click();
+        const alan: Record<string, string> = Object.fromEntries(await alanlar(await paneli(k)));
+        alan[await yazi(k.locator('.kayit-ozet-etiket'))] ??= await yazi(k.locator('.kayit-ozet-deger'));
+        for (const [sutunAdi, deger] of Object.entries(satirlar[i].alan)) {
+          // Uygulanamayan personel alanı (“—”) kayıtta sunulmaz; onun dışında her sütun aynı etiketle aynı değeri taşır.
+          if (deger === '—' && !(sutunAdi in alan)) continue;
+          expect(alan[sutunAdi], `${satirlar[i].ad} → ${sutunAdi}`).toBe(deger);
+        }
+      }
+      // Geniş ekrana dönüş: tablo, aynı süzgeç ve sıra, aynı satırlar; tekrar dar ekranda açık kayıtlar kimlikle korunur.
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect(tablo.locator('table')).toBeVisible();
+      await expect(tablo.locator('thead th', { hasText: /^Toplam ₺$/ })).toHaveAttribute('aria-sort', 'descending');
+      await expect(sayac).toHaveText(`${TEKNOLOJI} / ${HEPSI} kalem`);
+      expect(await tabloSatirlari()).toEqual(satirlar);
+      await page.setViewportSize({ width: 320, height: 700 });
+      await expect(kayitlar).toHaveCount(TEKNOLOJI);
+      for (let i = 0; i < TEKNOLOJI; i++) await expect(kayitlar.nth(i).locator('h4 button')).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    test('320 px: süzülmüş ve genel toplam kapsamı görünür (UX-12); özet kayıtları süzgece göre; “Sütunlar” ay alanlarını gizler; sıfır sonuçta açıklama ve temizleme yolu (UX-13)', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await mockScript(page, { ozet: 'kapsam', model: MODEL }, 'open');
+      await page.goto(PATH);
+      await hydrated(page);
+      const p = planOfModel(MODEL);
+      const giderToplam = (g: (typeof MODEL.giderler)[number]) => p.donemler.reduce((t, d) => t + giderDonem(g, d).toplam, 0);
+      const kisiToplam = (k: (typeof MODEL.kisiler)[number]) => p.donemler.reduce((t, d) => t + kisiDonem(k, d).toplam.maliyet, 0);
+      const genel = MODEL.giderler.reduce((t, g) => t + giderToplam(g), 0) + MODEL.kisiler.reduce((t, k) => t + kisiToplam(k), 0);
+      const teknoloji = MODEL.giderler.filter((g) => g.kume === 'teknoloji').reduce((t, g) => t + giderToplam(g), 0);
+      const sayac = page.locator('.opex-veri-sayi');
+      const kapsam = page.locator('.opex-veri-kapsam');
+      const ozetler = page.locator(OZET_KAYIT);
+      // Süzgeç yokken kapsam notu yok (sayaç yeter); süzgeçle süzülmüş ve genel toplam birlikte, dönem toplamı olarak.
+      await expect(sayac).toHaveText(`${HEPSI} / ${HEPSI} kalem`);
+      await expect(kapsam).toHaveCount(0);
+      await page.getByRole('button', { name: /^Teknoloji \(\d+\)$/ }).click();
+      await expect(sayac).toHaveText(`${TEKNOLOJI} / ${HEPSI} kalem`);
+      await expect(kapsam).toBeVisible();
+      const m = /Süzülmüş toplam ([\d.]+) ₺.*Genel toplam ([\d.]+) ₺/.exec((await kapsam.textContent()) ?? '');
+      expect(m, 'kapsam notu').not.toBeNull();
+      expect(Math.abs(sayi(m![1]) - teknoloji)).toBeLessThanOrEqual(1);
+      expect(Math.abs(sayi(m![2]) - genel)).toBeLessThanOrEqual(1);
+      // Özet kayıtları: tek grup listelenince grup ara toplamı yok; toplam kaydı vurgulu; başlıkta rapor ayı toplamı.
+      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam · ${TEKNOLOJI} kalem`, 'Önceki aya göre']);
+      const toplamKaydi = ozetler.filter({ hasText: /^Toplam ·/ });
+      await expect(toplamKaydi).toHaveAttribute('data-tone', 'total');
+      await expect(toplamKaydi.locator('.kayit-ozet-etiket')).toHaveText('Ekim 2026');
+      expect(Math.abs(sayi(await yazi(toplamKaydi.locator('.kayit-ozet-deger'))) - donemOf(MODEL, 2026).seri[0].teknoloji)).toBeLessThanOrEqual(1);
+      await toplamKaydi.locator('h4 button').click();
+      expect((await alanlar(await paneli(toplamKaydi))).map(([dt]) => dt)).toEqual(['Toplam ₺', '2026 ₺', '2027 ₺', ...p.aylar.map((a) => a.ad)]);
+      // Sütun durumu ortak: ay alanları gizlenince kayıt panelinde ay yok, başlık özeti Toplam ₺, “Önceki aya göre” kalkar.
+      await page.getByRole('button', { name: 'Sütunlar' }).click();
+      await page.getByRole('checkbox', { name: /Ay sütunları/ }).uncheck();
+      await page.keyboard.press('Escape');
+      const ilk = page.locator(KAYIT).first();
+      await expect(ilk.locator('.kayit-ozet-etiket')).toHaveText('Toplam ₺');
+      await ilk.locator('h4 button').click();
+      expect((await alanlar(await paneli(ilk))).map(([dt]) => dt)).not.toContain('Ekim 2026');
+      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam · ${TEKNOLOJI} kalem`]);
+      await page.getByRole('button', { name: 'Sütunlar' }).click();
+      await page.getByRole('checkbox', { name: /Ay sütunları/ }).check();
+      await page.keyboard.press('Escape');
+      await expect(ilk.locator('.kayit-ozet-etiket')).toHaveText('Ekim 2026');
+      // UX-13: kayıt kabuğunda kalem araması (Kalem sütunu aramasıyla aynı durum); sıfır sonuçta açıklama ve temizleme.
+      await page.getByRole('searchbox', { name: 'Kalem ara' }).fill('zzz-yok');
+      await expect(sayac).toHaveText(`0 / ${HEPSI} kalem`);
+      await expect(page.locator(KAYIT)).toHaveCount(0);
+      await expect(page.locator('.opex-veri .opex-kayit-bos')).toHaveText('Bu filtrelerle kalem yok.');
+      await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
+      await expect(sayac).toHaveText(`${HEPSI} / ${HEPSI} kalem`);
+      await expect(page.locator(KAYIT)).toHaveCount(HEPSI);
+      await expect(kapsam).toHaveCount(0);
+      // Aynı arama geniş ekranda Kalem sütununun kutusunda (tek durum).
+      await page.getByRole('searchbox', { name: 'Kalem ara' }).fill('sunucu');
+      await expect(sayac).toHaveText(`1 / ${HEPSI} kalem`);
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect(page.getByRole('searchbox', { name: 'Kalem sütununda ara' })).toHaveValue('sunucu');
+      await expect(sayac).toHaveText(`1 / ${HEPSI} kalem`);
+    });
   });
 
   test('teşvik yoksa bileşim notunda teşvik yok; işveren payı tam', async ({ page }) => {
