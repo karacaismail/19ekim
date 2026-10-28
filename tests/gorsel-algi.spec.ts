@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { buildModel, reply } from './opex-fixture';
 
 /**
  * gorsel_algi.md (kullanıcı kararı 2026-10-28) kabul senaryoları (§6 V01–V30), paket paket. GA-1: seçenek etiketinde tek
@@ -151,5 +152,93 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
     await expect(page.locator('#kadro').getByRole('group', { name: 'Grafik görünümü' }).first()).toBeVisible();
     await expect(page.locator('.table-block:has(#katki-tablo)').getByRole('group', { name: 'Tablo görünümü' })).toBeVisible();
     await expect(page.locator('#gelir').getByRole('group', { name: 'Grafik ve tablo görünümü' }).first()).toBeVisible();
+  });
+});
+
+/** Giderler sayfası: Apps Script yanıtı sahte modelle (anahtarsız uç), veri hemen gelir. */
+async function giderlerAc(page: Page) {
+  const model = buildModel();
+  await page.route('https://script.google.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(model, 'ozet-1')) }),
+  );
+  await page.goto('giderler/');
+  await hydrated(page);
+  await expect(page.getByRole('region', { name: /^Kalemler · / })).toBeVisible({ timeout: 15_000 });
+}
+
+test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlüğü, kaynak tonu', () => {
+  test('V24: aynı ölçüt gelir ve nakit sayfalarında aynı ad, işaret ve birimle; ek fon ile negatif bakiye ayrı kavram', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const ana = page.locator('.sonuc');
+    await expect(ana.locator('.sonuc-etiket').first()).toHaveText('En yüksek birikmiş açık');
+    expect((await ana.locator('.sonuc-deger').first().innerText()).trim()).toMatch(/^[−-]\d|^0 ₺$/);
+    await expect(ana).toContainText(/gereken finansman \d/);
+    const metin = await page.locator('main').innerText();
+    // Eski ad (“fon ihtiyacı”) hiçbir yerde yok; yapışkan özet, senaryo tablosu ve filtre etkisi aynı adı taşır.
+    expect(metin).not.toMatch(/fon ihtiyacı/i);
+    await expect(page.locator('.yapiskan-cip', { hasText: 'En yüksek birikmiş açık' })).toHaveCount(1);
+    await expect(page.locator('.table-block:has(#senaryolar-tablo) thead')).toContainText('En yüksek birikmiş açık');
+    // Nakit sayfasındaki ölçütle ilişki açık: nakit açığı tavanı başka ölçüttür (başlangıç nakdi ve yatırım girişi).
+    expect(metin).toMatch(/nakit açığı tavanı/i);
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    const nakit = await page.locator('main').innerText();
+    expect(nakit).toMatch(/birikmiş açık/i);
+    expect(nakit).not.toMatch(/fon ihtiyacı/i);
+    expect((await page.locator('.sonuc .sonuc-deger').first().innerText()).trim()).not.toMatch(/^[−-]/);
+  });
+
+  test('V25: sıfır, veri yok, uygulanmıyor ve senaryoda yok ayrı okunur; tablolarda çıplak “—” hücresi yok; Giderler’de kısa sembol görünür efsaneyle', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kadro = page.locator('.table-block:has(#katki-tablo)');
+    await expect(kadro.locator('tbody tr[data-tone="total"]').first()).toContainText('Uygulanmıyor');
+    expect(await kadro.locator('td', { hasText: /^—$/ }).count()).toBe(0);
+    await kadro.getByRole('group', { name: /görünüm/i }).getByRole('button', { name: 'Üçü üst üste' }).click();
+    await expect(kadro.locator('.table-note-alt')).toContainText('Senaryoda yok');
+    expect(await kadro.locator('td', { hasText: /^—$/ }).count()).toBe(0);
+    expect(await page.locator('main td', { hasText: /^—$/ }).count()).toBe(0);
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    const nakitTablo = page.locator('.table-block:has(#nakit-tablo)');
+    expect(await nakitTablo.locator('td', { hasText: /^—$/ }).count()).toBe(0);
+    expect(await nakitTablo.locator('td', { hasText: /^0 ₺$/ }).count()).toBeGreaterThan(0);
+    expect(await page.locator('main').innerText()).not.toMatch(/“—” sıfır/);
+    await giderlerAc(page);
+    await expect(page.locator('.opex-sembol-efsanesi')).toContainText(/— : o ay bu kalemde gider yok \(0 ₺\)/);
+    await expect(page.locator('.opex-sembol-efsanesi')).toContainText(/uygulanmıyor/i);
+  });
+
+  test('F18: alt bilgi sayfa türüne göre kaynak ve statü söyler; Giderler kaynak araması doğrulanmış kaynak değildir; şerit “Canlı” demez', async ({ page }) => {
+    const sayfalar: [string, RegExp, RegExp][] = [
+      ['eylem-plani/', /kesinleşen karar/i, /örnek veri|koşullu tahmin/i],
+      ['gelir-plani/', /koşullu tahmin/i, /kesinleşen/i],
+      ['nakit-akisi/', /koşullu tahmin/i, /kesinleşen/i],
+      ['applet/', /örnek veri/i, /kesinleşen/i],
+    ];
+    for (const [yol, bekle, olmasin] of sayfalar) {
+      await page.goto(yol);
+      await icerik(page);
+      await hydrated(page);
+      const alt = await page.locator('.app-footer').innerText();
+      expect(alt, yol).toMatch(bekle);
+      expect(alt, yol).not.toMatch(olmasin);
+    }
+    await giderlerAc(page);
+    const alt = await page.locator('.app-footer').innerText();
+    expect(alt).toMatch(/Sheets/);
+    expect(alt).not.toMatch(/kesinleşen/i);
+    // Varsayımlar seçili yıl panelinde (2027): sekmeyi seç.
+    await page.getByRole('tablist', { name: 'Yıl' }).getByRole('tab', { name: /2027/ }).click();
+    const kaynak = page.locator('.opex-source').first();
+    await expect(kaynak.getByRole('link', { name: /Kaynak arama bağlantısı/ })).toHaveCount(1);
+    await expect(kaynak).toContainText(/doğrulanmış kaynak değildir/i);
+    await expect(page.locator('.opex-live-label')).not.toHaveText('Canlı');
+    await expect(page.locator('.opex-live-label')).toHaveText('Sheets');
   });
 });

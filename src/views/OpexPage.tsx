@@ -45,12 +45,12 @@ import { tl, tlExact } from '../lib/format';
 const pct2 = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(r * 100)}`;
 const signed = (r: number) => `${r > 0 ? '+' : r < 0 ? '−' : ''}${pct2(Math.abs(r))}`;
 /** Değişim oranı; önceki değer 0 ise (ör. tüm kalemleri işaretsiz ay) “—”. */
-const change = (now: number, before: number) => (before ? signed(now / before - 1) : '—');
+const change = (now: number, before: number) => (before ? signed(now / before - 1) : 'Uygulanmıyor');
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const rate = (value: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value)} ₺`;
 const clock = (iso: string | null | undefined) =>
-  iso ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso)) : '—';
+  iso ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso)) : 'Veri yok';
 const stamp = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 
 const KUME_TONE: Record<KumeKod, OpexTone> = { teknoloji: 'tech', insan: 'people', ofis: 'office' };
@@ -408,9 +408,8 @@ function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extrac
     <div className="opex-live" data-state={live.stale ? 'stale' : 'live'}>
       <p className="opex-live-status" title={detay}>
         <span className="opex-live-dot" aria-hidden="true" />
-        <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Canlı'}</span>
+        <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Sheets'}</span>
         <span className="opex-live-meta">
-          <span className="opex-live-kaynak">Sheets </span>
           {clock(live.data.degisti)} · {guncelleme}
         </span>
         <span className="visually-hidden"> · {detay}</span>
@@ -1446,6 +1445,10 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
                 Süzülmüş toplam {tl(toplam.donem)} ({suzulmus.length} kalem) · Genel toplam {tl(genel.donem)} ({all.length} kalem)
               </p>
             ) : null}
+            {/* Kısa sembol efsanesi (gorsel_algi.md F17): yoğun tabloda “—” korunur, anlamı görünür ve yereldir. */}
+            <p className="opex-sembol-efsanesi">
+              — : o ay bu kalemde gider yok (0 ₺); personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bordrosuz kalem için uygulanmıyor demektir.
+            </p>
           </div>
         </div>
         {mod === 'kayit' ? (
@@ -1765,7 +1768,7 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
     },
     { key: 'o26', header: <Num>{`2026 aylık ort. (${once.etiket.replace(' 2026', '')})`}</Num>, nowrap: true, render: (r) => <Num>{tl(once.ortalama[r.k])}</Num> },
     { key: 'o27', header: <Num>2027 aylık ort.</Num>, nowrap: true, render: (r) => <Num>{tl(d.ortalama[r.k])}</Num> },
-    { key: 'dg', header: <Num>Değişim</Num>, nowrap: true, render: (r) => <Num>{once.ortalama[r.k] ? signed(d.ortalama[r.k] / once.ortalama[r.k] - 1) : '—'}</Num> },
+    { key: 'dg', header: <Num>Değişim</Num>, nowrap: true, render: (r) => <Num>{once.ortalama[r.k] ? signed(d.ortalama[r.k] / once.ortalama[r.k] - 1) : 'Uygulanmıyor'}</Num> },
     { key: 'y27', header: <Num>2027 yıllık</Num>, nowrap: true, render: (r) => <Num>{tl(d.toplam[r.k])}</Num> },
   ];
   return (
@@ -1783,8 +1786,9 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
         2026 enflasyonu ({e.donem}): yıllık TÜFE {pct2(e.yillik)}, aylık TÜFE {pct2(e.aylik)}, 12 aylık ortalama TÜFE {pct2(e.ortalama12)}, Yİ-ÜFE
         aylık {pct2(e.yiufeAylik)}.{' '}
         <a className="text-link" href={e.kaynak} target="_blank" rel="noopener noreferrer">
-          Kaynak araması
-        </a>
+          Kaynak arama bağlantısı
+        </a>{' '}
+        (arama sonucu; doğrulanmış kaynak değildir, tarih ve sürümü kullanıcı denetler).
       </p>
       <Chart
         id="kisi-2027"

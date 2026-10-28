@@ -26,7 +26,8 @@ import { useOpexOnce } from '../lib/useOpex';
  */
 
 const gun = (d: string | null, son: string) => (d ? longDate(d) : `${son} sonuna kadar değil`);
-const kisaGun = (d: string | null) => (d ? shortDate(d) : '—');
+/* “—” sözlüğü (gorsel_algi.md F17): ulaşılmayan tarih “Dönem içinde yok”, geçerli olmayan süre/oran “Uygulanmıyor”, sıfır fark 0. */
+const kisaGun = (d: string | null) => (d ? shortDate(d) : 'Dönem içinde yok');
 const ayAdi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 const yuzde = (v: number) => `%${Math.round(v * 100)}`;
 const binTl = (v: number) => Math.round(v / 1000);
@@ -48,11 +49,11 @@ function HedefKartlari({ milestones, digerleri, son }: { milestones: Milestone[]
           <dl className="gelir-hedef-bilgi">
             <div>
               <dt>Başlangıçtan</dt>
-              <dd>{m.days === null ? '—' : sure(m.days)}</dd>
+              <dd>{m.days === null ? 'Uygulanmıyor' : sure(m.days)}</dd>
             </div>
             <div>
               <dt>Önceki hedeften</dt>
-              <dd>{m.sinceDays === null ? '—' : `${m.sinceDays} gün`}</dd>
+              <dd>{m.sinceDays === null ? 'Uygulanmıyor' : `${m.sinceDays} gün`}</dd>
             </div>
             <div>
               <dt>Hedef ayının toplam abonelik ödemesi</dt>
@@ -171,17 +172,17 @@ function Icerik() {
       : `${son} sonuna kadar gelir gideri geçmiyor ve açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}): bu seçeneklerle sürdürülebilir değil`;
   const fark = (a: number, b: number) => {
     const v = b - a;
-    return v === 0 ? '—' : `${v > 0 ? '+' : '−'}${tl(Math.abs(v))}`;
+    return v === 0 ? '0 ₺' : `${v > 0 ? '+' : '−'}${tl(Math.abs(v))}`;
   };
   const farkGun = (a: { date: string } | null, b: { date: string } | null) => (a && b ? (a.date === b.date ? 'Aynı' : `${kisaGun(a.date)} → ${kisaGun(b.date)}`) : `${a ? kisaGun(a.date) : 'yok'} → ${b ? kisaGun(b.date) : 'yok'}`);
   const etkiRows = [
     { ad: `${H} ay gelir`, var: tl(be0.toplam.gelir), sec: tl(be.toplam.gelir), fark: fark(be0.toplam.gelir, be.toplam.gelir) },
     { ad: `${H} ay gider`, var: tl(be0.toplam.gider), sec: tl(be.toplam.gider), fark: fark(be0.toplam.gider, be.toplam.gider) },
     { ad: `${H} ay net`, var: tl(be0.toplam.net), sec: tl(be.toplam.net), fark: fark(be0.toplam.net, be.toplam.net) },
-    { ad: `${son} sonuna kadar yeni aktif satıcı`, var: int(Math.round(be0.sim.kumAktif[H - 1])), sec: int(Math.round(sim.kumAktif[H - 1])), fark: Math.round(sim.kumAktif[H - 1] - be0.sim.kumAktif[H - 1]) === 0 ? '—' : `${sim.kumAktif[H - 1] > be0.sim.kumAktif[H - 1] ? '+' : '−'}${int(Math.abs(Math.round(sim.kumAktif[H - 1] - be0.sim.kumAktif[H - 1])))}` },
+    { ad: `${son} sonuna kadar yeni aktif satıcı`, var: int(Math.round(be0.sim.kumAktif[H - 1])), sec: int(Math.round(sim.kumAktif[H - 1])), fark: Math.round(sim.kumAktif[H - 1] - be0.sim.kumAktif[H - 1]) === 0 ? '0' : `${sim.kumAktif[H - 1] > be0.sim.kumAktif[H - 1] ? '+' : '−'}${int(Math.abs(Math.round(sim.kumAktif[H - 1] - be0.sim.kumAktif[H - 1])))}` },
     { ad: 'Aylık başabaş (eğilimle)', var: tarihYaz(be0.ongoru.nokta), sec: tarihYaz(be.ongoru.nokta), fark: farkGun(be0.ongoru.nokta, be.ongoru.nokta) },
     { ad: 'Birikmiş açığın kapanışı (eğilimle)', var: tarihYaz(be0.ongoru.geriOdeme), sec: tarihYaz(be.ongoru.geriOdeme), fark: farkGun(be0.ongoru.geriOdeme, be.ongoru.geriOdeme) },
-    { ad: 'En çok fon ihtiyacı', var: tl(Math.min(0, be0.enDusuk.deger)), sec: tl(Math.min(0, be.enDusuk.deger)), fark: fark(Math.min(0, be0.enDusuk.deger), Math.min(0, be.enDusuk.deger)) },
+    { ad: 'En yüksek birikmiş açık', var: tl(Math.min(0, be0.enDusuk.deger)), sec: tl(Math.min(0, be.enDusuk.deger)), fark: fark(Math.min(0, be0.enDusuk.deger), Math.min(0, be.enDusuk.deger)) },
   ];
   const kum = (xs: number[]) => {
     let acc = 0;
@@ -260,7 +261,7 @@ function Icerik() {
     { etiket: `${son} sonu gelir`, deger: tl(sim.kumulatif[H - 1]) },
     { etiket: 'Başabaş', deger: tarihYaz(be.ongoru.nokta) },
     { etiket: 'Açığın kapanışı', deger: tarihYaz(be.ongoru.geriOdeme) },
-    { etiket: 'Birikmiş açık (en çok)', deger: fon },
+    { etiket: 'En yüksek birikmiş açık', deger: fon },
   ];
   /* Ana sonuç (ux.md M05, P6.2): yapışkan özetle aynı değerler; durum başabaş öngörüsünden (kritik risk gizlenmez). */
   const sonucDurum = be.nokta
@@ -291,7 +292,7 @@ function Icerik() {
           aciklama: `Model açığı; gereken finansman ${tl(Math.abs(Math.min(0, be.enDusuk.deger)))} (gider kaynağı: ${be.kaynak === 'sheets' ? 'Sheets' : 'plan kadrosu'}). En düşük nokta ${months[be.enDusuk.t].ad}.`,
         }}
         durum={sonucDurum}
-        kiyas={{ temel: 'Aynı ölçü hazır senaryolarda (en yüksek birikmiş açık)', satirlar: sonucKiyas }}
+        kiyas={{ temel: 'Aynı ölçü hazır senaryolarda (en yüksek birikmiş açık). Nakit akışı sayfasındaki nakit açığı tavanı ayrı ölçüttür: başlangıç nakdi ve yatırım girişini de sayar.', satirlar: sonucKiyas }}
         ikincil={ozet.slice(0, 5)}
         strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} />}
       />
@@ -398,10 +399,10 @@ function Icerik() {
               { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => shortDate(x.role.startIso) },
               { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${tl(params.commission)} / satış` : tl(x.role.maliyet)) },
               { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => tl(x.gider) },
-              { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => (x.dogrudan ? int(Math.round(x.aktif)) : '—') },
+              { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => (x.dogrudan ? int(Math.round(x.aktif)) : 'Uygulanmıyor') },
               { key: 'k', header: 'Gelire katkı', nowrap: true, summary: true, render: (x) => (x.dogrudan ? tl(x.katki) : 'Dolaylı') },
               { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(x.net) },
-              { key: 'o', header: 'Katkı ÷ gider', nowrap: true, render: (x) => (x.oran === null ? '—' : `${x.oran.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
+              { key: 'o', header: 'Katkı ÷ gider', nowrap: true, render: (x) => (x.oran === null ? 'Uygulanmıyor' : `${x.oran.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
             ]}
             rows={katkiRows}
             rowKey={(x) => x.role.id}
@@ -411,13 +412,13 @@ function Icerik() {
           <DataTable
             id="katki"
             title={katkiBaslik}
-            altNot="Kötümser, medyan ve iyimser kendi kapasite, elde tutma ve büyüme kuralıyla; diğer seçenekler seçili senaryodan. Senaryoda olmayan satır “—”."
+            altNot="Kötümser, medyan ve iyimser kendi kapasite, elde tutma ve büyüme kuralıyla; diğer seçenekler seçili senaryodan. Senaryoda olmayan satırda “Senaryoda yok” yazar."
             tools={katkiAraclar}
             columns={[
               { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: (typeof katkiUcRows)[number]) => <RoleChip role={x.row.role.role} label={x.row.role.name} /> },
               { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => tl(x.row.gider) },
-              ...stUc.senaryolar.map((sn) => ({ key: `k-${sn.scenario.id}`, header: `${sn.scenario.name}: katkı`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? (x.by[sn.scenario.id]!.dogrudan ? tl(x.by[sn.scenario.id]!.katki) : 'Dolaylı') : '—') })),
-              ...stUc.senaryolar.map((sn) => ({ key: `n-${sn.scenario.id}`, header: `${sn.scenario.name}: net`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? tl(x.by[sn.scenario.id]!.net) : '—') })),
+              ...stUc.senaryolar.map((sn) => ({ key: `k-${sn.scenario.id}`, header: `${sn.scenario.name}: katkı`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? (x.by[sn.scenario.id]!.dogrudan ? tl(x.by[sn.scenario.id]!.katki) : 'Dolaylı') : 'Senaryoda yok') })),
+              ...stUc.senaryolar.map((sn) => ({ key: `n-${sn.scenario.id}`, header: `${sn.scenario.name}: net`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? tl(x.by[sn.scenario.id]!.net) : 'Senaryoda yok') })),
             ]}
             rows={katkiUcRows}
             rowKey={(x) => x.row.role.id}
@@ -459,9 +460,9 @@ function Icerik() {
             { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `${d.adStart}’den başlangıç; ${zincir.olcek ? `kural tutuyor: ufuk sonunda ${tl(zincir.sonButce)} / ay` : 'ölçeklenmiyor'}` },
             { label: 'Kayıt', value: `${zincir.kayit.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (ölçek öncesi)` },
             { label: 'Yeni aktif satıcı', value: `${zincir.aktif.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `Kayıttan ödemeye %${params.dijitalLeadToActive} × kapasite ${yuzde(inputs.factor)}` },
-            { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? '—' : tl(zincir.cac), note: 'Bütçe ÷ yeni aktif' },
+            { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? 'Uygulanmıyor' : tl(zincir.cac), note: 'Bütçe ÷ yeni aktif' },
             { label: 'Satıcı başına gelir (LTV)', value: tl(zincir.ltv), note: `Elde tutma ${yuzde(inputs.retention)}, yıllık peşin payı ${yuzde(inputs.annualShare)}` },
-            { label: 'LTV ÷ CAC', value: zincir.ltvCac === null ? '—' : `${zincir.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`, note: zincir.ltvCac === null ? 'Reklam yok' : zincir.ltvCac >= 3 ? 'Kural: bütçeyi artır' : zincir.ltvCac >= 1.5 ? 'Kural: koru, dönüşümü iyileştir' : 'Kural: durdur, dönüşümü düzelt' },
+            { label: 'LTV ÷ CAC', value: zincir.ltvCac === null ? 'Uygulanmıyor' : `${zincir.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`, note: zincir.ltvCac === null ? 'Reklam yok' : zincir.ltvCac >= 3 ? 'Kural: bütçeyi artır' : zincir.ltvCac >= 1.5 ? 'Kural: koru, dönüşümü iyileştir' : 'Kural: durdur, dönüşümü düzelt' },
           ]}
         />
         <DataTable
@@ -499,8 +500,8 @@ function Icerik() {
             { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => int(Math.round(x.aktif)) },
             { key: 'r', header: 'Gelire katkı', nowrap: true, render: (x) => tl(x.katki) },
             { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(x.net) },
-            { key: 'c', header: 'CAC', nowrap: true, render: (x) => (x.cac === null ? '—' : tl(x.cac)) },
-            { key: 'l', header: 'LTV ÷ CAC', nowrap: true, render: (x) => (x.ltvCac === null ? '—' : `${x.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
+            { key: 'c', header: 'CAC', nowrap: true, render: (x) => (x.cac === null ? 'Uygulanmıyor' : tl(x.cac)) },
+            { key: 'l', header: 'LTV ÷ CAC', nowrap: true, render: (x) => (x.ltvCac === null ? 'Uygulanmıyor' : `${x.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
           ]}
           rows={tiers.tiers}
           rowKey={(x) => String(x.butce)}
@@ -623,7 +624,7 @@ function Icerik() {
         />
         <DataTable
           id="senaryolar"
-          title="Senaryo, varsayım, tarihler, başabaş ve fon ihtiyacı"
+          title="Senaryo, varsayım, tarihler, başabaş ve en yüksek birikmiş açık"
           tools={cubuk()}
           columns={[
             { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof senaryoRows)[number]) => <RoleChip role={x.x.role} label={x.x.name} /> },
@@ -634,7 +635,7 @@ function Icerik() {
             { key: 'k90', header: '90. günde kümülatif', nowrap: true, render: (x) => tl(x.kum90) },
             { key: 'ks', header: `${son} sonu kümülatif`, nowrap: true, render: (x) => tl(x.kumSon) },
             { key: 'bb', header: 'Aylık başabaş', nowrap: true, render: (x) => tarihYaz(x.basabas) },
-            { key: 'f', header: 'En çok fon ihtiyacı', nowrap: true, render: (x) => tl(x.fon) },
+            { key: 'f', header: 'En yüksek birikmiş açık', nowrap: true, render: (x) => tl(x.fon) },
           ]}
           rows={senaryoRows}
           rowKey={(x) => x.x.name}
@@ -730,7 +731,7 @@ function Icerik() {
               note: `Kümülatif gelir eksi giderin ilk kez sıfır ya da pozitif olduğu tarih; kredi ya da yatırımcıya ödeme değildir. ${be.geriOdeme ? '' : be.ongoru.geriOdeme ? `${son} sonuna kadar değil; son ayın netiyle (${tl(be.ongoru.sonNet)} / ay) birikmiş açık kapanır.` : 'Birikmiş açık kapanmıyor: aylık net sıfırın altında.'}`,
             },
             { label: 'En yüksek birikmiş açık', value: tl(Math.min(0, be.enDusuk.deger)), note: `En düşük kümülatif net · ${months[be.enDusuk.t].ad}; gereken finansman ${tl(Math.abs(Math.min(0, be.enDusuk.deger)))}` },
-            { label: 'Başabaş noktası', value: be.adet.nokta === null ? '—' : `${int(Math.ceil(be.adet.nokta))} ödeyen satıcı`, note: be.adet.ulasir ? `Seçili senaryoda ${shortDate(be.adet.ulasir.date)} ulaşılır` : `${son} sonuna kadar ulaşılmıyor` },
+            { label: 'Başabaş noktası', value: be.adet.nokta === null ? 'Uygulanmıyor' : `${int(Math.ceil(be.adet.nokta))} ödeyen satıcı`, note: be.adet.ulasir ? `Seçili senaryoda ${shortDate(be.adet.ulasir.date)} ulaşılır` : `${son} sonuna kadar ulaşılmıyor` },
           ]}
         />
         <DataTable
@@ -765,7 +766,7 @@ function Icerik() {
           id="basabas-kum"
           title={`Kümülatif net (gelir − gider), ${son} sonuna kadar`}
           altNot={modKum === 'secili' ? `Seçili senaryo (${senaryoAdi}).` : 'Hazır senaryolar üst üste.'}
-          note="Sıfır çizgisinin altı birikmiş açık (fon ihtiyacı), üstü geri ödeme sonrası birikim."
+          note="Sıfır çizgisinin altı birikmiş açık (gereken finansman bunun büyüklüğüdür), üstü açığın kapanışından sonraki birikim."
           summary={
             modKum === 'secili'
               ? `${months.map((a, t) => `${a.kisa}: ${tl(be.kumNet[t])}`).join('; ')}. En düşük ${tl(be.enDusuk.deger)} (${months[be.enDusuk.t].ad}).`

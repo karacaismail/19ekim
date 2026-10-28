@@ -155,6 +155,20 @@ export { useMotionMs };
 
 type MenuLink = { label: string; path: string; role?: string; no?: number; also?: string[] };
 
+/**
+ * Alt bilgi kaynak/statü cümlesi sayfa türüne göre (gorsel_algi.md F18 / C006): karar sayfaları kesinleşen karar, gelir ve
+ * nakit sayfaları koşullu tahmin, applet örnek veri, Giderler Sheets verisi. Her ekrana aynı iddia yüklenmez.
+ */
+function altBilgiNotu(current: string) {
+  const yol = current.replace(/\/$/, '');
+  const son = yol.slice(yol.lastIndexOf('/') + 1);
+  if (son === 'applet') return 'Applet tutarları örnek verilerdir; şirket kararı değildir ve yapılan değişiklikler yalnız bu tarayıcıda saklanır.';
+  if (son === 'gelir-plani' || son === 'nakit-akisi' || son === 'hedefler' || son === 'buyume-modeli')
+    return 'Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Parametreler sayfasında değiştirilen değerler yalnız o tarayıcıda saklanır.';
+  if (son === 'giderler') return 'Gider tutarları Giderler Sheets dosyasından açılışta okunur; dosya değişince burası da değişir. Varsayım kaynakları arama bağlantısıdır, doğrulanmış belge değildir.';
+  return 'Tutarlar kesinleşen kararlardır; Parametreler sayfasında değiştirilen değerler yalnız o tarayıcıda saklanır.';
+}
+
 /** Bağlantının etkin sayfaya göre durumu: tam eşleşme (aria-current) ya da bölümü (data-section). */
 function durumOf(item: MenuLink, current: string) {
   const target = normalizePath(href(item.path));
@@ -459,8 +473,7 @@ export function AppFrame({
             <div className="wrap">
               <p>
                 19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
-                2. haftanın sonunda gerçek veriyle kalibre edilir. Tutarlar kesinleşen kararlardır; Parametreler sayfasında
-                değiştirilen değerler yalnız o tarayıcıda saklanır.
+                2. haftanın sonunda gerçek veriyle kalibre edilir. {altBilgiNotu(current)}
               </p>
               <p className="footer-links">
                 <a className="text-link" data-standalone="" href={href('/arsiv/')}>

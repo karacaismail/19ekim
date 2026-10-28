@@ -3471,6 +3471,14 @@ html:not([data-js]) .email-btn {
   font-variant-numeric: tabular-nums;
 }
 
+/* Kısa sembol efsanesi (gorsel_algi.md F17): tablonun altında, kapsam notuyla aynı ses. */
+.opex-sembol-efsanesi {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Kayıt kabuğu (P4): tepsinin altında kalem araması; süzgeç sonucu boşsa açıklama (temizleme yolu tepside). */
 .opex-kayit-arac {
   padding: var(--space-3) 0 var(--space-2);

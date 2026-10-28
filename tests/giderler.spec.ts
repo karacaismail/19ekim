@@ -843,9 +843,9 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await page.goto(PATH);
     await hydrated(page);
     await connect(page);
-    // Kasım toplamı 0: Aralık’ın önceki aya göre değişimi “—”.
+    // Kasım toplamı 0: Aralık’ın önceki aya göre değişimi hesaplanamaz → “Uygulanmıyor” (gorsel_algi.md F17).
     const items = page.getByRole('region', { name: `Kalemler · ${planEtiket(zero)}` });
-    await expect(altSatir(items, 'Önceki aya göre').locator('td').nth(await sutun(items, 'Ara ’26Aralık 2026'))).toHaveText('—');
+    await expect(altSatir(items, 'Önceki aya göre').locator('td').nth(await sutun(items, 'Ara ’26Aralık 2026'))).toHaveText('Uygulanmıyor');
     expect(await page.locator('.app-main').innerText()).not.toMatch(/∞|NaN|Infinity/);
   });
 

@@ -53,7 +53,8 @@ function satirlar(cf: Cashflow, ayrintili: boolean): Satir[] {
   return [...cf.girisler.map((l, i) => kalem(l, i, 'g')), giris, ...cf.cikislar.map((l, i) => kalem(l, i, 'c')), cikis, net, basi, sonu];
 }
 
-const para = (v: number) => (v === 0 ? '—' : tl(v));
+/* Sıfır “0 ₺” yazılır (gorsel_algi.md F17 / C082): kısa sembol tek anlamlı değildi. */
+const para = (v: number) => tl(v);
 
 function Icerik() {
   const m = useModel();
@@ -240,7 +241,8 @@ function Icerik() {
           <p>
             Dönem sonu nakit = dönem başı nakit + net nakit akışı. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir; yatırım
             girişi ve başlangıç nakdi parametresi bunu değiştirir. Senaryo seçimi girişleri ve satış primini değiştirir; Sheets giderleri üç senaryoda aynıdır. Tutarlar ₺, kuruş
-            yuvarlanır; “—” sıfır demektir.
+            yuvarlanır; sıfır 0 ₺ yazılır. Gelir planındaki “en yüksek birikmiş açık” yalnız modelin gelir − gider birikimidir; nakit açığı tavanı
+            başlangıç nakdi ve yatırım girişini de sayar, ayrı ölçüttür.
           </p>
         </Note>
       </Section>

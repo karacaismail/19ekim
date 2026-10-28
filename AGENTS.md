@@ -604,6 +604,27 @@ başlıkları varyanta göre değişmez, varyant açıklaması grafiğin altınd
 orada korunur). `Dugmeler` / OPEX `Toggles` ortak sözleşmesi GA-5’e kaldı (F03 kalan). Test: `tests/gorsel-algi.spec.ts`
 (V01, V02/V03, V04, V05, V06/V08 320 + 1280, V11); `gelir.spec.ts` araç çubuğu testi grafikleri de kapsar.
 
+**GA-2** (F16/F17/F18; kullanıcı kararı 2026-10-28): **İşaret ve ad sözlüğü (F16):** aynı ölçüt her yerde aynı adla —
+“En yüksek birikmiş açık” (negatif değer: en düşük kümülatif net; yapışkan özet çipi, ana sonuç, başabaş Stats, senaryo
+tablosu sütunu ve başlığı, filtre etkisi satırı; “fon ihtiyacı” adı kalktı), “gereken finansman” onun büyüklüğü (pozitif);
+nakit akışındaki “nakit açığı tavanı” ayrı ölçüttür (başlangıç nakdi ve yatırım girişini sayar) ve iki sayfa bunu birbirine
+atıfla söyler (gelir ana sonuç kıyas başlığı, nakit “Okuma” notu). Applet yüzde başlıkları paydayı taşır (“Ağırlık payı”,
+“Başlangıç ücretine göre”, “Matris (tabanın yüzdesi)”; “Hedef primin” / “Tabanın” / “Yıllık tabanın” zaten). OPEX yıl
+kapsamı zaten görünür (sekmede ay aralığı, özet kutusunda ay sayısı); sekme metni değiştirilmedi (gezinme ortalama
+kararı, giderler.spec). **“—” sözlüğü (F17):** sıfır `0 ₺` (nakit tablosu; eski “— sıfır demektir” notu kalktı), veri
+eksik “Veri yok”, geçerli değil “Uygulanmıyor” (kadro dolaylı rollerde yeni aktif ve katkı ÷ gider, CAC / LTV ÷ CAC,
+başabaş noktası, hedef kartı süreleri, OPEX “Önceki aya göre” ve 2027 değişim sütunu, applet kademe/terfi/sprint
+alanları), ulaşılmayan tarih “Dönem içinde yok” (`kisaGun`), senaryo kıyasında “Senaryoda yok” (tablo ve CSV), “Yok”
+(kapı/şişme), “Son seviye”; yoğun OPEX kalemler tablosunda kısa sembol korunur ve görünür efsanesi vardır
+(`.opex-sembol-efsanesi`: o ay gider yok = 0 ₺; personel sütunlarında bordrosuz kalem için uygulanmıyor). **Kaynak tonu
+(F18):** alt bilgi cümlesi sayfa türüne göre (`AppFrame altBilgiNotu`: karar sayfaları “kesinleşen karar”, gelir / nakit /
+hedefler / büyüme “koşullu tahmin”, applet “örnek veri”, Giderler “Sheets dosyasından açılışta okunur; varsayım kaynakları
+arama bağlantısıdır”); OPEX varsayımlarında “Kaynak arama bağlantısı (arama sonucu; doğrulanmış kaynak değildir, tarih ve
+sürümü kullanıcı denetler)”; üst bant şeridi “Canlı” demez: “Sheets” + Sheets’teki son değişiklik saati + güncelleme
+ritmi (genişlik aynı; gezinme ortalı kalır). `Dayanak` yapısal ayrımı (kaynak kimliği / tarih / şirket uyarlaması; 17
+applet metni) GA-5’e kaldı. Test: `tests/gorsel-algi.spec.ts` GA-2 (V24, V25, F18); `giderler.spec` “Önceki aya göre”
+beklentisi “Uygulanmıyor”.
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
@@ -623,9 +644,9 @@ orada korunur). `Dugmeler` / OPEX `Toggles` ortak sözleşmesi GA-5’e kaldı (
 | F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | planlandı (GA-3) |
 | F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | planlandı (GA-3) |
 | F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu; gelir planı tablo (GA-0) ve grafik (GA-1) araç çubukları | V23; `gelir.spec` araç çubuğu | GA-0/GA-1 uygulandı, yerelde doğrulandı; kopyalama durumu planlandı (GA-3) |
-| F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit fon ihtiyacı adı ve işareti, CSV başlıkları; applet yüzde paydası; OPEX yıl kapsamı | V24 | planlandı (GA-2) |
-| F17 “—” sözlüğü | nakit, OPEX, senaryo kıyası, tarih alanları | V25 | planlandı (GA-2) |
-| F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, `Dayanak`, OPEX `Assumptions`, `LiveStrip` | V26 | planlandı (GA-2) |
+| F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit açık/finansman adı ve işareti; applet yüzde paydası; OPEX yıl kapsamı (zaten görünür) | V24 | uygulandı (GA-2), yerelde doğrulandı |
+| F17 “—” sözlüğü | nakit, gelir, applet, OPEX (efsane), senaryo kıyası, tarih alanları | V25 | uygulandı (GA-2), yerelde doğrulandı; OPEX hücreleri sembol + efsane |
+| F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, OPEX `Assumptions`, `LiveStrip` (GA-2); `Dayanak` yapısı (GA-5) | V26, F18 testi | GA-2 uygulandı, yerelde doğrulandı; `Dayanak` planlandı (GA-5) |
 | F19 Gezinti sözlüğü | menü / kırıntı / h1 eşlemesi; Partnership `Sira` | V18, V29 | planlandı (GA-5) |
 | F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` | V30 | uygulanıyor (her pakette güncellenir) |
 | F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | planlandı (GA-5) |

@@ -309,7 +309,7 @@ test.describe('gelir planı', () => {
     const senaryolar = page.locator('.table-block:has(#senaryolar-tablo) .kayit');
     await expect(senaryolar.first().locator('.kayit-ad')).toHaveText('Varsayım');
     await expect(senaryolar.first().locator('.kayit-ozet-etiket')).toHaveText('Medyan');
-    await expect(senaryolar.last().locator('.kayit-ad')).toHaveText('En çok fon ihtiyacı');
+    await expect(senaryolar.last().locator('.kayit-ad')).toHaveText('En yüksek birikmiş açık');
     await expect(senaryolar.last().locator('dl.kayit-alanlar dt')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
   });
 
