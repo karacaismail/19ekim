@@ -288,8 +288,10 @@ function Loader() {
         <p className="opex-loader-title" role="status">
           Google Sheets’ten veriler alınıyor
         </p>
+        {/* Geçen süre ilerleme oranı değildir (gorsel_algi.md F23 / C097); uzun beklemede uygulanabilir sonraki adım. */}
         <p className="opex-loader-meta" aria-hidden="true">
-          {seconds} sn{seconds >= 6 ? ' · Apps Script ilk istekte birkaç saniye sürebilir' : ''}
+          {seconds} sn geçti · ilerleme oranı değil{seconds >= 6 ? ' · Apps Script ilk istekte birkaç saniye sürebilir' : ''}
+          {seconds >= 20 ? ' · Uzun sürüyor: Bağlantı’dan adresi ve Sheets paylaşımını denetleyin ya da Şimdi yenile' : ''}
         </p>
       </div>
       <div className="opex-loader-bar" aria-hidden="true">

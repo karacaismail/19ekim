@@ -42,18 +42,25 @@ export function Sayi({
   const goster = yuzde ? yuvarla(value * 100, ondalik) : value;
   const ust = max ?? Infinity;
   const [taslak, setTaslak] = useState<number | string>(goster);
+  // Sessiz düzeltme yok (gorsel_algi.md F13): sınır önceden yazılır; odaktan çıkınca sınıra çekilen ya da geri alınan değer
+  // nedeniyle birlikte bildirilir, yeni yazımda mesaj kalkar. Mesaj girdinin yanında ayrı durum satırıdır (hata rengi değil).
+  const [duzeltme, setDuzeltme] = useState<string | null>(null);
   const odakta = useRef(false);
   useEffect(() => {
     if (!odakta.current) setTaslak(goster);
   }, [goster]);
   const isle = (v: number) => onChange(yuzde ? v / 100 : v);
+  const bicim = (v: number) => `${yuzde ? '%' : ''}${v.toLocaleString('tr-TR', { maximumFractionDigits: ondalik })}${birim ? ` ${birim}` : ''}`;
+  const sinirMetni = Number.isFinite(ust) ? `En az ${bicim(min)}, en çok ${bicim(ust)}.` : min > 0 ? `En az ${bicim(min)}.` : null;
+  const aciklamaTam = sinirMetni ? (aciklama ? <>{aciklama} {sinirMetni}</> : sinirMetni) : aciklama;
   return (
+    <>
     <NumberInput
       className={gizliEtiket ? 'param-field applet-hucre' : 'param-field'}
       classNames={{ label: 'param-label', input: 'param-input', description: 'param-help' }}
       label={gizliEtiket ? undefined : label}
       aria-label={gizliEtiket ? label : undefined}
-      description={gizliEtiket ? undefined : aciklama}
+      description={gizliEtiket ? undefined : aciklamaTam}
       inputWrapperOrder={['label', 'input', 'description', 'error']}
       value={taslak}
       hideControls
@@ -75,37 +82,61 @@ export function Sayi({
         odakta.current = false;
         if (typeof taslak === 'number' && Number.isFinite(taslak)) {
           const sinirli = Math.min(ust, Math.max(min, taslak));
+          if (sinirli !== taslak) setDuzeltme(`${bicim(taslak)} yerine ${taslak > ust ? 'üst sınır' : 'alt sınır'} ${bicim(sinirli)} uygulandı.`);
           if (sinirli !== goster) isle(sinirli);
           setTaslak(sinirli);
-        } else setTaslak(goster);
+        } else {
+          setTaslak(goster);
+          setDuzeltme(`Geçersiz yazım; son geçerli değer ${bicim(goster)} korundu.`);
+        }
       }}
       onChange={(next) => {
         setTaslak(next);
+        setDuzeltme(null);
         if (typeof next === 'number' && Number.isFinite(next) && next >= min && next <= ust) isle(next);
       }}
     />
+      {duzeltme ? (
+        <p className="param-duzeltme" role="status">
+          {duzeltme}
+        </p>
+      ) : null}
+    </>
   );
 }
 
 /** Metin alanı (meslek, uzmanlık, kişi adı). Boş bırakılırsa son geçerli ad korunur. */
 export function Metin({ label, value, onChange, gizliEtiket = false }: { label: string; value: string; onChange: (v: string) => void; gizliEtiket?: boolean }) {
   const [taslak, setTaslak] = useState(value);
+  const [uyari, setUyari] = useState<string | null>(null);
   useEffect(() => setTaslak(value), [value]);
   return (
-    <TextInput
-      className={gizliEtiket ? 'param-field applet-hucre applet-metin' : 'param-field'}
-      classNames={{ label: 'param-label', input: 'param-input' }}
-      label={gizliEtiket ? undefined : label}
-      aria-label={gizliEtiket ? label : undefined}
-      value={taslak}
-      size="md"
-      onChange={(e) => {
-        const v = e.currentTarget.value;
-        setTaslak(v);
-        if (v.trim()) onChange(v);
-      }}
-      onBlur={() => setTaslak(value)}
-    />
+    <>
+      <TextInput
+        className={gizliEtiket ? 'param-field applet-hucre applet-metin' : 'param-field'}
+        classNames={{ label: 'param-label', input: 'param-input' }}
+        label={gizliEtiket ? undefined : label}
+        aria-label={gizliEtiket ? label : undefined}
+        value={taslak}
+        size="md"
+        onChange={(e) => {
+          const v = e.currentTarget.value;
+          setTaslak(v);
+          setUyari(null);
+          if (v.trim()) onChange(v);
+        }}
+        onBlur={() => {
+          // Boş ad kaydedilmez; geri dönüş sessiz değil (gorsel_algi.md F13).
+          if (!taslak.trim()) setUyari(`Boş bırakılamaz; önceki ad (${value}) korundu.`);
+          setTaslak(value);
+        }}
+      />
+      {uyari ? (
+        <p className="param-duzeltme" role="status">
+          {uyari}
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -210,30 +241,54 @@ export function Dugmeler<T extends string>({ label, value, data, onChange }: { l
   );
 }
 
-/** Eylem düğmesi (ekle, sil, ön ayar). `ikiAdim`: ilk basış onay ister, 4 sn içinde ikinci basış uygular. */
-export function Eylem({ children, onClick, ikiAdim = false, disabled = false, ad }: { children: ReactNode; onClick: () => void; ikiAdim?: boolean; disabled?: boolean; ad?: string }) {
-  const [onay, setOnay] = useState(false);
-  useEffect(() => {
-    if (!onay) return undefined;
-    const t = window.setTimeout(() => setOnay(false), 4000);
-    return () => window.clearTimeout(t);
-  }, [onay]);
+/**
+ * Eylem düğmesi (ekle, sil, ön ayar). `ikiAdim` (gorsel_algi.md F14, WCAG 2.2.1): ilk basış onay ister, onay süreye bağlı
+ * değildir; onay etiketi nesne ve kapsamı taşır (`onay` ya da “{eylem}: {ad} (onayla)”); “Vazgeç” kapatır, ilk basış
+ * veriyi değiştirmez.
+ */
+export function Eylem({
+  children,
+  onClick,
+  ikiAdim = false,
+  disabled = false,
+  ad,
+  onay,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+  ikiAdim?: boolean;
+  disabled?: boolean;
+  /** Nesnenin adı (erişilebilir ad ve onay etiketi). */
+  ad?: string;
+  /** Onay adımının tam etiketi (kapsamla), ör. “3 applet’i örnek değerlere döndür (onayla)”. */
+  onay?: string;
+}) {
+  const [armed, setArmed] = useState(false);
+  const metin = typeof children === 'string' ? children : 'Uygula';
+  const onayMetni = onay ?? `${metin}${ad ? `: ${ad}` : ''} (onayla)`;
   return (
-    <button
-      type="button"
-      className="applet-eylem"
-      data-armed={onay ? '' : undefined}
-      disabled={disabled}
-      onClick={() => {
-        if (!ikiAdim || onay) {
-          setOnay(false);
-          onClick();
-        } else setOnay(true);
-      }}
-    >
-      {onay ? 'Emin misiniz? Tekrar basın' : children}
-      {ad ? <span className="visually-hidden"> {ad}</span> : null}
-    </button>
+    <>
+      <button
+        type="button"
+        className="applet-eylem"
+        data-armed={armed ? '' : undefined}
+        disabled={disabled}
+        onClick={() => {
+          if (!ikiAdim || armed) {
+            setArmed(false);
+            onClick();
+          } else setArmed(true);
+        }}
+      >
+        {armed ? onayMetni : children}
+        {ad && !armed ? <span className="visually-hidden"> {ad}</span> : null}
+      </button>
+      {armed ? (
+        <button type="button" className="applet-eylem applet-vazgec" onClick={() => setArmed(false)}>
+          Vazgeç
+        </button>
+      ) : null}
+    </>
   );
 }
 

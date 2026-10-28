@@ -74,9 +74,13 @@ function Field({ def }: { def: ParamDef }) {
  */
 function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; value: number; decimals: number; common: Record<string, unknown>; onCommit: (n: number) => void }) {
   const [taslak, setTaslak] = useState<number | string | null>(null);
+  // Sınıra çekme sessiz değil (gorsel_algi.md F13): uygulanan değer ve nedeni alanın yanında; yeni yazımda kalkar.
+  const [duzeltme, setDuzeltme] = useState<string | null>(null);
   const sinirda = (n: number) => (def.min === undefined || n >= def.min) && (def.max === undefined || n <= def.max);
   const kirp = (n: number) => Math.min(def.max ?? Number.POSITIVE_INFINITY, Math.max(def.min ?? Number.NEGATIVE_INFINITY, n));
+  const bicim = (n: number) => `${n.toLocaleString('tr-TR', { maximumFractionDigits: decimals })}${def.unit ? ` ${def.unit}` : ''}`;
   return (
+    <>
     <NumberInput
       {...common}
       value={taslak ?? value}
@@ -92,13 +96,24 @@ function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; 
       suffix={def.unit ? ` ${def.unit}` : undefined}
       onChange={(next) => {
         setTaslak(next);
+        setDuzeltme(null);
         if (typeof next === 'number' && Number.isFinite(next) && sinirda(next)) onCommit(next);
       }}
       onBlur={() => {
-        if (typeof taslak === 'number' && Number.isFinite(taslak)) onCommit(kirp(taslak));
+        if (typeof taslak === 'number' && Number.isFinite(taslak)) {
+          const k = kirp(taslak);
+          if (k !== taslak) setDuzeltme(`${bicim(taslak)} yerine ${taslak > k ? 'üst sınır' : 'alt sınır'} ${bicim(k)} uygulandı.`);
+          onCommit(k);
+        }
         setTaslak(null);
       }}
     />
+      {duzeltme ? (
+        <p className="param-duzeltme" role="status">
+          {duzeltme}
+        </p>
+      ) : null}
+    </>
   );
 }
 

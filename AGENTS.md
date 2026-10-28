@@ -625,6 +625,23 @@ ritmi (genişlik aynı; gezinme ortalı kalır). `Dayanak` yapısal ayrımı (ka
 applet metni) GA-5’e kaldı. Test: `tests/gorsel-algi.spec.ts` GA-2 (V24, V25, F18); `giderler.spec` “Önceki aya göre”
 beklentisi “Uygulanmıyor”.
 
+**GA-3** (F13/F14/F15/F23 ve F12 parçası; kullanıcı kararı 2026-10-28): **Sessiz düzeltme yok (F13):** applet `Sayi`
+sınırı önceden yazar (“En az 2, en çok 15.” açıklamada), odaktan çıkınca sınıra çekilen ya da geri alınan değer
+nedeniyle bildirilir (`.param-duzeltme`, `role="status"`, açıklama tonu — hata rengi ve `aria-invalid` değil; yeni
+yazımda kalkar: “40 yerine üst sınır 15 uygulandı.”, “Geçersiz yazım; son geçerli değer 7 korundu.”); `Metin` boş ad
+geri dönüşünü söyler; Parametreler `SayiAlani` aynı kalıp. **Süresiz onay (F14, WCAG 2.2.1):** `appletKit.Eylem` ve
+Notlar `ConfirmButton` 4 sn zamanlayıcısı kalktı; onay etiketi nesne ve kapsamı taşır (“Notu sil (onayla)” + gizli
+“Not: …”, “Varsayılan notlara dön (onayla)”, “N applet’i örnek değerlere döndür (onayla)”, `Eylem.onay` /
+`{eylem}: {ad} (onayla)`), yanında “Vazgeç”; ilk basış veri değiştirmez; applet çizim hatası (`AppletHata`) gerçek
+nedeni yazar, kayıt bozulması teşhisini kesinleştirmez ve toplu sıfırlamanın kapsamını (bütün applet’ler) açık ve
+onaylı sunar. **Durum mesajı (F15):** senaryo bağlantısı kopyalama hatası durum satırında kalır (başarı 2,5 sn),
+düğmeler yer değiştirmez (V23). **Bekleme (F23):** Giderler yüklenirken “N sn geçti · ilerleme oranı değil”, 20 sn
+sonra sonraki adım (Bağlantı / Şimdi yenile). **Uzun içerik (F12):** not düzenleyici çok satırlı Mantine `Textarea`
+(autosize; Enter satır, Kaydet ya da Ctrl/Cmd+Enter kaydeder, Esc vazgeçer), sil düğmesinin erişilebilir adı notun kısa
+tanımını taşır. Kalan: `GirisEkrani` bekleme nedeni, OPEX eski veri / yeniden bağlanma ekranı (F23) ve `Secim` /
+`ConnectForm` uzun içerik (F12) GA-5’e. Test: `tests/gorsel-algi.spec.ts` GA-3 (V20 ×2, V21 ×2, V23, F12, F23);
+`applet.spec` / `ui.spec` onay ve düzenleme beklentileri güncel.
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
@@ -640,10 +657,10 @@ beklentisi “Uygulanmıyor”.
 | F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` | V15 | planlandı (GA-4) |
 | F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320), `PartnershipPage` `BolumSekmeleri` | V17 | planlandı (GA-4) |
 | F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |
-| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | GA-1: `Choice.note` aria-describedby (V11); `NoteRow` / `Secim` / `ConnectForm` planlandı (GA-3 / GA-5) |
-| F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | planlandı (GA-3) |
-| F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | planlandı (GA-3) |
-| F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu; gelir planı tablo (GA-0) ve grafik (GA-1) araç çubukları | V23; `gelir.spec` araç çubuğu | GA-0/GA-1 uygulandı, yerelde doğrulandı; kopyalama durumu planlandı (GA-3) |
+| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | GA-1: `Choice.note` aria-describedby (V11); GA-3: `NoteRow` çok satırlı; `Secim` / `ConnectForm` planlandı (GA-5) |
+| F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | uygulandı (GA-3), yerelde doğrulandı |
+| F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | uygulandı (GA-3), yerelde doğrulandı (V22 geri al: yalnız Parametreler’de mümkün, diğerlerinde sunulmaz) |
+| F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu (GA-3); gelir planı tablo (GA-0) ve grafik (GA-1) araç çubukları | V23; `gelir.spec` araç çubuğu | uygulandı (GA-0/GA-1/GA-3), yerelde doğrulandı |
 | F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit açık/finansman adı ve işareti; applet yüzde paydası; OPEX yıl kapsamı (zaten görünür) | V24 | uygulandı (GA-2), yerelde doğrulandı |
 | F17 “—” sözlüğü | nakit, gelir, applet, OPEX (efsane), senaryo kıyası, tarih alanları | V25 | uygulandı (GA-2), yerelde doğrulandı; OPEX hücreleri sembol + efsane |
 | F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, OPEX `Assumptions`, `LiveStrip` (GA-2); `Dayanak` yapısı (GA-5) | V26, F18 testi | GA-2 uygulandı, yerelde doğrulandı; `Dayanak` planlandı (GA-5) |
@@ -651,7 +668,7 @@ beklentisi “Uygulanmıyor”.
 | F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` | V30 | uygulanıyor (her pakette güncellenir) |
 | F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | planlandı (GA-5) |
 | F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | planlandı (GA-5) |
-| F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | planlandı (GA-3) |
+| F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | GA-3: `Loader` süre notu, `AppletHata` gerçek neden; `GirisEkrani` bekleme nedeni ve OPEX eski veri ekranı planlandı (GA-5) |
 | F24 Uzun sayfa belge takibi | gelir planı bölüm dizini, bölüm soruları, kalıcı adres | V29 | planlandı (GA-5) |
 
 ## Gizlilik ve yayın

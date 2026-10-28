@@ -110,7 +110,8 @@ test.describe('applet sayfası', () => {
     await expect(yazilimHucresi(page, 'P2')).toContainText('2 ×');
 
     await page.getByRole('button', { name: 'Örnek değerlere dön' }).click();
-    await page.getByRole('button', { name: 'Emin misiniz? Tekrar basın' }).click();
+    // gorsel_algi.md F14 (2026-10-28): onay nesne ve kapsamla (“N applet’i örnek değerlere döndür (onayla)”), süresiz.
+    await page.getByRole('button', { name: /örnek değerlere döndür \(onayla\)/ }).click();
     await expect(yazilimHucresi(page, 'P2')).toContainText('1,8 ×');
     await page.getByRole('navigation', { name: 'Applet’ler' }).getByRole('link', { name: 'Meslek ve seviye kataloğu' }).click();
     await expect(page.getByRole('textbox', { name: 'Yazılım katsayısı' })).toHaveValue('1,8');

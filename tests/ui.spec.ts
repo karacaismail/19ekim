@@ -1959,19 +1959,20 @@ test.describe('notlar', () => {
     await row.getByRole('button', { name: /Düzenle/ }).click();
     const edit = page.getByLabel('Notu düzenle');
     await edit.fill('Prim sistemi: kurallar');
-    await edit.press('Enter');
+    // gorsel_algi.md F12 (2026-10-28): düzenleyici çok satırlı; Enter satır ekler, Kaydet düğmesi (ya da Ctrl/Cmd+Enter) kaydeder.
+    await page.getByRole('button', { name: 'Kaydet' }).click();
     await expect(page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' })).toHaveCount(1);
 
     // Sil (iki adım)
     const target = page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' });
     await target.getByRole('button', { name: 'Sil' }).click();
-    await target.getByRole('button', { name: 'Silinsin mi?' }).click();
+    await target.getByRole('button', { name: /^Notu sil \(onayla\)/ }).click();
     await expect(page.locator('.note-row', { hasText: 'Prim sistemi: kurallar' })).toHaveCount(0);
 
     // Varsayılana dön
     const reset = page.getByRole('button', { name: 'Varsayılan notlara dön' });
     await reset.click();
-    await page.getByRole('button', { name: 'Emin misiniz? Tekrar basın' }).click();
+    await page.getByRole('button', { name: 'Varsayılan notlara dön (onayla)' }).click();
     await expect(page.locator('.note-row', { hasText: 'Prim sistemi eklemeli' })).toHaveCount(1);
     expect(await page.evaluate(() => localStorage.getItem('istoc-plan-notlar'))).toBeNull();
   });
@@ -2016,8 +2017,9 @@ test.describe('parametreler: ara yazım ve süreye bağlı olmayan sıfırlama o
     const alan = page.getByLabel('İşveren maliyeti çarpanı');
     await expect(alan).toBeVisible();
     const varsayilan = await alan.inputValue();
+    // Önce alan boşaltılır (yük altında tümünü seç ile yazım yarışıyordu: “20,”), sonra ara yazım harf harf.
     await alan.click();
-    await alan.press('ControlOrMeta+a');
+    await alan.fill('');
     await alan.pressSequentially('0,');
     // Ara yazım taslakta kalır; alt sınır (1) henüz dayatılmaz.
     expect(await alan.inputValue()).toMatch(/^0,/);
@@ -2025,7 +2027,7 @@ test.describe('parametreler: ara yazım ve süreye bağlı olmayan sıfırlama o
     expect(parseFloat((await alan.inputValue()).replace(/[^\d,]/g, '').replace(',', '.'))).toBeGreaterThanOrEqual(1);
     // Geçerli değişiklik: 3 → “Varsayılanlara dön” etkin.
     await alan.click();
-    await alan.press('ControlOrMeta+a');
+    await alan.fill('');
     await alan.pressSequentially('3');
     await alan.press('Tab');
     expect(await alan.inputValue()).not.toBe(varsayilan);

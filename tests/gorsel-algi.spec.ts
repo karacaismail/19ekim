@@ -242,3 +242,139 @@ test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlü
     await expect(page.locator('.opex-live-label')).toHaveText('Sheets');
   });
 });
+
+test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay, durum mesajı, uzun içerik', () => {
+  test('V20 (applet): üst sınırı aşan taslak odaktan çıkınca sınıra çekilir ve nedeni görünür; sınır önceden yazılı; yeni yazımda mesaj kalkar', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('applet/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('navigation', { name: 'Applet’ler' }).getByRole('link', { name: /Kademe serisi/ }).click();
+    const alan = page.getByRole('textbox', { name: 'Derece sayısı' });
+    await expect(alan).toBeVisible();
+    await expect(page.locator('.param-field', { has: alan }).locator('.param-help')).toContainText(/en az 2, en çok 15/i);
+    await alan.click();
+    await alan.press('ControlOrMeta+a');
+    await alan.pressSequentially('40');
+    await alan.press('Tab');
+    await expect(alan).toHaveValue('15');
+    await expect(page.locator('.param-duzeltme')).toContainText(/40 yerine üst sınır 15 uygulandı/);
+    await alan.click();
+    await alan.press('ControlOrMeta+a');
+    await alan.pressSequentially('7');
+    await expect(page.locator('.param-duzeltme')).toHaveCount(0);
+  });
+
+  test('V20 (Parametreler): sınır dışı taslak odaktan çıkınca sınıra çekilir; uygulanan değer ve nedeni görünür', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('searchbox', { name: 'Parametre ara' }).fill('Plan senaryosu: aylık elde tutma');
+    const alan = page.getByLabel('Plan senaryosu: aylık elde tutma');
+    await expect(alan).toBeVisible();
+    await alan.click();
+    await alan.press('ControlOrMeta+a');
+    await alan.pressSequentially('150');
+    await alan.press('Tab');
+    expect((await alan.inputValue()).replace(/[^\d]/g, '')).toBe('100');
+    await expect(page.locator('.param-duzeltme')).toContainText(/150 ?%? yerine üst sınır 100 ?%? uygulandı/);
+  });
+
+  test('V21 (Notlar): silme ve varsayılana dönüş onayı süreye bağlı değil (6 sn), kapsamı söyler, Vazgeç kapatır, ilk tıklama veri değiştirmez', async ({ page }) => {
+    await page.goto('notlar/');
+    await icerik(page);
+    await hydrated(page);
+    const satir = page.locator('.note-row', { hasText: 'Prim sistemi eklemeli' });
+    await satir.getByRole('button', { name: /^Sil/ }).click();
+    const onay = satir.getByRole('button', { name: /^Notu sil \(onayla\)/ });
+    await expect(onay).toBeVisible();
+    await page.waitForTimeout(6000);
+    await expect(onay, 'onay süreye bağlı değil').toBeVisible();
+    await expect(satir).toHaveCount(1);
+    await satir.getByRole('button', { name: 'Vazgeç' }).click();
+    await expect(onay).toHaveCount(0);
+    await expect(satir.getByRole('button', { name: /^Sil/ })).toBeVisible();
+    const sifirla = page.getByRole('button', { name: /^Varsayılan notlara dön/ });
+    await sifirla.click();
+    await expect(sifirla).toHaveText('Varsayılan notlara dön (onayla)');
+    await page.waitForTimeout(6000);
+    await expect(sifirla).toHaveText('Varsayılan notlara dön (onayla)');
+    await page.getByRole('button', { name: 'Vazgeç' }).click();
+    await expect(sifirla).toHaveText('Varsayılan notlara dön');
+  });
+
+  test('V21 (applet): örnek değerlere dönüş onayı kapsamı (kaç applet) ve süresiz; Vazgeç değeri korur', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('applet/');
+    await icerik(page);
+    await hydrated(page);
+    const katsayi = page.getByRole('textbox', { name: 'Yazılım katsayısı' });
+    await katsayi.fill('2');
+    const don = page.locator('.param-toolbar .applet-eylem').first();
+    await expect(don).toHaveText('Örnek değerlere dön');
+    await don.click();
+    await expect(don).toHaveText(/1 applet’i örnek değerlere döndür \(onayla\)/);
+    await page.waitForTimeout(6000);
+    await expect(don).toHaveText(/örnek değerlere döndür \(onayla\)/);
+    await page.getByRole('button', { name: 'Vazgeç' }).click();
+    await expect(don).toHaveText('Örnek değerlere dön');
+    await expect(katsayi).toHaveValue('2');
+  });
+
+  test('V23: senaryo bağlantısı kopyalanamayınca hata durum satırında kalır (2,5 sn sonra da); düğmeler yer değiştirmez', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new Error('reddedildi')) }, configurable: true });
+    });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kurucu = page.locator('.kurucu');
+    const dugme = kurucu.getByRole('button', { name: 'Senaryo bağlantısını kopyala' });
+    const sifirla = kurucu.getByRole('button', { name: 'Sayfa seçeneklerini sıfırla' });
+    const belge = async (l: typeof dugme) => {
+      const b = (await l.boundingBox())!;
+      const y = await page.evaluate(() => window.scrollY);
+      return { x: b.x, y: b.y + y };
+    };
+    await dugme.scrollIntoViewIfNeeded();
+    const once = [await belge(dugme), await belge(sifirla)];
+    await dugme.click();
+    const durum = kurucu.getByRole('status');
+    await expect(durum).toContainText(/kopyalanamadı/);
+    await page.waitForTimeout(3500);
+    await expect(durum, 'hata kalıcı').toContainText(/kopyalanamadı/);
+    await expect(dugme).toHaveText('Senaryo bağlantısını kopyala');
+    const sonra = [await belge(dugme), await belge(sifirla)];
+    for (let i = 0; i < 2; i++) {
+      expect(Math.abs(sonra[i].x - once[i].x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(sonra[i].y - once[i].y)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('F12: not düzenleyici çok satırlı; Kaydet düğmesiyle kaydeder; sil düğmesinin erişilebilir adı notu söyler', async ({ page }) => {
+    await page.goto('notlar/');
+    await icerik(page);
+    await hydrated(page);
+    const satir = page.locator('.note-row', { hasText: 'Prim sistemi eklemeli' });
+    await expect(satir.getByRole('button', { name: /Sil.*Prim sistemi eklemeli/ })).toHaveCount(1);
+    await satir.getByRole('button', { name: /Düzenle/ }).click();
+    const alan = page.getByLabel('Notu düzenle');
+    expect(await alan.evaluate((el) => el.tagName)).toBe('TEXTAREA');
+    await alan.fill('Prim sistemi eklemeli\nİkinci satır: kurallar');
+    await page.getByRole('button', { name: 'Kaydet' }).click();
+    await expect(page.locator('.note-row', { hasText: 'İkinci satır: kurallar' })).toHaveCount(1);
+  });
+
+  test('F23: Giderler yüklenirken geçen süre ilerleme oranı değildir; veri gelince tablo', async ({ page }) => {
+    const model = buildModel();
+    await page.route('https://script.google.com/**', async (route) => {
+      await new Promise((r) => setTimeout(r, 2500));
+      await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(model, 'ozet-1')) });
+    });
+    await page.goto('giderler/');
+    await hydrated(page);
+    await expect(page.locator('.opex-loader-meta')).toContainText(/sn geçti · ilerleme oranı değil/);
+    await expect(page.getByRole('region', { name: /^Kalemler · / })).toBeVisible({ timeout: 15_000 });
+  });
+});

@@ -1489,26 +1489,30 @@ function Sira({ aktif, sec }: { aktif: string; sec: (id: string) => void }) {
 }
 
 /** Kayıtlı değerler bir applet’i bozarsa (eski veya elle değiştirilmiş kayıt) sayfa boş kalmaz; sıfırlama önerilir. */
-class AppletHata extends Component<{ children: ReactNode }, { hata: boolean }> {
-  state = { hata: false };
-
-  static getDerivedStateFromError() {
-    return { hata: true };
+class AppletHata extends Component<{ children: ReactNode }, { hata: boolean; mesaj: string }> {
+  state = { hata: false, mesaj: '' };
+  static getDerivedStateFromError(error: unknown) {
+    return { hata: true, mesaj: error instanceof Error ? error.message : String(error) };
   }
-
   render() {
     if (!this.state.hata) return this.props.children;
+    /* Çizim hatası (gorsel_algi.md F14/F23, C073): gerçek neden yazılır, teşhis kesinleştirilmez; toplu sıfırlamanın kapsamı açık ve onaylı. */
     return (
-      <Note title="Bu applet açılamadı">
-        <p>Bu tarayıcıda kayıtlı değerler okunamadı. Örnek değerlere dönünce applet yeniden açılır.</p>
+      <Note title="Bu applet çizilemedi">
+        <p>
+          Teknik neden: {this.state.mesaj || 'bilinmiyor'}. Bu, kayıtlı değerlerin bozulduğu anlamına gelmeyebilir; önce sayfayı yenilemeyi deneyin. Sürerse
+          bütün applet’leri örnek değerlere döndürebilirsiniz; bu tarayıcıdaki applet kayıtlarının tamamı silinir.
+        </p>
         <Araclar>
           <Eylem
+            ikiAdim
+            onay="Bütün applet’leri örnek değerlere döndür (onayla)"
             onClick={() => {
               ornekDegerlereDon();
-              this.setState({ hata: false });
+              this.setState({ hata: false, mesaj: '' });
             }}
           >
-            Örnek değerlere dön
+            Bütün applet’leri örnek değerlere dön
           </Eylem>
         </Araclar>
       </Note>
@@ -1527,7 +1531,7 @@ function AppletAraclari() {
           ? 'Tarayıcı depolaması kapalı: değişiklikler yalnız bu sayfa açıkken geçerli.'
           : `${ozet.degisen ? `${ozet.degisen} applet örnek değerlerden farklı.` : 'Tüm applet’ler örnek değerlerde.'}${saat ? ` Son kayıt ${saat}.` : ''}`}
       </p>
-      <Eylem ikiAdim disabled={!ozet.degisen} onClick={ozet.sifirla}>
+      <Eylem ikiAdim disabled={!ozet.degisen} onay={`${ozet.degisen} applet’i örnek değerlere döndür (onayla)`} onClick={ozet.sifirla}>
         Örnek değerlere dön
       </Eylem>
     </div>

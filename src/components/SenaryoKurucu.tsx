@@ -70,13 +70,14 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
   const seciliKume = preset?.id ?? 'ozel';
   const temel = presets.find((x) => x.id === base)!;
   const kopyala = async () => {
+    // Başarı kısa süre görünür; hata (ve çözümü) okunana kadar kalır (gorsel_algi.md F15): bir sonraki denemede yenilenir.
     try {
       await navigator.clipboard.writeText(shareUrl());
       setKopya('oldu');
+      window.setTimeout(() => setKopya((k) => (k === 'oldu' ? 'bekliyor' : k)), 2500);
     } catch {
       setKopya('olmadi');
     }
-    window.setTimeout(() => setKopya('bekliyor'), 2500);
   };
   return (
     <section className="kurucu" aria-labelledby="kurucu-baslik">
