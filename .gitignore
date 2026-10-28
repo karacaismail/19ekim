@@ -17,3 +17,6 @@ blob-report/
 # OPEX: kişisel veri içeren tohum ve Apps Script paketi repoya girmez (repo dışında: ../opex-google/).
 Tohum.js
 *.gs
+
+# Sahibin özgün (kişi adlı) rapor kopyaları depoya girmez (AGENTS “Gizlilik ve yayın”)
+docs/*.ozgun.md
