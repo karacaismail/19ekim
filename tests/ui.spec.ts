@@ -90,6 +90,9 @@ async function audit(page: Page) {
       .filter((r) => r.scrollWidth > r.clientWidth + 1)
       .map((r) => document.getElementById(r.getAttribute('aria-labelledby') ?? '')?.textContent?.trim() ?? r.getAttribute('aria-label') ?? '?');
     const chartScroll = document.querySelectorAll('.chart-scroll').length;
+    // ux_v2.md §3.2 / §5.2 (MUST): kayıt başlığı (h4 > button) içinde girdi, seçim, onay, düğme ya da bağlantı bulunmaz;
+    // düzenleyici alanlar yalnız açılan paneldedir (başlıkta düzenleyici = özet ile editörün karışması).
+    const basliktaGirdi = document.querySelectorAll('.kayit h4 button :is(input, select, textarea, button, a[href], [role="switch"], [role="checkbox"], [role="combobox"])').length;
     // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık h4 içinde düğme (aria-expanded, aria-controls → panel),
     // alanlar dl/dt/dd ile etiketli, hedef alanı en az 44 CSS px.
     const records = [...document.querySelectorAll<HTMLElement>('.kayit')].map((k) => {
@@ -104,7 +107,7 @@ async function audit(page: Page) {
         hit: btn ? btn.getBoundingClientRect().height : 0,
       };
     });
-    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, chartScroll, records };
+    return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, chartScroll, records, basliktaGirdi };
   });
 }
 
@@ -129,6 +132,7 @@ test.describe('yerleşim ve okunabilirlik', () => {
         if (width < 768) expect(result.tableOverflow, `${path} dar ekranda tablo yatay kayıyor`).toEqual([]);
         // P5 (ux.md §8.1, UX-29/30): dar ekranda geniş grafik de kaymaz; yerinde ajanda / hiyerarşi / değer listesi vardır.
         if (width < 768) expect(result.chartScroll, `${path} dar ekranda grafik kaydırma bölgesi (.chart-scroll)`).toBe(0);
+        expect(result.basliktaGirdi, `${path} kayıt başlığında düzenleyici (ux_v2 §3.2)`).toBe(0);
         for (const record of result.records) {
           expect(record, `${path} kayıt başlığı`).toMatchObject({ button: true, panel: true });
           expect(['true', 'false'], `${path} kayıt aria-expanded`).toContain(record.expanded);
@@ -1994,5 +1998,49 @@ test.describe('notlar', () => {
     expect(state.isCheck).toBe(true);
     expect(state.ring).toBe(false);
     expect(state.underline).toContain('underline');
+  });
+});
+
+/*
+ * ux_v2.md §3.4 / §5.2 (kullanıcı kararı 2026-10-28, V2-D): sayı alanında ara yazım (`0,`) engellenmez, geçersiz taslak
+ * hesap değeriyle karışmaz, odaktan çıkınca sınıra çekilir (M14 Field); “varsayılana dön” onayı süreye bağlı değildir
+ * (WCAG 2.2.1): ikinci basış uygular, “Vazgeç” iptal eder, bekleyen kullanıcı dışlanmaz.
+ */
+test.describe('parametreler: ara yazım ve süreye bağlı olmayan sıfırlama onayı (ux_v2 §3.4)', () => {
+  test('`0,` yazılabilir; odaktan çıkınca alt sınıra çekilir; onay 5 sn sonra da durur; Vazgeç iptal eder; ikinci basış uygular', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('searchbox', { name: 'Parametre ara' }).fill('İşveren maliyeti çarpanı');
+    const alan = page.getByLabel('İşveren maliyeti çarpanı');
+    await expect(alan).toBeVisible();
+    const varsayilan = await alan.inputValue();
+    await alan.click();
+    await alan.press('ControlOrMeta+a');
+    await alan.pressSequentially('0,');
+    // Ara yazım taslakta kalır; alt sınır (1) henüz dayatılmaz.
+    expect(await alan.inputValue()).toMatch(/^0,/);
+    await alan.press('Tab');
+    expect(parseFloat((await alan.inputValue()).replace(/[^\d,]/g, '').replace(',', '.'))).toBeGreaterThanOrEqual(1);
+    // Geçerli değişiklik: 3 → “Varsayılanlara dön” etkin.
+    await alan.click();
+    await alan.press('ControlOrMeta+a');
+    await alan.pressSequentially('3');
+    await alan.press('Tab');
+    expect(await alan.inputValue()).not.toBe(varsayilan);
+    const sifirla = page.getByRole('button', { name: /Varsayılanlara dön|Emin misiniz/ });
+    await sifirla.click();
+    await expect(sifirla).toHaveText('Emin misiniz? Tekrar basın');
+    await page.waitForTimeout(5000);
+    await expect(sifirla, 'onay süreye bağlı değil').toHaveText('Emin misiniz? Tekrar basın');
+    await page.getByRole('button', { name: 'Vazgeç' }).click();
+    await expect(sifirla).toHaveText('Varsayılanlara dön');
+    expect(await alan.inputValue()).not.toBe(varsayilan);
+    await sifirla.click();
+    await sifirla.click();
+    await expect(sifirla).toHaveText('Varsayılanlara dön');
+    expect(await alan.inputValue()).toBe(varsayilan);
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
   });
 });

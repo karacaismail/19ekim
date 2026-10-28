@@ -2242,7 +2242,8 @@ a.hiyerarsi-kutu:hover .hiyerarsi-ad {
   color: var(--text-secondary);
 }
 
-.param-reset {
+.param-reset,
+.param-vazgec {
   min-height: var(--hit-min);
   padding: 0 var(--space-4);
   border: 0;
@@ -2257,7 +2258,8 @@ a.hiyerarsi-kutu:hover .hiyerarsi-ad {
   transition-timing-function: var(--motion-ease-standard);
 }
 
-.param-reset:hover:not(:disabled) {
+.param-reset:hover:not(:disabled),
+.param-vazgec:hover {
   background: var(--surface-hover);
 }
 

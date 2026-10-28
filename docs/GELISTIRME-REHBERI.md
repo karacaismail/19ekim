@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 904 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 910 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -118,6 +118,10 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
 - **Önce sonuç, sonra ayar, sonra veri.** Gelir planı ve nakit akışında seçili senaryonun ana sonucu (`ResultSummary`:
   değer + dönem + kıyas + durum) sayfa başlığının hemen altındadır ve 320×480’de kaydırmadan görünür; kritik risk
   (“kapanmıyor”, “sıfırın üstüne çıkmıyor”) alt bölümlere ya da accordion’a gömülmez.
+- **İlişki kabul birimidir (`docs/ux_v2.md`, 28 Ekim 2026).** Kayıt başlığında asla girdi/düğme olmaz (düzenleyiciler
+  panelde, `Column.editor`); özet alan tanısal olandır (`Column.summary`: nakitte en düşük nakit, kadroda gelire katkı);
+  senaryo kıyası dar ekranda ölçüt başına kayıttır (özet seçili senaryo, panelde üçü); bakiye toplanmaz ama boş kalmaz;
+  parametre alanında ara yazım engellenmez ve sıfırlama onayı süreye bağlı değildir.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 

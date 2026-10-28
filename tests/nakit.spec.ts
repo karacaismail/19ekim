@@ -138,8 +138,9 @@ test.describe('nakit akış tablosu', () => {
     await expect(karsilastirma.nth(0)).toHaveAttribute('data-tone', 'secili');
     await expect(page.locator('#nakit-tablo')).toContainText('kötümser');
     expect(await page.evaluate(() => localStorage.getItem('istoc-plan-senaryo'))).toBe('kotumser');
-    // Karşılaştırma satırındaki giriş toplamı özetle aynı.
-    const satirGiris = sayi((await karsilastirma.nth(0).locator('td').first().textContent()) ?? '0');
+    // Karşılaştırma satırındaki giriş toplamı özetle aynı (sütun başlıkla bulunur: ölçüt sırası riske göre).
+    const girisSutunu = (await page.locator('.table-block:has(#senaryo-karsilastirma-tablo) thead th').allTextContents()).findIndex((t) => t.trim() === 'Nakit girişi') - 1;
+    const satirGiris = sayi((await karsilastirma.nth(0).locator('td').nth(girisSutunu).textContent()) ?? '0');
     expect(satirGiris).toBe(kotumser);
     // Üçü üst üste: tek grafik kutusu, türü değişir.
     const canvas = page.locator('.chart-canvas');
@@ -216,6 +217,8 @@ test.describe('nakit akış tablosu', () => {
       }),
     );
     expect(okunan).toEqual(beklenen);
+    // ux_v2.md §3.1: bakiye toplanmaz ama Toplam kaydının özeti boş kalmaz — açıklamalı metin.
+    await expect(kayitlar.last().locator('.kayit-ozet-deger')).toContainText(/toplanmaz/i);
     // Bir ay açılır: panel region, alanlar görünür; ayrıntılı görünüm kayıt sayısını değil alan sayısını artırır.
     const ilk = kayitlar.first().locator('h4 button');
     await ilk.click();
@@ -270,6 +273,33 @@ test.describe('nakit akış tablosu', () => {
     await expect(deger).toHaveText(t(await kiyas.nth(0).locator('dd').textContent()));
     await expect(page.locator('.stat', { hasText: 'Nakit açığı tavanı' }).locator('.stat-value')).toHaveText(t(await deger.textContent()));
     await page.evaluate(() => localStorage.removeItem('istoc-plan-senaryo'));
+  });
+
+  // ux_v2.md §3.1 (seçilen C): dar ekranda senaryo kıyası ölçüt bazlıdır — her ölçüt bir kayıt, başlıkta seçili senaryonun
+  // değeri, açılan panelde üç senaryo art arda; ilk ölçüt likidite riski (en düşük nakit), gelir değil.
+  test('320 px: senaryo kıyası ölçüt başına kayıt; ilk kayıt en düşük nakit; özet seçili senaryo; panelde üç senaryo', async ({ page }) => {
+    await acikUc(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
+    const blok = page.locator('.table-block:has(#senaryo-karsilastirma-tablo)');
+    const tablo = await blok.evaluate((el) => {
+      const txt = (n: Element | null | undefined) => (n?.textContent ?? '').replace(/\s+/g, ' ').trim();
+      return { headers: [...el.querySelectorAll('thead th')].map(txt), rows: [...el.querySelectorAll('tbody tr')].map((tr) => [...tr.children].map(txt)) };
+    });
+    expect(tablo.headers[1]).toBe('En düşük nakit');
+    expect(tablo.headers[2]).toBe('Nakit açığı tavanı');
+    expect(tablo.rows.map((r) => r[0])).toEqual(['Kötümser', 'Medyan', 'İyimser']);
+    await page.setViewportSize({ width: 320, height: 480 });
+    const kayitlar = blok.locator('.kayit');
+    await expect(kayitlar).toHaveCount(tablo.headers.length - 1);
+    await expect(kayitlar.first().locator('.kayit-ad')).toHaveText('En düşük nakit');
+    await expect(kayitlar.first().locator('.kayit-ozet-etiket')).toHaveText('Medyan');
+    await expect(kayitlar.first().locator('.kayit-ozet-deger')).toHaveText(tablo.rows[1][1]);
+    const alanlar = await kayitlar.first().locator('dl.kayit-alanlar > div').evaluateAll((divs) => divs.map((d) => [d.querySelector('dt')?.textContent?.trim(), d.querySelector('dd')?.textContent?.replace(/\s+/g, ' ').trim()]));
+    expect(alanlar).toEqual(tablo.rows.map((r) => [r[0], r[1]]));
   });
 
   test('Sheets okunamazsa tablo plan kalemleriyle kalır ve Giderler sayfasına yönlendirir', async ({ page }) => {

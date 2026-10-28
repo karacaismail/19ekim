@@ -370,7 +370,7 @@ function Icerik() {
               { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${tl(params.commission)} / satış` : tl(x.role.maliyet)) },
               { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => tl(x.gider) },
               { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => (x.dogrudan ? int(Math.round(x.aktif)) : '—') },
-              { key: 'k', header: 'Gelire katkı', nowrap: true, render: (x) => (x.dogrudan ? tl(x.katki) : 'Dolaylı') },
+              { key: 'k', header: 'Gelire katkı', nowrap: true, summary: true, render: (x) => (x.dogrudan ? tl(x.katki) : 'Dolaylı') },
               { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(x.net) },
               { key: 'o', header: 'Katkı ÷ gider', nowrap: true, render: (x) => (x.oran === null ? '—' : `${x.oran.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
             ]}
@@ -546,7 +546,7 @@ function Icerik() {
               { key: 'y', header: 'Yeni aktif', nowrap: true, render: (x) => int(Math.round(sim.yeniAktif[x.t])) },
               { key: 'k', header: 'Kayıt (üye)', nowrap: true, render: (x) => int(Math.round(sim.kayit[x.t])) },
               { key: 'o', header: 'Ödemeye devam eden', nowrap: true, render: (x) => int(Math.round(sim.odeyen[x.t])) },
-              { key: 'g', header: 'Aylık gelir', nowrap: true, render: (x) => tl(sim.gelir[x.t]) },
+              { key: 'g', header: 'Aylık gelir', nowrap: true, summary: true, render: (x) => tl(sim.gelir[x.t]) },
               { key: 'c', header: 'Kümülatif gelir', nowrap: true, render: (x) => tl(sim.kumulatif[x.t]) },
               { key: 'gi', header: 'Aylık gider', nowrap: true, render: (x) => tl(be.gider[x.t]) },
               { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(be.net[x.t]) },
@@ -614,6 +614,9 @@ function Icerik() {
           rows={senaryoRows}
           rowKey={(x) => x.x.name}
           rowTone={(x) => (x.x.name === senaryoAdi ? 'secili' : undefined)}
+          // Dar ekranda ölçüt bazlı kıyas (ux_v2.md §3.1 / ux.md §8.4): ölçüt başına kayıt, özet seçili senaryo, panelde üç senaryo.
+          kayit="sutun"
+          ozetSatir={(x) => x.x.name === senaryoAdi}
         />
       </Section>
 
@@ -770,7 +773,7 @@ function Icerik() {
             { key: 's', header: 'Sabit gider', nowrap: true, render: (x) => tl(be.sabit[x.t]) },
             { key: 'p', header: 'Satış primi', nowrap: true, render: (x) => tl(be.prim[x.t]) },
             { key: 't', header: 'Toplam gider', nowrap: true, render: (x) => tl(be.gider[x.t]) },
-            { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(be.net[x.t]) },
+            { key: 'n', header: 'Net', nowrap: true, summary: true, render: (x) => tl(be.net[x.t]) },
             { key: 'k', header: 'Kümülatif net', nowrap: true, render: (x) => tl(be.kumNet[x.t]) },
           ]}
           rows={beRows}

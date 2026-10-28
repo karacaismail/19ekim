@@ -157,8 +157,16 @@ export interface Column<T> {
   rowHeader?: boolean;
   /** Yatay kaydırmada solda sabit kalır (≥ 48em; dar ekranda tablo yerine kayıt listesi vardır). */
   sticky?: boolean;
-  /** Kayıt görünümünde başlıkta gösterilen tek özet alan; yoksa ilk veri sütunu. */
+  /** Kayıt görünümünde başlıkta gösterilen tek özet alan (tanısal: risk, sonuç); yoksa ilk düzenleyici olmayan veri sütunu. */
   summary?: boolean;
+  /**
+   * Düzenleyici alan (girdi, seçim, onay, düğme): kayıt görünümünde yalnız açılan paneldedir; başlığa (h4 > button) ya da
+   * özete taşınmaz (ux_v2.md §3.2, MUST). Başlık sütunu düzenleyiciyse başlık `text` ile düz metin olur, düzenleyici
+   * panelin ilk alanıdır.
+   */
+  editor?: boolean;
+  /** Kayıt görünümünde başlık/özet için düz metin karşılığı (düzenleyici başlık sütununda zorunlu). */
+  text?: (row: T) => string;
   render: (row: T) => ReactNode;
 }
 
@@ -318,6 +326,7 @@ export function DataTable<T>({
   rowTone,
   rowKey,
   kayit = 'satir',
+  ozetSatir,
 }: {
   id: string;
   title: string;
@@ -329,8 +338,13 @@ export function DataTable<T>({
   rowTone?: (row: T) => string | undefined;
   /** Satırın kalıcı anahtarı (veri güncellenince satır kayarsa hücreler yanlış satıra eşlenmesin; açık kayıt kimliği); yoksa sıra. */
   rowKey?: (row: T, index: number) => string;
-  /** Kayıt görünümünün ekseni: satır = kayıt (varsayılan) ya da sütun = kayıt (ay sütunlu tablolar). */
+  /** Kayıt görünümünün ekseni: satır = kayıt (varsayılan) ya da sütun = kayıt (ay sütunlu tablolar, senaryo kıyası). */
   kayit?: KayitEkseni;
+  /**
+   * Sütun ekseninde özet satır (ux_v2.md §3.1 ölçüt bazlı kıyas: seçili senaryo); verilmezse son satır (toplam / dönem
+   * sonu). Verilince panel bütün satırları art arda gösterir (kıyas), verilmezse özet satır panelde yinelenmez.
+   */
+  ozetSatir?: (row: T) => boolean;
 }) {
   const titleId = `${id}-tablo`;
   const sarmal = useRef<HTMLDivElement>(null);
@@ -342,28 +356,36 @@ export function DataTable<T>({
   const baslikSutunu = columns.find((c) => c.rowHeader) ?? columns[0];
   const veriSutunlari = columns.filter((c) => c !== baslikSutunu);
   const etiket = (c: Column<T>) => c.label ?? c.header;
+  // Başlık ve özet salt okunurdur: düzenleyici başlık sütunu düz metin karşılığıyla yazılır (ux_v2.md §3.2).
+  const baslikMetni = (r: T, i: number): ReactNode => (baslikSutunu.editor ? (baslikSutunu.text?.(r) ?? `${typeof baslikSutunu.header === 'string' ? baslikSutunu.header : 'Kayıt'} ${i + 1}`) : baslikSutunu.render(r));
 
   let kayitlar: Kayit[] = [];
   if (mod === 'kayit') {
     if (kayit === 'sutun') {
-      // Sütun = kayıt (ay); satırlar alan; özet son satır (dönem sonu / toplam).
-      const ozetSatir = rows.length ? rows[rows.length - 1] : undefined;
-      const alanSatirlari = rows.slice(0, -1);
+      // Sütun = kayıt (ay, ölçüt); satırlar alan. Özet satır: verilen (seçili senaryo) ya da son satır (dönem sonu / toplam).
+      const secilen = ozetSatir ? rows.find(ozetSatir) : undefined;
+      const sonSatir = rows.length ? rows[rows.length - 1] : undefined;
+      const ozet = secilen ?? sonSatir;
+      const alanSatirlari = ozetSatir ? rows : rows.slice(0, -1);
       kayitlar = veriSutunlari.map((c) => ({
         key: c.key,
         title: etiket(c),
-        summary: ozetSatir ? { label: baslikSutunu.render(ozetSatir), value: c.render(ozetSatir) } : undefined,
-        fields: alanSatirlari.map((r, i) => ({ key: keyOf(r, i), label: baslikSutunu.render(r), value: c.render(r) })),
+        summary: ozet && !c.editor ? { label: baslikMetni(ozet, rows.indexOf(ozet)), value: c.render(ozet) } : undefined,
+        fields: (ozet && c.editor && !ozetSatir ? rows : alanSatirlari).map((r, i) => ({ key: keyOf(r, i), label: baslikMetni(r, i), value: c.render(r) })),
       }));
     } else {
-      const ozetSutunu = veriSutunlari.find((c) => c.summary) ?? veriSutunlari[0];
+      const ozetSutunu = veriSutunlari.find((c) => c.summary && !c.editor) ?? veriSutunlari.find((c) => !c.editor);
       const alanSutunlari = veriSutunlari.filter((c) => c !== ozetSutunu);
       kayitlar = rows.map((r, i) => ({
         key: keyOf(r, i),
-        title: baslikSutunu.render(r),
+        title: baslikMetni(r, i),
         tone: rowTone?.(r),
         summary: ozetSutunu ? { label: etiket(ozetSutunu), value: ozetSutunu.render(r) } : undefined,
-        fields: alanSutunlari.map((c) => ({ key: c.key, label: etiket(c), value: c.render(r) })),
+        fields: [
+          // Düzenleyici başlık sütunu (ad) panelin ilk alanı: düzenleme başlıkta değil, etiketli alanda.
+          ...(baslikSutunu.editor ? [{ key: baslikSutunu.key, label: etiket(baslikSutunu), value: baslikSutunu.render(r) }] : []),
+          ...alanSutunlari.map((c) => ({ key: c.key, label: etiket(c), value: c.render(r) })),
+        ],
       }));
     }
   }

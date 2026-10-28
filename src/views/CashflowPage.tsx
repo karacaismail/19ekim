@@ -156,18 +156,22 @@ function Icerik() {
           note="Aynı Sheets giderleri; girişler ve satış primi senaryoya göre. Seçili senaryo vurgulanır."
           tools={cubuk()}
           columns={[
+            // Ölçüt sırası riske göre (ux_v2.md §3.1): önce en düşük nakit ve ayı, açık tavanı, toparlanma, dönem sonu; akışlar sonra.
             { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof karsilastirma)[number]) => <RoleChip role={x.s.role} label={x.s.name} /> },
-            { key: 'g', header: 'Nakit girişi', nowrap: true, render: (x) => tl(x.cf.toplam.giris) },
-            { key: 'c', header: 'Nakit çıkışı', nowrap: true, render: (x) => tl(x.cf.toplam.cikis) },
-            { key: 'net', header: 'Net', nowrap: true, render: (x) => tl(x.cf.toplam.net) },
-            { key: 'd', header: 'En düşük nakit', nowrap: true, render: (x) => `${tl(x.cf.enDusuk.deger)} · ${x.cf.enDusuk.ay.kisa}` },
+            { key: 'd', header: 'En düşük nakit', nowrap: true, summary: true, render: (x) => `${tl(x.cf.enDusuk.deger)} · ${x.cf.enDusuk.ay.kisa}` },
             { key: 'a', header: 'Nakit açığı tavanı', nowrap: true, render: (x) => (x.cf.acik ? tl(x.cf.acik) : '0 ₺') },
             { key: 't', header: 'Toparlanma', nowrap: true, render: (x) => (x.cf.toparlanma ? (x.cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : x.cf.toparlanma.kisa) : 'Dönem içinde yok') },
             { key: 's', header: 'Dönem sonu (Ara 2027)', nowrap: true, render: (x) => tl(x.cf.donemSonu[x.cf.donemSonu.length - 1]) },
+            { key: 'g', header: 'Nakit girişi', nowrap: true, render: (x) => tl(x.cf.toplam.giris) },
+            { key: 'c', header: 'Nakit çıkışı', nowrap: true, render: (x) => tl(x.cf.toplam.cikis) },
+            { key: 'net', header: 'Net', nowrap: true, render: (x) => tl(x.cf.toplam.net) },
           ]}
           rows={karsilastirma}
           rowKey={(x) => x.s.id}
           rowTone={(x) => (x.s.id === sid ? 'secili' : undefined)}
+          // Dar ekranda ölçüt bazlı kıyas (ux_v2.md §3.1, seçilen C): her ölçüt bir kayıt, özet seçili senaryo, panelde üç senaryo.
+          kayit="sutun"
+          ozetSatir={(x) => x.s.id === sid}
         />
       </Section>
 
@@ -217,7 +221,8 @@ function Icerik() {
               ),
             },
             ...cf.aylar.map((a, i) => ({ key: a.iso, header: a.kisa, nowrap: true, render: (r: Satir) => para(r.aylar[i]) })),
-            { key: 'toplam', header: 'Toplam', nowrap: true, render: (r) => (r.toplam === null ? '' : para(r.toplam)) },
+            // Bakiye (dönem başı/sonu nakit) toplanmaz; boş hücre yerine açıklama (ux_v2.md §3.1: boş ve açıklamasız kayıt yok).
+            { key: 'toplam', header: 'Toplam', nowrap: true, render: (r) => (r.toplam === null ? 'Toplanmaz (bakiye)' : para(r.toplam)) },
           ]}
           rows={rows}
           rowKey={(r) => r.id}

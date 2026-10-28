@@ -449,11 +449,15 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   yoksa 7rem) sığmıyorsa — ya da tablo ölçülünce taşıyorsa (güvenlik ağı) — **kayıt listesi** çizilir: Mantine
   `Accordion` (`multiple`, `order={4}`, süre `--motion-duration-base`, eğri `--motion-ease-standard`); her kayıt başlığı
   h4 içinde düğme (`aria-expanded`, `aria-controls` → `role="region"` panel), içinde kayıt adı (`.kayit-ad`, satır başlığı
-  sütunu) ve tek özet alan (`.kayit-ozet`: `Column.summary` ya da ilk veri sütunu); açılan panelde diğer alanlar
+  sütunu; başlık sütunu düzenleyiciyse `Column.text` düz metni) ve tek özet alan (`.kayit-ozet`: `Column.summary` —
+  tanısal alan — ya da ilk düzenleyici olmayan veri sütunu); `Column.editor` sütunlar (girdi, seçim, onay, düğme) yalnız
+  açılan paneldedir, başlığa taşınmaz (ux_v2 §3.2 MUST); açılan panelde diğer alanlar
   `dl.kayit-alanlar` (dt = sütun başlığı ya da `Column.label`, dd = hücre). Birden çok kayıt açık kalabilir; açık
   kayıtlar `rowKey` kimliğiyle saklanır (kabuk değişince kaybolmaz). Kayıt ekseni `kayit="sutun"` ay sütunlu tablolarda
   (nakit akış tablosu, hedefler kaynak × ay): sütun = kayıt, satırlar alan, özet son satır (dönem sonu / toplam) — ux.md
-  §8.5 PeriodExplorer. Geniş alanda semantik tablo; yalnız ≥ 48em’de gerekirse kendi kutusunda kayar (sabit Kalem
+  §8.5 PeriodExplorer; senaryo kıyas tablolarında (nakit üç senaryo, gelir planı senaryolar) `ozetSatir` seçili senaryoyu
+  özet yapar ve panel üç senaryoyu art arda gösterir (ux_v2 §3.1 ölçüt bazlı kıyas; nakit kıyasında ölçüt sırası riske
+  göre: en düşük nakit, açık tavanı, toparlanma, dönem sonu, sonra akışlar). Geniş alanda semantik tablo; yalnız ≥ 48em’de gerekirse kendi kutusunda kayar (sabit Kalem
   sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. Kabuk seçimi (`useKabuk`) ve kayıt listesi (`KayitListesi`,
   `Kayit` modeli) dışa açıktır: Giderler kalemler tablosu (`KalemTablosu`, `.opex-veri`) kendi süzgeç/sıra/sütun
   durumuyla aynı kalıbı kullanır (P4; davranış `/giderler/` maddesinde). Testler: `tests/ui.spec.ts` (320/360/375/390’da
@@ -479,6 +483,23 @@ bunu denetler.
 | P6.1 Sayfa başlığı tek kalıp (`PageHeader`: kırıntıda tek h1, bir cümlelik amaç, dönem/kaynak satırı) ve bölüm başlığı sadeleşmesi (hairline, numara yalnız sıralı bölümlerde) | §3, §5.4, M03 | **Tamam** (2026-10-27) | `ui.spec.ts → sayfa başlığı ve bölüm başlığı` (320), `ONCEKI` (1280, kırıntı satırı dahil), kırıntı testi; `gelir.spec.ts` dönem satırı |
 | P6.2 `ResultSummary` (M05): gelir planı (en çok fon ihtiyacı, başabaş durumu) ve nakit akışında (nakit açığı tavanı) seçili senaryonun ana sonucu dönem, birim ve kıyasla 320×480 ilk ekranda; durum/risk gizlenmez; yapışkan özet şerit olarak bloğun başında (tek kaynak); gelirde sonuç kurucudan önce (§5.4 sırası) | §5.4, §5.15, §9, M05 | **Tamam** (2026-10-27) | `gelir.spec.ts → ana sonuç` (320×480, kıyas, risk, tek kaynak) ve sıra testi; `nakit.spec.ts → ana sonuç` (özet kutusu ve tabloyla aynı değer, seçici, kaynak uyarısı) |
 | P6.3 Parametreler: aranabilir/daraltılabilir görev grupları (M13; kapalı gelir, arama grupları açar), değişiklik özeti (alan · grup, varsayılan → yeni, alana git, tek alanı geri al), “bu tarayıcıda kaydedildi/kaydedilemedi” açık yazımı (UX-15), “varsayılana dön” kapsamı onaydan önce + geri al (UX-14) | §3, §9, M13/M23, UX-14/15 | **Tamam** (2026-10-27) | `ui.spec.ts → parametreler: görev grupları…` (320×480 belge yüksekliği ve görünür girdi, arama, özet, kapsam + geri al, depolama kapalı); eski parametre testleri grupları açarak sürer |
+
+### ux_v2.md: ilişki kabul birimi (kullanıcı kararı 2026-10-28)
+
+İkinci belge `docs/ux_v2.md` (27 Ekim 2026, taban 5f15b62) biçim kurallarını değil **bilgi ilişkilerini** kabul birimi
+yapar: tutar–ay–kaynak, faktör–katkı–eşik, kayıt–filtre–sürüm, girdi–kapsam–etki. Uygulanan paketler (TDD-first, veri
+modeli değişmedi):
+
+| Paket | ux_v2.md | Durum | Kanıt |
+|---|---|---|---|
+| V2-A Kayıt başlığında düzenleyici yok (MUST): `Column.editor` yalnız panelde, `Column.text` düz başlık; applet tabloları işaretli | §3.2, §5.2 | **Tamam** (2026-10-28) | `ui.spec.ts` audit `basliktaGirdi = 0` (her sayfa/genişlik); `applet.spec.ts` 17 applet 320 px |
+| V2-B Tanısal özet ve ölçüt bazlı kıyas: `Column.summary` (nakit en düşük nakit, kadro gelire katkı, aylık gelir, net); senaryo kıyas tabloları `kayit="sutun"` + `ozetSatir` (seçili senaryo) | §3.1, §4.1 | **Tamam** (2026-10-28) | `nakit.spec.ts` ölçüt başına kayıt; `gelir.spec.ts` 320 px senaryolar/kadro |
+| V2-C Bakiye toplanmaz ama boş kalmaz: nakit tablosu Toplam sütununda “Toplanmaz (bakiye)” | §3.1 | **Tamam** (2026-10-28) | `nakit.spec.ts` Toplam kaydı |
+| V2-D Parametre alanında taslak ↔ geçerli değer ayrımı (`clampBehavior="blur"`, sınır dışı taslak modele gitmez), sıfırlama onayı süreye bağlı değil + “Vazgeç” | §3.4, WCAG 2.2.1 | **Tamam** (2026-10-28) | `ui.spec.ts → parametreler: ara yazım ve süreye bağlı olmayan sıfırlama onayı` |
+| V2-E Ay gezgini (M10: seçili ay, önceki/sonraki, ay özeti) | §3.1 B/C | Bekliyor | ay başına kayıt listesi (P2) geçerli |
+| V2-F Matris komşuluğu (seçili kesişim + komşu eşikler + katkı açıklaması) | §3.2 C | Bekliyor | — |
+| V2-G OPEX canlı veride sunum sabitleme kararı, silinen kayıt/gecikmiş yanıt durumları | §3.3 | Bekliyor (ürün kararı) | — |
+| Kullanıcı araştırması, gerçek yardımcı teknoloji, kontrast ölçümü | §5.1–5.3 | NOT_RUN | — |
 
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,

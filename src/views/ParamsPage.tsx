@@ -64,10 +64,22 @@ function Field({ def }: { def: ParamDef }) {
   }
 
   const decimals = def.kind === 'money' ? 2 : def.kind === 'multiplier' || def.kind === 'rate' || def.kind === 'number' ? 2 : 0;
+  return <SayiAlani def={def} value={value as number} decimals={decimals} common={common} onCommit={(n) => setParam(def.key, n as never)} />;
+}
+
+/**
+ * Sayı alanı (ux_v2.md §3.4, M14): yazım sırasında taslak ile geçerli hesap değeri ayrıdır. Ara yazım (`0,`, boş) engellenmez
+ * ve modele gitmez; sınır içindeki her sayı anında modele yazılır; odaktan çıkınca sınır dışı taslak alt/üst sınıra
+ * çekilir, boş ya da geçersiz taslak son geçerli değere döner.
+ */
+function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; value: number; decimals: number; common: Record<string, unknown>; onCommit: (n: number) => void }) {
+  const [taslak, setTaslak] = useState<number | string | null>(null);
+  const sinirda = (n: number) => (def.min === undefined || n >= def.min) && (def.max === undefined || n <= def.max);
+  const kirp = (n: number) => Math.min(def.max ?? Number.POSITIVE_INFINITY, Math.max(def.min ?? Number.NEGATIVE_INFINITY, n));
   return (
     <NumberInput
       {...common}
-      value={value as number}
+      value={taslak ?? value}
       hideControls
       allowNegative={false}
       thousandSeparator="."
@@ -76,28 +88,29 @@ function Field({ def }: { def: ParamDef }) {
       min={def.min}
       max={def.max}
       step={def.step}
-      clampBehavior="strict"
+      clampBehavior="blur"
       suffix={def.unit ? ` ${def.unit}` : undefined}
       onChange={(next) => {
-        if (typeof next === 'number' && Number.isFinite(next)) setParam(def.key, next as never);
+        setTaslak(next);
+        if (typeof next === 'number' && Number.isFinite(next) && sinirda(next)) onCommit(next);
+      }}
+      onBlur={() => {
+        if (typeof taslak === 'number' && Number.isFinite(taslak)) onCommit(kirp(taslak));
+        setTaslak(null);
       }}
     />
   );
 }
 
 /**
- * Varsayılana dönüş (UX-14): ilk basış onay ister ve kapsamı yazar (kaç alan, yalnız bu tarayıcı, neler değişmez), 4 sn
- * içinde ikinci basış uygular; ardından “Geri al” önceki değerleri geri getirir (bir sonraki değişikliğe kadar).
+ * Varsayılana dönüş (UX-14; ux_v2.md §3.4, WCAG 2.2.1): ilk basış onay ister ve kapsamı yazar (kaç alan, yalnız bu
+ * tarayıcı, neler değişmez); onay süreye bağlı değildir — ikinci basış uygular, “Vazgeç” iptal eder; ardından “Geri al”
+ * önceki değerleri geri getirir (bir sonraki değişikliğe kadar).
  */
 function Sifirla() {
   const { params, reset, restore, changed } = useParams();
   const [confirming, setConfirming] = useState(false);
   const [onceki, setOnceki] = useState<Params | null>(null);
-  useEffect(() => {
-    if (!confirming) return undefined;
-    const timer = window.setTimeout(() => setConfirming(false), 4000);
-    return () => window.clearTimeout(timer);
-  }, [confirming]);
   useEffect(() => {
     if (changed) setOnceki(null);
   }, [changed]);
@@ -117,6 +130,11 @@ function Sifirla() {
       >
         {confirming ? 'Emin misiniz? Tekrar basın' : 'Varsayılanlara dön'}
       </button>
+      {confirming ? (
+        <button type="button" className="param-vazgec" onClick={() => setConfirming(false)}>
+          Vazgeç
+        </button>
+      ) : null}
       {onceki ? (
         <button
           type="button"

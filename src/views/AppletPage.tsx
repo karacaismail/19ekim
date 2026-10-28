@@ -196,9 +196,9 @@ function KatalogApplet() {
         rowKey={(s) => s.kod}
         columns={[
           { key: 'kod', header: 'Kod', nowrap: true, rowHeader: true, render: (s) => s.kod },
-          { key: 'ad', header: 'Ad', minWidth: '13rem', render: (s) => <Metin gizliEtiket label={`${s.kod} seviye adı`} value={s.ad} onChange={(v) => seviyeGuncelle(s.kod, { ad: v })} /> },
+          { key: 'ad', editor: true, header: 'Ad', minWidth: '13rem', render: (s) => <Metin gizliEtiket label={`${s.kod} seviye adı`} value={s.ad} onChange={(v) => seviyeGuncelle(s.kod, { ad: v })} /> },
           { key: 'hat', header: 'Hat', nowrap: true, render: (s) => HAT_ADI[s.hat] },
-          { key: 'carpan', header: 'Seviye çarpanı', minWidth: '8rem', render: (s) => <Sayi gizliEtiket label={`${s.kod} çarpanı`} value={s.carpan} min={0.1} step={0.05} onChange={(v) => seviyeGuncelle(s.kod, { carpan: v })} /> },
+          { key: 'carpan', editor: true, header: 'Seviye çarpanı', minWidth: '8rem', render: (s) => <Sayi gizliEtiket label={`${s.kod} çarpanı`} value={s.carpan} min={0.1} step={0.05} onChange={(v) => seviyeGuncelle(s.kod, { carpan: v })} /> },
           {
             key: 'adim',
             header: 'Adım',
@@ -232,13 +232,14 @@ function KatalogApplet() {
         note={`Katsayı: mesleğin piyasa fiyatı ÷ baz birim (${p2?.kod ?? 'P2'} seviyesinde). Örnek değerlerdir; ülke ve piyasa verisiyle kalibre edin.`}
         rowKey={(m) => m.id}
         columns={[
-          { key: 'ad', header: 'Meslek', minWidth: '13rem', rowHeader: true, render: (m) => <Metin gizliEtiket label={`${ortak.meslekler.indexOf(m) + 1}. meslek adı`} value={m.ad} onChange={(v) => meslekGuncelle(m.id, { ad: v })} /> },
-          { key: 'katsayi', header: 'Katsayı', minWidth: '8rem', render: (m) => <Sayi gizliEtiket label={`${m.ad} katsayısı`} value={m.katsayi} min={0.1} step={0.05} onChange={(v) => meslekGuncelle(m.id, { katsayi: v })} /> },
+          { key: 'ad', editor: true, text: (m) => m.ad, header: 'Meslek', minWidth: '13rem', rowHeader: true, render: (m) => <Metin gizliEtiket label={`${ortak.meslekler.indexOf(m) + 1}. meslek adı`} value={m.ad} onChange={(v) => meslekGuncelle(m.id, { ad: v })} /> },
+          { key: 'katsayi', editor: true, header: 'Katsayı', minWidth: '8rem', render: (m) => <Sayi gizliEtiket label={`${m.ad} katsayısı`} value={m.katsayi} min={0.1} step={0.05} onChange={(v) => meslekGuncelle(m.id, { katsayi: v })} /> },
           { key: 'uzm', header: 'Uzmanlık', nowrap: true, render: (m) => int(m.uzmanliklar.length) },
           { key: 'ornek', header: `${p2?.kod ?? 'P2'} örneği`, nowrap: true, render: (m) => (p2 ? <>{para(m.katsayi * p2.carpan)}<span className="cell-sub">{times(m.katsayi * p2.carpan)}</span></> : '—') },
           {
             key: 'sil',
             header: 'Sil',
+            editor: true,
             nowrap: true,
             render: (m) => (
               <Eylem ikiAdim ad={m.ad} disabled={ortak.meslekler.length <= 1} onClick={() => guncelle({ meslekler: ortak.meslekler.filter((x) => x.id !== m.id) })}>
@@ -274,6 +275,8 @@ function KatalogApplet() {
               {
                 key: 'ad',
                 header: 'Uzmanlık',
+                editor: true,
+                text: (u) => u.ad,
                 minWidth: '13rem',
                 rowHeader: true,
                 render: (u: Meslek['uzmanliklar'][number]) => (
@@ -283,6 +286,7 @@ function KatalogApplet() {
               {
                 key: 'carpan',
                 header: 'Çarpan',
+                editor: true,
                 minWidth: '8rem',
                 render: (u) => <Sayi gizliEtiket label={`${u.ad} çarpanı`} value={u.carpan} min={0.1} step={0.01} onChange={(v) => meslekGuncelle(duzenlenen.id, { uzmanliklar: duzenlenen.uzmanliklar.map((x) => (x.id === u.id ? { ...x, carpan: v } : x)) })} />,
               },
@@ -290,6 +294,7 @@ function KatalogApplet() {
               {
                 key: 'sil',
                 header: 'Sil',
+                editor: true,
                 nowrap: true,
                 render: (u) => (
                   <Eylem ikiAdim ad={u.ad} disabled={duzenlenen.uzmanliklar.length <= 1} onClick={() => meslekGuncelle(duzenlenen.id, { uzmanliklar: duzenlenen.uzmanliklar.filter((x) => x.id !== u.id) })}>
@@ -455,9 +460,9 @@ function IsDegerleme() {
         note={`Ağırlık toplamı ${int(agirlikToplam)}; hesapta 100’e ölçeklenir.`}
         rowKey={(f) => f.id}
         columns={[
-          { key: 'ad', header: 'Faktör', minWidth: '13rem', rowHeader: true, render: (f: AppletDurum['degerleme']['faktorler'][number]) => <Metin gizliEtiket label={`${d.faktorler.indexOf(f) + 1}. faktör adı`} value={f.ad} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, ad: v } : x)) })} /> },
+          { key: 'ad', editor: true, text: (f) => f.ad, header: 'Faktör', minWidth: '13rem', rowHeader: true, render: (f: AppletDurum['degerleme']['faktorler'][number]) => <Metin gizliEtiket label={`${d.faktorler.indexOf(f) + 1}. faktör adı`} value={f.ad} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, ad: v } : x)) })} /> },
           { key: 'olcer', header: 'Ne ölçer', minWidth: '16rem', render: (f) => f.olcer },
-          { key: 'agirlik', header: 'Ağırlık', minWidth: '7rem', render: (f) => <Sayi gizliEtiket label={`${f.ad} ağırlığı`} value={f.agirlik} ondalik={0} step={5} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, agirlik: v } : x)) })} /> },
+          { key: 'agirlik', editor: true, header: 'Ağırlık', minWidth: '7rem', render: (f) => <Sayi gizliEtiket label={`${f.ad} ağırlığı`} value={f.agirlik} ondalik={0} step={5} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, agirlik: v } : x)) })} /> },
           { key: 'pay', header: 'Pay', nowrap: true, render: (f) => (agirlikToplam ? pct(Math.max(0, f.agirlik) / agirlikToplam) : '—') },
         ]}
         rows={d.faktorler}
@@ -468,10 +473,11 @@ function IsDegerleme() {
         note="Puan = Σ ağırlık × faktör puanı. Derece eşiklerle bulunur; derece orta noktası Kademe serisi applet’inden gelir. Puanları %15’ten az farklı pozisyonlar Hay kuralına göre aynı büyüklüktedir."
         rowKey={(p) => p.id}
         columns={[
-          { key: 'ad', header: 'Pozisyon', minWidth: '16rem', rowHeader: true, sticky: true, render: (p) => <Metin gizliEtiket label={`${d.pozisyonlar.indexOf(p) + 1}. pozisyon adı`} value={p.ad} onChange={(v) => pozGuncelle(p.id, { ad: v })} /> },
+          { key: 'ad', editor: true, text: (p) => p.ad, header: 'Pozisyon', minWidth: '16rem', rowHeader: true, sticky: true, render: (p) => <Metin gizliEtiket label={`${d.pozisyonlar.indexOf(p) + 1}. pozisyon adı`} value={p.ad} onChange={(v) => pozGuncelle(p.id, { ad: v })} /> },
           ...d.faktorler.map((f, i) => ({
             key: f.id,
             header: f.ad,
+            editor: true,
             minWidth: '6rem',
             render: (p: Poz) => <Sayi gizliEtiket label={`${p.ad}: ${f.ad}`} value={puanDizisi(p)[i]} min={1} max={5} step={1} ondalik={0} onChange={(v) => pozGuncelle(p.id, { puan: puanDizisi(p).map((x, j) => (j === i ? v : x)) })} />,
           })),
@@ -487,7 +493,7 @@ function IsDegerleme() {
             },
           },
           { key: 'hay', header: 'Hay %15', nowrap: true, render: (p) => (ayni.has(p.id) ? <DurumHapi durum="uyari">Aynı büyüklük</DurumHapi> : 'Ayrışıyor') },
-          { key: 'meslek', header: 'Meslek', minWidth: '13rem', render: (p) => <Secim gizliEtiket label={`${p.ad} mesleği`} value={meslekBul(ortak.meslekler, p.meslekId)?.id ?? ''} data={meslekVerisi(ortak.meslekler)} onChange={(v) => pozGuncelle(p.id, { meslekId: v })} /> },
+          { key: 'meslek', editor: true, header: 'Meslek', minWidth: '13rem', render: (p) => <Secim gizliEtiket label={`${p.ad} mesleği`} value={meslekBul(ortak.meslekler, p.meslekId)?.id ?? ''} data={meslekVerisi(ortak.meslekler)} onChange={(v) => pozGuncelle(p.id, { meslekId: v })} /> },
         ]}
         rows={d.pozisyonlar}
       />
@@ -528,8 +534,8 @@ function TabanUcret() {
       note={not}
       rowKey={(r) => r.id}
       columns={[
-        { key: 'ad', header: 'Ad', minWidth: '14rem', rowHeader: true, render: (r) => <Metin gizliEtiket label={`${baslik}: ${ortak[alan].indexOf(r) + 1}. satır adı`} value={r.ad} onChange={(v) => setOrtak((o) => ({ ...o, [alan]: o[alan].map((x) => (x.id === r.id ? { ...x, ad: v } : x)) }))} /> },
-        { key: 'carpan', header: 'Çarpan', minWidth: '8rem', render: (r) => <Sayi gizliEtiket label={`${r.ad} çarpanı`} value={r.carpan} min={0.1} step={0.05} onChange={(v) => setOrtak((o) => ({ ...o, [alan]: o[alan].map((x) => (x.id === r.id ? { ...x, carpan: v } : x)) }))} /> },
+        { key: 'ad', editor: true, text: (r) => r.ad, header: 'Ad', minWidth: '14rem', rowHeader: true, render: (r) => <Metin gizliEtiket label={`${baslik}: ${ortak[alan].indexOf(r) + 1}. satır adı`} value={r.ad} onChange={(v) => setOrtak((o) => ({ ...o, [alan]: o[alan].map((x) => (x.id === r.id ? { ...x, ad: v } : x)) }))} /> },
+        { key: 'carpan', editor: true, header: 'Çarpan', minWidth: '8rem', render: (r) => <Sayi gizliEtiket label={`${r.ad} çarpanı`} value={r.carpan} min={0.1} step={0.05} onChange={(v) => setOrtak((o) => ({ ...o, [alan]: o[alan].map((x) => (x.id === r.id ? { ...x, carpan: v } : x)) }))} /> },
       ]}
       rows={ortak[alan]}
     />
@@ -628,12 +634,13 @@ function BandKonumu() {
           ...b.kriterler.map((kr, i) => ({
             key: kr.id,
             header: kr.ad,
+            editor: true,
             minWidth: '7rem',
             render: (k: Kisi) => <Sayi gizliEtiket label={`${k.ad}: ${kr.ad}`} value={k.puan[i] ?? 0} max={100} step={5} ondalik={0} onChange={(v) => kisiGuncelle(k.id, { puan: b.kriterler.map((_, j) => (j === i ? v : (k.puan[j] ?? 0))) })} />,
           })),
           { key: 'kbf', header: 'Puan', nowrap: true, render: (k) => pct(kbfOrani(b.kriterler, k.puan)) },
           { key: 'hedef', header: 'Hedef ücret', nowrap: true, render: (k) => <>{para(hedef(k))}<span className="cell-sub">compa {orta > 0 ? num(Math.round((hedef(k) / orta) * 100) / 100) : '—'}</span></> },
-          { key: 'mevcut', header: 'Mevcut (compa)', minWidth: '7.5rem', render: (k) => <Sayi gizliEtiket label={`${k.ad} mevcut compa-ratio`} value={k.mevcut} min={0.3} max={2} step={0.01} onChange={(v) => kisiGuncelle(k.id, { mevcut: v })} /> },
+          { key: 'mevcut', editor: true, header: 'Mevcut (compa)', minWidth: '7.5rem', render: (k) => <Sayi gizliEtiket label={`${k.ad} mevcut compa-ratio`} value={k.mevcut} min={0.3} max={2} step={0.01} onChange={(v) => kisiGuncelle(k.id, { mevcut: v })} /> },
           { key: 'fark', header: 'Fark (aylık)', nowrap: true, render: (k) => { const f = hedef(k) - k.mevcut * orta; return <>{f >= 0 ? '+' : '−'}{para(Math.abs(f))}<span className="cell-sub">mevcut {para(k.mevcut * orta)}</span></>; } },
           { key: 'bolge', header: 'Bölge', nowrap: true, render: (k) => { const z = BOLGELER[bolge(k.mevcut)]; return <DurumHapi durum={z.durum}>{z.ad}</DurumHapi>; } },
           { key: 'eylem', header: 'Ne yapılır', minWidth: '15rem', render: (k) => BOLGELER[bolge(k.mevcut)].eylem },
@@ -677,6 +684,7 @@ function LiyakatMatrisi() {
           ...COMPA_ETIKETLERI.map((etiket, c) => ({
             key: `c${c}`,
             header: `Compa ${etiket}`,
+            editor: true,
             minWidth: '7rem',
             render: (p: number) => (
               <Sayi gizliEtiket yuzde ondalik={1} label={`Puan ${p}, compa ${etiket}`} value={(mr.matris[p - 1]?.[c] ?? 0) / 100} max={100} onChange={(v) => setMr({ ...mr, matris: mr.matris.map((satir, i) => (i === p - 1 ? satir.map((x, j) => (j === c ? Math.round(v * 1000) / 10 : x)) : satir)) })} />
@@ -706,9 +714,9 @@ function LiyakatMatrisi() {
         rowKey={(r) => r.kisi.id}
         columns={[
           { key: 'ad', header: 'Kişi', nowrap: true, rowHeader: true, sticky: true, render: (r: (typeof s.satirlar)[number]) => r.kisi.ad },
-          { key: 'ucret', header: 'Ücret', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} ücreti`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kisiGuncelle(r.kisi.id, { ucret: v })} /> },
-          { key: 'orta', header: 'Band orta', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} band orta noktası`} birim="×" value={r.kisi.orta} min={0.1} step={0.05} onChange={(v) => kisiGuncelle(r.kisi.id, { orta: v })} /> },
-          { key: 'puan', header: 'Puan', minWidth: '6rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} performans puanı`} value={r.kisi.puan} min={1} max={5} step={1} ondalik={0} onChange={(v) => kisiGuncelle(r.kisi.id, { puan: v })} /> },
+          { key: 'ucret', editor: true, header: 'Ücret', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} ücreti`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kisiGuncelle(r.kisi.id, { ucret: v })} /> },
+          { key: 'orta', editor: true, header: 'Band orta', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} band orta noktası`} birim="×" value={r.kisi.orta} min={0.1} step={0.05} onChange={(v) => kisiGuncelle(r.kisi.id, { orta: v })} /> },
+          { key: 'puan', editor: true, header: 'Puan', minWidth: '6rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} performans puanı`} value={r.kisi.puan} min={1} max={5} step={1} ondalik={0} onChange={(v) => kisiGuncelle(r.kisi.id, { puan: v })} /> },
           { key: 'compa', header: 'Compa', nowrap: true, render: (r) => num(Math.round(r.compa * 100) / 100) },
           { key: 'oran', header: 'Matris', nowrap: true, render: (r) => <>{pct(r.oran)}{s.olcek < 1 && r.oran > 0 ? <span className="cell-sub">ölçekli {pct(r.oran * s.olcek)}</span> : null}</> },
           { key: 'artis', header: 'Aylık artış', nowrap: true, render: (r) => para(r.artis) },
@@ -837,8 +845,8 @@ function TerfiKapisi() {
         rowKey={(r) => r}
         columns={[
           { key: 'kriter', header: 'Kriter', minWidth: '12rem', rowHeader: true, render: (r) => r },
-          { key: 'd1', header: 'Önceki dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: önceki dönem`} checked={!!t.donem1[i]} onChange={(v) => g({ donem1: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem1[j])) })} />; } },
-          { key: 'd2', header: 'Son dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: son dönem`} checked={!!t.donem2[i]} onChange={(v) => g({ donem2: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem2[j])) })} />; } },
+          { key: 'd1', editor: true, header: 'Önceki dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: önceki dönem`} checked={!!t.donem1[i]} onChange={(v) => g({ donem1: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem1[j])) })} />; } },
+          { key: 'd2', editor: true, header: 'Son dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: son dönem`} checked={!!t.donem2[i]} onChange={(v) => g({ donem2: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem2[j])) })} />; } },
         ]}
         rows={TERFI_KRITERLERI}
       />
@@ -922,8 +930,8 @@ function KademeAdimlari() {
         rowKey={(r) => `k${r.kademe}`}
         columns={[
           { key: 'k', header: 'Kademe', nowrap: true, rowHeader: true, render: (r: (typeof satirlar)[number]) => int(r.kademe) },
-          { key: 'bekle', header: 'Bekleme', minWidth: '7rem', render: (r) => (r.kademe === 1 ? '—' : <Sayi gizliEtiket label={`${r.kademe}. kademe bekleme süresi (ay)`} birim="ay" value={bekleme[r.kademe - 2]} max={120} step={1} ondalik={0} onChange={(v) => g({ bekleme: bekleme.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
-          { key: 'hizli', header: 'Üstün performans', nowrap: true, render: (r) => (r.kademe === 1 ? '—' : <Onay gizliEtiket label={`${r.kademe}. kademe: bekleme yok`} checked={hizli[r.kademe - 2]} onChange={(v) => g({ hizli: hizli.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
+          { key: 'bekle', editor: true, header: 'Bekleme', minWidth: '7rem', render: (r) => (r.kademe === 1 ? '—' : <Sayi gizliEtiket label={`${r.kademe}. kademe bekleme süresi (ay)`} birim="ay" value={bekleme[r.kademe - 2]} max={120} step={1} ondalik={0} onChange={(v) => g({ bekleme: bekleme.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
+          { key: 'hizli', editor: true, header: 'Üstün performans', nowrap: true, render: (r) => (r.kademe === 1 ? '—' : <Onay gizliEtiket label={`${r.kademe}. kademe: bekleme yok`} checked={hizli[r.kademe - 2]} onChange={(v) => g({ hizli: hizli.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
           { key: 'ay', header: 'Başlangıçtan', nowrap: true, render: (r) => (r.ay ? `${num(Math.round((r.ay / 12) * 10) / 10)} yıl` : 'Giriş') },
           { key: 'carpan', header: 'Çarpan', nowrap: true, render: (r) => times(Math.round(r.carpan * 1000) / 1000) },
           { key: 'adim', header: 'Adım', nowrap: true, render: (r) => (r.adimArtis === null ? '—' : isaretli(r.adimArtis)) },
@@ -966,9 +974,9 @@ function PerformansKarnesi() {
         rowKey={(b) => b.id}
         columns={[
           { key: 'ad', header: 'Boyut', minWidth: '13rem', rowHeader: true, sticky: true, render: (b) => b.ad },
-          { key: 'agirlik', header: 'Ağırlık', minWidth: '7rem', render: (b) => { const i = boyutlar.indexOf(b); return <Sayi gizliEtiket label={`${b.ad} ağırlığı`} value={b.agirlik} ondalik={0} step={5} onChange={(v) => setKr({ ...kr, agirliklar: { ...kr.agirliklar, [sablon.id]: boyutlar.map((x, j) => (j === i ? v : x.agirlik)) } })} />; } },
+          { key: 'agirlik', editor: true, header: 'Ağırlık', minWidth: '7rem', render: (b) => { const i = boyutlar.indexOf(b); return <Sayi gizliEtiket label={`${b.ad} ağırlığı`} value={b.agirlik} ondalik={0} step={5} onChange={(v) => setKr({ ...kr, agirliklar: { ...kr.agirliklar, [sablon.id]: boyutlar.map((x, j) => (j === i ? v : x.agirlik)) } })} />; } },
           { key: 'kapi', header: 'Kapı', minWidth: '9rem', render: (b) => (b.kapi === 'kalite' ? 'Kalite' : b.kapi === 'uyum' ? 'Uyum' : '—') },
-          { key: 'puan', header: 'Puan', minWidth: '7rem', render: (b) => { const i = boyutlar.indexOf(b); return <Sayi gizliEtiket label={`${b.ad} puanı`} value={puan[i] ?? 100} max={150} step={1} ondalik={0} onChange={(v) => setKr({ ...kr, puanlar: { ...kr.puanlar, [sablon.id]: boyutlar.map((_, j) => (j === i ? v : (puan[j] ?? 100))) } })} />; } },
+          { key: 'puan', editor: true, header: 'Puan', minWidth: '7rem', render: (b) => { const i = boyutlar.indexOf(b); return <Sayi gizliEtiket label={`${b.ad} puanı`} value={puan[i] ?? 100} max={150} step={1} ondalik={0} onChange={(v) => setKr({ ...kr, puanlar: { ...kr.puanlar, [sablon.id]: boyutlar.map((_, j) => (j === i ? v : (puan[j] ?? 100))) } })} />; } },
           { key: 'katki', header: 'Katkı', nowrap: true, render: (b) => num(Math.round((s.katki[boyutlar.indexOf(b)] ?? 0) * 10) / 10) },
           { key: 'cubuk', header: 'Puan / 150', minWidth: '9rem', render: (b) => { const p = puan[boyutlar.indexOf(b)] ?? 0; return <Cubuk oran={p / 150} ton={b.kapi && p < 80 ? 'kotu' : p >= 110 ? 'iyi' : 'vurgu'} />; } },
         ]}
@@ -1002,6 +1010,7 @@ function SprintSkoru() {
   const sayiHucre = (alan: 'taahhut' | 'kabul' | 'geriDonen' | 'kacanHata' | 'sp', ad: string) => ({
     key: alan,
     header: ad,
+    editor: true,
     minWidth: '6.5rem',
     render: (r: (typeof seri)[number]) => <Sayi gizliEtiket label={`${r.sprint.ad}: ${ad}`} value={r.sprint[alan]} max={999} step={1} ondalik={0} onChange={(v) => sg(r.sprint.id, { [alan]: v })} />,
   });
@@ -1036,7 +1045,7 @@ function SprintSkoru() {
           sayiHucre('kabul', 'Kabul'),
           sayiHucre('geriDonen', 'Geri dönen'),
           sayiHucre('kacanHata', 'Kaçan hata'),
-          { key: 'hedef', header: 'Hedef tuttu', nowrap: true, render: (r) => <Onay gizliEtiket label={`${r.sprint.ad}: sprint hedefi tuttu`} checked={r.sprint.hedef} onChange={(v) => sg(r.sprint.id, { hedef: v })} /> },
+          { key: 'hedef', editor: true, header: 'Hedef tuttu', nowrap: true, render: (r) => <Onay gizliEtiket label={`${r.sprint.ad}: sprint hedefi tuttu`} checked={r.sprint.hedef} onChange={(v) => sg(r.sprint.id, { hedef: v })} /> },
           sayiHucre('sp', 'SP'),
           { key: 'skor', header: 'Skor', nowrap: true, render: (r) => <>{num(Math.round(r.skor * 10) / 10)}<span className="cell-sub">{int(r.teslim)} · {int(r.kalite)} · {int(r.takim)}</span></> },
           { key: 'kayan', header: 'Kayan ort.', nowrap: true, render: (r) => num(Math.round(r.kayan * 10) / 10) },
@@ -1196,9 +1205,9 @@ function PrimHavuzu() {
         rowKey={(r) => r.kisi.id}
         columns={[
           { key: 'ad', header: 'Kişi', nowrap: true, rowHeader: true, sticky: true, render: (r: (typeof s.satirlar)[number]) => r.kisi.ad },
-          { key: 'ucret', header: 'Aylık taban', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} aylık tabanı`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kg(r.kisi.id, { ucret: v })} /> },
-          { key: 'takim', header: 'Takım', minWidth: '9rem', render: (r) => <Metin gizliEtiket label={`${r.kisi.ad} takımı`} value={r.kisi.takim} onChange={(v) => kg(r.kisi.id, { takim: v })} /> },
-          { key: 'skor', header: 'Birey skoru', minWidth: '6.5rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} skoru`} value={r.kisi.skor} max={200} step={1} ondalik={0} onChange={(v) => kg(r.kisi.id, { skor: v })} /> },
+          { key: 'ucret', editor: true, header: 'Aylık taban', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} aylık tabanı`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kg(r.kisi.id, { ucret: v })} /> },
+          { key: 'takim', editor: true, header: 'Takım', minWidth: '9rem', render: (r) => <Metin gizliEtiket label={`${r.kisi.ad} takımı`} value={r.kisi.takim} onChange={(v) => kg(r.kisi.id, { takim: v })} /> },
+          { key: 'skor', editor: true, header: 'Birey skoru', minWidth: '6.5rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} skoru`} value={r.kisi.skor} max={200} step={1} ondalik={0} onChange={(v) => kg(r.kisi.id, { skor: v })} /> },
           { key: 'hedef', header: 'Hedef prim', nowrap: true, render: (r) => para(r.hedef) },
           { key: 'carpan', header: 'Şirket × takım × birey', nowrap: true, render: (r) => `${num(r.sirket)} × ${num(r.takim)} × ${num(r.birey)}` },
           { key: 'odeme', header: 'Ödeme', nowrap: true, render: (r) => <>{para(r.odeme)}<span className="cell-sub">hedefin {pct(r.hedef ? r.odeme / r.hedef : 0)}</span></> },
@@ -1272,8 +1281,8 @@ function KarPaylasimi() {
         rowKey={(r) => r.kisi.id}
         columns={[
           { key: 'ad', header: 'Kişi', nowrap: true, rowHeader: true, sticky: true, render: (r: (typeof s.satirlar)[number]) => r.kisi.ad },
-          { key: 'ucret', header: 'Aylık taban', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} aylık tabanı`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kg(r.kisi.id, { ucret: v })} /> },
-          { key: 'kidem', header: 'Kıdem (yıl)', minWidth: '6.5rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} kıdemi (yıl)`} value={r.kisi.kidem} max={40} step={0.5} ondalik={1} onChange={(v) => kg(r.kisi.id, { kidem: v })} /> },
+          { key: 'ucret', editor: true, header: 'Aylık taban', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} aylık tabanı`} birim="×" value={r.kisi.ucret} step={0.05} onChange={(v) => kg(r.kisi.id, { ucret: v })} /> },
+          { key: 'kidem', editor: true, header: 'Kıdem (yıl)', minWidth: '6.5rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} kıdemi (yıl)`} value={r.kisi.kidem} max={40} step={0.5} ondalik={1} onChange={(v) => kg(r.kisi.id, { kidem: v })} /> },
           { key: 'uygun', header: 'Uygun', nowrap: true, render: (r) => (r.uygun ? <DurumHapi durum="gecti">Uygun</DurumHapi> : <DurumHapi durum="kaldi">Kıdem yetmiyor</DurumHapi>) },
           { key: 'pay', header: 'Pay', nowrap: true, render: (r) => (r.uygun ? para(r.pay) : '—') },
           { key: 'oran', header: 'Yıllık tabanın', nowrap: true, render: (r) => (r.uygun ? <>{pct(r.tabanOrani)}{r.tavanda ? <span className="cell-sub">tavanda</span> : null}</> : '—') },
@@ -1346,7 +1355,7 @@ function ToplamOdul() {
         rowKey={(r) => r.seviye.kod}
         columns={[
           { key: 'sev', header: 'Seviye', minWidth: '10rem', rowHeader: true, sticky: true, render: (r: (typeof satirlar)[number]) => <>{r.seviye.kod}<span className="cell-sub">{r.seviye.ad}</span></> },
-          { key: 'pay', header: 'Değişken payı', minWidth: '7rem', render: (r) => <Sayi gizliEtiket yuzde ondalik={0} label={`${r.seviye.kod} değişken payı`} value={r.degisken} max={90} onChange={(v) => setO({ ...o, karisim: { ...o.karisim, [r.seviye.kod]: Math.round(v * 100) } })} /> },
+          { key: 'pay', editor: true, header: 'Değişken payı', minWidth: '7rem', render: (r) => <Sayi gizliEtiket yuzde ondalik={0} label={`${r.seviye.kod} değişken payı`} value={r.degisken} max={90} onChange={(v) => setO({ ...o, karisim: { ...o.karisim, [r.seviye.kod]: Math.round(v * 100) } })} /> },
           { key: 'aylik', header: 'Aylık taban', nowrap: true, render: (r) => para(r.aylik) },
           { key: 'yillik', header: 'Yıllık taban', nowrap: true, render: (r) => para(r.yillik) },
           { key: 'prim', header: 'Hedef prim', nowrap: true, render: (r) => <>{para(r.prim)}<span className="cell-sub">tabanın {pct(r.primTabanOrani)}</span></> },

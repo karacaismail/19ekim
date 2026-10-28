@@ -82,11 +82,14 @@ test.describe('applet sayfası', () => {
             tasma: document.documentElement.scrollWidth - window.innerWidth,
             kucuk: metin.filter((el) => parseFloat(getComputedStyle(el).fontSize) < 14).map((el) => el.className),
             bolme: [...document.querySelectorAll('.data-table th, .data-table td')].filter((c) => getComputedStyle(c).wordBreak === 'break-all' || getComputedStyle(c).overflowWrap === 'anywhere').length,
+            // ux_v2.md §3.2 (MUST): kayıt başlığında girdi/seçim/onay/düğme yok; düzenleyiciler yalnız açılan panelde.
+            basliktaGirdi: document.querySelectorAll('.kayit h4 button :is(input, select, textarea, button, a[href], [role="switch"], [role="checkbox"], [role="combobox"])').length,
           };
         });
         expect(r.tasma, `${id} yatay taşıyor`).toBeLessThanOrEqual(0);
         expect(r.kucuk, `${id} 14 px altı metin`).toEqual([]);
         expect(r.bolme, `${id} zorlayıcı kelime bölme`).toBe(0);
+        expect(r.basliktaGirdi, `${id} kayıt başlığında düzenleyici (ux_v2 §3.2)`).toBe(0);
       }
     });
   }
@@ -252,7 +255,16 @@ test.describe('applet sayfası', () => {
     // Onay kutusunun çevresine dokunmak da işaretler.
     await page.goto('applet/#terfi-kapisi');
     await icerik(page);
+    // Dar ekranda kriter tablosu kayıt listesidir; onay kutusu (düzenleyici) başlıkta değil açılan paneldedir (ux_v2 §3.2).
+    const kayit = page.locator('.kayit', { has: page.locator('.kayit-ad', { hasText: 'Bilgi' }) }).first();
+    if (await kayit.count()) {
+      await kayit.locator('h4 button').click();
+      await expect(kayit.locator('h4 button')).toHaveAttribute('aria-expanded', 'true');
+      // Açılma geçişi (hareket tokenı) bitsin: dokunma koordinatları yerleşim durulunca ölçülür.
+      await page.waitForTimeout(500);
+    }
     const kutu = page.getByRole('checkbox', { name: 'Bilgi: önceki dönem' });
+    await expect(kutu).toBeVisible();
     await expect(kutu).not.toBeChecked();
     await kutu.scrollIntoViewIfNeeded();
     const alan = await kutu.evaluate((el) => { const r = el.closest('.applet-onay-alan')!.getBoundingClientRect(); return { x: r.left + 3, y: r.top + 3 }; });

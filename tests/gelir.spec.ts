@@ -287,5 +287,13 @@ test.describe('gelir planı', () => {
     const kadro = page.locator('.table-block:has(#katki-tablo) .kayit');
     await expect(kadro).toHaveCount(11);
     await expect(page.locator('.table-block:has(#katki-tablo) .kayit-ad')).toHaveCount(11);
+    // ux_v2.md §4.1: tanısal özet — kadro kaydının başlığında görev metni değil gelire katkı; senaryolar tablosu ölçüt
+    // başına kayıt (özet seçili senaryo, panelde üç senaryo art arda).
+    await expect(kadro.first().locator('.kayit-ozet-etiket')).toContainText(/katkı/i);
+    const senaryolar = page.locator('.table-block:has(#senaryolar-tablo) .kayit');
+    await expect(senaryolar.first().locator('.kayit-ad')).toHaveText('Varsayım');
+    await expect(senaryolar.first().locator('.kayit-ozet-etiket')).toHaveText('Medyan');
+    await expect(senaryolar.last().locator('.kayit-ad')).toHaveText('En çok fon ihtiyacı');
+    await expect(senaryolar.last().locator('dl.kayit-alanlar dt')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
   });
 });
