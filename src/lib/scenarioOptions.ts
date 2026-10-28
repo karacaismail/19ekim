@@ -6,7 +6,8 @@
  * Durum bu tarayıcıda saklanır (`istoc-plan-senaryo-secenekler`) ve adres çubuğuna yazılır (paylaşılabilir bağlantı;
  * adresteki seçenekler açılışta öne geçer).
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { KayitDurum } from '../components/ui';
 import { defaultFilters, type BreakevenFilters, type GiderKaynak } from '../data/breakeven';
 import type { Params } from '../data/params';
 import type { RoleKey } from '../data/types';
@@ -125,18 +126,25 @@ export function fromQuery(search: string, d: ScenarioOptions): { base: ScenarioI
  * Tek durum: temel senaryo + seçenekler. Açılışta adres çubuğu > saklanan seçenekler > varsayılan; her değişiklik
  * saklanır ve adrese yazılır (`history.replaceState`). Sunucu çiziminde varsayılan (hidrasyon eşleşmesi bozulmaz).
  */
+const saat = () => new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
 export function useScenarioOptions(p: Params) {
   const [base, setBase] = useScenario();
   const d = useMemo(() => defaultFilters(p), [p]);
   const presets = useMemo(() => presetsOf(p), [p]);
   const [opts, setOptsState] = useState<ScenarioOptions>(d);
   const [ready, setReady] = useState(false);
+  // Kayıt durumu (F13 / UX-15; adım 2b): “kaydedildi” yalnız gerçekten yapılan yazım için, saatiyle; açılıştaki yeniden yazım
+  // “kaydedildi” sayılmaz (kayıt varsa “kayıtlı”); yazım başarısızsa “kaydedilemedi”.
+  const [kayit, setKayit] = useState<{ durum: KayitDurum; zaman: string | null }>({ durum: 'yok', zaman: null });
+  const ilkYazim = useRef(true);
 
   useEffect(() => {
     let next: ScenarioOptions = d;
     try {
       const raw = localStorage.getItem(OPTIONS_KEY);
       if (raw) {
+        setKayit({ durum: 'kayitli', zaman: null });
         const saved = JSON.parse(raw) as Partial<ScenarioOptions>;
         next = { ...d };
         // Saklanan değer türü varsayılanla uyuşmalı; varsayılanı `null` (kaynağı izle) olan alanlarda sabitlenmiş sayı da geçerlidir
@@ -167,11 +175,13 @@ export function useScenarioOptions(p: Params) {
   }, [d, setBase]);
 
   const persist = useCallback(
-    (nextBase: ScenarioId, nextOpts: ScenarioOptions) => {
+    (nextBase: ScenarioId, nextOpts: ScenarioOptions): boolean => {
+      let ok = true;
       try {
         localStorage.setItem(OPTIONS_KEY, JSON.stringify(nextOpts));
+        localStorage.setItem(SCENARIO_KEY, nextBase);
       } catch {
-        /* depolama kapalı */
+        ok = false; /* depolama kapalı */
       }
       try {
         const q = toQuery(nextBase, nextOpts, d);
@@ -180,12 +190,18 @@ export function useScenarioOptions(p: Params) {
       } catch {
         /* adres yazılamadı */
       }
+      return ok;
     },
     [d],
   );
 
   useEffect(() => {
-    if (ready) persist(base, opts);
+    if (!ready) return;
+    const ok = persist(base, opts);
+    const ilk = ilkYazim.current;
+    ilkYazim.current = false;
+    if (!ok) setKayit({ durum: 'kaydedilemedi', zaman: null });
+    else if (!ilk) setKayit({ durum: 'kaydedildi', zaman: saat() });
   }, [ready, base, opts, persist]);
 
   const set = useCallback(<K extends keyof ScenarioOptions>(k: K, v: ScenarioOptions[K]) => setOptsState((o) => ({ ...o, [k]: v })), []);
@@ -202,5 +218,5 @@ export function useScenarioOptions(p: Params) {
   const preset = useMemo(() => matchPreset(p, presets, base, opts), [p, presets, base, opts]);
   const changes = useMemo(() => diffCount(p, opts), [p, opts]);
   const shareUrl = useCallback(() => (typeof window === 'undefined' ? '' : `${window.location.origin}${window.location.pathname}?${toQuery(base, opts, d)}`), [base, opts, d]);
-  return { base, setBase, opts, set, applyPreset, reset, presets, preset, changes, ready, shareUrl };
+  return { base, setBase, opts, set, applyPreset, reset, presets, preset, changes, ready, shareUrl, kayit };
 }

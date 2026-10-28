@@ -642,3 +642,13 @@ export function kirinti(path: string): string[] {
   parca.push(k.baslik);
   return parca;
 }
+
+/**
+ * Dar ekranda gizlenebilen grup kırıntısı (K5, kullanıcı kararı 2026-10-28 “test et, karar ver”; 320×480 ölçümü): otomatik
+ * yolun ilk parçası. Belgeli yolda (`kirintiYolu`, Giderler), doğrudan erişimde, sistem sayfasında ve ana sayfada yok.
+ */
+export function kirintiGrubu(path: string): string | null {
+  const k = icerikOf(path);
+  if (!k || k.path === '/' || k.kirintiYolu || k.grup === 'sistem' || k.grup === 'dogrudan') return null;
+  return GRUP_ADI[k.grup];
+}

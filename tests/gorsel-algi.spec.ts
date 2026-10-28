@@ -347,7 +347,7 @@ test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay,
     await dugme.scrollIntoViewIfNeeded();
     const once = [await belge(dugme), await belge(sifirla)];
     await dugme.click();
-    const durum = kurucu.getByRole('status');
+    const durum = kurucu.locator('.kurucu-durum');
     await expect(durum).toContainText(/kopyalanamadı/);
     await page.waitForTimeout(3500);
     await expect(durum, 'hata kalıcı').toContainText(/kopyalanamadı/);

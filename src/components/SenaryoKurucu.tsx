@@ -7,7 +7,7 @@ import { monthName } from '../lib/dates';
 import { int, tl } from '../lib/format';
 import { href } from '../lib/paths';
 import type { useScenarioOptions } from '../lib/scenarioOptions';
-import { Anahtar, Choice } from './ui';
+import { Anahtar, Choice, KayitDurumu } from './ui';
 
 /**
  * Senaryo kurucu (kullanıcı kararı 2026-10-27, UX-first): sayfanın en başında hazır senaryolar (tek dokunuşla tüm
@@ -49,7 +49,7 @@ function ParametreKaynagi({ deger }: { deger: string }) {
 }
 
 export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, factorDefault }: { p: Params; state: ScenarioState; sahaGrowthDefault: number; retentionDefault: number; factorDefault: number }) {
-  const { opts, set, presets, preset, applyPreset, reset, changes, base, shareUrl } = state;
+  const { opts, set, presets, preset, applyPreset, reset, changes, base, shareUrl, kayit } = state;
   const [acik, setAcik] = useState(false);
   const [kopya, setKopya] = useState<'bekliyor' | 'oldu' | 'olmadi'>('bekliyor');
   useEffect(() => {
@@ -113,6 +113,14 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
       <p className="kurucu-kapsam">
         Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Seçenekler Nakit akışı sayfasına da aynen uygulanır (aynı etkin girdiler). Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
       </p>
+      {/* Kayıt durumu tek bileşenle (F13 / UX-15; adım 2b): “kaydedildi” yalnız gerçek yazım için, saatiyle; kapalı depolamada etki alanı açık. */}
+      <KayitDurumu
+        className="kurucu-kayit"
+        kapsam="Senaryo seçenekleri"
+        durum={kayit.durum}
+        zaman={kayit.zaman}
+        etki={kayit.durum === 'kaydedilemedi' ? 'Nakit akışı sayfasına taşınmaz; bağlantı yine çalışır.' : 'Gelir planı ve Nakit akışı aynı seçenekleri okur.'}
+      />
       <p className="kurucu-durum" role="status" aria-live="polite">
         {kopya === 'oldu' ? 'Senaryo bağlantısı panoya kopyalandı.' : kopya === 'olmadi' ? 'Senaryo bağlantısı panoya kopyalanamadı. Tarayıcının adres çubuğundaki bağlantıyı seçip kopyalayabilirsiniz.' : ''}
       </p>

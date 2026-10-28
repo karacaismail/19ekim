@@ -78,7 +78,7 @@ test.describe('ifade: finans ve kayıt anlamı (ifade.md §10.2 birinci grup)', 
     await expect(kopyala).toBeVisible();
     await expect(kurucu.locator('.kurucu-kapsam')).toContainText(/genel (plan )?parametre/i);
     await kopyala.click();
-    const durum = kurucu.getByRole('status');
+    const durum = kurucu.locator('.kurucu-durum');
     await expect(durum).toContainText(/kopyalandı|kopyalanamadı/);
     await expect(kopyala).toHaveText('Senaryo bağlantısını kopyala');
     // Sıfırlama: temel senaryo korunur, sayfa seçenekleri plan değerine döner.

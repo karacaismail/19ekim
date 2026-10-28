@@ -131,6 +131,55 @@ test.describe('gelir planı', () => {
   });
 
   /*
+   * Adım 2b (docs/birlesik_plan.md §5 B2; ct-F13, ux.md UX-15; kullanıcı kararı 2026-10-28): senaryo kurucunun kayıt durumu
+   * tek bileşenle (`KayitDurumu`) ve tek dille yazılır — “kaydedildi” yalnız gerçekten yapılan tarayıcı kaydı için, saatiyle;
+   * depolama kapalıysa “kaydedilemedi”, ne kaybolacağı ve Nakit akışı’na taşınmayacağı açık.
+   */
+  test('Adım 2b: senaryo kurucu kayıt durumu — değişiklikten sonra “bu tarayıcıda kaydedildi ss:dd:ss”; etki alanı Nakit akışı', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kayit = page.locator('.kurucu .kayit-durumu');
+    await expect(kayit).toHaveCount(1);
+    await expect(kayit).toHaveAttribute('role', 'status');
+    await expect(kayit).toHaveAttribute('data-durum', /^(yok|kayitli)$/);
+    await expect(kayit).toContainText('Senaryo seçenekleri');
+    await expect(kayit).not.toContainText(/kaydedildi \d/);
+    const hazir = page.locator('.kurucu').getByRole('group', { name: 'Hazır senaryolar' });
+    await hazir.getByRole('button', { name: 'Saha ağırlıklı' }).click();
+    await expect(kayit).toHaveAttribute('data-durum', 'kaydedildi');
+    await expect(kayit).toContainText(/bu tarayıcıda kaydedildi \d{2}:\d{2}:\d{2}/);
+    await expect(kayit).toContainText('Nakit akışı');
+    await expect(kayit).not.toContainText('kaydedilemedi');
+    await page.evaluate(() => {
+      localStorage.removeItem('istoc-plan-senaryo');
+      localStorage.removeItem('istoc-plan-senaryo-secenekler');
+    });
+  });
+
+  test('Adım 2b: depolama kapalıyken senaryo kurucu “kaydedilemedi” der; değişiklik çalışır; Nakit akışı’na taşınmayacağı yazılır', async ({ page }) => {
+    await page.addInitScript(() => {
+      const asil = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k: string, v: string) {
+        if (k.startsWith('istoc-plan-senaryo')) throw new Error('depolama kapalı');
+        return asil.call(this, k, v);
+      };
+    });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const kayit = page.locator('.kurucu .kayit-durumu');
+    const hazir = page.locator('.kurucu').getByRole('group', { name: 'Hazır senaryolar' });
+    await hazir.getByRole('button', { name: 'Tutumlu' }).click();
+    await expect(page.locator('.yapiskan .yapiskan-ad')).toHaveText('Tutumlu');
+    await expect(kayit).toHaveAttribute('data-durum', 'kaydedilemedi');
+    await expect(kayit).toContainText('kaydedilemedi');
+    await expect(kayit).toContainText('yalnız bu sekme');
+    await expect(kayit).toContainText(/Nakit akışı.*taşınmaz/);
+    await expect(kayit).not.toContainText(/kaydedildi \d/);
+  });
+
+  /*
    * ux.md M05 ResultSummary (P6.2, kullanıcı kararı 2026-10-27): seçili senaryonun ana sonucu (en çok fon ihtiyacı) dönem,
    * birim ve kıyas temeliyle ilk ekranda (320×480); başabaş durumu (kritik risk) accordion’a gizlenmez; yapışkan özetle aynı
    * kaynaktan (aynı değer), tek yapışkan özet.
@@ -206,7 +255,7 @@ test.describe('gelir planı', () => {
     expect(konum.top).toBeGreaterThanOrEqual(0);
     await page.locator('.kurucu').scrollIntoViewIfNeeded();
     await page.locator('.kurucu').getByRole('button', { name: 'Senaryo bağlantısını kopyala' }).click();
-    await expect(page.locator('.kurucu').getByRole('status')).toContainText(/kopyalandı|kopyalanamadı/);
+    await expect(page.locator('.kurucu .kurucu-durum')).toContainText(/kopyalandı|kopyalanamadı/);
     const [indirme] = await Promise.all([page.waitForEvent('download'), page.locator('.table-block:has(#aylik-tablo)').getByRole('button', { name: 'CSV indir' }).click()]);
     expect(indirme.suggestedFilename()).toMatch(/^gelir-plani-aylik-.*\.csv$/);
   });

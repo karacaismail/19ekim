@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ICERIK, kirinti } from '../data/icerik';
+import { ICERIK, kirinti, kirintiGrubu } from '../data/icerik';
 import { useFrame } from '../lib/frame';
 import { href } from '../lib/paths';
 
@@ -53,6 +53,8 @@ export function PageHeader({
   // Tek parçalı yol (doğrudan erişilen sayfa: BCG, e-posta) kırıntısızdır; ana sayfada kırıntı yoktur.
   const parcalar = kirinti(pathname);
   const yol = parcalar.length > 1 ? parcalar : null;
+  // K5 (2026-10-28, 320×480 ölçümü): bağlantısız grup kırıntısı dar ekranda gizlenir (CSS `li[data-grup]`); ebeveyn ve başlık kalır.
+  const grup = kirintiGrubu(pathname);
   const crumbPath = (label: string) => ICERIK.find((k) => !k.planlandi && k.baslik === label)?.path;
   const h1 = <h1 className="crumbs-title">{title}</h1>;
   const baslik =
@@ -74,9 +76,13 @@ export function PageHeader({
               <li>
                 <a href={href('/')}>19 Ekim</a>
               </li>
-              {yol.slice(0, -1).map((c) => {
+              {yol.slice(0, -1).map((c, i) => {
                 const path = crumbPath(c);
-                return <li key={c}>{path ? <a href={href(path)}>{c}</a> : c}</li>;
+                return (
+                  <li key={c} data-grup={i === 0 && c === grup ? '' : undefined}>
+                    {path ? <a href={href(path)}>{c}</a> : c}
+                  </li>
+                );
               })}
               <li aria-current="page">{baslik}</li>
             </ol>

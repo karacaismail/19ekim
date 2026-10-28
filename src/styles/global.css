@@ -1306,6 +1306,13 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
   color: var(--rule-strong);
 }
 
+/* K5 (2026-10-28, 320×480 ölçümü): dar ekranda bağlantısız grup kırıntısı gizlenir; bağlantılı ebeveyn ve başlık kalır. ≥ 48em tam yol. */
+@media (max-width: 47.99em) {
+  .crumbs li[data-grup] {
+    display: none;
+  }
+}
+
 .crumbs a {
   display: inline-flex;
   align-items: center;
@@ -5615,6 +5622,14 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 .nakit-kaynak,
 .nakit-secenekler {
   margin: var(--space-4) 0 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Tarayıcı kaydı durumu (F13 tek bileşen `KayitDurumu`; adım 2b): ikincil metin, düzyazı genişliği. */
+.kayit-durumu {
+  margin: var(--space-2) 0 0;
   max-width: var(--prose-max);
   color: var(--text-secondary);
   font-size: var(--text-sm);

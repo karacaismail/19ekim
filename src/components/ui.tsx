@@ -610,6 +610,30 @@ export function Note({ title, children }: { title: string; children: ReactNode }
   );
 }
 
+export type KayitDurum = 'yok' | 'kayitli' | 'kaydedildi' | 'kaydedilemedi';
+
+/**
+ * Tarayıcı kaydı durumu — tek bileşen, tek dil (docs/contents.md F13, ux.md UX-15; adım 2b, 2026-10-28). “Kaydedildi” yalnız
+ * gerçekten yapılan tarayıcı kaydı için ve saatiyle; depolama kapalıysa ne kaybolacağı açık; `etki` hangi sayfaların bu
+ * kaydı okuduğunu söyler. Senaryo kurucu bunu kullanır; Parametreler, Applet, Affilate ve Notlar aynı bileşene adım 7’de geçer.
+ */
+export function KayitDurumu({ kapsam, durum, zaman, etki, className }: { kapsam: string; durum: KayitDurum; zaman?: string | null; etki?: string; className?: string }) {
+  const metin =
+    durum === 'kaydedilemedi'
+      ? `${kapsam}: bu tarayıcıda kaydedilemedi (depolama kapalı); değişiklikler yalnız bu sekme açıkken geçerli.`
+      : durum === 'kaydedildi'
+        ? `${kapsam}: bu tarayıcıda kaydedildi${zaman ? ` ${zaman}` : ''} (yerel depolama).`
+        : durum === 'kayitli'
+          ? `${kapsam}: bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama).`
+          : `${kapsam}: henüz kayıt yok; değişince bu tarayıcıda saklanır.`;
+  return (
+    <p className={`kayit-durumu${className ? ` ${className}` : ''}`} role="status" aria-live="polite" data-durum={durum}>
+      {metin}
+      {etki ? ` ${etki}` : ''}
+    </p>
+  );
+}
+
 /* ---------- Grafik ----------
  * ECharts yalnız grafik görünür olunca yüklenir (src/scripts/charts.ts, ayrı paket). Spec değişince (ör. Parametreler)
  * aynı grafik yeniden çizilir. Çizilene kadar ve çizilemezse Türkçe özet görünür; ekran okuyucu metni de bu özettir.

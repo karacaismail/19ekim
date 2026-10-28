@@ -1100,6 +1100,40 @@ test.describe('başlık ve İstihdam menüsü', () => {
  * dönem/kaynak satırı. Eski hero (turuncu üst etiket + büyük başlık + uzun açıklama) ve kırıntı-başlık ikiliği yok.
  * Bölüm başlığı: tek ana başlık + açıklama; kalın üst çizgi ve turuncu numara yok; numara yalnız sıralama anlamlıysa.
  */
+/*
+ * Kırıntı derinliği (K5, docs/birlesik_plan.md §4.1; kullanıcı kararı 2026-10-28 “test et, karar ver”): 320×480’de rol
+ * sayfasının kırıntısı üç satır tutuyordu (19 Ekim › İstihdam › Organizasyon şeması › başlık). Karar: dar ekranda (< 48em)
+ * bağlantısız grup adı gizlenir, bağlantılı ebeveyn ve başlık kalır; geniş ekranda tam yol. Giderler’in belgeli yolu
+ * (Finans › OpEx) grup adı değil, her genişlikte kalır.
+ */
+test.describe('kırıntı derinliği (K5, 2026-10-28)', () => {
+  // Son kırıntı h1 + durum hapı taşır; metin olarak yalnız h1 okunur.
+  const gorunen = (page: Page) =>
+    page.locator('.crumbs li').evaluateAll((lis) => lis.filter((li) => getComputedStyle(li).display !== 'none').map((li) => ((li.querySelector('h1') ?? li).textContent ?? '').replace(/\s+/g, ' ').trim()));
+  test('320×480: grup adı gizli, bağlantılı ebeveyn ve başlık kalır; başlık ilk ekranda; 1280: tam yol; Giderler yolu her genişlikte', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('roller/ekip-lideri/');
+    await icerik(page);
+    expect(await gorunen(page)).toEqual(['19 Ekim', 'Organizasyon şeması', 'Satış-pazarlama ekip lideri']);
+    await expect(page.locator('.crumbs li[data-grup]')).toHaveCount(1);
+    await expect(page.locator('.crumbs li[data-grup]')).toBeHidden();
+    const h1 = await page.locator('h1').boundingBox();
+    expect(h1!.y + h1!.height, 'başlık ilk ekranda').toBeLessThanOrEqual(480);
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    expect(await gorunen(page)).toEqual(['19 Ekim', 'Gelir planı']);
+    await page.goto('giderler/');
+    await icerik(page);
+    expect(await gorunen(page)).toEqual(['19 Ekim', 'Finans', 'OpEx', 'Operasyonel Giderler']);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('roller/ekip-lideri/');
+    await icerik(page);
+    expect(await gorunen(page)).toEqual(['19 Ekim', 'İstihdam', 'Organizasyon şeması', 'Satış-pazarlama ekip lideri']);
+    await expect(page.locator('.crumbs li[data-grup]')).toBeVisible();
+    await expect(page.locator('.crumbs li[data-grup] a')).toHaveCount(0);
+  });
+});
+
 test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 PageHeader; P6.1)', () => {
   const ORNEK = ['', 'gelir-plani/', 'nakit-akisi/', 'giderler/', 'parametreler/', 'roller/saha-uzmani/', 'buyume-modeli/', 'bcg/', 'notlar/', 'partnership/', 'applet/'];
   for (const path of ORNEK) {

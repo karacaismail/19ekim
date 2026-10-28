@@ -887,7 +887,7 @@ Kullanıcı kararı 2026-10-28: S0 (asıl ihtiyaç tanımı) onaylandı; K1–K1
 yıllık %15 girdi; K3 şirket yapısı Türksab → Mogem [Segika/SGK] ve iStoc Company [iStoc, Toptan], tutarlar Sheets’te; K4 “SMART
 hedefler”; K6 sunum sırası güncellenir; K10 e-posta gizli kalır; K11 marka bazlı faturalanan → tahsilat → kasa; K12 pilot sahip);
 cevapsız K1/K7/K8/K9 varsayılan; açık alt sorular §4.2. Plan **sürüm 2** (payda 10): yeni B3 şirket yapısı, eski B3–B8 → B4–B9.
-**Sayaç (sürüm 2): 0/10 tamamlandı, 2/10 aktif (B0 cevaplar geldi; B2 — B2.1 tamam).**
+**Sayaç (sürüm 2): 1/10 tamamlandı (B2), 1/10 aktif (B0 — alt sorular ve belge önekleri).**
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,
@@ -904,8 +904,23 @@ Değişmez (ar-13): aynı girdilerle gelir planının gideri/geliri ile nakit ak
 `tests/data.spec.ts` B2 ×3 (sahaEk = addedSahaCosts, ikinci saha ayında tek kişi; “Saha ağırlıklı” ile ay ay eşitlik ve
 Aralık 2026’da üç kişi; ek sabit / prim / fiyat seçenekleri), `tests/nakit.spec.ts` B2 (ad, satır, not, temel değişince
 seçenekler kalır), `tests/gelir.spec.ts` (nakit akışında “Özel: İyimser + 2 değişiklik”). CA-1 artığı: `PageHeader`
-kullanılmayan `normalizePath` içe aktarımı kaldırıldı. **Kalan (B2.2):** tek etkin girdi anlık görüntüsü ve sürümlü kayıt
-anahtarı, senaryo kurucu kayıt durumu (“kaydedildi / kaydedilemedi”), “yalnız bu tarayıcı” uyarısı tek bileşen (F13).
+kullanılmayan `normalizePath` içe aktarımı kaldırıldı.
+
+**B2.2 (adım 2b) — kayıt durumu, tek uyarı bileşeni, kırıntı derinliği (ct-F13, ux UX-15, K5; 2026-10-28), test önce:**
+`useScenarioOptions` yazımın sonucunu bildirir (`kayit: { durum: yok | kayitli | kaydedildi | kaydedilemedi; zaman }`;
+açılıştaki yeniden yazım “kaydedildi” sayılmaz, kayıt varsa “kayıtlı”; seçenek ve temel senaryo birlikte yazılır, yazım
+başarısızsa “kaydedilemedi”). Tek bileşen `KayitDurumu` (ui.tsx; `.kayit-durumu`, `role="status"`, `data-durum`): tek dil —
+“<kapsam>: bu tarayıcıda kaydedildi ss:dd:ss (yerel depolama)” / “kayıtlı (önceki oturumdan)” / “kaydedilemedi (depolama
+kapalı); değişiklikler yalnız bu sekme açıkken geçerli” + etki cümlesi (“Gelir planı ve Nakit akışı aynı seçenekleri okur” /
+“Nakit akışı sayfasına taşınmaz”). Senaryo kurucu bunu kullanır (`.kurucu-kayit`); Parametreler, Applet, Affilate ve Notlar
+aynı bileşene **adım 7**’de geçer (mevcut `.param-status` vb. metinleri testli, dokunulmadı). **K5 kırıntı derinliği
+(“test et, karar ver”):** 320×480’de rol kırıntısı üç satırdı; karar — dar ekranda (< 48em) bağlantısız grup kırıntısı
+gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağlantılı ebeveyn ve başlık kalır
+(“19 Ekim › Organizasyon şeması › rol”); ≥ 48em tam yol; Giderler’in belgeli yolu (Finans › OpEx) her genişlikte. Ertelenen
+(adım 7): tek etkin girdi anlık görüntüsü ve sürümlü kayıt anahtarı (geçiş/kurtarma ile birlikte). Testler:
+`tests/gelir.spec.ts` adım 2b ×2 (kaydedildi + saat + etki; depolama kapalı → kaydedilemedi, yalnız bu sekme, taşınmaz),
+`tests/ui.spec.ts` kırıntı derinliği (320: gizli grup, ebeveyn + başlık, başlık ilk ekranda; 1280: tam yol; Giderler),
+`tests/icerik.spec.ts` `kirintiGrubu`. **B2 tamam.**
 
 ## Gizlilik ve yayın
 

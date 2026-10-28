@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, icerikOf, kirinti } from '../src/data/icerik';
+import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
 import { BASE_ROLES as ROLES } from '../src/data/roles';
 import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 
@@ -123,6 +123,12 @@ test.describe('içerik envanteri', () => {
     expect(kirinti('/arsiv/')).toEqual(['Yardımcı', 'Arşiv: tahtadan karara']);
     expect(kirinti('/email/')).toEqual(['E-posta']); // doğrudan erişim: tek parça, kırıntı satırı çizilmez
     expect(kirinti('/')).toEqual([]);
+    // K5 (2026-10-28): dar ekranda gizlenebilen grup adı yalnız otomatik yolun ilk parçasıdır; belgeli yol (Giderler) ve doğrudan erişimde yok.
+    expect(kirintiGrubu('/roller/asistan/')).toBe('İstihdam');
+    expect(kirintiGrubu('/gelir-plani/')).toBe('Finans');
+    expect(kirintiGrubu('/giderler/')).toBeNull();
+    expect(kirintiGrubu('/bcg/')).toBeNull();
+    expect(kirintiGrubu('/')).toBeNull();
     expect(Object.keys(GRUP_ADI)).toEqual(['pazarlama', 'istihdam', 'finans', 'yonetim', 'yardimci', 'dogrudan', 'sistem']);
   });
 });
