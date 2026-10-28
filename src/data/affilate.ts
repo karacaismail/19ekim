@@ -248,7 +248,7 @@ export const gecerliTarih = (t: unknown): t is string =>
   typeof t === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(t) && !Number.isNaN(utc(t)) && iso(utc(t)) === t;
 
 /** Yarım yukarı yuvarlama (tam sayı bölme; negatifte simetrik). */
-function bolYuvarla(pay: bigint, payda: bigint): bigint {
+export function bolYuvarla(pay: bigint, payda: bigint): bigint {
   if (payda === 0n) return 0n;
   const neg = pay < 0n !== payda < 0n;
   const a = pay < 0n ? -pay : pay;
@@ -470,12 +470,12 @@ function musteriHizmetAyi(grup: MusteriGrubu, fatura: Fatura, ayIndeks: number):
 }
 
 /** Zaman çizelgesi: en erken başlangıcın (müşteri ya da açık fatura) ayından ufuk kadar ay; `son` hariçtir. */
-function zamanCizelgesi(s: Senaryo) {
-  const baslar = [...s.musteriler.map((m) => m.baslangic), ...(s.faturalar ?? []).map((f) => f.tarih)].sort(tarihSira);
+export function zamanCizelgesi(ufukAy: number, baslangiclar: string[]) {
+  const baslar = [...baslangiclar].sort(tarihSira);
   const ilkAy = `${(baslar[0] ?? '2027-01-01').slice(0, 7)}-01`;
   const aylar: string[] = [];
-  for (let i = 0; i < s.ufukAy; i++) aylar.push(ayAnahtari(ayEkle(ilkAy, i)));
-  return { aylar, son: ayEkle(ilkAy, s.ufukAy) };
+  for (let i = 0; i < ufukAy; i++) aylar.push(ayAnahtari(ayEkle(ilkAy, i)));
+  return { aylar, son: ayEkle(ilkAy, ufukAy) };
 }
 
 /**
@@ -486,7 +486,7 @@ function zamanCizelgesi(s: Senaryo) {
 export function hesapla(s: Senaryo): Sonuc {
   const hatalar = dogrula(s);
   if (hatalar.length) return { hatalar, aylar: [], hareketler: [], ortaklar: [], musteriler: [], segika: [], sonrasi: [] };
-  const { aylar, son } = zamanCizelgesi(s);
+  const { aylar, son } = zamanCizelgesi(s.ufukAy, [...s.musteriler.map((m) => m.baslangic), ...(s.faturalar ?? []).map((f) => f.tarih)]);
   const sonMs = utc(son);
   const ayIdx = new Map(aylar.map((a, i) => [a, i]));
   const hareketler: Hareket[] = [];
@@ -795,7 +795,7 @@ export function karsilastir(s: Senaryo, musteriId: string): Record<OrtakId, Sonu
 
 /* ---------- Başlangıç değerleri (örnek; düzenlenebilir) ---------- */
 
-export const ORTAK_ADLARI: Record<OrtakId, string> = { ayse: 'Ayşe (ilk fatura)', satis: 'Satış ortağı', cozum: 'Çözüm ortağı' };
+export const ORTAK_ADLARI: Record<OrtakId, string> = { ayse: 'Ayşe', satis: 'Satış ortağı', cozum: 'Çözüm ortağı' };
 
 /** Başlangıç kuralları (docs/affilate.md §2, §5.4): bütün değerler girdi; örnek başlangıç, onaylanmış sözleşme değil. */
 export function baslangicOrtaklar(): Record<OrtakId, OrtakKurali> {

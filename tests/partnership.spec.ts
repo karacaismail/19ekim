@@ -129,9 +129,9 @@ test.describe('iş ortaklığı programı', () => {
     await page.getByRole('button', { name: 'Pazarlama' }).click();
     await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem', { name: 'İş ortaklığı' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
-    // Sunum sırası: Eylem planı → İş ortaklığı → Karar yetkisi.
+    // Sunum sırası: Eylem planı → İş ortaklığı → Affilate (kullanıcı kararı 2026-10-28).
     await expect(page.locator('.pager-link[rel="prev"] .pager-label')).toHaveText('Eylem planı');
-    await expect(page.locator('.pager-link[rel="next"] .pager-label')).toHaveText('Karar yetkisi ve kontrol noktaları');
+    await expect(page.locator('.pager-link[rel="next"] .pager-label')).toHaveText('Affilate');
   });
 
   test('klavye: oklar program ve bölüm sekmelerini değiştirir; odakta çevreleyen halka yok', async ({ page, browserName }) => {

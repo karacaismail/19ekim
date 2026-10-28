@@ -164,6 +164,7 @@ function altBilgiNotu(current: string) {
   const yol = current.replace(/\/$/, '');
   const son = yol.slice(yol.lastIndexOf('/') + 1);
   if (son === 'applet') return 'Applet tutarları örnek verilerdir; şirket kararı değildir ve yapılan değişiklikler yalnız bu tarayıcıda saklanır.';
+  if (son === 'affilate') return 'Affilate bir simülasyondur: oranlar, süreler ve fiyatlar örnek başlangıç değerleridir, onaylanmış sözleşme değildir; hareketler gerçek fatura ya da ödeme değildir. Değişiklikler yalnız bu tarayıcıda saklanır.';
   if (son === 'gelir-plani' || son === 'nakit-akisi' || son === 'hedefler' || son === 'buyume-modeli')
     return 'Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Parametreler sayfasında değiştirilen değerler yalnız o tarayıcıda saklanır.';
   if (son === 'giderler') return 'Gider tutarları Giderler Sheets dosyasından açılışta okunur; dosya değişince burası da değişir. Varsayım kaynakları arama bağlantısıdır, doğrulanmış belge değildir.';

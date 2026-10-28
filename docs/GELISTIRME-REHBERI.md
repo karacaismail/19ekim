@@ -26,6 +26,9 @@ bağımsız modül vardır:
   seçili senaryosundan; basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
   geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
+- **Affilate** (`/affilate/`): Segika satış ortaklığı komisyon simülasyonu; üç ortak modeli (Ayşe ilk fatura, satış ortağı,
+  çözüm ortağı) aynı müşteri üzerinden, bütün oranlar/süreler/fiyatlar düzenlenebilir; dört bölüm (Model, Karşılaştırma,
+  Aylık döküm, Varsayımlar), hazır senaryolar, JSON/CSV dışa aktarım. Görev tanımı `docs/affilate.md`.
 
 Site bir **giriş kapısı** arkasındadır (kullanıcı adı `turksab`, parola repoda yok). Kapı robotlara karşıdır, gerçek
 erişim denetimi değildir; bunu güvenlik önlemi sanıp üzerine bir şey inşa etmeyin.
@@ -56,7 +59,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 1036 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 1124 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -211,6 +214,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Sheets kurulumu | `apps-script/src/Kurulum.js`, `apps-script/README.md` |
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
 | İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |
+| Affilate | `src/data/affilate.ts` (hesap motoru), `src/data/affilateKurgu.ts` (kurgu, hazır senaryolar, JSON), `src/lib/affilateStore.ts` (saklama), `src/views/AffilatePage.tsx` (sayfa) |
 | Nakit akış tablosu | `src/data/cashflow.ts` (senaryo girişleri, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
 | Gelir planı | `src/data/revenue.ts` (kapasite, `simulate`, senaryolar, büyüme modeli: kur, temsilci ağı, reklam ölçeği, saha büyümesi; 24 ay), `src/views/RevenuePage.tsx` |
 | Başabaş | `src/data/breakeven.ts` (filtreler, gider kaynakları, kesişimler, adet noktası, duyarlılık, filtre etkisi); gelir planı sayfasının bölümü |

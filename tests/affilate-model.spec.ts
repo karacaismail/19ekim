@@ -496,3 +496,85 @@ test.describe('Affilate motoru — portföy, karşılaştırma ve değişmezler'
     expect(sum(r.aylar.map((a) => a.tahsilat))).toBe(r.segika[0].tahsilat);
   });
 });
+
+/* ---------- Kurgu katmanı (docs/affilate.md §6, §11): hazır senaryolar, kurgu → senaryo çevirisi, JSON doğrulama ---------- */
+import { HAZIR_SENARYOLAR, baslangicKurgu, baslangicMusteri, degisiklikler, hazirEslesen, kurguJson, kurguOku, senaryoKur, tahsilatMetni } from '../src/data/affilateKurgu';
+
+test.describe('Affilate kurgu — hazır senaryolar ve JSON', () => {
+  const sonucu = (id: string) => {
+    const h = HAZIR_SENARYOLAR.find((x) => x.id === id)!;
+    const r = hesapla(senaryoKur(h.kurgu()));
+    expect(r.hatalar).toEqual([]);
+    return r;
+  };
+
+  test('dokuz hazır senaryo aynı motoru kullanır ve §9 örnekleriyle uyumludur', () => {
+    expect(HAZIR_SENARYOLAR.map((h) => h.ad)).toEqual(['İlk satış', 'Aylık müşteri', 'Yıllık peşin', '10 aylık fiyat / 12 aylık hizmet', 'İkinci döneme geçiş', 'Kısmi ödeme', 'Destek kesintisi', 'İade', 'Üç ortaklı portföy']);
+    expect(ortak(sonucu('ilk-satis'), 'ayse').netHakedis).toBe(TL(10));
+    expect(ortak(sonucu('aylik-musteri'), 'satis').netHakedis).toBe(TL(300));
+    expect(ortak(sonucu('yillik-pesin'), 'satis').netHakedis).toBe(TL(250));
+    expect(ortak(sonucu('on-aylik-fiyat'), 'cozum').netHakedis).toBe(TL(250));
+    const ikinci = sonucu('ikinci-donem');
+    expect(hakedis(ikinci, (h) => h.ay < '2028-02')).toBe(TL(180)); // 1. dönem: 12 × 15
+    expect(hakedis(ikinci, (h) => h.ay >= '2028-02')).toBe(TL(110)); // 2. dönem: ufuk içinde 11 ay × 10
+    const kismi = sonucu('kismi-odeme');
+    expect(kismi.musteriler[0].planlanan).toBe(TL(150));
+    expect(ortak(kismi, 'satis').netHakedis).toBe(TL(150));
+    expect(hakedis(kismi, (h) => h.ay <= '2027-03')).toBe(TL(10)); // 400 ₺ tahsilatla 2 ay × 5
+    expect(ortak(sonucu('destek-kesintisi'), 'cozum').netHakedis).toBe(TL(229.17));
+    const iade = sonucu('iade');
+    expect(ortak(iade, 'satis').netHakedis).toBe(TL(120)); // %15 × 800 ₺
+    expect(duzeltme(iade)).toBeLessThan(0);
+    expect(ortak(iade, 'satis').odenen).toBe(TL(120));
+    const portfoy = sonucu('portfoy');
+    expect(portfoy.musteriler).toHaveLength(3);
+    expect(portfoy.segika[0].netHakedis).toBe(TL(100 + 250 + 400));
+  });
+
+  test('kurgu → senaryo: kısmi tahsilat parçaları kümülatif yuvarlanır (toplam ≤ fatura); iade ve hariç kalem faturaya bağlanır', () => {
+    const k = baslangicKurgu();
+    k.musteriler = [baslangicMusteri({ tahsilat: [{ oranBp: 3333, gecikmeAy: 0 }, { oranBp: 3333, gecikmeAy: 1 }, { oranBp: 3334, gecikmeAy: 2 }], iadeler: [{ fatura: 1, gecikmeAy: 4, oranBp: 1000 }], haricBp: 500 })];
+    const s = senaryoKur(k);
+    expect(s.faturalar?.[0].haric).toBe(TL(50));
+    const t = s.tahsilatlar!.filter((x) => x.faturaId === s.faturalar![0].id);
+    expect(t.map((x) => x.tutar)).toEqual([TL(333.3), TL(333.3), TL(333.4)]); // kümülatif: 33330, 66660, 100000
+    expect(sum(t.map((x) => x.tutar))).toBe(TL(1000));
+    expect(t.map((x) => x.tarih)).toEqual(['2027-01-01', '2027-02-01', '2027-03-01']);
+    expect(s.iadeler[0]).toEqual({ id: `${s.faturalar![0].id}-i1`, faturaId: s.faturalar![0].id, tarih: '2027-05-01', tutar: TL(100) });
+    expect(hesapla(s).hatalar).toEqual([]);
+    expect(tahsilatMetni(k.musteriler[0].tahsilat)).toBe('%33,33 fatura tarihinde + %33,33 1 ay sonra + %33,34 2 ay sonra');
+  });
+
+  test('JSON: dışa aktarılan kurgu birebir geri okunur; şema / oran / tarih / tutar / kimlik hatalı dosya reddedilir', () => {
+    const k = baslangicKurgu();
+    k.ortaklar.cozum.donemler[1].oranBp = 1000;
+    expect(kurguOku(JSON.parse(kurguJson(k)))).toEqual(k);
+    expect(kurguOku(null)).toBeNull();
+    expect(kurguOku({ v: 1, kurgu: { ufukAy: -5 } })).toBeNull();
+    const bozuk = (boz: (x: ReturnType<typeof baslangicKurgu>) => void) => {
+      const x = baslangicKurgu();
+      boz(x);
+      return kurguOku(JSON.parse(JSON.stringify({ v: 1, kurgu: x })));
+    };
+    expect(bozuk((x) => (x.ortaklar.satis.donemler[0].oranBp = 10_100))).toBeNull();
+    expect(bozuk((x) => (x.musteriler[0].baslangic = '2027-02-30'))).toBeNull();
+    expect(bozuk((x) => (x.fiyat.aylik = -1))).toBeNull();
+    expect(bozuk((x) => (x.musteriler[0].tahsilat = [{ oranBp: 6000, gecikmeAy: 0 }, { oranBp: 6000, gecikmeAy: 1 }]))).toBeNull();
+    expect(bozuk((x) => (x.musteriler[0].id = 'a b'))).toBeNull();
+    expect(bozuk((x) => ((x.ortaklar as Record<string, unknown>).satis = undefined))).toBeNull();
+    // Bilinmeyen seçili müşteri ilk gruba düşer; fazladan alan yok sayılır.
+    const secili = bozuk((x) => (x.secili = 'yok'));
+    expect(secili?.secili).toBe('a');
+    expect(kurguOku({ v: 1, kurgu: { ...baslangicKurgu(), fazladan: 1 } })?.ufukAy).toBe(36);
+  });
+
+  test('hazır senaryo eşleşmesi ve değişiklik özeti', () => {
+    expect(hazirEslesen(baslangicKurgu())).toBe('yillik-pesin');
+    const k = baslangicKurgu();
+    k.ortaklar.cozum.donemler[1].oranBp = 1000;
+    expect(hazirEslesen(k)).toBeNull();
+    const d = degisiklikler(k, baslangicKurgu());
+    expect(d).toEqual([{ alan: 'Çözüm ortağı · 2. dönem oranı', once: '%15', simdi: '%10' }]);
+    expect(degisiklikler(baslangicKurgu(), baslangicKurgu())).toEqual([]);
+  });
+});

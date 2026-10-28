@@ -83,6 +83,8 @@ export const SEQUENCE: Stop[] = [
   { path: '/eylem-plani/', label: 'Eylem planı', crumb: ['Eylem planı'] },
   // İş ortaklığı programı (kullanıcı kararı 2026-10-27): Segika ve iStoc, iki ana sekme; adres /partnership/.
   { path: '/partnership/', label: 'İş ortaklığı programı', crumb: ['İş ortaklığı programı'] },
+  // Affilate (kullanıcı kararı 2026-10-28, docs/affilate.md): Segika satış ortaklığı komisyon simülasyonu; adres /affilate/.
+  { path: '/affilate/', label: 'Affilate', crumb: ['Affilate'], tam: 'Affilate · Segika satış ortaklığı simülasyonu' },
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları', crumb: ['Karar yetkisi ve kontrol noktaları'] },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler', crumb: ['Karar bekleyenler'] },
   { path: '/parametreler/', label: 'Parametreler', crumb: ['Parametreler'] },
@@ -116,6 +118,7 @@ export const MARKETING_NAV = [
   { label: 'Eylem planı', path: '/eylem-plani/' },
   { label: 'MLM ağı', path: '/buyume-modeli/' },
   { label: 'İş ortaklığı', path: '/partnership/' },
+  { label: 'Affilate', path: '/affilate/' },
   { label: 'Karar yetkisi', path: '/karar-yetkisi/' },
   { label: 'Karar bekleyenler', path: '/karar-bekleyenler/' },
   { label: 'Parametreler', path: '/parametreler/' },

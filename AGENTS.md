@@ -175,6 +175,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     aşama, `hire-*` sınıfları). Stil `.ortak-*` (global.css). Testler: her programın her bölümü 320/390/1280 px’te
     taşma, 14 px, 44 px hedef ve grafik metni; sekme/adres/klavye; veri tutarlılığı (huni azalan, geçit hedefleri
     artan, puan kartları 100, kapasite 52 ve 83 saat/hafta, takvim bitişik, tarih kayması).
+  - `/affilate/` Affilate (kullanıcı kararı 2026-10-28; Pazarlama menüsünde “Affilate”, sunum sırasında İş ortaklığı ile
+    Karar yetkisi arasında): Segika satış ortaklığı komisyon simülasyonu — üç ortak modeli aynı müşteri ve aynı satış
+    koşulları üzerinden; saf motor `src/data/affilate.ts`, kurgu `src/data/affilateKurgu.ts`, saklama
+    `src/lib/affilateStore.ts` (`segika-affilate-v1`), görünüm `src/views/AffilatePage.tsx`. Ayrıntı: “affilate.md” bölümü.
   - `/nakit-akisi/` nakit akış tablosu (kullanıcı kararı 2026-10-27; “Giderler” açılır menüsünde — kullanıcı kararı
     2026-10-27: üst gezinmede Giderler artık bir menüdür, `FINANCE_NAV`: Giderler (OPEX), Nakit akış tablosu; `COMMON_NAV`
     yalnız Notlar —, sunum sırasında Giderler’den sonra, kırıntı “Finans › Nakit akış tablosu”, başlık kırıntıda). Klasik
@@ -729,6 +733,70 @@ görüntüleri oturumda alındı (320 ve 1280 px), depoya konmadı; etkilenen du
 | F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | ertelendi: renk sözlüğü marka ve ton kararı (H); seçim topuzla, durum metinle, odak merkezi politikayla zaten ayrışır |
 | F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | uygulandı (GA-3: `Loader`, `AppletHata`; GA-5: giriş bekleme nedeni, eski veri notu saat + sonraki adım); ağ gecikmesi / yeniden bağlanma senaryosu testi NOT_RUN |
 | F24 Uzun sayfa belge takibi | gelir planı bölüm dizini, kalıcı adres, dizine dönüş | V29 | uygulandı (GA-5), yerelde doğrulandı; bölüm sırası ve bölüm soruları ertelendi (içerik kararı) |
+
+### affilate.md: Segika satış ortaklığı simülasyonu (kullanıcı kararı 2026-10-28)
+
+Kanonik görev tanımı `docs/affilate.md` (Codex raporu; depoda). Sayfa **Pazarlama → Affilate**, adres `/affilate/`
+(yayında `/19ekim/affilate/`); `MARKETING_NAV` ve `SEQUENCE` durağı İş ortaklığı’nın yanında, kırıntı “Affilate”, tam ad
+“Affilate · Segika satış ortaklığı simülasyonu”. Mevcut `/partnership/` korunur; `/buyume-modeli/` MLM hesapları taşınmadı.
+
+- **Hesap motoru** `src/data/affilate.ts`: DOM, React, depolama ve ağdan bağımsız saf hesap. Para kuruş (tam sayı), oran
+  baz puan (%15 = 1500), BigInt ile kesin bölme ve yarım-yukarı yuvarlama; kümülatif taksit dağıtımı
+  `kümülatif(k) = roundHalfUp(C × k / N)` (100 ₺ / 12 → 8 × 8,33 + 4 × 8,34; 2., 5., 8., 11. taksit 8,34). Fatura bazlı
+  kümülatif tahsilat komisyonu `(F − X) × Q / F` (parçalı tahsilat toplamı değiştirmez; `F = 0` bölme yok). Komisyon yaşı
+  müşteri bazlıdır (dönemler takvim yılı değil); ay ekleme ilk tarihin gününe göre, kısa ayda son gün, kalıcı kayma yok
+  (31 Ocak → 28 Şubat → 31 Mart). Hizmet ayı sonu olayının tarihi dönemin bitiş sınırıdır (1 Ocak başlayan müşteri için
+  1 Şubat; hareket Şubat raporunda) — bu yüzden 12 hizmet ayının tamamı 13 takvim aylık ufukta görünür; tek yıllık
+  hazır senaryolar yenilemeyi `iptalHizmetAyi: 12` ile kapatır. Aynı tarihte işleme sırası: fatura → tahsilat/iade →
+  ay sonu (destek, hakediş) → ortak ödemesi; ödeme kazanılmamış tutarı avans olarak ödemez, eksik kalan plan geri
+  alınacak bakiyeden mahsup edilir. Üç ortak modeli örnek başlangıçtır (Ayşe ilk fatura %10; satış ortağı 12 ay %15 / 12
+  ay %10 / 12 ay %0; çözüm ortağı 12 ay %25 / 12 ay %15 / 12 ay %0; sonrası %0) — hiçbir yüzde iş kuralı olarak gömülü
+  değildir, hepsi girdidir, %0 geçerlidir. Kapsam: ilk fatura (ilk pozitif fatura, ödeme sırasından bağımsız; iade yeni ilk
+  fatura doğurmaz) / süreli (oran-dönem matrisi, ardışık, sonrası açık girdi). Politikalar: tahsilatta kazan aynı ay öde ·
+  hizmet ayı sonunda kazan ve öde · tahsilatta kazan taksitle öde; gecikme ayrı girdi. Destek (ortak sorumluysa): aktif /
+  sağlanmadı / belirsiz; sağlanmayan ay hak kazandırmaz (tahsilatta kazanılmışsa geri alma düzeltmesi), belirsiz ay
+  `beklet` ile koşullu bekler; pay kalan aylara dağıtılmaz; oran kendiliğinden düşürülmez. İptal gelecek faturaları
+  durdurur, tahsilatta kazanılmış taksitleri sıfırlamaz; iade net bazı düşürür (düzeltme, geri alınacak bakiye); aynı
+  olay kimliği ikinci kez uygulanmaz. Ölçütler ayrı: planlanan / kazanılan / düzeltme / net hakediş / ödenen / ödenecek /
+  geri alınacak / koşullu / bekleyen; Segika komisyon bazı, komisyon sonrası tutar ve komisyon ödemeleri sonrası nakit
+  (kâr değil). Para birimleri (TRY, EUR) ayrı toplanır. `karsilastir` aynı satışın üç alternatifini ayrı hesaplar
+  (toplanmaz). Doğrulama (`dogrula`): negatif, %101, boş, sıfır taksit, geçersiz tarih, fazla tahsilat alan hatası; motor
+  hesap üretmez. Teknik sınırlar: ufuk 1–120 ay, en çok 100 müşteri grubu, 12 dönem.
+- **Kurgu katmanı** `src/data/affilateKurgu.ts`: sayfanın düzenlediği girdiler (müşteri grubu: adet, başlangıç, aylık /
+  paket, ortak, tahsilat planı = faturanın yüzdesi + gecikme ayı, iade = fatura no + gecikme + yüzde, destek ay kayıtları
+  ve kayıtsız ay varsayımı, hariç kalem yüzdesi; fiyat kurucu; üç ortak kuralı; ufuk) → motor senaryosu (`senaryoKur`;
+  açık olay listesi gerekiyorsa bütün gruplar için üretilir). Dokuz hazır senaryo (İlk satış, Aylık müşteri, Yıllık peşin,
+  10 aylık fiyat / 12 aylık hizmet, İkinci döneme geçiş, Kısmi ödeme, Destek kesintisi, İade, Üç ortaklı portföy) aynı
+  motoru kullanır. JSON içe aktarma (`kurguOku`) şema, oran, tarih, tutar ve kimlik doğrulamasından geçer; geçmeyen dosya
+  mevcut durumu değiştirmez. Başlangıca göre değişiklik özeti (`degisiklikler`).
+- **Saklama** `src/lib/affilateStore.ts`: sayfaya özel anahtar `segika-affilate-v1` (sürüm 1: kurgu + adlandırılmış
+  kayıtlar); genel parametreler, gelir planı senaryosu, notlar ve tema değişmez. Yazım başarısızsa “kaydedildi” denmez
+  (durum satırı “Kaydedilemedi … JSON dışa aktarın”). Geri alma yığını bellekte (40 adım; sıfırlama dahil).
+- **Sayfa** `src/views/AffilatePage.tsx` (+ `src/pages/affilate.astro`, Combobox CSS yalnız bu sayfada): başlık ve
+  `ResultSummary` (seçili müşterinin planlanan toplam komisyonu; dönem ve para birimi; ufuk içinde kazanılan, ödenen,
+  ödenecek, seçili ay, Segika komisyon sonrası; üç alternatifin kıyası; “Neden bu tutar?” hesap açıklaması: baz, kapsam ve
+  oran-dönem, kazanma/ödeme, destek, yuvarlama, ilk hakediş hareketi). Dört bölüm tek panelde, adres `#model` /
+  `#karsilastirma` / `#aylik` / `#varsayimlar` (geri/ileri; girdiler ve seçili ay korunur): ≥ 48em APG sekmeler
+  (`.af-sekmeler`, ok tuşları), dar ekranda Choice “Bölüm” (konum + ad). Model: hazır senaryo, ufuk, müşteri grubu
+  (istisnalar accordion’da: tahsilat düzeni, iptal ve iade, destek ve hariç kalem), fiyat kurucu (tek etkin kaynak; türetilen
+  paket / aylık eşdeğer “komisyon değil” / indirim görünür), üç ortak editörü accordion’da (seçili ortak açık; kapsam,
+  dönem satırları ekle/kaldır, sonraki oran, politika + taksit + gecikme, destek sorumlusu / ihlali / maliyet anahtarı).
+  Karşılaştırma: `DataTable kayit="matris" eksenEtiketi="Ölçüt"` (ölçüt seçilir, üç ortağın değeri aynı anda) ve kayıtlı
+  senaryolar. Aylık döküm: ay gezgini (önceki / seçim / sonraki), ayın özeti, hareket tablosu (tutar özet), bütün dönem
+  özeti (“Bu dönemden sonra” ödenecek ve koşullu; nakit kâr değil). Varsayımlar: başlangıca göre değişiklikler, hesap
+  sözlüğü, kayıt durumu (`#af-kayit-durum`), senaryo kaydet / yükle / sil (onaylı), JSON dışa/içe, hareket CSV (metin
+  hücrelerinde formül koruması), başlangıca döndür (iki adım + Vazgeç) ve Geri al. Alt bilgi notu Affilate için ayrı
+  (simülasyon; sözleşme değil). Seçeneklerde yalnız değer (`%10`, `12 ay`, `Aylık × katsayı`); sayısal alanlar
+  appletKit `Sayi` sözleşmesini izler (sınır önceden yazılır, sessiz düzeltme yok, boş alan sıfıra çevrilmez).
+- **320 px tabanı**: ilk ekranda (320×480) seçili müşterinin sonucu; yatay taşma yok; üç ayar paneli üst üste açılmaz
+  (accordion); dönem satırları dikey; matris profili karşılaştırma. Ölçüldü: Chromium 320/640 px testleri + yerel tarayıcı
+  (320 px: en küçük yazı ≥ 14 px, hedefler ≥ 44 px, içerik 296 / 320 px).
+- **Testler**: `tests/affilate-model.spec.ts` (M01–M44, §9 örnekleri, §12.3 dönüşümsel kontroller, kurgu / hazır senaryo /
+  JSON; 46 test, yalnız Chromium) ve `tests/affilate.spec.ts` (U01–U17, U19 ve 320×480 ilk ekran; 14 test, üç tarayıcı).
+  NOT_RUN: U20 ve P01–P04 insanla anlama testi; U18 forced-colors / reduced-motion tam seti; gerçek Safari / iOS /
+  Android; ekran okuyucu. `docs/affilate.md §14` commit yazarı/`Co-Authored-By` kuralı depo geleneğiyle çelişir; depo
+  geleneği (Türkçe tek konulu mesaj, `Co-Authored-By: Claude Fable 5.1`) sürdürüldü. Kaynak fotoğraf ve dosyalar depoya
+  kopyalanmadı; gerçek müşteri verisi yok (kurgusal “Müşteri A”).
 
 ## Gizlilik ve yayın
 

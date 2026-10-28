@@ -1,0 +1,10 @@
+---
+// Açılır seçim (Mantine Select) bu sayfada da kullanılır; stili yalnız bu sayfanın paketine girer.
+import '@mantine/core/styles/Combobox.layer.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AffilatePage } from '../views/AffilatePage';
+---
+
+<BaseLayout title="Affilate">
+  <AffilatePage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

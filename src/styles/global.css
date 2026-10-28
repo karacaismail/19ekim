@@ -6508,3 +6508,149 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   text-transform: uppercase;
 }
 
+
+/* ---------- Affilate (docs/affilate.md; kullanıcı kararı 2026-10-28) ----------
+ * Taban dar ekrandır: tek sütun, sıkı boşluk, büyük hedef; ≥ 48em yalnız satır düzenlerini yan yana açar. */
+.af-baslik {
+  margin-top: var(--space-8);
+}
+
+.af-not {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.af-turetilen {
+  margin-top: var(--space-4);
+}
+
+.af-musteri,
+.af-ortak,
+.af-araclar,
+.af-neden-sarmal {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.af-neden-sarmal {
+  justify-items: start;
+}
+
+.af-neden {
+  width: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-surface);
+  background: var(--surface-raised);
+}
+
+.af-neden-liste {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.af-neden-liste dt {
+  font-weight: var(--weight-semibold);
+}
+
+.af-neden-liste dd {
+  margin: var(--space-1) 0 0;
+  color: var(--text-secondary);
+}
+
+.af-satir {
+  display: grid;
+  gap: var(--space-3) var(--gap-normal);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.af-donem {
+  display: grid;
+  gap: var(--space-3) var(--gap-normal);
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  padding-top: var(--space-2);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.af-anahtar,
+.af-istisnalar,
+.af-ortaklar {
+  margin-top: var(--space-4);
+}
+
+.af-ay-gezgin {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  margin-top: var(--space-4);
+}
+
+.af-ay-gezgin .param-field {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.af-kayit-durum,
+.af-durum {
+  margin: var(--space-3) 0 0;
+}
+
+.af-durum:empty {
+  display: none;
+}
+
+.af-kayitli {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.af-kayitli li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+
+.af-kayitli-ad {
+  margin-inline-end: auto;
+  font-weight: var(--weight-medium);
+}
+
+.af-dosya {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.af-sozluk {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-inline-start: 1.1em;
+}
+
+@media (min-width: 48em) {
+  .af-satir {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)) auto;
+  }
+
+  .af-ay-gezgin {
+    grid-template-columns: auto minmax(12rem, 1fr) auto;
+  }
+
+  .af-ay-gezgin .param-field {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
