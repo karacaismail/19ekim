@@ -691,6 +691,16 @@ renk sözlüğü (marka ve ton kararı; durumlar metinle zaten ayrışır), F03 
 sözleşmesi aynı: `aria-pressed`; görünüm kullanıcı kararı), F18 `Dayanak` yapısal ayrımı (17 applet metni; içerik
 kararı). Test: `tests/gorsel-algi.spec.ts` GA-5a (V18, V29, F08/F21, F05/F12).
 
+**GA-6 — kapanış (F20, belge §11; 2026-10-28):** Paket commit’leri: GA-0 `6a50e5b`, GA-1 `327a8ae`, GA-2 `431e716`,
+GA-3 `61fd2ff`, GA-4a `cc3e856`, GA-4b `324f805`, GA-5 `15011e9`. Doğrulama durumları: hepsi yerelde doğrulandı (kapı +
+derleme + üç tarayıcıda tam tur); CI: GA-1…GA-5 commit’leri main’de yeşil (GA-4a koşusu eşzamanlılık kuralıyla GA-4b koşusuna devredildi); son yayın GA-5 15011e9, Pages dağıtımı 2026-10-28 08:47 UTC — yayında doğrulandı. Her bulgu iz tablosunda `uygulandı` / `ertelendi (gerekçe)` olarak kapandı;
+“genel olarak daha temiz oldu” kapanış sayılmadı. **NOT_RUN (insan ya da ayrı kanıt gerektirir):** insanla anlama
+testi (“hangi değer seçili, bu sayı neyin yüzdesi, bu işlem neyi değiştirecek?”); 200 % metin ve WCAG metin aralığı
+(V09); 400 % yakınlaştırma (V10); gerçek Safari / iOS / Android; forced-colors ve reduced-motion tam seti (V28); ağ
+gecikmesi / eski veri / yeniden bağlanma senaryosu (V26); ekran okuyucu; kontrast AA iddiası yok. Önce / sonra
+görüntüleri oturumda alındı (320 ve 1280 px), depoya konmadı; etkilenen durumların test sonucu
+`tests/gorsel-algi.spec.ts` ve tam tur kayıtlarıdır. `H` kayıtları uygulayıcının beğenisiyle “kanıtlandı” sayılmadı.
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
@@ -714,7 +724,7 @@ kararı). Test: `tests/gorsel-algi.spec.ts` GA-5a (V18, V29, F08/F21, F05/F12).
 | F17 “—” sözlüğü | nakit, gelir, applet, OPEX (efsane), senaryo kıyası, tarih alanları | V25 | uygulandı (GA-2), yerelde doğrulandı; OPEX hücreleri sembol + efsane |
 | F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, OPEX `Assumptions`, `LiveStrip` (GA-2); `Dayanak` yapısı | V26, F18 testi | GA-2 uygulandı, yerelde doğrulandı; `Dayanak` yapısal ayrımı ertelendi (17 applet metni, içerik kararı) |
 | F19 Gezinti sözlüğü | `tree.ts` `Stop.tam` eşlemesi; Partnership `Sira` | V18, V29 | uygulandı (GA-5), yerelde doğrulandı (her durak testte) |
-| F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` | V30 | uygulanıyor (her pakette güncellenir) |
+| F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` (kök kopyası yok) | V30 | uygulandı: her bulgu kimlik · kapsam · test · durum ile; durum sözlüğü uygulanıyor (GA-6 kapanışı) |
 | F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | GA-5: `Cubuk` aşım işareti; grafik başlıkları ölçü, varyant notu altta (GA-1); “hangi soru” satırı ve birim sözlüğü ertelendi (28 grafik içerik geçişi) |
 | F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | ertelendi: renk sözlüğü marka ve ton kararı (H); seçim topuzla, durum metinle, odak merkezi politikayla zaten ayrışır |
 | F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | uygulandı (GA-3: `Loader`, `AppletHata`; GA-5: giriş bekleme nedeni, eski veri notu saat + sonraki adım); ağ gecikmesi / yeniden bağlanma senaryosu testi NOT_RUN |
