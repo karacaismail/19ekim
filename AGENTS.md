@@ -908,7 +908,22 @@ atıfları “karar bekliyor / henüz verilmedi” oldu (K1 kararı üretilmez).
 örnek), `tests/nakit.spec.ts` (kapsam, kalıcı toparlanma etiketi, Sheets yokken açıklama, seçenek notu), `tests/gelir.spec.ts`
 (kurucu kapsamı), `tests/icerik.spec.ts` (`turetim`, `altBilgiOnCumle`, sayfada ön cümle kuralı). **B2 tamam (2a/2b/2c).**
 
-**Sayaç (sürüm 3): 1/10 tamamlandı (B2), 1/10 aktif (B0).** Sırada B6-öncü dar korumalar (MS-04 Affilate kayıt, MS-05 parametre doğrulama).
+**B6-öncü dar korumalar — MS-04 Affilate kayıt koruması, MS-05 parametre doğrulama (docs/missings.md; T05/T06; 2026-10-28),
+test önce:** `src/lib/affilateStore.ts → oku()` beş durum verir (`bos` / `gecerli` / `kismi` / `bozuk` / `uyumsuz`); yalnız
+`bos` ve `gecerli` otomatik yazımı açar, diğerleri **ham kaydı korur** (sayfa açılıp kapanınca byte düzeyinde aynı; değişiklik
+yapılsa da yazılmaz). Sayfada `#af-kayit-sorun` (Varsayımlar › Kayıt): sorun açıklaması (başka sürüm vN / bozuk veri / n kayıtlı
+senaryo okunamadı), “Ham kaydı dışa aktar” (JSON, dönüştürülmeden) ve “Başlangıçla devam et (üzerine yaz)” (`ustuneYaz`: sorun
+kapanır, yazım açılır); `#af-kayit-durum` bu sırada “Kayıt korunuyor…” der. Başka sekmenin yazdığı sorunlu kayıt buradaki durumu
+ezmez. `src/data/params.ts → loadParamsDetay()`: `gecerliParametre(key, value)` tür + tarih biçimi/geçerliliği (ISO gün, Şubat 30
+değil) + alan tanımı min–max ile doğrular; geçersiz alan varsayılana döner ve `gecersiz` listesinde bildirilir; ham kayıt ilk
+kullanıcı yazımına kadar dokunulmaz; `loadParams()` aynı sonucu verir. `ModelContext` `gecersiz` taşır (başarılı kayıtta boşalır);
+Parametreler sayfasında `.param-gecersiz` (“N kayıtlı değer geçersizdi ve varsayılana döndü: alan adları…”). Testler:
+`tests/affilate.spec.ts` MS-04 ×3 (v=99, bozuk JSON, kısmi: ham korunur, değişiklik çalışır ama yazılmaz, dışa aktar düğmesi,
+üzerine yazma yalnız kararla → v1 ve değişiklik kaydı), `tests/data.spec.ts` MS-05 (negatif fiyat, geçersiz/olmayan tarih, aralık
+dışı, tür dışı; geçerli kalır; bozuk/boş kayıt), `tests/ui.spec.ts` MS-05 sayfada. B6’nın kalanı (sürümlü anlık görüntü, migration,
+iki sekme çakışması, updater saflığı, dışa/içe aktarma genelleme) açık.
+
+**Sayaç (sürüm 3): 1/10 tamamlandı (B2), 2/10 aktif (B0, B6 — dar korumalar yapıldı).**
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,

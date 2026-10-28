@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { baslangicKurgu } from '../src/data/affilateKurgu';
 
 /**
  * Affilate sayfası (docs/affilate.md §12.2 U01–U19, §10.4; kullanıcı kararı 28 Ekim): gezinme, girdi sözleşmesi, 320 px
@@ -357,5 +358,56 @@ test.describe('Affilate — kayıt, dışa aktarım, sıfırlama', () => {
     await expect(page.locator('#af-kayit-durum')).toContainText('JSON dışa aktar');
     await expect(page.locator('#af-kayit-durum')).not.toContainText('Bu tarayıcıda kaydedildi');
     await expect(page.getByRole('button', { name: 'JSON dışa aktar' })).toBeVisible();
+  });
+  /*
+   * B6-öncü dar koruma (docs/missings.md MS-04, T06; kullanıcı yönergesi 2026-10-28): bozuk, uyumsuz sürümde ya da kısmen
+   * geçersiz kayıt açılışta korunur — hiçbir alan değiştirilmeden byte düzeyinde aynı kalır, değişiklik yapılsa da üzerine
+   * yazılmaz; ham kayıt dışa aktarılabilir; üzerine yazma yalnız “Başlangıçla devam et” kararıyla.
+   */
+  for (const [ad, ham, beklenen] of [
+    ['uyumsuz sürüm (v=99)', '{"v":99,"kurgu":{"x":1}}', /başka bir sürüm/],
+    ['bozuk JSON', '{bozuk', /okunamadı/],
+  ] as const) {
+    test(`MS-04 / T06: ${ad} kayıt korunur; değişiklik çalışır ama yazılmaz; üzerine yazma yalnız açık kararla`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.addInitScript(({ key, ham }) => localStorage.setItem(key, ham), { key: 'segika-affilate-v1', ham });
+      await ac(page);
+      await page.getByLabel('Simülasyon ufku').fill('13');
+      await page.getByLabel('Simülasyon ufku').press('Tab');
+      await expect(page.locator('#af-sonuc')).toContainText('13 ay');
+      expect(await page.evaluate(() => localStorage.getItem('segika-affilate-v1')), 'ham kayıt değişmedi').toBe(ham);
+      await page.getByRole('tablist', { name: 'Bölümler' }).getByRole('tab', { name: /Varsayımlar/ }).click();
+      const sorun = page.locator('#af-kayit-sorun');
+      await expect(sorun).toContainText(beklenen);
+      await expect(sorun).toContainText('üzerine yazılmıyor');
+      await expect(page.locator('#af-kayit-durum')).toContainText('korunuyor');
+      await expect(page.locator('#af-kayit-durum')).not.toContainText(/kaydedildi/);
+      await expect(sorun.getByRole('button', { name: /dışa aktar/ })).toBeVisible();
+      expect(await page.evaluate(() => localStorage.getItem('segika-affilate-v1')), 'ham kayıt hâlâ aynı').toBe(ham);
+      await sorun.getByRole('button', { name: /Başlangıçla devam et/ }).click();
+      await expect(page.locator('#af-kayit-sorun')).toHaveCount(0);
+      await expect(page.locator('#af-kayit-durum')).toContainText(/kaydedildi/);
+      const yeni = await page.evaluate(() => localStorage.getItem('segika-affilate-v1'));
+      expect(yeni).not.toBe(ham);
+      expect(JSON.parse(yeni!).v).toBe(1);
+      expect(JSON.parse(yeni!).kurgu.ufukAy).toBe(13);
+    });
+  }
+
+  test('MS-04 / T06: kısmen geçersiz kayıt — okunabilen senaryolar yüklenir, ham kayıt korunur, uyarı sayıyı söyler', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const kurgu = baslangicKurgu();
+    kurgu.ufukAy = 18;
+    const ham = JSON.stringify({ v: 1, kurgu, kayitli: [{ ad: 'İyi senaryo', kurgu }, { ad: 'Bozuk', kurgu: 'x' }] });
+    await page.addInitScript(({ key, ham }) => localStorage.setItem(key, ham), { key: 'segika-affilate-v1', ham });
+    await ac(page);
+    await expect(page.locator('#af-sonuc')).toContainText('18 ay');
+    await page.getByRole('tablist', { name: 'Bölümler' }).getByRole('tab', { name: /Varsayımlar/ }).click();
+    const sorun = page.locator('#af-kayit-sorun');
+    await expect(sorun).toContainText('1 kayıtlı senaryo okunamadı');
+    await expect(sorun).toContainText('üzerine yazılmıyor');
+    await expect(page.locator('.af-kayitli')).toContainText('İyi senaryo');
+    await expect(page.locator('.af-kayitli')).not.toContainText('Bozuk');
+    expect(await page.evaluate(() => localStorage.getItem('segika-affilate-v1')), 'ham kayıt korunur').toBe(ham);
   });
 });

@@ -2097,3 +2097,24 @@ test.describe('parametreler: ara yazım ve süreye bağlı olmayan sıfırlama o
     await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
   });
 });
+
+/* ---------- Parametre kaydı doğrulaması sayfada (docs/missings.md MS-05 / T05; B6-öncü, 2026-10-28) ---------- */
+
+test.describe('parametre kaydı doğrulaması — sayfada (MS-05)', () => {
+  test('kayıtlı geçersiz parametreler varsayılana döner ve Parametreler sayfasında alan adıyla bildirilir; ham kayıt ilk yazıma kadar korunur', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('istoc-plan-parametreler', JSON.stringify({ subscriptionEur: -1, startDate: 'not-a-date', sahaSalary: 55000 })));
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    const not = page.locator('.param-gecersiz');
+    await expect(not).toHaveCount(1);
+    await expect(not).toContainText(/2 kayıtlı değer geçersiz/);
+    await expect(not).toContainText('Aktif satıcı aboneliği');
+    await expect(not).toContainText('Program başlangıcı');
+    await expect(not).toContainText('varsayılan');
+    // Model geçerli olanı kullanır: yalnız saha maaşı varsayılandan farklı.
+    await expect(page.locator('.param-status')).toContainText('1 değer varsayılandan farklı');
+    expect(await page.evaluate(() => localStorage.getItem('istoc-plan-parametreler'))).toContain('not-a-date');
+    await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
+  });
+});

@@ -9,7 +9,7 @@ import { addedSahaCosts, makeStaffing, staffingSheet } from '../src/data/staffin
 import { adCapacity, adSchedule, growthHires, HORIZON, priceSeries } from '../src/data/revenue';
 import { buildCashflow, cashSeriesOf, toparlanmaOf } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
-import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
+import { DEFAULT_PARAMS, loadParams, loadParamsDetay, PARAM_GROUPS, PARAMS_KEY, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
 import { addDays, monthStart, shiftText } from '../src/lib/dates';
 import { presetOptions, presetsOf } from '../src/lib/scenarioOptions';
@@ -876,5 +876,40 @@ test.describe('dijital pazarlama stratejisi: gider → gelir', () => {
     }
     expect(d.byId.kotumser.ltv).toBeLessThan(d.byId.medyan.ltv);
     expect(d.byId.kotumser.tiers[2].katki).toBeLessThan(d.byId.medyan.tiers[2].katki);
+  });
+});
+
+/* ---------- Parametre kaydı doğrulaması (docs/missings.md MS-05 / T05; B6-öncü, 2026-10-28) ---------- */
+
+test.describe('parametre kaydı doğrulaması (MS-05 / T05)', () => {
+  test('saklanan geçersiz değerler (negatif fiyat, geçersiz tarih, aralık dışı, tür dışı) varsayılana döner ve bildirilir; geçerli değer kalır; ham kayıt okunur', () => {
+    const depo = new Map<string, string>();
+    const sahte = { getItem: (k: string) => depo.get(k) ?? null, setItem: (k: string, v: string) => void depo.set(k, v), removeItem: (k: string) => void depo.delete(k) };
+    (globalThis as unknown as { localStorage: unknown }).localStorage = sahte;
+    try {
+      depo.set(PARAMS_KEY, JSON.stringify({ subscriptionEur: -1, startDate: 'not-a-date', annualMonths: 13, planRetention: 150, sahaSalary: 55_000, eurTry: 'abc', decStartDate: '2026-02-30' }));
+      const d = loadParamsDetay();
+      expect(d.params).not.toBeNull();
+      expect(d.params!.subscriptionEur).toBe(DEFAULT_PARAMS.subscriptionEur);
+      expect(d.params!.startDate).toBe(DEFAULT_PARAMS.startDate);
+      expect(d.params!.decStartDate).toBe(DEFAULT_PARAMS.decStartDate);
+      expect(d.params!.annualMonths).toBe(DEFAULT_PARAMS.annualMonths);
+      expect(d.params!.planRetention).toBe(DEFAULT_PARAMS.planRetention);
+      expect(d.params!.eurTry).toBe(DEFAULT_PARAMS.eurTry);
+      expect(d.params!.sahaSalary).toBe(55_000);
+      expect([...d.gecersiz].sort()).toEqual(['annualMonths', 'decStartDate', 'eurTry', 'planRetention', 'startDate', 'subscriptionEur']);
+      expect(d.ham).toContain('not-a-date');
+      // Eski giriş noktası aynı sonucu verir (geçersiz değer domain’e geçmez).
+      expect(loadParams()!.subscriptionEur).toBe(DEFAULT_PARAMS.subscriptionEur);
+      expect(loadParams()!.sahaSalary).toBe(55_000);
+      // Kayıt yoksa / bozuksa: null ve boş liste; ham korunur.
+      depo.delete(PARAMS_KEY);
+      expect(loadParamsDetay()).toEqual({ params: null, gecersiz: [], ham: null });
+      depo.set(PARAMS_KEY, '{bozuk');
+      expect(loadParamsDetay().params).toBeNull();
+      expect(loadParamsDetay().ham).toBe('{bozuk');
+    } finally {
+      delete (globalThis as unknown as { localStorage?: unknown }).localStorage;
+    }
   });
 });

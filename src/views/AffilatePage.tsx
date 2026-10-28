@@ -480,7 +480,7 @@ const OLCUTLER: Olcut[] = [
 ];
 
 function Icerik() {
-  const { kurgu, setKurgu, geriAl, geriSayisi, sifirla, kayit, yuklendi, kayitli, kaydet, sil } = useAffilate();
+  const { kurgu, setKurgu, geriAl, geriSayisi, sifirla, kayit, yuklendi, kayitli, kaydet, sil, kayitSorunu, ustuneYaz } = useAffilate();
   const senaryo = useMemo(() => senaryoKur(kurgu), [kurgu]);
   const sonuc = useMemo(() => hesapla(senaryo), [senaryo]);
   const secili = kurgu.musteriler.find((m) => m.id === kurgu.secili) ?? kurgu.musteriler[0];
@@ -624,7 +624,34 @@ function Icerik() {
       .catch(() => setDurum('Dosya okunamadı; mevcut senaryo değişmedi.'));
   };
 
-  const kayitMetni = !yuklendi || kayit === null ? 'Değişiklikler bu tarayıcıda saklanır; henüz yeni kayıt yok.' : kayit === false ? 'Kaydedilemedi: depolama kapalı ya da dolu. Değişiklikler yalnız bu sayfa açıkken geçerlidir; saklamak için JSON dışa aktarın.' : `Bu tarayıcıda kaydedildi · ${kayit.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.`;
+  // Korunan kayıt sorunu (MS-04): ham kaydı indirme ve açık üzerine yazma kararı; bu sırada otomatik yazım kapalı.
+  const hamIndir = () => {
+    if (!kayitSorunu) return;
+    try {
+      const blob = new Blob([kayitSorunu.ham], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'segika-affilate-ham-kayit.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      setDurum('Ham kayıt dışa aktarıldı (olduğu gibi, dönüştürülmeden).');
+    } catch {
+      setDurum('Ham kayıt dışa aktarılamadı.');
+    }
+  };
+  const sorunMetni = !kayitSorunu
+    ? ''
+    : `${
+        kayitSorunu.tur === 'uyumsuz'
+          ? `Bu tarayıcıdaki Affilate kaydı başka bir sürümde (${kayitSorunu.surum === undefined ? 'sürüm belirsiz' : `v${kayitSorunu.surum}`}); bu sayfa onu okuyamıyor.`
+          : kayitSorunu.tur === 'bozuk'
+            ? 'Bu tarayıcıdaki Affilate kaydı okunamadı (bozuk veri).'
+            : `Kayıttaki ${kayitSorunu.okunamayan ?? 0} kayıtlı senaryo okunamadı; okunabilenler yüklendi.`
+      } Kayıt korunuyor ve üzerine yazılmıyor: önce “Ham kaydı dışa aktar” ile yedekleyin; “Başlangıçla devam et” derseniz bu sayfadaki durum kaydın yerine geçer.`;
+  const kayitMetni = kayitSorunu
+    ? 'Kayıt korunuyor; yukarıdaki kayıt sorunu çözülene kadar değişiklikler bu tarayıcıya yazılmıyor (sayfa kapanınca kaybolur; JSON dışa aktarabilirsiniz).'
+    : !yuklendi || kayit === null ? 'Değişiklikler bu tarayıcıda saklanır; henüz yeni kayıt yok.' : kayit === false ? 'Kaydedilemedi: depolama kapalı ya da dolu. Değişiklikler yalnız bu sayfa açıkken geçerlidir; saklamak için JSON dışa aktarın.' : `Bu tarayıcıda kaydedildi · ${kayit.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.`;
   const degisiklikListesi = useMemo(() => degisiklikler(kurgu, baslangicKurgu()), [kurgu]);
   const ilkAy = aylar[0];
   const sonAy = aylar[aylar.length - 1];
@@ -795,6 +822,15 @@ function Icerik() {
                 </ul>
               </Note>
               <h3 className="block-title af-baslik">Kayıt</h3>
+              {kayitSorunu ? (
+                <div className="af-kayit-sorun" id="af-kayit-sorun" role="status">
+                  <p>{sorunMetni}</p>
+                  <div className="applet-araclar">
+                    <Eylem onClick={hamIndir}>Ham kaydı dışa aktar</Eylem>
+                    <Eylem onClick={ustuneYaz}>Başlangıçla devam et (üzerine yaz)</Eylem>
+                  </div>
+                </div>
+              ) : null}
               <p className="af-kayit-durum" id="af-kayit-durum" role="status">
                 {kayitMetni}
               </p>

@@ -172,8 +172,8 @@ Codex B2.1’i doğruladı (1,8 M₺ fark → 0) ve 27 bulgu bıraktı. Durum s�
 | MS-01 | Eklenen saha gideri (eski P0) | — | B2 | B2.1 ile giderildi; “Sheets’te tek saha” varsayımı ve çift sayım kabulü (T02) B2c/B3’te |
 | MS-02 | Seçenek aktarımı: gider kaynağı istisnası ve sürümlü anlık görüntü | P1 | B2c (metin) **giderildi**, B6 (snapshot) | metinler kapsamı doğru söylüyor; Sheets yokken ana tutar “tam finansman değil”; snapshot B6 |
 | MS-03 | “Kalıcı toparlanma” hesabı hatalı (`[-100,50,-30,50]` → Kasım) | P1 hatalı | B2c | **giderildi**: `toparlanmaOf` ilk/kalıcı; sayfa üç hâl |
-| MS-04 | Affilate bozuk/uyumsuz kaydın üzerine yazıyor | **P0** | **B6-öncü (hemen)** | T06: ham kayıt korunur; kurtarma/üzerine yazma açık karar |
-| MS-05 | Parametre yüklemede tür dışı doğrulama yok (negatif fiyat, geçersiz tarih kabul) | P1 | **B6-öncü (hemen)** | T05: alan anlamına göre doğrulama; geçersiz değer varsayılana döner, kullanıcıya yazılır |
+| MS-04 | Affilate bozuk/uyumsuz kaydın üzerine yazıyor | **P0** | B6-öncü | **giderildi**: beş kayıt durumu; sorunlu kayıt ham korunur; dışa aktar / üzerine yaz açık karar |
+| MS-05 | Parametre yüklemede tür dışı doğrulama yok (negatif fiyat, geçersiz tarih kabul) | P1 | B6-öncü | **giderildi**: `loadParamsDetay` + `gecerliParametre`; sayfada bildirim; ham kayıt ilk yazıma kadar korunur |
 | MS-06 | Sekmeler arası çakışma çözümü yok | P1 | B6 | T08 |
 | MS-07 | Updater içinde kayıt/geçmiş yan etkisi | P1 | B6 | T10 |
 | MS-08 | İş modeli (K1) varsayılanla onaylanamaz | P1 | B0/B1 | K1 “karar bekliyor” (§4.1 düzeltildi) |
@@ -263,7 +263,7 @@ raporu: `once`, `simdi`, `fark`, `kullaniciYolculugu`, `kalanEngel`, `capability
 | B8 | **Kapanış ve cila** (CA-8) | IA durum tablosu; 320×480 ölçüm turu (her sayfa ilk ekran, kırıntı dahil); %200 metin; gizlilik/secret taraması; rehber ve AGENTS tek liste; insan testi pilotu (§6); bağımsız QA (Codex salt-okunur, aynı anlık görüntü hash’i) | tam tur + CI; pilot raporu (sahip, K12); `not_run` listesi | B1–B7 | 2 + pilot |
 | B9 | **Birleştirme ve yayın** | Worktree dalları → `main` (ff-only); birleşmiş uzak dallar ve worktree’ler temizlenir (onayla); ana klasör hizalanır; Pages doğrulanır (200, son commit) | CI yeşil; Pages; AGENTS yayın kaydı | B8 | 1 |
 
-Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 1/10 tamamlandı (B2), 1/10 aktif** (B0: alt sorular ve belge önekleri kalan). B6’nın iki dar koruması (MS-04, MS-05) öne alındı — sırada.
+Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 1/10 tamamlandı (B2), 2/10 aktif** (B0: alt sorular ve belge önekleri kalan; B6: dar korumalar MS-04/MS-05 yapıldı, kalanı açık).
 
 ### 5.1 Sıra gerekçesi
 1. B0 önce: kararsız çelişki yeni sayfalara kopyalanır (Y3). Cevaplar geldi; alt sorular (§4.2) B1/B3 başlarken kapanır.
@@ -326,8 +326,8 @@ Codex Desktop MASTER’dan istenen: **yalnız bu belgenin** salt-okunur eleştir
 | T02 | Sheets’te zaten ikinci saha kişisi: çift sayım yok | B3 | açık (şirket/kadro eşleştirme) |
 | T03 | Dönem sonu `[-100,50,-30,50]`: ilk ↔ kalıcı toparlanma | B2c | geçti (`tests/data.spec.ts` B2c, yedi karşı örnek) |
 | T04 | 13 seçenek ↔ nakit ↔ yeniden açılış; kaynak istisnası kayıtlı ürün kararı | B2c/B6 | kısmi (B2.1 testleri) |
-| T05 | Saklanan negatif fiyat / geçersiz tarih domain’e geçmez | **B6-öncü** | sırada |
-| T06 | Affilate `v=99` / bozuk JSON: açılış ham kaydı değiştirmez | **B6-öncü** | sırada |
+| T05 | Saklanan negatif fiyat / geçersiz tarih domain’e geçmez | B6-öncü | geçti (`tests/data.spec.ts`, `tests/ui.spec.ts` MS-05) |
+| T06 | Affilate `v=99` / bozuk JSON: açılış ham kaydı değiştirmez | B6-öncü | geçti (`tests/affilate.spec.ts` MS-04 ×3) |
 | T07 | Eski bazla kaydedilmiş senaryo + yeni varsayılan | B6 | açık |
 | T08 | Aynı revizyondan iki sekme | B6 | açık |
 | T09 | Migration sırasında kesinti | B6 | açık |

@@ -247,21 +247,65 @@ export const PARAM_GROUPS: ParamGroup[] = [
 export const PARAMS_KEY = 'istoc-plan-parametreler';
 
 /** Kayıtlı değerleri okur; bilinmeyen anahtar ve tür uyuşmazlığı varsayılanla değişir. */
-export function loadParams(): Params | null {
-  try {
-    const raw = localStorage.getItem(PARAMS_KEY);
-    if (!raw) return null;
-    const stored = JSON.parse(raw) as Partial<Record<string, unknown>>;
-    const merged = { ...DEFAULT_PARAMS } as Record<string, unknown>;
-    for (const key of Object.keys(DEFAULT_PARAMS) as ParamKey[]) {
-      const value = stored[key];
-      if (typeof value === typeof DEFAULT_PARAMS[key]) merged[key] = value;
+/** Alan tanımları anahtara göre (doğrulama için). */
+const DEFS: Partial<Record<ParamKey, ParamDef>> = Object.fromEntries(PARAM_GROUPS.flatMap((g) => g.fields.map((f) => [f.key, f])));
+const ISO_GUN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Saklanan değerin alanın anlamına uygunluğu (docs/missings.md MS-05 / T05): tür eşleşmesi yetmez — tarih alanı geçerli bir
+ * ISO gün olmalı; sayı sonlu ve alan tanımındaki min–max içinde olmalı. Geçersiz değer domain’e geçmez (varsayılan kalır).
+ */
+export function gecerliParametre(key: ParamKey, value: unknown): boolean {
+  const d = DEFAULT_PARAMS[key];
+  if (typeof value !== typeof d) return false;
+  const def = DEFS[key];
+  if (typeof value === 'string') {
+    if (def?.kind === 'date' || ISO_GUN.test(d as string)) {
+      if (!ISO_GUN.test(value)) return false;
+      const t = new Date(`${value}T00:00:00Z`);
+      return !Number.isNaN(t.getTime()) && t.toISOString().slice(0, 10) === value;
     }
-    return merged as Params;
+    return true;
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return false;
+    if (def?.min !== undefined && value < def.min) return false;
+    if (def?.max !== undefined && value > def.max) return false;
+  }
+  return true;
+}
+
+/**
+ * Tarayıcı kaydını doğrulayarak yükler (MS-05): geçersiz alanlar varsayılana döner ve `gecersiz` listesinde bildirilir; ham
+ * metin korunur (kayıt sessizce yeniden yazılmaz — ilk kullanıcı kaydında geçersizler düşer). Kayıt yoksa `params: null`.
+ */
+export function loadParamsDetay(): { params: Params | null; gecersiz: ParamKey[]; ham: string | null } {
+  let ham: string | null = null;
+  try {
+    ham = localStorage.getItem(PARAMS_KEY);
+    if (!ham) return { params: null, gecersiz: [], ham: null };
+    const stored = JSON.parse(ham) as Partial<Record<string, unknown>> | null;
+    if (!stored || typeof stored !== 'object') return { params: null, gecersiz: [], ham };
+    const merged = { ...DEFAULT_PARAMS } as Record<string, unknown>;
+    const gecersiz: ParamKey[] = [];
+    for (const key of Object.keys(DEFAULT_PARAMS) as ParamKey[]) {
+      if (!(key in stored)) continue;
+      const value = stored[key];
+      if (gecerliParametre(key, value)) merged[key] = value;
+      else gecersiz.push(key);
+    }
+    return { params: merged as Params, gecersiz, ham };
   } catch {
-    return null;
+    return { params: null, gecersiz: [], ham };
   }
 }
+
+export function loadParams(): Params | null {
+  return loadParamsDetay().params;
+}
+
+/** Alanın görünen adı (bildirimler için); tanımı yoksa anahtar. */
+export const paramEtiketi = (key: ParamKey) => DEFS[key]?.label ?? key;
 
 export function saveParams(params: Params) {
   try {

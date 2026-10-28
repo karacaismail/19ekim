@@ -5627,6 +5627,16 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   font-size: var(--text-sm);
 }
 
+/* Korunan kayıt sorunu (Affilate, MS-04): açıklama ve iki eylem; otomatik yazım kapalıyken görünür. */
+.af-kayit-sorun {
+  max-width: var(--prose-max);
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.af-kayit-sorun p {
+  margin: 0 0 var(--space-2);
+}
+
 /* Tarayıcı kaydı durumu (F13 tek bileşen `KayitDurumu`; adım 2b): ikincil metin, düzyazı genişliği. */
 .kayit-durumu {
   margin: var(--space-2) 0 0;

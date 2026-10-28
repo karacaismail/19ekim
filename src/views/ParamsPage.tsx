@@ -6,7 +6,7 @@ import { AppFrame } from '../components/AppFrame';
 import { useModel, useParams } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, Section } from '../components/ui';
-import { DEFAULT_PARAMS, PARAM_GROUPS, type ParamDef, type ParamKey, type Params } from '../data/params';
+import { DEFAULT_PARAMS, PARAM_GROUPS, type ParamDef, type ParamKey, type Params, paramEtiketi } from '../data/params';
 import { longDate } from '../lib/dates';
 import { int, num, pct, times, tl, tlExact } from '../lib/format';
 import { useMotionMs } from '../lib/motion';
@@ -173,7 +173,7 @@ function Sifirla() {
 
 /** Kayıt durumu (UX-15): nereye, ne zaman; “kaydedildi” yalnız gerçekten yapılan tarayıcı kaydı için. */
 function SaveStatus() {
-  const { changed, saved } = useParams();
+  const { changed, saved, gecersiz } = useParams();
   const saat = saved ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(saved) : null;
   const fark = `${changed} değer varsayılandan farklı`;
   const metin =
@@ -185,9 +185,17 @@ function SaveStatus() {
           ? `${fark}; bu tarayıcıya son kayıt ${saat} (yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`
           : `${fark}; bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`;
   return (
-    <p className="param-status" role="status">
-      {metin}
-    </p>
+    <>
+      <p className="param-status" role="status">
+        {metin}
+      </p>
+      {/* Kayıttan okunamayan değerler (MS-05 / T05): varsayılana döndü, alan adıyla bildirilir; ham kayıt ilk yazıma kadar korunur. */}
+      {gecersiz.length ? (
+        <p className="param-gecersiz kayit-durumu" role="status">
+          {`${gecersiz.length} kayıtlı değer geçersizdi ve varsayılana döndü: ${gecersiz.map(paramEtiketi).join(', ')}. Kayıt değiştirilmedi; bir alanı değiştirdiğinizde geçersiz değerler kayıttan silinir.`}
+        </p>
+      ) : null}
+    </>
   );
 }
 
