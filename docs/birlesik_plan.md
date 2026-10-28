@@ -181,7 +181,7 @@ Codex B2.1’i doğruladı (1,8 M₺ fark → 0) ve 27 bulgu bıraktı. Durum s�
 | MS-10 | Giderin marka kapsamı ana sonuçta görünmüyor | P1 | B2c | **giderildi**: ana sonuç kaynak satırı kapsamla başlar; “Türksab toplam” yok (B3 şirket yapısına kadar) |
 | MS-11 | Alt bilgi cümleleri geleceği olmuş gibi anlatıyor; sabit ön cümle her sayfada | P1 | B2c | **giderildi**: `turetim` alanı + `altBilgiOnCumle`; nakit/gelir/giderler cümleleri mevcut davranış; “(Kararlar)” → “karar bekliyor” (karar kaydı B1) |
 | MS-12 | Envanter alanları kullanıcıya görünmüyor; yayın ↔ politika durumu aynı alanda | P1 | B1/B5 | `publicationStatus` / `policyStatus` ayrımı |
-| MS-13 | Kararlar karar yaşam döngüsü taşımıyor; gecikme yok | P1 | B1 | soru → seçenek → sahip → tarih → sonuç → yürürlük |
+| MS-13 | Kararlar karar yaşam döngüsü taşımıyor; gecikme yok | P1 | B1 | **giderildi (B1a)**: `kararlar.ts`, bekleyen/gecikti/verildi/yürürlükte; K1 açık soru |
 | MS-14 | Blok taşıması yapılmadı | P1 | B5 | ct-IA-03/05/06/30 |
 | MS-15 | Metrik sözlüğü yok | P1 | B4 | K11 |
 | MS-16 | Applet dayanakları kaynak/örnek ayrımı | P1 | B6 (Genel bakış/Kaynaklar) | ga-F18 |
@@ -263,7 +263,7 @@ raporu: `once`, `simdi`, `fark`, `kullaniciYolculugu`, `kalanEngel`, `capability
 | B8 | **Kapanış ve cila** (CA-8) | IA durum tablosu; 320×480 ölçüm turu (her sayfa ilk ekran, kırıntı dahil); %200 metin; gizlilik/secret taraması; rehber ve AGENTS tek liste; insan testi pilotu (§6); bağımsız QA (Codex salt-okunur, aynı anlık görüntü hash’i) | tam tur + CI; pilot raporu (sahip, K12); `not_run` listesi | B1–B7 | 2 + pilot |
 | B9 | **Birleştirme ve yayın** | Worktree dalları → `main` (ff-only); birleşmiş uzak dallar ve worktree’ler temizlenir (onayla); ana klasör hizalanır; Pages doğrulanır (200, son commit) | CI yeşil; Pages; AGENTS yayın kaydı | B8 | 1 |
 
-Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 1/10 tamamlandı (B2), 2/10 aktif** (B0: alt sorular ve belge önekleri kalan; B6: dar korumalar MS-04/MS-05 yapıldı, kalanı açık).
+Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 1/10 tamamlandı (B2), 3/10 aktif** (B0: alt sorular ve belge önekleri kalan; B1: 1a karar defteri tamam, 1b adlar / sunum sırası / K2 politikası kalan; B6: dar korumalar MS-04/MS-05 yapıldı, kalanı açık).
 
 ### 5.1 Sıra gerekçesi
 1. B0 önce: kararsız çelişki yeni sayfalara kopyalanır (Y3). Cevaplar geldi; alt sorular (§4.2) B1/B3 başlarken kapanır.

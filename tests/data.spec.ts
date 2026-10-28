@@ -9,6 +9,7 @@ import { addedSahaCosts, makeStaffing, staffingSheet } from '../src/data/staffin
 import { adCapacity, adSchedule, growthHires, HORIZON, priceSeries } from '../src/data/revenue';
 import { buildCashflow, cashSeriesOf, toparlanmaOf } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
+import { kararDurumu, makeKararlar, type KararKaydi } from '../src/data/kararlar';
 import { DEFAULT_PARAMS, loadParams, loadParamsDetay, PARAM_GROUPS, PARAMS_KEY, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
 import { addDays, monthStart, shiftText } from '../src/lib/dates';
@@ -911,5 +912,85 @@ test.describe('parametre kaydı doğrulaması (MS-05 / T05)', () => {
     } finally {
       delete (globalThis as unknown as { localStorage?: unknown }).localStorage;
     }
+  });
+});
+
+/* ---------- Karar defteri (docs/birlesik_plan.md B1; ct-F02/F03/F16, ct-IA-05/34; docs/missings.md MS-13; 2026-10-28) ---------- */
+
+test.describe('karar defteri (adım 1a)', () => {
+  const k = makeKararlar(DEFAULT_PARAMS, m);
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const by = (id: string) => k.kayitlar.find((x) => x.id === id)!;
+
+  test('her kayıt: tekil kimlik, soru, etki, karar veren (İsmail Karaca ya da yatırımcı), kaynak; verilen kararın sonucu ve tarihi var, bekleyenin yok', () => {
+    const ids = k.kayitlar.map((x) => x.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const x of k.kayitlar) {
+      expect(x.soru.length, x.id).toBeGreaterThan(8);
+      expect(x.etki.length, x.id).toBeGreaterThan(8);
+      expect(['yonetici', 'yatirimci'], x.id).toContain(x.sahip);
+      expect(x.kaynak.length, x.id).toBeGreaterThan(3);
+      expect(['bekliyor', 'verildi'], x.id).toContain(x.durum);
+      if (x.sonTarih) expect(x.sonTarih, x.id).toMatch(ISO);
+      if (x.durum === 'verildi') {
+        expect(x.sonuc, x.id).toBeTruthy();
+        expect(x.kararTarihi, x.id).toMatch(ISO);
+      } else {
+        expect(x.sonuc, x.id).toBeUndefined();
+        expect(x.kararTarihi, x.id).toBeUndefined();
+      }
+      if (x.yururlukTarihi) expect(x.yururlukTarihi, x.id).toMatch(ISO);
+      for (const yol of x.ilgili) expect(yol, x.id).toMatch(/^\/[a-z0-9/-]*\/$/);
+    }
+  });
+
+  test('durum türetimi: son tarihi geçen bekleyen karar “gecikti”; yürürlük tarihi gelen karar “yürürlükte”; “verildi” üretilmez', () => {
+    const bekleyen = { id: 't', soru: 'Soru?', etki: 'etki', sahip: 'yatirimci', kaynak: 'test', durum: 'bekliyor', sonTarih: '2026-10-26', ilgili: [] } as KararKaydi;
+    expect(kararDurumu(bekleyen, '2026-10-25')).toBe('bekliyor');
+    expect(kararDurumu(bekleyen, '2026-10-26')).toBe('bekliyor');
+    expect(kararDurumu(bekleyen, '2026-10-27')).toBe('gecikti');
+    expect(kararDurumu({ ...bekleyen, sonTarih: undefined }, '2030-01-01')).toBe('bekliyor');
+    const verilen = { ...bekleyen, durum: 'verildi', sonuc: 'Karar', kararTarihi: '2026-10-19', yururlukTarihi: '2026-11-01' } as KararKaydi;
+    expect(kararDurumu(verilen, '2026-10-28')).toBe('verildi');
+    expect(kararDurumu(verilen, '2026-11-01')).toBe('yururlukte');
+    expect(kararDurumu({ ...verilen, yururlukTarihi: undefined }, '2030-01-01')).toBe('verildi');
+  });
+
+  test('19 Ekim kararları verildi, program açık kararları bekliyor (26 Ekim son tarihli ikisi bugün gecikmiş); yeni kayıtlar: iş modeli açık, Segika komisyonu ve gider kapsamı 28 Ekim verildi', () => {
+    for (const d of m.decisions) expect(k.kayitlar.some((x) => x.durum === 'verildi' && x.soru.includes(d.topic) || x.sonuc === d.decision), d.topic).toBe(true);
+    for (const d of m.openDecisions) {
+      const x = k.kayitlar.find((y) => y.soru === d.topic)!;
+      expect(x, d.topic).toBeTruthy();
+      expect(x.durum).toBe('bekliyor');
+      expect(x.sonTarih).toBe(d.deadline);
+      expect(kararDurumu(x, '2026-10-28')).toBe('gecikti');
+    }
+    const is = by('is-modeli');
+    expect(is.durum).toBe('bekliyor');
+    expect(is.secenekler!.length).toBeGreaterThanOrEqual(2);
+    expect(is.soru).toMatch(/aboneli/i);
+    expect(is.ilgili).toEqual(expect.arrayContaining(['/gelir-plani/', '/partnership/']));
+    const kom = by('segika-komisyon');
+    expect(kom.durum).toBe('verildi');
+    expect(kom.kararTarihi).toBe('2026-10-28');
+    expect(kom.sonuc).toMatch(/%10/);
+    expect(kom.sonuc).toMatch(/%15/);
+    expect(kom.acik!.length).toBeGreaterThanOrEqual(1);
+    expect(kom.yururlukTarihi).toBeUndefined(); // uygulama (ortaklık metni, Affilate politika sürümü) henüz yok
+    const gider = by('gider-kapsami');
+    expect(gider.durum).toBe('verildi');
+    expect(gider.sonuc).toMatch(/Türksab/);
+    expect(gider.sonuc).toMatch(/Mogem/);
+    expect(gider.yururlukTarihi).toBeUndefined();
+    const aktarim = by('senaryo-aktarimi');
+    expect(kararDurumu(aktarim, '2026-10-29')).toBe('yururlukte');
+    // Özetler
+    const ozet = k.ozet('2026-10-28');
+    expect(ozet.bekleyen).toBeGreaterThanOrEqual(3);
+    expect(ozet.gecikmis).toBe(2);
+    expect(ozet.verilen).toBeGreaterThanOrEqual(6 + 2);
+    // Gizlilik: kişi adı ve Mogem gelir tutarı kayıtlarda yok.
+    const metin = JSON.stringify(k.kayitlar);
+    expect(metin).not.toMatch(/700\.000|1\.000\.000|700000|1000000/);
   });
 });

@@ -5637,6 +5637,22 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   margin: 0 0 var(--space-2);
 }
 
+/* Karar defteri (adım 1a): hücre içi seçenek ve ilgili sayfa listeleri sıkı. */
+.karar-secenekler {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.karar-ilgili {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.karar-ilgili li + li {
+  margin-top: var(--space-1);
+}
+
 /* Tarayıcı kaydı durumu (F13 tek bileşen `KayitDurumu`; adım 2b): ikincil metin, düzyazı genişliği. */
 .kayit-durumu {
   margin: var(--space-2) 0 0;

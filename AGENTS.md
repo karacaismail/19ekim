@@ -923,7 +923,29 @@ Parametreler sayfasında `.param-gecersiz` (“N kayıtlı değer geçersizdi ve
 dışı, tür dışı; geçerli kalır; bozuk/boş kayıt), `tests/ui.spec.ts` MS-05 sayfada. B6’nın kalanı (sürümlü anlık görüntü, migration,
 iki sekme çakışması, updater saflığı, dışa/içe aktarma genelleme) açık.
 
-**Sayaç (sürüm 3): 1/10 tamamlandı (B2), 2/10 aktif (B0, B6 — dar korumalar yapıldı).**
+**B1a (adım 1a) — Karar defteri (docs/birlesik_plan.md B1; ct-F02/F03/F16, ct-IA-05/34; docs/missings.md MS-13; 2026-10-28),
+test önce:** `src/data/kararlar.ts → makeKararlar(p, prog)`: tek kayıt türü `KararKaydi` (kimlik, soru, seçenekler / öneri,
+etki, karar veren — yalnız `yonetici` ya da `yatirimci` —, hazırlayan, son tarih, durum `bekliyor` | `verildi`, sonuç, karar
+tarihi, yürürlük tarihi, politika, açık alt sorular, kaynak, ilgili sayfalar). Görünen durum bugünden türetilir
+(`kararDurumu`): son tarihi geçen bekleyen “gecikti”, yürürlük tarihi gelen verilmiş karar “yürürlükte”; gerçek karar
+girilmeden “verildi” üretilmez. Kayıtlar: 19 Ekim tahta kararları (`program.ts decisions` → verildi 2026-10-19, yürürlük
+program/Aralık başlangıcına bağlı) ve açık soruları (`openDecisions` → bekliyor, 26 Ekim son tarihli ikisi bugün gecikmiş);
+28 Ekim sahip cevapları: `is-modeli` (K1 — **bekliyor**, üç seçenek; yanıtsızlık onay değil), `segika-komisyon` (K2 verildi:
+oran girdi, aylık %10 / yıllık %15; politika sürümü taslak, uygulama bekliyor; açık: süre, taban, ortak tipleri),
+`gider-kapsami` (K3 verildi: Türksab grubu → Mogem, iStoc Company; tutarlar Sheets’te; açık: Toptan, Şirket sütunu, Gelirler
+sayfası), `senaryo-aktarimi` (yürürlükte 28 Ekim), `hedef-adi`, `kirinti-derinligi`, `eposta-sayfasi`, `gelir-terimleri`,
+`insan-testi`. Tutar ve kişi adı yok. Model: `m.kararlar` (`ozet(bugun)`: bekleyen / gecikmiş / verilen / yürürlükte).
+Kararlar sayfası (`OtherPages PendingContent`): amaç satırı sayılarla; bekleyen tablo (`#karar-tablo`: son tarih + durum
+“Gecikti · n gün” / “Son tarih yok”, soru, öneri ya da numaralı seçenekler, etki, karar veren + hazırlayan); verilen tablo
+(`#verilen-tablo`: karar tarihi, konu, karar + politika + açık alt sorular, durum “Yürürlükte · tarih” / “Verildi · yürürlük
+tarih” / “Verildi · uygulama bekliyor”, ilgili sayfa bağlantıları); bugün yalnız istemcide (sunucu çiziminde tarihsiz,
+hidrasyon bozulmaz); son tarih grafiği bekleyenlerden. Bölüm kimlikleri (`#bekleyen`, `#kesin`) korundu; ücret / CRM / mesai
+bölümleri taşınana (B5) kadar burada. Testler: `tests/data.spec.ts` “karar defteri” ×3 (kayıt sözleşmesi; durum türetimi;
+19 Ekim / 28 Ekim kayıtları, özet, gizlilik), `tests/ui.spec.ts` “karar defteri — sayfada”. RED: `src/data/kararlar` yok; GREEN sonrası Chromium 13/13; tam tur üç tarayıcıda 1143 geçti, 22 atlandı, 2 kırmızı — Firefox `tests/ui.spec.ts` “grafiklerin dar ekran eşdeğeri” 320/390 px 30 sn test zaman aşımı (üç tarayıcı eşzamanlı yük; sayfa döngüsü 30 sn bütçeyi aştı); aynı testler Firefox’ta yalnız başına 8/8 yeşil (9 sn), uygulama değişmedi. **Kalan (B1b):** menü adı =
+başlık (K4 “SMART hedefler”), sunum sırası (K6), K2 politikasının İş ortaklığı metnine ve Affilate politika sürümü
+preset’ine bağlanması (MS-09), yayın ↔ politika durumu alanları (MS-12), çapraz bağlantılar.
+
+**Sayaç (sürüm 3): 1/10 tamamlandı (B2), 3/10 aktif (B0, B1 — 1a tamam, B6 — dar korumalar yapıldı).**
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,

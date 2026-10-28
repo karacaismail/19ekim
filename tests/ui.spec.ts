@@ -2118,3 +2118,36 @@ test.describe('parametre kaydı doğrulaması — sayfada (MS-05)', () => {
     await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
   });
 });
+
+/* ---------- Karar defteri sayfası (docs/birlesik_plan.md B1; docs/missings.md MS-13; 2026-10-28) ---------- */
+
+test.describe('karar defteri — sayfada (adım 1a)', () => {
+  test('bekleyen kararlar gecikme durumuyla; iş modeli açık soru olarak; verilen kararlar sonucu, tarihi ve durumuyla; açık alt sorular görünür', async ({ page }) => {
+    await page.goto('karar-bekleyenler/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.page-purpose')).toContainText(/\d+ karar bekliyor/);
+    await expect(page.locator('.page-purpose')).toContainText(/gecikmiş/);
+    const bekleyen = page.locator('.table-block:has(#karar-tablo)');
+    await expect(bekleyen.locator('tbody tr')).toHaveCount(await bekleyen.locator('tbody tr').count());
+    const asistan = bekleyen.locator('tbody tr', { hasText: 'Asistan alınacak mı?' });
+    await expect(asistan).toHaveCount(1);
+    await expect(asistan).toContainText(/Gecikti/);
+    const isModeli = bekleyen.locator('tbody tr', { hasText: /abonelik/ });
+    await expect(isModeli).toHaveCount(1);
+    await expect(isModeli).toContainText(/Son tarih yok|Tarih yok/);
+    await expect(isModeli).not.toContainText(/Gecikti/);
+    const verilen = page.locator('.table-block:has(#verilen-tablo)');
+    const komisyon = verilen.locator('tbody tr', { hasText: 'Segika satış ortağı' });
+    await expect(komisyon).toHaveCount(1);
+    await expect(komisyon).toContainText('%10');
+    await expect(komisyon).toContainText('%15');
+    await expect(komisyon).toContainText(/Verildi/);
+    await expect(komisyon).toContainText(/28 Ekim 2026/);
+    await expect(komisyon).toContainText(/Açık:/);
+    const aktarim = verilen.locator('tbody tr', { hasText: 'Gelir planı seçenekleri' });
+    await expect(aktarim).toContainText(/Yürürlükte/);
+    // Verilen karar sonuç metni kullanıcıya “onaylı politika” demez; iş modeli satırı strateji onayı üretmez.
+    await expect(isModeli).not.toContainText(/onaylandı/i);
+  });
+});

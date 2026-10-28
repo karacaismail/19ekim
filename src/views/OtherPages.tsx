@@ -1,4 +1,5 @@
 import 'dayjs/locale/tr';
+import { useEffect, useState } from 'react';
 import { Timeline } from '@mantine/core';
 import { Month } from '@mantine/dates';
 import { AppFrame } from '../components/AppFrame';
@@ -16,7 +17,9 @@ import {
 } from '../components/ui';
 import { PageHeader } from '../components/PageHeader';
 import { boardMapping, type BoardRow } from '../data/archive';
-import type { CrmStage, GovNode, OpenDecision, PayRule, WorkPeriod } from '../data/program';
+import type { CrmStage, GovNode, PayRule, WorkPeriod } from '../data/program';
+import { KARAR_DURUM_ADI, kararDurumu, type KararKaydi } from '../data/kararlar';
+import { icerikOf } from '../data/icerik';
 import { ROLE_LABELS } from '../data/roles';
 import type { RoleKey } from '../data/types';
 import { useModel } from '../components/ModelContext';
@@ -422,61 +425,140 @@ function overtimeSeries(startWeek: number, perWeek: number, lastWeek: number) {
 
 function PendingContent() {
   const m = useModel();
-  const { openDecisions, decisions, payRules, crmStages, LEGAL_LIMITS, workPeriods, OVERTIME_CAP, overtimeUsed, overtimeHourly, dates, params } = m;
+  const { payRules, crmStages, LEGAL_LIMITS, workPeriods, OVERTIME_CAP, overtimeUsed, overtimeHourly, dates, params, kararlar } = m;
   const COMMISSION_PER_SALE = params.commission;
-
-  const sorted = [...openDecisions].sort((a, b) => a.deadline.localeCompare(b.deadline));
+  // Bugün (gecikme ve yürürlük için) yalnız istemcide: sunucu ve ilk çizim tarihsiz (“bekliyor”), hidrasyon bozulmaz.
+  const [bugun, setBugun] = useState('');
+  useEffect(() => setBugun(new Date().toISOString().slice(0, 10)), []);
+  const gorunum = (k: KararKaydi) => kararDurumu(k, bugun);
+  const gecikmeGun = (k: KararKaydi) => (k.sonTarih && bugun ? Math.round((Date.UTC(+bugun.slice(0, 4), +bugun.slice(5, 7) - 1, +bugun.slice(8, 10)) - Date.UTC(+k.sonTarih.slice(0, 4), +k.sonTarih.slice(5, 7) - 1, +k.sonTarih.slice(8, 10))) / 86_400_000) : 0);
+  const bekleyenler = kararlar.kayitlar.filter((k) => k.durum === 'bekliyor').sort((a, b) => (a.sonTarih ?? '9999').localeCompare(b.sonTarih ?? '9999'));
+  const verilenler = kararlar.kayitlar.filter((k) => k.durum === 'verildi').sort((a, b) => b.kararTarihi!.localeCompare(a.kararTarihi!));
+  const ozet = kararlar.ozet(bugun);
+  const sayfaAdi = (yol: string) => {
+    const k = icerikOf(yol);
+    return k ? (k.menu ?? k.baslik) : yol;
+  };
+  const sorted = bekleyenler.filter((k) => k.sonTarih);
   const [p1, p2] = workPeriods;
   const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(addDays(dates.firstDay, w * 7)));
   const decWeek = Math.max(1, Math.round((new Date(dates.dec).getTime() - new Date(dates.firstDay).getTime()) / (7 * 86_400_000)) + 1);
-  const deadlines = sorted.map((d) => d.deadline);
+  const deadlines = sorted.map((d) => d.sonTarih!);
   const crossWeek = Math.ceil(OVERTIME_CAP / Math.max(1, p1.overtimePerWeek));
   const monthlyOvertime = Math.round((p1.overtimePerWeek * 52) / 12);
   return (
     <>
-      <PageHeader title="Karar bekleyenler" purpose={`${openDecisions.length} karar bekliyor; ${decisions.length} karar 19 Ekim 2026’da kesinleşti.`} />
+      {/* Karar defteri (adım 1a; docs/missings.md MS-13): soru → seçenekler/öneri → etki → karar veren → son tarih → sonuç → yürürlük. */}
+      <PageHeader title="Karar bekleyenler" purpose={`${ozet.bekleyen} karar bekliyor (${ozet.gecikmis} gecikmiş); ${ozet.verilen} karar verildi, ${ozet.yururlukte} yürürlükte.`} />
 
-      <Section id="bekleyen" index={1} title="Bekleyen kararlar">
+      <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Son tarihi geçen karar “gecikti” olarak işaretlenir; karar girilmeden “verildi” yazılmaz.">
         <Chart
           id="son-tarih"
           title="Karar × son tarih"
-          summary={sorted.map((d) => `${d.topic}: ${shortDate(d.deadline)}, ${ROLE_LABELS[d.owner]}`).join('; ')}
-          spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.topic, date: d.deadline, role: d.owner })) }}
+          summary={sorted.map((d) => `${d.soru}: ${shortDate(d.sonTarih!)}, ${ROLE_LABELS[d.sahip]}`).join('; ')}
+          spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.soru, date: d.sonTarih!, role: d.sahip })) }}
           size="md"
           wide
         />
-        <DataTable<OpenDecision>
+        <DataTable<KararKaydi>
           id="karar"
-          title="Konu, öneri, karar veren"
+          title="Soru, seçenekler, etki, karar veren"
           columns={[
-            { key: 'deadline', header: 'Son tarih', nowrap: true, rowHeader: true, render: (d) => shortDate(d.deadline) },
-            { key: 'topic', header: 'Konu', minWidth: '14rem', render: (d) => d.topic },
-            { key: 'proposal', header: 'Öneri', minWidth: '18rem', render: (d) => d.proposal },
             {
-              key: 'owner',
-              header: 'Karar veren', summary: true,
+              key: 'sonTarih',
+              header: 'Son tarih',
+              nowrap: true,
+              rowHeader: true,
+              render: (d) => (
+                <>
+                  {d.sonTarih ? shortDate(d.sonTarih) : 'Son tarih yok'}
+                  <span className="cell-sub" data-durum={gorunum(d)}>
+                    {gorunum(d) === 'gecikti' ? `${KARAR_DURUM_ADI.gecikti} · ${gecikmeGun(d)} gün` : KARAR_DURUM_ADI[gorunum(d)]}
+                  </span>
+                </>
+              ),
+            },
+            { key: 'soru', header: 'Soru', minWidth: '14rem', render: (d) => d.soru },
+            {
+              key: 'oneri',
+              header: 'Öneri / seçenekler',
+              minWidth: '18rem',
+              render: (d) =>
+                d.secenekler ? (
+                  <ol className="karar-secenekler">
+                    {d.secenekler.map((s) => (
+                      <li key={s}>{s}</li>
+                    ))}
+                  </ol>
+                ) : (
+                  d.oneri
+                ),
+            },
+            { key: 'etki', header: 'Etki', minWidth: '14rem', render: (d) => d.etki },
+            {
+              key: 'sahip',
+              header: 'Karar veren',
+              summary: true,
               nowrap: true,
               render: (d) => (
                 <>
-                  <RoleChip role={d.owner} />
-                  {d.preparer ? <span className="cell-sub">Hazırlayan: {ROLE_LABELS[d.preparer]}</span> : null}
+                  <RoleChip role={d.sahip} />
+                  {d.hazirlayan ? <span className="cell-sub">Hazırlayan: {ROLE_LABELS[d.hazirlayan]}</span> : null}
                 </>
               ),
             },
           ]}
-          rows={sorted}
+          rows={bekleyenler}
+          rowKey={(d) => d.id}
         />
       </Section>
 
-      <Section id="kesin" index={2} title="Kesinleşen kararlar" desc="19 Ekim 2026; ayrıntılar aşağıdaki bölümlerde.">
-        <DataTable
-          id="kesin"
-          title="Konu ve karar"
+      <Section id="kesin" index={2} title="Verilen kararlar" desc="19 Ekim 2026 tahta kararları ve 28 Ekim sahip cevapları; “yürürlükte” yalnız uygulamada karşılığı olan karar için. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerde.">
+        <DataTable<KararKaydi>
+          id="verilen"
+          title="Tarih, konu, karar, durum"
           columns={[
-            { key: 'topic', header: 'Konu', minWidth: '12rem', rowHeader: true, render: (d: (typeof decisions)[number]) => d.topic },
-            { key: 'decision', header: 'Karar', summary: true, minWidth: '24rem', render: (d) => d.decision },
+            { key: 'kararTarihi', header: 'Karar tarihi', nowrap: true, rowHeader: true, render: (d) => longDate(d.kararTarihi!) },
+            { key: 'soru', header: 'Konu', minWidth: '12rem', render: (d) => d.soru },
+            {
+              key: 'sonuc',
+              header: 'Karar',
+              summary: true,
+              minWidth: '24rem',
+              render: (d) => (
+                <>
+                  {d.sonuc}
+                  {d.politika ? <span className="cell-sub">Politika: {d.politika}</span> : null}
+                  {d.acik?.length ? <span className="cell-sub">Açık: {d.acik.join(' · ')}</span> : null}
+                </>
+              ),
+            },
+            {
+              key: 'durum',
+              header: 'Durum',
+              nowrap: true,
+              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} · ${shortDate(d.yururlukTarihi!)}` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi} · yürürlük ${shortDate(d.yururlukTarihi)}` : `${KARAR_DURUM_ADI.verildi} · uygulama bekliyor`),
+            },
+            {
+              key: 'ilgili',
+              header: 'İlgili sayfa',
+              minWidth: '10rem',
+              render: (d) =>
+                d.ilgili.length ? (
+                  <ul className="karar-ilgili">
+                    {d.ilgili.map((yol) => (
+                      <li key={yol}>
+                        <TextLink to={yol}>{sayfaAdi(yol)}</TextLink>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  '—'
+                ),
+            },
           ]}
-          rows={decisions}
+          rows={verilenler}
+          rowKey={(d) => d.id}
         />
       </Section>
 
