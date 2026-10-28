@@ -102,11 +102,26 @@ function Icerik() {
   const karsilastirma = m.cashflow.senaryolar.map((s) => ({ s, cf: hepsi[s.id] }));
   const acikYaz = (x: Cashflow) => (x.acik ? tl(x.acik) : '0 ₺');
   /* Ana sonuç (ux.md M05, P6.2): nakit açığı tavanı, dönem, üç senaryo kıyası; durum (negatife iniş / toparlanma) görünür. */
+  // Toparlanma (B2c, MS-03): “kalıcı” yalnız incelenen dönemin kalanı için; geçici toparlanma kalıcı gibi anlatılmaz.
+  const { ilk: ilkTop, kalici } = cf.toparlanma;
   const sonucDurum = cf.acik
-    ? cf.toparlanma
-      ? { ton: 'uyari' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} ile en düşük noktasına iner; ${cf.toparlanma.ad} itibarıyla kalıcı olarak sıfırın üstüne çıkar. O güne kadar ${tl(cf.acik)} ek nakit gerekir.` }
-      : { ton: 'risk' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda sıfırın altına iner ve ${son.ad} sonuna kadar sıfırın üstüne çıkmaz: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
+    ? kalici
+      ? {
+          ton: 'uyari' as const,
+          metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} ile en düşük noktasına iner; ${kalici.ad} itibarıyla incelenen dönemin kalanında (${son.ad} sonuna kadar) sıfırın altına inmiyor${ilkTop && ilkTop.iso !== kalici.iso ? ` (ilk toparlanma ${ilkTop.ad}, ardından yeniden açık)` : ''}. O güne kadar ${tl(cf.acik)} ek nakit gerekir; dönem sonrası için güvence değildir.`,
+        }
+      : ilkTop
+        ? { ton: 'risk' as const, metin: `Dönem sonu nakit sıfırın altına iner; ${ilkTop.ad}’de ilk kez sıfırın üstüne çıkar ama dönem içinde yeniden açık verir ve ${son.ad} sonunda hâlâ sıfırın altındadır: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
+        : { ton: 'risk' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda sıfırın altına iner ve ${son.ad} sonuna kadar sıfırın üstüne çıkmaz: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
     : { ton: 'iyi' as const, metin: `Dönem sonu nakit hiçbir ay sıfırın altına düşmüyor (en düşük ${tl(cf.enDusuk.deger)}, ${cf.enDusuk.ay.ad} sonu); ek nakit gerekmez.` };
+  const toparlanmaYaz = (x: Cashflow) =>
+    x.enDusuk.deger >= 0
+      ? 'Hiç negatife düşmüyor'
+      : x.toparlanma.kalici
+        ? `${x.toparlanma.kalici.kisa}${x.toparlanma.ilk && x.toparlanma.ilk.iso !== x.toparlanma.kalici.iso ? ` (ilk ${x.toparlanma.ilk.kisa})` : ''}`
+        : x.toparlanma.ilk
+          ? `Dönem içinde yok (ilk ${x.toparlanma.ilk.kisa}, sonra yine açık)`
+          : 'Dönem içinde yok';
 
   return (
     <>
@@ -125,22 +140,26 @@ function Icerik() {
         ana={{
           etiket: 'Nakit açığı tavanı',
           deger: acikYaz(cf),
-          aciklama: 'Dönem sonu nakdi hiçbir ay sıfırın altına düşürmeyen en küçük ek nakit; yatırım girişi ve başlangıç nakdi parametresi bunu değiştirir.',
+          // Sheets yokken eksik gider kapsamı tam finansman hesabı gibi sunulmaz (B2c, MS-02).
+          aciklama: cf.sheets
+            ? 'Dönem sonu nakdi hiçbir ay sıfırın altına düşürmeyen en küçük ek nakit; yatırım girişi ve başlangıç nakdi parametresi bunu değiştirir.'
+            : 'Sheets gider verisi okunamadı: bu tutar yalnız plan kalemleriyle hesaplandı; tam finansman ihtiyacı değildir.',
         }}
         durum={sonucDurum}
         tools={secici}
         kiyas={{ temel: 'Aynı Sheets giderleri ve aynı seçeneklerle üç temel senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
         ikincil={[
           { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} · ${cf.enDusuk.ay.kisa}` },
-          { etiket: 'Toparlanma', deger: cf.toparlanma ? (cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : cf.toparlanma.kisa) : 'Dönem içinde yok' },
+          { etiket: 'Kalıcı toparlanma', deger: toparlanmaYaz(cf) },
           { etiket: `Dönem sonu nakit (${son.kisa})`, deger: tl(cf.donemSonu[cf.donemSonu.length - 1]) },
           { etiket: `Net nakit akışı, ${cf.aylar.length} ay`, deger: tl(cf.toplam.net) },
         ]}
-        kaynak={
+        // Kapsam ana sonucun bağlamında (B2c, MS-10): yalnız iStoc girişleri, ortak gider planının tamamı; markaya dağıtım belirlenmedi — “Türksab toplam” denmez.
+        kaynak={`Kapsam: iStoc girişleri (abonelik) × Sheets’teki ortak gider planının tamamı (kaynak kurum Türksab; markaya dağıtım belirlenmedi). ${
           cf.sheets
-            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (eklenen saha personeli, satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu ve seçenekleri.'
-            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu ve seçenekleri.'
-        }
+            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (eklenen saha personeli, satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu ve hesap seçenekleri.'
+            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu ve hesap seçenekleri.'
+        }`}
       />
       <Section
         id="ozet"
@@ -169,8 +188,8 @@ function Icerik() {
         {/* Gelir planı seçeneklerinin taşındığı açıkça yazılır (B2, ct-F04; ct-IA-23): hangi seçeneklerle bakıldığı ve nerede değiştiği. */}
         <p className="nakit-secenekler">
           {changes ? `Gelir planı seçenekleri uygulandı: ${changes} değişiklik (${senaryoAdi}). ` : 'Gelir planı seçenekleri: genel plan değerleri (değişiklik yok). '}
-          {opts.kaynak === 'plan' ? 'Gider kaynağı seçeneği burada uygulanmaz; çıkışlar Sheets’ten. ' : ''}
-          Seçenekler <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirilir; iki sayfa aynı etkin girdileri kullanır.
+          {opts.kaynak === 'plan' ? 'Gelir planında seçili gider kaynağı (plan kadrosu) burada uygulanmaz. ' : ''}
+          Seçenekler <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirilir; hesap girdileri iki sayfada aynıdır, gider kaynağı seçeneği hariç: çıkışlar burada her zaman Sheets gider planı + plan kalemleridir.
         </p>
         <DataTable
           id="senaryo-karsilastirma"
@@ -182,7 +201,7 @@ function Icerik() {
             { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof karsilastirma)[number]) => <RoleChip role={x.s.role} label={x.s.name} /> },
             { key: 'd', header: 'En düşük nakit', nowrap: true, summary: true, render: (x) => `${tl(x.cf.enDusuk.deger)} · ${x.cf.enDusuk.ay.kisa}` },
             { key: 'a', header: 'Nakit açığı tavanı', nowrap: true, render: (x) => (x.cf.acik ? tl(x.cf.acik) : '0 ₺') },
-            { key: 't', header: 'Toparlanma', nowrap: true, render: (x) => (x.cf.toparlanma ? (x.cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : x.cf.toparlanma.kisa) : 'Dönem içinde yok') },
+            { key: 't', header: 'Kalıcı toparlanma', nowrap: true, render: (x) => toparlanmaYaz(x.cf) },
             { key: 's', header: 'Dönem sonu (Ara 2027)', nowrap: true, render: (x) => tl(x.cf.donemSonu[x.cf.donemSonu.length - 1]) },
             { key: 'g', header: 'Nakit girişi', nowrap: true, render: (x) => tl(x.cf.toplam.giris) },
             { key: 'c', header: 'Nakit çıkışı', nowrap: true, render: (x) => tl(x.cf.toplam.cikis) },

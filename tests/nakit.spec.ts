@@ -262,6 +262,12 @@ test.describe('nakit akış tablosu', () => {
     expect(ton).toBe((await deger.textContent())?.trim() === '0 ₺' ? 'iyi' : ton === 'risk' ? 'risk' : 'uyari');
     if (ton !== 'iyi') await expect(sonuc.locator('.sonuc-durum')).toContainText(/en düşük noktasına iner|sıfırın altına iner/);
     await expect(sonuc.locator('.sonuc-kaynak')).toContainText('Sheets');
+    // B2c (MS-10): giderin marka kapsamı ana sonucun bağlamında — iStoc girişleri × ortak gider planı; markaya dağıtım belirlenmedi.
+    await expect(sonuc.locator('.sonuc-kaynak')).toContainText(/iStoc girişleri/);
+    await expect(sonuc.locator('.sonuc-kaynak')).toContainText(/markaya dağıtım/);
+    await expect(sonuc).not.toContainText('Türksab toplam');
+    // B2c (MS-03): “kalıcı toparlanma” yalnız incelenen dönemin kalanı için; etiket bunu söyler.
+    await expect(sonuc.locator('.sonuc-ikincil, .sonuc')).toContainText('Kalıcı toparlanma');
     const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
     await expect(kiyas).toHaveCount(3);
     await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Medyan/, /İyimser/]);
@@ -331,6 +337,9 @@ test.describe('nakit akış tablosu', () => {
     await expect(sonuc.locator('.sonuc-baslik')).toContainText('Saha ağırlıklı');
     await expect(page.locator('.nakit-secenekler')).toContainText(/4 değişiklik/);
     await expect(page.locator('.nakit-secenekler').getByRole('link', { name: /Gelir planı/ })).toHaveAttribute('href', /\/gelir-plani\/$/);
+    // B2c (MS-02): mutlak “aynı etkin girdiler” iddiası yok; gider kaynağı istisnası ve çıkış kapsamı (Sheets + plan kalemleri) açık.
+    await expect(page.locator('.nakit-secenekler')).toContainText(/gider kaynağı/);
+    await expect(page.locator('.nakit-secenekler')).not.toContainText('aynı etkin girdileri');
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     const satirlar = page.locator('.table-block:has(#nakit-tablo) tbody tr');
     const satir = satirlar.filter({ has: page.locator('th', { hasText: 'Eklenen saha personeli' }) });
@@ -361,6 +370,8 @@ test.describe('nakit akış tablosu', () => {
     await expect(page.locator('.nakit-kaynak').getByRole('link', { name: 'Giderler sayfası' })).toHaveAttribute('href', /\/giderler\/$/);
     // Ana sonuç eksik Sheets verisini tam plan gibi göstermez (ux.md §9).
     await expect(page.locator('.sonuc-kaynak')).toContainText('okunamadı');
+    // B2c (MS-02): Sheets yokken eksik gider kapsamı ana sonuçta tam finansman hesabı gibi sunulmaz.
+    await expect(page.locator('.sonuc-aciklama')).toContainText('tam finansman ihtiyacı değildir');
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     await expect(page.locator('.data-table tbody th', { hasText: 'Bordrolu personel' })).toHaveCount(0);
     await expect(page.locator('.data-table tbody th', { hasText: 'Meta reklamları' })).toHaveCount(1);

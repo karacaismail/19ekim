@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
+import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, altBilgiOnCumle, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
 import { BASE_ROLES as ROLES } from '../src/data/roles';
 import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 
@@ -133,8 +133,24 @@ test.describe('içerik envanteri', () => {
   });
 });
 
+/*
+ * B2c (docs/missings.md MS-11): alt bilginin sabit ön cümlesi (“19 Ekim tahta kararlarından türetildi… kalibre edilir”) yalnız
+ * gerçekten tahtadan türetilen içerik için; kaynağı Sheets, öneri, örnek, eğitim, kişisel ya da sistem olan sayfalarda yok.
+ */
+test('B2c (MS-11): her kaydın türetim kaynağı var; ön cümle yalnız tahtadan türetilen sayfalarda', () => {
+  const turler = ['tahta', 'sheets', 'oneri', 'ornek', 'egitim', 'kisisel', 'sistem'];
+  for (const k of ICERIK) expect(turler, k.id).toContain(k.turetim);
+  expect(altBilgiOnCumle('/19ekim/roller/asistan/')).toMatch(/19 Ekim 2026/);
+  expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/kalibre edilir/);
+  for (const p of ['/19ekim/bcg/', '/19ekim/notlar/', '/19ekim/email/', '/19ekim/applet/', '/19ekim/affilate/', '/19ekim/giderler/', '/19ekim/partnership/', '/19ekim/404/', '/bilinmeyen/']) expect(altBilgiOnCumle(p), p).toBe('');
+  // Nakit akışı kapsam cümlesi mevcut davranışı anlatır: hesap seçenekleri uygulanır, gider kaynağı seçeneği uygulanmaz; gelecek vaadi yok.
+  const nakit = altBilgiKapsami('/19ekim/nakit-akisi/');
+  expect(nakit).toMatch(/gider kaynağı seçeneği/);
+  expect(nakit).not.toMatch(/ayrıca gösterilir/);
+});
+
 test.describe('içerik envanteri — sayfada', () => {
-  test('F10 / IA-18: alt bilgi kaydın kapsam cümlesini söyler; öneri, eğitim, örnek ve taslak “kesinleşen” demez', async ({ page }) => {
+  test('F10 / IA-18: alt bilgi kaydın kapsam cümlesini söyler; öneri, eğitim, örnek ve taslak “kesinleşen” demez; ön cümle yalnız tahta kaynaklı sayfada', async ({ page }) => {
     for (const id of ['partnership', 'bcg', 'applet', 'affilate', 'notlar', 'eylem-plani', 'giderler']) {
       const k = ICERIK.find((x) => x.id === id)!;
       await page.goto(k.path.slice(1));
@@ -143,6 +159,9 @@ test.describe('içerik envanteri — sayfada', () => {
       const alt = await page.locator('.app-footer').innerText();
       expect(alt, id).toContain(k.kapsam.slice(0, 40));
       if (['partnership', 'bcg', 'applet', 'affilate', 'notlar'].includes(id)) expect(alt, id).not.toMatch(/kesinleşen/i);
+      // B2c (MS-11): tahtadan türetilmeyen sayfada “19 Ekim … kalibre edilir” ön cümlesi yok.
+      if (k.turetim === 'tahta') expect(alt, id).toMatch(/kalibre edilir/);
+      else expect(alt, id).not.toMatch(/kalibre edilir|tahta kararlarından/);
     }
   });
 });

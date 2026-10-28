@@ -143,7 +143,7 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
         : `Yatırım girişi ayı (${p.investmentDate}) tablo dönemi dışında; tabloya girmez. Başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺.`,
       'Çıkışlar: Google Sheets’teki 15 aylık gider planı (kategori bazında; bordrolu personel işveren maliyeti teşvik düşülmüş; freelancer faturaları KDV dahil) — Giderler sayfasıyla aynı canlı veri. Ödeme ayı = gider ayı (SGK ve vergi gecikmesi modellenmez).',
       `Eklenen saha personeli (plan kalemi): ikinci saha personeli (parametre ${monthName(monthStart(p.secondSahaDate))} ${p.secondSahaDate.slice(0, 4)}; gelir planı seçeneğiyle değişir), ek saha ve büyüme kuralıyla gelen saha personeli başladıkları aydan itibaren işveren maliyetiyle (maaş × ${p.costFactor.toLocaleString('tr-TR')}). Sheets’te tek saha personeli vardır; gelir planının başabaş hesabıyla aynı kural.`,
-      'Gelir planı sayfasındaki senaryo seçenekleri (fiyat, ikinci saha ayı, ek saha, reklam bütçesi ve ölçek, kur artışı, büyüme kuralı, yıllık peşin payı, ek sabit gider, prim) bu tabloya aynen uygulanır: iki sayfa aynı etkin girdileri okur. Gider kaynağı seçeneği burada uygulanmaz; çıkışlar her zaman Sheets’ten gelir.',
+      'Gelir planı sayfasındaki hesap seçenekleri (fiyat, ikinci saha ayı, ek saha, reklam bütçesi ve ölçek, kur artışı, büyüme kuralı, yıllık peşin payı, ek sabit gider, prim) bu tabloda da kullanılır. Gider kaynağı seçeneği burada uygulanmaz: çıkışlar her zaman Sheets gider planı + plan kalemleridir; Sheets okunamazsa yalnız plan kalemleri kalır ve tablo eksiktir.',
     ],
   };
 }
@@ -170,13 +170,35 @@ export interface Cashflow {
   enDusuk: { deger: number; ay: CashMonth };
   /** Nakit açığı tavanı: dönem sonu nakit negatife düşüyorsa kapatmak için gereken en küçük ek nakit */
   acik: number;
-  /** Dönem sonu nakdin kalıcı olarak sıfırın üstüne çıktığı ay (negatife düşmüşse); hiç düşmediyse ilk ay, çıkmıyorsa null */
-  toparlanma: CashMonth | null;
+  /**
+   * Toparlanma (B2c, docs/missings.md MS-03): `ilk` — ilk negatif aydan sonra dönem sonu nakdin ilk kez sıfırın altında
+   * olmadığı ay; `kalici` — incelenen dönemin kalanında bir daha sıfırın altına inmediği ilk ay. Hiç negatife düşmüyorsa
+   * ikisi de null (açık yok). Dönem sonrası için güvence değildir.
+   */
+  toparlanma: { ilk: CashMonth | null; kalici: CashMonth | null };
   /** Sheets verisi tabloya girdi mi */
   sheets: boolean;
 }
 
 const sum = (xs: number[]) => r2(xs.reduce((a, b) => a + b, 0));
+
+/**
+ * Toparlanma ölçütleri (B2c, docs/missings.md MS-03 / T03). Eski hesap küresel en düşük aydan sonraki ilk `>= 0` ayı
+ * “kalıcı” sayıyordu: `[-100, 50, -30, 50]` için Kasım dönüyor, sonraki ay yine açık veriyordu. İki ayrı ölçüt: `ilk` —
+ * ilk negatif aydan sonra ilk `>= 0` ay; `kalici` — son negatif aydan sonraki ay (dönemin kalanında hep `>= 0`). Hiç
+ * negatife düşmeyen dizide ikisi de null. Sınır: sıfır “altında” değildir (`>= 0`). Ufuk sonrasına garanti vermez.
+ */
+export function toparlanmaOf(donemSonu: number[]): { ilk: number | null; kalici: number | null } {
+  const ilkNegatif = donemSonu.findIndex((v) => v < 0);
+  if (ilkNegatif < 0) return { ilk: null, kalici: null };
+  const ilk = donemSonu.findIndex((v, i) => i > ilkNegatif && v >= 0);
+  let sonNegatif = ilkNegatif;
+  donemSonu.forEach((v, i) => {
+    if (v < 0) sonNegatif = i;
+  });
+  const kalici = sonNegatif + 1;
+  return { ilk: ilk < 0 ? null : ilk, kalici: kalici < donemSonu.length ? kalici : null };
+}
 const line = (ad: string, kaynak: CashLine['kaynak'], aylar: number[]): CashLine => ({ ad, kaynak, aylar: aylar.map(r2), toplam: sum(aylar) });
 
 /** Sheets kalemlerini kategori bazında 15 aya dağıtır (Giderler sayfasının kategorileriyle aynı sıra). */
@@ -240,8 +262,7 @@ export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: S
   }
   const minIndex = donemSonu.reduce((best, v, i) => (v < donemSonu[best] ? i : best), 0);
   const enDusuk = { deger: donemSonu[minIndex], ay: aylar[minIndex] };
-  // Toparlanma: en düşük noktadan sonra dönem sonu nakdin sıfırın üstüne çıktığı ilk ay.
-  const t = enDusuk.deger >= 0 ? 0 : donemSonu.findIndex((v, i) => i > minIndex && v >= 0);
+  const top = toparlanmaOf(donemSonu);
   return {
     senaryo,
     aylar,
@@ -255,7 +276,7 @@ export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: S
     toplam: { giris: sum(giris), cikis: sum(cikis), net: sum(net) },
     enDusuk,
     acik: Math.max(0, -enDusuk.deger),
-    toparlanma: t < 0 ? null : aylar[t],
+    toparlanma: { ilk: top.ilk === null ? null : aylar[top.ilk], kalici: top.kalici === null ? null : aylar[top.kalici] },
     sheets: !!opex,
   };
 }

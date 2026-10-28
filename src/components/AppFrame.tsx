@@ -5,7 +5,7 @@ import { IconChecklist, IconChevronDown, IconMenu2, IconMoon, IconReceipt2, Icon
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
-import { altBilgiKapsami } from '../data/icerik';
+import { altBilgiKapsami, altBilgiOnCumle } from '../data/icerik';
 import { NAV_GROUPS, SEQUENCE, type NavLink } from '../data/tree';
 import { FrameContext } from '../lib/frame';
 import { cssVariablesResolver, theme } from '../lib/theme';
@@ -402,9 +402,10 @@ export function AppFrame({
         {girisli ? (
           <footer className="app-footer">
             <div className="wrap">
+              {/* Ön cümle kayıt bazlı (B2c, docs/missings.md MS-11): yalnız tahtadan türetilen sayfada; kapsam cümlesi her sayfada kayıttan. */}
               <p>
-                19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir;
-                2. haftanın sonunda gerçek veriyle kalibre edilir. {altBilgiNotu(current)}
+                {altBilgiOnCumle(current)}
+                {altBilgiNotu(current)}
               </p>
               <p className="footer-links">
                 <a className="text-link" data-standalone="" href={href('/arsiv/')}>

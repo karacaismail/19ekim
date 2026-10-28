@@ -16,6 +16,9 @@ export type KanitNiteligi = 'olculmus' | 'kaynakli' | 'hesaplanmis' | 'varsayilm
 export type YasamDongusu = 'taslak' | 'inceleniyor' | 'onaylandi' | 'yururlukte' | 'arsiv';
 /** Düzenleme kapsamı (§4.4). */
 export type DuzenlemeKapsami = 'yok' | 'yayin-varsayilani' | 'bu-tarayici' | 'bu-senaryo' | 'dis-kaynak';
+/** İçeriğin türetildiği kaynak türü (B2c, docs/missings.md MS-11): alt bilgi ön cümlesi yalnız `tahta` için. */
+export type Turetim = 'tahta' | 'sheets' | 'oneri' | 'ornek' | 'egitim' | 'kisisel' | 'sistem';
+
 /** Ana ebeveyn (menü grubu, §5.2). `dogrudan`: menüde ve sunum sırasında olmayan sayfa. */
 export type IcerikGrubu = 'pazarlama' | 'istihdam' | 'finans' | 'yonetim' | 'yardimci' | 'dogrudan' | 'sistem';
 export type Marka = 'istoc' | 'segika' | 'turksab';
@@ -31,6 +34,8 @@ export interface IcerikKaydi {
   grup: IcerikGrubu;
   /** Grup içinde ana ebeveyn sayfa (rol sayfaları → organizasyon şeması). */
   ebeveyn?: string;
+  /** Türetim kaynağı: tahta (19 Ekim kararları ve pano) / sheets / öneri / örnek / eğitim / kişisel / sistem. */
+  turetim: Turetim;
   marka: Marka[];
   sahip: string;
   durum: YasamDongusu;
@@ -78,6 +83,7 @@ const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: 
   kullaniciSorusu: soru,
   grup: 'istihdam',
   ebeveyn: 'organizasyon',
+  turetim: 'tahta',
   marka,
   sahip: BELIRLENMEDI,
   durum: 'inceleniyor',
@@ -103,6 +109,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'varsayilmis',
     kaynak: 'src/data/tree.ts; kişi sayısı ve tarihler Parametreler',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Kadro kararı ya da başlangıç tarihi değişince',
     duzenleme: 'yok',
@@ -129,6 +136,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'varsayilmis',
     kaynak: 'src/data/program.ts, src/data/staffing.ts; Parametreler',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'İşe alım sırası, başlangıç tarihi ya da bütçe değişince',
     duzenleme: 'yok',
@@ -148,6 +156,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'ornek',
     kaynak: 'src/data/applet.ts (örnek veriler)',
+    turetim: 'ornek',
     asOf: T,
     gozdenGecirme: 'Ücret politikası taslağı değişince',
     duzenleme: 'bu-tarayici',
@@ -167,6 +176,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'onaylandi',
     kanit: 'varsayilmis',
     kaynak: 'src/data/program.ts (19 Ekim tahta hedefleri); tahmin src/data/revenue.ts',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: '2. haftanın sonunda gerçek veriyle kalibrasyon',
     duzenleme: 'bu-senaryo',
@@ -186,10 +196,11 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'hesaplanmis',
     kaynak: 'src/data/revenue.ts, src/data/model.ts; Parametreler ve senaryo kurucu',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Fiyat, kadro, kanal bütçesi ya da dönüşüm varsayımı değişince',
     duzenleme: 'bu-senaryo',
-    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. İş modeli iStoc aboneliğidir; işlem gelirine dayalı likidite pilotunun hesap modeli yoktur (Kararlar). ${PARAM_NOTU}`,
+    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Hesap, koşullu abonelik modeliyle çalışır; iş modeli kararı (abonelik mi, işlem gelirine dayalı likidite pilotu mu) henüz verilmedi ve likidite pilotunun hesap modeli yoktur. ${PARAM_NOTU}`,
     iliskili: ['hedefler', 'nakit-akisi', 'giderler', 'parametreler', 'karar-bekleyenler'],
     menu: 'Gelir planı',
   },
@@ -205,6 +216,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'onaylandi',
     kanit: 'varsayilmis',
     kaynak: 'src/data/program.ts (yönetici planı ve rol planları)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Teslim tarihi, sorumlu ya da bağımlılık değişince',
     duzenleme: 'yok',
@@ -224,6 +236,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'hesaplanmis',
     kaynak: 'src/data/growth.ts; Parametreler',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Temsilci kazanım varsayımı ya da katman kuralı değişince',
     duzenleme: 'bu-senaryo',
@@ -243,6 +256,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'varsayilmis',
     kaynak: 'src/data/partnership.ts (başlangıç tasarımı)',
+    turetim: 'oneri',
     asOf: T,
     gozdenGecirme: '14. günde gerçek veriyle yeniden yazım',
     duzenleme: 'yok',
@@ -262,6 +276,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'ornek',
     kaynak: 'src/data/affilate.ts (saf motor), docs/affilate.md; başlangıç değerleri örnek',
+    turetim: 'ornek',
     asOf: T,
     gozdenGecirme: 'Ortaklık politikası sürümü ya da fiyat değişince',
     duzenleme: 'bu-tarayici',
@@ -281,6 +296,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'onaylandi',
     kanit: 'kaynakli',
     kaynak: 'src/data/program.ts (19 Ekim tahta kararları)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Yetki ya da kontrol eşiği değişince',
     duzenleme: 'yok',
@@ -300,6 +316,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'kaynakli',
     kaynak: 'src/data/program.ts (karar kayıtları)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Karar alınınca ya da yeni çelişki kaydı açılınca',
     duzenleme: 'yok',
@@ -319,6 +336,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'varsayilmis',
     kaynak: 'src/data/params.ts (yayın varsayılanları)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Yasal değer (asgari ücret, dilim), fiyat ya da kadro kararı değişince',
     duzenleme: 'bu-tarayici',
@@ -339,10 +357,11 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'kaynakli',
     kaynak: 'Giderler Sheets dosyası (açılışta okunur); src/data/opex.ts',
+    turetim: 'sheets',
     asOf: T,
     gozdenGecirme: 'Sheets dosyası değişince (her açılışta)',
     duzenleme: 'dis-kaynak',
-    kapsam: 'Gider tutarları Giderler Sheets dosyasından açılışta okunur; dosya değişince burası da değişir. Kaynak bir plandır, ödeme takibi değildir; kaynak kurum Türksab’dır ve giderin markaya dağıtımı belirlenmemiştir (Kararlar). Varsayım kaynakları arama bağlantısıdır, doğrulanmış belge değildir.',
+    kapsam: 'Gider tutarları Giderler Sheets dosyasından açılışta okunur; dosya değişince burası da değişir. Kaynak bir plandır, ödeme takibi değildir; kaynak kurum Türksab’dır ve giderin markaya dağıtımı henüz belirlenmemiştir (karar bekliyor). Varsayım kaynakları arama bağlantısıdır, doğrulanmış belge değildir.',
     iliskili: ['nakit-akisi', 'gelir-plani', 'parametreler', 'karar-bekleyenler'],
     menu: 'Giderler',
   },
@@ -358,10 +377,11 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'inceleniyor',
     kanit: 'hesaplanmis',
     kaynak: 'src/data/cashflow.ts; gelir temel senaryosu, Giderler Sheets planı',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Senaryo, gider planı ya da tahsilat varsayımı değişince',
     duzenleme: 'bu-senaryo',
-    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Nakit kâr ya da ciro değildir; gelir temel senaryosunu ve Sheets gider planını okur, gelir planındaki özel değişikliklerin hangileri taşındı ayrıca gösterilir. ${PARAM_NOTU}`,
+    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Nakit kâr ya da ciro değildir; gelir planının seçili senaryosunu ve hesap seçeneklerini okur (gider kaynağı seçeneği hariç; hangi seçeneklerin uygulandığı sayfada yazılır), çıkışları Sheets gider planı ve plan kalemlerinden alır. ${PARAM_NOTU}`,
     iliskili: ['gelir-plani', 'giderler', 'karar-bekleyenler'],
     menu: 'Nakit akışı',
   },
@@ -377,6 +397,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'bilinmiyor',
     kaynak: 'src/data/notes.ts varsayılan notlar; düzenlemeler bu tarayıcıda',
+    turetim: 'kisisel',
     asOf: T,
     gozdenGecirme: 'Kullanıcı düzenleyince',
     duzenleme: 'bu-tarayici',
@@ -396,6 +417,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'ornek',
     kaynak: 'src/data/bcg.ts (kurgusal örnek)',
+    turetim: 'egitim',
     asOf: T,
     gozdenGecirme: 'Gerçek pazar verisiyle uygulama kararı alınırsa',
     duzenleme: 'yok',
@@ -414,6 +436,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'arsiv',
     kanit: 'kaynakli',
     kaynak: 'src/data/program.ts (tahta notları ve karar eşlemesi)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Yeni karar eski notun yerine geçince',
     duzenleme: 'yok',
@@ -433,6 +456,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'bilinmiyor',
     kaynak: 'src/data/email.ts (kişisel taslak)',
+    turetim: 'kisisel',
     asOf: T,
     gozdenGecirme: 'Paylaşılan içerikten ayrıştırma kararı (kullanıcı)',
     duzenleme: 'yok',
@@ -451,6 +475,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'yururlukte',
     kanit: 'bilinmiyor',
     kaynak: 'src/pages/404.astro',
+    turetim: 'sistem',
     asOf: T,
     gozdenGecirme: 'Adres taşınınca',
     duzenleme: 'yok',
@@ -470,6 +495,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'bilinmiyor',
     kaynak: 'Kanonik kayıtlardan türetilecek (hedef, teslim, karar, nakit)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Kanonik kayıtlar değişince',
     duzenleme: 'yok',
@@ -489,10 +515,11 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'varsayilmis',
     kaynak: 'src/data/partnership.ts (marka ve teklif açıklamaları), src/data/revenue.ts (iş modeli)',
+    turetim: 'oneri',
     asOf: T,
     gozdenGecirme: 'Segment, teklif ya da iş modeli kararı değişince',
     duzenleme: 'yok',
-    kapsam: 'Strateji kayıtları öneri, seçilmiş yaklaşım ya da sınanacak hipotezdir; iStoc abonelik ve likidite pilotu açık alternatiflerdir (Kararlar).',
+    kapsam: 'Strateji kayıtları öneri, seçilmiş yaklaşım ya da sınanacak hipotezdir; iStoc abonelik ve likidite pilotu açık alternatiflerdir (karar bekliyor).',
     iliskili: ['partnership', 'gelir-plani', 'karar-bekleyenler', 'musteri-yolculugu'],
     menu: 'Strateji ve teklif',
     planlandi: true,
@@ -509,6 +536,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'varsayilmis',
     kaynak: 'CRM karar içeriği (src/data/program.ts), src/data/partnership.ts akışları',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Aşama tanımı ya da devir koşulu değişince',
     duzenleme: 'yok',
@@ -529,6 +557,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'varsayilmis',
     kaynak: 'src/data/digital.ts, src/data/digitalStrategy.ts (dijital rol ve gelir planı kanal içeriği)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Kanal deneyi ya da üretim planı değişince',
     duzenleme: 'yok',
@@ -549,6 +578,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'kaynakli',
     kaynak: 'Ücret ve mesai karar içeriği (src/data/program.ts), rol ücret özetleri (src/data/roles.ts)',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Ücret, prim ya da çalışma düzeni kararı değişince',
     duzenleme: 'yok',
@@ -569,6 +599,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'bilinmiyor',
     kaynak: 'Metrik sözlüğü (planlanıyor); gerçekleşen veri yok',
+    turetim: 'tahta',
     asOf: T,
     gozdenGecirme: 'Ölçüm kaynağı bağlanınca',
     duzenleme: 'yok',
@@ -589,6 +620,7 @@ export const ICERIK: IcerikKaydi[] = [
     durum: 'taslak',
     kanit: 'bilinmiyor',
     kaynak: 'Bu envanter ve sayfa varsayım kaynakları',
+    turetim: 'sistem',
     asOf: T,
     gozdenGecirme: 'Kaynak eklenince ya da çelişki kaydı açılınca',
     duzenleme: 'yok',
@@ -619,6 +651,16 @@ export function icerikOf(path: string): IcerikKaydi | undefined {
 /** Alt bilgi kapsam cümlesi (F10): kaydı olmayan sayfa için genel, kapsamı doğru özetleyen cümle. */
 export function altBilgiKapsami(path: string): string {
   return icerikOf(path)?.kapsam ?? `Tutarlar 19 Ekim tahta kararlarından türetilen planlardır; kesinleşmiş sonuç değildir. ${PARAM_NOTU}`;
+}
+
+/**
+ * Alt bilgi ön cümlesi (B2c, MS-11): yalnız 19 Ekim tahta kararlarından türetilen içerikte; Sheets, öneri, örnek, eğitim,
+ * kişisel ve sistem sayfalarında boş (kapsam cümlesi yeter). Sondaki boşluk kapsam cümlesine birleşir.
+ */
+export function altBilgiOnCumle(path: string): string {
+  return icerikOf(path)?.turetim === 'tahta'
+    ? '19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir; 2. haftanın sonunda gerçek veriyle kalibre edilir. '
+    : '';
 }
 
 /** Kimliğe göre kayıt (menü ve kırıntı tüketicileri için). */

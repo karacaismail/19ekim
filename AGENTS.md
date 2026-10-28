@@ -890,7 +890,25 @@ cevapsız K1/K7/K8/K9 varsayılan; açık alt sorular §4.2. Plan **sürüm 2** 
 B2.1 doğrulandı; B2 Codex bulgularıyla yeniden açıldı (B2c: MS-03 toparlanma, MS-02/10/11 metin ve kapsam); B6’nın iki dar
 koruması öne alındı (MS-04 Affilate bozuk/uyumsuz kayıt, MS-05 parametre doğrulama); K1 “karar bekliyor” (varsayılanla onay yok);
 K8 bağlayıcı kural; K9 archetype rol sürümü depoda; Ç13 yanlış pozitif geri alındı (MS-25).
-**Sayaç (sürüm 3): 0/10 tamamlandı, 2/10 aktif (B0, B2).**
+**B2c (adım 2c) — Codex bulguları MS-03/02/10/11 (docs/missings.md; 2026-10-28), test önce:** **Toparlanma (MS-03, T03):**
+`cashflow.ts → toparlanmaOf(donemSonu)` iki ölçüt verir — `ilk` (ilk negatif aydan sonra ilk `>= 0` ay) ve `kalici` (son
+negatif aydan sonraki ay: incelenen dönemin kalanında hep `>= 0`); eski hesap küresel en düşükten sonraki ilk `>= 0` ayı
+“kalıcı” sayıyordu (`[-100, 50, -30, 50]` → Kasım; artık ilk Kasım, kalıcı Ocak). `Cashflow.toparlanma = { ilk, kalici }`;
+sayfa durumu üç hâl: kalıcı (uyarı; “incelenen dönemin kalanında … inmiyor”, varsa ilk toparlanma ve yeniden açık notu,
+“dönem sonrası için güvence değildir”), yalnız ilk (risk; “yeniden açık verir ve son ayda hâlâ sıfırın altında”), hiç
+(risk). İkincil ölçüt ve kıyas sütunu “Kalıcı toparlanma”. **Kapsam ve metin (MS-02, MS-10):** nakit ana sonucunun kaynak
+satırı “Kapsam: iStoc girişleri (abonelik) × Sheets’teki ortak gider planının tamamı (kaynak kurum Türksab; markaya dağıtım
+belirlenmedi)” ile başlar (“Türksab toplam” denmez); Sheets okunamazsa ana tutarın açıklaması “yalnız plan kalemleriyle; tam
+finansman ihtiyacı değildir”; “aynen / aynı etkin girdiler” iddiaları kalktı — senaryo kurucu, `KayitDurumu` etkisi,
+`.nakit-secenekler` ve varsayımlar “hesap seçenekleri aynı, gider kaynağı seçeneği hariç; çıkışlar Sheets + plan kalemleri”
+der. **Alt bilgi (MS-11):** içerik kaydına `turetim` alanı (tahta / sheets / öneri / örnek / eğitim / kişisel / sistem);
+`altBilgiOnCumle()` yalnız `tahta` için “19 Ekim … kalibre edilir” ön cümlesini verir (BCG, Notlar, E-posta, Applet, Affilate,
+Giderler, İş ortaklığı, 404’te yok); nakit kapsam cümlesi mevcut davranışı anlatır (gelecek vaadi yok); “(Kararlar)”
+atıfları “karar bekliyor / henüz verilmedi” oldu (K1 kararı üretilmez). Testler: `tests/data.spec.ts` B2c (yedi karşı
+örnek), `tests/nakit.spec.ts` (kapsam, kalıcı toparlanma etiketi, Sheets yokken açıklama, seçenek notu), `tests/gelir.spec.ts`
+(kurucu kapsamı), `tests/icerik.spec.ts` (`turetim`, `altBilgiOnCumle`, sayfada ön cümle kuralı). **B2 tamam (2a/2b/2c).**
+
+**Sayaç (sürüm 3): 1/10 tamamlandı (B2), 1/10 aktif (B0).** Sırada B6-öncü dar korumalar (MS-04 Affilate kayıt, MS-05 parametre doğrulama).
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,

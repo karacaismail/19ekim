@@ -7,7 +7,7 @@ import { DEFAULT_NOTES } from '../src/data/notes';
 import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
 import { addedSahaCosts, makeStaffing, staffingSheet } from '../src/data/staffing';
 import { adCapacity, adSchedule, growthHires, HORIZON, priceSeries } from '../src/data/revenue';
-import { buildCashflow, cashSeriesOf } from '../src/data/cashflow';
+import { buildCashflow, cashSeriesOf, toparlanmaOf } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
@@ -421,8 +421,8 @@ test.describe('nakit akış tablosu', () => {
     expect(k.cikislar.find((l) => l.ad.startsWith('Satış primi'))!.toplam).toBeLessThan(cf.cikislar.find((l) => l.ad.startsWith('Satış primi'))!.toplam);
     expect(k.enDusuk.deger).toBeLessThanOrEqual(cf.enDusuk.deger);
     expect(cf.enDusuk.deger).toBeLessThanOrEqual(iy.enDusuk.deger);
-    // Toparlanma: negatife düşen nakit sıfırın üstüne çıktığı ay (varsa) en düşük aydan sonradır.
-    if (cf.enDusuk.deger < 0 && cf.toparlanma) expect(cf.toparlanma.iso > cf.enDusuk.ay.iso).toBe(true);
+    // Kalıcı toparlanma: negatife düşen nakdin incelenen dönemin kalanında bir daha sıfırın altına inmediği ilk ay (varsa) en düşük aydan sonradır.
+    if (cf.enDusuk.deger < 0 && cf.toparlanma.kalici) expect(cf.toparlanma.kalici.iso > cf.enDusuk.ay.iso).toBe(true);
   });
 
   test('yatırım girişi ve başlangıç nakdi dönem sonu nakdi kaydırır; dönem dışı yatırım tabloya girmez', () => {
@@ -491,6 +491,26 @@ test.describe('nakit akış tablosu', () => {
     expect(seri.sahaEk[2]).toBeCloseTo(3 * kisi, 0);
     // Seçeneksiz temel seriyle fark var: seçenekler gerçekten taşındı.
     expect(Math.abs(cf.toplam.cikis - buildCashflow(m.cashflow, opex, 'medyan').toplam.cikis)).toBeGreaterThan(1);
+  });
+
+  /*
+   * B2c (docs/missings.md MS-03, T03; kullanıcı yönergesi 2026-10-28): eski hesap küresel en düşük aydan sonraki ilk `>= 0` ayı
+   * “kalıcı toparlanma” diye sunuyordu; `[-100, 50, -30, 50]` için Kasım dönüyordu (sonraki ay yine açık). İki ayrı ölçüt:
+   * ilk toparlanma (ilk negatif aydan sonra ilk `>= 0`) ve incelenen dönemin kalanında yeniden negatife düşmeme.
+   */
+  test('B2c (MS-03 / T03): ilk toparlanma ile dönemde kalıcı toparlanma ayrı ölçüt; karşı örnekler', () => {
+    expect(toparlanmaOf([-100, 50, -30, 50])).toEqual({ ilk: 1, kalici: 3 });
+    expect(toparlanmaOf([-100, 50, -200, 50])).toEqual({ ilk: 1, kalici: 3 });
+    expect(toparlanmaOf([-100, -50, -10])).toEqual({ ilk: null, kalici: null });
+    expect(toparlanmaOf([10, 20])).toEqual({ ilk: null, kalici: null }); // hiç negatife düşmüyor
+    expect(toparlanmaOf([-5, 0, 0])).toEqual({ ilk: 1, kalici: 1 }); // sıfır “altında” değil
+    expect(toparlanmaOf([-5, 5, -1])).toEqual({ ilk: 1, kalici: null }); // son ay açık: kalıcı yok
+    expect(toparlanmaOf([5, -5, 5])).toEqual({ ilk: 2, kalici: 2 });
+    const cf = buildCashflow(m.cashflow, opex);
+    if (cf.enDusuk.deger < 0) {
+      if (cf.toparlanma.kalici) expect(cf.donemSonu.slice(cf.aylar.indexOf(cf.toparlanma.kalici)).every((v) => v >= 0)).toBe(true);
+      if (cf.toparlanma.ilk && cf.toparlanma.kalici) expect(cf.toparlanma.ilk.iso <= cf.toparlanma.kalici.iso).toBe(true);
+    } else expect(cf.toparlanma).toEqual({ ilk: null, kalici: null });
   });
 
   test('B2: ek sabit gider seçeneği çıkış satırı; prim hariç seçeneğinde prim satırı yok; fiyat seçeneği girişleri değiştirir', () => {

@@ -170,16 +170,16 @@ Codex B2.1’i doğruladı (1,8 M₺ fark → 0) ve 27 bulgu bıraktı. Durum s�
 | MS | Özet | Öncelik | Paket | Durum |
 |---|---|---|---|---|
 | MS-01 | Eklenen saha gideri (eski P0) | — | B2 | B2.1 ile giderildi; “Sheets’te tek saha” varsayımı ve çift sayım kabulü (T02) B2c/B3’te |
-| MS-02 | Seçenek aktarımı: gider kaynağı istisnası ve sürümlü anlık görüntü | P1 | B2c (metin), B6 (snapshot) | “aynen / aynı etkin girdiler” metinleri düzeltilecek; snapshot B6 |
-| MS-03 | “Kalıcı toparlanma” hesabı hatalı (`[-100,50,-30,50]` → Kasım) | P1 hatalı | **B2c** | T03 ile önce kırmızı, sonra ilk/kalıcı toparlanma ayrımı |
+| MS-02 | Seçenek aktarımı: gider kaynağı istisnası ve sürümlü anlık görüntü | P1 | B2c (metin) **giderildi**, B6 (snapshot) | metinler kapsamı doğru söylüyor; Sheets yokken ana tutar “tam finansman değil”; snapshot B6 |
+| MS-03 | “Kalıcı toparlanma” hesabı hatalı (`[-100,50,-30,50]` → Kasım) | P1 hatalı | B2c | **giderildi**: `toparlanmaOf` ilk/kalıcı; sayfa üç hâl |
 | MS-04 | Affilate bozuk/uyumsuz kaydın üzerine yazıyor | **P0** | **B6-öncü (hemen)** | T06: ham kayıt korunur; kurtarma/üzerine yazma açık karar |
 | MS-05 | Parametre yüklemede tür dışı doğrulama yok (negatif fiyat, geçersiz tarih kabul) | P1 | **B6-öncü (hemen)** | T05: alan anlamına göre doğrulama; geçersiz değer varsayılana döner, kullanıcıya yazılır |
 | MS-06 | Sekmeler arası çakışma çözümü yok | P1 | B6 | T08 |
 | MS-07 | Updater içinde kayıt/geçmiş yan etkisi | P1 | B6 | T10 |
 | MS-08 | İş modeli (K1) varsayılanla onaylanamaz | P1 | B0/B1 | K1 “karar bekliyor” (§4.1 düzeltildi) |
 | MS-09 | Ortaklık politikası ↔ Affilate örneği bağlanmamış | P1 | B1/B5 | K2 cevabı (aylık %10 / yıllık %15, girdi) politika kaydı olur; “çözüm ortağı” adı alt türle ayrılır |
-| MS-10 | Giderin marka kapsamı ana sonuçta görünmüyor | P1 | **B2c** | ana sonuç bağlamı: “iStoc girişleri × ortak gider planı; markaya dağıtım belirlenmedi”; “Türksab toplam” denmez (B3 şirket yapısına kadar) |
-| MS-11 | Alt bilgi cümleleri geleceği olmuş gibi anlatıyor; sabit ön cümle her sayfada | P1 | **B2c** (ön cümle, nakit cümlesi), B1 (Kararlar atıfları) | her cümle mevcut davranıştan |
+| MS-10 | Giderin marka kapsamı ana sonuçta görünmüyor | P1 | B2c | **giderildi**: ana sonuç kaynak satırı kapsamla başlar; “Türksab toplam” yok (B3 şirket yapısına kadar) |
+| MS-11 | Alt bilgi cümleleri geleceği olmuş gibi anlatıyor; sabit ön cümle her sayfada | P1 | B2c | **giderildi**: `turetim` alanı + `altBilgiOnCumle`; nakit/gelir/giderler cümleleri mevcut davranış; “(Kararlar)” → “karar bekliyor” (karar kaydı B1) |
 | MS-12 | Envanter alanları kullanıcıya görünmüyor; yayın ↔ politika durumu aynı alanda | P1 | B1/B5 | `publicationStatus` / `policyStatus` ayrımı |
 | MS-13 | Kararlar karar yaşam döngüsü taşımıyor; gecikme yok | P1 | B1 | soru → seçenek → sahip → tarih → sonuç → yürürlük |
 | MS-14 | Blok taşıması yapılmadı | P1 | B5 | ct-IA-03/05/06/30 |
@@ -254,7 +254,7 @@ raporu: `once`, `simdi`, `fark`, `kullaniciYolculugu`, `kalanEngel`, `capability
 |---|---|---|---|---|---|
 | B0 | **Karar kapısı ve tek liste** | §4 cevapları (**geldi, §4.1**); docs kimlik önekleri; AGENTS “Birleşik plan” bölümü ve sayaç; archetype dışarıda | belge | §4.2 alt soruları | 1 (belge) — aktif |
 | B1 | **Kararlar gerçek kayıt olur; anlam temizliği** (CA-2) | Karar kaydı alanları (soru, seçenekler, etki, sahip, son tarih, durum: bekliyor/gecikti/karar verildi/yürürlükte); F02/F03/F16 kayıtları (`program.ts` → karar verisi); alt bilgi ön cümlesi ve yanlış vaatler kayıttan (Y5); envanter `durum` alanları düzeltilir (Affilate `taslak`); OPEX “Ödendi/Bekliyor” (Ç13); K4 uygulanırsa ad eşitleme; Gelir planı ↔ İş ortaklığı ↔ Affilate karşılıklı bağlantı | ct-IA-05/14/18/34; icerik.spec; ui.spec karar sayfası | K1–K4 | 2 |
-| B2 | **Gelir → Nakit bütünlüğü** (F04; archetype Aşama 1–2 pilotu) | `cashflow.ts`: eklenen saha personeli maliyeti çıkış satırı; `CashflowPage`: seçenek kaydını okur — taşır ya da “N seçenek taşınmadı” yazar; tek etkin girdi anlık görüntüsü (`scenarioOptions` + `scenario`), sürümlü kayıt anahtarı; `SenaryoKurucu` kayıt durumu; “yalnız bu tarayıcı” uyarısı tek bileşen (F13) | ar-13/14/15, ct-IA-23/27; gelir+nakit spec: aynı seçeneklerle iki sayfanın kadro maliyeti ve senaryo adı eşit; T03 toparlanma | — (K13 ile hemen) | 3 — B2.1 `fa58509`, B2.2 `3d10eff`; **B2c yeniden açıldı** (Codex MS-02/03/10/11): toparlanma hesabı, kapsam ve “aynen” metinleri, alt bilgi ön cümlesi |
+| B2 | **Gelir → Nakit bütünlüğü** (F04; archetype Aşama 1–2 pilotu) | `cashflow.ts`: eklenen saha personeli maliyeti çıkış satırı; `CashflowPage`: seçenek kaydını okur — taşır ya da “N seçenek taşınmadı” yazar; tek etkin girdi anlık görüntüsü (`scenarioOptions` + `scenario`), sürümlü kayıt anahtarı; `SenaryoKurucu` kayıt durumu; “yalnız bu tarayıcı” uyarısı tek bileşen (F13) | ar-13/14/15, ct-IA-23/27; gelir+nakit spec: aynı seçeneklerle iki sayfanın kadro maliyeti ve senaryo adı eşit; T03 toparlanma | — (K13 ile hemen) | 3 — B2.1 `fa58509`, B2.2 `3d10eff`, B2c (MS-02/03/10/11: toparlanma, kapsam, metinler, ön cümle) — **tamam** |
 | B3 | **Şirket yapısı ve şirket bazlı finans** (yeni; K3, K11) | `src/data/sirketler.ts`: Türksab (grup) → Mogem (Segika/SGK) ve iStoc Company (iStoc, Toptan); Sheets’e “Şirket” sütunu (Apps Script kurulum adımı + motor; boşsa “Türksab ortak”), gider kalemleri şirkete göre; Mogem sabit gelirleri Sheets’te (“Gelirler” sayfası; tutar repoya girmez); nakit akışı: şirket bazlı giriş/çıkış, Mogem → Türksab aktarımı, Türksab → iStoc yatırımı, Türksab’ın ödediği Mogem gideri; grup toplamı görünümü; Giderler ve Nakit akışı sayfalarında şirket seçici | opex-motor/opex-script: Şirket sütunu ve Gelirler; data.spec: şirket toplamları = kalem toplamları, grup = şirketler toplamı; nakit.spec: şirket seçici ve grup satırı; 320×480 | §4.2-2…4; Sheets düzenlemesi sahip | 3 |
 | B4 | **Metrik sözlüğü ve “ölçülmedi”** (CA-6) | `src/data/metrics.ts`: kimlik, birim, dönem, kaynak, olay tanımı (üye/ilk ödeme/devam eden/aktif temsilci/aktif ortak); Hedefler, rol KPI, İş ortaklığı, Temsilci ağı aynı kimliği okur; gerçekleşen yoksa “ölçülmedi” (0 çizilmez); K11 terimleri ekranda | ct-IA-16/19, ar-05 | K11, B3 (şirket/marka kapsamı) | 2 |
 | B5 | **Mevcut içeriğin taşınması** (CA-3/4/5’in mevcut-içerik kısmı) | Dijital rol `#olcum/#otomasyon/#uretim/#icerik-plani` → `/pazarlama-operasyonu/`; Kararlar `#ucret/#crm/#mesai` → `/ucret-politikasi/` ve `/musteri-yolculugu/#asamalar`; kaynakta özet + bağlantı; eski hash köprüleri; envanterde `planlandi` kalkar | ct-IA-03/05/06/30; icerik.spec | B1 | 3 |
@@ -263,7 +263,7 @@ raporu: `once`, `simdi`, `fark`, `kullaniciYolculugu`, `kalanEngel`, `capability
 | B8 | **Kapanış ve cila** (CA-8) | IA durum tablosu; 320×480 ölçüm turu (her sayfa ilk ekran, kırıntı dahil); %200 metin; gizlilik/secret taraması; rehber ve AGENTS tek liste; insan testi pilotu (§6); bağımsız QA (Codex salt-okunur, aynı anlık görüntü hash’i) | tam tur + CI; pilot raporu (sahip, K12); `not_run` listesi | B1–B7 | 2 + pilot |
 | B9 | **Birleştirme ve yayın** | Worktree dalları → `main` (ff-only); birleşmiş uzak dallar ve worktree’ler temizlenir (onayla); ana klasör hizalanır; Pages doğrulanır (200, son commit) | CI yeşil; Pages; AGENTS yayın kaydı | B8 | 1 |
 
-Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 0/10 tamamlandı, 2/10 aktif** (B0: alt sorular ve belge önekleri kalan; B2: B2c Codex bulgularıyla yeniden açıldı — 2a/2b yayında). B6’nın iki dar koruması (MS-04, MS-05) öne alındı.
+Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 3): 1/10 tamamlandı (B2), 1/10 aktif** (B0: alt sorular ve belge önekleri kalan). B6’nın iki dar koruması (MS-04, MS-05) öne alındı — sırada.
 
 ### 5.1 Sıra gerekçesi
 1. B0 önce: kararsız çelişki yeni sayfalara kopyalanır (Y3). Cevaplar geldi; alt sorular (§4.2) B1/B3 başlarken kapanır.
@@ -324,7 +324,7 @@ Codex Desktop MASTER’dan istenen: **yalnız bu belgenin** salt-okunur eleştir
 |---|---|---|---|
 | T01 | Aynı kadro, sıfır Sheets: nakit = başabaş gideri | B2 | geçti (`tests/data.spec.ts` B2) — korunur |
 | T02 | Sheets’te zaten ikinci saha kişisi: çift sayım yok | B3 | açık (şirket/kadro eşleştirme) |
-| T03 | Dönem sonu `[-100,50,-30,50]`: ilk ↔ kalıcı toparlanma | **B2c** | sırada (önce kırmızı) |
+| T03 | Dönem sonu `[-100,50,-30,50]`: ilk ↔ kalıcı toparlanma | B2c | geçti (`tests/data.spec.ts` B2c, yedi karşı örnek) |
 | T04 | 13 seçenek ↔ nakit ↔ yeniden açılış; kaynak istisnası kayıtlı ürün kararı | B2c/B6 | kısmi (B2.1 testleri) |
 | T05 | Saklanan negatif fiyat / geçersiz tarih domain’e geçmez | **B6-öncü** | sırada |
 | T06 | Affilate `v=99` / bozuk JSON: açılış ham kaydı değiştirmez | **B6-öncü** | sırada |

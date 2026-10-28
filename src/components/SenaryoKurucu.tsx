@@ -111,7 +111,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
       {/* Kapsam (ifade.md C18/C19): sıfırlama bu sayfanın seçeneklerini plan değerlerine döndürür, temel senaryo ve Parametreler
           sayfası değişmez; bağlantı yalnız bu sayfanın seçeneklerini taşır. Kopyalama sonucu düğmede değil durum satırında (C20). */}
       <p className="kurucu-kapsam">
-        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Seçenekler Nakit akışı sayfasına da aynen uygulanır (aynı etkin girdiler). Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
+        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Hesap seçenekleri (fiyat, kadro, reklam, kur, yıllık pay, ek gider, prim) Nakit akışı sayfasında da kullanılır; gider kaynağı seçeneği orada uygulanmaz (çıkışlar Sheets + plan kalemleri). Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
       </p>
       {/* Kayıt durumu tek bileşenle (F13 / UX-15; adım 2b): “kaydedildi” yalnız gerçek yazım için, saatiyle; kapalı depolamada etki alanı açık. */}
       <KayitDurumu
@@ -119,7 +119,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
         kapsam="Senaryo seçenekleri"
         durum={kayit.durum}
         zaman={kayit.zaman}
-        etki={kayit.durum === 'kaydedilemedi' ? 'Nakit akışı sayfasına taşınmaz; bağlantı yine çalışır.' : 'Gelir planı ve Nakit akışı aynı seçenekleri okur.'}
+        etki={kayit.durum === 'kaydedilemedi' ? 'Nakit akışı sayfasına taşınmaz; bağlantı yine çalışır.' : 'Gelir planı ve Nakit akışı aynı hesap seçeneklerini okur (gider kaynağı hariç).'}
       />
       <p className="kurucu-durum" role="status" aria-live="polite">
         {kopya === 'oldu' ? 'Senaryo bağlantısı panoya kopyalandı.' : kopya === 'olmadi' ? 'Senaryo bağlantısı panoya kopyalanamadı. Tarayıcının adres çubuğundaki bağlantıyı seçip kopyalayabilirsiniz.' : ''}
