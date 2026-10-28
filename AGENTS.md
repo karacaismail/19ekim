@@ -872,6 +872,17 @@ kalite kapıları; Astro/React/Mantine/ECharts korunur, toplu yeniden yazma yok 
 gelir → nakit özel senaryo bağı, F04/IA-23 ile örtüşür). Durum: **paket açılmadı**; uygulama CA-8 kapanışından sonra.
 Belgedeki “önerilen” ad, dizin ve komutlar mevcut özellik gibi sunulmaz (belge yalnız yönergedir; §Teslim notu).
 
+### birlesik_plan.md: birleşik düzenleme ve bitirme planı B1 (taslak, 2026-10-28)
+
+Kullanıcı isteği 2026-10-28 (“yaklaşımların toplamında çelişki kaldı mı; asıl ihtiyaca odaklı eleştirel inceleme, toplu plan,
+Codex eleştirisi, uygula, cilala, bitir”). `docs/birlesik_plan.md`: asıl ihtiyaç hipotezi (S0), yedi programın durumu,
+yapısal bulgular (Y1–Y10), belgeler arası çelişkiler (Ç1–Ç13), kod denetimi (F02/F03/F04/F16/F13 kanıtları; altı okuma
+işinin kapsamı), sahip kararları (K1–K13, varsayılanlarıyla), plan B0–B8 (payda 9; CA-2…CA-8 ve archetype’ın gereken
+parçaları tek listede; ertelenen/kesilenler gerekçeli), bitiş tanımı ve Codex’e eleştiri soruları. Durum: **taslak** —
+sahibin S0/K cevapları ve Codex eleştirisi (`docs/birlesik_plan_elestiri.md`, önek `bp-`) bekleniyor; B paketleri
+başlayınca ilerleme `X/9 tamamlandı, Z/9 aktif` sayacıyla bu bölümün altına yazılır. Teknik P0 (B2: Nakit akışı eklenen
+saha personelinin maaşını saymıyor; Gelir planı seçenekleri taşınmıyor) K13 ile Codex’i beklemeden başlayabilir.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
