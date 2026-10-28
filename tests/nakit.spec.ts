@@ -1,4 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
+import { buildModel as siteModel } from '../src/data/model';
+import { DEFAULT_PARAMS } from '../src/data/params';
+import { tl } from '../src/lib/format';
+import { OPTIONS_KEY, presetOptions, presetsOf } from '../src/lib/scenarioOptions';
 import { buildModel, reply } from './opex-fixture';
 
 /**
@@ -300,6 +304,50 @@ test.describe('nakit akış tablosu', () => {
     await expect(kayitlar.first().locator('.kayit-ozet-deger')).toHaveText(tablo.rows[1][1]);
     const alanlar = await kayitlar.first().locator('dl.kayit-alanlar > div').evaluateAll((divs) => divs.map((d) => [d.querySelector('dt')?.textContent?.trim(), d.querySelector('dd')?.textContent?.replace(/\s+/g, ' ').trim()]));
     expect(alanlar).toEqual(tablo.rows.map((r) => [r[0], r[1]]));
+  });
+
+  /*
+   * B2 (docs/birlesik_plan.md §3.3-C, ct-F04 / ar-13; kullanıcı kararı 2026-10-28): gelir planının seçenekleri nakit akışına
+   * taşınır — aynı ad, aynı etkin girdiler; eklenen saha personelinin işveren maliyeti çıkış satırıdır; seçenek notu görünür;
+   * temel senaryo değişince seçenekler kalır (“Özel: … + n değişiklik”).
+   */
+  test('B2: gelir planı seçenekleri taşınır — “Saha ağırlıklı” adı, eklenen saha personeli Aralık 2026’da üç kişi, seçenek notu; temel değişince seçenekler kalır', async ({ page }) => {
+    const site = siteModel(DEFAULT_PARAMS);
+    const saha = presetsOf(DEFAULT_PARAMS).find((x) => x.id === 'saha')!;
+    const opts = presetOptions(DEFAULT_PARAMS, saha);
+    await acikUc(page);
+    await page.addInitScript(
+      ({ key, value, base }) => {
+        localStorage.setItem(key, JSON.stringify(value));
+        localStorage.setItem('istoc-plan-senaryo', base);
+      },
+      { key: OPTIONS_KEY, value: opts, base: saha.base },
+    );
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
+    const sonuc = page.locator('.sonuc');
+    await expect(sonuc.locator('.sonuc-baslik')).toContainText('Saha ağırlıklı');
+    await expect(page.locator('.nakit-secenekler')).toContainText(/4 değişiklik/);
+    await expect(page.locator('.nakit-secenekler').getByRole('link', { name: /Gelir planı/ })).toHaveAttribute('href', /\/gelir-plani\/$/);
+    await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
+    const satirlar = page.locator('.table-block:has(#nakit-tablo) tbody tr');
+    const satir = satirlar.filter({ has: page.locator('th', { hasText: 'Eklenen saha personeli' }) });
+    await expect(satir).toHaveCount(1);
+    const hucreler = await satir.locator('td').allTextContents();
+    const kisi = Math.round(site.salaries.saha * DEFAULT_PARAMS.costFactor * 100) / 100;
+    // Sütunlar: Eki, Kas, Ara 2026 … ; Kasım 0 ₺, Aralık üç kişi (ikinci saha + 2 ek saha).
+    expect(hucreler[1].trim()).toBe('0 ₺');
+    expect(hucreler[2].trim()).toBe(tl(3 * kisi));
+    // Temel senaryo değişince seçenekler kalır: ad “Özel: Kötümser + 4 değişiklik”.
+    await sonuc.getByRole('group', { name: 'Senaryo' }).getByRole('button', { name: 'Kötümser' }).click();
+    await expect(sonuc.locator('.sonuc-baslik')).toContainText('Özel: Kötümser + 4 değişiklik');
+    await expect(satir.locator('td').nth(2)).toHaveText(tl(3 * kisi));
+    await page.evaluate(() => {
+      localStorage.removeItem('istoc-plan-senaryo');
+      localStorage.removeItem('istoc-plan-senaryo-secenekler');
+    });
   });
 
   test('Sheets okunamazsa tablo plan kalemleriyle kalır ve Giderler sayfasına yönlendirir', async ({ page }) => {

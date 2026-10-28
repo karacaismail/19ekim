@@ -5612,7 +5612,8 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 }
 
 /* ---------- Nakit akış tablosu (/nakit-akisi/; kullanıcı kararı 2026-10-27) ---------- */
-.nakit-kaynak {
+.nakit-kaynak,
+.nakit-secenekler {
   margin: var(--space-4) 0 0;
   max-width: var(--prose-max);
   color: var(--text-secondary);

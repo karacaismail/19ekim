@@ -7,11 +7,12 @@ import { DEFAULT_NOTES } from '../src/data/notes';
 import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
 import { addedSahaCosts, makeStaffing, staffingSheet } from '../src/data/staffing';
 import { adCapacity, adSchedule, growthHires, HORIZON, priceSeries } from '../src/data/revenue';
-import { buildCashflow } from '../src/data/cashflow';
+import { buildCashflow, cashSeriesOf } from '../src/data/cashflow';
 import { buildModel } from '../src/data/model';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
-import { addDays, shiftText } from '../src/lib/dates';
+import { addDays, monthStart, shiftText } from '../src/lib/dates';
+import { presetOptions, presetsOf } from '../src/lib/scenarioOptions';
 import { buildModel as buildOpex } from './opex-fixture';
 
 const m = buildModel(DEFAULT_PARAMS);
@@ -437,6 +438,75 @@ test.describe('nakit akış tablosu', () => {
     const z = buildCashflow(m.cashflow, null);
     expect(z.sheets).toBe(false);
     expect(z.cikislar.every((l) => l.kaynak === 'plan')).toBe(true);
+  });
+
+  /*
+   * B2 (docs/birlesik_plan.md §3.3-C, ct-F04, ar-13; kullanıcı kararı 2026-10-28): nakit akışı, gelir planının eklediği saha
+   * personelinin (ikinci, ek, büyüme) işveren maliyetini çıkış olarak sayar ve gelir planı seçenekleriyle aynı etkin
+   * girdileri kullanır — aynı girdilerle iki sayfanın gideri ve geliri ay ay eşittir.
+   */
+  test('B2: eklenen saha personelinin işveren maliyeti çıkışlarda — seri.sahaEk = addedSahaCosts; “Eklenen saha personeli” satırı; ikinci saha ayında tek kişi', () => {
+    const plan = m.cashflow;
+    const months = m.revenue.months;
+    const top = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+    for (const sc of m.revenue.scenarios) {
+      const beklenen = addedSahaCosts(DEFAULT_PARAMS, m, months, m.revenue.inputsFor(sc));
+      const s = plan.seri[sc.id];
+      expect(s.sahaEk.length).toBe(15);
+      for (let i = 0; i < 15; i++) expect(s.sahaEk[i], `${sc.id} ay ${i}`).toBeCloseTo(beklenen[i], 1);
+    }
+    expect(top(plan.seri.medyan.sahaEk)).toBeGreaterThan(0);
+    // Kötümser büyümez: yalnız ikinci saha; medyan her 6 ayda bir kişi ekler.
+    expect(top(plan.seri.kotumser.sahaEk)).toBeLessThan(top(plan.seri.medyan.sahaEk));
+    const cf = buildCashflow(plan, opex);
+    const satir = cf.cikislar.find((l) => l.ad.startsWith('Eklenen saha personeli'))!;
+    expect(satir).toBeTruthy();
+    expect(satir.kaynak).toBe('plan');
+    expect(satir.toplam).toBeCloseTo(top(plan.seri.medyan.sahaEk), 0);
+    const kisi = Math.round(m.salaries.saha * DEFAULT_PARAMS.costFactor * 100) / 100;
+    const ikinci = cf.aylar.findIndex((a) => a.iso === monthStart(DEFAULT_PARAMS.secondSahaDate));
+    expect(ikinci).toBeGreaterThan(0);
+    expect(satir.aylar[ikinci - 1]).toBe(0);
+    expect(satir.aylar[ikinci]).toBeCloseTo(kisi, 0);
+    // Çıkış toplamı satırı içerir (önceki modelde eksikti): Sheets + plan kalemleri + eklenen kadro.
+    expect(cf.toplam.cikis).toBeCloseTo(cf.cikislar.reduce((t, l) => t + l.toplam, 0), 0);
+  });
+
+  test('B2: aynı girdilerle gelir planının gideri ve geliri = nakit akışının çıkışı ve girişi (ar-13); “Saha ağırlıklı” seçenekleri taşınır', () => {
+    const p = DEFAULT_PARAMS;
+    const r = m.revenue;
+    const saha = presetsOf(p).find((x) => x.id === 'saha')!;
+    const opts = presetOptions(p, saha);
+    const be = computeBreakeven(p, m, r, saha.base, opts, opex);
+    expect(be.kaynak).toBe('sheets');
+    const seri = cashSeriesOf(p, m, r, be.inputs);
+    const cf = buildCashflow(m.cashflow, opex, saha.base, { seri, ekSabit: opts.ekSabit, primDahil: opts.primDahil });
+    expect(cf.aylar.map((a) => a.iso)).toEqual(be.months.map((x) => x.iso));
+    for (let i = 0; i < 15; i++) {
+      expect(cf.cikis[i], `çıkış ay ${i}`).toBeCloseTo(be.gider[i], 0);
+      expect(cf.giris[i] - m.cashflow.yatirim[i], `giriş ay ${i}`).toBeCloseTo(be.gelir[i], 0);
+    }
+    // Aralık 2026: ikinci saha + 2 ek saha = üç kişinin işveren maliyeti.
+    const kisi = Math.round(m.salaries.saha * p.costFactor * 100) / 100;
+    expect(seri.sahaEk[2]).toBeCloseTo(3 * kisi, 0);
+    // Seçeneksiz temel seriyle fark var: seçenekler gerçekten taşındı.
+    expect(Math.abs(cf.toplam.cikis - buildCashflow(m.cashflow, opex, 'medyan').toplam.cikis)).toBeGreaterThan(1);
+  });
+
+  test('B2: ek sabit gider seçeneği çıkış satırı; prim hariç seçeneğinde prim satırı yok; fiyat seçeneği girişleri değiştirir', () => {
+    const p = DEFAULT_PARAMS;
+    const r = m.revenue;
+    const opts = { ...defaultFilters(p), ekSabit: 100_000, primDahil: false, priceEur: p.subscriptionEur * 2 };
+    const seri = cashSeriesOf(p, m, r, inputsOf(p, r, 'medyan', opts));
+    const cf = buildCashflow(m.cashflow, opex, 'medyan', { seri, ekSabit: opts.ekSabit, primDahil: opts.primDahil });
+    const ek = cf.cikislar.find((l) => l.ad.startsWith('Ek sabit gider'))!;
+    expect(ek.kaynak).toBe('plan');
+    expect(ek.aylar.every((v) => v === 100_000)).toBe(true);
+    expect(cf.cikislar.some((l) => l.ad.startsWith('Satış primi'))).toBe(false);
+    const temel = buildCashflow(m.cashflow, opex, 'medyan');
+    expect(cf.toplam.giris).toBeGreaterThan(temel.toplam.giris);
+    expect(temel.cikislar.some((l) => l.ad.startsWith('Ek sabit gider'))).toBe(false);
+    expect(temel.cikislar.some((l) => l.ad.startsWith('Satış primi'))).toBe(true);
   });
 });
 

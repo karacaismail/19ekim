@@ -23,7 +23,8 @@ bağımsız modül vardır:
   `src/data/revenue.ts`, `src/data/staffing.ts`, `src/data/digitalStrategy.ts`, `src/data/breakeven.ts`; durum
   `src/lib/scenarioOptions.ts`; temel senaryo `src/lib/scenario.ts` ile nakit akış tablosu ve istihdam takvimiyle ortak.
 - **Nakit akış tablosu** (`/nakit-akisi/`, Finans menüsünde “Nakit akışı”): çıkışlar Sheets’ten canlı, girişler gelir planının
-  seçili senaryosundan; basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
+  seçili senaryosundan ve seçeneklerinden (aynı etkin girdiler; eklenen saha personelinin işveren maliyeti plan kalemi);
+  basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
   geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
 - **Affilate** (`/affilate/`): Segika satış ortaklığı komisyon simülasyonu; üç ortak modeli (Ayşe ilk fatura, satış ortağı,
@@ -59,7 +60,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 1131 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 1137 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 

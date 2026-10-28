@@ -15,7 +15,8 @@ import type { ScenarioId } from '../lib/scenario';
 import type { OpexModel, YilKey } from './opex';
 import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
-import type { Revenue, Scenario } from './revenue';
+import { simulate, type Revenue, type Scenario, type Sim, type SimInputs } from './revenue';
+import { addedSahaCosts } from './staffing';
 
 export interface CashMonth {
   /** Ayın ilk günü (ISO) */
@@ -56,6 +57,42 @@ export interface CashSeries {
   prim: number[];
   /** Satıcı kazanım reklam bütçesi (senaryoya göre ölçeklenir; Sheets’te yok) */
   reklam: number[];
+  /**
+   * Gelir planının eklediği saha personelinin (ikinci, ek, büyüme kuralı) işveren maliyeti — Sheets’te tek saha personeli
+   * vardır; gelir planının başabaş hesabıyla aynı kural (B2, docs/birlesik_plan.md §3.3-C: önceden çıkışlarda yoktu).
+   */
+  sahaEk: number[];
+}
+
+/** Gelir planı ayını nakit ızgarasına eşler: ufuk dışı (program öncesi Ekim) sıfır. */
+function pickTo(aylar: CashMonth[], t0: number, xs: number[]) {
+  return aylar.map((m) => {
+    const k = monthNo(m.iso) - t0;
+    return k >= 0 && k < xs.length ? r2(xs[k]) : 0;
+  });
+}
+
+/** Bir simülasyonun (temel senaryo ya da gelir planı seçenekleri) nakit ızgarasına oturtulmuş serileri. */
+function seriOf(p: Params, aylar: CashMonth[], t0: number, sim: Sim, sahaEk: number[]): CashSeries {
+  const yeniAktif = pickTo(aylar, t0, sim.yeniAktif);
+  return {
+    yeniAktif,
+    odeyen: pickTo(aylar, t0, sim.odeyen),
+    ilkOdeme: pickTo(aylar, t0, sim.ilkOdeme),
+    yenilemeTl: pickTo(aylar, t0, sim.yenileme),
+    prim: yeniAktif.map((n) => r2(n * p.commission)),
+    reklam: pickTo(aylar, t0, sim.butce),
+    sahaEk: pickTo(aylar, t0, sahaEk),
+  };
+}
+
+/**
+ * Gelir planı sayfasının etkin girdileriyle (temel senaryo + seçenekler; `breakeven.ts → inputsOf`) nakit serileri — B2
+ * (ct-F04, ar-13): iki sayfa aynı simülasyonu ve aynı eklenen kadro maliyetini kullanır.
+ */
+export function cashSeriesOf(p: Params, prog: ProgramModel, rev: Revenue, inputs: SimInputs): CashSeries {
+  const t0 = monthNo(rev.months[0].iso);
+  return seriOf(p, CASH_MONTHS, t0, simulate(p, prog, rev.months, inputs), addedSahaCosts(p, prog, rev.months, inputs));
 }
 
 export interface CashPlan {
@@ -76,25 +113,8 @@ export interface CashPlan {
 export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashPlan {
   const aylar = CASH_MONTHS;
   const t0 = monthNo(rev.months[0].iso);
-  /** Gelir planı ayına eşle: ufuk dışı (program öncesi Ekim) sıfır. */
-  const pick = (xs: number[]) =>
-    aylar.map((m) => {
-      const k = monthNo(m.iso) - t0;
-      return k >= 0 && k < xs.length ? r2(xs[k]) : 0;
-    });
-  const seri = Object.fromEntries(
-    rev.series.map((x) => [
-      x.scenario.id,
-      {
-        yeniAktif: pick(x.yeniAktif),
-        odeyen: pick(x.odeyen),
-        ilkOdeme: pick(x.ilkOdeme),
-        yenilemeTl: pick(x.yenileme),
-        prim: pick(x.yeniAktif).map((n) => r2(n * p.commission)),
-        reklam: pick(x.butce),
-      } satisfies CashSeries,
-    ]),
-  ) as Record<ScenarioId, CashSeries>;
+  // Temel senaryoların serileri; eklenen saha personelinin işveren maliyeti senaryonun kendi girdileriyle (B2).
+  const seri = Object.fromEntries(rev.series.map((x) => [x.scenario.id, seriOf(p, aylar, t0, x, addedSahaCosts(p, prog, rev.months, rev.inputsFor(x.scenario)))])) as Record<ScenarioId, CashSeries>;
   const metaStart = monthNo(monthStart(p.metaStartDate));
   const metaAylik = r2((p.metaWeekly * 52) / 12);
   const yatirimAy = monthNo(monthStart(p.investmentDate));
@@ -122,6 +142,8 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
         ? `Yatırım girişi: ${p.investmentAmount.toLocaleString('tr-TR')} ₺, ${monthName(monthStart(p.investmentDate))} ${p.investmentDate.slice(0, 4)} (parametre); başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺.`
         : `Yatırım girişi ayı (${p.investmentDate}) tablo dönemi dışında; tabloya girmez. Başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺.`,
       'Çıkışlar: Google Sheets’teki 15 aylık gider planı (kategori bazında; bordrolu personel işveren maliyeti teşvik düşülmüş; freelancer faturaları KDV dahil) — Giderler sayfasıyla aynı canlı veri. Ödeme ayı = gider ayı (SGK ve vergi gecikmesi modellenmez).',
+      `Eklenen saha personeli (plan kalemi): ikinci saha personeli (parametre ${monthName(monthStart(p.secondSahaDate))} ${p.secondSahaDate.slice(0, 4)}; gelir planı seçeneğiyle değişir), ek saha ve büyüme kuralıyla gelen saha personeli başladıkları aydan itibaren işveren maliyetiyle (maaş × ${p.costFactor.toLocaleString('tr-TR')}). Sheets’te tek saha personeli vardır; gelir planının başabaş hesabıyla aynı kural.`,
+      'Gelir planı sayfasındaki senaryo seçenekleri (fiyat, ikinci saha ayı, ek saha, reklam bütçesi ve ölçek, kur artışı, büyüme kuralı, yıllık peşin payı, ek sabit gider, prim) bu tabloya aynen uygulanır: iki sayfa aynı etkin girdileri okur. Gider kaynağı seçeneği burada uygulanmaz; çıkışlar her zaman Sheets’ten gelir.',
     ],
   };
 }
@@ -175,10 +197,22 @@ function sheetsLines(m: OpexModel, aylar: CashMonth[]): CashLine[] {
   return [...insan, ...out];
 }
 
+/** Gelir planı seçeneklerinin nakit tablosuna taşınan kısmı (B2): seriler etkin girdilerden, ek sabit gider ve prim seçeneği. */
+export interface CashSecenek {
+  /** `cashSeriesOf` ile etkin girdilerden; yoksa temel senaryonun serisi */
+  seri?: CashSeries;
+  /** Ek sabit gider, ₺ / ay (gelir planı seçeneği; 0 = satır yok) */
+  ekSabit?: number;
+  /** Satış primi gider olarak sayılsın mı (gelir planı seçeneği) */
+  primDahil?: boolean;
+}
+
 /** Seçili senaryonun girişleri, plan çıkışları ve (varsa) Sheets çıkışlarından tam tablo. */
-export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: ScenarioId = 'medyan'): Cashflow {
+export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: ScenarioId = 'medyan', secenek: CashSecenek = {}): Cashflow {
   const { aylar } = plan;
-  const s = plan.seri[senaryo];
+  const s = secenek.seri ?? plan.seri[senaryo];
+  const ekSabit = secenek.ekSabit ?? 0;
+  const primDahil = secenek.primDahil ?? true;
   const girisler: CashLine[] = [
     line('Abonelik: ilk ödemeler', 'plan', s.ilkOdeme),
     line('Abonelik: yenilemeler', 'plan', s.yenilemeTl),
@@ -186,9 +220,12 @@ export function buildCashflow(plan: CashPlan, opex: OpexModel | null, senaryo: S
   ];
   const cikislar: CashLine[] = [
     ...(opex ? sheetsLines(opex, aylar) : []),
+    // Sheets’te tek saha personeli vardır; gelir planının eklediği saha kadrosu plan kalemidir (B2 — önceden eksikti).
+    line('Eklenen saha personeli (plan)', 'plan', s.sahaEk),
     line('Meta reklamları (plan)', 'plan', plan.meta),
     line('Satıcı kazanım reklamı (plan)', 'plan', s.reklam),
-    line('Satış primi (plan, en çok)', 'plan', s.prim),
+    ...(primDahil ? [line('Satış primi (plan, en çok)', 'plan', s.prim)] : []),
+    ...(ekSabit > 0 ? [line('Ek sabit gider (seçenek)', 'plan', aylar.map(() => ekSabit))] : []),
   ];
   const giris = aylar.map((_, i) => sum(girisler.map((l) => l.aylar[i])));
   const cikis = aylar.map((_, i) => sum(cikislar.map((l) => l.aylar[i])));

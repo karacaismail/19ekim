@@ -121,6 +121,9 @@ test.describe('gelir planı', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.getByRole('group', { name: 'Senaryo' }).first().getByRole('button', { name: 'İyimser' })).toHaveAttribute('aria-pressed', 'true');
+    // B2 (ct-F04): seçenekler de taşınır — nakit akışı aynı özel senaryo adını ve değişiklik sayısını gösterir.
+    await expect(page.locator('.sonuc-baslik')).toContainText('Özel: İyimser + 2 değişiklik');
+    await expect(page.locator('.nakit-secenekler')).toContainText(/2 değişiklik/);
     await page.evaluate(() => {
       localStorage.removeItem('istoc-plan-senaryo');
       localStorage.removeItem('istoc-plan-senaryo-secenekler');

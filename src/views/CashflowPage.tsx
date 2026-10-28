@@ -5,9 +5,11 @@ import { PageHeader } from '../components/PageHeader';
 import { ResultSummary } from '../components/ResultSummary';
 import { Araclar, ModSecimi, SenaryoSecimi, type Mod } from '../components/Senaryo';
 import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
-import { buildCashflow, type CashLine, type Cashflow } from '../data/cashflow';
+import { inputsOf } from '../data/breakeven';
+import { buildCashflow, cashSeriesOf, type CashLine, type Cashflow } from '../data/cashflow';
 import { tl } from '../lib/format';
-import { useScenario, type ScenarioId } from '../lib/scenario';
+import type { ScenarioId } from '../lib/scenario';
+import { scenarioLabel, useScenarioOptions } from '../lib/scenarioOptions';
 import { useOpexOnce } from '../lib/useOpex';
 
 /**
@@ -59,11 +61,24 @@ const para = (v: number) => tl(v);
 function Icerik() {
   const m = useModel();
   const durum = useOpexOnce();
-  const [sid, setSid] = useScenario();
+  // Senaryo durumu gelir planıyla ortak (B2, ct-F04 / ar-13): temel senaryo + seçenekler aynı kayıttan okunur; iki sayfa aynı
+  // etkin girdileri ve aynı eklenen kadro maliyetini kullanır. Üç senaryo kıyası aynı seçeneklerle üç temel senaryodur.
+  const state = useScenarioOptions(m.params);
+  const { base: sid, setBase: setSid, opts, changes } = state;
+  const { ad: senaryoAdi, role: senaryoRol } = scenarioLabel(state);
   const [ayrintili, setAyrintili] = useState(false);
   const [mod, setMod] = useState<Mod>('secili');
   const opex = durum.status === 'ready' ? durum.model : null;
-  const hepsi = useMemo(() => Object.fromEntries(m.cashflow.senaryolar.map((s) => [s.id, buildCashflow(m.cashflow, opex, s.id)])) as Record<ScenarioId, Cashflow>, [m, opex]);
+  const hepsi = useMemo(
+    () =>
+      Object.fromEntries(
+        m.cashflow.senaryolar.map((s) => {
+          const seri = cashSeriesOf(m.params, m, m.revenue, inputsOf(m.params, m.revenue, s.id, opts));
+          return [s.id, buildCashflow(m.cashflow, opex, s.id, { seri, ekSabit: opts.ekSabit, primDahil: opts.primDahil })];
+        }),
+      ) as Record<ScenarioId, Cashflow>,
+    [m, opex, opts],
+  );
   const cf = hepsi[sid];
   const sc = m.cashflow.senaryolar.find((s) => s.id === sid)!;
   const rows = satirlar(cf, ayrintili);
@@ -100,12 +115,12 @@ function Icerik() {
         purpose={`${cf.aylar.length} ayın nakit girişleri, çıkışları, net akışı ve dönem sonu nakdi; nakit açığı tavanı ek nakit ihtiyacını gösterir.`}
         meta={[
           { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
-          { label: 'Kaynak', value: 'Girişler gelir planı senaryosu · çıkışlar Google Sheets' },
+          { label: 'Kaynak', value: 'Girişler gelir planının senaryo ve seçenekleri · çıkışlar Google Sheets + plan kalemleri' },
         ]}
       />
       <ResultSummary
         baslik="Sonuç"
-        senaryo={{ ad: sc.name, role: sc.role }}
+        senaryo={{ ad: senaryoAdi, role: senaryoRol }}
         donem={`${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay`}
         ana={{
           etiket: 'Nakit açığı tavanı',
@@ -114,7 +129,7 @@ function Icerik() {
         }}
         durum={sonucDurum}
         tools={secici}
-        kiyas={{ temel: 'Aynı Sheets giderleriyle üç senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
+        kiyas={{ temel: 'Aynı Sheets giderleri ve aynı seçeneklerle üç temel senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
         ikincil={[
           { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} · ${cf.enDusuk.ay.kisa}` },
           { etiket: 'Toparlanma', deger: cf.toparlanma ? (cf.enDusuk.deger >= 0 ? 'Hiç negatife düşmüyor' : cf.toparlanma.kisa) : 'Dönem içinde yok' },
@@ -123,21 +138,21 @@ function Icerik() {
         ]}
         kaynak={
           cf.sheets
-            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu.'
-            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu.'
+            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (eklenen saha personeli, satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu ve seçenekleri.'
+            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu ve seçenekleri.'
         }
       />
       <Section
         id="ozet"
         title="Özet"
-        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan, çıkışlar Sheets’teki gider planından; satış primi ve satıcı kazanım reklamı plan kalemleridir.`}
+        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan ve seçeneklerinden, çıkışlar Sheets’teki gider planından; eklenen saha personeli, satış primi ve satıcı kazanım reklamı plan kalemleridir.`}
         tools={cubuk()}
       >
         <Stats
           items={[
-            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `${sc.name} · 15 ay toplamı` },
+            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `${senaryoAdi} · 15 ay toplamı` },
             { label: 'Nakit çıkışı', value: tl(cf.toplam.cikis), note: cf.sheets ? 'Sheets + plan kalemleri' : 'Yalnız plan kalemleri' },
-            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `${sc.name} · 15 ay toplamı` },
+            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `${senaryoAdi} · 15 ay toplamı` },
             { label: 'En düşük nakit', value: tl(cf.enDusuk.deger), note: `${cf.enDusuk.ay.ad} sonu` },
             { label: 'Nakit açığı tavanı', value: cf.acik ? tl(cf.acik) : '0 ₺', note: cf.acik ? 'Dönem sonu nakdi sıfırın altına düşürmeyen en küçük ek nakit' : 'Dönem sonu nakit hiç negatife düşmüyor' },
           ]}
@@ -151,10 +166,16 @@ function Icerik() {
             </>
           ) : null}
         </p>
+        {/* Gelir planı seçeneklerinin taşındığı açıkça yazılır (B2, ct-F04; ct-IA-23): hangi seçeneklerle bakıldığı ve nerede değiştiği. */}
+        <p className="nakit-secenekler">
+          {changes ? `Gelir planı seçenekleri uygulandı: ${changes} değişiklik (${senaryoAdi}). ` : 'Gelir planı seçenekleri: genel plan değerleri (değişiklik yok). '}
+          {opts.kaynak === 'plan' ? 'Gider kaynağı seçeneği burada uygulanmaz; çıkışlar Sheets’ten. ' : ''}
+          Seçenekler <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirilir; iki sayfa aynı etkin girdileri kullanır.
+        </p>
         <DataTable
           id="senaryo-karsilastirma"
           title="Üç senaryo: 15 ayın özeti"
-          note="Aynı Sheets giderleri; girişler ve satış primi senaryoya göre. Seçili senaryo vurgulanır."
+          note="Aynı Sheets giderleri ve aynı seçenekler; girişler, satış primi ve eklenen saha personeli temel senaryoya göre. Seçili senaryo vurgulanır."
           tools={cubuk()}
           columns={[
             // Ölçüt sırası riske göre (ux_v2.md §3.1): önce en düşük nakit ve ayı, açık tavanı, toparlanma, dönem sonu; akışlar sonra.
@@ -242,7 +263,8 @@ function Icerik() {
         <Note title="Okuma">
           <p>
             Dönem sonu nakit = dönem başı nakit + net nakit akışı. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir; yatırım
-            girişi ve başlangıç nakdi parametresi bunu değiştirir. Senaryo seçimi girişleri ve satış primini değiştirir; Sheets giderleri üç senaryoda aynıdır. Tutarlar ₺, kuruş
+            girişi ve başlangıç nakdi parametresi bunu değiştirir. Senaryo seçimi girişleri, satış primini ve eklenen saha personelini değiştirir; Sheets giderleri üç senaryoda aynıdır;
+            gelir planı seçenekleri üç temel senaryoya aynen uygulanır. Tutarlar ₺, kuruş
             yuvarlanır; sıfır 0 ₺ yazılır. Gelir planındaki “en yüksek birikmiş açık” yalnız modelin gelir − gider birikimidir; nakit açığı tavanı
             başlangıç nakdi ve yatırım girişini de sayar, ayrı ölçüttür.
           </p>

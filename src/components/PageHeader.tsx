@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ICERIK, kirinti } from '../data/icerik';
 import { useFrame } from '../lib/frame';
-import { href, normalizePath } from '../lib/paths';
+import { href } from '../lib/paths';
 
 /** Kırıntı satırının sağındaki sayfa araçları yeri (ör. Giderler döviz kurları, portal ile). */
 export const PAGE_TOOLS_ID = 'sayfa-araclari';

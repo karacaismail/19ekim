@@ -111,7 +111,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
       {/* Kapsam (ifade.md C18/C19): sıfırlama bu sayfanın seçeneklerini plan değerlerine döndürür, temel senaryo ve Parametreler
           sayfası değişmez; bağlantı yalnız bu sayfanın seçeneklerini taşır. Kopyalama sonucu düğmede değil durum satırında (C20). */}
       <p className="kurucu-kapsam">
-        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
+        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Seçenekler Nakit akışı sayfasına da aynen uygulanır (aynı etkin girdiler). Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
       </p>
       <p className="kurucu-durum" role="status" aria-live="polite">
         {kopya === 'oldu' ? 'Senaryo bağlantısı panoya kopyalandı.' : kopya === 'olmadi' ? 'Senaryo bağlantısı panoya kopyalanamadı. Tarayıcının adres çubuğundaki bağlantıyı seçip kopyalayabilirsiniz.' : ''}

@@ -87,6 +87,15 @@ export function diffCount(p: Params, opts: ScenarioOptions) {
   return KEYS.filter((k) => opts[k] !== d[k]).length;
 }
 
+/**
+ * Seçili senaryonun görünen adı ve rolü: hazır kümenin adı ya da “Özel: Temel + n değişiklik”. Gelir planı ve nakit akışı
+ * aynı adı gösterir (B2, ct-F04: aynı durum, aynı ad).
+ */
+export function scenarioLabel(s: { presets: Preset[]; base: ScenarioId; preset: Preset | null; changes: number }): { ad: string; role: RoleKey } {
+  const temel = s.presets.find((x) => x.id === s.base)!;
+  return s.preset ? { ad: s.preset.name, role: s.preset.role } : { ad: `Özel: ${temel.name} + ${s.changes} değişiklik`, role: temel.role };
+}
+
 export function toQuery(base: ScenarioId, opts: ScenarioOptions, d: ScenarioOptions): string {
   const q = new URLSearchParams();
   q.set('senaryo', base);

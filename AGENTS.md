@@ -883,6 +883,27 @@ sahibin S0/K cevapları ve Codex eleştirisi (`docs/birlesik_plan_elestiri.md`, 
 başlayınca ilerleme `X/9 tamamlandı, Z/9 aktif` sayacıyla bu bölümün altına yazılır. Teknik P0 (B2: Nakit akışı eklenen
 saha personelinin maaşını saymıyor; Gelir planı seçenekleri taşınmıyor) K13 ile Codex’i beklemeden başlayabilir.
 
+Kullanıcı kararı 2026-10-28: S0 (asıl ihtiyaç tanımı) onaylandı; K1–K13 için varsayılanlar uygulanır (K13(a): B2 hemen).
+**Sayaç: 0/9 tamamlandı, 1/9 aktif (B2).**
+
+**B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
+Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,
+`istoc-plan-senaryo` ve `istoc-plan-senaryo-secenekler`; adres çubuğuna da yazılır): üç temel senaryo aynı seçeneklerle
+hesaplanır (`cashflow.ts → cashSeriesOf(p, prog, rev, inputsOf(…))`, `buildCashflow(plan, opex, senaryo, { seri, ekSabit,
+primDahil })`), ad gelir planıyla aynı (`scenarioOptions.ts → scenarioLabel`: hazır küme adı ya da “Özel: Temel + n
+değişiklik”), Özet’te `.nakit-secenekler` notu (kaç değişiklik, Gelir planı bağlantısı; gider kaynağı seçeneği burada
+uygulanmaz — çıkışlar her zaman Sheets’ten). **Sayısal düzeltme:** gelir planının eklediği saha personelinin (ikinci, ek,
+büyüme kuralı) işveren maliyeti çıkış satırı “Eklenen saha personeli (plan)” (`CashSeries.sahaEk`,
+`staffing.ts → addedSahaCosts`; temel senaryolarda da) — önceden nakit akışı bu kişilerin gelirini sayıyor, maaşını
+saymıyordu, nakit açığı tavanı olduğundan küçük görünüyordu. Ek sabit gider seçeneği ayrı satır; prim hariç seçeneğinde
+prim satırı yok. Varsayımlar listesine iki madde; senaryo kurucuda “Seçenekler Nakit akışı sayfasına da aynen uygulanır”.
+Değişmez (ar-13): aynı girdilerle gelir planının gideri/geliri ile nakit akışının çıkışı/girişi ay ay eşit. Testler:
+`tests/data.spec.ts` B2 ×3 (sahaEk = addedSahaCosts, ikinci saha ayında tek kişi; “Saha ağırlıklı” ile ay ay eşitlik ve
+Aralık 2026’da üç kişi; ek sabit / prim / fiyat seçenekleri), `tests/nakit.spec.ts` B2 (ad, satır, not, temel değişince
+seçenekler kalır), `tests/gelir.spec.ts` (nakit akışında “Özel: İyimser + 2 değişiklik”). CA-1 artığı: `PageHeader`
+kullanılmayan `normalizePath` içe aktarımı kaldırıldı. **Kalan (B2.2):** tek etkin girdi anlık görüntüsü ve sürümlü kayıt
+anahtarı, senaryo kurucu kayıt durumu (“kaydedildi / kaydedilemedi”), “yalnız bu tarayıcı” uyarısı tek bileşen (F13).
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

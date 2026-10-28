@@ -13,7 +13,7 @@ import { makeStaffing, staffScenario, type StaffResult } from '../data/staffing'
 import { downloadCsv } from '../lib/csv';
 import { longDate, monthName, shortDate } from '../lib/dates';
 import { int, tl } from '../lib/format';
-import { presetOptions, useScenarioOptions } from '../lib/scenarioOptions';
+import { presetOptions, scenarioLabel, useScenarioOptions } from '../lib/scenarioOptions';
 import { useOpexOnce } from '../lib/useOpex';
 
 /**
@@ -101,8 +101,7 @@ function Icerik() {
   const { base, opts, preset, changes, presets } = state;
   const sc = r.byId[base].scenario;
   const temel = presets.find((x) => x.id === base)!;
-  const senaryoAdi = preset ? preset.name : `Özel: ${temel.name} + ${changes} değişiklik`;
-  const senaryoRol = preset?.role ?? temel.role;
+  const { ad: senaryoAdi, role: senaryoRol } = scenarioLabel(state);
 
   /* Gider kaynağı Sheets sayfa açılınca bir kez okunur; tek durumdan simülasyon, başabaş ve türevleri. */
   const durum = useOpexOnce();
