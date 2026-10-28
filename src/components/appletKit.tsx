@@ -305,12 +305,15 @@ export function DurumHapi({ durum, children }: { durum: Durum; children?: ReactN
 }
 
 /** Yatay oran çubuğu (0–1; 1’i aşan değer tavanda). */
+/** Oran çubuğu: 1’in üstü tavana kırpılmış gibi görünmez — aşım işareti (gorsel_algi.md F21 / C026); gerçek değer yanındaki sayıda. */
 export function Cubuk({ oran, ton = 'vurgu' }: { oran: number; ton?: 'vurgu' | 'iyi' | 'uyari' | 'kotu' | 'notr' }) {
+  const asim = oran > 1;
   const w = Math.max(0, Math.min(100, oran * 100));
   return (
-    <svg className="applet-cubuk" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <svg className="applet-cubuk" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-asim={asim ? '' : undefined}>
       <rect className="applet-cubuk-iz" x="0" y="0" width="100" height="8" />
-      <rect className="applet-cubuk-dolgu" data-ton={ton} x="0" y="0" width={w} height="8" />
+      <rect className="applet-cubuk-dolgu" data-ton={ton} x="0" y="0" width={asim ? 94 : w} height="8" />
+      {asim ? <rect className="applet-cubuk-asim" x="96" y="0" width="4" height="8" /> : null}
     </svg>
   );
 }

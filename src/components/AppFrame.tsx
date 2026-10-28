@@ -102,8 +102,9 @@ function ParamsNotice() {
   return (
     <div className="params-notice" role="status">
       <div className="wrap">
+        {/* Kısa durum + kapsam bağlantısı (gorsel_algi.md F05 / C002): uzun açıklama her sayfada yinelenmez. */}
         <p>
-          Bu tarayıcıda {changed} parametre değiştirildi; sayfalardaki değerler varsayılandan farklı.{' '}
+          {changed} parametre bu tarayıcıda değiştirildi; sayfalar bu değerlerle hesaplanır.{' '}
           <a className="text-link" href={href('/parametreler/')}>
             Parametreler
           </a>

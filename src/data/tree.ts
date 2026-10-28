@@ -55,21 +55,27 @@ export function makeOrg(p: Params, _roles: Role[]): OrgNode {
 
 export interface Stop {
   path: string;
+  /** Menü / sıra kısa adı. */
   label: string;
   crumb: string[];
+  /**
+   * Sayfa başlığının (h1) tam adı, kısa addan ve kırıntı sonundan farklıysa (gorsel_algi.md F19 sözlüğü, 2026-10-28):
+   * menü, başlık ve belge bağlantısı aynı yere işaret eder; `tests/gorsel-algi.spec.ts` V18 her durak için doğrular.
+   */
+  tam?: string;
 }
 
 /** Doğrusal sunum sırası. */
 export const SEQUENCE: Stop[] = [
   { path: '/', label: 'Organizasyon şeması', crumb: [] },
-  { path: '/roller/dijital-pazarlama/', label: 'Ağaç 1 · Dijital pazarlama', crumb: ['Ağaç 1 · Dijital pazarlama'] },
-  { path: '/roller/pazarlamaci/', label: 'Ağaç 2 · Masa başı pazarlama', crumb: ['Ağaç 2 · Masa başı pazarlama'] },
-  { path: '/roller/saha-uzmani/', label: 'Ağaç 3 · Saha ekibi', crumb: ['Ağaç 3 · Saha satış'] },
-  { path: '/roller/ekip-lideri/', label: 'Ağaç 3 · Ekip lideri', crumb: ['Ağaç 3 · Saha satış', 'Ekip lideri'] },
-  { path: '/buyume-modeli/', label: 'Ağaç 3 · Çok katmanlı pazarlama ağı', crumb: ['Ağaç 3 · Saha satış', 'Çok katmanlı pazarlama ağı'] },
-  { path: '/roller/organizator/', label: 'Ağaç 4 · Organizatör', crumb: ['Ağaç 4 · Organizatör'] },
-  { path: '/roller/segika/', label: 'Segika · Masa başı (CRM)', crumb: ['Segika · Masa başı (CRM)'] },
-  { path: '/roller/asistan/', label: 'Kurmay · Asistan', crumb: ['Kurmay · Asistan'] },
+  { path: '/roller/dijital-pazarlama/', label: 'Ağaç 1 · Dijital pazarlama', crumb: ['Ağaç 1 · Dijital pazarlama'], tam: 'Dijital pazarlama uzmanı' },
+  { path: '/roller/pazarlamaci/', label: 'Ağaç 2 · Masa başı pazarlama', crumb: ['Ağaç 2 · Masa başı pazarlama'], tam: 'Masa başı pazarlama (CRM)' },
+  { path: '/roller/saha-uzmani/', label: 'Ağaç 3 · Saha ekibi', crumb: ['Ağaç 3 · Saha satış'], tam: 'Saha pazarlama ekibi' },
+  { path: '/roller/ekip-lideri/', label: 'Ağaç 3 · Ekip lideri', crumb: ['Ağaç 3 · Saha satış', 'Ekip lideri'], tam: 'Satış-pazarlama ekip lideri' },
+  { path: '/buyume-modeli/', label: 'Ağaç 3 · Çok katmanlı pazarlama ağı', crumb: ['Ağaç 3 · Saha satış', 'Çok katmanlı pazarlama ağı'], tam: 'Çok katmanlı pazarlama ağı (MLM)' },
+  { path: '/roller/organizator/', label: 'Ağaç 4 · Organizatör', crumb: ['Ağaç 4 · Organizatör'], tam: 'Organizatör' },
+  { path: '/roller/segika/', label: 'Segika · Masa başı (CRM)', crumb: ['Segika · Masa başı (CRM)'], tam: 'Segika masa başı pazarlama (CRM)' },
+  { path: '/roller/asistan/', label: 'Kurmay · Asistan', crumb: ['Kurmay · Asistan'], tam: 'Yönetici asistanı' },
   { path: '/istihdam/', label: 'İstihdam takvimi', crumb: ['İstihdam takvimi'] },
   { path: '/hedefler/', label: '90 gün hedefleri', crumb: ['90 gün hedefleri'] },
   // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.
@@ -101,7 +107,7 @@ export const TREE_NAV: { label: string; path: string; role?: RoleKey; no?: numbe
 
 /** “İstihdam” menüsünün alt bölümü: takvim ve ücret/performans modelleri. */
 export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
-export const APPLET_NAV = { label: 'Applet', path: '/applet/' };
+export const APPLET_NAV = { label: 'Applet', path: '/applet/', tam: 'Ücret ve performans applet’leri' };
 
 /** “Pazarlama” açılır menüsü (kullanıcı kararı 2026-10-20). */
 export const MARKETING_NAV = [

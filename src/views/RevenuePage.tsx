@@ -6,7 +6,7 @@ import { Araclar, ModSecimi, type Mod } from '../components/Senaryo';
 import { SenaryoKurucu, YapiskanOzet } from '../components/SenaryoKurucu';
 import { PageHeader } from '../components/PageHeader';
 import { ResultSummary } from '../components/ResultSummary';
-import { Chart, Choice, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
+import { BolumDizini, Chart, Choice, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../data/breakeven';
 import { buildSources, simulate, sure, type Milestone, type SimInputs } from '../data/revenue';
 import { makeStaffing, staffScenario, type StaffResult } from '../data/staffing';
@@ -75,6 +75,19 @@ function HedefKartlari({ milestones, digerleri, son }: { milestones: Milestone[]
     </div>
   );
 }
+
+/** Karar odaklı bölüm dizini (gorsel_algi.md F24): kısa ad, kalıcı adres; sıra sayfadaki sırayla aynı. */
+const BOLUM_DIZINI = [
+  { id: 'hedefler', baslik: 'Hedef zinciri' },
+  { id: 'kadro', baslik: 'Kadro ve katkı' },
+  { id: 'dijital', baslik: 'Dijital pazarlama' },
+  { id: 'gelir', baslik: 'Aylık gelir' },
+  { id: 'senaryo', baslik: 'Senaryolar üst üste' },
+  { id: 'fiyat', baslik: 'Fiyat ve paket' },
+  { id: 'huni', baslik: 'Üye → aktif → devam eden' },
+  { id: 'basabas', baslik: 'Başabaş' },
+  { id: 'varsayim', baslik: 'Varsayımlar' },
+];
 
 function Icerik() {
   const m = useModel();
@@ -296,10 +309,13 @@ function Icerik() {
         ikincil={ozet.slice(0, 5)}
         strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} oncelikli="En yüksek birikmiş açık" />}
       />
+      <BolumDizini bolumler={BOLUM_DIZINI} />
       <SenaryoKurucu p={params} state={state} sahaGrowthDefault={sc.sahaGrowthEvery} retentionDefault={sc.retention} factorDefault={sc.factor} />
 
       <Section
         id="hedefler"
+
+        dizin
         index={1}
         title="Hedef zinciri"
         desc={`Her kayıtta hedefe ulaşılması beklenen tarih ve ${r.labels.start} başlangıcından geçen süre gösterilir; para tutarları hedef gününü değil ayın tamamını kapsar. Yıllık peşin ödeme, ödendiği ayda bütünüyle sayılır. Diğer senaryoların tarihleri karşılaştırma içindir. Aktif satıcı: ilk abonelik ödemesini yapan satıcı; bu toplam, bugün aboneliği devam eden satıcı sayısıyla aynı değildir.`}
@@ -340,6 +356,8 @@ function Icerik() {
 
       <Section
         id="kadro"
+
+        dizin
         index={2}
         title="Kadro ile nasıl ilerlenir: görev, gider, gelir katkısı"
         desc={`Önce 1 saha personeli sistemi kurar; sistem oturunca ikincisi gelir; kârlı senaryolarda büyüme kuralıyla yenileri. CRM masa başı soğuk arama ve e-postayla kayıt üretir, dijital kayıtları arar. Organizatör İstoç çarşısından toptancıları toplar. Dijital pazarlama uzmanı ölçümü, reklamı ve içerik hattını yürütür. Modelde hesaplanan katkı, ilgili satış kaynağı çıkarılınca ${H} aylık tahmini abonelik ödemesinin ne kadar azaldığını gösterir; gerçekleşmiş kişisel performans ölçümü değildir.`}
@@ -450,6 +468,8 @@ function Icerik() {
 
       <Section
         id="dijital"
+
+        dizin
         index={3}
         title="Dijital pazarlama stratejisi: gider → gelir"
         desc={`Reklam bütçesi kayda, kayıt ilk ödemeye, ilk ödeme yenilemeye dönüşür; her halka ölçülür ve bütçe LTV ÷ CAC kuralıyla açılır. Ücretli kanal hızlı ve pahalı, organik içerik yavaş ve ucuz; ikisi de CRM’e aynı aşamalarla girer. İçerik üretim hattı /dijital/ sayfasındadır; burada paranın gelire dönüşümü vardır.`}
@@ -540,6 +560,8 @@ function Icerik() {
 
       <Section
         id="gelir"
+
+        dizin
         index={4}
         title="Aylık gelir ve kümülatif"
         desc={`İlk ödemeler (aylık ve yıllık peşin), yenilemeler ve kümülatif gelir; kesikli çizgi ${tl(params.ciroTarget)} hedefi. “Üçü üst üste” aylık geliri hazır senaryolarla yan yana koyar. Tablo ${son} sonuna kadar tüm ayları içerir ve CSV olarak indirilebilir.`}
@@ -600,6 +622,8 @@ function Icerik() {
 
       <Section
         id="senaryo"
+
+        dizin
         index={5}
         title="Hazır senaryolar üst üste"
         desc="Kötümser, medyan ve iyimser kendi kapasite, elde tutma ve büyüme kuralıyla; seçtiğiniz özel senaryo varsa dördüncü eğri. Eğriler aynı eksende ayrışır; kötümser yatırımcı sunumunun alt sınırıdır."
@@ -649,6 +673,8 @@ function Icerik() {
 
       <Section
         id="fiyat"
+
+        dizin
         index={6}
         title="Fiyat ve paket"
         desc={`Kur ${params.eurTry.toLocaleString('tr-TR')} ₺/€ (parametre), seçili kur artışı ${yuzde(inputs.fxGrowth)} / yıl. Yıllık peşin payı ${yuzde(inputs.annualShare)}: nakit önden gelir ve o satıcı yıl boyunca kayıp riski taşımaz.`}
@@ -684,6 +710,8 @@ function Icerik() {
 
       <Section
         id="huni"
+
+        dizin
         index={7}
         title="Üye → aktif → devam eden"
         desc={`${int(params.memberTarget)} üyeden ${int(params.activeTarget)} aktif; seçili elde tutma oranıyla (${yuzde(inputs.retention)}) aynı ${int(params.activeTarget)} satıcıdan kaçı 3., 6. ve 12. ayda hâlâ ödüyor. Elde tutma olmadan aktif sayısı erir; yenileme çağrısı ve aylık değer raporu bu yüzden planın parçasıdır.`}
@@ -707,6 +735,8 @@ function Icerik() {
 
       <Section
         id="basabas"
+
+        dizin
         index={8}
         title="Başabaş"
         desc={`Aylık gelir aylık gideri hangi ay geçer (başabaş), kümülatif net ne zaman sıfırın üstüne çıkar (geri ödeme), kaç ödeyen satıcı sabit gideri karşılar (başabaş noktası). ${son} sonuna kadar kesişmiyorsa son 6 ayın eğilimiyle öngörü yazılır; eğilim de kapatmıyorsa seçili senaryo sürdürülebilir değildir. Seçenekler sayfanın başındaki senaryo kurucudadır.`}
@@ -834,7 +864,7 @@ function Icerik() {
         </Note>
       </Section>
 
-      <Section id="varsayim" index={9} title="Varsayımlar" desc="Değerler Parametreler sayfasında değiştirilir; tarihler ve tutarlar anında yeniden hesaplanır. Senaryo kurucudaki seçenekler parametre değildir: bu tarayıcıda ve adres çubuğunda saklanır.">
+      <Section id="varsayim" dizin index={9} title="Varsayımlar" desc="Değerler Parametreler sayfasında değiştirilir; tarihler ve tutarlar anında yeniden hesaplanır. Senaryo kurucudaki seçenekler parametre değildir: bu tarayıcıda ve adres çubuğunda saklanır.">
         <ul className="bullets">
           {r.assumptions.map((a) => (
             <li key={a}>{a}</li>

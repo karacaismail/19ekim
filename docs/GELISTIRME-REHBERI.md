@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 1024 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 1036 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -126,6 +126,12 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   ödeme yapan (toplam), “birikmiş açık” ve “açığın kapanışı” (kredi/yatırımcı ödemesi değil), katkı = model farkı
   (performans ölçümü değil), gider kaynağı istenen/kullanılan olarak yazılır, sayfa seçeneği ile genel parametre ve
   Sheets ayrı kapsamdır. Dinamik sayıya apostrof eki eklenmez (“yüzde 20 kadarı”). Testi `tests/ifade.spec.ts`.
+- **Görsel algı sözleşmesi** (`docs/gorsel_algi.md`, 2026-10-28; AGENTS.md “gorsel_algi.md” bölümü ve F01–F24 iz
+  tablosu): değer seçenek alanına, ölçülen şey grup etiketine, kaynak ve bağlanma modu ayrı alana (`Baglanti` anahtarı),
+  yardım `aria-describedby` ile; her `DataTable` açık özet verir (UI kapısı reddeder: `summary` / `ozetSatir` /
+  `kayit="matris"` / `ozetYok`); matris tabloları dar ekranda `kayit="matris"`; onaylar süresiz + Vazgeç; “—” yerine
+  sözlük (0 ₺ / Veri yok / Uygulanmıyor / Dönem içinde yok / Senaryoda yok); görünüm varyantı değişince araç çubuğu
+  bileşenleri yer değiştirmez. Testi `tests/gorsel-algi.spec.ts` (GA-1 … GA-5a).
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 

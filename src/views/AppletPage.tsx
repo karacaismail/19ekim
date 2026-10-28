@@ -426,6 +426,8 @@ function KademeSerisi() {
           { key: 'g', header: 'Derece', nowrap: true, rowHeader: true, render: (r: (typeof satirlar)[number]) => `G${r.g}` },
           { key: 'ar', header: 'Aritmetik', nowrap: true, render: (r) => <>{times(r.aritmetik)}<span className="cell-sub">{r.aritArtis === null ? 'Uygulanmıyor' : isaretli(r.aritArtis)}</span></> },
           { key: 'geo', header: 'Geometrik orta', summary: true, nowrap: true, render: (r) => <>{times(r.geometrik)}<span className="cell-sub">{para(r.geometrik)}</span></> },
+          // Aynı dereceyi iki modelle kıyaslayan görünür fark (gorsel_algi.md F08 / C054): ezber yok.
+          { key: 'fark', header: 'Fark (geometrik − aritmetik)', nowrap: true, render: (r) => `${r.geometrik >= r.aritmetik ? '+' : '−'}${para(Math.abs(r.geometrik - r.aritmetik))}` },
           { key: 'min', header: 'En az', nowrap: true, render: (r) => para(r.min) },
           { key: 'max', header: 'En çok', nowrap: true, render: (r) => para(r.max) },
           { key: 'ort', header: 'Üst bantla örtüşme', nowrap: true, render: (r) => (r.ortusme === null ? 'Uygulanmıyor' : r.ortusme > 0.5 ? <DurumHapi durum="uyari">{pct(r.ortusme)}</DurumHapi> : pct(r.ortusme)) },

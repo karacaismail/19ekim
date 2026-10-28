@@ -93,12 +93,33 @@ export function FactsRow({ items, compact = false }: { items: { label: string; v
  * sıralama anlamlıysa (sunum/anlatım sırası: roller, hedefler, gelir planı, BCG, applet…). Araç sayfalarında
  * (Parametreler grupları, nakit akışı) `index` verilmez.
  */
+/**
+ * Karar odaklı bölüm dizini (gorsel_algi.md F24): kalıcı `#id` bağlantıları, kısa adlar; ana sonucun altında (320×480 ilk
+ * ekranı itmez). Bölümler `Section.dizin` ile buraya döner (`#bolum-dizini`).
+ */
+export function BolumDizini({ bolumler }: { bolumler: { id: string; baslik: string }[] }) {
+  return (
+    <nav className="bolum-dizini" id="bolum-dizini" aria-label="Bölümler">
+      <ol>
+        {bolumler.map((b) => (
+          <li key={b.id}>
+            <a className="text-link" href={`#${b.id}`}>
+              {b.baslik}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 export function Section({
   id,
   index,
   title,
   desc,
   tools,
+  dizin = false,
   children,
 }: {
   id: string;
@@ -108,6 +129,8 @@ export function Section({
   desc?: ReactNode;
   /** Bölüm başındaki araç satırı (senaryo seçici, görünüm): başlık bloğunun hemen altında. */
   tools?: ReactNode;
+  /** Sayfada bölüm dizini varsa (PageHeader.dizin) bölümün sonunda dizine dönüş bağlantısı (gorsel_algi.md F24). */
+  dizin?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -129,6 +152,13 @@ export function Section({
       </div>
       {tools}
       {children}
+      {dizin ? (
+        <p className="section-geri">
+          <a className="text-link" href="#bolum-dizini">
+            Bölüm dizini
+          </a>
+        </p>
+      ) : null}
     </section>
   );
 }

@@ -5950,6 +5950,48 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   gap: var(--space-3);
 }
 
+/* Bölüm dizini (gorsel_algi.md F24): sayfa başında kısa bağlantılar; bölüm sonunda dizine dönüş. */
+.bolum-dizini {
+  margin-top: var(--space-5);
+}
+
+.bolum-dizini ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-geri {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+}
+
+/* Bağlantıyla gelen bölüm yapışkan üst bant ve özetin altında kalmaz (tarayıcı kenar boşluğunu da sayar: bant + 2rem yeter). */
+.section {
+  scroll-margin-top: calc(var(--bant-h, 0px) + 2rem);
+}
+
+/* Oran çubuğu tavan aşımı işareti (F21). */
+.applet-cubuk-asim {
+  fill: var(--text-primary);
+}
+
+/* Giriş bekleme durumu (F23); bağlantı formu açıklaması (F12). */
+.giris-durum {
+  margin: var(--space-2) 0 0;
+  min-height: 1.5em;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.opex-check-desc {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
 /* Matris kıyas profili (gorsel_algi.md F08): eksen seçimi üstte, diğer eksenin değerleri açık listede (kayıt paneliyle aynı dl). */
 .matris-kiyas {
   display: grid;

@@ -90,6 +90,10 @@ export function GirisEkrani() {
         <button type="submit" className="note-btn note-btn-primary giris-dugme" disabled={!hazir || bekliyor}>
           Giriş yap
         </button>
+        {/* Pasif düğmenin nedeni görünür (gorsel_algi.md F23 / C008): bekleme ile yanlış parola karışmaz. */}
+        <p className="giris-durum" role="status">
+          {!hazir ? 'Sayfa hazırlanıyor…' : bekliyor ? 'Giriş denetleniyor…' : ''}
+        </p>
       </form>
     </section>
   );

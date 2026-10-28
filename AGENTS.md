@@ -672,34 +672,53 @@ yalnız ad ve öncelikli sonuç bildirilir (gizli `role="status"`; F23). ≥ 48e
 `tabpanel` sürer. Test: `tests/gorsel-algi.spec.ts` GA-4b (V15 sıralama + yön + filtre kaldırma 320 px; V16/F10 320 ↔
 1280; V17 gezgin + adres); `giderlerAc` iki kabuğu bekler.
 
+**GA-5** (F19/F24/F21/F05/F12/F23/F08 parçaları; kullanıcı kararı 2026-10-28): **Gezinti sözlüğü (F19):** `tree.ts`
+`Stop.tam` — menü kısa adı ile sayfa başlığı farklıysa tam ad orada (rol sayfaları: “Dijital pazarlama uzmanı” …,
+büyüme modeli, `APPLET_NAV` “Ücret ve performans applet’leri”); kural: h1 ∈ {kısa ad, tam ad, kırıntı sonu}; her durak
+testle doğrulanır (V18). Numara sözlüğü değişmedi (rol numarası = organizasyon sırası; bölüm numarası = sayfa sırası).
+**Bölüm dizini (F24):** `BolumDizini` (ui.tsx) → `nav#bolum-dizini` (“Bölümler”, kalıcı `#id` bağlantıları, kısa adlar) ana
+sonucun altında, kurucunun üstünde (sayfa başında dokuz bağlantı 320×480 ilk ekranda ana sonucu aşağı itiyordu);
+`Section.dizin` → bölüm sonunda “Bölüm dizini” dönüşü; gelir planında dokuz bölüm; `.section { scroll-margin-top }`
+bağlantıyla gelen bölümü yapışkan bant ve özetin altından çıkarır. Bölüm sırası değişmedi (belgenin önerdiği akış ayrı
+içerik kararı). **Oran çubuğu (F21 / C026):** `Cubuk` 1’in üstünde `data-asim` + aşım işareti (`.applet-cubuk-asim`);
+gerçek değer yanındaki sayıda; `ShareBar` oranları ≤ 1. **Kademe serisi (F08 / C054):** “Fark (geometrik − aritmetik)”
+sütunu. **Parametre uyarısı (F05 / C002):** kısa durum + Parametreler bağlantısı. **Bağlantı formu (F12 / C098):** “Bu
+cihazda hatırla” + ayrı açıklama (`.opex-check-desc`). **Bekleme (F23):** giriş düğmesinin pasif nedeni
+(`.giris-durum`: hazırlanıyor / denetleniyor); Giderler eski veri notu son değişiklik ve denetim saatiyle sonraki adımı
+yazar. **Ertelenen (gerekçeyle):** F11 zaman görünümleri (ana görünüm seçimi içerik ve ürün kararı; beş görünüm aynı olay
+kimliğine bağlı, veri kaybı yok), F06 büyük harf etiketler (kısa etiketlerde sorun yok; uzun etiket segmentte yok), F22
+renk sözlüğü (marka ve ton kararı; durumlar metinle zaten ayrışır), F03 `Dugmeler` / `Toggles` görsel birleştirme (durum
+sözleşmesi aynı: `aria-pressed`; görünüm kullanıcı kararı), F18 `Dayanak` yapısal ayrımı (17 applet metni; içerik
+kararı). Test: `tests/gorsel-algi.spec.ts` GA-5a (V18, V29, F08/F21, F05/F12).
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
 |---|---|---|---|
 | F01 Seçenek etiketinde tek bilgi türü | `SenaryoKurucu.tsx`, `Choice` | V01, V05–V08 | uygulandı (GA-1), yerelde doğrulandı |
 | F02 Otomatik/sabit değer ayrımı | `scenarioOptions.ts`, `SenaryoKurucu.tsx` (`Baglanti`), `ui.tsx Anahtar` | V02–V04 | uygulandı (GA-1), yerelde doğrulandı |
-| F03 Kontrol görevi (değer / görünüm / gezinti / anahtar / işlem) | `Choice`, `ModSecimi`, `Dugmeler`, OPEX `Toggles` | V08, V28 | GA-1: görünüm anahtarı adı, ikili kural = `Anahtar` (switch); `Dugmeler` / `Toggles` ortaklaştırma planlandı (GA-5) |
-| F04 Kontrol–yardım–bölüm ritmi | `SenaryoKurucu.tsx`, `Choice.note` → `aria-describedby`, `Girdiler` | V11 | planlandı (GA-5) |
-| F05 Bağlam/özet tekrarları | `YapiskanOzet`, `ResultSummary`, `Section`, `ParamsNotice` | V16 | planlandı (GA-5) |
-| F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | GA-1: seçili ağırlık sabit (V08); kalan roller planlandı (GA-5) |
+| F03 Kontrol görevi (değer / görünüm / gezinti / anahtar / işlem) | `Choice`, `ModSecimi`, `Dugmeler`, OPEX `Toggles` | V08, V28 | GA-1: görünüm anahtarı adı, ikili kural = `Anahtar` (switch); `Dugmeler` / `Toggles` görsel birleştirme ertelendi (durum sözleşmesi aynı: `aria-pressed`; görünüm kullanıcı kararı) |
+| F04 Kontrol–yardım–bölüm ritmi | `SenaryoKurucu.tsx`, `Choice.note` → `aria-describedby`, `Girdiler` | V11 | uygulandı (GA-1: etiket → kontrol → bağlam → yardım sırası, aria-describedby; iç boşluk < grup boşluğu mevcut) |
+| F05 Bağlam/özet tekrarları | `YapiskanOzet`, `ResultSummary`, `Section`, `ParamsNotice` | V16 | uygulandı (GA-0/GA-1 başlıklar senaryo adını yinelemez; GA-4b dar ekran tek öncelikli sonuç; GA-5 kısa parametre uyarısı) |
+| F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | GA-1: seçili ağırlık sabit (V08); büyük harf etiket ve `Stats` ağırlıkları ertelendi (kısa etiket; tasarım kararı, H) |
 | F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir` / `ozetYok`), UI kapısı kuralı | V12 | uygulandı (GA-4a), yerelde doğrulandı |
-| F08 Karşılaştırma komşuluğu (matris) | `DataTable kayit="matris"` (`MatrisKiyas`); liyakat matrisi, duyarlılık | V13 | uygulandı (GA-4a), yerelde doğrulandı; `BandKonumu` / `KademeSerisi` fark satırı planlandı (GA-5) |
+| F08 Karşılaştırma komşuluğu (matris) | `DataTable kayit="matris"` (`MatrisKiyas`); liyakat matrisi, duyarlılık; kademe serisi fark sütunu | V13 | uygulandı (GA-4a, GA-5), yerelde doğrulandı; `BandKonumu` fark sütunu zaten var (“Fark (aylık)”) |
 | F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` (`.opex-kayit-arac`) | V15 | uygulandı (GA-4b), yerelde doğrulandı |
 | F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320: öncelikli sonuç + liste), `PartnershipPage` `BolumGezgini` | V16, V17 | uygulandı (GA-4b), yerelde doğrulandı |
-| F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |
-| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | GA-1: `Choice.note` aria-describedby (V11); GA-3: `NoteRow` çok satırlı; `Secim` / `ConnectForm` planlandı (GA-5) |
+| F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | ertelendi: ana zaman görünümü seçimi içerik / ürün kararı (H); görünümler aynı olay kimliğine bağlı, mobil sıra kronolojiyle aynı |
+| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | uygulandı: `Choice.note` (GA-1), `NoteRow` (GA-3), `ConnectForm` kısa etiket + açıklama (GA-5); `Secim` uzun ad (Mantine Select sarar) mevcut |
 | F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | uygulandı (GA-3), yerelde doğrulandı |
 | F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | uygulandı (GA-3), yerelde doğrulandı (V22 geri al: yalnız Parametreler’de mümkün, diğerlerinde sunulmaz) |
 | F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu (GA-3); gelir planı tablo (GA-0) ve grafik (GA-1) araç çubukları | V23; `gelir.spec` araç çubuğu | uygulandı (GA-0/GA-1/GA-3), yerelde doğrulandı |
 | F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit açık/finansman adı ve işareti; applet yüzde paydası; OPEX yıl kapsamı (zaten görünür) | V24 | uygulandı (GA-2), yerelde doğrulandı |
 | F17 “—” sözlüğü | nakit, gelir, applet, OPEX (efsane), senaryo kıyası, tarih alanları | V25 | uygulandı (GA-2), yerelde doğrulandı; OPEX hücreleri sembol + efsane |
-| F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, OPEX `Assumptions`, `LiveStrip` (GA-2); `Dayanak` yapısı (GA-5) | V26, F18 testi | GA-2 uygulandı, yerelde doğrulandı; `Dayanak` planlandı (GA-5) |
-| F19 Gezinti sözlüğü | menü / kırıntı / h1 eşlemesi; Partnership `Sira` | V18, V29 | planlandı (GA-5) |
+| F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, OPEX `Assumptions`, `LiveStrip` (GA-2); `Dayanak` yapısı | V26, F18 testi | GA-2 uygulandı, yerelde doğrulandı; `Dayanak` yapısal ayrımı ertelendi (17 applet metni, içerik kararı) |
+| F19 Gezinti sözlüğü | `tree.ts` `Stop.tam` eşlemesi; Partnership `Sira` | V18, V29 | uygulandı (GA-5), yerelde doğrulandı (her durak testte) |
 | F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` | V30 | uygulanıyor (her pakette güncellenir) |
-| F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | planlandı (GA-5) |
-| F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | planlandı (GA-5) |
-| F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | GA-3: `Loader` süre notu, `AppletHata` gerçek neden; `GirisEkrani` bekleme nedeni ve OPEX eski veri ekranı planlandı (GA-5) |
-| F24 Uzun sayfa belge takibi | gelir planı bölüm dizini, bölüm soruları, kalıcı adres | V29 | planlandı (GA-5) |
+| F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | GA-5: `Cubuk` aşım işareti; grafik başlıkları ölçü, varyant notu altta (GA-1); “hangi soru” satırı ve birim sözlüğü ertelendi (28 grafik içerik geçişi) |
+| F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | ertelendi: renk sözlüğü marka ve ton kararı (H); seçim topuzla, durum metinle, odak merkezi politikayla zaten ayrışır |
+| F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | uygulandı (GA-3: `Loader`, `AppletHata`; GA-5: giriş bekleme nedeni, eski veri notu saat + sonraki adım); ağ gecikmesi / yeniden bağlanma senaryosu testi NOT_RUN |
+| F24 Uzun sayfa belge takibi | gelir planı bölüm dizini, kalıcı adres, dizine dönüş | V29 | uygulandı (GA-5), yerelde doğrulandı; bölüm sırası ve bölüm soruları ertelendi (içerik kararı) |
 
 ## Gizlilik ve yayın
 

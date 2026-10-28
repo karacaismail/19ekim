@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { buildModel, reply } from './opex-fixture';
+import { APPLET_NAV, SEQUENCE } from '../src/data/tree';
 
 /**
  * gorsel_algi.md (kullanıcı kararı 2026-10-28) kabul senaryoları (§6 V01–V30), paket paket. GA-1: seçenek etiketinde tek
@@ -500,5 +501,78 @@ test.describe('gorsel_algi GA-4b: dar ekranda karar araçları — Giderler sır
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
     await page.setViewportSize({ width: 1280, height: 800 });
     await expect(page.getByRole('tablist', { name: 'Segika bölümleri' })).toBeVisible();
+  });
+});
+
+test.describe('gorsel_algi GA-5a: gezinti sözlüğü, bölüm dizini, oran çubuğu, kısa durum, uzun etiket', () => {
+  test('V18/V29 (F19): her menü adı ile sayfa başlığı aynı yere işaret eder — kısa ad, tam ad ya da kırıntı sonu', async ({ page }) => {
+    const duraklar = [...SEQUENCE, { ...APPLET_NAV, crumb: [] as string[] }];
+    for (const d of duraklar) {
+      await page.goto(d.path.replace(/^\//, ''));
+      await icerik(page);
+      const h1 = (await page.getByRole('heading', { level: 1 }).innerText()).trim();
+      const kabul = new Set([d.label, d.tam ?? '', d.crumb[d.crumb.length - 1] ?? ''].filter(Boolean));
+      expect(kabul.has(h1), `${d.path}: menü “${d.label}”${d.tam ? ` / tam ad “${d.tam}”` : ''} ↔ başlık “${h1}”`).toBe(true);
+    }
+  });
+
+  test('V29 (F24): gelir planı bölüm dizini — kalıcı bölüm adresleri, dizinden bölüme ve bölümden dizine dönüş', async ({ page }) => {
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const dizin = page.getByRole('navigation', { name: 'Bölümler' });
+    const baglantilar = dizin.getByRole('link');
+    await expect(baglantilar).toHaveCount(9);
+    const hrefler = await baglantilar.evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).getAttribute('href')));
+    expect(hrefler).toEqual(['#hedefler', '#kadro', '#dijital', '#gelir', '#senaryo', '#fiyat', '#huni', '#basabas', '#varsayim']);
+    await dizin.getByRole('link', { name: /Başabaş/ }).click();
+    await expect(page).toHaveURL(/#basabas$/);
+    const ust = await page.locator('#basabas').evaluate((el) => el.getBoundingClientRect().top);
+    // Yapışkan üst bant + özet (~124 px) altında, ama ilk ekranda.
+    expect(ust).toBeGreaterThanOrEqual(120);
+    expect(ust).toBeLessThan(280);
+    await expect(page.locator('.section-geri a')).toHaveCount(9);
+    await page.locator('#basabas .section-geri a').click();
+    await expect(page).toHaveURL(/#bolum-dizini$/);
+  });
+
+  test('F08 (C054): kademe serisi tablosunda geometrik − aritmetik fark sütunu; F21 (C026): oran çubuğu tavan aşımını işaretler', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('applet/#kademe-serisi');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.table-block:has(#kademe-tablo) thead')).toContainText('Fark (geometrik − aritmetik)');
+    // Oran çubuğu: 1’in üstü kırpılmaz gibi gösterilmez — aşım işareti ve erişilebilir metin.
+    await page.goto('applet/#prim-egrisi');
+    await icerik(page);
+    await hydrated(page);
+    const cubuklar = page.locator('.applet-cubuk');
+    expect(await cubuklar.count()).toBeGreaterThan(0);
+    const asim = await page.evaluate(() => [...document.querySelectorAll('.applet-cubuk')].map((c) => ({ asim: c.hasAttribute('data-asim'), isaret: !!c.querySelector('.applet-cubuk-asim') })));
+    for (const c of asim) expect(c.asim).toBe(c.isaret);
+  });
+
+  test('F05 (C002): parametre uyarısı kısa durum + bağlantı; F12 (C098): Giderler bağlantı formunda kısa etiket + ayrı açıklama', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('parametreler/');
+    await icerik(page);
+    await hydrated(page);
+    await page.getByRole('searchbox', { name: 'Parametre ara' }).fill('Plan senaryosu: aylık elde tutma');
+    const alan = page.getByLabel('Plan senaryosu: aylık elde tutma');
+    await alan.click();
+    await alan.fill('');
+    await alan.pressSequentially('66');
+    await alan.press('Tab');
+    const uyari = page.locator('.params-notice');
+    await expect(uyari).toContainText(/^1 parametre bu tarayıcıda değiştirildi/);
+    expect((await uyari.innerText()).length).toBeLessThan(110);
+    await expect(uyari.getByRole('link', { name: 'Parametreler' })).toHaveCount(1);
+    // Bağlantı formu (anahtar isteyen uç): onay kutusu kısa adla, risk açıklaması ayrı ve görünür.
+    await page.route('https://script.google.com/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: false, hata: 'yetki', mesaj: 'Bu veri ucu erişim anahtarı istiyor ya da anahtar geçersiz.' }) }));
+    await page.goto('giderler/');
+    await hydrated(page);
+    const kutu = page.getByRole('checkbox', { name: 'Bu cihazda hatırla', exact: true });
+    await expect(kutu).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.opex-check-desc')).toContainText(/Önerilmez/);
   });
 });

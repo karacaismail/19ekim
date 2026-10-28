@@ -366,8 +366,9 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
       />
       <Checkbox
         className="opex-remember"
-        classNames={{ input: 'opex-check-input', label: 'opex-check-label', body: 'opex-check-body' }}
-        label="Bu cihazda hatırla (önerilmez: aynı github.io adresindeki diğer sayfalar da okuyabilir; kapalıysa yalnız bu sekmede)"
+        classNames={{ input: 'opex-check-input', label: 'opex-check-label', body: 'opex-check-body', description: 'opex-check-desc' }}
+        label="Bu cihazda hatırla"
+        description="Önerilmez: aynı github.io adresindeki diğer sayfalar da okuyabilir; kapalıysa anahtar yalnız bu sekmede kalır."
         checked={remember}
         onChange={(e) => setRemember(e.currentTarget.checked)}
       />
@@ -2038,7 +2039,8 @@ function Body() {
           <LiveStrip live={live} settingsOpen={settings} onRefresh={refreshNow} onSettings={() => setSettings((v) => !v)} />
           {live.stale ? (
             <p className="opex-live-stale" role="status">
-              {live.stale} Son alınan veri gösteriliyor.
+              {live.stale} Son alınan veri gösteriliyor (Sheets’teki son değişiklik {clock(live.data.degisti)}, son denetim {clock(live.checked)}). Üst banttaki “Şimdi
+              yenile” ile tekrar deneyin; sürerse Bağlantı’dan adresi denetleyin.
             </p>
           ) : null}
           {storageNote ? <p className="opex-live-stale">{storageNote}</p> : null}
