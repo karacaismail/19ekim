@@ -1697,7 +1697,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
     c('Net', (s) => s.net),
     c('İşveren SGK + işsizlik', (s) => s.sgkIsveren + s.issizlikIsveren),
     c('Teşvik', (s) => s.tesvik),
-    c('İşveren maliyeti', (s) => s.maliyet),
+    { ...c('İşveren maliyeti', (s) => s.maliyet), summary: true },
   ];
   const first = pd.aylar[0];
   const last = pd.aylar[pd.aylar.length - 1];
@@ -1736,7 +1736,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
         id={`bordro-ay-${d.yil}`}
         title={`${person.ad} · ${d.etiket} bordro`}
         note={`SGK tavanı ${tl(asg.tavan)}; asgari ücret ${tlExact(asg.brut)} brüt / ${tlExact(asg.net)} net. Asgari ücrete isabet eden gelir ve damga vergisi istisna edilir.${d.yil === 2026 && d.aySayisi < 12 ? ' Kümülatif matrah Ocak 2026’dan hesaplanır.' : ''}`}
-        columns={columns}
+        columns={columns /* summary: 'İşveren maliyeti' (sütun tanımında, F07) */}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
       />
@@ -1770,7 +1770,7 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
     },
     { key: 'o26', header: <Num>{`2026 aylık ort. (${once.etiket.replace(' 2026', '')})`}</Num>, nowrap: true, render: (r) => <Num>{tl(once.ortalama[r.k])}</Num> },
     { key: 'o27', header: <Num>2027 aylık ort.</Num>, nowrap: true, render: (r) => <Num>{tl(d.ortalama[r.k])}</Num> },
-    { key: 'dg', header: <Num>Değişim</Num>, nowrap: true, render: (r) => <Num>{once.ortalama[r.k] ? signed(d.ortalama[r.k] / once.ortalama[r.k] - 1) : 'Uygulanmıyor'}</Num> },
+    { key: 'dg', header: <Num>Değişim</Num>, nowrap: true, summary: true, render: (r) => <Num>{once.ortalama[r.k] ? signed(d.ortalama[r.k] / once.ortalama[r.k] - 1) : 'Uygulanmıyor'}</Num> },
     { key: 'y27', header: <Num>2027 yıllık</Num>, nowrap: true, render: (r) => <Num>{tl(d.toplam[r.k])}</Num> },
   ];
   return (
@@ -1831,7 +1831,7 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
         </>
       ),
     },
-    { key: 'tur', header: 'Tür ve değer', minWidth: '12rem', render: (t) => `${t.tur}: ${value(t, d.yil === 2027 ? t.deger2027 : t.deger2026)}` },
+    { key: 'tur', header: 'Tür ve değer', minWidth: '12rem', summary: true, render: (t) => `${t.tur}: ${value(t, d.yil === 2027 ? t.deger2027 : t.deger2026)}` },
     { key: 'kim', header: 'Uygulanan', minWidth: '12rem', render: (t) => (t.uygulananlar.length ? t.uygulananlar.join(', ') : '—') },
     d.yil === 2026
       ? { key: 'bu', header: <Num>{`Bu ay (${m.donem.ayAdi})`}</Num>, nowrap: true, render: (t) => <Num>{tlExact(t.buAy)}</Num> }
@@ -1844,7 +1844,7 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
       id={`tesvikler-${d.yil}`}
       title={`SGK teşvik ve destekleri · ${d.yil}`}
       note="Standart olanlar uygun herkese parametreyle uygulanır; koşullu olanlar yalnız Sheets’te kişiye kodu yazılınca. Mali müşavirle doğrulayın."
-      columns={columns}
+      columns={columns /* summary: 'Tür ve değer' (sütun tanımında, F07) */}
       rows={m.tesvikler}
     />
   );

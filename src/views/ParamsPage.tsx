@@ -253,7 +253,7 @@ function Derived() {
       note="Parametrelerden hesaplanır; tüm sayfalar bu değerleri kullanır."
       columns={[
         { key: 'label', header: 'Değer', minWidth: '16rem', rowHeader: true, render: (r: (typeof rows)[number]) => r.label },
-        { key: 'value', header: 'Sonuç', minWidth: '12rem', render: (r) => r.value },
+        { key: 'value', header: 'Sonuç', summary: true, minWidth: '12rem', render: (r) => r.value },
       ]}
       rows={rows}
     />

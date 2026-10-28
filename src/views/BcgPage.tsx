@@ -126,7 +126,7 @@ function BcgContent() {
           title="Eksenler"
           columns={[
             { key: 'axis', header: 'Eksen', nowrap: true, rowHeader: true, render: (r: (typeof AXES)[number]) => r.axis },
-            { key: 'name', header: 'Ne ölçer', minWidth: '11rem', render: (r) => r.name },
+            { key: 'name', header: 'Ne ölçer', summary: true, minWidth: '11rem', render: (r) => r.name },
             { key: 'question', header: 'Soru', minWidth: '15rem', render: (r) => r.question },
             { key: 'rule', header: 'Eşik', minWidth: '15rem', render: (r) => r.rule },
           ]}
@@ -139,7 +139,7 @@ function BcgContent() {
           columns={[
             { key: 'case', header: 'Durum', minWidth: '15rem', rowHeader: true, render: (r: (typeof SHARE_EXAMPLES)[number]) => r.case },
             { key: 'calc', header: 'Hesap', nowrap: true, render: (r) => r.calc },
-            { key: 'result', header: 'Anlamı', minWidth: '14rem', render: (r) => r.result },
+            { key: 'result', header: 'Anlamı', summary: true, minWidth: '14rem', render: (r) => r.result },
           ]}
           rows={SHARE_EXAMPLES}
         />
@@ -157,7 +157,7 @@ function BcgContent() {
             { key: 'growth', header: 'Pazar büyümesi', nowrap: true, render: (r) => r.growth },
             { key: 'share', header: 'Göreli pay', minWidth: '10rem', render: (r) => r.share },
             { key: 'cash', header: 'Nakit', minWidth: '12rem', render: (r) => r.cash },
-            { key: 'action', header: 'Ne yapılır', minWidth: '15rem', render: (r) => r.action },
+            { key: 'action', header: 'Ne yapılır', summary: true, minWidth: '15rem', render: (r) => r.action },
             { key: 'next', header: 'Sonra ne olur', minWidth: '11rem', render: (r) => r.next },
           ]}
           rows={QUADRANTS}
@@ -170,7 +170,7 @@ function BcgContent() {
           title="Strateji, anlamı ve uygun kutu"
           columns={[
             { key: 'name', header: 'Strateji', nowrap: true, rowHeader: true, render: (r: (typeof STRATEGIES)[number]) => r.name },
-            { key: 'meaning', header: 'Ne demek', minWidth: '18rem', render: (r) => r.meaning },
+            { key: 'meaning', header: 'Ne demek', summary: true, minWidth: '18rem', render: (r) => r.meaning },
             { key: 'where', header: 'Hangi kutu', minWidth: '13rem', render: (r) => r.where },
           ]}
           rows={STRATEGIES}
@@ -196,7 +196,7 @@ function BcgContent() {
             { key: 'our', header: 'Bizim pay', nowrap: true, render: (r) => `%${num(r.ourShare)}` },
             { key: 'rival', header: 'En büyük rakip', nowrap: true, render: (r) => `%${num(r.rivalShare)}` },
             { key: 'rel', header: 'Göreli pay', nowrap: true, render: (r) => `${num(r.ourShare)} ÷ ${num(r.rivalShare)} = ${num(Math.round(r.rel * 100) / 100)}` },
-            { key: 'quadrant', header: 'Kutu', nowrap: true, render: (r) => quadrantName(r.quadrant) },
+            { key: 'quadrant', header: 'Kutu', summary: true, nowrap: true, render: (r) => quadrantName(r.quadrant) },
             { key: 'revenue', header: 'Ciro', nowrap: true, render: (r) => `${num(r.revenue)} milyon ₺` },
           ]}
           rows={rows}
@@ -222,7 +222,7 @@ function BcgContent() {
           columns={[
             { key: 'name', header: 'Ürün', nowrap: true, rowHeader: true, render: (r) => r.name },
             { key: 'quadrant', header: 'Kutu', nowrap: true, render: (r) => quadrantName(r.quadrant) },
-            { key: 'strategy', header: 'Strateji', minWidth: '20rem', render: (r) => r.strategy },
+            { key: 'strategy', header: 'Strateji', summary: true, minWidth: '20rem', render: (r) => r.strategy },
           ]}
           rows={rows}
         />
@@ -242,7 +242,7 @@ function BcgContent() {
           title="Hata ve doğrusu"
           columns={[
             { key: 'mistake', header: 'Hata', minWidth: '14rem', rowHeader: true, render: (r: (typeof MISTAKES)[number]) => r.mistake },
-            { key: 'fix', header: 'Doğrusu', minWidth: '20rem', render: (r) => r.fix },
+            { key: 'fix', header: 'Doğrusu', summary: true, minWidth: '20rem', render: (r) => r.fix },
           ]}
           rows={MISTAKES}
         />

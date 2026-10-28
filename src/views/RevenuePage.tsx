@@ -356,7 +356,7 @@ function Icerik() {
             { key: 'r', header: 'Günlük ve haftalık düzen', minWidth: '22rem', render: (x) => x.routine },
             { key: 'c', header: 'Tam kapasite', nowrap: true, render: (x) => `${x.capacity.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay` },
             { key: 'i', header: 'İlk 3 satış ayı', nowrap: true, render: (x) => int(Math.round(x.values.slice(1, 4).reduce((a, b, i) => a + b * r.satis[i + 1], 0) * inputs.factor)) },
-            { key: 'o', header: '12 ay', nowrap: true, render: (x) => int(Math.round(x.values.slice(0, 12).reduce((a, b, i) => a + b * r.satis[i], 0) * inputs.factor)) },
+            { key: 'o', header: '12 ay', summary: true, nowrap: true, render: (x) => int(Math.round(x.values.slice(0, 12).reduce((a, b, i) => a + b * r.satis[i], 0) * inputs.factor)) },
           ]}
           rows={kaynaklar}
           rowKey={(x) => x.id}
@@ -417,7 +417,7 @@ function Icerik() {
             columns={[
               { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: (typeof katkiUcRows)[number]) => <RoleChip role={x.row.role.role} label={x.row.role.name} /> },
               { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => tl(x.row.gider) },
-              ...stUc.senaryolar.map((sn) => ({ key: `k-${sn.scenario.id}`, header: `${sn.scenario.name}: katkı`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? (x.by[sn.scenario.id]!.dogrudan ? tl(x.by[sn.scenario.id]!.katki) : 'Dolaylı') : 'Senaryoda yok') })),
+              ...stUc.senaryolar.map((sn) => ({ key: `k-${sn.scenario.id}`, header: `${sn.scenario.name}: katkı`, nowrap: true, summary: sn.scenario.id === base, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? (x.by[sn.scenario.id]!.dogrudan ? tl(x.by[sn.scenario.id]!.katki) : 'Dolaylı') : 'Senaryoda yok') })),
               ...stUc.senaryolar.map((sn) => ({ key: `n-${sn.scenario.id}`, header: `${sn.scenario.name}: net`, nowrap: true, render: (x: (typeof katkiUcRows)[number]) => (x.by[sn.scenario.id] ? tl(x.by[sn.scenario.id]!.net) : 'Senaryoda yok') })),
             ]}
             rows={katkiUcRows}
@@ -473,7 +473,7 @@ function Icerik() {
             { key: 'a', header: 'Amaç', minWidth: '20rem', render: (x) => x.amac },
             { key: 'r', header: 'Sorumlu', nowrap: true, render: (x) => <RoleChip role={x.role} /> },
             { key: 'o', header: 'Ölçüm', minWidth: '16rem', render: (x) => x.olcum },
-            { key: 'b', header: 'Başlangıç', nowrap: true, render: (x) => x.baslangic },
+            { key: 'b', header: 'Başlangıç', summary: true, nowrap: true, render: (x) => x.baslangic },
           ]}
           rows={d.kanallar}
         />
@@ -499,7 +499,7 @@ function Icerik() {
             { key: 'k', header: 'Kayıt', nowrap: true, render: (x) => int(Math.round(x.kayit)) },
             { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => int(Math.round(x.aktif)) },
             { key: 'r', header: 'Gelire katkı', nowrap: true, render: (x) => tl(x.katki) },
-            { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(x.net) },
+            { key: 'n', header: 'Net', summary: true, nowrap: true, render: (x) => tl(x.net) },
             { key: 'c', header: 'CAC', nowrap: true, render: (x) => (x.cac === null ? 'Uygulanmıyor' : tl(x.cac)) },
             { key: 'l', header: 'LTV ÷ CAC', nowrap: true, render: (x) => (x.ltvCac === null ? 'Uygulanmıyor' : `${x.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
           ]}
@@ -513,7 +513,7 @@ function Icerik() {
           columns={[
             { key: 'a', header: 'Ay', nowrap: true, rowHeader: true, render: (x: (typeof d.takvim)[number]) => x.ay },
             { key: 's', header: 'Adım', nowrap: true, render: (x) => x.adim },
-            { key: 'i', header: 'İş', minWidth: '22rem', render: (x) => x.is },
+            { key: 'i', header: 'İş', summary: true, minWidth: '22rem', render: (x) => x.is },
             { key: 'o', header: 'Ölçüt', minWidth: '14rem', render: (x) => x.olcut },
           ]}
           rows={d.takvim}
@@ -523,7 +523,7 @@ function Icerik() {
           title="Haftalık ve aylık ölçüm"
           columns={[
             { key: 'm', header: 'Metrik', minWidth: '12rem', rowHeader: true, render: (x: (typeof d.kpis)[number]) => x.metrik },
-            { key: 'h', header: 'Hedef', nowrap: true, render: (x) => x.hedef },
+            { key: 'h', header: 'Hedef', summary: true, nowrap: true, render: (x) => x.hedef },
             { key: 's', header: 'Sıklık', nowrap: true, render: (x) => x.sik },
             { key: 'k', header: 'Kaynak', minWidth: '14rem', render: (x) => x.kaynak },
           ]}
@@ -588,7 +588,7 @@ function Icerik() {
             tools={aylikAraclar}
             columns={[
               { key: 'a', header: 'Ay', nowrap: true, rowHeader: true, render: (x: (typeof tumAyRows)[number]) => x.ay.kisa },
-              ...ustUste.map((x, i) => ({ key: `g-${i}`, header: `${x.name}: aylık`, nowrap: true, render: (row: (typeof tumAyRows)[number]) => tl(x.be.sim.gelir[row.t]) })),
+              ...ustUste.map((x, i) => ({ key: `g-${i}`, header: `${x.name}: aylık`, nowrap: true, summary: x.sc.id === base, render: (row: (typeof tumAyRows)[number]) => tl(x.be.sim.gelir[row.t]) })),
               ...ustUste.map((x, i) => ({ key: `k-${i}`, header: `${x.name}: kümülatif`, nowrap: true, render: (row: (typeof tumAyRows)[number]) => tl(x.be.sim.kumulatif[row.t]) })),
             ]}
             rows={tumAyRows}
@@ -642,6 +642,7 @@ function Icerik() {
           rowTone={(x) => (x.x.name === senaryoAdi ? 'secili' : undefined)}
           // Dar ekranda ölçüt bazlı kıyas (ux_v2.md §3.1 / ux.md §8.4): ölçüt başına kayıt, özet seçili senaryo, panelde üç senaryo.
           kayit="sutun"
+          kiyas
           ozetSatir={(x) => x.x.name === senaryoAdi}
         />
       </Section>
@@ -658,7 +659,7 @@ function Icerik() {
           title="Paket, fiyat, ₺ karşılığı"
           columns={[
             { key: 'p', header: 'Paket', nowrap: true, rowHeader: true, render: (x: (typeof r.pricing)[number]) => x.paket },
-            { key: 'f', header: 'Fiyat', nowrap: true, render: (x) => x.fiyat },
+            { key: 'f', header: 'Fiyat', summary: true, nowrap: true, render: (x) => x.fiyat },
             { key: 't', header: '₺ (başlangıç)', nowrap: true, render: (x) => tl(x.tl) },
             { key: 'n', header: 'Not', minWidth: '18rem', render: (x) => x.note },
           ]}
@@ -672,7 +673,7 @@ function Icerik() {
             { key: 'k', header: 'Durum', minWidth: '14rem', rowHeader: true, render: (x: { ad: string; tarih: string | null; kum90: number; kum12: number }) => x.ad },
             { key: 'm3', header: `${tl(params.ciroTarget)} tarihi`, nowrap: true, render: (x) => gun(x.tarih, son) },
             { key: 'k90', header: '90. günde kümülatif', nowrap: true, render: (x) => tl(x.kum90) },
-            { key: 'k12', header: '12 ay kümülatif', nowrap: true, render: (x) => tl(x.kum12) },
+            { key: 'k12', header: '12 ay kümülatif', summary: true, nowrap: true, render: (x) => tl(x.kum12) },
           ]}
           rows={[
             { ad: `Yeni satıcıların yüzde ${Math.round(inputs.annualShare * 100)} oranında yıllık peşin ödediği varsayımı (seçili)`, tarih: gelir3m.date, kum90: sim.kumulatif[2], kum12: sim.kumulatif[11] },
@@ -743,7 +744,7 @@ function Icerik() {
             { key: 'a', header: 'Gösterge', minWidth: '12rem', rowHeader: true, render: (x: (typeof etkiRows)[number]) => x.ad },
             { key: 'v', header: temel.name, nowrap: true, render: (x) => x.var },
             { key: 's', header: 'Seçili senaryo', nowrap: true, render: (x) => x.sec },
-            { key: 'f', header: 'Fark', nowrap: true, render: (x) => x.fark },
+            { key: 'f', header: 'Fark', summary: true, nowrap: true, render: (x) => x.fark },
           ]}
           rows={etkiRows}
           rowKey={(x) => x.ad}
@@ -812,8 +813,10 @@ function Icerik() {
         <DataTable
           id="duyarlilik"
           title={`Koşullu başabaş: kapasite çarpanı × elde tutma (${senaryoAdi}, diğer seçenekler sabit)`}
-          note={`Hücre: aylık gelirin gideri ilk geçtiği tarih; “—” ${son} sonuna kadar geçmiyor.`}
+          note={`Hücre: aylık gelirin gideri ilk geçtiği tarih; “Dönem içinde yok”: ${son} sonuna kadar geçmiyor.`}
           tools={cubuk()}
+          kayit="matris"
+          eksenEtiketi="Kapasite çarpanı"
           columns={[
             { key: 'f', header: 'Kapasite ↓ · Elde tutma →', nowrap: true, rowHeader: true, render: (x: { factor: number; cells: (string | null)[] }) => yuzde(x.factor) },
             ...SENS_RETENTIONS.map((ret, j) => ({ key: `r${j}`, header: yuzde(ret), nowrap: true, render: (x: { factor: number; cells: (string | null)[] }) => kisaGun(x.cells[j]) })),

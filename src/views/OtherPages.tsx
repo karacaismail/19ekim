@@ -155,7 +155,7 @@ function HiringContent() {
             { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => kisaTarih(x.role.startIso) },
             { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${lira(m.params.commission)} / satış` : lira(x.role.maliyet)) },
             { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => lira(x.gider) },
-            { key: 'k', header: 'Gelire katkı', nowrap: true, render: (x) => (x.dogrudan ? lira(x.katki) : 'Dolaylı') },
+            { key: 'k', header: 'Gelire katkı', summary: true, nowrap: true, render: (x) => (x.dogrudan ? lira(x.katki) : 'Dolaylı') },
             { key: 'n', header: 'Net', nowrap: true, render: (x) => lira(x.net) },
           ]}
           rows={st.rows}
@@ -228,7 +228,7 @@ function GoalsContent() {
           columns={[
             { key: 'r', header: 'Aylık elde tutma', nowrap: true, rowHeader: true, render: (s: (typeof scenarios)[number]) => pct(s.r) },
             { key: 'm', header: 'Satıcı-ay', nowrap: true, render: (s) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(s.months) },
-            { key: 'c', header: 'Ciro', nowrap: true, render: (s) => lira(s.ciro) },
+            { key: 'c', header: 'Ciro', summary: true, nowrap: true, render: (s) => lira(s.ciro) },
             { key: 'g', header: 'Hedefe göre', nowrap: true, render: (s) => (s.ciro >= CIRO_TARGET ? `+${lira(s.ciro - CIRO_TARGET)}` : `−${lira(CIRO_TARGET - s.ciro)}`) },
           ]}
           rows={scenarios}
@@ -247,7 +247,7 @@ function GoalsContent() {
           columns={[
             { key: 'o', header: 'Seçenek', minWidth: '16rem', rowHeader: true, render: (o: (typeof options)[number]) => o.option },
             { key: 'u', header: 'Birim', nowrap: true, render: (o) => o.unit },
-            { key: 'c', header: 'Gereken adet', nowrap: true, render: (o) => o.count },
+            { key: 'c', header: 'Gereken adet', summary: true, nowrap: true, render: (o) => o.count },
             { key: 'n', header: 'Not', minWidth: '14rem', render: (o) => o.note },
           ]}
           rows={options}
@@ -280,6 +280,7 @@ function GoalsContent() {
           id="kaynak"
           title="Kaynak × ay (kayıt / yeni aktif)"
           kayit="sutun"
+          ozetSatir={(t) => t.source === 'Toplam'}
           columns={[
             { key: 's', header: 'Kaynak', minWidth: '15rem', rowHeader: true, render: (t: (typeof targetPlan)[number]) => t.source },
             ...MONTHS.map((m, i) => ({ key: m, header: m, nowrap: true, render: (t: (typeof targetPlan)[number]) => `${t.kayit[i]} / ${t.aktif[i]}` })),
@@ -348,7 +349,7 @@ function PlanContent() {
           title="Eylem, tarih ve hedef"
           columns={[
             { key: 'who', header: 'Kim', nowrap: true, rowHeader: true, render: (r) => <RoleChip role={r.who} /> },
-            { key: 'when', header: 'Tarih', nowrap: true, render: (r) => `${shortDate(r.from)} – ${shortDate(r.to)}` },
+            { key: 'when', header: 'Tarih', summary: true, nowrap: true, render: (r) => `${shortDate(r.from)} – ${shortDate(r.to)}` },
             { key: 'action', header: 'Eylem', minWidth: '20rem', render: (r) => r.action },
             { key: 'target', header: 'Hedef', minWidth: '14rem', render: (r) => <Target row={r} /> },
           ]}
@@ -397,7 +398,7 @@ function AuthorityContent() {
             { key: 'a', header: 'Aktif satıcı', nowrap: true, render: (c) => `≥ ${c.aktif}` },
             { key: 'k', header: 'Kayıt', nowrap: true, render: (c) => `≥ ${c.kayit}` },
             { key: 'c', header: 'Kümülatif ciro', nowrap: true, render: (c) => `≥ ${lira(c.ciro)}` },
-            { key: 'r', header: 'Karar', minWidth: '16rem', render: (c) => c.rule },
+            { key: 'r', header: 'Karar', summary: true, minWidth: '16rem', render: (c) => c.rule },
           ]}
           rows={checkpoints}
         />
@@ -453,7 +454,7 @@ function PendingContent() {
             { key: 'proposal', header: 'Öneri', minWidth: '18rem', render: (d) => d.proposal },
             {
               key: 'owner',
-              header: 'Karar veren',
+              header: 'Karar veren', summary: true,
               nowrap: true,
               render: (d) => (
                 <>
@@ -473,7 +474,7 @@ function PendingContent() {
           title="Konu ve karar"
           columns={[
             { key: 'topic', header: 'Konu', minWidth: '12rem', rowHeader: true, render: (d: (typeof decisions)[number]) => d.topic },
-            { key: 'decision', header: 'Karar', minWidth: '24rem', render: (d) => d.decision },
+            { key: 'decision', header: 'Karar', summary: true, minWidth: '24rem', render: (d) => d.decision },
           ]}
           rows={decisions}
         />
@@ -492,7 +493,7 @@ function PendingContent() {
             { key: 'who', header: 'Kim', minWidth: '13rem', rowHeader: true, render: (r) => r.who },
             { key: 'status', header: 'Statü', minWidth: '12rem', render: (r) => r.status },
             { key: 'fixed', header: 'Sabit', minWidth: '12rem', render: (r) => r.fixed },
-            { key: 'cost', header: 'İşveren maliyeti', minWidth: '11rem', render: (r) => r.cost },
+            { key: 'cost', header: 'İşveren maliyeti', summary: true, minWidth: '11rem', render: (r) => r.cost },
             { key: 'commission', header: 'Prim', minWidth: '18rem', render: (r) => r.commission },
           ]}
           rows={payRules}
@@ -527,7 +528,7 @@ function PendingContent() {
           title="Aşama, geçiş kuralı, sorumlu"
           columns={[
             { key: 'stage', header: 'Aşama', nowrap: true, rowHeader: true, render: (r) => r.stage },
-            { key: 'rule', header: 'Geçiş kuralı', minWidth: '18rem', render: (r) => r.rule },
+            { key: 'rule', header: 'Geçiş kuralı', summary: true, minWidth: '18rem', render: (r) => r.rule },
             { key: 'owner', header: 'Sorumlu', minWidth: '11rem', render: (r) => r.owner },
             { key: 'commission', header: 'Prim kriteri', nowrap: true, render: (r) => (r.commission ? 'Evet' : 'Hayır') },
           ]}
@@ -546,7 +547,7 @@ function PendingContent() {
           title="Yasal sınırlar"
           columns={[
             { key: 'rule', header: 'Kural', minWidth: '13rem', rowHeader: true, render: (r: (typeof LEGAL_LIMITS)[number]) => r.rule },
-            { key: 'limit', header: 'Sınır', minWidth: '16rem', render: (r) => r.limit },
+            { key: 'limit', header: 'Sınır', summary: true, minWidth: '16rem', render: (r) => r.limit },
             { key: 'source', header: 'Dayanak', minWidth: '11rem', render: (r) => r.source },
           ]}
           rows={LEGAL_LIMITS}
@@ -557,7 +558,7 @@ function PendingContent() {
           columns={[
             { key: 'name', header: 'Dönem', minWidth: '12rem', rowHeader: true, render: (r) => <>{r.name}<span className="cell-sub">{shortDate(r.from)} – {shortDate(r.to)}</span></> },
             { key: 'week', header: 'Hafta içi ve Cumartesi', minWidth: '18rem', render: (r) => <>{r.weekday}<span className="cell-sub">{r.saturday}</span></> },
-            { key: 'weekly', header: 'Haftalık', nowrap: true, render: (r) => `${r.weekly} sa (${r.overtimePerWeek} sa fazla)` },
+            { key: 'weekly', header: 'Haftalık', summary: true, nowrap: true, render: (r) => `${r.weekly} sa (${r.overtimePerWeek} sa fazla)` },
             { key: 'org', header: 'Organizatör', minWidth: '16rem', render: (r) => r.organizer },
           ]}
           rows={workPeriods}
@@ -618,7 +619,7 @@ function GrowthContent() {
           columns={[
             { key: 'l', header: 'Seviye', nowrap: true, rowHeader: true, render: (l: (typeof levels)[number]) => l.level },
             { key: 'n', header: 'Kademe', minWidth: '14rem', render: (l) => l.name },
-            { key: 'c', header: 'Kişi', nowrap: true, render: (l) => l.count },
+            { key: 'c', header: 'Kişi', summary: true, nowrap: true, render: (l) => l.count },
           ]}
           rows={levels}
         />
@@ -640,7 +641,7 @@ function GrowthContent() {
           title="Ölçüt, hedef, zaman"
           columns={[
             { key: 'm', header: 'Ölçüt', minWidth: '14rem', rowHeader: true, render: (k: (typeof growthKpis)[number]) => k.metric },
-            { key: 't', header: 'Hedef', minWidth: '12rem', render: (k) => k.target },
+            { key: 't', header: 'Hedef', summary: true, minWidth: '12rem', render: (k) => k.target },
             { key: 'w', header: 'Ne zaman', minWidth: '10rem', render: (k) => k.when },
           ]}
           rows={growthKpis}
@@ -668,7 +669,7 @@ export function ArchivePage({ pathname }: { pathname: string }) {
         title="Tahta notu → karar → sayfa"
         columns={[
           { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },
-          { key: 'decision', header: 'Plandaki karar', minWidth: '18rem', render: (r) => r.decision },
+          { key: 'decision', header: 'Plandaki karar', summary: true, minWidth: '18rem', render: (r) => r.decision },
           { key: 'where', header: 'Sayfa', nowrap: true, render: (r) => <TextLink to={r.where.path}>{r.where.label}</TextLink> },
         ]}
         rows={boardMapping}

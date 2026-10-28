@@ -642,6 +642,21 @@ tanımını taşır. Kalan: `GirisEkrani` bekleme nedeni, OPEX eski veri / yenid
 `ConnectForm` uzun içerik (F12) GA-5’e. Test: `tests/gorsel-algi.spec.ts` GA-3 (V20 ×2, V21 ×2, V23, F12, F23);
 `applet.spec` / `ui.spec` onay ve düzenleme beklentileri güncel.
 
+**GA-4a** (F07/F08; kullanıcı kararı 2026-10-28): **Açık özet sözleşmesi (F07):** her `DataTable` kapalı kaydın özet
+ölçütünü açıkça verir — 90’ı aşkın tabloda `Column.summary` iş ölçütüyle (kişi → gelire katkı / aylık artış / ödeme,
+ay → net, karar → karar veren, iş → tarih / ölçüt / durum, applet → sonuç sütunu), sütun eksenli tablolarda `ozetSatir`
+açık (nakit tablosu: dönem sonu nakit; kaynak × ay: toplam satırı), bütün veri sütunları düzenleyici olan tablolarda
+`ozetYok` (katalog seviye/çarpan, terfi kriterleri: başlık yeter); sütunlar değişkenle kurulan OPEX tablolarında
+kullanım yerinde `columns={columns /* summary: … */}` işareti. Sütun ekseninde `kiyas` yalnız ölçüt bazlı kıyas tablolarında (senaryo kıyasları: özet satır panelde de yinelenir, üç senaryo art arda); diğerlerinde (nakit tablosu) özet satır panelde yinelenmez. UI kapısı özeti olmayan `DataTable`’ı reddeder
+(`summary:` / `ozetSatir` / `kayit="matris"` / `ozetYok`; element sınırı aynı girintideki `/>`): özet kolon
+sırasından türemez (V12). **Matris kıyas profili (F08, ux_v2 V2-F kapandı):** `DataTable kayit="matris"` +
+`eksenEtiketi` → dar ekranda `MatrisKiyas` (`.matris-kiyas`): satır ekseni `Choice` ile seçilir (segment / liste /
+seçim kutusu), diğer eksenin bütün sütunları aynı anda `dl.matris-alanlar` açık listesinde (kayıt paneliyle aynı dl),
+düzenleyici ve sonucu aynı bağlamda, kapat/aç ve ezber yok; masaüstü tablo, sıra, birim ve eksen aynı. Kullanım:
+liyakat zam matrisi (`merit-matris`, eksen “Performans”), gelir planı duyarlılık (`duyarlilik`, eksen “Kapasite
+çarpanı”; not “Dönem içinde yok” sözlüğüyle). Band konumu / kademe serisi “fark satırı” (C054/C057) GA-5’e. Test:
+`tests/gorsel-algi.spec.ts` GA-4a (V12/F07 üç sayfada özet etiketi; V13/F08 liyakat ve duyarlılık 320 px).
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
@@ -652,8 +667,8 @@ tanımını taşır. Kalan: `GirisEkrani` bekleme nedeni, OPEX eski veri / yenid
 | F04 Kontrol–yardım–bölüm ritmi | `SenaryoKurucu.tsx`, `Choice.note` → `aria-describedby`, `Girdiler` | V11 | planlandı (GA-5) |
 | F05 Bağlam/özet tekrarları | `YapiskanOzet`, `ResultSummary`, `Section`, `ParamsNotice` | V16 | planlandı (GA-5) |
 | F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | GA-1: seçili ağırlık sabit (V08); kalan roller planlandı (GA-5) |
-| F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir`) | V12 | planlandı (GA-4) |
-| F08 Karşılaştırma komşuluğu (matris) | `DataTable` kıyas profili; `LiyakatMatrisi`, `RutbeMatrisi`, `BandKonumu`, `KademeSerisi` | V13 | planlandı (GA-4; ux_v2 V2-F) |
+| F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir` / `ozetYok`), UI kapısı kuralı | V12 | uygulandı (GA-4a), yerelde doğrulandı |
+| F08 Karşılaştırma komşuluğu (matris) | `DataTable kayit="matris"` (`MatrisKiyas`); liyakat matrisi, duyarlılık | V13 | uygulandı (GA-4a), yerelde doğrulandı; `BandKonumu` / `KademeSerisi` fark satırı planlandı (GA-5) |
 | F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` | V15 | planlandı (GA-4) |
 | F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320), `PartnershipPage` `BolumSekmeleri` | V17 | planlandı (GA-4) |
 | F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |

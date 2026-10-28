@@ -248,6 +248,20 @@ for (const [edge, corners] of Object.entries(EDGE_CORNERS)) {
   }
 }
 
+// gorsel_algi.md F07 (kullanıcı kararı 2026-10-28): her DataTable kapalı kaydın özet ölçütünü açıkça verir — Column.summary,
+// ozetSatir (sütun ekseni) ya da kayit="matris" (kıyas profili). Özet kolon sırasından türemez (V12).
+for (const file of files.filter((f) => /src[\\/]views[\\/].*\.tsx$/.test(f))) {
+  const text = readFileSync(file, 'utf8');
+  for (const m of text.matchAll(/^( *)<DataTable/gm)) {
+    const kapanis = text.indexOf(`\n${m[1]}/>`, m.index);
+    const eleman = text.slice(m.index, kapanis < 0 ? m.index + 6000 : kapanis);
+    if (!/summary:|ozetSatir|kayit="matris"|ozetYok/.test(eleman)) {
+      const satir = text.slice(0, m.index).split('\n').length;
+      fail(file, `DataTable (satır ${satir}) kapalı kayıt özetini belirtmiyor: Column.summary, ozetSatir ya da kayit="matris" gerekli (gorsel_algi.md F07)`);
+    }
+  }
+}
+
 for (const file of files.filter((f) => /\.(tsx|ts|astro)$/.test(f))) {
   const text = readFileSync(file, 'utf8');
   for (const match of text.matchAll(/style=\{\{([^}]*)\}\}/g)) {

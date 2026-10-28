@@ -5883,6 +5883,17 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   font-size: var(--text-sm);
 }
 
+/* Matris kıyas profili (gorsel_algi.md F08): eksen seçimi üstte, diğer eksenin değerleri açık listede (kayıt paneliyle aynı dl). */
+.matris-kiyas {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+}
+
+.matris-alanlar {
+  margin: 0;
+}
+
 /* Düzeltme / geri alma bildirimi (gorsel_algi.md F13): girdinin altında ayrı durum satırı; hata rengi değil, açıklama tonu. */
 .param-duzeltme {
   margin: var(--space-1) 0 0;

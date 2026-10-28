@@ -1513,6 +1513,8 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
 
   for (const width of [320, 390]) {
     test(`${width} px: grafik metinleri kesilmez, SVG dışına taşmaz, birbirine binmez`, async ({ page }) => {
+      // Bütün grafik sayfalarını tek testte gezer; CI’daki Firefox 320 px’te 30 sn sınırını aşıyordu (zaman aşımı, iddia hatası değil).
+      test.slow();
       await page.setViewportSize({ width, height: 800 });
       for (const path of CHART_PAGES) {
         await page.goto(path);

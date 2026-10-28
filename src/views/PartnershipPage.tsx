@@ -104,7 +104,7 @@ function PuanKarti({ id, sc }: { id: string; sc: Scorecard }) {
         note={`${sc.note} Eşik: ≥ ${sc.threshold} puan.`}
         columns={[
           { key: 'c', header: 'Ölçüt', minWidth: '20rem', rowHeader: true, render: (r) => r.criterion },
-          { key: 'p', header: 'Puan', nowrap: true, render: (r) => r.points },
+          { key: 'p', header: 'Puan', summary: true, nowrap: true, render: (r) => r.points },
         ]}
         rows={rows}
         rowTone={(r) => (r.criterion === 'Toplam' ? 'total' : undefined)}
@@ -139,7 +139,7 @@ function Ozet({ p, no }: { p: Program; no: number }) {
           title="Seçim ve karar"
           columns={[
             { key: 'q', header: 'Seçim', nowrap: true, rowHeader: true, render: (r) => r.question },
-            { key: 'a', header: 'Karar', minWidth: '26rem', render: (r) => r.answer },
+            { key: 'a', header: 'Karar', summary: true, minWidth: '26rem', render: (r) => r.answer },
           ]}
           rows={p.cascade}
         />
@@ -152,7 +152,7 @@ function Ozet({ p, no }: { p: Program; no: number }) {
             { key: 'n', header: 'Eylem', minWidth: '14rem', rowHeader: true, render: (r) => r.name },
             { key: 'w', header: 'Ne yapılır', minWidth: '20rem', render: (r) => r.what },
             { key: 'm', header: 'Ölçüt', minWidth: '14rem', render: (r) => r.measure },
-            { key: 'h', header: 'Hafta', nowrap: true, render: (r) => r.weeks },
+            { key: 'h', header: 'Hafta', summary: true, nowrap: true, render: (r) => r.weeks },
           ]}
           rows={p.actions}
         />
@@ -184,7 +184,7 @@ function Teshis({ p, no }: { p: Program; no: number }) {
           columns={[
             { key: 'id', header: '#', nowrap: true, rowHeader: true, render: (r) => r.id },
             { key: 'h', header: 'Hipotez', minWidth: '20rem', render: (r) => r.hypothesis },
-            { key: 's', header: 'Doğrulama sinyali', minWidth: '14rem', render: (r) => r.signal },
+            { key: 's', header: 'Doğrulama sinyali', summary: true, minWidth: '14rem', render: (r) => r.signal },
             { key: 'r', header: 'Doğruysa karşılığı', minWidth: '14rem', render: (r) => r.response },
           ]}
           rows={p.hypotheses}
@@ -196,7 +196,7 @@ function Teshis({ p, no }: { p: Program; no: number }) {
           title="Grup, sayı, aranan kanıt"
           columns={[
             { key: 'g', header: 'Grup', minWidth: '12rem', rowHeader: true, render: (r) => r.group },
-            { key: 'c', header: 'Görüşme', nowrap: true, render: (r) => r.count },
+            { key: 'c', header: 'Görüşme', summary: true, nowrap: true, render: (r) => r.count },
             { key: 'e', header: 'Aranan kanıt', minWidth: '24rem', render: (r) => r.evidence },
           ]}
           rows={p.interviews}
@@ -221,7 +221,7 @@ function Kime({ p, no }: { p: Program; no: number }) {
           columns={[
             { key: 's', header: 'Segment', minWidth: '16rem', rowHeader: true, render: (r) => r.segment },
             { key: 'w', header: 'Neden', minWidth: '20rem', render: (r) => r.why },
-            { key: 'p', header: 'Öncelik', nowrap: true, render: (r) => r.priority },
+            { key: 'p', header: 'Öncelik', summary: true, nowrap: true, render: (r) => r.priority },
           ]}
           rows={p.segments}
         />
@@ -234,7 +234,7 @@ function Kime({ p, no }: { p: Program; no: number }) {
             columns={[
               { key: 'n', header: 'Aday hücre', minWidth: '18rem', rowHeader: true, render: (r) => r.name },
               { key: 'j', header: 'Alıcının somut işi', minWidth: '16rem', render: (r) => r.job },
-              { key: 'r', header: 'Araştırılacak kritik risk', minWidth: '16rem', render: (r) => r.risk },
+              { key: 'r', header: 'Araştırılacak kritik risk', summary: true, minWidth: '16rem', render: (r) => r.risk },
             ]}
             rows={p.cellOptions.rows}
           />
@@ -249,7 +249,7 @@ function Kime({ p, no }: { p: Program; no: number }) {
             { key: 't', header: 'Ortak tipi', minWidth: '16rem', rowHeader: true, render: (r) => r.type },
             { key: 'b', header: 'Ne getirir', minWidth: '18rem', render: (r) => r.brings },
             { key: 'e', header: 'Giriş koşulu ve ekonomi', minWidth: '18rem', render: (r) => r.entry },
-            { key: 'w', header: 'Dalga', nowrap: true, render: (r) => r.wave },
+            { key: 'w', header: 'Dalga', summary: true, nowrap: true, render: (r) => r.wave },
           ]}
           rows={p.partnerTypes}
         />
@@ -279,7 +279,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           columns={[
             { key: 't', header: h1, minWidth: '13rem', rowHeader: true, render: (r) => r.tier },
             { key: 'c', header: h2, minWidth: '16rem', render: (r) => r.condition },
-            { key: 'g', header: h3, minWidth: '20rem', render: (r) => r.gets },
+            { key: 'g', header: h3, minWidth: '20rem', summary: true, render: (r) => r.gets },
           ]}
           rows={p.tiers}
         />
@@ -291,7 +291,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           columns={[
             { key: 's', header: 'Aşama', nowrap: true, rowHeader: true, render: (r) => r.stage },
             { key: 'd', header: 'Süre', nowrap: true, render: (r) => r.duration },
-            { key: 'c', header: 'Başarı kriteri', minWidth: '20rem', render: (r) => r.criterion },
+            { key: 'c', header: 'Başarı kriteri', summary: true, minWidth: '20rem', render: (r) => r.criterion },
             { key: 'o', header: 'Sahip', nowrap: true, render: (r) => r.owner },
           ]}
           rows={p.journey}
@@ -315,7 +315,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           title="Kural ve dayanak"
           columns={[
             { key: 'i', header: 'Konu', minWidth: '12rem', rowHeader: true, render: (r) => r.item },
-            { key: 'v', header: 'Kural', minWidth: '20rem', render: (r) => r.value },
+            { key: 'v', header: 'Kural', summary: true, minWidth: '20rem', render: (r) => r.value },
             { key: 'n', header: 'Dayanak ve sınır', minWidth: '20rem', render: (r) => r.note },
           ]}
           rows={p.economics}
@@ -335,7 +335,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           title="Örnek hesap adımları"
           columns={[
             { key: 'i', header: 'Kalem', minWidth: '14rem', rowHeader: true, render: (r) => r.item },
-            { key: 'v', header: 'Hesap', minWidth: '16rem', render: (r) => r.value },
+            { key: 'v', header: 'Hesap', summary: true, minWidth: '16rem', render: (r) => r.value },
             { key: 'n', header: 'Not', minWidth: '18rem', render: (r) => r.note },
           ]}
           rows={p.example.rows}
@@ -356,7 +356,7 @@ function Kanal({ p, no }: { p: Program; no: number }) {
             { key: 'r', header: 'Halka', nowrap: true, rowHeader: true, render: (r) => r.ring },
             { key: 'c', header: 'Kanal', minWidth: '20rem', render: (r) => r.channel },
             { key: 't', header: '90 günlük test', minWidth: '16rem', render: (r) => r.test },
-            { key: 'm', header: 'Başarı ölçütü', minWidth: '12rem', render: (r) => r.metric },
+            { key: 'm', header: 'Başarı ölçütü', summary: true, minWidth: '12rem', render: (r) => r.metric },
           ]}
           rows={p.channels}
         />
@@ -367,7 +367,7 @@ function Kanal({ p, no }: { p: Program; no: number }) {
           title="Ne zaman akla gelmeliyiz, tetik, hazırlık"
           columns={[
             { key: 'm', header: 'Giriş noktası', minWidth: '12rem', rowHeader: true, render: (r) => r.moment },
-            { key: 't', header: 'Tetik', minWidth: '16rem', render: (r) => r.trigger },
+            { key: 't', header: 'Tetik', summary: true, minWidth: '16rem', render: (r) => r.trigger },
             { key: 'p', header: 'Hazırlık', minWidth: '14rem', render: (r) => r.prep },
           ]}
           rows={p.entryPoints}
@@ -393,7 +393,7 @@ function Olcum({ p, no, dates }: { p: Program; no: number; dates: Partnership['d
             { key: 's', header: 'Kaynak', minWidth: '8rem', render: (r) => r.source },
             { key: 'p', header: 'Dönem', nowrap: true, render: (r) => r.period },
             { key: 'c', header: 'Hangi kararı değiştirir', minWidth: '12rem', render: (r) => r.decision },
-            { key: 't', header: 'Hedef (90 gün)', minWidth: '12rem', render: (r) => r.target },
+            { key: 't', header: 'Hedef (90 gün)', summary: true, minWidth: '12rem', render: (r) => r.target },
           ]}
           rows={p.kpis}
         />
@@ -420,7 +420,7 @@ function Olcum({ p, no, dates }: { p: Program; no: number; dates: Partnership['d
           title="Hedef × geçit"
           columns={[
             { key: 'n', header: 'Hedef', minWidth: '12rem', rowHeader: true, render: (s: Program['gateSeries'][number]) => s.name },
-            ...GATE_STEPS.map((g, i) => ({ key: g, header: g, nowrap: true, render: (s: Program['gateSeries'][number]) => `≥ ${int(s.values[i])}` })),
+            ...GATE_STEPS.map((g, i) => ({ key: g, header: g, nowrap: true, summary: i === GATE_STEPS.length - 1, render: (s: Program['gateSeries'][number]) => `≥ ${int(s.values[i])}` })),
           ]}
           rows={p.gateSeries}
         />
@@ -503,7 +503,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
           columns={[
             { key: 'q', header: 'Çeyrek', minWidth: '10rem', rowHeader: true, render: (r) => r.quarter },
             { key: 'f', header: 'Odak', minWidth: '22rem', render: (r) => r.focus },
-            { key: 't', header: 'Hedef', minWidth: '14rem', render: (r) => r.target },
+            { key: 't', header: 'Hedef', summary: true, minWidth: '14rem', render: (r) => r.target },
           ]}
           rows={p.quarters}
         />
@@ -524,7 +524,7 @@ function RiskBolumu({ p, no }: { p: Program; no: number }) {
           columns={[
             { key: 'r', header: 'Risk veya varsayım', minWidth: '16rem', rowHeader: true, render: (r) => r.risk },
             { key: 'p', header: 'Olasılık', nowrap: true, render: (r) => r.probability },
-            { key: 'i', header: 'Etki', nowrap: true, render: (r) => r.impact },
+            { key: 'i', header: 'Etki', summary: true, nowrap: true, render: (r) => r.impact },
             { key: 'c', header: 'Karşılık', minWidth: '20rem', render: (r) => r.response },
           ]}
           rows={p.risks}
@@ -549,7 +549,7 @@ function RiskBolumu({ p, no }: { p: Program; no: number }) {
           title="Rol, saat/hafta, sorumluluk"
           columns={[
             { key: 'r', header: 'Rol', minWidth: '14rem', rowHeader: true, render: (r) => r.role },
-            { key: 'h', header: 'Saat / hafta', nowrap: true, render: (r) => `${r.hours} sa` },
+            { key: 'h', header: 'Saat / hafta', summary: true, nowrap: true, render: (r) => `${r.hours} sa` },
             { key: 'd', header: 'Teslim sorumluluğu', minWidth: '18rem', render: (r) => r.duty },
           ]}
           rows={rows}

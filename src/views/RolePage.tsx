@@ -103,7 +103,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
           title="Hafta içi"
           columns={[
             { key: 'time', header: 'Saat', nowrap: true, rowHeader: true, render: (r) => r.time },
-            { key: 'block', header: 'Blok', minWidth: '12rem', render: (r) => r.block },
+            { key: 'block', header: 'Blok', summary: true, minWidth: '12rem', render: (r) => r.block },
           ]}
           rows={role.daily}
           rowTone={(r) => r.tone}
@@ -113,7 +113,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
           title="Cumartesi"
           columns={[
             { key: 'time', header: 'Saat', nowrap: true, rowHeader: true, render: (r) => r.time },
-            { key: 'block', header: 'Blok', minWidth: '12rem', render: (r) => r.block },
+            { key: 'block', header: 'Blok', summary: true, minWidth: '12rem', render: (r) => r.block },
           ]}
           rows={role.saturday}
           rowTone={(r) => r.tone}
@@ -163,7 +163,7 @@ function DigitalSections({ role }: { role: Role }) {
             { key: 'name', header: 'Entegrasyon', minWidth: '13rem', rowHeader: true, render: (r) => r.name },
             { key: 'measures', header: 'Ne ölçer', minWidth: '16rem', render: (r) => r.measures },
             { key: 'done', header: 'Kabul ölçütü', minWidth: '16rem', render: (r) => r.done },
-            { key: 'date', header: 'Tarih', nowrap: true, render: (r) => shortDate(r.date) },
+            { key: 'date', header: 'Tarih', summary: true, nowrap: true, render: (r) => shortDate(r.date) },
           ]}
           rows={integrations}
         />
@@ -192,7 +192,7 @@ function DigitalSections({ role }: { role: Role }) {
             { key: 'step', header: 'Adım', nowrap: true, rowHeader: true, render: (r) => r.step },
             { key: 'what', header: 'Ne olur', minWidth: '18rem', render: (r) => r.what },
             { key: 'mode', header: 'Kim', minWidth: '10rem', render: (r) => STEP_MODE_LABELS[r.mode] },
-            { key: 'measure', header: 'Ölçüt', minWidth: '12rem', render: (r) => r.measure },
+            { key: 'measure', header: 'Ölçüt', summary: true, minWidth: '12rem', render: (r) => r.measure },
           ]}
           rows={pipeline}
         />
@@ -202,7 +202,7 @@ function DigitalSections({ role }: { role: Role }) {
           note="Karar 19 Ekim. Tavan aşımı İsmail Karaca onayıyla; 30 Aralık’ta ölçüm panosuyla yeniden bakılır."
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
-            { key: 'use', header: 'Ne için', minWidth: '18rem', render: (r) => r.use },
+            { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },
             { key: 'license', header: 'Lisans', minWidth: '12rem', render: (r) => r.license },
           ]}
           rows={aiTools}
@@ -234,7 +234,7 @@ function DigitalSections({ role }: { role: Role }) {
           columns={[
             { key: 'channel', header: 'Kanal', minWidth: '12rem', rowHeader: true, render: (r) => r.channel },
             { key: 'content', header: 'Ne paylaşılır', minWidth: '16rem', render: (r) => r.content },
-            { key: 'frequency', header: 'Sıklık', nowrap: true, render: (r) => r.frequency },
+            { key: 'frequency', header: 'Sıklık', summary: true, nowrap: true, render: (r) => r.frequency },
           ]}
           rows={channels}
         />
@@ -281,7 +281,7 @@ function DigitalSections({ role }: { role: Role }) {
               ),
             },
             { key: 'format', header: 'Format', minWidth: '12rem', render: (r) => r.format },
-            { key: 'perWeek', header: 'Haftada', nowrap: true, render: (r) => r.perWeek },
+            { key: 'perWeek', header: 'Haftada', summary: true, nowrap: true, render: (r) => r.perWeek },
             { key: 'measure', header: 'Ölçüt', minWidth: '11rem', render: (r) => r.measure },
           ]}
           rows={contentPlan}
@@ -315,7 +315,7 @@ function DigitalSections({ role }: { role: Role }) {
           title="Akış, tarih, eylem, hedef"
           columns={[
             { key: 'stream', header: 'Akış', nowrap: true, rowHeader: true, render: (r) => STREAM_LABELS[r.stream] },
-            { key: 'when', header: 'Tarih', nowrap: true, render: (r) => shortRange(r) },
+            { key: 'when', header: 'Tarih', summary: true, nowrap: true, render: (r) => shortRange(r) },
             { key: 'action', header: 'Eylem', minWidth: '18rem', render: (r) => r.action },
             { key: 'target', header: 'Hedef', minWidth: '13rem', render: (r) => <Target row={r} /> },
           ]}
@@ -343,7 +343,7 @@ function GenericSections({ role }: { role: Role }) {
           title="Görevler"
           columns={[
             { key: 'task', header: 'Görev', minWidth: '16rem', rowHeader: true, render: (r) => r.task },
-            { key: 'measure', header: 'Ölçüt', minWidth: '16rem', render: (r) => r.measure },
+            { key: 'measure', header: 'Ölçüt', summary: true, minWidth: '16rem', render: (r) => r.measure },
           ]}
           rows={role.tasks}
         />
@@ -380,7 +380,7 @@ function GenericSections({ role }: { role: Role }) {
           columns={[
             { key: 'when', header: 'Tarih', nowrap: true, rowHeader: true, render: (r) => range(r) },
             { key: 'action', header: 'Eylem', minWidth: '18rem', render: (r) => r.action },
-            { key: 'target', header: 'Hedef', minWidth: '14rem', render: (r) => <Target row={r} /> },
+            { key: 'target', header: 'Hedef', summary: true, minWidth: '14rem', render: (r) => <Target row={r} /> },
           ]}
           rows={role.plan}
         />

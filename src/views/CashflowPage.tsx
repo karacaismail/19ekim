@@ -172,6 +172,7 @@ function Icerik() {
           rowTone={(x) => (x.s.id === sid ? 'secili' : undefined)}
           // Dar ekranda ölçüt bazlı kıyas (ux_v2.md §3.1, seçilen C): her ölçüt bir kayıt, özet seçili senaryo, panelde üç senaryo.
           kayit="sutun"
+          kiyas
           ozetSatir={(x) => x.s.id === sid}
         />
       </Section>
@@ -207,6 +208,7 @@ function Icerik() {
           title={`${ayrintili ? 'Ayrıntılı nakit akış tablosu' : 'Nakit akış tablosu'} (${sc.name.toLocaleLowerCase('tr-TR')})`}
           tools={cubuk()}
           kayit="sutun"
+          ozetSatir={(r) => r.id === 'sonu'}
           columns={[
             {
               key: 'ad',

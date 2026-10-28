@@ -378,3 +378,61 @@ test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay,
     await expect(page.getByRole('region', { name: /^Kalemler · / })).toBeVisible({ timeout: 15_000 });
   });
 });
+
+test.describe('gorsel_algi GA-4a: açık özet sözleşmesi ve matris kıyas profili', () => {
+  test('V12/F07: kapalı kaydın özeti açık sözleşmeden gelir (istihdam katkı: gelire katkı; liyakat kişi: aylık artış; nakit: dönem sonu)', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('istihdam/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.table-block:has(#istihdam-katki-tablo) .kayit-ozet-etiket').first()).toHaveText('Gelire katkı');
+    await page.goto('nakit-akisi/');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.table-block:has(#nakit-tablo) .kayit-ozet-etiket').first()).toHaveText('Dönem sonu nakit');
+    await page.goto('applet/#liyakat-matrisi');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.table-block:has(#merit-kisi-tablo) .kayit-ozet-etiket').first()).toHaveText('Aylık artış');
+  });
+
+  test('V13/F08: liyakat matrisi 320 px’te kapalı kayıt değil — performans seçilir, bütün compa sütunları açık listede, düzenleyici bağlamında', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('applet/#liyakat-matrisi');
+    await icerik(page);
+    await hydrated(page);
+    const blok = page.locator('.table-block:has(#merit-matris-tablo)');
+    await expect(blok.locator('.kayit')).toHaveCount(0);
+    const eksen = blok.getByRole('group', { name: 'Performans' });
+    await expect(eksen).toBeVisible();
+    const alanlar = blok.locator('.matris-alanlar dt');
+    await expect(alanlar).toHaveCount(5);
+    await expect(alanlar.first()).toContainText('Compa');
+    // Eksen değişince aynı sütunlar başka satırın değerleriyle; düzenleyiciler listede (textbox).
+    const ilk = await blok.locator('.matris-alanlar input').first().inputValue();
+    const secenekler = eksen.locator('.secim-dugme, [role="combobox"]');
+    if ((await eksen.locator('.secim-dugme').count()) > 1) await eksen.locator('.secim-dugme').nth(4).click();
+    else {
+      await eksen.getByRole('combobox').click();
+      await page.getByRole('option', { name: /Olağanüstü/ }).click();
+    }
+    await expect(alanlar).toHaveCount(5);
+    expect(await blok.locator('.matris-alanlar input').first().inputValue()).not.toBe(ilk);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+    void secenekler;
+  });
+
+  test('V13/F08: gelir planı duyarlılık matrisi 320 px’te kapasite seçilir, elde tutma sütunları açık listede', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const blok = page.locator('.table-block:has(#duyarlilik-tablo)');
+    await blok.scrollIntoViewIfNeeded();
+    await expect(blok.locator('.kayit')).toHaveCount(0);
+    await expect(blok.getByRole('group', { name: 'Kapasite çarpanı', exact: true })).toBeVisible();
+    const dt = await blok.locator('.matris-alanlar dt').allInnerTexts();
+    expect(dt.length).toBeGreaterThan(2);
+    for (const d of dt) expect(d).toMatch(/^%\d+$/);
+  });
+});

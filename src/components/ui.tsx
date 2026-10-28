@@ -204,7 +204,8 @@ function useKapsayiciGenisligi(ref: RefObject<HTMLElement | null>) {
   return genislik;
 }
 
-export type KayitEkseni = 'satir' | 'sutun';
+/** Kayıt görünümünün ekseni: satır = kayıt; sütun = kayıt (ay sütunları); matris = kıyas profili (bir eksen seçilir, diğer eksen açık liste). */
+export type KayitEkseni = 'satir' | 'sutun' | 'matris';
 
 /** Kayıt görünümündeki bir kayıt: başlık (kayıt adı), tek özet alan ve açılan paneldeki etiketli alanlar. */
 export interface Kayit {
@@ -319,6 +320,52 @@ export function KayitListesi({
   );
 }
 
+/**
+ * Matris kıyas profili (gorsel_algi.md F08, ux_v2 V2-F; kullanıcı kararı 2026-10-28): dar ekranda matris satırları kapalı
+ * kayıt olmaz — bir eksen seçilir (satır başlığı: performans puanı, kapasite çarpanı), diğer eksenin bütün değerleri aynı
+ * anda açık listede durur; düzenleyici ve sonucu aynı bağlamda. Masaüstüyle aynı veri, sıra, birim ve eksen.
+ */
+function MatrisKiyas<T>({
+  columns,
+  rows,
+  keyOf,
+  baslik,
+  labelledBy,
+  eksenEtiketi,
+}: {
+  columns: Column<T>[];
+  rows: T[];
+  keyOf: (row: T, index: number) => string;
+  baslik: (row: T, index: number) => ReactNode;
+  labelledBy: string;
+  eksenEtiketi: string;
+}) {
+  const satirlar = rows.map((row, i) => ({ key: keyOf(row, i), ad: baslik(row, i), row }));
+  const [secili, setSecili] = useState(satirlar[0]?.key ?? '');
+  const aktif = satirlar.find((x) => x.key === secili) ?? satirlar[0];
+  const alanlar = columns.filter((c) => !c.rowHeader);
+  return (
+    <div className="matris-kiyas kayitlar-sarmal" role="group" aria-labelledby={labelledBy}>
+      <Choice
+        label={eksenEtiketi}
+        value={aktif?.key ?? ''}
+        options={satirlar.map((x) => ({ id: x.key, name: typeof x.ad === 'string' ? x.ad : String(x.key) }))}
+        onChange={setSecili}
+      />
+      {aktif ? (
+        <dl className="kayit-alanlar matris-alanlar">
+          {alanlar.map((c) => (
+            <div key={c.key}>
+              <dt>{c.label ?? c.header}</dt>
+              <dd>{c.render(aktif.row)}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </div>
+  );
+}
+
 export function DataTable<T>({
   id,
   title,
@@ -331,6 +378,9 @@ export function DataTable<T>({
   rowKey,
   kayit = 'satir',
   ozetSatir,
+  ozetYok = false,
+  eksenEtiketi,
+  kiyas = false,
 }: {
   id: string;
   title: string;
@@ -351,7 +401,14 @@ export function DataTable<T>({
    * sonu). Verilince panel bütün satırları art arda gösterir (kıyas), verilmezse özet satır panelde yinelenmez.
    */
   ozetSatir?: (row: T) => boolean;
+  /** Açık sözleşme (gorsel_algi.md F07): bütün veri sütunları düzenleyici olduğundan kapalı kayıtta özet yoktur (başlık yeter). */
+  ozetYok?: boolean;
+  /** Matris profilinde seçilen eksenin adı (ör. “Performans”, “Kapasite çarpanı”); yoksa satır başlığı sütununun adı. */
+  eksenEtiketi?: string;
+  /** Sütun ekseninde ölçüt bazlı kıyas (ux_v2 §3.1): özet satır (seçili senaryo) panelde de yinelenir, bütün satırlar art arda. */
+  kiyas?: boolean;
 }) {
+  void ozetYok;
   const titleId = `${id}-tablo`;
   const sarmal = useRef<HTMLDivElement>(null);
   const kaydiran = useRef<HTMLDivElement>(null);
@@ -368,16 +425,17 @@ export function DataTable<T>({
   let kayitlar: Kayit[] = [];
   if (mod === 'kayit') {
     if (kayit === 'sutun') {
-      // Sütun = kayıt (ay, ölçüt); satırlar alan. Özet satır: verilen (seçili senaryo) ya da son satır (dönem sonu / toplam).
+      // Sütun = kayıt (ay, ölçüt); satırlar alan. Özet satır: verilen (`ozetSatir`: seçili senaryo, dönem sonu) ya da son satır.
+      // Panel: kıyas tablolarında (`kiyas`) bütün satırlar art arda (özet de yinelenir); diğerlerinde özet satır panelde yinelenmez.
       const secilen = ozetSatir ? rows.find(ozetSatir) : undefined;
       const sonSatir = rows.length ? rows[rows.length - 1] : undefined;
       const ozet = secilen ?? sonSatir;
-      const alanSatirlari = ozetSatir ? rows : rows.slice(0, -1);
+      const alanSatirlari = kiyas ? rows : rows.filter((r) => r !== ozet);
       kayitlar = veriSutunlari.map((c) => ({
         key: c.key,
         title: etiket(c),
         summary: ozet && !c.editor ? { label: baslikMetni(ozet, rows.indexOf(ozet)), value: c.render(ozet) } : undefined,
-        fields: (ozet && c.editor && !ozetSatir ? rows : alanSatirlari).map((r, i) => ({ key: keyOf(r, i), label: baslikMetni(r, i), value: c.render(r) })),
+        fields: (c.editor ? rows : alanSatirlari).map((r, i) => ({ key: keyOf(r, i), label: baslikMetni(r, i), value: c.render(r) })),
       }));
     } else {
       const ozetSutunu = veriSutunlari.find((c) => c.summary && !c.editor) ?? veriSutunlari.find((c) => !c.editor);
@@ -420,6 +478,8 @@ export function DataTable<T>({
             </div>
           ))}
         </dl>
+      ) : mod === 'kayit' && kayit === 'matris' ? (
+        <MatrisKiyas columns={columns} rows={rows} keyOf={keyOf} baslik={baslikMetni} labelledBy={titleId} eksenEtiketi={eksenEtiketi ?? (typeof baslikSutunu.header === 'string' ? baslikSutunu.header : 'Satır')} />
       ) : mod === 'kayit' ? (
         <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} />
       ) : (
