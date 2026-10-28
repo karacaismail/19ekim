@@ -3,7 +3,8 @@ import { Timeline } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { Chart, DataTable, Note, Section, Stats } from '../components/ui';
+import { useMediaQuery } from '@mantine/hooks';
+import { Chart, Choice, DataTable, Note, Section, Stats } from '../components/ui';
 import {
   GATE_STEPS,
   type Action,
@@ -602,6 +603,20 @@ function ProgramSekmeleri({ programs, value, onChange }: { programs: Program[]; 
   );
 }
 
+/**
+ * Dar ekran bölüm gezgini (gorsel_algi.md F10 / C154, kullanıcı kararı 2026-10-28): sekiz bölüm yatay şeritte gizlenmez —
+ * seçili bölüm adı ve konumu (“6 / 8 · Ölçüm”) markalı seçim kutusunda, bütün bölümlere açık erişim; önceki / sonraki
+ * bölümün altındaki sırada. Geniş ekranda gerçek sekmeler (APG) sürer.
+ */
+function BolumGezgini({ program, value, onChange }: { program: Program; value: SectionId; onChange: (id: SectionId) => void }) {
+  // Önceki / sonraki bölümün altındaki “Bölüm sırası” gezinmesinde (Sira); burada yinelenmez (F05).
+  return (
+    <div className="ortak-gezgin">
+      <Choice label={`${program.name} bölümü`} value={value} options={SECTIONS.map((s, j) => ({ id: s.id, name: `${j + 1} / ${SECTIONS.length} · ${s.label}` }))} onChange={onChange} />
+    </div>
+  );
+}
+
 function BolumSekmeleri({ program, value, onChange }: { program: Program; value: SectionId; onChange: (id: SectionId) => void }) {
   const list = useRef<HTMLDivElement>(null);
   // Dar ekranda yatay şeritte seçili sekme görünür alana gelir (animasyonsuz).
@@ -732,6 +747,7 @@ function Icerik() {
   };
   const program = pt.byId[konum.program];
   const no = SECTIONS.findIndex((s) => s.id === konum.section) + 1;
+  const genis = useMediaQuery('(min-width: 48em)', true, { getInitialValueInEffect: false });
   const bolum = (() => {
     switch (konum.section) {
       case 'ozet':
@@ -763,8 +779,20 @@ function Icerik() {
       <div className="ortak-kume">
         <ProgramSekmeleri programs={pt.programs} value={konum.program} onChange={(id) => go({ program: id, section: konum.section })} />
         <div className="ortak-panel" id="ortak-panel" role="tabpanel" aria-labelledby={`ortak-sekme-${program.id}`}>
-          <BolumSekmeleri program={program} value={konum.section} onChange={(id) => go({ program: konum.program, section: id })} />
-          <div className="ortak-bolum" id="ortak-bolum" role="tabpanel" aria-labelledby={`ortak-alt-${konum.section}`} ref={panel} tabIndex={-1}>
+          {genis ? (
+            <BolumSekmeleri program={program} value={konum.section} onChange={(id) => go({ program: konum.program, section: id })} />
+          ) : (
+            <BolumGezgini program={program} value={konum.section} onChange={(id) => go({ program: konum.program, section: id })} />
+          )}
+          <div
+            className="ortak-bolum"
+            id="ortak-bolum"
+            role={genis ? 'tabpanel' : 'region'}
+            aria-labelledby={genis ? `ortak-alt-${konum.section}` : undefined}
+            aria-label={genis ? undefined : `${program.name} · ${SECTIONS[no - 1]?.label ?? ''}`}
+            ref={panel}
+            tabIndex={-1}
+          >
             <p className="ortak-bolum-ust">
               <span className="ortak-bolum-program" data-role={program.role}>
                 {program.name}

@@ -294,7 +294,7 @@ function Icerik() {
         durum={sonucDurum}
         kiyas={{ temel: 'Aynı ölçü hazır senaryolarda (en yüksek birikmiş açık). Nakit akışı sayfasındaki nakit açığı tavanı ayrı ölçüttür: başlangıç nakdi ve yatırım girişini de sayar.', satirlar: sonucKiyas }}
         ikincil={ozet.slice(0, 5)}
-        strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} />}
+        strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} oncelikli="En yüksek birikmiş açık" />}
       />
       <SenaryoKurucu p={params} state={state} sahaGrowthDefault={sc.sahaGrowthEvery} retentionDefault={sc.retention} factorDefault={sc.factor} />
 

@@ -4,7 +4,7 @@ import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Chart, DataTable, FactsRow, KayitListesi, Note, Section, useKabuk, type Column, type Kayit } from '../components/ui';
+import { Chart, Choice, DataTable, FactsRow, KayitListesi, Note, Section, useKabuk, type Column, type Kayit } from '../components/ui';
 import {
   OPEX_ENDPOINT,
   OPEX_MIN_GAP_MS,
@@ -1324,6 +1324,26 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     enCok !== '' ||
     hizli.length > 0;
   const siraDegistir = (id: string) => setSirala((s) => (!s || s.id !== id ? { id, yon: 'asc' } : s.yon === 'asc' ? { id, yon: 'desc' } : null));
+  /* Etkin filtreler (F09): her biri adı ve kaldırma eylemiyle; sütun filtreleri masaüstünden kalsa da burada görünür. */
+  const etkinFiltreler: { ad: string; kaldir: () => void }[] = [
+    ...(grupSec !== 'tumu' ? [{ ad: `Grup: ${grupSec}`, kaldir: () => setGrupSec('tumu') }] : []),
+    ...Object.entries(kolon).map(([id, f]) => ({
+      ad: `${sutunlar.find((s) => s.id === id)?.ad ?? id}: ${f.tur === 'liste' ? f.secili.join(', ') : [f.min !== '' ? `en az ${tl(f.min)}` : '', f.max !== '' ? `en çok ${tl(f.max)}` : '', f.bos ? 'boş dahil' : ''].filter(Boolean).join(' · ')}`,
+      kaldir: () =>
+        setKolon((k) => {
+          const { [id]: _eski, ...kalan } = k;
+          return kalan;
+        }),
+    })),
+    ...(kategoriSec.length ? [{ ad: `Kategori: ${kategoriSec.join(', ')}`, kaldir: () => setKategoriSec([]) }] : []),
+    ...(durumSec.length ? [{ ad: `Bu ay: ${durumSec.join(', ')}`, kaldir: () => setDurumSec([]) }] : []),
+    ...(turSec.length ? [{ ad: `Tür: ${turSec.join(', ')}`, kaldir: () => setTurSec([]) }] : []),
+    ...(paraSec.length ? [{ ad: `Para birimi: ${paraSec.join(', ')}`, kaldir: () => setParaSec([]) }] : []),
+    ...(artisSec.length ? [{ ad: `2027 artışı: ${artisSec.join(', ')}`, kaldir: () => setArtisSec([]) }] : []),
+    ...(enAzHam !== '' ? [{ ad: `Toplam ₺ en az: ${enAzHam}`, kaldir: () => setEnAz('') }] : []),
+    ...(enCokHam !== '' ? [{ ad: `Toplam ₺ en çok: ${enCokHam}`, kaldir: () => setEnCok('') }] : []),
+    ...hizli.map((kod) => ({ ad: `Hızlı: ${HIZLI.find((h) => h.kod === kod)?.ad ?? kod}`, kaldir: () => setHizli((h) => h.filter((x) => x !== kod)) })),
+  ];
   const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
   const tabloAdi = `Kalemler · ${p.etiket}`;
   return (
@@ -1468,6 +1488,37 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
                   setArama((a) => ({ ...a, kalem: v }));
                 }}
               />
+              {/* Dar ekran araçları (gorsel_algi.md F09 / C109): sıralama ölçütü + yönü ve etkin filtreler burada da düzenlenir;
+                  masaüstünden kalan sütun filtresi görünür ve kaldırılabilir. Durum kabuğun dışında (aynı state). */}
+              <Choice
+                label="Sırala"
+                value={sirala?.id ?? 'yok'}
+                options={[{ id: 'yok', name: 'Varsayılan sıra' }, ...gorunen.filter((s) => s.id !== 'kalem').map((s) => ({ id: s.id, name: s.ad }))]}
+                onChange={(id) => setSirala(id === 'yok' ? null : { id, yon: sirala?.yon ?? 'asc' })}
+              />
+              {sirala ? (
+                <Choice
+                  label="Yön"
+                  value={sirala.yon}
+                  options={[
+                    { id: 'asc', name: 'Artan' },
+                    { id: 'desc', name: 'Azalan' },
+                  ]}
+                  onChange={(yon) => setSirala((s) => (s ? { ...s, yon } : s))}
+                />
+              ) : null}
+              {etkinFiltreler.length ? (
+                <ul className="opex-etkin-filtreler" aria-label="Etkin filtreler">
+                  {etkinFiltreler.map((f) => (
+                    <li key={f.ad} className="opex-etkin-filtre">
+                      <span className="opex-etkin-ad">{f.ad}</span>
+                      <button type="button" className="opex-btn opex-etkin-kaldir" aria-label={`Kaldır: ${f.ad}`} onClick={f.kaldir}>
+                        Kaldır
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             {suzulmus.length ? (
               <KayitListesi className="opex-kayitlar" label={tabloAdi} kayitlar={kayitlar} acik={acik} onChange={setAcik} />

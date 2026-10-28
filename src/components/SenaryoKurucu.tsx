@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 import { NO_SECOND_SAHA, SENS_RETENTIONS } from '../data/breakeven';
 import type { Params } from '../data/params';
 import { SCALE_RULE } from '../data/revenue';
@@ -233,19 +234,49 @@ export interface OzetCip {
   deger: string;
 }
 
-/** Yapışkan özet: kaydırırken üstte sabit; seçili senaryonun adı ve ana göstergeleri (aria-live). */
-export function YapiskanOzet({ ad, role, cipler, children }: { ad: string; role?: string; cipler: OzetCip[]; children?: ReactNode }) {
+/**
+ * Yapışkan özet: kaydırırken üstte sabit; seçili senaryonun adı ve ana göstergeleri. Dar ekranda (< 48em; gorsel_algi.md
+ * F10 / C017) yalnız öncelikli sonuç görünür, diğerleri adlandırılmış açılır listede — kritik değer gizli yatay kaydırmaya
+ * bağlı değildir. Yardımcı teknolojiye yalnız ad ve öncelikli sonuç bildirilir (F23: uzun özet her değişimde yeniden
+ * okunmaz).
+ */
+export function YapiskanOzet({ ad, role, cipler, oncelikli, children }: { ad: string; role?: string; cipler: OzetCip[]; /** Dar ekranda tek başına kalan sonucun etiketi; yoksa son çip. */ oncelikli?: string; children?: ReactNode }) {
+  const genis = useMediaQuery('(min-width: 48em)', true, { getInitialValueInEffect: false });
+  const [acik, setAcik] = useState(false);
+  const listeId = useId();
+  const ana = cipler.find((c) => c.etiket === oncelikli) ?? cipler[cipler.length - 1];
+  const digerleri = cipler.filter((c) => c !== ana);
+  const cip = (c: OzetCip) => (
+    <li key={c.etiket} className="yapiskan-cip">
+      <span className="yapiskan-etiket">{c.etiket}</span>
+      <span className="yapiskan-deger">{c.deger}</span>
+    </li>
+  );
   return (
-    <div className="yapiskan" role="status" aria-live="polite" aria-label="Seçili senaryonun özeti" data-role={role}>
+    <div className="yapiskan" aria-label="Seçili senaryonun özeti" data-role={role}>
       <span className="yapiskan-ad">{ad}</span>
-      <ul className="yapiskan-cipler">
-        {cipler.map((c) => (
-          <li key={c.etiket} className="yapiskan-cip">
-            <span className="yapiskan-etiket">{c.etiket}</span>
-            <span className="yapiskan-deger">{c.deger}</span>
-          </li>
-        ))}
-      </ul>
+      <p className="visually-hidden" role="status" aria-live="polite">
+        {ana ? `${ad}: ${ana.etiket} ${ana.deger}` : ad}
+      </p>
+      {genis ? (
+        <ul className="yapiskan-cipler">{cipler.map(cip)}</ul>
+      ) : (
+        <>
+          {/* Tek satır (320×480 ilk ekran korunur): ad · öncelikli sonuç (sarar, kaydırmaz) · “Diğer n” düğmesi; liste alt satırda. */}
+          <ul className="yapiskan-cipler yapiskan-cipler-dar">{ana ? cip(ana) : null}</ul>
+          {digerleri.length ? (
+            <button type="button" className="secim-dugme yapiskan-digerleri-dugme" aria-expanded={acik} aria-controls={listeId} onClick={() => setAcik((v) => !v)}>
+              {acik ? 'Gizle' : `Diğer ${digerleri.length}`}
+              <span className="visually-hidden">{acik ? ' diğer sonuçları' : ' sonuç'}</span>
+            </button>
+          ) : null}
+          {acik ? (
+            <ul id={listeId} className="yapiskan-digerleri">
+              {digerleri.map(cip)}
+            </ul>
+          ) : null}
+        </>
+      )}
       {children}
     </div>
   );

@@ -5883,6 +5883,73 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   font-size: var(--text-sm);
 }
 
+/* Yapışkan özet dar ekran (gorsel_algi.md F10): öncelikli sonuç + “Diğer n sonuç” düğmesi; açılan liste alt satırda, çipler
+   yatay kaydırmaya bağlı değil. Taban kural sarar (.yapiskan), geniş ekranda tek satır (aşağıdaki medya kuralı). */
+.yapiskan .yapiskan-cipler-dar {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: visible;
+  padding: 0;
+}
+
+.yapiskan .yapiskan-cipler-dar .yapiskan-cip {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+}
+
+.yapiskan .yapiskan-digerleri-dugme {
+  flex: none;
+  padding-inline: var(--space-1);
+  background: var(--surface-control);
+}
+
+
+.yapiskan .yapiskan-digerleri {
+  flex: 1 1 100%;
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  list-style: none;
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.yapiskan .yapiskan-digerleri .yapiskan-cip {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: var(--space-3);
+  white-space: normal;
+}
+
+/* İş ortaklığı dar ekran bölüm gezgini (F10 / C154). */
+.ortak-gezgin {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+/* Giderler dar ekran araçları (F09): sıralama seçimleri ve etkin filtre listesi arama kutusunun altında. */
+.opex-kayit-arac {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.opex-etkin-filtreler {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opex-etkin-filtre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 /* Matris kıyas profili (gorsel_algi.md F08): eksen seçimi üstte, diğer eksenin değerleri açık listede (kayıt paneliyle aynı dl). */
 .matris-kiyas {
   display: grid;
@@ -6150,11 +6217,11 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   top: 0;
   z-index: 14;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3) var(--space-4);
+  gap: var(--space-2) var(--space-3);
   margin-top: var(--space-5);
-  padding: var(--space-2) 0;
+  padding: var(--space-1) 0;
   border-bottom: var(--hairline) solid var(--rule-strong);
   background: var(--surface-page);
 }
@@ -6162,6 +6229,14 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 @media (min-width: 48em) and (min-height: 40em) {
   .yapiskan {
     top: var(--bant-h, 0px);
+  }
+}
+
+@media (min-width: 48em) {
+  .yapiskan {
+    flex-wrap: nowrap;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-2) 0;
   }
 }
 

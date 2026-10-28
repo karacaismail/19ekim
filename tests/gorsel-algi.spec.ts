@@ -163,7 +163,8 @@ async function giderlerAc(page: Page) {
   );
   await page.goto('giderler/');
   await hydrated(page);
-  await expect(page.getByRole('region', { name: /^Kalemler · / })).toBeVisible({ timeout: 15_000 });
+  // Kalemler bloğu iki kabukta da (.opex-veri[data-kabuk]); kayan tablo bölgesi yalnız geniş ekranda var.
+  await expect(page.locator('.opex-veri[data-kabuk]')).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlüğü, kaynak tonu', () => {
@@ -434,5 +435,70 @@ test.describe('gorsel_algi GA-4a: açık özet sözleşmesi ve matris kıyas pro
     const dt = await blok.locator('.matris-alanlar dt').allInnerTexts();
     expect(dt.length).toBeGreaterThan(2);
     for (const d of dt) expect(d).toMatch(/^%\d+$/);
+  });
+});
+
+test.describe('gorsel_algi GA-4b: dar ekranda karar araçları — Giderler sıralama/filtre, yapışkan özet, bölüm gezgini', () => {
+  test('V15: Giderler 320 px — toplam tutara göre sıralanır, yön değişir, etkin filtre görünür ve kaldırılır; masaüstüne geçmeden', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await giderlerAc(page);
+    const blok = page.locator('.opex-veri');
+    const kayitlar = blok.locator('.kayit');
+    const ilkDeger = async () => (await kayitlar.first().locator('.kayit-ozet-deger').innerText()).replace(/[^\d]/g, '');
+    const sira = blok.getByRole('group', { name: 'Sırala', exact: true });
+    await expect(sira).toBeVisible();
+    await sira.getByRole('combobox').click();
+    await page.getByRole('option', { name: 'Toplam ₺' }).click();
+    await expect(blok.getByRole('group', { name: 'Yön', exact: true })).toBeVisible();
+    const artan = Number(await ilkDeger());
+    await blok.getByRole('group', { name: 'Yön', exact: true }).getByRole('button', { name: 'Azalan' }).click();
+    await expect.poll(async () => Number(await ilkDeger())).toBeGreaterThan(artan);
+    // Etkin filtre: panelden alt sınır; liste gösterir, Kaldır temizler.
+    const once = await blok.locator('.opex-veri-sayi').innerText();
+    await page.getByLabel('Toplam ₺ en az').fill('999999999');
+    await expect(blok.locator('.opex-etkin-filtre')).toHaveCount(1);
+    await expect(blok.locator('.opex-etkin-filtre')).toContainText('Toplam ₺ en az');
+    await expect(blok.locator('.opex-veri-sayi')).not.toHaveText(once);
+    await blok.getByRole('button', { name: /^Kaldır: Toplam ₺ en az/ }).click();
+    await expect(blok.locator('.opex-etkin-filtre')).toHaveCount(0);
+    await expect(blok.locator('.opex-veri-sayi')).toHaveText(once);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+
+  test('V16/F10: yapışkan özet 320 px’te öncelikli sonucu açık gösterir, diğerleri adlandırılmış listede; 1280’de hepsi; yatay kaydırma yok', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const ozet = page.locator('.yapiskan');
+    await expect(ozet.locator('.yapiskan-cip')).toHaveCount(1);
+    await expect(ozet.locator('.yapiskan-cip .yapiskan-etiket')).toHaveText('En yüksek birikmiş açık');
+    const dugme = ozet.getByRole('button', { name: 'Diğer 5 sonuç' });
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    expect(await ozet.locator('.yapiskan-cipler').evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+    await dugme.click();
+    await expect(ozet.locator('.yapiskan-digerleri .yapiskan-cip')).toHaveCount(5);
+    await expect(ozet.locator('.yapiskan-digerleri')).toContainText('Açığın kapanışı');
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(ozet.locator('.yapiskan-cip')).toHaveCount(6);
+    await expect(ozet.getByRole('button', { name: /Diğer/ })).toHaveCount(0);
+  });
+
+  test('V17: iş ortaklığı 320 px — bölüm gezgini seçili bölümü ve konumunu söyler (6 / 8 · Ölçüm), bütün bölümlere erişim; adres ve bölüm değişir', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 480 });
+    await page.goto('partnership/#segika-olcum');
+    await icerik(page);
+    await hydrated(page);
+    await expect(page.locator('.ortak-alt')).toHaveCount(0);
+    const gezgin = page.getByRole('group', { name: 'Segika bölümü' });
+    await expect(gezgin.getByRole('combobox')).toHaveValue('6 / 8 · Ölçüm');
+    await gezgin.getByRole('combobox').click();
+    await page.getByRole('option', { name: '8 / 8 · Risk' }).click();
+    await expect(page).toHaveURL(/#segika-risk$/);
+    await expect(page.locator('#ortak-bolum .section-title').first()).toHaveText('Riskler ve karşılıklar');
+    await expect(gezgin.getByRole('combobox')).toHaveValue('8 / 8 · Risk');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.getByRole('tablist', { name: 'Segika bölümleri' })).toBeVisible();
   });
 });

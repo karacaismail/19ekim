@@ -657,6 +657,21 @@ liyakat zam matrisi (`merit-matris`, eksen “Performans”), gelir planı duyar
 çarpanı”; not “Dönem içinde yok” sözlüğüyle). Band konumu / kademe serisi “fark satırı” (C054/C057) GA-5’e. Test:
 `tests/gorsel-algi.spec.ts` GA-4a (V12/F07 üç sayfada özet etiketi; V13/F08 liyakat ve duyarlılık 320 px).
 
+**GA-4b** (F09/F10; kullanıcı kararı 2026-10-28): **Giderler dar ekran araçları (F09 / C109):** kalemler kayıt kabuğunda
+(`.opex-kayit-arac`) arama kutusunun altında sıralama ölçütü (`Choice` “Sırala”: varsayılan sıra ya da görünen sütun) ve
+yönü (“Yön”: artan / azalan) ile etkin filtre listesi (`.opex-etkin-filtreler`: grup, masaüstünden kalan sütun filtreleri,
+kategori / bu ay / tür / para birimi / 2027 artışı, toplam ₺ sınırları, hızlı filtreler; her satırda “Kaldır”); durum
+kabuğun dışında, iki kabuk aynı sırayı ve süzgeci paylaşır. **Yapışkan özet (F10 / C017):** < 48em yalnız öncelikli sonuç
+(`YapiskanOzet.oncelikli`, gelir planında “En yüksek birikmiş açık”) tek satırda senaryo adı ile “Diğer n” düğmesi
+arasında (etiket sarar, şerit kaydırmaz; çubuk ≈ 77 px, 320×480 ilk ekranda ana sonuç görünür kalır), açılan liste alt
+satırda (`.yapiskan-digerleri`, `aria-expanded`); yardımcı teknolojiye
+yalnız ad ve öncelikli sonuç bildirilir (gizli `role="status"`; F23). ≥ 48em bütün çipler tek satırda (eski görünüm).
+**İş ortaklığı bölüm gezgini (F10 / C154; 2026-10-28 kararıyla önceki yatay şerit kararı güncellendi):** < 48em
+`BolumGezgini` — markalı seçim kutusunda konum ve ad (“6 / 8 · Ölçüm”), bütün bölümlere açık erişim; panel `role="region"`
++ `aria-label`; önceki / sonraki bölümün altındaki “Bölüm sırası”nda (yinelenmez). ≥ 48em gerçek sekmeler (APG) ve
+`tabpanel` sürer. Test: `tests/gorsel-algi.spec.ts` GA-4b (V15 sıralama + yön + filtre kaldırma 320 px; V16/F10 320 ↔
+1280; V17 gezgin + adres); `giderlerAc` iki kabuğu bekler.
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
@@ -669,8 +684,8 @@ liyakat zam matrisi (`merit-matris`, eksen “Performans”), gelir planı duyar
 | F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | GA-1: seçili ağırlık sabit (V08); kalan roller planlandı (GA-5) |
 | F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir` / `ozetYok`), UI kapısı kuralı | V12 | uygulandı (GA-4a), yerelde doğrulandı |
 | F08 Karşılaştırma komşuluğu (matris) | `DataTable kayit="matris"` (`MatrisKiyas`); liyakat matrisi, duyarlılık | V13 | uygulandı (GA-4a), yerelde doğrulandı; `BandKonumu` / `KademeSerisi` fark satırı planlandı (GA-5) |
-| F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` | V15 | planlandı (GA-4) |
-| F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320), `PartnershipPage` `BolumSekmeleri` | V17 | planlandı (GA-4) |
+| F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` (`.opex-kayit-arac`) | V15 | uygulandı (GA-4b), yerelde doğrulandı |
+| F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320: öncelikli sonuç + liste), `PartnershipPage` `BolumGezgini` | V16, V17 | uygulandı (GA-4b), yerelde doğrulandı |
 | F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |
 | F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | GA-1: `Choice.note` aria-describedby (V11); GA-3: `NoteRow` çok satırlı; `Secim` / `ConnectForm` planlandı (GA-5) |
 | F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | uygulandı (GA-3), yerelde doğrulandı |
