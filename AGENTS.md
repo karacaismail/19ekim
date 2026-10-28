@@ -561,6 +561,57 @@ tuşları; `ui.spec.ts` 900 px testi). Dar kapsayıcıda (< 48em; 768 px dikey t
 boyutlu şema başka düzende aynı ilişkiyi vermiyor”, görünür “Grafiği yatay kaydırabilirsiniz” notu) kapandı. **Y-02** Giderler kalemler tablosu istisnası P4 ile 2026-10-27’de kapandı: tablo 48em altında kayıt
 listesidir; `ui.spec.ts` dar ekran denetimi `.opex-veri`yi dışlamaz.
 
+### gorsel_algi.md: görsel algı, okunabilirlik ve belge takibi (kullanıcı kararı 2026-10-28)
+
+Dördüncü belge `docs/gorsel_algi.md` (28 Ekim 2026, taban 34a4bd2; kanonik kopya depodaki bu dosyadır) bilginin hangi
+görsel alana ait olduğunu tanımlar: değer seçenek alanına, ölçülen şey grup etiketine, kaynak ve otomatik güncelleme
+davranışı ayrı bağlam alanına, neden ve yöntem yardım alanına (§1, §5.1); karşılaştırma aynı anda yapılabilmeli (F08).
+Uygulama sırası belgenin §7’sidir: GA-1 etiket + davranış (F01/F02/F03) → GA-2 kritik anlam (F16/F17/F18) → GA-3 ortak
+durumlar (F13/F14/F15/F23) → GA-4 mobil karar görevleri (F07/F08/F09/F10) → GA-5 görsel ritim ve belge akışı
+(F04/F05/F06/F11/F19/F21/F22/F24); F20 izlenebilirlik her adımda. Her paket test önce; hesap, model, varsayılan değer,
+birim, depolama ve adres sözleşmeleri değişmez (§7 uygulama sözleşmesi). Durum sözlüğü (F20): planlandı · uygulandı ·
+yerelde doğrulandı · CI doğrulandı · yayında doğrulandı · ertelendi (gerekçe) · bağlam nedeniyle uygulanmadı (gerekçe).
+`H` düzeyi kayıtlar insan testi olmadan “kanıtlandı” olmaz (NOT_RUN).
+
+**GA-0** (kullanıcı isteği 2026-10-28, ekran görüntüsü; F15 ve §4 süreklilik satırı): gelir planı kadro ve ay
+tablolarında görünüm varyantı değişince araç çubuğu bileşenleri yer değiştirmez — iki varyant aynı araç çubuğunu paylaşır
+(`katkiAraclar`, `aylikAraclar`: Dışa aktar + Görünüm; görünüm anahtarı her çubukta en sağda), başlık varyantla değişmez ve
+senaryo adını tekrar etmez (`katkiBaslik`, `aylikBaslik`; senaryo adı `.araclar-etiket`’te), varyanta bağlı yöntem notu
+tablonun altında (`DataTable.altNot`, `.table-note-alt`); “Üçü üst üste” görünümünde de CSV indirilir (`csvKadroUc`,
+`csvAylikUc`: `gelir-plani-{kadro|aylik}-senaryolar-*.csv`, görünen sütunlar). `.araclar` dar ekran tabanı sola hizalı
+akış; ≥ 48em etiketten sonraki ilk araç grubu sağa yaslanır, sonrakiler ona bitişik (serbest alan gruplar arasında
+bölüşülmez; etiketsiz çubukta ikinci grup sağda kalır). Test: `gelir.spec.ts → "görünüm değişince araç çubuğu
+bileşenleri yerinde kalır"` (320 ve 1280 px; konumlar blok içinde ±1 px, başlık sabit, CSV içeriği hazır senaryo sütunlu).
+
+İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
+
+| Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
+|---|---|---|---|
+| F01 Seçenek etiketinde tek bilgi türü | `SenaryoKurucu.tsx`, `Choice` | V01, V05–V08 | planlandı (GA-1) |
+| F02 Otomatik/sabit değer ayrımı | `scenarioOptions.ts`, `SenaryoKurucu.tsx` | V02–V04 | planlandı (GA-1) |
+| F03 Kontrol görevi (değer / görünüm / gezinti / anahtar / işlem) | `Choice`, `ModSecimi`, `Dugmeler`, OPEX `Toggles` | V08, V28 | planlandı (GA-1) |
+| F04 Kontrol–yardım–bölüm ritmi | `SenaryoKurucu.tsx`, `Choice.note` → `aria-describedby`, `Girdiler` | V11 | planlandı (GA-5) |
+| F05 Bağlam/özet tekrarları | `YapiskanOzet`, `ResultSummary`, `Section`, `ParamsNotice` | V16 | planlandı (GA-5) |
+| F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | planlandı (GA-5) |
+| F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir`) | V12 | planlandı (GA-4) |
+| F08 Karşılaştırma komşuluğu (matris) | `DataTable` kıyas profili; `LiyakatMatrisi`, `RutbeMatrisi`, `BandKonumu`, `KademeSerisi` | V13 | planlandı (GA-4; ux_v2 V2-F) |
+| F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` | V15 | planlandı (GA-4) |
+| F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320), `PartnershipPage` `BolumSekmeleri` | V17 | planlandı (GA-4) |
+| F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |
+| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | planlandı (GA-3 / GA-5) |
+| F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | planlandı (GA-3) |
+| F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | planlandı (GA-3) |
+| F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu; gelir planı tablo araç çubukları (GA-0) | V23; `gelir.spec` araç çubuğu | GA-0 uygulandı, yerelde doğrulandı; kopyalama durumu planlandı (GA-3) |
+| F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit fon ihtiyacı adı ve işareti, CSV başlıkları; applet yüzde paydası; OPEX yıl kapsamı | V24 | planlandı (GA-2) |
+| F17 “—” sözlüğü | nakit, OPEX, senaryo kıyası, tarih alanları | V25 | planlandı (GA-2) |
+| F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, `Dayanak`, OPEX `Assumptions`, `LiveStrip` | V26 | planlandı (GA-2) |
+| F19 Gezinti sözlüğü | menü / kırıntı / h1 eşlemesi; Partnership `Sira` | V18, V29 | planlandı (GA-5) |
+| F20 Sürüm ve izlenebilirlik | bu tablo; kanonik `docs/*.md` | V30 | uygulanıyor (her pakette güncellenir) |
+| F21 Grafik okuma sorusu | `Chart` eşdeğerleri, `Cubuk`, `ShareBar` | V27 | planlandı (GA-5) |
+| F22 Kimlik / seçim / durum / odak dili | tokenlar; `RoleChip` / `StatusChip` | V28 | planlandı (GA-5) |
+| F23 Bekleme / hata / boş / eski veri | OPEX `Loader` / `Body`, `GirisEkrani`, `AppletHata` | V26 | planlandı (GA-3) |
+| F24 Uzun sayfa belge takibi | gelir planı bölüm dizini, bölüm soruları, kalıcı adres | V29 | planlandı (GA-5) |
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

@@ -1764,6 +1764,11 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   color: var(--text-secondary);
 }
 
+/* Tablonun altındaki yöntem notu (gorsel_algi.md F15): başlık ve araç çubuğu sabit, varyanta bağlı açıklama tablonun altında. */
+.table-note-alt {
+  margin-block: var(--space-3) 0;
+}
+
 .table-scroll {
   position: relative;
   overflow-x: auto;
@@ -5865,9 +5870,19 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   background: var(--surface-raised);
 }
 
-/* İkinci seçim grubu (görünüm, eksen) çubuğun sağına yaslanır (kullanıcı kararı 2026-10-27: anahtar grafiğin sağ tarafında). */
-.araclar > .secim + .secim {
-  margin-inline-start: auto;
+/* Dar ekran taban: araç grupları sola hizalı, sığmayan alt satıra iner (sağa yaslama geniş ekran eklentisidir). Geniş
+   ekranda (≥ 48em) etiketten sonraki ilk araç grubu sağa yaslanır, sonrakiler ona bitişik kalır: araçlar tek küme, görünüm
+   anahtarı her çubukta en sağda (kullanıcı kararı 2026-10-27: anahtar grafiğin sağ tarafında; gorsel_algi.md F15 /
+   kullanıcı kararı 2026-10-28: varyant değişince araçlar yer değiştirmez, serbest alan gruplar arasında bölüşülmez). */
+@media (min-width: 48em) {
+  .araclar > .secim + .secim,
+  .araclar > .araclar-etiket + .secim {
+    margin-inline-start: auto;
+  }
+
+  .araclar > .araclar-etiket ~ .secim + .secim {
+    margin-inline-start: 0;
+  }
 }
 
 .chart > .araclar {
@@ -6241,6 +6256,3 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   text-transform: uppercase;
 }
 
-.araclar > .araclar-etiket + .secim {
-  margin-inline-start: auto;
-}

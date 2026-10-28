@@ -323,6 +323,7 @@ export function DataTable<T>({
   id,
   title,
   note,
+  altNot,
   tools,
   columns,
   rows,
@@ -334,6 +335,8 @@ export function DataTable<T>({
   id: string;
   title: string;
   note?: ReactNode;
+  /** Tablonun altındaki yöntem notu: görünüm varyantına göre değişebilir; başlık, üst not ve araç çubuğu sabit kalır (gorsel_algi.md F15). */
+  altNot?: ReactNode;
   /** Tablo başındaki araç satırı (senaryo seçici, görünüm). */
   tools?: ReactNode;
   columns: Column<T>[];
@@ -458,6 +461,7 @@ export function DataTable<T>({
           </div>
         </div>
       )}
+      {altNot ? <p className="table-note table-note-alt">{altNot}</p> : null}
     </div>
   );
 }

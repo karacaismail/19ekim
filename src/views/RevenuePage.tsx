@@ -221,6 +221,38 @@ function Icerik() {
       ['Rol', 'Görev', 'Gelire katkı yolu', 'Başlangıç', 'Aylık maliyet (₺)', `${H} ay gider (₺)`, 'Yeni aktif', 'Gelire katkı (₺)', 'Net (₺)', 'Katkı ÷ gider'],
       ...st.rows.map((x) => [x.role.name, x.role.gorev, x.role.katkiYolu, x.role.startIso, x.role.maliyet, Math.round(x.gider), Math.round(x.aktif * 10) / 10, x.dogrudan ? Math.round(x.katki) : '', Math.round(x.net), x.oran ?? '']),
     ]);
+  const csvKadroUc = () =>
+    downloadCsv(`gelir-plani-kadro-senaryolar-${base}`, [
+      ['Rol', `${H} ay gider (₺)`, ...stUc.senaryolar.map((sn) => `${sn.scenario.name}: katkı (₺)`), ...stUc.senaryolar.map((sn) => `${sn.scenario.name}: net (₺)`)],
+      ...katkiUcRows.map((x) => [
+        x.row.role.name,
+        Math.round(x.row.gider),
+        ...stUc.senaryolar.map((sn) => (x.by[sn.scenario.id] ? (x.by[sn.scenario.id]!.dogrudan ? Math.round(x.by[sn.scenario.id]!.katki) : 'Dolaylı') : 'Senaryoda yok')),
+        ...stUc.senaryolar.map((sn) => (x.by[sn.scenario.id] ? Math.round(x.by[sn.scenario.id]!.net) : 'Senaryoda yok')),
+      ]),
+    ]);
+  const csvAylikUc = () =>
+    downloadCsv(`gelir-plani-aylik-senaryolar-${base}`, [
+      ['Ay', ...ustUste.map((x) => `${x.name}: aylık gelir (₺)`), ...ustUste.map((x) => `${x.name}: kümülatif gelir (₺)`)],
+      ...months.map((ay, t) => [ay.ad, ...ustUste.map((x) => Math.round(x.be.sim.gelir[t])), ...ustUste.map((x) => Math.round(x.be.sim.kumulatif[t]))]),
+    ]);
+  /* Tablo araç çubukları iki görünümde aynı (gorsel_algi.md F15 / kullanıcı kararı 2026-10-28: varyant değişince araçlar yer
+     değiştirmez; başlık varyantla değişmez, senaryo adı araç çubuğu etiketindedir). Dışa aktarma görünen tabloyu verir;
+     görünüm anahtarı her çubukta en sağda. */
+  const katkiBaslik = `Rol başına gider ve gelire katkı, ${H} ay`;
+  const katkiAraclar = cubuk(
+    <>
+      <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => (modKatki === 'secili' ? csvKadro() : csvKadroUc())} />
+      <ModSecimi value={modKatki} onChange={setModKatki} />
+    </>,
+  );
+  const aylikBaslik = `Ay ay: bütün aylar, ${son} sonuna kadar`;
+  const aylikAraclar = cubuk(
+    <>
+      <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => (modGelir === 'secili' ? csvAylik() : csvAylikUc())} />
+      <ModSecimi value={modGelir} onChange={setModGelir} />
+    </>,
+  );
   const fon = tl(Math.min(0, be.enDusuk.deger));
   const ozet = [
     { etiket: `${int(params.activeTarget)} aktif`, deger: kisaGun(aktif100.date) },
@@ -355,14 +387,9 @@ function Icerik() {
         {modKatki === 'secili' ? (
           <DataTable
             id="katki"
-            title={`Rol, görev, gider ve gelire katkı, ${H} ay (${senaryoAdi})`}
-            note={`Katkı = kaynak olmasaydı kaybedilecek ${H} ay geliri (ayıklama). Dolaylı rollerin katkısı modellenmez; gideri kadro giderindedir. Büyüme kuralıyla gelen saha personeli ayrı satırdır.`}
-            tools={cubuk(
-              <>
-                <ModSecimi value={modKatki} onChange={setModKatki} />
-                <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => csvKadro()} />
-              </>,
-            )}
+            title={katkiBaslik}
+            altNot={`Katkı = kaynak olmasaydı kaybedilecek ${H} ay geliri (ayıklama). Dolaylı rollerin katkısı modellenmez; gideri kadro giderindedir. Büyüme kuralıyla gelen saha personeli ayrı satırdır.`}
+            tools={katkiAraclar}
             columns={[
               { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: StaffResult) => <RoleChip role={x.role.role} label={x.role.name} /> },
               { key: 'g', header: 'Görev', minWidth: '20rem', render: (x) => x.role.gorev },
@@ -382,9 +409,9 @@ function Icerik() {
         ) : (
           <DataTable
             id="katki"
-            title={`Rol × hazır senaryo: ${H} ay gelire katkı ve net`}
-            note="Kötümser, medyan ve iyimser kendi kapasite, elde tutma ve büyüme kuralıyla; diğer seçenekler seçili senaryodan. Senaryoda olmayan satır “—”."
-            tools={cubuk(<ModSecimi value={modKatki} onChange={setModKatki} />)}
+            title={katkiBaslik}
+            altNot="Kötümser, medyan ve iyimser kendi kapasite, elde tutma ve büyüme kuralıyla; diğer seçenekler seçili senaryodan. Senaryoda olmayan satır “—”."
+            tools={katkiAraclar}
             columns={[
               { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: (typeof katkiUcRows)[number]) => <RoleChip role={x.row.role.role} label={x.row.role.name} /> },
               { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => tl(x.row.gider) },
@@ -535,13 +562,8 @@ function Icerik() {
         {modGelir === 'secili' ? (
           <DataTable
             id="aylik"
-            title={`Ay ay: yeni aktif, kayıt, ödeyen, gelir, gider, net (${senaryoAdi})`}
-            tools={cubuk(
-              <>
-                <ModSecimi value={modGelir} onChange={setModGelir} />
-                <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => csvAylik()} />
-              </>,
-            )}
+            title={aylikBaslik}
+            tools={aylikAraclar}
             columns={[
               { key: 'a', header: 'Ay', nowrap: true, rowHeader: true, render: (x: (typeof tumAyRows)[number]) => x.ay.kisa },
               { key: 'y', header: 'Yeni aktif', nowrap: true, render: (x) => int(Math.round(sim.yeniAktif[x.t])) },
@@ -559,8 +581,8 @@ function Icerik() {
         ) : (
           <DataTable
             id="aylik"
-            title="Ay ay: hazır senaryoların aylık ve kümülatif geliri"
-            tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} />)}
+            title={aylikBaslik}
+            tools={aylikAraclar}
             columns={[
               { key: 'a', header: 'Ay', nowrap: true, rowHeader: true, render: (x: (typeof tumAyRows)[number]) => x.ay.kisa },
               ...ustUste.map((x, i) => ({ key: `g-${i}`, header: `${x.name}: aylık`, nowrap: true, render: (row: (typeof tumAyRows)[number]) => tl(x.be.sim.gelir[row.t]) })),

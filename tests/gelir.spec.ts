@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 
 /**
@@ -207,7 +208,8 @@ test.describe('gelir planı', () => {
     await expect(canvas('gelir')).toHaveAttribute('data-kind', 'gelir-ay');
     await page.locator('#gelir').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
     await expect(canvas('gelir')).toHaveAttribute('data-kind', 'grup-ay');
-    await expect(page.locator('#aylik-tablo')).toHaveText('Ay ay: hazır senaryoların aylık ve kümülatif geliri');
+    // gorsel_algi.md F05/F15 (2026-10-28): tablo başlığı varyantla değişmez; senaryo adı araç çubuğu etiketinde, başlıkta tekrar etmez.
+    await expect(page.locator('#aylik-tablo')).toHaveText(/^Ay ay: bütün aylar, 2027 sonuna kadar$/);
     await page.locator('#huni').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
     await expect(canvas('huni')).toHaveAttribute('data-kind', 'hedef-adim');
     const bolum = page.locator('#basabas');
@@ -296,4 +298,44 @@ test.describe('gelir planı', () => {
     await expect(senaryolar.last().locator('.kayit-ad')).toHaveText('En çok fon ihtiyacı');
     await expect(senaryolar.last().locator('dl.kayit-alanlar dt')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
   });
+
+  // gorsel_algi.md (kullanıcı kararı 2026-10-28) F15 / süreklilik ilkesi ve kullanıcının ekran görüntüsü: görünüm varyantı
+  // değişince araç çubuğundaki bileşenler yer değiştirmez — iki varyantta aynı araçlar (Dışa aktar + Görünüm), başlık sabit;
+  // “Üçü üst üste” görünümünde de CSV indirilir (hazır senaryo sütunlarıyla).
+  for (const genislik of [1280, 320]) {
+    test(`${genislik} px: görünüm değişince araç çubuğu bileşenleri yerinde kalır; üst üste görünümde CSV indirilir`, async ({ page }) => {
+      await page.setViewportSize({ width: genislik, height: genislik === 320 ? 480 : 800 });
+      await page.goto('gelir-plani/');
+      await icerik(page);
+      await hydrated(page);
+      await page.evaluate(() => document.fonts.ready);
+      const tablolar: [string, RegExp, RegExp][] = [
+        ['#katki-tablo', /^gelir-plani-kadro-senaryolar-.*\.csv$/, /Kötümser: katkı/],
+        ['#aylik-tablo', /^gelir-plani-aylik-senaryolar-.*\.csv$/, /Kötümser: aylık/],
+      ];
+      for (const [baslik, dosya, sutun] of tablolar) {
+        const blok = page.locator(`.table-block:has(${baslik})`);
+        const gorunum = blok.getByRole('group', { name: /görünüm/i });
+        const csv = blok.getByRole('button', { name: 'CSV indir' });
+        await blok.scrollIntoViewIfNeeded();
+        const konum = async () => {
+          const b = (await blok.boundingBox())!;
+          const g = (await gorunum.boundingBox())!;
+          const c = (await csv.boundingBox())!;
+          return { gx: g.x - b.x, gy: g.y - b.y, cx: c.x - b.x, cy: c.y - b.y };
+        };
+        const ilkBaslik = await blok.locator(baslik).innerText();
+        const once = await konum();
+        await gorunum.getByRole('button', { name: 'Üçü üst üste' }).click();
+        await expect(gorunum.getByRole('button', { name: 'Üçü üst üste' })).toHaveAttribute('aria-pressed', 'true');
+        expect(await blok.locator(baslik).innerText(), `${baslik} başlık sabit`).toBe(ilkBaslik);
+        const sonra = await konum();
+        for (const k of ['gx', 'gy', 'cx', 'cy'] as const) expect(Math.abs(sonra[k] - once[k]), `${baslik} ${k}`).toBeLessThanOrEqual(1);
+        const [indirme] = await Promise.all([page.waitForEvent('download'), csv.click()]);
+        expect(indirme.suggestedFilename()).toMatch(dosya);
+        expect(readFileSync((await indirme.path())!, 'utf8')).toMatch(sutun);
+        await gorunum.getByRole('button', { name: 'Seçili senaryo' }).click();
+      }
+    });
+  }
 });
