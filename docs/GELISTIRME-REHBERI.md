@@ -59,7 +59,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 1124 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 1131 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -215,6 +215,7 @@ Kod bilmeden ilerlemek istiyorsan şu sırayı izle:
 | Applet’ler | `src/data/applet.ts` (hesap), `src/views/AppletPage.tsx` (görünüm) |
 | İş ortaklığı programı | `src/data/partnership.ts` (içerik ve tarihler), `src/views/PartnershipPage.tsx` (sekmeler, bölümler) |
 | Affilate | `src/data/affilate.ts` (hesap motoru), `src/data/affilateKurgu.ts` (kurgu, hazır senaryolar, JSON), `src/lib/affilateStore.ts` (saklama), `src/views/AffilatePage.tsx` (sayfa) |
+| İçerik envanteri (alt bilgi kapsamı, kırıntı) | `src/data/icerik.ts` (her sayfanın ana kaydı: sınıf, soru, grup, sahip, durum, kanıt, kaynak, kapsam cümlesi; docs/contents.md) |
 | Nakit akış tablosu | `src/data/cashflow.ts` (senaryo girişleri, Sheets çıkışları, nakit zinciri), `src/views/CashflowPage.tsx` |
 | Gelir planı | `src/data/revenue.ts` (kapasite, `simulate`, senaryolar, büyüme modeli: kur, temsilci ağı, reklam ölçeği, saha büyümesi; 24 ay), `src/views/RevenuePage.tsx` |
 | Başabaş | `src/data/breakeven.ts` (filtreler, gider kaynakları, kesişimler, adet noktası, duyarlılık, filtre etkisi); gelir planı sayfasının bölümü |

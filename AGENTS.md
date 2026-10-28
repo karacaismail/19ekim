@@ -798,6 +798,39 @@ Kanonik görev tanımı `docs/affilate.md` (Codex raporu; depoda). Sayfa **Pazar
   geleneği (Türkçe tek konulu mesaj, `Co-Authored-By: Claude Fable 5.1`) sürdürüldü. Kaynak fotoğraf ve dosyalar depoya
   kopyalanmadı; gerçek müşteri verisi yok (kurgusal “Müşteri A”).
 
+### contents.md: içerik mimarisi — anlam, ana adres ve sunum sözleşmesi (kullanıcı kararı 2026-10-28)
+
+Kanonik belge `docs/contents.md` (Codex raporu; `61fd2ff` anının denetimi, Affilate’ten önce hazırlandı — kullanıcı
+kararıyla Affilate dahil bütün içerik aynı felsefeyle güncellenir). Çelişkide doğrudan kullanıcı kararı önceliklidir;
+belge mevcut açık kararı kendiliğinden kaldırmaz (§1.2). `MUST` teslim koşulu, `SHOULD` gerekçeyle uyarlanır, `MAY`
+sonraya kalır. Belge kod değiştirmez; her dönüşüm önce kabul testiyle (IA-xx) kurulur.
+
+**Korunan doğrudan kararlar (§5.1):** `/` organizasyon şeması; `/applet/` İstihdam → Applet (tek model görünür);
+`/affilate/` Pazarlama → Affilate (ad düzeltilmez); `/partnership/` iki program; `/bcg/` yalnız doğrudan erişim;
+`/arsiv/` ikincil erişim (silme ve geçmiş yazma yok); OPEX kaynak modeli korunur (bu belge kaynak taşıma yetkisi vermez).
+
+**Paketler (program CA, tek sabit payda 9; her paket test önce, tam tur, tek konulu commit):**
+CA-0 içerik envanteri ve belge · CA-1 navigasyon yeniden gruplama ve kırıntı ayrımı · CA-2 Kararlar (karar kaydı,
+çelişki kayıtları F02/F03/F04/F16) · CA-3 Pazarlama operasyonu (dijital rol ve gelir planı ayrıştırma) · CA-4 Strateji
+ve Müşteri yolculuğu · CA-5 Ücret ve çalışma modeli · CA-6 metrik sözlüğü, Ölçüm, Hedefler/Eylem/İstihdam · CA-7 Genel
+bakış, Kaynaklar, kapsam notları (F13), Affilate uyarlaması (N08, §9.4, §12.1) · CA-8 kapanış (IA durumu, insan testi
+`not_run`). Durum bu bölümün altındaki paket kayıtlarında.
+
+**CA-0 — İçerik envanteri (§4.2–§4.4, §6, IA-01/02/04/10; 2026-10-28):** `src/data/icerik.ts` her yayımlanan sayfanın
+tek ana kaydı: `sinif` (strateji / operasyon / politika / finans-model / kaynak-veri / yöntem / kişisel / sistem),
+`kullaniciSorusu`, `grup` (ana ebeveyn: pazarlama / istihdam / finans / yönetim / yardımcı / doğrudan / sistem),
+`ebeveyn`, `marka`, `sahip` (“belirlenmedi” — hayali kişi yok), `durum` (taslak … arşiv), `kanit` (ölçülmüş …
+bilinmiyor), `kaynak`, `asOf`, `gozdenGecirme`, `duzenleme` (yayın varsayılanı / bu tarayıcı / bu senaryo / dış
+kaynak), `kapsam` (alt bilgi cümlesi, F10), `iliskili`, `menu`; planlanan yedi ana adres (`planlandi`: Genel bakış,
+Strateji ve teklif, Müşteri yolculuğu, Pazarlama operasyonu, Ücret ve çalışma modeli, Ölçüm ve sonuçlar, Kaynaklar ve
+tanımlar) içerik taşınana kadar dosya olarak açılmaz (boş kabuk yok, §8). Alt bilgi (`AppFrame`) kapsam cümlesini
+kayıttan okur: öneri (İş ortaklığı), eğitim (BCG), örnek (Applet, Affilate), kişisel taslak (Notlar, E-posta) artık
+“kesinleşen karar” varsayılanıyla sunulmaz; finans sayfaları koşullu tahmin, Giderler Sheets planı (plan ≠ ödeme;
+kaynak kurum Türksab, markaya dağıtım belirlenmedi → F16 karar kaydı). Kırıntı yardımcıları (`kirinti`) hazır; etkin
+kullanım CA-1’de (F15). Testler: `tests/icerik.spec.ts` (yalnız Chromium): sayfa ↔ kayıt birebir (26 sayfa, 404 dahil),
+tekil kimlik/yol, ilişkiler çözülür, planlanan sayfa dosyasız, Applet/BCG/arşiv/e-posta konumları, F10 kapsam cümleleri,
+F15 kırıntı; `tests/gorsel-algi.spec.ts` F18 alt bilgi beklentileri yeni cümlelere göre.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

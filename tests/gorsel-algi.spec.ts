@@ -217,11 +217,15 @@ test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlü
   });
 
   test('F18: alt bilgi sayfa türüne göre kaynak ve statü söyler; Giderler kaynak araması doğrulanmış kaynak değildir; şerit “Canlı” demez', async ({ page }) => {
+    // contents.md F10 (2026-10-28): kapsam cümlesi içerik envanterinden; eylem planı “planlanmış teslim”, öneri/eğitim/örnek
+    // içerik “kesinleşen” demez.
     const sayfalar: [string, RegExp, RegExp][] = [
-      ['eylem-plani/', /kesinleşen karar/i, /örnek veri|koşullu tahmin/i],
-      ['gelir-plani/', /koşullu tahmin/i, /kesinleşen/i],
-      ['nakit-akisi/', /koşullu tahmin/i, /kesinleşen/i],
+      ['eylem-plani/', /planlanmış teslim/i, /kesinleşen|örnek veri|koşullu tahmin/i],
+      ['gelir-plani/', /koşullu tahmin/i, /kesinleşen karar/i],
+      ['nakit-akisi/', /koşullu tahmin/i, /kesinleşen karar/i],
       ['applet/', /örnek veri/i, /kesinleşen/i],
+      ['partnership/', /öneri ve başlangıç tasarımı/i, /kesinleşen/i],
+      ['bcg/', /eğitim/i, /kesinleşen/i],
     ];
     for (const [yol, bekle, olmasin] of sayfalar) {
       await page.goto(yol);

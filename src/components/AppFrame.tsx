@@ -5,6 +5,7 @@ import { IconChevronDown, IconMenu2, IconMoon, IconNotes, IconReceipt2, IconSpea
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
+import { altBilgiKapsami } from '../data/icerik';
 import { APPLET_NAV, COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
 import { FrameContext } from '../lib/frame';
 import { cssVariablesResolver, theme } from '../lib/theme';
@@ -160,16 +161,12 @@ type MenuLink = { label: string; path: string; role?: string; no?: number; also?
  * Alt bilgi kaynak/statü cümlesi sayfa türüne göre (gorsel_algi.md F18 / C006): karar sayfaları kesinleşen karar, gelir ve
  * nakit sayfaları koşullu tahmin, applet örnek veri, Giderler Sheets verisi. Her ekrana aynı iddia yüklenmez.
  */
-function altBilgiNotu(current: string) {
-  const yol = current.replace(/\/$/, '');
-  const son = yol.slice(yol.lastIndexOf('/') + 1);
-  if (son === 'applet') return 'Applet tutarları örnek verilerdir; şirket kararı değildir ve yapılan değişiklikler yalnız bu tarayıcıda saklanır.';
-  if (son === 'affilate') return 'Affilate bir simülasyondur: oranlar, süreler ve fiyatlar örnek başlangıç değerleridir, onaylanmış sözleşme değildir; hareketler gerçek fatura ya da ödeme değildir. Değişiklikler yalnız bu tarayıcıda saklanır.';
-  if (son === 'gelir-plani' || son === 'nakit-akisi' || son === 'hedefler' || son === 'buyume-modeli')
-    return 'Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir; kesinleşmiş karar değildir. Parametreler sayfasında değiştirilen değerler yalnız o tarayıcıda saklanır.';
-  if (son === 'giderler') return 'Gider tutarları Giderler Sheets dosyasından açılışta okunur; dosya değişince burası da değişir. Varsayım kaynakları arama bağlantısıdır, doğrulanmış belge değildir.';
-  return 'Tutarlar kesinleşen kararlardır; Parametreler sayfasında değiştirilen değerler yalnız o tarayıcıda saklanır.';
-}
+/**
+ * Alt bilgi kapsam cümlesi (docs/contents.md F10, kullanıcı kararı 2026-10-28): sayfanın içerik envanteri kaydından
+ * (`src/data/icerik.ts`) okunur — öneri, eğitim, örnek ve kişisel taslak “kesinleşen karar” varsayılanıyla sunulmaz;
+ * finans sayfaları koşullu tahmin, Giderler Sheets planı der. Kaydı olmayan sayfa için genel, kapsamı doğru özetleyen cümle.
+ */
+const altBilgiNotu = (current: string) => altBilgiKapsami(current);
 
 /** Bağlantının etkin sayfaya göre durumu: tam eşleşme (aria-current) ya da bölümü (data-section). */
 function durumOf(item: MenuLink, current: string) {
