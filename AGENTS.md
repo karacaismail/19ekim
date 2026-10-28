@@ -583,25 +583,46 @@ akış; ≥ 48em etiketten sonraki ilk araç grubu sağa yaslanır, sonrakiler o
 bölüşülmez; etiketsiz çubukta ikinci grup sağda kalır). Test: `gelir.spec.ts → "görünüm değişince araç çubuğu
 bileşenleri yerinde kalır"` (320 ve 1280 px; konumlar blok içinde ±1 px, başlık sabit, CSV içeriği hazır senaryo sütunlu).
 
+**GA-1** (F01/F02/F03 ve F06/F12 parçaları; kullanıcı kararı 2026-10-28): senaryo kurucu seçenekleri yalnız değer taşır
+(`%100`, `399 €`, `Ocak 2027`, `%25`, `30.000 ₺`, `Özel`); grup etiketi ölçülen şeyi söyler (“Aylık reklam bütçesi”,
+“Yıllık kur artışı”, “Aylık ek sabit gider”); kaynak bilgisi seçenekte değil: başlangıç değeri genel parametreden gelen
+gruplarda (yıllık peşin payı, abonelik fiyatı, ikinci saha, reklam bütçesi) `ParametreKaynagi` satırı (`.secim-kaynak`,
+Parametreler bağlantısı); kaynağı izleyebilen gruplarda (kapasite, elde tutma, saha büyümesi → temel senaryo; kur artışı →
+genel parametre) `Baglanti` anahtarı (`ui.tsx Anahtar`, `role="switch"`, “Senaryoyla / Genel parametreyle birlikte
+güncellenir”, `.anahtar-aciklama` durum satırı): aynı etkili değer bir kez görünür, değer seçmek sabitler (`null → sayı`),
+anahtarı açmak kaynağa bağlar (`→ null`); iç anahtarlar, adres (`kapasite=1` / anahtar yok) ve saklama sözleşmesi
+değişmedi. Saklama okuması düzeltildi: varsayılanı `null` olan alanda sabitlenmiş sayı yeniden açılışta ve başka
+sayfadan senaryo değişince artık korunur (önceden tür denetimi onu düşürüyordu; V03). Liste dışı geçerli değer
+(ör. `?ucret=449`) tek gerçek seçenek. `Choice`: yardım gruba `aria-describedby` ile bağlı (F12), `baglam` yuvası (§5.1
+sırası: etiket → kontrol → etkin bağlam / kaynak → yardım), sunum içerik genişliğinden türer (§5.2: tek satır segment;
+sığmazsa ≤ 5 seçenek kısa açık liste `data-sunum="liste"`, daha çoğu markalı Mantine `Select` `data-sunum="secim"`;
+gereken genişlik düğme yazı tipinden ölçülür, yazı tipi yüklenince yeniden; seçim kutusu kipinde son ölçüm korunur,
+salınım yok); `.filtreler` sütunu en az 28rem (1280 px’te iki sütun, bütün gruplar tek satır; 320 px’te hazır senaryolar
+seçim kutusu, sayısal gruplar liste). Seçili düğmenin ağırlığı değişmez (F06 / V08: seçim geometriyi oynatmaz). Görünüm
+anahtarı neyi etkilediğini söyler (F03 / C014: “Grafik görünümü”, “Tablo görünümü”, “Grafik ve tablo görünümü”); grafik
+başlıkları varyanta göre değişmez, varyant açıklaması grafiğin altında (`Chart.altNot`, `.chart-altnot`; ifade C26 metni
+orada korunur). `Dugmeler` / OPEX `Toggles` ortak sözleşmesi GA-5’e kaldı (F03 kalan). Test: `tests/gorsel-algi.spec.ts`
+(V01, V02/V03, V04, V05, V06/V08 320 + 1280, V11); `gelir.spec.ts` araç çubuğu testi grafikleri de kapsar.
+
 İz tablosu (F20; bulgu → kapsam → test taslağı (belge §6) → durum):
 
 | Bulgu | Kapsam (bileşen) | Test | Durum (2026-10-28) |
 |---|---|---|---|
-| F01 Seçenek etiketinde tek bilgi türü | `SenaryoKurucu.tsx`, `Choice` | V01, V05–V08 | planlandı (GA-1) |
-| F02 Otomatik/sabit değer ayrımı | `scenarioOptions.ts`, `SenaryoKurucu.tsx` | V02–V04 | planlandı (GA-1) |
-| F03 Kontrol görevi (değer / görünüm / gezinti / anahtar / işlem) | `Choice`, `ModSecimi`, `Dugmeler`, OPEX `Toggles` | V08, V28 | planlandı (GA-1) |
+| F01 Seçenek etiketinde tek bilgi türü | `SenaryoKurucu.tsx`, `Choice` | V01, V05–V08 | uygulandı (GA-1), yerelde doğrulandı |
+| F02 Otomatik/sabit değer ayrımı | `scenarioOptions.ts`, `SenaryoKurucu.tsx` (`Baglanti`), `ui.tsx Anahtar` | V02–V04 | uygulandı (GA-1), yerelde doğrulandı |
+| F03 Kontrol görevi (değer / görünüm / gezinti / anahtar / işlem) | `Choice`, `ModSecimi`, `Dugmeler`, OPEX `Toggles` | V08, V28 | GA-1: görünüm anahtarı adı, ikili kural = `Anahtar` (switch); `Dugmeler` / `Toggles` ortaklaştırma planlandı (GA-5) |
 | F04 Kontrol–yardım–bölüm ritmi | `SenaryoKurucu.tsx`, `Choice.note` → `aria-describedby`, `Girdiler` | V11 | planlandı (GA-5) |
 | F05 Bağlam/özet tekrarları | `YapiskanOzet`, `ResultSummary`, `Section`, `ParamsNotice` | V16 | planlandı (GA-5) |
-| F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | planlandı (GA-5) |
+| F06 Tipografik hiyerarşi | `.secim-etiket`, `.secim-dugme` seçili ağırlık, `Stats` | V07, V09 | GA-1: seçili ağırlık sabit (V08); kalan roller planlandı (GA-5) |
 | F07 Mobil kayıt özeti sözleşmesi | `DataTable` tüketicileri (`summary` / `ozetSatir`) | V12 | planlandı (GA-4) |
 | F08 Karşılaştırma komşuluğu (matris) | `DataTable` kıyas profili; `LiyakatMatrisi`, `RutbeMatrisi`, `BandKonumu`, `KademeSerisi` | V13 | planlandı (GA-4; ux_v2 V2-F) |
 | F09 Mobil OPEX araçları (sıralama, filtre) | `OpexPage.tsx` `KalemTablosu` | V15 | planlandı (GA-4) |
 | F10 Kritik bilgi yatay alan dışında | `YapiskanOzet` (320), `PartnershipPage` `BolumSekmeleri` | V17 | planlandı (GA-4) |
 | F11 Zaman görünümleri tekrarı | `HiringContent`, `PlanContent`, `Takvim` | — | planlandı (GA-5) |
-| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | planlandı (GA-3 / GA-5) |
+| F12 Uzun içerik kısa alanda | `NoteRow`, `Secim`, `ConnectForm`, `Choice.note` | V19 | GA-1: `Choice.note` aria-describedby (V11); `NoteRow` / `Secim` / `ConnectForm` planlandı (GA-3 / GA-5) |
 | F13 Sessiz otomatik düzeltme | `SayiAlani`, applet `Sayi` / `Metin` | V20 | planlandı (GA-3) |
 | F14 Süresiz onay her yerde | `appletKit.Eylem`, `NotesPage.ConfirmButton`, `AppletHata` | V21, V22 | planlandı (GA-3) |
-| F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu; gelir planı tablo araç çubukları (GA-0) | V23; `gelir.spec` araç çubuğu | GA-0 uygulandı, yerelde doğrulandı; kopyalama durumu planlandı (GA-3) |
+| F15 Durum mesajı / varyant değişimi düğmeyi oynatmaz | `SenaryoKurucu` kopyalama durumu; gelir planı tablo (GA-0) ve grafik (GA-1) araç çubukları | V23; `gelir.spec` araç çubuğu | GA-0/GA-1 uygulandı, yerelde doğrulandı; kopyalama durumu planlandı (GA-3) |
 | F16 Birim / işaret / dönem / yüzde tabanı | gelir ↔ nakit fon ihtiyacı adı ve işareti, CSV başlıkları; applet yüzde paydası; OPEX yıl kapsamı | V24 | planlandı (GA-2) |
 | F17 “—” sözlüğü | nakit, OPEX, senaryo kıyası, tarih alanları | V25 | planlandı (GA-2) |
 | F18 Kaynak / varsayım / sonuç tonu | `AppFrame` alt bilgi, `Dayanak`, OPEX `Assumptions`, `LiveStrip` | V26 | planlandı (GA-2) |

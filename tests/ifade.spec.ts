@@ -153,7 +153,10 @@ test.describe('ifade: görev ve terim haritası (ikinci grup) ve biçim (üçün
     await gelir(page);
     const kadro = page.locator('#kadro');
     await kadro.getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
-    await expect(kadro.locator('.chart').first().locator('.chart-title')).toContainText(/senaryolara göre aylık yeni satıcı/i);
+    // gorsel_algi.md F15 (2026-10-28): başlık görünüm varyantıyla değişmez (“Aylık yeni satıcı tahmini”); C26’nın varyant açıklaması
+    // grafiğin altındaki notta (aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla).
+    await expect(kadro.locator('.chart').first().locator('.chart-title')).toContainText(/aylık yeni satıcı tahmini/i);
+    await expect(kadro.locator('.chart').first().locator('.chart-altnot')).toContainText(/senaryolara göre: aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla/i);
     await expect(page.locator('#kaynak-tablo')).toContainText('Satış kanalları');
     await expect(page.locator('#kaynak-tablo')).toContainText(/yeni satıcı/);
   });

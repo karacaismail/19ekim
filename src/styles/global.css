@@ -5833,12 +5833,114 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   background: var(--surface-control-hover);
 }
 
+/* Seçili düğme: topuz ve yazı rengi; ağırlık değişmez (gorsel_algi.md F06 / V08: seçim geometriyi oynatmaz). */
 .secim-dugme[aria-pressed='true'],
 .secim-dugme[aria-pressed='true']:hover {
   background: transparent;
   color: var(--surface-page);
-  font-weight: var(--weight-semibold);
   cursor: default;
+}
+
+/* Sunum kipleri (gorsel_algi.md §5.2): kısa açık liste alt alta, seçim kutusu izsiz. */
+.secim-iz[data-sunum='liste'] {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.secim-iz[data-sunum='liste'] .secim-dugme {
+  justify-content: flex-start;
+}
+
+.secim-iz[data-sunum='secim'] {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+
+.secim-kutu {
+  inline-size: 100%;
+}
+
+/* Etkin bağlam / kaynak yuvası (gorsel_algi.md §5.1): kontrol ile yardım arasında, kendi satırında. */
+.secim-baglam {
+  flex-basis: 100%;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.secim-kaynak {
+  margin: 0;
+  max-width: var(--prose-max);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Ortak anahtar (ui.tsx Anahtar): görünür ad + pill iz/topuz (K-02). */
+.anahtar-alan {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.anahtar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  text-align: start;
+  cursor: pointer;
+}
+
+.anahtar-iz {
+  position: relative;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 1.5rem;
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: var(--radius-switch);
+  background-color: var(--toggle-track-off);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.anahtar-top {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.1875rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--radius-switch);
+  background-color: var(--toggle-thumb-off);
+  transform: translateY(-50%);
+  transition-property: transform, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.anahtar[aria-checked='true'] .anahtar-iz {
+  background-color: var(--toggle-track-on);
+}
+
+.anahtar[aria-checked='true'] .anahtar-top {
+  background-color: var(--toggle-thumb-on);
+  transform: translate(1.25rem, -50%);
+}
+
+html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
+  text-decoration-line: underline;
+}
+
+.anahtar-aciklama {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
 
 /* Rol tonlu seçenek (senaryolar): topuz senaryonun zemin, yazı senaryonun yazı rengi. */
@@ -5917,10 +6019,12 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 }
 
 /* Başabaş filtreleri: çok seçenekli ızgara; dar ekranda tek sütun. */
+/* Seçenek ızgarası: sütun en az 28rem (gorsel_algi.md §5.2, 2026-10-28: önce kapsayıcı genişliği — masaüstünde 339 px’lik
+   üç sütun seçenekleri kırıyordu; iki sütunda her sayısal grup tek satır segment, kırılma dar ekranda kontrollü sunuma). */
 .filtreler {
   display: grid;
   gap: var(--space-5) var(--space-8);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
   margin-top: var(--space-5);
   padding: var(--space-5) var(--space-5) var(--space-6);
   border-radius: var(--radius-surface);

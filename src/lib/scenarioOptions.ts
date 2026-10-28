@@ -130,7 +130,13 @@ export function useScenarioOptions(p: Params) {
       if (raw) {
         const saved = JSON.parse(raw) as Partial<ScenarioOptions>;
         next = { ...d };
-        for (const k of KEYS) if (k in saved && (saved[k] === null || typeof saved[k] === typeof d[k])) (next as unknown as Record<string, unknown>)[k] = saved[k];
+        // Saklanan değer türü varsayılanla uyuşmalı; varsayılanı `null` (kaynağı izle) olan alanlarda sabitlenmiş sayı da geçerlidir
+        // (gorsel_algi.md F02 / V03, 2026-10-28: sabit değer yeniden açılışta ve başka sayfadan senaryo değişince korunur).
+        for (const k of KEYS) {
+          if (!(k in saved)) continue;
+          const v = saved[k];
+          if (v === null || typeof v === typeof d[k] || (d[k] === null && typeof v === 'number')) (next as unknown as Record<string, unknown>)[k] = v;
+        }
       }
     } catch {
       /* depolama kapalı */

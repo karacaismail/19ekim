@@ -33,7 +33,7 @@ const MIN_FONT_WEIGHT = 300;
 const RADIUS_PROP = /^border(-(top|bottom|start|end)-(left|right|start|end))?-radius$/;
 const RADIUS_ZERO_TOKENS = ['--radius-surface', '--radius-control', '--radius-overlay'];
 const PILL_SELECTOR = /\.(chip|opex-state|opex-pill|yapiskan-ad|bcg-flow-chip|ortak-bolum-program)\b/;
-const SWITCH_SELECTOR = /\.(theme-(track|thumb)|(opex|applet|nakit)-anahtar-(iz|top))\b/;
+const SWITCH_SELECTOR = /\.(theme-(track|thumb)|((opex|applet|nakit)-)?anahtar-(iz|top))\b/;
 const DOT_SELECTOR = /::before$|\.(opex-dot|opex-live-dot)$/;
 
 const errors = [];

@@ -9,6 +9,16 @@ import { expect, test, type Page } from '@playwright/test';
  */
 const icerik = (page: Page) => page.waitForSelector('.app-footer', { state: 'attached' });
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+/** Hazır senaryo seçimi: geniş ekranda segment düğmesi; dar ekranda (gorsel_algi.md §5.2) markalı seçim kutusu. */
+async function hazirSec(page: Page, ad: string) {
+  const grup = page.locator('.kurucu').getByRole('group', { name: 'Hazır senaryolar' });
+  const dugme = grup.getByRole('button', { name: ad, exact: true });
+  if (await dugme.count()) await dugme.click();
+  else {
+    await grup.getByRole('combobox').click();
+    await page.getByRole('option', { name: ad, exact: true }).click();
+  }
+}
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://script.google.com/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
@@ -90,10 +100,10 @@ test.describe('gelir planı', () => {
     if ((await acici.getAttribute('aria-expanded')) === 'false') await acici.click();
     const secenekler = kurucu.getByRole('group', { name: 'Ayrıntılı seçenekler' });
     await expect(secenekler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '+2 kişi' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(secenekler.getByRole('group', { name: 'Satıcı kazanım reklamı' }).getByRole('button', { name: 'Yok' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(secenekler.getByRole('group', { name: 'Aylık reklam bütçesi' }).getByRole('button', { name: 'Yok' })).toHaveAttribute('aria-pressed', 'true');
     await expect(page).toHaveURL(/eksaha=2/);
     // Bir seçenek değişince senaryo “özel” olur; sıfırla hazır senaryoya döner.
-    await secenekler.getByRole('group', { name: 'Kur artışı' }).getByRole('button', { name: '%0 (sabit kur)' }).click();
+    await secenekler.getByRole('group', { name: 'Yıllık kur artışı' }).getByRole('button', { name: '%0', exact: true }).click();
     await expect(hazir.getByRole('button', { name: /^Özel/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(ozet.locator('.yapiskan-ad')).toContainText('Özel: Medyan');
     await expect(page).toHaveURL(/kur=0/);
@@ -103,7 +113,9 @@ test.describe('gelir planı', () => {
     await page.goto('gelir-plani/?senaryo=iyimser&eksaha=1&reklam=2');
     await icerik(page);
     await hydrated(page);
-    await expect(hazir.getByRole('button', { name: /^Özel \(İyimser/ })).toHaveAttribute('aria-pressed', 'true');
+    // gorsel_algi.md F01 (2026-10-28): seçenek yalnız “Özel”; temel ve değişiklik sayısı grubun yardım satırında.
+    await expect(hazir.getByRole('button', { name: 'Özel', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(hazir.locator('.secim-not')).toContainText(/İyimser temelinde 2 seçenek değiştirildi/);
     // Yenilenince saklanan seçim kalır; nakit akış tablosu temel senaryoyu (iyimser) okur.
     await page.goto('nakit-akisi/');
     await icerik(page);
@@ -156,7 +168,7 @@ test.describe('gelir planı', () => {
     expect((await cip.textContent())?.trim()).toBe((await deger.textContent())?.trim());
     // Senaryo değişince sonuç ve kıyas işareti değişir; riskli seçeneklerde durum riske döner ve yine gizlenmez.
     const kurucu = page.locator('.kurucu');
-    await kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Kötümser' }).click();
+    await hazirSec(page, 'Kötümser');
     await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Kötümser');
     const acici = kurucu.getByRole('button', { name: /Ayrıntılı seçenekler/ });
     if ((await acici.getAttribute('aria-expanded')) === 'false') await acici.click();
@@ -164,9 +176,9 @@ test.describe('gelir planı', () => {
     // Riskli seçenekler (ek sabit gider, düşük elde tutma, reklamsız): sonuç ve durum anında değişir, durum yine görünür
     // ve tonuyla tutarlı; özel senaryo kıyasa dördüncü satır olarak girer; şerit ile blok aynı değeri taşır.
     const onceki = (await deger.textContent())?.trim();
-    await secenekler.getByRole('group', { name: 'Ek sabit gider' }).getByRole('button', { name: '+500 bin ₺ / ay' }).click();
+    await secenekler.getByRole('group', { name: 'Aylık ek sabit gider' }).getByRole('button', { name: '+500 bin ₺' }).click();
     await secenekler.getByRole('group', { name: 'Aylık elde tutma' }).getByRole('button', { name: '%60', exact: true }).click();
-    await secenekler.getByRole('group', { name: 'Satıcı kazanım reklamı' }).getByRole('button', { name: 'Yok' }).click();
+    await secenekler.getByRole('group', { name: 'Aylık reklam bütçesi' }).getByRole('button', { name: 'Yok' }).click();
     await expect(deger).not.toHaveText(onceki ?? '');
     await expect(durum).toBeVisible();
     await tutarli();
@@ -222,7 +234,9 @@ test.describe('gelir planı', () => {
     });
     expect(konum.right).toBeLessThan(konum.left);
     await eksen.getByRole('button', { name: 'Kümülatif' }).click();
-    await expect(bolum.locator('.chart').first().locator('.chart-title')).toContainText('Kümülatif gelir ve gider');
+    // gorsel_algi.md F15 (2026-10-28): grafik başlığı eksenle değişmez; ölçü farkı grafiğin altındaki notta.
+    await expect(bolum.locator('.chart').first().locator('.chart-title')).toContainText('Gelir ve gider');
+    await expect(bolum.locator('.chart').first().locator('.chart-altnot')).toContainText('Kümülatif gelir ve kümülatif gider');
     for (let i = 0; i < 3; i++) {
       const c = bolum.locator('.chart-canvas').nth(i);
       await c.scrollIntoViewIfNeeded();
@@ -309,6 +323,24 @@ test.describe('gelir planı', () => {
       await icerik(page);
       await hydrated(page);
       await page.evaluate(() => document.fonts.ready);
+      // Grafik blokları da: başlık sabit, görünüm anahtarı figür içinde yerinde (varyanta bağlı açıklama grafiğin altında).
+      for (const [bolum, secenek] of [['#kadro', 'Üçü üst üste'], ['#gelir', 'Üçü üst üste'], ['#huni', 'Üçü üst üste'], ['#basabas', 'Kümülatif']] as const) {
+        const figur = page.locator(`${bolum} figure.chart`).filter({ has: page.getByRole('button', { name: secenek }) }).first();
+        const grup = figur.locator('.araclar .secim').last();
+        await figur.scrollIntoViewIfNeeded();
+        const konum = async () => {
+          const f = (await figur.boundingBox())!;
+          const q = (await grup.boundingBox())!;
+          return { x: q.x - f.x, y: q.y - f.y, baslik: await figur.locator('.chart-title').innerText() };
+        };
+        const once = await konum();
+        await grup.getByRole('button', { name: secenek }).click();
+        await expect(grup.getByRole('button', { name: secenek })).toHaveAttribute('aria-pressed', 'true');
+        const sonra = await konum();
+        expect(sonra.baslik, `${bolum} grafik başlığı sabit`).toBe(once.baslik);
+        expect(Math.abs(sonra.x - once.x), `${bolum} grafik anahtarı x`).toBeLessThanOrEqual(1);
+        expect(Math.abs(sonra.y - once.y), `${bolum} grafik anahtarı y`).toBeLessThanOrEqual(1);
+      }
       const tablolar: [string, RegExp, RegExp][] = [
         ['#katki-tablo', /^gelir-plani-kadro-senaryolar-.*\.csv$/, /Kötümser: katkı/],
         ['#aylik-tablo', /^gelir-plani-aylik-senaryolar-.*\.csv$/, /Kötümser: aylık/],

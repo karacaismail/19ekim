@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
-import { Accordion, Anchor, Badge, Table, Text, Title } from '@mantine/core';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
+import { Accordion, Anchor, Badge, Select, Table, Text, Title } from '@mantine/core';
 import {
   IconBuildingBank,
   IconCode,
@@ -538,6 +538,7 @@ export function Chart({
   note,
   summary,
   tools,
+  altNot,
   size = 'md',
   wide = false,
   rows,
@@ -550,6 +551,8 @@ export function Chart({
   summary: string;
   /** Grafik başındaki araç satırı (senaryo seçici, görünüm): başlığın altında, çizimin üstünde. */
   tools?: ReactNode;
+  /** Grafiğin altındaki yöntem notu: görünüm varyantına göre değişebilir; başlık ve araç çubuğu sabit kalır (gorsel_algi.md F15). */
+  altNot?: ReactNode;
   size?: ChartSize;
   /** Geniş grafik: dar kapsayıcıda eşdeğer liste, geniş kapsayıcıda gerekirse kendi kutusunda kayan ECharts. */
   wide?: boolean;
@@ -655,6 +658,7 @@ export function Chart({
         ) : (
           kutu
         ))}
+      {altNot ? <p className="table-note table-note-alt chart-altnot">{altNot}</p> : null}
     </figure>
   );
 }
@@ -884,10 +888,70 @@ interface Thumb {
   h: number;
 }
 
-export function Choice<T extends string>({ label, value, options, note, onChange }: { label: string; value: T; options: ChoiceOption<T>[]; /** Görünür açıklama (ipucu yerine; dokunmada hover yoktur) */ note?: string; onChange: (id: T) => void }) {
+export type ChoiceSunum = 'segment' | 'liste' | 'secim';
+
+/**
+ * Seçeneklerin tek satırda gereken genişliği (CSS px): düğme yazısı + düğme iç boşluğu, aralarında iz boşluğu, iz iç
+ * boşluğu. Düğme varken onun yazı tipi ve boşlukları ölçülür; yoksa (seçim kutusu kipinde) son ölçüm korunur.
+ */
+function gerekenGenislik(iz: HTMLElement, options: { name: string }[]): number | null {
+  const dugme = iz.querySelector<HTMLElement>('.secim-dugme');
+  if (!dugme) return null;
+  const tuval = document.createElement('canvas').getContext('2d');
+  if (!tuval) return null;
+  const st = getComputedStyle(dugme);
+  tuval.font = `${st.fontWeight} ${st.fontSize} ${st.fontFamily}`;
+  const yatay = parseFloat(st.paddingLeft) + parseFloat(st.paddingRight);
+  const izSt = getComputedStyle(iz);
+  const bosluk = parseFloat(izSt.columnGap) || 0;
+  const izYatay = (parseFloat(izSt.paddingLeft) || 0) + (parseFloat(izSt.paddingRight) || 0);
+  return options.reduce((t, o) => t + Math.ceil(tuval.measureText(o.name).width) + yatay, 0) + bosluk * Math.max(0, options.length - 1) + izYatay;
+}
+
+/** Grubun kullanabileceği genişlik: esnek satırda (araç çubuğu) ebeveynin iç genişliği, ızgara/blok bağlamında kendi genişliği. */
+function kullanilabilirGenislik(el: HTMLElement) {
+  const ebeveyn = el.parentElement;
+  if (ebeveyn && getComputedStyle(ebeveyn).display.includes('flex')) {
+    const st = getComputedStyle(ebeveyn);
+    return ebeveyn.clientWidth - (parseFloat(st.paddingLeft) || 0) - (parseFloat(st.paddingRight) || 0);
+  }
+  return el.clientWidth;
+}
+
+/**
+ * Seçim grubu (gorsel_algi.md F01/§5.2, 2026-10-28): seçenek yalnız değer; grup etiketi ölçülen şey; yardım (`note`)
+ * gruba `aria-describedby` ile bağlı (F12); `baglam` yuvası etkin bağlam / kaynak için (bağlanma anahtarı, parametre
+ * bağlantısı; §5.1). Sunum içerik genişliğinden türer (§5.2): seçenekler tek satıra sığıyorsa segment; sığmıyorsa kısa
+ * açık liste (≤ 5 seçenek, alt alta) ya da markalı seçim kutusu (daha çok seçenek). Rastgele iki/üç satıra kırılan
+ * segment yoktur; metin küçültülmez, kırpılmaz. Gereken genişlik düğme yazı tipinden ölçülür (yazı tipi yüklenince
+ * yeniden), kullanılabilir genişlik kapsayıcıdan izlenir; seçim kutusu kipinde son ölçüm korunur (salınım yok).
+ */
+export function Choice<T extends string>({
+  label,
+  value,
+  options,
+  note,
+  baglam,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: ChoiceOption<T>[];
+  /** Görünür açıklama (ipucu yerine; dokunmada hover yoktur); gruba aria-describedby ile bağlanır. */
+  note?: ReactNode;
+  /** Etkin bağlam / kaynak: kontrol ile yardım arasında (bağlanma anahtarı, parametre bağlantısı). */
+  baglam?: ReactNode;
+  onChange: (id: T) => void;
+}) {
+  const root = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
+  const gereken = useRef<number | null>(null);
   const [thumb, setThumb] = useState<Thumb | null>(null);
+  const [sunum, setSunum] = useState<ChoiceSunum>('segment');
+  const notId = useId();
+  const sure = useMotionMs('--motion-duration-fast');
   const selected = options.find((o) => o.id === value);
+  const etiketler = options.map((o) => o.name).join('\u0001');
   useLayoutEffect(() => {
     const el = track.current;
     if (!el) return undefined;
@@ -900,21 +964,97 @@ export function Choice<T extends string>({ label, value, options, note, onChange
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
     ro?.observe(el);
     return () => ro?.disconnect();
-  }, [value, options.length]);
+  }, [value, options.length, sunum]);
+  useLayoutEffect(() => {
+    gereken.current = null;
+  }, [etiketler]);
+  useLayoutEffect(() => {
+    const el = root.current;
+    const iz = track.current;
+    if (!el || !iz) return undefined;
+    const karar = () => {
+      const olcum = gerekenGenislik(iz, options);
+      if (olcum !== null) gereken.current = olcum;
+      const gerek = gereken.current;
+      if (gerek === null) return;
+      const sigar = gerek <= kullanilabilirGenislik(el) + 0.5;
+      setSunum(sigar ? 'segment' : options.length <= 5 ? 'liste' : 'secim');
+    };
+    karar();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(karar);
+    ro?.observe(el);
+    if (el.parentElement) ro?.observe(el.parentElement);
+    let iptal = false;
+    document.fonts?.ready.then(() => {
+      if (!iptal) karar();
+    });
+    return () => {
+      iptal = true;
+      ro?.disconnect();
+    };
+  }, [etiketler, options]);
   return (
-    <div className="secim" role="group" aria-label={label}>
+    <div className="secim" role="group" aria-label={label} aria-describedby={note ? notId : undefined} ref={root}>
       <span className="secim-etiket">{label}</span>
-      <div className="secim-iz" ref={track} data-olculdu={thumb ? '' : undefined}>
-        {thumb ? (
-          <span className="secim-top" aria-hidden="true" data-role={selected?.role} style={{ transform: `translate(${thumb.x}px, ${thumb.y}px)`, width: thumb.w, height: thumb.h }} />
-        ) : null}
-        {options.map((o) => (
-          <button key={o.id} type="button" className="secim-dugme" data-role={o.role} aria-pressed={o.id === value} onClick={() => onChange(o.id)}>
-            {o.name}
-          </button>
-        ))}
+      <div className="secim-iz" ref={track} data-olculdu={thumb ? '' : undefined} data-sunum={sunum}>
+        {sunum === 'secim' ? (
+          <Select
+            className="secim-kutu"
+            classNames={{ input: 'param-input applet-select', dropdown: 'navmenu applet-liste', option: 'navmenu-item applet-secenek' }}
+            aria-label={label}
+            data={options.map((o) => ({ value: o.id, label: o.name }))}
+            value={value}
+            allowDeselect={false}
+            withScrollArea={false}
+            checkIconPosition="right"
+            size="md"
+            comboboxProps={{ middlewares: { flip: true, shift: true }, transitionProps: { transition: 'fade', duration: sure, exitDuration: sure, timingFunction: 'var(--motion-ease-standard)' } }}
+            onChange={(v) => {
+              if (v) onChange(v as T);
+            }}
+          />
+        ) : (
+          <>
+            {thumb ? (
+              <span className="secim-top" aria-hidden="true" data-role={selected?.role} style={{ transform: `translate(${thumb.x}px, ${thumb.y}px)`, width: thumb.w, height: thumb.h }} />
+            ) : null}
+            {options.map((o) => (
+              <button key={o.id} type="button" className="secim-dugme" data-role={o.role} aria-pressed={o.id === value} onClick={() => onChange(o.id)}>
+                {o.name}
+              </button>
+            ))}
+          </>
+        )}
       </div>
-      {note ? <p className="secim-not">{note}</p> : null}
+      {baglam ? <div className="secim-baglam">{baglam}</div> : null}
+      {note ? (
+        <p className="secim-not" id={notId}>
+          {note}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Ortak anahtar (gorsel_algi.md F03: ikili kural için switch; F02 bağlanma modu): görünür ad, role="switch",
+ * aria-checked, isteğe bağlı açıklama (aria-describedby). Pill izi ve topuzu kayıtlı köşe istisnasıdır (K-02).
+ */
+export function Anahtar({ ad, acik, onChange, aciklama }: { ad: string; acik: boolean; onChange: (v: boolean) => void; aciklama?: ReactNode }) {
+  const id = useId();
+  return (
+    <div className="anahtar-alan">
+      <button type="button" role="switch" aria-checked={acik} aria-describedby={aciklama ? id : undefined} className="anahtar" onClick={() => onChange(!acik)}>
+        <span className="anahtar-iz" aria-hidden="true">
+          <span className="anahtar-top" />
+        </span>
+        <span className="anahtar-ad">{ad}</span>
+      </button>
+      {aciklama ? (
+        <span className="anahtar-aciklama" id={id}>
+          {aciklama}
+        </span>
+      ) : null}
     </div>
   );
 }

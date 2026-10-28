@@ -15,10 +15,11 @@ export function SenaryoSecimi({ scenarios, value, onChange, label = 'Senaryo' }:
   return <Choice label={label} value={value} options={scenarios.map((s) => ({ id: s.id, name: s.name, role: s.role }))} note={secili?.desc} onChange={onChange} />;
 }
 
-export function ModSecimi({ value, onChange }: { value: Mod; onChange: (m: Mod) => void }) {
+/** Görünüm anahtarı: sunum tercihi, değer filtresi değil; grup adı neyi etkilediğini söyler (gorsel_algi.md F03 / C014). */
+export function ModSecimi({ value, onChange, label = 'Görünüm' }: { value: Mod; onChange: (m: Mod) => void; label?: string }) {
   return (
     <Choice
-      label="Görünüm"
+      label={label}
       value={value}
       options={[
         { id: 'secili', name: 'Seçili senaryo' },

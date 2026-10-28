@@ -243,14 +243,14 @@ function Icerik() {
   const katkiAraclar = cubuk(
     <>
       <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => (modKatki === 'secili' ? csvKadro() : csvKadroUc())} />
-      <ModSecimi value={modKatki} onChange={setModKatki} />
+      <ModSecimi value={modKatki} onChange={setModKatki} label="Tablo görünümü" />
     </>,
   );
   const aylikBaslik = `Ay ay: bütün aylar, ${son} sonuna kadar`;
   const aylikAraclar = cubuk(
     <>
       <Choice label="Dışa aktar" value="" options={[{ id: 'csv', name: 'CSV indir' }]} onChange={() => (modGelir === 'secili' ? csvAylik() : csvAylikUc())} />
-      <ModSecimi value={modGelir} onChange={setModGelir} />
+      <ModSecimi value={modGelir} onChange={setModGelir} label="Grafik ve tablo görünümü" />
     </>,
   );
   const fon = tl(Math.min(0, be.enDusuk.deger));
@@ -362,13 +362,14 @@ function Icerik() {
         />
         <Chart
           id="kaynak-ay"
-          title={modKadro === 'secili' ? `Yeni aktif satıcı: kaynak × ay (${senaryoAdi})` : 'Senaryolara göre aylık yeni satıcı tahmini: aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla'}
+          title="Aylık yeni satıcı tahmini"
+          altNot={modKadro === 'secili' ? `Kaynaklara göre (${senaryoAdi}): her satış kanalının aylık yeni satıcısı üst üste.` : 'Senaryolara göre: aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla.'}
           summary={
             modKadro === 'secili'
               ? kaynaklar.map((x) => `${x.short}: ${on2.map((_, t) => int(Math.round(x.values[t] * inputs.factor * r.satis[t]))).join(', ')}`).join('; ')
               : ustUste.map((x) => `${x.name}: ${on2.map((_, t) => int(Math.round(x.be.sim.yeniAktif[t]))).join(', ')}`).join('; ')
           }
-          tools={cubuk(<ModSecimi value={modKadro} onChange={setModKadro} />)}
+          tools={cubuk(<ModSecimi value={modKadro} onChange={setModKadro} label="Grafik görünümü" />)}
           spec={
             modKadro === 'secili'
               ? { kind: 'kaynak-ay', months: on2.map((a) => a.kisa), unit: 'Yeni aktif satıcı', series: kaynaklar.map((x) => ({ name: x.short, role: x.role, values: on2.map((_, t) => Math.round(x.values[t] * inputs.factor * r.satis[t] * 10) / 10) })) }
@@ -541,17 +542,18 @@ function Icerik() {
         index={4}
         title="Aylık gelir ve kümülatif"
         desc={`İlk ödemeler (aylık ve yıllık peşin), yenilemeler ve kümülatif gelir; kesikli çizgi ${tl(params.ciroTarget)} hedefi. “Üçü üst üste” aylık geliri hazır senaryolarla yan yana koyar. Tablo ${son} sonuna kadar tüm ayları içerir ve CSV olarak indirilebilir.`}
-        tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} />)}
+        tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} label="Grafik ve tablo görünümü" />)}
       >
         <Chart
           id="gelir-ay"
-          title={modGelir === 'secili' ? `İlk ödemeler, yenilemeler ve kümülatif gelir (${senaryoAdi})` : 'Aylık gelir: hazır senaryolar yan yana'}
+          title={`Aylık gelir, ${son} sonuna kadar`}
+          altNot={modGelir === 'secili' ? `İlk ödemeler, yenilemeler ve kümülatif gelir (${senaryoAdi}).` : 'Hazır senaryolar yan yana: aynı ayın aylık geliri.'}
           summary={
             modGelir === 'secili'
               ? `${months.map((a, t) => `${a.kisa}: ${tl(sim.gelir[t])}`).join('; ')}. ${son} sonu kümülatif ${tl(sim.kumulatif[H - 1])}.`
               : ustUste.map((x) => `${x.name}: ${months.map((a, t) => `${a.kisa} ${tl(x.be.sim.gelir[t])}`).join(', ')}`).join('; ')
           }
-          tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} />)}
+          tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} label="Grafik ve tablo görünümü" />)}
           spec={
             modGelir === 'secili'
               ? { kind: 'gelir-ay', months: months.map((a) => a.kisa), first: months.map((_, t) => Math.round(sim.ilkOdeme[t])), renew: months.map((_, t) => Math.round(sim.yenileme[t])), target: params.ciroTarget }
@@ -683,13 +685,14 @@ function Icerik() {
         index={7}
         title="Üye → aktif → devam eden"
         desc={`${int(params.memberTarget)} üyeden ${int(params.activeTarget)} aktif; seçili elde tutma oranıyla (${yuzde(inputs.retention)}) aynı ${int(params.activeTarget)} satıcıdan kaçı 3., 6. ve 12. ayda hâlâ ödüyor. Elde tutma olmadan aktif sayısı erir; yenileme çağrısı ve aylık değer raporu bu yüzden planın parçasıdır.`}
-        tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} />)}
+        tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} label="Grafik görünümü" />)}
       >
         <Chart
           id="huni"
-          title={modHuni === 'secili' ? `Kayıttan devam eden ödemeye (${senaryoAdi})` : 'Kayıttan devam eden ödemeye: hazır senaryolar'}
+          title="Kayıttan devam eden ödemeye"
+          altNot={modHuni === 'secili' ? `Seçili senaryo (${senaryoAdi}): üye → aktif → devam eden.` : 'Hazır senaryolar yan yana.'}
           summary={modHuni === 'secili' ? funnel.map((x) => `${x.name}: ${int(x.value)}`).join('; ') : r.scenarios.map((x) => `${x.name}: ${r.funnels[x.id].map((y) => int(y.value)).join(', ')}`).join('; ')}
-          tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} />)}
+          tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} label="Grafik görünümü" />)}
           spec={
             modHuni === 'secili'
               ? { kind: 'huni', role: senaryoRol, items: funnel }
@@ -746,7 +749,8 @@ function Icerik() {
         />
         <Chart
           id="basabas-ay"
-          title={modBas === 'aylik' ? `Aylık gelir ve gider, ${son} sonuna kadar (${senaryoAdi})` : `Kümülatif gelir ve gider, ${son} sonuna kadar (${senaryoAdi})`}
+          title={`Gelir ve gider, ${son} sonuna kadar`}
+          altNot={modBas === 'aylik' ? `Aylık gelir ve aylık gider (${senaryoAdi}); kesişim aylık başabaş.` : `Kümülatif gelir ve kümülatif gider (${senaryoAdi}); kesişim birikmiş açığın kapanışı.`}
           note={modBas === 'aylik' ? `Kesikli çizgi başabaş ayı: ${noktaMetni}.` : `Kümülatif çizgiler kesişince birikmiş açık kapanır (geri ödeme): ${be.geriOdeme ? longDate(be.geriOdeme.date) : be.ongoru.geriOdeme ? `${son} sonuna kadar değil; son ayın netiyle ≈ ${longDate(be.ongoru.geriOdeme.date)}` : 'kapanmıyor'}.`}
           summary={modBas === 'aylik' ? `${months.map((a, t) => `${a.kisa}: gelir ${tl(be.gelir[t])}, gider ${tl(be.gider[t])}`).join('; ')}. Başabaş: ${noktaMetni}.` : `${months.map((a, t) => `${a.kisa}: kümülatif gelir ${tl(kumGelir[t])}, kümülatif gider ${tl(kumGider[t])}`).join('; ')}. Geri ödeme: ${be.geriOdeme ? longDate(be.geriOdeme.date) : `${son} sonuna kadar değil`}.`}
           tools={cubuk(<Choice label="Eksen" value={modBas} options={[{ id: 'aylik', name: 'Aylık' }, { id: 'kumulatif', name: 'Kümülatif' }]} onChange={setModBas} />)}
@@ -759,14 +763,15 @@ function Icerik() {
         />
         <Chart
           id="basabas-kum"
-          title={modKum === 'secili' ? `Kümülatif net (gelir − gider), ${son} sonuna kadar (${senaryoAdi})` : 'Kümülatif net: hazır senaryolar üst üste'}
+          title={`Kümülatif net (gelir − gider), ${son} sonuna kadar`}
+          altNot={modKum === 'secili' ? `Seçili senaryo (${senaryoAdi}).` : 'Hazır senaryolar üst üste.'}
           note="Sıfır çizgisinin altı birikmiş açık (fon ihtiyacı), üstü geri ödeme sonrası birikim."
           summary={
             modKum === 'secili'
               ? `${months.map((a, t) => `${a.kisa}: ${tl(be.kumNet[t])}`).join('; ')}. En düşük ${tl(be.enDusuk.deger)} (${months[be.enDusuk.t].ad}).`
               : ustUste.map((x) => `${x.name}: en düşük ${tl(x.be.enDusuk.deger)}, ${son} sonu ${tl(x.be.kumNet[H - 1])}, geri ödeme ${tarihYaz(x.be.ongoru.geriOdeme)}`).join('; ')
           }
-          tools={cubuk(<ModSecimi value={modKum} onChange={setModKum} />)}
+          tools={cubuk(<ModSecimi value={modKum} onChange={setModKum} label="Grafik görünümü" />)}
           spec={{
             kind: 'kumulatif-tl',
             labels: months.map((a) => a.kisa),
