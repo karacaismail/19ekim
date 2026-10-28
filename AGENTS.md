@@ -864,9 +864,8 @@ V18 genişletildi. Hesap ve model değişmedi.
 
 ### archetype.md: değişime dayanıklı mimari yönergesi (kullanıcı kararı 2026-10-28: contents.md programından sonra)
 
-Kanonik belge `docs/archetype.md` (Codex raporu, `15011e9` anının denetimi) **depoda değil**: §11.4 üçüncü kişi adları
-içerir (gizlilik kuralı, “Gizlilik ve yayın”); kullanıcı klasöründe durur, adlar rol adıyla değiştirilmeden eklenmez
-(kullanıcı kararı bekliyor). Öneri: özellik modüllerine ayrılmış
+Kanonik belge `docs/archetype.md` (Codex raporu, `15011e9` anının denetimi) depoda **rol sürümüyle** (2026-10-28, Codex MS-26):
+§11.4’teki kişi adları rol adıyla değiştirildi; kişi/erişim devir kaydı sahibin bilgisayarındaki özgün kopyada kalır. Öneri: özellik modüllerine ayrılmış
 tek uygulama + saf hesap çekirdeği + React’e uygun ViewModel katmanı + sürümlü veri sözleşmeleri + yayımdan önce durduran
 kalite kapıları; Astro/React/Mantine/ECharts korunur, toplu yeniden yazma yok (§12 aşamalı dönüşüm 0–7; önerilen pilot:
 gelir → nakit özel senaryo bağı, F04/IA-23 ile örtüşür). Durum: **paket açılmadı**; uygulama CA-8 kapanışından sonra.
@@ -887,7 +886,11 @@ Kullanıcı kararı 2026-10-28: S0 (asıl ihtiyaç tanımı) onaylandı; K1–K1
 yıllık %15 girdi; K3 şirket yapısı Türksab → Mogem [Segika/SGK] ve iStoc Company [iStoc, Toptan], tutarlar Sheets’te; K4 “SMART
 hedefler”; K6 sunum sırası güncellenir; K10 e-posta gizli kalır; K11 marka bazlı faturalanan → tahsilat → kasa; K12 pilot sahip);
 cevapsız K1/K7/K8/K9 varsayılan; açık alt sorular §4.2. Plan **sürüm 2** (payda 10): yeni B3 şirket yapısı, eski B3–B8 → B4–B9.
-**Sayaç (sürüm 2): 1/10 tamamlandı (B2), 1/10 aktif (B0 — alt sorular ve belge önekleri).**
+**Codex denetimi `docs/missings.md` (2026-10-28 18:11; `5b3453e`/`fa58509` incelemesi) plana işlendi (sürüm 3; §3.4 MS→paket, §9 T01–T20):**
+B2.1 doğrulandı; B2 Codex bulgularıyla yeniden açıldı (B2c: MS-03 toparlanma, MS-02/10/11 metin ve kapsam); B6’nın iki dar
+koruması öne alındı (MS-04 Affilate bozuk/uyumsuz kayıt, MS-05 parametre doğrulama); K1 “karar bekliyor” (varsayılanla onay yok);
+K8 bağlayıcı kural; K9 archetype rol sürümü depoda; Ç13 yanlış pozitif geri alındı (MS-25).
+**Sayaç (sürüm 3): 0/10 tamamlandı, 2/10 aktif (B0, B2).**
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,
@@ -963,6 +966,9 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   kullanılmamalı. Giriş süresizdir (çıkışa kadar). `GIRIS_PAROLA` CI sırrı yapılırsa hata izleri/HTML raporu yazılan
   parolayı içerebilir.
 - Lisans henüz seçilmedi; kullanıcının onayı olmadan lisans eklenmez.
+- **Commit kimliği (kullanıcı yönergesi 2026-10-28, docs/missings.md MS-23):** yazar ve committer
+  `karacaismail <35493655+karacaismail@users.noreply.github.com>` (depo yerel `git config`); AI ortak yazar satırı
+  (`Co-Authored-By`) ya da üretim imzası eklenmez; geçmiş yeniden yazılmaz (eski commit’ler olduğu gibi kalır). `3d10eff`’ten itibaren.
 
 ## Komutlar
 
