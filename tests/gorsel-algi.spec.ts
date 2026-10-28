@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { buildModel, reply } from './opex-fixture';
-import { APPLET_NAV, SEQUENCE } from '../src/data/tree';
+import { YAYIMLANAN, icerikOf } from '../src/data/icerik';
+import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 
 /**
  * gorsel_algi.md (kullanıcı kararı 2026-10-28) kabul senaryoları (§6 V01–V30), paket paket. GA-1: seçenek etiketinde tek
@@ -509,14 +510,24 @@ test.describe('gorsel_algi GA-4b: dar ekranda karar araçları — Giderler sır
 });
 
 test.describe('gorsel_algi GA-5a: gezinti sözlüğü, bölüm dizini, oran çubuğu, kısa durum, uzun etiket', () => {
-  test('V18/V29 (F19): her menü adı ile sayfa başlığı aynı yere işaret eder — kısa ad, tam ad ya da kırıntı sonu', async ({ page }) => {
-    const duraklar = [...SEQUENCE, { ...APPLET_NAV, crumb: [] as string[] }];
-    for (const d of duraklar) {
-      await page.goto(d.path.replace(/^\//, ''));
+  test('V18/V29 (F19): her sıra ve menü adı ile sayfa başlığı aynı yere işaret eder — kısa ad, tam ad ya da içerik kaydının başlığı', async ({ page }) => {
+    // Sunum sırası durakları (kısa ad / tam ad) ve beş menünün bütün öğeleri (menü etiketi / kayıt başlığı). Menü, kırıntı ve
+    // sunum sırası ayrı tanımlanır ama aynı içerik kaydına bağlanır (docs/contents.md F15, CA-1); h1 bu adlardan biridir.
+    const duraklar = new Map<string, Set<string>>();
+    const ekle = (path: string, ...adlar: (string | undefined)[]) => {
+      const set = duraklar.get(path) ?? new Set<string>();
+      for (const ad of adlar) if (ad) set.add(ad);
+      duraklar.set(path, set);
+    };
+    for (const s of SEQUENCE) ekle(s.path, s.label, s.tam);
+    for (const g of NAV_GROUPS) for (const m of g.items) ekle(m.path, m.label, icerikOf(m.path)?.baslik, SEQUENCE.find((s) => s.path === m.path)?.tam);
+    // Gruplu her yayımlanan sayfa sıradan ya da bir menüden ulaşılır (doğrudan erişim ve sistem sayfaları hariç).
+    for (const k of YAYIMLANAN.filter((x) => x.grup !== 'dogrudan' && x.grup !== 'sistem')) expect(duraklar.has(k.path), k.id).toBe(true);
+    for (const [path, kabul] of duraklar) {
+      await page.goto(path.replace(/^\//, ''));
       await icerik(page);
       const h1 = (await page.getByRole('heading', { level: 1 }).innerText()).trim();
-      const kabul = new Set([d.label, d.tam ?? '', d.crumb[d.crumb.length - 1] ?? ''].filter(Boolean));
-      expect(kabul.has(h1), `${d.path}: menü “${d.label}”${d.tam ? ` / tam ad “${d.tam}”` : ''} ↔ başlık “${h1}”`).toBe(true);
+      expect(kabul.has(h1), `${path}: adlar {${[...kabul].join(' · ')}} ↔ başlık “${h1}”`).toBe(true);
     }
   });
 

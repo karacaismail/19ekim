@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, icerikOf, kirinti } from '../src/data/icerik';
 import { BASE_ROLES as ROLES } from '../src/data/roles';
-import { APPLET_NAV, COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../src/data/tree';
+import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 
 /**
  * İçerik envanteri sözleşmesi (docs/contents.md §4, §6, §13.2 IA-01, IA-02, IA-04, IA-10; kullanıcı kararı 28 Ekim):
@@ -62,25 +62,41 @@ test.describe('içerik envanteri', () => {
       expect(k.durum, k.id).toBe('taslak');
       expect(existsSync(join(PAGES_DIR, `${k.path.replace(/\//g, '')}.astro`)), `${k.id} dosyası`).toBe(false);
     }
-    // Sunum sırasındaki her durak kayıtlıdır ve başlığı (tam ad ya da kısa ad) kayıtla aynıdır.
+    // Sunum sırasındaki her durak kayıtlıdır ve kayıt başlığı durağın kısa adı ya da tam adıdır (F19 sözlüğü). Sırada kırıntı
+    // yoktur (F15, CA-1): kırıntı yalnız kayıttan türer.
     for (const s of SEQUENCE) {
       const k = icerikOf(s.path);
       expect(k, s.path).toBeTruthy();
-      expect([s.tam ?? s.label, s.label, s.crumb[s.crumb.length - 1]], s.path).toContain(k!.baslik); // F19 sözlüğü: h1 ∈ {kısa ad, tam ad, kırıntı sonu}
+      expect([s.tam ?? s.label, s.label], s.path).toContain(k!.baslik);
+      expect(s, s.path).not.toHaveProperty('crumb');
     }
-    // Menü öğeleri kayıtlı ve menü etiketi kayıtla aynı (menü yeniden gruplanınca bu etiketler kaynaktır).
-    for (const m of [...TREE_NAV, HIRING_NAV, APPLET_NAV, ...MARKETING_NAV, ...FINANCE_NAV, ...COMMON_NAV]) expect(icerikOf(m.path), m.path).toBeTruthy();
+    // Menü grupları: etiket kayıt grubunun adıdır (kırıntının ilk parçasıyla aynı sözcük); öğeler kayıtlı, grubu kayıtla aynı;
+    // İstihdam dışındaki grupların etiketi kayıttaki menü etiketidir (F15).
+    expect(NAV_GROUPS.map((g) => g.label)).toEqual(['İstihdam', 'Pazarlama', 'Finans', 'Yönetim', 'Yardımcı']);
+    for (const g of NAV_GROUPS) {
+      expect(g.label, g.id).toBe(GRUP_ADI[g.id]);
+      for (const m of g.items) {
+        const k = icerikOf(m.path);
+        expect(k, m.path).toBeTruthy();
+        expect(k!.grup, m.path).toBe(g.id);
+        if (g.id !== 'istihdam') expect(m.label, m.path).toBe(k!.menu);
+      }
+    }
+    // Her menülü kayıt bir grupta bulunur (yayımlanan sayfalar).
+    for (const k of YAYIMLANAN.filter((x) => x.menu)) expect(NAV_GROUPS.some((g) => g.items.some((m) => m.path === k.path)), k.id).toBe(true);
   });
 
-  test('IA-10: Applet İstihdam grubunda; BCG, arşiv ve e-posta yalnız doğrudan erişimde (menüsüz); kişisel sayfalar kişisel sınıfta', () => {
+  test('IA-10: Applet İstihdam grubunda; BCG ve e-posta yalnız doğrudan erişimde (menüsüz); arşiv Yardımcı erişimde; kişisel sayfalar kişisel sınıfta', () => {
     expect(icerikOf('/applet/')?.grup).toBe('istihdam');
     expect(icerikOf('/applet/')?.menu).toBe('Applet');
-    for (const p of ['/bcg/', '/arsiv/', '/email/']) {
+    for (const p of ['/bcg/', '/email/']) {
       expect(icerikOf(p)?.grup, p).toBe('dogrudan');
       expect(icerikOf(p)?.menu, p).toBeUndefined();
-      expect([...TREE_NAV, HIRING_NAV, APPLET_NAV, ...MARKETING_NAV, ...FINANCE_NAV, ...COMMON_NAV].some((m) => m.path === p), p).toBe(false);
+      expect(NAV_GROUPS.some((g) => g.items.some((m) => m.path === p)), p).toBe(false);
       expect(SEQUENCE.some((s) => s.path === p), p).toBe(false);
     }
+    expect(icerikOf('/arsiv/')?.grup).toBe('yardimci');
+    expect(SEQUENCE.some((s) => s.path === '/arsiv/')).toBe(false);
     expect(icerikOf('/email/')?.sinif).toContain('kisisel');
     expect(icerikOf('/notlar/')?.sinif).toContain('kisisel');
   });
@@ -101,6 +117,12 @@ test.describe('içerik envanteri', () => {
     expect(kirinti('/gelir-plani/')).toEqual(['Finans', 'Gelir planı']);
     expect(kirinti('/affilate/')).toEqual(['Pazarlama', 'Affilate']);
     expect(kirinti('/bcg/')).toEqual(['BCG matrisi eğitimi']);
+    expect(kirinti('/giderler/')).toEqual(['Finans', 'OpEx', 'Operasyonel Giderler']); // kullanıcı kararı 2026-10-21 korunur
+    expect(kirinti('/applet/')).toEqual(['İstihdam', 'Ücret ve performans applet’leri']);
+    expect(kirinti('/notlar/')).toEqual(['Yardımcı', 'Notlar']);
+    expect(kirinti('/arsiv/')).toEqual(['Yardımcı', 'Arşiv: tahtadan karara']);
+    expect(kirinti('/email/')).toEqual(['E-posta']); // doğrudan erişim: tek parça, kırıntı satırı çizilmez
+    expect(kirinti('/')).toEqual([]);
     expect(Object.keys(GRUP_ADI)).toEqual(['pazarlama', 'istihdam', 'finans', 'yonetim', 'yardimci', 'dogrudan', 'sistem']);
   });
 });

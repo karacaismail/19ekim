@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { SEQUENCE } from '../data/tree';
+import { ICERIK, kirinti } from '../data/icerik';
 import { useFrame } from '../lib/frame';
 import { href, normalizePath } from '../lib/paths';
 
@@ -23,9 +23,10 @@ export interface PageMeta {
  *
  * Kırıntı satırı `.wrap` içinde doğrudan durmalıdır ki ≥ 48em’de üstte yapışık kalabilsin (sticky, kapsayıcısıyla
  * sınırlıdır); bu yüzden bileşen tek kapsayıcı yerine iki kardeş kutu döndürür ve ikisi `data-page-header` taşır
- * (testler ikisini birlikte ölçer). SEQUENCE dışındaki sayfalarda (BCG, applet, e-posta, arşiv, 404) ve ana sayfada
- * kırıntı yolu yoktur; h1 satırda tek başına durur. Veri (`src/data/tree.ts`) değişmez: ara kırıntılar SEQUENCE’tan,
- * son kırıntının metni sayfanın `title`’ıdır.
+ * (testler ikisini birlikte ölçer). Kırıntı yolu içerik kaydından gelir (`src/data/icerik.ts → kirinti()`; docs/contents.md
+ * F15, kullanıcı kararı 2026-10-28, CA-1): grup › (ebeveyn sayfa) › başlık; sunum sırası (`SEQUENCE`) kırıntının otoritesi
+ * değildir. Tek parçalı yolda (doğrudan erişim: BCG, e-posta), 404’te ve ana sayfada kırıntı yolu yoktur; h1 satırda tek
+ * başına durur. Son kırıntının metni sayfanın `title`’ıdır (kayıttaki `baslik` ile aynı; V18 doğrular).
  */
 export function PageHeader({
   title,
@@ -47,10 +48,12 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   const { pathname } = useFrame();
-  const stop = SEQUENCE.find((s) => normalizePath(href(s.path)) === pathname) ?? null;
-  const yol = stop && stop.crumb.length ? stop.crumb : null;
-  // Ara kırıntı, tek kırıntılı sayfanın etiketiyse o sayfaya bağlanır (ör. Ağaç 3 · Saha satış → saha ekibi).
-  const crumbPath = (label: string) => SEQUENCE.find((s) => s.crumb.length === 1 && s.crumb[0] === label)?.path;
+  // Kırıntı ana ebeveynden (docs/contents.md F15, kullanıcı kararı 2026-10-28): grup › (ebeveyn sayfa) › başlık; sunum
+  // sırasından bağımsız. Ara kırıntı bir sayfaysa (Organizasyon şeması) ona bağlanır; grup adı bağlantısızdır.
+  // Tek parçalı yol (doğrudan erişilen sayfa: BCG, e-posta) kırıntısızdır; ana sayfada kırıntı yoktur.
+  const parcalar = kirinti(pathname);
+  const yol = parcalar.length > 1 ? parcalar : null;
+  const crumbPath = (label: string) => ICERIK.find((k) => !k.planlandi && k.baslik === label)?.path;
   const h1 = <h1 className="crumbs-title">{title}</h1>;
   const baslik =
     icon || badge ? (

@@ -782,7 +782,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     });
   }
 
-  // Kullanıcı kararı 2026-10-20: hedefler, eylem planı, MLM ağı, karar sayfaları ve parametreler “Pazarlama” menüsünde.
+  // Kullanıcı kararı 2026-10-28 (docs/contents.md §5.2): göreve göre beş menü — İstihdam, Pazarlama, Finans, Yönetim, Yardımcı.
   // Kullanıcı kararı 2026-10-21: tema ani değişmez (“şimşek çakar gibi değil”): sayfa görünüm geçişiyle (destek varsa)
   // yumuşak geçer, anahtar topu kayar; hareket azaltmada anında.
   test('tema değişimi yumuşak: görünüm geçişi ve kayan anahtar; hareket azaltmada anında', async ({ page }) => {
@@ -823,30 +823,43 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await page.goto('hedefler/');
     await icerik(page);
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    await expect(nav.locator('.mainnav-link .mainnav-icon')).toHaveCount(4);
+    await expect(nav.locator('.mainnav-link .mainnav-icon')).toHaveCount(5);
     const ayiricilar = await nav.locator('.mainnav-list > li').evaluateAll((lis) => lis.map((li) => { const b = getComputedStyle(li, '::before'); return b.content !== 'none' && parseFloat(b.width) > 0 && parseFloat(b.height) > 0; }));
-    expect(ayiricilar).toEqual([false, true, true, true]);
+    expect(ayiricilar).toEqual([false, true, true, true, true]);
   });
 
-  test('Pazarlama menüsü: dokuz sayfa; etkin sayfa işaretli; başlıkta yalnız İstihdam, Pazarlama, Giderler, Notlar', async ({ page }) => {
+  test('menüler: İstihdam, Pazarlama, Finans, Yönetim, Yardımcı; Yönetim dört sayfa; etkin sayfa işaretli; grup kapsamları', async ({ page }) => {
     await page.goto('karar-yetkisi/');
     await icerik(page);
     await hydrated(page);
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, /^Giderler/, 'Notlar']);
-    const tetik = page.getByRole('button', { name: 'Pazarlama' });
+    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, /^Finans/, /^Yönetim/, /^Yardımcı/]);
+    const tetik = page.getByRole('button', { name: 'Yönetim' });
     await expect(tetik).toHaveAttribute('data-section', 'true');
-    await expect(page.getByRole('button', { name: 'İstihdam' })).not.toHaveAttribute('data-section', 'true');
+    await expect(page.getByRole('button', { name: 'Pazarlama' })).not.toHaveAttribute('data-section', 'true');
     await tetik.click();
-    const menu = page.getByRole('menu', { name: 'Pazarlama' });
+    const menu = page.getByRole('menu', { name: 'Yönetim' });
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole('menuitem')).toHaveText(['90 gün hedefleri', 'Gelir planı', 'Eylem planı', 'MLM ağı', 'İş ortaklığı', 'Affilate', 'Karar yetkisi', 'Karar bekleyenler', 'Parametreler']);
+    await expect(menu.getByRole('menuitem')).toHaveText(['Hedefler', 'Eylem planı', 'Kararlar', 'Karar yetkisi']);
     await expect(menu.getByRole('menuitem', { name: 'Karar yetkisi' })).toHaveAttribute('aria-current', 'page');
-    await menu.getByRole('menuitem', { name: 'MLM ağı' }).click();
-    await expect(page).toHaveURL(/\/buyume-modeli\/$/);
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Pazarlama' }).click();
+    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'İş ortaklığı', 'Affilate']);
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Finans' }).click();
+    await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı']);
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Yardımcı' }).click();
+    const yardimci = page.getByRole('menu', { name: 'Yardımcı' });
+    await expect(yardimci.getByRole('menuitem')).toHaveText(['Varsayımlar ve ayarlar', 'Notlar', 'Arşiv']);
+    await yardimci.getByRole('menuitem', { name: 'Varsayımlar ve ayarlar' }).click();
+    await expect(page).toHaveURL(/\/parametreler\/$/);
+    await page.getByRole('button', { name: 'Yönetim' }).click();
+    await page.getByRole('menu', { name: 'Yönetim' }).getByRole('menuitem', { name: 'Kararlar' }).click();
+    await expect(page).toHaveURL(/\/karar-bekleyenler\/$/);
   });
 
-  test('MLM ağı yalnız Pazarlama menüsünde etkin (İstihdam menüsü bölüm saymaz)', async ({ page }) => {
+  test('Temsilci ağı yalnız Pazarlama menüsünde etkin (İstihdam menüsü bölüm saymaz)', async ({ page }) => {
     await page.goto('buyume-modeli/');
     await icerik(page);
     await hydrated(page);
@@ -920,7 +933,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   // işaretli, Escape kapatır, odak düğmeye döner. 48em’den itibaren şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst
   // satırda, ortalı).
   for (const width of [320, 360, 375, 390]) {
-    test(`${width} px: gezinme çekmecede — şerit yok, 21 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
+    test(`${width} px: gezinme çekmecede — şerit yok, 22 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
       await icerik(page);
@@ -938,9 +951,9 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const cekmece = page.getByRole('dialog', { name: 'Menü' });
       await expect(cekmece).toBeVisible();
       const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
-      await expect(nav.getByRole('link')).toHaveCount(21);
+      await expect(nav.getByRole('link')).toHaveCount(22);
       await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
-      await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Giderler']);
+      await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Finans', 'Yönetim', 'Yardımcı']);
       await expect(nav.locator('.tree-no')).toHaveCount(7);
       const yukseklikler = await nav.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
       expect(Math.min(...yukseklikler)).toBeGreaterThanOrEqual(44);
@@ -1040,7 +1053,8 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await page.goto('');
     await icerik(page);
     await hydrated(page);
-    await page.getByRole('link', { name: 'Notlar', exact: true }).focus();
+    // Gezinmenin son öğesi “Yardımcı” menü düğmesi (CA-1, 2026-10-28; önce ayrık Notlar bağlantısıydı); sonraki odak tema anahtarı.
+    await page.getByRole('button', { name: 'Yardımcı' }).focus();
     await page.keyboard.press('Tab');
     const st = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement;
@@ -1096,8 +1110,9 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page.locator('.crumbs-row h1.crumbs-title')).toHaveCount(1);
       await expect(page.locator('.hero, .eyebrow, .display, .lead')).toHaveCount(0);
-      // Kırıntılı sayfada h1 son kırıntıdır (aria-current="page"); kırıntısız sayfada (ana sayfa, BCG, applet) tek başına.
-      const kirintili = !['', 'bcg/', 'applet/'].includes(path);
+      // Kırıntılı sayfada h1 son kırıntıdır (aria-current="page"); kırıntısız sayfada (ana sayfa, doğrudan erişilen BCG) tek başına.
+      // Applet İstihdam grubunda: kırıntı “İstihdam › Ücret ve performans applet’leri” (docs/contents.md F15, 2026-10-28).
+      const kirintili = !['', 'bcg/'].includes(path);
       await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveCount(kirintili ? 1 : 0);
       await expect(page.locator('.crumbs')).toHaveCount(kirintili ? 1 : 0);
       // Amaç: tek paragraf, en çok bir cümle (rol görevi veridir — src/data değişmez — muaf).
@@ -1246,9 +1261,9 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.getByRole('button', { name: 'Menü', exact: true }).click();
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
-    await expect(cekmece.getByRole('link')).toHaveCount(21);
+    await expect(cekmece.getByRole('link')).toHaveCount(22);
     const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(linkler.length).toBe(21);
+    expect(linkler.length).toBe(22);
     expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
@@ -1319,7 +1334,7 @@ test.describe('dokunmatik cihaz', () => {
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
     const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(21);
+    expect(ogeler.length).toBe(22);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
     expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });

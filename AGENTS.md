@@ -52,7 +52,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   - `/hedefler/` 90 gün hedefleri, ciro köprüsü, açığı kapatma, aylık ciro, kaynak × ay.
   - `/eylem-plani/` istoc.com genel planı: Gantt + tablo (İsmail Karaca ve her rolün tarihli adımları).
   - `/karar-yetkisi/`, `/karar-bekleyenler/`, `/buyume-modeli/` (MLM: piramit, huni, hedefler, uyum).
-  - `/arsiv/` tahtadan karara eşlemesi; ana gezinmede yok, alt bilgiden bağlanır (veri kaybı olmasın diye).
+  - `/arsiv/` tahtadan karara eşlemesi; Yardımcı menüsünde “Arşiv” (kullanıcı kararı 2026-10-28, docs/contents.md §5.2; CA-1)
+    ve alt bilgiden bağlanır, sunum sırasında yok (veri kaybı olmasın diye); başlık “Arşiv: tahtadan karara” (içerik kaydıyla aynı).
   - `/parametreler/` karar parametreleri (yukarıda) ve türetilen değerler.
   - `/giderler/` OPEX (kullanıcı kararı 2026-10-20). Sıra: önce yıl ayrımı olmayan bölümler (`planOfModel`: Sheets ızgarasının 15
     ayı, Ekim 2026 – Aralık 2027; rapor ayıyla kaymaz — `PLAN_ILK_AY`) — aylık plan (özet ve yığın grafik; ay ay
@@ -82,8 +83,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     kalemleri azaltınca durum satırında kapsam notu `.opex-veri-kapsam` “Süzülmüş toplam … (n kalem) · Genel toplam …
     (m kalem)” (dönem toplamı, iki kabukta; UX-12); boş sonuçta “Bu filtrelerle kalem yok.” ve Filtreleri temizle
     (UX-13). Açık kayıtlar kalıcı kimlikle saklanır (`kimlik`: id güvenli anahtar); kabuk değişince süzgeç, sıra, arama
-    ve açık kayıtlar korunur (UX-02). Sıralama ve sütun filtreleri/aramaları yalnız tablo başlığındadır (dar ekranda
-    yalnız durum korunur; bilinen sınır). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı; sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
+    ve açık kayıtlar korunur (UX-02). Sütun filtreleri/aramaları yalnız tablo başlığındadır; dar ekranda sıralama ölçütü
+    ve yönü ile etkin filtre listesi kayıt kabuğunun araçlarında (`.opex-kayit-arac`, GA-4b; durum iki kabukta ortak). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı; sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
     seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri (özet ve bordro grafikleri; kişi tablosu kalemlerde), netten brüte aylık bordro (kümülatif GV,
     asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
     Sheets → Parametreler’de); sayfa sonunda yalnız hesap damgası (zaman, motor sürümü, özet). Veri repoda yoktur: Google Sheets → Apps Script web
@@ -179,9 +180,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     Karar yetkisi arasında): Segika satış ortaklığı komisyon simülasyonu — üç ortak modeli aynı müşteri ve aynı satış
     koşulları üzerinden; saf motor `src/data/affilate.ts`, kurgu `src/data/affilateKurgu.ts`, saklama
     `src/lib/affilateStore.ts` (`segika-affilate-v1`), görünüm `src/views/AffilatePage.tsx`. Ayrıntı: “affilate.md” bölümü.
-  - `/nakit-akisi/` nakit akış tablosu (kullanıcı kararı 2026-10-27; “Giderler” açılır menüsünde — kullanıcı kararı
-    2026-10-27: üst gezinmede Giderler artık bir menüdür, `FINANCE_NAV`: Giderler (OPEX), Nakit akış tablosu; `COMMON_NAV`
-    yalnız Notlar —, sunum sırasında Giderler’den sonra, kırıntı “Finans › Nakit akış tablosu”, başlık kırıntıda). Klasik
+  - `/nakit-akisi/` nakit akış tablosu (kullanıcı kararı 2026-10-27; “Finans” açılır menüsünde “Nakit akışı” — 2026-10-27’de
+    açılan “Giderler” menüsü 2026-10-28 kararıyla (docs/contents.md §5.2, CA-1) Finans oldu, `FINANCE_NAV`: Gelir planı,
+    Giderler, Nakit akışı; `COMMON_NAV` kalktı, Notlar Yardımcı menüsünde —, sunum sırasında Giderler’den sonra, kırıntı
+    “Finans › Nakit akış tablosu”, başlık kırıntıda). Klasik
     düzen: nakit girişleri, nakit çıkışları, net nakit akışı, dönem başı ve dönem sonu nakit; Sheets ızgarasının 15 ayı
     (Ekim 2026 – Aralık 2027, `CASH_MONTHS`). İki kaynak: **çıkışlar** Google Sheets’ten (sayfa açılınca tek istek,
     `useOpexOnce` (`src/lib/useOpex.ts`) → `requestOpex`; Giderler’deki canlı yoklama yok) kategori bazında — kalemlerin
@@ -211,8 +213,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     ikincil göstergeler (en düşük nakit, toparlanma, dönem sonu nakit, 15 ay net) ve kaynak satırı (Sheets okunamadıysa
     “yalnız plan kalemleri … tablo eksiktir”: eksik veri tam plan gibi görünmez). Değer özet kutusu ve karşılaştırma
     tablosuyla aynıdır (`nakit.spec.ts → ana sonuç`); 320×480’de kaydırmadan görünür.
-  - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; Pazarlama menüsünde 90 gün hedeflerinden sonra, sunum
-    sırasında da). **UX-first yeniden kurulum (kullanıcı kararı 2026-10-27: “seçenekleri en başta seçeyim, kalan tüm veri
+  - `/gelir-plani/` gelir planı (kullanıcı kararı 2026-10-27; menüde Finans → Gelir planı — 2026-10-28 kararına kadar
+    Pazarlama menüsünde 90 gün hedeflerinden sonraydı —, sunum sırasında 90 gün hedeflerinden sonra). **UX-first yeniden kurulum (kullanıcı kararı 2026-10-27: “seçenekleri en başta seçeyim, kalan tüm veri
     tek seferde değişsin; hazır seçenek kümeleri; seçili senaryonun özeti kaydırırken üstte sabit; enterprise olgunluk”):**
     sayfanın başında **senaryo kurucu** (`src/components/SenaryoKurucu.tsx`: hazır senaryolar — kötümser · medyan ·
     iyimser ve dört örnek bileşim saha ağırlıklı / dijital ağırlıklı / tutumlu / yatırımlı büyüme (`presetsOf`,
@@ -376,8 +378,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   yok:** markanın altında “Menü” düğmesi (`.cekmece-tetik`, `aria-haspopup="dialog"`), tam gezinme sağdan açılan
   çekmecede (`CekmeceGezinme`, Mantine `Drawer`: `size="min(20rem, 100%)"`, odak tuzağı, Escape, kapanınca odak
   düğmeye döner, sayfa kaydırması kilitli; süre `--motion-duration-base`, eğri hareket tokenı; stil `.cekmece*`,
-  BaseLayout `Overlay/ModalBase/CloseButton/Drawer.layer.css`). İçerik üç grup (İstihdam 1–7 + takvim + Applet, Pazarlama,
-  Giderler) ve Notlar = 20 bağlantı; etkin sayfa `aria-current`, bölümü `data-section`. Kabuk `useMediaQuery('(min-width:
+  BaseLayout `Overlay/ModalBase/CloseButton/Drawer.layer.css`). İçerik beş grup (İstihdam 1–7 + takvim + Applet, Pazarlama,
+  Finans, Yönetim, Yardımcı; `NAV_GROUPS`, CA-1 2026-10-28) = 22 bağlantı; etkin sayfa `aria-current`, bölümü `data-section`. Kabuk `useMediaQuery('(min-width:
   48em)')` ile seçilir; şerit ve çekmece aynı anda mount edilmez. Testler `tests/ui.spec.ts` (320–390 px çekmece,
   768 px şerit, dokunmatik 48 px, 667×375 alçak ekran), `tests/giderler.spec.ts` (canlı durum Menü düğmesinin altında). Tema düğmesi: görünür yazı yok (adı “Koyu tema”), büyük anahtar; simge izin boş tarafında —
   açık temada beyaz izde ay, koyu temada turuncu izde güneş. Plan tarihi başlıkta yok. **Sayfa başlığı tek kalıp (kullanıcı kararı 2026-10-27, ux.md §3/§5.4, M03; paket P6.1):**
@@ -387,17 +389,20 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   turuncu üst etiket ve `AppFrame titleInCrumbs` kalktı). Altında **bir cümlelik amaç** (`purpose`, `.page-purpose`) ve
   **dönem/kaynak satırı** (`meta`, `.page-meta`: Dönem, İlk satış, Paket, Kaynak, Kayıt…); ≥ 48em’de sığarsa amaç ve dönem
   satırı yan yana. Rol sayfasında simge + ad + durum hapı aynı kırıntı öğesinde, görev (`role.mission`, veri) amaç
-  satırında, kişi/başlangıç/bağlı/ücret/aranan dönem satırında. SEQUENCE dışı sayfalarda (BCG, applet, e-posta, arşiv,
-  404) ve ana sayfada kırıntı yolu yok, h1 satırda tek başına. Giderler’de amaç satırı yok (ilk ekran kararı 2026-10-21).
+  satırında, kişi/başlangıç/bağlı/ücret/aranan dönem satırında. Kırıntı yolu içerik kaydından (`kirinti()`, docs/contents.md
+  F15; CA-1 2026-10-28): grup › (ebeveyn sayfa) › başlık, sunum sırasından bağımsız; tek parçalı yolda (doğrudan erişim:
+  BCG, e-posta), 404’te ve ana sayfada kırıntı yolu yok, h1 satırda tek başına. Giderler’de amaç satırı yok (ilk ekran kararı 2026-10-21).
   Kırıntı satırı `.wrap` içinde doğrudan durur (yapışkan kalması için ayrı kapsayıcı yok); iki kutu `data-page-header`
   taşır ve testler ikisini birlikte ölçer. Kullanıcı kararı 2026-10-21: kırıntılar %10–20 büyük (`--text-crumb`: 1rem,
   Giderler 1.0625rem), başlık %10–20 küçük (`--text-crumb-title`, en çok 1.7rem). **Bölüm başlığı** (ux.md §3, P6.1):
   tek ana başlık + açıklama; üst çizgi hairline (`--rule`; kalın mürekkep çizgisi yok), numara ikincil renkte
   (`--text-secondary`) ve yalnız sırası anlamlı bölümlerde (`Section index` isteğe bağlı; Parametreler grupları ve nakit
   akışı bölümleri numarasız); ≥ 64em’de tek satır: [numara ·] başlık · açıklama (dar ekranda açıklama başlığın altında).
-  Gezinme tek satır: “İstihdam” (organizasyon,
-  rol sayfaları, istihdam takvimi) ve “Pazarlama” (90 gün hedefleri, eylem planı, MLM ağı, karar yetkisi, karar
-  bekleyenler, parametreler; `MARKETING_NAV`) ve Giderler (OPEX, nakit akış tablosu; `FINANCE_NAV`, kullanıcı kararı 2026-10-27) açılır menüleri, Notlar. Menüler tek bileşen (`NavMenu`,
+  Gezinme tek satır, beş açılır menü (kullanıcı
+  kararı 2026-10-28, docs/contents.md §5.2; `NAV_GROUPS`, CA-1): “İstihdam” (organizasyon, 1–7 rol sayfaları, istihdam
+  takvimi, Applet), “Pazarlama” (Temsilci ağı, İş ortaklığı, Affilate), “Finans” (Gelir planı, Giderler, Nakit akışı),
+  “Yönetim” (Hedefler, Eylem planı, Kararlar, Karar yetkisi), “Yardımcı” (Varsayımlar ve ayarlar, Notlar, Arşiv); etiket
+  içerik kaydının `menu` alanıdır, grup adı `GRUP_ADI` (kırıntının ilk parçasıyla aynı sözcük). Menüler tek bileşen (`NavMenu`,
   `NAV_MENUS`; Mantine Menu, markalı panel, oklar/Escape, odak alt çizgiyle, işaretçi modunda odak zemini yok; alçak
   ekranda panel kendi içinde kayar). Sayfa başlıkları sıkışık: her sayfa için önceki
   yüksekliğe göre rol ≥ %75, diğerleri ≥ %50 az (`tests/ui.spec.ts → ONCEKI`, 1280 px; 2026-10-27’den beri kırıntı
@@ -679,7 +684,8 @@ yalnız ad ve öncelikli sonuç bildirilir (gizli `role="status"`; F23). ≥ 48e
 **GA-5** (F19/F24/F21/F05/F12/F23/F08 parçaları; kullanıcı kararı 2026-10-28): **Gezinti sözlüğü (F19):** `tree.ts`
 `Stop.tam` — menü kısa adı ile sayfa başlığı farklıysa tam ad orada (rol sayfaları: “Dijital pazarlama uzmanı” …,
 büyüme modeli, `APPLET_NAV` “Ücret ve performans applet’leri”); kural: h1 ∈ {kısa ad, tam ad, kırıntı sonu}; her durak
-testle doğrulanır (V18). Numara sözlüğü değişmedi (rol numarası = organizasyon sırası; bölüm numarası = sayfa sırası).
+testle doğrulanır (V18; CA-1’den sonra kırıntı sonu = içerik kaydının `baslik`’i ve beş menünün her öğesi de aynı
+testte: menü etiketi ya da kayıt başlığı). Numara sözlüğü değişmedi (rol numarası = organizasyon sırası; bölüm numarası = sayfa sırası).
 **Bölüm dizini (F24):** `BolumDizini` (ui.tsx) → `nav#bolum-dizini` (“Bölümler”, kalıcı `#id` bağlantıları, kısa adlar) ana
 sonucun altında, kurucunun üstünde (sayfa başında dokuz bağlantı 320×480 ilk ekranda ana sonucu aşağı itiyordu);
 `Section.dizin` → bölüm sonunda “Bölüm dizini” dönüşü; gelir planında dokuz bölüm; `.section { scroll-margin-top }`
@@ -831,6 +837,41 @@ kullanım CA-1’de (F15). Testler: `tests/icerik.spec.ts` (yalnız Chromium): s
 tekil kimlik/yol, ilişkiler çözülür, planlanan sayfa dosyasız, Applet/BCG/arşiv/e-posta konumları, F10 kapsam cümleleri,
 F15 kırıntı; `tests/gorsel-algi.spec.ts` F18 alt bilgi beklentileri yeni cümlelere göre.
 
+**CA-1 — Navigasyon yeniden gruplama ve kırıntı ayrımı (§5.2, §5.3, F01, F15; IA-07/08/09/10/11/46; 2026-10-28):** Üst
+gezinme göreve göre beş grup (`src/data/tree.ts NAV_GROUPS`; adresler değişmedi): İstihdam (organizasyon, 1–7 rol,
+takvim, Applet — 2026-10-20/21 kararları korunur), Pazarlama (Temsilci ağı, İş ortaklığı, Affilate), Finans (Gelir planı,
+Giderler, Nakit akışı), Yönetim (Hedefler, Eylem planı, Kararlar, Karar yetkisi), Yardımcı (Varsayımlar ve ayarlar, Notlar,
+Arşiv). Menü etiketi ve yol içerik kaydından (`menu`, `path`; `icerikKaydi`), grup adı `GRUP_ADI` (“Yardımcı”, §5.2’deki
+“Yardımcı erişim”in kısa adı; kırıntıyla aynı sözcük). Eski “Pazarlama” (dokuz öğe) ve “Giderler” menüleri ile ayrık
+Notlar bağlantısı (`COMMON_NAV`, `NavItem`) kalktı; çekmecede beş grup, 22 bağlantı. Geniş ekranda (≥ 80em; içerik
+genişliği 74rem) beş menü, Giderler canlı durum şeridiyle tek satırda ve gezinme ortalı kalsın (2026-10-21) diye menü
+öğesi dolgusu/simge aralığı, bant sütun aralığı ve işaretçili ekranda şerit simge düğmelerinin genişliği (36 px;
+yükseklik 44, dokunmatikte 44) bir kademe sıkı (`global.css` ≥ 80em blokları; tablet 48–80em değişmedi). Kırıntı (`PageHeader`) artık
+`kirinti()` ile içerik kaydından türer: grup › (ebeveyn) › başlık — roller “İstihdam › Organizasyon şeması › …”, Applet
+“İstihdam › …”, Notlar/Arşiv “Yardımcı › …”; Giderler’in 2026-10-21 kırıntısı kayıttaki `kirintiYolu` ile korunur
+(“Finans › OpEx › Operasyonel Giderler”); tek parçalı yol (BCG, e-posta), 404 ve ana sayfa kırıntısız. `SEQUENCE` yalnız
+sunum sırasıdır (`crumb` alanı kaldırıldı; `Stop.tam` F19 için kaldı, Giderler’e “Operasyonel Giderler” eklendi). Arşiv
+Yardımcı grubuna geçti (ikincil erişim sürüyor; sunum sırasında yok), sayfa başlığı kayıtla aynı: “Arşiv: tahtadan
+karara”; büyüme modeli kaydının başlığı sayfa başlığıyla eşitlendi (“… (MLM)”). F19 sözlüğü genişledi: V18 sunum
+duraklarına ek olarak beş menünün her öğesini açar; h1 ∈ {kısa ad, tam ad, kayıt başlığı}. **Bilinen gerilim (§5.3.8 ↔
+F19):** menü kısa adları (“Hedefler”, “Kararlar”, “Temsilci ağı”, “Varsayımlar ve ayarlar”) sayfa başlıklarından farklı
+(“90 gün hedefleri”, “Karar bekleyenler”, “Çok katmanlı pazarlama ağı (MLM)”, “Parametreler”); rol menüsündeki “Asistan →
+Yönetici asistanı” gibi kabul edildi, başlıkların menüyle aynı dil düzeyine getirilmesi CA-6/CA-7’de kullanıcı kararıyla.
+Testler: `tests/icerik.spec.ts` IA-04 (grup adı = `GRUP_ADI`, menü etiketi = kayıt, sırada `crumb` yok), IA-10 (arşiv
+Yardımcı), F15 (applet, notlar, arşiv, e-posta kırıntıları); `tests/ui.spec.ts` (beş menü ve kapsamları, 22 bağlantı,
+beş simge/ayırıcı, Applet kırıntılı); `tests/gelir.spec.ts`, `tests/nakit.spec.ts` (Finans menüsü); `tests/gorsel-algi.spec.ts`
+V18 genişletildi. Hesap ve model değişmedi.
+
+### archetype.md: değişime dayanıklı mimari yönergesi (kullanıcı kararı 2026-10-28: contents.md programından sonra)
+
+Kanonik belge `docs/archetype.md` (Codex raporu, `15011e9` anının denetimi) **depoda değil**: §11.4 üçüncü kişi adları
+içerir (gizlilik kuralı, “Gizlilik ve yayın”); kullanıcı klasöründe durur, adlar rol adıyla değiştirilmeden eklenmez
+(kullanıcı kararı bekliyor). Öneri: özellik modüllerine ayrılmış
+tek uygulama + saf hesap çekirdeği + React’e uygun ViewModel katmanı + sürümlü veri sözleşmeleri + yayımdan önce durduran
+kalite kapıları; Astro/React/Mantine/ECharts korunur, toplu yeniden yazma yok (§12 aşamalı dönüşüm 0–7; önerilen pilot:
+gelir → nakit özel senaryo bağı, F04/IA-23 ile örtüşür). Durum: **paket açılmadı**; uygulama CA-8 kapanışından sonra.
+Belgedeki “önerilen” ad, dizin ve komutlar mevcut özellik gibi sunulmaz (belge yalnız yönergedir; §Teslim notu).
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
@@ -911,8 +952,8 @@ Pages yayınından önce çalıştırır.
   dilimler, destek) varsayımdır ve Parametreler sayfasında (teşvikler `H:P`) güncellenir. Varsayılan modelde 2027 asgari ücreti
   şirket zam oranını izler; dilimler yeniden değerleme oranı yerine yıllık TÜFE ile artar (parametreyle değişir).
 - Giderler sayfasında dokunmatik/kaba işaretçi, yatay telefon ve kısa yükseklik profilleri ayrıca test edilmedi.
-- Giderler kalemleri kayıt kabuğunda (< 48em) sıralama ve sütun filtreleri/aramaları için kontrol yok (durum korunur;
-  tepsi filtreleri ve “Kalem ara” var). Dar ekran sıralama seçici sonraki paket.
+- Giderler kalemleri kayıt kabuğunda (< 48em) sütun aramaları ve yeni sütun filtresi ekleme için kontrol yok (durum
+  korunur; tepsi filtreleri, “Kalem ara”, sıralama ölçütü/yönü ve etkin filtre kaldırma var — GA-4b, F09).
 
 - Playwright WebKit ok tuşlarıyla varsayılan kaydırmayı uygulamaz; tablo ve Gantt klavye kaydırması WebKit’te `not_run`.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.

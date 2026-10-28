@@ -73,13 +73,13 @@ test.describe('nakit akış tablosu', () => {
     await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
 
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
-    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, /^Giderler/, 'Notlar']);
-    const tetik = page.getByRole('button', { name: 'Giderler' });
+    await expect(nav.locator('.mainnav-link')).toHaveText([/^İstihdam/, /^Pazarlama/, /^Finans/, /^Yönetim/, /^Yardımcı/]);
+    const tetik = page.getByRole('button', { name: 'Finans' });
     await expect(tetik).toHaveAttribute('data-section', 'true');
     await tetik.click();
-    const menu = page.getByRole('menu', { name: 'Giderler' });
-    await expect(menu.getByRole('menuitem')).toHaveText(['Giderler (OPEX)', 'Nakit akış tablosu']);
-    await expect(menu.getByRole('menuitem', { name: 'Nakit akış tablosu' })).toHaveAttribute('aria-current', 'page');
+    const menu = page.getByRole('menu', { name: 'Finans' });
+    await expect(menu.getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı']);
+    await expect(menu.getByRole('menuitem', { name: 'Nakit akışı' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
 
     const tablo = page.locator('.table-block:has(#nakit-tablo) .data-table');

@@ -574,6 +574,40 @@ html[data-js] .theme-toggle[hidden] {
   display: none;
 }
 
+/*
+ * Beş grup menüsü (CA-1, 2026-10-28) 80em’den geniş ekranda bant araçlarıyla (Giderler canlı durumu) birlikte tek satıra
+ * sığsın ve gezinme ortalı kalsın (kullanıcı kararı 2026-10-21; içerik genişliği 74rem ile sınırlı): öğe dolgusu ve
+ * simge aralığı bir kademe sıkı, öğeler arası boşluk yalnız ayırıcının kenar boşluğundan, bant araçları aralığı bir
+ * kademe dar. Hedef yüksekliği (min-height) ve ayırıcılar değişmez. Bu blok gezinme kurallarından sonra durmalıdır
+ * (aynı özgüllük; kaynak sırası kazanır).
+ */
+@media (min-width: 80em) {
+  .mainnav-list {
+    gap: 0;
+  }
+
+  .mainnav-list > li + li::before {
+    margin-inline: var(--space-1);
+  }
+
+  .mainnav-link {
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+  }
+
+  .topbar .wrap {
+    column-gap: var(--space-2);
+  }
+
+  .topbar-tools {
+    gap: var(--space-2);
+  }
+
+  .header-tools .opex-live-status {
+    margin-inline-end: 0;
+  }
+}
+
 .app-main {
   flex: 1;
   min-width: 0;
@@ -1125,8 +1159,7 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
   padding: var(--space-2) var(--page-gutter) var(--space-6);
 }
 
-.cekmece-grup + .cekmece-grup,
-.cekmece-grup + .cekmece-liste-ortak {
+.cekmece-grup + .cekmece-grup {
   margin-top: var(--space-4);
 }
 
@@ -4163,6 +4196,25 @@ p.opex-live-stale {
 
 .opex-live-label {
   font-weight: var(--weight-semibold);
+}
+
+/*
+ * Üst banttaki canlı durum şeridi işaretçili geniş ekranda (≥ 80em) sıkı: simge düğmeleri 44 px yüksek kalır, genişliği
+ * 36 px; aralıklar bir kademe dar. Beş grup menüsüyle (CA-1) gezinme ortalı tek satırda kalsın diye (kullanıcı kararı
+ * 2026-10-21). Dokunmatikte (hover: none) 44 px genişlik sürer.
+ */
+@media (min-width: 80em) and (hover: hover) {
+  .header-tools .opex-live {
+    column-gap: 0;
+  }
+
+  .header-tools .opex-live-status {
+    column-gap: var(--space-1);
+  }
+
+  .header-tools .opex-icon-btn {
+    inline-size: 2.25rem;
+  }
 }
 
 .opex-live-meta,

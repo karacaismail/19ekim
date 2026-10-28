@@ -663,7 +663,7 @@ function GrowthContent() {
 export function ArchivePage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
-      <PageHeader title="Tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığı; toplantı için gerekli değil, kayıt amaçlı." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
+      <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığı; toplantı için gerekli değil, kayıt amaçlı." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
       <DataTable<BoardRow>
         id="tahta"
         title="Tahta notu → karar → sayfa"

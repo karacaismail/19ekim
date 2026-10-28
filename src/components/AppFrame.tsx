@@ -1,12 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { Drawer, MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconChevronDown, IconMenu2, IconMoon, IconNotes, IconReceipt2, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
+import { IconChecklist, IconChevronDown, IconMenu2, IconMoon, IconReceipt2, IconSettings, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
 import { altBilgiKapsami } from '../data/icerik';
-import { APPLET_NAV, COMMON_NAV, FINANCE_NAV, HIRING_NAV, MARKETING_NAV, SEQUENCE, TREE_NAV } from '../data/tree';
+import { NAV_GROUPS, SEQUENCE, type NavLink } from '../data/tree';
 import { FrameContext } from '../lib/frame';
 import { cssVariablesResolver, theme } from '../lib/theme';
 import { useGiris } from '../lib/giris';
@@ -115,52 +115,6 @@ function ParamsNotice() {
   );
 }
 
-/** Üst gezinme öğelerinin simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
-const COMMON_ICONS: Record<string, Icon> = { '/notlar/': IconNotes };
-
-function NavItem({
-  label,
-  path,
-  current,
-  also = [],
-  role,
-  no,
-}: {
-  label: string;
-  path: string;
-  current: string;
-  also?: string[];
-  role?: string;
-  no?: number;
-}) {
-  const target = normalizePath(href(path));
-  const exact = target === current;
-  const inSection = !exact && also.some((p) => normalizePath(href(p)) === current);
-  const Simge = COMMON_ICONS[path];
-  return (
-    <a
-      className="mainnav-link"
-      href={href(path)}
-      data-role={role}
-      aria-current={exact ? 'page' : undefined}
-      data-section={inSection ? 'true' : undefined}
-    >
-      {no ? <span className="tree-no">{no}</span> : null}
-      {Simge ? <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" /> : null}
-      {label}
-    </a>
-  );
-}
-
-// Hareket süresi kancası `src/lib/motion.ts`’te; eski içe aktarımlar için buradan da verilir.
-export { useMotionMs };
-
-type MenuLink = { label: string; path: string; role?: string; no?: number; also?: string[] };
-
-/**
- * Alt bilgi kaynak/statü cümlesi sayfa türüne göre (gorsel_algi.md F18 / C006): karar sayfaları kesinleşen karar, gelir ve
- * nakit sayfaları koşullu tahmin, applet örnek veri, Giderler Sheets verisi. Her ekrana aynı iddia yüklenmez.
- */
 /**
  * Alt bilgi kapsam cümlesi (docs/contents.md F10, kullanıcı kararı 2026-10-28): sayfanın içerik envanteri kaydından
  * (`src/data/icerik.ts`) okunur — öneri, eğitim, örnek ve kişisel taslak “kesinleşen karar” varsayılanıyla sunulmaz;
@@ -169,26 +123,23 @@ type MenuLink = { label: string; path: string; role?: string; no?: number; also?
 const altBilgiNotu = (current: string) => altBilgiKapsami(current);
 
 /** Bağlantının etkin sayfaya göre durumu: tam eşleşme (aria-current) ya da bölümü (data-section). */
-function durumOf(item: MenuLink, current: string) {
+function durumOf(item: NavLink, current: string) {
   const target = normalizePath(href(item.path));
   const exact = target === current;
   const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
   return { ...item, exact, inSection };
 }
 
-/** Başlıktaki açılır menüler (kullanıcı kararı 2026-10-20): İstihdam (organizasyon, roller, takvim) ve Pazarlama. */
-const NAV_MENUS: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon }[] = [
-  { label: 'İstihdam', items: [...TREE_NAV, HIRING_NAV, APPLET_NAV], dividerBefore: HIRING_NAV.path, icon: IconUsersGroup },
-  { label: 'Pazarlama', items: MARKETING_NAV, icon: IconSpeakerphone },
-  // Kullanıcı kararı 2026-10-27: Giderler bir menü; OPEX ve nakit akış tablosu.
-  { label: 'Giderler', items: FINANCE_NAV, icon: IconReceipt2 },
-];
+/** Grup simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
+const GRUP_SIMGESI: Record<string, Icon> = { istihdam: IconUsersGroup, pazarlama: IconSpeakerphone, finans: IconReceipt2, yonetim: IconChecklist, yardimci: IconSettings };
+/** Üst gezinme (kullanıcı kararı 2026-10-28, docs/contents.md §5.2): beş grup menüsü; kapsam `src/data/tree.ts NAV_GROUPS`. */
+const NAV_MENUS: { label: string; items: NavLink[]; dividerBefore?: string; icon: Icon }[] = NAV_GROUPS.map((g) => ({ label: g.label, items: g.items, dividerBefore: g.dividerBefore, icon: GRUP_SIMGESI[g.id] ?? IconChecklist }));
 
 /**
  * Açılır gezinme menüsü. Mantine Menu (erişilebilir menü: oklar, Home/End, Escape, odak tetikleyiciye döner); panel ve
  * tetikleyici markalı. Etkin sayfa menüdeyse tetikleyici seçili görünür, öğe aria-current taşır.
  */
-function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: { label: string; items: MenuLink[]; dividerBefore?: string; icon: Icon; current: string }) {
+function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: { label: string; items: NavLink[]; dividerBefore?: string; icon: Icon; current: string }) {
   const duration = useMotionMs('--motion-duration-fast');
   const items = links.map((item) => durumOf(item, current));
   const active = items.some((i) => i.exact || i.inSection);
@@ -237,7 +188,7 @@ const GENIS_GEZINME = '(min-width: 48em)';
 /**
  * Dar ekran gezinmesi (kullanıcı kararı 2026-10-27, docs/ux.md §3, M01/M02): yatay kayan şerit yerine markanın altında
  * “Menü” düğmesi ve sağdan açılan çekmece (Mantine Drawer: odak tuzağı, Escape, kapanınca odak düğmeye döner, sayfa
- * kaydırması kilitli). İçerik tam gezinmedir: üç grup (İstihdam 1–7 + takvim, Pazarlama, Giderler) ve Notlar; etkin sayfa
+ * kaydırması kilitli). İçerik tam gezinmedir: beş grup (İstihdam 1–7 + takvim + Applet, Pazarlama, Finans, Yönetim, Yardımcı); etkin sayfa
  * aria-current, bölümü data-section. Süre ve eğri hareket tokenlarından.
  */
 function CekmeceGezinme({ current }: { current: string }) {
@@ -288,20 +239,6 @@ function CekmeceGezinme({ current }: { current: string }) {
               </div>
             );
           })}
-          <ul className="cekmece-liste cekmece-liste-ortak">
-            {COMMON_NAV.map((link) => {
-              const item = durumOf(link, current);
-              const Simge = COMMON_ICONS[item.path];
-              return (
-                <li key={item.path}>
-                  <a className="cekmece-link" href={href(item.path)} aria-current={item.exact ? 'page' : undefined}>
-                    {Simge ? <Simge className="mainnav-icon" size={18} stroke={1.75} aria-hidden="true" /> : <span className="navmenu-bullet" aria-hidden="true" />}
-                    {item.label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
         </nav>
       </Drawer>
     </>
@@ -420,11 +357,6 @@ export function AppFrame({
                   {NAV_MENUS.map((menu) => (
                     <li key={menu.label} className="mainnav-menu-li">
                       <NavMenu {...menu} current={current} />
-                    </li>
-                  ))}
-                  {COMMON_NAV.map((item) => (
-                    <li key={item.path}>
-                      <NavItem {...item} current={current} />
                     </li>
                   ))}
                 </ul>

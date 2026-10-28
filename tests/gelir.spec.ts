@@ -62,9 +62,9 @@ test.describe('gelir planı', () => {
     await expect(page.locator('.table-block:has(#basabas-aylar-tablo) tbody tr')).toHaveCount(15);
     // “Ufukta yok” yazılmaz.
     await expect(page.locator('main')).not.toContainText('Ufukta yok');
-    // Pazarlama menüsü ve sunum sırası
-    await page.getByRole('button', { name: 'Pazarlama' }).click();
-    const menu = page.getByRole('menu', { name: 'Pazarlama' });
+    // Finans menüsü (docs/contents.md §5.2, 2026-10-28) ve sunum sırası
+    await page.getByRole('button', { name: 'Finans' }).click();
+    const menu = page.getByRole('menu', { name: 'Finans' });
     await expect(menu.getByRole('menuitem', { name: 'Gelir planı' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await expect(page.locator('.pager-link[rel="prev"] .pager-label')).toHaveText('90 gün hedefleri');

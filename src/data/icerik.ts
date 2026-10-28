@@ -46,6 +46,8 @@ export interface IcerikKaydi {
   menu?: string;
   /** Henüz içerik taşınmamış, planlanan sayfa (dosyası yok). */
   planlandi?: boolean;
+  /** Ara kırıntılar (grup/ebeveyn yerine; son kırıntı başlıktır) — belgeli kullanıcı kararı (Giderler: Finans › OpEx). */
+  kirintiYolu?: string[];
 }
 
 export const SINIF_ADI: Record<IcerikSinifi, string> = {
@@ -61,7 +63,8 @@ export const SINIF_ADI: Record<IcerikSinifi, string> = {
 export const KANIT_ADI: Record<KanitNiteligi, string> = { olculmus: 'Ölçülmüş', kaynakli: 'Kaynaklı', hesaplanmis: 'Hesaplanmış', varsayilmis: 'Varsayılmış', ornek: 'Örnek', bilinmiyor: 'Bilinmiyor' };
 export const DURUM_ADI: Record<YasamDongusu, string> = { taslak: 'Taslak', inceleniyor: 'İnceleniyor', onaylandi: 'Onaylandı', yururlukte: 'Yürürlükte', arsiv: 'Arşiv' };
 export const DUZENLEME_ADI: Record<DuzenlemeKapsami, string> = { yok: 'Düzenlenmez', 'yayin-varsayilani': 'Yayın varsayılanı', 'bu-tarayici': 'Bu tarayıcı', 'bu-senaryo': 'Bu senaryo', 'dis-kaynak': 'Dış kaynak' };
-export const GRUP_ADI: Record<IcerikGrubu, string> = { pazarlama: 'Pazarlama', istihdam: 'İstihdam', finans: 'Finans', yonetim: 'Yönetim', yardimci: 'Yardımcı erişim', dogrudan: 'Doğrudan erişim', sistem: 'Sistem' };
+/** Grup adları: menü düğmesi, çekmece başlığı ve kırıntının ilk parçası aynı sözcük (F19 sözlüğü; “Yardımcı” §5.2’deki “Yardımcı erişim”in kısa adı). */
+export const GRUP_ADI: Record<IcerikGrubu, string> = { pazarlama: 'Pazarlama', istihdam: 'İstihdam', finans: 'Finans', yonetim: 'Yönetim', yardimci: 'Yardımcı', dogrudan: 'Doğrudan erişim', sistem: 'Sistem' };
 
 const T = '2026-10-28';
 const BELIRLENMEDI = 'belirlenmedi';
@@ -213,7 +216,7 @@ export const ICERIK: IcerikKaydi[] = [
     id: 'buyume-modeli',
     path: '/buyume-modeli/',
     sinif: ['strateji', 'finans-model'],
-    baslik: 'Çok katmanlı pazarlama ağı',
+    baslik: 'Çok katmanlı pazarlama ağı (MLM)',
     kullaniciSorusu: 'iStoc temsilci ağı nasıl büyür; katmanlar, huni ve hedefler ne?',
     grup: 'pazarlama',
     marka: ['istoc'],
@@ -327,7 +330,8 @@ export const ICERIK: IcerikKaydi[] = [
     id: 'giderler',
     path: '/giderler/',
     sinif: ['kaynak-veri', 'finans-model'],
-    baslik: 'Giderler (OPEX)',
+    baslik: 'Operasyonel Giderler',
+    kirintiYolu: ['Finans', 'OpEx'],
     kullaniciSorusu: 'Hangi gider kalemi, hangi dönemde, hangi kaynaktan planlandı; personel maliyeti ne?',
     grup: 'finans',
     marka: ['turksab', 'istoc'],
@@ -404,7 +408,7 @@ export const ICERIK: IcerikKaydi[] = [
     sinif: ['kaynak-veri'],
     baslik: 'Arşiv: tahtadan karara',
     kullaniciSorusu: '19 Ekim tahtasındaki hangi not hangi karara dönüştü?',
-    grup: 'dogrudan',
+    grup: 'yardimci',
     marka: ['istoc', 'segika'],
     sahip: BELIRLENMEDI,
     durum: 'arsiv',
@@ -415,6 +419,7 @@ export const ICERIK: IcerikKaydi[] = [
     duzenleme: 'yok',
     kapsam: 'Tarihsel kaynak ve karar izidir; güncel politika değildir. Her kaydın güncel karşılığı ilgili sayfadadır.',
     iliskili: ['karar-bekleyenler', 'karar-yetkisi'],
+    menu: 'Arşiv',
   },
   {
     id: 'email',
@@ -616,10 +621,18 @@ export function altBilgiKapsami(path: string): string {
   return icerikOf(path)?.kapsam ?? `Tutarlar 19 Ekim tahta kararlarından türetilen planlardır; kesinleşmiş sonuç değildir. ${PARAM_NOTU}`;
 }
 
-/** Ana ebeveyn kırıntısı (F15): sunum sırasından bağımsız; grup adı → (ebeveyn) → sayfa. */
+/** Kimliğe göre kayıt (menü ve kırıntı tüketicileri için). */
+export function icerikKaydi(id: string): IcerikKaydi {
+  const k = ICERIK.find((x) => x.id === id);
+  if (!k) throw new Error(`İçerik kaydı yok: ${id}`);
+  return k;
+}
+
+/** Ana ebeveyn kırıntısı (F15): sunum sırasından bağımsız; grup adı → (ebeveyn) → sayfa; ana sayfada kırıntı yok. */
 export function kirinti(path: string): string[] {
   const k = icerikOf(path);
-  if (!k) return [];
+  if (!k || k.path === '/') return [];
+  if (k.kirintiYolu) return [...k.kirintiYolu, k.baslik];
   const parca: string[] = [];
   if (k.grup !== 'sistem' && k.grup !== 'dogrudan') parca.push(GRUP_ADI[k.grup]);
   if (k.ebeveyn) {

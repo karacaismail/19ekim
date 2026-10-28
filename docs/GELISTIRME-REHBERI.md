@@ -15,14 +15,14 @@ bağımsız modül vardır:
 
 - **Giderler (OPEX)**: veri repoda değil, Google Sheets’te. Apps Script web uygulaması sayfaya canlı veri verir; aynı
   hesap motoru (`apps-script/src/Motor.js`) hem Sheets’teki panoyu hem sayfayı besler.
-- **Applet’ler** (`/applet/`): ücret ve performans modelleri, menüde yok, yalnız adresle açılır.
-- **Gelir planı** (`/gelir-plani/`, Pazarlama menüsünde): sayfanın başında senaryo kurucu (hazır senaryolar + ayrıntılı
+- **Applet’ler** (`/applet/`): ücret ve performans modelleri; İstihdam menüsünde “Applet” (kullanıcı kararı 2026-10-27).
+- **Gelir planı** (`/gelir-plani/`, Finans menüsünde): sayfanın başında senaryo kurucu (hazır senaryolar + ayrıntılı
   seçenekler; tek durum, adres çubuğunda paylaşılabilir) ve kaydırırken üstte kalan yapışkan özet; kadro kapasitesinden
   hedef zinciri, kadronun görev/gider/gelir katkısı, dijital pazarlama stratejisi (gider → gelir), aylık ve kümülatif
   gelir, hazır senaryolar üst üste, başabaş (öngörülü). Takvim 19 Ekim 2026 → Aralık 2027, ilk satış 6 Kasım. Veri
   `src/data/revenue.ts`, `src/data/staffing.ts`, `src/data/digitalStrategy.ts`, `src/data/breakeven.ts`; durum
   `src/lib/scenarioOptions.ts`; temel senaryo `src/lib/scenario.ts` ile nakit akış tablosu ve istihdam takvimiyle ortak.
-- **Nakit akış tablosu** (`/nakit-akisi/`, Giderler menüsünde): çıkışlar Sheets’ten canlı, girişler gelir planının
+- **Nakit akış tablosu** (`/nakit-akisi/`, Finans menüsünde “Nakit akışı”): çıkışlar Sheets’ten canlı, girişler gelir planının
   seçili senaryosundan; basit/ayrıntılı anahtar, üç senaryo karşılaştırması. Veri `src/data/cashflow.ts`.
 - **İş ortaklığı programı** (`/partnership/`): Segika ve iStoc için iki sekmeli 90 günlük program; sekiz bölüm, grafikler,
   geçitler ve haftalık takvim. Veri `src/data/partnership.ts`; tarihler program başlangıcından kayar.
@@ -111,6 +111,9 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   ECharts verisiyle 320 px listesini karşılaştırır.
 - **Dar ekranda gezinme çekmecede.** 48em altında marka satırının altında “Menü” düğmesi; tam gezinme sağdan açılan
   çekmecede (Escape kapatır, odak düğmeye döner). Yatay kayan menü şeridi yalnız 48em’den geniş ekranda.
+- **Gezinme göreve göre beş grup; kırıntı içerik kaydından.** Üst menüler İstihdam, Pazarlama, Finans, Yönetim, Yardımcı
+  (`src/data/tree.ts NAV_GROUPS`; etiket ve yol `src/data/icerik.ts` kaydından, kullanıcı kararı 2026-10-28). Kırıntı ana
+  ebeveynden türer (`kirinti()`); sunum sırası (`SEQUENCE`) yalnız önceki/sonraki içindir (docs/contents.md F15).
 - **Sayfa başlığı tek kalıptır.** Her sayfanın tek h1’i kırıntı satırının son öğesidir (“19 Ekim › Gelir planı”); altında
   bir cümlelik amaç ve dönem/kaynak satırı (`PageHeader`). Ayrı “hero”, turuncu üst etiket ve uzun giriş metni yok; bölüm
   başlığında numara yalnız sıra anlamlıysa (araç sayfalarında yok), üst çizgi ince.
@@ -151,7 +154,7 @@ yeşil, ve arayüz değişikliğiyse gerçek tarayıcıda 320 px’te bakılmı�
 
 ## 6. Yapay zekâ ajanı (Codex, Claude, Cursor…) neye dikkat etmeli?
 
-1. **AGENTS.md’yi baştan sona oku, özetleme.** 300 satırlık dosya kullanıcı kararlarını tarihleriyle kaydeder
+1. **AGENTS.md’yi baştan sona oku, özetleme.** 900 satırı aşan dosya kullanıcı kararlarını tarihleriyle kaydeder
    (“kullanıcı kararı 2026-10-21”). Bir kararı geri almak için yeni bir kullanıcı kararı gerekir; “daha iyi olur”
    diye değiştirme.
 2. **Dosya başına değil, karar başına değiştir.** `OpexPage.tsx` 1.900 satır, `AppletPage.tsx` 1.600 satır. Bu
