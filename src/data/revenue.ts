@@ -343,7 +343,7 @@ const carpanSon = (carpan: number[]) => (carpan.length ? Math.max(1, carpan[carp
 
 function milestoneDefs(p: Params): { id: string; name: string; kind: MilestoneKind; threshold: number; role: RoleKey }[] {
   return [
-    { id: 'kurulum', name: 'Sistem kuruldu: ilk 10 aktif satıcı', kind: 'aktif', threshold: 10, role: 'yonetici' },
+    { id: 'kurulum', name: 'İlk 10 satıcının ödeme yapması', kind: 'aktif', threshold: 10, role: 'yonetici' },
     { id: 'aktif50', name: '50 aktif satıcı', kind: 'aktif', threshold: 50, role: 'saha-uzmani' },
     { id: 'aktif100', name: `${p.activeTarget} aktif satıcı`, kind: 'aktif', threshold: p.activeTarget, role: 'ekip-lideri' },
     { id: 'uye', name: `${p.memberTarget} üye satıcı`, kind: 'uye', threshold: p.memberTarget, role: 'pazarlamaci' },
@@ -414,9 +414,9 @@ export function makeRevenue(p: Params, prog: ProgramModel) {
   const ratio = p.activeTarget ? p.memberTarget / p.activeTarget : 5;
   const optRetention = Math.min(0.9, prog.planRetention + 0.1);
   const scenarios: Scenario[] = [
-    { id: 'kotumser', name: 'Kötümser', role: 'dijital-pazarlama', factor: p.pessimisticFactor / 100, retention: p.pessimisticRetention / 100, sahaGrowthEvery: 0, desc: `Kapasitenin %${p.pessimisticFactor}’i, aylık elde tutma %${p.pessimisticRetention}, kadro büyümesi yok` },
-    { id: 'medyan', name: 'Medyan', role: 'saha-uzmani', factor: 1, retention: prog.planRetention, sahaGrowthEvery: 6, desc: `Tam kapasite, aylık elde tutma %${Math.round(prog.planRetention * 100)}, her 6 ayda +1 saha (plan senaryosu)` },
-    { id: 'iyimser', name: 'İyimser', role: 'pazarlamaci', factor: 1.3, retention: optRetention, sahaGrowthEvery: 4, desc: `Kapasitenin %130’u, aylık elde tutma %${Math.round(optRetention * 100)}, her 4 ayda +1 saha` },
+    { id: 'kotumser', name: 'Kötümser', role: 'dijital-pazarlama', factor: p.pessimisticFactor / 100, retention: p.pessimisticRetention / 100, sahaGrowthEvery: 0, desc: `Kapasitenin yüzde ${p.pessimisticFactor} kadarı, aylık yenileme %${p.pessimisticRetention}, saha kadrosu büyümez` },
+    { id: 'medyan', name: 'Medyan', role: 'saha-uzmani', factor: 1, retention: prog.planRetention, sahaGrowthEvery: 6, desc: `Tam kapasite, aylık yenileme %${Math.round(prog.planRetention * 100)}, ikinci sahadan sonra her 6 ayda bir saha çalışanı (plan senaryosu)` },
+    { id: 'iyimser', name: 'İyimser', role: 'pazarlamaci', factor: 1.3, retention: optRetention, sahaGrowthEvery: 4, desc: `Kapasitenin yüzde 130 kadarı, aylık yenileme %${Math.round(optRetention * 100)} (plan senaryosuna göre 10 yüzde puan yüksek), ikinci sahadan sonra her 4 ayda bir saha çalışanı` },
   ];
   const inputsFor = (sc: Scenario, override: Partial<SimInputs> = {}): SimInputs => ({
     factor: sc.factor,
@@ -464,11 +464,11 @@ export function makeRevenue(p: Params, prog: ProgramModel) {
 
   const assumptions = [
     `Takvim: tüm senaryolar ${longDate(p.simStartDate)}’de başlar; ilk satış ${longDate(p.firstSaleDate)} (o güne kadar satışa bağlı gelir 0 ₺, o ay kalan gün oranıyla); ufuk ${longDate(p.simEndDate)} (${months.length} ay). Aktif satıcı = ilk ödemesini yapan satıcı (hedefler sayfasıyla aynı tanım); üye satıcı = kayıt (aktif başına ${ratio.toLocaleString('tr-TR')} kayıt: ${p.memberTarget} üye / ${p.activeTarget} aktif).`,
-    `Fiyat: ${p.subscriptionEur} € / ay = ${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺ (kur ${p.eurTry.toLocaleString('tr-TR')} ₺/€); yıllık ${p.subscriptionEur * p.annualMonths} € = ${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺. Yeni satıcıların %${p.annualShare}’i yıllık peşin öder (parametre). Kur yılda %${p.eurTryGrowth} artar: € fiyat sabit, ₺ karşılığı her ay bileşik büyür (büyüme parametresi).`,
+    `Fiyat: ${p.subscriptionEur} € / ay = ${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺ (kur ${p.eurTry.toLocaleString('tr-TR')} ₺/€); yıllık ${p.subscriptionEur * p.annualMonths} € = ${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺. Yeni satıcıların yüzde ${p.annualShare} kadarının yıllık peşin ödediği varsayılır (parametre); peşin tutar ödendiği ayda bütünüyle sayılır. Kur yılda %${p.eurTryGrowth} artar: € fiyat sabit, ₺ karşılığı her ay bileşik büyür (büyüme parametresi).`,
     `Kapasite (tam): saha personeli ${p.sahaActivesMonthly}, CRM masa başı ${p.crmActivesMonthly}, organizatör ${p.organizatorActivesMonthly} yeni aktif satıcı / ay; her kişinin ilk ayı %50, ikinci ayı %75. İkinci saha personeli ${longDate(monthStart(p.secondSahaDate))}; organizatör ve temsilciler ${longDate(p.decStartDate)}. Büyüme kuralı: medyan her 6, iyimser her 4 ayda +1 saha personeli (en çok ${p.sahaMaxCount}); kötümser büyümez.`,
     `Dijital pazarlama (gider → gelir): satıcı kazanım reklamı ${longDate(monthStart(p.dijitalAdStartDate))}’den ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺; kayıt başına ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺, kayıttan ilk ödemeye %${p.dijitalLeadToActive} → tam hızda ayda ${adCapacity(p, p.dijitalAdBudgetMonthly).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} yeni aktif; LTV ÷ CAC ≥ ${SCALE_RULE.threshold} ise bütçe her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')} (en çok ${p.dijitalScaleMax}×); organik içerik ${longDate(monthStart(p.dijitalOrganicStartDate))}’den ayda ${p.dijitalOrganicActivesMonthly}. Reklam bütçesi nakit akışında ve başabaşta giderdir.`,
     `Bağımsız temsilciler: her ay ${p.repPerMonth} yeni temsilci, en çok ${p.repCap}; temsilci başına ayda ${REP_SALES} ilk ödeme.`,
-    `Senaryolar: kötümser kapasitenin %${p.pessimisticFactor}’i, elde tutma %${p.pessimisticRetention}, büyüme yok; medyan tam kapasite, %${Math.round(prog.planRetention * 100)}, her 6 ayda +1 saha (plan senaryosu); iyimser %130, %${Math.round(optRetention * 100)}, her 4 ayda +1 saha. Seçim gelir planı, nakit akış tablosu ve istihdam takviminde ortaktır ve bu tarayıcıda saklanır.`,
+    `Senaryolar: kötümser kapasitenin yüzde ${p.pessimisticFactor} kadarı, elde tutma %${p.pessimisticRetention}, büyüme yok; medyan tam kapasite, %${Math.round(prog.planRetention * 100)}, her 6 ayda +1 saha (plan senaryosu); iyimser %130, %${Math.round(optRetention * 100)}, her 4 ayda +1 saha. Seçim gelir planı, nakit akış tablosu ve istihdam takviminde ortaktır ve bu tarayıcıda saklanır.`,
     'Gelir = o ay yıllık peşin ödeyenler × yıllık ücret + aylık ödeyen satıcı-ay × aylık ücret (o ayın ₺ fiyatıyla); KDV ve tahsilat gecikmesi modellenmez. Hedef tarihleri ay içinde doğrusal hesaplanır.',
   ];
 

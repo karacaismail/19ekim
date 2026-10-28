@@ -1655,7 +1655,7 @@ test.describe('parametreler', () => {
     await hydrated(page);
     const reset = page.locator('.param-reset');
     await reset.click();
-    await expect(reset).toHaveText('Emin misiniz? Tekrar basın');
+    await expect(reset).toHaveText('Genel ayarları sıfırla (onayla)');
     await reset.click();
     await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
     await page.goto('karar-bekleyenler/');
@@ -1789,7 +1789,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     // Kayıt yazımı: nereye, ne zaman; “Kaydedildi” yalnız gerçekten yapılan tarayıcı kaydı için.
     const durum = page.locator('.param-status');
     await expect(durum).toContainText('1 değer varsayılandan farklı');
-    await expect(durum).toContainText(/bu tarayıcıda kaydedildi \d{2}:\d{2}:\d{2}/);
+    await expect(durum).toContainText(/bu tarayıcıya son kayıt \d{2}:\d{2}:\d{2}/);
     await expect(durum).toContainText('yerel depolama');
     // Grup kapatılıp özetten “alana git”: grup açılır, alan odaklanır.
     await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
@@ -1822,7 +1822,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     const reset = page.locator('.param-reset');
     await expect(page.locator('.param-reset-kapsam')).toHaveCount(0);
     await reset.click();
-    await expect(reset).toHaveText('Emin misiniz? Tekrar basın');
+    await expect(reset).toHaveText('Genel ayarları sıfırla (onayla)');
     const kapsam = page.locator('.param-reset-kapsam');
     await expect(kapsam).toBeVisible();
     await expect(kapsam).toContainText('1 alan');
@@ -2029,11 +2029,11 @@ test.describe('parametreler: ara yazım ve süreye bağlı olmayan sıfırlama o
     await alan.pressSequentially('3');
     await alan.press('Tab');
     expect(await alan.inputValue()).not.toBe(varsayilan);
-    const sifirla = page.getByRole('button', { name: /Varsayılanlara dön|Emin misiniz/ });
+    const sifirla = page.getByRole('button', { name: /Varsayılanlara dön|Genel ayarları sıfırla/ });
     await sifirla.click();
-    await expect(sifirla).toHaveText('Emin misiniz? Tekrar basın');
+    await expect(sifirla).toHaveText('Genel ayarları sıfırla (onayla)');
     await page.waitForTimeout(5000);
-    await expect(sifirla, 'onay süreye bağlı değil').toHaveText('Emin misiniz? Tekrar basın');
+    await expect(sifirla, 'onay süreye bağlı değil').toHaveText('Genel ayarları sıfırla (onayla)');
     await page.getByRole('button', { name: 'Vazgeç' }).click();
     await expect(sifirla).toHaveText('Varsayılanlara dön');
     expect(await alan.inputValue()).not.toBe(varsayilan);

@@ -56,7 +56,7 @@ Bu üç katmanı ihlal eden değişiklik (sayfaya sabit sayı yazmak, Astro dosy
 | UI | React 19, Mantine 9 (core + dates), Tabler ikonları | Emoji yok |
 | Grafik | ECharts 6 | Görünür olunca dinamik yüklenir; aria kapalı, özet metin `role="img"` |
 | Stil | Tek token dosyası `src/styles/tokens.css` | Bileşen içinde sabit renk, boyut, süre yazılmaz |
-| Test | Playwright (Chromium, Firefox, WebKit), 910 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
+| Test | Playwright (Chromium, Firefox, WebKit), 946 test (üç tarayıcı toplamı) | Testler girişli başlar; `npx playwright install` ile tarayıcılar iner |
 | Kapı | `scripts/check-ui-gates.mjs` | CI’da ve `npm run check` ile koşar |
 | OPEX | Google Apps Script (V8) | Node testleri aynı dosyayı çalıştırır |
 
@@ -122,6 +122,10 @@ uygulanıyor (durum tablosu AGENTS.md’de). Üç kural artık kodun parçasıd�
   panelde, `Column.editor`); özet alan tanısal olandır (`Column.summary`: nakitte en düşük nakit, kadroda gelire katkı);
   senaryo kıyası dar ekranda ölçüt başına kayıttır (özet seçili senaryo, panelde üçü); bakiye toplanmaz ama boş kalmaz;
   parametre alanında ara yazım engellenmez ve sıfırlama onayı süreye bağlı değildir.
+- **Arayüz dili (`docs/ifade.md`, 28 Ekim 2026).** Metin, okurun o bilgiyle ne yapacağını söyler: aktif satıcı = ilk
+  ödeme yapan (toplam), “birikmiş açık” ve “açığın kapanışı” (kredi/yatırımcı ödemesi değil), katkı = model farkı
+  (performans ölçümü değil), gider kaynağı istenen/kullanılan olarak yazılır, sayfa seçeneği ile genel parametre ve
+  Sheets ayrı kapsamdır. Dinamik sayıya apostrof eki eklenmez (“yüzde 20 kadarı”). Testi `tests/ifade.spec.ts`.
 - **Yeni test önce yazılır (TDD-first).** Önce ux.md’deki kabul senaryosu Playwright testi olur ve kırmızı düşer, sonra
   en küçük uygulama onu yeşile çevirir; eski kabulle çelişen test gerekçesiyle yeniden yazılır, sessizce silinmez.
 

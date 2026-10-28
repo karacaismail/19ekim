@@ -190,7 +190,7 @@ export const PARAM_GROUPS: ParamGroup[] = [
     desc: 'Kadro kapasitesi (tam kapasitede kişi başına aylık yeni aktif satıcı; ilk ay %50, ikinci ay %75), ikinci saha personelinin başlangıcı, yıllık peşin ödeyen payı ve kötümser senaryo.',
     fields: [
       { key: 'simStartDate', label: 'Senaryo başlangıcı', kind: 'date', help: 'Tüm senaryolar, tablolar ve grafikler bu tarihten başlar (kullanıcı kararı: 19 Ekim 2026)' },
-      { key: 'firstSaleDate', label: 'İlk satış', kind: 'date', help: 'Bu tarihe kadar satışa bağlı gelir 0 ₺; o ay kalan gün oranıyla' },
+      { key: 'firstSaleDate', label: 'İlk satış', kind: 'date', help: 'İlk satışın varsayılan tarihi: satışa bağlı ödemeler bu tarihten önce sıfır kabul edilir; ilk ayın satış kapasitesi ayda kalan günlerin oranıyla hesaplanır' },
       { key: 'simEndDate', label: 'Ufuk sonu', kind: 'date', help: 'Senaryolar bu ayın sonuna kadar sürer (kullanıcı kararı: 2027 sonu)' },
       { key: 'sahaActivesMonthly', label: 'Saha personeli: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay / kişi', min: 0, help: 'Günde ≈ 8 ziyaret → haftada ≈ 10 kayıt → ayda 8 ilk ödeme' },
       { key: 'crmActivesMonthly', label: 'CRM masa başı: aylık yeni aktif satıcı', kind: 'count', unit: 'satıcı / ay', min: 0, help: 'Günde ≈ 40 arama + 100 e-posta → haftada ≈ 5 kayıt' },

@@ -67,18 +67,26 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           {acik ? 'Ayrıntılı seçenekleri kapat' : `Ayrıntılı seçenekler (${changes ? `${changes} değişiklik` : 'parametre değerleri'})`}
         </button>
         <button type="button" className="secim-dugme kurucu-dugme" onClick={reset} disabled={changes === 0}>
-          Seçenekleri sıfırla
+          Sayfa seçeneklerini sıfırla
         </button>
         <button type="button" className="secim-dugme kurucu-dugme" onClick={kopyala}>
-          {kopya === 'oldu' ? 'Bağlantı kopyalandı' : kopya === 'olmadi' ? 'Kopyalanamadı: adres çubuğunu kopyalayın' : 'Bağlantıyı kopyala'}
+          Senaryo bağlantısını kopyala
         </button>
       </div>
+      {/* Kapsam (ifade.md C18/C19): sıfırlama bu sayfanın seçeneklerini plan değerlerine döndürür, temel senaryo ve Parametreler
+          sayfası değişmez; bağlantı yalnız bu sayfanın seçeneklerini taşır. Kopyalama sonucu düğmede değil durum satırında (C20). */}
+      <p className="kurucu-kapsam">
+        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
+      </p>
+      <p className="kurucu-durum" role="status" aria-live="polite">
+        {kopya === 'oldu' ? 'Senaryo bağlantısı panoya kopyalandı.' : kopya === 'olmadi' ? 'Senaryo bağlantısı panoya kopyalanamadı. Tarayıcının adres çubuğundaki bağlantıyı seçip kopyalayabilirsiniz.' : ''}
+      </p>
       <div className="filtreler" id="kurucu-secenekler" role="group" aria-label="Ayrıntılı seçenekler" hidden={!acik}>
         <Choice
           label="Kapasite çarpanı"
           value={sayi(opts.factor)}
           options={[{ id: 'senaryo', name: `Senaryonun (${yuzde(factorDefault)})` }, ...[0.6, 0.8, 1, 1.3].map((v) => ({ id: String(v), name: yuzde(v) }))]}
-          note="Kaynakların aylık yeni aktif satıcısı bu oranla çarpılır."
+          note="Her satış kanalından ayda kazanılması beklenen yeni satıcı sayısı bu oranla çarpılır; yeni satıcı, ilk abonelik ödemesini yapan satıcıdır. %80 seçilirse tam kapasite tahmininin yüzde 80 kadarı kullanılır."
           onChange={(v) => set('factor', v === 'senaryo' ? null : Number(v))}
         />
         <Choice
@@ -88,13 +96,25 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           note="Aylık ödeyen satıcıların ertesi ay yenileme oranı."
           onChange={(v) => set('retention', v === 'senaryo' ? null : Number(v))}
         />
-        <Choice label="Yıllık peşin payı" value={String(opts.annualShare)} options={paylar.map((v) => ({ id: String(v), name: v === s ? `${yuzde(v)} (parametre)` : yuzde(v) }))} onChange={(v) => set('annualShare', Number(v))} />
-        <Choice label="Aylık ücret" value={String(opts.priceEur)} options={fiyatlar.map((v) => ({ id: String(v), name: v === p.subscriptionEur ? `${v} € (parametre)` : `${v} €` }))} onChange={(v) => set('priceEur', Number(v))} />
+        <Choice
+          label="Yıllık peşin payı"
+          value={String(opts.annualShare)}
+          options={paylar.map((v) => ({ id: String(v), name: v === s ? `${yuzde(v)} (parametre)` : yuzde(v) }))}
+          note="Yıllık peşin ödeyen yeni satıcıların oranı: %20 seçilirse ilk ödemesini yapan her 100 yeni satıcının 20’sinin yıllık peşin ödediği varsayılır."
+          onChange={(v) => set('annualShare', Number(v))}
+        />
+        <Choice
+          label="Aylık abonelik fiyatı"
+          value={String(opts.priceEur)}
+          options={fiyatlar.map((v) => ({ id: String(v), name: v === p.subscriptionEur ? `${v} € (parametre)` : `${v} €` }))}
+          note="Satıcı başına aylık abonelik fiyatı (€); gelir hesabını değiştirir, personel maaşını değiştirmez."
+          onChange={(v) => set('priceEur', Number(v))}
+        />
         <Choice
           label="İkinci saha personeli"
           value={opts.secondSahaIso}
           options={[...sahaAylari.map((iso) => ({ id: iso, name: iso === p.secondSahaDate ? `${ayAdi(iso)} (parametre)` : ayAdi(iso) })), { id: NO_SECOND_SAHA, name: 'Gelmez' }]}
-          note="Hem işveren maliyeti hem kapasite; Sheets kaynağında da eklenir (Sheets’te tek saha vardır)."
+          note="İkinci saha çalışanı başladığında model bu kişinin işveren maliyetini gider hesabına, beklenen yeni satıcılarını satış hesabına ekler. Sheets gider verisi seçilse de ekleme modelde yapılır; Sheets dosyasını değiştirmez."
           onChange={(v) => set('secondSahaIso', v)}
         />
         <Choice
@@ -125,7 +145,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
             { id: 'kural', name: 'LTV ÷ CAC kuralı' },
             { id: 'sabit', name: 'Sabit bütçe' },
           ]}
-          note={`Kural: LTV ÷ CAC ≥ ${SCALE_RULE.threshold} ise bütçe her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')}, en çok ${p.dijitalScaleMax}×.`}
+          note={`Kural: reklam bütçesi, modeldeki satıcı değeri (LTV) ÷ satıcı edinme maliyeti (CAC) oranı ${SCALE_RULE.threshold} ve üstündeyse her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')} artar, en çok ${p.dijitalScaleMax}×. LTV burada abonelik ödemesi tahminidir, kâr değildir; formül dijital strateji bölümünde.`}
           onChange={(v) => set('dijitalScale', v === 'kural')}
         />
         <Choice
@@ -139,10 +159,10 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           label="Gider kaynağı"
           value={opts.kaynak}
           options={[
-            { id: 'sheets', name: 'Sheets (canlı)' },
+            { id: 'sheets', name: 'Sheets gider verisi (açılışta okunur)' },
             { id: 'plan', name: 'Plan kadrosu' },
           ]}
-          note="Sheets: Giderler sayfasıyla aynı canlı veri (ikinci saha ve reklam eklenir). Plan kadrosu: kadro tablosu, YZ araçları, Meta ve reklam bütçesi."
+          note="Sheets: Giderler sayfasının verisi bu sayfa açılırken bir kez okunur; modelin ek giderleri (ikinci ve ek saha, reklam) üstüne eklenir; hesapta kullanılan kaynak başabaş bölümünde yazılır. Plan kadrosu: kadro tablosu, YZ araçları, Meta ve reklam bütçesi."
           onChange={(v) => set('kaynak', v)}
         />
         <Choice

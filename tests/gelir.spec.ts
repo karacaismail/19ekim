@@ -38,7 +38,7 @@ test.describe('gelir planı', () => {
     expect(sayisal).toEqual([...sayisal].sort((a, b) => a - b));
     expect(sayisal[0]).toBeGreaterThanOrEqual(18);
     await expect(page.locator('.gelir-zaman .hire-item')).toHaveCount(7);
-    await expect(page.locator('#kaynak-tablo')).toHaveText('Kaynak, başlangıç, düzen, kapasite');
+    await expect(page.locator('#kaynak-tablo')).toHaveText('Satış kanalları: başlangıç, düzen ve ayda beklenen yeni satıcı');
     await expect(page.locator('.table-block:has(#kaynak-tablo) tbody tr')).toHaveCount(7);
     await expect(page.locator('.chart-canvas')).toHaveCount(10);
     // Aylık tablo Ekim 2026 – Aralık 2027: 15 satır; ilk satış öncesi ay vurgulu ve geliri 0.
@@ -96,7 +96,7 @@ test.describe('gelir planı', () => {
     await expect(hazir.getByRole('button', { name: /^Özel/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(ozet.locator('.yapiskan-ad')).toContainText('Özel: Medyan');
     await expect(page).toHaveURL(/kur=0/);
-    await kurucu.getByRole('button', { name: 'Seçenekleri sıfırla' }).click();
+    await kurucu.getByRole('button', { name: 'Sayfa seçeneklerini sıfırla' }).click();
     await expect(hazir.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
     // Adres çubuğundan açılış: aynı seçenekler.
     await page.goto('gelir-plani/?senaryo=iyimser&eksaha=1&reklam=2');
@@ -132,7 +132,7 @@ test.describe('gelir planı', () => {
     const kutu = await deger.evaluate((el) => el.getBoundingClientRect());
     expect(kutu.top, 'ana sonuç ilk ekranda').toBeGreaterThanOrEqual(0);
     expect(kutu.bottom, 'ana sonuç kaydırmadan tam görünür').toBeLessThanOrEqual(480);
-    await expect(sonuc.locator('.sonuc-etiket')).toContainText('Fon ihtiyacı');
+    await expect(sonuc.locator('.sonuc-etiket')).toContainText('En yüksek birikmiş açık');
     await expect(sonuc.locator('.sonuc-donem')).toContainText('19 Ekim 2026 – Aralık 2027');
     // Kıyas temeli: hazır senaryolar aynı ölçüyle; seçili olan işaretli.
     const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
@@ -147,11 +147,11 @@ test.describe('gelir planı', () => {
       const ton = await durum.getAttribute('data-ton');
       const metin = (await durum.textContent()) ?? '';
       expect(ton).toMatch(/^(iyi|uyari|risk)$/);
-      expect(metin).toMatch(ton === 'iyi' ? /Aylık başabaş \d/ : ton === 'uyari' ? /≈/ : /Kapanmıyor.*sürdürülebilir değil/);
+      expect(metin).toMatch(ton === 'iyi' ? /Aylık başabaş \d/ : ton === 'uyari' ? /≈/ : /kapanmıyor.*sürdürülebilir değil/);
     };
     await tutarli();
-    // Tek kaynak: yapışkan özetin “Fon ihtiyacı” çipi ile ana sonuç aynı değer.
-    const cip = page.locator('.yapiskan-cip', { hasText: 'Fon ihtiyacı' }).locator('.yapiskan-deger');
+    // Tek kaynak: yapışkan özetin “Birikmiş açık” çipi ile ana sonuç aynı değer (ifade.md C11).
+    const cip = page.locator('.yapiskan-cip', { hasText: 'Birikmiş açık' }).locator('.yapiskan-deger');
     expect((await cip.textContent())?.trim()).toBe((await deger.textContent())?.trim());
     // Senaryo değişince sonuç ve kıyas işareti değişir; riskli seçeneklerde durum riske döner ve yine gizlenmez.
     const kurucu = page.locator('.kurucu');
@@ -171,7 +171,7 @@ test.describe('gelir planı', () => {
     await tutarli();
     await expect(kiyas).toHaveCount(4);
     await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText(/^Özel/);
-    expect((await page.locator('.yapiskan-cip', { hasText: 'Fon ihtiyacı' }).locator('.yapiskan-deger').textContent())?.trim()).toBe((await deger.textContent())?.trim());
+    expect((await page.locator('.yapiskan-cip', { hasText: 'Birikmiş açık' }).locator('.yapiskan-deger').textContent())?.trim()).toBe((await deger.textContent())?.trim());
     await page.evaluate(() => {
       localStorage.removeItem('istoc-plan-senaryo');
       localStorage.removeItem('istoc-plan-senaryo-secenekler');
@@ -189,8 +189,8 @@ test.describe('gelir planı', () => {
     expect(konum.top).toBeLessThan(120);
     expect(konum.top).toBeGreaterThanOrEqual(0);
     await page.locator('.kurucu').scrollIntoViewIfNeeded();
-    await page.locator('.kurucu').getByRole('button', { name: 'Bağlantıyı kopyala' }).click();
-    await expect(page.locator('.kurucu').getByRole('button', { name: /kopyalandı|Kopyalanamadı/ })).toBeVisible();
+    await page.locator('.kurucu').getByRole('button', { name: 'Senaryo bağlantısını kopyala' }).click();
+    await expect(page.locator('.kurucu').getByRole('status')).toContainText(/kopyalandı|kopyalanamadı/);
     const [indirme] = await Promise.all([page.waitForEvent('download'), page.locator('.table-block:has(#aylik-tablo)').getByRole('button', { name: 'CSV indir' }).click()]);
     expect(indirme.suggestedFilename()).toMatch(/^gelir-plani-aylik-.*\.csv$/);
   });

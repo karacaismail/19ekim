@@ -128,7 +128,7 @@ function Sifirla() {
           } else setConfirming(true);
         }}
       >
-        {confirming ? 'Emin misiniz? Tekrar basın' : 'Varsayılanlara dön'}
+        {confirming ? 'Genel ayarları sıfırla (onayla)' : 'Varsayılanlara dön'}
       </button>
       {confirming ? (
         <button type="button" className="param-vazgec" onClick={() => setConfirming(false)}>
@@ -149,8 +149,7 @@ function Sifirla() {
       ) : null}
       {confirming ? (
         <p className="param-reset-kapsam" role="status">
-          Kapsam: {changed} alan yalnız bu tarayıcıdaki varsayılana döner; gelir planı senaryo seçenekleri, notlar ve tema değişmez. Uyguladıktan sonra “Geri al” ile önceki değerlere
-          dönebilirsiniz.
+          Tüm genel plan ayarları varsayılan değerlere dönecek: {changed} alan, yalnız bu tarayıcıda. Gelir planı senaryo seçenekleri, notlar, tema ve Sheets dosyası değişmez. Onaylamak için “Genel ayarları sıfırla”ya, iptal için “Vazgeç”e basın; uyguladıktan sonra “Geri al” önceki değerleri geri getirir.
         </p>
       ) : null}
     </div>
@@ -166,10 +165,10 @@ function SaveStatus() {
     saved === false
       ? `${changed ? `${fark}. ` : ''}Bu tarayıcıda kaydedilemedi (depolama kapalı): değişiklikler yalnız bu sekme açıkken geçerli.`
       : !changed
-        ? 'Tüm değerler varsayılan.'
+        ? 'Tüm değerler varsayılan. Değişiklikler yalnız bu tarayıcıya kaydedilir; başka cihaza aktarılmaz ve Sheets dosyasını değiştirmez.'
         : saat
-          ? `${fark}; bu tarayıcıda kaydedildi ${saat} (yerel depolama). Başka tarayıcı ve yayındaki site varsayılanları gösterir.`
-          : `${fark}; bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama). Başka tarayıcı ve yayındaki site varsayılanları gösterir.`;
+          ? `${fark}; bu tarayıcıya son kayıt ${saat} (yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`
+          : `${fark}; bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`;
   return (
     <p className="param-status" role="status">
       {metin}

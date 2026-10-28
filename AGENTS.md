@@ -501,6 +501,48 @@ modeli değişmedi):
 | V2-G OPEX canlı veride sunum sabitleme kararı, silinen kayıt/gecikmiş yanıt durumları | §3.3 | Bekliyor (ürün kararı) | — |
 | Kullanıcı araştırması, gerçek yardımcı teknoloji, kontrast ölçümü | §5.1–5.3 | NOT_RUN | — |
 
+### ifade.md: anlaşılır arayüz dili (kullanıcı kararı 2026-10-28)
+
+Üçüncü belge `docs/ifade.md` (27 Ekim 2026, taban 1950925) arayüz metinlerini inceler: metin bilgiyi değil, okurun o
+bilgiyle ne yapacağını ve anlam sınırını taşımalı (§2 dört bozukluk: anlamsal sıkıştırma, etiket çakışması, iddia düzeyi
+kayması, bağlam borcu). Uygulama 2026-10-28: C01–C32’nin tamamı, önce `tests/ifade.spec.ts` (RED), sonra metin; hesap,
+model ve davranış değişmedi (C32 davranışı V2-D ile zaten süresiz onay + Vazgeç). Terim kaydı (§7.1): “aktif satıcı” =
+ilk abonelik ödemesini yapan satıcı (toplam; aboneliği devam edenle aynı değil); “gelir” = modeldeki abonelik ödemesi
+toplamı (muhasebe dönemine dağıtılmış gelir değil; yıllık peşin ödendiği ayda bütünüyle); “birikmiş açık” = kümülatif net
+(gelir − seçili gider) en düşük noktası, gereken finansman bunun büyüklüğü; “açığın kapanışı” = kümülatif netin ilk kez
+sıfır/pozitif olduğu tarih (kredi ya da yatırımcı ödemesi değil); “katkı” = kaynak çıkarılınca tahmini ödemedeki fark
+(performans ölçümü değil). Türkçe üretim kuralı (§7.3): dinamik sayıya apostrof eki eklenmez (`%20’i` yasak → “yüzde 20
+kadarı”); `tests/ifade.spec.ts → C23` gelir planı sayfasında `%\d+’` arar. Teslim tablosu (ifade §10.4; “sonra” puanı
+insan testi olmadan doldurulmaz — NOT_RUN):
+
+| Kimlik | Önceki ifade | Yeni ifade (özet) | Anlam farkı | Kaynak / test |
+|---|---|---|---|---|
+| C01 | “… ne zaman gelir; kadro katkısı, dijital strateji ve başabaş.” | “Koşullu tahmin: seçtiğiniz senaryoya göre …” | Gelecek tahmini olduğu ve ilk adımın senaryo seçimi olduğu söylenir; 320×480 ilk ekranı korur | `RevenuePage.tsx` purpose; ifade.spec C01, gelir.spec M05 |
+| C02 | “Kaynakların aylık yeni aktif satıcısı bu oranla çarpılır.” | “Her satış kanalından ayda kazanılması beklenen yeni satıcı sayısı bu oranla çarpılır; yeni satıcı = ilk ödeme …” | Kaynak = satış kanalı; çarpılan beklenen adet; oranın bazı | `SenaryoKurucu.tsx` |
+| C03/C14/C25 | “Tam kapasite, elde tutma %70, her 6 ayda +1 saha …”, “+10 puan” | Plan senaryosu (ad Medyan; varsayım kümesi, istatistiksel medyan değil); yenileme oranı; “10 yüzde puan (%70 yerine %80)” | Sayaç başlangıcı, kişi, yüzde puan ile yüzde ayrımı | `scenarioOptions.ts`, `revenue.ts` desc; ifade.spec C03 |
+| C04 | “Yıllık peşin payı” | + not: “Yıllık peşin ödeyen yeni satıcıların oranı: %20 → her 100 yeni satıcının 20’si” | Payda yeni satıcılar | `SenaryoKurucu.tsx` |
+| C05/C06/C12 | “Aktif satıcı = ilk ödemesini yapan satıcı.”, “Her hedef: …” | Tarih + süre; tutarlar ayın tamamı; yıllık peşin ilk ayda bütünüyle; aktif toplamı ≠ devam eden | Toplam/ay ve stok/akış ayrımı | `RevenuePage.tsx` hedefler desc; ifade.spec C08 |
+| C07 | “Hem işveren maliyeti hem kapasite; Sheets kaynağında da eklenir …” | “İkinci saha çalışanı başladığında model maliyetini gider, yeni satıcılarını satış hesabına ekler; Sheets dosyasını değiştirmez.” | Ne, nereye, dış dosya değişmez | `SenaryoKurucu.tsx` |
+| C08/C09 | “O ayın geliri”, “Kümülatif gelir” (hedef kartı) | “Hedef ayının toplam abonelik ödemesi”, “Başlangıçtan ay sonuna kadar birikmiş ödeme” | Hedef günü ≠ ay toplamı; tahsilat varsayımı | `RevenuePage.tsx` HedefKartlari; ifade.spec C08 |
+| C10 | “Geri ödeme” | “Açığın kapanışı” / “Birikmiş açığın kapanışı” + not: kredi ya da yatırımcıya ödeme değil | Nesne açık | yapışkan özet, başabaş Stats, filtre etkisi; ifade.spec C11 |
+| C11 | “Fon ihtiyacı” (negatif) | “En yüksek birikmiş açık” (negatif değer) + “gereken finansman X ₺ (gider kaynağı …)” | İşaret ve kapsam | ResultSummary, Stats, çipler; ifade.spec C11 |
+| C13 | “Aylık ücret” | “Aylık abonelik fiyatı” + not: personel maaşı değil | Çalışan maaşı ile abonelik ayrımı | `SenaryoKurucu.tsx`; ifade.spec C01 |
+| C15/C29 | “…ayıklanarak ölçülür”, “modelde doğrudan gelir yok” | “kaynak çıkarılınca … ne kadar azaldığını gösterir; performans ölçümü değildir”, “ayrı satış katkısı hesaplamıyor; katkısı yok demek değildir” | Model karşıolgusu ≠ ölçüm; kapsam | `RevenuePage.tsx`; ifade.spec C15 |
+| C16/C17/C27 | “Sheets (canlı)”, “…o ana kadar plan kadrosu…”, “…okunamadı …; plan kadrosu kullanılır.” | “Sheets gider verisi (açılışta okunur)”; okunuyor/okundu/okunamadı üç durum, yedek kapsamı (ofis, yazılım ekibi hariç), teknik neden ayrı | İstenen/kullanılan kaynak; tazelik | `SenaryoKurucu.tsx`, `RevenuePage.tsx` sheetsNotu; ifade.spec C16 |
+| C18/C19/C20 | “Seçenekleri sıfırla”, “Bağlantıyı kopyala”, düğmede “Kopyalanamadı: …” | “Sayfa seçeneklerini sıfırla”, “Senaryo bağlantısını kopyala”, kapsam notu `.kurucu-kapsam`, sonuç `.kurucu-durum` (role=status) | Kapsam ve nesne; kopyalama ≠ paylaşım; durum düğmede değil | `SenaryoKurucu.tsx`; ifade.spec C18 |
+| C21 | “…bu tarayıcıda kaydedildi …” | “bu tarayıcıya son kayıt …; başka cihaza aktarılmaz, Sheets dosyasını değiştirmez” (varsayılan durumda da) | Kayıt yeri ve sınırı | `ParamsPage.tsx` SaveStatus; ifade.spec C21 |
+| C22 | “Bu tarihe kadar satışa bağlı gelir 0 ₺; o ay kalan gün oranıyla” | “…ödemeler bu tarihten önce sıfır kabul edilir; ilk ayın satış kapasitesi ayda kalan günlerin oranıyla hesaplanır” | Eksiltisiz | `params.ts`; ifade.spec C22 |
+| C23 | “%20’i yıllık peşin” | “yüzde 20 kadarının yıllık peşin ödediği varsayılır” | Ek yok; varsayım kipi | `RevenuePage.tsx`, `revenue.ts`, `cashflow.ts`; ifade.spec C23 |
+| C24 | “LTV ÷ CAC kuralı” notu | “satıcı değeri (LTV) ÷ satıcı edinme maliyeti (CAC) … LTV abonelik ödemesi tahminidir, kâr değildir; formül dijital strateji bölümünde” | Model tanımı ve sınır | `SenaryoKurucu.tsx` |
+| C26/C30 | “Yeni aktif satıcı: hazır senaryolar üst üste”, “Kaynak, başlangıç, düzen, kapasite” | “Senaryolara göre aylık yeni satıcı tahmini: aynı aylar yan yana …”, “Satış kanalları: başlangıç, düzen ve ayda beklenen yeni satıcı” | Ölçüt, dönem, birim | `RevenuePage.tsx`; ifade.spec C26 |
+| C28 | “Kapanmıyor” | “{ufuk} sonuna kadar kapanmıyor” (+ eğilim notu) | Dönem içi sonuç ≠ hiç | `RevenuePage.tsx` tarihYaz, Stats, sonucDurum; ifade.spec C28 |
+| C31 | “Sistem kuruldu: ilk 10 aktif satıcı” | “İlk 10 satıcının ödeme yapması” | Hedef ≠ sistemin kurulduğu hükmü | `revenue.ts` milestone adı (veri etiketi, hesap değil) |
+| C32 | “Emin misiniz? Tekrar basın” | “Genel ayarları sıfırla (onayla)” + kapsam cümlesi (alan sayısı, yalnız bu tarayıcı, değişmeyenler) + Vazgeç | Nesne ve kapsam; süresiz onay (V2-D) | `ParamsPage.tsx`; ifade.spec C32, ui.spec |
+
+Kabul: `tests/ifade.spec.ts` (12 senaryo, Chromium/Firefox/WebKit) içerik ve ilişki denetimi; insanla anlama testi
+(ifade §8.4) ve kalan uzman puanlaması **NOT_RUN**. Açık karar: “gelir” sözcüğünün üründe toptan “ödeme” yapılması
+(ifade §7.1) alan terminolojisi kararıdır, yapılmadı.
+
 **Köşe istisna kaydı** (ux.md §6.3 şablonu: kimlik · bileşen/slot · kullanıcı yararı · neden köşeli yetersiz · izinli
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,
 `.opex-pill`, `.yapiskan-ad`, `.bcg-flow-chip`, `.ortak-bolum-program`) — kısa durum/kategori etiketi, pill şekli etiketi
