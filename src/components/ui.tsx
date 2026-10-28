@@ -276,6 +276,9 @@ export function KayitListesi({
         onChange={onChange}
         order={4}
         transitionDuration={sure}
+        // Kapalı panel içeriği DOM’da hazır ve display:none (odak/erişilebilirlik ağacı dışında): React Activity’nin
+        // ertelenmiş çizimi yavaş motorda (CI WebKit) panel alanlarını geç kuruyor, denetim boş kayıt görüyordu.
+        keepMountedMode="display-none"
         classNames={{
           root: 'kayitlar',
           item: 'kayit',

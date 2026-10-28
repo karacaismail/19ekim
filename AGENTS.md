@@ -447,7 +447,9 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   ortak `DataTable` (`src/components/ui.tsx`) aynı sütun/satır modelini iki kabukta sunar, iki kabuk aynı anda mount
   edilmez. Taban dar ekrandır: kapsayıcı 48em’den darsa ve sütunların okunabilir toplam genişliği (`Column.minWidth`,
   yoksa 7rem) sığmıyorsa — ya da tablo ölçülünce taşıyorsa (güvenlik ağı) — **kayıt listesi** çizilir: Mantine
-  `Accordion` (`multiple`, `order={4}`, süre `--motion-duration-base`, eğri `--motion-ease-standard`); her kayıt başlığı
+  `Accordion` (`multiple`, `order={4}`, süre `--motion-duration-base`, eğri `--motion-ease-standard`; kapalı paneller
+  `keepMountedMode="display-none"` ile DOM’da kalır — varsayılan `activity` kipi React 19 Activity ile ertelenmiş
+  çizer ve CI’daki Linux WebKit’te denetim kayıt alanlarını 0 saymıştı, 2026-10-28); her kayıt başlığı
   h4 içinde düğme (`aria-expanded`, `aria-controls` → `role="region"` panel), içinde kayıt adı (`.kayit-ad`, satır başlığı
   sütunu; başlık sütunu düzenleyiciyse `Column.text` düz metni) ve tek özet alan (`.kayit-ozet`: `Column.summary` —
   tanısal alan — ya da ilk düzenleyici olmayan veri sütunu); `Column.editor` sütunlar (girdi, seçim, onay, düğme) yalnız
