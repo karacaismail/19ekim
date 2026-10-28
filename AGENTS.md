@@ -883,8 +883,11 @@ sahibin S0/K cevapları ve Codex eleştirisi (`docs/birlesik_plan_elestiri.md`, 
 başlayınca ilerleme `X/9 tamamlandı, Z/9 aktif` sayacıyla bu bölümün altına yazılır. Teknik P0 (B2: Nakit akışı eklenen
 saha personelinin maaşını saymıyor; Gelir planı seçenekleri taşınmıyor) K13 ile Codex’i beklemeden başlayabilir.
 
-Kullanıcı kararı 2026-10-28: S0 (asıl ihtiyaç tanımı) onaylandı; K1–K13 için varsayılanlar uygulanır (K13(a): B2 hemen).
-**Sayaç: 0/9 tamamlandı, 1/9 aktif (B2).**
+Kullanıcı kararı 2026-10-28: S0 (asıl ihtiyaç tanımı) onaylandı; K1–K13 cevapları plan §4.1’de (K2 komisyon aylık %10 /
+yıllık %15 girdi; K3 şirket yapısı Türksab → Mogem [Segika/SGK] ve iStoc Company [iStoc, Toptan], tutarlar Sheets’te; K4 “SMART
+hedefler”; K6 sunum sırası güncellenir; K10 e-posta gizli kalır; K11 marka bazlı faturalanan → tahsilat → kasa; K12 pilot sahip);
+cevapsız K1/K7/K8/K9 varsayılan; açık alt sorular §4.2. Plan **sürüm 2** (payda 10): yeni B3 şirket yapısı, eski B3–B8 → B4–B9.
+**Sayaç (sürüm 2): 0/10 tamamlandı, 2/10 aktif (B0 cevaplar geldi; B2 — B2.1 tamam).**
 
 **B2.1 — Gelir → Nakit bütünlüğü (docs/birlesik_plan.md §3.3-C, §5 B2; ct-F04, ar-13/14, ct-IA-23; 2026-10-28), test önce:**
 Nakit akışı sayfası gelir planıyla aynı senaryo durumunu okur (`useScenarioOptions`: temel senaryo + seçenekler,

@@ -1,7 +1,8 @@
-# Birleşik düzenleme ve bitirme planı — B1 (taslak; Codex eleştirisine sunulur)
+# Birleşik düzenleme ve bitirme planı — B1, sürüm 2 (taslak; Codex eleştirisine sunulur)
 
 28 Ekim 2026 · Hazırlayan: Claude (uygulama yazarı; salt-okunur belge analizi ve kod denetimi ayrı ajanlarla) · İncelenen
-anlık görüntü: `main` `6e7799b` (CA-1) · Durum: **taslak** — sahibin onayı (§1, §4) ve Codex’in eleştirisi (§7) bekleniyor.
+anlık görüntü: `main` `6e7799b` (CA-1) · Durum: **taslak, sürüm 2** — S0 onaylı; sahip cevapları §4.1’de (28 Ekim akşamı), açık alt sorular §4.2; Codex’in eleştirisi (§7) bekleniyor.
+Sürüm 1 (payda 9) sahibin K3 cevabıyla (şirket yapısı) sürüm 2’ye geçti: yeni B3 eklendi, eski B3–B8 → B4–B9 (payda 10); tamamlanmış adım yoktu, B2 numarasını korur.
 Bu belge kod değiştirmez ve karar vermez; kararları soru olarak listeler, cevapsız kalırsa uygulanacak varsayılanı yazar.
 
 ## 0. Sahip için özet
@@ -180,33 +181,60 @@ Her karar bir yolculukla; teknik ve geri alınabilir ayrıntılar sahibe sorulma
 | K12 | İnsan testi | Bitiş için en az bir pilot. | kim: sahip + yatırımcı benzeri bir okur; ne zaman | B7’de, §6’daki 6 görev |
 | K13 | Sayısal P0’ı Codex eleştirisini beklemeden düzeltmek | Bugün yayındaki Nakit akışı kadro maliyetini eksik gösteriyor. | (a) B2’yi hemen başlat (test önce); (b) plan onayını bekle | (a) önerilir |
 
-## 5. Birleşik plan B1 (payda 9; sayaç `X/9 tamamlandı, Z/9 aktif`)
+### 4.1 Sahip cevapları (28 Ekim akşamı)
 
-CA-0 ve CA-1 bu planın öncülü (contents sayacı 2/9’da donar; ilerleme B sayacıyla yazılır). Her paket: RED → GREEN →
+| K | Cevap (sahibin sözleriyle, kısaltılmış) | Plana etkisi |
+|---|---|---|
+| S0 | “Evet.” | §1 tanımı kesinleşti. |
+| K1 | Cevap yok → varsayılan (a): abonelik esas, likidite açık alternatif. | B1. |
+| K2 | “Girdi olmalı; aylık satarsa %10, yıllık satarsa %15.” | Yeni politika kaydı (28 Ekim): komisyon oranı girdi; aylık abonelik satışında %10, yıllık satışta %15. İş ortaklığı metni (“ilk 6 ay %15”) ve Affilate varsayılanları bu kayda göre güncellenir (B1 kayıt, B6 Affilate). Süre ve taban §4.2-1. |
+| K3 | “Segika ve SGK aynı proje, Mogem şirketinin gideri; iStoc ile Toptan kardeş proje, iStoc şirketinin gideri; hepsinin toplamı Türksab (şirketler grubu, holding gibi; Mogem ve iStoc ayrı şirket, kendi gelir ve giderleri olmalı). Mogem’in 2026’da aylık sabit, 2027’de aylık sabit geliri var (tutar sahipte); Mogem parayı Türksab’a aktarır, Türksab iStoc’a yatırım yapar ve Mogem’in giderini öder.” | **Yeni adım B3:** şirket yapısı (Türksab → Mogem [Segika/SGK], iStoc Company [iStoc, Toptan]); tutarlar Sheets’te (repoya girmez); şirket bazlı gelir-gider-nakit, grup toplamı ve şirketler arası akış. Alt sorular §4.2-2…4. |
+| K4 | “Smart Goals.” | Hedefler sayfası ve menü adı “SMART hedefler”; genel kural: menü adı = sayfa başlığı, uzun ad amaç satırında (B1). Teyit §4.2-5. |
+| K5 | “Test et, karar ver.” | Yazar 320×480’de ölçer ve karar verir (B2.2; B8 ölçüm turunda yeniden). |
+| K6 | “Evet ama güncelle.” | Önceki/sonraki kalır; sunum sırası beş grup düzenine ve yeni adlara göre güncellenir (B1). |
+| K7–K9 | Cevap yok → varsayılanlar (Arşiv menüde; ortak yazar satırı kalır; archetype dışarıda). | — |
+| K10 | “Evet; menüde olmasın, gizli kalsın, URL bilen girer.” | Mevcut durum korunur (`/email/`; menüde yok; noindex); “kişisel” etiketi B1. |
+| K11 | İki akış: Segika SaaS satışı → faturalanan gelir → tahsilat → kasa; iStoc paket satışı → faturalanan gelir → tahsilat → kasa. | Metrik sözlüğü marka bazlı üç aşama: faturalanan / tahsil edilen / kasa (B4); nakit akışı tahsilatı kullanır. |
+| K12 | “19ekim = ben; istoc.com yazılımcı ekip.” | Pilot: sahip tek başına, altı görev (B8). |
+| K13 | (a) — B2.1 yapıldı (`fa58509`). | — |
+
+### 4.2 Açık alt sorular (cevap gelmezse yazılan varsayım uygulanır)
+
+1. **K2 süresi ve tabanı:** %10 / %15 her ödemede mi (müşteri ödedikçe), yoksa yalnız ilk yıl mı? Taban net tahsilat mı? Bütün ortak tipleri için aynı mı? *Varsayım:* her ödemede, net tahsilat üzerinden, bütün ortak tipleri; Affilate’te girdi olarak değiştirilebilir.
+2. **“Toptan” projesi:** adı/yazımı ve bugün sitede içeriği var mı? *Varsayım:* yalnız yapıda yer alır, içerik yok.
+3. **Mogem’in giderleri:** hangi Sheets kalemleri? Sheets’e “Şirket” sütunu (Mogem / iStoc / Türksab ortak) için kurulum adımı yazılabilir; dolduran sahip. *Varsayım:* sütun boşsa kalem “Türksab ortak” sayılır.
+4. **Mogem sabit gelirleri** Sheets’e girilir (ör. “Gelirler” sayfası: şirket, ay, tutar); tutar repoya ve bu belgeye yazılmaz. Onay?
+5. **K4 adı** “SMART hedefler” (menü ve başlık) ve kuralın bütün sayfalara uygulanması (Kararlar, Temsilci ağı, Varsayımlar ve ayarlar) uygun mu?
+
+## 5. Birleşik plan B1 — sürüm 2 (payda 10; sayaç `X/10 tamamlandı, Z/10 aktif`)
+
+CA-0 ve CA-1 bu planın öncülü (contents sayacı 2/9’da donar; ilerleme B sayacıyla yazılır). Sürüm 2: yeni B3 (şirket yapısı); eski B3–B8 → B4–B9. Her paket: RED → GREEN →
 `npm run check` → `npm run build` → tam tur (üç tarayıcı) → AGENTS kaydı → tek konulu commit → push (CI + Pages). Paket
 raporu: `once`, `simdi`, `fark`, `kullaniciYolculugu`, `kalanEngel`, `capability_delta`, çalışır / çalışmaz ürün iddiası.
 
 | B | Paket | Kapsam | Kabul (test önce) | Bağımlılık | Büyüklük |
 |---|---|---|---|---|---|
-| B0 | **Karar kapısı ve tek liste** | §4 cevapları; docs kimlik önekleri; AGENTS “Birleşik plan” bölümü ve sayaç; archetype dışarıda | belge | sahip | 1 (belge) |
+| B0 | **Karar kapısı ve tek liste** | §4 cevapları (**geldi, §4.1**); docs kimlik önekleri; AGENTS “Birleşik plan” bölümü ve sayaç; archetype dışarıda | belge | §4.2 alt soruları | 1 (belge) — aktif |
 | B1 | **Kararlar gerçek kayıt olur; anlam temizliği** (CA-2) | Karar kaydı alanları (soru, seçenekler, etki, sahip, son tarih, durum: bekliyor/gecikti/karar verildi/yürürlükte); F02/F03/F16 kayıtları (`program.ts` → karar verisi); alt bilgi ön cümlesi ve yanlış vaatler kayıttan (Y5); envanter `durum` alanları düzeltilir (Affilate `taslak`); OPEX “Ödendi/Bekliyor” (Ç13); K4 uygulanırsa ad eşitleme; Gelir planı ↔ İş ortaklığı ↔ Affilate karşılıklı bağlantı | ct-IA-05/14/18/34; icerik.spec; ui.spec karar sayfası | K1–K4 | 2 |
-| B2 | **Gelir → Nakit bütünlüğü** (F04; archetype Aşama 1–2 pilotu) | `cashflow.ts`: eklenen saha personeli maliyeti çıkış satırı; `CashflowPage`: seçenek kaydını okur — taşır ya da “N seçenek taşınmadı” yazar; tek etkin girdi anlık görüntüsü (`scenarioOptions` + `scenario`), sürümlü kayıt anahtarı; `SenaryoKurucu` kayıt durumu; “yalnız bu tarayıcı” uyarısı tek bileşen (F13) | ar-13/14/15, ct-IA-23/27; gelir+nakit spec: aynı seçeneklerle iki sayfanın kadro maliyeti ve senaryo adı eşit | — (K13 ile hemen) | 2 |
-| B3 | **Metrik sözlüğü ve “ölçülmedi”** (CA-6) | `src/data/metrics.ts`: kimlik, birim, dönem, kaynak, olay tanımı (üye/ilk ödeme/devam eden/aktif temsilci/aktif ortak); Hedefler, rol KPI, İş ortaklığı, Temsilci ağı aynı kimliği okur; gerçekleşen yoksa “ölçülmedi” (0 çizilmez); K11 terimleri ekranda | ct-IA-16/19, ar-05 | K11 | 2 |
-| B4 | **Mevcut içeriğin taşınması** (CA-3/4/5’in mevcut-içerik kısmı) | Dijital rol `#olcum/#otomasyon/#uretim/#icerik-plani` → `/pazarlama-operasyonu/`; Kararlar `#ucret/#crm/#mesai` → `/ucret-politikasi/` ve `/musteri-yolculugu/#asamalar`; kaynakta özet + bağlantı; eski hash köprüleri; envanterde `planlandi` kalkar | ct-IA-03/05/06/30; icerik.spec | B1 | 3 |
-| B5 | **Genel bakış, Kaynaklar, kapsam notları, Affilate politika sürümü** (CA-7) | `/genel-bakis/` kanonik kayıtlardan (N01: amaç, kapsam, kritik karar, yakın teslim, finansman özeti; K1 çelişkisi görünür); Kaynaklar önce bölüm (envanter kaynak/tarih/kanıt alanları ekranda); F13 düzenleyici kapsam notu; Affilate “politika sürümü” (K2) | ct-IA-04/07/12/13; affilate ek U | B1, B2 | 2 |
-| B6 | **Yerel kayıt dayanıklılığı** (archetype Aşama 3, dar) | Parametreler / temel senaryo / seçenekler / Notlar: sürüm anahtarı, dışa/içe aktarma, bozuk kayıtta kurtarma, iki sekme çakışması (Applet ve Affilate’teki kalıp genelleştirilir) | ar-23…28, ar-41 | B2 | 2 |
-| B7 | **Kapanış ve cila** (CA-8) | IA durum tablosu; 320×480 ölçüm turu (her sayfa ilk ekran, kırıntı dahil); %200 metin; gizlilik/secret taraması; rehber ve AGENTS tek liste; insan testi pilotu (§6); bağımsız QA (Codex salt-okunur, aynı anlık görüntü hash’i) | tam tur + CI; pilot raporu; `not_run` listesi | B1–B6 | 2 + pilot |
-| B8 | **Birleştirme ve yayın** | Worktree dalları → `main` (ff-only); birleşmiş uzak dallar ve worktree’ler temizlenir (onayla); ana klasör hizalanır; Pages doğrulanır (200, son commit) | CI yeşil; Pages; AGENTS yayın kaydı | B7 | 1 |
+| B2 | **Gelir → Nakit bütünlüğü** (F04; archetype Aşama 1–2 pilotu) | `cashflow.ts`: eklenen saha personeli maliyeti çıkış satırı; `CashflowPage`: seçenek kaydını okur — taşır ya da “N seçenek taşınmadı” yazar; tek etkin girdi anlık görüntüsü (`scenarioOptions` + `scenario`), sürümlü kayıt anahtarı; `SenaryoKurucu` kayıt durumu; “yalnız bu tarayıcı” uyarısı tek bileşen (F13) | ar-13/14/15, ct-IA-23/27; gelir+nakit spec: aynı seçeneklerle iki sayfanın kadro maliyeti ve senaryo adı eşit | — (K13 ile hemen) | 2 — **B2.1 tamam (`fa58509`)**, B2.2 kalan |
+| B3 | **Şirket yapısı ve şirket bazlı finans** (yeni; K3, K11) | `src/data/sirketler.ts`: Türksab (grup) → Mogem (Segika/SGK) ve iStoc Company (iStoc, Toptan); Sheets’e “Şirket” sütunu (Apps Script kurulum adımı + motor; boşsa “Türksab ortak”), gider kalemleri şirkete göre; Mogem sabit gelirleri Sheets’te (“Gelirler” sayfası; tutar repoya girmez); nakit akışı: şirket bazlı giriş/çıkış, Mogem → Türksab aktarımı, Türksab → iStoc yatırımı, Türksab’ın ödediği Mogem gideri; grup toplamı görünümü; Giderler ve Nakit akışı sayfalarında şirket seçici | opex-motor/opex-script: Şirket sütunu ve Gelirler; data.spec: şirket toplamları = kalem toplamları, grup = şirketler toplamı; nakit.spec: şirket seçici ve grup satırı; 320×480 | §4.2-2…4; Sheets düzenlemesi sahip | 3 |
+| B4 | **Metrik sözlüğü ve “ölçülmedi”** (CA-6) | `src/data/metrics.ts`: kimlik, birim, dönem, kaynak, olay tanımı (üye/ilk ödeme/devam eden/aktif temsilci/aktif ortak); Hedefler, rol KPI, İş ortaklığı, Temsilci ağı aynı kimliği okur; gerçekleşen yoksa “ölçülmedi” (0 çizilmez); K11 terimleri ekranda | ct-IA-16/19, ar-05 | K11, B3 (şirket/marka kapsamı) | 2 |
+| B5 | **Mevcut içeriğin taşınması** (CA-3/4/5’in mevcut-içerik kısmı) | Dijital rol `#olcum/#otomasyon/#uretim/#icerik-plani` → `/pazarlama-operasyonu/`; Kararlar `#ucret/#crm/#mesai` → `/ucret-politikasi/` ve `/musteri-yolculugu/#asamalar`; kaynakta özet + bağlantı; eski hash köprüleri; envanterde `planlandi` kalkar | ct-IA-03/05/06/30; icerik.spec | B1 | 3 |
+| B6 | **Genel bakış, Kaynaklar, kapsam notları, Affilate politika sürümü** (CA-7) | `/genel-bakis/` kanonik kayıtlardan (N01: amaç, kapsam, kritik karar, yakın teslim, finansman özeti; K1 çelişkisi görünür); Kaynaklar önce bölüm (envanter kaynak/tarih/kanıt alanları ekranda); F13 düzenleyici kapsam notu; Affilate “politika sürümü” (K2) | ct-IA-04/07/12/13; affilate ek U | B1, B2, B3 | 2 |
+| B7 | **Yerel kayıt dayanıklılığı** (archetype Aşama 3, dar) | Parametreler / temel senaryo / seçenekler / Notlar: sürüm anahtarı, dışa/içe aktarma, bozuk kayıtta kurtarma, iki sekme çakışması (Applet ve Affilate’teki kalıp genelleştirilir) | ar-23…28, ar-41 | B2 | 2 |
+| B8 | **Kapanış ve cila** (CA-8) | IA durum tablosu; 320×480 ölçüm turu (her sayfa ilk ekran, kırıntı dahil); %200 metin; gizlilik/secret taraması; rehber ve AGENTS tek liste; insan testi pilotu (§6); bağımsız QA (Codex salt-okunur, aynı anlık görüntü hash’i) | tam tur + CI; pilot raporu (sahip, K12); `not_run` listesi | B1–B7 | 2 + pilot |
+| B9 | **Birleştirme ve yayın** | Worktree dalları → `main` (ff-only); birleşmiş uzak dallar ve worktree’ler temizlenir (onayla); ana klasör hizalanır; Pages doğrulanır (200, son commit) | CI yeşil; Pages; AGENTS yayın kaydı | B8 | 1 |
 
-Toplam ≈ 17 paket + pilot.
+Toplam ≈ 20 paket + pilot. **Sayaç (sürüm 2): 0/10 tamamlandı, 2/10 aktif** (B0: cevaplar geldi, belge önekleri kalan; B2: B2.1 tamam, B2.2 kalan).
 
 ### 5.1 Sıra gerekçesi
-1. B0 önce: kararsız çelişki yeni sayfalara kopyalanır (Y3).
-2. B2 B1’den bağımsız (ayrı dosyalar) ve yayındaki sayıyı düzeltir; K13 ile hemen başlayabilir.
-3. B3, B4’ten önce: metrik kimliği olmadan taşınan bloklar kopya tanım üretir (Y7).
-4. B4 yalnız mevcut içerik; yeni içerik (Strateji, Müşteri yolculuğu tam, Segika finans) sahip verince ayrı plan sürümü (B2 planı).
-5. B6, B2’nin kayıt modeline dayanır; B5 Genel bakış için B1’in karar kaydı gerekir.
-6. B7/B8 en sonda; bağımsız QA değişmemiş anlık görüntüde.
+1. B0 önce: kararsız çelişki yeni sayfalara kopyalanır (Y3). Cevaplar geldi; alt sorular (§4.2) B1/B3 başlarken kapanır.
+2. B2 B1’den bağımsız (ayrı dosyalar) ve yayındaki sayıyı düzeltir; B2.1 yapıldı.
+3. B3 (şirket yapısı) B4’ten önce: metrik sözlüğü şirket/marka kapsamıyla tanımlanır; nakit akışı şirket bazlı olmadan Segika/iStoc akışları (K11) ayrışmaz.
+4. B4, B5’ten önce: metrik kimliği olmadan taşınan bloklar kopya tanım üretir (Y7).
+5. B5 yalnız mevcut içerik; yeni içerik (Strateji, Müşteri yolculuğu tam, Toptan) sahip verince ayrı plan sürümü.
+6. B7, B2’nin kayıt modeline dayanır; B6 Genel bakış için B1’in karar kaydı ve B3’ün şirket yapısı gerekir.
+7. B8/B9 en sonda; bağımsız QA değişmemiş anlık görüntüde.
 
 ### 5.2 Ertelenen (v1 dışı, gerekçeli)
 - archetype §3.1 dizin yeniden düzeni, ViewModel katmanı, tam CI kapı seti, branch koruması: bitirme için gerekmez; `deneysel`.
@@ -222,7 +250,7 @@ Toplam ≈ 17 paket + pilot.
 ## 6. Bitiş tanımı (Definition of Done)
 
 1. **Anlam:** F02/F03/F04/F16 çözüldü ya da “açık alternatif / taslak sürüm” etiketli; hiçbir sayfa öneri/örnek/taslağı karar gibi sunmuyor (ct-IA-18); alt bilgi cümleleri kodla uyumlu.
-2. **Sayı:** Gelir planı ve Nakit akışı aynı kadro maliyetini ve aynı etkin girdileri kullanıyor ya da farkı ekranda yazıyor (ar-13).
+2. **Sayı:** Gelir planı ve Nakit akışı aynı kadro maliyetini ve aynı etkin girdileri kullanıyor ya da farkı ekranda yazıyor (ar-13); şirket bazlı gelir-gider-nakit ile grup toplamı tutarlı, Mogem/iStoc akışları ayrı (B3).
 3. **Yolculuk:** §1’deki altı iş uçtan uca; pilotta (sahip + bir okur) her görev kendi cümlesiyle doğru anlatılıyor; yanlış para/komisyon/kapsam yorumu sıfır (contents §13.4).
 4. **Ölçüm:** 320×480 her sayfada ilk ekranda ana sonuç, yatay taşma yok, ≥ 14 px, hedef ≥ 44 px; %200 metin büyütmede okunur.
 5. **Kanıt:** tam tur üç tarayıcıda yeşil; CI yeşil; `not_run` listesi (gerçek cihaz, ekran okuyucu, forced-colors tam seti) AGENTS’ta; bağımsız QA raporu aynı anlık görüntüde.
@@ -240,10 +268,11 @@ Codex Desktop MASTER’dan istenen: **yalnız bu belgenin** salt-okunur eleştir
 2. §3.3-C sayısal bulgu (nakit akışında eklenen saha maliyeti eksik; seçenekler taşınmıyor) doğru mu; tutar tahmini ve en küçük adım uygun mu?
 3. §3.1–3.2 bulgular ve çelişkiler eksik mi; yanlış atfedilen var mı?
 4. §4: sahibe sorulmaması gereken (teknik) ya da sorulması gereken (ürün / geri alınamaz) başka karar var mı? Varsayılanlar güvenli mi? K13 önerisi doğru mu?
-5. §5 sıra: B2’yi B1 ile paralel/önce almak riskli mi; B3 → B4 sırası; payda 9 ve ≈ 17 paket gerçekçi mi?
+5. §5 sıra (sürüm 2): B2’yi B1 ile paralel/önce almak riskli mi; B3 (şirket yapısı) → B4 (metrik) → B5 (taşıma) sırası; payda 10 ve ≈ 20 paket gerçekçi mi?
 6. §5.2 ertelenenler: bitirme için gerekli olduğu hâlde ertelenen var mı (archetype A06–A09, A16)?
 7. §6: ölçülemeyen madde var mı; pilot (sahip + 1 okur, 6 görev) yeterli mi?
 8. Belge sahibin yanlış anlama riskini (karar / tahmin / örnek) bir yerde artırıyor mu?
+9. §4.1 cevapları ve §4.2 alt soruları: K2 politikası (aylık %10 / yıllık %15, girdi) ve K3 şirket yapısı (Türksab → Mogem, iStoc; tutarlar Sheets’te) plana doğru işlendi mi; B3 kapsamında eksik varsayım ya da gizlilik riski var mı?
 
 ## 8. Kaynak haritası
 - docs/contents.md §2, §3, §5, §7, §8, §13–§15; docs/gorsel_algi.md F19; docs/affilate.md §13–§14; docs/archetype.md §3, §7, §9.3, §12, §13 (depo dışı).
