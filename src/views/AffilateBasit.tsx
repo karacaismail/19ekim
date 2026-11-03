@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Girdi, Grup, Hesap, Kurallar, Sec, Sonuc } from '../components/sadeKit';
+import { Girdi, Grup, Hesap, KararJson, Kurallar, Sec, Sonuc, useYapisikSutunlar } from '../components/sadeKit';
 import { ORTAK_ADLARI, baslangicOrtaklar, karsilastir, type OrtakId, type OrtakKurali, type Politika, type Sonuc as MotorSonuc } from '../data/affilate';
 import { POLITIKA_ADI, baslangicKurgu, senaryoKur } from '../data/affilateKurgu';
 
@@ -129,6 +129,7 @@ function ModelAyarlari({ id, s, g }: { id: OrtakId; s: Sade; g: (p: Partial<Sade
 }
 
 export function AffilateBasit() {
+  const duzen = useYapisikSutunlar();
   const { s, g, sifirla } = useSade();
   const [secili, setSecili] = useState<OrtakId>('satis');
   const sonuc = useMemo(() => hesapla(s), [s]);
@@ -168,7 +169,7 @@ export function AffilateBasit() {
         </p>
       </div>
 
-      <div className="so2-duzen">
+      <div className="so2-duzen" ref={duzen}>
         <aside className="so2-ayarlar" aria-label="Ayarlar">
           <div className="so2-ayarlar-ust">
             <p className="so2-ayarlar-baslik">Ayarlar</p>
@@ -263,6 +264,22 @@ export function AffilateBasit() {
         </section>
         </div>
       </div>
+      <KararJson
+        veri={{
+          sayfa: 'Affilate',
+          surum: 1,
+          secim: { musteriOder: s.odeme, sureAy: s.ufukAy, seciliModel: secili },
+          satis: { musteriSayisi: s.adet, aylikFiyat: s.aylikTl, yillikPaketAy: s.kat, yillikPaket: yillik },
+          modeller: Object.fromEntries(
+            IDLER.map((id) => [
+              id,
+              { ad: METIN[id].ad, oranlar: s.ortaklar[id].oranlar, sonrakiYillar: s.ortaklar[id].sonraki, odeme: POLITIKA_ADI[s.ortaklar[id].politika], ortagaToplam: Math.round(toplam(sonuc[id]) / 100), bizeKalan: Math.round(segikayaKalan(sonuc[id]) / 100), yillara: yillar(sonuc[id], s.ufukAy).map((t) => Math.round(t / 100)) },
+            ]),
+          ),
+          ayarlar: s,
+        }}
+        dosyaAdi="affilate"
+      />
     </div>
   );
 }

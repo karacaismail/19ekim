@@ -157,6 +157,56 @@ export function kadrolu(a: Ayar) {
   return { ciro, kota: k, kotaIcinSatis, prim, toplam: a.maas + prim, doluluk: k > 0 ? ciro / k : 0 };
 }
 
+/** Aşama süreleri (gün): ilk 14 gün, 15–45, 46–90, 91–365. İlk yıl kazancı bu sürelerle hesaplanır. */
+const ASAMA_GUN = [14, 31, 45, 275];
+const GUN_AY = 365 / 12;
+
+export interface DonemSatiri {
+  ad: string;
+  yillik: number;
+  /** Yıllık tutarın nasıl hesaplandığı (kısa formül). */
+  formul: string;
+}
+
+/**
+ * Dönemsel kazanç (kullanıcı kararı 2026-11-03): her rolün seçili ayarlarla yaklaşık yıllık kazancı. Günlük = yıllık ÷ 365,
+ * haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12. Satış adetleri her ay aynı kabul edilir; öncü ortakta ilk yıl aşamalarla hesaplanır.
+ */
+export function donemKazanci(a: Ayar, rol: RolId): DonemSatiri[] {
+  const n = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
+  const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+  if (rol === 'oncu') {
+    const birim = satisKazanci(a, a.oncuSeviye);
+    const ilkYilSatis = a.oncuAsama.reduce((top, adet, i) => top + (adet * ASAMA_GUN[i]) / GUN_AY, 0);
+    return [
+      { ad: 'İlk yıl', yillik: ilkYilSatis * birim, formul: `${n(ilkYilSatis)} satış × ${t(birim)}` },
+      { ad: '2. yıldan sonra', yillik: a.oncuAsama[3] * 12 * birim, formul: `${a.oncuAsama[3]} satış × 12 ay × ${t(birim)}` },
+    ];
+  }
+  if (rol === 'kadrolu') {
+    const k = kadrolu(a);
+    return [
+      { ad: 'Maaş', yillik: a.maas * 12, formul: `${t(a.maas)} × 12 ay` },
+      { ad: 'Prim', yillik: k.prim * 12, formul: `${t(k.prim)} × 12 ay` },
+      { ad: 'Toplam', yillik: k.toplam * 12, formul: `${t(k.toplam)} × 12 ay` },
+    ];
+  }
+  if (rol === 'cozum') {
+    const birim = cozumKazanci(a);
+    const brut = birim * a.cozumMusteri;
+    const satirlar: DonemSatiri[] = [{ ad: 'Komisyon', yillik: brut, formul: `${a.cozumMusteri} müşteri × ${t(birim)}` }];
+    const egitim = a.marka === 'segika' ? a.ekEgitimSaat * a.egitimSaatUcret : 0;
+    if (egitim > 0) satirlar.push({ ad: 'Ek eğitim düşülünce', yillik: brut - egitim, formul: `${t(brut)} − ${t(egitim)}` });
+    return satirlar;
+  }
+  if (rol === 'tavsiye') {
+    const kredi = aylikFiyat(a) * a.krediAy;
+    return [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye (kredi)`, yillik: kredi * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(kredi)}` }];
+  }
+  const birim = satisKazanci(a, a.elciSeviye);
+  return [{ ad: 'Elçi', yillik: birim * a.elciSatis * 12, formul: `${a.elciSatis} satış × 12 ay × ${t(birim)}` }];
+}
+
 export function musavir(a: Ayar) {
   const yillik = yillikFiyat(a);
   return a.musavirModel === 'komisyon'

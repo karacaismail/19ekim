@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { NumberInput } from '@mantine/core';
 
 /**
@@ -145,4 +145,103 @@ export function Hesap({ baslik, satirlar }: { baslik: string; satirlar: { ad: st
       </dl>
     </div>
   );
+}
+
+/**
+ * Karar verisi (kullanıcı kararı 2026-11-03): sayfadaki seçimler, girilen değerler ve hesaplanan sonuçlar canlı JSON.
+ * Varsayılan kapalı açılır bölüm; altında JSON dosyası olarak indirme düğmesi.
+ */
+export function KararJson({ veri, dosyaAdi }: { veri: unknown; dosyaAdi: string }) {
+  const metin = JSON.stringify(veri, null, 2);
+  const indir = () => {
+    const tarih = new Date().toISOString();
+    const icerik = JSON.stringify({ disaAktarim: tarih, ...(veri as object) }, null, 2);
+    const url = URL.createObjectURL(new Blob([icerik], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${dosyaAdi}-${tarih.slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <section className="so2-json" aria-label="Karar verisi">
+      <details className="so2-json-ac">
+        <summary className="so2-json-baslik">Karar verisi (JSON)</summary>
+        <pre className="so2-json-icerik" tabIndex={0}>
+          <code>{metin}</code>
+        </pre>
+      </details>
+      <button type="button" className="so2-json-indir" onClick={indir}>
+        JSON dosyasını indir
+      </button>
+    </section>
+  );
+}
+
+/** Dönemsel kazanç tablosu: her satır bir kazanç kalemi; sütunlar günlük, haftalık, aylık, yıllık. */
+export function Donemler({ satirlar }: { satirlar: { ad: string; yillik: number; formul: string }[] }) {
+  const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+  const donem = [
+    { ad: 'Günlük', bol: 365 },
+    { ad: 'Haftalık', bol: 52 },
+    { ad: 'Aylık', bol: 12 },
+    { ad: 'Yıllık', bol: 1 },
+  ];
+  return (
+    <div className="so2-donem">
+      <p className="so2-alt-baslik">Ne kadar kazanır?</p>
+      <div className="so2-donem-kap">
+        <table className="so2-donem-tablo">
+          <thead>
+            <tr>
+              <th scope="col">Kalem</th>
+              {donem.map((d) => (
+                <th key={d.ad} scope="col">
+                  {d.ad}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {satirlar.map((r) => (
+              <tr key={r.ad}>
+                <th scope="row">
+                  {r.ad}
+                  <small>
+                    <Canli deger={r.formul}>{r.formul}</Canli>
+                  </small>
+                </th>
+                {donem.map((d) => (
+                  <td key={d.ad}>
+                    <Canli deger={r.yillik / d.bol}>{tl(r.yillik / d.bol)}</Canli>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="so2-donem-not">Yaklaşık değerdir. Günlük = yıllık ÷ 365, haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12.</p>
+    </div>
+  );
+}
+
+/**
+ * Yapışık sütunlar (kullanıcı kararı 2026-11-03): sütunların içinde kaydırma yok, sayfa kayar. Her sütunun yüksekliği
+ * --so2-boy olarak yazılır; kısa sütun bitince ekranın altına yapışır ve uzun sütunla birlikte iner.
+ */
+export function useYapisikSutunlar() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const kap = ref.current;
+    if (!kap || typeof ResizeObserver === 'undefined') return;
+    const gozlem = new ResizeObserver((girdiler) => {
+      for (const g of girdiler) (g.target as HTMLElement).style.setProperty('--so2-boy', `${(g.target as HTMLElement).offsetHeight}px`);
+    });
+    for (const el of Array.from(kap.children)) gozlem.observe(el);
+    return () => gozlem.disconnect();
+  }, []);
+  return ref;
 }

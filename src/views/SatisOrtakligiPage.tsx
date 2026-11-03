@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Girdi, Grup, Hesap, Kimler, Kurallar, Sec, Sonuc } from '../components/sadeKit';
+import { Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useYapisikSutunlar } from '../components/sadeKit';
 import {
   ASAMA_ADI,
   ASAMA_SURE,
@@ -10,6 +10,7 @@ import {
   SEVIYE_ADI,
   VARSAYILAN_AYAR,
   aylikFiyat,
+  donemKazanci,
   kadrolu,
   musavir,
   rolMetinleri,
@@ -277,6 +278,41 @@ function RolHesabi({ a, rol }: { a: Ayar; rol: RolId }) {
   return <Hesap baslik="Hesap" satirlar={satirlar} />;
 }
 
+/** Karar verisi: seçimler, girilen değerler ve beş rolün hesaplanan sonuçları (tutarlar ₺, oranlar 0–1). */
+function kararVerisi(a: Ayar, rol: RolId) {
+  const r = (n: number) => Math.round(n);
+  const k = kadrolu(a);
+  const sg = a.marka === 'segika' ? segikaAylik(a) : null;
+  return {
+    sayfa: 'Satış ortaklığı programı',
+    surum: 1,
+    secim: { urun: a.marka, odemeModeli: a.model, seciliRol: rol },
+    fiyat: {
+      aylik: r(aylikFiyat(a)),
+      yillikPaket: r(yillikFiyat(a)),
+      ...(a.marka === 'istoc'
+        ? { aylikEuro: a.istocAyEur, kur: a.kur, yillikPaketAy: a.istocYilAy }
+        : { paket: PAKET_ADI[a.segikaPaket], calisan: sg!.kisi, blok: a.blok, dilimler: sg!.dilimler.map((d) => ({ alt: d.alt, ust: d.ust, kisi: d.kisi, indirim: d.indirim, tutar: r(d.tutar) })) }),
+    },
+    roller: {
+      oncu: { seviye: SEVIYE_ADI[a.oncuSeviye], satisBasina: r(satisKazanci(a, a.oncuSeviye)), aylikSatisHedefleri: a.oncuAsama, aylikKazanc: a.oncuAsama.map((n) => r(n * satisKazanci(a, a.oncuSeviye))) },
+      kadrolu: { maas: a.maas, kota: r(k.kota), primOrani: a.kadroluPrim[a.marka], aylikSatis: a.kadroluSatis, ciro: r(k.ciro), prim: r(k.prim), toplam: r(k.toplam) },
+      cozum: {
+        ...(a.marka === 'segika' ? { oran: a.cozumOran, ucretsizEgitimSaat: a.egitimSaat, ekEgitimSaatUcreti: a.egitimSaatUcret, ekEgitimSaat: a.ekEgitimSaat, ekEgitimBedeli: r(a.ekEgitimSaat * a.egitimSaatUcret) } : { seviye: SEVIYE_ADI[a.cozumSeviye] }),
+        musteriBasina: r(cozumKazanci(a)),
+        yillikMusteri: a.cozumMusteri,
+        yillikKazanc: r(cozumKazanci(a) * a.cozumMusteri),
+        maliMusavir: { model: a.musavirModel, oran: a.musavirModel === 'komisyon' ? a.musavirOran : a.musavirIndirim, musteriBasina: r(musavir(a).musteriBasina) },
+      },
+      tavsiye: { tavsiyeEdeneAy: a.krediAy, yeniMusteriyeAy: a.yeniKrediAy, yillikSinir: a.tavsiyeSinir, kredi: r(aylikFiyat(a) * a.krediAy) },
+      elci: { seviye: SEVIYE_ADI[a.elciSeviye], satisBasina: r(satisKazanci(a, a.elciSeviye)), aylikSatis: a.elciSatis, aylikKazanc: r(satisKazanci(a, a.elciSeviye) * a.elciSatis) },
+    },
+    odeme: { komisyonOranlari: a.oran, satisBasiTutar: a.sabit, ilkOdeme: a.ilkOdeme, ilkOdemeGunu: a.ilkGun, kalanOdemeGunu: a.kalanGun },
+    donemselKazanc: Object.fromEntries((['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as RolId[]).map((id) => [id, donemKazanci(a, id).map((d) => ({ kalem: d.ad, gunluk: r(d.yillik / 365), haftalik: r(d.yillik / 52), aylik: r(d.yillik / 12), yillik: r(d.yillik) }))])),
+    ayarlar: a,
+  };
+}
+
 /* ---------- Ayarlar: seçili rolün değerleri önce ---------- */
 
 function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>) => void }) {
@@ -417,6 +453,7 @@ function segikaOzet(a: Ayar) {
 /* ---------- Sayfa ---------- */
 
 function Icerik() {
+  const duzen = useYapisikSutunlar();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
   const roller = rolMetinleri(a.marka);
@@ -460,7 +497,7 @@ function Icerik() {
         </p>
       </div>
 
-      <div className="so2-duzen">
+      <div className="so2-duzen" ref={duzen}>
         <aside className="so2-ayarlar" aria-label="Ayarlar">
           <div className="so2-ayarlar-ust">
             <p className="so2-ayarlar-baslik">Ayarlar</p>
@@ -508,12 +545,14 @@ function Icerik() {
           <p className="so2-kim">{secili.kim}</p>
           <Kimler liste={secili.kimler} />
           {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
+          <Donemler satirlar={donemKazanci(a, rol)} />
           <RolHesabi a={a} rol={rol} />
           <Kurallar maddeler={secili.kurallar} />
           </div>
         </section>
         </div>
       </div>
+      <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi" />
     </div>
   );
 }

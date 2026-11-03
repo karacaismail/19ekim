@@ -7418,29 +7418,26 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
  * Canlı simülasyon (kullanıcı kararı 2026-11-03): soldaki ayarlar sayfayla kayar, sağdaki sonuç sütunu yapışık kalır;
  * değişen değer kısa bir zemin vurgusuyla belirir. Hesap dökümü her ayarın sonuca etkisini formülüyle gösterir.
  */
-.so2-ayarlar {
-  position: static;
-  max-height: none;
-  overflow: visible;
-}
-
-.so2-sag {
+.so2-duzen {
   /* Üst bant ve yapışık kırıntı şeridinin (sayfa başlığı) altında durur. */
   --so2-ust: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
-  position: sticky;
-  top: var(--so2-ust);
-  max-height: calc(100dvh - var(--so2-ust) - var(--space-4));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  transition-property: top, max-height;
-  transition-duration: var(--motion-duration-base);
-  transition-timing-function: var(--motion-ease-standard);
-  transition-delay: var(--motion-delay-none);
 }
 
-html[data-bant-gizli] .so2-sag {
+html[data-bant-gizli] .so2-duzen {
   --so2-ust: calc(var(--hit-min) + var(--space-4));
+}
+
+/*
+ * Sütunların içinde kaydırma yok (kullanıcı kararı 2026-11-03); sayfa kayar. Ekrana sığan sütun üstte yapışır; sığmayan
+ * sütun sonu görününce alta yapışır. Uzun sütun satırı doldurduğu için yerinde kalır, kısa olan onunla birlikte iner.
+ */
+.so2-ayarlar,
+.so2-sag {
+  position: sticky;
+  top: min(var(--so2-ust), calc(100dvh - var(--so2-boy, 0px) - var(--space-4)));
+  align-self: start;
+  max-height: none;
+  overflow: visible;
 }
 
 .so2-canli {
@@ -7494,4 +7491,135 @@ html[data-bant-gizli] .so2-sag {
 /* İki panel arasında boşluk (kullanıcı isteği 2026-11-03). */
 .so2-duzen {
   gap: var(--space-6);
+}
+
+/* Karar verisi (JSON): sayfanın en altında, varsayılan kapalı; altında indirme düğmesi. */
+.so2-json {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  margin-top: var(--space-10);
+}
+
+.so2-json-ac {
+  width: 100%;
+  background-color: var(--surface-raised);
+}
+
+.so2-json-baslik {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-5);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-json-baslik:hover {
+  background-color: var(--surface-hover);
+}
+
+.so2-json-icerik {
+  max-height: 32rem;
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  overflow: auto;
+  border-top: var(--hairline) solid var(--rule);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  white-space: pre;
+}
+
+.so2-json-ac[open] .so2-json-icerik {
+  animation-name: so2-belir;
+  animation-duration: var(--motion-duration-base);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+}
+
+.so2-json-indir {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-5);
+  border: var(--hairline) solid var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-json-indir:hover {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* Dönemsel kazanç: günlük, haftalık, aylık, yıllık. Dar alanda tablo kendi kabında yatay kayar. */
+.so2-donem {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-8);
+}
+
+.so2-donem-kap {
+  overflow-x: auto;
+}
+
+.so2-donem-tablo {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.so2-donem-tablo th,
+.so2-donem-tablo td {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: var(--hairline) solid var(--rule);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.so2-donem-tablo thead th {
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.so2-donem-tablo th:first-child {
+  text-align: start;
+  white-space: normal;
+}
+
+.so2-donem-tablo tbody th {
+  font-weight: var(--weight-semibold);
+}
+
+.so2-donem-tablo tbody th small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.so2-donem-tablo tbody td {
+  font-weight: var(--weight-semibold);
+}
+
+.so2-donem-tablo tbody td:last-child {
+  color: var(--accent-strong);
+}
+
+.so2-donem-not {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
