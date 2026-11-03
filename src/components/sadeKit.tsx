@@ -37,6 +37,7 @@ export function Girdi({ label, value, onChange, yuzdeMi = false, birim, step = 1
       allowNegative={false}
       thousandSeparator="."
       decimalSeparator=","
+      allowedDecimalSeparators={[',']}
       decimalScale={2}
       step={step}
       prefix={yuzdeMi ? '%' : undefined}
@@ -182,7 +183,7 @@ export function KararJson({ veri, dosyaAdi }: { veri: unknown; dosyaAdi: string 
 
 /** Dönemsel kazanç tablosu: her satır bir kazanç kalemi; sütunlar günlük, haftalık, aylık, yıllık. */
 export function Donemler({ satirlar }: { satirlar: { ad: string; yillik: number; formul: string }[] }) {
-  const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+  const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
   const donem = [
     { ad: 'Günlük', bol: 365 },
     { ad: 'Haftalık', bol: 52 },
@@ -243,5 +244,18 @@ export function useYapisikSutunlar() {
     for (const el of Array.from(kap.children)) gozlem.observe(el);
     return () => gozlem.disconnect();
   }, []);
+  return ref;
+}
+
+/** Seçili sekme dar ekrandaki yatay şeritte görünür kalsın; yalnız şerit kayar, sayfa kaymaz. */
+export function useSeciliSekmeGorunur(secili: string) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const serit = ref.current;
+    const sekme = serit?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!serit || !sekme || serit.scrollWidth <= serit.clientWidth) return;
+    const sol = sekme.offsetLeft - serit.offsetLeft;
+    if (sol < serit.scrollLeft || sol + sekme.offsetWidth > serit.scrollLeft + serit.clientWidth) serit.scrollLeft = sol;
+  }, [secili]);
   return ref;
 }

@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DegerOnerisiPage } from '../views/DegerOnerisiPage';
+---
+
+<BaseLayout title="Değer önerisi">
+  <DegerOnerisiPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

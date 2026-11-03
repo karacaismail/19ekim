@@ -52,7 +52,7 @@ html[data-focus-mode='keyboard'] :where(a[href], button, summary):focus-visible 
   text-underline-offset: var(--focus-indicator-offset);
 }
 
-html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list):focus-visible {
+html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .so2-json-icerik):focus-visible {
   box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
 }
 
@@ -7501,8 +7501,14 @@ html[data-bant-gizli] .so2-duzen {
   margin-top: var(--space-10);
 }
 
+.so2-json {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Açılınca içerik genişliğine büyüyüp sayfayı yana taşırmasın (iPhone QA 2026-11-03); JSON kendi kutusunda kayar. */
 .so2-json-ac {
   width: 100%;
+  min-width: 0;
   background-color: var(--surface-raised);
 }
 
@@ -7622,4 +7628,592 @@ html[data-bant-gizli] .so2-duzen {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--text-sm);
+}
+
+/*
+ * Dar ekran (kullanıcı kararı 2026-11-03): tek sütun. Önce rol sekmeleri ve sonuç, sonra ayarlar. Ayarlar başlığı yapışık
+ * kalır ve seçili rolün canlı sonucunu gösterir; ayar değişince sonuç ekrandan çıkmadan görülür. Sekmeler yatay kayar.
+ */
+.so2-ayarlar-ozet {
+  display: none;
+}
+
+@media (max-width: 63.99em) {
+  .so2-duzen {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+  }
+
+  .so2-sag {
+    order: -1;
+  }
+
+  .so2-ayarlar,
+  .so2-sag {
+    position: static;
+  }
+
+  .so2-ayarlar {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .so2-ayarlar-ust {
+    position: sticky;
+    top: calc(var(--so2-ust) - var(--space-4));
+    z-index: 5;
+    flex-wrap: wrap;
+    gap: 0 var(--space-3);
+    margin-inline: calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--surface-raised);
+    box-shadow: 0 var(--hairline) 0 var(--rule);
+  }
+
+  .so2-ayarlar-ozet {
+    display: block;
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  .so2-ayarlar-ozet strong {
+    color: var(--accent-strong);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .so2-roller,
+  .so2-roller-3 {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(11rem, 1fr);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+
+  .so2-rol {
+    scroll-snap-align: start;
+  }
+
+  .so2-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .so2-fiyat {
+    flex-basis: 100%;
+    min-height: 0;
+    margin: 0;
+    text-align: start;
+  }
+
+  .so2-asamalar,
+  .so2-asamalar[data-n] {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  }
+}
+
+/* Sayfa üstündeki bant ve kırıntı şeridi yalnız geniş ve yeterince yüksek ekranda yapışıktır; diğerlerinde başlık en üste yapışır. */
+@media (max-width: 47.99em), (max-height: 39.99em) {
+  html .so2-duzen,
+  html[data-bant-gizli] .so2-duzen {
+    --so2-ust: var(--space-4);
+  }
+}
+
+@media (max-width: 47.99em) {
+  .so2-ikili,
+  .so2-kademe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .so2-hazir {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .so2-hesap-satir {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'ad sonuc'
+      'formul formul';
+  }
+
+  .so2-hesap-satir > dt {
+    grid-area: ad;
+  }
+
+  .so2-hesap-formul {
+    grid-area: formul;
+  }
+
+  .so2-hesap-sonuc {
+    grid-area: sonuc;
+  }
+
+  .so2-kota-ust {
+    flex-wrap: wrap;
+  }
+}
+
+/* Hesap dökümünün alt çizgisinden sonra kurallar ikinci bir çizgiyle başlamasın. */
+.so2-hesap + .so2-kurallar {
+  border-top: 0;
+}
+
+/* ---------- Alıntı (değer önerisi; kullanıcı kararı 2026-11-03) ----------
+ * Söz, sayfadaki açıklamalardan ayrışsın: sıcak yüzey, solda düz vurgu çizgisi (kenar sistemi), büyük tırnak ve iri metin.
+ */
+.alinti {
+  position: relative;
+  margin: 0;
+  /* Sağdaki boşluk tırnak işaretine ayrılır; işaret metnin üstüne binmez. */
+  padding: var(--space-5) calc(var(--space-6) + 2.75rem) var(--space-5) calc(var(--space-6) + var(--edge-width));
+  background-color: var(--surface-accent);
+}
+
+.alinti-isaret {
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-end: var(--space-4);
+  color: var(--accent);
+  font-size: 4.5rem;
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.alinti-metin {
+  margin: 0;
+}
+
+.alinti-metin p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+
+.alinti[data-boyut='buyuk'] {
+  padding-block: var(--space-8);
+}
+
+.alinti[data-boyut='buyuk'] .alinti-metin p {
+  max-width: 40ch;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-wrap: balance;
+}
+
+.alinti[data-boyut='buyuk'] {
+  padding-inline-end: calc(var(--space-6) + 4.5rem);
+}
+
+.alinti[data-boyut='buyuk'] .alinti-isaret {
+  font-size: 7rem;
+}
+
+.alinti-kaynak {
+  margin-top: var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Değer önerisi sayfası (/deger-onerisi/) ---------- */
+.dg {
+  max-width: 54rem;
+}
+
+.dg-uyari {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.dg-icindekiler {
+  margin-top: var(--space-6);
+}
+
+.dg-icindekiler ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dg-icindekiler a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.dg-icindekiler a:hover {
+  background-color: var(--surface-hover);
+  color: var(--accent-strong);
+}
+
+.dg-bolum {
+  margin-top: var(--space-12, 3rem);
+  scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
+}
+
+.dg-bolum-ust {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dg-bolum-ust > :not(.dg-harf) {
+  grid-column: 1 / -1;
+}
+
+.dg-kategori .dg-bolum-ust > .dg-bolum-baslik {
+  grid-column: 2;
+}
+
+.dg-bolum-baslik,
+.dg-katalog-baslik {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.dg-harf {
+  color: var(--accent-strong);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.dg-bolum-sayi {
+  margin: var(--space-1) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.dg-bolum-giris {
+  max-width: 62ch;
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+}
+
+.dg-katalog-ust {
+  margin-top: var(--space-16, 4rem);
+  padding-top: var(--space-8);
+  border-top: var(--hairline) solid var(--rule-strong);
+}
+
+/* En güçlü 10 söz: büyük sıra numarası solda, başlık, alıntı ve güçlü tarafı sağda. */
+.dg-guclu-liste,
+.dg-oneriler,
+.dg-adimlar,
+.dg-eskiler {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dg-guclu {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.dg-guclu:hover,
+.dg-oneri:hover,
+.dg-adim:hover {
+  background-color: var(--surface-hover);
+}
+
+.dg-guclu-no {
+  color: var(--accent-strong);
+  font-size: var(--text-sonuc);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dg-guclu-govde {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.dg-guclu-baslik {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.dg-guclu-taraf {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.dg-guclu-taraf strong {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.dg-ortak {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.dg-ortak-ad,
+.dg-eski-ad {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Kapıda ilk 30 saniye: numaralı adımlar. */
+.dg-adim {
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background-color: var(--surface-raised);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.dg-adim-no {
+  display: grid;
+  place-items: center;
+  width: var(--hit-min);
+  height: var(--hit-min);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.dg-adim-govde {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dg-adim-ad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.dg-adim-bag {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.dg-adim-bag a {
+  color: var(--text-link);
+}
+
+.dg-not {
+  max-width: 62ch;
+  margin: var(--space-6) 0 0;
+  color: var(--text-secondary);
+}
+
+.dg-not strong {
+  color: var(--text-primary);
+}
+
+/* Kategorideki öneri kartı: üstte numara ve ilk gün rozeti, sıkıntı, söz, altta bilgi ızgarası. */
+.dg-oneri {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+  scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.dg-oneri:target {
+  background-color: var(--surface-selected);
+}
+
+.dg-oneri-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.dg-oneri-no {
+  color: var(--accent-strong);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.dg-rozet {
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.dg-rozet[data-durum='evet'] {
+  background-color: var(--surface-accent);
+  color: var(--accent-strong);
+}
+
+.dg-sikinti {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.dg-bilgi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.dg-bilgi-genis {
+  grid-column: 1 / -1;
+}
+
+.dg-bilgi dt,
+.dg-kisaltmalar dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.dg-bilgi dd {
+  margin: var(--space-1) 0 0;
+}
+
+.dg-persona {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dg-persona li {
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--surface-sunken);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Eski sözlerin güçlü hali: eski söz silik ve üstü çizili, yerine geçen söz alıntı. */
+.dg-eski {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+}
+
+.dg-eski-metin {
+  margin: 0 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+}
+
+.dg-kisaltmalar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.dg-kisaltmalar dt {
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+.dg-kisaltmalar dd {
+  margin: var(--space-1) 0 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 47.99em) {
+  .dg-guclu {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .dg-guclu-no {
+    font-size: var(--text-2xl);
+  }
+
+  .dg-oneri,
+  .dg-eski {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .dg-adim {
+    padding: var(--space-4);
+  }
+
+  /* Dar ekranda tırnak işareti metnin üstündeki boşluğa yerleşir; metin bütün genişliği kullanır. */
+  .alinti,
+  .alinti[data-boyut='buyuk'] {
+    padding: calc(var(--space-4) + 2rem) var(--space-4) var(--space-4) calc(var(--space-4) + var(--edge-width));
+  }
+
+  .alinti-isaret,
+  .alinti[data-boyut='buyuk'] .alinti-isaret {
+    inset-inline-start: calc(var(--space-4) + var(--edge-width));
+    inset-inline-end: auto;
+    font-size: 3.5rem;
+  }
+
+  .dg-adim {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .dg-bilgi {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
 }

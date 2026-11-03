@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useYapisikSutunlar } from '../components/sadeKit';
+import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKit';
 import {
   ASAMA_ADI,
   ASAMA_SURE,
@@ -27,7 +27,7 @@ import {
 } from '../data/satisOrtakligi';
 
 const ANAHTAR = 'turksab-satis-ortakligi-v1';
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
 const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
 
 function useAyar() {
@@ -73,7 +73,7 @@ function Oncu({ a }: { a: Ayar }) {
   return (
     <>
       <Sonuc
-        etiket="Ortağın aylık kazancı · 90. günden sonra"
+        etiket={'Ortağın aylık kazancı\u00a0· 90. günden sonra'}
         deger={tl(enIyi)}
         aciklama={
           <>
@@ -456,6 +456,7 @@ function Icerik() {
   const duzen = useYapisikSutunlar();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
+  const serit = useSeciliSekmeGorunur(rol);
   const roller = rolMetinleri(a.marka);
   const secili = roller.find((r) => r.id === rol)!;
   const yillik = yillikFiyat(a);
@@ -504,12 +505,19 @@ function Icerik() {
             <button type="button" className="so2-sifirla" onClick={sifirla}>
               Başa dön
             </button>
+            <p className="so2-ayarlar-ozet">
+              {secili.ad}{' '}
+              <strong>
+                <Canli deger={ozet[rol]}>{ozet[rol]}</Canli>
+              </strong>{' '}
+              {ozetBirim[rol]}
+            </p>
           </div>
           <RolAyarlari rol={rol} a={a} g={g} />
           <OrtakAyarlar a={a} g={g} />
         </aside>
         <div className="so2-sag">
-          <div className="so2-roller" role="tablist" aria-label="Roller">
+          <div className="so2-roller" role="tablist" ref={serit} aria-label="Roller">
         {roller.map((r, i) => (
           <button
             key={r.id}

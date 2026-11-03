@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Girdi, Grup, Hesap, KararJson, Kurallar, Sec, Sonuc, useYapisikSutunlar } from '../components/sadeKit';
+import { Canli, Girdi, Grup, Hesap, KararJson, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKit';
 import { ORTAK_ADLARI, baslangicOrtaklar, karsilastir, type OrtakId, type OrtakKurali, type Politika, type Sonuc as MotorSonuc } from '../data/affilate';
 import { POLITIKA_ADI, baslangicKurgu, senaryoKur } from '../data/affilateKurgu';
 
@@ -35,7 +35,7 @@ const METIN: Record<OrtakId, { ad: string; kisa: string; kim: string }> = {
   cozum: { ad: ORTAK_ADLARI.cozum, kisa: 'Destek de verir, oranı yüksek', kim: 'Çözüm ortağı müşteriye destek de verir. Bu yüzden oranı yüksektir. Destek vermediği ay kazanmaz.' },
 };
 
-const tl = (kurus: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(kurus / 100))} ₺`;
+const tl = (kurus: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(kurus / 100))}\u00a0₺`;
 const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
 
 function useSade() {
@@ -132,6 +132,7 @@ export function AffilateBasit() {
   const duzen = useYapisikSutunlar();
   const { s, g, sifirla } = useSade();
   const [secili, setSecili] = useState<OrtakId>('satis');
+  const serit = useSeciliSekmeGorunur(secili);
   const sonuc = useMemo(() => hesapla(s), [s]);
   const r = sonuc[secili];
   const dagilim = yillar(r, s.ufukAy);
@@ -176,6 +177,13 @@ export function AffilateBasit() {
             <button type="button" className="so2-sifirla" onClick={sifirla}>
               Başa dön
             </button>
+            <p className="so2-ayarlar-ozet">
+              {METIN[secili].ad}{' '}
+              <strong>
+                <Canli deger={toplam(sonuc[secili])}>{tl(toplam(sonuc[secili]))}</Canli>
+              </strong>{' '}
+              / {s.ufukAy / 12} yıl
+            </p>
           </div>
           <ModelAyarlari id={secili} s={s} g={g} />
           <Grup baslik="Satış">
@@ -185,7 +193,7 @@ export function AffilateBasit() {
           </Grup>
         </aside>
         <div className="so2-sag">
-          <div className="so2-roller so2-roller-3" role="tablist" aria-label="Ortaklık modelleri">
+          <div className="so2-roller so2-roller-3" role="tablist" ref={serit} aria-label="Ortaklık modelleri">
         {IDLER.map((id, i) => (
           <button
             key={id}

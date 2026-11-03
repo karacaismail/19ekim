@@ -174,7 +174,7 @@ export interface DonemSatiri {
  */
 export function donemKazanci(a: Ayar, rol: RolId): DonemSatiri[] {
   const n = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
-  const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+  const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
   if (rol === 'oncu') {
     const birim = satisKazanci(a, a.oncuSeviye);
     const ilkYilSatis = a.oncuAsama.reduce((top, adet, i) => top + (adet * ASAMA_GUN[i]) / GUN_AY, 0);
