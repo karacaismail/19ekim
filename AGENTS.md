@@ -980,6 +980,15 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 `tests/ui.spec.ts` kırıntı derinliği (320: gizli grup, ebeveyn + başlık, başlık ilk ekranda; 1280: tam yol; Giderler),
 `tests/icerik.spec.ts` `kirintiGrubu`. **B2 tamam.**
 
+### Satış ortaklığı v1 ve v2 (kullanıcı kararları 2026-11-03)
+
+- `/satis-ortakligi/` iki sürümlüdür. Sarmalayıcı `src/views/SatisOrtakligiSurumleri.tsx` sunucuda v1’i çizer, `?surum=v2` ya da kayıtlı seçim varsa istemcide v2’ye geçer. v1 (`SatisOrtakligiPage.tsx`, `satisOrtakligi.ts`, `kosullar.ts`, `.so2-*`) değişmez. v2 yalnız `*V2` dosyalarını, `data/ozetV2.ts` ve `styles/{satisOrtakligiV2,ozetPaneliV2}.css` (`v2-` önekli sınıflar) kullanır. `tests/surum.spec.ts` iki yönlü import ayrımını ve önekleri denetler.
+- v2 modeli: persona ayrı, segment ayrı, kampanya ayrı. Fiyatlandırma robotu herkes için aynıdır; bağımsız ortakların kazancını segment (Başlangıç, Gümüş, Altın, Profesyonel çözüm ortağı rozeti) ve satıştaki katkı belirler. Kadrolu satış uzmanı aynı eşiklerle kariyer basamağı kazanır. Ağ en çok 2 kademedir; pay yalnız gerçek satıştan doğar.
+- v2 düzeni: ≥80em kap 1440 px (`.wrap[data-wide]:has(.v2-so2)`): üstte “Standart ayarlar” bandı; solda personaya özel ayarlar ve açık program kuralları (290–340 px); ortada sekmeler ve persona paneli (~600 px); sağda sayfa başlığının altından başlayan yapışık özet. Ürün satırı ve sekmeler ≥64em ve ≥40em yükseklikte başlığa yapışır.
+- Uyarlanmış teslim: `useMediaQuery('(min-width: 64em)')` kabuğu değiştirir. 64em altında ayarlar sayfada çizilmez; alttaki sonuç çubuğundan açılan çekmecededir (Standart, Persona, Kurallar). 80em altında özet sondadır ve canlı sonuç alttaki çubukta görünür. Kabuk değişince odak aynı etiketli alana ya da açan düğmeye taşınır, çekmece geniş ekranda kapanır. CSS kırılımı `(width < 64em)`; JS ile aynı sınır.
+- Koşullar penceresi (`components/KosullarV2.tsx`: segment ve kariyer merdiveni, ağ kuralları ve diyagram, kampanyalar) `React.lazy` ile ilk açılışta yüklenir, düğmeye gelince önceden yüklenir. Odak açan düğmeye sayfa tarafından döndürülür (Safari tıklamada odak vermez).
+- Test: `npm run build` sonra `npx playwright test tests/satis-ortakligi-v2.spec.ts tests/satis-ortakligi.spec.ts tests/surum.spec.ts --project=chromium --project=webkit`. Firefox kullanıcı kararıyla çalıştırılmaz.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

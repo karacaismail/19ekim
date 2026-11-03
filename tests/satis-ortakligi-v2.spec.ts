@@ -284,6 +284,74 @@ test('uyarlanmış teslim: Koşullar penceresi ilk yüklemede indirilmez, açıl
   expect(istekler.filter((u) => /KosullarV2/.test(u)).length).toBeGreaterThan(0);
 });
 
+test('64em geçişinde odak korunur, çekmece kendiliğinden açılmaz', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  await page.setViewportSize({ width: 900, height: 800 });
+  await page.goto('satis-ortakligi/?surum=v2');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  await page.locator('.v2-so2-alt-cubuk').getByRole('button', { name: 'Ayarlar' }).click();
+  const cekmece = page.getByRole('dialog', { name: 'Ayarlar' });
+  await cekmece.getByRole('textbox', { name: 'Yenileme oranı' }).focus();
+  // Geniş ekrana geçince çekmece kapanır, odak sayfadaki aynı alana geçer.
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await expect(cekmece).toHaveCount(0);
+  await expect(page.locator('.v2-so2-standart').getByRole('textbox', { name: 'Yenileme oranı' })).toBeFocused();
+  // Geri daralınca çekmece kendiliğinden açılmaz; odak ayar düğmesine düşer.
+  await page.setViewportSize({ width: 900, height: 800 });
+  await expect(page.getByRole('dialog', { name: 'Ayarlar' })).toHaveCount(0);
+  await expect(page.locator('.v2-so2-alt-cubuk').getByRole('button', { name: 'Ayarlar' })).toBeFocused();
+  // Geniş ekranda yan sütunun yüksekliği yeniden ölçülür.
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await expect.poll(() => page.locator('.v2-so2-ayarlar').evaluate((e) => getComputedStyle(e).getPropertyValue('--v2-so2-boy'))).not.toBe('');
+});
+
+test('320 px: alttaki çubuk sayfanın sonunu ve odaklanan öğeyi örtmez', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  await ac(page, 320);
+  const son = page.locator('.app-footer a, .app-footer button').last();
+  await son.focus();
+  await page.waitForTimeout(300);
+  const [oge, cubuk] = await Promise.all([son.boundingBox(), page.locator('.v2-so2-alt-cubuk').boundingBox()]);
+  expect(oge!.y + oge!.height).toBeLessThanOrEqual(cubuk!.y + 1);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(200);
+  const [oge2, cubuk2] = await Promise.all([son.boundingBox(), page.locator('.v2-so2-alt-cubuk').boundingBox()]);
+  expect(oge2!.y + oge2!.height).toBeLessThanOrEqual(cubuk2!.y + 1);
+});
+
+test('1024 × 768: seçimler önce, özet sonda, canlı sonuç alttaki çubukta', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto('satis-ortakligi/?surum=v2');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  await expect(page.locator('.v2-so2-arac')).toBeInViewport();
+  const ozetUst = await page.locator('.v2-so2-ozet-kap').evaluate((e) => e.getBoundingClientRect().top);
+  const panelUst = await page.locator('.v2-so2-panel').evaluate((e) => e.getBoundingClientRect().top);
+  expect(ozetUst).toBeGreaterThan(panelUst);
+  const cubuk = page.locator('.v2-so2-alt-cubuk');
+  await expect(cubuk).toBeInViewport();
+  await expect(cubuk.locator('strong')).toContainText('46.922 ₺');
+  await page.mouse.move(500, 500);
+  await page.mouse.wheel(0, 2400);
+  await page.waitForTimeout(400);
+  const alt = await page.locator('.v2-so2-roller').evaluate((e) => e.getBoundingClientRect().bottom);
+  expect(alt).toBeLessThan(768 * 0.45);
+  await cubuk.getByRole('button', { name: 'Özet' }).click();
+  await expect(page.locator('.v2-oz')).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('Koşullar kapanınca odak açan düğmeye döner (Chrome ve Safari motoru)', async ({ page, browserName }) => {
+  test.skip(browserName === 'firefox', 'Firefox testleri kullanıcı kararıyla çalıştırılmaz');
+  await ac(page);
+  const dugme = page.getByRole('button', { name: 'Koşullar', exact: true });
+  await dugme.click();
+  await expect(pencere(page)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(pencere(page)).toHaveCount(0);
+  await expect(dugme).toBeFocused();
+});
+
 for (const genislik of [320, 360, 375, 390]) {
   test(`v2 ${genislik} px: her personada yatay taşma yok`, async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');

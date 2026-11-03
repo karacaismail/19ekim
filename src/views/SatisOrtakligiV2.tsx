@@ -7,7 +7,7 @@
  * (ne satar, nasıl katkı verir?) → sağda kazanç, segment merdiveni (nasıl yükselir?), kampanyalar, ağ, dönemler ve hesap.
  * Personaya özel koşullar solun en altında durur; standart bölüm her personada aynı kalır.
  */
-import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Drawer } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
@@ -466,7 +466,7 @@ function Kirilim({ satirlar }: { satirlar: { ad: string; deger: string; not?: st
 
 
 /** Paneldeki kısa segment durumu: dört basamak şeridi, eksikler ve bütün koşulları açan düğme. */
-function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => void }) {
+function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: (acan: HTMLElement) => void }) {
   const durum = segmentDurumu(sg, tur);
   return (
     <section className="v2-sg-ozet" aria-labelledby="v2-sg-ozet-baslik">
@@ -487,7 +487,7 @@ function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => 
       <p className="v2-sg-durum">
         <strong>{sg.basamaklar[sg.seviye].ad}</strong> <Canli deger={durum}>{durum}</Canli>
       </p>
-      <button type="button" className="v2-so2-ikincil" aria-haspopup="dialog" onClick={ac}>
+      <button type="button" className="v2-so2-ikincil" aria-haspopup="dialog" onPointerEnter={onYukle} onFocus={onYukle} onClick={(e) => ac(e.currentTarget)}>
         Bütün koşulları gör
       </button>
     </section>
@@ -736,10 +736,11 @@ function AyarCekmecesi({ acik, kapat, a, g, rol, persona, ozet, sifirla }: { aci
       size="92%"
       transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }}
       overlayProps={{ backgroundOpacity: 0.55 }}
+      returnFocus={false}
       closeButtonProps={{ 'aria-label': 'Ayarları kapat', size: 'xl' }}
       classNames={{ content: 'v2-pencere', header: 'v2-pencere-ust', title: 'v2-pencere-baslik', body: 'v2-cekmece-govde', close: 'v2-pencere-kapat' }}
     >
-      <div className="v2-cekmece-sonuc" aria-live="polite">
+      <div className="v2-cekmece-sonuc">
         <span>{persona.ad}</span>
         <strong>
           <Canli deger={ozet.deger}>{ozet.deger}</Canli> <small>{ozet.birim}</small>
@@ -778,7 +779,12 @@ function AyarCekmecesi({ acik, kapat, a, g, rol, persona, ozet, sifirla }: { aci
 }
 
 /** Uyarlanmış teslim: Koşullar penceresi ve ağ diyagramı ilk yüklemede indirilmez, ilk açılışta yüklenir. */
-const KosullarPenceresi = lazy(() => import('../components/KosullarV2'));
+const kosullarModulu = () => import('../components/KosullarV2');
+const KosullarPenceresi = lazy(kosullarModulu);
+/** Fare düğmeye gelince ya da düğme odak alınca pencere modülü önceden yüklenir; tıklayınca bekleme olmaz. */
+const onYukle = () => {
+  void kosullarModulu();
+};
 
 /* ---------- Sayfa ---------- */
 
@@ -813,8 +819,38 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const kok = useYapisikUst();
   // Uyarlanmış teslim (kullanıcı kararı 2026-11-03, 320 px önce): geniş ekranda ayarlar sayfada açık durur; dar ekranda
   // sayfada yalnız persona ve sonuç kalır, ayarlar alttaki sonuç çubuğundan açılan çekmecede ve yalnız açılınca çizilir.
+  // v2 yalnız istemcide çizilir (sarmalayıcı sunucuda v1’i çizer); değer ilk çizimde gerçek ekran genişliğinden okunur.
   const genis = useMediaQuery('(min-width: 64em)', true, { getInitialValueInEffect: false });
+  // 80em altında özet sütunu yoktur; canlı sonuç alttaki çubukta görünür.
+  const ucSutun = useMediaQuery('(min-width: 80em)', true, { getInitialValueInEffect: false });
   const [cekmece, setCekmece] = useState(false);
+  const ayarDugmesi = useRef<HTMLButtonElement>(null);
+  const cekmeceyiKapat = () => {
+    setCekmece(false);
+    window.setTimeout(() => ayarDugmesi.current?.focus(), 0);
+  };
+  // Kabuk değişince (ör. tablet döndürülünce) odak ve açık çekmece korunur: son odaklanan alanın etiketi saklanır,
+  // yeni kabukta aynı etiketli alan, yoksa açan düğme odak alır. Geniş ekrana geçince çekmece kapanır.
+  const sonAlan = useRef<string | null>(null);
+  useEffect(() => {
+    const kaydet = (e: FocusEvent) => {
+      const el = e.target instanceof HTMLElement ? e.target : null;
+      sonAlan.current = el?.closest('.v2-so2-girdi')?.querySelector('label')?.textContent ?? null;
+    };
+    document.addEventListener('focusin', kaydet);
+    return () => document.removeEventListener('focusin', kaydet);
+  }, []);
+  const oncekiGenis = useRef(genis);
+  useLayoutEffect(() => {
+    if (oncekiGenis.current === genis) return;
+    oncekiGenis.current = genis;
+    if (genis) setCekmece(false);
+    if (document.activeElement && document.activeElement !== document.body) return;
+    const alan = sonAlan.current
+      ? Array.from(document.querySelectorAll<HTMLElement>('.v2-so2 .v2-so2-girdi')).find((x) => x.querySelector('label')?.textContent === sonAlan.current)?.querySelector('input')
+      : null;
+    (alan ?? document.querySelector<HTMLElement>(genis ? '.v2-so2-kosullar-dugme' : '.v2-so2-alt-cubuk-dugme'))?.focus();
+  }, [genis]);
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
   const [kosulAcik, setKosulAcik] = useState(false);
@@ -822,9 +858,10 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   // Pencere ilk açılışta yüklendiği için açan düğme burada saklanır; kapanınca odak ona döner.
   const acan = useRef<HTMLElement | null>(null);
   const [bolum, setBolum] = useState<KosulBolum>('segment');
-  const kosullariAc = (b?: KosulBolum) => {
+  // Safari tıklamada düğmeye odak vermez; açan öğe olaydan alınır.
+  const kosullariAc = (b?: KosulBolum, el?: HTMLElement) => {
     if (b) setBolum(b);
-    acan.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    acan.current = el ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     setKosulYuklendi(true);
     setKosulAcik(true);
   };
@@ -862,7 +899,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           ]}
           onChange={(v) => g({ faturalama: v })}
         />
-        <button type="button" className="v2-so2-kosullar-dugme" aria-haspopup="dialog" aria-expanded={kosulAcik} onClick={() => kosullariAc()}>
+        <button type="button" className="v2-so2-kosullar-dugme" aria-haspopup="dialog" aria-expanded={kosulAcik} onPointerEnter={onYukle} onFocus={onYukle} onClick={(e) => kosullariAc(undefined, e.currentTarget)}>
           Koşullar
         </button>
         <p className="v2-so2-fiyat">
@@ -895,13 +932,6 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         <aside className="v2-so2-ayarlar" aria-label="Personaya özel ayarlar ve program kuralları">
           <div className="v2-so2-ayarlar-ust">
             <p className="v2-so2-ayarlar-baslik">{secili.ad}</p>
-            <p className="v2-so2-ayarlar-ozet">
-              {secili.ad}{' '}
-              <strong>
-                <Canli deger={ozet.deger}>{ozet.deger}</Canli>
-              </strong>{' '}
-              {ozet.birim}
-            </p>
           </div>
           <div className="v2-so2-gecis" key={rol}>
             <OzelKosullar rol={rol} persona={secili} a={a} g={g} />
@@ -957,7 +987,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
                 <>
                   {secili.sozlesme === 'kadrolu' ? <KadroluSonuc a={a} /> : secili.sozlesme === 'musteri' ? <MusteriSonuc a={a} /> : <BagimsizSonuc a={a} persona={secili} />}
                   {secili.sozlesme === 'musteri' ? null : (
-                    <SegmentOzeti sg={kadroluVeyaBagimsiz(a, secili.sozlesme)} tur={secili.sozlesme === 'kadrolu' ? 'kadrolu' : 'bagimsiz'} ac={() => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment')} />
+                    <SegmentOzeti sg={kadroluVeyaBagimsiz(a, secili.sozlesme)} tur={secili.sozlesme === 'kadrolu' ? 'kadrolu' : 'bagimsiz'} ac={(el) => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment', el)} />
                   )}
                   <KampanyaListesi a={a} rol={rol} />
                   <Donemler satirlar={donemKazanci(a, secili.sozlesme)} />
@@ -970,12 +1000,12 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </div>
       </div>
       </div>
-      <div className="v2-so2-ozet-kap">
-        <OzetPaneli a={a} rol={rol} onKosullar={() => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment')} />
+      <div className="v2-so2-ozet-kap" id="v2-so2-ozet" tabIndex={-1}>
+        <OzetPaneli a={a} rol={rol} onKosullar={(el) => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment', el)} />
       </div>
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi-v2" />
-      {genis ? null : (
+      {ucSutun ? null : (
         <>
           <div className="v2-so2-alt-cubuk">
             <p className="v2-so2-alt-cubuk-sonuc">
@@ -984,11 +1014,25 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
                 <Canli deger={ozet.deger}>{ozet.deger}</Canli> <small>{ozet.birim}</small>
               </strong>
             </p>
-            <button type="button" className="v2-so2-alt-cubuk-dugme" aria-haspopup="dialog" aria-expanded={cekmece} onClick={() => setCekmece(true)}>
-              Ayarlar
-            </button>
+            {genis ? (
+              <button
+                type="button"
+                className="v2-so2-alt-cubuk-dugme"
+                onClick={() => {
+                  const hedef = document.getElementById('v2-so2-ozet');
+                  hedef?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                  hedef?.focus({ preventScroll: true });
+                }}
+              >
+                Özet
+              </button>
+            ) : (
+              <button type="button" ref={ayarDugmesi} className="v2-so2-alt-cubuk-dugme" aria-haspopup="dialog" aria-expanded={cekmece} onClick={() => setCekmece(true)}>
+                Ayarlar
+              </button>
+            )}
           </div>
-          <AyarCekmecesi acik={cekmece} kapat={() => setCekmece(false)} a={a} g={g} rol={rol} persona={secili} ozet={ozet} sifirla={sifirla} />
+          {genis ? null : <AyarCekmecesi acik={cekmece} kapat={cekmeceyiKapat} a={a} g={g} rol={rol} persona={secili} ozet={ozet} sifirla={sifirla} />}
         </>
       )}
       {kosulYuklendi ? (

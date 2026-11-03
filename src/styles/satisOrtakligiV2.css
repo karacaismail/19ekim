@@ -844,7 +844,7 @@ html[data-bant-gizli] .v2-so2-duzen {
   display: none;
 }
 
-@media (max-width: 63.99em) {
+@media (width < 64em) {
   .v2-so2-duzen {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
@@ -1745,7 +1745,7 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   border-top: 0;
 }
 
-@media (max-width: 63.99em) {
+@media (width < 64em) {
   .v2-so2-arac .v2-so2-kosullar-dugme {
     margin-inline: 0;
   }
@@ -1764,7 +1764,7 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
 /*
  * Üç sütunlu iskelet (kullanıcı kararı 2026-11-03): kap 1440 px. Üstte bütün personalar için aynı standart ayarlar;
  * altında solda personaya özel ayarlar ve program kuralları (~290–340 px, açık), ortada persona sonucu (~600 px);
- * sağda sayfa başlığının altından başlayan, yapışık ve kompakt özet. Dar ekranda özet en üste, tek sütuna iner.
+ * sağda sayfa başlığının altından başlayan, yapışık ve kompakt özet. 80em altında özet sonda, sonuç alttaki çubukta.
  */
 .wrap[data-wide]:has(.v2-so2) {
   max-width: calc(90rem + 2 * var(--page-gutter));
@@ -1835,12 +1835,7 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   min-width: 0;
 }
 
-/* 1024–1279 px: iki sütun; özet en üstte, yapışık değil. */
-@media (min-width: 64em) and (max-width: 79.99em) {
-  .v2-so2-ozet-kap {
-    order: -1;
-  }
-}
+/* 80em altında özet ana bölümden sonra gelir; canlı sonuç alttaki çubukta görünür. */
 
 @media (min-width: 80em) {
   .v2-so2-iskelet {
@@ -1865,21 +1860,7 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
 
   /* Yapışık ürün satırının zemini yalnız sola uzar; sağdaki özet sütununun üstüne çizilmez. */
   .v2-so2-arac {
-    column-gap: var(--space-4);
     clip-path: inset(0 0 0 -100vmax);
-  }
-
-  /* Ciro ve bütün personaların tutarı sağdaki özette görünür; burada tekrar edilmez, yapışık bölüm kısa kalır. */
-  .v2-so2-arac .v2-so2-fiyat,
-  .v2-so2-sag .v2-so2-rol-no,
-  .v2-so2-sag .v2-so2-rol-kisa,
-  .v2-so2-sag .v2-so2-rol-tutar {
-    display: none;
-  }
-
-  .v2-so2-sag .v2-so2-rol {
-    grid-template-rows: auto;
-    align-content: center;
   }
 }
 
@@ -1910,7 +1891,9 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
 
 /*
  * Dar ekran, 320 px önce (kullanıcı kararı 2026-11-03): sayfada persona sekmeleri, sonuç ve özet kalır. Ayarlar alttaki
- * sonuç çubuğundan açılan çekmecededir (SatisOrtakligiV2.tsx → AyarCekmecesi). Sonuç çubuğu güvenli alanı korur.
+ * sonuç çubuğundan açılan çekmecededir (SatisOrtakligiV2.tsx → AyarCekmecesi). Çubuk 80em altında görünür; 64–80em
+ * arasında “Özet” düğmesi özete götürür. env(safe-area-inset-bottom) yalnız sayfa viewport-fit=cover kullanırsa etkilidir;
+ * site bunu şu an kullanmaz, değer 0 olur.
  */
 .v2-so2-alt-cubuk {
   position: fixed;
@@ -2006,10 +1989,16 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   justify-self: stretch;
 }
 
-@media (max-width: 63.99em) {
-  .v2-so2 {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
-  }
+/* Çubuk sayfanın sonunu (sayfalama, alt bilgi) ve odaklanan öğeyi örtmez. */
+.app:has(.v2-so2-alt-cubuk) {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+html:has(.v2-so2-alt-cubuk) {
+  scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@media (width < 64em) {
 
   .v2-so2-arac .v2-so2-fiyat,
   .v2-so2-sag .v2-so2-rol-no,
@@ -2042,5 +2031,27 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
 
   .v2-so2-arac .v2-so2-kosullar-dugme {
     padding: 0 var(--space-4);
+  }
+}
+
+/*
+ * 64em ve üstü: yapışık bölüm kısa kalır. Ciro ve bütün personaların tutarı özette (80em üstü sağda, altında sonda),
+ * seçili personanın tutarı alttaki çubukta görünür; sekmelerde yalnız ad durur.
+ */
+@media (min-width: 64em) {
+  .v2-so2-arac {
+    column-gap: var(--space-4);
+  }
+
+  .v2-so2-arac .v2-so2-fiyat,
+  .v2-so2-sag .v2-so2-rol-no,
+  .v2-so2-sag .v2-so2-rol-kisa,
+  .v2-so2-sag .v2-so2-rol-tutar {
+    display: none;
+  }
+
+  .v2-so2-sag .v2-so2-rol {
+    grid-template-rows: auto;
+    align-content: center;
   }
 }

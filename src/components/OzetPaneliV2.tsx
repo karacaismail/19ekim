@@ -86,7 +86,7 @@ function sonucVerisi(a: Ayar, secili: RolMetni, rol: RolId) {
   };
 }
 
-export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosullar: () => void }) {
+export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosullar: (acan: HTMLElement) => void }) {
   const roller = rolMetinleri(a.marka);
   const secili = roller.find((r) => r.id === rol) ?? roller[0];
   const s = satisOzeti(a);
@@ -198,7 +198,7 @@ export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosu
           <p className="v2-oz-adim">
             <Canli deger={sonrakiAdim}>{sonrakiAdim}</Canli>
           </p>
-          <button type="button" className="v2-oz-dugme" aria-haspopup="dialog" onClick={onKosullar}>
+          <button type="button" className="v2-oz-dugme" aria-haspopup="dialog" onClick={(e) => onKosullar(e.currentTarget)}>
             Koşulları gör
           </button>
         </section>

@@ -118,7 +118,7 @@ function TumKampanyalar({ a }: { a: Ayar }) {
  */
 export default function KosullarPenceresi({ a, acik, bolum, setBolum, kapat }: { a: Ayar; acik: boolean; bolum: KosulBolum; setBolum: (b: KosulBolum) => void; kapat: () => void }) {
   const sure = useMotionMs('--motion-duration-base');
-  const dar = useMediaQuery('(max-width: 47.99em)', false);
+  const dar = useMediaQuery('(max-width: 47.99em)', false, { getInitialValueInEffect: false });
   return (
     <Modal
       opened={acik}

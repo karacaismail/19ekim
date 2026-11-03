@@ -243,8 +243,18 @@ export function useYapisikSutunlar() {
     const gozlem = new ResizeObserver((girdiler) => {
       for (const g of girdiler) (g.target as HTMLElement).style.setProperty('--v2-so2-boy', `${(g.target as HTMLElement).offsetHeight}px`);
     });
-    for (const el of Array.from(kap.children)) gozlem.observe(el);
-    return () => gozlem.disconnect();
+    // Kabuk değişince (dar ↔ geniş) sütunlar eklenip çıkar; yeni çocuklar da izlenir.
+    const izle = () => {
+      gozlem.disconnect();
+      for (const el of Array.from(kap.children)) gozlem.observe(el);
+    };
+    izle();
+    const degisim = new MutationObserver(izle);
+    degisim.observe(kap, { childList: true });
+    return () => {
+      gozlem.disconnect();
+      degisim.disconnect();
+    };
   }, []);
   return ref;
 }
