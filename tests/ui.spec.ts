@@ -682,7 +682,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu).toBeVisible();
     const ogeler = menu.getByRole('menuitem');
     // Kullanıcı kararı 2026-10-21: 1–7 sıralı numara, roller pozisyon adıyla; numarasız öğede aynı sade nokta.
-    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Applet']);
+    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Kadro kapasitesi', 'Applet']);
     await expect(menu.getByRole('menuitem', { name: 'Segika CRM' })).toHaveAttribute('aria-current', 'page');
     await expect(menu.locator('.tree-no')).toHaveCount(7);
     await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' }).locator('.navmenu-bullet')).toHaveCount(1);
@@ -923,7 +923,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const ogeler = await page.getByRole('menuitem').evaluateAll((els) =>
       els.map((el) => ({ deco: getComputedStyle(el).textDecorationLine, bg: getComputedStyle(el).backgroundColor, current: el.getAttribute('aria-current') })),
     );
-    expect(ogeler.length).toBe(9);
+    expect(ogeler.length).toBe(10);
     expect(ogeler.filter((o) => o.deco.includes('underline'))).toEqual([]);
     expect(ogeler.filter((o) => !o.current && o.bg !== 'rgba(0, 0, 0, 0)')).toEqual([]);
   });
@@ -933,7 +933,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   // işaretli, Escape kapatır, odak düğmeye döner. 48em’den itibaren şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst
   // satırda, ortalı).
   for (const width of [320, 360, 375, 390]) {
-    test(`${width} px: gezinme çekmecede — şerit yok, 24 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
+    test(`${width} px: gezinme çekmecede — şerit yok, 25 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
       await icerik(page);
@@ -951,7 +951,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const cekmece = page.getByRole('dialog', { name: 'Menü' });
       await expect(cekmece).toBeVisible();
       const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
-      await expect(nav.getByRole('link')).toHaveCount(24);
+      await expect(nav.getByRole('link')).toHaveCount(25);
       await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
       await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Finans', 'Yönetim', 'Yardımcı']);
       await expect(nav.locator('.tree-no')).toHaveCount(7);
@@ -1295,9 +1295,9 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.getByRole('button', { name: 'Menü', exact: true }).click();
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
-    await expect(cekmece.getByRole('link')).toHaveCount(24);
+    await expect(cekmece.getByRole('link')).toHaveCount(25);
     const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(linkler.length).toBe(24);
+    expect(linkler.length).toBe(25);
     expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
@@ -1368,7 +1368,7 @@ test.describe('dokunmatik cihaz', () => {
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
     const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(24);
+    expect(ogeler.length).toBe(25);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
     expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });
@@ -1520,15 +1520,26 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
     }
   });
 
-  test('takvim ve zaman çizelgesi: Mantine bileşenleri, metin en az 14 px', async ({ page }) => {
+  test('istihdam takvimi: görünüm seçici (zaman çizelgesi ↔ takvim), 3 Kasım planı, metin en az 14 px', async ({ page }) => {
     await page.goto('istihdam/');
     await icerik(page);
-    await expect(page.locator('.hire-timeline .hire-item')).toHaveCount(8);
-    await expect(page.locator('.cal')).toHaveCount(4);
-    expect(await page.locator('.cal-day[data-event]').count()).toBe(11);
+    await hydrated(page);
+    // Zaman çizelgesi varsayılan: 7 aşama çubuğu, 17 tarihli adım; birinci dalga 23 Kasım.
+    await expect(page.locator('.tk-gantt-satir')).toHaveCount(7);
+    await expect(page.locator('.tk-olay')).toHaveCount(17);
+    await expect(page.locator('.tk-olay').filter({ hasText: 'Birinci dalga başlar' })).toContainText('23');
+    const secici = page.locator('#plan');
+    const ust = await secici.boundingBox();
+    await page.getByRole('button', { name: 'Takvim', exact: true }).click();
+    await expect(page.locator('.tk-izgara')).toBeVisible();
+    // Görünüm değişince seçici yerinde kalır (zıplama yok).
+    expect(Math.round((await secici.boundingBox())!.y)).toBe(Math.round(ust!.y));
+    await page.getByRole('button', { name: 'Sonraki ay' }).click();
+    await page.getByRole('button', { name: 'Önceki ay' }).click();
+    await expect(page.locator('.tk-takvim-baslik')).toContainText('2026');
     const sizes = await page
-      .locator('.cal-day, .cal-weekday, .hire-title, .hire-body')
-      .evaluateAll((els) => els.map((el) => parseFloat(getComputedStyle(el).fontSize)));
+      .locator('.tk-gun-no, .tk-hafta-gun, .tk-cip-metin, .tk-takvim-baslik')
+      .evaluateAll((els) => els.filter((el) => el.getClientRects().length).map((el) => parseFloat(getComputedStyle(el).fontSize)));
     expect(Math.min(...sizes)).toBeGreaterThanOrEqual(14);
     // Grafik sayfası değil: ECharts indirilmez.
     const echarts = await page.evaluate(() => performance.getEntriesByType('resource').some((e) => /echarts|charts\./.test(e.name)));

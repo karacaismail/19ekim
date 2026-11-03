@@ -1,7 +1,4 @@
-import 'dayjs/locale/tr';
 import { useEffect, useState } from 'react';
-import { Timeline } from '@mantine/core';
-import { Month } from '@mantine/dates';
 import { AppFrame } from '../components/AppFrame';
 import {
   Chart,
@@ -11,11 +8,11 @@ import {
   RoleChip,
   Section,
   Stats,
-  StatusChip,
   Target,
   TextLink,
 } from '../components/ui';
 import { PageHeader } from '../components/PageHeader';
+import { IstihdamPlanGorunumu } from './IstihdamPlani';
 import { boardMapping, type BoardRow } from '../data/archive';
 import type { CrmStage, GovNode, PayRule, WorkPeriod } from '../data/program';
 import { KARAR_DURUM_ADI, kararDurumu, type KararKaydi } from '../data/kararlar';
@@ -25,7 +22,7 @@ import type { RoleKey } from '../data/types';
 import { useModel } from '../components/ModelContext';
 import { Araclar, SenaryoSecimi } from '../components/Senaryo';
 import type { StaffResult } from '../data/staffing';
-import { addDays, longDate, monthStart, nextMonth } from '../lib/dates';
+import { addDays, longDate } from '../lib/dates';
 import { useScenario } from '../lib/scenario';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
@@ -35,99 +32,24 @@ const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 const shortDate = (iso: string) =>
   new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
 
-/* ---------- İstihdam takvimi: takvim + zaman çizelgesi ---------- */
-
-const monthTitle = (iso: string) =>
-  new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
+/* ---------- İstihdam takvimi: plan görünümü (IstihdamPlani.tsx) ve kadro katkısı ---------- */
 
 function HiringContent() {
   const m = useModel();
-  const { calendarEvents, hiringOrder } = m;
   const [sid, setSid] = useScenario();
   const st = m.staffing.byId[sid];
   const sc = st.scenario;
   const H = m.staffing.horizon;
   const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
-  /** Takvim ayları: ilk olaydan son olaya. */
-  const CALENDAR_MONTHS: string[] = [];
-  for (let month = monthStart(calendarEvents[0].date); month <= calendarEvents[calendarEvents.length - 1].date; month = nextMonth(month)) CALENDAR_MONTHS.push(month);
-
-  const byDate = new Map(calendarEvents.map((e) => [e.date, e]));
   return (
     <>
-      <PageHeader title="İstihdam takvimi" purpose="Kim, hangi sırayla, hangi tarihte başlıyor." />
+      <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
 
-      <Section id="sira" index={1} title="İşe alım sırası">
-        <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
-          {hiringOrder.map((h) => (
-            <Timeline.Item
-              key={h.no}
-              bullet={
-                <span className="hire-no" data-role={h.role}>
-                  {h.no}
-                </span>
-              }
-              title={h.title}
-            >
-              <p className="hire-date">
-                {h.date}
-                <StatusChip status={h.status} />
-              </p>
-              <p className="hire-note">
-                {h.count !== '—' ? `${h.count} kişi · ` : ''}
-                {h.note}
-              </p>
-            </Timeline.Item>
-          ))}
-        </Timeline>
-      </Section>
-
-      <Section id="takvim" index={2} title="Takvim" desc="Renkli günler tarihli olaylardır; ayrıntı ayın altında.">
-        <div className="cal-grid">
-          {CALENDAR_MONTHS.map((month) => {
-            const events = calendarEvents.filter((e) => e.date.slice(0, 7) === month.slice(0, 7));
-            return (
-              <section className="cal" key={month} aria-labelledby={`ay-${month}`}>
-                <h3 className="cal-title" id={`ay-${month}`}>
-                  {monthTitle(month)}
-                </h3>
-                <Month
-                  month={month}
-                  locale="tr"
-                  firstDayOfWeek={1}
-                  hideOutsideDates
-                  static
-                  fullWidth
-                  weekendDays={[0]}
-                  classNames={{ day: 'cal-day', weekday: 'cal-weekday', month: 'cal-month' }}
-                  getDayProps={(date) => {
-                    // Ay dışı (gizli) günler işaretlenmez; olay yalnız kendi ayında görünür.
-                    const event = date.slice(0, 7) === month.slice(0, 7) ? byDate.get(date) : undefined;
-                    return event ? { 'data-event': '', 'data-role': event.role, title: event.title } : {};
-                  }}
-                />
-                {events.length ? (
-                  <ol className="cal-events">
-                    {events.map((e) => (
-                      <li key={e.date} data-role={e.role}>
-                        <span className="cal-event-date">{shortDate(e.date)}</span>
-                        <span className="cal-event-title">{e.title}</span>
-                        <span className="cal-event-detail">{e.detail}</span>
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <p className="cal-empty">Bu ayda tarihli olay yok.</p>
-                )}
-              </section>
-            );
-          })}
-        </div>
-      </Section>
+      <IstihdamPlanGorunumu />
 
       <Section
         id="katki"
-        index={3}
+        index={2}
         title="Görev, gider ve gelir katkısı (senaryo)"
         desc={`İstihdam planı gelir planına yedirilmiştir (kullanıcı kararı 2026-10-27): her rolün görevi, işveren maliyeti ve seçili senaryoda ${H} ayda gelire katkısı. Katkı, gelir planı simülasyonunda o kaynak olmasaydı kaybedilecek gelirdir; dolaylı rollerin katkısı modellenmez. Seçim gelir planı ve nakit akış tablosuyla ortaktır.`}
         tools={

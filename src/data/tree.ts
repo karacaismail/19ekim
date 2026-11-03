@@ -111,6 +111,7 @@ export const TREE_NAV: NavLink[] = [
 
 /** “İstihdam” menüsünün alt bölümü: takvim ve ücret/performans modelleri. */
 export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
+export const KADRO_NAV = { label: 'Kadro kapasitesi', path: '/kadro-kapasitesi/' };
 export const APPLET_NAV = { label: 'Applet', path: '/applet/', tam: 'Ücret ve performans applet’leri' };
 
 /** Menü öğesi; etiket ve yol içerik envanterinden (docs/contents.md F15: menü, kırıntı ve sunum sırası ayrı). */
@@ -147,7 +148,7 @@ export interface NavGroup {
   dividerBefore?: string;
 }
 export const NAV_GROUPS: NavGroup[] = [
-  { id: 'istihdam', label: GRUP_ADI.istihdam, items: [...TREE_NAV, HIRING_NAV, APPLET_NAV], dividerBefore: HIRING_NAV.path },
+  { id: 'istihdam', label: GRUP_ADI.istihdam, items: [...TREE_NAV, HIRING_NAV, KADRO_NAV, APPLET_NAV], dividerBefore: HIRING_NAV.path },
   { id: 'pazarlama', label: GRUP_ADI.pazarlama, items: MARKETING_NAV },
   { id: 'finans', label: GRUP_ADI.finans, items: FINANCE_NAV },
   { id: 'yonetim', label: GRUP_ADI.yonetim, items: MANAGEMENT_NAV },
