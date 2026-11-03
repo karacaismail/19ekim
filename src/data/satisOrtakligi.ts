@@ -41,7 +41,9 @@ export interface Ayar {
   kotaEk: number;
   kadroluPrim: Record<Marka, number>;
   kadroluSatis: number;
-  /** Çözüm ortağı komisyonu: müşteri desteğini ortak verir (kullanıcı kararı 2026-11-03). */
+  /** iStoc çözüm ortağı: yaptığı işe göre oran (tanıştırır / demo / kapanış). */
+  cozumSeviye: Seviye;
+  /** Segika çözüm ortağı komisyonu: müşteri desteğini ortak verir (kullanıcı kararı 2026-11-03). */
   cozumOran: number;
   cozumMusteri: number;
   /** Yılda ücretsiz program eğitimi (saat); fazlası saat başı ücretlidir. */
@@ -84,8 +86,9 @@ export const VARSAYILAN_AYAR: Ayar = {
   maas: 50_000,
   kotaCarpan: 2,
   kotaEk: 0.2,
-  kadroluPrim: { istoc: 0.1, segika: 0.1 },
+  kadroluPrim: { istoc: 0.05, segika: 0.1 },
   kadroluSatis: 2,
+  cozumSeviye: 'C',
   cozumOran: 0.25,
   cozumMusteri: 10,
   egitimSaat: 8,
@@ -133,8 +136,12 @@ export function segikaAylik(a: Ayar) {
 export const aylikFiyat = (a: Ayar) => (a.marka === 'istoc' ? a.istocAyEur * a.kur : segikaAylik(a).toplam);
 /** Yıllık paket bedeli (₺, KDV hariç). iStoc: yıllık ay bedeli; Segika: 12 ay. */
 export const yillikFiyat = (a: Ayar) => (a.marka === 'istoc' ? a.istocAyEur * a.kur * a.istocYilAy : segikaAylik(a).toplam * 12);
-/** Çözüm ortağının bir müşteriden kazancı: oran modelinde kendi oranı (%25), tutar modelinde satış başı tutar. */
-export const cozumKazanci = (a: Ayar) => (a.model === 'oran' ? yillikFiyat(a) * a.cozumOran : a.sabit);
+/**
+ * Çözüm ortağının bir müşteriden kazancı. Segika: oran modelinde kendi oranı (%25); iStoc: yaptığı işin oranı.
+ * Tutar modelinde satış başı tutar.
+ */
+export const cozumKazanci = (a: Ayar) =>
+  a.model === 'sabit' ? a.sabit : a.marka === 'segika' ? yillikFiyat(a) * a.cozumOran : yillikFiyat(a) * a.oran[a.cozumSeviye];
 
 /** Bir yıllık paket satışında ortağın kazancı. */
 export const satisKazanci = (a: Ayar, s: Seviye) => (a.model === 'oran' ? yillikFiyat(a) * a.oran[s] : a.sabit);
@@ -188,13 +195,15 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
     {
       id: 'kadrolu',
       ad: 'Kadrolu satış uzmanı',
-      kisa: 'SGK’lı, kota sonrası %10 prim',
-      kim: 'Bizim SGK’lı çalışanımızdır. Satışı yapar ve müşteri listesini yönetir. Kotayı aşınca cironun %10’unu prim olarak alır.',
-      kurallar: [
-        'Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.',
-        'Müşteri ilişkileri için CRM yazılımını biz sağlarız.',
-        'Prim, müşteri ödeyince ve iade süresi geçince ödenir.',
-      ],
+      kisa: marka === 'segika' ? 'SGK’lı, kota sonrası %10 prim' : 'Sabit maaş ve kota üstü prim',
+      kim:
+        marka === 'segika'
+          ? 'Bizim SGK’lı çalışanımızdır. Satışı yapar ve müşteri listesini yönetir. Kotayı aşınca cironun %10’unu prim olarak alır.'
+          : 'Bizimle maaşlı çalışır. Müşteri listesini yönetir ve satışı kapatır. Kotayı aşınca prim kazanır.',
+      kurallar:
+        marka === 'segika'
+          ? ['Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.', 'Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.']
+          : ['İlk iki ay kota yoktur, işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
       kimler:
         marka === 'istoc'
           ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']
@@ -203,12 +212,15 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
     {
       id: 'cozum',
       ad: 'Profesyonel çözüm ortağı',
-      kisa: 'Desteği kendisi verir, %25 alır',
+      kisa: marka === 'segika' ? 'Desteği kendisi verir, %25 alır' : 'Danışmanlar ve hizmet firmaları',
       kim:
         marka === 'istoc'
-          ? 'İşletme sahibinin zaten güvendiği danışman ya da firmadır. iStoc’u müşterisine önerir ve müşterinin desteğini kendisi verir.'
+          ? 'İşletme sahibinin zaten güvendiği danışman ya da firmadır. iStoc’u müşterisine önerir. Kurulumu ve desteği biz yaparız.'
           : 'İşverene bordro, İK ya da iş güvenliği hizmeti veren profesyoneldir. Segika’yı müşterisine önerir ve müşterinin desteğini kendisi verir.',
-      kurallar: ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Sözleşmeyle çalışır, faturalı öder.', 'Her firma tek ortağa yazılır.'],
+      kurallar:
+        marka === 'segika'
+          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Sözleşmeyle çalışır, faturalı öder.', 'Her firma tek ortağa yazılır.']
+          : ['Sözleşmeyle çalışır, faturalı öder.', 'Ortak getirmeye para ödemeyiz.', 'Her firma tek ortağa yazılır.'],
       kimler:
         marka === 'istoc'
           ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'ERP ve POS bayisi', 'Lojistik firması', 'Gümrük müşaviri', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']

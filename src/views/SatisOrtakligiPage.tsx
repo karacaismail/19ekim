@@ -115,8 +115,9 @@ function Cozum({ a }: { a: Ayar }) {
       <Sonuc
         etiket="Yıllık kazanç"
         deger={tl(birim * a.cozumMusteri)}
-        aciklama={`Yılda ${a.cozumMusteri} müşteri getirirse kazanır. Her müşteri ${tl(birim)} getirir${a.model === 'oran' ? `, bu paket bedelinin ${yuzde(a.cozumOran)}’idir` : ''}.`}
+        aciklama={`Yılda ${a.cozumMusteri} müşteri getirirse kazanır. Her müşteri ${tl(birim)} getirir${a.model === 'oran' && a.marka === 'segika' ? `, bu paket bedelinin ${yuzde(a.cozumOran)}’idir` : ''}.`}
       />
+      {a.marka === 'segika' ? (
       <div className="so2-ikili">
         <div>
           <p className="so2-alt-baslik">Ücretsiz eğitim</p>
@@ -129,6 +130,7 @@ function Cozum({ a }: { a: Ayar }) {
           <p>{a.ekEgitimSaat > 0 ? `${a.ekEgitimSaat} saat ek eğitim için ortaktan ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} alırız.` : 'Personeli değişirse ya da fazlasını isterse saat başı ücret alırız.'}</p>
         </div>
       </div>
+      ) : null}
       <div className="so2-musavir">
         <p className="so2-alt-baslik">Mali müşavir</p>
         <p>
@@ -192,11 +194,19 @@ function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>)
   if (rol === 'cozum')
     return (
       <Grup baslik="Ortak ve müşavir">
-        <Girdi label="Komisyon oranı" yuzdeMi value={a.cozumOran} onChange={(v) => g({ cozumOran: Math.min(1, v) })} />
+        {a.marka === 'segika' ? (
+          <Girdi label="Komisyon oranı" yuzdeMi value={a.cozumOran} onChange={(v) => g({ cozumOran: Math.min(1, v) })} />
+        ) : (
+          <SeviyeSec value={a.cozumSeviye} onChange={(s) => g({ cozumSeviye: s })} />
+        )}
         <Girdi label="Yılda getirdiği müşteri" value={a.cozumMusteri} onChange={(v) => g({ cozumMusteri: v })} />
-        <Girdi label="Ücretsiz eğitim" birim="saat / yıl" value={a.egitimSaat} onChange={(v) => g({ egitimSaat: v })} />
-        <Girdi label="Ek eğitim ücreti" birim="₺ / saat" step={100} value={a.egitimSaatUcret} onChange={(v) => g({ egitimSaatUcret: v })} />
-        <Girdi label="Ek eğitim" birim="saat" value={a.ekEgitimSaat} onChange={(v) => g({ ekEgitimSaat: v })} />
+        {a.marka === 'segika' ? (
+          <>
+            <Girdi label="Ücretsiz eğitim" birim="saat / yıl" value={a.egitimSaat} onChange={(v) => g({ egitimSaat: v })} />
+            <Girdi label="Ek eğitim ücreti" birim="₺ / saat" step={100} value={a.egitimSaatUcret} onChange={(v) => g({ egitimSaatUcret: v })} />
+            <Girdi label="Ek eğitim" birim="saat" value={a.ekEgitimSaat} onChange={(v) => g({ ekEgitimSaat: v })} />
+          </>
+        ) : null}
         <Sec<'komisyon' | 'indirim'>
           label="Mali müşavire"
           value={a.musavirModel}
