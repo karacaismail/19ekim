@@ -14,6 +14,12 @@ async function ac(page: Page, genislik = 1512) {
   await expect(page.locator('.v2-so2')).toBeVisible();
 }
 const robot = (page: Page) => page.getByRole('group', { name: 'Satış: ayda kaç yeni müşteri?' });
+const pencere = (page: Page) => page.getByRole('dialog', { name: 'Koşullar' });
+async function kosullariAc(page: Page, bolum?: string) {
+  await page.getByRole('button', { name: 'Koşullar', exact: true }).click();
+  await expect(pencere(page)).toBeVisible();
+  if (bolum) await pencere(page).getByRole('button', { name: bolum }).click();
+}
 const sekme = (page: Page, id: string) => page.locator(`#v2-so2-sekme-${id}`);
 const sekmeTutari = async (page: Page, id: string) => tutar((await sekme(page, id).locator('.v2-so2-rol-tutar').innerText()).split('/')[0]);
 
@@ -27,7 +33,37 @@ test('aynı satış, aynı kazanç: bağımsız personalar eşit, kadrolu ve mü
   await expect(sekme(page, 'kadrolu').locator('.v2-so2-rol-kisa')).toHaveText('Kadrolu çalışan');
   await expect(sekme(page, 'tavsiye').locator('.v2-so2-rol-kisa')).toHaveText('Müşteri');
   await expect(sekme(page, 'tavsiye').locator('.v2-so2-rol-ad')).toHaveText('Mevcut müşteri');
-  await expect(page.locator('.v2-adalet-baslik').first()).toHaveText('Aynı satış, aynı kazanç');
+  await kosullariAc(page);
+  await expect(pencere(page).locator('.v2-adalet-baslik').first()).toHaveText('Aynı satış, aynı kazanç');
+});
+
+test('Koşullar penceresi: sabit koşullar burada, panelde kısa segment durumu', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await ac(page);
+  // Sağ panelde merdivenin tamamı ve ağ kuralları yok; kısa durum ve kampanyalar var.
+  await expect(page.locator('.v2-so2-panel .v2-sg-liste')).toHaveCount(0);
+  await expect(page.locator('.v2-so2-panel .v2-ag')).toHaveCount(0);
+  await expect(page.locator('.v2-so2-panel .v2-sg-durum')).toContainText('Altın ortak olmak için');
+  const dugme = page.getByRole('button', { name: 'Koşullar', exact: true });
+  await dugme.click();
+  await expect(pencere(page)).toBeVisible();
+  await expect(pencere(page).locator('.v2-sg-basamak')).toHaveCount(4);
+  await expect(pencere(page)).toContainText('bütün personalarda aynıdır');
+  for (const [bolum, metin] of [
+    ['Kadrolu kariyer', 'Takım lideri'],
+    ['Ağ', 'saadet zinciri'],
+    ['Kampanyalar', 'Arkadaşını getir'],
+  ]) {
+    await pencere(page).getByRole('button', { name: bolum }).click();
+    await expect(pencere(page)).toContainText(metin);
+  }
+  // Escape kapatır, odak düğmeye döner.
+  await page.keyboard.press('Escape');
+  await expect(pencere(page)).toHaveCount(0);
+  await expect(dugme).toBeFocused();
+  // Paneldeki kısa durumdan da açılır.
+  await page.locator('.v2-so2-panel').getByRole('button', { name: 'Bütün koşulları gör' }).click();
+  await expect(pencere(page).locator('.v2-sg-basamak')).toHaveCount(4);
 });
 
 test('fiyatlandırma robotu: üç iStoc paketi ciroyu verir, Kurumsal teklifle satılır', async ({ page, browserName }) => {
@@ -45,14 +81,14 @@ test('fiyatlandırma robotu: üç iStoc paketi ciroyu verir, Kurumsal teklifle s
 test('segment merdiveni: satış ve koşullar yükseltir, rozet desteği verene açılır', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
   await ac(page);
-  await expect(page.locator('.v2-sg-basamak[data-durum="simdi"] .v2-sg-ad')).toContainText('Gümüş ortak');
+  await expect(page.locator('.v2-sg-adimlar [data-durum="simdi"]')).toContainText('Gümüş ortak');
   await expect(page.locator('.v2-sg-durum')).toContainText('Altın ortak olmak için');
   const gumus = await sekmeTutari(page, 'oncu');
 
   await robot(page).getByRole('textbox', { name: /Standart paket/ }).fill('3');
   await page.getByRole('button', { name: 'Ürün sertifikası' }).click();
   await page.getByRole('textbox', { name: 'Yenileme oranı' }).fill('80');
-  await expect(page.locator('.v2-sg-basamak[data-durum="simdi"] .v2-sg-ad')).toContainText('Altın ortak');
+  await expect(page.locator('.v2-sg-adimlar [data-durum="simdi"]')).toContainText('Altın ortak');
   await expect(page.locator('.v2-sg-durum')).toContainText('kurulum ve desteği üstlenmek');
   const altin = await sekmeTutari(page, 'oncu');
   expect(altin).toBeGreaterThan(gumus);
@@ -63,22 +99,25 @@ test('segment merdiveni: satış ve koşullar yükseltir, rozet desteği verene 
   expect(pro).toBeGreaterThan(altin);
   // Rozet persona değil segmenttir: öğrenci de aynı tutarı alır.
   expect(await sekmeTutari(page, 'cozum')).toBe(pro);
-  await expect(page.locator('.v2-sg-neden')).toContainText('Rozet herkese açıktır');
+  await kosullariAc(page);
+  await expect(pencere(page).locator('.v2-sg-neden')).toContainText('Rozet herkese açıktır');
 });
 
 test('ağ en çok 2 kademe; kademe payları segmentle açılır', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
   await ac(page);
-  const basliklar = await page.locator('.v2-ag .v2-so2-donem-tablo thead th').allInnerTexts();
+  await kosullariAc(page, 'Ağ');
+  const basliklar = await pencere(page).locator('.v2-ag .v2-so2-donem-tablo thead th').allInnerTexts();
   expect(basliklar).toEqual(expect.arrayContaining(['1. kademe', '2. kademe']));
   expect(basliklar).not.toContain('3. kademe');
   // Gümüş: 1. kademe açık, 2. kademe kapalı.
   await expect(page.locator('.v2-kr-satir', { hasText: 'Ağ, 1. kademe' })).not.toHaveAttribute('data-kapali', '');
   await expect(page.locator('.v2-kr-satir', { hasText: 'Ağ, 2. kademe' })).toHaveAttribute('data-kapali', '');
-  await expect(page.locator('.v2-ag-bolum')).toContainText('saadet zinciri');
-  // Kadrolu çalışan ağ payı almaz.
+  await expect(pencere(page)).toContainText('saadet zinciri');
+  await page.keyboard.press('Escape');
+  // Kadrolu çalışanın kırılımında ağ payı yoktur.
   await sekme(page, 'kadrolu').click();
-  await expect(page.locator('.v2-ag')).toHaveCount(0);
+  await expect(page.locator('.v2-kr-satir', { hasText: 'Ağ, 1. kademe' })).toHaveCount(0);
 });
 
 test('sol panel: standart bölüm her personada aynı, özel koşullar en altta', async ({ page, browserName }) => {

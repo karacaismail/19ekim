@@ -8,14 +8,18 @@
  * Personaya özel koşullar solun en altında durur; standart bölüm her personada aynı kalır.
  */
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Modal } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
 import { AgDiyagrami } from '../components/AgDiyagramiV2';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
+import { useMotionMs } from '../lib/motion';
 import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKitV2';
 import {
   ALAN_ADI,
   ISTOC_PAKET_ADI,
+  KAMPANYALAR,
   KARIYER_ADI,
   PAKET_ADI,
   PRO_GEREKCE,
@@ -47,6 +51,7 @@ import {
 import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullarV2';
 import { POLITIKA_ADI } from '../data/affilateKurguV2';
 import type { Politika } from '../data/affilateV2';
+import '@mantine/core/styles/Modal.layer.css';
 import '../styles/satisOrtakligiV2.css';
 
 /** Model değişti (2026-11-03): eski v2 kaydı yeni alanlarla karışmasın diye anahtar yenilendi. */
@@ -459,12 +464,49 @@ function Kirilim({ satirlar }: { satirlar: { ad: string; deger: string; not?: st
   );
 }
 
-/** Segment ya da kariyer merdiveni: hangi basamakta, bir üste geçmek için ne eksik. */
-function Merdiven({ sg, tur }: { sg: SegmentSonucu; tur: 'bagimsiz' | 'kadrolu' }) {
-  const simdi = sg.basamaklar[sg.seviye];
+type Tur = 'bagimsiz' | 'kadrolu';
+const basamakDurumu = (sg: SegmentSonucu, i: number) => (i < sg.seviye ? 'gecildi' : i === sg.seviye ? 'simdi' : i === sg.seviye + 1 ? 'sonraki' : 'kilitli');
+
+/** Şu anki basamak ve bir üste geçmek için eksikler (tam cümle). */
+function segmentDurumu(sg: SegmentSonucu, tur: Tur) {
   const sonraki = sg.basamaklar[sg.seviye + 1];
   const birlestir = (l: string[]) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} ve ${l[l.length - 1]}`);
-  const durum = sonraki ? `${sonraki.ad} olmak için ${birlestir(sg.eksikler)} gerekir.` : tur === 'bagimsiz' ? 'Ortak en üst segmenttedir. Rozet her yıl yeniden değerlendirilir.' : 'Çalışan en üst basamaktadır.';
+  return sonraki ? `${sonraki.ad} olmak için ${birlestir(sg.eksikler)} gerekir.` : tur === 'bagimsiz' ? 'Ortak en üst segmenttedir. Rozet her yıl yeniden değerlendirilir.' : 'Çalışan en üst basamaktadır.';
+}
+
+/** Paneldeki kısa segment durumu: dört basamak şeridi, eksikler ve bütün koşulları açan düğme. */
+function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => void }) {
+  const durum = segmentDurumu(sg, tur);
+  return (
+    <section className="v2-sg-ozet" aria-labelledby="v2-sg-ozet-baslik">
+      <p className="v2-so2-alt-baslik" id="v2-sg-ozet-baslik">
+        {tur === 'bagimsiz' ? 'Segment' : 'Kariyer basamağı'}
+      </p>
+      <ol className="v2-sg-adimlar">
+        {sg.basamaklar.map((b, i) => {
+          const d = basamakDurumu(sg, i);
+          return (
+            <li key={b.ad} data-durum={d} aria-current={d === 'simdi' ? 'step' : undefined}>
+              {b.ad}
+              <span className="visually-hidden">{d === 'simdi' ? ', şu anki basamak' : d === 'gecildi' ? ', geçildi' : ', henüz değil'}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="v2-sg-durum">
+        <strong>{sg.basamaklar[sg.seviye].ad}</strong> <Canli deger={durum}>{durum}</Canli>
+      </p>
+      <button type="button" className="v2-so2-ikincil" aria-haspopup="dialog" onClick={ac}>
+        Bütün koşulları gör
+      </button>
+    </section>
+  );
+}
+
+/** Segment ya da kariyer merdiveni (Koşullar penceresinde): her basamağın koşulları ve şu anki durumu. */
+function Merdiven({ sg, tur }: { sg: SegmentSonucu; tur: Tur }) {
+  const simdi = sg.basamaklar[sg.seviye];
+  const durum = segmentDurumu(sg, tur);
   return (
     <section className="v2-sg" aria-labelledby="v2-sg-baslik">
       <p className="v2-so2-alt-baslik" id="v2-sg-baslik">
@@ -475,7 +517,7 @@ function Merdiven({ sg, tur }: { sg: SegmentSonucu; tur: 'bagimsiz' | 'kadrolu' 
       </p>
       <ol className="v2-sg-liste">
         {sg.basamaklar.map((b, i) => {
-          const d = i < sg.seviye ? 'gecildi' : i === sg.seviye ? 'simdi' : i === sg.seviye + 1 ? 'sonraki' : 'kilitli';
+          const d = basamakDurumu(sg, i);
           return (
             <li key={b.ad} className="v2-sg-basamak" data-durum={d} aria-current={d === 'simdi' ? 'step' : undefined}>
               <span className="v2-sg-isaret" aria-hidden="true">
@@ -567,9 +609,6 @@ function BagimsizSonuc({ a, persona }: { a: Ayar; persona: RolMetni }) {
           { ad: '2. yıldan sonra yenileme payı', deger: tl(b.yenilemePay), not: b.yenilemePay > 0 ? `Yenilenen ciro × ${yuzde(a.proYenilemePay)}, her ay` : 'Profesyonel çözüm ortağı rozetiyle açılır', kapali: b.yenilemePay === 0 },
         ]}
       />
-      <Adalet baslik="Aynı satış, aynı kazanç">
-        Öncü satış ortağı, danışman ya da marka elçisi olmak tutarı değiştirmez. Aynı satışı yapan her bağımsız ortak aynı tutarı alır. Tutarı segment ve satıştaki katkı belirler.
-      </Adalet>
     </>
   );
 }
@@ -669,6 +708,77 @@ const AG_KURALLARI = [
   'Kazanç yalnız gerçek müşteri satışından doğar. Ortak getirmek tek başına para kazandırmaz. Aksi durum, 6502 sayılı Kanun’a göre yasak olan saadet zinciri sayılır.',
   'Giriş ücreti, zorunlu alım ve stok yoktur. Reklamda kazanç vaadi kullanılmaz.',
 ];
+
+/* ---------- Koşullar penceresi: personaya göre değişmeyen kurallar ---------- */
+
+type KosulBolum = 'segment' | 'kariyer' | 'ag' | 'kampanya';
+const BOLUM_ADI: Record<KosulBolum, string> = { segment: 'Segmentler', kariyer: 'Kadrolu kariyer', ag: 'Ağ', kampanya: 'Kampanyalar' };
+
+function TumKampanyalar({ a }: { a: Ayar }) {
+  const adlar = Object.fromEntries(rolMetinleri(a.marka).map((r) => [r.id, r.ad]));
+  return (
+    <ul className="v2-kp-liste">
+      {KAMPANYALAR.filter((k) => k.marka.includes(a.marka)).map((k) => (
+        <li key={k.id}>
+          <strong>{k.ad}</strong>
+          <span>{k.ozet(a)}</span>
+          <span>Katılabilen: {k.kimler.map((id) => adlar[id]).join(', ')}.</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Koşullar penceresi (kullanıcı kararı 2026-11-03: değişmeyen sabit veriler tek pencerede). Basamaklar, eşikler, ağ
+ * kuralları ve kampanya tanımları her personada aynıdır; işaretler ve tutarlar soldaki girdilerle güncellenir.
+ * Mantine Modal: odak tuzağı, Escape ile kapanma, kapanınca odak açan düğmeye döner. Dar ekranda tam ekran.
+ */
+function KosullarPenceresi({ a, acik, bolum, setBolum, kapat }: { a: Ayar; acik: boolean; bolum: KosulBolum; setBolum: (b: KosulBolum) => void; kapat: () => void }) {
+  const sure = useMotionMs('--motion-duration-base');
+  const dar = useMediaQuery('(max-width: 47.99em)', false);
+  return (
+    <Modal
+      opened={acik}
+      onClose={kapat}
+      title="Koşullar"
+      size="64rem"
+      fullScreen={dar}
+      radius={0}
+      transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }}
+      overlayProps={{ backgroundOpacity: 0.55 }}
+      closeButtonProps={{ 'aria-label': 'Koşulları kapat', size: 'xl' }}
+      classNames={{ content: 'v2-pencere', header: 'v2-pencere-ust', title: 'v2-pencere-baslik', body: 'v2-pencere-govde', close: 'v2-pencere-kapat' }}
+    >
+      <p className="v2-pencere-not">Bu koşullar bütün personalarda aynıdır. İşaretler ve tutarlar soldaki satış ve koşul girdilerine göre değişir.</p>
+      <Choice<KosulBolum> label="Bölüm" value={bolum} options={(Object.keys(BOLUM_ADI) as KosulBolum[]).map((id) => ({ id, name: BOLUM_ADI[id] }))} onChange={setBolum} />
+      <div className="v2-so2-gecis v2-pencere-bolum" key={bolum}>
+        {bolum === 'segment' ? (
+          <>
+            <Adalet baslik="Aynı satış, aynı kazanç">
+              Öncü satış ortağı, danışman ya da marka elçisi olmak tutarı değiştirmez. Aynı satışı yapan her bağımsız ortak aynı tutarı alır. Tutarı segment ve satıştaki katkı belirler.
+            </Adalet>
+            <Merdiven sg={bagimsizKazanc(a).sg} tur="bagimsiz" />
+          </>
+        ) : bolum === 'kariyer' ? (
+          <>
+            <Adalet baslik="Kadrolu çalışan için aynı eşikler">
+              Kadrolu satış uzmanı segment değil, SGK’lı çalışanımızdır. Bağımsız ortakla aynı satış eşikleriyle basamak yükselir. Basamak maaşı ve prim oranını belirler. Takım lideri olmak için ekip yönetmek gerekir.
+            </Adalet>
+            <Merdiven sg={kadroluKazanc(a).sg} tur="kadrolu" />
+          </>
+        ) : bolum === 'ag' ? (
+          <>
+            <Kurallar maddeler={AG_KURALLARI} />
+            <AgDiyagrami a={a} />
+          </>
+        ) : (
+          <TumKampanyalar a={a} />
+        )}
+      </div>
+    </Modal>
+  );
+}
 
 function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
   const s = satisOzeti(a);
@@ -811,6 +921,12 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const kok = useYapisikUst();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
+  const [kosulAcik, setKosulAcik] = useState(false);
+  const [bolum, setBolum] = useState<KosulBolum>('segment');
+  const kosullariAc = (b?: KosulBolum) => {
+    if (b) setBolum(b);
+    setKosulAcik(true);
+  };
   const serit = useSeciliSekmeGorunur(rol);
   const roller = rolMetinleri(a.marka);
   const secili = roller.find((r) => r.id === rol)!;
@@ -842,6 +958,9 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           ]}
           onChange={(v) => g({ faturalama: v })}
         />
+        <button type="button" className="v2-so2-kosullar-dugme" aria-haspopup="dialog" aria-expanded={kosulAcik} onClick={() => kosullariAc()}>
+          Koşullar
+        </button>
         <p className="v2-so2-fiyat">
           Aylık satış cirosu <strong>{tl(s.ciro)}</strong>
           <span>
@@ -918,15 +1037,10 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
               ) : (
                 <>
                   {secili.sozlesme === 'kadrolu' ? <KadroluSonuc a={a} /> : secili.sozlesme === 'musteri' ? <MusteriSonuc a={a} /> : <BagimsizSonuc a={a} persona={secili} />}
-                  {secili.sozlesme === 'musteri' ? null : <Merdiven sg={kadroluVeyaBagimsiz(a, secili.sozlesme)} tur={secili.sozlesme === 'kadrolu' ? 'kadrolu' : 'bagimsiz'} />}
+                  {secili.sozlesme === 'musteri' ? null : (
+                    <SegmentOzeti sg={kadroluVeyaBagimsiz(a, secili.sozlesme)} tur={secili.sozlesme === 'kadrolu' ? 'kadrolu' : 'bagimsiz'} ac={() => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment')} />
+                  )}
                   <KampanyaListesi a={a} rol={rol} />
-                  {secili.sozlesme === 'bagimsiz' ? (
-                    <div className="v2-ag-bolum">
-                      <p className="v2-so2-alt-baslik">Ağ kuralları</p>
-                      <Kurallar maddeler={AG_KURALLARI} />
-                      <AgDiyagrami a={a} />
-                    </div>
-                  ) : null}
                   <Donemler satirlar={donemKazanci(a, secili.sozlesme)} />
                   <Hesap baslik="Hesap" satirlar={hesapSatirlari(a, secili.sozlesme)} />
                   <Kurallar maddeler={secili.kurallar} />
@@ -937,6 +1051,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </div>
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi-v2" />
+      <KosullarPenceresi a={a} acik={kosulAcik} bolum={bolum} setBolum={setBolum} kapat={() => setKosulAcik(false)} />
     </div>
   );
 }
