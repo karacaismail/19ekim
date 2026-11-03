@@ -1,108 +1,126 @@
 /**
- * v2 KOPYASI (2026-11-03): v1 (satisOrtakligi.ts) korunur, v2 farkları yalnız bu dosyada ve *V2 dosyalarında yapılır.
- * Satış ortaklığı programı (/satis-ortakligi/; kullanıcı kararları 2026-11-03): iStoc ve Segika için beş ortak rolü.
- * Ödeme iki modelle hesaplanır: işe göre oran (tanıştırma A, demo B, kapanış C) ya da satış başı sabit tutar.
- * iStoc yıllık paket 10 ay bedelidir; tavsiye ödülü hizmet kredisidir; mali müşavir için komisyon ya da indirim seçilir.
- * Bütün sayılar değiştirilebilir başlangıç değeridir (`VARSAYILAN_AYAR`); kaynak docs: satis-ortakligi-programi.md.
+ * Satış ortaklığı v2 (kullanıcı kararları 2026-11-03). v1 (satisOrtakligi.ts) korunur, v2 yalnız *V2 dosyalarında gelişir.
+ *
+ * v2’nin ana fikri: persona ayrı, segment ayrı, kampanya ayrı.
+ * - Persona, ortağın kim olduğudur: öncü satış ortağı, kadrolu satış uzmanı, danışman ve hizmet firması, marka elçisi,
+ *   mevcut müşteri. Persona sözleşme türünü belirler: bağımsız ortak, kadrolu çalışan ya da müşteri.
+ * - Fiyatlandırma robotu herkes için aynıdır. Hangi paketten ayda kaç tane satıldığı ciroyu verir.
+ * - Segment, satış sonucuna ve koşullara göre kazanılan kademedir: Başlangıç, Gümüş, Altın ve Profesyonel çözüm ortağı
+ *   rozeti. Komisyon oranını persona değil segment ve satıştaki katkı belirler. Aynı satışı yapan bağımsız ortaklar aynı
+ *   tutarı alır. Kadrolu çalışan aynı eşiklerle kariyer basamağı kazanır.
+ * - Ağ en çok 2 kademe derinliktedir: ortak, getirdiği ortakların ve onların getirdiklerinin satışından pay alır.
+ *   Pay yalnız gerçek satıştan doğar ve satış yapanın komisyonundan düşülmez.
+ * - Kampanya, belirli personalara ve sürelere açık ek ödüldür. “Arkadaşını getir” bir kampanyadır.
+ * Bütün sayılar değiştirilebilir başlangıç değeridir (`VARSAYILAN_AYAR`). Tutarlar ₺, oranlar 0–1 arasıdır.
  */
 
 export type Marka = 'istoc' | 'segika';
 export type Model = 'oran' | 'sabit';
 export type Seviye = 'A' | 'B' | 'C';
 export type SegikaPaket = 'ikisi' | 'tesvik' | 'otomasyon';
+export type IstocPaket = 'standart' | 'pro' | 'kurumsal';
+export type Faturalama = 'yillik' | 'aylik';
+export type Egitim = 'temel' | 'sertifika';
+export type Sozlesme = 'bagimsiz' | 'kadrolu' | 'musteri';
+export type KadroluAlan = 'saha' | 'ic' | 'kurumsal';
+/** Persona kimlikleri (v1 ile aynı anahtarlar; özel programlar bu anahtarlarla bağlıdır). */
 export type RolId = 'oncu' | 'kadrolu' | 'cozum' | 'tavsiye' | 'elci';
+
+type Dortlu = [number, number, number, number];
 
 export interface Ayar {
   marka: Marka;
+  /** v1’den kalan alan; v2’de komisyon her zaman oranla hesaplanır. */
   model: Model;
-  /* Fiyat */
-  istocAyEur: number;
+  /* ---------- Fiyatlandırma robotu: herkes için aynı ---------- */
+  /** iStoc paketlerinin aylık fiyatı (€). Kurumsal paket teklifle satılır; değer örnek teklif ortalamasıdır. */
+  istocPaketEur: Record<IstocPaket, number>;
+  /** iStoc: ayda kaç yeni müşteri, paket başına. */
+  istocSatis: Record<IstocPaket, number>;
+  /** Segika: ayda kaç yeni müşteri, paket başına. */
+  segikaSatis: Record<SegikaPaket, number>;
+  /** Müşteri nasıl öder: yıllık paket ya da aylık abonelik. Komisyon her iki durumda ilk yıl bedelinden hesaplanır. */
+  faturalama: Faturalama;
   kur: number;
+  /** iStoc yıllık paket kaç aylık bedeldir. */
   istocYilAy: number;
-  segikaPaket: SegikaPaket;
-  /** Paket fiyatı: blok başına aylık (₺). */
+  /** Segika fiyatı: 25 çalışanlık blok başına aylık (₺), kademeli büyük firma indirimi. */
   segikaFiyat: Record<SegikaPaket, number>;
-  /** Müşterinin çalışan sayısı. */
   calisan: number;
-  /** Fiyat bloğu: kaç çalışan için bir paket fiyatı (sitede 25). */
   blok: number;
-  /** Kademeli indirim: çalışan sayısı bu sınıra kadar olan kısma indirim uygulanır (son kademe sınırsız). */
   kademeler: { ust: number; indirim: number }[];
-  /* Ödeme */
-  oran: Record<Seviye, number>;
-  sabit: number;
-  ilkOdeme: number;
-  ilkGun: number;
-  kalanGun: number;
-  /* Roller */
-  oncuSeviye: Seviye;
-  oncuAsama: [number, number, number, number];
-  maas: number;
-  kotaCarpan: number;
-  kotaEk: number;
-  kadroluPrim: Record<Marka, number>;
-  kadroluSatis: number;
-  /** iStoc çözüm ortağı: yaptığı işe göre oran (tanıştırır / demo / kapanış). */
-  cozumSeviye: Seviye;
-  /** Segika çözüm ortağı komisyonu: müşteri desteğini ortak verir (kullanıcı kararı 2026-11-03). */
-  cozumOran: number;
-  cozumMusteri: number;
-  /** Yılda ücretsiz program eğitimi (saat); fazlası saat başı ücretlidir. */
-  egitimSaat: number;
-  egitimSaatUcret: number;
-  ekEgitimSaat: number;
-  musavirModel: 'komisyon' | 'indirim';
-  musavirOran: number;
-  musavirIndirim: number;
+  /* ---------- Satıştaki katkı: herkes için aynı ---------- */
+  katki: Seviye;
+  /** Segment oranının katkıya göre ne kadarı ödenir (tanıştırır, demo yapar, satışı kapatır). */
+  katkiCarpan: Record<Seviye, number>;
+  /* ---------- Segment koşulları (simülasyon) ---------- */
+  /** Müşterilerin aboneliği yenileme oranı. */
+  yenileme: number;
+  egitim: Egitim;
+  /** Ortak kurulumu, eğitimi ve ilk seviye desteği kendisi verir mi? */
+  destek: boolean;
+  /** Net tavsiye puanı (NPS, müşterinin bizi tavsiye etme isteği; ölçek −100 ile 100, burada 0–100 girilir). */
+  memnuniyet: number;
+  /* ---------- Segment kuralları ---------- */
+  /** Segment başına komisyon oranı (satışı kapatan ortak için): Başlangıç, Gümüş, Altın, Profesyonel. */
+  segmentOran: Dortlu;
+  /** Gümüş, Altın ve Profesyonel için yıllık müşteri ve ciro eşiği (ürün başına). */
+  segmentEsik: Record<Marka, { musteri: number; ciro: number }[]>;
+  /** Altın ve Profesyonel için en düşük yenileme oranı. */
+  segmentYenileme: [number, number];
+  /** Profesyonel için en düşük memnuniyet puanı. */
+  proMemnuniyet: number;
+  /** Profesyonel çözüm ortağı müşteri yenilediğinde yenilenen bedelden bu oranı alır. */
+  proYenilemePay: number;
+  /* ---------- Ağ: en çok 2 kademe ---------- */
+  /** Getirilen ortakların satışından pay: [1. kademe, 2. kademe] (cironun oranı). */
+  agPay: [number, number];
+  /** Her ortağın doğrudan getirdiği ortak sayısı. */
+  agAltTemsilci: number;
+  /** Ağdaki her ortağın aylık satışı (Standart paket eşdeğeri). */
+  agAltSatis: number;
+  /* ---------- Kampanyalar ---------- */
+  /** İlk 90 gün hızlı başlangıç: yeni ortağın ilk 3 aydaki satışlarına ek oran. */
+  hizliBaslangic: number;
+  /** Kurumsal paket hızlandırıcı (iStoc): Kurumsal paket satışına ek oran. */
+  kurumsalEk: number;
+  /** Arkadaşını getir: tavsiye edene ve yeni müşteriye kaç ay ücretsiz kullanım, yılda en çok kaç tavsiye. */
   krediAy: number;
   yeniKrediAy: number;
   tavsiyeSinir: number;
-  elciSeviye: Seviye;
-  elciSatis: number;
-  /*
-   * Koşul setleri (kullanıcı kararı 2026-11-03: dört Pazarlama sayfası tek sayfada). Rol başına seçili set; boşsa ana
-   * program. Setlerin tanımı ve hesabı src/data/kosullar.ts içindedir.
-   */
+  /* ---------- Hakediş ödemesi ---------- */
+  ilkOdeme: number;
+  ilkGun: number;
+  kalanGun: number;
+  /* ---------- Kadrolu satış uzmanına özel ---------- */
+  kadroluAlan: KadroluAlan;
+  /** Kariyer basamağına göre aylık maaş ve kota üstü prim oranı. */
+  kadroluMaas: Dortlu;
+  kadroluPrimOran: Dortlu;
+  kotaCarpan: number;
+  kotaEk: number;
+  /** Takım lideri olmak için yönetilen ekip (kişi). */
+  kadroluEkip: number;
+  /** Takım liderinin ekibinin aylık satışı ve satış başı payı. */
+  liderEkipSatis: number;
+  liderPay: number;
+  /* ---------- Danışman ve hizmet firmasına özel ---------- */
+  musavirModel: 'komisyon' | 'indirim';
+  musavirOran: number;
+  musavirIndirim: number;
+  /* ---------- Özel programlar (kosullarV2.ts) ---------- */
+  /** Persona başına seçili özel program; boşsa standart program. */
   kosul: Partial<Record<RolId, string>>;
-  /**
-   * Temsilci ağı (kullanıcı kararı 2026-11-03: kademeli ağ). Satış yapan komisyon alır; üstündeki kişiler kademe
-   * derinliğine kadar kademe payı alır, aşağı indikçe pay küçülür. Kazanç yalnız gerçek satıştan doğar.
-   */
-  agKomisyon: number;
-  /** 1., 2. ve 3. kademe payı (satış başı ₺). */
-  agKademePay: [number, number, number];
-  /** Kaç kademe yukarıya pay gider (1–3). */
-  agDerinlik: number;
-  /** Her temsilcinin getirdiği temsilci sayısı. */
-  agAltTemsilci: number;
-  /** Her temsilcinin aylık satışı. */
-  agAltSatis: number;
-  /** Bir satış için ödenen toplam tutarın üst sınırı. */
-  agTavan: number;
-  /** Affilate: yıllara yayılan komisyon oranları (1., 2., 3. yıl). */
+  oncuAsama: [number, number, number, number];
+  cozumMusteri: number;
   yillaraOncu: [number, number, number];
   yillaraCozum: [number, number, number];
-  /** Temsilci ağı: saha personeli kotası maaşın katı; kota sonrası satış başı prim. */
-  sahaKotaCarpan: number;
-  sahaPrim: number;
-  /** Temsilci ağı: ekip lideri maaş farkı, ekip satışı başına pay ve ekibin aylık satışı. */
-  liderEk: number;
-  liderPay: number;
-  liderEkipSatis: number;
-  /** İş ortaklığı (Segika P2): ilk ödenmiş aylardan oran. */
   yonlendirmeOran: number;
   yonlendirmeAy: number;
-  /** İş ortaklığı (Segika P1): mali müşavirin aktif mükellef sayısı. */
   smmmMukellef: number;
-  /** İş ortaklığı (iStoc): satıcı geliştirme oranı ve süresi. */
   gelistirmeOran: number;
   gelistirmeAy: number;
-  /** Affilate: tek seferlik tavsiye, ilk faturadan oran. */
   tekSeferOran: number;
-  /**
-   * Affilate hesap motoru (kullanıcı kararı 2026-11-03: Affilate sayfası satış ortaklığına taşındı). Müşterinin ödeme
-   * biçimi, hesap süresi, ortağa ödeme zamanı ve 3. yıldan sonraki oran. Motor: src/data/affilate.ts.
-   */
   affOdeme: 'paket' | 'aylik';
   affUfukAy: number;
   affPolitika: Record<'ayse' | 'satis' | 'cozum', 'tahsilatta' | 'hizmet-ayi' | 'tahsilatta-taksit'>;
@@ -112,10 +130,12 @@ export interface Ayar {
 export const VARSAYILAN_AYAR: Ayar = {
   marka: 'istoc',
   model: 'oran',
-  istocAyEur: 399,
+  istocPaketEur: { standart: 399, pro: 599, kurumsal: 1_200 },
+  istocSatis: { standart: 1, pro: 0, kurumsal: 0 },
+  segikaSatis: { ikisi: 1, tesvik: 0, otomasyon: 0 },
+  faturalama: 'yillik',
   kur: 56,
   istocYilAy: 10,
-  segikaPaket: 'ikisi',
   segikaFiyat: { ikisi: 2_600, tesvik: 1_850, otomasyon: 1_600 },
   calisan: 25,
   blok: 25,
@@ -125,46 +145,55 @@ export const VARSAYILAN_AYAR: Ayar = {
     { ust: 10_000, indirim: 0.35 },
     { ust: 0, indirim: 0.5 },
   ],
-  oran: { A: 0.08, B: 0.12, C: 0.18 },
-  sabit: 2_500,
-  ilkOdeme: 0.7,
-  ilkGun: 14,
-  kalanGun: 60,
-  oncuSeviye: 'B',
-  oncuAsama: [0, 1, 2, 4],
-  maas: 50_000,
-  kotaCarpan: 2,
-  kotaEk: 0.2,
-  kadroluPrim: { istoc: 0.05, segika: 0.1 },
-  kadroluSatis: 2,
-  cozumSeviye: 'C',
-  cozumOran: 0.25,
-  cozumMusteri: 10,
-  egitimSaat: 8,
-  egitimSaatUcret: 1_500,
-  ekEgitimSaat: 4,
-  musavirModel: 'indirim',
-  musavirOran: 0.08,
-  musavirIndirim: 0.2,
+  katki: 'C',
+  katkiCarpan: { A: 0.5, B: 0.75, C: 1 },
+  yenileme: 0.75,
+  egitim: 'temel',
+  destek: false,
+  memnuniyet: 45,
+  segmentOran: [0.12, 0.15, 0.18, 0.22],
+  segmentEsik: {
+    istoc: [
+      { musteri: 6, ciro: 1_300_000 },
+      { musteri: 18, ciro: 4_000_000 },
+      { musteri: 36, ciro: 8_000_000 },
+    ],
+    segika: [
+      { musteri: 6, ciro: 180_000 },
+      { musteri: 18, ciro: 560_000 },
+      { musteri: 36, ciro: 1_120_000 },
+    ],
+  },
+  segmentYenileme: [0.7, 0.8],
+  proMemnuniyet: 40,
+  proYenilemePay: 0.08,
+  agPay: [0.03, 0.015],
+  agAltTemsilci: 2,
+  agAltSatis: 1,
+  hizliBaslangic: 0.03,
+  kurumsalEk: 0.02,
   krediAy: 2,
   yeniKrediAy: 1,
   tavsiyeSinir: 3,
-  elciSeviye: 'A',
-  elciSatis: 2,
+  ilkOdeme: 0.7,
+  ilkGun: 14,
+  kalanGun: 60,
+  kadroluAlan: 'saha',
+  kadroluMaas: [42_000, 50_000, 62_000, 75_000],
+  kadroluPrimOran: [0.03, 0.05, 0.06, 0.07],
+  kotaCarpan: 2,
+  kotaEk: 0.2,
+  kadroluEkip: 0,
+  liderEkipSatis: 6,
+  liderPay: 1_500,
+  musavirModel: 'indirim',
+  musavirOran: 0.08,
+  musavirIndirim: 0.2,
   kosul: {},
-  agKomisyon: 2_500,
-  agKademePay: [500, 250, 100],
-  agDerinlik: 2,
-  agAltTemsilci: 2,
-  agAltSatis: 2,
-  agTavan: 3_250,
+  oncuAsama: [0, 1, 2, 4],
+  cozumMusteri: 10,
   yillaraOncu: [0.15, 0.1, 0],
   yillaraCozum: [0.25, 0.15, 0],
-  sahaKotaCarpan: 2,
-  sahaPrim: 2_500,
-  liderEk: 10_000,
-  liderPay: 250,
-  liderEkipSatis: 10,
   yonlendirmeOran: 0.15,
   yonlendirmeAy: 6,
   smmmMukellef: 10,
@@ -179,15 +208,26 @@ export const VARSAYILAN_AYAR: Ayar = {
 
 export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Demo da yapar', C: 'Satışı kendisi kapatır' };
 export const PAKET_ADI: Record<SegikaPaket, string> = { ikisi: 'Teşvik ve Otomasyon', tesvik: 'SGK Teşvik', otomasyon: 'SGK Otomasyon' };
+export const ISTOC_PAKET_ADI: Record<IstocPaket, string> = { standart: 'Standart', pro: 'Pro', kurumsal: 'Kurumsal' };
+export const SEGMENT_ADI = ['Başlangıç ortağı', 'Gümüş ortak', 'Altın ortak', 'Profesyonel çözüm ortağı'];
+export const KARIYER_ADI = ['Satış uzmanı yardımcısı', 'Satış uzmanı', 'Kıdemli satış uzmanı', 'Takım lideri'];
+export const ALAN_ADI: Record<KadroluAlan, string> = { saha: 'Saha satışı', ic: 'Telefon ve çevrim içi satış', kurumsal: 'Kurumsal müşteri' };
+export const SOZLESME_ADI: Record<Sozlesme, string> = { bagimsiz: 'Bağımsız ortak', kadrolu: 'Kadrolu çalışan', musteri: 'Müşteri' };
+
+const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const sayi = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
+
+/* ---------- Fiyatlandırma robotu ---------- */
 
 /**
  * Segika aylık fiyatı: çalışan sayısı blok katına yuvarlanır; her kademedeki çalışanlar o kademenin indirimiyle
  * fiyatlanır (kademeli, sıçramasız). 1–500 sitedeki liste fiyatı; üst kademe indirimleri teklif varsayımıdır.
  */
-export function segikaAylik(a: Ayar) {
+export function segikaAylik(a: Ayar, paket: SegikaPaket = 'ikisi') {
   const blok = Math.max(1, a.blok);
   const kisi = Math.max(blok, Math.ceil(Math.max(1, a.calisan) / blok) * blok);
-  const kisiBasi = a.segikaFiyat[a.segikaPaket] / blok;
+  const kisiBasi = a.segikaFiyat[paket] / blok;
   let alt = 0;
   let toplam = 0;
   const dilimler: { alt: number; ust: number; kisi: number; indirim: number; tutar: number }[] = [];
@@ -205,34 +245,201 @@ export function segikaAylik(a: Ayar) {
   return { kisi, toplam, dilimler, listeFiyati: kisi * kisiBasi };
 }
 
-/** Aylık fiyat (₺). */
-export const aylikFiyat = (a: Ayar) => (a.marka === 'istoc' ? a.istocAyEur * a.kur : segikaAylik(a).toplam);
-/** Yıllık paket bedeli (₺, KDV hariç). iStoc: yıllık ay bedeli; Segika: 12 ay. */
-export const yillikFiyat = (a: Ayar) => (a.marka === 'istoc' ? a.istocAyEur * a.kur * a.istocYilAy : segikaAylik(a).toplam * 12);
-/**
- * Çözüm ortağının bir müşteriden kazancı. Segika: oran modelinde kendi oranı (%25); iStoc: yaptığı işin oranı.
- * Tutar modelinde satış başı tutar.
- */
-export const cozumKazanci = (a: Ayar) =>
-  a.model === 'sabit' ? a.sabit : a.marka === 'segika' ? yillikFiyat(a) * a.cozumOran : yillikFiyat(a) * a.oran[a.cozumSeviye];
-
-/** Bir yıllık paket satışında ortağın kazancı. */
-export const satisKazanci = (a: Ayar, s: Seviye) => (a.model === 'oran' ? yillikFiyat(a) * a.oran[s] : a.sabit);
-
-export const kota = (a: Ayar) => a.maas * a.kotaCarpan * (1 + a.kotaEk);
-
-export function kadrolu(a: Ayar) {
-  const yillik = yillikFiyat(a);
-  const ciro = a.kadroluSatis * yillik;
-  const k = kota(a);
-  const kotaIcinSatis = yillik > 0 ? Math.ceil(k / yillik) : 0;
-  const prim = a.model === 'oran' ? Math.max(0, ciro - k) * a.kadroluPrim[a.marka] : Math.max(0, a.kadroluSatis - kotaIcinSatis) * a.sabit;
-  return { ciro, kota: k, kotaIcinSatis, prim, toplam: a.maas + prim, doluluk: k > 0 ? ciro / k : 0 };
+export interface PaketSatiri {
+  id: string;
+  ad: string;
+  /** Aylık liste fiyatı (₺). */
+  aylik: number;
+  /** Müşterinin ilk yıl ödediği tutar (₺): yıllık pakette paket bedeli, aylık abonelikte 12 ay. */
+  ilkYil: number;
+  /** Ayda kaç yeni müşteri. */
+  adet: number;
+  /** Bu paketin aylık satış cirosu: adet × ilk yıl bedeli. */
+  ciro: number;
+  fiyatNotu?: string;
 }
 
-/** Aşama süreleri (gün): ilk 14 gün, 15–45, 46–90, 91–365. İlk yıl kazancı bu sürelerle hesaplanır. */
-const ASAMA_GUN = [14, 31, 45, 275];
-const GUN_AY = 365 / 12;
+/** Ödeme biçimine göre ilk yılın kaç aylık bedel olduğu. iStoc yıllık paketi indirimlidir; Segika 12 aydır. */
+export const ilkYilAy = (a: Ayar) => (a.faturalama === 'aylik' ? 12 : a.marka === 'istoc' ? a.istocYilAy : 12);
+
+export function paketler(a: Ayar): PaketSatiri[] {
+  const ay = ilkYilAy(a);
+  if (a.marka === 'istoc')
+    return (Object.keys(ISTOC_PAKET_ADI) as IstocPaket[]).map((id) => {
+      const aylik = a.istocPaketEur[id] * a.kur;
+      const adet = Math.max(0, a.istocSatis[id]);
+      return { id, ad: ISTOC_PAKET_ADI[id], aylik, ilkYil: aylik * ay, adet, ciro: adet * aylik * ay, fiyatNotu: id === 'kurumsal' ? 'Teklifle satılır, örnek tutar' : undefined };
+    });
+  return (Object.keys(PAKET_ADI) as SegikaPaket[]).map((id) => {
+    const aylik = segikaAylik(a, id).toplam;
+    const adet = Math.max(0, a.segikaSatis[id]);
+    return { id, ad: PAKET_ADI[id], aylik, ilkYil: aylik * ay, adet, ciro: adet * aylik * ay };
+  });
+}
+
+/** Robotun sonucu: ayda kaç müşteri ve aylık satış cirosu (yeni müşterilerin ilk yıl bedeli). */
+export function satisOzeti(a: Ayar) {
+  const p = paketler(a);
+  const adet = p.reduce((s, x) => s + x.adet, 0);
+  const ciro = p.reduce((s, x) => s + x.ciro, 0);
+  const ortalamaIlkYil = adet > 0 ? ciro / adet : p[0].ilkYil;
+  const ortalamaAylik = adet > 0 ? p.reduce((s, x) => s + x.adet * x.aylik, 0) / adet : p[0].aylik;
+  return { paketler: p, adet, ciro, ortalamaIlkYil, ortalamaAylik, referans: p[0] };
+}
+
+/** Bir müşterinin ortalama aylık fiyatı ve ilk yıl bedeli (özel programlar bu tutarlarla hesaplanır). */
+export const aylikFiyat = (a: Ayar) => satisOzeti(a).ortalamaAylik;
+export const yillikFiyat = (a: Ayar) => satisOzeti(a).ortalamaIlkYil;
+
+/* ---------- Segment ve kariyer basamağı ---------- */
+
+export interface Kosul {
+  ad: string;
+  mevcut: string;
+  tamam: boolean;
+  /** Hedefe ilerleme, 0–1. */
+  ilerleme: number;
+  /** Eksikse ne yapılmalı (tam cümle parçası). */
+  eksik?: string;
+}
+
+export interface Basamak {
+  ad: string;
+  /** Bağımsız ortakta komisyon oranı, kadroluda prim oranı. */
+  oran: number;
+  maas?: number;
+  kosullar: Kosul[];
+  tamam: boolean;
+}
+
+export interface SegmentSonucu {
+  seviye: number;
+  basamaklar: Basamak[];
+  yillikMusteri: number;
+  yillikCiro: number;
+  /** Bir üst basamağa geçmek için eksikler; en üst basamakta boş. */
+  eksikler: string[];
+}
+
+/**
+ * Segment hesabı. Satış adetleri her ay aynı kabul edilir: yıllık müşteri = aylık × 12, yıllık ciro = aylık × 12.
+ * Basamaklar sırayla kazanılır; bir basamağın bütün koşulları ve önceki basamaklar sağlanmalıdır.
+ * Bağımsız ortak Profesyonel çözüm ortağı rozeti için kurulum ve desteği kendisi verir. Kadrolu çalışan takım lideri
+ * olmak için en az 2 kişilik ekip yönetir.
+ */
+export function segmentHesabi(a: Ayar, tur: 'bagimsiz' | 'kadrolu'): SegmentSonucu {
+  const s = satisOzeti(a);
+  const yillikMusteri = s.adet * 12;
+  const yillikCiro = s.ciro * 12;
+  const esik = a.segmentEsik[a.marka];
+  const oranlar = tur === 'bagimsiz' ? a.segmentOran : a.kadroluPrimOran;
+  const adlar = tur === 'bagimsiz' ? SEGMENT_ADI : KARIYER_ADI;
+  const musteriK = (e: { musteri: number }): Kosul => ({
+    ad: `Yılda en az ${sayi(e.musteri)} yeni müşteri`,
+    mevcut: `${sayi(yillikMusteri)} müşteri`,
+    tamam: yillikMusteri >= e.musteri,
+    ilerleme: e.musteri > 0 ? Math.min(1, yillikMusteri / e.musteri) : 1,
+    eksik: `yılda ${sayi(Math.max(0, e.musteri - yillikMusteri))} müşteri daha kazanmak`,
+  });
+  const ciroK = (e: { ciro: number }): Kosul => ({
+    ad: `Yılda en az ${tl(e.ciro)} ciro`,
+    mevcut: tl(yillikCiro),
+    tamam: yillikCiro >= e.ciro,
+    ilerleme: e.ciro > 0 ? Math.min(1, yillikCiro / e.ciro) : 1,
+    eksik: `yıllık ciroyu ${tl(Math.max(0, e.ciro - yillikCiro))} artırmak`,
+  });
+  const yenilemeK = (alt: number): Kosul => ({
+    ad: `Müşterilerin en az ${yuzde(alt)} kadarı aboneliği yeniler`,
+    mevcut: yuzde(a.yenileme),
+    tamam: a.yenileme >= alt,
+    ilerleme: alt > 0 ? Math.min(1, a.yenileme / alt) : 1,
+    eksik: `yenileme oranını ${yuzde(alt)} düzeyine çıkarmak`,
+  });
+  const sertifikaK: Kosul = { ad: 'Ürün sertifikası alınmış', mevcut: a.egitim === 'sertifika' ? 'Alındı' : 'Yalnız temel eğitim', tamam: a.egitim === 'sertifika', ilerleme: a.egitim === 'sertifika' ? 1 : 0.5, eksik: 'ürün sertifikasını almak' };
+  const memnuniyetK: Kosul = {
+    ad: `Net tavsiye puanı (NPS) en az ${sayi(a.proMemnuniyet)}`,
+    mevcut: sayi(a.memnuniyet),
+    tamam: a.memnuniyet >= a.proMemnuniyet,
+    ilerleme: a.proMemnuniyet > 0 ? Math.min(1, a.memnuniyet / a.proMemnuniyet) : 1,
+    eksik: `net tavsiye puanını ${sayi(a.proMemnuniyet)} düzeyine çıkarmak`,
+  };
+  const ustK: Kosul =
+    tur === 'bagimsiz'
+      ? { ad: 'Kurulumu, eğitimi ve ilk seviye desteği kendisi verir', mevcut: a.destek ? 'Veriyor' : 'Vermiyor', tamam: a.destek, ilerleme: a.destek ? 1 : 0, eksik: 'kurulum ve desteği üstlenmek' }
+      : { ad: 'En az 2 kişilik ekip yönetir', mevcut: `${sayi(a.kadroluEkip)} kişi`, tamam: a.kadroluEkip >= 2, ilerleme: Math.min(1, a.kadroluEkip / 2), eksik: 'en az 2 kişilik ekibi yönetmek' };
+  const kosullar: Kosul[][] = [
+    [{ ad: tur === 'bagimsiz' ? 'Ortaklık sözleşmesi ve temel eğitim' : 'İşe giriş ve temel eğitim', mevcut: 'Tamam', tamam: true, ilerleme: 1 }],
+    [musteriK(esik[0]), ciroK(esik[0])],
+    [musteriK(esik[1]), ciroK(esik[1]), yenilemeK(a.segmentYenileme[0]), sertifikaK],
+    [musteriK(esik[2]), ciroK(esik[2]), yenilemeK(a.segmentYenileme[1]), sertifikaK, ustK, memnuniyetK],
+  ];
+  let seviye = 0;
+  for (let i = 1; i < 4 && kosullar[i].every((k) => k.tamam); i++) seviye = i;
+  const basamaklar = kosullar.map((k, i) => ({ ad: adlar[i], oran: oranlar[i], maas: tur === 'kadrolu' ? a.kadroluMaas[i] : undefined, kosullar: k, tamam: i <= seviye }));
+  const eksikler = seviye < 3 ? kosullar[seviye + 1].filter((k) => !k.tamam).map((k) => k.eksik ?? k.ad) : [];
+  return { seviye, basamaklar, yillikMusteri, yillikCiro, eksikler };
+}
+
+/* ---------- Kazanç ---------- */
+
+/** Ağ kademe payları: satış başına ₺ (Standart paket). Satış yapanın komisyonu, 1. ve 2. kademe payı. */
+export function agBirimPaylari(a: Ayar) {
+  const ref = satisOzeti(a).referans.ilkYil;
+  const sg = segmentHesabi(a, 'bagimsiz');
+  return { ref, satici: ref * a.segmentOran[sg.seviye] * a.katkiCarpan[a.katki], k1: ref * a.agPay[0], k2: ref * a.agPay[1] };
+}
+
+/**
+ * Bağımsız ortağın aylık kazancı. Aynı satış, aynı segment ve aynı katkı aynı tutarı verir; persona tutarı değiştirmez.
+ * Ağ payı için ortak o ay en az bir satış yapmış olmalıdır. 1. kademe payı Gümüş, 2. kademe payı Altın segmentinden
+ * itibaren ödenir. Profesyonel çözüm ortağı yenilenen müşterilerden yenileme payı da alır (2. yıldan itibaren).
+ */
+export function bagimsizKazanc(a: Ayar) {
+  const s = satisOzeti(a);
+  const sg = segmentHesabi(a, 'bagimsiz');
+  const oran = a.segmentOran[sg.seviye] * a.katkiCarpan[a.katki];
+  const komisyon = s.ciro * oran;
+  const kurumsal = a.marka === 'istoc' ? (s.paketler.find((p) => p.id === 'kurumsal')?.ciro ?? 0) * a.kurumsalEk : 0;
+  const hizli = s.ciro * a.hizliBaslangic;
+  const aktif = s.adet >= 1;
+  const birim = agBirimPaylari(a);
+  const dal = Math.max(0, Math.round(a.agAltTemsilci));
+  const k1Acik = aktif && sg.seviye >= 1;
+  const k2Acik = aktif && sg.seviye >= 2;
+  const k1 = k1Acik ? dal * a.agAltSatis * birim.k1 : 0;
+  const k2 = k2Acik ? dal * dal * a.agAltSatis * birim.k2 : 0;
+  const yenilemePay = sg.seviye === 3 ? s.ciro * a.yenileme * a.proYenilemePay : 0;
+  const aylik = komisyon + kurumsal + k1 + k2;
+  /** Bize kalan: komisyon, kampanya ve satışın üstündeki 2 kademeye en çok ödenecek ağ payı düşülünce. */
+  const agUst = s.ciro * (a.agPay[0] + a.agPay[1]);
+  return { s, sg, oran, komisyon, kurumsal, hizli, aktif, dal, k1, k2, k1Acik, k2Acik, birim, yenilemePay, aylik, satisKazanci: komisyon + kurumsal, agUst, bize: s.ciro - komisyon - kurumsal - agUst };
+}
+
+/** Kadrolu satış uzmanı: basamağın maaşı, kota üstü ciro primi, takım liderinde ekip payı. */
+export function kadroluKazanc(a: Ayar) {
+  const s = satisOzeti(a);
+  const sg = segmentHesabi(a, 'kadrolu');
+  const b = sg.seviye;
+  const maas = a.kadroluMaas[b];
+  const kota = maas * a.kotaCarpan * (1 + a.kotaEk);
+  const primOran = a.kadroluPrimOran[b];
+  const prim = Math.max(0, s.ciro - kota) * primOran;
+  const ekip = b === 3 ? a.liderEkipSatis * a.liderPay : 0;
+  return { s, sg, maas, kota, primOran, prim, ekip, toplam: maas + prim + ekip, doluluk: kota > 0 ? s.ciro / kota : 0 };
+}
+
+/**
+ * Mevcut müşteri: “Arkadaşını getir” kampanyasıyla hizmet kredisi kazanır. Robotun satışı, müşterinin tavsiyesiyle gelen
+ * yeni müşteri sayısıdır. Yılda en çok `tavsiyeSinir` tavsiye krediye çevrilir; daha fazlası ortaklık hacmidir.
+ */
+export function musteriKazanc(a: Ayar) {
+  const s = satisOzeti(a);
+  const kendiAylik = s.referans.aylik;
+  const yillikTavsiye = s.adet * 12;
+  const sayilan = Math.min(yillikTavsiye, a.tavsiyeSinir);
+  const tavsiyeBasi = kendiAylik * a.krediAy;
+  return { s, kendiAylik, yillikTavsiye, sayilan, tavsiyeBasi, yillikKredi: sayilan * tavsiyeBasi, fazla: Math.max(0, yillikTavsiye - a.tavsiyeSinir), ortakOlursa: bagimsizKazanc(a) };
+}
 
 export interface DonemSatiri {
   ad: string;
@@ -241,141 +448,155 @@ export interface DonemSatiri {
   formul: string;
 }
 
-/**
- * Dönemsel kazanç (kullanıcı kararı 2026-11-03): her rolün seçili ayarlarla yaklaşık yıllık kazancı. Günlük = yıllık ÷ 365,
- * haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12. Satış adetleri her ay aynı kabul edilir; öncü ortakta ilk yıl aşamalarla hesaplanır.
- */
-export function donemKazanci(a: Ayar, rol: RolId): DonemSatiri[] {
-  const n = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
-  const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
-  if (rol === 'oncu') {
-    const birim = satisKazanci(a, a.oncuSeviye);
-    const ilkYilSatis = a.oncuAsama.reduce((top, adet, i) => top + (adet * ASAMA_GUN[i]) / GUN_AY, 0);
+/** Dönemsel kazanç: günlük = yıllık ÷ 365, haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12. */
+export function donemKazanci(a: Ayar, sozlesme: Sozlesme): DonemSatiri[] {
+  if (sozlesme === 'kadrolu') {
+    const k = kadroluKazanc(a);
     return [
-      { ad: 'İlk yıl', yillik: ilkYilSatis * birim, formul: `${n(ilkYilSatis)} satış × ${t(birim)}` },
-      { ad: '2. yıldan sonra', yillik: a.oncuAsama[3] * 12 * birim, formul: `${a.oncuAsama[3]} satış × 12 ay × ${t(birim)}` },
+      { ad: 'Maaş', yillik: k.maas * 12, formul: `${tl(k.maas)} × 12 ay` },
+      { ad: 'Kota üstü prim', yillik: k.prim * 12, formul: `${tl(k.prim)} × 12 ay` },
+      ...(k.ekip > 0 ? [{ ad: 'Ekip payı', yillik: k.ekip * 12, formul: `${tl(k.ekip)} × 12 ay` }] : []),
+      { ad: 'Toplam', yillik: k.toplam * 12, formul: `${tl(k.toplam)} × 12 ay` },
     ];
   }
-  if (rol === 'kadrolu') {
-    const k = kadrolu(a);
-    return [
-      { ad: 'Maaş', yillik: a.maas * 12, formul: `${t(a.maas)} × 12 ay` },
-      { ad: 'Prim', yillik: k.prim * 12, formul: `${t(k.prim)} × 12 ay` },
-      { ad: 'Toplam', yillik: k.toplam * 12, formul: `${t(k.toplam)} × 12 ay` },
-    ];
+  if (sozlesme === 'musteri') {
+    const m = musteriKazanc(a);
+    return [{ ad: 'Hizmet kredisi', yillik: m.yillikKredi, formul: `${sayi(m.sayilan)} tavsiye × ${tl(m.tavsiyeBasi)}` }];
   }
-  if (rol === 'cozum') {
-    const birim = cozumKazanci(a);
-    const brut = birim * a.cozumMusteri;
-    const satirlar: DonemSatiri[] = [{ ad: 'Komisyon', yillik: brut, formul: `${a.cozumMusteri} müşteri × ${t(birim)}` }];
-    const egitim = a.marka === 'segika' ? a.ekEgitimSaat * a.egitimSaatUcret : 0;
-    if (egitim > 0) satirlar.push({ ad: 'Ek eğitim düşülünce', yillik: brut - egitim, formul: `${t(brut)} − ${t(egitim)}` });
-    return satirlar;
-  }
-  if (rol === 'tavsiye') {
-    const kredi = aylikFiyat(a) * a.krediAy;
-    return [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye (kredi)`, yillik: kredi * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(kredi)}` }];
-  }
-  const birim = satisKazanci(a, a.elciSeviye);
-  return [{ ad: 'Elçi', yillik: birim * a.elciSatis * 12, formul: `${a.elciSatis} satış × 12 ay × ${t(birim)}` }];
+  const b = bagimsizKazanc(a);
+  const satirlar: DonemSatiri[] = [{ ad: 'Satış komisyonu', yillik: b.komisyon * 12, formul: `${tl(b.komisyon)} × 12 ay` }];
+  if (b.kurumsal > 0) satirlar.push({ ad: 'Kurumsal paket kampanyası', yillik: b.kurumsal * 12, formul: `${tl(b.kurumsal)} × 12 ay, kampanya sürerse` });
+  if (b.k1 > 0) satirlar.push({ ad: 'Ağ, 1. kademe', yillik: b.k1 * 12, formul: `${tl(b.k1)} × 12 ay` });
+  if (b.k2 > 0) satirlar.push({ ad: 'Ağ, 2. kademe', yillik: b.k2 * 12, formul: `${tl(b.k2)} × 12 ay` });
+  satirlar.push({ ad: 'Toplam', yillik: b.aylik * 12, formul: `${tl(b.aylik)} × 12 ay` });
+  if (b.yenilemePay > 0) satirlar.push({ ad: '2. yıldan sonra ek: yenileme payı', yillik: b.yenilemePay * 12, formul: `${tl(b.yenilemePay)} × 12 ay` });
+  return satirlar;
 }
 
-export function musavir(a: Ayar) {
-  const yillik = yillikFiyat(a);
-  return a.musavirModel === 'komisyon'
-    ? { tur: 'komisyon' as const, musteriBasina: yillik * a.musavirOran, toplam: yillik * a.musavirOran * a.cozumMusteri }
-    : { tur: 'indirim' as const, musteriBasina: yillik * a.musavirIndirim, toplam: yillik * a.musavirIndirim * a.cozumMusteri };
-}
+/* ---------- Persona metinleri ---------- */
 
 export interface RolMetni {
   id: RolId;
   ad: string;
   kisa: string;
+  sozlesme: Sozlesme;
   kim: string;
   kurallar: string[];
-  /** Kimlerle çalışırız: persona başlıkları. */
+  /** Kimlerle çalışırız: personanın gerçek hayattaki karşılıkları. */
   kimler: string[];
 }
 
-/** Kısa, tam cümleli metinler (yalın Türkçe talimatı). Ayrıntı eylem planındadır. */
+/** Kısa, tam cümleli metinler (yalın Türkçe talimatı). */
 export function rolMetinleri(marka: Marka): RolMetni[] {
   const urun = marka === 'istoc' ? 'iStoc' : 'Segika';
+  const ist = marka === 'istoc';
   return [
     {
       id: 'oncu',
       ad: 'Öncü satış ortağı',
       kisa: 'Satışa yeni başlayan gençler',
-      kim:
-        marka === 'istoc'
-          ? 'Deniz 22 yaşında, son sınıf öğrencisi. Gerçek işletmelerle görüşerek satış öğrenmek istiyor. Kazancı, ödeme yapan müşteri sayısıyla artar.'
-          : 'Ece 23 yaşında, İK ya da muhasebe öğrencisi. Doğru işletmeyi bulur ve demo ayarlar. Teşvik sonucu hakkında söz vermez.',
-      kurallar: ['Kazanç garantisi verilmez.', 'Başarılı olanı kadro görüşmesine çağırırız.', 'Tahsilat yapmaz, indirim veremez.'],
-      kimler:
-        marka === 'istoc'
-          ? ['Üniversite öğrencisi', 'Yeni mezun', 'İşletme ve pazarlama öğrencisi', 'Yarı zamanlı çalışmak isteyen', 'Ticarete ilgi duyan genç']
-          : ['İK öğrencisi', 'Muhasebe öğrencisi', 'Çalışma ekonomisi mezunu', 'İşletme öğrencisi', 'Yeni mezun'],
+      sozlesme: 'bagimsiz',
+      kim: ist
+        ? 'Deniz 22 yaşında, son sınıf öğrencisi. Gerçek işletmelerle görüşerek satış öğrenmek istiyor. Başlangıç ortağı olarak başlar ve satış yaptıkça üst segmentlere çıkar.'
+        : 'Ece 23 yaşında, İK ya da muhasebe öğrencisi. Doğru işletmeyi bulur ve demo ayarlar. Teşvik sonucu hakkında söz vermez.',
+      kurallar: ['Kazanç garantisi verilmez.', 'Tahsilat yapmaz ve indirim veremez.', 'Başarılı öncü ortağı kadro görüşmesine çağırırız.'],
+      kimler: ist
+        ? ['Üniversite öğrencisi', 'Yeni mezun', 'İşletme ve pazarlama öğrencisi', 'Yarı zamanlı çalışmak isteyen', 'Ticarete ilgi duyan genç', 'Esnaf ailesinden gelen genç', 'Kampüs girişimcilik kulübü üyesi', 'Staj arayan öğrenci']
+        : ['İK öğrencisi', 'Muhasebe öğrencisi', 'Çalışma ekonomisi mezunu', 'İşletme öğrencisi', 'Yeni mezun', 'Yarı zamanlı çalışmak isteyen'],
     },
     {
       id: 'kadrolu',
       ad: 'Kadrolu satış uzmanı',
-      kisa: marka === 'segika' ? 'SGK’lı, kota sonrası %10 prim' : 'Sabit maaş ve kota üstü prim',
-      kim:
-        marka === 'segika'
-          ? 'Bizim SGK’lı çalışanımızdır. Satışı yapar ve müşteri listesini yönetir. Kotayı aşınca cironun %10’unu prim olarak alır.'
-          : 'Bizimle maaşlı çalışır. Müşteri listesini yönetir ve satışı kapatır. Kotayı aşınca prim kazanır.',
-      kurallar:
-        marka === 'segika'
-          ? ['Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.', 'Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.']
-          : ['İlk iki ay kota yoktur. Bu sürede işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
-      kimler:
-        marka === 'istoc'
-          ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']
-          : ['Yazılım satış temsilcisi', 'Bordro yazılımı satışçısı', 'Muhasebe yazılımı satışçısı', 'SGK bilgili satış uzmanı', 'Öncü ortaklardan yükselen'],
+      kisa: 'SGK’lı çalışanımız',
+      sozlesme: 'kadrolu',
+      kim: ist
+        ? 'Bizim SGK’lı çalışanımızdır. Müşteri listesini yönetir ve satışı kapatır. Maaş alır, kotayı aşınca prim kazanır. Aynı satış eşikleriyle kariyer basamağı yükselir.'
+        : 'Bizim SGK’lı çalışanımızdır. Satışı yapar ve müşteri listesini yönetir. Maaş alır, kotayı aşınca prim kazanır. Aynı satış eşikleriyle kariyer basamağı yükselir.',
+      kurallar: ['Müşteri desteğini biz veririz.', 'İlk iki ay kota uygulanmaz ve bu sürede işi öğrenir. Hesap, üçüncü aydan sonraki bir ayı gösterir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.', 'Kadrolu çalışan ağ payı ve kampanya ödülü almaz. Bunun yerine maaş, SGK ve prim alır.'],
+      kimler: ist
+        ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Telefonla satış uzmanı', 'Kurumsal müşteri yöneticisi', 'Öncü ortaklardan yükselen']
+        : ['Yazılım satış temsilcisi', 'Bordro yazılımı satışçısı', 'Muhasebe yazılımı satışçısı', 'SGK bilgili satış uzmanı', 'Telefonla satış uzmanı', 'Öncü ortaklardan yükselen'],
     },
     {
       id: 'cozum',
-      ad: 'Profesyonel çözüm ortağı',
-      kisa: marka === 'segika' ? 'Desteği kendisi verir, %25 alır' : 'Danışmanlar ve hizmet firmaları',
-      kim:
-        marka === 'istoc'
-          ? 'İşletme sahibinin zaten güvendiği danışman ya da firmadır. iStoc’u müşterisine önerir. Kurulumu ve desteği biz yaparız.'
-          : 'İşverene bordro, İK ya da iş güvenliği hizmeti veren profesyoneldir. Segika’yı müşterisine önerir ve müşterinin desteğini kendisi verir.',
-      kurallar:
-        marka === 'segika'
-          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Her firma tek ortağa yazılır.']
-          : ['Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Ortak getirmeye para ödemeyiz.', 'Her firma tek ortağa yazılır.'],
-      kimler:
-        marka === 'istoc'
-          ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'ERP ve POS bayisi', 'Lojistik firması', 'Gümrük müşaviri', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']
-          : ['Mali müşavir', 'Bordro bürosu', 'OSGB', 'Bağımsız İK danışmanı', 'İK dernekleri', 'OSB yönetimi', 'Sanayi ve ticaret odası', 'ERP bayisi (Luca, Mikro, ETA)', 'Özel istihdam bürosu', 'İş hukuku avukatı'],
+      ad: 'Danışman ve hizmet firması',
+      kisa: 'İşletmenin güvendiği uzman',
+      sozlesme: 'bagimsiz',
+      kim: ist
+        ? 'İşletme sahibinin zaten güvendiği danışman ya da firmadır. iStoc’u müşterisine önerir. Kurulumu ve desteği kendisi verirse Profesyonel çözüm ortağı rozetine aday olur.'
+        : 'İşverene bordro, İK ya da iş güvenliği hizmeti veren profesyoneldir. Segika’yı müşterisine önerir. Desteği kendisi verirse Profesyonel çözüm ortağı rozetine aday olur.',
+      kurallar: ['Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Her firma tek ortağa yazılır.', 'Ortak getirmeye para ödemeyiz. Ağ payı yalnız gerçek satıştan doğar.'],
+      kimler: ist
+        ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'ERP ve POS bayisi', 'Muhasebe bürosu', 'Lojistik firması', 'Kargo acentesi', 'Gümrük müşaviri', 'Marka ve ambalaj ajansı', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']
+        : ['Mali müşavir', 'Bordro bürosu', 'OSGB', 'Bağımsız İK danışmanı', 'İK dernekleri', 'OSB yönetimi', 'Sanayi ve ticaret odası', 'ERP bayisi (Luca, Mikro, ETA)', 'Özel istihdam bürosu', 'İş hukuku avukatı'],
     },
     {
       id: 'tavsiye',
-      ad: 'Arkadaşını getir',
-      kisa: 'Mevcut müşterinin tavsiyesi',
-      kim:
-        marka === 'istoc'
-          ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. Komşu yıllık paket alırsa iki taraf da ücretsiz kullanım kazanır.'
-          : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. Firma yıllık paket alırsa iki taraf da kazanır.',
+      ad: 'Mevcut müşteri',
+      kisa: 'Arkadaşını getir kampanyası',
+      sozlesme: 'musteri',
+      kim: ist
+        ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. “Arkadaşını getir” kampanyasıyla para değil ücretsiz kullanım kazanır. Daha fazla tavsiye getirirse ortak olabilir.'
+        : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. “Arkadaşını getir” kampanyasıyla ücretsiz kullanım kazanır. Daha fazla tavsiye getirirse ortak olabilir.',
       kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.', 'Tavsiye, müşteri hizmetten doğrulanmış bir sonuç aldıktan sonra istenir.'],
-      kimler:
-        marka === 'istoc'
-          ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf']
-          : ['Mevcut Segika müşterisi', 'İK yöneticisi', 'Muhasebe yöneticisi', 'Aynı OSB’deki firma', 'Grup şirketleri'],
+      kimler: ist
+        ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf', 'Esnaf derneği üyesi']
+        : ['Mevcut Segika müşterisi', 'İK yöneticisi', 'Muhasebe yöneticisi', 'Aynı OSB’deki firma', 'Grup şirketleri'],
     },
     {
       id: 'elci',
       ad: 'Marka elçisi',
       kisa: 'İçerik üreticileri ve eğitmenler',
-      kim: `Sosyal medyada ${urun}’u kendi bağlantısıyla tanıtır. Bağlantıdan gelen müşteri ödeme yaparsa komisyon alır.`,
-      kurallar: ['Elçi, paylaşımlarına “reklam” ibaresini ekler.', 'Sahte yorum ve toplu mesaj yasaktır.'],
-      kimler:
-        marka === 'istoc'
-          ? ['Toptan ticaret eğitmeni', 'E-ihracat içerik üreticisi', 'LinkedIn yazarı', 'Sektör YouTube kanalı', 'Girişimcilik topluluğu']
-          : ['İK içerik üreticisi', 'Bordro eğitmeni', 'SGK mevzuat yazarı', 'LinkedIn İK topluluğu', 'Muhasebe YouTube kanalı'],
+      sozlesme: 'bagimsiz',
+      kim: `Kendi kitlesine ${urun}’u kendi bağlantısıyla tanıtır. Çoğu zaman yalnız tanıştırır. Bağlantıdan gelen müşteri ödeme yaparsa segmentine ve katkısına göre komisyon alır.`,
+      kurallar: ['Elçi, paylaşımlarına “reklam” ibaresini ekler.', 'Sahte yorum ve toplu mesaj yasaktır.', 'Kazanç vaadiyle ortak toplamaz.'],
+      kimler: ist
+        ? ['Toptan ticaret eğitmeni', 'E-ihracat içerik üreticisi', 'LinkedIn yazarı', 'Sektör YouTube kanalı', 'Girişimcilik topluluğu', 'Esnafa yönelik Instagram hesabı', 'Ticaret podcast’i yapan', 'Sektör bülteni yazarı', 'Çevrim içi seminer düzenleyen eğitmen', 'Ticaret odası eğitmeni', 'Üniversitede girişimcilik dersi veren']
+        : ['İK içerik üreticisi', 'Bordro eğitmeni', 'SGK mevzuat yazarı', 'LinkedIn İK topluluğu', 'Muhasebe YouTube kanalı', 'İK podcast’i yapan', 'Çevrim içi seminer düzenleyen eğitmen'],
     },
   ];
 }
 
-export const ASAMA_ADI = ['Eğitim dönemi', 'İlk müşteri', 'Düzenli satış', 'Deneyimli'];
-export const ASAMA_SURE = ['İlk 14 gün', '15–45. gün', '46–90. gün', '90. günden sonra'];
+/* ---------- Kampanyalar ---------- */
+
+export interface Kampanya {
+  id: string;
+  ad: string;
+  /** Hangi personalar katılabilir. */
+  kimler: RolId[];
+  marka: Marka[];
+  ozet: (a: Ayar) => string;
+}
+
+export const KAMPANYALAR: Kampanya[] = [
+  {
+    id: 'hizli-baslangic',
+    ad: 'İlk 90 gün hızlı başlangıç',
+    kimler: ['oncu', 'cozum', 'elci'],
+    marka: ['istoc', 'segika'],
+    ozet: (a) => `Yeni bağımsız ortak, ilk 90 gündeki satışlarında segment oranına ek olarak ${yuzde(a.hizliBaslangic)} alır.`,
+  },
+  {
+    id: 'kurumsal',
+    ad: 'Kurumsal paket hızlandırıcı',
+    kimler: ['oncu', 'cozum', 'elci'],
+    marka: ['istoc'],
+    ozet: (a) => `Kurumsal paket satışında segment oranına ek olarak ${yuzde(a.kurumsalEk)} ödenir. Kampanya, duyurulan dönemin sonunda biter.`,
+  },
+  {
+    id: 'arkadasini-getir',
+    ad: 'Arkadaşını getir',
+    kimler: ['tavsiye'],
+    marka: ['istoc', 'segika'],
+    ozet: (a) => `Tavsiye eden müşteri ${a.krediAy} ay, yeni müşteri ${a.yeniKrediAy} ay ücretsiz kullanım kazanır. Yılda en çok ${a.tavsiyeSinir} tavsiye krediye çevrilir.`,
+  },
+];
+
+export const kampanyalar = (a: Ayar, rol: RolId) => KAMPANYALAR.filter((k) => k.kimler.includes(rol) && k.marka.includes(a.marka));
+
+/** Profesyonel çözüm ortağının neden daha çok kazandığı (kullanıcı kararı 2026-11-03: gerekçe vurgulanmalı). */
+export const PRO_GEREKCE = [
+  'Kurulumu, eğitimi ve ilk seviye desteği ortak verir. Bu işleri biz yapmadığımız için tasarruf ettiğimiz maliyetin bir kısmını ortağa öderiz.',
+  'Müşteriyi elde tutmaktan sorumludur. Bu yüzden müşteri yenilediğinde yenileme payı alır.',
+  'Rozet herkese açıktır. Koşulları sağlayan öğrenci, danışman ya da marka elçisi aynı oranı alır.',
+];

@@ -8229,6 +8229,317 @@ html[data-bant-gizli] .so2-duzen {
 
 }
 
+/*
+ * Gelir modelleri sayfası (/gelir-modelleri/, kullanıcı kararı 2026-11-03): paketler ve aday modeller kenarlıksız,
+ * yüzey tonu ve boşlukla ayrılır. Hazırlık etiketi metinle okunur, renk yalnız destekler.
+ */
+.gm {
+  max-width: 54rem;
+}
+
+.gm-uyari {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.gm-paketler,
+.gm-modeller,
+.gm-oncelik-liste {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gm-paketler {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.gm-paket {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+}
+
+.gm-paket-ad {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-paket-tutar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gm-paket-fiyat {
+  color: var(--accent-strong);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-paket-birim,
+.gm-paket-yillik {
+  color: var(--text-secondary);
+}
+
+.gm-paket-yillik {
+  margin: 0;
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-paket-not {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Bölüm başlığı ile içerik arasında boşluk (Section başlık bloğunun hemen altı). */
+.gm .section-head + .gm-paketler,
+.gm .section-head + .gm-arastirma,
+.gm .section-head + .gm-araclar,
+.gm .section-head + .gm-oncelik-liste,
+.gm .section-head + .gm-kisaltmalar {
+  margin-top: var(--space-5);
+}
+
+.gm-arastirma {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 62ch;
+}
+
+.gm-arastirma p {
+  margin: 0;
+}
+
+.gm-arastirma p:last-child {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.gm-araclar {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.gm-tanim {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gm-tanim > div {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.gm-tanim dt {
+  font-weight: var(--weight-semibold);
+}
+
+.gm-tanim dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.gm-sayac {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.gm-model {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+  scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.gm-model:hover {
+  background-color: var(--surface-hover);
+}
+
+.gm-model:target {
+  background-color: var(--surface-selected);
+}
+
+.gm-model-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+
+.gm-model-ad {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.gm-hazirlik {
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-hazirlik[data-durum='hazir'] {
+  background-color: var(--surface-accent);
+  color: var(--accent-strong);
+}
+
+.gm-hazirlik[data-durum='hazir-degil'] {
+  color: var(--text-secondary);
+}
+
+.gm-oncelik {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.gm-nasil {
+  margin: 0;
+}
+
+.gm-ornek {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+.gm-ornek-ad {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-ornek-metin {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-bilgi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.gm-bilgi dt,
+.gm-kisaltmalar dd {
+  color: var(--text-secondary);
+}
+
+.gm-bilgi dt {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-bilgi dd {
+  margin: var(--space-1) 0 0;
+}
+
+.gm-oncelik-oge {
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background-color: var(--surface-raised);
+}
+
+.gm-oncelik-no {
+  display: grid;
+  place-items: center;
+  width: var(--hit-min);
+  height: var(--hit-min);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.gm-oncelik-ad {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-oncelik-ad a {
+  color: var(--text-link);
+}
+
+.gm-oncelik-neden {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+}
+
+.gm-not {
+  max-width: 62ch;
+  margin: var(--space-6) 0 0;
+  color: var(--text-secondary);
+}
+
+.gm-kisaltmalar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.gm-kisaltmalar dt {
+  font-weight: var(--weight-semibold);
+}
+
+.gm-kisaltmalar dd {
+  margin: var(--space-1) 0 0;
+}
+
+@media (max-width: 47.99em) {
+  .gm-model,
+  .gm-paket {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .gm-bilgi {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gm-oncelik-oge {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .gm-tanim > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
+
 /* Koşul setleri (kullanıcı kararı 2026-11-03: dört Pazarlama sayfası tek sayfada): seçenekte kaynak sayfa, panelde kaynak. */
 .so2-sec-dugme:has(.so2-sec-not) {
   justify-content: space-between;

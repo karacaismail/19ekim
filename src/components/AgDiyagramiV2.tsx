@@ -5,10 +5,10 @@ import type { Ayar } from '../data/satisOrtakligiV2';
 import { Canli } from './sadeKitV2';
 
 /**
- * Kademeli temsilci ağı diyagramı (kullanıcı kararı 2026-11-03). Zincir: Haydar → Ömer → Ahmet → Mehmet → Ayşe → Fatma.
- * Haydar ve Ömer, Ahmet’in kümesinin bağlı olduğu üst kademedir; yanlarındaki “+n” düğümleri aynı kademedeki diğer
- * temsilcilerdir. Ahmet’in ağı açık çizilir. Bir kişi seçilince o kişinin bir satışından kimin ne kazandığı görünür.
- * Diyagram kişi başı en çok 3 temsilci çizer; hesap girilen sayıyla yapılır. Stiller satisOrtakligiV2.css → .v2-ag-*.
+ * Ortak ağı diyagramı (kullanıcı kararı 2026-11-03: ağ en çok 2 kademe). Zincir: Haydar → Ömer → Ahmet → Mehmet → Ayşe →
+ * Fatma. Haydar ve Ömer, Ahmet’in kümesinin bağlı olduğu üst kademedir; yanlarındaki “+n” düğümleri aynı kademedeki diğer
+ * ortaklardır. Bir satışın ödemesi satış yapana ve üstündeki 2 kademeye gider; daha üsttekiler pay almaz. Ahmet’in ağı açık çizilir. Bir kişi seçilince o kişinin bir satışından kimin ne kazandığı görünür.
+ * Diyagram kişi başı en çok 3 ortak çizer; hesap girilen sayıyla yapılır. Stiller satisOrtakligiV2.css → .v2-ag-*.
  */
 
 const G = 720;
@@ -68,7 +68,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
   const [secili, setSecili] = useState('n-4-0');
   const satici = harita.get(secili) ?? harita.get('n-2-0')!;
   const pay = agSatisPayi(a);
-  const derinlik = agDerinlik(a);
+  const derinlik = agDerinlik();
 
   // Satış yapandan yukarı: 0 satış yapan, 1..derinlik kademe payı alanlar, daha üsttekiler pay almaz.
   const zincir: Dugum[] = [];
@@ -78,10 +78,10 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
 
   const ustAd = (n: Dugum): string => {
     if (n.ad) return n.ad;
-    if (n.grup) return `${IYELIK[harita.get(n.ust!)!.ad!]} getirdiği diğer temsilciler`;
+    if (n.grup) return `${IYELIK[harita.get(n.ust!)!.ad!]} getirdiği diğer ortaklar`;
     let u = n.ust ? harita.get(n.ust) : undefined;
     while (u && !u.ad) u = u.ust ? harita.get(u.ust) : undefined;
-    return `${u ? IYELIK[u.ad!] : 'Ağın'} ağındaki bir temsilci`;
+    return `${u ? IYELIK[u.ad!] : 'Ağın'} ağındaki bir ortak`;
   };
   const yariCap = (n: Dugum) => (n.ad ? 18 : n.grup ? 16 : [0, 0, 0, 12, 9, 7][n.satir]);
 
@@ -102,9 +102,11 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
   return (
     <div className="v2-ag">
       <p className="v2-so2-alt-baslik">Ağ diyagramı</p>
-      <p className="v2-ag-ipucu">Bir kişiye tıklayın. O kişinin bir satışından kimin ne kazandığı görünür.</p>
+      <p className="v2-ag-ipucu">
+        Bir kişiye tıklayın. O kişinin bir Standart paket satışından kimin ne kazandığı görünür. Diyagram, pay alanların gereken segmentte olduğunu varsayar: 1. kademe payı için Gümüş ve üstü, 2. kademe payı için Altın ve üstü. Satış yapanın komisyonu seçili segment ve katkıyla hesaplanır.
+      </p>
       <div className="v2-ag-kap">
-        <svg className="v2-ag-svg" width={G} height={Y} viewBox={`0 0 ${G} ${Y}`} role="group" aria-label="Temsilci ağı: kişiyi seçin">
+        <svg className="v2-ag-svg" width={G} height={Y} viewBox={`0 0 ${G} ${Y}`} role="group" aria-label="Ortak ağı: kişiyi seçin">
           {dugumler
             .filter((n) => n.ust)
             .map((n) => {
@@ -173,7 +175,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
       <p className="v2-ag-aciklama" aria-live="polite">
         <Canli deger={aciklama}>{aciklama}</Canli>
       </p>
-      {dal > 3 ? <p className="v2-ag-ipucu">Diyagram kişi başı 3 temsilci çizer. Hesap kişi başı {dal} temsilciyle yapılır.</p> : null}
+      {dal > 3 ? <p className="v2-ag-ipucu">Diyagram kişi başı 3 ortak çizer. Hesap kişi başı {dal} ortakla yapılır.</p> : null}
 
       <p className="v2-so2-alt-baslik v2-ag-tablo-baslik">Kim ayda ne kazanır?</p>
       <div className="v2-so2-donem-kap">
@@ -211,7 +213,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
           </tbody>
         </table>
       </div>
-      <p className="v2-so2-donem-not">Herkes ayda {new Intl.NumberFormat('tr-TR').format(a.agAltSatis)} satış yapar ve {dal} temsilci getirir. Ağ Fatma’nın kuşağında biter.</p>
+      <p className="v2-so2-donem-not">Herkes ayda {new Intl.NumberFormat('tr-TR').format(a.agAltSatis)} satış yapar ve {dal} ortak getirir. Tablo herkesin ağ payına hak kazandığını varsayar. Ağ Fatma’nın kuşağında biter.</p>
     </div>
   );
 }
