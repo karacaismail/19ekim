@@ -281,7 +281,7 @@ export const KATEGORILER: Kategori[] = [
     id: 'operasyon',
     harf: 'D',
     ad: 'Operasyon, zaman kazancı ve ücretsiz araçlar',
-    giris: 'Esnaf araç için gelir, ağ için kalır. Bu sözlerin hiçbiri alıcı gerektirmez.',
+    giris: 'Esnaf platforma önce araçlar için gelir, sonra ağın getirdiği müşteriler için kalır. Bu sözlerin hiçbiri alıcı gerektirmez.',
     oneriler: [
       {
         no: 17,
@@ -307,11 +307,11 @@ export const KATEGORILER: Kategori[] = [
         no: 19,
         soz: 'Siparişin faturası e-fatura ve e-arşiv olarak otomatik kesilsin. Logo, Mikro veya Paraşüt’e kendiliğinden aktarılsın.',
         persona: ['Hepsi'],
-        sikinti: 'e-belge yükümlülüğü ve çift kayıt',
-        platform: 'e-belge entegratörleri ve muhasebe yazılımlarıyla entegrasyon kurmalı.',
+        sikinti: 'E-belge yükümlülüğü ve çift kayıt',
+        platform: 'E-belge entegratörleri ve muhasebe yazılımlarıyla entegrasyon kurmalı.',
         ilkGun: 'ortakla',
         risk: 'Orta. Entegrasyonları geliştirmek gerekir.',
-        dayanak: '2026’da e-arşiv tutar sınırı kalkıyor. e-fatura eşiği 3 milyon TL.',
+        dayanak: '2026’da e-arşiv tutar sınırı kalkıyor. E-fatura eşiği 3 milyon TL.',
       },
       {
         no: 20,
@@ -321,7 +321,7 @@ export const KATEGORILER: Kategori[] = [
         platform: 'Dükkânda mağaza kuran bir saha ekibi kurmalı. İçeriği dolu mağaza alıcıyı çeker.',
         ilkGun: 'evet',
         risk: 'Orta. Ekip maliyeti vardır, ama satıcı kazanmanın en etkili yoludur.',
-        dayanak: 'Lenny Rachitsky (2019): Görüşülen şirketlerin yaklaşık yüzde 60’ında doğrudan satış kritik rol oynadı. Bu yöntem, sıradaki yöntemden iki kat daha yaygın.',
+        dayanak: 'Lenny Rachitsky (2019): Görüşülen şirketlerin yaklaşık yüzde 60’ında doğrudan satış kritik rol oynadı. Bu yöntem, en yaygın ikinci yöntemden iki kat daha yaygındı.',
       },
       {
         no: 21,
@@ -460,7 +460,7 @@ export const KATEGORILER: Kategori[] = [
         soz: 'Getirdiğiniz her komşu esnaf için komisyon indirimi kazanın.',
         persona: ['Hepsi'],
         sikinti: 'Ek gelir isteği ve tanıdığa duyulan güven',
-        platform: 'Satıcı referans programı kurmalı. Satıcı, satıcıyı getirir.',
+        platform: 'Satıcı referans programı kurmalı. Böylece satıcılar başka satıcıları getirir.',
         ilkGun: 'evet',
         risk: 'Düşük ile orta. İndirim maliyeti vardır.',
         dayanak: 'Lenny Rachitsky (2019): Referans programları görüşülen pazar yerlerinin yaklaşık üçte birinde büyük başarı sağladı. Uber’de ilk yolculukların yaklaşık üçte biri referanstan geldi.',
@@ -509,7 +509,7 @@ export const ILK_30_SANIYE: { ad: string; oneriler: number[]; soz: string }[] = 
 ];
 
 export const BASLANGIC_NOTU =
-  'P1 ve P5 esnafına para ve sıfır riskle, P2 esnafına araçlar ve ihracatla, P4 ve P6 esnafına ihracatla başlayın. Bütün esnafa ortak açılış “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
+  'P1 ve P5 esnafına para ve sıfır risk sözleriyle, P2 esnafına araç ve ihracat sözleriyle, P4 ve P6 esnafına ihracat sözleriyle başlayın. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
 
 export const ESKI_SOZLER: { eski: string; yeni: string; neden: string; not?: string }[] = [
   {

@@ -68,14 +68,14 @@ const BOLUMLER = [
 type BolumId = (typeof BOLUMLER)[number]['id'];
 const ORTAKLAR: OrtakId[] = ['ayse', 'satis', 'cozum'];
 const ORTAK_NOTU: Record<OrtakId, string> = {
-  ayse: 'Tek satıştan kazancını görmek isteyen kişi: komisyon ilk uygun faturanın tahsil edilen bazına bir kez uygulanır.',
-  satis: 'Müşteri portföyünün dönemsel kazancını izleyen kişi: oran müşterinin dönemine göre; destek Segika’da.',
-  cozum: 'Satışla birlikte müşteri desteğini sağlayan taraf: oran döneme göre; destek sağlanmayan ay hak kazandırmaz.',
+  ayse: 'Ayşe tek bir satıştan kazanç elde eder. Komisyon, ilk uygun faturada tahsil edilen komisyon bazına bir kez uygulanır.',
+  satis: 'Satış ortağı, müşterilerinden dönem dönem kazanç elde eder. Oran, müşterinin hangi dönemde olduğuna göre değişir. Müşteri desteğini Segika verir.',
+  cozum: 'Çözüm ortağı satışı yapar ve müşteri desteğini de verir. Oran döneme göre değişir. Desteğin sağlanmadığı ay komisyon kazandırmaz.',
 };
 const POLITIKA_NOTU: Record<Politika, string> = {
-  tahsilatta: 'Uygun faturanın tahsilatı geldiğinde hakediş doğar; ödeme aynı ay (varsa gecikme sonrasında).',
-  'hizmet-ayi': 'Tahsil edilmiş tutardan ilgili hizmet ayına düşen bölüm ay tamamlanınca kazanılır ve o ay ödenir.',
-  'tahsilatta-taksit': 'Tahsilatta toplam hakediş kazanılır; ortağa ödeme girilen taksit sayısına bölünür (kuruş farkları takvimde dengelenir).',
+  tahsilatta: 'Uygun faturanın ödemesi tahsil edilince hakediş doğar. Ortağa ödeme aynı ay yapılır. Ödeme gecikmesi girildiyse ödeme bu süre kadar sonra yapılır.',
+  'hizmet-ayi': 'Tahsil edilen tutarın her hizmet ayına düşen bölümü, o ay tamamlanınca kazanılır ve aynı ay ödenir.',
+  'tahsilatta-taksit': 'Toplam hakediş, ödeme tahsil edilince kazanılır. Ortağa ödeme, girilen taksit sayısına bölünür. Kuruş farkları ödeme takviminde dengelenir.',
 };
 const TUR_ADI: Record<Hareket['tur'], string> = { fatura: 'Fatura', tahsilat: 'Tahsilat', iade: 'İade', hakedis: 'Hakediş', duzeltme: 'Düzeltme', bekleyen: 'Bekleyen / not', odeme: 'Ortak ödemesi' };
 
@@ -137,35 +137,35 @@ function HesapAciklamasi({ kurgu, musteri, sonuc, acik, onToggle }: { kurgu: Kur
             <div>
               <dt>Komisyon bazı</dt>
               <dd>
-                Fatura {kurusFormat(F, pb)}{X ? ` − hariç kalem ${kurusFormat(X, pb)} = ${kurusFormat(F - X, pb)}` : ''}; tahsil edilen baz = (fatura − hariç) × tahsilat ÷ fatura. Tahsilat düzeni: {tahsilatMetni(musteri.tahsilat)}.
+                Fatura {kurusFormat(F, pb)}{X ? ` − hariç kalem ${kurusFormat(X, pb)} = ${kurusFormat(F - X, pb)}` : ''}. Tahsil edilen baz = (fatura − hariç) × tahsilat ÷ fatura. Tahsilat düzeni: {tahsilatMetni(musteri.tahsilat)}.
               </dd>
             </div>
             <div>
               <dt>Kapsam ve oran</dt>
               <dd>
                 {k.kapsam === 'ilk-fatura'
-                  ? `Yalnız ilk uygun faturaya, bir kez: ${yuzde(k.donemler[0]?.oranBp ?? 0)}. Sonraki faturalara hak yok.`
-                  : `Müşterinin başlangıcından sayılan dönemler: ${donemMetni(k)}. Oran ödemenin geldiği aya değil hizmet dönemine bağlıdır; iki dönemi kapsayan fatura aylara eşit dağıtılır.`}
+                  ? `Oran yalnız ilk uygun faturaya bir kez uygulanır: ${yuzde(k.donemler[0]?.oranBp ?? 0)}. Sonraki faturalar komisyon kazandırmaz.`
+                  : `Müşterinin başlangıcından sayılan dönemler: ${donemMetni(k)}. Oran, ödemenin geldiği aya değil hizmet dönemine bağlıdır. İki dönemi kapsayan fatura aylara eşit dağıtılır.`}
               </dd>
             </div>
             <div>
               <dt>Kazanma ve ödeme</dt>
               <dd>
-                {POLITIKA_ADI[k.politika]}. {k.politika === 'tahsilatta-taksit' ? `${k.taksit} taksit. ` : ''}
-                {k.gecikmeAy ? `Ödeme gecikmesi ${k.gecikmeAy} ay.` : 'Gecikme yok.'}
+                {POLITIKA_ADI[k.politika]}. {k.politika === 'tahsilatta-taksit' ? `Ödeme ${k.taksit} taksite bölünür. ` : ''}
+                {k.gecikmeAy ? `Ödeme gecikmesi ${k.gecikmeAy} ay.` : 'Ödeme gecikmesi yok.'}
               </dd>
             </div>
             <div>
               <dt>Destek koşulu</dt>
               <dd>
                 {k.destekSorumlusu === 'ortak'
-                  ? `Destek ortağa ait: kayıtsız aylar ${DESTEK_ADI[musteri.destekVarsayilan].toLocaleLowerCase('tr-TR')} sayılır; sağlanmayan ay ${k.destekIhlali === 'beklet' ? 'hak kazandırmaz, belirsiz ay bekletilir' : 'hak kazandırmaz'}; pay kalan aylara dağıtılmaz. ${musteri.destek.length} ay kaydı var.`
-                  : 'Destek Segika’da; ortak için destek koşulu yok.'}
+                  ? `Müşteri desteğini ortak verir. Kaydı olmayan aylarda destek durumu “${DESTEK_ADI[musteri.destekVarsayilan].toLocaleLowerCase('tr-TR')}” sayılır. Desteğin sağlanmadığı ay komisyon kazandırmaz.${k.destekIhlali === 'beklet' ? ' Sonucu belirsiz ayın payı bekletilir.' : ''} Bu pay kalan aylara dağıtılmaz. ${musteri.destek.length} ay kaydı var.`
+                  : 'Müşteri desteğini Segika verir. Bu yüzden ortağın kazancı destek koşuluna bağlı değildir.'}
               </dd>
             </div>
             <div>
               <dt>Yuvarlama</dt>
-              <dd>Her hizmet ayının kesin payı hesaplanır, toplam bir kez kuruşa yuvarlanır, kuruş farkları kümülatif dağıtılır (100 ₺ / 12 → 8 × 8,33 + 4 × 8,34). Parçalı tahsilat toplamı değiştirmez.</dd>
+              <dd>Önce her hizmet ayının kesin payı hesaplanır. Toplam bir kez kuruşa yuvarlanır ve kuruş farkları aylara kümülatif, yani birikimli olarak dağıtılır. Örneğin 100 ₺, 12 aya 8 × 8,33 ₺ ve 4 × 8,34 ₺ olarak bölünür. Tahsilatın parça parça gelmesi toplamı değiştirmez.</dd>
             </div>
             {ilkHakedis ? (
               <div>
@@ -177,7 +177,7 @@ function HesapAciklamasi({ kurgu, musteri, sonuc, acik, onToggle }: { kurgu: Kur
             ) : (
               <div>
                 <dt>Hakediş</dt>
-                <dd>Ufuk içinde hakediş doğmadı (tahsilat yok ya da koşul sağlanmadı).</dd>
+                <dd>Simülasyon ufku içinde hakediş doğmadı. Nedeni, tahsilatın olmaması ya da bir koşulun sağlanmamasıdır.</dd>
               </div>
             )}
           </dl>
@@ -205,12 +205,12 @@ function FiyatKurucu({ fiyat, onChange }: { fiyat: Fiyat; onChange: (f: Fiyat) =
         value={fiyat.kaynak}
         options={[{ id: 'kat', name: 'Aylık × katsayı' }, { id: 'paket', name: 'Paket tutarı' }, { id: 'indirim', name: 'İndirimle' }, { id: 'indirimsiz', name: 'İndirimsiz' }]}
         onChange={(v) => onChange({ ...fiyat, kaynak: v })}
-        note={`${KAYNAK_ADI[fiyat.kaynak]}: bir anda tek kaynak etkindir; diğer girdiler silinmez.`}
+        note={`Seçili kaynak: ${KAYNAK_ADI[fiyat.kaynak]}. Fiyat aynı anda yalnız bir kaynaktan hesaplanır. Diğer alanlardaki değerler silinmez.`}
       />
       <Girdiler>
         <Sayi label="Aylık fiyat" birim={pb === 'TRY' ? '₺' : '€'} value={tl(fiyat.aylik)} min={0} max={10_000_000} ondalik={2} onChange={(v) => onChange({ ...fiyat, aylik: kurus(v) })} aciklama={aktif('aylik')} />
         <Sayi label="Paket fiyatının aylık ücret sayısı" value={fiyat.kat} min={0} max={120} step={0.5} ondalik={2} onChange={(v) => onChange({ ...fiyat, kat: v })} aciklama={aktif('kat')} />
-        <Sayi label="Paket hizmet süresi" birim="ay" value={fiyat.hizmetAy} min={1} max={60} ondalik={0} onChange={(v) => onChange({ ...fiyat, hizmetAy: v })} aciklama="Müşterinin paketle aldığı hizmet; aylık eşdeğerin paydası." />
+        <Sayi label="Paket hizmet süresi" birim="ay" value={fiyat.hizmetAy} min={1} max={60} ondalik={0} onChange={(v) => onChange({ ...fiyat, hizmetAy: v })} aciklama="Müşterinin paketle kaç ay hizmet aldığını gösterir. Aylık eşdeğer, paket fiyatı bu süreye bölünerek bulunur." />
         <Sayi label="İndirim oranı" yuzde value={oran(fiyat.indirimBp)} min={0} max={100} ondalik={2} onChange={(v) => onChange({ ...fiyat, indirimBp: bp(v) })} aciklama={aktif('indirimBp')} />
         <Sayi label="Paket tutarı" birim={pb === 'TRY' ? '₺' : '€'} value={tl(fiyat.paket)} min={0} max={100_000_000} ondalik={2} onChange={(v) => onChange({ ...fiyat, paket: kurus(v) })} aciklama={aktif('paket')} />
       </Girdiler>
@@ -246,11 +246,11 @@ function OrtakEditoru({ kural, pb, onChange }: { kural: OrtakKurali; pb: ParaBir
         value={kural.kapsam}
         options={[{ id: 'ilk-fatura', name: 'İlk fatura' }, { id: 'sureli', name: 'Süreli' }]}
         onChange={(v) => onChange({ ...kural, kapsam: v })}
-        note={kural.kapsam === 'ilk-fatura' ? 'İlk uygun faturanın tahsil edilen bazına bir kez; dönem alanları uygulanmaz (“uygulanmaz” sıfır oran değildir).' : 'İlk fatura yerine seçtiğiniz dönemlerdeki uygun ödemeler komisyon kazandırır.'}
+        note={kural.kapsam === 'ilk-fatura' ? 'Komisyon, ilk uygun faturada tahsil edilen baza bir kez uygulanır. Dönem alanları bu seçimde kullanılmaz. Bu, oranın sıfır olduğu anlamına gelmez.' : 'İlk fatura yerine seçtiğiniz dönemlerdeki uygun ödemeler komisyon kazandırır.'}
       />
       {kural.kapsam === 'ilk-fatura' ? (
         <Girdiler>
-          <Sayi label="Komisyon oranı" yuzde value={oran(kural.donemler[0]?.oranBp ?? 0)} min={0} max={100} ondalik={2} onChange={(v) => donem(0, { oranBp: bp(v) })} aciklama="İlk uygun faturanın komisyon bazına uygulanır; %0 geçerli girdidir." />
+          <Sayi label="Komisyon oranı" yuzde value={oran(kural.donemler[0]?.oranBp ?? 0)} min={0} max={100} ondalik={2} onChange={(v) => donem(0, { oranBp: bp(v) })} aciklama="İlk uygun faturanın komisyon bazına uygulanır. %0 da geçerli bir değerdir." />
         </Girdiler>
       ) : (
         <>
@@ -261,7 +261,7 @@ function OrtakEditoru({ kural, pb, onChange }: { kural: OrtakKurali; pb: ParaBir
                 <Sayi label={`${i + 1}. dönem oranı`} yuzde value={oran(d.oranBp)} min={0} max={100} ondalik={2} onChange={(v) => donem(i, { oranBp: bp(v) })} aciklama={`Müşterinin ${i + 1}. dönemine ait uygun ödemelere uygulanır.`} />
               </div>
             ))}
-            <Sayi label="Sonraki dönemlerin oranı" yuzde value={oran(kural.sonrakiOranBp)} min={0} max={100} ondalik={2} onChange={(v) => onChange({ ...kural, sonrakiOranBp: bp(v) })} aciklama="Son dönemden sonrası açık girdidir; son satır kendiliğinden tekrar etmez." />
+            <Sayi label="Sonraki dönemlerin oranı" yuzde value={oran(kural.sonrakiOranBp)} min={0} max={100} ondalik={2} onChange={(v) => onChange({ ...kural, sonrakiOranBp: bp(v) })} aciklama="Son dönemden sonraki aylarda bu oran kullanılır. Son dönemin oranı kendiliğinden tekrar etmez." />
           </Girdiler>
           <div className="applet-araclar">
             <Eylem onClick={() => onChange({ ...kural, donemler: [...kural.donemler, { ay: 12, oranBp: 0 }] })} disabled={kural.donemler.length >= 12}>
@@ -281,26 +281,26 @@ function OrtakEditoru({ kural, pb, onChange }: { kural: OrtakKurali; pb: ParaBir
         note={
           <>
             {POLITIKA_NOTU[kural.politika]}
-            {kural.destekSorumlusu === 'ortak' && kural.politika !== 'hizmet-ayi' ? ' Dikkat: gelecekte sağlanmayacak desteğin komisyonu geri alma düzeltmesi oluşturur.' : ''}
+            {kural.destekSorumlusu === 'ortak' && kural.politika !== 'hizmet-ayi' ? ' Dikkat: İleride bir ay destek sağlanmazsa, o ay için kazanılmış komisyon düzeltmeyle geri alınır.' : ''}
           </>
         }
       />
       <Girdiler>
-        {kural.politika === 'tahsilatta-taksit' ? <Sayi label="Taksit sayısı" value={kural.taksit} min={1} max={60} ondalik={0} onChange={(v) => onChange({ ...kural, taksit: v })} aciklama="Toplam hakediş değişmez; yalnız ödeme takvimi bölünür." /> : null}
+        {kural.politika === 'tahsilatta-taksit' ? <Sayi label="Taksit sayısı" value={kural.taksit} min={1} max={60} ondalik={0} onChange={(v) => onChange({ ...kural, taksit: v })} aciklama="Toplam hakediş değişmez. Yalnız ödeme takvimi bölünür." /> : null}
         <Sayi label="Ödeme gecikmesi" birim="ay" value={kural.gecikmeAy} min={0} max={24} ondalik={0} onChange={(v) => onChange({ ...kural, gecikmeAy: v })} />
       </Girdiler>
-      <Choice label={`${kural.ad} destek sorumlusu`} value={kural.destekSorumlusu} options={[{ id: 'segika', name: 'Segika' }, { id: 'ortak', name: 'Ortak' }]} onChange={(v) => onChange({ ...kural, destekSorumlusu: v })} note="Ortak sorumluysa her hizmet ayının destek durumu hakedişi etkiler." />
+      <Choice label={`${kural.ad} destek sorumlusu`} value={kural.destekSorumlusu} options={[{ id: 'segika', name: 'Segika' }, { id: 'ortak', name: 'Ortak' }]} onChange={(v) => onChange({ ...kural, destekSorumlusu: v })} note="Desteği ortak veriyorsa her hizmet ayının destek durumu hakedişi etkiler." />
       {kural.destekSorumlusu === 'ortak' ? (
         <Choice
           label={`${kural.ad} destek ihlali`}
           value={kural.destekIhlali}
           options={[{ id: 'kazandirmaz', name: 'Kazandırmaz' }, { id: 'beklet', name: 'Beklet' }]}
           onChange={(v) => onChange({ ...kural, destekIhlali: v })}
-          note={kural.destekIhlali === 'beklet' ? 'Sağlanmayan ay hak kazandırmaz; belirsiz ayın payı “destek sonucu bekleniyor” durumunda tutulur, kazanılmış borç değildir.' : 'Sağlanmayan ya da belirsiz ay hak kazandırmaz; pay kalan aylara dağıtılmaz. Oran kendiliğinden düşürülmez.'}
+          note={kural.destekIhlali === 'beklet' ? 'Desteğin sağlanmadığı ay komisyon kazandırmaz. Sonucu belirsiz ayın payı “destek sonucu bekleniyor” durumunda tutulur. Bu pay henüz kazanılmış sayılmaz ve ortağa borç oluşturmaz.' : 'Desteğin sağlanmadığı ya da sonucu belirsiz olan ay komisyon kazandırmaz. Bu ayın payı kalan aylara dağıtılmaz. Oran kendiliğinden düşürülmez.'}
         />
       ) : null}
       <div className="af-anahtar">
-        <Anahtar ad="Destek maliyeti hesabı" acik={kural.destekMaliyeti !== null} onChange={(v) => onChange({ ...kural, destekMaliyeti: v ? 0 : null })} aciklama="Açıkken ortağın müşteri başına aylık destek maliyeti komisyondan düşülür (“destek maliyeti sonrası tutar”; net kâr değildir). Girilmemiş tutar ile 0 ayrıdır." />
+        <Anahtar ad="Destek maliyeti hesabı" acik={kural.destekMaliyeti !== null} onChange={(v) => onChange({ ...kural, destekMaliyeti: v ? 0 : null })} aciklama="Bu seçenek açıkken ortağın müşteri başına aylık destek maliyeti komisyondan düşülür. Sonuç “destek maliyeti sonrası tutar” olarak gösterilir ve net kâr değildir. Tutarı hiç girmemek ile 0 girmek farklı kabul edilir." />
         {kural.destekMaliyeti !== null ? (
           <Girdiler>
             <Sayi label="Müşteri başına aylık destek maliyeti" birim={birim} value={tl(kural.destekMaliyeti)} min={0} max={1_000_000} ondalik={2} onChange={(v) => onChange({ ...kural, destekMaliyeti: kurus(v) })} />
@@ -320,13 +320,13 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
     <div className="af-musteri">
       <Girdiler>
         <Metin label="Grup adı" value={musteri.ad} onChange={(v) => onChange({ ...musteri, ad: v })} />
-        <Sayi label="Müşteri adedi" value={musteri.adet} min={1} max={10_000} ondalik={0} onChange={(v) => onChange({ ...musteri, adet: v })} aciklama="Aynı koşulları paylaşan müşteri sayısı; grup toplamı kişi başına sonucun katıdır." />
+        <Sayi label="Müşteri adedi" value={musteri.adet} min={1} max={10_000} ondalik={0} onChange={(v) => onChange({ ...musteri, adet: v })} aciklama="Aynı koşullara sahip müşteri sayısıdır. Grup toplamı, tek müşterinin sonucu bu sayıyla çarpılarak bulunur." />
         <TextInput
           type="date"
           className="param-field"
           classNames={{ label: 'param-label', input: 'param-input', description: 'param-help' }}
           label="Abonelik başlangıcı"
-          description="Komisyon yaşı bu tarihten sayılır; dönemler takvim yılına bağlı değildir."
+          description="Komisyon dönemleri bu tarihten itibaren sayılır. Dönemler takvim yılına bağlı değildir."
           inputWrapperOrder={['label', 'input', 'description', 'error']}
           size="md"
           value={musteri.baslangic}
@@ -341,7 +341,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
         value={musteri.odeme}
         options={[{ id: 'aylik', name: 'Aylık' }, { id: 'paket', name: `Paket (${kurgu.fiyat.hizmetAy} ay)` }]}
         onChange={(v) => onChange({ ...musteri, odeme: v })}
-        note="Aylık: her hizmet ayı bir fatura. Paket: hizmet süresinin başında tek fatura, yenilemede yeniden."
+        note="Aylık ödemede her hizmet ayı için bir fatura kesilir. Paket ödemede hizmet süresinin başında tek fatura kesilir. Paket yenilenince yeni fatura kesilir."
       />
       <Choice label="Ortak modeli" value={musteri.ortak} options={ORTAKLAR.map((id) => ({ id, name: ORTAK_ADLARI[id] }))} onChange={(v) => onChange({ ...musteri, ortak: v })} note={ORTAK_NOTU[musteri.ortak]} />
       <Accordion
@@ -363,7 +363,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
               value={mod}
               options={[{ id: 'tam', name: 'Fatura tarihinde tam' }, { id: 'yok', name: 'Ödeme yok' }, { id: 'kismi', name: 'Kısmi / gecikmeli' }]}
               onChange={(v) => onChange({ ...musteri, tahsilat: v === 'tam' ? TAM_TAHSILAT.map((t) => ({ ...t })) : v === 'yok' ? [] : mod === 'kismi' ? musteri.tahsilat : [{ oranBp: 4000, gecikmeAy: 0 }, { oranBp: 6000, gecikmeAy: 2 }] })}
-              note="Her faturanın ödeme parçaları: faturanın yüzdesi ve fatura tarihinden gecikme. Ödenmeyen bölüm kazanılmış tutara girmez."
+              note="Her fatura parça parça ödenebilir. Her parça için faturanın yüzde kaçının, fatura tarihinden kaç ay sonra ödendiğini girin. Ödenmeyen bölüm kazanılmış tutara girmez."
             />
             {mod === 'kismi' ? (
               <>
@@ -381,7 +381,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
                     Parça ekle
                   </Eylem>
                   <p className={toplamPay > 10_000 ? 'param-duzeltme' : 'af-not'} role={toplamPay > 10_000 ? 'alert' : undefined}>
-                    {toplamPay > 10_000 ? `Payların toplamı ${yuzde(toplamPay)}: %100’ü aşan bölüm hesaba girmez; payları düzeltin.` : `Toplam ${yuzde(toplamPay)}; kalan ${yuzde(10_000 - toplamPay)} ödenmez.`}
+                    {toplamPay > 10_000 ? `Payların toplamı ${yuzde(toplamPay)}. %100’ü aşan bölüm hesaba girmez. Payları düzeltin.` : `Payların toplamı ${yuzde(toplamPay)}. Kalan ${yuzde(10_000 - toplamPay)} ödenmez.`}
                   </p>
                 </div>
               </>
@@ -393,10 +393,10 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
             <span className="kayit-ad">İptal ve iade</span> <span className="kayit-ozet-deger">{musteri.iptalHizmetAyi === null ? 'İptal yok' : `${musteri.iptalHizmetAyi} ay hizmet`}{musteri.iadeler.length ? ` · ${musteri.iadeler.length} iade` : ''}</span>
           </Accordion.Control>
           <Accordion.Panel>
-            <Anahtar ad="Abonelik iptali" acik={musteri.iptalHizmetAyi !== null} onChange={(v) => onChange({ ...musteri, iptalHizmetAyi: v ? 3 : null })} aciklama="İptal gelecek faturaları durdurur; önceden tahsil edilen para kendiliğinden iade edilmez." />
+            <Anahtar ad="Abonelik iptali" acik={musteri.iptalHizmetAyi !== null} onChange={(v) => onChange({ ...musteri, iptalHizmetAyi: v ? 3 : null })} aciklama="İptal, gelecek faturaları durdurur. Önceden tahsil edilen para kendiliğinden iade edilmez." />
             {musteri.iptalHizmetAyi !== null ? (
               <Girdiler>
-                <Sayi label="Hizmet alınan ay sayısı" birim="ay" value={musteri.iptalHizmetAyi} min={0} max={120} ondalik={0} onChange={(v) => onChange({ ...musteri, iptalHizmetAyi: v })} aciklama="Bu kadar hizmet ayından sonra hizmet yok; sonraki aylar hak kazandırmaz." />
+                <Sayi label="Hizmet alınan ay sayısı" birim="ay" value={musteri.iptalHizmetAyi} min={0} max={120} ondalik={0} onChange={(v) => onChange({ ...musteri, iptalHizmetAyi: v })} aciklama="Hizmet bu kadar ay sürer, sonra durur. Sonraki aylar komisyon kazandırmaz." />
               </Girdiler>
             ) : null}
             {musteri.iadeler.map((iade, i) => (
@@ -413,7 +413,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
               <Eylem onClick={() => onChange({ ...musteri, iadeler: [...musteri.iadeler, { fatura: 1, gecikmeAy: 3, oranBp: 2000 }] })} disabled={musteri.iadeler.length >= 12}>
                 İade ekle
               </Eylem>
-              <p className="af-not">İade net komisyon bazını düşürür; fark iade tarihli düzeltmedir, ödenmiş fazlası geri alınacak bakiyedir.</p>
+              <p className="af-not">İade, net komisyon bazını düşürür. Aradaki fark, iade tarihinde düzeltme olarak kaydedilir. Ortağa fazla ödenen tutar geri alınacak bakiyeye yazılır.</p>
             </div>
           </Accordion.Panel>
         </Accordion.Item>
@@ -427,7 +427,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
               value={musteri.destekVarsayilan}
               options={[{ id: 'aktif', name: 'Aktif' }, { id: 'saglanmadi', name: 'Sağlanmadı' }, { id: 'belirsiz', name: 'Belirsiz' }]}
               onChange={(v) => onChange({ ...musteri, destekVarsayilan: v })}
-              note={kurgu.ortaklar[musteri.ortak].destekSorumlusu === 'ortak' ? 'Görünür varsayım: ay kaydı olmayan hizmet ayları bu durumda sayılır; seçilmeyen başarı varsayılmaz.' : 'Seçili ortağın destek sorumlusu Segika; bu alan ortak sorumlu olunca etkilidir.'}
+              note={kurgu.ortaklar[musteri.ortak].destekSorumlusu === 'ortak' ? 'Kaydı olmayan hizmet ayları bu durumda sayılır. Bu varsayım ekranda açıkça görünür. Başarılı destek, siz seçmedikçe varsayılmaz.' : 'Seçili ortak modelinde desteği Segika verir. Bu alan yalnız desteği ortak verdiğinde hesabı etkiler.'}
             />
             {musteri.destek.map((d, i) => (
               <div className="af-satir" key={i} role="group" aria-label={`${i + 1}. destek kaydı`}>
@@ -444,7 +444,7 @@ function MusteriEditoru({ kurgu, musteri, onChange, onRemove }: { kurgu: Kurgu; 
               </Eylem>
             </div>
             <Girdiler>
-              <Sayi label="Komisyon dışı kalemler" yuzde value={oran(musteri.haricBp)} min={0} max={100} ondalik={2} onChange={(v) => onChange({ ...musteri, haricBp: bp(v) })} aciklama="Faturanın komisyona girmeyen bölümü (yüzde). Kısmi ödeme ve iade kalemlere oransal dağıtılır." />
+              <Sayi label="Komisyon dışı kalemler" yuzde value={oran(musteri.haricBp)} min={0} max={100} ondalik={2} onChange={(v) => onChange({ ...musteri, haricBp: bp(v) })} aciklama="Faturanın komisyona girmeyen bölümünün yüzdesidir. Kısmi ödeme ve iade, kalemlere oranlarına göre dağıtılır." />
             </Girdiler>
           </Accordion.Panel>
         </Accordion.Item>
@@ -585,7 +585,7 @@ function Icerik() {
     for (const h of sonuc.hareketler) {
       satirlar.push([h.ay, h.tarih, guvenli(kurgu.musteriler.find((m) => m.id === h.musteri)?.ad ?? h.musteri), ORTAK_ADLARI[h.ortak], h.faturaId ?? '', h.hizmetAyi === undefined ? '' : h.hizmetAyi + 1, TUR_ADI[h.tur], h.paraBirimi, (h.tutar / 100).toFixed(2).replace('.', ','), guvenli(h.aciklama)]);
     }
-    setDurum(downloadCsv('affilate-hareketler', satirlar) ? `CSV indirildi: ${sonuc.hareketler.length} hareket.` : 'CSV indirilemedi (tarayıcı indirmeyi engelledi).');
+    setDurum(downloadCsv('affilate-hareketler', satirlar) ? `CSV indirildi: ${sonuc.hareketler.length} hareket.` : 'CSV indirilemedi, çünkü tarayıcı indirmeyi engelledi.');
   };
   const jsonIndir = () => {
     try {
@@ -616,13 +616,13 @@ function Icerik() {
         }
         const k = kurguOku(veri);
         if (!k) {
-          setDurum('Dosya okunamadı ya da doğrulamadan geçmedi (şema, oran, tarih, tutar, kimlik); mevcut senaryo değişmedi.');
+          setDurum('Dosya okunamadı ya da doğrulamadan geçmedi. Şema, oran, tarih, tutar ve kimlik alanları denetlenir. Mevcut senaryo değişmedi.');
           return;
         }
         setKurgu(() => k);
-        setDurum(`JSON içe alındı: ${k.musteriler.length} müşteri grubu, ${k.ufukAy} ay ufuk. Geri al ile önceki duruma dönülür.`);
+        setDurum(`JSON içe alındı: ${k.musteriler.length} müşteri grubu, ${k.ufukAy} aylık simülasyon. “Geri al” düğmesiyle önceki duruma dönebilirsiniz.`);
       })
-      .catch(() => setDurum('Dosya okunamadı; mevcut senaryo değişmedi.'));
+      .catch(() => setDurum('Dosya okunamadı. Mevcut senaryo değişmedi.'));
   };
 
   // Korunan kayıt sorunu (MS-04): ham kaydı indirme ve açık üzerine yazma kararı; bu sırada otomatik yazım kapalı.
@@ -636,7 +636,7 @@ function Icerik() {
       a.download = 'segika-affilate-ham-kayit.json';
       a.click();
       URL.revokeObjectURL(url);
-      setDurum('Ham kayıt dışa aktarıldı (olduğu gibi, dönüştürülmeden).');
+      setDurum('Ham kayıt, hiç değiştirilmeden dışa aktarıldı.');
     } catch {
       setDurum('Ham kayıt dışa aktarılamadı.');
     }
@@ -645,14 +645,14 @@ function Icerik() {
     ? ''
     : `${
         kayitSorunu.tur === 'uyumsuz'
-          ? `Bu tarayıcıdaki Affilate kaydı başka bir sürümde (${kayitSorunu.surum === undefined ? 'sürüm belirsiz' : `v${kayitSorunu.surum}`}); bu sayfa onu okuyamıyor.`
+          ? `Bu tarayıcıdaki Affilate kaydı başka bir sürümde (${kayitSorunu.surum === undefined ? 'sürüm belirsiz' : `v${kayitSorunu.surum}`}). Bu sayfa o kaydı okuyamıyor.`
           : kayitSorunu.tur === 'bozuk'
-            ? 'Bu tarayıcıdaki Affilate kaydı okunamadı (bozuk veri).'
-            : `Kayıttaki ${kayitSorunu.okunamayan ?? 0} kayıtlı senaryo okunamadı; okunabilenler yüklendi.`
-      } Kayıt korunuyor ve üzerine yazılmıyor: önce “Ham kaydı dışa aktar” ile yedekleyin; “Başlangıçla devam et” derseniz bu sayfadaki durum kaydın yerine geçer.`;
+            ? 'Bu tarayıcıdaki Affilate kaydı bozuk olduğu için okunamadı.'
+            : `Kayıttaki ${kayitSorunu.okunamayan ?? 0} kayıtlı senaryo okunamadı. Okunabilen senaryolar yüklendi.`
+      } Kayıt korunuyor ve üzerine yazılmıyor. Önce “Ham kaydı dışa aktar” düğmesiyle kaydı yedekleyin. “Başlangıçla devam et” düğmesine basarsanız bu sayfadaki durum eski kaydın yerine geçer.`;
   const kayitMetni = kayitSorunu
-    ? 'Kayıt korunuyor; yukarıdaki kayıt sorunu çözülene kadar değişiklikler bu tarayıcıya yazılmıyor (sayfa kapanınca kaybolur; JSON dışa aktarabilirsiniz).'
-    : !yuklendi || kayit === null ? 'Değişiklikler bu tarayıcıda saklanır; henüz yeni kayıt yok.' : kayit === false ? 'Kaydedilemedi: depolama kapalı ya da dolu. Değişiklikler yalnız bu sayfa açıkken geçerlidir; saklamak için JSON dışa aktarın.' : `Bu tarayıcıda kaydedildi · ${kayit.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.`;
+    ? 'Kayıt korunuyor. Yukarıdaki kayıt sorunu çözülene kadar değişiklikler bu tarayıcıya yazılmıyor. Sayfa kapanınca değişiklikler kaybolur, ama bunları JSON olarak dışa aktarabilirsiniz.'
+    : !yuklendi || kayit === null ? 'Değişiklikler bu tarayıcıda saklanır. Henüz yeni kayıt yok.' : kayit === false ? 'Kaydedilemedi, çünkü tarayıcı depolaması kapalı ya da dolu. Değişiklikler yalnız bu sayfa açıkken geçerlidir. Saklamak için JSON dışa aktarın.' : `Bu tarayıcıda kaydedildi. Son kayıt saati: ${kayit.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.`;
   const degisiklikListesi = useMemo(() => degisiklikler(kurgu, baslangicKurgu()), [kurgu]);
   const ilkAy = aylar[0];
   const sonAy = aylar[aylar.length - 1];
@@ -663,7 +663,7 @@ function Icerik() {
     <>
       <PageHeader
         title="Affilate"
-        purpose="Segika satış ortaklığı simülasyonu: müşteri ödediğinde ortak ne kazanır, ne zaman ödenir, Segika’ya ne kalır. Oranlar ve fiyatlar örnek başlangıç değerleridir."
+        purpose="Bu sayfa Segika satış ortaklığını simüle eder. Müşteri ödediğinde ortağın ne kazandığını, kazancın ne zaman ödendiğini ve Segika’ya ne kaldığını gösterir. Oranlar ve fiyatlar örnek başlangıç değerleridir."
         meta={[{ label: 'Dönem', value: donemMetniKisa }]}
       />
       <ResultSummary
@@ -674,15 +674,15 @@ function Icerik() {
         ana={{
           etiket: 'Planlanan toplam komisyon',
           deger: kurusFormat(mo?.planlanan ?? 0, pb),
-          aciklama: `Bütün ödeme ve hizmet koşulları gerçekleşirse. Ufuk içinde kazanılan ${kurusFormat(mo?.netHakedis ?? 0, pb)}; gelecek koşullara bağlı ${kurusFormat(mo?.kosullu ?? 0, pb)}.`,
+          aciklama: `Bütün ödeme ve hizmet koşulları gerçekleşirse ortak bu tutarı kazanır. Simülasyon ufku içinde kazanılan tutar ${kurusFormat(mo?.netHakedis ?? 0, pb)}. Gelecek koşullara bağlı tutar ${kurusFormat(mo?.kosullu ?? 0, pb)}.`,
         }}
         durum={
           sonuc.hatalar.length
             ? { ton: 'risk', metin: `Hesap yapılmadı: ${sonuc.hatalar[0]}` }
             : (mo?.bekleyen ?? 0) > 0
-              ? { ton: 'uyari', metin: `Destek sonucu bekleyen ${kurusFormat(mo?.bekleyen ?? 0, pb)}: kazanılmış borç değil.` }
+              ? { ton: 'uyari', metin: `Destek sonucunu bekleyen tutar: ${kurusFormat(mo?.bekleyen ?? 0, pb)}. Bu tutar henüz kazanılmış sayılmaz.` }
               : (mo?.odenen ?? 0) > (mo?.netHakedis ?? 0)
-                ? { ton: 'uyari', metin: `Geri alınacak ${kurusFormat((mo?.odenen ?? 0) - (mo?.netHakedis ?? 0), pb)}: ödenen tutar net hakedişi aşıyor; sonraki ödemelerden mahsup edilir.` }
+                ? { ton: 'uyari', metin: `Geri alınacak tutar: ${kurusFormat((mo?.odenen ?? 0) - (mo?.netHakedis ?? 0), pb)}. Ortağa ödenen tutar net hakedişi aşıyor. Fark sonraki ödemelerden düşülür.` }
                 : undefined
         }
         tools={
@@ -692,7 +692,7 @@ function Icerik() {
           </div>
         }
         kiyas={{
-          temel: 'Aynı satışın üç alternatif ortağı · planlanan toplam (alternatifler toplanmaz)',
+          temel: 'Aynı satış üç farklı ortakla yapılsaydı planlanacak toplam komisyon. Bu üç tutar birbirine eklenmez.',
           satirlar: ORTAKLAR.map((id) => ({ ad: ORTAK_ADLARI[id], deger: kurusFormat(kiyas[id].musteriler[0]?.planlanan ?? 0, pb), secili: id === secili.ortak })),
         }}
         ikincil={[
@@ -703,14 +703,14 @@ function Icerik() {
           { etiket: `${seciliAy ? ayEtiketi(seciliAy) : 'Bu ay'} ödenen`, deger: kurusFormat(buAyOdeme, pb) },
           { etiket: 'Segika komisyon sonrası', deger: kurusFormat(segika?.komisyonSonrasi ?? 0, pb) },
         ]}
-        kaynak="Simülasyon: örnek başlangıç değerleri, onaylanmış sözleşme değil; gerçek fatura, banka ödemesi ya da CRM verisi içermez. Hareketler bu tarayıcıda hesaplanır."
+        kaynak="Bu bir simülasyondur. Değerler örnek başlangıç değerleridir ve onaylanmış bir sözleşmeyi yansıtmaz. Gerçek fatura, banka ödemesi ya da müşteri yönetim yazılımı (CRM) verisi içermez. Hareketler bu tarayıcıda hesaplanır."
       />
 
       <div className="ortak-kume af-kume">
         {genis ? <BolumSekmeleri value={bolum} onChange={go} /> : <div className="ortak-gezgin"><Choice label="Bölüm" value={bolum} options={BOLUMLER.map((b, j) => ({ id: b.id, name: `${j + 1} / ${BOLUMLER.length} · ${b.label}` }))} onChange={go} /></div>}
         <div className="ortak-bolum af-bolum" id="af-bolum" role={genis ? 'tabpanel' : 'region'} aria-labelledby={genis ? `af-sekme-${bolum}` : undefined} aria-label={genis ? undefined : bolumBilgi.baslik} ref={panel} tabIndex={-1}>
           {bolum === 'model' ? (
-            <Section id="af-model" title="Model ve girdiler" desc="Bütün oranlar, süreler, fiyatlar ve taksitler düzenlenebilir girdidir; %0 geçerlidir. Bir değer değişince bütün kurgu yeni varsayımla yeniden hesaplanır; geçmiş hakedişler değiştirilmez.">
+            <Section id="af-model" title="Model ve girdiler" desc="Hakediş, ortağın kazandığı komisyon tutarıdır. Bütün oranları, süreleri, fiyatları ve taksitleri değiştirebilirsiniz. %0 da geçerli bir değerdir. Bir değer değişince bütün senaryo yeni varsayımla yeniden hesaplanır. Geçmiş hakedişler değiştirilmez.">
               <Girdiler baslik="Hazır senaryo">
                 <Secim
                   label="Hazır senaryo"
@@ -720,9 +720,9 @@ function Icerik() {
                     const h = HAZIR_SENARYOLAR.find((x) => x.id === v);
                     if (h) setKurgu(() => h.kurgu());
                   }}
-                  aciklama={hazir ? HAZIR_SENARYOLAR.find((h) => h.id === hazir)?.aciklama : 'Özel: girdiler hazır senaryolardan farklı. Hazır senaryo seçmek bütün girdileri onunla değiştirir (Geri al ile dönülür).'}
+                  aciklama={hazir ? HAZIR_SENARYOLAR.find((h) => h.id === hazir)?.aciklama : 'Özel: Girdiler hazır senaryolardan farklı. Hazır bir senaryo seçerseniz bütün girdiler o senaryonun değerleriyle değişir. “Geri al” düğmesiyle eski değerlere dönebilirsiniz.'}
                 />
-                <Sayi label="Simülasyon ufku" birim="ay" value={kurgu.ufukAy} min={1} max={120} ondalik={0} onChange={(v) => setKurgu((k) => ({ ...k, ufukAy: v }))} aciklama="Hareketler bu süre içinde üretilir; sonraki yükümlülük özette ayrıca durur." />
+                <Sayi label="Simülasyon ufku" birim="ay" value={kurgu.ufukAy} min={1} max={120} ondalik={0} onChange={(v) => setKurgu((k) => ({ ...k, ufukAy: v }))} aciklama="Hareketler bu süre için hesaplanır. Bu süreden sonraya kalan yükümlülükler özette ayrıca gösterilir." />
               </Girdiler>
 
               <h3 className="block-title af-baslik">Müşteri grubu</h3>
@@ -747,33 +747,33 @@ function Icerik() {
                 >
                   Müşteri grubu ekle
                 </Eylem>
-                <p className="af-not">Portföy: farklı gruplar farklı ortaklara atanabilir; aynı müşteri iki kez sayılmaz, toplam alt kayıtların toplamıdır.</p>
+                <p className="af-not">Farklı müşteri grupları farklı ortaklara atanabilir. Aynı müşteri iki kez sayılmaz. Portföy toplamı, grupların toplamıdır.</p>
               </div>
 
               <h3 className="block-title af-baslik">Fiyat</h3>
               <FiyatKurucu fiyat={kurgu.fiyat} onChange={(f) => setKurgu((k) => ({ ...k, fiyat: f }))} />
 
               <h3 className="block-title af-baslik">Ortak modelleri</h3>
-              <p className="af-not">Üç modelin bütün oranları aynı bağlamda düzenlenir; büyük oran “daha üst seviye” değildir, farklı sorumluluk ve koşuldur.</p>
+              <p className="af-not">Üç modelin oranlarını burada birlikte düzenleyebilirsiniz. Yüksek oran “daha üst seviye” anlamına gelmez. Farklı oranlar, farklı sorumlulukları ve koşulları yansıtır.</p>
               <OrtakAccordion kurgu={kurgu} secili={secili.ortak} pb={pb} onChange={ortakGuncelle} />
             </Section>
           ) : null}
 
           {bolum === 'karsilastirma' ? (
-            <Section id="af-karsilastirma" title="Üç ortak modelinin karşılaştırması" desc={`${secili.ad}: aynı satışın üç alternatif ortağı, aynı fiyat ve ödeme düzeniyle. Üç sonuç toplanmaz (tek müşteri, tek atıf).`}>
-              <DataTable id="af-kiyas" title="Aynı müşteri, üç alternatif ortak" kayit="matris" eksenEtiketi="Ölçüt" columns={kiyasSutunlariTam} rows={kiyasSatirlari} rowKey={(o) => o.key} note={`Ortak koşullar: ${secili.odeme === 'aylik' ? `aylık ${kurusFormat(kurgu.fiyat.aylik, pb)}` : `${kurgu.fiyat.hizmetAy} aylık paket ${kurusFormat(paketFiyati(kurgu.fiyat), pb)}`}, ${kurgu.ufukAy} ay ufuk, tahsilat düzeni “${tahsilatMetni(secili.tahsilat)}”. Değişen koşullar: kapsam, oran dönemleri, kazanma/ödeme politikası, destek.`} />
+            <Section id="af-karsilastirma" title="Üç ortak modelinin karşılaştırması" desc={`${secili.ad}: Aynı satış, aynı fiyat ve ödeme düzeniyle üç farklı ortak modelinde hesaplanır. Üç sonuç birbirine eklenmez, çünkü müşteri tektir ve yalnız bir ortağa yazılır.`}>
+              <DataTable id="af-kiyas" title="Aynı müşteri, üç alternatif ortak" kayit="matris" eksenEtiketi="Ölçüt" columns={kiyasSutunlariTam} rows={kiyasSatirlari} rowKey={(o) => o.key} note={`Üç modelde aynı olan koşullar: ${secili.odeme === 'aylik' ? `aylık ${kurusFormat(kurgu.fiyat.aylik, pb)}` : `${kurgu.fiyat.hizmetAy} aylık paket ${kurusFormat(paketFiyati(kurgu.fiyat), pb)}`}, ${kurgu.ufukAy} aylık simülasyon ve “${tahsilatMetni(secili.tahsilat)}” tahsilat düzeni. Modeller arasında kapsam, oran dönemleri, kazanma ve ödeme kuralı ile destek sorumluluğu değişir.`} />
               {kayitli.length ? (
-                <DataTable id="af-kayitli" title="Kayıtlı senaryolarla karşılaştırma" kayit="matris" eksenEtiketi="Ölçüt" columns={kayitliSutunlari} rows={kiyasSatirlari} rowKey={(o) => o.key} note="Her kayıt kendi girdileriyle sabit kalır; ‘Şimdiki’ bu sayfadaki düzenlenen kurgudur." />
+                <DataTable id="af-kayitli" title="Kayıtlı senaryolarla karşılaştırma" kayit="matris" eksenEtiketi="Ölçüt" columns={kayitliSutunlari} rows={kiyasSatirlari} rowKey={(o) => o.key} note="Her kayıt kendi girdileriyle sabit kalır. “Şimdiki” sütunu, bu sayfada düzenlediğiniz senaryoyu gösterir." />
               ) : (
                 <Note title="Kayıtlı senaryo yok">
-                  <p>Varsayımlar bölümünde kurguyu adlandırıp kaydedin; iki ya da daha çok kayıt burada yan yana karşılaştırılır.</p>
+                  <p>Varsayımlar bölümünde senaryoya bir ad verip kaydedin. Kayıtlı senaryolar burada yan yana karşılaştırılır.</p>
                 </Note>
               )}
             </Section>
           ) : null}
 
           {bolum === 'aylik' ? (
-            <Section id="af-aylik" title="Aylık döküm" desc="Her hareket tarihli ve kimlikli: fatura, tahsilat, iade, hakediş, düzeltme ve simüle edilen ortak ödemesi. Hakediş hizmet ayının bittiği tarihte, o takvim ayının raporundadır.">
+            <Section id="af-aylik" title="Aylık döküm" desc="Her hareketin bir tarihi ve kimliği vardır. Hareket türleri fatura, tahsilat, iade, hakediş, düzeltme ve simüle edilen ortak ödemesidir. Hakediş, hizmet ayının bittiği tarihte o takvim ayının raporuna yazılır.">
               <div className="af-ay-gezgin">
                 <Eylem onClick={() => seciliAy && setAy(aylar[Math.max(0, aylar.indexOf(seciliAy) - 1)])} disabled={!seciliAy || aylar.indexOf(seciliAy) === 0} ad="ay">
                   ← Önceki
@@ -792,14 +792,14 @@ function Icerik() {
                   ...ayOzeti(hareketlerPb),
                   { label: 'Ödenecek bakiye', value: kurusFormat(sonrasi?.odenecek ?? 0, pb), note: 'Bu dönemden sonra' },
                   { label: 'Gelecek koşullara bağlı', value: kurusFormat(sonrasi?.kosullu ?? 0, pb), note: 'Bu dönemden sonra' },
-                  { label: 'Komisyon ödemeleri sonrası nakit', value: kurusFormat(segika?.nakit ?? 0, pb), note: 'Net tahsilat − ortak ödemeleri; kâr değil' },
+                  { label: 'Komisyon ödemeleri sonrası nakit', value: kurusFormat(segika?.nakit ?? 0, pb), note: 'Net tahsilat − ortak ödemeleri. Kâr değildir.' },
                 ]}
               />
             </Section>
           ) : null}
 
           {bolum === 'varsayimlar' ? (
-            <Section id="af-varsayimlar" title="Varsayımlar, kayıt ve dışa aktarım" desc="Başlangıç değerlerinden farklar, hesap sözlüğü, bu tarayıcıdaki kayıt durumu, adlandırılmış senaryolar ve dışa aktarım.">
+            <Section id="af-varsayimlar" title="Varsayımlar, kayıt ve dışa aktarım" desc="Bu bölüm, başlangıç değerlerinden farkları ve hesap sözlüğünü gösterir. Ayrıca bu tarayıcıdaki kayıt durumunu, kayıtlı senaryoları ve dışa aktarma seçeneklerini içerir.">
               <DataTable
                 id="af-degisiklikler"
                 title="Başlangıca göre değişiklikler"
@@ -810,16 +810,16 @@ function Icerik() {
                 ]}
                 rows={degisiklikListesi}
                 rowKey={(d) => d.alan}
-                note={degisiklikListesi.length ? `${degisiklikListesi.length} alan başlangıçtan farklı; sonuç bu değerlerle hesaplandı.` : 'Başlangıç değerlerinden fark yok.'}
+                note={degisiklikListesi.length ? `${degisiklikListesi.length} alan başlangıç değerinden farklı. Sonuç bu değerlerle hesaplandı.` : 'Başlangıç değerlerinden fark yok.'}
               />
               <Note title="Hesap sözlüğü">
                 <ul className="af-sozluk">
-                  <li>Fatura tutarı, tahsilat, komisyona esas tutar, planlanan toplam, kazanılan hakediş, ödeme planı ve ödeme hareketi ayrı olaylardır; tek “ödendi” alanına sıkıştırılmaz.</li>
-                  <li>Oran, ödemenin geldiği aya değil ilgili hizmet dönemine bağlıdır; birinci dönemde kazanılan komisyonun ikinci dönemde ödenen taksiti yeniden hesaplanmaz.</li>
-                  <li>Komisyon bazı = (fatura − hariç kalemler) × tahsilat ÷ fatura; parçalı tahsilat toplamı değiştirmez.</li>
-                  <li>Destek sağlanmayan ayın payı kazanılmaz ve kalan aylara dağıtılmaz; oran kendiliğinden düşürülmez.</li>
-                  <li>İade net bazı düşürür; fazla ödenen tutar geri alınacak bakiyedir, sıfıra kırpılıp kaybedilmez.</li>
-                  <li>Komisyon sonrası tutar ve nakit, kâr değildir: vergi, personel ve altyapı modellenmemiştir.</li>
+                  <li>Fatura tutarı, tahsilat, komisyona esas tutar, planlanan toplam, kazanılan hakediş, ödeme planı ve ödeme hareketi ayrı ayrı izlenir. Bunlar tek bir “ödendi” alanında birleştirilmez.</li>
+                  <li>Oran, ödemenin geldiği aya değil ilgili hizmet dönemine bağlıdır. Birinci dönemde kazanılan komisyonun taksiti ikinci dönemde ödense de yeniden hesaplanmaz.</li>
+                  <li>Komisyon bazı = (fatura − hariç kalemler) × tahsilat ÷ fatura. Tahsilatın parça parça gelmesi toplamı değiştirmez.</li>
+                  <li>Desteğin sağlanmadığı ayın payı kazanılmaz ve kalan aylara dağıtılmaz. Oran kendiliğinden düşürülmez.</li>
+                  <li>İade, net komisyon bazını düşürür. Ortağa fazla ödenen tutar geri alınacak bakiyeye yazılır. Bu tutar sıfırlanıp silinmez.</li>
+                  <li>Komisyon sonrası tutar ve nakit, kâr değildir. Çünkü vergi, personel ve altyapı giderleri hesaba katılmamıştır.</li>
                 </ul>
               </Note>
               <h3 className="block-title af-baslik">Kayıt</h3>
@@ -841,8 +841,8 @@ function Icerik() {
               <div className="applet-araclar">
                 <Eylem
                   onClick={() => {
-                    if (kaydet(senaryoAdi)) setDurum(kayit === false ? `“${senaryoAdi.trim()}” listeye eklendi; depolama kapalı olduğundan sayfa kapanınca kaybolur.` : `“${senaryoAdi.trim()}” senaryosu kaydedildi.`);
-                    else setDurum('Senaryo adı boş; kaydedilmedi.');
+                    if (kaydet(senaryoAdi)) setDurum(kayit === false ? `“${senaryoAdi.trim()}” listeye eklendi. Tarayıcı depolaması kapalı olduğu için senaryo, sayfa kapanınca kaybolur.` : `“${senaryoAdi.trim()}” senaryosu kaydedildi.`);
+                    else setDurum('Senaryo adı boş olduğu için kaydedilmedi.');
                   }}
                 >
                   Senaryoyu kaydet
@@ -862,7 +862,7 @@ function Icerik() {
                       <Eylem
                         onClick={() => {
                           setKurgu(() => k.kurgu);
-                          setDurum(`“${k.ad}” yüklendi; Geri al ile önceki duruma dönülür.`);
+                          setDurum(`“${k.ad}” yüklendi. “Geri al” düğmesiyle önceki duruma dönebilirsiniz.`);
                         }}
                         ad={k.ad}
                       >
@@ -880,7 +880,7 @@ function Icerik() {
                 <Eylem
                   onClick={() => {
                     sifirla();
-                    setDurum('Bütün girdiler başlangıç değerlerine döndü; Geri al ile son durum geri gelir. Kayıtlı senaryolar ve diğer sayfalar değişmedi.');
+                    setDurum('Bütün girdiler başlangıç değerlerine döndü. “Geri al” düğmesiyle son duruma dönebilirsiniz. Kayıtlı senaryolar ve diğer sayfalar değişmedi.');
                   }}
                   ikiAdim
                   onay="Bütün Affilate girdilerini başlangıç değerlerine döndür (onayla)"
@@ -896,7 +896,7 @@ function Icerik() {
                 >
                   Geri al
                 </Eylem>
-                <p className="af-not">Kapsam: yalnız bu sayfanın girdileri. Parametreler, gelir planı senaryosu, notlar ve tema değişmez.</p>
+                <p className="af-not">Bu işlem yalnız bu sayfanın girdilerini etkiler. Parametreler, gelir planı senaryosu, notlar ve tema değişmez.</p>
               </div>
               <p className="af-durum" role="status">
                 {durum ?? ''}

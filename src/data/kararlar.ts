@@ -66,20 +66,20 @@ const slug = (s: string) =>
 /** 19 Ekim kararlarının kimliği, yürürlük günü, etkisi ve ilgili sayfaları (konu başlığına göre; eşleşmeyen konu genel kalır). */
 function tahtaKarari(prog: Program, topic: string): Pick<KararKaydi, 'id' | 'yururlukTarihi' | 'etki' | 'ilgili'> {
   const { dates } = prog;
-  if (topic.startsWith('Ücret, prim')) return { id: 'ucret-prim-kota', yururlukTarihi: dates.start, etki: 'Rol sayfalarının ücret özeti, plan kadrosu maliyeti (Gelir planı, Nakit akışı), Giderler plan kadrosu', ilgili: ['/roller/saha-uzmani/', '/gelir-plani/'] };
-  if (topic.startsWith('Diğer rollerin maaşları')) return { id: 'diger-maaslar', yururlukTarihi: dates.start, etki: 'Rol sayfaları, plan kadrosu maliyeti, Applet örnek değerleri', ilgili: ['/roller/dijital-pazarlama/', '/applet/'] };
-  if (topic.startsWith('CRM aracı')) return { id: 'crm-asamalari', yururlukTarihi: dates.start, etki: 'CRM aşamaları ve prim kriterleri; masa başı ve saha rollerinin görevleri', ilgili: ['/roller/pazarlamaci/'] };
-  if (topic.startsWith('Kazanç planı')) return { id: 'mlm-kazanc', yururlukTarihi: dates.dec, etki: 'Temsilci ağı kazanç kuralı, satış primi (Nakit akışı plan kalemi)', ilgili: ['/buyume-modeli/', '/nakit-akisi/'] };
+  if (topic.startsWith('Ücret, prim')) return { id: 'ucret-prim-kota', yururlukTarihi: dates.start, etki: 'Rol sayfalarının ücret özeti, plan kadrosu maliyeti (Gelir planı ve Nakit akışı) ve Giderler sayfasındaki plan kadrosu', ilgili: ['/roller/saha-uzmani/', '/gelir-plani/'] };
+  if (topic.startsWith('Diğer rollerin maaşları')) return { id: 'diger-maaslar', yururlukTarihi: dates.start, etki: 'Rol sayfaları, plan kadrosu maliyeti ve Applet örnek değerleri', ilgili: ['/roller/dijital-pazarlama/', '/applet/'] };
+  if (topic.startsWith('CRM aracı')) return { id: 'crm-asamalari', yururlukTarihi: dates.start, etki: 'CRM aşamaları, prim kriterleri ve masa başı ile saha rollerinin görevleri', ilgili: ['/roller/pazarlamaci/'] };
+  if (topic.startsWith('Kazanç planı')) return { id: 'mlm-kazanc', yururlukTarihi: dates.dec, etki: 'Temsilci ağının kazanç kuralı ve satış primi (Nakit akışı plan kalemi)', ilgili: ['/buyume-modeli/', '/nakit-akisi/'] };
   if (topic.startsWith('Ekip lideri primi')) return { id: 'ekip-lideri-primi', yururlukTarihi: dates.dec, etki: 'Ekip lideri ücreti ve pay kuralı', ilgili: ['/roller/ekip-lideri/'] };
-  if (topic.startsWith('Kapasite açığı')) return { id: 'kapasite-acigi', yururlukTarihi: dates.dec, etki: 'Aralık saha takviyesi, istihdam takvimi, kadro maliyeti', ilgili: ['/istihdam/', '/hedefler/'] };
-  if (topic.startsWith('4. aydan itibaren mesai')) return { id: 'mesai-modeli', yururlukTarihi: dates.firstDay, etki: 'Mesai dönemleri ve yasal tavan; rol günlük düzeni', ilgili: ['/roller/saha-uzmani/'] };
+  if (topic.startsWith('Kapasite açığı')) return { id: 'kapasite-acigi', yururlukTarihi: dates.dec, etki: 'Aralık saha takviyesi, istihdam takvimi ve kadro maliyeti', ilgili: ['/istihdam/', '/hedefler/'] };
+  if (topic.startsWith('4. aydan itibaren mesai')) return { id: 'mesai-modeli', yururlukTarihi: dates.firstDay, etki: 'Mesai dönemleri, yasal tavan ve rollerin günlük düzeni', ilgili: ['/roller/saha-uzmani/'] };
   if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika masa başı rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/partnership/'] };
   return { id: slug(topic), yururlukTarihi: undefined, etki: 'Plan sayfaları', ilgili: ['/karar-bekleyenler/'] };
 }
 
 function acikTahtaKarari(topic: string): Pick<KararKaydi, 'etki' | 'ilgili'> {
-  if (topic.startsWith('Asistan')) return { etki: 'Kadro ve işveren maliyeti; asistan yoksa dijital pazarlama başlangıcı kayar', ilgili: ['/roller/asistan/', '/istihdam/', '/roller/dijital-pazarlama/'] };
-  if (topic.includes('RFQ')) return { etki: 'Müşteri edinme kanalı (B) ve ilk ücretli reklam; dijital pazarlama planı', ilgili: ['/roller/dijital-pazarlama/', '/gelir-plani/'] };
+  if (topic.startsWith('Asistan')) return { etki: 'Kadro ve işveren maliyeti. Asistan alınmazsa dijital pazarlamanın başlangıcı kayar.', ilgili: ['/roller/asistan/', '/istihdam/', '/roller/dijital-pazarlama/'] };
+  if (topic.includes('RFQ')) return { etki: 'Müşteri edinme kanalı (B), ilk ücretli reklam ve dijital pazarlama planı', ilgili: ['/roller/dijital-pazarlama/', '/gelir-plani/'] };
   return { etki: 'Plan sayfaları', ilgili: ['/karar-bekleyenler/'] };
 }
 
@@ -97,14 +97,14 @@ export function makeKararlar(_p: Params, prog: Program) {
       id: 'is-modeli',
       soru: 'iStoc nasıl para kazanacak: satıcı aboneliği mi, işlem gelirine dayalı likidite pilotu mu?',
       secenekler: [
-        'Abonelik esas; likidite yaklaşımı alternatif olarak görünür kalır',
-        'Likidite pilotu esas; abonelik hesabı koşullu tahmin olarak kalır (likiditenin hesap modeli yok)',
-        'İkisi birlikte; kapsam ve geçiş koşulu yazılır',
+        'Abonelik esas alınır, likidite yaklaşımı seçenek olarak görünür kalır.',
+        'Likidite pilotu esas alınır, abonelik hesabı koşullu tahmin olarak kalır. Likidite için henüz hesap modeli yok.',
+        'İkisi birlikte yürütülür, kapsam ve geçiş koşulu yazılı olarak belirlenir.',
       ],
-      etki: 'Gelir planı ve Nakit akışı hesabı (bugün koşullu abonelik modeliyle çalışır), İş ortaklığı stratejisi, Genel bakış',
+      etki: 'Gelir planı ve Nakit akışı hesabı (bugün koşullu abonelik modeliyle yapılır), İş ortaklığı stratejisi ve Genel bakış',
       sahip: 'yonetici',
       durum: 'bekliyor',
-      kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim: cevap bekleniyor; yanıtsızlık onay sayılmaz)',
+      kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim: cevap bekleniyor, cevap gelmemesi onay sayılmaz)',
       ilgili: ['/gelir-plani/', '/partnership/', '/nakit-akisi/'],
     },
     {
@@ -113,32 +113,32 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'İş ortaklığı politika metni, Affilate başlangıç değerleri ve politika sürümü seçimi',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Oran girdi olarak değiştirilebilir; aylık abonelik satışında %10, yıllık satışta %15 (sahip, 28 Ekim). Önceki metinler (ilk 6 ay %15; 12 ay %15 + 12 ay %10) taslak örnekti.',
+      sonuc: 'Komisyon oranı aylık abonelik satışında %10, yıllık satışta %15 olur ve oran girdi olarak değiştirilebilir (sahip, 28 Ekim). Önceki metinlerdeki “ilk 6 ay %15” ve “12 ay %15, ardından 12 ay %10” oranları yalnız taslak örnekti.',
       kararTarihi: '2026-10-28',
-      politika: 'segika-komisyon-2026-10-28 (taslak sürüm; uygulama bekliyor)',
-      acik: ['Süre: her ödemede mi, yalnız ilk yıl mı?', 'Taban: net tahsilat mı?', 'Bütün ortak tipleri için aynı mı?'],
+      politika: 'segika-komisyon-2026-10-28 (taslak sürüm, uygulama bekliyor)',
+      acik: ['Süre: komisyon her ödemede mi, yalnız ilk yıl mı ödenir?', 'Taban: komisyon net tahsilat üzerinden mi hesaplanır?', 'Oran bütün ortak türleri için aynı mı?'],
       kaynak: 'docs/contents.md F03; birleşik plan K2 (sahip cevabı 28 Ekim)',
       ilgili: ['/partnership/', '/affilate/'],
     },
     {
       id: 'gider-kapsami',
-      soru: 'Sheets gider planı hangi şirketin; giderler markalara nasıl dağıtılacak?',
-      etki: 'Giderler ve Nakit akışı kapsamı; şirket bazlı gelir-gider-nakit görünümü (adım 3)',
+      soru: 'Sheets gider planı hangi şirkete ait ve giderler markalara nasıl dağıtılacak?',
+      etki: 'Giderler ve Nakit akışı kapsamı ile şirket bazında gelir, gider ve nakit görünümü (adım 3)',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Türksab şirketler grubu: Mogem (Segika / SGK projesi) ve iStoc Company (iStoc, Toptan) ayrı şirketler; her birinin kendi gelir ve gideri, grup toplamı Türksab. Mogem geliri Türksab’a aktarılır; Türksab iStoc’a yatırım yapar ve Mogem’in giderini öder (sahip, 28 Ekim). Tutarlar Sheets’te tutulur.',
+      sonuc: 'Türksab bir şirketler grubudur. Mogem (Segika ve SGK projesi) ile iStoc Company (iStoc ve Toptan) ayrı şirketlerdir. Her şirketin kendi geliri ve gideri vardır, grup toplamı Türksab’da görünür. Mogem’in geliri Türksab’a aktarılır. Türksab, iStoc’a yatırım yapar ve Mogem’in giderini öder (sahip, 28 Ekim). Tutarlar Sheets dosyasında tutulur.',
       kararTarihi: '2026-10-28',
-      acik: ['Toptan projesinin tanımı', 'Mogem giderleri hangi Sheets kalemleri (Şirket sütunu)', 'Mogem gelirleri için Gelirler sayfası'],
+      acik: ['Toptan projesi nasıl tanımlanacak?', 'Mogem giderleri hangi Sheets kalemleridir (Şirket sütunu)?', 'Mogem gelirleri için Gelirler sayfası konusu açık.'],
       kaynak: 'docs/contents.md F16; birleşik plan K3 (sahip cevabı 28 Ekim)',
       ilgili: ['/giderler/', '/nakit-akisi/'],
     },
     {
       id: 'senaryo-aktarimi',
       soru: 'Gelir planı seçenekleri Nakit akışı’na taşınsın mı?',
-      etki: 'Nakit akışı girişleri, prim, eklenen saha personeli ve ek sabit gider; senaryo adı',
+      etki: 'Nakit akışı girişleri, prim, eklenen saha personeli, ek sabit gider ve senaryo adı',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Evet: hesap seçenekleri aynen; gider kaynağı seçeneği hariç. Eklenen saha personelinin maaşı nakit çıkışlarında.',
+      sonuc: 'Evet. Hesap seçenekleri aynen taşınır, yalnız gider kaynağı seçeneği taşınmaz. Eklenen saha personelinin maaşı nakit çıkışlarında yer alır.',
       kararTarihi: '2026-10-28',
       yururlukTarihi: '2026-10-28',
       kaynak: 'docs/contents.md F04; Codex MS-01/02; birleşik plan K13',
@@ -147,22 +147,22 @@ export function makeKararlar(_p: Params, prog: Program) {
     {
       id: 'hedef-adi',
       soru: 'Menü adı ile sayfa başlığı aynı olsun mu?',
-      etki: 'Hedefler sayfası ve menü; aynı kural diğer sayfalara',
+      etki: 'Hedefler sayfası ve menü. Aynı kural diğer sayfalara da uygulanır.',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: '“SMART hedefler” (menü ve başlık); kural bütün sayfalara uygulanır.',
+      sonuc: 'Menüde ve başlıkta “SMART hedefler” adı kullanılır. Kural bütün sayfalara uygulanır.',
       kararTarihi: '2026-10-28',
-      acik: ['Kural Kararlar / Temsilci ağı / Varsayımlar ve ayarlar için de mi?'],
+      acik: ['Kural Kararlar, Temsilci ağı ve “Varsayımlar ve ayarlar” sayfalarında da geçerli mi?'],
       kaynak: 'birleşik plan K4 (sahip cevabı 28 Ekim)',
       ilgili: ['/hedefler/'],
     },
     {
       id: 'kirinti-derinligi',
-      soru: 'Telefonda kırıntı yolu kısaltılsın mı?',
+      soru: 'Telefonda sayfa yolu (kırıntı) kısaltılsın mı?',
       etki: 'Sayfa başlığı satırı (320×480 ilk ekran)',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Sahip ölçüp karar vermeyi yazara bıraktı: dar ekranda bağlantısız grup adı gizli, bağlantılı ebeveyn ve başlık kalır; geniş ekranda tam yol.',
+      sonuc: 'Sahip, ölçüp karar vermeyi yazara bıraktı. Dar ekranda bağlantısız grup adı gizlenir, bağlantılı üst sayfa ve başlık kalır. Geniş ekranda tam yol görünür.',
       kararTarihi: '2026-10-28',
       yururlukTarihi: '2026-10-28',
       kaynak: 'birleşik plan K5 (“test et, karar ver”)',
@@ -171,10 +171,10 @@ export function makeKararlar(_p: Params, prog: Program) {
     {
       id: 'eposta-sayfasi',
       soru: 'E-posta sayfası sitede kalsın mı?',
-      etki: 'Yayın kapsamı; menü',
+      etki: 'Yayın kapsamı ve menü',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Kalır; menüde yok, adresi bilen girer. (noindex gizlilik sağlamaz; sayfa herkese açık sitede.)',
+      sonuc: 'Sayfa kalır. Menüde yer almaz, yalnız adresi bilen açabilir. Arama motorlarını engelleyen noindex etiketi gizlilik sağlamaz, çünkü sayfa herkese açık sitededir.',
       kararTarihi: '2026-10-28',
       yururlukTarihi: '2026-10-28',
       kaynak: 'docs/contents.md F12; birleşik plan K10',
@@ -183,10 +183,10 @@ export function makeKararlar(_p: Params, prog: Program) {
     {
       id: 'gelir-terimleri',
       soru: '“Gelir” hangi aşamayı anlatıyor?',
-      etki: 'Metrik sözlüğü; Gelir planı, Nakit akışı ve Hedefler etiketleri',
+      etki: 'Metrik sözlüğü ile Gelir planı, Nakit akışı ve Hedefler etiketleri',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'İki akış ayrı: Segika SaaS satışı ve iStoc paket satışı; her biri faturalanan gelir → tahsilat → kasa olarak adlandırılır.',
+      sonuc: 'Segika SaaS (abonelikle sunulan yazılım) satışı ile iStoc paket satışı iki ayrı akıştır. Her akışta aşamalar sırasıyla faturalanan gelir, tahsilat ve kasa olarak adlandırılır.',
       kararTarihi: '2026-10-28',
       kaynak: 'docs/ifade.md; birleşik plan K11 (sahip cevabı 28 Ekim)',
       ilgili: ['/gelir-plani/', '/nakit-akisi/', '/hedefler/'],
@@ -197,7 +197,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'Kapanış kanıtı (pilot)',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: '19ekim sitesini sahip dener (altı görev, kapanışta); istoc.com yazılım ekibinin işi.',
+      sonuc: '19ekim sitesini kapanışta sahip dener ve altı görevi tamamlar. istoc.com sitesinin testi yazılım ekibinin işidir.',
       kararTarihi: '2026-10-28',
       kaynak: 'birleşik plan K12',
       ilgili: [],

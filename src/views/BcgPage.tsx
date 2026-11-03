@@ -41,7 +41,7 @@ function BcgMatrix() {
         <span className="chart-title" id="bcg-matrix-baslik">
           Dört kutu
         </span>
-        <span className="chart-note">Dikey: pazar büyüme hızı (yukarı = hızlı). Yatay: göreli pazar payı (sol = yüksek, klasik BCG yerleşimi).</span>
+        <span className="chart-note">Dikey eksen pazar büyüme hızını gösterir, yukarısı hızlıdır. Yatay eksen göreli pazar payını gösterir. Klasik BCG yerleşiminde sol taraf yüksek paydır.</span>
       </figcaption>
       <div className="bcg-frame">
         <div className="bcg-y" aria-hidden="true">
@@ -120,7 +120,7 @@ function BcgContent() {
         </ul>
       </Section>
 
-      <Section id="eksenler" index={2} title="İki soru" desc="Matrisin iki ekseni; her ürün için ayrı ayrı sorulur.">
+      <Section id="eksenler" index={2} title="İki soru" desc="Matrisin iki ekseni birer sorudur. İki soru da her ürün için ayrı ayrı sorulur.">
         <DataTable
           id="eksen"
           title="Eksenler"
@@ -145,7 +145,7 @@ function BcgContent() {
         />
       </Section>
 
-      <Section id="kutular" index={3} title="Dört kutu ve nakit döngüsü" desc="Hızlı pazarda güçlüysen Yıldız, zayıfsan Soru işareti; yavaş pazarda güçlüysen Nakit ineği, zayıfsan Köpek.">
+      <Section id="kutular" index={3} title="Dört kutu ve nakit döngüsü" desc="Hızlı pazarda payı yüksek ürün Yıldız, payı düşük ürün Soru işaretidir. Yavaş pazarda payı yüksek ürün Nakit ineği, payı düşük ürün Köpektir.">
         <BcgMatrix />
         <h3 className="block-title">Nakit döngüsü</h3>
         <CashCycle />
@@ -164,7 +164,7 @@ function BcgContent() {
         />
       </Section>
 
-      <Section id="stratejiler" index={4} title="Dört strateji" desc="Kutu teşhistir; strateji tedavidir.">
+      <Section id="stratejiler" index={4} title="Dört strateji" desc="Kutu ürünün durumunu teşhis eder. Strateji ise tedaviyi seçer.">
         <DataTable
           id="strateji"
           title="Strateji, anlamı ve uygun kutu"
@@ -185,7 +185,7 @@ function BcgContent() {
         id="ornek"
         index={6}
         title="Çalışılmış örnek"
-        desc={`Kurgusal “Örnek Ev Aletleri A.Ş.”; sayılar yalnız yöntemi göstermek içindir. Eşikler: pazar büyümesi %${GROWTH_SPLIT}, göreli pay ${SHARE_SPLIT}.`}
+        desc={`“Örnek Ev Aletleri A.Ş.” kurgusal bir şirkettir. Sayılar yalnız yöntemi göstermek içindir. Eşikler: pazar büyümesi %${GROWTH_SPLIT}, göreli pay ${SHARE_SPLIT}.`}
       >
         <DataTable
           id="ornek"
@@ -204,7 +204,7 @@ function BcgContent() {
         <Chart
           id="ornek-matris"
           title="Örnek matris"
-          note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşiklerdir: göreli pay 1×, pazar büyümesi %10. Yatay eksen logaritmik."
+          note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşiklerdir: göreli pay 1×, pazar büyümesi %10. Yatay eksen logaritmik ölçeklidir."
           summary={rows.map((r) => `${r.name}: büyüme %${r.growth}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('; ')}
           spec={{
             kind: 'bcg-num',
@@ -228,10 +228,10 @@ function BcgContent() {
         />
         <Note title="Yorum">
           <p>
-            Cironun %{num(Math.round((cow / total) * 100))}’i tek Nakit ineğinden (kahve makinesi) geliyor; iki Soru işaretini bu nakit
-            finanse eder. Termostat lidere yakın olduğu için büyütülmeye değer; scooter’da lider 10 kat büyük, ya güçlü yatırım ya çıkış
-            gerekir. DVD oynatıcının pazarı küçülüyor: hasat edilip kapatılır. Portföy dengeli: bugünü finanse eden ve geleceği taşıyan
-            ürünler birlikte var.
+            Cironun %{num(Math.round((cow / total) * 100))}’i tek Nakit ineğinden, yani kahve makinesinden geliyor. İki Soru işaretini bu
+            nakit finanse eder. Termostat lidere yakın olduğu için büyütülmeye değer. Scooter’da lider 10 kat büyük, bu yüzden ya güçlü
+            yatırım ya da çıkış gerekir. DVD oynatıcının pazarı küçülüyor, bu yüzden ürün hasat edilip kapatılır. Portföy dengelidir:
+            bugünü finanse eden ve geleceği taşıyan ürünler birlikte var.
           </p>
         </Note>
       </Section>

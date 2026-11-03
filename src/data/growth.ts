@@ -12,7 +12,7 @@ const BASE_FUNNEL = [
   { stage: 'Başvuru', value: 50 },
   { stage: 'Ön eleme', value: 25 },
   { stage: 'Bilgilendirme toplantısı', value: 12 },
-  { stage: 'Onboarding’e başlayan', value: 6 },
+  { stage: 'İlk eğitime katılan', value: 6 },
   { stage: 'İlk satışını yapan', value: 2 },
   { stage: 'Aktif kalan', value: 0.5 },
 ];
@@ -41,21 +41,21 @@ export function makeGrowth(p: Params, prog: Program) {
   }));
 
   const growthKpis = [
-    { metric: 'Meta reklam bütçesi', target: `${tl(p.metaWeekly)} / hafta (~${tl(monthlyMeta)} / ay)`, when: t('20 Ekim’den, sürekli') },
-    { metric: 'Başvuru', target: `En fazla ~${int(p.applicationsWeekly)} / hafta`, when: t('16 Kasım’dan') },
+    { metric: 'Meta reklam bütçesi', target: `${tl(p.metaWeekly)} / hafta (~${tl(monthlyMeta)} / ay)`, when: t('20 Ekim itibarıyla, sürekli') },
+    { metric: 'Başvuru', target: `En fazla ~${int(p.applicationsWeekly)} / hafta`, when: t('16 Kasım itibarıyla') },
     { metric: 'Aktif temsilci', target: '~3 → ~5', when: t('30 Aralık → 30 Ocak') },
     { metric: 'Aktif temsilci başına maliyet', target: monthlyReps ? `~${tl(monthlyMeta / monthlyReps)}` : '—', when: 'Her ay ölçülür' },
     { metric: 'Ağdan aktif satıcı', target: `~${int(mlm.aktif.reduce((a, b) => a + b, 0))}`, when: t('30 Ocak') },
-    { metric: 'Temsilci kazancı', target: `Satış başına ${tl(p.commission)}; maaş yok (hizmet faturası)`, when: 'İlk satıştan' },
-    { metric: 'Sponsor payı', target: `Doğrudan getirdiği temsilcinin satışından ${tl(p.sponsorShare)}; tek seviye`, when: 'Satış prim kriterlerini tamamlayınca' },
+    { metric: 'Temsilci kazancı', target: `Satış başına ${tl(p.commission)}. Maaş yok, temsilci hizmet faturası keser.`, when: 'İlk satıştan' },
+    { metric: 'Sponsor payı', target: `Doğrudan getirdiği temsilcinin her satışından ${tl(p.sponsorShare)}. Pay yalnız tek seviyede ödenir.`, when: 'Satış prim kriterleri tamamlanınca' },
     { metric: 'Uyum ihlali', target: '0', when: 'Ayda bir kontrol' },
   ];
 
   const compliance = [
-    `Kazanç yalnız gerçek satıştan: satış başına ${tl(p.commission)}, sponsor payı tek seviye ${tl(p.sponsorShare)}; giriş ücreti, zorunlu alım, kayıt veya getirme primi yok (piramit satış 6502 sayılı Kanun’la yasak).`,
-    'Temsilci çalışan değildir: kendi şirketini kurar ve hizmet faturası keser. Mesai, çalışma yeri ve talimat verilmez; aksi gizli işçilik (muvazaa) sayılabilir.',
-    t('Kazanç planı ve sözleşme 14 Kasım’a kadar hukuk danışmanı ve mali müşavire teyit ettirilir.'),
-    'Meta reklamında ürün ve iş açıkça anlatılır; gelir vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',
+    `Kazanç yalnız gerçek satıştan doğar. Temsilci satış başına ${tl(p.commission)}, sponsor ise tek seviyede ${tl(p.sponsorShare)} alır. Giriş ücreti, zorunlu alım, kayıt primi veya kişi getirme primi yoktur, çünkü piramit satış 6502 sayılı Kanun’la yasaktır.`,
+    'Temsilci çalışan değildir. Kendi şirketini kurar ve hizmet faturası keser. Temsilciye mesai, çalışma yeri veya talimat verilmez. Verilirse ilişki gizli işçilik (muvazaa) sayılabilir.',
+    t('Kazanç planı ve sözleşme, 14 Kasım tarihine kadar hukuk danışmanına ve mali müşavire onaylatılır.'),
+    'Meta reklamında ürün ve yapılacak iş açıkça anlatılır. Reklamda gelir vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',
   ];
 
   return { levels, recruitmentFunnel, growthKpis, compliance, monthlyRepsText: num(monthlyReps) };

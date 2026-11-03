@@ -86,12 +86,12 @@ function Icerik() {
   const son = cf.aylar[cf.aylar.length - 1];
   const kaynakNotu =
     durum.status === 'ready'
-      ? `Giderler: Google Sheets (hesaplandı ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}).`
+      ? `Giderler Google Sheets’ten okundu (hesaplanma zamanı: ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}).`
       : durum.status === 'loading'
         ? 'Giderler Sheets’ten okunuyor…'
         : durum.status === 'setup'
-          ? 'Sheets verisi okunamadı: veri ucu erişim anahtarı istiyor. Anahtarı Giderler sayfasında girin; tablo şimdilik yalnız plan kalemlerini gösterir.'
-          : `Sheets verisi okunamadı (${durum.message}); tablo yalnız plan kalemlerini gösterir.`;
+          ? 'Sheets verisi okunamadı, çünkü veri ucu erişim anahtarı istiyor. Anahtarı Giderler sayfasında girin. Tablo şimdilik yalnız plan kalemlerini gösterir.'
+          : `Sheets verisi okunamadı. ${durum.message} Tablo yalnız plan kalemlerini gösterir.`;
   const secici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} />;
   const cubuk = (extra?: React.ReactNode) => (
     <Araclar role={sc.role}>
@@ -108,12 +108,12 @@ function Icerik() {
     ? kalici
       ? {
           ton: 'uyari' as const,
-          metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} ile en düşük noktasına iner; ${kalici.ad} itibarıyla incelenen dönemin kalanında (${son.ad} sonuna kadar) sıfırın altına inmiyor${ilkTop && ilkTop.iso !== kalici.iso ? ` (ilk toparlanma ${ilkTop.ad}, ardından yeniden açık)` : ''}. O güne kadar ${tl(cf.acik)} ek nakit gerekir; dönem sonrası için güvence değildir.`,
+          metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} ile en düşük noktasına iner. ${kalici.ad} itibarıyla incelenen dönemin sonuna (${son.ad} sonu) kadar sıfırın altına inmez${ilkTop && ilkTop.iso !== kalici.iso ? `. İlk toparlanma ${ilkTop.ad} sonunda olur, ama ardından nakit yeniden açık verir` : ''}. O aya kadar ${tl(cf.acik)} ek nakit gerekir. Bu sonuç, dönem sonrası için güvence değildir.`,
         }
       : ilkTop
-        ? { ton: 'risk' as const, metin: `Dönem sonu nakit sıfırın altına iner; ${ilkTop.ad}’de ilk kez sıfırın üstüne çıkar ama dönem içinde yeniden açık verir ve ${son.ad} sonunda hâlâ sıfırın altındadır: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
-        : { ton: 'risk' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda sıfırın altına iner ve ${son.ad} sonuna kadar sıfırın üstüne çıkmaz: ${tl(cf.acik)} ek nakit olmadan sürdürülebilir değil.` }
-    : { ton: 'iyi' as const, metin: `Dönem sonu nakit hiçbir ay sıfırın altına düşmüyor (en düşük ${tl(cf.enDusuk.deger)}, ${cf.enDusuk.ay.ad} sonu); ek nakit gerekmez.` };
+        ? { ton: 'risk' as const, metin: `Dönem sonu nakit sıfırın altına iner. Nakit ilk kez ${ilkTop.ad} sonunda sıfırın üstüne çıkar, ama dönem içinde yeniden açık verir ve ${son.ad} sonunda hâlâ sıfırın altındadır. Bu plan ${tl(cf.acik)} ek nakit olmadan sürdürülemez.` }
+        : { ton: 'risk' as const, metin: `Dönem sonu nakit ${cf.enDusuk.ay.ad} sonunda sıfırın altına iner ve ${son.ad} sonuna kadar sıfırın üstüne çıkmaz. Bu plan ${tl(cf.acik)} ek nakit olmadan sürdürülemez.` }
+    : { ton: 'iyi' as const, metin: `Dönem sonu nakit hiçbir ay sıfırın altına düşmez. En düşük değer ${cf.enDusuk.ay.ad} sonunda ${tl(cf.enDusuk.deger)} olur. Bu yüzden ek nakit gerekmez.` };
   const toparlanmaYaz = (x: Cashflow) =>
     x.enDusuk.deger >= 0
       ? 'Hiç negatife düşmüyor'
@@ -127,10 +127,10 @@ function Icerik() {
     <>
       <PageHeader
         title="Nakit akış tablosu"
-        purpose={`${cf.aylar.length} ayın nakit girişleri, çıkışları, net akışı ve dönem sonu nakdi; nakit açığı tavanı ek nakit ihtiyacını gösterir.`}
+        purpose={`Bu sayfa ${cf.aylar.length} ayın nakit girişlerini, çıkışlarını, net nakit akışını ve dönem sonu nakdini gösterir. Nakit açığı tavanı, gereken ek nakdi gösterir.`}
         meta={[
           { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
-          { label: 'Kaynak', value: 'Girişler gelir planının senaryo ve seçenekleri · çıkışlar Google Sheets + plan kalemleri' },
+          { label: 'Kaynak', value: 'Girişler: gelir planının senaryo ve seçenekleri. Çıkışlar: Google Sheets ve plan kalemleri.' },
         ]}
       />
       <ResultSummary
@@ -142,8 +142,8 @@ function Icerik() {
           deger: acikYaz(cf),
           // Sheets yokken eksik gider kapsamı tam finansman hesabı gibi sunulmaz (B2c, MS-02).
           aciklama: cf.sheets
-            ? 'Dönem sonu nakdi hiçbir ay sıfırın altına düşürmeyen en küçük ek nakit; yatırım girişi ve başlangıç nakdi parametresi bunu değiştirir.'
-            : 'Sheets gider verisi okunamadı: bu tutar yalnız plan kalemleriyle hesaplandı; tam finansman ihtiyacı değildir.',
+            ? 'Bu tutar, dönem sonu nakdin hiçbir ay sıfırın altına düşmemesi için gereken en küçük ek nakittir. Yatırım girişi ve başlangıç nakdi parametresi bu tutarı değiştirir.'
+            : 'Sheets gider verisi okunamadı. Bu tutar yalnız plan kalemleriyle hesaplandı, bu yüzden tam finansman ihtiyacı değildir.',
         }}
         durum={sonucDurum}
         tools={secici}
@@ -155,16 +155,16 @@ function Icerik() {
           { etiket: `Net nakit akışı, ${cf.aylar.length} ay`, deger: tl(cf.toplam.net) },
         ]}
         // Kapsam ana sonucun bağlamında (B2c, MS-10): yalnız iStoc girişleri, ortak gider planının tamamı; markaya dağıtım belirlenmedi — “Türksab toplam” denmez.
-        kaynak={`Kapsam: iStoc girişleri (abonelik) × Sheets’teki ortak gider planının tamamı (kaynak kurum Türksab; markaya dağıtım belirlenmedi). ${
+        kaynak={`Kapsam: iStoc girişleri (abonelik) ve Sheets’teki ortak gider planının tamamı. Gider planının kaynak kurumu Türksab’dır ve giderlerin markaya dağıtımı henüz belirlenmedi. ${
           cf.sheets
-            ? 'Çıkışlar: Google Sheets gider planı + plan kalemleri (eklenen saha personeli, satıcı kazanım reklamı, satış primi); girişler: gelir planının seçili senaryosu ve hesap seçenekleri.'
-            : 'Çıkışlar: yalnız plan kalemleri — Sheets gider verisi okunamadı, tablo eksiktir; girişler: gelir planının seçili senaryosu ve hesap seçenekleri.'
+            ? 'Çıkışlar, Google Sheets gider planından ve plan kalemlerinden (eklenen saha personeli, satıcı kazanım reklamı, satış primi) gelir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
+            : 'Sheets gider verisi okunamadı. Bu yüzden çıkışlar yalnız plan kalemlerinden oluşur ve tablo eksiktir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
         }`}
       />
       <Section
         id="ozet"
         title="Özet"
-        desc={`${ilk.ad} – ${son.ad}: ${cf.aylar.length} ay. Girişler gelir planının seçili senaryosundan ve seçeneklerinden, çıkışlar Sheets’teki gider planından; eklenen saha personeli, satış primi ve satıcı kazanım reklamı plan kalemleridir.`}
+        desc={`${ilk.ad} – ${son.ad} arası, ${cf.aylar.length} ay. Girişler, gelir planının seçili senaryosundan ve seçeneklerinden gelir. Çıkışlar, Sheets’teki gider planından gelir. Eklenen saha personeli, satış primi ve satıcı kazanım reklamı ise plan kalemleridir.`}
         tools={cubuk()}
       >
         <Stats
@@ -187,14 +187,14 @@ function Icerik() {
         </p>
         {/* Gelir planı seçeneklerinin taşındığı açıkça yazılır (B2, ct-F04; ct-IA-23): hangi seçeneklerle bakıldığı ve nerede değiştiği. */}
         <p className="nakit-secenekler">
-          {changes ? `Gelir planı seçenekleri uygulandı: ${changes} değişiklik (${senaryoAdi}). ` : 'Gelir planı seçenekleri: genel plan değerleri (değişiklik yok). '}
+          {changes ? `Gelir planı seçenekleri uygulandı: ${changes} değişiklik (${senaryoAdi}). ` : 'Gelir planı seçeneklerinde değişiklik yok, genel plan değerleri kullanılıyor. '}
           {opts.kaynak === 'plan' ? 'Gelir planında seçili gider kaynağı (plan kadrosu) burada uygulanmaz. ' : ''}
-          Seçenekler <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirilir; hesap girdileri iki sayfada aynıdır, gider kaynağı seçeneği hariç: çıkışlar burada her zaman Sheets gider planı + plan kalemleridir.
+          Seçenekleri <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirebilirsiniz. Gider kaynağı seçeneği dışındaki hesap girdileri iki sayfada aynıdır. Bu sayfada çıkışlar her zaman Sheets gider planından ve plan kalemlerinden oluşur.
         </p>
         <DataTable
           id="senaryo-karsilastirma"
           title="Üç senaryo: 15 ayın özeti"
-          note="Aynı Sheets giderleri ve aynı seçenekler; girişler, satış primi ve eklenen saha personeli temel senaryoya göre. Seçili senaryo vurgulanır."
+          note="Üç senaryoda Sheets giderleri ve seçenekler aynıdır. Girişler, satış primi ve eklenen saha personeli temel senaryoya göre değişir. Seçili senaryo vurgulanır."
           tools={cubuk()}
           columns={[
             // Ölçüt sırası riske göre (ux_v2.md §3.1): önce en düşük nakit ve ayı, açık tavanı, toparlanma, dönem sonu; akışlar sonra.
@@ -220,7 +220,7 @@ function Icerik() {
       <Section
         id="tablo"
         title="Aylık nakit akışı"
-        desc="Basit görünüm dört satır; ayrıntılı görünüm giriş ve çıkış kalemlerini, dönem başı nakdi ekler. Grafik seçili senaryoyu ya da üç senaryonun dönem sonu nakdini üst üste gösterir."
+        desc="Basit görünüm dört satır gösterir. Ayrıntılı görünüm bunlara giriş ve çıkış kalemlerini ve dönem başı nakdi ekler. Grafik, seçili senaryoyu ya da üç senaryonun dönem sonu nakdini üst üste gösterir."
         tools={cubuk()}
       >
         <div className="nakit-araclar">
@@ -229,10 +229,10 @@ function Icerik() {
         <Chart
           id="nakit-ay"
           title={mod === 'secili' ? `Giriş, çıkış ve dönem sonu nakit (${sc.name.toLocaleLowerCase('tr-TR')})` : 'Dönem sonu nakit: üç senaryo üst üste'}
-          note={mod === 'secili' ? 'Çubuklar aylık giriş ve çıkış; işaret dönem sonu nakit (negatifse nakit açığı).' : 'Sıfır çizgisinin altı nakit açığı; eğriler elde tutma ve kapasite farkıyla ayrışır.'}
+          note={mod === 'secili' ? 'Çubuklar aylık giriş ve çıkışı, işaret ise dönem sonu nakdi gösterir. Negatif dönem sonu nakit, nakit açığıdır.' : 'Sıfır çizgisinin altı nakit açığıdır. Eğriler, elde tutma ve kapasite farkı nedeniyle ayrışır.'}
           summary={
             mod === 'secili'
-              ? `${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}; en düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}); dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`
+              ? `${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}. En düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}). Son dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`
               : karsilastirma.map((x) => `${x.s.name}: en düşük ${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa}), ${son.kisa} sonu ${tl(x.cf.donemSonu[x.cf.donemSonu.length - 1])}`).join('; ')
           }
           tools={cubuk(<ModSecimi value={mod} onChange={setMod} />)}
@@ -273,7 +273,7 @@ function Icerik() {
         />
       </Section>
 
-      <Section id="varsayimlar" title="Varsayımlar ve kaynaklar" desc="Her satırın nereden geldiği; parametreler Parametreler sayfasında değiştirilir, tablo anında yeniden hesaplanır.">
+      <Section id="varsayimlar" title="Varsayımlar ve kaynaklar" desc="Bu bölüm her satırın nereden geldiğini gösterir. Parametreleri Parametreler sayfasında değiştirebilirsiniz, tablo hemen yeniden hesaplanır.">
         <ul className="bullets">
           {m.cashflow.varsayimlar.map((v) => (
             <li key={v}>{v}</li>
@@ -281,11 +281,11 @@ function Icerik() {
         </ul>
         <Note title="Okuma">
           <p>
-            Dönem sonu nakit = dönem başı nakit + net nakit akışı. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir; yatırım
-            girişi ve başlangıç nakdi parametresi bunu değiştirir. Senaryo seçimi girişleri, satış primini ve eklenen saha personelini değiştirir; Sheets giderleri üç senaryoda aynıdır;
-            gelir planı seçenekleri üç temel senaryoya aynen uygulanır. Tutarlar ₺, kuruş
-            yuvarlanır; sıfır 0 ₺ yazılır. Gelir planındaki “en yüksek birikmiş açık” yalnız modelin gelir − gider birikimidir; nakit açığı tavanı
-            başlangıç nakdi ve yatırım girişini de sayar, ayrı ölçüttür.
+            Dönem sonu nakit = dönem başı nakit + net nakit akışı. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir. Yatırım
+            girişi ve başlangıç nakdi parametresi bu tutarı değiştirir. Senaryo seçimi girişleri, satış primini ve eklenen saha personelini değiştirir. Sheets giderleri
+            üç senaryoda aynıdır. Gelir planı seçenekleri üç temel senaryoya aynen uygulanır. Tutarlar ₺ cinsindendir ve kuruşa yuvarlanır. Sıfır “0 ₺” olarak
+            yazılır. Gelir planındaki “en yüksek birikmiş açık” yalnız modelin gelir − gider birikimidir. Nakit açığı tavanı ise başlangıç nakdini ve yatırım
+            girişini de sayar, yani ayrı bir ölçüttür.
           </p>
         </Note>
       </Section>

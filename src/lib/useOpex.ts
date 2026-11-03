@@ -28,10 +28,10 @@ export function useOpexOnce(): OpexDurum {
         if (reply.kind === 'data') setDurum({ status: 'ready', model: reply.data.model, denetlendi: reply.data.denetlendi });
         else if (reply.kind === 'error' && (reply.code === 'yetki' || reply.code === 'kurulum')) setDurum({ status: 'setup', message: reply.message });
         else if (reply.kind === 'error') setDurum({ status: 'failed', message: reply.message });
-        else setDurum({ status: 'failed', message: 'Sunucu veri yerine “değişmedi” döndürdü; sayfayı yenileyin.' });
+        else setDurum({ status: 'failed', message: 'Sunucu veri yerine “değişmedi” yanıtı verdi. Sayfayı yenileyin.' });
       })
       .catch(() => {
-        if (!stopped) setDurum({ status: 'failed', message: `Yanıt ${Math.round(OPEX_TIMEOUT_MS / 1000)} sn içinde gelmedi.` });
+        if (!stopped) setDurum({ status: 'failed', message: `Sunucu ${Math.round(OPEX_TIMEOUT_MS / 1000)} saniye içinde yanıt vermedi.` });
       })
       .finally(() => window.clearTimeout(timer));
     return () => {

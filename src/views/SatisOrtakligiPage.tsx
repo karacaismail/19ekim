@@ -110,7 +110,7 @@ function Kadrolu({ a }: { a: Ayar }) {
         deger={tl(k.toplam)}
         aciklama={
           <>
-            {k.prim > 0 ? `${tl(a.maas)} maaş alır. Kotayı aştığı için cironun ${yuzde(a.kadroluPrim[a.marka])}’u kadar, ${tl(k.prim)} prim eklenir.` : `${tl(a.maas)} maaş alır. Kotayı aşınca cironun ${yuzde(a.kadroluPrim[a.marka])}’unu prim olarak alır.`}
+            {k.prim > 0 ? `${tl(a.maas)} maaş alır. Kotayı aştığı için ayrıca ${tl(k.prim)} prim alır. Prim, cironun ${yuzde(a.kadroluPrim[a.marka])} oranında hesaplanır.` : `${tl(a.maas)} maaş alır. Kotayı aşınca cironun ${yuzde(a.kadroluPrim[a.marka])} oranında prim alır.`}
             <span className="so2-bize">{k.prim > 0 ? `Bu ay ciromuz ${tl(k.ciro)}. Prim düşülünce bize ${tl(k.ciro - k.prim)} kalır.` : `Bu ay ciromuz ${tl(k.ciro)}.`}</span>
           </>
         }
@@ -150,7 +150,7 @@ function Cozum({ a }: { a: Ayar }) {
         deger={tl(birim * a.cozumMusteri)}
         aciklama={
           <>
-            Çözüm ortağı yılda {a.cozumMusteri} müşteri getirirse bu tutarı kazanır. Her müşteriden {tl(birim)} alır{a.model === 'oran' && a.marka === 'segika' ? `, bu paket bedelinin ${yuzde(a.cozumOran)}’idir` : ''}.
+            Çözüm ortağı yılda {a.cozumMusteri} müşteri getirirse bu tutarı kazanır. Her müşteriden {tl(birim)} alır.{a.model === 'oran' && a.marka === 'segika' ? ` Bu tutar, paket bedeline ${yuzde(a.cozumOran)} oranı uygulanarak bulunur.` : ''}
             <span className="so2-bize">Aynı müşterilerden bize {tl(a.cozumMusteri * (yillikFiyat(a) - birim))} kalır.</span>
           </>
         }
@@ -165,7 +165,7 @@ function Cozum({ a }: { a: Ayar }) {
         <div>
           <p className="so2-alt-baslik">Ek eğitim</p>
           <p className="so2-ikili-deger">{tl(a.egitimSaatUcret)} / saat</p>
-          <p>{a.ekEgitimSaat > 0 ? `${a.ekEgitimSaat} saat ek eğitim için ortaktan ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} alırız.` : 'Personeli değişirse ya da fazlasını isterse saat başı ücret alırız.'}</p>
+          <p>{a.ekEgitimSaat > 0 ? `${a.ekEgitimSaat} saat ek eğitim için ortaktan ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} alırız.` : 'Ortağın personeli değişirse ya da ortak daha fazla eğitim isterse saat başı ücret alırız.'}</p>
         </div>
       </div>
       ) : null}
@@ -174,7 +174,7 @@ function Cozum({ a }: { a: Ayar }) {
         <p>
           {m.tur === 'komisyon'
             ? `Müşavir her müşteriden ${tl(m.musteriBasina)} komisyon alır.`
-            : `Müşavirin müşterisi ${yuzde(a.musavirIndirim)} indirimli alır. Müşavire komisyon ödemeyiz, ona panel veririz.`}
+            : `Müşavirin müşterisi paketi ${yuzde(a.musavirIndirim)} indirimle alır. Müşavire komisyon ödemeyiz, ona panel veririz.`}
         </p>
       </div>
     </>
@@ -204,7 +204,7 @@ function Tavsiye({ a }: { a: Ayar }) {
         <div>
           <p className="so2-alt-baslik">Yıllık sınır</p>
           <p className="so2-ikili-deger">{a.tavsiyeSinir} tavsiye</p>
-          <p>Daha fazlası çözüm ortağı olur.</p>
+          <p>Daha fazla tavsiye getiren müşteri çözüm ortağı olur.</p>
         </div>
       </div>
     </>
@@ -381,7 +381,7 @@ function AnaAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>)
   return (
     <Grup baslik="Elçi">
       <SeviyeSec value={a.elciSeviye} onChange={(s) => g({ elciSeviye: s })} />
-      <Girdi label="Ayda satış" value={a.elciSatis} onChange={(v) => g({ elciSatis: v })} />
+      <Girdi label="Aylık satış" value={a.elciSatis} onChange={(v) => g({ elciSatis: v })} />
     </Grup>
   );
 }
@@ -512,7 +512,7 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
         {a.model === 'oran' ? (
           (['A', 'B', 'C'] as Seviye[]).map((s) => <Girdi key={s} label={SEVIYE_ADI[s]} yuzdeMi value={a.oran[s]} onChange={(v) => g({ oran: { ...a.oran, [s]: v } })} />)
         ) : (
-          <Girdi label="Her yıllık paket" birim="₺" step={100} value={a.sabit} onChange={(v) => g({ sabit: v })} />
+          <Girdi label="Yıllık paket başına" birim="₺" step={100} value={a.sabit} onChange={(v) => g({ sabit: v })} />
         )}
       </Grup>
       ) : null}

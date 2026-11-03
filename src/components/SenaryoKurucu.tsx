@@ -29,9 +29,9 @@ function Baglanti({ kaynak, kaynakAdi, acik, deger, onChange }: { kaynak: 'senar
   const ad = kaynak === 'senaryo' ? 'Senaryoyla birlikte güncellenir' : 'Genel parametreyle birlikte güncellenir';
   const durum = acik
     ? kaynak === 'senaryo'
-      ? `Değer seçili senaryodan (${kaynakAdi}): ${deger}; senaryo değişince değişir.`
-      : `Değer Parametreler sayfasından: ${deger}; parametre değişince değişir.`
-    : `Sabit: ${deger}; ${kaynak === 'senaryo' ? 'senaryo' : 'parametre'} değişse de kalır. Yeniden bağlamak için anahtarı açın.`;
+      ? `Değer seçili senaryodan (${kaynakAdi}): ${deger}. Senaryo değişince bu değer de değişir.`
+      : `Değer Parametreler sayfasından alınır: ${deger}. Parametre değişince bu değer de değişir.`
+    : `Sabit: ${deger}. ${kaynak === 'senaryo' ? 'Senaryo' : 'Parametre'} değişse de bu değer korunur. Yeniden bağlamak için anahtarı açın.`;
   return <Anahtar ad={ad} acik={acik} onChange={onChange} aciklama={durum} />;
 }
 
@@ -39,11 +39,11 @@ function Baglanti({ kaynak, kaynakAdi, acik, deger, onChange }: { kaynak: 'senar
 function ParametreKaynagi({ deger }: { deger: string }) {
   return (
     <p className="secim-kaynak">
-      Başlangıç değeri genel parametre: {deger} (
+      Başlangıç değeri genel parametre: {deger}. Bu değer{' '}
       <a className="text-link" href={href('/parametreler/')}>
         Parametreler
       </a>{' '}
-      sayfasından; burada seçilen değer o parametreyi değiştirmez).
+      sayfasından gelir. Burada seçtiğiniz değer o parametreyi değiştirmez.
     </p>
   );
 }
@@ -86,13 +86,13 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
         <h2 className="kurucu-baslik" id="kurucu-baslik">
           Senaryo kurucu
         </h2>
-        <p className="kurucu-aciklama">Önce hazır bir senaryo seçin; isterseniz seçenekleri değiştirin. Aşağıdaki her bölüm, tablo ve grafik aynı anda bu seçime göre yeniden hesaplanır.</p>
+        <p className="kurucu-aciklama">Önce hazır bir senaryo seçin. İsterseniz seçenekleri de değiştirebilirsiniz. Aşağıdaki her bölüm, tablo ve grafik bu seçime göre aynı anda yeniden hesaplanır.</p>
       </div>
       <Choice
         label="Hazır senaryolar"
         value={seciliKume}
         options={[...presets.map((x) => ({ id: x.id, name: x.name, role: x.role })), ...(preset ? [] : [{ id: 'ozel', name: 'Özel', role: temel.role }])]}
-        note={preset ? preset.desc : `${temel.name} temelinde ${changes} seçenek değiştirildi. Hazır bir senaryoya dönmek için adına dokunun.`}
+        note={preset ? preset.desc : `${temel.name} temelinde ${changes} seçenek değiştirildi. Hazır bir senaryoya dönmek için adını seçin.`}
         onChange={(id) => {
           if (id !== 'ozel') applyPreset(id);
         }}
@@ -111,7 +111,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
       {/* Kapsam (ifade.md C18/C19): sıfırlama bu sayfanın seçeneklerini plan değerlerine döndürür, temel senaryo ve Parametreler
           sayfası değişmez; bağlantı yalnız bu sayfanın seçeneklerini taşır. Kopyalama sonucu düğmede değil durum satırında (C20). */}
       <p className="kurucu-kapsam">
-        Sıfırlama bu sayfanın seçeneklerini genel plan değerlerine döndürür; seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Hesap seçenekleri (fiyat, kadro, reklam, kur, yıllık pay, ek gider, prim) Nakit akışı sayfasında da kullanılır; gider kaynağı seçeneği orada uygulanmaz (çıkışlar Sheets + plan kalemleri). Bağlantı bu sayfanın senaryo seçeneklerini taşır; genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
+        Sıfırlama, bu sayfanın seçeneklerini genel plan değerlerine döndürür. Seçili temel senaryo ve Parametreler sayfasındaki değerler değişmez. Hesap seçenekleri (fiyat, kadro, reklam, kur, yıllık pay, ek gider, prim) Nakit akışı sayfasında da kullanılır. Gider kaynağı seçeneği orada uygulanmaz, çünkü Nakit akışı çıkışları Sheets ve plan kalemlerinden alır. Bağlantı bu sayfanın senaryo seçeneklerini taşır. Genel plan parametrelerinin ve Sheets verisinin kopyasını içermez.
       </p>
       {/* Kayıt durumu tek bileşenle (F13 / UX-15; adım 2b): “kaydedildi” yalnız gerçek yazım için, saatiyle; kapalı depolamada etki alanı açık. */}
       <KayitDurumu
@@ -119,7 +119,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
         kapsam="Senaryo seçenekleri"
         durum={kayit.durum}
         zaman={kayit.zaman}
-        etki={kayit.durum === 'kaydedilemedi' ? 'Nakit akışı sayfasına taşınmaz; bağlantı yine çalışır.' : 'Gelir planı ve Nakit akışı aynı hesap seçeneklerini okur (gider kaynağı hariç).'}
+        etki={kayit.durum === 'kaydedilemedi' ? 'Seçenekler Nakit akışı sayfasına taşınmaz, ama senaryo bağlantısı yine çalışır.' : 'Gelir planı ve Nakit akışı aynı hesap seçeneklerini okur (gider kaynağı hariç).'}
       />
       <p className="kurucu-durum" role="status" aria-live="polite">
         {kopya === 'oldu' ? 'Senaryo bağlantısı panoya kopyalandı.' : kopya === 'olmadi' ? 'Senaryo bağlantısı panoya kopyalanamadı. Tarayıcının adres çubuğundaki bağlantıyı seçip kopyalayabilirsiniz.' : ''}
@@ -130,7 +130,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.factor ?? factorDefault)}
           options={degerler([0.6, 0.8, 1, 1.3], factorDefault, opts.factor).map((v) => ({ id: String(v), name: yuzde(v) }))}
           baglam={<Baglanti kaynak="senaryo" kaynakAdi={temel.name} acik={opts.factor === null} deger={yuzde(opts.factor ?? factorDefault)} onChange={(acik) => set('factor', acik ? null : factorDefault)} />}
-          note="Her satış kanalından ayda kazanılması beklenen yeni satıcı sayısı bu oranla çarpılır; yeni satıcı, ilk abonelik ödemesini yapan satıcıdır. %80 seçilirse tam kapasite tahmininin yüzde 80 kadarı kullanılır."
+          note="Her satış kanalından ayda kazanılması beklenen yeni satıcı sayısı bu oranla çarpılır. Yeni satıcı, ilk abonelik ödemesini yapan satıcıdır. %80 seçilirse tam kapasite tahmininin yüzde 80 kadarı kullanılır."
           onChange={(v) => set('factor', Number(v))}
         />
         <Choice
@@ -138,7 +138,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.retention ?? retentionDefault)}
           options={degerler([...SENS_RETENTIONS], retentionDefault, opts.retention).map((v) => ({ id: String(v), name: yuzde(v) }))}
           baglam={<Baglanti kaynak="senaryo" kaynakAdi={temel.name} acik={opts.retention === null} deger={yuzde(opts.retention ?? retentionDefault)} onChange={(acik) => set('retention', acik ? null : retentionDefault)} />}
-          note="Aylık ödeyen satıcıların ertesi ay yenileme oranı."
+          note="Aylık ödeyen satıcılardan ertesi ay aboneliğini yenileyenlerin oranıdır."
           onChange={(v) => set('retention', Number(v))}
         />
         <Choice
@@ -146,7 +146,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.annualShare)}
           options={paylar.map((v) => ({ id: String(v), name: yuzde(v) }))}
           baglam={<ParametreKaynagi deger={yuzde(s)} />}
-          note="Yıllık peşin ödeyen yeni satıcıların oranı: %20 seçilirse ilk ödemesini yapan her 100 yeni satıcının 20’sinin yıllık peşin ödediği varsayılır."
+          note="Yıllık peşin ödeyen yeni satıcıların oranıdır. %20 seçilirse ilk ödemesini yapan her 100 yeni satıcının 20’sinin yıllık peşin ödediği varsayılır."
           onChange={(v) => set('annualShare', Number(v))}
         />
         <Choice
@@ -154,7 +154,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.priceEur)}
           options={fiyatlar.map((v) => ({ id: String(v), name: `${v} €` }))}
           baglam={<ParametreKaynagi deger={`${p.subscriptionEur} €`} />}
-          note="Satıcı başına aylık abonelik fiyatı (€); gelir hesabını değiştirir, personel maaşını değiştirmez."
+          note="Satıcı başına aylık abonelik fiyatıdır (€). Gelir hesabını değiştirir, personel maaşını değiştirmez."
           onChange={(v) => set('priceEur', Number(v))}
         />
         <Choice
@@ -162,14 +162,14 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={opts.secondSahaIso}
           options={[...sahaAylari.map((iso) => ({ id: iso, name: ayAdi(iso) })), { id: NO_SECOND_SAHA, name: 'Gelmez' }]}
           baglam={<ParametreKaynagi deger={ayAdi(p.secondSahaDate)} />}
-          note="İkinci saha çalışanı başladığında model bu kişinin işveren maliyetini gider hesabına, beklenen yeni satıcılarını satış hesabına ekler. Sheets gider verisi seçilse de ekleme modelde yapılır; Sheets dosyasını değiştirmez."
+          note="İkinci saha çalışanı başladığında model bu kişinin işveren maliyetini gider hesabına, beklenen yeni satıcılarını satış hesabına ekler. Sheets gider verisi seçilse de ekleme modelde yapılır. Bu ekleme Sheets dosyasını değiştirmez."
           onChange={(v) => set('secondSahaIso', v)}
         />
         <Choice
           label="Ek saha personeli"
           value={String(opts.extraSaha)}
           options={degerler([0, 1, 2, 3], opts.extraSaha).map((v) => ({ id: String(v), name: v ? `+${v} kişi` : 'Yok' }))}
-          note={`İkinciyle aynı ay başlar; kişi başına ${tl(p.sahaSalary * p.costFactor)} / ay işveren maliyeti ve ${p.sahaActivesMonthly} yeni aktif satıcı / ay.`}
+          note={`Ek saha personeli ikinci saha personeliyle aynı ay başlar. Her kişinin işveren maliyeti ayda ${tl(p.sahaSalary * p.costFactor)} olur ve her kişi ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir.`}
           onChange={(v) => set('extraSaha', Number(v))}
         />
         <Choice
@@ -177,7 +177,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.sahaGrowthEvery ?? sahaGrowthDefault)}
           options={[0, ...degerler([6, 4, 3], sahaGrowthDefault || null, opts.sahaGrowthEvery || null).reverse()].map((v) => ({ id: String(v), name: v ? `Her ${v} ayda +1` : 'Yok' }))}
           baglam={<Baglanti kaynak="senaryo" kaynakAdi={temel.name} acik={opts.sahaGrowthEvery === null} deger={(opts.sahaGrowthEvery ?? sahaGrowthDefault) ? `her ${opts.sahaGrowthEvery ?? sahaGrowthDefault} ayda +1` : 'yok'} onChange={(acik) => set('sahaGrowthEvery', acik ? null : sahaGrowthDefault)} />}
-          note={`İkinci saha personelinden sonra, üst sınır ${p.sahaMaxCount} saha personeli; her kişi hem maliyet hem kapasite.`}
+          note={`Yeni saha personeli ikinci saha personelinden sonra eklenir ve saha personeli sayısı en çok ${p.sahaMaxCount} olur. Her yeni kişi hem gideri hem satış kapasitesini artırır.`}
           onChange={(v) => set('sahaGrowthEvery', Number(v))}
         />
         <Choice
@@ -185,7 +185,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.dijitalBudgetFactor)}
           options={degerler([0, 0.5, 1, 2, 4], opts.dijitalBudgetFactor).map((v) => ({ id: String(v), name: v === 0 ? 'Yok' : tl(p.dijitalAdBudgetMonthly * v) }))}
           baglam={<ParametreKaynagi deger={`${tl(p.dijitalAdBudgetMonthly)} / ay`} />}
-          note={`Satıcı kazanım reklamı: hem gider hem kayıt; ${tl(p.dijitalCostPerLead)} / kayıt, kayıttan ilk ödemeye %${p.dijitalLeadToActive}.`}
+          note={`Satıcı kazanım reklamı hem gider oluşturur hem kayıt getirir. Kayıt başına maliyet ${tl(p.dijitalCostPerLead)}, kayıttan ilk ödemeye dönüşüm %${p.dijitalLeadToActive} olarak alınır.`}
           onChange={(v) => set('dijitalBudgetFactor', Number(v))}
         />
         <Choice
@@ -195,7 +195,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
             { id: 'kural', name: 'LTV ÷ CAC kuralı' },
             { id: 'sabit', name: 'Sabit bütçe' },
           ]}
-          note={`Kural: reklam bütçesi, modeldeki satıcı değeri (LTV) ÷ satıcı edinme maliyeti (CAC) oranı ${SCALE_RULE.threshold} ve üstündeyse her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')} artar, en çok ${p.dijitalScaleMax}×. LTV burada abonelik ödemesi tahminidir, kâr değildir; formül dijital strateji bölümünde.`}
+          note={`Kurala göre modeldeki satıcı değeri (LTV) ÷ satıcı edinme maliyeti (CAC) oranı ${SCALE_RULE.threshold} veya üstündeyse reklam bütçesi her ${SCALE_RULE.everyMonths} ayda ×${SCALE_RULE.step.toLocaleString('tr-TR')} artar, en çok ${p.dijitalScaleMax}× olur. LTV burada kâr değil, abonelik ödemesi tahminidir. Formül dijital strateji bölümündedir.`}
           onChange={(v) => set('dijitalScale', v === 'kural')}
         />
         <Choice
@@ -203,7 +203,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.fxGrowth ?? kurGecerli)}
           options={degerler([0, 0.1, 0.4], kurGecerli, opts.fxGrowth).map((v) => ({ id: String(v), name: `%${Math.round(v * 100)}` }))}
           baglam={<Baglanti kaynak="parametre" acik={opts.fxGrowth === null} deger={`%${Math.round((opts.fxGrowth ?? kurGecerli) * 100)}`} onChange={(acik) => set('fxGrowth', acik ? null : kurGecerli)} />}
-          note="€ fiyat sabit; ₺ karşılığı her ay bileşik büyür (%0 = kur sabit). Sheets giderleri ₺ ve kendi 2027 artışıyla."
+          note="€ fiyat sabit kalır, ₺ karşılığı her ay bileşik olarak artar. %0 seçilirse kur sabit kalır. Sheets giderleri ₺ cinsindendir ve kendi 2027 artışıyla hesaplanır."
           onChange={(v) => set('fxGrowth', Number(v))}
         />
         <Choice
@@ -213,7 +213,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
             { id: 'sheets', name: 'Sheets gider verisi' },
             { id: 'plan', name: 'Plan kadrosu' },
           ]}
-          note="Sheets: Giderler sayfasının verisi bu sayfa açılırken bir kez okunur; modelin ek giderleri (ikinci ve ek saha, reklam) üstüne eklenir; hesapta kullanılan kaynak başabaş bölümünde yazılır. Plan kadrosu: kadro tablosu, YZ araçları, Meta ve reklam bütçesi."
+          note="Sheets seçilirse Giderler sayfasının verisi bu sayfa açılırken bir kez okunur. Modelin ek giderleri (ikinci ve ek saha, reklam) bu verinin üstüne eklenir. Hesapta kullanılan kaynak başabaş bölümünde yazar. Plan kadrosu seçilirse kadro tablosu, yapay zekâ araçları, Meta ve reklam bütçesi kullanılır."
           onChange={(v) => set('kaynak', v)}
         />
         <Choice
@@ -229,7 +229,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
             { id: 'evet', name: 'Dahil' },
             { id: 'hayir', name: 'Hariç' },
           ]}
-          note={`Her yeni aktif satıcı için ${tl(p.commission)} (değişken gider).`}
+          note={`Her yeni aktif satıcı için ${tl(p.commission)} prim ödenir. Bu değişken giderdir.`}
           onChange={(v) => set('primDahil', v === 'evet')}
         />
       </div>

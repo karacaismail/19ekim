@@ -127,7 +127,7 @@ export function Metin({ label, value, onChange, gizliEtiket = false }: { label: 
         }}
         onBlur={() => {
           // Boş ad kaydedilmez; geri dönüş sessiz değil (gorsel_algi.md F13).
-          if (!taslak.trim()) setUyari(`Boş bırakılamaz; önceki ad (${value}) korundu.`);
+          if (!taslak.trim()) setUyari(`Ad boş bırakılamaz. Önceki ad (${value}) korundu.`);
           setTaslak(value);
         }}
       />

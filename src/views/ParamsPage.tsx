@@ -164,7 +164,7 @@ function Sifirla() {
       ) : null}
       {confirming ? (
         <p className="param-reset-kapsam" role="status">
-          Tüm genel plan ayarları varsayılan değerlere dönecek: {changed} alan, yalnız bu tarayıcıda. Gelir planı senaryo seçenekleri, notlar, tema ve Sheets dosyası değişmez. Onaylamak için “Genel ayarları sıfırla”ya, iptal için “Vazgeç”e basın; uyguladıktan sonra “Geri al” önceki değerleri geri getirir.
+          Genel plan ayarlarındaki {changed} alan varsayılan değerine dönecek. Bu değişiklik yalnız bu tarayıcıda geçerlidir. Gelir planı senaryo seçenekleri, notlar, tema ve Sheets dosyası değişmez. Onaylamak için “Genel ayarları sıfırla” düğmesine, iptal etmek için “Vazgeç” düğmesine basın. Sıfırladıktan sonra “Geri al” düğmesi önceki değerleri geri getirir.
         </p>
       ) : null}
     </div>
@@ -178,12 +178,12 @@ function SaveStatus() {
   const fark = `${changed} değer varsayılandan farklı`;
   const metin =
     saved === false
-      ? `${changed ? `${fark}. ` : ''}Bu tarayıcıda kaydedilemedi (depolama kapalı): değişiklikler yalnız bu sekme açıkken geçerli.`
+      ? `${changed ? `${fark}. ` : ''}Değişiklikler bu tarayıcıya kaydedilemedi, çünkü tarayıcı depolaması kapalı. Değişiklikler yalnız bu sekme açık kaldığı sürece geçerlidir.`
       : !changed
-        ? 'Tüm değerler varsayılan. Değişiklikler yalnız bu tarayıcıya kaydedilir; başka cihaza aktarılmaz ve Sheets dosyasını değiştirmez.'
+        ? 'Tüm değerler varsayılan. Değişiklikler yalnız bu tarayıcıya kaydedilir. Başka cihaza aktarılmaz ve Sheets dosyasını değiştirmez.'
         : saat
-          ? `${fark}; bu tarayıcıya son kayıt ${saat} (yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`
-          : `${fark}; bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama). Bu ayarlar başka cihaza aktarılmaz, Sheets dosyasını değiştirmez; başka tarayıcı ve yayındaki site varsayılanları gösterir.`;
+          ? `${fark} ve bu tarayıcıya son kayıt ${saat} saatinde yapıldı (yerel depolama). Bu ayarlar başka cihaza aktarılmaz ve Sheets dosyasını değiştirmez. Başka tarayıcılar ve yayındaki site varsayılan değerleri gösterir.`
+          : `${fark}. Bu değerler önceki oturumdan beri bu tarayıcıda kayıtlı (yerel depolama). Bu ayarlar başka cihaza aktarılmaz ve Sheets dosyasını değiştirmez. Başka tarayıcılar ve yayındaki site varsayılan değerleri gösterir.`;
   return (
     <>
       <p className="param-status" role="status">
@@ -192,7 +192,7 @@ function SaveStatus() {
       {/* Kayıttan okunamayan değerler (MS-05 / T05): varsayılana döndü, alan adıyla bildirilir; ham kayıt ilk yazıma kadar korunur. */}
       {gecersiz.length ? (
         <p className="param-gecersiz kayit-durumu" role="status">
-          {`${gecersiz.length} kayıtlı değer geçersizdi ve varsayılana döndü: ${gecersiz.map(paramEtiketi).join(', ')}. Kayıt değiştirilmedi; bir alanı değiştirdiğinizde geçersiz değerler kayıttan silinir.`}
+          {`${gecersiz.length} kayıtlı değer geçersizdi ve varsayılana döndü: ${gecersiz.map(paramEtiketi).join(', ')}. Kayıt değiştirilmedi. Bir alanı değiştirdiğinizde geçersiz değerler kayıttan silinir.`}
         </p>
       ) : null}
     </>
@@ -258,7 +258,7 @@ function Derived() {
     <DataTable
       id="turetilen"
       title="Türetilen değerler"
-      note="Parametrelerden hesaplanır; tüm sayfalar bu değerleri kullanır."
+      note="Bu değerler parametrelerden hesaplanır ve tüm sayfalarda kullanılır."
       columns={[
         { key: 'label', header: 'Değer', minWidth: '16rem', rowHeader: true, render: (r: (typeof rows)[number]) => r.label },
         { key: 'value', header: 'Sonuç', summary: true, minWidth: '12rem', render: (r) => r.value },
@@ -302,7 +302,7 @@ function Gruplar({ acik, setAcik, sorgu, setSorgu }: { acik: string[]; setAcik: 
           </button>
         ) : null}
         <p className="param-ara-sonuc" aria-live="polite">
-          {q ? `${toplam} alan, ${grupSayisi} grupta eşleşiyor.` : `${ALAN_SAYISI} alan, ${PARAM_GROUPS.length} grupta. Bir grubu açın ya da arayın.`}
+          {q ? `${toplam} alan, ${grupSayisi} grupta eşleşiyor.` : `${ALAN_SAYISI} alan ${PARAM_GROUPS.length} grupta toplandı. Bir grubu açın veya arama yapın.`}
         </p>
       </div>
       <Accordion
@@ -387,10 +387,10 @@ function ParamsContent() {
     <DatesProvider settings={{ locale: 'tr', firstDayOfWeek: 1 }}>
       <PageHeader
         title="Parametreler"
-        purpose="Karar verilen tarih, kişi sayısı, ücret, prim, kota, bütçe ve hedefler; burada değiştirilen değer tüm sayfalara anında yansır."
+        purpose="Bu sayfada planın kararlaştırılan tarihleri, kişi sayıları, ücretleri, primleri, kotaları, bütçeleri ve hedefleri yer alır. Burada değiştirdiğiniz değer tüm sayfalara anında yansır."
         meta={[
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı (yerel depolama)' },
-          { label: 'Yayın', value: 'Herkese varsayılan değerler' },
+          { label: 'Yayın', value: 'Herkes varsayılan değerleri görür' },
         ]}
       >
         <div className="param-toolbar">

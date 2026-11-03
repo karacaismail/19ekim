@@ -43,7 +43,7 @@ export const EMAIL_ROWS: EmailRow[] = [
 ];
 
 export const EMAIL_CLOSING_PARAGRAPHS = [
-  'Karşılıklı olumlu konuştuk. Takdir de karar da senin; fikrin değişirse buna da saygı duyarım.',
+  'Karşılıklı olumlu konuştuk. Takdir de karar da senin. Fikrin değişirse buna da saygı duyarım.',
   `Olacaksa, yeni rakamların ${START_DATE}’dan itibaren uygulanmasını beklediğimi de belirtmek isterim. Bu yüzden kararını bu ay içinde bildirirsen müteşekkir olurum.`,
 ];
 

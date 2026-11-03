@@ -345,10 +345,10 @@ export function parseReply(json: unknown): OpexReply {
   if (!isObj(json)) return { kind: 'error', code: 'sunucu', message: 'Sunucu yanıtı okunamadı.' };
   if (json.ok !== true) {
     const code = json.hata === 'yetki' || json.hata === 'kurulum' || json.hata === 'istek' ? json.hata : 'sunucu';
-    return { kind: 'error', code, message: str(json.mesaj) || 'Sunucu hata döndürdü.' };
+    return { kind: 'error', code, message: str(json.mesaj) || 'Sunucu bir hata bildirdi.' };
   }
   if (json.sema !== OPEX_SCHEMA) {
-    return { kind: 'error', code: 'sema', message: `Apps Script sürümü bu sayfayla uyumsuz (şema ${String(json.sema)}). Sheets’teki kodu güncelleyin.` };
+    return { kind: 'error', code: 'sema', message: `Apps Script sürümü bu sayfayla uyumlu değil (şema ${String(json.sema)}). Sheets’teki Apps Script kodunu güncelleyin.` };
   }
   const ozet = str(json.ozet);
   const denetlendi = str(json.denetlendi) || new Date().toISOString();
@@ -397,7 +397,7 @@ export function parseReply(json: unknown): OpexReply {
     isNum(m.zam.oran) &&
     isObj(m.enflasyon) &&
     isObj(m.artis2027);
-  if (!ok) return { kind: 'error', code: 'sema', message: 'Yanıt beklenen biçimde değil; Apps Script kodunu güncelleyin.' };
+  if (!ok) return { kind: 'error', code: 'sema', message: 'Yanıt beklenen biçimde değil. Apps Script kodunu güncelleyin.' };
   const tablo = str(json.tablo);
   aylariTamamla(m as unknown as OpexModel);
   return { kind: 'data', data: { model: m as unknown as OpexModel, ozet, tablo: SHEET_RE.test(tablo) ? tablo : null, denetlendi, degisti }, bekledi };
@@ -492,16 +492,16 @@ export async function requestOpex(conn: OpexConnection, lastDigest: string, sign
     });
   } catch (error) {
     if (signal.aborted) throw error;
-    return { kind: 'error', code: 'sunucu', message: 'Google Apps Script’e ulaşılamadı (ağ veya adres).' };
+    return { kind: 'error', code: 'sunucu', message: 'Google Apps Script’e ulaşılamadı. İnternet bağlantısını ve web uygulaması adresini kontrol edin.' };
   }
-  if (!response.ok) return { kind: 'error', code: 'sunucu', message: `Sunucu ${response.status} döndürdü.` };
+  if (!response.ok) return { kind: 'error', code: 'sunucu', message: `Sunucu ${response.status} hata koduyla yanıt verdi.` };
   let json: unknown;
   try {
     json = await response.json();
   } catch (error) {
     // Zaman aşımı gövde okunurken de gelebilir: biçim hatası gibi gösterilmez.
     if (signal.aborted) throw error;
-    return { kind: 'error', code: 'sunucu', message: 'Yanıt JSON değil. Web uygulaması erişimi “Herkes” olmalı.' };
+    return { kind: 'error', code: 'sunucu', message: 'Yanıt JSON biçiminde değil. Web uygulamasının erişim ayarı “Herkes” olmalı.' };
   }
   return parseReply(json);
 }

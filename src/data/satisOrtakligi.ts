@@ -313,7 +313,7 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kurallar:
         marka === 'segika'
           ? ['Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.', 'Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.']
-          : ['İlk iki ay kota yoktur, işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
+          : ['İlk iki ay kota yoktur. Bu sürede işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
       kimler:
         marka === 'istoc'
           ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']
@@ -342,9 +342,9 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kisa: 'Mevcut müşterinin tavsiyesi',
       kim:
         marka === 'istoc'
-          ? 'İstoç’taki müşterimiz komşu dükkâna iStoc’u söyler. Komşu yıllık alırsa iki taraf da ücretsiz kullanım kazanır.'
-          : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. Firma yıllık alırsa iki taraf da kazanır.',
-      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün devam edince kredi yazılır.'],
+          ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. Komşu yıllık paket alırsa iki taraf da ücretsiz kullanım kazanır.'
+          : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. Firma yıllık paket alırsa iki taraf da kazanır.',
+      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.'],
       kimler:
         marka === 'istoc'
           ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf']
@@ -355,7 +355,7 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       ad: 'Marka elçisi',
       kisa: 'İçerik üreticileri ve eğitmenler',
       kim: `Sosyal medyada ${urun}’u kendi bağlantısıyla tanıtır. Bağlantıdan gelen müşteri ödeme yaparsa komisyon alır.`,
-      kurallar: ['Paylaşımda “reklam” yazar.', 'Sahte yorum ve toplu mesaj yasaktır.'],
+      kurallar: ['Elçi, paylaşımlarına “reklam” ibaresini ekler.', 'Sahte yorum ve toplu mesaj yasaktır.'],
       kimler:
         marka === 'istoc'
           ? ['Toptan ticaret eğitmeni', 'E-ihracat içerik üreticisi', 'LinkedIn yazarı', 'Sektör YouTube kanalı', 'Girişimcilik topluluğu']

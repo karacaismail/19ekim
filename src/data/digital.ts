@@ -19,14 +19,14 @@ export interface Integration {
 }
 
 const BASE_INTEGRATIONS: Integration[] = [
-  { name: 'Google Tag Manager', measures: 'Tüm etiketler tek kapsayıcıda: istoc.com ve alt alan adları', done: 'Önizlemede tüm etiketler tetikleniyor; sürüm notlu yayın', date: '2026-11-06' },
-  { name: 'Çerez onayı (KVKK) + Consent Mode', measures: 'Ziyaretçi izni; izin yoksa ölçüm etiketi çalışmaz', done: 'Onaysız oturumda ölçüm isteği 0', date: '2026-11-06' },
-  { name: 'Google Analytics 4', measures: 'Kayıt → onboarding → abonelik (399 €) → yenileme olayları', done: 'Huni raporu CRM sayılarıyla ± %5 içinde', date: '2026-11-13' },
-  { name: 'Yandex Metrica', measures: 'Hedefler, ısı haritası, oturum kaydı (Webvisor)', done: 'Kayıt formu ve abonelik sayfası hedefleri ölçülüyor', date: '2026-11-13' },
-  { name: 'Search Console + Yandex Webmaster', measures: 'Site haritası, dizine ekleme, arama sorguları', done: 'Site haritası onaylı; dizine ekleme hatası 0', date: '2026-11-13' },
-  { name: 'Meta Pixel + Conversions API', measures: 'Temsilci başvurusu ve kayıt; reklam hesabı İsmail Karaca’dan devralınır', done: 'Başvuru olayı tarayıcı + sunucu kaynaklı, tekilleştirilmiş', date: '2026-11-16' },
-  { name: 'UTM standardı + CRM kaynak alanı', measures: 'Her paylaşım ve reklam bağlantısının kaynağı Frappe CRM’de', done: 'UTM’li paylaşım %100; kaynağı boş CRM kaydı %0', date: '2026-11-20' },
-  { name: 'Haftalık ölçüm panosu', measures: 'GA4 + Metrica + CRM: kaynak → kayıt → aktif satıcı', done: 'Her Pazartesi 09:00 yönetici brifinginde', date: '2026-11-23' },
+  { name: 'Google Tag Manager', measures: 'istoc.com ve alt alan adlarındaki bütün ölçüm etiketleri tek kapsayıcıda toplanır.', done: 'Önizlemede bütün etiketler çalışıyor. Her yayın sürüm notuyla yapılıyor.', date: '2026-11-06' },
+  { name: 'Çerez onayı (KVKK) + Consent Mode', measures: 'Ziyaretçinin iznini kaydeder. İzin yoksa ölçüm etiketi çalışmaz.', done: 'Onay verilmeyen oturumda hiç ölçüm isteği gitmiyor.', date: '2026-11-06' },
+  { name: 'Google Analytics 4', measures: 'Kayıt, ilk kurulum, abonelik (399 €) ve yenileme adımlarını ölçer.', done: 'Huni raporu CRM sayılarından en çok %5 sapıyor.', date: '2026-11-13' },
+  { name: 'Yandex Metrica', measures: 'Hedefleri, ısı haritasını ve oturum kaydını (Webvisor) ölçer.', done: 'Kayıt formu ve abonelik sayfası hedefleri ölçülüyor.', date: '2026-11-13' },
+  { name: 'Search Console + Yandex Webmaster', measures: 'Site haritasını, sayfaların dizine eklenmesini ve arama sorgularını izler.', done: 'Site haritası onaylandı. Dizine ekleme hatası yok.', date: '2026-11-13' },
+  { name: 'Meta Pixel + Conversions API', measures: 'Temsilci başvurusunu ve kaydı ölçer. Reklam hesabı İsmail Karaca’dan devralınır.', done: 'Başvuru hem tarayıcıdan hem sunucudan gelir ve bir kez sayılır.', date: '2026-11-16' },
+  { name: 'UTM standardı + CRM kaynak alanı', measures: 'Her paylaşım ve reklam bağlantısı kaynak etiketi (UTM) taşır. Kaynak, Frappe CRM kaydına yazılır.', done: 'Bütün paylaşımlarda UTM var. Kaynağı boş CRM kaydı yok.', date: '2026-11-20' },
+  { name: 'Haftalık ölçüm panosu', measures: 'GA4, Metrica ve CRM verisini birleştirir. Kaynaktan kayda ve aktif satıcıya kadar olan yolu gösterir.', done: 'Pano her pazartesi 09:00’daki yönetici toplantısında sunuluyor.', date: '2026-11-23' },
 ];
 
 /* ---------- 2. AI-first paylaşım otomasyonu (hat) ---------- */
@@ -47,12 +47,12 @@ export interface PipelineStep {
 }
 
 export const pipeline: PipelineStep[] = [
-  { step: 'Kaynak toplama', what: 'Changelog, CRM’de sık sorulan sorular, eğitim kayıtları ve saha notları haftalık kuyruğa düşer', mode: 'otomatik', measure: 'Haftada ≥ 30 içerik fikri' },
-  { step: 'Senaryo', what: 'Her fikir için AI 3 kanca ve 30–60 sn senaryo yazar; uzman birini seçer', mode: 'secim', measure: 'Senaryo başına ≤ 10 dk' },
-  { step: 'Üretim', what: 'AI seslendirme, altyazı ve marka şablonuyla kurgu; Ocak’ta çok dilli altyazı', mode: 'otomatik', measure: 'Video başına 90 dk → 20 dk (Ocak)' },
-  { step: 'Onay', what: 'Bilgi, fiyat ve uyum kontrol listesi; gelir vaadi yok', mode: 'onay', measure: 'Hatalı bilgiyle yayın 0' },
-  { step: 'Zamanlama ve paylaşım', what: 'Tek kuyruktan tüm kanallara zamanlanmış paylaşım', mode: 'otomatik', measure: 'Paylaşımların %80’i otomatik (Ocak)' },
-  { step: 'Ölçüm ve geri besleme', what: 'UTM → GA4 ve Metrica; yorum ve mesajdaki talep CRM’e', mode: 'otomatik', measure: 'Talep 24 saatte masa başına' },
+  { step: 'Kaynak toplama', what: 'Sürüm notları, CRM’deki sık sorular, eğitim kayıtları ve saha notları her hafta kuyruğa eklenir.', mode: 'otomatik', measure: 'Haftada ≥ 30 içerik fikri' },
+  { step: 'Senaryo', what: 'AI her fikir için 3 açılış cümlesi ve 30–60 saniyelik senaryo yazar. Uzman bunlardan birini seçer.', mode: 'secim', measure: 'Senaryo başına ≤ 10 dk' },
+  { step: 'Üretim', what: 'AI seslendirme, altyazı ve marka şablonuyla video kurgulanır. Ocak’ta altyazılar çok dilli olur.', mode: 'otomatik', measure: 'Video başına 90 dk → 20 dk (Ocak)' },
+  { step: 'Onay', what: 'Uzman bilgiyi, fiyatı ve uyumu kontrol listesiyle denetler. İçerikte gelir vaadi bulunmaz.', mode: 'onay', measure: 'Hatalı bilgiyle yayın 0' },
+  { step: 'Zamanlama ve paylaşım', what: 'İçerik tek kuyruktan bütün kanallara zamanlanarak paylaşılır.', mode: 'otomatik', measure: 'Paylaşımların %80’i otomatik (Ocak)' },
+  { step: 'Ölçüm ve geri besleme', what: 'UTM verisi GA4 ve Metrica’ya gider. Yorum ve mesajlardaki talepler CRM’e aktarılır.', mode: 'otomatik', measure: 'Talep 24 saat içinde masa başı ekibine ulaşır' },
 ];
 
 /** Araç kararı (19 Ekim 2026): otomasyon açık kaynak ve kendi sunucumuzda; üretim ve paylaşım ücretli araçlarla. Tavan: parametre. */
@@ -64,11 +64,11 @@ export interface AiTool {
 }
 
 export const aiTools: AiTool[] = [
-  { tool: 'n8n', use: 'Hat otomasyonu: kaynak toplama, kuyruk, yorum ve mesajdan CRM’e talep', license: 'Açık kaynak, kendi sunucumuzda (lisans 0 ₺)' },
-  { tool: 'Claude', use: 'Senaryo, kanca, altyazı metni, makale taslağı', license: 'Ücretli abonelik' },
+  { tool: 'n8n', use: 'Hattı otomatik çalıştırır: kaynak toplar, kuyruğu yönetir, yorum ve mesajlardaki talebi CRM’e taşır.', license: 'Açık kaynak, kendi sunucumuzda (lisans 0 ₺)' },
+  { tool: 'Claude', use: 'Senaryo, açılış cümlesi, altyazı metni ve makale taslağı', license: 'Ücretli abonelik' },
   { tool: 'ElevenLabs', use: 'Türkçe seslendirme', license: 'Ücretli abonelik' },
-  { tool: 'CapCut Pro', use: 'Kurgu, otomatik altyazı, marka şablonları', license: 'Ücretli abonelik' },
-  { tool: 'Canva Pro', use: 'Kapak, carousel, görsel şablonlar', license: 'Ücretli abonelik' },
+  { tool: 'CapCut Pro', use: 'Kurgu, otomatik altyazı ve marka şablonları', license: 'Ücretli abonelik' },
+  { tool: 'Canva Pro', use: 'Kapak, kaydırmalı görsel seti (carousel) ve görsel şablonlar', license: 'Ücretli abonelik' },
   { tool: 'Metricool', use: 'Zamanlanmış paylaşım: Instagram, TikTok, YouTube, LinkedIn, Facebook', license: 'Ücretli abonelik' },
 ];
 
@@ -88,10 +88,10 @@ export interface Channel {
 
 export const channels: Channel[] = [
   { channel: 'Instagram Reels', content: 'Tüm içerik sütunları (dikey video)', frequency: 'Ocak’ta günde 3' },
-  { channel: 'YouTube Shorts', content: 'Ürün yenilikleri, nasıl yapılır', frequency: 'Günde 1–2' },
+  { channel: 'YouTube Shorts', content: 'Ürün yenilikleri ve nasıl yapılır videoları', frequency: 'Günde 1–2' },
   { channel: 'TikTok', content: 'Dikey videoların aynısı', frequency: 'Günde 1–2' },
-  { channel: 'LinkedIn', content: 'Ürün yenilikleri, pazar içgörüsü (kurumsal)', frequency: 'Haftada 3' },
-  { channel: 'Facebook sayfası ve satıcı grupları', content: 'Nasıl yapılır, eğitim davetleri', frequency: 'Haftada 5' },
+  { channel: 'LinkedIn', content: 'Ürün yenilikleri ve pazar içgörüsü (kurumsal dil)', frequency: 'Haftada 3' },
+  { channel: 'Facebook sayfası ve satıcı grupları', content: 'Nasıl yapılır videoları ve eğitim davetleri', frequency: 'Haftada 5' },
   { channel: 'istoc.com blog', content: 'Tam makale: nasıl yapılır ve pazar içgörüsü', frequency: 'Haftada 3 (Ocak)' },
 ];
 
@@ -111,12 +111,12 @@ export interface ContentPillar {
 
 /** Ocak 2027 haftalık hedefi: 18 video = günde 3 × 6 gün. Kasım’da günde 1, Aralık’ta günde 2 ile aynı oranlar. */
 export const contentPlan: ContentPillar[] = [
-  { pillar: 'Ürün yenilikleri', what: 'Her sprintteki yeni özellik 60 saniyede', source: 'yazilim', sourceNote: 'Sprint changelog’u (asistan taslağı)', format: '30–45 sn ekran videosu', perWeek: 4, measure: 'Videodan siteye geçiş (UTM)', example: '“Toplu ürün yükleme artık 3 adımda”' },
-  { pillar: 'Nasıl yapılır', what: 'Satıcının istoc.com’u kullanması için adım adım anlatım', source: 'pazarlamaci', sourceNote: 'CRM’de en sık 10 soru; eğitim modülleri M1–M5', format: '60–90 sn ekran kaydı + tam makale', perWeek: 4, measure: 'İçerikten kayıt', example: '“Telefonla ürün fotoğrafı: 3 kural”' },
-  { pillar: 'Satıcı hikâyeleri', what: 'Gerçek satıcının istoc.com deneyimi (yazılı izinle)', source: 'saha-uzmani', sourceNote: 'Saha ziyaretleri, aktif satıcılar', format: '45–60 sn röportaj', perWeek: 2, measure: 'CRM’e talep', example: '“Bir İstoç satıcısının istoc.com’daki ilk 30 günü”' },
-  { pillar: 'Pazar içgörüsü', what: 'Toptan talep ve ürün eğilimleri, veriyle', source: 'asistan', sourceNote: 'istoc.com arama ve talep verisi; asistan derler', format: 'Carousel + tam makale', perWeek: 2, measure: 'Kaydetme ve paylaşım', example: '“Bu hafta en çok aranan 5 ürün grubu”' },
-  { pillar: 'Eğitim ve etkinlik', what: 'Her iş günü 17:00 eğitiminin daveti ve kesiti', source: 'organizator', sourceNote: 'Organizatör eğitimleri (7 Aralık’tan)', format: 'Davet hikâyesi + 30 sn kesit', perWeek: 5, measure: 'Eğitime kayıt', example: '“Yarın 17:00: katalog eğitimi, ofis toplantı salonu”' },
-  { pillar: 'Temsilci programı', what: 'Bağımsız temsilcinin ne yaptığı; gelir vaadi yok', source: 'ekip-lideri', sourceNote: 'Hukuk teyitli kazanç planı (14 Kasım)', format: 'Bilgilendirme videosu', perWeek: 1, measure: 'Başvuru (en fazla ~50 / hafta)', example: '“Bağımsız satış temsilcisi ne yapar?”' },
+  { pillar: 'Ürün yenilikleri', what: 'Her geliştirme döneminde (sprint) çıkan yeni özellik 60 saniyede anlatılır', source: 'yazilim', sourceNote: 'Sprint sürüm notları (taslağı asistan hazırlar)', format: '30–45 sn ekran videosu', perWeek: 4, measure: 'Videodan siteye geçiş (UTM)', example: '“Toplu ürün yükleme artık 3 adımda”' },
+  { pillar: 'Nasıl yapılır', what: 'Satıcının istoc.com’u kullanması için adım adım anlatım', source: 'pazarlamaci', sourceNote: 'CRM’de en sık sorulan 10 soru ve M1–M5 eğitim modülleri', format: '60–90 sn ekran kaydı + tam makale', perWeek: 4, measure: 'İçerikten kayıt', example: '“Telefonla ürün fotoğrafı: 3 kural”' },
+  { pillar: 'Satıcı hikâyeleri', what: 'Gerçek bir satıcının istoc.com deneyimi, yazılı izniyle anlatılır', source: 'saha-uzmani', sourceNote: 'Saha ziyaretleri ve aktif satıcılar', format: '45–60 sn röportaj', perWeek: 2, measure: 'CRM’e talep', example: '“Bir İstoç satıcısının istoc.com’daki ilk 30 günü”' },
+  { pillar: 'Pazar içgörüsü', what: 'Toptan talep ve ürün eğilimleri veriyle anlatılır', source: 'asistan', sourceNote: 'istoc.com arama ve talep verisi. Veriyi asistan derler.', format: 'Carousel + tam makale', perWeek: 2, measure: 'Kaydetme ve paylaşım', example: '“Bu hafta en çok aranan 5 ürün grubu”' },
+  { pillar: 'Eğitim ve etkinlik', what: 'Her iş günü saat 17:00’deki eğitimin daveti ve kısa kesiti', source: 'organizator', sourceNote: 'Organizatör eğitimleri (7 Aralık’tan)', format: 'Davet hikâyesi + 30 sn kesit', perWeek: 5, measure: 'Eğitime kayıt', example: '“Yarın 17:00: katalog eğitimi, ofis toplantı salonu”' },
+  { pillar: 'Temsilci programı', what: 'Bağımsız temsilcinin ne yaptığı anlatılır. Gelir vaadi verilmez.', source: 'ekip-lideri', sourceNote: 'Hukuk teyitli kazanç planı (14 Kasım)', format: 'Bilgilendirme videosu', perWeek: 1, measure: 'Başvuru (en fazla ~50 / hafta)', example: '“Bağımsız satış temsilcisi ne yapar?”' },
 ];
 
 /* ---------- 90 günlük plan (iş akışı × zaman) ---------- */
@@ -140,17 +140,17 @@ export interface DigitalPlanRow {
 }
 
 const BASE_DIGITAL_PLAN: DigitalPlanRow[] = [
-  { stream: 'olcum', from: '2026-11-02', to: '2026-11-13', action: 'GTM, çerez onayı, GA4, Yandex Metrica, Search Console + Yandex Webmaster', target: 'Hepsi 13 Kasım’da yayında', milestone: true },
-  { stream: 'olcum', from: '2026-11-16', to: '2026-11-20', action: 'Meta Pixel + Conversions API; UTM standardı ve CRM kaynak alanı', target: 'UTM’li paylaşım %100' },
-  { stream: 'olcum', from: '2026-11-23', to: '2027-01-30', action: 'Haftalık ölçüm panosu', target: 'Her Pazartesi 09:00' },
-  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool); hat v1: kaynak → senaryo → üretim yarı otomatik', target: '%30 otomatik paylaşım · araç gideri tavanın içinde' },
-  { stream: 'otomasyon', from: '2026-11-30', to: '2026-12-26', action: 'Hat v2: zamanlayıcı ve yorum → CRM otomasyonu', target: '%60 otomatik · talep 24 saatte' },
-  { stream: 'otomasyon', from: '2026-12-28', to: '2027-01-30', action: 'Hat v3: çok dilli altyazı, tam otomatik zamanlama', target: '%80 otomatik', milestone: true },
-  { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar: ürün yenilikleri ve nasıl yapılır', target: 'Günde 1 video' },
-  { stream: 'uretim', from: '2026-11-30', to: '2026-12-26', action: 'Satıcı hikâyeleri ve eğitim davetleri eklenir', target: 'Günde 2 video · haftada 5 talep' },
-  { stream: 'uretim', from: '2026-12-28', to: '2027-01-30', action: 'Altı sütunun tamamı', target: 'Günde 3 video · haftada 10 talep', milestone: true },
-  { stream: 'plan', from: '2026-11-02', to: '2026-11-06', action: 'İçerik planı v1: 6 sütun, kanallar, haftalık takvim', target: 'İsmail Karaca onayı 6 Kasım', milestone: true },
-  { stream: 'plan', from: '2026-11-30', to: '2026-12-04', action: 'İçerik planı v2: ilk ayın verisiyle sütun oranları', target: 'Ölçüte göre en zayıf 2 sütun yeniden dengelenir' },
+  { stream: 'olcum', from: '2026-11-02', to: '2026-11-13', action: 'GTM, çerez onayı, GA4, Yandex Metrica, Search Console + Yandex Webmaster', target: 'Hepsi 13 Kasım tarihinde yayında', milestone: true },
+  { stream: 'olcum', from: '2026-11-16', to: '2026-11-20', action: 'Meta Pixel ve Conversions API kurulur. UTM standardı ve CRM kaynak alanı eklenir.', target: 'Bütün paylaşımlarda UTM var' },
+  { stream: 'olcum', from: '2026-11-23', to: '2027-01-30', action: 'Haftalık ölçüm panosu', target: 'Her pazartesi 09:00' },
+  { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool). Hat v1 kaynaktan senaryoya ve üretime kadar yarı otomatik çalışır.', target: 'Paylaşımların %30’u otomatik, araç gideri tavanın içinde' },
+  { stream: 'otomasyon', from: '2026-11-30', to: '2026-12-26', action: 'Hat v2: zamanlayıcı eklenir, yorumlar otomatik olarak CRM’e aktarılır.', target: 'Paylaşımların %60’ı otomatik, talep 24 saatte iletilir' },
+  { stream: 'otomasyon', from: '2026-12-28', to: '2027-01-30', action: 'Hat v3: çok dilli altyazı ve tam otomatik zamanlama', target: 'Paylaşımların %80’i otomatik', milestone: true },
+  { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar: ürün yenilikleri ve nasıl yapılır videoları', target: 'Günde 1 video' },
+  { stream: 'uretim', from: '2026-11-30', to: '2026-12-26', action: 'Satıcı hikâyeleri ve eğitim davetleri eklenir', target: 'Günde 2 video, haftada 5 talep' },
+  { stream: 'uretim', from: '2026-12-28', to: '2027-01-30', action: 'Altı içerik sütununun tamamı yayında', target: 'Günde 3 video, haftada 10 talep', milestone: true },
+  { stream: 'plan', from: '2026-11-02', to: '2026-11-06', action: 'İçerik planı v1: 6 sütun, kanallar ve haftalık takvim', target: 'İsmail Karaca onayı: 6 Kasım', milestone: true },
+  { stream: 'plan', from: '2026-11-30', to: '2026-12-04', action: 'İçerik planı v2: sütun oranları ilk ayın verisiyle güncellenir', target: 'Ölçüte göre en zayıf 2 sütun yeniden dengelenir' },
   { stream: 'plan', from: '2026-12-28', to: '2026-12-31', action: 'İçerik planı v3: Ocak takvimi', target: 'Haftada 18 video planlı' },
 ];
 

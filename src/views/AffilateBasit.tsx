@@ -32,7 +32,7 @@ const baslangic = (): Sade => {
 const METIN: Record<OrtakId, { ad: string; kisa: string; kim: string }> = {
   ayse: { ad: 'Tek seferlik tavsiye', kisa: 'İlk faturadan bir kez', kim: 'Ayşe müşteriyi bize tanıştırır. Müşterinin ilk faturasından bir kez komisyon alır.' },
   satis: { ad: ORTAK_ADLARI.satis, kisa: 'Müşteri ödedikçe, azalan oran', kim: 'Satış ortağı müşteriyi getirir ve satışı yapar. Müşteri ödedikçe her yıl azalan oranla kazanır.' },
-  cozum: { ad: ORTAK_ADLARI.cozum, kisa: 'Destek de verir, oranı yüksek', kim: 'Çözüm ortağı müşteriye destek de verir. Bu yüzden oranı yüksektir. Destek vermediği ay kazanmaz.' },
+  cozum: { ad: ORTAK_ADLARI.cozum, kisa: 'Destek de verir, oranı yüksektir', kim: 'Çözüm ortağı müşteriye destek de verir. Bu yüzden oranı yüksektir. Destek vermediği ay kazanmaz.' },
 };
 
 const tl = (kurus: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(kurus / 100))}\u00a0₺`;
@@ -144,7 +144,7 @@ export function AffilateBasit() {
 
       <div className="so2-arac">
         <Choice<'paket' | 'aylik'>
-          label="Müşteri öder"
+          label="Müşteri nasıl öder?"
           value={s.odeme}
           options={[
             { id: 'paket', name: 'Yıllık paket' },

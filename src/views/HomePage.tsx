@@ -21,12 +21,12 @@ function OrgChart() {
   const ORG = useModel().org;
   return (
     <>
-      <PageHeader title="Organizasyon şeması" purpose="istoc.com satış ve pazarlama organizasyonu: kim kime bağlı; her kutu bir rol sayfasına açılır." />
+      <PageHeader title="Organizasyon şeması" purpose="istoc.com satış ve pazarlama ekibinde kimin kime bağlı olduğunu gösterir. Her kutu bir rol sayfası açar." />
       <Chart
         id="organizasyon"
-        title="İsmail Karaca → kurmay → dört ağaç"
-        note="Kutuya tıklayınca rol sayfası açılır; aynı sayfalar üst gezinmede de var."
-        summary={`Organizasyon şeması, ${count(ORG)} kutu. Tepede İsmail Karaca; altında asistan ve yazılım ekibi; dört ağaç: 1 dijital pazarlama, 2 masa başı pazarlama (CRM), 3 saha satış (saha ekibi; ekip lideri ve bağımsız temsilciler), 4 organizatör; ayrıca Segika masa başı (CRM).`}
+        title="İsmail Karaca, kurmay ekip ve dört ağaç"
+        note="Bir kutuya tıklayınca o rolün sayfası açılır. Aynı sayfalara üst menüden de ulaşabilirsiniz."
+        summary={`Organizasyon şeması, ${count(ORG)} kutu. Tepede İsmail Karaca var. Altında asistan ve yazılım ekibi bulunur. Dört ağaç şunlardır: 1 dijital pazarlama, 2 masa başı pazarlama (CRM), 3 saha satış, 4 organizatör. Saha satış ağacında saha ekibi, ekip lideri ve bağımsız temsilciler yer alır. Ayrıca Segika masa başı (CRM) da vardır.`}
         spec={{ kind: 'org', root: toChart(ORG) }}
         size="xl"
         wide

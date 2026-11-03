@@ -14,7 +14,7 @@ const ICINDEKILER = [
   { id: 'en-guclu', ad: 'En güçlü 10 söz' },
   { id: 'ilk-30-saniye', ad: 'Kapıda ilk 30 saniye' },
   ...KATEGORILER.map((k) => ({ id: k.id, ad: k.ad })),
-  { id: 'eski-sozler', ad: 'Eski sözlerin güçlü hali' },
+  { id: 'eski-sozler', ad: 'Eski sözlerin güçlü hâli' },
   { id: 'kisaltmalar', ad: 'Kısaltmalar' },
 ];
 
@@ -63,7 +63,7 @@ function Icerik() {
       <PageHeader title="Değer önerisi" purpose="Saha ekibinin esnafa söyleyeceği sözleri ve her sözü tutmak için platformun yapması gereken işi gösterir." />
 
       <p className="dg-uyari">
-        Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir, geliştirilmesi gereken öneridir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
+        Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir. Bunlar geliştirilmesi gereken önerilerdir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
       </p>
 
       <nav className="dg-icindekiler" aria-label="Sayfa bölümleri">
@@ -170,9 +170,9 @@ function Icerik() {
       <section className="dg-bolum" id="eski-sozler" aria-labelledby="eski-sozler-baslik">
         <header className="dg-bolum-ust">
           <h2 id="eski-sozler-baslik" className="dg-bolum-baslik">
-            Eski sözlerin güçlü hali
+            Eski sözlerin güçlü hâli
           </h2>
-          <p className="dg-bolum-giris">Tutulamayacak iki söz yerine tutulabilecek iki söz.</p>
+          <p className="dg-bolum-giris">Bu bölüm, tutulamayacak iki sözün yerine tutulabilecek iki söz önerir.</p>
         </header>
         <ol className="dg-eskiler">
           {ESKI_SOZLER.map((e) => (

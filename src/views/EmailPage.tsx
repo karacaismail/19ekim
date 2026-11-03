@@ -82,7 +82,7 @@ const DONE: Record<Target, string> = {
   subject: 'Konu kopyalandı. Apple Mail’de Konu alanına yapıştırın.',
   email: 'E-posta kopyalandı. Apple Mail’de ileti alanına ⌘V ile yapıştırın (Windows’ta Ctrl+V).',
 };
-const FAILED = 'Kopyalanamadı. Önizlemedeki metni seçip ⌘C (Windows’ta Ctrl+C) ile kopyalayın; biçim korunur.';
+const FAILED = 'Kopyalanamadı. Önizlemedeki metni seçip ⌘C (Windows’ta Ctrl+C) ile kopyalayın. Biçim korunur.';
 
 function CopyButton({
   label,
@@ -178,8 +178,8 @@ function EmailContent() {
                   İleti
                 </h2>
                 <p className="email-hint">
-                  Tablo ve biçimiyle kopyalanır; ⌘V ile yapıştırın (⌥⇧⌘V biçimi siler). Apple Mail iletisi Zengin Metin
-                  olmalı: Biçim › Zengin Metin Yap (⇧⌘T).
+                  İleti tablo ve biçimiyle birlikte kopyalanır. ⌘V ile yapıştırın, çünkü ⌥⇧⌘V biçimi siler. Apple Mail
+                  iletisi Zengin Metin olmalıdır. Bunun için Biçim › Zengin Metin Yap (⇧⌘T) komutunu kullanın.
                 </p>
               </div>
               <CopyButton label="E-postayı kopyala" doneLabel="E-posta kopyalandı" primary done={done('email')} onClick={() => copy('email')} />
@@ -192,7 +192,7 @@ function EmailContent() {
               <h2 className="email-preview-label" id="email-onizleme">
                 Önizleme
               </h2>
-              <p className="email-hint">Yazı tipi Outfit; cihazında Outfit kurulu olmayan alıcı Helvetica veya Arial görür.</p>
+              <p className="email-hint">Yazı tipi Outfit’tir. Cihazında Outfit kurulu olmayan alıcı metni Helvetica veya Arial ile görür.</p>
             </div>
             <article className="email-preview" aria-label="E-posta metni" onCopy={copySelectionClean} dangerouslySetInnerHTML={{ __html: HTML }} />
           </section>

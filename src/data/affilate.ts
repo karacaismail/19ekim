@@ -327,29 +327,29 @@ export function dogrula(s: Senaryo): string[] {
   const oran = (v: unknown) => tam(v) && (v as number) >= 0 && (v as number) <= 10_000;
   if (!tam(s.ufukAy) || s.ufukAy <= 0 || s.ufukAy > 120) h.push('Simülasyon ufku 1–120 ay olmalı.');
   const f = s.fiyat;
-  if (!para(f.aylik)) h.push('Aylık fiyat negatif olamaz ve sayı olmalı.');
-  if (!para(f.paket)) h.push('Paket fiyatı negatif olamaz ve sayı olmalı.');
-  if (!(typeof f.kat === 'number' && Number.isFinite(f.kat) && f.kat >= 0)) h.push('Fiyat katsayısı negatif olamaz ve sayı olmalı.');
-  if (!tam(f.hizmetAy) || f.hizmetAy <= 0) h.push('Paket hizmet süresi pozitif tam ay olmalı.');
+  if (!para(f.aylik)) h.push('Aylık fiyat sıfır ya da pozitif bir sayı olmalı.');
+  if (!para(f.paket)) h.push('Paket fiyatı sıfır ya da pozitif bir sayı olmalı.');
+  if (!(typeof f.kat === 'number' && Number.isFinite(f.kat) && f.kat >= 0)) h.push('Fiyat katsayısı sıfır ya da pozitif bir sayı olmalı.');
+  if (!tam(f.hizmetAy) || f.hizmetAy <= 0) h.push('Paket hizmet süresi en az 1 tam ay olmalı.');
   if (!oran(f.indirimBp)) h.push('İndirim %0–100 arası olmalı.');
   for (const k of Object.values(s.ortaklar)) {
     if (!k.donemler.length) h.push(`${k.ad}: en az bir dönem gerekli.`);
     for (const d of k.donemler) {
-      if (!tam(d.ay) || d.ay <= 0) h.push(`${k.ad}: dönem süresi pozitif tam ay olmalı.`);
+      if (!tam(d.ay) || d.ay <= 0) h.push(`${k.ad}: dönem süresi en az 1 tam ay olmalı.`);
       if (!oran(d.oranBp)) h.push(`${k.ad}: komisyon oranı %0–100 arası olmalı.`);
     }
     if (!oran(k.sonrakiOranBp)) h.push(`${k.ad}: sonraki dönem oranı %0–100 arası olmalı.`);
-    if (!tam(k.taksit) || k.taksit <= 0) h.push(`${k.ad}: taksit sayısı pozitif tam sayı olmalı.`);
-    if (!tam(k.gecikmeAy) || k.gecikmeAy < 0) h.push(`${k.ad}: ödeme gecikmesi negatif olmayan tam ay olmalı.`);
+    if (!tam(k.taksit) || k.taksit <= 0) h.push(`${k.ad}: taksit sayısı en az 1 olan bir tam sayı olmalı.`);
+    if (!tam(k.gecikmeAy) || k.gecikmeAy < 0) h.push(`${k.ad}: ödeme gecikmesi 0 ya da daha fazla tam ay olmalı.`);
     if (k.destekMaliyeti !== null && !para(k.destekMaliyeti)) h.push(`${k.ad}: destek maliyeti negatif olamaz.`);
   }
   if (!s.musteriler.length) h.push('En az bir müşteri grubu gerekli.');
-  if (s.musteriler.length > 100) h.push('En çok 100 müşteri grubu (teknik sınır).');
+  if (s.musteriler.length > 100) h.push('En çok 100 müşteri grubu eklenebilir. Bu, teknik bir sınırdır.');
   const idler = new Set<string>();
   for (const m of s.musteriler) {
-    if (idler.has(m.id)) h.push(`Müşteri grubu kimliği yineleniyor: ${m.id}.`);
+    if (idler.has(m.id)) h.push(`Aynı müşteri grubu kimliği birden fazla kez kullanılmış: ${m.id}.`);
     idler.add(m.id);
-    if (!tam(m.adet) || m.adet <= 0) h.push(`${m.ad}: adet pozitif tam sayı olmalı.`);
+    if (!tam(m.adet) || m.adet <= 0) h.push(`${m.ad}: adet en az 1 olan bir tam sayı olmalı.`);
     if (!gecerliTarih(m.baslangic)) h.push(`${m.ad}: başlangıç tarihi geçersiz.`);
     if (m.iptalHizmetAyi !== null && (!tam(m.iptalHizmetAyi) || m.iptalHizmetAyi < 0)) h.push(`${m.ad}: iptal ayı negatif olamaz.`);
   }
@@ -357,7 +357,7 @@ export function dogrula(s: Senaryo): string[] {
   for (const fa of s.faturalar ?? []) {
     if (!para(fa.tutar) || !para(fa.haric) || fa.haric > fa.tutar) h.push(`Fatura ${fa.id}: 0 ≤ hariç kalem ≤ tutar olmalı.`);
     if (!gecerliTarih(fa.tarih) || !gecerliTarih(fa.hizmetBaslangic)) h.push(`Fatura ${fa.id}: tarih geçersiz.`);
-    if (!tam(fa.hizmetAy) || fa.hizmetAy <= 0) h.push(`Fatura ${fa.id}: hizmet süresi pozitif tam ay olmalı.`);
+    if (!tam(fa.hizmetAy) || fa.hizmetAy <= 0) h.push(`Fatura ${fa.id}: hizmet süresi en az 1 tam ay olmalı.`);
     faturaTutar.set(fa.id, fa.tutar);
   }
   const tahsilToplam = new Map<string, Kurus>();
@@ -370,7 +370,7 @@ export function dogrula(s: Senaryo): string[] {
   }
   for (const [fid, toplam] of tahsilToplam) {
     const F = faturaTutar.get(fid);
-    if (F !== undefined && toplam > F) h.push(`Fatura ${fid}: toplam tahsilat faturayı aşıyor (fazla tahsilat bu sürümde hata).`);
+    if (F !== undefined && toplam > F) h.push(`Fatura ${fid}: toplam tahsilat fatura tutarını aşıyor. Bu sürüm fazla tahsilatı hata sayar.`);
   }
   for (const i of s.iadeler) if (!para(i.tutar) || !gecerliTarih(i.tarih)) h.push(`İade ${i.id}: tutar ve tarih geçerli olmalı.`);
   return h;
@@ -539,7 +539,7 @@ export function hesapla(s: Senaryo): Sonuc {
     };
     const bazMetni = (d: FaturaDurumu) =>
       `${d.fatura.id}: baz ${kurusFormat(d.fatura.tutar - d.fatura.haric, pb)} × tahsilat ${kurusFormat(Math.min(d.Q, d.fatura.tutar), pb)} / ${kurusFormat(d.fatura.tutar, pb)}`;
-    const hizmetAyiMetni = (d: FaturaDurumu, m: number) => `hizmet ayı ${musteriHizmetAyi(grup, d.fatura, m) + 1}`;
+    const hizmetAyiMetni = (d: FaturaDurumu, m: number) => `${musteriHizmetAyi(grup, d.fatura, m) + 1}. hizmet ayı`;
     /** Tahsilatta politikalar: faturanın toplam kazancını yeniden değerlendir; fark hakediş ya da düzeltmedir. */
     const tahsilattaDegerlendir = (d: FaturaDurumu, tarih: string) => {
       const paylar = faturaPaylari(d.fatura, d.oranlar, d.Q);
@@ -551,11 +551,11 @@ export function hesapla(s: Senaryo): Sonuc {
       });
       if (fark > 0) {
         netHakedis += fark;
-        kayit({ tarih, tur: 'hakedis', tutar: fark, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}; tahsilatta kazanıldı (oranlar hizmet dönemine göre)` });
+        kayit({ tarih, tur: 'hakedis', tutar: fark, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}. Tahsilatta kazanıldı. Oran, hizmet dönemine göre uygulandı.` });
         odemeyiPlanla(tarih, fark);
       } else if (fark < 0) {
         netHakedis += fark;
-        kayit({ tarih, tur: 'duzeltme', tutar: fark, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}; iade sonrası düzeltme` });
+        kayit({ tarih, tur: 'duzeltme', tutar: fark, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}. İade sonrası düzeltme.` });
       }
     };
     /** Hizmet ayı politikası: bitmiş ve uygun ayların payını yeniden değerlendir (yalnız bir ay ya da hepsi). */
@@ -578,13 +578,13 @@ export function hesapla(s: Senaryo): Sonuc {
       });
       if (kazanc > 0) {
         netHakedis += kazanc;
-        const ne = yalnizAy !== undefined ? `${hizmetAyiMetni(d, yalnizAy)} sonunda kazanıldı` : 'tahsilat sonrası geçmiş uygun ayların farkı';
-        kayit({ tarih, tur: 'hakedis', tutar: kazanc, faturaId: d.fatura.id, hizmetAyi: yalnizAy !== undefined ? musteriHizmetAyi(grup, d.fatura, yalnizAy) : undefined, aciklama: `${bazMetni(d)}; ${ne}` });
+        const ne = yalnizAy !== undefined ? `${hizmetAyiMetni(d, yalnizAy)}nın sonunda kazanıldı` : 'Tahsilattan sonra geçmiş uygun ayların farkı kazanıldı';
+        kayit({ tarih, tur: 'hakedis', tutar: kazanc, faturaId: d.fatura.id, hizmetAyi: yalnizAy !== undefined ? musteriHizmetAyi(grup, d.fatura, yalnizAy) : undefined, aciklama: `${bazMetni(d)}. ${ne}.` });
         odemeyiPlanla(tarih, kazanc);
       }
       if (duzeltme < 0) {
         netHakedis += duzeltme;
-        kayit({ tarih, tur: 'duzeltme', tutar: duzeltme, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}; iade sonrası düzeltme` });
+        kayit({ tarih, tur: 'duzeltme', tutar: duzeltme, faturaId: d.fatura.id, aciklama: `${bazMetni(d)}. İade sonrası düzeltme.` });
       }
     };
     /**
@@ -601,7 +601,7 @@ export function hesapla(s: Senaryo): Sonuc {
         const odeme = Math.max(0, Math.min(plan, netHakedis - odenen));
         if (odeme <= 0) continue;
         odenen += odeme;
-        kayit({ tarih, tur: 'odeme', tutar: odeme, aciklama: odeme < plan ? `Simüle edilen ortak ödemesi; planın ${kurusFormat(plan - odeme, pb)} bölümü geri alınacak bakiyeden mahsup edildi` : 'Simüle edilen ortak ödemesi' });
+        kayit({ tarih, tur: 'odeme', tutar: odeme, aciklama: odeme < plan ? `Simüle edilen ortak ödemesi. Planın ${kurusFormat(plan - odeme, pb)} tutarındaki bölümü geri alınacak bakiyeden düşüldü.` : 'Simüle edilen ortak ödemesi.' });
       }
     };
 
@@ -621,7 +621,7 @@ export function hesapla(s: Senaryo): Sonuc {
       const d = durumlar.get(o.faturaId);
       if (!d) continue;
       if (o.tur === 'fatura') {
-        kayit({ tarih: o.tarih, tur: 'fatura', tutar: d.fatura.tutar, faturaId: d.fatura.id, aciklama: `${d.ilk ? 'İlk uygun fatura' : 'Fatura'}: ${d.fatura.hizmetAy} ay hizmet${d.fatura.haric ? `; hariç kalem ${kurusFormat(d.fatura.haric, pb)}` : ''}` });
+        kayit({ tarih: o.tarih, tur: 'fatura', tutar: d.fatura.tutar, faturaId: d.fatura.id, aciklama: `${d.ilk ? 'İlk uygun fatura' : 'Fatura'}: ${d.fatura.hizmetAy} ay hizmet.${d.fatura.haric ? ` Hariç kalem ${kurusFormat(d.fatura.haric, pb)}.` : ''}` });
       } else if (o.tur === 'tahsilat' || o.tur === 'iade') {
         const anahtar = `${o.tur}:${o.id}`;
         if (gorulen.has(anahtar)) continue; // aynı olay iki kez içeri alınmaz (§7.6)
@@ -629,21 +629,21 @@ export function hesapla(s: Senaryo): Sonuc {
         const tutar = o.tutar ?? 0;
         if (o.tur === 'tahsilat') {
           if (d.Q + tutar > d.fatura.tutar) {
-            hatalar.push(`Tahsilat ${o.id}: toplam ödeme faturayı aşıyor (fazla tahsilat bu sürümde hata).`);
+            hatalar.push(`Tahsilat ${o.id}: toplam ödeme fatura tutarını aşıyor. Bu sürüm fazla tahsilatı hata sayar.`);
             continue;
           }
           d.Q += tutar;
           tahsilatToplam += tutar;
-          kayit({ tarih: o.tarih, tur: 'tahsilat', tutar, faturaId: d.fatura.id, id: `${grup.id}-${o.id}`, aciklama: `Müşteri tahsilatı (${d.fatura.id}); kümülatif ${kurusFormat(d.Q, pb)}` });
+          kayit({ tarih: o.tarih, tur: 'tahsilat', tutar, faturaId: d.fatura.id, id: `${grup.id}-${o.id}`, aciklama: `Müşteri tahsilatı (${d.fatura.id}). Bu faturada toplam tahsilat ${kurusFormat(d.Q, pb)}.` });
         } else {
           if (tutar > d.Q) {
-            hatalar.push(`İade ${o.id}: net tahsilatı aşıyor.`);
+            hatalar.push(`İade ${o.id}: iade tutarı net tahsilatı aşıyor.`);
             continue;
           }
           d.Q -= tutar;
           d.iadeVar = true;
           iadeToplam += tutar;
-          kayit({ tarih: o.tarih, tur: 'iade', tutar: -tutar, faturaId: d.fatura.id, id: `${grup.id}-${o.id}`, aciklama: `İade (${d.fatura.id}); net tahsilat ${kurusFormat(d.Q, pb)}` });
+          kayit({ tarih: o.tarih, tur: 'iade', tutar: -tutar, faturaId: d.fatura.id, id: `${grup.id}-${o.id}`, aciklama: `İade (${d.fatura.id}). Kalan net tahsilat ${kurusFormat(d.Q, pb)}.` });
         }
         if (kural.politika === 'hizmet-ayi') hizmetAyiDegerlendir(d, o.tarih);
         else tahsilattaDegerlendir(d, o.tarih);
@@ -658,23 +658,23 @@ export function hesapla(s: Senaryo): Sonuc {
           // İptal gelecek faturaları durdurur; tahsilatta kazanılmış komisyon sırf iptalle sıfırlanmaz (§7.6).
           if (kural.politika === 'hizmet-ayi') {
             d.kayip[m] = true;
-            if (pay > 0) kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: 0, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: abonelik iptal edildi; ${kurusFormat(pay, pb)} kazanılmadı, kalan aylara dağıtılmaz` });
+            if (pay > 0) kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: 0, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: abonelik iptal edildi. ${kurusFormat(pay, pb)} kazanılmadı ve kalan aylara dağıtılmaz.` });
           }
         } else if (durum === 'saglanmadi' || (durum === 'belirsiz' && kural.destekIhlali === 'kazandirmaz')) {
           const neden = durum === 'saglanmadi' ? 'destek sağlanmadı' : 'destek sonucu belirsiz';
           if (d.kazanilan[m] > 0) {
             netHakedis -= d.kazanilan[m];
-            kayit({ tarih: o.tarih, tur: 'duzeltme', tutar: -d.kazanilan[m], faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: ${neden}; tahsilatta kazanılan ${kurusFormat(d.kazanilan[m], pb)} geri alınır` });
+            kayit({ tarih: o.tarih, tur: 'duzeltme', tutar: -d.kazanilan[m], faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: ${neden}. Tahsilatta kazanılan ${kurusFormat(d.kazanilan[m], pb)} geri alınır.` });
             d.kazanilan[m] = 0;
           } else if (pay > 0) {
-            kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: 0, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: ${neden}; ${kurusFormat(pay, pb)} kazanılmadı, kalan aylara dağıtılmaz` });
+            kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: 0, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: ${neden}. ${kurusFormat(pay, pb)} kazanılmadı ve kalan aylara dağıtılmaz.` });
           }
           d.kayip[m] = true;
         } else if (durum === 'belirsiz') {
           if (kural.politika === 'hizmet-ayi' && pay > 0) {
             d.bekleyen[m] = pay;
             bekleyenToplam += pay;
-            kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: pay, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: destek sonucu bekleniyor; ${kurusFormat(pay, pb)} koşullu, kazanılmış borç değil` });
+            kayit({ tarih: o.tarih, tur: 'bekleyen', tutar: pay, faturaId: d.fatura.id, hizmetAyi: hm, aciklama: `${ayAdi}: destek sonucu bekleniyor. ${kurusFormat(pay, pb)} koşullu bir tutardır ve henüz ortağa borç oluşturmaz.` });
           }
         } else if (kural.politika === 'hizmet-ayi') {
           hizmetAyiDegerlendir(d, o.tarih, m);

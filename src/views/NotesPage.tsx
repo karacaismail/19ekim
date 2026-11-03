@@ -99,7 +99,7 @@ function NoteRow({ note, listName, onToggle, onEdit, onRemove }: { note: Note; l
             className="note-field"
             classNames={{ label: 'note-field-label', input: 'note-input', description: 'param-help' }}
             label="Notu düzenle"
-            description="Enter yeni satır; Kaydet ya da Ctrl/Cmd+Enter kaydeder, Esc vazgeçer."
+            description="Enter yeni satır açar. Kaydet düğmesi veya Ctrl/Cmd+Enter notu kaydeder. Esc değişikliği iptal eder."
             value={draft}
             autosize
             minRows={2}
@@ -199,7 +199,7 @@ function NotesContent() {
 
   return (
     <>
-      <PageHeader title="Notlar" purpose="Basit not ve görev listesi: ekle, işaretle, düzenle, sil." meta={[{ label: 'Kayıt', value: 'Yalnız bu tarayıcı' }]} />
+      <PageHeader title="Notlar" purpose="Not ekleyin, tamamlananları işaretleyin, notları düzenleyin veya silin." meta={[{ label: 'Kayıt', value: 'Yalnız bu tarayıcı' }]} />
       <div className="notes">
         <nav className="note-lists" aria-label="Listeler">
           <ul>
@@ -277,8 +277,8 @@ function NotesContent() {
           <div className="note-footer">
             <p className="note-status" role="status">
               {storage
-                ? `Bu tarayıcıda saklanır · ${state.notes.filter((n) => !n.done).length} açık, ${state.notes.filter((n) => n.done).length} tamamlandı.`
-                : 'Tarayıcı depolaması kapalı: değişiklikler yalnız bu sayfa açıkken geçerli.'}
+                ? `Notlar bu tarayıcıda saklanır. ${state.notes.filter((n) => !n.done).length} açık ve ${state.notes.filter((n) => n.done).length} tamamlanmış not var.`
+                : 'Tarayıcı depolaması kapalı. Değişiklikler yalnız bu sayfa açık kaldığı sürece geçerlidir.'}
             </p>
             <ConfirmButton label="Varsayılan notlara dön" confirm="Varsayılan notlara dön (onayla)" onConfirm={reset} />
           </div>

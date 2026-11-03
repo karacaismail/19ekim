@@ -252,14 +252,14 @@ export function IstihdamPlanGorunumu() {
           { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => a.ad.split(': ')[1]).join(', ') : 'Plan 3 Kasım 2026’da başlar.' },
           { label: 'Sıradaki adım', value: siradaki ? uzunTarih(siradaki.tarih) : 'Yok', note: siradaki?.baslik },
           { label: 'Birinci dalga', value: '23 Kasım 2026', note: '6 kişi başlar.' },
-          { label: 'İkinci dalga', value: '1 Aralık 2026', note: 'Organizatör ve koşullu 3. saha.' },
+          { label: 'İkinci dalga', value: '1 Aralık 2026', note: 'Organizatör ve koşullu 3. saha personeli başlar.' },
         ]}
       />
       <Section
         id="plan"
         index={1}
         title="Plan"
-        desc="Zaman çizelgesi aşamaları ve sırayla adımları gösterir. Takvim aynı adımları ay ay gösterir."
+        desc="Zaman çizelgesi aşamaları ve adımları sırayla gösterir. Takvim aynı adımları ay ay gösterir."
         tools={
           <Choice<Gorunum>
             label="Görünüm"
@@ -324,7 +324,7 @@ function KadroIcerik() {
                 <p>
                   <strong>{r.saat} saat</strong> gerekir.{' '}
                   {r.saat > NET_SAAT ? `Kapasiteyi yüzde ${Math.round(((r.saat - NET_SAAT) / NET_SAAT) * 100)} aşar.` : 'Kapasiteye sığar.'}
-                  {r.oneriSaat ? ` Öneriyle ${r.oneriSaat} saate iner.` : ''}
+                  {r.oneriSaat ? ` Önerilen düzenlemeyle ${r.oneriSaat} saate iner.` : ''}
                 </p>
               </div>
               <dl className="tk-rol-bilgi">
@@ -353,7 +353,7 @@ function KadroIcerik() {
             <div className="tk-rol-kapasite">
               <KapasiteCubugu saat={YONETICI_YUKU.saat} />
               <p>
-                <strong>{YONETICI_YUKU.saat} saat</strong> gerekir: {YONETICI_YUKU.iseAlim} saat işe alım, {YONETICI_YUKU.yonetim} saat tekrarlayan yönetim. Asistan alınmazsa bu yük zor azalır.
+                <strong>{YONETICI_YUKU.saat} saat</strong> gerekir: {YONETICI_YUKU.iseAlim} saat işe alım ve {YONETICI_YUKU.yonetim} saat tekrarlayan yönetim işi. Asistan alınmazsa bu yük zor azalır.
               </p>
             </div>
           </li>
@@ -379,7 +379,7 @@ function KadroIcerik() {
         </ol>
       </Section>
 
-      <Section id="kararlar" index={3} title="Kararlar ve son tarihler" desc="Kritik kararlar kapanmadan ilgili iş başlamamalıdır. Durum bugünün tarihine göre hesaplanır.">
+      <Section id="kararlar" index={3} title="Kararlar ve son tarihler" desc="Kritik kararlar verilmeden ilgili iş başlamamalıdır. Durum bugünün tarihine göre hesaplanır.">
         <ol className="tk-kararlar">
           {kararlar.map((k) => (
             <li key={k.konu} className="tk-karar">
@@ -408,7 +408,7 @@ function KadroIcerik() {
         </ul>
       </Section>
 
-      <Section id="ek-roller" index={4} title="Listede olmayan ama gereken roller" desc="Hemen yeni kadro gerekmez. Her rol, yazılı tetikleyici gerçekleşince açılır.">
+      <Section id="ek-roller" index={4} title="Listede olmayan ama gereken roller" desc="Bu roller için hemen yeni kadro gerekmez. Her rol, yanında yazan koşul gerçekleşince açılır.">
         <div className="tk-ek">
           {SEVIYE_SIRA.map((s) => (
             <section key={s} className="tk-ek-grup" aria-labelledby={`ek-${s}`}>
@@ -423,7 +423,7 @@ function KadroIcerik() {
                     <p className="tk-ek-ad">{r.ad}</p>
                     <p>{r.neden}</p>
                     <p className="tk-ek-meta">
-                      Ne zaman: {r.tetik}. Model: {r.model}.
+                      Ne zaman: {r.tetik}. Çalışma biçimi: {r.model}.
                     </p>
                   </li>
                 ))}

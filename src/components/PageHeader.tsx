@@ -71,7 +71,7 @@ export function PageHeader({
     <>
       <div className="crumbs-row" data-page-header="">
         {yol ? (
-          <nav aria-label="Ağaç yolu" className="crumbs">
+          <nav aria-label="Sayfa yolu" className="crumbs">
             <ol>
               <li>
                 <a href={href('/')}>19 Ekim</a>

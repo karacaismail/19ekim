@@ -173,7 +173,7 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
       values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + sahaEk[m.t] + f.ekSabit)),
       kaynak: 'sheets',
       fallback: false,
-      note: `Sabit giderler Google Sheets’ten (Giderler sayfasıyla aynı canlı veri; bordrolu personel teşvik düşülmüş işveren maliyeti, teknoloji ve ofis kalemleri); 2028 ayları 2027 ortalamasıyla. Sheets’te olmayanlar eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay başlangıç; kural tutuyorsa ölçeklenir) ve ikinci, ek ve büyüme saha personelinin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}) başladıkları aydan itibaren.`,
+      note: `Sabit giderler Google Sheets’ten alınır. Bu veri Giderler sayfasıyla aynıdır: bordrolu personelin teşvik düşüldükten sonraki işveren maliyeti, teknoloji ve ofis kalemleri. 2028 ayları için 2027 ortalaması kullanılır. Sheets’te olmayan kalemler ayrıca eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay, kural sağlanırsa ölçeklenir) ve ikinci, ek ve büyüme saha personelinin başladıkları aydan itibaren işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}).`,
     };
   }
   const kadro = staffCosts(p, prog, months, inputs);
@@ -182,7 +182,7 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
     values: months.map((m) => r2(kadro[m.t] + (m.t >= startT ? p.aiToolsMonthly : 0) + meta(m) + reklam[m.t] + f.ekSabit)),
     kaynak: 'plan',
     fallback: f.kaynak === 'sheets',
-    note: `Sabit giderler plan kadrosundan: kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}; ikinci, ek ve büyüme saha personeli başladıkları aydan, organizatör ve ekip lideri Aralık’tan), YZ araçları tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesi (${budget.toLocaleString('tr-TR')} ₺ / ay başlangıç; kural tutuyorsa ölçeklenir). Ofis ve yazılım ekibi bu kaynakta yoktur; tam resim Sheets kaynağıdır.`,
+    note: `Sabit giderler plan kadrosundan alınır. Bunlar kadro tablosundaki maaşlı rollerin işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}), yapay zekâ araçlarının tavanı, Meta işe alım reklamı ve satıcı kazanım reklam bütçesidir (başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay, kural sağlanırsa ölçeklenir). İkinci, ek ve büyüme saha personeli başladıkları aydan, organizatör ve ekip lideri Aralık’tan itibaren sayılır. Ofis ve yazılım ekibi giderleri bu kaynakta yoktur. Tüm giderleri görmek için Sheets kaynağını seçin.`,
   };
 }
 

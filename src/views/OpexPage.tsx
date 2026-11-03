@@ -212,7 +212,7 @@ function useOpexLive() {
         } else setLive({ status: 'failed', error: reply.message });
       } catch {
         if (stopped || active !== own) return;
-        const message = timedOut ? `Yanıt ${Math.round(limit / 1000)} sn içinde gelmedi.` : 'İstek kesildi.';
+        const message = timedOut ? `Sunucu ${Math.round(limit / 1000)} saniye içinde yanıt vermedi.` : 'İstek yarıda kesildi.';
         if (last.current) setLive({ status: 'ready', data: last.current, checked: last.current.denetlendi, stale: message });
         else setLive({ status: 'failed', error: message });
       } finally {
@@ -290,8 +290,8 @@ function Loader() {
         </p>
         {/* Geçen süre ilerleme oranı değildir (gorsel_algi.md F23 / C097); uzun beklemede uygulanabilir sonraki adım. */}
         <p className="opex-loader-meta" aria-hidden="true">
-          {seconds} sn geçti · ilerleme oranı değil{seconds >= 6 ? ' · Apps Script ilk istekte birkaç saniye sürebilir' : ''}
-          {seconds >= 20 ? ' · Uzun sürüyor: Bağlantı’dan adresi ve Sheets paylaşımını denetleyin ya da Şimdi yenile' : ''}
+          {seconds} sn geçti · ilerleme oranı değil{seconds >= 6 ? ' · Apps Script ilk istekte birkaç saniye sürebilir.' : ''}
+          {seconds >= 20 ? ' Yükleme uzun sürüyor. Bağlantı ayarından adresi ve Sheets paylaşımını kontrol edin ya da “Şimdi yenile” düğmesine basın.' : ''}
         </p>
       </div>
       <div className="opex-loader-bar" aria-hidden="true">
@@ -326,7 +326,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
     event.preventDefault();
     const url = endpoint.trim();
     if (!isEndpoint(url)) {
-      setProblem('Adres script.google.com ile başlayıp “/exec” ile bitmeli: Apps Script → Dağıt → Web uygulaması adresi.');
+      setProblem('Adres script.google.com ile başlamalı ve “/exec” ile bitmeli. Doğru adresi Apps Script’te Dağıt → Web uygulaması bölümünde bulabilirsiniz.');
       return;
     }
     setProblem('');
@@ -337,14 +337,14 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
     <form className="opex-connect" onSubmit={submit} noValidate aria-describedby={message ? errorId : undefined}>
       <h3 className="block-title">Google Sheets bağlantısı</h3>
       <p className="opex-connect-lead">
-        Veriler bu sayfada saklanmaz; Google Sheets’teki Apps Script web uygulamasından okunur. Sheets’te erişim “Anahtarla” ise anahtar
-        gerekir; anahtar yalnız bu tarayıcıda tutulur ve adreste taşınmaz.
+        Bu sayfa verileri saklamaz. Veriler, Google Sheets’e bağlı Apps Script web uygulamasından okunur. Sheets’te erişim “Anahtarla”
+        olarak ayarlıysa anahtar girmeniz gerekir. Anahtar yalnız bu tarayıcıda tutulur ve sayfa adresine eklenmez.
       </p>
       <TextInput
         className="opex-field"
         classNames={{ label: 'opex-field-label', input: 'opex-input', description: 'opex-field-help' }}
         label="Web uygulaması adresi"
-        description="Apps Script → Dağıt → Web uygulaması adresi (…/exec)"
+        description="Apps Script’te Dağıt → Web uygulaması bölümündeki adres (…/exec ile biter)"
         type="url"
         inputMode="url"
         autoComplete="off"
@@ -357,7 +357,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
         className="opex-field"
         classNames={{ label: 'opex-field-label', input: 'opex-input', description: 'opex-field-help' }}
         label="Erişim anahtarı"
-        description="Erişim “Herkese açık” ise boş bırakın; değilse Sheets → OPEX → Web bağlantısı bilgisi"
+        description="Erişim “Herkese açık” ise boş bırakın. Değilse anahtarı Sheets’te OPEX → Web bağlantısı bilgisi menüsünden alın."
         type="password"
         autoComplete="off"
         spellCheck={false}
@@ -368,7 +368,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
         className="opex-remember"
         classNames={{ input: 'opex-check-input', label: 'opex-check-label', body: 'opex-check-body', description: 'opex-check-desc' }}
         label="Bu cihazda hatırla"
-        description="Önerilmez: aynı github.io adresindeki diğer sayfalar da okuyabilir; kapalıysa anahtar yalnız bu sekmede kalır."
+        description="Önerilmez, çünkü aynı github.io adresindeki diğer sayfalar da anahtarı okuyabilir. Bu seçenek kapalıysa anahtar yalnız bu sekmede kalır."
         checked={remember}
         onChange={(e) => setRemember(e.currentTarget.checked)}
       />
@@ -388,9 +388,9 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
         ) : null}
       </div>
       <ol className="opex-steps">
-        <li>Google Sheets’te Uzantılar → Apps Script’e paketi yapıştırın; OPEX menüsünden “Kurulum / onarım” çalıştırın.</li>
-        <li>Dağıt → Yeni dağıtım → Web uygulaması: “Ben olarak çalıştır”, erişim “Herkes”.</li>
-        <li>OPEX → “Web bağlantısı bilgisi”nden adresi ve anahtarı kopyalayıp buraya girin.</li>
+        <li>Google Sheets’te Uzantılar → Apps Script bölümünü açın ve paketi yapıştırın. Ardından OPEX menüsünden “Kurulum / onarım” komutunu çalıştırın.</li>
+        <li>Dağıt → Yeni dağıtım → Web uygulaması yolunu izleyin. “Ben olarak çalıştır” seçeneğini ve erişim için “Herkes” seçeneğini seçin.</li>
+        <li>OPEX → “Web bağlantısı bilgisi” menüsünden adresi ve anahtarı kopyalayın, sonra bu forma yapıştırın.</li>
       </ol>
     </form>
   );
@@ -588,7 +588,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
         <Chart
           id={`kategoriler-${d.yil}`}
           title="Kategoriler"
-          note={`${d.etiket} toplamı; renk grubu gösterir`}
+          note={`${d.etiket} toplamı. Renk, kategorinin grubunu gösterir.`}
           size="lg"
           rows={kats.length}
           summary={kats.map((k) => `${k.name} ${tl(k.value)}`).join('; ')}
@@ -686,11 +686,11 @@ type KalemFiltre = 'tumu' | KumeKod;
 type HizliKod = 'doviz' | 'tesvik' | 'bekleyen' | 'bos' | 'ozel' | 'artar';
 const HIZLI: { kod: HizliKod; ad: string; tip: 'anahtar' | 'kutu'; aciklama: string }[] = [
   { kod: 'doviz', ad: 'Dövizli', tip: 'anahtar', aciklama: 'USD veya EUR ile ödenen kalemler' },
-  { kod: 'tesvik', ad: 'Teşvikli', tip: 'anahtar', aciklama: 'İşveren teşviki düşülen personel' },
+  { kod: 'tesvik', ad: 'Teşvikli', tip: 'anahtar', aciklama: 'İşveren teşviki düşülen personel kalemleri' },
   { kod: 'bekleyen', ad: 'Bekleyen', tip: 'anahtar', aciklama: 'Bu ay ödemesi bekleyen kalemler' },
-  { kod: 'bos', ad: 'Boş ay', tip: 'kutu', aciklama: 'En az bir ayı boş (gider yok) olanlar' },
-  { kod: 'ozel', ad: 'Özel tutar', tip: 'kutu', aciklama: 'En az bir aya ayrı tutar yazılmış olanlar' },
-  { kod: 'artar', ad: 'Artışlı', tip: 'kutu', aciklama: '2027 artışı veya zammı olanlar' },
+  { kod: 'bos', ad: 'Boş ay', tip: 'kutu', aciklama: 'En az bir ayında gider olmayan kalemler' },
+  { kod: 'ozel', ad: 'Özel tutar', tip: 'kutu', aciklama: 'En az bir ayına özel tutar yazılmış kalemler' },
+  { kod: 'artar', ad: 'Artışlı', tip: 'kutu', aciklama: '2027 için artış veya zam tanımlanmış kalemler' },
 ];
 const HIZLI_KOSUL: Record<HizliKod, (r: Kalem) => boolean> = {
   doviz: (r) => r.para !== 'TRY',
@@ -1470,7 +1470,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             ) : null}
             {/* Kısa sembol efsanesi (gorsel_algi.md F17): yoğun tabloda “—” korunur, anlamı görünür ve yereldir. */}
             <p className="opex-sembol-efsanesi">
-              — : o ay bu kalemde gider yok (0 ₺); personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bordrosuz kalem için uygulanmıyor demektir.
+              — : o ay bu kalemde gider yok (0 ₺). Personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bu işaret, alanın bordrosuz kalem için geçerli olmadığını gösterir.
             </p>
           </div>
         </div>
@@ -1657,7 +1657,7 @@ function TechVendors({ m, p }: { m: OpexModel; p: Plan }) {
     <Chart
       id="teknoloji"
       title="Teknoloji sağlayıcıları"
-      note={`${p.etiket} toplamı ₺, hesaplar toplanmış`}
+      note={`${p.etiket} toplamı (₺). Aynı sağlayıcının hesapları birleştirildi.`}
       size="md"
       rows={tech.length}
       summary={tech.map(([n, v]) => `${n} ${tl(v)}`).join('; ')}
@@ -1716,7 +1716,7 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
       <Chart
         id={`bordro-bilesim-${d.yil}`}
         title="Netten işveren maliyetine"
-        note={`${d.etiket}, bordrolu toplam · işveren maliyeti ${tl(b.maliyet)} (brüt ${tl(b.brut)})${b.tesvik ? ` · teşvik −${tl(b.tesvik)} düşüldü` : ''}`}
+        note={`${d.etiket}, bordrolu personelin toplamı. İşveren maliyeti ${tl(b.maliyet)} (brüt ${tl(b.brut)})${b.tesvik ? `, düşülen teşvik ${tl(b.tesvik)}` : ''}.`}
         size="sm"
         rows={1}
         shortLabels
@@ -1741,10 +1741,10 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
     { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (r) => (r.kind === 'ay' ? r.ad : 'Dönem toplamı') },
     c('Brüt', (s) => s.brut),
     c('SGK + işsizlik (işçi)', (s) => s.sgkIsci + s.issizlikIsci),
-    c('GV matrahı', (s) => s.gvMatrahi),
+    c('Gelir vergisi matrahı', (s) => s.gvMatrahi),
     c('Kümülatif matrah', (s) => s.kumulatifMatrah),
     c('Gelir vergisi', (s) => s.gv),
-    c('Asgari ücret GV istisnası', (s) => s.gvIstisna),
+    c('Asgari ücret gelir vergisi istisnası', (s) => s.gvIstisna),
     c('Damga vergisi', (s) => s.dv),
     c('Net', (s) => s.net),
     c('İşveren SGK + işsizlik', (s) => s.sgkIsveren + s.issizlikIsveren),
@@ -1768,7 +1768,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <Chart
         id={`bordro-aylik-${d.yil}`}
         title={`${person.ad}: aylık bordro`}
-        note={`${d.etiket}; kümülatif gelir vergisi dilimi geçtikçe aynı net için brüt artar`}
+        note={`${d.etiket}. Kümülatif matrah yeni bir gelir vergisi dilimine geçtikçe aynı net ücret için brüt ücret artar.`}
         size="lg"
         rows={d.aySayisi}
         shortLabels
@@ -1787,7 +1787,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <DataTable
         id={`bordro-ay-${d.yil}`}
         title={`${person.ad} · ${d.etiket} bordro`}
-        note={`SGK tavanı ${tl(asg.tavan)}; asgari ücret ${tlExact(asg.brut)} brüt / ${tlExact(asg.net)} net. Asgari ücrete isabet eden gelir ve damga vergisi istisna edilir.${d.yil === 2026 && d.aySayisi < 12 ? ' Kümülatif matrah Ocak 2026’dan hesaplanır.' : ''}`}
+        note={`SGK tavanı ${tl(asg.tavan)}. Asgari ücret ${tlExact(asg.brut)} brüt, ${tlExact(asg.net)} net. Asgari ücrete denk gelen tutar gelir vergisi ve damga vergisinden istisnadır.${d.yil === 2026 && d.aySayisi < 12 ? ' Kümülatif matrah Ocak 2026’dan hesaplanır.' : ''}`}
         columns={columns /* summary: 'İşveren maliyeti' (sütun tanımında, F07) */}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
@@ -1842,7 +1842,7 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
         <a className="text-link" href={e.kaynak} target="_blank" rel="noopener noreferrer">
           Kaynak arama bağlantısı
         </a>{' '}
-        (arama sonucu; doğrulanmış kaynak değildir, tarih ve sürümü kullanıcı denetler).
+        (Bu bağlantı bir arama sonucudur, doğrulanmış kaynak değildir. Tarihi ve sürümü kullanıcının kontrol etmesi gerekir.)
       </p>
       <Chart
         id="kisi-2027"
@@ -1895,7 +1895,7 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
     <DataTable
       id={`tesvikler-${d.yil}`}
       title={`SGK teşvik ve destekleri · ${d.yil}`}
-      note="Standart olanlar uygun herkese parametreyle uygulanır; koşullu olanlar yalnız Sheets’te kişiye kodu yazılınca. Mali müşavirle doğrulayın."
+      note="Standart teşvikler, koşulu sağlayan herkese parametreyle uygulanır. Koşullu teşvikler yalnız Sheets’te kişinin satırına teşvik kodu yazılınca uygulanır. Tutarları mali müşavirle doğrulayın."
       columns={columns /* summary: 'Tür ve değer' (sütun tanımında, F07) */}
       rows={m.tesvikler}
     />
@@ -1911,14 +1911,14 @@ function YearPanel({ m, d, start }: { m: OpexModel; d: Donem; start: number }) {
       <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`}>
         <Overview m={m} d={d} />
       </Section>
-      <Section id={`ucretler-${d.yil}-bolum`} index={no()} title="Personel giderleri" desc="Bordrolu personel netten brüte ve işveren maliyetine; freelancerlar KDV dahil faturayla.">
+      <Section id={`ucretler-${d.yil}-bolum`} index={no()} title="Personel giderleri" desc="Bordrolu personelin maliyeti netten brüte, oradan da işveren maliyetine hesaplanır. Freelancer maliyeti KDV dahil fatura tutarıdır.">
         <People m={m} d={d} />
       </Section>
-      <Section id={`bordro-${d.yil}-bolum`} index={no()} title="Netten brüte: aylık bordro" desc="Gelir vergisi yıl içinde kümülatif matrahla hesaplanır; asgari ücret istisnası ve SGK tavanı uygulanır.">
+      <Section id={`bordro-${d.yil}-bolum`} index={no()} title="Netten brüte: aylık bordro" desc="Gelir vergisi yıl içinde kümülatif matrahla hesaplanır. Asgari ücret istisnası ve SGK tavanı da uygulanır.">
         <Payroll m={m} d={d} />
       </Section>
       {d.yil === 2027 ? (
-        <Section id="varsayimlar-2027" index={no()} title="2027 varsayımları" desc="Ücret zammı enflasyon parametresine bağlıdır; kira, fatura ve döviz kalemleri kendi artış esasıyla.">
+        <Section id="varsayimlar-2027" index={no()} title="2027 varsayımları" desc="Ücret zammı enflasyon parametresine bağlıdır. Kira, fatura ve döviz kalemleri kendi artış esaslarına göre artar.">
           <Assumptions m={m} d={d} />
         </Section>
       ) : null}
@@ -1950,10 +1950,10 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
           </ul>
         </Note>
       ) : null}
-      <Section id="plan-bolum" index={1} title={`Aylık plan · ${p.etiket}`} desc="Her ayın teknoloji, ofis ve işletme ve personel gideri ayrı hesaplanır.">
+      <Section id="plan-bolum" index={1} title={`Aylık plan · ${p.etiket}`} desc="Her ay için teknoloji, ofis ve işletme ile personel giderleri ayrı hesaplanır.">
         <Plan p={p} />
       </Section>
-      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Üç grup: ofis (kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları), teknoloji (yazılım, yapay zekâ, sunucu, API, AWS vb.), personel (bordro ve freelancer).">
+      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Kalemler üç gruba ayrılır: ofis (kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları), teknoloji (yazılım, yapay zekâ, sunucu, API, AWS vb.) ve personel (bordro ve freelancer).">
         <KalemTablosu m={m} p={p} />
         {/* Tablo ile grafik arasında ayırıcı (kullanıcı kararı 2026-10-21). */}
         <hr className="opex-ayrac opex-ayrac-arada" />
@@ -1995,7 +1995,7 @@ function Body() {
       onCancel={cancel}
       onConnect={(c) => {
         setSettings(false);
-        setStorageNote(connect(c) ? '' : 'Tarayıcı depolaması kapalı; bağlantı yalnız bu sayfa açıkken geçerli.');
+        setStorageNote(connect(c) ? '' : 'Tarayıcı depolaması kapalı. Bu yüzden bağlantı yalnız bu sayfa açıkken geçerlidir.');
       }}
     />
   );
@@ -2007,7 +2007,7 @@ function Body() {
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}
       </p>
-      <p className="opex-nojs">Bu sayfa verileri Google Sheets’ten JavaScript ile okur; tarayıcınızda JavaScript açık olmalı.</p>
+      <p className="opex-nojs">Bu sayfa verileri Google Sheets’ten JavaScript ile okur. Bu yüzden tarayıcınızda JavaScript açık olmalıdır.</p>
       {live.status === 'init' ? <Loader /> : null}
       {live.status === 'setup' ? form(live.error) : null}
       {live.status === 'loading' ? <Loader /> : null}
@@ -2040,7 +2040,7 @@ function Body() {
           {live.stale ? (
             <p className="opex-live-stale" role="status">
               {live.stale} Son alınan veri gösteriliyor (Sheets’teki son değişiklik {clock(live.data.degisti)}, son denetim {clock(live.checked)}). Üst banttaki “Şimdi
-              yenile” ile tekrar deneyin; sürerse Bağlantı’dan adresi denetleyin.
+              yenile” düğmesiyle tekrar deneyin. Sorun sürerse Bağlantı ayarından adresi kontrol edin.
             </p>
           ) : null}
           {storageNote ? <p className="opex-live-stale">{storageNote}</p> : null}
