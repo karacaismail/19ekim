@@ -108,14 +108,24 @@ function Kadrolu({ a }: { a: Ayar }) {
         aciklama={
           <>
             {k.prim > 0 ? `${tl(a.maas)} maaş alır. Kotayı aştığı için cironun ${yuzde(a.kadroluPrim[a.marka])}’u kadar, ${tl(k.prim)} prim eklenir.` : `${tl(a.maas)} maaş alır. Kotayı aşınca cironun ${yuzde(a.kadroluPrim[a.marka])}’unu prim olarak alır.`}
-            <span className="so2-bize">Bu ay bizim cironuz {tl(k.ciro)}. Prim düşülünce {tl(k.ciro - k.prim)} kalır.</span>
+            <span className="so2-bize">{k.prim > 0 ? `Bu ay ciromuz ${tl(k.ciro)}. Prim düşülünce bize ${tl(k.ciro - k.prim)} kalır.` : `Bu ay ciromuz ${tl(k.ciro)}.`}</span>
           </>
         }
       />
       <div className="so2-kota">
         <div className="so2-kota-ust">
-          <span>Ciro {tl(k.ciro)}</span>
-          <span>Kota {tl(k.kota)}</span>
+          <span>
+            Ciro {tl(k.ciro)}
+            <small>
+              {a.kadroluSatis} paket × {tl(yillikFiyat(a))}
+            </small>
+          </span>
+          <span>
+            Kota {tl(k.kota)}
+            <small>
+              {tl(a.maas)} maaş × {a.kotaCarpan} + %{Math.round(a.kotaEk * 100)}
+            </small>
+          </span>
         </div>
         <svg className="so2-kota-cubuk" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
           <rect className="so2-kota-iz" x="0" y="0" width="100" height="10" />
