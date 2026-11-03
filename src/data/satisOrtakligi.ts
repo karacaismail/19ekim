@@ -104,7 +104,7 @@ export const VARSAYILAN_AYAR: Ayar = {
   elciSatis: 2,
 };
 
-export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Tanıştırır', B: 'Demo yapar', C: 'Satışı kapatır' };
+export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Demo da yapar', C: 'Satışı kendisi kapatır' };
 export const PAKET_ADI: Record<SegikaPaket, string> = { ikisi: 'Teşvik ve Otomasyon', tesvik: 'SGK Teşvik', otomasyon: 'SGK Otomasyon' };
 
 /**
@@ -254,5 +254,5 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
   ];
 }
 
-export const ASAMA_ADI = ['Öğrenir', 'İlk müşteri', 'Portföy', 'Usta'];
-export const ASAMA_SURE = ['0–14. gün', '15–45. gün', '46–90. gün', '90. gün sonrası'];
+export const ASAMA_ADI = ['Eğitim dönemi', 'İlk müşteri', 'Düzenli satış', 'Deneyimli'];
+export const ASAMA_SURE = ['İlk 14 gün', '15–45. gün', '46–90. gün', '90. günden sonra'];

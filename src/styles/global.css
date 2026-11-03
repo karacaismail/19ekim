@@ -6763,6 +6763,8 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 
 .so2-fiyat {
   display: grid;
+  min-height: 5rem;
+  align-content: end;
   margin: 0 0 0 auto;
   color: var(--text-secondary);
   text-align: end;
@@ -6844,16 +6846,17 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   font-weight: var(--weight-medium);
 }
 
+/* Solda değiştirilebilen ayarlar (en çok %50, burada %40), sağda hesaplanan sonuçlar (en az %50) (kullanıcı kararı 2026-11-03). */
 .so2-duzen {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 22rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   gap: var(--space-2);
   align-items: start;
 }
 
 .so2-panel {
   min-height: 32rem;
-  padding: var(--space-8) var(--space-10);
+  padding: var(--space-8);
   background-color: var(--surface-raised);
 }
 
@@ -7095,7 +7098,16 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 
 .so2-grup-alanlar {
   display: grid;
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-3) var(--space-4);
+  align-items: end;
+}
+
+/* Seçenek grupları ve kademe satırları ayar sütununun tam genişliğinde. */
+.so2-grup-alanlar > .so2-sec,
+.so2-grup-alanlar > .so2-kademe,
+.so2-grup-alanlar > .secim {
+  grid-column: 1 / -1;
 }
 
 .so2-girdi-ad {
@@ -7157,17 +7169,14 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 
 /* Segika müşteri büyüklüğü: çalışan sayısı ve hazır örnekler */
 .so2-calisan {
-  display: flex;
-  align-items: flex-end;
+  display: grid;
+  grid-column: 1 / -1;
   gap: var(--space-2);
 }
 
-.so2-calisan .so2-girdi {
-  width: 14rem;
-}
-
 .so2-hazir {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-1);
 }
 
@@ -7199,8 +7208,17 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 
 .so2-kademe {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.so2-kademe-ad {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Affilate sade görünüm: üç model sekmesi, yıllara dağılım */
@@ -7222,4 +7240,137 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 
 .so2-ayrinti {
   margin: var(--space-6) 0 0;
+}
+
+/*
+ * Hareket (kullanıcı kararı 2026-11-03: tıklama ve üzerine gelmede güçlü, yumuşak easeInOut): sekmeler, seçenek ve
+ * örnek düğmeleri temel süreyle renk ve zemin geçişi; seçili rol ya da ürün değişince sonuç sütunu yumuşakça belirir.
+ * Kutu boyutu ve konumu değişmez (zıplama yok); hareket azaltma tercihinde süreler 0.
+ */
+.so2-rol,
+.so2-sec-dugme,
+.so2-hazir-dugme,
+.so2-sifirla {
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-rol-tutar,
+.so2-rol-ad {
+  transition-property: color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-rol:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.so2-rol:hover .so2-rol-ad {
+  color: var(--accent-strong);
+}
+
+.so2-sifirla:hover {
+  color: var(--text-primary);
+}
+
+.so2-gecis {
+  animation-name: so2-belir;
+  animation-duration: var(--motion-duration-theme);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+  animation-fill-mode: both;
+}
+
+@keyframes so2-belir {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.so2-kota-dolgu,
+.so2-asama .so2-kota-dolgu {
+  transition-property: width, fill;
+  transition-duration: var(--motion-duration-theme);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+/* Girdi alanı: − / + düğmeleri ve belirgin kutu; sonuç metinlerinden açıkça ayrılır. */
+.so2-girdi-satir {
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr) var(--hit-min);
+}
+
+.so2-girdi-kutu {
+  --input-bd: var(--rule-strong);
+  --input-bd-focus: var(--text-primary);
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  border-radius: 0;
+  cursor: text;
+}
+
+.so2-girdi-kutu:hover {
+  --input-bd: var(--text-primary);
+}
+
+.so2-girdi-birim {
+  color: var(--text-secondary);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.so2-adim {
+  display: grid;
+  place-items: center;
+  min-height: var(--hit-min);
+  border: var(--hairline) solid var(--rule-strong);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color, color, border-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-adim:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+}
+
+.so2-adim:disabled {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+/* Sonucun altında platforma (bize) kalan tutar: kazancın kime ait olduğu ayrışsın. */
+.so2-bize {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+}
+
+.so2-asama-tutar small {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
 }

@@ -6,16 +6,32 @@ import { NumberInput } from '@mantine/core';
  * ayar grubu, tek büyük sonuç ve kısa kurallar. Stiller global.css → .so2-*.
  */
 
-/** Sade sayı alanı: etiket, değer, birim. Yüzde alanında değer oran olarak saklanır. */
+/**
+ * Değiştirilebilen sayı alanı (kullanıcı kararı 2026-11-03: girdi ile sonuç ayırt edilsin): − / + düğmeleri, belirgin
+ * kenarlı kutu ve kutunun dışında duran birim. Yüzde alanında değer oran olarak saklanır; adım yüzde puanıdır.
+ */
 export function Girdi({ label, value, onChange, yuzdeMi = false, birim, step = 1, min = 0 }: { label: string; value: number; onChange: (v: number) => void; yuzdeMi?: boolean; birim?: string; step?: number; min?: number }) {
+  const goster = yuzdeMi ? Math.round(value * 1000) / 10 : value;
+  const yaz = (v: number) => {
+    if (Number.isFinite(v) && v >= min) onChange(yuzdeMi ? v / 100 : v);
+  };
+  const adim = (yon: 1 | -1) => yaz(Math.max(min, Math.round((goster + yon * step) * 100) / 100));
   return (
     <NumberInput
       className="so2-girdi"
       classNames={{ label: 'so2-girdi-ad', input: 'param-input so2-girdi-kutu' }}
-      label={label}
-      value={yuzdeMi ? Math.round(value * 1000) / 10 : value}
+      label={
+        birim ? (
+          <>
+            {label} <span className="so2-girdi-birim">{birim}</span>
+          </>
+        ) : (
+          label
+        )
+      }
+      value={goster}
       onChange={(v) => {
-        if (typeof v === 'number' && Number.isFinite(v) && v >= min) onChange(yuzdeMi ? v / 100 : v);
+        if (typeof v === 'number') yaz(v);
       }}
       hideControls
       allowNegative={false}
@@ -24,8 +40,18 @@ export function Girdi({ label, value, onChange, yuzdeMi = false, birim, step = 1
       decimalScale={2}
       step={step}
       prefix={yuzdeMi ? '%' : undefined}
-      suffix={birim ? ` ${birim}` : undefined}
       size="md"
+      inputContainer={(children) => (
+        <div className="so2-girdi-satir">
+          <button type="button" className="so2-adim" aria-label={`${label}: azalt`} disabled={goster - step < min} onClick={() => adim(-1)}>
+            −
+          </button>
+          {children}
+          <button type="button" className="so2-adim" aria-label={`${label}: artır`} onClick={() => adim(1)}>
+            +
+          </button>
+        </div>
+      )}
     />
   );
 }
