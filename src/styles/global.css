@@ -9460,3 +9460,11 @@ html[data-focus-mode='keyboard'] :where(.ks-secenek, .ks-liste-oge):focus-visibl
     padding: var(--space-5) var(--space-4);
   }
 }
+
+/* Satış ortaklığı sürüm seçicisi (2026-11-03): ürün ve ödeme satırının üstünde ayrı satır; v1 ve v2 için ortaktır. */
+.so-surum {
+  display: flex;
+  margin-top: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--rule);
+}

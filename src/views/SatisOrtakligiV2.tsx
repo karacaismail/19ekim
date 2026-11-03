@@ -1,9 +1,15 @@
+/**
+ * Satış ortaklığı v2 (kullanıcı kararı 2026-11-03): v1'in (SatisOrtakligiPage.tsx) kopyasıdır ve ondan bağımsız gelişir.
+ * v2 yalnız *V2 dosyalarını kullanır: data/satisOrtakligiV2, kosullarV2, affilateV2, affilateKurguV2,
+ * components/sadeKitV2, AgDiyagramiV2, AffilateMotoruV2 ve styles/satisOrtakligiV2.css (v2- önekli sınıflar).
+ * Ortak kalanlar yalnız sitenin genel parçalarıdır: PageHeader, Choice, tokenlar.
+ */
 import { useEffect, useState, type ReactNode } from 'react';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
 import { AgDiyagrami } from '../components/AgDiyagramiV2';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKit';
+import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKitV2';
 import {
   ASAMA_ADI,
   ASAMA_SURE,
@@ -27,8 +33,9 @@ import {
   type Seviye,
 } from '../data/satisOrtakligiV2';
 import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullarV2';
-import { POLITIKA_ADI } from '../data/affilateKurgu';
-import type { Politika } from '../data/affilate';
+import { POLITIKA_ADI } from '../data/affilateKurguV2';
+import type { Politika } from '../data/affilateV2';
+import '../styles/satisOrtakligiV2.css';
 
 const ANAHTAR = 'turksab-satis-ortakligi-v2';
 const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
@@ -82,17 +89,17 @@ function Oncu({ a }: { a: Ayar }) {
         aciklama={
           <>
             {a.marka === 'istoc' ? 'Deniz' : 'Ece'} ayda {a.oncuAsama[3]} yıllık paket satarsa bu tutarı kazanır. Her satıştan {tl(birim)} alır.
-            <span className="so2-bize">Aynı satışlardan bize {tl(a.oncuAsama[3] * (yillikFiyat(a) - birim))} kalır.</span>
+            <span className="v2-so2-bize">Aynı satışlardan bize {tl(a.oncuAsama[3] * (yillikFiyat(a) - birim))} kalır.</span>
           </>
         }
       />
-      <ol className="so2-asamalar">
+      <ol className="v2-so2-asamalar">
         {ASAMA_ADI.map((ad, i) => (
-          <li key={ad} className="so2-asama" data-aktif={a.oncuAsama[i] > 0 ? '' : undefined}>
-            <span className="so2-asama-sure">{ASAMA_SURE[i]}</span>
-            <span className="so2-asama-ad">{ad}</span>
-            <span className="so2-asama-hedef">{a.oncuAsama[i] ? `Ayda ${a.oncuAsama[i]} satış` : 'Satış beklenmez'}</span>
-            <span className="so2-asama-tutar">
+          <li key={ad} className="v2-so2-asama" data-aktif={a.oncuAsama[i] > 0 ? '' : undefined}>
+            <span className="v2-so2-asama-sure">{ASAMA_SURE[i]}</span>
+            <span className="v2-so2-asama-ad">{ad}</span>
+            <span className="v2-so2-asama-hedef">{a.oncuAsama[i] ? `Ayda ${a.oncuAsama[i]} satış` : 'Satış beklenmez'}</span>
+            <span className="v2-so2-asama-tutar">
               <small>Ortağa</small> {tl(a.oncuAsama[i] * birim)}
             </span>
           </li>
@@ -113,12 +120,12 @@ function Kadrolu({ a }: { a: Ayar }) {
         aciklama={
           <>
             {`${tl(a.maas)} maaş alır. ` + (a.model === 'oran' ? (k.prim > 0 ? `Kotayı aştığı için ${tl(k.prim)} prim de alır. Prim, kotayı aşan cironun ${yuzde(a.kadroluPrim[a.marka])} kadarıdır.` : `Kotayı aşınca, kotayı aşan cironun ${yuzde(a.kadroluPrim[a.marka])} kadarını prim olarak alır.`) : k.prim > 0 ? `Kotayı aştığı için ${tl(k.prim)} prim de alır. Kotadan sonraki her satış ${tl(a.sabit)} prim getirir.` : `Kotayı aşınca, sonraki her satıştan ${tl(a.sabit)} prim alır.`)}
-            <span className="so2-bize">{k.prim > 0 ? `Bu ay ciromuz ${tl(k.ciro)}. Prim düşülünce bize ${tl(k.ciro - k.prim)} kalır.` : `Bu ay ciromuz ${tl(k.ciro)}.`}</span>
+            <span className="v2-so2-bize">{k.prim > 0 ? `Bu ay ciromuz ${tl(k.ciro)}. Prim düşülünce bize ${tl(k.ciro - k.prim)} kalır.` : `Bu ay ciromuz ${tl(k.ciro)}.`}</span>
           </>
         }
       />
-      <div className="so2-kota">
-        <div className="so2-kota-ust">
+      <div className="v2-so2-kota">
+        <div className="v2-so2-kota-ust">
           <span>
             Ciro {tl(k.ciro)}
             <small>
@@ -132,11 +139,11 @@ function Kadrolu({ a }: { a: Ayar }) {
             </small>
           </span>
         </div>
-        <svg className="so2-kota-cubuk" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-          <rect className="so2-kota-iz" x="0" y="0" width="100" height="10" />
-          <rect className="so2-kota-dolgu" data-asti={k.doluluk >= 1 ? '' : undefined} x="0" y="0" width={dolu * 100} height="10" />
+        <svg className="v2-so2-kota-cubuk" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+          <rect className="v2-so2-kota-iz" x="0" y="0" width="100" height="10" />
+          <rect className="v2-so2-kota-dolgu" data-asti={k.doluluk >= 1 ? '' : undefined} x="0" y="0" width={dolu * 100} height="10" />
         </svg>
-        <p className="so2-kota-not">{k.doluluk >= 1 ? `Kotaya ${k.kotaIcinSatis} satışla ulaşır. Sonraki her satış prim getirir.` : `Kotaya ulaşmak için ${k.kotaIcinSatis} satış gerekir.`}</p>
+        <p className="v2-so2-kota-not">{k.doluluk >= 1 ? `Kotaya ${k.kotaIcinSatis} satışla ulaşır. Sonraki her satış prim getirir.` : `Kotaya ulaşmak için ${k.kotaIcinSatis} satış gerekir.`}</p>
       </div>
     </>
   );
@@ -153,26 +160,26 @@ function Cozum({ a }: { a: Ayar }) {
         aciklama={
           <>
             Çözüm ortağı yılda {a.cozumMusteri} müşteri getirirse bu tutarı kazanır. Her müşteriden {tl(birim)} alır.{a.model === 'oran' && a.marka === 'segika' ? ` Bu tutar, paket bedeline ${yuzde(a.cozumOran)} oranı uygulanarak bulunur.` : ''}
-            <span className="so2-bize">Aynı müşterilerden bize {tl(a.cozumMusteri * (yillikFiyat(a) - birim))} kalır.</span>
+            <span className="v2-so2-bize">Aynı müşterilerden bize {tl(a.cozumMusteri * (yillikFiyat(a) - birim))} kalır.</span>
           </>
         }
       />
       {a.marka === 'segika' ? (
-      <div className="so2-ikili">
+      <div className="v2-so2-ikili">
         <div>
-          <p className="so2-alt-baslik">Ücretsiz eğitim</p>
-          <p className="so2-ikili-deger">Yılda {a.egitimSaat} saat</p>
+          <p className="v2-so2-alt-baslik">Ücretsiz eğitim</p>
+          <p className="v2-so2-ikili-deger">Yılda {a.egitimSaat} saat</p>
           <p>Programın kullanımını ortağa ve destek personeline biz öğretiriz.</p>
         </div>
         <div>
-          <p className="so2-alt-baslik">Ek eğitim</p>
-          <p className="so2-ikili-deger">{tl(a.egitimSaatUcret)} / saat</p>
+          <p className="v2-so2-alt-baslik">Ek eğitim</p>
+          <p className="v2-so2-ikili-deger">{tl(a.egitimSaatUcret)} / saat</p>
           <p>{a.ekEgitimSaat > 0 ? `${a.ekEgitimSaat} saat ek eğitim için ortaktan ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} alırız.` : 'Ortağın personeli değişirse ya da ortak daha fazla eğitim isterse saat başı ücret alırız.'}</p>
         </div>
       </div>
       ) : null}
-      <div className="so2-musavir">
-        <p className="so2-alt-baslik">Mali müşavir</p>
+      <div className="v2-so2-musavir">
+        <p className="v2-so2-alt-baslik">Mali müşavir</p>
         <p>
           {m.tur === 'komisyon'
             ? `Müşavir her müşteriden ${tl(m.musteriBasina)} komisyon alır.`
@@ -193,19 +200,19 @@ function Tavsiye({ a }: { a: Ayar }) {
         aciklama={
           <>
             Tavsiye eden müşteri {a.krediAy} ay ücretsiz kullanım kazanır. Para ödemeyiz.
-            <span className="so2-bize">Yeni müşterinin yıllık paketinden bize {tl(yillikFiyat(a) - ay * (a.krediAy + a.yeniKrediAy))} kalır.</span>
+            <span className="v2-so2-bize">Yeni müşterinin yıllık paketinden bize {tl(yillikFiyat(a) - ay * (a.krediAy + a.yeniKrediAy))} kalır.</span>
           </>
         }
       />
-      <div className="so2-ikili">
+      <div className="v2-so2-ikili">
         <div>
-          <p className="so2-alt-baslik">Yeni müşteri</p>
-          <p className="so2-ikili-deger">{tl(ay * a.yeniKrediAy)}</p>
+          <p className="v2-so2-alt-baslik">Yeni müşteri</p>
+          <p className="v2-so2-ikili-deger">{tl(ay * a.yeniKrediAy)}</p>
           <p>{a.yeniKrediAy} ay ücretsiz kullanım kazanır.</p>
         </div>
         <div>
-          <p className="so2-alt-baslik">Yıllık sınır</p>
-          <p className="so2-ikili-deger">{a.tavsiyeSinir} tavsiye</p>
+          <p className="v2-so2-alt-baslik">Yıllık sınır</p>
+          <p className="v2-so2-ikili-deger">{a.tavsiyeSinir} tavsiye</p>
           <p>Daha fazla tavsiye getiren müşteri çözüm ortağı olur.</p>
         </div>
       </div>
@@ -222,7 +229,7 @@ function Elci({ a }: { a: Ayar }) {
       aciklama={
         <>
           Elçinin bağlantısından ayda {a.elciSatis} yıllık paket satılırsa bu tutarı kazanır. Her satıştan {tl(birim)} alır.
-          <span className="so2-bize">Aynı satışlardan bize {tl(a.elciSatis * (yillikFiyat(a) - birim))} kalır.</span>
+          <span className="v2-so2-bize">Aynı satışlardan bize {tl(a.elciSatis * (yillikFiyat(a) - birim))} kalır.</span>
         </>
       }
     />
@@ -558,7 +565,7 @@ function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>)
           />
         </Grup>
       ) : null}
-      <div className="so2-gecis" key={kosul}>
+      <div className="v2-so2-gecis" key={kosul}>
         {kosul === 'ana' ? <AnaAyarlari rol={rol} a={a} g={g} /> : <KosulAyarlari rol={rol} kosul={kosul} a={a} g={g} />}
       </div>
     </>
@@ -586,11 +593,11 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
           </>
         ) : (
           <>
-            <div className="so2-calisan">
+            <div className="v2-so2-calisan">
               <Girdi label="Müşterinin çalışan sayısı" birim="kişi" min={1} step={25} value={a.calisan} onChange={(v) => g({ calisan: Math.max(1, v) })} />
-              <div className="so2-hazir" role="group" aria-label="Örnek firma büyüklüğü">
+              <div className="v2-so2-hazir" role="group" aria-label="Örnek firma büyüklüğü">
                 {[25, 250, 1_000, 20_000].map((n) => (
-                  <button key={n} type="button" className="so2-hazir-dugme" aria-pressed={a.calisan === n} onClick={() => g({ calisan: n })}>
+                  <button key={n} type="button" className="v2-so2-hazir-dugme" aria-pressed={a.calisan === n} onClick={() => g({ calisan: n })}>
                     {new Intl.NumberFormat('tr-TR').format(n)}
                   </button>
                 ))}
@@ -609,8 +616,8 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
             const alt = i === 0 ? 1 : a.kademeler[i - 1].ust + 1;
             const sayi = (n: number) => new Intl.NumberFormat('tr-TR').format(n);
             return (
-              <div key={i} className="so2-kademe">
-                <p className="so2-kademe-ad">{son ? `${sayi(alt)} çalışan ve üstü` : `${sayi(alt)}–${sayi(k.ust)} çalışan`}</p>
+              <div key={i} className="v2-so2-kademe">
+                <p className="v2-so2-kademe-ad">{son ? `${sayi(alt)} çalışan ve üstü` : `${sayi(alt)}–${sayi(k.ust)} çalışan`}</p>
                 {son ? null : <Girdi label="Kademe sonu" birim="kişi" step={100} value={k.ust} onChange={(v) => g({ kademeler: a.kademeler.map((x, j) => (j === i ? { ...x, ust: v } : x)) })} />}
                 <Girdi label="İndirim" yuzdeMi value={k.indirim} onChange={(v) => g({ kademeler: a.kademeler.map((x, j) => (j === i ? { ...x, indirim: Math.min(1, v) } : x)) })} />
               </div>
@@ -640,14 +647,14 @@ function segikaOzet(a: Ayar) {
 function KosulPaneli({ a, ks, kaynak, ek }: { a: Ayar; ks: KosulSonuc; kaynak: string; ek?: ReactNode }) {
   return (
     <>
-      <p className="so2-kaynak">Koşulların kaynağı: {kaynak} sayfası</p>
+      <p className="v2-so2-kaynak">Koşulların kaynağı: {kaynak} sayfası</p>
       <Sonuc
         etiket={ks.etiket}
         deger={ks.deger}
         aciklama={
           <>
             {ks.aciklama}
-            {ks.bize ? <span className="so2-bize">{ks.bize}</span> : null}
+            {ks.bize ? <span className="v2-so2-bize">{ks.bize}</span> : null}
           </>
         }
       />
@@ -689,11 +696,11 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const ks = kosulSonucu(a, rol);
   const kosulTanim = seciliKosul(a, rol);
   return (
-    <div className="so2">
+    <div className="v2-so2">
       <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir ve ayarlar değişince sonuçlar hemen güncellenir." />
 
-      <div className="so2-arac">
-        {surum}
+      {surum}
+      <div className="v2-so2-arac">
         <Choice<Marka>
           label="Ürün"
           value={a.marka}
@@ -713,20 +720,20 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           onChange={(v) => g({ model: v })}
         />
 
-        <p className="so2-fiyat">
+        <p className="v2-so2-fiyat">
           Yıllık paket <strong>{tl(yillik)}</strong>
           <span>{a.marka === 'istoc' ? `${a.istocAyEur} € × ${a.istocYilAy} ay` : segikaOzet(a)}</span>
         </p>
       </div>
 
-      <div className="so2-duzen" ref={duzen}>
-        <aside className="so2-ayarlar" aria-label="Ayarlar">
-          <div className="so2-ayarlar-ust">
-            <p className="so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="so2-sifirla" onClick={sifirla}>
+      <div className="v2-so2-duzen" ref={duzen}>
+        <aside className="v2-so2-ayarlar" aria-label="Ayarlar">
+          <div className="v2-so2-ayarlar-ust">
+            <p className="v2-so2-ayarlar-baslik">Ayarlar</p>
+            <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
               Başa dön
             </button>
-            <p className="so2-ayarlar-ozet">
+            <p className="v2-so2-ayarlar-ozet">
               {secili.ad}{' '}
               <strong>
                 <Canli deger={ozet[rol]}>{ozet[rol]}</Canli>
@@ -737,18 +744,18 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           <RolAyarlari rol={rol} a={a} g={g} />
           <OrtakAyarlar a={a} g={g} ana={!ks} />
         </aside>
-        <div className="so2-sag">
-          <div className="so2-roller" role="tablist" ref={serit} aria-label="Roller">
+        <div className="v2-so2-sag">
+          <div className="v2-so2-roller" role="tablist" ref={serit} aria-label="Roller">
         {roller.map((r, i) => (
           <button
             key={r.id}
             type="button"
             role="tab"
-            id={`so2-sekme-${r.id}`}
+            id={`v2-so2-sekme-${r.id}`}
             aria-selected={r.id === rol}
-            aria-controls="so2-panel"
+            aria-controls="v2-so2-panel"
             tabIndex={r.id === rol ? 0 : -1}
-            className="so2-rol"
+            className="v2-so2-rol"
             data-edge={r.id === rol ? 'top' : undefined}
             onClick={() => setRol(r.id)}
             onKeyDown={(e) => {
@@ -756,22 +763,22 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
               if (j < 0) return;
               e.preventDefault();
               setRol(roller[j].id);
-              document.getElementById(`so2-sekme-${roller[j].id}`)?.focus();
+              document.getElementById(`v2-so2-sekme-${roller[j].id}`)?.focus();
             }}
           >
-            <span className="so2-rol-no">{i + 1}</span>
-            <span className="so2-rol-ad">{r.ad}</span>
-            <span className="so2-rol-kisa">{r.kisa}</span>
-            <span className="so2-rol-tutar">
+            <span className="v2-so2-rol-no">{i + 1}</span>
+            <span className="v2-so2-rol-ad">{r.ad}</span>
+            <span className="v2-so2-rol-kisa">{r.kisa}</span>
+            <span className="v2-so2-rol-tutar">
               {ozet[r.id]} <small>{ozetBirim[r.id]}</small>
             </span>
           </button>
         ))}
       </div>
-          <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
-          <div className="so2-gecis" key={`${a.marka}-${rol}-${kosulTanim.id}`}>
-          <h2 className="so2-baslik">{secili.ad}</h2>
-          <p className="so2-kim">{secili.kim}</p>
+          <section className="v2-so2-panel" id="v2-so2-panel" role="tabpanel" aria-labelledby={`v2-so2-sekme-${rol}`}>
+          <div className="v2-so2-gecis" key={`${a.marka}-${rol}-${kosulTanim.id}`}>
+          <h2 className="v2-so2-baslik">{secili.ad}</h2>
+          <p className="v2-so2-kim">{secili.kim}</p>
           <Kimler liste={secili.kimler} />
           {ks ? (
             <KosulPaneli a={a} ks={ks} kaynak={kosulTanim.kaynak} ek={rol === 'oncu' && kosulTanim.id === 'ag' ? <AgDiyagrami a={a} /> : affilateModeli(a, rol) ? <AffilateMotoru a={a} id={affilateModeli(a, rol)!} /> : null} />

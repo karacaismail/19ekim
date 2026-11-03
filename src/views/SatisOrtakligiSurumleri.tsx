@@ -6,8 +6,9 @@ import { SatisOrtakligiV2 } from './SatisOrtakligiV2';
 
 /**
  * Satış ortaklığı sürümleri (kullanıcı kararı 2026-11-03): v1 korunur, v2 onun kopyasıdır ve ayrı gelişir.
- * v2 dosyaları: views/SatisOrtakligiV2.tsx, data/satisOrtakligiV2.ts, data/kosullarV2.ts, components/*V2.tsx.
- * Seçili sürüm adreste (?surum=v2) ve tarayıcıda saklanır. Her sürümün ayarları ayrı anahtarda durur.
+ * v2 yalnız *V2 dosyalarını ve styles/satisOrtakligiV2.css'i kullanır. tests/surum.spec.ts iki sürümün birbirini
+ * import etmediğini denetler.
+ * Seçici, ürün ve ödeme satırının üstünde ayrı bir satırdır. Seçili sürüm adreste (?surum=v2) ve tarayıcıda saklanır. Her sürümün ayarları ayrı anahtarda durur.
  */
 
 type Surum = 'v1' | 'v2';
@@ -43,15 +44,21 @@ function useSurum() {
 export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
   const [surum, sec] = useSurum();
   const secici = (
-    <Choice<Surum>
-      label="Sürüm"
-      value={surum}
-      options={[
-        { id: 'v1', name: 'v1' },
-        { id: 'v2', name: 'v2' },
-      ]}
-      onChange={sec}
-    />
+    <div className="so-surum">
+      <Choice<Surum>
+        label="Sürüm"
+        value={surum}
+        options={[
+          { id: 'v1', name: 'v1' },
+          { id: 'v2', name: 'v2' },
+        ]}
+        onChange={sec}
+      />
+    </div>
   );
-  return <AppFrame pathname={pathname} wide>{surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}</AppFrame>;
+  return (
+    <AppFrame pathname={pathname} wide>
+      {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
+    </AppFrame>
+  );
 }

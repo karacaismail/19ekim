@@ -163,6 +163,11 @@ test('sürüm seçici: v1 ve v2 ayrı ayarlarla çalışır, v2 adresten açıl�
   await page.goto('satis-ortakligi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await expect(page.getByRole('button', { name: 'v1' })).toHaveAttribute('aria-pressed', 'true');
+  // Sürüm seçici ürün ve ödeme satırının üstünde, ayrı bir satırdadır.
+  const surumAlt = await page.locator('.so-surum').evaluate((e) => e.getBoundingClientRect().bottom);
+  const aracUst = await page.locator('.so2-arac').evaluate((e) => e.getBoundingClientRect().top);
+  expect(surumAlt).toBeLessThanOrEqual(aracUst);
+  await expect(page.locator('.so2-arac').getByRole('button', { name: 'v1' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Segika' }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');
 
@@ -170,9 +175,11 @@ test('sürüm seçici: v1 ve v2 ayrı ayarlarla çalışır, v2 adresten açıl�
   await expect(page).toHaveURL(/[?&]surum=v2/);
   await expect(page.getByRole('tab')).toHaveCount(5);
   // v2 kendi ayarıyla başlar: v1'deki Segika seçimi v2'ye geçmez.
-  await expect(page.locator('.so2-fiyat strong')).toHaveText('223.440 ₺');
+  await expect(page.locator('.v2-so2-fiyat strong')).toHaveText('223.440 ₺');
+  // v2 kendi stil dosyasıyla biçimlenir.
+  expect(await page.locator('.v2-so2-roller').evaluate((e) => getComputedStyle(e).display)).toBe('grid');
   await page.getByText('Karar verisi (JSON)').click();
-  await expect(page.locator('.so2-json-ac pre')).toContainText('"program": "v2"');
+  await expect(page.locator('.v2-so2-json-ac pre')).toContainText('"program": "v2"');
 
   await page.getByRole('button', { name: 'v1' }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');

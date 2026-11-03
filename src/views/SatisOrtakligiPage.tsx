@@ -692,8 +692,8 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
     <div className="so2">
       <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir ve ayarlar değişince sonuçlar hemen güncellenir." />
 
+      {surum}
       <div className="so2-arac">
-        {surum}
         <Choice<Marka>
           label="Ürün"
           value={a.marka}

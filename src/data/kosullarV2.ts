@@ -1,11 +1,12 @@
+/* v2 kopyası (2026-11-03): v1 dosyası ayrı durur, bu dosyadaki değişiklik v1'i etkilemez. */
 /**
  * Koşul setleri (kullanıcı kararı 2026-11-03: “4 sayfa → tek sayfa”). Temsilci ağı, İş ortaklığı ve Affilate
  * sayfalarındaki personalar ve koşulları, satış ortaklığı sayfasındaki beş rolün altında seçilebilir set olarak durur.
  * Ana program (`ana`) satış ortaklığı sayfasının kendi hesabıdır ve değişmez; burada yalnız diğer setler hesaplanır.
  * Kaynaklar: src/data/growth.ts ve program.ts (Temsilci ağı), partnership.ts (İş ortaklığı), affilate.ts (Affilate).
  */
-import { karsilastir, type OrtakId, type Sonuc as MotorSonuc } from './affilate';
-import { baslangicKurgu, senaryoKur } from './affilateKurgu';
+import { karsilastir, type OrtakId, type Sonuc as MotorSonuc } from './affilateV2';
+import { baslangicKurgu, senaryoKur } from './affilateKurguV2';
 import { aylikFiyat, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligiV2';
 
 export type KaynakSayfa = 'Satış ortaklığı' | 'Temsilci ağı' | 'İş ortaklığı' | 'Affilate';

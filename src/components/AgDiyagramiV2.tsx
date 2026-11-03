@@ -1,13 +1,14 @@
+/* v2 kopyası (2026-11-03): v1 dosyası ayrı durur, bu dosyadaki değişiklik v1'i etkilemez. */
 import { useState, type KeyboardEvent } from 'react';
 import { AG_ISIMLER, agDerinlik, agKisiKazanci, agSatisPayi } from '../data/kosullarV2';
 import type { Ayar } from '../data/satisOrtakligiV2';
-import { Canli } from './sadeKit';
+import { Canli } from './sadeKitV2';
 
 /**
  * Kademeli temsilci ağı diyagramı (kullanıcı kararı 2026-11-03). Zincir: Haydar → Ömer → Ahmet → Mehmet → Ayşe → Fatma.
  * Haydar ve Ömer, Ahmet’in kümesinin bağlı olduğu üst kademedir; yanlarındaki “+n” düğümleri aynı kademedeki diğer
  * temsilcilerdir. Ahmet’in ağı açık çizilir. Bir kişi seçilince o kişinin bir satışından kimin ne kazandığı görünür.
- * Diyagram kişi başı en çok 3 temsilci çizer; hesap girilen sayıyla yapılır. Stiller global.css → .ag-*.
+ * Diyagram kişi başı en çok 3 temsilci çizer; hesap girilen sayıyla yapılır. Stiller satisOrtakligiV2.css → .v2-ag-*.
  */
 
 const G = 720;
@@ -99,11 +100,11 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
   const satirlar = AG_ISIMLER.map((ad, r) => ({ ad, ...agKisiKazanci(a, r) }));
 
   return (
-    <div className="ag">
-      <p className="so2-alt-baslik">Ağ diyagramı</p>
-      <p className="ag-ipucu">Bir kişiye tıklayın. O kişinin bir satışından kimin ne kazandığı görünür.</p>
-      <div className="ag-kap">
-        <svg className="ag-svg" width={G} height={Y} viewBox={`0 0 ${G} ${Y}`} role="group" aria-label="Temsilci ağı: kişiyi seçin">
+    <div className="v2-ag">
+      <p className="v2-so2-alt-baslik">Ağ diyagramı</p>
+      <p className="v2-ag-ipucu">Bir kişiye tıklayın. O kişinin bir satışından kimin ne kazandığı görünür.</p>
+      <div className="v2-ag-kap">
+        <svg className="v2-ag-svg" width={G} height={Y} viewBox={`0 0 ${G} ${Y}`} role="group" aria-label="Temsilci ağı: kişiyi seçin">
           {dugumler
             .filter((n) => n.ust)
             .map((n) => {
@@ -114,7 +115,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
               return (
                 <line
                   key={`e-${n.id}`}
-                  className="ag-kenar"
+                  className="v2-ag-kenar"
                   data-vurgu={vurgu ? '' : undefined}
                   data-grup={n.grup ? '' : undefined}
                   x1={n.grup ? u.x + ru * 0.7 : u.x}
@@ -132,7 +133,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
             return (
               <g
                 key={n.id}
-                className="ag-dugum"
+                className="v2-ag-dugum"
                 data-durum={durum}
                 data-adli={n.ad ? '' : undefined}
                 role="button"
@@ -142,25 +143,25 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
                 onClick={() => sec(n.id)}
                 onKeyDown={(e) => tus(e, n.id)}
               >
-                <circle cx={n.x} cy={y} r={r + 8} className="ag-alan" />
-                <circle cx={n.x} cy={y} r={r} className="ag-daire" />
+                <circle cx={n.x} cy={y} r={r + 8} className="v2-ag-alan" />
+                <circle cx={n.x} cy={y} r={r} className="v2-ag-daire" />
                 {n.grup ? (
-                  <text x={n.x} y={y + 5} className="ag-grup">
+                  <text x={n.x} y={y + 5} className="v2-ag-grup">
                     +{n.grup}
                   </text>
                 ) : null}
                 {n.ad ? (
-                  <text x={n.x - r - 10} y={y + 5} className="ag-ad">
+                  <text x={n.x - r - 10} y={y + 5} className="v2-ag-ad">
                     {n.ad}
                   </text>
                 ) : null}
-                <rect className="ag-odak" x={n.x - r} y={y + r + 4} width={r * 2} height={3} />
+                <rect className="v2-ag-odak" x={n.x - r} y={y + r + 4} width={r * 2} height={3} />
                 {durum === 'satici' || durum === 'kazanir' ? (
-                  <text key={`${secili}-${tutar}`} x={n.x + r + 8} y={y + 5} className="ag-tutar" data-durum={durum}>
+                  <text key={`${secili}-${tutar}`} x={n.x + r + 8} y={y + 5} className="v2-ag-tutar" data-durum={durum}>
                     +{tl(tutar ?? 0)}
                   </text>
                 ) : durum === 'almaz' && (n.ad || n.grup) ? (
-                  <text x={n.x + r + 8} y={y + 5} className="ag-tutar" data-durum="almaz">
+                  <text x={n.x + r + 8} y={y + 5} className="v2-ag-tutar" data-durum="almaz">
                     pay yok
                   </text>
                 ) : null}
@@ -169,14 +170,14 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
           })}
         </svg>
       </div>
-      <p className="ag-aciklama" aria-live="polite">
+      <p className="v2-ag-aciklama" aria-live="polite">
         <Canli deger={aciklama}>{aciklama}</Canli>
       </p>
-      {dal > 3 ? <p className="ag-ipucu">Diyagram kişi başı 3 temsilci çizer. Hesap kişi başı {dal} temsilciyle yapılır.</p> : null}
+      {dal > 3 ? <p className="v2-ag-ipucu">Diyagram kişi başı 3 temsilci çizer. Hesap kişi başı {dal} temsilciyle yapılır.</p> : null}
 
-      <p className="so2-alt-baslik ag-tablo-baslik">Kim ayda ne kazanır?</p>
-      <div className="so2-donem-kap">
-        <table className="so2-donem-tablo">
+      <p className="v2-so2-alt-baslik v2-ag-tablo-baslik">Kim ayda ne kazanır?</p>
+      <div className="v2-so2-donem-kap">
+        <table className="v2-so2-donem-tablo">
           <thead>
             <tr>
               <th scope="col">Kişi</th>
@@ -210,7 +211,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
           </tbody>
         </table>
       </div>
-      <p className="so2-donem-not">Herkes ayda {new Intl.NumberFormat('tr-TR').format(a.agAltSatis)} satış yapar ve {dal} temsilci getirir. Ağ Fatma’nın kuşağında biter.</p>
+      <p className="v2-so2-donem-not">Herkes ayda {new Intl.NumberFormat('tr-TR').format(a.agAltSatis)} satış yapar ve {dal} temsilci getirir. Ağ Fatma’nın kuşağında biter.</p>
     </div>
   );
 }

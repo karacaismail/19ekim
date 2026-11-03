@@ -1,12 +1,13 @@
+/* v2 kopyası (2026-11-03): v1 dosyası ayrı durur, bu dosyadaki değişiklik v1'i etkilemez. */
 import { affilateHesabi, affilateYillari } from '../data/kosullarV2';
-import type { OrtakId } from '../data/affilate';
+import type { OrtakId } from '../data/affilateV2';
 import type { Ayar } from '../data/satisOrtakligiV2';
-import { Canli } from './sadeKit';
+import { Canli } from './sadeKitV2';
 
 /**
  * Ödeme takvimi (kullanıcı kararı 2026-11-03: Affilate sayfası satış ortaklığına taşındı). Affilate kaynaklı koşul
  * setlerinde bir müşterinin ödemesi ay ay izlenir: müşteri ne öder, ortak ne hak eder, ortağa ne zaman ne ödenir.
- * Hesap Affilate motorundan gelir (src/data/affilate.ts). Stiller global.css → .so2-donem-*, .am-*.
+ * Hesap Affilate motorundan gelir (src/data/affilate.ts). Stiller global.css → .v2-so2-donem-*, .am-*.
  */
 
 const tl = (kurus: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(kurus / 100))} ₺`;
@@ -19,8 +20,8 @@ export function AffilateMotoru({ a, id }: { a: Ayar; id: OrtakId }) {
   const r = affilateHesabi(a, id);
   if (r.hatalar.length)
     return (
-      <div className="am">
-        <p className="so2-alt-baslik">Ödeme takvimi</p>
+      <div className="v2-am">
+        <p className="v2-so2-alt-baslik">Ödeme takvimi</p>
         <p>Bu ayarlarla ödeme takvimi hesaplanamıyor: {r.hatalar.join(' ')}</p>
       </div>
     );
@@ -31,12 +32,12 @@ export function AffilateMotoru({ a, id }: { a: Ayar; id: OrtakId }) {
   const aylar = r.aylar.filter((m) => m.tahsilat || m.hakedis || m.odeme || m.duzeltme);
   const ozet = `Bir müşteri ${a.affOdeme === 'paket' ? 'yıllık paket' : 'aylık abonelik'} öderse ortak ${a.affUfukAy} ayda ${tl(ortak)} kazanır. ${ilk ? `Ortağa ilk ödeme ${ayAdi(ilk.ay)} ayında yapılır.` : 'Bu sürede ortağa ödeme yapılmaz.'} Aynı sürede Segika’ya ${tl(kalan)} kalır.`;
   return (
-    <div className="am">
-      <p className="so2-alt-baslik">Ödeme takvimi</p>
-      <p className="am-ozet">
+    <div className="v2-am">
+      <p className="v2-so2-alt-baslik">Ödeme takvimi</p>
+      <p className="v2-am-ozet">
         <Canli deger={ozet}>{ozet}</Canli>
       </p>
-      <ul className="am-yillar">
+      <ul className="v2-am-yillar">
         {yillar.map((y, i) => (
           <li key={i}>
             <span>{i + 1}. hizmet yılı</span>
@@ -46,8 +47,8 @@ export function AffilateMotoru({ a, id }: { a: Ayar; id: OrtakId }) {
           </li>
         ))}
       </ul>
-      <div className="so2-donem-kap">
-        <table className="so2-donem-tablo am-tablo">
+      <div className="v2-so2-donem-kap">
+        <table className="v2-so2-donem-tablo v2-am-tablo">
           <thead>
             <tr>
               <th scope="col">Ay</th>
@@ -68,7 +69,7 @@ export function AffilateMotoru({ a, id }: { a: Ayar; id: OrtakId }) {
           </tbody>
         </table>
       </div>
-      <p className="so2-donem-not">Hakediş, ortağın kazandığı ama henüz ödenmemiş olabilecek tutardır. Müşteri ödemezse komisyon doğmaz, iade olursa geri alınır.</p>
+      <p className="v2-so2-donem-not">Hakediş, ortağın kazandığı ama henüz ödenmemiş olabilecek tutardır. Müşteri ödemezse komisyon doğmaz, iade olursa geri alınır.</p>
     </div>
   );
 }
