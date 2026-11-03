@@ -84,7 +84,9 @@ export function Sonuc({ etiket, deger, aciklama }: { etiket: string; deger: stri
   return (
     <div className="so2-sonuc" data-edge="top">
       <p className="so2-sonuc-etiket">{etiket}</p>
-      <p className="so2-sonuc-deger">{deger}</p>
+      <p className="so2-sonuc-deger">
+        <Canli deger={deger}>{deger}</Canli>
+      </p>
       <p className="so2-sonuc-aciklama">{aciklama}</p>
     </div>
   );
@@ -113,3 +115,34 @@ export function Kurallar({ maddeler }: { maddeler: string[] }) {
   );
 }
 
+
+/** Canlı değer: değer değişince kısa bir vurguyla belirir (sol paneldeki değişikliğin sağdaki etkisi görünür). */
+export function Canli({ children, deger }: { children: ReactNode; deger: string | number }) {
+  return (
+    <span className="so2-canli" key={String(deger)}>
+      {children}
+    </span>
+  );
+}
+
+/** Hesap dökümü: her satır bir formül ve sonucu. */
+export function Hesap({ baslik, satirlar }: { baslik: string; satirlar: { ad: string; formul: string; sonuc: string }[] }) {
+  return (
+    <div className="so2-hesap">
+      <p className="so2-alt-baslik">{baslik}</p>
+      <dl className="so2-hesap-liste">
+        {satirlar.map((r) => (
+          <div key={r.ad} className="so2-hesap-satir">
+            <dt>{r.ad}</dt>
+            <dd className="so2-hesap-formul">
+              <Canli deger={r.formul}>{r.formul}</Canli>
+            </dd>
+            <dd className="so2-hesap-sonuc">
+              <Canli deger={r.sonuc}>{r.sonuc}</Canli>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Girdi, Grup, Kimler, Kurallar, Sec, Sonuc } from '../components/sadeKit';
+import { Girdi, Grup, Hesap, Kimler, Kurallar, Sec, Sonuc } from '../components/sadeKit';
 import {
   ASAMA_ADI,
   ASAMA_SURE,
@@ -222,6 +222,59 @@ function Elci({ a }: { a: Ayar }) {
       }
     />
   );
+}
+
+/* ---------- Hesap dökümü: soldaki her değerin sonuca etkisi ---------- */
+
+const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+
+function fiyatSatirlari(a: Ayar) {
+  if (a.marka === 'istoc') {
+    const ay = a.istocAyEur * a.kur;
+    return [
+      { ad: 'Aylık fiyat', formul: `${sayi(a.istocAyEur)} € × ${sayi(a.kur)} ₺`, sonuc: tl(ay) },
+      { ad: 'Yıllık paket', formul: `${tl(ay)} × ${a.istocYilAy} ay`, sonuc: tl(ay * a.istocYilAy) },
+    ];
+  }
+  const sg = segikaAylik(a);
+  const kisiBasi = a.segikaFiyat[a.segikaPaket] / Math.max(1, a.blok);
+  return [
+    { ad: 'Kişi başı fiyat', formul: `${tl(a.segikaFiyat[a.segikaPaket])} ÷ ${a.blok} çalışan`, sonuc: `${sayi(Math.round(kisiBasi * 100) / 100)} ₺` },
+    ...sg.dilimler.map((d) => ({
+      ad: `${sayi(d.alt)}–${sayi(d.ust)} çalışan`,
+      formul: `${sayi(d.kisi)} kişi × ${sayi(Math.round(kisiBasi * 100) / 100)} ₺${d.indirim > 0 ? ` − %${sayi(Math.round(d.indirim * 1000) / 10)}` : ''}`,
+      sonuc: tl(d.tutar),
+    })),
+    { ad: 'Aylık toplam', formul: `${sayi(sg.kisi)} çalışan`, sonuc: tl(sg.toplam) },
+    { ad: 'Yıllık paket', formul: `${tl(sg.toplam)} × 12 ay`, sonuc: tl(sg.toplam * 12) },
+  ];
+}
+
+function payKalemi(a: Ayar, rol: RolId) {
+  const yillik = yillikFiyat(a);
+  if (rol === 'kadrolu') {
+    const k = kadrolu(a);
+    return a.model === 'oran'
+      ? { ad: 'Prim', formul: `(${tl(k.ciro)} − ${tl(k.kota)}) × %${sayi(a.kadroluPrim[a.marka] * 100)}`, tutar: k.prim }
+      : { ad: 'Prim', formul: `${Math.max(0, a.kadroluSatis - k.kotaIcinSatis)} satış × ${tl(a.sabit)}`, tutar: k.prim };
+  }
+  if (rol === 'tavsiye') return { ad: 'Kredi', formul: `${tl(aylikFiyat(a))} × ${a.krediAy} ay`, tutar: aylikFiyat(a) * a.krediAy };
+  const oran = rol === 'cozum' ? (a.marka === 'segika' ? a.cozumOran : a.oran[a.cozumSeviye]) : a.oran[rol === 'oncu' ? a.oncuSeviye : a.elciSeviye];
+  const tutar = rol === 'cozum' ? cozumKazanci(a) : satisKazanci(a, rol === 'oncu' ? a.oncuSeviye : a.elciSeviye);
+  return a.model === 'oran'
+    ? { ad: 'Bir satıştan ortağa', formul: `${tl(yillik)} × %${sayi(Math.round(oran * 1000) / 10)}`, tutar }
+    : { ad: 'Bir satıştan ortağa', formul: 'Satış başı tutar', tutar };
+}
+
+function RolHesabi({ a, rol }: { a: Ayar; rol: RolId }) {
+  const pay = payKalemi(a, rol);
+  const satirlar = [...fiyatSatirlari(a), { ad: pay.ad, formul: pay.formul, sonuc: tl(pay.tutar) }];
+  if (rol !== 'tavsiye' && pay.tutar > 0)
+    satirlar.push(
+      { ad: `${a.ilkGun}. gün ödenir`, formul: `${tl(pay.tutar)} × %${sayi(Math.round(a.ilkOdeme * 1000) / 10)}`, sonuc: tl(pay.tutar * a.ilkOdeme) },
+      { ad: `${a.kalanGun}. gün ödenir`, formul: `kalan %${sayi(Math.round((1 - a.ilkOdeme) * 1000) / 10)}`, sonuc: tl(pay.tutar * (1 - a.ilkOdeme)) },
+    );
+  return <Hesap baslik="Hesap" satirlar={satirlar} />;
 }
 
 /* ---------- Ayarlar: seçili rolün değerleri önce ---------- */
@@ -455,7 +508,8 @@ function Icerik() {
           <p className="so2-kim">{secili.kim}</p>
           <Kimler liste={secili.kimler} />
           {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
-          <Kurallar maddeler={[...secili.kurallar, `İlk ödeme ${yuzde(a.ilkOdeme)}, tahsilattan ${a.ilkGun} gün sonra. Kalanı ${a.kalanGun}. günde ödenir.`]} />
+          <RolHesabi a={a} rol={rol} />
+          <Kurallar maddeler={secili.kurallar} />
           </div>
         </section>
         </div>

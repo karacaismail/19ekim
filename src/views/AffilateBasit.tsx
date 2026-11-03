@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
-import { Girdi, Grup, Kurallar, Sec, Sonuc } from '../components/sadeKit';
+import { Girdi, Grup, Hesap, Kurallar, Sec, Sonuc } from '../components/sadeKit';
 import { ORTAK_ADLARI, baslangicOrtaklar, karsilastir, type OrtakId, type OrtakKurali, type Politika, type Sonuc as MotorSonuc } from '../data/affilate';
 import { POLITIKA_ADI, baslangicKurgu, senaryoKur } from '../data/affilateKurgu';
 
@@ -98,6 +98,14 @@ function yillar(r: MotorSonuc, ufukAy: number) {
     if (i >= 0 && i < n) dizi[i] += h.tutar;
   }
   return dizi;
+}
+
+/** Ortağa ilk ödemenin ayı (motorun ödeme hareketlerinden). */
+function ilkOdeme(r: MotorSonuc) {
+  const o = r.hareketler.find((h) => h.tur === 'odeme' && h.tutar > 0);
+  if (!o) return 'Ödeme yok';
+  const [y, m] = o.ay.split('-').map(Number);
+  return `İlk ödeme ${new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(Date.UTC(y, m - 1, 1)))}`;
 }
 
 function ModelAyarlari({ id, s, g }: { id: OrtakId; s: Sade; g: (p: Partial<Sade>) => void }) {
@@ -228,7 +236,24 @@ export function AffilateBasit() {
               </li>
             ))}
           </ol>
-          <Kurallar maddeler={[`Ödeme: ${POLITIKA_ADI[s.ortaklar[secili].politika]}.`, 'Müşteri ödemezse komisyon oluşmaz.', 'İade olursa komisyon geri alınır.']} />
+          <Hesap
+            baslik="Hesap"
+            satirlar={[
+              { ad: 'Yıllık paket', formul: `${tl(s.aylikTl * 100)} × ${s.kat} ay`, sonuc: tl(yillik * 100) },
+              ...dagilim.map((t, i) => ({
+                ad: `${i + 1}. yıl`,
+                formul:
+                  secili === 'ayse'
+                    ? i === 0
+                      ? `İlk fatura × %${Math.round((s.ortaklar.ayse.oranlar[0] ?? 0) * 1000) / 10} × ${s.adet} müşteri`
+                      : 'Komisyon yok'
+                    : `%${Math.round((s.ortaklar[secili].oranlar[i] ?? s.ortaklar[secili].sonraki) * 1000) / 10} × ${s.adet} müşteri`,
+                sonuc: tl(t),
+              })),
+              { ad: 'Ortağa ödeme', formul: POLITIKA_ADI[s.ortaklar[secili].politika], sonuc: ilkOdeme(r) },
+            ]}
+          />
+          <Kurallar maddeler={['Müşteri ödemezse komisyon oluşmaz.', 'İade olursa komisyon geri alınır.']} />
           <p className="so2-ayrinti">
             <a className="text-link" href="#model">
               Ayrıntılı hesabı aç

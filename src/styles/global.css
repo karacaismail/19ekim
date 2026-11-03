@@ -7413,3 +7413,85 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 .so2-sag .so2-rol-tutar {
   font-size: var(--text-md);
 }
+
+/*
+ * Canlı simülasyon (kullanıcı kararı 2026-11-03): soldaki ayarlar sayfayla kayar, sağdaki sonuç sütunu yapışık kalır;
+ * değişen değer kısa bir zemin vurgusuyla belirir. Hesap dökümü her ayarın sonuca etkisini formülüyle gösterir.
+ */
+.so2-ayarlar {
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
+.so2-sag {
+  /* Üst bant ve yapışık kırıntı şeridinin (sayfa başlığı) altında durur. */
+  --so2-ust: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
+  position: sticky;
+  top: var(--so2-ust);
+  max-height: calc(100dvh - var(--so2-ust) - var(--space-4));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  transition-property: top, max-height;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+html[data-bant-gizli] .so2-sag {
+  --so2-ust: calc(var(--hit-min) + var(--space-4));
+}
+
+.so2-canli {
+  animation-name: so2-vurgu;
+  animation-duration: var(--motion-duration-theme);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+}
+
+@keyframes so2-vurgu {
+  from {
+    background-color: var(--surface-changed);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+.so2-hesap {
+  margin-top: var(--space-8);
+}
+
+.so2-hesap-liste {
+  display: grid;
+  margin: 0;
+}
+
+.so2-hesap-satir {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+
+.so2-hesap-satir dt {
+  color: var(--text-secondary);
+}
+
+.so2-hesap-satir dd {
+  margin: 0;
+}
+
+.so2-hesap-sonuc {
+  font-weight: var(--weight-semibold);
+  text-align: end;
+}
+
+/* İki panel arasında boşluk (kullanıcı isteği 2026-11-03). */
+.so2-duzen {
+  gap: var(--space-6);
+}
