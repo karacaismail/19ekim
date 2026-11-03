@@ -6,7 +6,6 @@ import { Choice } from '../components/ui';
 import {
   ASAMA_ADI,
   ASAMA_SURE,
-  ORTAK_TURLERI,
   PAKET_ADI,
   SEVIYE_ADI,
   VARSAYILAN_AYAR,
@@ -15,6 +14,7 @@ import {
   musavir,
   rolMetinleri,
   satisKazanci,
+  segikaAylik,
   yillikFiyat,
   type Ayar,
   type Marka,
@@ -121,6 +121,19 @@ function Sonuc({ etiket, deger, aciklama }: { etiket: string; deger: string; aci
   );
 }
 
+function Kimler({ liste }: { liste: string[] }) {
+  return (
+    <div className="so2-ortaklar">
+      <p className="so2-alt-baslik">Kimlerle çalışırız?</p>
+      <ul className="so2-etiketler">
+        {liste.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Kurallar({ maddeler }: { maddeler: string[] }) {
   return (
     <ul className="so2-kurallar">
@@ -180,14 +193,6 @@ function Cozum({ a }: { a: Ayar }) {
   return (
     <>
       <Sonuc etiket="Yıllık kazanç" deger={tl(birim * a.cozumMusteri)} aciklama={`Yılda ${a.cozumMusteri} müşteri getirirse kazanır. Her müşteri ${tl(birim)} getirir.`} />
-      <div className="so2-ortaklar">
-        <p className="so2-alt-baslik">Kimlerle çalışırız?</p>
-        <ul className="so2-etiketler">
-          {ORTAK_TURLERI[a.marka].map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-      </div>
       <div className="so2-musavir">
         <p className="so2-alt-baslik">Mali müşavir</p>
         <p>
@@ -305,10 +310,26 @@ function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
         ) : (
           <>
             <Sec<SegikaPaket> label="Paket" value={a.segikaPaket} options={(Object.keys(PAKET_ADI) as SegikaPaket[]).map((p) => ({ id: p, name: PAKET_ADI[p] }))} onChange={(v) => g({ segikaPaket: v })} />
-            <Girdi label={`${PAKET_ADI[a.segikaPaket]}: aylık`} birim="₺" step={50} value={a.segikaFiyat[a.segikaPaket]} onChange={(v) => g({ segikaFiyat: { ...a.segikaFiyat, [a.segikaPaket]: v } })} />
+            <Girdi label={`${PAKET_ADI[a.segikaPaket]}: ${a.blok} çalışan, aylık`} birim="₺" step={50} value={a.segikaFiyat[a.segikaPaket]} onChange={(v) => g({ segikaFiyat: { ...a.segikaFiyat, [a.segikaPaket]: v } })} />
+            <Girdi label="Fiyat bloğu" birim="çalışan" min={1} value={a.blok} onChange={(v) => g({ blok: v })} />
           </>
         )}
       </Grup>
+      {a.marka === 'segika' ? (
+        <Grup baslik="Büyük firma indirimi">
+          {a.kademeler.map((k, i) => (
+            <div key={i} className="so2-kademe">
+              <Girdi
+                label={i === a.kademeler.length - 1 ? 'Sonrası' : `${i === 0 ? 1 : a.kademeler[i - 1].ust + 1} çalışandan`}
+                birim="kişiye kadar"
+                value={k.ust}
+                onChange={(v) => g({ kademeler: a.kademeler.map((x, j) => (j === i ? { ...x, ust: v } : x)) })}
+              />
+              <Girdi label="İndirim" yuzdeMi value={k.indirim} onChange={(v) => g({ kademeler: a.kademeler.map((x, j) => (j === i ? { ...x, indirim: Math.min(1, v) } : x)) })} />
+            </div>
+          ))}
+        </Grup>
+      ) : null}
       <Grup baslik="Hakediş ödemesi">
         <Girdi label="İlk ödeme" yuzdeMi value={a.ilkOdeme} onChange={(v) => g({ ilkOdeme: Math.min(1, v) })} />
         <Girdi label="İlk ödeme günü" birim="gün" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
@@ -316,6 +337,13 @@ function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
       </Grup>
     </>
   );
+}
+
+/** Segika fiyat özeti: paket, çalışan ve ortalama indirim. */
+function segikaOzet(a: Ayar) {
+  const s = segikaAylik(a);
+  const indirim = s.listeFiyati > 0 ? 1 - s.toplam / s.listeFiyati : 0;
+  return `${PAKET_ADI[a.segikaPaket]}, ${new Intl.NumberFormat('tr-TR').format(s.kisi)} çalışan, aylık ${tl(s.toplam)}${indirim > 0.0005 ? `, indirim ${yuzde(indirim)}` : ''}`;
 }
 
 /* ---------- Sayfa ---------- */
@@ -357,9 +385,21 @@ function Icerik() {
           ]}
           onChange={(v) => g({ model: v })}
         />
+        {a.marka === 'segika' ? (
+          <div className="so2-calisan">
+            <Girdi label="Müşterinin çalışan sayısı" birim="kişi" min={1} step={25} value={a.calisan} onChange={(v) => g({ calisan: Math.max(1, v) })} />
+            <div className="so2-hazir" role="group" aria-label="Örnek firma büyüklüğü">
+              {[25, 250, 1_000, 20_000].map((n) => (
+                <button key={n} type="button" className="so2-hazir-dugme" aria-pressed={a.calisan === n} onClick={() => g({ calisan: n })}>
+                  {new Intl.NumberFormat('tr-TR').format(n)}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <p className="so2-fiyat">
           Yıllık paket <strong>{tl(yillik)}</strong>
-          <span>{a.marka === 'istoc' ? `${a.istocAyEur} € × ${a.istocYilAy} ay` : `${PAKET_ADI[a.segikaPaket]}, 25 çalışan`}</span>
+          <span>{a.marka === 'istoc' ? `${a.istocAyEur} € × ${a.istocYilAy} ay` : segikaOzet(a)}</span>
         </p>
       </div>
 
@@ -398,6 +438,7 @@ function Icerik() {
         <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
           <h2 className="so2-baslik">{secili.ad}</h2>
           <p className="so2-kim">{secili.kim}</p>
+          <Kimler liste={secili.kimler} />
           {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
           <Kurallar maddeler={[...secili.kurallar, `İlk ödeme ${yuzde(a.ilkOdeme)}, tahsilattan ${a.ilkGun} gün sonra. Kalanı ${a.kalanGun}. günde ödenir.`]} />
         </section>

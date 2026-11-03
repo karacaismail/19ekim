@@ -7154,3 +7154,51 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
   color: var(--surface-page);
   font-weight: var(--weight-semibold);
 }
+
+/* Segika müşteri büyüklüğü: çalışan sayısı ve hazır örnekler */
+.so2-calisan {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.so2-calisan .so2-girdi {
+  width: 14rem;
+}
+
+.so2-hazir {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.so2-hazir-dugme {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  border: var(--hairline) solid var(--rule);
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.so2-hazir-dugme:hover {
+  background-color: var(--surface-hover);
+}
+
+.so2-hazir-dugme[aria-pressed='true'] {
+  border-color: var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font-weight: var(--weight-semibold);
+}
+
+.so2-kademe {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-2);
+}
