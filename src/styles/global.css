@@ -6748,3 +6748,69 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
     grid-row: auto;
   }
 }
+
+/* ---------- Satış ortaklığı programı (/satis-ortakligi/) ---------- */
+.so-marka {
+  margin-top: var(--space-6);
+  max-width: 24rem;
+}
+
+.so-rol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--gap-normal);
+  margin-top: var(--space-5);
+}
+
+@media (min-width: 64em) {
+  .so-rol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.so-blok {
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-raised);
+}
+
+.so-blok p {
+  margin: 0 0 var(--space-3);
+}
+
+.so-blok-baslik {
+  margin: 0 0 var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.so-mesaj {
+  font-weight: var(--weight-semibold);
+}
+
+.so-liste {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.so-satir dt {
+  font-weight: var(--weight-semibold);
+}
+
+.so-satir dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.so-ortaklar {
+  margin-top: var(--gap-normal);
+}
+
+.so-ortaklar .so-liste {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4) var(--gap-normal);
+}

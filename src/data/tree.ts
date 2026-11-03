@@ -134,7 +134,7 @@ const menu = (id: string): NavLink => {
  * değişti; adresler aynı. Yeni ana adresler (Strateji, Müşteri yolculuğu, Pazarlama operasyonu, Ücret ve çalışma modeli,
  * Ölçüm, Genel bakış, Kaynaklar) içerik taşınınca ilgili gruba girer.
  */
-export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('partnership'), menu('affilate')];
+export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('partnership'), menu('affilate'), menu('satis-ortakligi')];
 export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi')];
 export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar-bekleyenler'), menu('karar-yetkisi')];
 export const HELPER_NAV: NavLink[] = [menu('parametreler'), menu('notlar'), menu('arsiv')];

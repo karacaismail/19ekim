@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SatisOrtakligiPage } from '../views/SatisOrtakligiPage';
+---
+
+<BaseLayout title="Satış ortaklığı programı">
+  <SatisOrtakligiPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>
