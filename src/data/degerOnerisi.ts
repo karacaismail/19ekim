@@ -219,7 +219,7 @@ export const KATEGORILER: Kategori[] = [
     id: 'ihracat',
     harf: 'C',
     ad: 'İhracat ve yabancı alıcı',
-    giris: 'Bu alan P4 ve P6 için en güçlü, P2 için en heyecan verici alandır. Yabancı alıcının dükkâna gelmesi zorlaştıkça değeri artar.',
+    giris: 'Bu alan P4 ve P6 için en güçlü, P2 için en heyecan verici alandır. Ancak istoc.com’un ihracat altyapısı ve süreçleri henüz hazır değildir. Bu öneriler yol haritasıdır ve kapıda söz olarak verilmez. Bugün kullanılacak sözler “İhracata hazırlık” bölümündedir.',
     oneriler: [
       {
         no: 12,
@@ -493,6 +493,64 @@ export const KATEGORILER: Kategori[] = [
       },
     ],
   },
+  {
+    id: 'ihracat-hazirlik',
+    harf: 'H',
+    ad: 'İhracata hazırlık',
+    giris: 'İhracat altyapısı ve süreçleri henüz hazır değil, ama hedefimiz var. Bu sözler ihracat vaadi vermeden yönü gösterir. Kapıda bugün bunlar kullanılır.',
+    oneriler: [
+      {
+        no: 36,
+        soz: 'İhracat hedefimiz var. Bugün katılan satıcılar, ihracat altyapımız hazır olduğunda ilk sırada yer alır.',
+        persona: ['P4', 'P6', 'P2'],
+        sikinti: 'İhracat isteyip nereden başlayacağını bilmemek',
+        platform: 'İhracata ilgi duyan satıcıları kaydetmeli. Altyapı hazır olduğunda önce bu satıcılarla başlamalı.',
+        ilkGun: 'evet',
+        risk: 'Düşük. Tarih verilmemeli. Altyapı hazır olmadan ihracat sözü verilmemeli.',
+        dayanak: 'Öneri',
+      },
+      {
+        no: 37,
+        soz: 'Ürün bilgilerinizi bugünden eksiksiz tutalım: ölçü, ağırlık, malzeme ve menşe. Eksiksiz ürün bilgisi her pazarda daha kolay satar.',
+        persona: ['P2', 'P3', 'P4'],
+        sikinti: 'Eksik ürün bilgisi yüzünden satış kaçırmak',
+        platform: 'Ürün kartına ölçü, ağırlık, malzeme ve menşe alanlarını eklemeli. Bu alanlar ileride ihracat için de kullanılır.',
+        ilkGun: 'kismen',
+        risk: 'Düşük. Alanların yazılıma eklenmesi gerekir.',
+        dayanak: 'Öneri',
+      },
+      {
+        no: 38,
+        soz: 'Yurt dışından gelen alıcı ilgisini kaydedelim. Altyapı hazır olduğunda bu alıcılarla sizi ilk biz buluşturalım.',
+        persona: ['P6', 'P4'],
+        sikinti: 'Yabancı alıcının ilgisini değerlendirememek',
+        platform: 'Yabancı alıcıdan gelen talepleri kayda almalı ve bekleme listesine yazmalı. Teslim ya da tarih sözü vermemeli.',
+        ilkGun: 'kismen',
+        risk: 'Orta. Kaydedilen alıcıya teslim tarihi sözü verilirse itibar zarar görür.',
+        dayanak: 'Öneri',
+      },
+      {
+        no: 39,
+        soz: 'Etkinliklerimizde ihracata hazırlığın ilk adımlarını birlikte konuşalım: ürün, belge ve fiyat.',
+        persona: ['P1', 'P2', 'P4'],
+        sikinti: 'İhracat bilgisinin dağınık ve pahalı olması',
+        platform: 'Etkinlik takvimine ihracata hazırlık konusunu eklemeli ve konuyu uzman bir eğitmene anlattırmalı.',
+        ilkGun: 'kismen',
+        risk: 'Düşük. Eğitim bir ihracat hizmeti sözü değildir, bu ayrım açıkça söylenmelidir.',
+        dayanak: 'Öneri. Etkinlik ve eğitmen kararlarıyla birlikte uygulanır.',
+      },
+      {
+        no: 40,
+        soz: 'Bugün Türkiye’nin dört bir yanına satın, yarın sınırların ötesine hazır olun.',
+        persona: ['Hepsi'],
+        sikinti: 'Büyümenin yönünü görememek',
+        platform: 'Yurt içi büyümeyi ihracat hedefine bağlayan bir yol haritası paylaşmalı.',
+        ilkGun: 'evet',
+        risk: 'Düşük. Yol haritasında kesin tarih verilmemeli.',
+        dayanak: 'Öneri',
+      },
+    ],
+  },
 ];
 
 /** Esnaf kapısında ilk 30 saniye: kaynaklı acı noktalarına ve ilk günden verilebilirliğe göre sıra. */
@@ -501,11 +559,11 @@ export const ILK_30_SANIYE: { ad: string; oneriler: number[]; soz: string }[] = 
   { ad: 'Para', oneriler: [1], soz: 'Platformdan gelen siparişin parası güvende. Çek ve senet derdi yok.' },
   { ad: 'Zaman', oneriler: [17, 18, 19], soz: 'WhatsApp siparişleri tek ekranda, fiyatlar tek tuşla güncel, faturalar otomatik.' },
   { ad: 'Ücretsiz kurulum', oneriler: [20], soz: 'Fotoğrafı biz çekeriz, mağazanız bugün açılır.' },
-  { ad: 'İhracata yatkın esnafa', oneriler: [12, 13], soz: 'Yurt dışındaki müşterinize koliyi mikro ihracatla gönderin. Devlet desteği başvurusunu birlikte hazırlayalım.' },
+  { ad: 'İhracata ilgi duyan esnafa', oneriler: [36, 40], soz: 'İhracat hedefimiz var. Bugün katılırsanız, altyapımız hazır olduğunda ilk sırada siz olursunuz.' },
 ];
 
 export const BASLANGIC_NOTU =
-  'P1 ve P5 esnafına para ve sıfır risk sözleriyle, P2 esnafına araç ve ihracat sözleriyle, P4 ve P6 esnafına ihracat sözleriyle başlayın. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
+  'P1 ve P5 esnafına para ve sıfır risk sözleriyle, P2 esnafına araç ve ihracata hazırlık sözleriyle, P4 ve P6 esnafına ihracata hazırlık sözleriyle başlayın. İhracat altyapısı hazır olmadığı için ihracat hizmeti vaat edilmez. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
 
 export const ESKI_SOZLER: { eski: string; yeni: string; neden: string; not?: string }[] = [
   {

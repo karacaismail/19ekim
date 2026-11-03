@@ -5,7 +5,7 @@ import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, 
 
 /**
  * Değer önerisi (kullanıcı kararı 2026-11-03): saha ekibinin esnafa söyleyeceği sözler alt alta, alıntı olarak.
- * Sıra: en güçlü sözler → kapıda ilk 30 saniye → kategorilere göre 35 öneri → eski sözlerin güçlü hali → kısaltmalar.
+ * Sıra: en güçlü sözler → kapıda ilk 30 saniye → kategorilere göre öneriler → eski sözlerin güçlü hali → kısaltmalar.
  */
 
 const iki = (n: number) => String(n).padStart(2, '0');
@@ -143,7 +143,7 @@ function Icerik() {
       <div className="dg-katalog-ust">
         <h2 className="dg-katalog-baslik">Bütün öneriler</h2>
         <p className="dg-bolum-giris">
-          35 öneri yedi başlıkta toplandı. “Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar, araştırma raporundaki esnaf tiplerini gösterir. Bu tiplerin tanımları sayfaya henüz eklenmedi.
+          {KATEGORILER.reduce((n, k) => n + k.oneriler.length, 0)} öneri {KATEGORILER.length} başlıkta toplandı. “Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar, araştırma raporundaki esnaf tiplerini gösterir. Bu tiplerin tanımları sayfaya henüz eklenmedi.
         </p>
       </div>
 
