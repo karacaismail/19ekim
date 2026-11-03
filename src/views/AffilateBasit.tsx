@@ -160,7 +160,23 @@ export function AffilateBasit() {
         </p>
       </div>
 
-      <div className="so2-roller so2-roller-3" role="tablist" aria-label="Ortaklık modelleri">
+      <div className="so2-duzen">
+        <aside className="so2-ayarlar" aria-label="Ayarlar">
+          <div className="so2-ayarlar-ust">
+            <p className="so2-ayarlar-baslik">Ayarlar</p>
+            <button type="button" className="so2-sifirla" onClick={sifirla}>
+              Başa dön
+            </button>
+          </div>
+          <ModelAyarlari id={secili} s={s} g={g} />
+          <Grup baslik="Satış">
+            <Girdi label="Müşteri sayısı" min={1} value={s.adet} onChange={(v) => g({ adet: Math.max(1, v) })} />
+            <Girdi label="Aylık fiyat" birim="₺" step={50} value={s.aylikTl} onChange={(v) => g({ aylikTl: v })} />
+            <Girdi label="Yıllık paket" birim="ay bedeli" min={1} value={s.kat} onChange={(v) => g({ kat: Math.max(1, v) })} />
+          </Grup>
+        </aside>
+        <div className="so2-sag">
+          <div className="so2-roller so2-roller-3" role="tablist" aria-label="Ortaklık modelleri">
         {IDLER.map((id, i) => (
           <button
             key={id}
@@ -190,23 +206,7 @@ export function AffilateBasit() {
           </button>
         ))}
       </div>
-
-      <div className="so2-duzen">
-        <aside className="so2-ayarlar" aria-label="Ayarlar">
-          <div className="so2-ayarlar-ust">
-            <p className="so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="so2-sifirla" onClick={sifirla}>
-              Başa dön
-            </button>
-          </div>
-          <ModelAyarlari id={secili} s={s} g={g} />
-          <Grup baslik="Satış">
-            <Girdi label="Müşteri sayısı" min={1} value={s.adet} onChange={(v) => g({ adet: Math.max(1, v) })} />
-            <Girdi label="Aylık fiyat" birim="₺" step={50} value={s.aylikTl} onChange={(v) => g({ aylikTl: v })} />
-            <Girdi label="Yıllık paket" birim="ay bedeli" min={1} value={s.kat} onChange={(v) => g({ kat: Math.max(1, v) })} />
-          </Grup>
-        </aside>
-        <section className="so2-panel" id="af-panel" role="tabpanel" aria-labelledby={`af-sekme-${secili}`}>
+          <section className="so2-panel" id="af-panel" role="tabpanel" aria-labelledby={`af-sekme-${secili}`}>
           <div className="so2-gecis" key={secili}>
           <h2 className="so2-baslik">{METIN[secili].ad}</h2>
           <p className="so2-kim">{METIN[secili].kim}</p>
@@ -236,6 +236,7 @@ export function AffilateBasit() {
           </p>
           </div>
         </section>
+        </div>
       </div>
     </div>
   );

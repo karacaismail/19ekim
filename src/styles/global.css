@@ -7386,3 +7386,30 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 .so2-kota-ust > span:last-child {
   text-align: end;
 }
+
+/* Rol sekmeleri sonuç sütununun parçasıdır (kullanıcı kararı 2026-11-03); ayarlar sütunu en üstten başlar. */
+.so2-duzen {
+  margin-top: var(--space-8);
+}
+
+.so2-sag {
+  display: grid;
+  min-width: 0;
+}
+
+.so2-sag > .so2-roller {
+  margin-top: 0;
+}
+
+.so2-sag .so2-rol {
+  min-height: 8rem;
+  padding: var(--space-3) var(--space-4);
+}
+
+.so2-sag .so2-rol-ad {
+  font-size: var(--text-md);
+}
+
+.so2-sag .so2-rol-tutar {
+  font-size: var(--text-md);
+}

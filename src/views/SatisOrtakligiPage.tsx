@@ -407,7 +407,19 @@ function Icerik() {
         </p>
       </div>
 
-      <div className="so2-roller" role="tablist" aria-label="Roller">
+      <div className="so2-duzen">
+        <aside className="so2-ayarlar" aria-label="Ayarlar">
+          <div className="so2-ayarlar-ust">
+            <p className="so2-ayarlar-baslik">Ayarlar</p>
+            <button type="button" className="so2-sifirla" onClick={sifirla}>
+              Başa dön
+            </button>
+          </div>
+          <RolAyarlari rol={rol} a={a} g={g} />
+          <OrtakAyarlar a={a} g={g} />
+        </aside>
+        <div className="so2-sag">
+          <div className="so2-roller" role="tablist" aria-label="Roller">
         {roller.map((r, i) => (
           <button
             key={r.id}
@@ -437,19 +449,7 @@ function Icerik() {
           </button>
         ))}
       </div>
-
-      <div className="so2-duzen">
-        <aside className="so2-ayarlar" aria-label="Ayarlar">
-          <div className="so2-ayarlar-ust">
-            <p className="so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="so2-sifirla" onClick={sifirla}>
-              Başa dön
-            </button>
-          </div>
-          <RolAyarlari rol={rol} a={a} g={g} />
-          <OrtakAyarlar a={a} g={g} />
-        </aside>
-        <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
+          <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
           <div className="so2-gecis" key={`${a.marka}-${rol}`}>
           <h2 className="so2-baslik">{secili.ad}</h2>
           <p className="so2-kim">{secili.kim}</p>
@@ -458,6 +458,7 @@ function Icerik() {
           <Kurallar maddeler={[...secili.kurallar, `İlk ödeme ${yuzde(a.ilkOdeme)}, tahsilattan ${a.ilkGun} gün sonra. Kalanı ${a.kalanGun}. günde ödenir.`]} />
           </div>
         </section>
+        </div>
       </div>
     </div>
   );
