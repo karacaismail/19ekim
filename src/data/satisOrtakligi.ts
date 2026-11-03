@@ -84,7 +84,7 @@ export const VARSAYILAN_AYAR: Ayar = {
   maas: 50_000,
   kotaCarpan: 2,
   kotaEk: 0.2,
-  kadroluPrim: { istoc: 0.05, segika: 0.1 },
+  kadroluPrim: { istoc: 0.1, segika: 0.1 },
   kadroluSatis: 2,
   cozumOran: 0.25,
   cozumMusteri: 10,
@@ -188,9 +188,13 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
     {
       id: 'kadrolu',
       ad: 'Kadrolu satış uzmanı',
-      kisa: 'Sabit maaş ve kota üstü prim',
-      kim: `Bizimle maaşlı çalışır. Müşteri listesini yönetir ve satışı kapatır. Kotayı aşınca prim kazanır.`,
-      kurallar: ['İlk iki ay kota yoktur, işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
+      kisa: 'SGK’lı, kota sonrası %10 prim',
+      kim: 'Bizim SGK’lı çalışanımızdır. Satışı yapar ve müşteri listesini yönetir. Kotayı aşınca cironun %10’unu prim olarak alır.',
+      kurallar: [
+        'Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.',
+        'Müşteri ilişkileri için CRM yazılımını biz sağlarız.',
+        'Prim, müşteri ödeyince ve iade süresi geçince ödenir.',
+      ],
       kimler:
         marka === 'istoc'
           ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']

@@ -91,7 +91,7 @@ function Kadrolu({ a }: { a: Ayar }) {
   const dolu = Math.min(1, k.doluluk);
   return (
     <>
-      <Sonuc etiket="Bu ayki toplam kazanç" deger={tl(k.toplam)} aciklama={`${tl(a.maas)} maaş alır. Kotayı aştığı için ${tl(k.prim)} prim eklenir.`} />
+      <Sonuc etiket="Bu ayki toplam kazanç" deger={tl(k.toplam)} aciklama={k.prim > 0 ? `${tl(a.maas)} maaş alır. Kotayı aştığı için cironun ${yuzde(a.kadroluPrim[a.marka])}’u kadar, ${tl(k.prim)} prim eklenir.` : `${tl(a.maas)} maaş alır. Kotayı aşınca cironun ${yuzde(a.kadroluPrim[a.marka])}’unu prim olarak alır.`} />
       <div className="so2-kota">
         <div className="so2-kota-ust">
           <span>Ciro {tl(k.ciro)}</span>
