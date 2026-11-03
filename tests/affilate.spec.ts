@@ -11,8 +11,9 @@ import { baslangicKurgu } from '../src/data/affilateKurgu';
 const icerik = (page: Page) => page.waitForSelector('.app-footer', { state: 'attached' });
 const hydrated = (page: Page) => page.waitForSelector('html[data-hydrated]', { state: 'attached' });
 
-async function ac(page: Page, hash = '') {
-  await page.goto(`affilate/${hash ? `#${hash}` : ''}`);
+/** Ayrıntılı simülasyon bölüm adreslerinde açılır; adressiz sayfa sade görünümdür (kullanıcı kararı 2026-11-03). */
+async function ac(page: Page, hash = 'model') {
+  await page.goto(`affilate/#${hash}`);
   await icerik(page);
   await hydrated(page);
 }
@@ -59,11 +60,13 @@ test.describe('Affilate — gezinme ve ilk ekran', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('.pager-link[rel="prev"] .pager-label')).toHaveText('İş ortaklığı programı');
     await expect(page.locator('.pager-link[rel="next"] .pager-label')).toHaveText('Karar yetkisi ve kontrol noktaları');
-    // U19: simülasyon, dönem ve para birimi görünür; gerçek ödeme ya da net kâr iddiası yok.
-    await expect(page.locator('.page-intro, .sonuc').first()).toContainText(/simülasyon/i);
+    // Sade görünüm (kullanıcı kararı 2026-11-03): üç model, dönem ve para birimiyle tek sonuç; ayrıntılı hesap bağlantısı.
+    await expect(page.getByRole('tab')).toHaveCount(3);
+    await expect(page.locator('.so2-sonuc')).toContainText('3 yılda');
+    await expect(page.locator('.so2-sonuc')).toContainText('₺');
+    await expect(page.locator('.so2-sonuc')).not.toContainText(/net kâr/i);
+    await page.getByRole('link', { name: 'Ayrıntılı hesabı aç' }).click();
     await expect(page.locator('#af-sonuc')).toContainText('36 ay');
-    await expect(page.locator('#af-sonuc')).toContainText('₺');
-    await expect(page.locator('#af-sonuc')).not.toContainText(/net kâr/i);
   });
 
   test('ilk ekran 320×480: ana sonuç kaydırmadan görünür; yatay taşma yok; başlangıç 250 ₺ (satış ortağı, yıllık, 36 ay)', async ({ page }) => {

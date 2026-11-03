@@ -3,6 +3,7 @@ import { Accordion, TextInput } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
+import { AffilateBasit } from './AffilateBasit';
 import { ResultSummary } from '../components/ResultSummary';
 import { Choice, DataTable, Note, Section, type Column } from '../components/ui';
 import { Anahtar, Eylem, Girdiler, Metin, Ozet, Sayi, Secim } from '../components/appletKit';
@@ -941,10 +942,27 @@ function OrtakAccordion({ kurgu, secili, pb, onChange }: { kurgu: Kurgu; secili:
   );
 }
 
+/** Sade görünüm varsayılan (kullanıcı kararı 2026-11-03); ayrıntılı simülasyon bölüm adresleriyle (#model …) açılır. */
+const ayrintiliMi = () => typeof window !== 'undefined' && BOLUMLER.some((b) => `#${b.id}` === window.location.hash);
+
+function Gorunum() {
+  const [ayrinti, setAyrinti] = useState(ayrintiliMi);
+  useEffect(() => {
+    const dinle = () => setAyrinti(ayrintiliMi());
+    window.addEventListener('hashchange', dinle);
+    window.addEventListener('popstate', dinle);
+    return () => {
+      window.removeEventListener('hashchange', dinle);
+      window.removeEventListener('popstate', dinle);
+    };
+  }, []);
+  return ayrinti ? <Icerik /> : <AffilateBasit />;
+}
+
 export function AffilatePage({ pathname }: { pathname: string }) {
   return (
-    <AppFrame pathname={pathname}>
-      <Icerik />
+    <AppFrame pathname={pathname} wide>
+      <Gorunum />
     </AppFrame>
   );
 }

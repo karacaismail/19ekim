@@ -7202,3 +7202,24 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: var(--space-2);
 }
+
+/* Affilate sade görünüm: üç model sekmesi, yıllara dağılım */
+.so2-roller-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.so2-asamalar[data-n='1'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.so2-asamalar[data-n='2'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.so2-asamalar[data-n='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.so2-ayrinti {
+  margin: var(--space-6) 0 0;
+}
