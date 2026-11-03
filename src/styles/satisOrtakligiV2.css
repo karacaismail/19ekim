@@ -1832,8 +1832,14 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
 }
 
 .v2-so2-ozet-kap {
-  order: -1;
   min-width: 0;
+}
+
+/* 1024–1279 px: iki sütun; özet en üstte, yapışık değil. */
+@media (min-width: 64em) and (max-width: 79.99em) {
+  .v2-so2-ozet-kap {
+    order: -1;
+  }
 }
 
 @media (min-width: 80em) {
@@ -1900,4 +1906,141 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/*
+ * Dar ekran, 320 px önce (kullanıcı kararı 2026-11-03): sayfada persona sekmeleri, sonuç ve özet kalır. Ayarlar alttaki
+ * sonuç çubuğundan açılan çekmecededir (SatisOrtakligiV2.tsx → AyarCekmecesi). Sonuç çubuğu güvenli alanı korur.
+ */
+.v2-so2-alt-cubuk {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--page-gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background-color: var(--surface-raised);
+  box-shadow: 0 calc(-1 * var(--hairline)) 0 var(--rule);
+}
+
+.v2-so2-alt-cubuk-sonuc,
+.v2-cekmece-sonuc {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+}
+
+.v2-so2-alt-cubuk-sonuc span,
+.v2-cekmece-sonuc span {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v2-so2-alt-cubuk-sonuc strong,
+.v2-cekmece-sonuc strong {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.v2-so2-alt-cubuk-sonuc small,
+.v2-cekmece-sonuc small {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.v2-so2-alt-cubuk-dugme {
+  flex-shrink: 0;
+  min-height: var(--hit-min);
+  padding: 0 var(--space-5);
+  border: var(--hairline) solid var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.v2-so2-alt-cubuk-dugme:hover {
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+}
+
+.v2-cekmece-govde {
+  display: grid;
+  gap: var(--space-5);
+  padding: 0 var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+/* Canlı sonuç çekmecenin yapışık başlığının hemen altında kalır. */
+.v2-cekmece-sonuc {
+  position: sticky;
+  top: calc(var(--hit-min) + 2 * var(--space-3) + var(--hairline));
+  z-index: 2;
+  margin-inline: calc(-1 * var(--space-4));
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-raised);
+}
+
+.v2-cekmece-bolum {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.v2-cekmece-bolum > .v2-so2-sifirla {
+  justify-self: start;
+}
+
+.v2-cekmece-kapat {
+  justify-self: stretch;
+}
+
+@media (max-width: 63.99em) {
+  .v2-so2 {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  .v2-so2-arac .v2-so2-fiyat,
+  .v2-so2-sag .v2-so2-rol-no,
+  .v2-so2-sag .v2-so2-rol-kisa {
+    display: none;
+  }
+
+  .v2-so2-roller {
+    grid-auto-columns: minmax(9.5rem, 1fr);
+  }
+
+  .v2-so2-sag .v2-so2-rol {
+    min-height: 0;
+    padding: var(--space-3);
+  }
+}
+
+/* Dar ekranda üst satır kısa kalır: sürüm kutusu tam genişlikte, ayracı altta; seçimler sıkı aralıkla. */
+@media (max-width: 47.99em) {
+  .v2-so2-arac {
+    gap: var(--space-3) var(--space-4);
+  }
+
+  .v2-so2-surum-kap {
+    flex-basis: 100%;
+    padding: var(--space-2) var(--space-3);
+    border-inline-end: 0;
+    border-bottom: var(--hairline) solid var(--rule-strong);
+  }
+
+  .v2-so2-arac .v2-so2-kosullar-dugme {
+    padding: 0 var(--space-4);
+  }
 }

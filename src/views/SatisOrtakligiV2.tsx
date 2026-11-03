@@ -7,23 +7,21 @@
  * (ne satar, nasıl katkı verir?) → sağda kazanç, segment merdiveni (nasıl yükselir?), kampanyalar, ağ, dönemler ve hesap.
  * Personaya özel koşullar solun en altında durur; standart bölüm her personada aynı kalır.
  */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Modal } from '@mantine/core';
+import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Drawer } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
-import { AgDiyagrami } from '../components/AgDiyagramiV2';
 import { OzetPaneli } from '../components/OzetPaneliV2';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
-import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKitV2';
+import type { KosulBolum } from '../components/KosullarV2';
+import { Adalet, Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKitV2';
 import {
   ALAN_ADI,
   ISTOC_PAKET_ADI,
-  KAMPANYALAR,
   KARIYER_ADI,
   PAKET_ADI,
-  PRO_GEREKCE,
   SEGMENT_ADI,
   SEVIYE_ADI,
   SOZLESME_ADI,
@@ -52,8 +50,7 @@ import {
 import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullarV2';
 import { POLITIKA_ADI } from '../data/affilateKurguV2';
 import type { Politika } from '../data/affilateV2';
-import { personaOzeti, segmentDurumu } from '../data/ozetV2';
-import '@mantine/core/styles/Modal.layer.css';
+import { basamakDurumu, personaOzeti, segmentDurumu, type Tur } from '../data/ozetV2';
 import '../styles/satisOrtakligiV2.css';
 
 /** Model değişti (2026-11-03): eski v2 kaydı yeni alanlarla karışmasın diye anahtar yenilendi. */
@@ -467,8 +464,6 @@ function Kirilim({ satirlar }: { satirlar: { ad: string; deger: string; not?: st
   );
 }
 
-type Tur = 'bagimsiz' | 'kadrolu';
-const basamakDurumu = (sg: SegmentSonucu, i: number) => (i < sg.seviye ? 'gecildi' : i === sg.seviye ? 'simdi' : i === sg.seviye + 1 ? 'sonraki' : 'kilitli');
 
 /** Paneldeki kısa segment durumu: dört basamak şeridi, eksikler ve bütün koşulları açan düğme. */
 function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => void }) {
@@ -496,81 +491,6 @@ function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => 
         Bütün koşulları gör
       </button>
     </section>
-  );
-}
-
-/** Segment ya da kariyer merdiveni (Koşullar penceresinde): her basamağın koşulları ve şu anki durumu. */
-function Merdiven({ sg, tur }: { sg: SegmentSonucu; tur: Tur }) {
-  const simdi = sg.basamaklar[sg.seviye];
-  const durum = segmentDurumu(sg, tur);
-  return (
-    <section className="v2-sg" aria-labelledby="v2-sg-baslik">
-      <p className="v2-so2-alt-baslik" id="v2-sg-baslik">
-        {tur === 'bagimsiz' ? 'Segment: koşulu sağlayan yükselir' : 'Kariyer basamağı: aynı eşikler'}
-      </p>
-      <p className="v2-sg-durum">
-        <strong>{simdi.ad}</strong> <Canli deger={durum}>{durum}</Canli>
-      </p>
-      <ol className="v2-sg-liste">
-        {sg.basamaklar.map((b, i) => {
-          const d = basamakDurumu(sg, i);
-          return (
-            <li key={b.ad} className="v2-sg-basamak" data-durum={d} aria-current={d === 'simdi' ? 'step' : undefined}>
-              <span className="v2-sg-isaret" aria-hidden="true">
-                {i + 1}
-              </span>
-              <div className="v2-sg-govde">
-                <p className="v2-sg-ad">
-                  {b.ad}
-                  {tur === 'bagimsiz' && i === 3 ? <span className="v2-sg-rozet">Rozet</span> : null}
-                  <span className="visually-hidden">{d === 'simdi' ? ', şu anki basamak' : d === 'gecildi' ? ', geçildi' : ', henüz değil'}</span>
-                </p>
-                <p className="v2-sg-oran">{tur === 'bagimsiz' ? `Satışı kapatana komisyon ${yuzde(b.oran)}` : `Maaş ${tl(b.maas ?? 0)}, kota üstü prim ${yuzde(b.oran)}`}</p>
-                <ul className="v2-sg-kosullar">
-                  {b.kosullar.map((k) => (
-                    <li key={k.ad} data-tamam={k.tamam ? '' : undefined}>
-                      <span className="v2-sg-kosul-ad">
-                        {k.ad}
-                        <span className="visually-hidden">{k.tamam ? ', sağlandı' : ', eksik'}</span>
-                      </span>
-                      <span className="v2-sg-mevcut">
-                        <span className="v2-sg-mevcut-on">Şu an: </span>
-                        {k.mevcut}
-                      </span>
-                      {d === 'sonraki' && !k.tamam ? (
-                        <svg className="v2-sg-cubuk" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true">
-                          <rect className="v2-sg-cubuk-iz" x="0" y="0" width="100" height="4" />
-                          <rect className="v2-sg-cubuk-dolgu" x="0" y="0" width={k.ilerleme * 100} height="4" />
-                        </svg>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      {tur === 'bagimsiz' ? (
-        <div className="v2-sg-neden">
-          <p className="v2-so2-alt-baslik">Profesyonel çözüm ortağı neden daha çok kazanır?</p>
-          <ul>
-            {PRO_GEREKCE.map((m) => (
-              <li key={m}>{m}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-function Adalet({ baslik, children }: { baslik: string; children: ReactNode }) {
-  return (
-    <div className="v2-adalet">
-      <p className="v2-adalet-baslik">{baslik}</p>
-      <p>{children}</p>
-    </div>
   );
 }
 
@@ -697,85 +617,6 @@ function KampanyaListesi({ a, rol }: { a: Ayar; rol: RolId }) {
   );
 }
 
-const AG_KURALLARI = [
-  'Ağ en çok 2 kademe derindir. Ortak, getirdiği ortakların ve onların getirdiklerinin satışından pay alır. Daha alttakilerden pay almaz.',
-  '1. kademe payı Gümüş, 2. kademe payı Altın segmentinden itibaren ödenir. Ortak o ay en az bir satış yapmış olmalıdır.',
-  'Ağ payı satış yapanın komisyonundan düşülmez. Bizim payımızdan ödenir. Bu yüzden ağdaki kimse kaybetmez.',
-  'Kazanç yalnız gerçek müşteri satışından doğar. Ortak getirmek tek başına para kazandırmaz. Aksi durum, 6502 sayılı Kanun’a göre yasak olan saadet zinciri sayılır.',
-  'Giriş ücreti, zorunlu alım ve stok yoktur. Reklamda kazanç vaadi kullanılmaz.',
-];
-
-/* ---------- Koşullar penceresi: personaya göre değişmeyen kurallar ---------- */
-
-type KosulBolum = 'segment' | 'kariyer' | 'ag' | 'kampanya';
-const BOLUM_ADI: Record<KosulBolum, string> = { segment: 'Segmentler', kariyer: 'Kadrolu kariyer', ag: 'Ağ', kampanya: 'Kampanyalar' };
-
-function TumKampanyalar({ a }: { a: Ayar }) {
-  const adlar = Object.fromEntries(rolMetinleri(a.marka).map((r) => [r.id, r.ad]));
-  return (
-    <ul className="v2-kp-liste">
-      {KAMPANYALAR.filter((k) => k.marka.includes(a.marka)).map((k) => (
-        <li key={k.id}>
-          <strong>{k.ad}</strong>
-          <span>{k.ozet(a)}</span>
-          <span>Katılabilen: {k.kimler.map((id) => adlar[id]).join(', ')}.</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/**
- * Koşullar penceresi (kullanıcı kararı 2026-11-03: değişmeyen sabit veriler tek pencerede). Basamaklar, eşikler, ağ
- * kuralları ve kampanya tanımları her personada aynıdır; işaretler ve tutarlar soldaki girdilerle güncellenir.
- * Mantine Modal: odak tuzağı, Escape ile kapanma, kapanınca odak açan düğmeye döner. Dar ekranda tam ekran.
- */
-function KosullarPenceresi({ a, acik, bolum, setBolum, kapat }: { a: Ayar; acik: boolean; bolum: KosulBolum; setBolum: (b: KosulBolum) => void; kapat: () => void }) {
-  const sure = useMotionMs('--motion-duration-base');
-  const dar = useMediaQuery('(max-width: 47.99em)', false);
-  return (
-    <Modal
-      opened={acik}
-      onClose={kapat}
-      title="Koşullar"
-      size="64rem"
-      fullScreen={dar}
-      radius={0}
-      transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }}
-      overlayProps={{ backgroundOpacity: 0.55 }}
-      closeButtonProps={{ 'aria-label': 'Koşulları kapat', size: 'xl' }}
-      classNames={{ content: 'v2-pencere', header: 'v2-pencere-ust', title: 'v2-pencere-baslik', body: 'v2-pencere-govde', close: 'v2-pencere-kapat' }}
-    >
-      <p className="v2-pencere-not">Bu koşullar bütün personalarda aynıdır. İşaretler ve tutarlar soldaki satış ve koşul girdilerine göre değişir.</p>
-      <Choice<KosulBolum> label="Bölüm" value={bolum} options={(Object.keys(BOLUM_ADI) as KosulBolum[]).map((id) => ({ id, name: BOLUM_ADI[id] }))} onChange={setBolum} />
-      <div className="v2-so2-gecis v2-pencere-bolum" key={bolum}>
-        {bolum === 'segment' ? (
-          <>
-            <Adalet baslik="Aynı satış, aynı kazanç">
-              Öncü satış ortağı, danışman ya da marka elçisi olmak tutarı değiştirmez. Aynı satışı yapan her bağımsız ortak aynı tutarı alır. Tutarı segment ve satıştaki katkı belirler.
-            </Adalet>
-            <Merdiven sg={bagimsizKazanc(a).sg} tur="bagimsiz" />
-          </>
-        ) : bolum === 'kariyer' ? (
-          <>
-            <Adalet baslik="Kadrolu çalışan için aynı eşikler">
-              Kadrolu satış uzmanı segment değil, SGK’lı çalışanımızdır. Bağımsız ortakla aynı satış eşikleriyle basamak yükselir. Basamak maaşı ve prim oranını belirler. Takım lideri olmak için ekip yönetmek gerekir.
-            </Adalet>
-            <Merdiven sg={kadroluKazanc(a).sg} tur="kadrolu" />
-          </>
-        ) : bolum === 'ag' ? (
-          <>
-            <Kurallar maddeler={AG_KURALLARI} />
-            <AgDiyagrami a={a} />
-          </>
-        ) : (
-          <TumKampanyalar a={a} />
-        )}
-      </div>
-    </Modal>
-  );
-}
-
 function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
   const s = satisOzeti(a);
   const ay = ilkYilAy(a);
@@ -877,6 +718,68 @@ function kararVerisi(a: Ayar, rol: RolId) {
   };
 }
 
+type CekmeceBolum = 'standart' | 'persona' | 'kurallar';
+
+/**
+ * Dar ekran ayar çekmecesi (320 px önce): alttan açılır, odak tuzağı ve Escape ile kapanma Mantine Drawer’dan gelir.
+ * Üstte canlı sonuç yapışık durur; girdi değişince etkisi çekmece kapanmadan görünür. İçerik yalnız açıkken çizilir.
+ */
+function AyarCekmecesi({ acik, kapat, a, g, rol, persona, ozet, sifirla }: { acik: boolean; kapat: () => void; a: Ayar; g: G; rol: RolId; persona: RolMetni; ozet: { deger: string; birim: string }; sifirla: () => void }) {
+  const [bolum, setBolum] = useState<CekmeceBolum>('standart');
+  const sure = useMotionMs('--motion-duration-base');
+  return (
+    <Drawer
+      opened={acik}
+      onClose={kapat}
+      title="Ayarlar"
+      position="bottom"
+      size="92%"
+      transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }}
+      overlayProps={{ backgroundOpacity: 0.55 }}
+      closeButtonProps={{ 'aria-label': 'Ayarları kapat', size: 'xl' }}
+      classNames={{ content: 'v2-pencere', header: 'v2-pencere-ust', title: 'v2-pencere-baslik', body: 'v2-cekmece-govde', close: 'v2-pencere-kapat' }}
+    >
+      <div className="v2-cekmece-sonuc" aria-live="polite">
+        <span>{persona.ad}</span>
+        <strong>
+          <Canli deger={ozet.deger}>{ozet.deger}</Canli> <small>{ozet.birim}</small>
+        </strong>
+      </div>
+      <Choice<CekmeceBolum>
+        label="Bölüm"
+        value={bolum}
+        options={[
+          { id: 'standart', name: 'Standart' },
+          { id: 'persona', name: 'Persona' },
+          { id: 'kurallar', name: 'Kurallar' },
+        ]}
+        onChange={setBolum}
+      />
+      <div className="v2-so2-gecis v2-cekmece-bolum" key={bolum}>
+        {bolum === 'standart' ? (
+          <>
+            <p className="v2-so2-standart-not">Bu ayarlar bütün personalarda aynıdır. Aynı satış, aynı sonucu verir.</p>
+            <StandartAyarlar a={a} g={g} />
+            <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
+              Başa dön
+            </button>
+          </>
+        ) : bolum === 'persona' ? (
+          <OzelKosullar rol={rol} persona={persona} a={a} g={g} />
+        ) : (
+          <ProgramKurallari a={a} g={g} />
+        )}
+      </div>
+      <button type="button" className="v2-so2-ikincil v2-cekmece-kapat" onClick={kapat}>
+        Sonucu gör
+      </button>
+    </Drawer>
+  );
+}
+
+/** Uyarlanmış teslim: Koşullar penceresi ve ağ diyagramı ilk yüklemede indirilmez, ilk açılışta yüklenir. */
+const KosullarPenceresi = lazy(() => import('../components/KosullarV2'));
+
 /* ---------- Sayfa ---------- */
 
 /**
@@ -908,12 +811,21 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const duzen = useYapisikSutunlar();
   const iskelet = useYapisikSutunlar();
   const kok = useYapisikUst();
+  // Uyarlanmış teslim (kullanıcı kararı 2026-11-03, 320 px önce): geniş ekranda ayarlar sayfada açık durur; dar ekranda
+  // sayfada yalnız persona ve sonuç kalır, ayarlar alttaki sonuç çubuğundan açılan çekmecede ve yalnız açılınca çizilir.
+  const genis = useMediaQuery('(min-width: 64em)', true, { getInitialValueInEffect: false });
+  const [cekmece, setCekmece] = useState(false);
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
   const [kosulAcik, setKosulAcik] = useState(false);
+  const [kosulYuklendi, setKosulYuklendi] = useState(false);
+  // Pencere ilk açılışta yüklendiği için açan düğme burada saklanır; kapanınca odak ona döner.
+  const acan = useRef<HTMLElement | null>(null);
   const [bolum, setBolum] = useState<KosulBolum>('segment');
   const kosullariAc = (b?: KosulBolum) => {
     if (b) setBolum(b);
+    acan.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setKosulYuklendi(true);
     setKosulAcik(true);
   };
   const serit = useSeciliSekmeGorunur(rol);
@@ -961,6 +873,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </p>
       </div>
 
+      {genis ? (
       <section className="v2-so2-standart" aria-labelledby="v2-so2-standart-baslik">
         <div className="v2-so2-standart-ust">
           <h2 className="v2-so2-standart-baslik" id="v2-so2-standart-baslik">
@@ -975,8 +888,10 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           <StandartAyarlar a={a} g={g} />
         </div>
       </section>
+      ) : null}
 
       <div className="v2-so2-duzen" ref={duzen}>
+        {genis ? (
         <aside className="v2-so2-ayarlar" aria-label="Personaya özel ayarlar ve program kuralları">
           <div className="v2-so2-ayarlar-ust">
             <p className="v2-so2-ayarlar-baslik">{secili.ad}</p>
@@ -993,6 +908,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           </div>
           <ProgramKurallari a={a} g={g} />
         </aside>
+        ) : null}
         <div className="v2-so2-sag">
           <div className="v2-so2-roller" role="tablist" ref={serit} aria-label="Personalar">
             {roller.map((r, i) => {
@@ -1059,7 +975,30 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
       </div>
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi-v2" />
-      <KosullarPenceresi a={a} acik={kosulAcik} bolum={bolum} setBolum={setBolum} kapat={() => setKosulAcik(false)} />
+      {genis ? null : (
+        <>
+          <div className="v2-so2-alt-cubuk">
+            <p className="v2-so2-alt-cubuk-sonuc">
+              <span>{secili.ad}</span>
+              <strong>
+                <Canli deger={ozet.deger}>{ozet.deger}</Canli> <small>{ozet.birim}</small>
+              </strong>
+            </p>
+            <button type="button" className="v2-so2-alt-cubuk-dugme" aria-haspopup="dialog" aria-expanded={cekmece} onClick={() => setCekmece(true)}>
+              Ayarlar
+            </button>
+          </div>
+          <AyarCekmecesi acik={cekmece} kapat={() => setCekmece(false)} a={a} g={g} rol={rol} persona={secili} ozet={ozet} sifirla={sifirla} />
+        </>
+      )}
+      {kosulYuklendi ? (
+        <Suspense fallback={null}>
+          <KosullarPenceresi a={a} acik={kosulAcik} bolum={bolum} setBolum={setBolum} kapat={() => {
+              setKosulAcik(false);
+              window.setTimeout(() => acan.current?.focus(), 0);
+            }} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

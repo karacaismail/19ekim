@@ -244,6 +244,46 @@ test('ürün satırı ve persona sekmeleri aşağı kayınca başlığa yapış�
   expect(Math.abs((await kutu('.v2-so2-arac')).ust - ilk.ust)).toBeLessThanOrEqual(2);
 });
 
+test('320 px önce: sayfada sonuç, ayarlar alttaki çubuktan açılan çekmecede', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  await ac(page, 320);
+  // Ayarlar sayfada çizilmez; sayfa kısa kalır.
+  await expect(page.locator('.v2-so2-standart')).toHaveCount(0);
+  await expect(page.locator('.v2-so2-ayarlar')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThan(8000);
+  const cubuk = page.locator('.v2-so2-alt-cubuk');
+  await expect(cubuk).toBeInViewport();
+  await expect(cubuk).toContainText('Öncü satış ortağı');
+  await expect(cubuk.locator('strong')).toContainText('46.922 ₺');
+  const dugme = cubuk.getByRole('button', { name: 'Ayarlar' });
+  await dugme.click();
+  const cekmece = page.getByRole('dialog', { name: 'Ayarlar' });
+  await expect(cekmece).toBeVisible();
+  await cekmece.getByRole('group', { name: 'Satış: ayda kaç yeni müşteri?' }).getByRole('textbox', { name: /Standart paket/ }).fill('2');
+  // Sonuç çekmece kapanmadan güncellenir: 2 × 223.440 × %15 + ağ 13.406 = 80.438.
+  await expect(cekmece.locator('.v2-cekmece-sonuc strong')).toContainText('80.438 ₺');
+  await cekmece.getByRole('button', { name: 'Persona' }).click();
+  await expect(cekmece).toContainText('Özel koşullar: Öncü satış ortağı');
+  await cekmece.getByRole('button', { name: 'Kurallar' }).click();
+  await expect(cekmece.getByRole('textbox', { name: 'Gümüş ortak' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  await page.keyboard.press('Escape');
+  await expect(cekmece).toHaveCount(0);
+  await expect(dugme).toBeFocused();
+  await expect(cubuk.locator('strong')).toContainText('80.438 ₺');
+});
+
+test('uyarlanmış teslim: Koşullar penceresi ilk yüklemede indirilmez, açılınca yüklenir', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  const istekler: string[] = [];
+  page.on('request', (r) => istekler.push(r.url()));
+  await ac(page);
+  await page.waitForLoadState('networkidle');
+  expect(istekler.filter((u) => /KosullarV2/.test(u))).toEqual([]);
+  await kosullariAc(page);
+  expect(istekler.filter((u) => /KosullarV2/.test(u)).length).toBeGreaterThan(0);
+});
+
 for (const genislik of [320, 360, 375, 390]) {
   test(`v2 ${genislik} px: her personada yatay taşma yok`, async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');

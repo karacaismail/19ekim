@@ -261,3 +261,13 @@ export function useSeciliSekmeGorunur(secili: string) {
   }, [secili]);
   return ref;
 }
+
+/** Gerekçe notu: başlık ve tek paragraf (ör. “Aynı satış, aynı kazanç”). */
+export function Adalet({ baslik, children }: { baslik: string; children: ReactNode }) {
+  return (
+    <div className="v2-adalet">
+      <p className="v2-adalet-baslik">{baslik}</p>
+      <p>{children}</p>
+    </div>
+  );
+}
