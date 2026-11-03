@@ -43,7 +43,7 @@ test('masaüstü: beş rol sekmesi, ürün ve rol değişir, ayar sonucu güncel
   expect(odak.golge).toContain('inset');
   expect(odak.cizgi).toBe('none');
   const veri = JSON.parse((await page.locator('.so2-json-icerik').textContent()) ?? '{}');
-  expect(veri.secim).toEqual({ urun: 'segika', odemeModeli: 'oran', seciliRol: 'kadrolu' });
+  expect(veri.secim).toEqual({ urun: 'segika', odemeModeli: 'oran', seciliRol: 'kadrolu', seciliKosul: 'ana' });
   expect(veri.ayarlar.maas).toBe(60000);
   const [indirme] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'JSON dosyasını indir' }).click()]);
   expect(indirme.suggestedFilename()).toMatch(/^satis-ortakligi-\d{4}-\d{2}-\d{2}\.json$/);
@@ -86,3 +86,50 @@ for (const [sayfa, yol] of [
     });
   }
 }
+
+/**
+ * Dört Pazarlama sayfası tek sayfada (kullanıcı kararı 2026-11-03): rol başına koşul seti. Ana program değişmez;
+ * Temsilci ağı seti kademeli ağdır ve diyagramda kimin ne kazandığı görünür.
+ */
+test('koşul setleri: ana program korunur, kademeli ağ ve diyagram, İş ortaklığı seti', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await page.setViewportSize({ width: 1512, height: 945 });
+  await page.goto('satis-ortakligi/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  await expect(page.locator('.so2-fiyat strong')).toHaveText('223.440 ₺');
+
+  // Temsilci ağı: herkes ayda 2 satış, 2 temsilci getirir; Ahmet = 2 × 2.500 + 2 × 2 × 500 + 4 × 2 × 250 = 9.000 ₺.
+  await page.getByRole('button', { name: /Bağımsız temsilci, kademeli ağ/ }).click();
+  await expect(page.locator('.so2-sonuc-deger')).toHaveText('9.000 ₺');
+  await expect(page.getByRole('tab', { name: /Öncü/ })).toContainText('9.000');
+  const aciklama = page.locator('.ag-aciklama');
+  await expect(aciklama).toHaveText('Ayşe bir satış yaptığında Ayşe 2.500 ₺, Mehmet 500 ₺ ve Ahmet 250 ₺ kazanır. Ömer ve Haydar bu satıştan pay almaz.');
+  await page.getByRole('button', { name: 'Fatma: satış yapan olarak seç' }).click();
+  await expect(aciklama).toHaveText('Fatma bir satış yaptığında Fatma 2.500 ₺, Ayşe 500 ₺ ve Mehmet 250 ₺ kazanır. Ahmet, Ömer ve Haydar bu satıştan pay almaz.');
+
+  // Üç kademe: Ahmet Fatma’dan 100 ₺ alır; bir satışta 3.350 ₺ ödenir ve 3.250 ₺ tavanı aşılır.
+  await page.getByRole('textbox', { name: 'Kaç kademe yukarı pay gider?' }).fill('3');
+  await expect(page.getByRole('textbox', { name: '3. kademe payı' })).toBeVisible();
+  await expect(aciklama).toContainText('Mehmet 250 ₺ ve Ahmet 100 ₺ kazanır');
+  await expect(page.locator('.so2-kurallar')).toContainText('tavanı aşılır');
+
+  // Klavye: düğüm Enter ile seçilir.
+  await page.getByRole('button', { name: 'Haydar: satış yapan olarak seç' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(aciklama).toHaveText('Haydar bir satış yaptığında Haydar 2.500 ₺ kazanır.');
+
+  // İş ortaklığı (Segika P2): 2.600 ₺ × 6 ay × %15 = 2.340 ₺; yılda 10 müşteri → 23.400 ₺.
+  await page.getByRole('button', { name: 'Segika' }).click();
+  await page.getByRole('tab', { name: /Profesyonel/ }).click();
+  await page.getByRole('button', { name: /Ticari yönlendirme ortağı/ }).click();
+  await expect(page.locator('.so2-sonuc-deger')).toHaveText('23.400 ₺');
+  await expect(page.locator('.so2-kaynak')).toHaveText('Koşulların kaynağı: İş ortaklığı sayfası');
+  // Ana programa dönünce ana hesap: 31.200 ₺ × %25 × 10 müşteri = 78.000 ₺.
+  await page.getByRole('button', { name: /Ana program/ }).click();
+  await expect(page.locator('.so2-sonuc-deger')).toHaveText('78.000 ₺');
+  const veri = JSON.parse((await page.locator('.so2-json-icerik').textContent()) ?? '{}');
+  // iStoc’a özgü ağ seti Segika’da ana programa düşer; seçim ayarlarda saklı kalır.
+  expect(veri.kosulSetleri.oncu.kosul).toBe('ana');
+  expect(veri.ayarlar.kosul.oncu).toBe('ag');
+  expect(veri.secim.seciliKosul).toBe('ana');
+});

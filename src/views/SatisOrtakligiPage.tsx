@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AgDiyagrami } from '../components/AgDiyagrami';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
@@ -25,6 +26,7 @@ import {
   type SegikaPaket,
   type Seviye,
 } from '../data/satisOrtakligi';
+import { kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullar';
 
 const ANAHTAR = 'turksab-satis-ortakligi-v1';
 const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
@@ -285,8 +287,9 @@ function kararVerisi(a: Ayar, rol: RolId) {
   const sg = a.marka === 'segika' ? segikaAylik(a) : null;
   return {
     sayfa: 'Satış ortaklığı programı',
-    surum: 1,
-    secim: { urun: a.marka, odemeModeli: a.model, seciliRol: rol },
+    surum: 2,
+    secim: { urun: a.marka, odemeModeli: a.model, seciliRol: rol, seciliKosul: seciliKosul(a, rol).id },
+    kosulSetleri: kosulOzeti(a),
     fiyat: {
       aylik: r(aylikFiyat(a)),
       yillikPaket: r(yillikFiyat(a)),
@@ -315,7 +318,7 @@ function kararVerisi(a: Ayar, rol: RolId) {
 
 /* ---------- Ayarlar: seçili rolün değerleri önce ---------- */
 
-function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>) => void }) {
+function AnaAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>) => void }) {
   if (rol === 'oncu')
     return (
       <Grup baslik="Satış hedefleri">
@@ -383,9 +386,128 @@ function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>)
   );
 }
 
-function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
+/** Yıllara yayılan oranlar (1., 2., 3. yıl). */
+function YilOranlari({ oranlar, onChange }: { oranlar: [number, number, number]; onChange: (o: [number, number, number]) => void }) {
   return (
     <>
+      {oranlar.map((o, i) => (
+        <Girdi key={i} label={`${i + 1}. yıl komisyonu`} yuzdeMi value={o} onChange={(v) => onChange(oranlar.map((x, j) => (j === i ? Math.min(1, v) : x)) as [number, number, number])} />
+      ))}
+    </>
+  );
+}
+
+/** Diğer sayfalardan gelen koşul setlerinin değiştirilebilir değerleri. Nakitsiz setlerde değer yoktur. */
+function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Ayar; g: (p: Partial<Ayar>) => void }) {
+  const asama = (i: number) => (
+    <Girdi key={i} label={`${ASAMA_SURE[i]}: ayda kaç satış?`} value={a.oncuAsama[i]} onChange={(v) => g({ oncuAsama: a.oncuAsama.map((x, j) => (j === i ? v : x)) as Ayar['oncuAsama'] })} />
+  );
+  const musteri = (label: string) => <Girdi label={label} value={a.cozumMusteri} onChange={(v) => g({ cozumMusteri: v })} />;
+  if (rol === 'oncu' && kosul === 'ag')
+    return (
+      <Grup baslik="Temsilci ağı">
+        <Girdi label="Satış başı komisyon" birim="₺" step={100} value={a.agKomisyon} onChange={(v) => g({ agKomisyon: v })} />
+        <Girdi label="Kişi başı aylık satış" value={a.agAltSatis} onChange={(v) => g({ agAltSatis: v })} />
+        <Girdi label="Kişi başı getirilen temsilci" birim="kişi" value={a.agAltTemsilci} onChange={(v) => g({ agAltTemsilci: Math.min(6, v) })} />
+        <Girdi label="Kaç kademe yukarı pay gider?" birim="kademe" min={1} value={a.agDerinlik} onChange={(v) => g({ agDerinlik: Math.min(3, Math.max(1, v)) })} />
+        {a.agKademePay.slice(0, Math.min(3, Math.max(1, a.agDerinlik))).map((p, i) => (
+          <Girdi key={i} label={`${i + 1}. kademe payı`} birim="₺ / satış" step={50} value={p} onChange={(v) => g({ agKademePay: a.agKademePay.map((x, j) => (j === i ? v : x)) as Ayar['agKademePay'] })} />
+        ))}
+        <Girdi label="Bir satışta ödeme tavanı" birim="₺" step={50} value={a.agTavan} onChange={(v) => g({ agTavan: v })} />
+      </Grup>
+    );
+  if (rol === 'oncu' && kosul === 'yillara')
+    return (
+      <Grup baslik="Satış hedefleri ve oranlar">
+        {[0, 1, 2, 3].map(asama)}
+        <YilOranlari oranlar={a.yillaraOncu} onChange={(o) => g({ yillaraOncu: o })} />
+      </Grup>
+    );
+  if (rol === 'kadrolu')
+    return (
+      <Grup baslik={kosul === 'lider' ? 'Ekip lideri' : 'Saha personeli'}>
+        <Girdi label="Aylık maaş" birim="₺" step={1000} value={a.maas} onChange={(v) => g({ maas: v })} />
+        <Girdi label="Kota: maaşın katı" birim="×" step={0.5} value={a.sahaKotaCarpan} onChange={(v) => g({ sahaKotaCarpan: v })} />
+        <Girdi label="Kota sonrası prim" birim="₺ / satış" step={100} value={a.sahaPrim} onChange={(v) => g({ sahaPrim: v })} />
+        <Girdi label="Bu ay satılan paket" value={a.kadroluSatis} onChange={(v) => g({ kadroluSatis: v })} />
+        {kosul === 'lider' ? (
+          <>
+            <Girdi label="Liderlik maaş farkı" birim="₺" step={1000} value={a.liderEk} onChange={(v) => g({ liderEk: v })} />
+            <Girdi label="Ekip satışı başına pay" birim="₺" step={50} value={a.liderPay} onChange={(v) => g({ liderPay: v })} />
+            <Girdi label="Ekibin bu ayki satışı" value={a.liderEkipSatis} onChange={(v) => g({ liderEkipSatis: v })} />
+          </>
+        ) : null}
+      </Grup>
+    );
+  if (rol === 'cozum' && kosul === 'yillara')
+    return (
+      <Grup baslik="Müşteri ve oranlar">
+        {musteri('Yılda getirdiği müşteri')}
+        <YilOranlari oranlar={a.yillaraCozum} onChange={(o) => g({ yillaraCozum: o })} />
+      </Grup>
+    );
+  if (rol === 'cozum' && kosul === 'yonlendirme')
+    return (
+      <Grup baslik="Yönlendirme">
+        {musteri('Yılda getirdiği müşteri')}
+        <Girdi label="Komisyon oranı" yuzdeMi value={a.yonlendirmeOran} onChange={(v) => g({ yonlendirmeOran: Math.min(1, v) })} />
+        <Girdi label="Komisyonlu ödenmiş ay" birim="ay" value={a.yonlendirmeAy} onChange={(v) => g({ yonlendirmeAy: v })} />
+      </Grup>
+    );
+  if (rol === 'cozum' && kosul === 'gelistirme')
+    return (
+      <Grup baslik="Satıcı geliştirme">
+        {musteri('Yılda geliştirdiği satıcı')}
+        <Girdi label="Komisyon oranı" yuzdeMi value={a.gelistirmeOran} onChange={(v) => g({ gelistirmeOran: Math.min(1, v) })} />
+        <Girdi label="Komisyonlu ay" birim="ay" value={a.gelistirmeAy} onChange={(v) => g({ gelistirmeAy: v })} />
+      </Grup>
+    );
+  if (rol === 'cozum' && kosul === 'smmm')
+    return (
+      <Grup baslik="Mali müşavir ofisi">
+        <Girdi label="Aktif mükellef" birim="firma" value={a.smmmMukellef} onChange={(v) => g({ smmmMukellef: v })} />
+      </Grup>
+    );
+  if (rol === 'tavsiye' && kosul === 'tek-sefer')
+    return (
+      <Grup baslik="Tavsiye komisyonu">
+        <Girdi label="İlk faturadan" yuzdeMi value={a.tekSeferOran} onChange={(v) => g({ tekSeferOran: Math.min(1, v) })} />
+        <Girdi label="Yılda en çok" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
+      </Grup>
+    );
+  return null;
+}
+
+/**
+ * Rol ayarları (kullanıcı kararı 2026-11-03: dört Pazarlama sayfası tek sayfada). Önce koşul seti seçilir: ana program ya
+ * da Temsilci ağı, İş ortaklığı, Affilate sayfalarından gelen set. Seçim kutusu yerinde kalır; altındaki değerler değişir.
+ */
+function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>) => void }) {
+  const liste = kosulListesi(a, rol);
+  const kosul = seciliKosul(a, rol).id;
+  return (
+    <>
+      {liste.length > 1 ? (
+        <Grup baslik="Koşul seti">
+          <Sec<string>
+            label="Hangi koşullarla çalışır?"
+            value={kosul}
+            options={liste.map((k) => ({ id: k.id, name: k.ad, not: k.kaynak }))}
+            onChange={(v) => g({ kosul: { ...a.kosul, [rol]: v } })}
+          />
+        </Grup>
+      ) : null}
+      <div className="so2-gecis" key={kosul}>
+        {kosul === 'ana' ? <AnaAyarlari rol={rol} a={a} g={g} /> : <KosulAyarlari rol={rol} kosul={kosul} a={a} g={g} />}
+      </div>
+    </>
+  );
+}
+
+function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; ana: boolean }) {
+  return (
+    <>
+      {ana ? (
       <Grup baslik={a.model === 'oran' ? 'Ortağın işine göre komisyon' : 'Satış başı tutar'}>
         {a.model === 'oran' ? (
           (['A', 'B', 'C'] as Seviye[]).map((s) => <Girdi key={s} label={SEVIYE_ADI[s]} yuzdeMi value={a.oran[s]} onChange={(v) => g({ oran: { ...a.oran, [s]: v } })} />)
@@ -393,6 +515,7 @@ function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
           <Girdi label="Her yıllık paket" birim="₺" step={100} value={a.sabit} onChange={(v) => g({ sabit: v })} />
         )}
       </Grup>
+      ) : null}
       <Grup baslik="Fiyat">
         {a.marka === 'istoc' ? (
           <>
@@ -434,11 +557,13 @@ function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
           })}
         </Grup>
       ) : null}
-      <Grup baslik="Hakediş ödemesi">
-        <Girdi label="İlk ödeme" yuzdeMi value={a.ilkOdeme} onChange={(v) => g({ ilkOdeme: Math.min(1, v) })} />
-        <Girdi label="İlk ödeme günü" birim="gün" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
-        <Girdi label="Kalan ödeme günü" birim="gün" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
-      </Grup>
+      {ana ? (
+        <Grup baslik="Hakediş ödemesi">
+          <Girdi label="İlk ödeme" yuzdeMi value={a.ilkOdeme} onChange={(v) => g({ ilkOdeme: Math.min(1, v) })} />
+          <Girdi label="İlk ödeme günü" birim="gün" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
+          <Girdi label="Kalan ödeme günü" birim="gün" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
+        </Grup>
+      ) : null}
     </>
   );
 }
@@ -448,6 +573,29 @@ function segikaOzet(a: Ayar) {
   const s = segikaAylik(a);
   const indirim = s.listeFiyati > 0 ? 1 - s.toplam / s.listeFiyati : 0;
   return `${PAKET_ADI[a.segikaPaket]}, ${new Intl.NumberFormat('tr-TR').format(s.kisi)} çalışan, aylık ${tl(s.toplam)}${indirim > 0.0005 ? `, indirim ${yuzde(indirim)}` : ''}`;
+}
+
+/** Diğer sayfalardan gelen koşul setinin sonucu: kaynak, büyük sonuç, dönemler, hesap ve kurallar. */
+function KosulPaneli({ a, ks, kaynak, ek }: { a: Ayar; ks: KosulSonuc; kaynak: string; ek?: ReactNode }) {
+  return (
+    <>
+      <p className="so2-kaynak">Koşulların kaynağı: {kaynak} sayfası</p>
+      <Sonuc
+        etiket={ks.etiket}
+        deger={ks.deger}
+        aciklama={
+          <>
+            {ks.aciklama}
+            {ks.bize ? <span className="so2-bize">{ks.bize}</span> : null}
+          </>
+        }
+      />
+      {ek}
+      {ks.donemler.length ? <Donemler satirlar={ks.donemler} /> : null}
+      {ks.hesap.length ? <Hesap baslik="Hesap" satirlar={[...fiyatSatirlari(a), ...ks.hesap]} /> : null}
+      <Kurallar maddeler={ks.kurallar} />
+    </>
+  );
 }
 
 /* ---------- Sayfa ---------- */
@@ -468,6 +616,16 @@ function Icerik() {
     elci: tl(satisKazanci(a, a.elciSeviye) * a.elciSatis),
   };
   const ozetBirim: Record<RolId, string> = { oncu: '/ ay', kadrolu: '/ ay', cozum: '/ yıl', tavsiye: 'kredi', elci: '/ ay' };
+  // Ana program dışındaki koşul setinde sekme özeti o setin sonucudur.
+  for (const id of Object.keys(ozet) as RolId[]) {
+    const k = kosulSonucu(a, id);
+    if (k) {
+      ozet[id] = k.ozet;
+      ozetBirim[id] = k.ozetBirim;
+    }
+  }
+  const ks = kosulSonucu(a, rol);
+  const kosulTanim = seciliKosul(a, rol);
   return (
     <div className="so2">
       <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir. Soldaki değerleri değiştirince sonuçlar hemen güncellenir." />
@@ -514,7 +672,7 @@ function Icerik() {
             </p>
           </div>
           <RolAyarlari rol={rol} a={a} g={g} />
-          <OrtakAyarlar a={a} g={g} />
+          <OrtakAyarlar a={a} g={g} ana={!ks} />
         </aside>
         <div className="so2-sag">
           <div className="so2-roller" role="tablist" ref={serit} aria-label="Roller">
@@ -548,14 +706,20 @@ function Icerik() {
         ))}
       </div>
           <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
-          <div className="so2-gecis" key={`${a.marka}-${rol}`}>
+          <div className="so2-gecis" key={`${a.marka}-${rol}-${kosulTanim.id}`}>
           <h2 className="so2-baslik">{secili.ad}</h2>
           <p className="so2-kim">{secili.kim}</p>
           <Kimler liste={secili.kimler} />
-          {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
-          <Donemler satirlar={donemKazanci(a, rol)} />
-          <RolHesabi a={a} rol={rol} />
-          <Kurallar maddeler={secili.kurallar} />
+          {ks ? (
+            <KosulPaneli a={a} ks={ks} kaynak={kosulTanim.kaynak} ek={rol === 'oncu' && kosulTanim.id === 'ag' ? <AgDiyagrami a={a} /> : null} />
+          ) : (
+            <>
+              {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
+              <Donemler satirlar={donemKazanci(a, rol)} />
+              <RolHesabi a={a} rol={rol} />
+              <Kurallar maddeler={secili.kurallar} />
+            </>
+          )}
           </div>
         </section>
         </div>

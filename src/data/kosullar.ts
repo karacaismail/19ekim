@@ -1,0 +1,371 @@
+/**
+ * Koşul setleri (kullanıcı kararı 2026-11-03: “4 sayfa → tek sayfa”). Temsilci ağı, İş ortaklığı ve Affilate
+ * sayfalarındaki personalar ve koşulları, satış ortaklığı sayfasındaki beş rolün altında seçilebilir set olarak durur.
+ * Ana program (`ana`) satış ortaklığı sayfasının kendi hesabıdır ve değişmez; burada yalnız diğer setler hesaplanır.
+ * Kaynaklar: src/data/growth.ts ve program.ts (Temsilci ağı), partnership.ts (İş ortaklığı), affilate.ts (Affilate).
+ */
+import { aylikFiyat, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligi';
+
+export type KaynakSayfa = 'Satış ortaklığı' | 'Temsilci ağı' | 'İş ortaklığı' | 'Affilate';
+
+export interface KosulTanim {
+  id: string;
+  ad: string;
+  kaynak: KaynakSayfa;
+  marka: Marka[];
+}
+
+export interface KosulSonuc {
+  etiket: string;
+  deger: string;
+  aciklama: string;
+  bize?: string;
+  ozet: string;
+  ozetBirim: string;
+  donemler: DonemSatiri[];
+  hesap: { ad: string; formul: string; sonuc: string }[];
+  kurallar: string[];
+  /** Karar verisine (JSON) giden sayılar. */
+  veri: Record<string, number | string>;
+}
+
+const IKISI: Marka[] = ['istoc', 'segika'];
+const ANA: KosulTanim = { id: 'ana', ad: 'Ana program', kaynak: 'Satış ortaklığı', marka: IKISI };
+
+export const KOSULLAR: Record<RolId, KosulTanim[]> = {
+  oncu: [
+    ANA,
+    { id: 'ag', ad: 'Bağımsız temsilci, kademeli ağ', kaynak: 'Temsilci ağı', marka: ['istoc'] },
+    { id: 'yillara', ad: 'Yıllara yayılan komisyon', kaynak: 'Affilate', marka: ['segika'] },
+  ],
+  kadrolu: [
+    ANA,
+    { id: 'saha', ad: 'Saha personeli, satış başı prim', kaynak: 'Temsilci ağı', marka: ['istoc'] },
+    { id: 'lider', ad: 'Ekip lideri', kaynak: 'Temsilci ağı', marka: ['istoc'] },
+  ],
+  cozum: [
+    ANA,
+    { id: 'yillara', ad: 'Destek veren çözüm ortağı, yıllara yayılan', kaynak: 'Affilate', marka: ['segika'] },
+    { id: 'yonlendirme', ad: 'Ticari yönlendirme ortağı', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'smmm', ad: 'Mali müşavir ofisi, seviyeli', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'altyapi', ad: 'Altyapı ve kendi markası', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'entegrasyon', ad: 'Bordro ve İK yazılımı', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'osgb', ad: 'OSGB', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'dernek', ad: 'Dernek, OSB ve oda', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'franchise', ad: 'Franchise ve zincir', kaynak: 'İş ortaklığı', marka: ['segika'] },
+    { id: 'gelistirme', ad: 'Satıcı geliştirme ortağı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+    { id: 'arz', ad: 'Kurumsal arz toplayıcı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+    { id: 'talep', ad: 'Talep toplayıcı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+    { id: 'hizmet', ad: 'Hizmet ortağı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+    { id: 'teknoloji', ad: 'Teknoloji ortağı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+    { id: 'bolge', ad: 'Bölge temsilcisi', kaynak: 'İş ortaklığı', marka: ['istoc'] },
+  ],
+  tavsiye: [ANA, { id: 'tek-sefer', ad: 'Tek seferlik tavsiye komisyonu', kaynak: 'Affilate', marka: ['segika'] }],
+  elci: [ANA],
+};
+
+/* ---------- Kademeli temsilci ağı ---------- */
+
+/** Örnek zincir: Haydar ve Ömer üst kademe, Ahmet odak kişi, Mehmet, Ayşe ve Fatma alt kademeler. */
+export const AG_ISIMLER = ['Haydar', 'Ömer', 'Ahmet', 'Mehmet', 'Ayşe', 'Fatma'];
+export const AG_ODAK = 2;
+export const agDerinlik = (a: Ayar) => Math.min(3, Math.max(1, Math.round(a.agDerinlik)));
+
+/** Bir satışın dağılımı: [satış yapana, 1. kademe üstüne, 2. kademe üstüne, …]. */
+export const agSatisPayi = (a: Ayar) => [a.agKomisyon, ...a.agKademePay.slice(0, agDerinlik(a))];
+
+/**
+ * Zincirde r. sıradaki kişinin aylık kazancı. Herkes ayda aynı sayıda satış yapar ve aynı sayıda temsilci getirir.
+ * Ağ Fatma’nın kuşağında biter: L. kademede dal^L kişi vardır, kuşak bittiyse ya da kademe derinliği aşıldıysa pay yoktur.
+ */
+export function agKisiKazanci(a: Ayar, r: number) {
+  const dal = Math.max(0, Math.round(a.agAltTemsilci));
+  const kendi = a.agAltSatis * a.agKomisyon;
+  const kademeler = a.agKademePay.slice(0, agDerinlik(a)).map((pay, i) => {
+    const L = i + 1;
+    const kisi = r + L < AG_ISIMLER.length ? dal ** L : 0;
+    return { kisi, pay, tutar: kisi * a.agAltSatis * pay };
+  });
+  return { kendi, kademeler, toplam: kendi + kademeler.reduce((s, x) => s + x.tutar, 0) };
+}
+
+/** Ürüne uygun setler; seçili set ürüne uymuyorsa ana program. */
+export const kosulListesi = (a: Ayar, rol: RolId) => KOSULLAR[rol].filter((k) => k.marka.includes(a.marka));
+export function seciliKosul(a: Ayar, rol: RolId): KosulTanim {
+  const liste = kosulListesi(a, rol);
+  return liste.find((k) => k.id === a.kosul?.[rol]) ?? ANA;
+}
+
+const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const sayi = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
+
+/* ---------- Yıllara yayılan komisyon: ay ay satış takvimi ve hizmet ayında hakediş ---------- */
+
+const GUN_AY = 365 / 12;
+const ASAMA_SINIR = [0, 14, 45, 90, Infinity];
+
+/** Aşamalı satış hızından (ayda adet) 36 aylık satış takvimi: her ay, o aya düşen günlerin satışı. */
+export function satisTakvimi(asama: readonly number[], ay = 36): number[] {
+  return Array.from({ length: ay }, (_, m) => {
+    const bas = m * GUN_AY;
+    const son = (m + 1) * GUN_AY;
+    let adet = 0;
+    for (let i = 0; i < 4; i++) {
+      const a0 = Math.max(bas, ASAMA_SINIR[i]);
+      const a1 = Math.min(son, ASAMA_SINIR[i + 1]);
+      if (a1 > a0) adet += (asama[i] * (a1 - a0)) / GUN_AY;
+    }
+    return adet;
+  });
+}
+
+/** Her müşteri her yıl yeniler; ortak, müşterinin k. yılında yıllık paketin oran[k]’sini 12 aya bölünmüş alır. */
+export function yillaraAylik(satis: readonly number[], yillik: number, oranlar: readonly number[]): number[] {
+  const kazanc = new Array<number>(satis.length).fill(0);
+  satis.forEach((adet, m) => {
+    for (let ay = m; ay < satis.length; ay++) kazanc[ay] += (adet * yillik * (oranlar[Math.floor((ay - m) / 12)] ?? 0)) / 12;
+  });
+  return kazanc;
+}
+
+const yilToplami = (seri: readonly number[], yil: number) => seri.slice(yil * 12, yil * 12 + 12).reduce((s, x) => s + x, 0);
+
+function yillaraSonuc(a: Ayar, satis: number[], oranlar: readonly number[], kim: string, kosulCumlesi: string, ekKural: string[]): KosulSonuc {
+  const yillik = yillikFiyat(a);
+  const seri = yillaraAylik(satis, yillik, oranlar);
+  const yillar = [0, 1, 2].map((y) => yilToplami(seri, y));
+  const toplam = yillar[0] + yillar[1] + yillar[2];
+  const ciro = satis.reduce((s, adet, m) => s + (adet * yillik * (satis.length - m)) / 12, 0);
+  const musteri = satis.reduce((s, x) => s + x, 0);
+  return {
+    etiket: `${kim} 3 yıllık kazancı`,
+    deger: t(toplam),
+    aciklama: `${kosulCumlesi} Her müşteriden 1. yıl ${yuzde(oranlar[0])}, 2. yıl ${yuzde(oranlar[1])}, 3. yıl ${yuzde(oranlar[2])} alır.`,
+    bize: `Aynı müşterilerden 3 yılda bize ${t(ciro - toplam)} kalır.`,
+    ozet: t(toplam),
+    ozetBirim: '/ 3 yıl',
+    donemler: yillar.map((y, i) => ({ ad: `${i + 1}. yıl`, yillik: y, formul: `Müşteri başı ${t(yillik * oranlar[i])}, aylara bölünür` })),
+    hesap: [
+      ...oranlar.map((o, i) => ({ ad: `Müşteri başı ${i + 1}. yıl`, formul: `${t(yillik)} × ${yuzde(o)}`, sonuc: t(yillik * o) })),
+      { ad: '3 yılda gelen müşteri', formul: 'Aylık satışların toplamı', sonuc: sayi(musteri) },
+    ],
+    kurallar: ['Komisyon hizmet ayında kazanılır ve o ay ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Hesap, müşterilerin her yıl yenilediğini varsayar.', ...ekKural],
+    veri: { yil1: Math.round(yillar[0]), yil2: Math.round(yillar[1]), yil3: Math.round(yillar[2]), toplam3Yil: Math.round(toplam), musteri3Yil: Math.round(musteri * 10) / 10 },
+  };
+}
+
+/* ---------- Ortak kurallar ---------- */
+
+const SEGIKA_ORTAK_KURALLARI = [
+  'Kaydedilen firma 12 ay korunur. Kabul ya da ret 1 iş gününde verilir.',
+  '60 gün ilerleme olmazsa kayıt gözden geçirilir. Son 90 günde temas olan firma yeni kazanım sayılmaz.',
+  'Yüzde 15’lik bütçe ortaklar arasında bölünür, üst üste eklenmez.',
+  'Liste fiyatının altında satış yapılmaz.',
+];
+
+const ISTOC_ORTAK_KURALLARI = [
+  'Fırsat 2 iş gününde kabul edilir. Koruma süresi 90 gündür.',
+  '30 gün ilerleme olmazsa fırsat gözden geçirilir.',
+  'Münhasırlık yoktur. Marka adı “iStoc Program Ortağı”dır.',
+  'Uyum süreci 21 gün, aktivasyon süresi 60 gündür.',
+];
+
+/** Nakit hesabı olmayan sözleşmeli ortaklık: sonuç, ödeme modelinin adıdır. */
+function sozlesmeli(deger: string, aciklama: string, kurallar: string[]): KosulSonuc {
+  return { etiket: 'Ödeme modeli', deger, aciklama, ozet: deger, ozetBirim: '', donemler: [], hesap: [], kurallar, veri: { model: deger } };
+}
+
+/** Seçili koşul setinin sonucu; ana program için null (sayfanın kendi hesabı kullanılır). */
+export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
+  const k = seciliKosul(a, rol).id;
+  const yillik = yillikFiyat(a);
+  const aylik = aylikFiyat(a);
+  if (k === 'ana') return null;
+
+  if (rol === 'oncu' && k === 'ag') {
+    const odak = agKisiKazanci(a, AG_ODAK);
+    const pay = agSatisPayi(a);
+    const birSatis = pay.reduce((s2, x) => s2 + x, 0);
+    const asar = birSatis > a.agTavan;
+    const d = agDerinlik(a);
+    return {
+      etiket: `${AG_ISIMLER[AG_ODAK]}’in aylık kazancı`,
+      deger: t(odak.toplam),
+      aciklama: `${AG_ISIMLER[AG_ODAK]} ayda ${sayi(a.agAltSatis)} satış yapar ve her satıştan ${t(a.agKomisyon)} alır. Altındaki ${d} kademenin satışlarından da kademe payı alır, daha alttakilerden almaz.`,
+      bize: `Bir satıştan bize ${t(yillik - birSatis)} kalır.`,
+      ozet: t(odak.toplam),
+      ozetBirim: '/ ay',
+      donemler: [
+        { ad: 'Kendi satışı', yillik: odak.kendi * 12, formul: `${sayi(a.agAltSatis)} satış × 12 ay × ${t(a.agKomisyon)}` },
+        ...odak.kademeler.map((x, L) => ({ ad: `${L + 1}. kademe`, yillik: x.tutar * 12, formul: `${sayi(x.kisi)} kişi × ${sayi(a.agAltSatis)} satış × ${t(x.pay)} × 12 ay` })),
+        { ad: 'Toplam', yillik: odak.toplam * 12, formul: `${t(odak.toplam)} × 12 ay` },
+      ],
+      hesap: [
+        { ad: 'Satış yapana', formul: 'Satış başı komisyon', sonuc: t(a.agKomisyon) },
+        ...pay.slice(1).map((x, L) => ({ ad: `${L + 1}. kademe üstüne`, formul: 'Satış başı kademe payı', sonuc: t(x) })),
+        { ad: 'Bir satışta toplam ödeme', formul: `Tavan ${t(a.agTavan)}`, sonuc: t(birSatis) },
+      ],
+      kurallar: [
+        ...(asar ? [`Bu ayarlarla bir satışta ${t(birSatis)} ödenir ve ${t(a.agTavan)} tavanı aşılır.`] : []),
+        `Satış yapanın üstündeki ${d} kademe pay alır. Daha üstteki kişi o satıştan pay almaz.`,
+        'Kazanç yalnız gerçek satıştan doğar. Üye getirmek tek başına para kazandırmaz. Aksi, 6502 sayılı Kanun’a göre yasak olan saadet zinciri sayılır.',
+        'Giriş ücreti, zorunlu alım, kayıt ya da üye getirme primi yoktur.',
+        'Kendi şirketi olan bağımsız temsilcidir. Hizmet faturası keser, maaş almaz.',
+        'Kazanç, ilk ödeme tahsil edilip satıcı aktif olunca hak edilir.',
+        'Reklamda kazanç vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',
+        'Temsilci ağı sayfasında ağ tek kademeliydi. Kaç kademe uygulanacağı sözleşmeden ve hukuk kontrolünden önce kesinleşmelidir.',
+      ],
+      veri: {
+        satisBasina: a.agKomisyon,
+        derinlik: d,
+        kademePaylari: pay.slice(1).join(' / '),
+        birSatistaToplamOdeme: birSatis,
+        tavan: a.agTavan,
+        tavanAsildi: asar ? 'evet' : 'hayir',
+        ...Object.fromEntries(AG_ISIMLER.map((ad, r) => [`aylik_${ad}`, Math.round(agKisiKazanci(a, r).toplam)])),
+      },
+    };
+  }
+
+  if (rol === 'oncu' && k === 'yillara')
+    return yillaraSonuc(a, satisTakvimi(a.oncuAsama), a.yillaraOncu, 'Ortağın', `Ortak ayda ${a.oncuAsama[3]} satışa ulaşırsa bu tutarı kazanır.`, ['Müşteriyi getirir ve satışı kapatır. Müşteri desteğini Segika verir.']);
+
+  if (rol === 'kadrolu' && (k === 'saha' || k === 'lider')) {
+    const lider = k === 'lider';
+    const maas = a.maas + (lider ? a.liderEk : 0);
+    const kotaTl = maas * a.sahaKotaCarpan;
+    const kotaIcin = yillik > 0 ? Math.ceil(kotaTl / yillik) : 0;
+    const prim = Math.max(0, a.kadroluSatis - kotaIcin) * a.sahaPrim;
+    const ekip = lider ? a.liderEkipSatis * a.liderPay : 0;
+    const toplam = maas + prim + ekip;
+    return {
+      etiket: lider ? 'Ekip liderinin bu ayki kazancı' : 'Saha personelinin bu ayki kazancı',
+      deger: t(toplam),
+      aciklama: `${t(maas)} maaş alır. Kota ${kotaIcin} satışla dolar, sonraki her satıştan ${t(a.sahaPrim)} prim alır.${lider ? ` Ekibin ${a.liderEkipSatis} satışından ${t(ekip)} pay eklenir.` : ''}`,
+      bize: `Bu ay kendi satışlarından ciromuz ${t(a.kadroluSatis * yillik)}.`,
+      ozet: t(toplam),
+      ozetBirim: '/ ay',
+      donemler: [
+        { ad: 'Maaş', yillik: maas * 12, formul: `${t(maas)} × 12 ay` },
+        { ad: 'Prim', yillik: prim * 12, formul: `${t(prim)} × 12 ay` },
+        ...(lider ? [{ ad: 'Ekip payı', yillik: ekip * 12, formul: `${t(ekip)} × 12 ay` }] : []),
+        { ad: 'Toplam', yillik: toplam * 12, formul: `${t(toplam)} × 12 ay` },
+      ],
+      hesap: [
+        { ad: 'Kota', formul: `${t(maas)} × ${sayi(a.sahaKotaCarpan)}`, sonuc: t(kotaTl) },
+        { ad: 'Kotaya gereken satış', formul: `${t(kotaTl)} ÷ ${t(yillik)}`, sonuc: `${kotaIcin}` },
+        { ad: 'Prim', formul: `${Math.max(0, a.kadroluSatis - kotaIcin)} satış × ${t(a.sahaPrim)}`, sonuc: t(prim) },
+        ...(lider ? [{ ad: 'Ekip payı', formul: `${a.liderEkipSatis} satış × ${t(a.liderPay)}`, sonuc: t(ekip) }] : []),
+      ],
+      kurallar: [
+        'SGK’lı çalışandır.',
+        ...(lider ? [`Maaşı saha maaşından ${t(a.liderEk)} fazladır.`, `Ekibindeki saha personeli ve temsilcilerin her satışından ${t(a.liderPay)} alır.`, 'Kendi satışları saha personeli kuralıyla hesaplanır.'] : []),
+        `Kota, maaşın ${sayi(a.sahaKotaCarpan)} katı satıştır. Ana programdaki kota ise maaşın ${sayi(a.kotaCarpan)} katına yüzde ${sayi(a.kotaEk * 100)} eklenerek bulunur.`,
+      ],
+      veri: { maas, kota: Math.round(kotaTl), kotayaGerekenSatis: kotaIcin, prim: Math.round(prim), ekipPayi: Math.round(ekip), toplam: Math.round(toplam) },
+    };
+  }
+
+  if (rol === 'cozum' && k === 'yillara')
+    return yillaraSonuc(
+      a,
+      new Array(36).fill(a.cozumMusteri / 12),
+      a.yillaraCozum,
+      'Çözüm ortağının',
+      `Çözüm ortağı yılda ${a.cozumMusteri} müşteri getirirse bu tutarı kazanır.`,
+      ['Müşteri desteğini ortak verir. Destek vermediği ay komisyon kazanmaz.'],
+    );
+
+  if (rol === 'cozum' && (k === 'yonlendirme' || k === 'gelistirme')) {
+    const yon = k === 'yonlendirme';
+    const oran = yon ? a.yonlendirmeOran : a.gelistirmeOran;
+    const ay = yon ? a.yonlendirmeAy : a.gelistirmeAy;
+    const birim = aylik * ay * oran;
+    const n = a.cozumMusteri;
+    return {
+      etiket: yon ? 'Yönlendirme ortağının yıllık kazancı' : 'Satıcı geliştirme ortağının yıllık kazancı',
+      deger: t(birim * n),
+      aciklama: yon
+        ? `Yılda ${n} müşteri getirirse bu tutarı kazanır. Her müşterinin ilk ${ay} ödenmiş ayından ${yuzde(oran)} alır, bu müşteri başı ${t(birim)} eder.`
+        : `Yılda ${n} satıcı geliştirirse bu tutarı kazanır. Her satıcının ilk ${ay} ayından ${yuzde(oran)} alır, bu satıcı başı ${t(birim)} eder.`,
+      bize: `Aynı müşterilerin ilk yılından bize ${t(n * (yillik - birim))} kalır.`,
+      ozet: t(birim * n),
+      ozetBirim: '/ yıl',
+      donemler: [{ ad: 'Komisyon', yillik: birim * n, formul: `${n} × ${t(birim)}` }],
+      hesap: [{ ad: 'Müşteri başı', formul: `${t(aylik)} × ${ay} ay × ${yuzde(oran)}`, sonuc: t(birim) }],
+      kurallar: yon
+        ? [
+            'Komisyon, vergi ve iade hariç uygun net tahsilattan hesaplanır.',
+            `${ay} ödenmiş ay, aktivasyondan sonraki 9 takvim ayı içinde başlamalıdır. Ücretsiz aylar sayılmaz.`,
+            'Ödeme, takip eden ayın 15’ine kadar yapılır.',
+            'Ortak puanı en az 70 olmalıdır. En çok 6 yönlendirme ortağıyla çalışılır.',
+            'Fiyatı değiştiremez, garanti veremez ve tahsilat yapamaz.',
+            ...SEGIKA_ORTAK_KURALLARI,
+          ]
+        : ['En çok 5 aday satıcıyla başlar ve en az 3’ünü satışa hazır hale getirir.', 'Oran örnektir. Finans ekibi oranı 14. günde kesinleştirir.', ...ISTOC_ORTAK_KURALLARI],
+      veri: { oran, ay, musteriBasina: Math.round(birim), yillikMusteri: n, yillikKazanc: Math.round(birim * n) },
+    };
+  }
+
+  if (rol === 'cozum' && k === 'smmm') {
+    const m = a.smmmMukellef;
+    const seviye = m >= 50 ? 'Altın' : m >= 10 ? 'Gümüş' : 'Kayıtlı Ortak';
+    return {
+      etiket: 'Mali müşavirin ortaklık seviyesi',
+      deger: seviye,
+      aciklama: `${m} aktif mükellefle ${seviye} seviyesindedir. Nakit komisyon almaz, toptan fiyattan yararlanır.`,
+      ozet: seviye,
+      ozetBirim: '',
+      donemler: [],
+      hesap: [{ ad: 'Seviye', formul: `${m} aktif mükellef. Gümüş için en az 10, Altın için en az 50`, sonuc: seviye }],
+      kurallar: [
+        'Kayıtlı Ortak ücretsizdir. 2 saat canlı eğitim ve kaydını, paneli, 2 mükellef için ücretsiz denemeyi ve kampanya kitini alır.',
+        'Gümüş için en az 10 aktif mükellef gerekir. Toptan fiyatın 1. kademesini, markalı raporu ve 4 saat öncelikli desteği alır.',
+        'Altın için en az 50 aktif mükellef gerekir. 2. kademe fiyatı, ayrılmış yöneticiyi, ortak pazarlama fonunu ve API erişimini alır.',
+        'Toptan fiyat bantları 10–49, 50–199 ve 200 üstü mükelleftir. Yıllık peşin ödemede ek indirim vardır.',
+        'Bordro hizmeti vermeli, Luca, Mikro ya da ETA kullanmalı ve sertifika eğitimini bitirmelidir.',
+        'İlk dalgada 10 ofisle çalışılır: 5 mevcut ve 5 yeni ofis.',
+        'Müşavire nakit, hediye ya da indirim verilmez. Ana programdaki müşavir komisyonu seçeneği bu kuralla çelişir. Hangisinin geçerli olacağına karar verilmelidir.',
+        ...SEGIKA_ORTAK_KURALLARI,
+      ],
+      veri: { aktifMukellef: m, seviye },
+    };
+  }
+
+  if (rol === 'tavsiye' && k === 'tek-sefer') {
+    const birim = yillik * a.tekSeferOran;
+    return {
+      etiket: 'Tavsiye edenin kazancı',
+      deger: t(birim),
+      aciklama: `Tavsiye ettiği müşterinin ilk faturasından bir kez ${yuzde(a.tekSeferOran)} alır. Bu tutar para olarak ödenir.`,
+      bize: `Yeni müşterinin yıllık paketinden bize ${t(yillik - birim)} kalır.`,
+      ozet: t(birim),
+      ozetBirim: '',
+      donemler: [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye`, yillik: birim * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(birim)}` }],
+      hesap: [{ ad: 'İlk faturadan', formul: `${t(yillik)} × ${yuzde(a.tekSeferOran)}`, sonuc: t(birim) }],
+      kurallar: ['Komisyon tahsilatta kazanılır ve aynı ay ödenir.', 'Yalnız ilk fatura için ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Müşteri desteğini Segika verir.'],
+      veri: { oran: a.tekSeferOran, tavsiyeBasina: Math.round(birim) },
+    };
+  }
+
+  const nakitsiz: Record<string, [string, string, string[]]> = {
+    altyapi: ['Yıllık taahhüt', 'Segika’yı kendi markasıyla sunar. Hacme göre fiyat alır.', ['Yıllık en az firma sayısını taahhüt eder.', 'Hizmet seviyesi sözleşmesi (SLA) imzalanır.', 'Hacme göre fiyat uygulanır.']],
+    entegrasyon: ['Ortak pazarlama', 'Bordro ya da İK yazılımıdır. Segika ile API üzerinden bağlanır ve birlikte pazarlama yapar.', ['API entegrasyonu ve ortak pazarlama anlaşması yapılır.', 'İlk hedef 2 görüşme ve 1 imzadır.']],
+    osgb: ['Yönlendirme anlaşması', 'Ortak sağlık ve güvenlik birimidir. Müşterilerini Segika’ya yönlendirir.', ['Yönlendirme anlaşmasıyla çalışır.', 'İkinci dalgada başlar.']],
+    dernek: ['Ortak eğitim', 'Dernek, organize sanayi bölgesi ya da odadır. Üyelerine Segika ile ortak eğitim düzenler.', ['Ortak eğitim programıyla çalışır.', 'İkinci dalgada başlar.']],
+    franchise: ['Merkez sözleşmesi', 'Franchise ya da zincir işletmedir. Bütün şubeler için merkezle tek sözleşme yapılır.', ['Merkezle sözleşme yapılır.', 'İkinci dalgada başlar.']],
+    arz: ['Nakit ödeme yok', 'Kurumsal arz toplayıcıdır. Üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'İlk dönemde 3 ortakla çalışılır.', 'Aktivasyon için en az 20 doğrulanmış vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
+    talep: ['Görev ücreti', 'Alıcı tarafında talep toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin yüzde 50’si kapsam kabulünde, yüzde 50’si sonuç takibinde ödenir.', 'Ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Aktivasyon için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
+    hizmet: ['Gelir paylaşımı', 'Ödeme, lojistik ya da benzeri bir hizmet verir. Hizmeti “iStoc Onaylı Hizmet” adıyla sunulur.', ['Gelir paylaşımı ya da yönlendirme ücreti alır.', ...ISTOC_ORTAK_KURALLARI]],
+    teknoloji: ['Karşılıklı indirim', 'iStoc ile API üzerinden bağlanan yazılımdır.', ['Liste fiyatında karşılıklı indirim uygulanır.', 'İkinci dalgada başlar.']],
+    bolge: ['Aktif satıcı başı ödeme', 'Bir bölgede satıcı ağı kurar. Aktif satıcı başına ödeme ve işlem payı alır.', ['Yalnız 6. aydan sonra, pazarın canlı olduğu kanıtlanınca başlar.', ...ISTOC_ORTAK_KURALLARI]],
+  };
+  const n = nakitsiz[k];
+  return n ? sozlesmeli(...n) : null;
+}
+
+/** Karar verisi için: bütün rollerin seçili koşul seti. */
+export const kosulOzeti = (a: Ayar) =>
+  Object.fromEntries((Object.keys(KOSULLAR) as RolId[]).map((rol) => [rol, { kosul: seciliKosul(a, rol).id, ad: seciliKosul(a, rol).ad, kaynak: seciliKosul(a, rol).kaynak, sonuc: kosulSonucu(a, rol)?.veri ?? null }]));
+

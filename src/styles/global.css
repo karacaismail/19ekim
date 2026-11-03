@@ -8217,3 +8217,172 @@ html[data-bant-gizli] .so2-duzen {
   }
 
 }
+
+/* Koşul setleri (kullanıcı kararı 2026-11-03: dört Pazarlama sayfası tek sayfada): seçenekte kaynak sayfa, panelde kaynak. */
+.so2-sec-dugme:has(.so2-sec-not) {
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.so2-sec-not {
+  flex: none;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.so2-sec-dugme[aria-pressed='true'] .so2-sec-not {
+  color: inherit;
+}
+
+.so2-kaynak {
+  margin: var(--space-6) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/*
+ * Kademeli temsilci ağı diyagramı (kullanıcı kararı 2026-11-03). Seçilen kişi satış yapandır; üstündeki pay alanlar
+ * vurgulanır, kademe dışında kalanlar silikleşir. Diyagram kendi kabında yatay kayar; metin küçülmez.
+ */
+.ag {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.ag-ipucu {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.ag-kap {
+  overflow-x: auto;
+  background-color: var(--surface-sunken);
+}
+
+.ag-svg {
+  display: block;
+  margin-inline: auto;
+}
+
+.ag-kenar {
+  stroke: var(--rule-strong);
+  stroke-width: 1.5;
+  transition-property: stroke, stroke-width;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.ag-kenar[data-grup] {
+  stroke-dasharray: 4 4;
+}
+
+.ag-kenar[data-vurgu] {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.ag-dugum {
+  cursor: pointer;
+}
+
+.ag-alan {
+  fill: transparent;
+}
+
+.ag-daire {
+  fill: var(--surface-raised);
+  stroke: var(--rule-strong);
+  stroke-width: 1.5;
+  transition-property: fill, stroke;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.ag-dugum[data-adli] .ag-daire {
+  stroke: var(--text-primary);
+  stroke-width: 2;
+}
+
+.ag-dugum:hover .ag-daire {
+  fill: var(--surface-hover);
+}
+
+.ag-dugum[data-durum='kazanir'] .ag-daire {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.ag-dugum[data-durum='satici'] .ag-daire {
+  fill: var(--accent-strong);
+  stroke: var(--accent-strong);
+}
+
+.ag-dugum[data-durum='almaz'] .ag-daire {
+  fill: var(--surface-sunken);
+  stroke: var(--rule);
+}
+
+.ag-ad,
+.ag-grup,
+.ag-tutar {
+  font-family: inherit;
+  font-size: var(--text-sm);
+  text-anchor: middle;
+}
+
+.ag-ad {
+  fill: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  text-anchor: end;
+}
+
+.ag-grup {
+  fill: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  pointer-events: none;
+}
+
+.ag-tutar {
+  fill: var(--accent-strong);
+  font-weight: var(--weight-bold);
+  text-anchor: start;
+  animation-name: so2-belir;
+  animation-duration: var(--motion-duration-base);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-delay: var(--motion-delay-none);
+}
+
+.ag-tutar[data-durum='almaz'] {
+  fill: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+/* Klavye odağı: düğümün altında kısa düz çizgi; çevreleyen halka yok. */
+.ag-odak {
+  fill: var(--focus-indicator);
+  opacity: 0;
+}
+
+html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
+  opacity: 1;
+}
+
+.ag-aciklama {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.ag-tablo-baslik {
+  margin-top: var(--space-4);
+}
+
+.ag .so2-donem-tablo td small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}

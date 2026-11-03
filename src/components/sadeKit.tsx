@@ -67,13 +67,14 @@ export function Grup({ baslik, children }: { baslik: string; children: ReactNode
 }
 
 /** Ayarlarda seçenek: etiket üstte, seçenekler alt alta (dar panelde okunur). */
-export function Sec<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; name: string }[]; onChange: (v: T) => void }) {
+export function Sec<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; name: string; not?: string }[]; onChange: (v: T) => void }) {
   return (
     <fieldset className="so2-sec">
       <legend className="so2-sec-ad">{label}</legend>
       {options.map((o) => (
         <button key={o.id} type="button" className="so2-sec-dugme" aria-pressed={o.id === value} onClick={() => onChange(o.id)}>
           {o.name}
+          {o.not ? <span className="so2-sec-not">{o.not}</span> : null}
         </button>
       ))}
     </fieldset>

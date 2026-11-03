@@ -58,6 +58,46 @@ export interface Ayar {
   tavsiyeSinir: number;
   elciSeviye: Seviye;
   elciSatis: number;
+  /*
+   * Koşul setleri (kullanıcı kararı 2026-11-03: dört Pazarlama sayfası tek sayfada). Rol başına seçili set; boşsa ana
+   * program. Setlerin tanımı ve hesabı src/data/kosullar.ts içindedir.
+   */
+  kosul: Partial<Record<RolId, string>>;
+  /**
+   * Temsilci ağı (kullanıcı kararı 2026-11-03: kademeli ağ). Satış yapan komisyon alır; üstündeki kişiler kademe
+   * derinliğine kadar kademe payı alır, aşağı indikçe pay küçülür. Kazanç yalnız gerçek satıştan doğar.
+   */
+  agKomisyon: number;
+  /** 1., 2. ve 3. kademe payı (satış başı ₺). */
+  agKademePay: [number, number, number];
+  /** Kaç kademe yukarıya pay gider (1–3). */
+  agDerinlik: number;
+  /** Her temsilcinin getirdiği temsilci sayısı. */
+  agAltTemsilci: number;
+  /** Her temsilcinin aylık satışı. */
+  agAltSatis: number;
+  /** Bir satış için ödenen toplam tutarın üst sınırı. */
+  agTavan: number;
+  /** Affilate: yıllara yayılan komisyon oranları (1., 2., 3. yıl). */
+  yillaraOncu: [number, number, number];
+  yillaraCozum: [number, number, number];
+  /** Temsilci ağı: saha personeli kotası maaşın katı; kota sonrası satış başı prim. */
+  sahaKotaCarpan: number;
+  sahaPrim: number;
+  /** Temsilci ağı: ekip lideri maaş farkı, ekip satışı başına pay ve ekibin aylık satışı. */
+  liderEk: number;
+  liderPay: number;
+  liderEkipSatis: number;
+  /** İş ortaklığı (Segika P2): ilk ödenmiş aylardan oran. */
+  yonlendirmeOran: number;
+  yonlendirmeAy: number;
+  /** İş ortaklığı (Segika P1): mali müşavirin aktif mükellef sayısı. */
+  smmmMukellef: number;
+  /** İş ortaklığı (iStoc): satıcı geliştirme oranı ve süresi. */
+  gelistirmeOran: number;
+  gelistirmeAy: number;
+  /** Affilate: tek seferlik tavsiye, ilk faturadan oran. */
+  tekSeferOran: number;
 }
 
 export const VARSAYILAN_AYAR: Ayar = {
@@ -102,6 +142,26 @@ export const VARSAYILAN_AYAR: Ayar = {
   tavsiyeSinir: 3,
   elciSeviye: 'A',
   elciSatis: 2,
+  kosul: {},
+  agKomisyon: 2_500,
+  agKademePay: [500, 250, 100],
+  agDerinlik: 2,
+  agAltTemsilci: 2,
+  agAltSatis: 2,
+  agTavan: 3_250,
+  yillaraOncu: [0.15, 0.1, 0],
+  yillaraCozum: [0.25, 0.15, 0],
+  sahaKotaCarpan: 2,
+  sahaPrim: 2_500,
+  liderEk: 10_000,
+  liderPay: 250,
+  liderEkipSatis: 10,
+  yonlendirmeOran: 0.15,
+  yonlendirmeAy: 6,
+  smmmMukellef: 10,
+  gelistirmeOran: 0.1,
+  gelistirmeAy: 6,
+  tekSeferOran: 0.1,
 };
 
 export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Demo da yapar', C: 'Satışı kendisi kapatır' };
