@@ -1,64 +1,424 @@
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { NumberInput } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Choice, Section } from '../components/ui';
-import { MARKALAR, rolleri, type Marka, type Satir } from '../data/satisOrtakligi';
+import { Choice } from '../components/ui';
+import {
+  ASAMA_ADI,
+  ASAMA_SURE,
+  ORTAK_TURLERI,
+  PAKET_ADI,
+  SEVIYE_ADI,
+  VARSAYILAN_AYAR,
+  aylikFiyat,
+  kadrolu,
+  musavir,
+  rolMetinleri,
+  satisKazanci,
+  yillikFiyat,
+  type Ayar,
+  type Marka,
+  type Model,
+  type RolId,
+  type SegikaPaket,
+  type Seviye,
+} from '../data/satisOrtakligi';
 
-function Liste({ baslik, satirlar }: { baslik: string; satirlar: Satir[] }) {
+const ANAHTAR = 'turksab-satis-ortakligi-v1';
+const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+
+function useAyar() {
+  const [ayar, setAyar] = useState<Ayar>(VARSAYILAN_AYAR);
+  useEffect(() => {
+    try {
+      const kayit = localStorage.getItem(ANAHTAR);
+      if (kayit) setAyar({ ...VARSAYILAN_AYAR, ...(JSON.parse(kayit) as Partial<Ayar>) });
+    } catch {
+      /* kayıt okunamazsa başlangıç değerleri */
+    }
+  }, []);
+  const guncelle = (p: Partial<Ayar>) =>
+    setAyar((o) => {
+      const yeni = { ...o, ...p };
+      try {
+        localStorage.setItem(ANAHTAR, JSON.stringify(yeni));
+      } catch {
+        /* depolama kapalı */
+      }
+      return yeni;
+    });
+  const sifirla = () => {
+    try {
+      localStorage.removeItem(ANAHTAR);
+    } catch {
+      /* yok */
+    }
+    setAyar(VARSAYILAN_AYAR);
+  };
+  return { ayar, guncelle, sifirla };
+}
+
+/** Sade sayı alanı: etiket, değer, birim. Yüzde alanında değer oran olarak saklanır. */
+function Girdi({ label, value, onChange, yuzdeMi = false, birim, step = 1, min = 0 }: { label: string; value: number; onChange: (v: number) => void; yuzdeMi?: boolean; birim?: string; step?: number; min?: number }) {
   return (
-    <div className="so-blok">
-      <h3 className="so-blok-baslik">{baslik}</h3>
-      <dl className="so-liste">
-        {satirlar.map((s) => (
-          <div key={s.ad} className="so-satir">
-            <dt>{s.ad}</dt>
-            <dd>{s.deger}</dd>
-          </div>
-        ))}
-      </dl>
+    <NumberInput
+      className="so2-girdi"
+      classNames={{ label: 'so2-girdi-ad', input: 'param-input so2-girdi-kutu' }}
+      label={label}
+      value={yuzdeMi ? Math.round(value * 1000) / 10 : value}
+      onChange={(v) => {
+        if (typeof v === 'number' && Number.isFinite(v) && v >= min) onChange(yuzdeMi ? v / 100 : v);
+      }}
+      hideControls
+      allowNegative={false}
+      thousandSeparator="."
+      decimalSeparator=","
+      decimalScale={2}
+      step={step}
+      prefix={yuzdeMi ? '%' : undefined}
+      suffix={birim ? ` ${birim}` : undefined}
+      size="md"
+    />
+  );
+}
+
+function Grup({ baslik, children }: { baslik: string; children: ReactNode }) {
+  return (
+    <fieldset className="so2-grup">
+      <legend className="so2-grup-baslik">{baslik}</legend>
+      <div className="so2-grup-alanlar">{children}</div>
+    </fieldset>
+  );
+}
+
+/** Ayarlarda seçenek: etiket üstte, seçenekler alt alta (dar panelde okunur). */
+function Sec<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; name: string }[]; onChange: (v: T) => void }) {
+  return (
+    <fieldset className="so2-sec">
+      <legend className="so2-sec-ad">{label}</legend>
+      {options.map((o) => (
+        <button key={o.id} type="button" className="so2-sec-dugme" aria-pressed={o.id === value} onClick={() => onChange(o.id)}>
+          {o.name}
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
+function SeviyeSec({ value, onChange }: { value: Seviye; onChange: (s: Seviye) => void }) {
+  return <Sec<Seviye> label="Ortağın yaptığı iş" value={value} options={(['A', 'B', 'C'] as Seviye[]).map((s) => ({ id: s, name: SEVIYE_ADI[s] }))} onChange={onChange} />;
+}
+
+/** Büyük sonuç: tek sayı ve onu açıklayan tek cümle. */
+function Sonuc({ etiket, deger, aciklama }: { etiket: string; deger: string; aciklama: ReactNode }) {
+  return (
+    <div className="so2-sonuc" data-edge="top">
+      <p className="so2-sonuc-etiket">{etiket}</p>
+      <p className="so2-sonuc-deger">{deger}</p>
+      <p className="so2-sonuc-aciklama">{aciklama}</p>
     </div>
   );
 }
 
-function Icerik() {
-  const [marka, setMarka] = useState<Marka>('istoc');
-  const secili = MARKALAR.find((m) => m.id === marka)!;
+function Kurallar({ maddeler }: { maddeler: string[] }) {
+  return (
+    <ul className="so2-kurallar">
+      {maddeler.map((m) => (
+        <li key={m}>{m}</li>
+      ))}
+    </ul>
+  );
+}
+
+/* ---------- Rol panelleri: sonuç + görsel + kurallar ---------- */
+
+function Oncu({ a }: { a: Ayar }) {
+  const birim = satisKazanci(a, a.oncuSeviye);
+  const enIyi = a.oncuAsama[3] * birim;
   return (
     <>
-      <PageHeader
-        title="Satış ortaklığı programı"
-        purpose="iStoc ve Segika için beş ortak rolü: kim, ne söyleriz, hedef ve kazanç. Yıllık paket satışında hakediş peşin ödenir."
-        meta={[{ label: 'Fiyat', value: secili.fiyat }]}
-      />
-      <div className="so-marka">
-        <Choice<Marka> label="Marka" value={marka} options={MARKALAR.map((m) => ({ id: m.id, name: m.ad }))} onChange={setMarka} />
-      </div>
-      {rolleri(marka).map((r, i) => (
-        <Section key={`${marka}-${r.id}`} id={r.id} index={i + 1} title={r.ad}>
-          <div className="so-rol">
-            <div className="so-blok">
-              <h3 className="so-blok-baslik">Kim</h3>
-              <p>{r.kim}</p>
-              <h3 className="so-blok-baslik">Ne söyleriz</h3>
-              <p className="so-mesaj">{r.mesaj}</p>
-            </div>
-            <Liste baslik="Hedefler" satirlar={r.hedefler} />
-            <Liste baslik="Kazanç" satirlar={r.kazanc} />
-          </div>
-          {r.liste ? (
-            <div className="so-ortaklar">
-              <Liste baslik={r.liste.baslik} satirlar={r.liste.ogeler} />
-            </div>
-          ) : null}
-        </Section>
-      ))}
+      <Sonuc etiket="Usta aşamasında aylık kazanç" deger={tl(enIyi)} aciklama={`Ayda ${a.oncuAsama[3]} yıllık paket satarsa kazanır. Her satış ${tl(birim)} getirir.`} />
+      <ol className="so2-asamalar">
+        {ASAMA_ADI.map((ad, i) => (
+          <li key={ad} className="so2-asama" data-aktif={a.oncuAsama[i] > 0 ? '' : undefined}>
+            <span className="so2-asama-sure">{ASAMA_SURE[i]}</span>
+            <span className="so2-asama-ad">{ad}</span>
+            <span className="so2-asama-hedef">{a.oncuAsama[i] ? `Ayda ${a.oncuAsama[i]} satış` : 'Satış beklenmez'}</span>
+            <span className="so2-asama-tutar">{tl(a.oncuAsama[i] * birim)}</span>
+          </li>
+        ))}
+      </ol>
     </>
+  );
+}
+
+function Kadrolu({ a }: { a: Ayar }) {
+  const k = kadrolu(a);
+  const dolu = Math.min(1, k.doluluk);
+  return (
+    <>
+      <Sonuc etiket="Bu ayki toplam kazanç" deger={tl(k.toplam)} aciklama={`${tl(a.maas)} maaş alır. Kotayı aştığı için ${tl(k.prim)} prim eklenir.`} />
+      <div className="so2-kota">
+        <div className="so2-kota-ust">
+          <span>Ciro {tl(k.ciro)}</span>
+          <span>Kota {tl(k.kota)}</span>
+        </div>
+        <svg className="so2-kota-cubuk" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+          <rect className="so2-kota-iz" x="0" y="0" width="100" height="10" />
+          <rect className="so2-kota-dolgu" data-asti={k.doluluk >= 1 ? '' : undefined} x="0" y="0" width={dolu * 100} height="10" />
+        </svg>
+        <p className="so2-kota-not">{k.doluluk >= 1 ? `Kotaya ${k.kotaIcinSatis} satışla ulaşır. Sonraki her satış prim getirir.` : `Kotaya ulaşmak için ${k.kotaIcinSatis} satış gerekir.`}</p>
+      </div>
+    </>
+  );
+}
+
+function Cozum({ a }: { a: Ayar }) {
+  const birim = satisKazanci(a, a.cozumSeviye);
+  const m = musavir(a);
+  return (
+    <>
+      <Sonuc etiket="Yıllık kazanç" deger={tl(birim * a.cozumMusteri)} aciklama={`Yılda ${a.cozumMusteri} müşteri getirirse kazanır. Her müşteri ${tl(birim)} getirir.`} />
+      <div className="so2-ortaklar">
+        <p className="so2-alt-baslik">Kimlerle çalışırız?</p>
+        <ul className="so2-etiketler">
+          {ORTAK_TURLERI[a.marka].map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="so2-musavir">
+        <p className="so2-alt-baslik">Mali müşavir</p>
+        <p>
+          {m.tur === 'komisyon'
+            ? `Müşavir her müşteriden ${tl(m.musteriBasina)} komisyon alır.`
+            : `Müşavirin müşterisi ${yuzde(a.musavirIndirim)} indirimli alır. Müşavire komisyon ödemeyiz, ona panel veririz.`}
+        </p>
+      </div>
+    </>
+  );
+}
+
+function Tavsiye({ a }: { a: Ayar }) {
+  const ay = aylikFiyat(a);
+  return (
+    <>
+      <Sonuc etiket="Tavsiye eden kazanır" deger={tl(ay * a.krediAy)} aciklama={`${a.krediAy} ay ücretsiz kullanım kazanır. Bu, aylık bedelin ${a.krediAy} katıdır.`} />
+      <div className="so2-ikili">
+        <div>
+          <p className="so2-alt-baslik">Yeni müşteri</p>
+          <p className="so2-ikili-deger">{tl(ay * a.yeniKrediAy)}</p>
+          <p>{a.yeniKrediAy} ay ücretsiz kullanım kazanır.</p>
+        </div>
+        <div>
+          <p className="so2-alt-baslik">Yıllık sınır</p>
+          <p className="so2-ikili-deger">{a.tavsiyeSinir} tavsiye</p>
+          <p>Daha fazlası çözüm ortağı olur.</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Elci({ a }: { a: Ayar }) {
+  const birim = satisKazanci(a, a.elciSeviye);
+  return <Sonuc etiket="Aylık kazanç" deger={tl(birim * a.elciSatis)} aciklama={`Bağlantısından ayda ${a.elciSatis} yıllık paket satılırsa kazanır. Her satış ${tl(birim)} getirir.`} />;
+}
+
+/* ---------- Ayarlar: seçili rolün değerleri önce ---------- */
+
+function RolAyarlari({ rol, a, g }: { rol: RolId; a: Ayar; g: (p: Partial<Ayar>) => void }) {
+  if (rol === 'oncu')
+    return (
+      <Grup baslik="Hedefler">
+        <SeviyeSec value={a.oncuSeviye} onChange={(s) => g({ oncuSeviye: s })} />
+        {ASAMA_ADI.map((ad, i) => (
+          <Girdi key={ad} label={`${ad}: aylık satış`} value={a.oncuAsama[i]} onChange={(v) => g({ oncuAsama: a.oncuAsama.map((x, j) => (j === i ? v : x)) as Ayar['oncuAsama'] })} />
+        ))}
+      </Grup>
+    );
+  if (rol === 'kadrolu')
+    return (
+      <Grup baslik="Maaş ve kota">
+        <Girdi label="Aylık maaş" birim="₺" step={1000} value={a.maas} onChange={(v) => g({ maas: v })} />
+        <Girdi label="Kota: maaşın katı" birim="×" step={0.5} value={a.kotaCarpan} onChange={(v) => g({ kotaCarpan: v })} />
+        <Girdi label="Kotaya ek" yuzdeMi value={a.kotaEk} onChange={(v) => g({ kotaEk: v })} />
+        <Girdi label="Kota üstü prim" yuzdeMi value={a.kadroluPrim[a.marka]} onChange={(v) => g({ kadroluPrim: { ...a.kadroluPrim, [a.marka]: v } })} />
+        <Girdi label="Bu ay satılan paket" value={a.kadroluSatis} onChange={(v) => g({ kadroluSatis: v })} />
+      </Grup>
+    );
+  if (rol === 'cozum')
+    return (
+      <Grup baslik="Ortak ve müşavir">
+        <SeviyeSec value={a.cozumSeviye} onChange={(s) => g({ cozumSeviye: s })} />
+        <Girdi label="Yılda getirdiği müşteri" value={a.cozumMusteri} onChange={(v) => g({ cozumMusteri: v })} />
+        <Sec<'komisyon' | 'indirim'>
+          label="Mali müşavire"
+          value={a.musavirModel}
+          options={[
+            { id: 'indirim', name: 'Müşterisine indirim' },
+            { id: 'komisyon', name: 'Komisyon' },
+          ]}
+          onChange={(v) => g({ musavirModel: v })}
+        />
+        {a.musavirModel === 'komisyon' ? (
+          <Girdi label="Müşavir komisyonu" yuzdeMi value={a.musavirOran} onChange={(v) => g({ musavirOran: v })} />
+        ) : (
+          <Girdi label="Müşteriye indirim" yuzdeMi value={a.musavirIndirim} onChange={(v) => g({ musavirIndirim: v })} />
+        )}
+      </Grup>
+    );
+  if (rol === 'tavsiye')
+    return (
+      <Grup baslik="Hizmet kredisi">
+        <Girdi label="Tavsiye edene" birim="ay" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
+        <Girdi label="Yeni müşteriye" birim="ay" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
+        <Girdi label="Yılda en çok" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
+      </Grup>
+    );
+  return (
+    <Grup baslik="Elçi">
+      <SeviyeSec value={a.elciSeviye} onChange={(s) => g({ elciSeviye: s })} />
+      <Girdi label="Ayda satış" value={a.elciSatis} onChange={(v) => g({ elciSatis: v })} />
+    </Grup>
+  );
+}
+
+function OrtakAyarlar({ a, g }: { a: Ayar; g: (p: Partial<Ayar>) => void }) {
+  return (
+    <>
+      <Grup baslik={a.model === 'oran' ? 'Komisyon oranları' : 'Satış başı tutar'}>
+        {a.model === 'oran' ? (
+          (['A', 'B', 'C'] as Seviye[]).map((s) => <Girdi key={s} label={SEVIYE_ADI[s]} yuzdeMi value={a.oran[s]} onChange={(v) => g({ oran: { ...a.oran, [s]: v } })} />)
+        ) : (
+          <Girdi label="Her yıllık paket" birim="₺" step={100} value={a.sabit} onChange={(v) => g({ sabit: v })} />
+        )}
+      </Grup>
+      <Grup baslik="Fiyat">
+        {a.marka === 'istoc' ? (
+          <>
+            <Girdi label="Aylık fiyat" birim="€" value={a.istocAyEur} onChange={(v) => g({ istocAyEur: v })} />
+            <Girdi label="Euro kuru" birim="₺" step={0.1} value={a.kur} onChange={(v) => g({ kur: v })} />
+            <Girdi label="Yıllık paket" birim="ay bedeli" value={a.istocYilAy} onChange={(v) => g({ istocYilAy: v })} />
+          </>
+        ) : (
+          <>
+            <Sec<SegikaPaket> label="Paket" value={a.segikaPaket} options={(Object.keys(PAKET_ADI) as SegikaPaket[]).map((p) => ({ id: p, name: PAKET_ADI[p] }))} onChange={(v) => g({ segikaPaket: v })} />
+            <Girdi label={`${PAKET_ADI[a.segikaPaket]}: aylık`} birim="₺" step={50} value={a.segikaFiyat[a.segikaPaket]} onChange={(v) => g({ segikaFiyat: { ...a.segikaFiyat, [a.segikaPaket]: v } })} />
+          </>
+        )}
+      </Grup>
+      <Grup baslik="Hakediş ödemesi">
+        <Girdi label="İlk ödeme" yuzdeMi value={a.ilkOdeme} onChange={(v) => g({ ilkOdeme: Math.min(1, v) })} />
+        <Girdi label="İlk ödeme günü" birim="gün" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
+        <Girdi label="Kalan ödeme günü" birim="gün" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
+      </Grup>
+    </>
+  );
+}
+
+/* ---------- Sayfa ---------- */
+
+function Icerik() {
+  const { ayar: a, guncelle: g, sifirla } = useAyar();
+  const [rol, setRol] = useState<RolId>('oncu');
+  const roller = rolMetinleri(a.marka);
+  const secili = roller.find((r) => r.id === rol)!;
+  const yillik = yillikFiyat(a);
+  const ozet: Record<RolId, string> = {
+    oncu: tl(a.oncuAsama[3] * satisKazanci(a, a.oncuSeviye)),
+    kadrolu: tl(kadrolu(a).toplam),
+    cozum: tl(satisKazanci(a, a.cozumSeviye) * a.cozumMusteri),
+    tavsiye: tl(aylikFiyat(a) * a.krediAy),
+    elci: tl(satisKazanci(a, a.elciSeviye) * a.elciSatis),
+  };
+  const ozetBirim: Record<RolId, string> = { oncu: '/ ay', kadrolu: '/ ay', cozum: '/ yıl', tavsiye: 'kredi', elci: '/ ay' };
+  return (
+    <div className="so2">
+      <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir. Sağdaki değerleri değiştirince sonuçlar hemen güncellenir." />
+
+      <div className="so2-arac">
+        <Choice<Marka>
+          label="Ürün"
+          value={a.marka}
+          options={[
+            { id: 'istoc', name: 'iStoc' },
+            { id: 'segika', name: 'Segika' },
+          ]}
+          onChange={(v) => g({ marka: v })}
+        />
+        <Choice<Model>
+          label="Ödeme"
+          value={a.model}
+          options={[
+            { id: 'oran', name: 'İşe göre oran' },
+            { id: 'sabit', name: 'Satış başı tutar' },
+          ]}
+          onChange={(v) => g({ model: v })}
+        />
+        <p className="so2-fiyat">
+          Yıllık paket <strong>{tl(yillik)}</strong>
+          <span>{a.marka === 'istoc' ? `${a.istocAyEur} € × ${a.istocYilAy} ay` : `${PAKET_ADI[a.segikaPaket]}, 25 çalışan`}</span>
+        </p>
+      </div>
+
+      <div className="so2-roller" role="tablist" aria-label="Roller">
+        {roller.map((r, i) => (
+          <button
+            key={r.id}
+            type="button"
+            role="tab"
+            id={`so2-sekme-${r.id}`}
+            aria-selected={r.id === rol}
+            aria-controls="so2-panel"
+            tabIndex={r.id === rol ? 0 : -1}
+            className="so2-rol"
+            data-edge={r.id === rol ? 'top' : undefined}
+            onClick={() => setRol(r.id)}
+            onKeyDown={(e) => {
+              const j = e.key === 'ArrowRight' ? (i + 1) % roller.length : e.key === 'ArrowLeft' ? (i - 1 + roller.length) % roller.length : -1;
+              if (j < 0) return;
+              e.preventDefault();
+              setRol(roller[j].id);
+              document.getElementById(`so2-sekme-${roller[j].id}`)?.focus();
+            }}
+          >
+            <span className="so2-rol-no">{i + 1}</span>
+            <span className="so2-rol-ad">{r.ad}</span>
+            <span className="so2-rol-kisa">{r.kisa}</span>
+            <span className="so2-rol-tutar">
+              {ozet[r.id]} <small>{ozetBirim[r.id]}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="so2-duzen">
+        <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
+          <h2 className="so2-baslik">{secili.ad}</h2>
+          <p className="so2-kim">{secili.kim}</p>
+          {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}
+          <Kurallar maddeler={[...secili.kurallar, `İlk ödeme ${yuzde(a.ilkOdeme)}, tahsilattan ${a.ilkGun} gün sonra. Kalanı ${a.kalanGun}. günde ödenir.`]} />
+        </section>
+        <aside className="so2-ayarlar" aria-label="Ayarlar">
+          <div className="so2-ayarlar-ust">
+            <p className="so2-ayarlar-baslik">Ayarlar</p>
+            <button type="button" className="so2-sifirla" onClick={sifirla}>
+              Başa dön
+            </button>
+          </div>
+          <RolAyarlari rol={rol} a={a} g={g} />
+          <OrtakAyarlar a={a} g={g} />
+        </aside>
+      </div>
+    </div>
   );
 }
 
 export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
   return (
-    <AppFrame pathname={pathname}>
+    <AppFrame pathname={pathname} wide>
       <Icerik />
     </AppFrame>
   );
