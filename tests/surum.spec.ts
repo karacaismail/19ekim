@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
  */
 
 const V1 = ['views/SatisOrtakligiPage.tsx', 'data/satisOrtakligi.ts', 'data/kosullar.ts', 'data/affilate.ts', 'data/affilateKurgu.ts', 'components/sadeKit.tsx', 'components/AgDiyagrami.tsx', 'components/AffilateMotoru.tsx'];
-const V2 = ['views/SatisOrtakligiV2.tsx', 'data/satisOrtakligiV2.ts', 'data/kosullarV2.ts', 'data/affilateV2.ts', 'data/affilateKurguV2.ts', 'components/sadeKitV2.tsx', 'components/AgDiyagramiV2.tsx', 'components/AffilateMotoruV2.tsx'];
+const V2 = ['views/SatisOrtakligiV2.tsx', 'data/satisOrtakligiV2.ts', 'data/kosullarV2.ts', 'data/affilateV2.ts', 'data/affilateKurguV2.ts', 'components/sadeKitV2.tsx', 'components/AgDiyagramiV2.tsx', 'components/AffilateMotoruV2.tsx', 'components/OzetPaneliV2.tsx', 'data/ozetV2.ts'];
 const oku = (f: string) => readFileSync(`src/${f}`, 'utf8');
 const importlar = (f: string) => [...oku(f).matchAll(/from '([^']+)'|import '([^']+)'/g)].map((m) => m[1] ?? m[2]);
 const ad = (f: string) => f.replace(/^.*\//, '').replace(/\.tsx?$/, '');
@@ -22,7 +22,7 @@ test('v2 dosyaları v1’e özel modülleri import etmez', () => {
 });
 
 test('v2 sınıfları önekli, v1 sınıflarıyla çakışmaz', () => {
-  const css = readFileSync('src/styles/satisOrtakligiV2.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const css = ['src/styles/satisOrtakligiV2.css', 'src/styles/ozetPaneliV2.css'].map((f) => readFileSync(f, 'utf8')).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
   expect(css.match(/\.(so2|ag|am)(?![\w])/g) ?? []).toEqual([]);
   expect(css.match(/(?<![\w-])--so2-/g) ?? []).toEqual([]);
   for (const f of V2.filter((x) => x.endsWith('.tsx'))) expect(oku(f).match(/className="(so2|ag|am)\b[^"]*"/g) ?? [], f).toEqual([]);

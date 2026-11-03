@@ -1,0 +1,218 @@
+/*
+ * v2 (2026-11-03): özet sütunu (OzetPaneliV2.tsx). Bütün sınıflar v2-oz- önekli, v1'i etkilemez.
+ * Kutusuz ve salt okunur: bölümler boşluk, ince çizgi ve yüzey tonuyla ayrılır. Yapışma ve sütun genişliği sayfanın
+ * stilindedir (satisOrtakligiV2.css). En küçük metin var(--text-sm).
+ */
+.v2-oz {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.v2-oz-baslik {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.v2-oz-bolum {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.v2-oz-alt {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.v2-oz-liste {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.v2-oz-satir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+  min-width: 0;
+}
+
+.v2-oz-satir dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.v2-oz-satir dd {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  text-align: end;
+  overflow-wrap: break-word;
+}
+
+.v2-oz-ek {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.v2-oz-sayi,
+.v2-oz-deger,
+.v2-oz-persona-tutar {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.v2-oz-not {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.v2-oz-sonuc {
+  gap: var(--space-1);
+}
+
+.v2-oz-etiket {
+  margin: var(--space-1) 0 0;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+}
+
+.v2-oz-deger {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-stat);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  white-space: normal;
+}
+
+.v2-oz-birim {
+  margin-inline-start: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.v2-oz-deger .v2-oz-birim {
+  margin-inline-start: 0;
+  font-size: var(--text-md);
+}
+
+.v2-oz-kirilim {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+.v2-oz-satir[data-kapali] dd {
+  color: var(--text-secondary);
+  font-weight: var(--weight-regular);
+}
+
+.v2-oz-satir[data-ayri] {
+  padding-top: var(--space-2);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.v2-oz-adim {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.v2-oz-dugme {
+  justify-self: start;
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.v2-oz-dugme:hover {
+  color: var(--text-primary);
+}
+
+.v2-oz-personalar {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-oz-persona {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  color: var(--text-secondary);
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.v2-oz-persona[aria-current='true'] {
+  background-color: var(--surface-selected);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.v2-oz-persona-ad {
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.v2-oz-persona[aria-current='true'] .v2-oz-persona-ad {
+  font-size: var(--text-md);
+}
+
+.v2-oz-persona-tutar {
+  font-weight: var(--weight-medium);
+}
+
+.v2-oz-persona[aria-current='true'] .v2-oz-persona-tutar {
+  font-weight: var(--weight-semibold);
+}
+
+@media (max-width: 23.99em) {
+  .v2-oz {
+    padding: var(--space-4);
+  }
+
+  .v2-oz-kirilim {
+    padding: var(--space-3);
+  }
+}

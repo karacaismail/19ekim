@@ -1167,11 +1167,6 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
  * kazanç kırılımı, “aynı satış, aynı kazanç” notu, kampanyalar, özel koşullar ve katlanır program kuralları.
  * Girdi kutulu ve kenarlıklıdır; çıktı kutusuz, yüzey tonuyla ayrılır (girdi ile sonuç karışmasın).
  */
-.v2-so2-standart-not {
-  margin: calc(-1 * var(--space-3)) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
 
 .v2-so2-robot {
   display: grid;
@@ -1197,51 +1192,6 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
 .v2-so2-robot small {
   color: var(--text-secondary);
   font-size: var(--text-sm);
-}
-
-.v2-so2-katlanir {
-  min-width: 0;
-  background-color: var(--surface-sunken);
-}
-
-.v2-so2-katlanir-baslik {
-  display: flex;
-  align-items: center;
-  min-height: var(--hit-min);
-  padding: var(--space-2) var(--space-4);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-  transition-property: background-color;
-  transition-duration: var(--motion-duration-base);
-  transition-timing-function: var(--motion-ease-standard);
-  transition-delay: var(--motion-delay-none);
-}
-
-.v2-so2-katlanir-baslik::after {
-  margin-inline-start: auto;
-  font-size: var(--text-lg);
-  content: '+' / '';
-}
-
-.v2-so2-katlanir[open] > .v2-so2-katlanir-baslik::after {
-  content: '−' / '';
-}
-
-.v2-so2-katlanir-baslik:hover {
-  background-color: var(--surface-hover);
-}
-
-.v2-so2-katlanir-icerik {
-  display: grid;
-  gap: var(--space-6);
-  padding: var(--space-4);
-}
-
-.v2-so2-katlanir[open] .v2-so2-katlanir-icerik {
-  animation-name: v2-so2-belir;
-  animation-duration: var(--motion-duration-base);
-  animation-timing-function: var(--motion-ease-standard);
-  animation-delay: var(--motion-delay-none);
 }
 
 .v2-so2-ozel {
@@ -1809,4 +1759,145 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   .v2-pencere-govde {
     padding: var(--space-4);
   }
+}
+
+/*
+ * Üç sütunlu iskelet (kullanıcı kararı 2026-11-03): kap 1440 px. Üstte bütün personalar için aynı standart ayarlar;
+ * altında solda personaya özel ayarlar ve program kuralları (~290–340 px, açık), ortada persona sonucu (~600 px);
+ * sağda sayfa başlığının altından başlayan, yapışık ve kompakt özet. Dar ekranda özet en üste, tek sütuna iner.
+ */
+.wrap[data-wide]:has(.v2-so2) {
+  max-width: calc(90rem + 2 * var(--page-gutter));
+}
+
+.v2-so2-iskelet {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.v2-so2-ana {
+  min-width: 0;
+}
+
+.v2-so2-standart {
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  background-color: var(--surface-raised);
+}
+
+.v2-so2-standart-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.v2-so2-standart-baslik {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.v2-so2-standart-not {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.v2-so2-standart-gruplar {
+  columns: 3 16rem;
+  column-gap: var(--space-8);
+}
+
+.v2-so2-standart-gruplar > * {
+  break-inside: avoid;
+  margin-bottom: var(--space-6);
+}
+
+.v2-so2-kurallar-bolum,
+.v2-so2-kurallar-icerik {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.v2-so2-kurallar-bolum {
+  padding-top: var(--space-6);
+  border-top: var(--hairline) solid var(--rule-strong);
+}
+
+/* Dar kenar çubuğunda iki girdili satırlar alt alta (girdi kutusu okunur genişlikte kalsın). */
+.v2-so2-ayarlar .v2-so2-kademe {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.v2-so2-ozet-kap {
+  order: -1;
+  min-width: 0;
+}
+
+@media (min-width: 80em) {
+  .v2-so2-iskelet {
+    grid-template-columns: minmax(0, 60.25rem) minmax(18rem, 1fr);
+    align-items: start;
+  }
+
+  .v2-so2-duzen {
+    grid-template-columns: minmax(18.125rem, 21.25rem) minmax(0, 37.5rem);
+  }
+
+  .v2-so2-ozet-kap {
+    position: sticky;
+    top: min(calc(var(--v2-yapis-ust, 0px) + var(--space-4)), calc(100dvh - var(--v2-so2-boy, 0px) - var(--space-4)));
+    order: 0;
+    align-self: start;
+    transition-property: top;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  /* Yapışık ürün satırının zemini yalnız sola uzar; sağdaki özet sütununun üstüne çizilmez. */
+  .v2-so2-arac {
+    column-gap: var(--space-4);
+    clip-path: inset(0 0 0 -100vmax);
+  }
+
+  /* Ciro ve bütün personaların tutarı sağdaki özette görünür; burada tekrar edilmez, yapışık bölüm kısa kalır. */
+  .v2-so2-arac .v2-so2-fiyat,
+  .v2-so2-sag .v2-so2-rol-no,
+  .v2-so2-sag .v2-so2-rol-kisa,
+  .v2-so2-sag .v2-so2-rol-tutar {
+    display: none;
+  }
+
+  .v2-so2-sag .v2-so2-rol {
+    grid-template-rows: auto;
+    align-content: center;
+  }
+}
+
+@media (max-width: 47.99em) {
+  .v2-so2-standart {
+    padding: var(--space-4);
+  }
+}
+
+/*
+ * Üst satır (kullanıcı kararı 2026-11-03): sürüm seçici, ürün ve ödeme seçimleriyle aynı satırda. Sürüm, sayfanın
+ * sarmalayıcısına ait olduğu için ayrı zeminli kutuda ve dikey ayraçla ayrılır; sağdaki kümeyle karışmaz.
+ */
+.v2-so2-surum-kap {
+  display: flex;
+  align-items: flex-end;
+  align-self: stretch;
+  padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+  background-color: var(--surface-sunken);
+  border-inline-end: var(--hairline) solid var(--rule-strong);
+}
+
+.v2-so2-surum-kap .so-surum {
+  margin: 0;
+  padding: 0;
+  border: 0;
 }

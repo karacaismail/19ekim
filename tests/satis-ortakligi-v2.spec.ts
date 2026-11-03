@@ -120,22 +120,59 @@ test('ağ en çok 2 kademe; kademe payları segmentle açılır', async ({ page,
   await expect(page.locator('.v2-kr-satir', { hasText: 'Ağ, 1. kademe' })).toHaveCount(0);
 });
 
-test('sol panel: standart bölüm her personada aynı, özel koşullar en altta', async ({ page, browserName }) => {
+test('standart ayarlar üstte ve her personada aynı; solda özel koşullar ve açık program kuralları', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
   await ac(page);
-  const standart = () => page.locator('.v2-so2-ayarlar > .v2-so2-grup > .v2-so2-grup-baslik').allInnerTexts();
+  const standart = () => page.locator('.v2-so2-standart-gruplar > .v2-so2-grup > .v2-so2-grup-baslik').allTextContents();
   const ilk = await standart();
-  expect(ilk.length).toBeGreaterThanOrEqual(5);
+  expect(ilk).toEqual(expect.arrayContaining(['Satış: ayda kaç yeni müşteri?', 'Satıştaki katkı', 'Segment koşulları', 'Ağ: en çok 2 kademe', 'Kampanyalar', 'Fiyat']));
+  // Sol panelde standart grup yok; program kuralları açık (akordeon değil).
+  await expect(page.locator('.v2-so2-ayarlar .v2-so2-grup-baslik', { hasText: 'Satış: ayda kaç yeni müşteri?' })).toHaveCount(0);
+  await expect(page.locator('.v2-so2-ayarlar details')).toHaveCount(0);
+  await expect(page.locator('.v2-so2-ayarlar .v2-so2-kurallar-bolum')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Gümüş ortak' })).toBeVisible();
   for (const id of ['kadrolu', 'cozum', 'tavsiye', 'elci']) {
     await sekme(page, id).click();
     expect(await standart()).toEqual(ilk);
-    // Özel koşullar bölümü sol panelin son öğesidir.
-    const son = await page.locator('.v2-so2-ayarlar > :last-child').evaluate((e) => !!e.querySelector('.v2-so2-ozel'));
-    expect(son).toBe(true);
+    await expect(page.locator('.v2-so2-ayarlar .v2-so2-ozel')).toBeVisible();
   }
   await sekme(page, 'kadrolu').click();
   await expect(page.locator('.v2-so2-ozel')).toContainText('Basamağa göre maaş ve prim');
-  await expect(page.locator('.v2-sg-durum strong')).toHaveText('Satış uzmanı');
+  await expect(page.locator('.v2-so2-panel .v2-sg-durum strong')).toHaveText('Satış uzmanı');
+});
+
+test('1440 px: üç sütun, yapışık özet ve sürüm aynı satırda ayrı kutuda', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await page.setViewportSize({ width: 1600, height: 960 });
+  await page.goto('satis-ortakligi/?surum=v2');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const kutu = (s: string) => page.locator(s).first().evaluate((e) => { const r = e.getBoundingClientRect(); return { sol: r.left, sag: r.right, ust: r.top, alt: r.bottom, gen: r.width }; });
+  const iskelet = await kutu('.v2-so2-iskelet');
+  expect(iskelet.gen).toBeLessThanOrEqual(1440.5);
+  expect(iskelet.gen).toBeGreaterThan(1400);
+  const sol = await kutu('.v2-so2-ayarlar');
+  const orta = await kutu('.v2-so2-sag');
+  const ozet = await kutu('.v2-so2-ozet-kap');
+  expect(sol.gen).toBeGreaterThanOrEqual(290);
+  expect(sol.gen).toBeLessThanOrEqual(340.5);
+  expect(orta.gen).toBeLessThanOrEqual(600.5);
+  expect(orta.gen).toBeGreaterThan(560);
+  expect(ozet.sol).toBeGreaterThan(orta.sag);
+  // Özet sayfa başlığının altından başlar ve aşağı kayınca görünür kalır.
+  const baslik = await kutu('.crumbs-row');
+  expect(ozet.ust).toBeLessThan((await kutu('.v2-so2-arac')).alt);
+  expect(ozet.ust).toBeGreaterThan(baslik.ust);
+  await page.mouse.move(1300, 600);
+  await page.mouse.wheel(0, 1800);
+  await page.waitForTimeout(400);
+  await expect(page.locator('.v2-oz')).toBeInViewport();
+  // Sürüm, ürün ve ödeme ile aynı satırda; ayrı kutuda.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(300);
+  const surum = await kutu('.v2-so2-surum-kap');
+  const urun = await kutu('.v2-so2-arac > .secim');
+  expect(Math.abs(surum.alt - urun.alt)).toBeLessThan(24);
+  expect(urun.sol).toBeGreaterThan(surum.sag);
 });
 
 test('marka elçisi: kimlerle çalışırız etiketleri gerçek karşılıklar, kampanyalar personaya göre', async ({ page, browserName }) => {
@@ -194,12 +231,12 @@ test('ürün satırı ve persona sekmeleri aşağı kayınca başlığa yapış�
   expect(roller.alt).toBeLessThan(945 * 0.45);
   await expect(page.locator('.v2-so2-rol').first()).toBeInViewport();
   // Altından kayan sütunlar yapışık bölümün üstüne çizilmez.
-  const ustte = await page.evaluate(([y1, y2]) => {
-    const x = innerWidth * 0.2;
-    const a = document.elementFromPoint(x, y1)?.closest('.v2-so2-arac');
-    const r = document.elementFromPoint(innerWidth * 0.7, y2)?.closest('.v2-so2-roller');
+  const ustte = await page.evaluate(() => {
+    const ortasi = (s: string) => { const r = document.querySelector(s)!.getBoundingClientRect(); return [r.left + r.width / 2, r.top + 8] as const; };
+    const a = document.elementFromPoint(...ortasi('.v2-so2-arac'))?.closest('.v2-so2-arac');
+    const r = document.elementFromPoint(...ortasi('.v2-so2-roller'))?.closest('.v2-so2-roller');
     return !!a && !!r;
-  }, [arac.ust + 4, roller.ust + 20]);
+  });
   expect(ustte).toBe(true);
   // Yukarı çıkınca yerine döner.
   await page.evaluate(() => window.scrollTo(0, 0));

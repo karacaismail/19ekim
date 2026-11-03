@@ -12,6 +12,7 @@ import { Modal } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
 import { AgDiyagrami } from '../components/AgDiyagramiV2';
+import { OzetPaneli } from '../components/OzetPaneliV2';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
@@ -51,6 +52,7 @@ import {
 import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullarV2';
 import { POLITIKA_ADI } from '../data/affilateKurguV2';
 import type { Politika } from '../data/affilateV2';
+import { personaOzeti, segmentDurumu } from '../data/ozetV2';
 import '@mantine/core/styles/Modal.layer.css';
 import '../styles/satisOrtakligiV2.css';
 
@@ -166,7 +168,6 @@ function StandartAyarlar({ a, g }: { a: Ayar; g: G }) {
         <Girdi label="Yılda en çok tavsiye" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
       </Grup>
       <FiyatAyarlari a={a} g={g} />
-      <ProgramKurallari a={a} g={g} />
     </>
   );
 }
@@ -218,14 +219,16 @@ function FiyatAyarlari({ a, g }: { a: Ayar; g: G }) {
   );
 }
 
-/** Program kuralları: oranlar ve eşikler. Seyrek değişir, bu yüzden varsayılan kapalıdır. */
+/** Program kuralları: oranlar ve eşikler (kullanıcı kararı 2026-11-03: sol panelde açık, akordeon içinde değil). */
 function ProgramKurallari({ a, g }: { a: Ayar; g: G }) {
   const esik = a.segmentEsik[a.marka];
   const esikYaz = (i: number, p: Partial<{ musteri: number; ciro: number }>) => g({ segmentEsik: { ...a.segmentEsik, [a.marka]: esik.map((e, j) => (j === i ? { ...e, ...p } : e)) } });
   return (
-    <details className="v2-so2-katlanir">
-      <summary className="v2-so2-katlanir-baslik">Program kuralları: oranlar ve eşikler</summary>
-      <div className="v2-so2-katlanir-icerik">
+    <section className="v2-so2-kurallar-bolum" aria-labelledby="v2-so2-kurallar-baslik">
+      <h2 className="v2-so2-ozel-baslik" id="v2-so2-kurallar-baslik">
+        Program kuralları: oranlar ve eşikler
+      </h2>
+      <div className="v2-so2-kurallar-icerik">
         <Grup baslik="Segment oranı (satışı kapatan için)">
           {SEGMENT_ADI.map((ad, i) => (
             <Girdi key={ad} label={ad} yuzdeMi value={a.segmentOran[i]} onChange={(v) => g({ segmentOran: a.segmentOran.map((x, j) => (j === i ? Math.min(1, v) : x)) as Ayar['segmentOran'] })} />
@@ -259,7 +262,7 @@ function ProgramKurallari({ a, g }: { a: Ayar; g: G }) {
           <Girdi label="Kalan ödeme günü" birim="gün" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
         </Grup>
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -466,13 +469,6 @@ function Kirilim({ satirlar }: { satirlar: { ad: string; deger: string; not?: st
 
 type Tur = 'bagimsiz' | 'kadrolu';
 const basamakDurumu = (sg: SegmentSonucu, i: number) => (i < sg.seviye ? 'gecildi' : i === sg.seviye ? 'simdi' : i === sg.seviye + 1 ? 'sonraki' : 'kilitli');
-
-/** Şu anki basamak ve bir üste geçmek için eksikler (tam cümle). */
-function segmentDurumu(sg: SegmentSonucu, tur: Tur) {
-  const sonraki = sg.basamaklar[sg.seviye + 1];
-  const birlestir = (l: string[]) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} ve ${l[l.length - 1]}`);
-  return sonraki ? `${sonraki.ad} olmak için ${birlestir(sg.eksikler)} gerekir.` : tur === 'bagimsiz' ? 'Ortak en üst segmenttedir. Rozet her yıl yeniden değerlendirilir.' : 'Çalışan en üst basamaktadır.';
-}
 
 /** Paneldeki kısa segment durumu: dört basamak şeridi, eksikler ve bütün koşulları açan düğme. */
 function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: () => void }) {
@@ -847,14 +843,6 @@ function ProgramPaneli({ a, ks, ad, ek }: { a: Ayar; ks: KosulSonuc; ad: string;
   );
 }
 
-function personaOzeti(a: Ayar, r: RolMetni) {
-  const k = kosulSonucu(a, r.id);
-  if (k) return { deger: k.ozet, birim: k.ozetBirim };
-  if (r.sozlesme === 'kadrolu') return { deger: tl(kadroluKazanc(a).toplam), birim: '/ ay' };
-  if (r.sozlesme === 'musteri') return { deger: tl(musteriKazanc(a).yillikKredi), birim: 'kredi / yıl' };
-  return { deger: tl(bagimsizKazanc(a).aylik), birim: '/ ay' };
-}
-
 /** Karar verisi: seçimler, robot, segment, personaların kazancı ve bütün ayarlar (tutarlar ₺, oranlar 0–1). */
 function kararVerisi(a: Ayar, rol: RolId) {
   const r = (n: number) => Math.round(n);
@@ -918,6 +906,7 @@ function useYapisikUst() {
 
 export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const duzen = useYapisikSutunlar();
+  const iskelet = useYapisikSutunlar();
   const kok = useYapisikUst();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
@@ -938,8 +927,11 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   return (
     <div className="v2-so2" ref={kok}>
       <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla ne kazandığını, hangi segmentte olduğunu ve bir üst segmente nasıl geçeceğini gösterir." />
-      {surum}
+      <div className="v2-so2-iskelet" ref={iskelet}>
+      <div className="v2-so2-ana">
       <div className="v2-so2-arac">
+        {/* Sürüm seçici sayfa sürümünü değiştirir (sarmalayıcıdan gelir); ürün ve ödeme seçimlerinden ayrı kutudadır. */}
+        <div className="v2-so2-surum-kap">{surum}</div>
         <Choice<Marka>
           label="Ürün"
           value={a.marka}
@@ -969,13 +961,25 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </p>
       </div>
 
+      <section className="v2-so2-standart" aria-labelledby="v2-so2-standart-baslik">
+        <div className="v2-so2-standart-ust">
+          <h2 className="v2-so2-standart-baslik" id="v2-so2-standart-baslik">
+            Standart ayarlar
+          </h2>
+          <p className="v2-so2-standart-not">Bu ayarlar bütün personalarda aynıdır. Aynı satış, aynı sonucu verir.</p>
+          <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
+            Başa dön
+          </button>
+        </div>
+        <div className="v2-so2-standart-gruplar">
+          <StandartAyarlar a={a} g={g} />
+        </div>
+      </section>
+
       <div className="v2-so2-duzen" ref={duzen}>
-        <aside className="v2-so2-ayarlar" aria-label="Ayarlar">
+        <aside className="v2-so2-ayarlar" aria-label="Personaya özel ayarlar ve program kuralları">
           <div className="v2-so2-ayarlar-ust">
-            <p className="v2-so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
-              Başa dön
-            </button>
+            <p className="v2-so2-ayarlar-baslik">{secili.ad}</p>
             <p className="v2-so2-ayarlar-ozet">
               {secili.ad}{' '}
               <strong>
@@ -984,11 +988,10 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
               {ozet.birim}
             </p>
           </div>
-          <p className="v2-so2-standart-not">Bu bölüm her personada aynıdır. Aynı satış, aynı sonucu verir.</p>
-          <StandartAyarlar a={a} g={g} />
           <div className="v2-so2-gecis" key={rol}>
             <OzelKosullar rol={rol} persona={secili} a={a} g={g} />
           </div>
+          <ProgramKurallari a={a} g={g} />
         </aside>
         <div className="v2-so2-sag">
           <div className="v2-so2-roller" role="tablist" ref={serit} aria-label="Personalar">
@@ -1049,6 +1052,11 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
             </div>
           </section>
         </div>
+      </div>
+      </div>
+      <div className="v2-so2-ozet-kap">
+        <OzetPaneli a={a} rol={rol} onKosullar={() => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment')} />
+      </div>
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi-v2" />
       <KosullarPenceresi a={a} acik={kosulAcik} bolum={bolum} setBolum={setBolum} kapat={() => setKosulAcik(false)} />
