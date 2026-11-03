@@ -387,7 +387,7 @@ function ParamsContent() {
     <DatesProvider settings={{ locale: 'tr', firstDayOfWeek: 1 }}>
       <PageHeader
         title="Parametreler"
-        purpose="Bu sayfada planın kararlaştırılan tarihleri, kişi sayıları, ücretleri, primleri, kotaları, bütçeleri ve hedefleri yer alır. Burada değiştirdiğiniz değer tüm sayfalara anında yansır."
+        purpose="Planın tarih, kişi sayısı, ücret, prim, kota, bütçe ve hedef değerlerini buradan değiştirirsiniz ve değişiklik bütün sayfalara hemen yansır."
         meta={[
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı (yerel depolama)' },
           { label: 'Yayın', value: 'Herkes varsayılan değerleri görür' },

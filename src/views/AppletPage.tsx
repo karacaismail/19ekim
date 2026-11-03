@@ -1597,7 +1597,7 @@ function AppletIcerik() {
     <div className="applet-sayfa">
       <PageHeader
         title="Ücret ve performans applet’leri"
-        purpose="Bu sayfada rütbe (sabit ücret) ve efor (zam, performans, prim) için 17 örnek İK hesap aracı (applet) var. Katalogdaki meslek, uzmanlık veya seviyeler değişince bütün applet’ler yeniden hesaplanır."
+        purpose="Rütbe (sabit ücret) ve efor (zam, performans, prim) için 17 küçük İK hesap aracı (applet) sunar ve katalog değişince hepsi yeniden hesaplanır."
         meta={[
           { label: 'Kapsam', value: 'Modeller meslekten bağımsızdır. Tutarlar baz birimin katıdır ve kişiler kurgusaldır.' },
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı' },

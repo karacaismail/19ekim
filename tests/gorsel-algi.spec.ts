@@ -225,7 +225,6 @@ test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlü
       ['gelir-plani/', /koşullu tahmin/i, /kesinleşen karar/i],
       ['nakit-akisi/', /koşullu tahmin/i, /kesinleşen karar/i],
       ['applet/', /örnek veri/i, /kesinleşen/i],
-      ['partnership/', /öneri ve başlangıç tasarımı/i, /kesinleşen/i],
       ['bcg/', /eğitim/i, /kesinleşen/i],
     ];
     for (const [yol, bekle, olmasin] of sayfalar) {
@@ -490,23 +489,6 @@ test.describe('gorsel_algi GA-4b: dar ekranda karar araçları — Giderler sır
     await expect(ozet.getByRole('button', { name: /Diğer/ })).toHaveCount(0);
   });
 
-  test('V17: iş ortaklığı 320 px — bölüm gezgini seçili bölümü ve konumunu söyler (6 / 8 · Ölçüm), bütün bölümlere erişim; adres ve bölüm değişir', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 480 });
-    await page.goto('partnership/#segika-olcum');
-    await icerik(page);
-    await hydrated(page);
-    await expect(page.locator('.ortak-alt')).toHaveCount(0);
-    const gezgin = page.getByRole('group', { name: 'Segika bölümü' });
-    await expect(gezgin.getByRole('combobox')).toHaveValue('6 / 8 · Ölçüm');
-    await gezgin.getByRole('combobox').click();
-    await page.getByRole('option', { name: '8 / 8 · Risk' }).click();
-    await expect(page).toHaveURL(/#segika-risk$/);
-    await expect(page.locator('#ortak-bolum .section-title').first()).toHaveText('Riskler ve karşılıklar');
-    await expect(gezgin.getByRole('combobox')).toHaveValue('8 / 8 · Risk');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await expect(page.getByRole('tablist', { name: 'Segika bölümleri' })).toBeVisible();
-  });
 });
 
 test.describe('gorsel_algi GA-5a: gezinti sözlüğü, bölüm dizini, oran çubuğu, kısa durum, uzun etiket', () => {

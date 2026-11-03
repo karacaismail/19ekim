@@ -73,7 +73,7 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   const takvim = [
     { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'GTM, GA4, Metrica, Meta Pixel ve Conversions API, UTM standardı ve CRM kaynak alanı kurulur. Kayıt sayfası, lead formu ve WhatsApp mesaj dizisi hazırlanır.', olcut: '8 ölçüm aracının 8’i yayında. Kaynağı boş kayıt yok.' },
     { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `CPL ≤ ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺, dönüşüm ≥ %${p.dijitalLeadToActive}` },
-    { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'İçerik makinesi', is: 'Altı içerik sütununda günde 3 video yayınlanır, paylaşımların %80’i otomatiktir. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
+    { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'İçerik makinesi', is: 'Altı içerik sütununda günde 3 video yayınlanır, paylaşımların yüzde 80’i otomatiktir. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
     { ay: longDate(prog.dates.day90), adim: 'Ölçek kararı', is: `Bütçe LTV ÷ CAC oranına göre belirlenir. Oran ${SCALE_RULE.threshold} veya üstündeyse bütçe ${SCALE_RULE.step.toLocaleString('tr-TR')} ile çarpılır (en çok ${p.dijitalScaleMax} katına kadar). Oran 1,5–3 arasındaysa bütçe korunur. 1,5’in altındaysa reklam durdurulur ve dönüşüm düzeltilir.`, olcut: '90. gün değerlendirmesi' },
   ];
 

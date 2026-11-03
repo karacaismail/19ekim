@@ -338,7 +338,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(page.locator('.nakit-secenekler')).toContainText(/4 değişiklik/);
     await expect(page.locator('.nakit-secenekler').getByRole('link', { name: /Gelir planı/ })).toHaveAttribute('href', /\/gelir-plani\/$/);
     // B2c (MS-02): mutlak “aynı etkin girdiler” iddiası yok; gider kaynağı istisnası ve çıkış kapsamı (Sheets + plan kalemleri) açık.
-    await expect(page.locator('.nakit-secenekler')).toContainText(/gider kaynağı/);
+    await expect(page.locator('.nakit-secenekler')).toContainText(/gider kaynağı/i);
     await expect(page.locator('.nakit-secenekler')).not.toContainText('aynı etkin girdileri');
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     const satirlar = page.locator('.table-block:has(#nakit-tablo) tbody tr');

@@ -287,7 +287,7 @@ function Icerik() {
     <>
       <PageHeader
         title="Gelir planı"
-        purpose="Bu sayfa koşullu bir tahmindir. Seçtiğiniz senaryoya göre satıcı sayısını, abonelik ödemelerini, hedef tarihlerini, giderleri ve finansman ihtiyacını gösterir."
+        purpose="Seçilen senaryoda satıcı sayısını, ödemeleri, giderleri ve finansman ihtiyacını tahmin eder."
         meta={[
           { label: 'Dönem', value: `${r.labels.start} – ${r.labels.end}` },
           { label: 'İlk satış', value: r.labels.firstSale },

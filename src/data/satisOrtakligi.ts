@@ -98,6 +98,14 @@ export interface Ayar {
   gelistirmeAy: number;
   /** Affilate: tek seferlik tavsiye, ilk faturadan oran. */
   tekSeferOran: number;
+  /**
+   * Affilate hesap motoru (kullanıcı kararı 2026-11-03: Affilate sayfası satış ortaklığına taşındı). Müşterinin ödeme
+   * biçimi, hesap süresi, ortağa ödeme zamanı ve 3. yıldan sonraki oran. Motor: src/data/affilate.ts.
+   */
+  affOdeme: 'paket' | 'aylik';
+  affUfukAy: number;
+  affPolitika: Record<'ayse' | 'satis' | 'cozum', 'tahsilatta' | 'hizmet-ayi' | 'tahsilatta-taksit'>;
+  affSonraki: Record<'satis' | 'cozum', number>;
 }
 
 export const VARSAYILAN_AYAR: Ayar = {
@@ -162,6 +170,10 @@ export const VARSAYILAN_AYAR: Ayar = {
   gelistirmeOran: 0.1,
   gelistirmeAy: 6,
   tekSeferOran: 0.1,
+  affOdeme: 'paket',
+  affUfukAy: 36,
+  affPolitika: { ayse: 'tahsilatta', satis: 'hizmet-ayi', cozum: 'hizmet-ayi' },
+  affSonraki: { satis: 0, cozum: 0 },
 };
 
 export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Demo da yapar', C: 'Satışı kendisi kapatır' };
@@ -344,7 +356,7 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
         marka === 'istoc'
           ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. Komşu yıllık paket alırsa iki taraf da ücretsiz kullanım kazanır.'
           : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. Firma yıllık paket alırsa iki taraf da kazanır.',
-      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.'],
+      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.', 'Tavsiye, müşteri hizmetten doğrulanmış bir sonuç aldıktan sonra istenir.'],
       kimler:
         marka === 'istoc'
           ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf']

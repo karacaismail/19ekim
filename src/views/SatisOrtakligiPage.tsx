@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { AffilateMotoru } from '../components/AffilateMotoru';
 import { AgDiyagrami } from '../components/AgDiyagrami';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
@@ -26,7 +27,9 @@ import {
   type SegikaPaket,
   type Seviye,
 } from '../data/satisOrtakligi';
-import { kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullar';
+import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullar';
+import { POLITIKA_ADI } from '../data/affilateKurgu';
+import type { Politika } from '../data/affilate';
 
 const ANAHTAR = 'turksab-satis-ortakligi-v1';
 const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
@@ -290,6 +293,21 @@ function kararVerisi(a: Ayar, rol: RolId) {
     surum: 2,
     secim: { urun: a.marka, odemeModeli: a.model, seciliRol: rol, seciliKosul: seciliKosul(a, rol).id },
     kosulSetleri: kosulOzeti(a),
+    ...(affilateModeli(a, rol)
+      ? (() => {
+          const m = affilateHesabi(a, affilateModeli(a, rol)!);
+          return {
+            odemeTakvimi: {
+              musteriOder: a.affOdeme,
+              sureAy: a.affUfukAy,
+              ortagaOdeme: POLITIKA_ADI[a.affPolitika[affilateModeli(a, rol)!]],
+              ortagaToplam: Math.round(m.ortaklar.reduce((n, o) => n + o.planlanan, 0) / 100),
+              segikayaKalan: Math.round(m.segika.reduce((n, s) => n + s.komisyonSonrasi, 0) / 100),
+              aylar: m.aylar.filter((x) => x.tahsilat || x.hakedis || x.odeme).map((x) => ({ ay: x.ay, musteriOder: Math.round(x.tahsilat / 100), hakedis: Math.round((x.hakedis + x.duzeltme) / 100), odenen: Math.round(x.odeme / 100) })),
+            },
+          };
+        })()
+      : {}),
     fiyat: {
       aylik: r(aylikFiyat(a)),
       yillikPaket: r(yillikFiyat(a)),
@@ -397,6 +415,40 @@ function YilOranlari({ oranlar, onChange }: { oranlar: [number, number, number];
   );
 }
 
+/** Affilate kaynaklı setlerde ödeme takvimi seçenekleri: müşterinin ödeme biçimi, süre, ortağa ödeme zamanı. */
+function AffilateAyarlari({ id, a, g }: { id: 'ayse' | 'satis' | 'cozum'; a: Ayar; g: (p: Partial<Ayar>) => void }) {
+  return (
+    <Grup baslik="Ödeme takvimi">
+      <Sec<'paket' | 'aylik'>
+        label="Müşteri nasıl öder?"
+        value={a.affOdeme}
+        options={[
+          { id: 'paket', name: 'Yıllık paket' },
+          { id: 'aylik', name: 'Aylık abonelik' },
+        ]}
+        onChange={(v) => g({ affOdeme: v })}
+      />
+      <Sec<'12' | '24' | '36'>
+        label="Hesap süresi"
+        value={String(a.affUfukAy) as '12' | '24' | '36'}
+        options={[
+          { id: '12', name: '1 yıl' },
+          { id: '24', name: '2 yıl' },
+          { id: '36', name: '3 yıl' },
+        ]}
+        onChange={(v) => g({ affUfukAy: Number(v) })}
+      />
+      <Sec<Politika>
+        label="Ortağa ödeme ne zaman?"
+        value={a.affPolitika[id]}
+        options={(Object.keys(POLITIKA_ADI) as Politika[]).map((p) => ({ id: p, name: POLITIKA_ADI[p] }))}
+        onChange={(v) => g({ affPolitika: { ...a.affPolitika, [id]: v } })}
+      />
+      {id !== 'ayse' ? <Girdi label="3. yıldan sonraki oran" yuzdeMi value={a.affSonraki[id]} onChange={(v) => g({ affSonraki: { ...a.affSonraki, [id]: Math.min(1, v) } })} /> : null}
+    </Grup>
+  );
+}
+
 /** Diğer sayfalardan gelen koşul setlerinin değiştirilebilir değerleri. Nakitsiz setlerde değer yoktur. */
 function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Ayar; g: (p: Partial<Ayar>) => void }) {
   const asama = (i: number) => (
@@ -418,10 +470,13 @@ function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Aya
     );
   if (rol === 'oncu' && kosul === 'yillara')
     return (
+      <>
       <Grup baslik="Satış hedefleri ve oranlar">
         {[0, 1, 2, 3].map(asama)}
         <YilOranlari oranlar={a.yillaraOncu} onChange={(o) => g({ yillaraOncu: o })} />
       </Grup>
+      <AffilateAyarlari id="satis" a={a} g={g} />
+      </>
     );
   if (rol === 'kadrolu')
     return (
@@ -441,10 +496,13 @@ function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Aya
     );
   if (rol === 'cozum' && kosul === 'yillara')
     return (
-      <Grup baslik="Müşteri ve oranlar">
-        {musteri('Yılda getirdiği müşteri')}
-        <YilOranlari oranlar={a.yillaraCozum} onChange={(o) => g({ yillaraCozum: o })} />
-      </Grup>
+      <>
+        <Grup baslik="Müşteri ve oranlar">
+          {musteri('Yılda getirdiği müşteri')}
+          <YilOranlari oranlar={a.yillaraCozum} onChange={(o) => g({ yillaraCozum: o })} />
+        </Grup>
+        <AffilateAyarlari id="cozum" a={a} g={g} />
+      </>
     );
   if (rol === 'cozum' && kosul === 'yonlendirme')
     return (
@@ -470,10 +528,13 @@ function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Aya
     );
   if (rol === 'tavsiye' && kosul === 'tek-sefer')
     return (
+      <>
       <Grup baslik="Tavsiye komisyonu">
         <Girdi label="İlk faturadan" yuzdeMi value={a.tekSeferOran} onChange={(v) => g({ tekSeferOran: Math.min(1, v) })} />
         <Girdi label="Yılda en çok" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
       </Grup>
+      <AffilateAyarlari id="ayse" a={a} g={g} />
+      </>
     );
   return null;
 }
@@ -628,7 +689,7 @@ function Icerik() {
   const kosulTanim = seciliKosul(a, rol);
   return (
     <div className="so2">
-      <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir. Soldaki değerleri değiştirince sonuçlar hemen güncellenir." />
+      <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir ve ayarlar değişince sonuçlar hemen güncellenir." />
 
       <div className="so2-arac">
         <Choice<Marka>
@@ -711,7 +772,7 @@ function Icerik() {
           <p className="so2-kim">{secili.kim}</p>
           <Kimler liste={secili.kimler} />
           {ks ? (
-            <KosulPaneli a={a} ks={ks} kaynak={kosulTanim.kaynak} ek={rol === 'oncu' && kosulTanim.id === 'ag' ? <AgDiyagrami a={a} /> : null} />
+            <KosulPaneli a={a} ks={ks} kaynak={kosulTanim.kaynak} ek={rol === 'oncu' && kosulTanim.id === 'ag' ? <AgDiyagrami a={a} /> : affilateModeli(a, rol) ? <AffilateMotoru a={a} id={affilateModeli(a, rol)!} /> : null} />
           ) : (
             <>
               {rol === 'oncu' ? <Oncu a={a} /> : rol === 'kadrolu' ? <Kadrolu a={a} /> : rol === 'cozum' ? <Cozum a={a} /> : rol === 'tavsiye' ? <Tavsiye a={a} /> : <Elci a={a} />}

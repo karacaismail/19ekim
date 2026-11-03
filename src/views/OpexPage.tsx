@@ -1470,7 +1470,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             ) : null}
             {/* Kısa sembol efsanesi (gorsel_algi.md F17): yoğun tabloda “—” korunur, anlamı görünür ve yereldir. */}
             <p className="opex-sembol-efsanesi">
-              — : o ay bu kalemde gider yok (0 ₺). Personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bu işaret, alanın bordrosuz kalem için geçerli olmadığını gösterir.
+              — : o ay bu kalemde gider yok (0 ₺). Personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bu işaret “uygulanmıyor” demektir, çünkü bordrosuz kalemde bu alan yoktur.
             </p>
           </div>
         </div>

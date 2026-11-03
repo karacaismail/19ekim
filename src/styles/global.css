@@ -9056,3 +9056,45 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
     padding: var(--space-4);
   }
 }
+
+/* Ödeme takvimi (Affilate motoru, satış ortaklığı içinde; kullanıcı kararı 2026-11-03). */
+.am {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.am-ozet {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.am-yillar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.am-yillar li {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+.am-yillar span {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.am-yillar strong,
+.am-yillar strong .so2-canli {
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}

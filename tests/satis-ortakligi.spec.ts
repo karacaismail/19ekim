@@ -55,7 +55,6 @@ test('masaüstü: beş rol sekmesi, ürün ve rol değişir, ayar sonucu güncel
  */
 for (const [sayfa, yol] of [
   ['satış ortaklığı', 'satis-ortakligi/'],
-  ['affilate', 'affilate/'],
 ] as const) {
   for (const genislik of [320, 390, 768]) {
     test(`${sayfa} ${genislik} px: tek sütun, önce sonuç, taşma yok`, async ({ page }) => {
@@ -132,4 +131,27 @@ test('koşul setleri: ana program korunur, kademeli ağ ve diyagram, İş ortakl
   expect(veri.kosulSetleri.oncu.kosul).toBe('ana');
   expect(veri.ayarlar.kosul.oncu).toBe('ag');
   expect(veri.secim.seciliKosul).toBe('ana');
+});
+
+/** Affilate sayfası satış ortaklığına taşındı (kullanıcı kararı 2026-11-03): Affilate setlerinde ödeme takvimi. */
+test('Affilate setleri: ödeme takvimi, ödeme biçimi ve ödeme zamanı canlı değişir', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await page.setViewportSize({ width: 1512, height: 945 });
+  await page.goto('satis-ortakligi/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  await page.getByRole('button', { name: 'Segika' }).click();
+  await page.getByRole('button', { name: /Yıllara yayılan komisyon/ }).click();
+  const takvim = page.locator('.am');
+  await expect(takvim).toBeVisible();
+  // 2.600 ₺ × 12 = 31.200 ₺; 1. yıl %15 = 4.680 ₺, 2. yıl %10 = 3.120 ₺, 3. yıl %0.
+  await expect(takvim.locator('.am-yillar li')).toHaveText(['1. hizmet yılı4.680 ₺', '2. hizmet yılı3.120 ₺', '3. hizmet yılı0 ₺']);
+  await expect(takvim.locator('.am-ozet')).toContainText('7.800 ₺');
+  await page.getByRole('button', { name: 'Aylık abonelik' }).click();
+  await expect(takvim.locator('.am-ozet')).toContainText('aylık abonelik');
+  await page.getByRole('button', { name: '1 yıl', exact: true }).click();
+  await expect(takvim.locator('.am-yillar li')).toHaveCount(1);
+  await page.getByText('Karar verisi (JSON)').click();
+  const veri = JSON.parse((await page.locator('.so2-json-icerik').textContent()) ?? '{}');
+  expect(veri.odemeTakvimi.musteriOder).toBe('aylik');
+  expect(veri.odemeTakvimi.sureAy).toBe(12);
 });

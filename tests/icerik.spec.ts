@@ -29,7 +29,7 @@ test.describe('içerik envanteri', () => {
     const yollar = sayfaYollari();
     const kayitli = YAYIMLANAN.map((k) => k.path).sort();
     expect(kayitli).toEqual(yollar);
-    expect(YAYIMLANAN).toHaveLength(29); // 404 dahil 25 sayfa (contents.md §1, 61fd2ff) + Affilate + Satış ortaklığı + Değer önerisi + Kadro kapasitesi
+    expect(YAYIMLANAN).toHaveLength(27); // 404 dahil 25 sayfa (contents.md §1, 61fd2ff) + Satış ortaklığı + Değer önerisi + Kadro kapasitesi − İş ortaklığı − Affilate (2026-11-03: satış ortaklığına taşındı)
     for (const k of ICERIK) {
       expect(k.kullaniciSorusu.length, k.id).toBeGreaterThan(10);
       expect(k.kullaniciSorusu.trim().endsWith('?'), k.id).toBe(true);
@@ -102,20 +102,20 @@ test.describe('içerik envanteri', () => {
   });
 
   test('F10: kapsam cümlesi öneri, eğitim, örnek ve taslak içeriği kesinleşmiş karar gibi sunmaz; finans sayfaları koşullu tahmin der', () => {
-    for (const id of ['partnership', 'bcg', 'applet', 'affilate', 'notlar', 'email']) {
+    for (const id of ['bcg', 'applet', 'notlar', 'email']) {
       const k = ICERIK.find((x) => x.id === id)!;
       expect(k.kapsam, id).not.toMatch(/kesinleşen|kesinleşmiş sonuç/i);
       expect(['varsayilmis', 'ornek', 'bilinmiyor'], id).toContain(k.kanit);
     }
     for (const id of ['gelir-plani', 'nakit-akisi', 'buyume-modeli']) expect(ICERIK.find((x) => x.id === id)!.kapsam, id).toMatch(/koşullu tahmin/);
-    expect(altBilgiKapsami('/19ekim/partnership/')).toMatch(/öneri/);
+    expect(altBilgiKapsami('/19ekim/satis-ortakligi/')).toMatch(/önerisidir|öneri/);
     expect(altBilgiKapsami('/bilinmeyen/')).toMatch(/kesinleşmiş sonuç değildir/);
   });
 
   test('F15: kırıntı ana ebeveynden türer, sunum sırasından bağımsız', () => {
     expect(kirinti('/roller/asistan/')).toEqual(['İstihdam', 'Organizasyon şeması', 'Yönetici asistanı']);
     expect(kirinti('/gelir-plani/')).toEqual(['Finans', 'Gelir planı']);
-    expect(kirinti('/affilate/')).toEqual(['Pazarlama', 'Affilate']);
+    expect(kirinti('/satis-ortakligi/')).toEqual(['Pazarlama', 'Satış ortaklığı programı']);
     expect(kirinti('/bcg/')).toEqual(['BCG matrisi eğitimi']);
     expect(kirinti('/giderler/')).toEqual(['Finans', 'OpEx', 'Operasyonel Giderler']); // kullanıcı kararı 2026-10-21 korunur
     expect(kirinti('/applet/')).toEqual(['İstihdam', 'Ücret ve performans applet’leri']);
@@ -142,23 +142,23 @@ test('B2c (MS-11): her kaydın türetim kaynağı var; ön cümle yalnız tahtad
   for (const k of ICERIK) expect(turler, k.id).toContain(k.turetim);
   expect(altBilgiOnCumle('/19ekim/roller/asistan/')).toMatch(/19 Ekim 2026/);
   expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/kalibre edilir/);
-  for (const p of ['/19ekim/bcg/', '/19ekim/notlar/', '/19ekim/email/', '/19ekim/applet/', '/19ekim/affilate/', '/19ekim/giderler/', '/19ekim/partnership/', '/19ekim/404/', '/bilinmeyen/']) expect(altBilgiOnCumle(p), p).toBe('');
+  for (const p of ['/19ekim/bcg/', '/19ekim/notlar/', '/19ekim/email/', '/19ekim/applet/', '/19ekim/giderler/', '/19ekim/404/', '/bilinmeyen/']) expect(altBilgiOnCumle(p), p).toBe('');
   // Nakit akışı kapsam cümlesi mevcut davranışı anlatır: hesap seçenekleri uygulanır, gider kaynağı seçeneği uygulanmaz; gelecek vaadi yok.
   const nakit = altBilgiKapsami('/19ekim/nakit-akisi/');
-  expect(nakit).toMatch(/gider kaynağı seçeneği/);
+  expect(nakit).toMatch(/gider kaynağı seçeneği/i);
   expect(nakit).not.toMatch(/ayrıca gösterilir/);
 });
 
 test.describe('içerik envanteri — sayfada', () => {
   test('F10 / IA-18: alt bilgi kaydın kapsam cümlesini söyler; öneri, eğitim, örnek ve taslak “kesinleşen” demez; ön cümle yalnız tahta kaynaklı sayfada', async ({ page }) => {
-    for (const id of ['partnership', 'bcg', 'applet', 'affilate', 'notlar', 'eylem-plani', 'giderler']) {
+    for (const id of ['bcg', 'applet', 'notlar', 'eylem-plani', 'giderler']) {
       const k = ICERIK.find((x) => x.id === id)!;
       await page.goto(k.path.slice(1));
       await page.waitForSelector('.app-footer', { state: 'attached' });
       await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
       const alt = await page.locator('.app-footer').innerText();
       expect(alt, id).toContain(k.kapsam.slice(0, 40));
-      if (['partnership', 'bcg', 'applet', 'affilate', 'notlar'].includes(id)) expect(alt, id).not.toMatch(/kesinleşen/i);
+      if (['bcg', 'applet', 'notlar'].includes(id)) expect(alt, id).not.toMatch(/kesinleşen/i);
       // B2c (MS-11): tahtadan türetilmeyen sayfada “19 Ekim … kalibre edilir” ön cümlesi yok.
       if (k.turetim === 'tahta') expect(alt, id).toMatch(/kalibre edilir/);
       else expect(alt, id).not.toMatch(/kalibre edilir|tahta kararlarından/);

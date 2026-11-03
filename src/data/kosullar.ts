@@ -4,6 +4,8 @@
  * Ana program (`ana`) satış ortaklığı sayfasının kendi hesabıdır ve değişmez; burada yalnız diğer setler hesaplanır.
  * Kaynaklar: src/data/growth.ts ve program.ts (Temsilci ağı), partnership.ts (İş ortaklığı), affilate.ts (Affilate).
  */
+import { karsilastir, type OrtakId, type Sonuc as MotorSonuc } from './affilate';
+import { baslangicKurgu, senaryoKur } from './affilateKurgu';
 import { aylikFiyat, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligi';
 
 export type KaynakSayfa = 'Satış ortaklığı' | 'Temsilci ağı' | 'İş ortaklığı' | 'Affilate';
@@ -89,6 +91,45 @@ export function agKisiKazanci(a: Ayar, r: number) {
   return { kendi, kademeler, toplam: kendi + kademeler.reduce((s, x) => s + x.tutar, 0) };
 }
 
+/* ---------- Affilate hesap motoru (Affilate sayfasından taşındı) ---------- */
+
+/** Affilate kaynaklı koşul setinin motor modeli: satış ortağı, çözüm ortağı ya da tek seferlik tavsiye. */
+export function affilateModeli(a: Ayar, rol: RolId): OrtakId | null {
+  const k = a.kosul?.[rol];
+  if (rol === 'oncu' && k === 'yillara') return 'satis';
+  if (rol === 'cozum' && k === 'yillara') return 'cozum';
+  if (rol === 'tavsiye' && k === 'tek-sefer') return 'ayse';
+  return null;
+}
+
+/**
+ * Bir müşteri için ay ay hakediş ve ödeme: aylık fiyat ve oranlar satış ortaklığı ayarlarından, ödeme biçimi, süre ve
+ * ödeme zamanı Affilate ayarlarından gelir. Tutarlar kuruştur.
+ */
+export function affilateHesabi(a: Ayar, id: OrtakId): MotorSonuc {
+  const k = baslangicKurgu();
+  k.ufukAy = a.affUfukAy;
+  k.fiyat = { ...k.fiyat, kaynak: 'kat', aylik: Math.round(aylikFiyat(a) * 100), kat: a.marka === 'istoc' ? a.istocYilAy : 12, hizmetAy: 12, paraBirimi: 'TRY' };
+  const o = k.ortaklar[id];
+  const oranlar = id === 'satis' ? a.yillaraOncu : id === 'cozum' ? a.yillaraCozum : [a.tekSeferOran];
+  o.donemler = o.donemler.map((d, i) => ({ ...d, oranBp: Math.round((oranlar[i] ?? 0) * 10_000) }));
+  if (id !== 'ayse') o.sonrakiOranBp = Math.round(a.affSonraki[id] * 10_000);
+  o.politika = a.affPolitika[id];
+  k.musteriler = [{ ...k.musteriler[0], adet: 1, odeme: a.affOdeme, ortak: id }];
+  return karsilastir(senaryoKur(k), k.musteriler[0].id)[id];
+}
+
+/** Hakedişin müşterinin hizmet yıllarına dağılımı (kuruş). */
+export function affilateYillari(r: MotorSonuc, ufukAy: number) {
+  const dizi = Array.from({ length: Math.max(1, Math.ceil(ufukAy / 12)) }, () => 0);
+  for (const h of r.hareketler) {
+    if (h.tur !== 'hakedis' && h.tur !== 'duzeltme') continue;
+    const i = Math.floor((h.hizmetAyi ?? 0) / 12);
+    if (i >= 0 && i < dizi.length) dizi[i] += h.tutar;
+  }
+  return dizi;
+}
+
 /** Ürüne uygun setler; seçili set ürüne uymuyorsa ana program. */
 export const kosulListesi = (a: Ayar, rol: RolId) => KOSULLAR[rol].filter((k) => k.marka.includes(a.marka));
 export function seciliKosul(a: Ayar, rol: RolId): KosulTanim {
@@ -162,13 +203,16 @@ const SEGIKA_ORTAK_KURALLARI = [
   '60 gün boyunca ilerleme olmazsa kayıt gözden geçirilir. Son 90 günde Segika ile teması olan firma yeni kazanım sayılmaz.',
   'Yüzde 15’lik bütçe ortaklar arasında paylaştırılır. Her ortak için ayrıca yüzde 15 eklenmez.',
   'Liste fiyatının altında satış yapılmaz.',
+  'Uyum süreci 14 gündür. Ortak bu sürede sertifika eğitimini bitirir ve ilk 5 mükellefini ekler. Aktivasyon 45 gün içinde beklenir.',
+  'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
 const ISTOC_ORTAK_KURALLARI = [
   'Bildirilen fırsat 2 iş günü içinde kabul edilir. Fırsat 90 gün boyunca ortak adına korunur.',
   '30 gün boyunca ilerleme olmazsa fırsat gözden geçirilir.',
   'Ortağa münhasırlık, yani tek yetkili olma hakkı verilmez. Ortak, “iStoc Program Ortağı” adını kullanır.',
-  'Uyum süreci 21 gün sürer. Aktivasyon süresi 60 gündür.',
+  'Uyum süreci 21 gün sürer ve 60 dakikalık eğitimi içerir. Aktivasyon süresi 60 gündür.',
+  'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
 /** Nakit hesabı olmayan sözleşmeli ortaklık: sonuç, ödeme modelinin adıdır. */
@@ -321,8 +365,8 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
       hesap: [{ ad: 'Seviye', formul: `${m} aktif mükellef. Gümüş için en az 10, Altın için en az 50`, sonuc: seviye }],
       kurallar: [
         'Kayıtlı Ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitimi ve bu eğitimin kaydını alır. Ayrıca paneli, 2 mükellef için ücretsiz denemeyi ve kampanya kitini alır.',
-        'Gümüş seviyesi için en az 10 aktif mükellef gerekir. Bu seviyede ofis toptan fiyatın 1. kademesini, markalı raporu ve 4 saat öncelikli desteği alır.',
-        'Altın seviyesi için en az 50 aktif mükellef gerekir. Bu seviyede ofis 2. kademe fiyatı, kendisine ayrılmış bir yöneticiyi, ortak pazarlama fonunu ve API erişimini, yani yazılımını doğrudan bağlama imkânını alır.',
+        'Gümüş seviyesi için en az 10 aktif mükellef gerekir. Bu seviyede ofis toptan fiyatın 1. kademesini ve ofis markalı Aylık Değer Raporunu alır. Destek taleplerine 4 saat içinde yanıt verilir.',
+        'Altın seviyesi için en az 50 aktif mükellef gerekir. Bu seviyede ofis 2. kademe fiyatı, yalnız onunla ilgilenen bir ortak başarı yöneticisini, ortak pazarlama fonunu ve API erişimini, yani yazılımını doğrudan bağlama imkânını alır.',
         'Toptan fiyat bantları 10–49, 50–199 ve 200 üstü mükellef sayısına göre belirlenir. Yıllık peşin ödemede ek indirim vardır.',
         'Ofis bordro hizmeti vermeli, Luca, Mikro ya da ETA kullanmalı ve sertifika eğitimini bitirmelidir.',
         'İlk dalgada 10 ofisle çalışılır: 5 mevcut ve 5 yeni ofis.',
@@ -350,15 +394,15 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
   }
 
   const nakitsiz: Record<string, [string, string, string[]]> = {
-    altyapi: ['Yıllık taahhüt', 'Ortak, Segika’yı kendi markasıyla sunar. İş hacmine göre fiyat alır.', ['Ortak, yılda en az kaç firma getireceğini taahhüt eder.', 'Hizmet seviyesi sözleşmesi (SLA) imzalanır.', 'Fiyat, iş hacmine göre belirlenir.']],
+    altyapi: ['Yıllık taahhüt', 'Ortak, Segika’yı kendi markasıyla sunar. İş hacmine göre fiyat alır.', ['Ortak, yılda en az kaç firma getireceğini taahhüt eder.', 'Hizmet seviyesi sözleşmesi (SLA) imzalanır.', 'Fiyat, iş hacmine göre belirlenir.', 'Ortak, teşvik danışmanlığı ya da dış kaynaklı bordro hizmeti verir.', 'Ortak ürün yol haritası birlikte hazırlanır.']],
     entegrasyon: ['Ortak pazarlama', 'Ortak, bir bordro ya da İK yazılımıdır. Bu yazılım Segika’ya API ile, yani doğrudan yazılım bağlantısıyla bağlanır. İki taraf birlikte pazarlama yapar.', ['API entegrasyonu ve ortak pazarlama anlaşması yapılır.', 'İlk hedef, 2 görüşme yapmak ve 1 anlaşma imzalamaktır.']],
     osgb: ['Yönlendirme anlaşması', 'Bu ortaklıkta karşı taraf bir OSGB, yani ortak sağlık ve güvenlik birimidir. Müşterilerini Segika’ya yönlendirir.', ['Yönlendirme anlaşmasıyla çalışır.', 'Bu ortaklık ikinci dalgada başlar.']],
     dernek: ['Ortak eğitim', 'Bu ortaklıkta karşı taraf bir dernek, organize sanayi bölgesi ya da odadır. Üyelerine Segika ile birlikte eğitim düzenler.', ['Ortak eğitim programıyla çalışır.', 'Bu ortaklık ikinci dalgada başlar.']],
     franchise: ['Merkez sözleşmesi', 'Ortak, bir franchise ya da zincir işletmedir. Bütün şubeler için merkezle tek sözleşme yapılır.', ['Merkezle sözleşme yapılır.', 'Bu ortaklık ikinci dalgada başlar.']],
-    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur, yani kurumsal arz toplayıcıdır. Üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'İlk dönemde 3 ortakla çalışılır.', 'Aktivasyon için en az 20 doğrulanmış vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
-    talep: ['Görev ücreti', 'Ortak, alıcıların satın alma taleplerini toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin yüzde 50’si kapsam kabul edilince, kalan yüzde 50’si sonuç takibinde ödenir.', 'Ortak ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Aktivasyon için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
-    hizmet: ['Gelir paylaşımı', 'Ortak, ödeme ya da lojistik gibi bir hizmet verir. Hizmetini “iStoc Onaylı Hizmet” adıyla sunar.', ['Gelir paylaşımı ya da yönlendirme ücreti alır.', ...ISTOC_ORTAK_KURALLARI]],
-    teknoloji: ['Karşılıklı indirim', 'Ortak, iStoc’a API ile, yani doğrudan yazılım bağlantısıyla bağlanan bir yazılımdır.', ['Liste fiyatında karşılıklı indirim uygulanır.', 'Bu ortaklık ikinci dalgada başlar.']],
+    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur, yani kurumsal arz toplayıcıdır. Üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'Ortak, markalı program sayfası, üye panosu, çeyreklik sonuç raporu ve üyelerine özel avantaj alır.', 'Platformun başarı komisyonu yüzde 3 ile 8 arasındadır. Kendi alıcılarını getiren üretici ilk 6 ay komisyon ödemez.', 'İlk dönemde 3 ortakla çalışılır.', 'Aktivasyon için en az 20 doğrulanmış vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
+    talep: ['Görev ücreti', 'Ortak, alıcıların satın alma taleplerini toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin yüzde 50’si kapsam kabul edilince, kalan yüzde 50’si sonuç takibinde ödenir.', 'Ortak ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Ortak, kapalı alıcı kulübüne erişir.', 'Aktivasyon için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
+    hizmet: ['Gelir paylaşımı', 'Ortak, ödeme ya da lojistik gibi bir hizmet verir. Hizmetini “iStoc Onaylı Hizmet” adıyla sunar.', ['Lojistik, ödeme, gümrük, kalite ya da katalog hizmeti verebilir.', 'Gelir paylaşımı ya da yönlendirme ücreti alır.', '“iStoc Onaylı Hizmet” rozetini ve iş akışını kullanır.', ...ISTOC_ORTAK_KURALLARI]],
+    teknoloji: ['Karşılıklı indirim', 'Ortak, iStoc’a API ile, yani doğrudan yazılım bağlantısıyla bağlanan bir yazılımdır.', ['Kataloglar otomatik eşitlenir ve iki taraf birlikte pazarlama yapar.', 'Liste fiyatında karşılıklı indirim uygulanır.', 'Bu ortaklık ikinci dalgada başlar.']],
     bolge: ['Aktif satıcı başı ödeme', 'Ortak, bir bölgede satıcı ağı kurar. Aktif satıcı başına ödeme ve işlem payı alır.', ['Bu ortaklık yalnız 6. aydan sonra ve pazarın canlı olduğu kanıtlanınca başlar.', ...ISTOC_ORTAK_KURALLARI]],
   };
   const n = nakitsiz[k];

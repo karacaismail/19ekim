@@ -127,7 +127,7 @@ function Icerik() {
     <>
       <PageHeader
         title="Nakit akış tablosu"
-        purpose={`Bu sayfa ${cf.aylar.length} ayın nakit girişlerini, çıkışlarını, net nakit akışını ve dönem sonu nakdini gösterir. Nakit açığı tavanı, gereken ek nakdi gösterir.`}
+        purpose={`${cf.aylar.length} ay için nakit girişini, çıkışını, dönem sonu nakdini ve nakit açığını kapatmak için gereken ek nakdi gösterir.`}
         meta={[
           { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
           { label: 'Kaynak', value: 'Girişler: gelir planının senaryo ve seçenekleri. Çıkışlar: Google Sheets ve plan kalemleri.' },

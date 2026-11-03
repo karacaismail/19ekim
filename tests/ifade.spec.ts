@@ -105,7 +105,7 @@ test.describe('ifade: finans ve kayıt anlamı (ifade.md §10.2 birinci grup)', 
     const durum = page.locator('.param-status');
     await expect(durum).toContainText(/bu tarayıcı/i);
     await expect(durum).toContainText(/Sheets dosyasını değiştirmez/);
-    await expect(durum).toContainText(/başka cihaz|Başka tarayıcı/);
+    await expect(durum).toContainText(/başka cihaz|başka tarayıcı/i);
   });
 });
 

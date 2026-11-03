@@ -83,10 +83,6 @@ export const SEQUENCE: Stop[] = [
   // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.
   { path: '/gelir-plani/', label: 'Gelir planı' },
   { path: '/eylem-plani/', label: 'Eylem planı' },
-  // İş ortaklığı programı (kullanıcı kararı 2026-10-27): Segika ve iStoc, iki ana sekme; adres /partnership/.
-  { path: '/partnership/', label: 'İş ortaklığı programı' },
-  // Affilate (kullanıcı kararı 2026-10-28, docs/affilate.md): Segika satış ortaklığı komisyon simülasyonu; adres /affilate/.
-  { path: '/affilate/', label: 'Affilate', tam: 'Affilate · Segika satış ortaklığı simülasyonu' },
   { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları' },
   { path: '/karar-bekleyenler/', label: 'Karar bekleyenler' },
   { path: '/parametreler/', label: 'Parametreler' },
@@ -135,7 +131,7 @@ const menu = (id: string): NavLink => {
  * değişti; adresler aynı. Yeni ana adresler (Strateji, Müşteri yolculuğu, Pazarlama operasyonu, Ücret ve çalışma modeli,
  * Ölçüm, Genel bakış, Kaynaklar) içerik taşınınca ilgili gruba girer.
  */
-export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('partnership'), menu('affilate'), menu('satis-ortakligi'), menu('deger-onerisi')];
+export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('satis-ortakligi'), menu('deger-onerisi')];
 export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi')];
 export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar-bekleyenler'), menu('karar-yetkisi')];
 export const HELPER_NAV: NavLink[] = [menu('parametreler'), menu('notlar'), menu('arsiv')];

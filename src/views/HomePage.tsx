@@ -21,7 +21,7 @@ function OrgChart() {
   const ORG = useModel().org;
   return (
     <>
-      <PageHeader title="Organizasyon şeması" purpose="istoc.com satış ve pazarlama ekibinde kimin kime bağlı olduğunu gösterir. Her kutu bir rol sayfası açar." />
+      <PageHeader title="Organizasyon şeması" purpose="istoc.com satış ve pazarlama ekibinde kimin kime bağlı olduğunu gösterir ve her kutudan o rolün sayfasına geçilir." />
       <Chart
         id="organizasyon"
         title="İsmail Karaca, kurmay ekip ve dört ağaç"

@@ -73,7 +73,7 @@ function tahtaKarari(prog: Program, topic: string): Pick<KararKaydi, 'id' | 'yur
   if (topic.startsWith('Ekip lideri primi')) return { id: 'ekip-lideri-primi', yururlukTarihi: dates.dec, etki: 'Ekip lideri ücreti ve pay kuralı', ilgili: ['/roller/ekip-lideri/'] };
   if (topic.startsWith('Kapasite açığı')) return { id: 'kapasite-acigi', yururlukTarihi: dates.dec, etki: 'Aralık saha takviyesi, istihdam takvimi ve kadro maliyeti', ilgili: ['/istihdam/', '/hedefler/'] };
   if (topic.startsWith('4. aydan itibaren mesai')) return { id: 'mesai-modeli', yururlukTarihi: dates.firstDay, etki: 'Mesai dönemleri, yasal tavan ve rollerin günlük düzeni', ilgili: ['/roller/saha-uzmani/'] };
-  if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika masa başı rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/partnership/'] };
+  if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika masa başı rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/satis-ortakligi/'] };
   return { id: slug(topic), yururlukTarihi: undefined, etki: 'Plan sayfaları', ilgili: ['/karar-bekleyenler/'] };
 }
 
@@ -105,7 +105,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sahip: 'yonetici',
       durum: 'bekliyor',
       kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim: cevap bekleniyor, cevap gelmemesi onay sayılmaz)',
-      ilgili: ['/gelir-plani/', '/partnership/', '/nakit-akisi/'],
+      ilgili: ['/gelir-plani/', '/satis-ortakligi/', '/nakit-akisi/'],
     },
     {
       id: 'segika-komisyon',
@@ -118,7 +118,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       politika: 'segika-komisyon-2026-10-28 (taslak sürüm, uygulama bekliyor)',
       acik: ['Süre: komisyon her ödemede mi, yalnız ilk yıl mı ödenir?', 'Taban: komisyon net tahsilat üzerinden mi hesaplanır?', 'Oran bütün ortak türleri için aynı mı?'],
       kaynak: 'docs/contents.md F03; birleşik plan K2 (sahip cevabı 28 Ekim)',
-      ilgili: ['/partnership/', '/affilate/'],
+      ilgili: ['/satis-ortakligi/'],
     },
     {
       id: 'gider-kapsami',

@@ -7,7 +7,6 @@ import { makeGrowth } from './growth';
 import { DEFAULT_PARAMS, type Params } from './params';
 import { makeCashflow } from './cashflow';
 import { makeKararlar } from './kararlar';
-import { makePartnership } from './partnership';
 import { makeRevenue } from './revenue';
 import { makeDigitalStrategy } from './digitalStrategy';
 import { makeStaffing } from './staffing';
@@ -28,7 +27,6 @@ export function buildModel(p: Params) {
     digital: makeDigital(p),
     growth: makeGrowth(p, program),
     org: makeOrg(p, roles),
-    partnership: makePartnership(p, program),
     cashflow: makeCashflow(p, program, revenue),
     kararlar: makeKararlar(p, program),
     revenue,
