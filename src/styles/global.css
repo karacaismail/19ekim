@@ -9098,3 +9098,137 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * Karar seçimleri (kullanıcı kararı 2026-11-03): açık sorular ve ajan kararları kart olarak; seçenekler Sec bileşeni,
+ * önerilen ya da uygulanan seçenek notla işaretlenir. Seçimler canlı JSON olur ve indirilir.
+ */
+.ks-arac {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.ks-ilerleme {
+  flex: 1 1 18rem;
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+
+.ks-dugme {
+  min-height: var(--hit-min);
+  padding: 0 var(--space-4);
+  border: var(--hairline) solid var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.ks-dugme:hover {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.ks-dugme[data-ikincil] {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+
+.ks-dugme[data-ikincil]:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.ks-grup {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.ks-aciklama {
+  margin: 0 0 var(--space-4);
+  color: var(--text-secondary);
+}
+
+.ks-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ks-kart {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background-color: var(--surface-raised);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.ks-kart[data-cevaplandi] {
+  background-color: var(--surface-selected);
+}
+
+.ks-baslik {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ks-soru {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.ks-neden,
+.ks-etki {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.ks-etki {
+  font-size: var(--text-sm);
+}
+
+.ks-not {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.ks-not textarea {
+  min-height: calc(var(--hit-min) * 1.5);
+  padding: var(--space-2) var(--space-3);
+  border: var(--hairline) solid var(--rule-strong);
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  resize: vertical;
+}
+
+html[data-focus-mode='keyboard'] .ks-not:has(textarea:focus-visible) > span {
+  text-decoration-line: underline;
+  text-decoration-color: var(--focus-indicator);
+  text-decoration-thickness: var(--focus-indicator-width);
+  text-underline-offset: var(--focus-indicator-offset);
+}

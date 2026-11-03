@@ -341,8 +341,8 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
           : 'İşverene bordro, İK ya da iş güvenliği hizmeti veren profesyoneldir. Segika’yı müşterisine önerir ve müşterinin desteğini kendisi verir.',
       kurallar:
         marka === 'segika'
-          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Sözleşmeyle çalışır, faturalı öder.', 'Her firma tek ortağa yazılır.']
-          : ['Sözleşmeyle çalışır, faturalı öder.', 'Ortak getirmeye para ödemeyiz.', 'Her firma tek ortağa yazılır.'],
+          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Her firma tek ortağa yazılır.']
+          : ['Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Ortak getirmeye para ödemeyiz.', 'Her firma tek ortağa yazılır.'],
       kimler:
         marka === 'istoc'
           ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'ERP ve POS bayisi', 'Lojistik firması', 'Gümrük müşaviri', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']

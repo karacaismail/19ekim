@@ -83,8 +83,7 @@ export const SEQUENCE: Stop[] = [
   // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.
   { path: '/gelir-plani/', label: 'Gelir planı' },
   { path: '/eylem-plani/', label: 'Eylem planı' },
-  { path: '/karar-yetkisi/', label: 'Karar yetkisi ve kontrol noktaları' },
-  { path: '/karar-bekleyenler/', label: 'Karar bekleyenler' },
+  { path: '/karar/', label: 'Kararlar' },
   { path: '/parametreler/', label: 'Parametreler' },
   // Giderler kırıntısı “Finans › OpEx › Operasyonel Giderler” (kullanıcı kararı 2026-10-21) içerik kaydındadır (`kirintiYolu`).
   { path: '/giderler/', label: 'Giderler (OPEX)', tam: 'Operasyonel Giderler' },
@@ -133,7 +132,7 @@ const menu = (id: string): NavLink => {
  */
 export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('satis-ortakligi'), menu('deger-onerisi')];
 export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi')];
-export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar-bekleyenler'), menu('karar-yetkisi')];
+export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar')];
 export const HELPER_NAV: NavLink[] = [menu('parametreler'), menu('notlar'), menu('arsiv')];
 
 export interface NavGroup {

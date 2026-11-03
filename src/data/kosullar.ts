@@ -370,7 +370,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
         'Toptan fiyat bantları 10–49, 50–199 ve 200 üstü mükellef sayısına göre belirlenir. Yıllık peşin ödemede ek indirim vardır.',
         'Ofis bordro hizmeti vermeli, Luca, Mikro ya da ETA kullanmalı ve sertifika eğitimini bitirmelidir.',
         'İlk dalgada 10 ofisle çalışılır: 5 mevcut ve 5 yeni ofis.',
-        'Müşavire nakit, hediye ya da indirim verilmez. Ana programdaki müşavir komisyonu seçeneği bu kuralla çelişir. Hangisinin geçerli olacağına karar verilmelidir.',
+        'Bu modelde müşavire nakit, hediye ya da indirim verilmez. Komisyon ya da müşteri indirimi isteniyorsa ana program seçilir.',
         ...SEGIKA_ORTAK_KURALLARI,
       ],
       veri: { aktifMukellef: m, seviye },

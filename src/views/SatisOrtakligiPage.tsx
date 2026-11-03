@@ -113,7 +113,7 @@ function Kadrolu({ a }: { a: Ayar }) {
         deger={tl(k.toplam)}
         aciklama={
           <>
-            {k.prim > 0 ? `${tl(a.maas)} maaş alır. Kotayı aştığı için ayrıca ${tl(k.prim)} prim alır. Prim, cironun ${yuzde(a.kadroluPrim[a.marka])} oranında hesaplanır.` : `${tl(a.maas)} maaş alır. Kotayı aşınca cironun ${yuzde(a.kadroluPrim[a.marka])} oranında prim alır.`}
+            {`${tl(a.maas)} maaş alır. ` + (a.model === 'oran' ? (k.prim > 0 ? `Kotayı aştığı için ${tl(k.prim)} prim de alır. Prim, kotayı aşan cironun ${yuzde(a.kadroluPrim[a.marka])} kadarıdır.` : `Kotayı aşınca, kotayı aşan cironun ${yuzde(a.kadroluPrim[a.marka])} kadarını prim olarak alır.`) : k.prim > 0 ? `Kotayı aştığı için ${tl(k.prim)} prim de alır. Kotadan sonraki her satış ${tl(a.sabit)} prim getirir.` : `Kotayı aşınca, sonraki her satıştan ${tl(a.sabit)} prim alır.`)}
             <span className="so2-bize">{k.prim > 0 ? `Bu ay ciromuz ${tl(k.ciro)}. Prim düşülünce bize ${tl(k.ciro - k.prim)} kalır.` : `Bu ay ciromuz ${tl(k.ciro)}.`}</span>
           </>
         }

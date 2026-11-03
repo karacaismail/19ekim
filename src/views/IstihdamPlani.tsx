@@ -448,3 +448,51 @@ export function KadroKapasitesiPage({ pathname }: { pathname: string }) {
     </AppFrame>
   );
 }
+
+/* ---------- Eylem planı: 3 Kasım planının güncel adımları ---------- */
+
+/** Eylem planının başındaki güncel plan: aşamalar ve tarihli adımlar, bugüne göre durumlarıyla. */
+export function GuncelPlan() {
+  const bugun = useBugun();
+  const satirlar = [
+    ...ASAMALAR.filter((a) => a.id.startsWith('f')).map((a) => ({ bas: a.bas, son: a.son, ad: a.ad, aciklama: a.aciklama, tur: 'Aşama' })),
+    ...OLAYLAR.map((o) => ({ bas: o.tarih, son: o.tarih, ad: o.baslik, aciklama: o.aciklama, tur: OLAY_TURU_ADI[o.tur] })),
+  ].sort((x, y) => x.bas.localeCompare(y.bas) || y.son.localeCompare(x.son));
+  const tarih = (b: string, s: string) => (b === s ? uzunTarih(b) : `${uzunTarih(b)} ile ${uzunTarih(s)} arası`);
+  const durum = (b: string, s: string): Durum | null => {
+    if (!bugun) return null;
+    if (bugun > s) return 'gecti';
+    if (bugun >= b) return 'bugun';
+    return durumu(b, bugun);
+  };
+  return (
+    <Section
+      id="guncel"
+      title="Güncel plan (3 Kasım 2026)"
+      desc="Bu adımlar 3 Kasım Kadro Kapasite Planı ve GAP eylem planından gelir. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır ve başlangıç tarihi kararı verilince güncellenir."
+    >
+      <ol className="tk-kararlar">
+        {satirlar.map((r) => (
+          <li key={`${r.bas}-${r.ad}`} className="tk-karar">
+            <p className="tk-karar-tarih">
+              {tarih(r.bas, r.son)}
+              <DurumEtiketi durum={durum(r.bas, r.son) === 'bugun' && r.bas !== r.son ? 'bugun' : durum(r.bas, r.son)} />
+            </p>
+            <div>
+              <p className="tk-karar-konu">
+                {r.ad}
+                <span className="tk-seviye">{r.tur}</span>
+              </p>
+              <p className="tk-karar-neden">{r.aciklama}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p>
+        <TextLink to="/karar/#secimler" standalone>
+          Karar seçimleri: başlangıç tarihi ve diğer açık sorular
+        </TextLink>
+      </p>
+    </Section>
+  );
+}

@@ -12,7 +12,8 @@ import {
   TextLink,
 } from '../components/ui';
 import { PageHeader } from '../components/PageHeader';
-import { IstihdamPlanGorunumu } from './IstihdamPlani';
+import { GuncelPlan, IstihdamPlanGorunumu } from './IstihdamPlani';
+import { KararSecimleri } from '../components/KararSecimleri';
 import { boardMapping, type BoardRow } from '../data/archive';
 import type { CrmStage, GovNode, PayRule, WorkPeriod } from '../data/program';
 import { KARAR_DURUM_ADI, kararDurumu, type KararKaydi } from '../data/kararlar';
@@ -247,6 +248,8 @@ function PlanContent() {
     <>
       <PageHeader title="Eylem planı" purpose="istoc.com genel planını, her satırda tarihli bir eylem ve ölçülebilir bir hedefle gösterir." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
 
+      <GuncelPlan />
+
       <Section id="gantt" index={1} title="Gantt şeması" desc={`Kesikli çizgiler, 60. gün (${shortDate(dates.day60)}) ve 90. gün (${shortDate(dates.day90)}) kontrollerini gösterir.`}>
         <Chart
           id="gantt"
@@ -289,15 +292,13 @@ function PlanContent() {
 
 const govChart = (node: GovNode): ChartTreeNode => ({ name: node.name, role: node.role ?? 'yonetici', children: node.children?.map(govChart) });
 
-function AuthorityContent() {
+function AuthorityContent({ ilkNo }: { ilkNo: number }) {
   const m = useModel();
   const { checkpoints, governanceTree, CIRO_TARGET, dates } = m;
 
   return (
     <>
-      <PageHeader title="Karar yetkisi ve kontrol noktaları" purpose="Kimin neye karar verdiğini ve hangi tarihte hangi eşiğin ölçüldüğünü gösterir." />
-
-      <Section id="yetki" index={1} title="Karar yetkisi">
+      <Section id="yetki" index={ilkNo} title="Karar yetkisi" desc="Kimin neye karar verdiğini gösterir.">
         <Chart
           id="yetki"
           title="Yatırımcı → İsmail Karaca → kararlar"
@@ -308,7 +309,7 @@ function AuthorityContent() {
         />
       </Section>
 
-      <Section id="kontrol" index={2} title="Kontrol noktaları" desc={`Ciro değerleri, aylık ${pct(m.planRetention)} elde tutma senaryosuyla hesaplandı.`}>
+      <Section id="kontrol" index={ilkNo + 1} title="Kontrol noktaları" desc={`Ciro değerleri, aylık ${pct(m.planRetention)} elde tutma senaryosuyla hesaplandı.`}>
         <Chart
           id="kontrol"
           title="Kümülatif aktif satıcı ve ciro"
@@ -371,7 +372,13 @@ function PendingContent() {
   return (
     <>
       {/* Karar defteri (adım 1a; docs/missings.md MS-13): soru → seçenekler/öneri → etki → karar veren → son tarih → sonuç → yürürlük. */}
-      <PageHeader title="Karar bekleyenler" purpose={`${ozet.bekleyen} karar bekliyor ve ${ozet.gecikmis} tanesi gecikmiş, ${ozet.verilen} karar verildi ve ${ozet.yururlukte} tanesi yürürlükte.`} />
+      <PageHeader
+        title="Kararlar"
+        purpose="Bekleyen ve verilen kararları, karar yetkisini ve kontrol noktalarını tek yerde gösterir."
+        meta={[{ label: 'Durum', value: `${ozet.bekleyen} bekliyor (${ozet.gecikmis} gecikmiş), ${ozet.verilen} verildi, ${ozet.yururlukte} yürürlükte` }]}
+      />
+
+      <KararSecimleri />
 
       <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Son tarihi geçen karar “gecikti” olarak işaretlenir. Karar girilmeden hiçbir kayıt “verildi” olarak gösterilmez.">
         <Chart
@@ -719,18 +726,12 @@ export function PlanPage({ pathname }: { pathname: string }) {
   );
 }
 
-export function AuthorityPage({ pathname }: { pathname: string }) {
-  return (
-    <AppFrame pathname={pathname}>
-      <AuthorityContent />
-    </AppFrame>
-  );
-}
-
-export function PendingPage({ pathname }: { pathname: string }) {
+/** Kararlar (kullanıcı kararı 2026-11-03): Karar bekleyenler ve Karar yetkisi tek sayfada, adres /karar/. */
+export function KararPage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
       <PendingContent />
+      <AuthorityContent ilkNo={6} />
     </AppFrame>
   );
 }

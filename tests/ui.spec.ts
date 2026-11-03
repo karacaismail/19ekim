@@ -7,8 +7,7 @@ const PAGES = [
   'hedefler/',
   'gelir-plani/',
   'eylem-plani/',
-  'karar-yetkisi/',
-  'karar-bekleyenler/',
+  'karar/',
   'buyume-modeli/',
   'roller/dijital-pazarlama/',
   'roller/pazarlamaci/',
@@ -322,12 +321,12 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
   /** Geniş grafikli sayfalar ve dar ekranda beklenen eşdeğer kabuk sayısı. */
   const GENIS: { path: string; esdeger: string; n: number }[] = [
     { path: '', esdeger: '.hiyerarsi', n: 1 },
-    { path: 'karar-yetkisi/', esdeger: '.hiyerarsi', n: 1 },
+    // Kararlar: karar yetkisi ağacı (.hiyerarsi) ve son tarih ajandası (.ajanda) aynı sayfada.
+    { path: 'karar/', esdeger: '.hiyerarsi, .ajanda', n: 2 },
     { path: 'eylem-plani/', esdeger: '.ajanda', n: 1 },
     { path: 'roller/organizator/', esdeger: '.ajanda', n: 1 },
     // Entegrasyon tarihleri (deadlines) + 90 günlük plan (gantt)
     { path: 'roller/dijital-pazarlama/', esdeger: '.ajanda', n: 2 },
-    { path: 'karar-bekleyenler/', esdeger: '.ajanda', n: 1 },
     { path: 'bcg/', esdeger: '.degerler', n: 1 },
   ];
 
@@ -353,15 +352,17 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
   }
 
   test('organizasyon ve karar yetkisi: 320 px dikey hiyerarşi 1280 px ECharts ağacıyla aynı düğümleri aynı derinlikte taşır; geniş ekrana dönüşte ağaç yeniden çizilir', async ({ page }) => {
-    for (const path of ['', 'karar-yetkisi/']) {
+    for (const path of ['', 'karar/']) {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path);
       await icerik(page);
       await hydrated(page);
-      const kutu = page.locator('.chart-canvas').first();
+      // Kararlar sayfasında ağaç, karar yetkisi bölümündeki grafiktir (önce son tarih grafiği gelir).
+      const kutu = path === 'karar/' ? page.locator('#yetki .chart-canvas') : page.locator('.chart-canvas').first();
       await kutu.scrollIntoViewIfNeeded();
       await expect(kutu.locator('svg')).toBeVisible({ timeout: 10_000 });
-      const agac = await agacVerisi(page, 0);
+      const sira = await page.evaluate(() => Math.max(0, [...document.querySelectorAll('.chart-canvas .chart-host')].findIndex((h) => h.closest('#yetki'))));
+      const agac = await agacVerisi(page, path === 'karar/' ? sira : 0);
       expect(agac, `${path} ECharts ağacı`).not.toBeNull();
       expect(agac!.length, path).toBeGreaterThan(5);
 
@@ -501,7 +502,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
 
   test('karar bekleyenler ve BCG: 320 px’te son tarih ajandası ve kutuya göre değer listesi ECharts verisiyle aynı', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto('karar-bekleyenler/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
     const kutu = page.locator('.chart-canvas[data-kind="deadlines"]');
@@ -757,7 +758,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   const KIRINTI_SATIRI = 44;
   const ONCEKI: Record<string, number> = {
     '': 175, 'arsiv/': 203, 'bcg/': 259, 'buyume-modeli/': 293, 'eylem-plani/': 231, 'giderler/': 233, 'hedefler/': 366,
-    'istihdam/': 203, 'karar-bekleyenler/': 203, 'karar-yetkisi/': 265, 'notlar/': 203, 'parametreler/': 299,
+    'istihdam/': 203, 'karar/': 203, 'notlar/': 203, 'parametreler/': 299,
     'roller/asistan/': 468, 'roller/dijital-pazarlama/': 496, 'roller/ekip-lideri/': 553, 'roller/organizator/': 468,
     'roller/pazarlamaci/': 468, 'roller/saha-uzmani/': 525, 'roller/segika/': 557,
   };
@@ -826,7 +827,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   });
 
   test('menüler: İstihdam, Pazarlama, Finans, Yönetim, Yardımcı; Yönetim dört sayfa; etkin sayfa işaretli; grup kapsamları', async ({ page }) => {
-    await page.goto('karar-yetkisi/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
@@ -837,8 +838,8 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await tetik.click();
     const menu = page.getByRole('menu', { name: 'Yönetim' });
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole('menuitem')).toHaveText(['Hedefler', 'Eylem planı', 'Kararlar', 'Karar yetkisi']);
-    await expect(menu.getByRole('menuitem', { name: 'Karar yetkisi' })).toHaveAttribute('aria-current', 'page');
+    await expect(menu.getByRole('menuitem')).toHaveText(['Hedefler', 'Eylem planı', 'Kararlar']);
+    await expect(menu.getByRole('menuitem', { name: 'Kararlar' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Pazarlama' }).click();
     await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi']);
@@ -853,7 +854,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(page).toHaveURL(/\/parametreler\/$/);
     await page.getByRole('button', { name: 'Yönetim' }).click();
     await page.getByRole('menu', { name: 'Yönetim' }).getByRole('menuitem', { name: 'Kararlar' }).click();
-    await expect(page).toHaveURL(/\/karar-bekleyenler\/$/);
+    await expect(page).toHaveURL(/\/karar\/$/);
   });
 
   test('Temsilci ağı yalnız Pazarlama menüsünde etkin (İstihdam menüsü bölüm saymaz)', async ({ page }) => {
@@ -930,7 +931,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
   // işaretli, Escape kapatır, odak düğmeye döner. 48em’den itibaren şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst
   // satırda, ortalı).
   for (const width of [320, 360, 375, 390]) {
-    test(`${width} px: gezinme çekmecede — şerit yok, 23 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
+    test(`${width} px: gezinme çekmecede — şerit yok, 22 bağlantı, etkin sayfa işaretli, Escape kapatır, odak düğmeye döner`, async ({ page }) => {
       await page.setViewportSize({ width, height: 700 });
       await page.goto('roller/asistan/');
       await icerik(page);
@@ -948,7 +949,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const cekmece = page.getByRole('dialog', { name: 'Menü' });
       await expect(cekmece).toBeVisible();
       const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
-      await expect(nav.getByRole('link')).toHaveCount(23);
+      await expect(nav.getByRole('link')).toHaveCount(22);
       await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
       await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Finans', 'Yönetim', 'Yardımcı']);
       await expect(nav.locator('.tree-no')).toHaveCount(7);
@@ -1292,9 +1293,9 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.getByRole('button', { name: 'Menü', exact: true }).click();
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
-    await expect(cekmece.getByRole('link')).toHaveCount(23);
+    await expect(cekmece.getByRole('link')).toHaveCount(22);
     const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(linkler.length).toBe(23);
+    expect(linkler.length).toBe(22);
     expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
@@ -1365,7 +1366,7 @@ test.describe('dokunmatik cihaz', () => {
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
     const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(23);
+    expect(ogeler.length).toBe(22);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
     expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });
@@ -1645,7 +1646,7 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
   }
 
   test('grafik hareketi: seri, işaret çizgisi, durum ve işaretçi simetrik cubicInOut, 120–320 ms', async ({ page }) => {
-    for (const path of ['hedefler/', 'karar-yetkisi/', 'roller/organizator/', 'buyume-modeli/']) {
+    for (const path of ['hedefler/', 'karar/', 'roller/organizator/', 'buyume-modeli/']) {
       await page.goto(path);
       await icerik(page);
       const canvases = page.locator('.chart-canvas');
@@ -1697,7 +1698,7 @@ test.describe('parametreler', () => {
     await expect(page.locator('.param-status')).toContainText('1 değer varsayılandan farklı');
     await expect(page.locator('.params-notice')).toBeVisible();
 
-    await page.goto('karar-bekleyenler/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
     await expect(page.getByText('70.000 ₺ maaş / ay').first()).toBeVisible();
@@ -1717,7 +1718,7 @@ test.describe('parametreler', () => {
     await expect(reset).toHaveText('Genel ayarları sıfırla (onayla)');
     await reset.click();
     await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
-    await page.goto('karar-bekleyenler/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
     await expect(page.getByText('50.000 ₺ maaş / ay').first()).toBeVisible();
@@ -1729,10 +1730,10 @@ test.describe('parametreler', () => {
     await icerik(page);
     await hydrated(page);
     await page.evaluate(() => localStorage.setItem('istoc-plan-parametreler', JSON.stringify({ startDate: '2026-11-15' })));
-    await page.goto('karar-yetkisi/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.locator('.data-table').first()).toContainText('13 Ocak');
+    await expect(page.locator('#kontrol')).toContainText('13 Ocak');
     await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
   });
 
@@ -2131,11 +2132,11 @@ test.describe('parametre kaydı doğrulaması — sayfada (MS-05)', () => {
 
 test.describe('karar defteri — sayfada (adım 1a)', () => {
   test('bekleyen kararlar gecikme durumuyla; iş modeli açık soru olarak; verilen kararlar sonucu, tarihi ve durumuyla; açık alt sorular görünür', async ({ page }) => {
-    await page.goto('karar-bekleyenler/');
+    await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.locator('.page-purpose')).toContainText(/\d+ karar bekliyor/);
-    await expect(page.locator('.page-purpose')).toContainText(/gecikmiş/);
+    await expect(page.locator('[data-page-header]').last()).toContainText(/\d+ bekliyor/);
+    await expect(page.locator('[data-page-header]').last()).toContainText(/gecikmiş/);
     const bekleyen = page.locator('.table-block:has(#karar-tablo)');
     await expect(bekleyen.locator('tbody tr')).toHaveCount(await bekleyen.locator('tbody tr').count());
     const asistan = bekleyen.locator('tbody tr', { hasText: 'Asistan alınacak mı?' });

@@ -74,13 +74,13 @@ function tahtaKarari(prog: Program, topic: string): Pick<KararKaydi, 'id' | 'yur
   if (topic.startsWith('Kapasite açığı')) return { id: 'kapasite-acigi', yururlukTarihi: dates.dec, etki: 'Aralık saha takviyesi, istihdam takvimi ve kadro maliyeti', ilgili: ['/istihdam/', '/hedefler/'] };
   if (topic.startsWith('4. aydan itibaren mesai')) return { id: 'mesai-modeli', yururlukTarihi: dates.firstDay, etki: 'Mesai dönemleri, yasal tavan ve rollerin günlük düzeni', ilgili: ['/roller/saha-uzmani/'] };
   if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika masa başı rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/satis-ortakligi/'] };
-  return { id: slug(topic), yururlukTarihi: undefined, etki: 'Plan sayfaları', ilgili: ['/karar-bekleyenler/'] };
+  return { id: slug(topic), yururlukTarihi: undefined, etki: 'Plan sayfaları', ilgili: ['/karar/'] };
 }
 
 function acikTahtaKarari(topic: string): Pick<KararKaydi, 'etki' | 'ilgili'> {
   if (topic.startsWith('Asistan')) return { etki: 'Kadro ve işveren maliyeti. Asistan alınmazsa dijital pazarlamanın başlangıcı kayar.', ilgili: ['/roller/asistan/', '/istihdam/', '/roller/dijital-pazarlama/'] };
   if (topic.includes('RFQ')) return { etki: 'Müşteri edinme kanalı (B), ilk ücretli reklam ve dijital pazarlama planı', ilgili: ['/roller/dijital-pazarlama/', '/gelir-plani/'] };
-  return { etki: 'Plan sayfaları', ilgili: ['/karar-bekleyenler/'] };
+  return { etki: 'Plan sayfaları', ilgili: ['/karar/'] };
 }
 
 export function makeKararlar(_p: Params, prog: Program) {
@@ -203,7 +203,143 @@ export function makeKararlar(_p: Params, prog: Program) {
       ilgili: [],
     },
   ];
-  const kayitlar = [...acik, ...yirmiSekizEkim.filter((k) => k.durum === 'bekliyor'), ...tahta, ...yirmiSekizEkim.filter((k) => k.durum === 'verildi')];
+  /** Sahibin 3 Kasım 2026’da verdiği kararlar (satış ortaklığı, istihdam ve yayın düzeni). */
+  const ucKasim: KararKaydi[] = [
+    {
+      id: 'ortaklik-ana-kaynak',
+      soru: 'Ortaklık programlarının ana kaynağı hangi sayfa olacak?',
+      etki: 'Pazarlama menüsü ve bütün ortaklık hesapları',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Satış ortaklığı sayfası ana kaynaktır. Değişmez ama geliştirilebilir. Temsilci ağı, İş ortaklığı ve Affilate personaları koşul seti olarak bu sayfaya taşındı. İş ortaklığı ve Affilate sayfaları kaldırıldı.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'ortak-odeme-modeli',
+      soru: 'Ortağa ödeme nasıl hesaplanacak?',
+      etki: 'Satış ortaklığındaki bütün rol kazançları',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'İki model de seçilebilir. Birinde oran ortağın işine göre değişir: yalnız tanıştırırsa yüzde 8, demo da yaparsa yüzde 12, satışı kapatırsa yüzde 18. Diğerinde satış başına 2.500 ₺ ödenir.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'istoc-yillik-paket',
+      soru: 'iStoc yıllık paketi kaç aylık ücrete denk gelir?',
+      etki: 'iStoc yıllık paket fiyatı ve bütün iStoc komisyonları',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'iStoc yıllık paketi 10 aylık ücrettir.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'tavsiye-odulu',
+      soru: 'Mevcut müşterinin tavsiye ödülü nedir?',
+      etki: 'Arkadaşını getir rolü',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Ödül nakit değil, hizmet kredisidir. Başlangıç değeri tavsiye edene 2 ay, yeni müşteriye 1 ay ücretsiz kullanımdır.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'musavir-modeli',
+      soru: 'Mali müşavire ne verilecek?',
+      etki: 'Profesyonel çözüm ortağı rolündeki mali müşavir kuralı',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Komisyon ya da müşterisine indirim seçilebilir. Oranlar ve seviyeler sayfada değiştirilebilir.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'segika-cozum-ortagi',
+      soru: 'Segika profesyonel çözüm ortağı hangi koşulla çalışır?',
+      etki: 'Segika çözüm ortağı kazancı ve eğitim bedeli',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Ortak yüzde 25 alır ve müşteri desteğini kendisi verir. CRM yazılımını biz sağlarız. Yılda 8 saat program eğitimi ücretsizdir, fazlası saat başı ücretlidir.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı (yalnız Segika)',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'segika-kadrolu',
+      soru: 'Segika kadrolu satış uzmanı hangi koşulla çalışır?',
+      etki: 'Segika kadrolu satış uzmanı primi',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'SGK’lı çalışandır ve kotayı aşınca yüzde 10 prim alır. Müşteri desteğini şirketin destek uzmanı verir, CRM yazılımını biz sağlarız.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı (yalnız Segika)',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'temsilci-agi-kademe',
+      soru: 'Temsilci ağında üst kademeler alt kademelerin satışından pay alacak mı?',
+      etki: 'Temsilci ağı koşul seti ve ağ diyagramı',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Evet. Satış yapanın üstündeki kademeler aşağı indikçe azalan pay alır. Başlangıç değeri 2 kademedir, derinlik ve paylar sayfada değiştirilebilir. Kazanç yalnız gerçek satıştan doğar.',
+      kararTarihi: '2026-11-03',
+      acik: ['Kademe sayısı sözleşmeden önce avukatla kesinleşmeli.'],
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı (Ahmet, Mehmet, Ayşe, Fatma örneği)',
+      ilgili: ['/satis-ortakligi/'],
+    },
+    {
+      id: 'istihdam-plani-3-kasim',
+      soru: 'İstihdam takvimi hangi planla güncellenecek?',
+      etki: 'İstihdam takvimi ve Kadro kapasitesi',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'İstihdam takvimi 3 Kasım 2026 Kadro Kapasite Planı ve GAP eylem planıyla güncellendi. Roller, kapasite ve kararlar Kadro kapasitesi sayfasında ayrı gösterilir.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      acik: ['Sitenin ortak başlangıç tarihi henüz 1 Kasım. 23 Kasım’a çekilip çekilmeyeceği karar seçimlerinde soruldu.'],
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      ilgili: ['/istihdam/', '/kadro-kapasitesi/'],
+    },
+    {
+      id: 'yalin-turkce',
+      soru: 'Site metinleri hangi yazım kuralıyla yazılacak?',
+      etki: 'Bütün sayfaların metinleri',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Bütün metinler yalın Türkçe kuralıyla yazılır: tam cümle, günlük kelime ve açık özne. Sayılar ve koşullar korunur.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 kalıcı yazım talimatı',
+      ilgili: [],
+    },
+    {
+      id: 'testsiz-yayin',
+      soru: 'Acil durumda yayın testleri bekleyecek mi?',
+      etki: 'GitHub Pages yayın akışı',
+      sahip: 'yonetici',
+      durum: 'verildi',
+      sonuc: 'Gerektiğinde önce testsiz yayınlanır, bütün testler hemen ardından çalıştırılır ve sorun çıkarsa yeniden yayınlanır. Normal yayın testli kalır.',
+      kararTarihi: '2026-11-03',
+      yururlukTarihi: '2026-11-03',
+      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      ilgili: [],
+    },
+  ];
+  const kayitlar = [...acik, ...yirmiSekizEkim.filter((k) => k.durum === 'bekliyor'), ...ucKasim, ...tahta, ...yirmiSekizEkim.filter((k) => k.durum === 'verildi')];
   /** Bugüne göre sayılar: bekleyen (gecikenler dahil), gecikmiş, verilen (yürürlüktekiler dahil), yürürlükte. */
   const ozet = (bugun: string) => {
     const g = kayitlar.map((k) => kararDurumu(k, bugun));
