@@ -1,18 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-/** Değer önerisi (kullanıcı kararı 2026-11-03): sözler alıntı olarak alt alta; 10 güçlü söz, 5 adım, 35 öneri, 2 eski söz. */
+/** Değer önerisi (kullanıcı kararı 2026-11-03): sözler alıntı olarak alt alta; 9 güçlü söz, 5 adım, 35 öneri, 2 eski söz. */
 for (const genislik of [320, 390, 1512]) {
   test(`değer önerisi ${genislik} px: bütün sözler alıntı, taşma yok, metin ≥ 14 px`, async ({ page }) => {
     await page.setViewportSize({ width: genislik, height: 900 });
     await page.goto('deger-onerisi/');
     await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Değer önerisi');
-    await expect(page.locator('.dg-guclu')).toHaveCount(10);
+    await expect(page.locator('.dg-guclu')).toHaveCount(9);
     await expect(page.locator('.dg-adim')).toHaveCount(5);
     await expect(page.locator('.dg-oneri')).toHaveCount(35);
     await expect(page.locator('.dg-eski')).toHaveCount(2);
-    // 10 + 1 ortak nokta + 5 + 35 + 2 = 53 alıntı; her söz blockquote içinde.
-    await expect(page.locator('figure.alinti blockquote')).toHaveCount(53);
+    // 9 + 1 ortak nokta + 5 + 35 + 2 = 52 alıntı; her söz blockquote içinde.
+    await expect(page.locator('figure.alinti blockquote')).toHaveCount(52);
     const olcum = await page.evaluate(() => ({
       tasma: document.documentElement.scrollWidth - innerWidth,
       kucuk: [...document.querySelectorAll<HTMLElement>('.dg *')]

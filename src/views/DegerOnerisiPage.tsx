@@ -5,13 +5,13 @@ import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, 
 
 /**
  * Değer önerisi (kullanıcı kararı 2026-11-03): saha ekibinin esnafa söyleyeceği sözler alt alta, alıntı olarak.
- * Sıra: en güçlü 10 söz → kapıda ilk 30 saniye → kategorilere göre 35 öneri → eski sözlerin güçlü hali → kısaltmalar.
+ * Sıra: en güçlü sözler → kapıda ilk 30 saniye → kategorilere göre 35 öneri → eski sözlerin güçlü hali → kısaltmalar.
  */
 
 const iki = (n: number) => String(n).padStart(2, '0');
 
 const ICINDEKILER = [
-  { id: 'en-guclu', ad: 'En güçlü 10 söz' },
+  { id: 'en-guclu', ad: `En güçlü ${GUCLU_SOZLER.length} söz` },
   { id: 'ilk-30-saniye', ad: 'Kapıda ilk 30 saniye' },
   ...KATEGORILER.map((k) => ({ id: k.id, ad: k.ad })),
   { id: 'eski-sozler', ad: 'Eski sözlerin güçlü hâli' },
@@ -79,7 +79,7 @@ function Icerik() {
       <section className="dg-bolum" id="en-guclu" aria-labelledby="en-guclu-baslik">
         <header className="dg-bolum-ust">
           <h2 id="en-guclu-baslik" className="dg-bolum-baslik">
-            En güçlü 10 söz
+            En güçlü {GUCLU_SOZLER.length} söz
           </h2>
           <p className="dg-bolum-giris">Saha ekibi ilk görüşmede bu sözlerle başlar.</p>
         </header>
@@ -100,7 +100,7 @@ function Icerik() {
           ))}
         </ol>
         <div className="dg-ortak">
-          <p className="dg-ortak-ad">On sözün ortak noktası</p>
+          <p className="dg-ortak-ad">Bu sözlerin ortak noktası</p>
           <Alinti boyut="buyuk">{ORTAK_NOKTA}</Alinti>
         </div>
       </section>

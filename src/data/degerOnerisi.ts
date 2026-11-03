@@ -58,11 +58,7 @@ export const GUCLU_SOZLER: GucluSoz[] = [
     soz: 'Yeni müşteriye mal satarken paranızı alamama riskinizi azaltalım. Güvenli ödeme ve doğrulanmış alıcılarla çalışın.',
     gucluTarafi: 'Tahsilat riskini azaltmak, yalnız daha fazla müşteri bulmaktan daha değerli olabilir. Bu güvence için ödeme altyapısı ve sözleşme gerekir.',
   },
-  {
-    baslik: 'Mevcut müşterilerinizi getirin, komisyon ödemeyin',
-    soz: 'Kendi müşterilerinize platformumuz üzerinden teklif verin, sipariş alın ve satışlarını takip edin. Bu müşterilerden satış komisyonu almayalım.',
-    gucluTarafi: 'Satıcıya hemen fayda sağlar ve alıcıların platforma gelmesini hızlandırır. Ödeme hizmetinin maliyeti ayrıca tanımlanmalıdır.',
-  },
+
   {
     baslik: 'Türkiye genelinde yeni bayiler kazanın',
     soz: 'İstanbul dışında size düzenli sipariş verebilecek nalbur, kırtasiye, market ve perakendecilere ulaşalım.',
