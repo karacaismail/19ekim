@@ -1603,3 +1603,59 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
     clip-path: none;
   }
 }
+
+/*
+ * Yapışık üst bölüm (kullanıcı kararı 2026-11-03): aşağı kaydırınca ürün satırı ve persona sekmeleri sayfa başlığının
+ * (kırıntı satırı) hemen altına yapışır; yukarı çıkınca yerine döner. Üst bant gizlenince birlikte yukarı kayarlar.
+ * Yükseklikler JS ile ölçülür (SatisOrtakligiV2.tsx → useYapisikUst). Dar ya da kısa ekranda yapışma yoktur: orada
+ * sekmeler yatay kayar ve ekranın büyük kısmını kaplamamalıdır. Sütunlar yapışık bölümün altından başlar.
+ */
+@media (min-width: 64em) and (min-height: 40em) {
+  .v2-so2 {
+    --v2-yapis-ust: calc(var(--bant-h, 0px) + var(--v2-kirinti-h, 0px));
+  }
+
+  html[data-bant-gizli] .v2-so2 {
+    --v2-yapis-ust: var(--v2-kirinti-h, 0px);
+  }
+
+  .v2-so2-arac {
+    position: sticky;
+    top: var(--v2-yapis-ust);
+    z-index: 12;
+    padding-block: var(--space-3);
+    background-color: var(--surface-page);
+    box-shadow: 0 0 0 100vmax var(--surface-page);
+    clip-path: inset(0 -100vmax);
+    transition-property: top;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  .v2-so2-arac .v2-so2-fiyat {
+    min-height: 0;
+  }
+
+  .v2-so2-sag > .v2-so2-roller {
+    position: sticky;
+    top: calc(var(--v2-yapis-ust) + var(--v2-arac-h, 0px));
+    z-index: 11;
+    padding-bottom: var(--space-2);
+    background-color: var(--surface-page);
+    transition-property: top;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  .v2-so2-sag .v2-so2-rol {
+    min-height: 0;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .v2-so2-duzen,
+  html[data-bant-gizli] .v2-so2-duzen {
+    --v2-so2-ust: calc(var(--v2-yapis-ust) + var(--v2-arac-h, 0px) + var(--space-4));
+  }
+}

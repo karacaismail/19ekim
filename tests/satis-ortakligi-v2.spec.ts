@@ -139,6 +139,35 @@ test('özel program seçilince klavye odağı seçilen düğmede kalır', async 
   await expect(page.locator('.v2-so2-kaynak')).toContainText('Özel program: Satıcı geliştirme ortağı');
 });
 
+test('ürün satırı ve persona sekmeleri aşağı kayınca başlığa yapışık kalır', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await ac(page);
+  const kutu = (s: string) => page.locator(s).first().evaluate((e) => { const r = e.getBoundingClientRect(); return { ust: r.top, alt: r.bottom }; });
+  const ilk = await kutu('.v2-so2-arac');
+  await page.mouse.wheel(0, 2200);
+  await page.waitForTimeout(400);
+  const kirinti = await kutu('.crumbs-row');
+  const arac = await kutu('.v2-so2-arac');
+  const roller = await kutu('.v2-so2-roller');
+  // Başlığın hemen altında, üst üste binmeden ve ekranın üst bölümünde durur.
+  expect(Math.abs(arac.ust - kirinti.alt)).toBeLessThanOrEqual(2);
+  expect(Math.abs(roller.ust - arac.alt)).toBeLessThanOrEqual(2);
+  expect(roller.alt).toBeLessThan(945 * 0.45);
+  await expect(page.locator('.v2-so2-rol').first()).toBeInViewport();
+  // Altından kayan sütunlar yapışık bölümün üstüne çizilmez.
+  const ustte = await page.evaluate(([y1, y2]) => {
+    const x = innerWidth * 0.2;
+    const a = document.elementFromPoint(x, y1)?.closest('.v2-so2-arac');
+    const r = document.elementFromPoint(innerWidth * 0.7, y2)?.closest('.v2-so2-roller');
+    return !!a && !!r;
+  }, [arac.ust + 4, roller.ust + 20]);
+  expect(ustte).toBe(true);
+  // Yukarı çıkınca yerine döner.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  expect(Math.abs((await kutu('.v2-so2-arac')).ust - ilk.ust)).toBeLessThanOrEqual(2);
+});
+
 for (const genislik of [320, 360, 375, 390]) {
   test(`v2 ${genislik} px: her personada yatay taşma yok`, async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');

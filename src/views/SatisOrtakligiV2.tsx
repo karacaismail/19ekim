@@ -7,7 +7,7 @@
  * (ne satar, nasıl katkı verir?) → sağda kazanç, segment merdiveni (nasıl yükselir?), kampanyalar, ağ, dönemler ve hesap.
  * Personaya özel koşullar solun en altında durur; standart bölüm her personada aynı kalır.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
 import { AgDiyagrami } from '../components/AgDiyagramiV2';
 import { PageHeader } from '../components/PageHeader';
@@ -781,8 +781,34 @@ function kararVerisi(a: Ayar, rol: RolId) {
 
 /* ---------- Sayfa ---------- */
 
+/**
+ * Yapışık üst bölüm (kullanıcı kararı 2026-11-03): ürün satırı ve persona sekmeleri aşağı kayınca sayfa başlığının
+ * altına yapışır. Başlık satırının ve ürün satırının yüksekliği CSS değişkeni olarak yazılır; yapışma kuralları
+ * satisOrtakligiV2.css → “Yapışık üst bölüm” içindedir (yalnız geniş ve yeterince yüksek ekranlarda).
+ */
+function useYapisikUst() {
+  const kok = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = kok.current;
+    if (!el) return undefined;
+    const kirinti = document.querySelector<HTMLElement>('.crumbs-row');
+    const arac = el.querySelector<HTMLElement>('.v2-so2-arac');
+    const olc = () => {
+      el.style.setProperty('--v2-kirinti-h', `${kirinti?.offsetHeight ?? 0}px`);
+      el.style.setProperty('--v2-arac-h', `${arac?.offsetHeight ?? 0}px`);
+    };
+    olc();
+    const gozlem = new ResizeObserver(olc);
+    if (kirinti) gozlem.observe(kirinti);
+    if (arac) gozlem.observe(arac);
+    return () => gozlem.disconnect();
+  }, []);
+  return kok;
+}
+
 export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const duzen = useYapisikSutunlar();
+  const kok = useYapisikUst();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
   const serit = useSeciliSekmeGorunur(rol);
@@ -794,7 +820,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const ozet = personaOzeti(a, secili);
   const model = affilateModeli(a, rol);
   return (
-    <div className="v2-so2">
+    <div className="v2-so2" ref={kok}>
       <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla ne kazandığını, hangi segmentte olduğunu ve bir üst segmente nasıl geçeceğini gösterir." />
       {surum}
       <div className="v2-so2-arac">
