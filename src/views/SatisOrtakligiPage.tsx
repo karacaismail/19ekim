@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { AffilateMotoru } from '../components/AffilateMotoru';
 import { AgDiyagrami } from '../components/AgDiyagrami';
-import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice } from '../components/ui';
 import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKit';
@@ -291,6 +290,7 @@ function kararVerisi(a: Ayar, rol: RolId) {
   return {
     sayfa: 'Satış ortaklığı programı',
     surum: 2,
+    program: 'v1',
     secim: { urun: a.marka, odemeModeli: a.model, seciliRol: rol, seciliKosul: seciliKosul(a, rol).id },
     kosulSetleri: kosulOzeti(a),
     ...(affilateModeli(a, rol)
@@ -661,7 +661,8 @@ function KosulPaneli({ a, ks, kaynak, ek }: { a: Ayar; ks: KosulSonuc; kaynak: s
 
 /* ---------- Sayfa ---------- */
 
-function Icerik() {
+/** Sürüm seçicisi dışarıdan gelir (src/views/SatisOrtakligiSurumleri.tsx). */
+export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
   const duzen = useYapisikSutunlar();
   const { ayar: a, guncelle: g, sifirla } = useAyar();
   const [rol, setRol] = useState<RolId>('oncu');
@@ -692,6 +693,7 @@ function Icerik() {
       <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir ve ayarlar değişince sonuçlar hemen güncellenir." />
 
       <div className="so2-arac">
+        {surum}
         <Choice<Marka>
           label="Ürün"
           value={a.marka}
@@ -787,13 +789,5 @@ function Icerik() {
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi" />
     </div>
-  );
-}
-
-export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
-  return (
-    <AppFrame pathname={pathname} wide>
-      <Icerik />
-    </AppFrame>
   );
 }
