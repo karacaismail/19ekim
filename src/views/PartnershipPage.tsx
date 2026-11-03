@@ -110,7 +110,7 @@ function PuanKarti({ id, sc }: { id: string; sc: Scorecard }) {
         rows={rows}
         rowTone={(r) => (r.criterion === 'Toplam' ? 'total' : undefined)}
       />
-      <Note title="Puandan bağımsız ret">
+      <Note title="Puandan bağımsız ret nedenleri">
         <p>{sc.veto}</p>
       </Note>
     </>
@@ -128,13 +128,13 @@ function Ozet({ p, no }: { p: Program; no: number }) {
             { title: 'İstek', text: p.summary.ask },
             { title: 'İhtiyaç', text: p.summary.need },
             { title: 'Teşhis', text: p.summary.diagnosis },
-            { title: 'Yönlendirici yaklaşım', text: p.summary.approach },
+            { title: 'Önerilen yaklaşım', text: p.summary.approach },
           ]}
         />
-        <h3 className="block-title ortak-blok">90 gün başarı ölçütleri</h3>
+        <h3 className="block-title ortak-blok">90 günlük başarı ölçütleri</h3>
         <Stats items={p.headline} />
       </Section>
-      <Section id={`${p.id}-kaskad`} index={`${no}.2`} title="Kazanma kaskadı" desc="Beş seçim birbirini desteklemeden yeni kanal açılmaz.">
+      <Section id={`${p.id}-kaskad`} index={`${no}.2`} title="Kazanmak için beş seçim" desc="Bu beş seçim birbirini desteklemiyorsa yeni kanal açılmaz.">
         <DataTable<Cascade>
           id={`${p.id}-kaskad`}
           title="Seçim ve karar"
@@ -145,7 +145,7 @@ function Ozet({ p, no }: { p: Program; no: number }) {
           rows={p.cascade}
         />
       </Section>
-      <Section id={`${p.id}-eylem`} index={`${no}.3`} title="Tutarlı eylemler" desc="Teşhisten türeyen, birbirini destekleyen az sayıda eylem; her birinin ölçütü ve haftası var.">
+      <Section id={`${p.id}-eylem`} index={`${no}.3`} title="Tutarlı eylemler" desc="Eylemler teşhisten çıkar ve birbirini destekler. Sayıları azdır, her birinin ölçütü ve haftası bellidir.">
         <DataTable<Action>
           id={`${p.id}-eylem`}
           title="Eylem, ölçüt, hafta"
@@ -172,13 +172,13 @@ function Teshis({ p, no }: { p: Program; no: number }) {
   const toplam = p.interviews.reduce((a, i) => a + i.count, 0);
   return (
     <>
-      <Section id={`${p.id}-durum`} index={`${no}.1`} title="Doğrulanmış durum" desc="Dış gözlemler (Ekim 2026); şirket verisi değildir.">
+      <Section id={`${p.id}-durum`} index={`${no}.1`} title="Doğrulanmış durum" desc="Bunlar Ekim 2026’daki dış gözlemlerdir, şirket verisi değildir.">
         <Maddeler items={p.verified} />
       </Section>
-      <Section id={`${p.id}-icveri`} index={`${no}.2`} title="İlk haftada doldurulacak iç veri" desc="Kaynak: fatura, tahsilat, iptal ve CRM kayıtları. Veri yoksa “bilinmiyor” yazılır, uydurulmaz.">
+      <Section id={`${p.id}-icveri`} index={`${no}.2`} title="İlk haftada doldurulacak iç veri" desc="Kaynaklar fatura, tahsilat, iptal ve CRM kayıtlarıdır. Veri yoksa “bilinmiyor” yazılır, tahmin uydurulmaz.">
         <Maddeler items={p.internalData} />
       </Section>
-      <Section id={`${p.id}-hipotez`} index={`${no}.3`} title="Hipotezler" desc="Her hipotezin sinyali ve karşılığı önceden yazılı; doğrulanmayan hipoteze karşılık uygulanmaz.">
+      <Section id={`${p.id}-hipotez`} index={`${no}.3`} title="Hipotezler" desc="Her hipotezin doğrulama sinyali ve karşılığı önceden yazılır. Doğrulanmayan bir hipotez için karşılık uygulanmaz.">
         <DataTable<Hypothesis>
           id={`${p.id}-hipotez`}
           title="Hipotez, doğrulama sinyali, karşılık"
@@ -191,7 +191,7 @@ function Teshis({ p, no }: { p: Program; no: number }) {
           rows={p.hypotheses}
         />
       </Section>
-      <Section id={`${p.id}-gorusme`} index={`${no}.4`} title="Görüşme planı" desc={`${toplam} görüşme, ilk üç hafta; istatistiksel temsil iddiası yok, hangi hipotezin sınanacağını seçmek için.`}>
+      <Section id={`${p.id}-gorusme`} index={`${no}.4`} title="Görüşme planı" desc={`İlk üç haftada ${toplam} görüşme yapılır. Görüşmeler istatistiksel olarak bütün müşterileri temsil etmez, hangi hipotezin sınanacağını seçmeye yarar.`}>
         <DataTable<Interview>
           id={`${p.id}-gorusme`}
           title="Grup, sayı, aranan kanıt"
@@ -262,7 +262,7 @@ function Kime({ p, no }: { p: Program; no: number }) {
           size="md"
         />
       </Section>
-      <Section id={`${p.id}-ortak-puan`} index={idx()} title="Ortak eleme" desc="İmza sayısı hedef değildir; puan kartı uygun ortağı seçer, kalanı eler.">
+      <Section id={`${p.id}-ortak-puan`} index={idx()} title="Ortak eleme" desc="İmza sayısı hedef değildir. Puan kartı uygun ortağı seçer, diğerlerini eler.">
         <PuanKarti id={`${p.id}-ortak-puan`} sc={p.partnerScorecard} />
       </Section>
     </>
@@ -273,7 +273,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
   const [h1, h2, h3] = p.tierHeaders;
   return (
     <>
-      <Section id={`${p.id}-katman`} index={`${no}.1`} title="Katmanlar ve ortak ekonomisi" desc="Her katmanın koşulu ve karşılığı yazılı; kademe adıyla değil, gerçekten devredilen işle büyür.">
+      <Section id={`${p.id}-katman`} index={`${no}.1`} title="Katmanlar ve ortak ekonomisi" desc="Her katmanın koşulu ve karşılığı yazılıdır. Ortak, kademe adıyla değil, gerçekten üstlendiği işle üst katmana çıkar.">
         <DataTable<Tier>
           id={`${p.id}-katman`}
           title="Katman, koşul, karşılık"
@@ -285,15 +285,15 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           rows={p.tiers}
         />
       </Section>
-      <Section id={`${p.id}-yolculuk`} index={`${no}.2`} title="Ortak yolculuğu" desc="Her aşamanın süresi, başarı kriteri ve sahibi; kriter sağlanmadan sonraki aşamaya geçilmez.">
+      <Section id={`${p.id}-yolculuk`} index={`${no}.2`} title="Ortak yolculuğu" desc="Her aşamanın süresi, başarı kriteri ve sorumlusu bellidir. Kriter sağlanmadan sonraki aşamaya geçilmez.">
         <DataTable<Journey>
           id={`${p.id}-yolculuk`}
-          title="Aşama, süre, başarı kriteri, sahip"
+          title="Aşama, süre, başarı kriteri, sorumlu"
           columns={[
             { key: 's', header: 'Aşama', nowrap: true, rowHeader: true, render: (r) => r.stage },
             { key: 'd', header: 'Süre', nowrap: true, render: (r) => r.duration },
             { key: 'c', header: 'Başarı kriteri', summary: true, minWidth: '20rem', render: (r) => r.criterion },
-            { key: 'o', header: 'Sahip', nowrap: true, render: (r) => r.owner },
+            { key: 'o', header: 'Sorumlu', nowrap: true, render: (r) => r.owner },
           ]}
           rows={p.journey}
         />
@@ -307,10 +307,10 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
           size="xxl"
         />
       </Section>
-      <Section id={`${p.id}-kural`} index={`${no}.4`} title="Kurallar" desc="Kayıt, çatışma, marka, sorumluluk ve veri.">
+      <Section id={`${p.id}-kural`} index={`${no}.4`} title="Kurallar" desc="Kayıt, kanal çatışması, marka, sorumluluk ve veri kuralları.">
         <Maddeler items={p.rules} />
       </Section>
-      <Section id={`${p.id}-ekonomi`} index={`${no}.5`} title="Ekonomi" desc="Fiyat, pay ve katkı kuralları. Tutar örneği yalnız hesap yöntemini gösterir; gerçek tarife 14. günde finansla doğrulanır.">
+      <Section id={`${p.id}-ekonomi`} index={`${no}.5`} title="Ekonomi" desc="Fiyat, pay ve katkı kuralları. Tutar örneği yalnız hesap yöntemini gösterir. Gerçek tarife 14. günde finans ekibiyle doğrulanır.">
         <DataTable<EconRow>
           id={`${p.id}-ekonomi`}
           title="Kural ve dayanak"
@@ -349,7 +349,7 @@ function ProgramTasarimi({ p, no }: { p: Program; no: number }) {
 function Kanal({ p, no }: { p: Program; no: number }) {
   return (
     <>
-      <Section id={`${p.id}-kanal`} index={`${no}.1`} title="Kanal seçimi: iç halka üç kanal" desc="İlk 90 günde üç kanal ölçülür; dış halka takvime alınır; ücretli reklam kanıttan sonra. Doğrudan kanal, ortak katkısını kıyaslamak için korunur.">
+      <Section id={`${p.id}-kanal`} index={`${no}.1`} title="Kanal seçimi: iç halka üç kanal" desc="İlk 90 günde iç halkadaki üç kanal ölçülür. Dış halkadaki kanallar takvime alınır. Ücretli reklam ancak kanıt geldikten sonra başlar. Doğrudan satış kanalı, ortakların katkısıyla kıyaslama yapmak için korunur.">
         <DataTable<Channel>
           id={`${p.id}-kanal`}
           title="Halka, kanal, 90 günlük test, başarı ölçütü"
@@ -362,18 +362,18 @@ function Kanal({ p, no }: { p: Program; no: number }) {
           rows={p.channels}
         />
       </Section>
-      <Section id={`${p.id}-giris`} index={`${no}.2`} title="Kategori giriş noktaları" desc="Alıcıların çoğu şu an pazarda değildir; iş, ihtiyaç anı geldiğinde akla gelmek ve o anda kolayca satın alınabilir olmaktır.">
+      <Section id={`${p.id}-giris`} index={`${no}.2`} title="Kategori giriş noktaları" desc="Alıcıların çoğu şu an satın almaya hazır değildir. Amaç, ihtiyaç anı geldiğinde akla gelmek ve o anda kolayca satın alınabilmektir.">
         <DataTable<EntryPoint>
           id={`${p.id}-giris`}
-          title="Ne zaman akla gelmeliyiz, tetik, hazırlık"
+          title="Ne zaman akla gelmeliyiz, tetikleyici, hazırlık"
           columns={[
             { key: 'm', header: 'Giriş noktası', minWidth: '12rem', rowHeader: true, render: (r) => r.moment },
-            { key: 't', header: 'Tetik', summary: true, minWidth: '16rem', render: (r) => r.trigger },
+            { key: 't', header: 'Tetikleyici', summary: true, minWidth: '16rem', render: (r) => r.trigger },
             { key: 'p', header: 'Hazırlık', minWidth: '14rem', render: (r) => r.prep },
           ]}
           rows={p.entryPoints}
         />
-        <Note title="Ayırt edici varlıklar ve bulunurluk">
+        <Note title="Ayırt edici varlıklar ve kolay bulunma">
           <p>{p.assets}</p>
         </Note>
       </Section>
@@ -384,7 +384,7 @@ function Kanal({ p, no }: { p: Program; no: number }) {
 function Olcum({ p, no, dates }: { p: Program; no: number; dates: Partnership['dates'] }) {
   return (
     <>
-      <Section id={`${p.id}-kpi`} index={`${no}.1`} title="Yönetim tablosu" desc="Her gösterge bir kararı değiştirir; tanım, kaynak ve dönem sabittir. Küçük örneklemde oranla birlikte adet gösterilir; olgunlaşmamış gösterge “ölçülemez” yazılır.">
+      <Section id={`${p.id}-kpi`} index={`${no}.1`} title="Yönetim tablosu" desc="Her gösterge bir kararı değiştirir. Tanım, kaynak ve dönem sabittir. Örnek sayısı küçükse oranla birlikte adet de gösterilir. Henüz yeterli veri birikmemiş göstergeye “ölçülemez” yazılır.">
         <DataTable<Metric>
           id={`${p.id}-kpi`}
           title="Gösterge, tanım, kaynak, dönem, karar, hedef"
@@ -408,7 +408,7 @@ function Olcum({ p, no, dates }: { p: Program; no: number; dates: Partnership['d
           size="lg"
         />
       </Section>
-      <Section id={`${p.id}-gecit-hedef`} index={`${no}.3`} title="Geçit hedefleri" desc={`${shortDate(dates.day30)}, ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} itibarıyla kümülatif en az değerler.`}>
+      <Section id={`${p.id}-gecit-hedef`} index={`${no}.3`} title="Geçit hedefleri" desc={`${shortDate(dates.day30)}, ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} tarihlerine kadar ulaşılması gereken en düşük toplam değerler.`}>
         <Chart
           id={`${p.id}-gecit-hedef`}
           title="Gün 30 · 60 · 90"
@@ -437,7 +437,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
   ];
   return (
     <>
-      <Section id={`${p.id}-asama`} index={`${no}.1`} title="İlk 90 gün: beş aşama" desc={`${longDate(dates.t0)} – ${longDate(dates.end)}; hafta 1 ilk iş günüdür. Her aşamanın çıktısı ve sahibi yazılı.`}>
+      <Section id={`${p.id}-asama`} index={`${no}.1`} title="İlk 90 gün: beş aşama" desc={`Program ${longDate(dates.t0)} ile ${longDate(dates.end)} arasında sürer. 1. hafta ilk iş günüyle başlar. Her aşamanın çıktısı ve sorumlusu yazılıdır.`}>
         <Timeline className="hire-timeline" bulletSize={44} lineWidth={2} radius={0} classNames={{ item: 'hire-item', itemBullet: 'hire-bullet', itemTitle: 'hire-title', itemBody: 'hire-body' }}>
           {p.phases.map((ph) => (
             <Timeline.Item
@@ -464,7 +464,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
           ))}
         </Timeline>
       </Section>
-      <Section id={`${p.id}-gantt`} index={`${no}.2`} title="İş paketleri" desc="Kesikli çizgiler geçitlerdir; kalın kenarlı çubuk kilometre taşı.">
+      <Section id={`${p.id}-gantt`} index={`${no}.2`} title="İş paketleri" desc="Kesikli çizgiler geçitleri, kalın kenarlı çubuklar kilometre taşlarını gösterir.">
         <Chart
           id={`${p.id}-gantt`}
           title="İş paketi × zaman"
@@ -474,7 +474,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
           wide
         />
       </Section>
-      <Section id={`${p.id}-gecit`} index={`${no}.3`} title="Geçitler: devam, düzeltme, durdurma" desc="Geçit tarihinin gelmesi değil, kanıt eşiğinin karşılanması genişletir. Her geçitte yazılı karar.">
+      <Section id={`${p.id}-gecit`} index={`${no}.3`} title="Geçitler: devam, düzeltme, durdurma" desc="Programı genişleten şey geçit tarihinin gelmesi değil, kanıt eşiğinin karşılanmasıdır. Her geçitte yazılı karar verilir.">
         <div className="ortak-gecitler">
           {p.gates.map((g: Gate) => (
             <article key={g.day} className="ortak-gecit" data-edge="top" data-role={p.role} aria-label={`${g.day}. gün: ${g.title}`}>
@@ -497,7 +497,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
       <Section id={`${p.id}-ritim`} index={`${no}.4`} title="Haftalık ritim">
         <Maddeler items={p.rhythm} />
       </Section>
-      <Section id={`${p.id}-ceyrek`} index={`${no}.5`} title="12 aylık yön" desc="Çeyrek hedefleri gerçek veriyle yazılır; kapsam değişirse yeni plan sürümü açılır, eski hedefler yeniden numaralanmaz.">
+      <Section id={`${p.id}-ceyrek`} index={`${no}.5`} title="12 aylık yön" desc="Çeyrek hedefleri gerçek veriyle yazılır. Kapsam değişirse planın yeni sürümü açılır ve eski hedefler yeniden numaralanmaz.">
         <DataTable<Quarter>
           id={`${p.id}-ceyrek`}
           title="Çeyrek, odak, hedef"
@@ -515,7 +515,7 @@ function Takvim({ p, no, dates }: { p: Program; no: number; dates: Partnership['
 
 function RiskBolumu({ p, no }: { p: Program; no: number }) {
   const total = p.capacity.reduce((a, c) => a + c.hours, 0);
-  const rows: Capacity[] = [...p.capacity, { role: 'Toplam', short: 'Toplam', hours: total, duty: `${p.capacity.length} rol; haftalık` }];
+  const rows: Capacity[] = [...p.capacity, { role: 'Toplam', short: 'Toplam', hours: total, duty: `${p.capacity.length} rol, haftalık toplam` }];
   return (
     <>
       <Section id={`${p.id}-risk`} index={`${no}.1`} title="Riskler ve karşılıklar">
@@ -531,8 +531,8 @@ function RiskBolumu({ p, no }: { p: Program; no: number }) {
           rows={p.risks}
         />
       </Section>
-      <Section id={`${p.id}-pivot`} index={`${no}.2`} title="Pivot ve durdurma kriterleri" desc={`${shortDate(p.gates[3].date)} kararı bu kriterlere göre verilir; daha yüksek satış hedefi kusurları telafi etmez.`}>
-        <h3 className="block-title ortak-blok">Pivot</h3>
+      <Section id={`${p.id}-pivot`} index={`${no}.2`} title="Yön değiştirme ve durdurma kriterleri" desc={`${shortDate(p.gates[3].date)} tarihindeki karar bu kriterlere göre verilir. Daha yüksek bir satış hedefi koymak bu kusurları gidermez.`}>
+        <h3 className="block-title ortak-blok">Yön değiştirme (pivot)</h3>
         <Maddeler items={p.pivots} />
         <h3 className="block-title ortak-blok">Durdurma</h3>
         <Maddeler items={p.stop} />
@@ -773,7 +773,7 @@ function Icerik() {
     <>
       <PageHeader
         title="İş ortaklığı programı"
-        purpose="İki marka için iki ayrı 90 günlük program; sayılar başlangıç tasarımıdır ve 14. günde gerçek veriyle yeniden yazılır."
+        purpose="Bu sayfa iki marka için ayrı ayrı hazırlanmış 90 günlük iki programı gösterir. Sayılar başlangıç tasarımıdır ve 14. günde gerçek veriyle yeniden yazılır."
         meta={[{ label: 'Dönem', value: `${longDate(pt.dates.t0)} – ${longDate(pt.dates.end)}` }]}
       />
       <div className="ortak-kume">
