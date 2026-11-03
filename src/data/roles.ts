@@ -39,12 +39,12 @@ const dijital: Role = {
   pay: 'Maaş + kota ve prim',
   reportsTo: 'İsmail Karaca',
   seeks: ['GA4, GTM, Yandex Metrica', 'Yapay zekâ otomasyonu', 'Video içerik'],
-  mission: 'Ölçüm altyapısını kurar (GA4, Yandex Metrica, GTM); AI-first otomasyonla içerik üretimini ve paylaşımını otomatikleştirir. Ne üretileceğini içerik planı belirler.',
+  mission: 'Ölçüm altyapısını kurar (GA4, Yandex Metrica, GTM). AI-first otomasyonla içerik üretimini ve paylaşımını otomatikleştirir. Ne üretileceğini içerik planı belirler.',
   tasks: [
-    { task: 'Ölçüm ve entegrasyonlar: GTM, GA4, Yandex Metrica, Meta Pixel, Search Console', measure: '13 Kasım’da yayında; UTM’li paylaşım %100 (20 Kasım)' },
-    { task: 'AI-first paylaşım otomasyonu kurmak', measure: 'Otomatik paylaşım %30 → %60 → %80 (Kasım → Ocak); her yayında insan onayı' },
-    { task: 'İçerik üretimini ve paylaşımını otomatikleştirmek', measure: 'Günde 1 → 2 → 3 video; video başına 90 dk → 20 dk' },
-    { task: 'İçerik planını yürütmek (6 sütun)', measure: 'Ocak’ta haftada 18 video; haftada 10 talep CRM’e' },
+    { task: 'Ölçüm ve entegrasyonlar: GTM, GA4, Yandex Metrica, Meta Pixel, Search Console', measure: '13 Kasım’da yayında, UTM’li paylaşım %100 (20 Kasım)' },
+    { task: 'AI-first paylaşım otomasyonu kurmak', measure: 'Otomatik paylaşım %30 → %60 → %80 (Kasım → Ocak), her yayında insan onayı' },
+    { task: 'İçerik üretimini ve paylaşımını otomatikleştirmek', measure: 'Günde 1 → 2 → 3 video, video başına 90 dk → 20 dk' },
+    { task: 'İçerik planını yürütmek (6 sütun)', measure: 'Ocak’ta haftada 18 video ve CRM’e haftada 10 talep' },
   ],
   kpis: [
     { metric: 'Ölçüm altyapısı', value: '8 / 8', unit: 'entegrasyon', when: '23 Kasım' },
@@ -54,8 +54,8 @@ const dijital: Role = {
   ],
   ramp: { metric: 'Kısa video / gün', values: [1, 2, 3], second: { metric: 'Talep / hafta', values: [3, 5, 10] } },
   plan: [
-    { from: '2026-11-02', to: '2026-11-28', action: 'Sıfır Noktası ve 101 Otomasyon: ölçüm (GA4, Yandex Metrica, GTM) 13 Kasım; içerik planı v1; yarı otomatik hat; Meta reklamlarını devralmak', target: 'Ölçüm yayında · günde 1 video' },
-    { from: '2026-11-30', to: '2026-12-26', action: '201 Like ve 301 Talep: zamanlayıcı, yorum → CRM otomasyonu, içerik planı v2', target: 'Günde 2 video · %60 otomatik · haftada 5 talep' },
+    { from: '2026-11-02', to: '2026-11-28', action: 'Sıfır Noktası ve 101 Otomasyon: ölçüm (GA4, Yandex Metrica, GTM) 13 Kasım, içerik planı v1, yarı otomatik hat ve Meta reklamlarını devralmak', target: 'Ölçüm yayında · günde 1 video' },
+    { from: '2026-11-30', to: '2026-12-26', action: '201 Like ve 301 Talep: zamanlayıcı, yorumları CRM’e aktaran otomasyon, içerik planı v2', target: 'Günde 2 video · %60 otomatik · haftada 5 talep' },
     { from: '2026-12-28', to: '2027-01-30', action: '401 Ölçek ve 501 Hakkını vermek: altı içerik sütunu, çok dilli altyazı', target: 'Günde 3 video · %80 otomatik · haftada 10 talep', milestone: true },
   ],
   hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
@@ -92,14 +92,14 @@ const pazarlamaci: Role = {
   start: '1 Kasım 2026',
   startStatus: 'karar',
   pay: 'Maaş + satış primi',
-  reportsTo: 'İsmail Karaca; 1 Aralık’tan ekip lideri',
+  reportsTo: 'İsmail Karaca, 1 Aralık’tan ekip lideri',
   seeks: ['Pazarlama dili', 'Canva', 'Sosyal medya kullanımı'],
-  mission: 'Telefon, WhatsApp ve e-postayla talep üretir; saha ekibine randevu açar; CRM’i günlük tutar.',
+  mission: 'Telefon, WhatsApp ve e-postayla talep üretir. Saha ekibine randevu açar ve CRM’i her gün günceller.',
   tasks: [
     { task: 'Soğuk arama', measure: 'Günde 60 arama, 20 nitelikli görüşme' },
-    { task: 'Saha ekibine randevu', measure: 'Günde 3 randevu; gerçekleşme ≥ %70' },
-    { task: 'İzinli WhatsApp ve e-posta', measure: 'Günde 20 kişiye özel mesaj; haftada 1 bülten' },
-    { task: 'Data ve CRM', measure: 'Günde 40 yeni aday; her temas aynı gün CRM’de' },
+    { task: 'Saha ekibine randevu', measure: 'Günde 3 randevu, gerçekleşme ≥ %70' },
+    { task: 'İzinli WhatsApp ve e-posta', measure: 'Günde 20 kişiye özel mesaj, haftada 1 bülten' },
+    { task: 'Veri ve CRM', measure: 'Günde 40 yeni aday, her temas aynı gün CRM’de' },
   ],
   kpis: [
     { metric: 'Arama', value: '60', unit: '/ gün', when: '16 Kasım’dan' },
@@ -117,7 +117,7 @@ const pazarlamaci: Role = {
   daily: day([
     ['08:00–08:15', 'Ekip stand-up'],
     ['08:15–09:00', 'Arama listesi'],
-    ['09:00–10:00', 'Data oluşturma'],
+    ['09:00–10:00', 'Aday listesi oluşturma'],
     ['10:00–12:30', 'Soğuk arama'],
     ['12:30–13:30', 'Ara dinlenme'],
     ['13:30–14:30', 'WhatsApp ve e-posta'],
@@ -132,7 +132,7 @@ const pazarlamaci: Role = {
     ['08:00–08:30', 'Haftalık kapanış'],
     ['08:30–10:30', 'Geri arama ve teyit'],
     ['10:30–11:00', 'Ara dinlenme'],
-    ['11:00–12:30', 'Bülten ve data temizliği'],
+    ['11:00–12:30', 'Bülten ve veri temizliği'],
     ['12:30–13:30', 'Haftalık rapor'],
   ]),
 };
@@ -143,16 +143,16 @@ const saha: Role = {
   title: 'Saha pazarlama ekibi',
   shortTitle: 'Saha ekibi',
   icon: 'map',
-  count: '3 kişi (2’si 1 Kasım, 1’i 1 Aralık; sonra ağla büyür)',
+  count: '3 kişi (2’si 1 Kasım, 1’i 1 Aralık, sonra ağla büyür)',
   start: '1 Kasım 2026 (3. kişi 1 Aralık)',
   startStatus: 'karar',
   pay: 'Maaş · kota üstü satış başına prim',
-  reportsTo: 'İsmail Karaca; 1 Aralık’tan ekip lideri',
+  reportsTo: 'İsmail Karaca, 1 Aralık’tan ekip lideri',
   seeks: ['Satış dili', 'Hırslı'],
-  mission: 'İstoç’ta randevulu ve çat kapı ziyaretle satıcıyı kaydeder, 48 saatte onboard eder, aboneliğe çevirir ve yeniletir.',
+  mission: 'İstoç’ta randevulu ve çat kapı ziyaretle satıcıyı kaydeder. Onboarding’i 48 saatte bitirir, satıcıyı aboneliğe geçirir ve yeniletir.',
   tasks: [
     { task: 'Randevulu ziyaret ve çat kapı (kişi başı)', measure: 'Günde 1–2 randevu + 10 çat kapı' },
-    { task: 'Yerinde kayıt ve 48 saatte müşteri onboarding’i', measure: 'Kişi başı günde 2 kayıt; onboarding %100' },
+    { task: 'Yerinde kayıt ve 48 saatte müşteri onboarding’i', measure: 'Kişi başı günde 2 kayıt, onboarding %100' },
     { task: '14. günde abonelik (399 €/ay) ve aylık yenileme', measure: 'Aylık elde tutma ≥ %70' },
     { task: 'Yıllık peşin ve pazarlama çözümü teklifi', measure: 'Her aktif satıcıya ilk 30 günde' },
   ],
@@ -198,17 +198,17 @@ const ekipLideri: Role = {
   title: 'Satış-pazarlama ekip lideri',
   shortTitle: 'Ekip lideri',
   icon: 'flag',
-  count: '1 kişi (içeriden)',
+  count: '1 kişi (mevcut ekipten)',
   start: '1 Aralık 2026',
   startStatus: 'karar',
   pay: 'Saha maaşı + liderlik farkı · ekibin her satışından pay',
   reportsTo: 'İsmail Karaca',
   seeks: ['Cevval', 'Kasım KPI’larında üst sırada'],
-  mission: '1 Kasım’da başlayanlar arasından seçilir; ekibi koçlar ve çok katmanlı pazarlama ağını yönetir.',
+  mission: '1 Kasım’da başlayanlar arasından seçilir. Ekibe koçluk yapar ve çok katmanlı pazarlama ağını yönetir.',
   tasks: [
     { task: 'Günlük ritmi yönetmek (08:00 stand-up, 19:30 senkron)', measure: 'Ekip hedef gerçekleşmesi ≥ %90' },
-    { task: 'Koçluk', measure: 'Haftada ≥ 5 saat; kişi başı 2 seans' },
-    { task: 'Çok katmanlı pazarlama ağını yönetmek', measure: 'Ayda ~2 aktif temsilci; 30 Ocak’ta ~5' },
+    { task: 'Koçluk', measure: 'Haftada ≥ 5 saat, kişi başı 2 seans' },
+    { task: 'Çok katmanlı pazarlama ağını yönetmek', measure: 'Ayda ~2 aktif temsilci, 30 Ocak’ta ~5' },
     { task: 'Oyuncu-koç olarak kişisel satış', measure: 'Önceki rol hedefinin %50’si' },
   ],
   kpis: [
@@ -259,7 +259,7 @@ const organizator: Role = {
   pay: 'Maaş + aktivasyon ve etkinlik primi',
   reportsTo: 'İsmail Karaca',
   seeks: ['Satış dili', 'Kurumsal organizasyon deneyimi', 'Hırslı'],
-  mission: 'İstoç satıcılarına her iş günü 17:00–18:00 ofis toplantı salonunda eğitim verir; segment organizasyonları ve kurumsal iş birlikleri kurar.',
+  mission: 'İstoç satıcılarına her iş günü 17:00–18:00 ofis toplantı salonunda eğitim verir. Segment organizasyonları ve kurumsal iş birlikleri de kurar.',
   tasks: [
     { task: 'Her iş günü 17:00–18:00 satıcı eğitimi (M1–M5)', measure: 'Haftada 5 oturum, ≥ 50 katılımcı' },
     { task: '15 kişilik segment organizasyonu', measure: 'Haftada 2 (Salı ve Perşembe)' },
@@ -274,8 +274,8 @@ const organizator: Role = {
   ],
   ramp: { metric: 'Katılım / hafta', values: [30, 50, 60], months: ['Aralık', 'Ocak', 'Şubat'] },
   plan: [
-    { from: '2026-12-01', to: '2026-12-12', action: 'Oryantasyon, salon düzeni, pilot oturum; günlük eğitim başlar', target: '5 oturum / hafta · 30 katılımcı' },
-    { from: '2026-12-14', to: '2027-01-16', action: 'Tam ritim: 5 eğitim + 2 organizasyon / hafta; kurumsal görüşmeler', target: '50 katılımcı / hafta · 1 protokol' },
+    { from: '2026-12-01', to: '2026-12-12', action: 'Oryantasyon, salon düzeni ve pilot oturum, ardından günlük eğitim başlar', target: '5 oturum / hafta · 30 katılımcı' },
+    { from: '2026-12-14', to: '2027-01-16', action: 'Tam ritim: haftada 5 eğitim ve 2 organizasyon, kurumsal görüşmeler', target: '50 katılımcı / hafta · 1 protokol' },
     { from: '2027-01-18', to: '2027-02-27', action: 'Aktivasyon kampanyası, mentor programı, 2. ve 3. protokol', target: '60 katılımcı / hafta · 3 protokol', milestone: true },
   ],
   hours: {
@@ -322,7 +322,7 @@ const asistan: Role = {
   seeks: ['Araştırma ve yazım', 'Sunum ve tablo', 'Scrum'],
   mission: 'Karar seçeneklerini hazırlar, raporları üretir ve 4 kişilik yazılım ekibinin Scrum düzenini destekler. Asistan alınmazsa dijital pazarlama 1 Ocak’a kayar.',
   tasks: [
-    { task: 'Seçenekli karar dokümanı (2–4 seçenek)', measure: 'Haftada ≥ 2; Perşembe 18:00 toplantısına' },
+    { task: 'Seçenekli karar dokümanı (2–4 seçenek)', measure: 'Haftada ≥ 2, Perşembe 18:00 toplantısına hazır' },
     { task: 'Scrum desteği: Daily notları, sprint raporu', measure: 'Sprint bitiminden itibaren 24 saat içinde rapor' },
     { task: 'Haftalık KPI raporu', measure: 'Her Cumartesi 13:30’a kadar' },
     { task: 'Changelog taslağı (dijital pazarlamanın kaynağı)', measure: 'Her sprint sonunda' },
@@ -335,9 +335,9 @@ const asistan: Role = {
   ],
   ramp: { metric: 'Teslim (doküman + rapor) / ay', values: [10, 12, 12] },
   plan: [
-    { from: '2026-11-02', to: '2026-11-27', action: 'Şablonlar; kazanç planı seçenekleri; ekip lideri seçim dokümanı', target: 'Teslim 14 Kasım ve 27 Kasım', milestone: true },
-    { from: '2026-11-30', to: '2026-12-30', action: 'M1–M5 eğitim desteleri; 60. gün raporu', target: '5 deste 26 Aralık · rapor 30 Aralık' },
-    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabı; 90. gün raporu; Dönem 2 vardiya listesi (1 Şubat)', target: 'Rapor 30 Ocak', milestone: true },
+    { from: '2026-11-02', to: '2026-11-27', action: 'Şablonlar, kazanç planı seçenekleri ve ekip lideri seçim dokümanı', target: 'Teslim 14 Kasım ve 27 Kasım', milestone: true },
+    { from: '2026-11-30', to: '2026-12-30', action: 'M1–M5 eğitim desteleri ve 60. gün raporu', target: '5 deste 26 Aralık · rapor 30 Aralık' },
+    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabı, 90. gün raporu ve Dönem 2 vardiya listesi (1 Şubat)', target: 'Rapor 30 Ocak', milestone: true },
   ],
   hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([
@@ -373,12 +373,12 @@ const segika: Role = {
   icon: 'shield',
   reportsTo: 'İsmail Karaca',
   mission:
-    'Segika markalı SGK teşvik yazılımı için telefon, WhatsApp ve e-postayla talep üretir; demo randevusu açar; CRM’deki Segika hattını günlük tutar. Masa başı rolünün kopyası, aynı yaklaşım.',
+    'Segika markalı SGK teşvik yazılımı için telefon, WhatsApp ve e-postayla talep üretir. Demo randevusu açar ve CRM’deki Segika hattını her gün günceller. Masa başı rolünün kopyasıdır.',
   tasks: [
     { task: 'Soğuk arama: işverenler, mali müşavirler, İK', measure: 'Günde 60 arama, 20 nitelikli görüşme' },
-    { task: 'Demo randevusu', measure: 'Günde 3 randevu; gerçekleşme ≥ %70' },
-    { task: 'İzinli WhatsApp ve e-posta', measure: 'Günde 20 kişiye özel mesaj; haftada 1 bülten' },
-    { task: 'Data ve CRM (Segika hattı)', measure: 'Günde 40 yeni aday; her temas aynı gün CRM’de' },
+    { task: 'Demo randevusu', measure: 'Günde 3 randevu, gerçekleşme ≥ %70' },
+    { task: 'İzinli WhatsApp ve e-posta', measure: 'Günde 20 kişiye özel mesaj, haftada 1 bülten' },
+    { task: 'Veri ve CRM (Segika hattı)', measure: 'Günde 40 yeni aday, her temas aynı gün CRM’de' },
   ],
   kpis: [
     { metric: 'Arama', value: '60', unit: '/ gün', when: '16 Kasım’dan' },
@@ -428,9 +428,9 @@ export function makeRoles(p: Params, prog: Program): Role[] {
 
   let sahaRole: Role = {
     ...shift(saha, d1),
-    count: `${person(p.sahaCount + p.sahaDecCount)} (${p.sahaCount} kişi ${shortDate(p.startDate)}, ${p.sahaDecCount} kişi ${shortDate(p.decStartDate)}; sonra ağla büyür)`,
+    count: `${person(p.sahaCount + p.sahaDecCount)} (${p.sahaCount} kişi ${shortDate(p.startDate)}, ${p.sahaDecCount} kişi ${shortDate(p.decStartDate)}, sonra ağla büyür)`,
     start: `${start} (Aralık takviyesi ${dec})`,
-    pay: `${tl(p.sahaSalary)} maaş · kota ay içinde ${tl(prog.quota)} satış; sonrasında satış başına ${tl(p.commission)} prim`,
+    pay: `${tl(p.sahaSalary)} maaş, kota ay içinde ${tl(prog.quota)} satış, kotadan sonra satış başına ${tl(p.commission)} prim`,
     ramp: { ...saha.ramp, values: sahaRow.kayit, second: { metric: saha.ramp.second!.metric, values: sahaRow.aktif } },
   };
   sahaRole = setKpi(setKpi(sahaRole, 'Kayıt (ekip)', int(sum(sahaRow.kayit))), 'Yeni aktif satıcı (ekip)', int(sum(sahaRow.aktif)));
@@ -442,7 +442,7 @@ export function makeRoles(p: Params, prog: Program): Role[] {
   let leadRole: Role = {
     ...shift(ekipLideri, d2),
     start: dec,
-    pay: `${tl(salaries.lead)} maaş (saha + ${tl(p.leadUplift)} liderlik farkı) · ekibin her satışından ${tl(p.leadTeamShare)} · kendi satışı saha kuralıyla`,
+    pay: `${tl(salaries.lead)} maaş (saha + ${tl(p.leadUplift)} liderlik farkı), ekibin her satışından ${tl(p.leadTeamShare)}, kendi satışında saha kuralı`,
   };
   leadRole = setKpi(leadRole, 'Ağdan aktif satıcı', `~${int(sum(mlmRow.aktif))}`);
 

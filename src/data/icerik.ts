@@ -589,7 +589,7 @@ export const ICERIK: IcerikKaydi[] = [
     path: '/musteri-yolculugu/',
     sinif: ['operasyon'],
     baslik: 'Müşteri yolculuğu',
-    kullaniciSorusu: 'Bir kişi nasıl müşteriye dönüşür; her aşamada kimin ne yapması gerekir?',
+    kullaniciSorusu: 'Bir kişi nasıl müşteriye dönüşür ve her aşamada kimin ne yapması gerekir?',
     grup: 'pazarlama',
     marka: ['istoc', 'segika'],
     sahip: BELIRLENMEDI,

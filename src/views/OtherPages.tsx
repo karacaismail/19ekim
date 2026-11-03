@@ -123,7 +123,7 @@ function GoalsContent() {
     <>
       <PageHeader
         title="90 gün hedefleri"
-        purpose={`Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder, ancak bazı satıcılar ilk aydan sonra aboneliği bırakabilir.`}
+        purpose={`Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder, ancak bazıları ilk aydan sonra bırakabilir.`}
         meta={[{ label: 'Dönem', value: `${longDate(dates.start)} – ${longDate(dates.day90)}` }]}
       >
         <Stats items={targets} />
@@ -245,7 +245,7 @@ function PlanContent() {
   const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action} · Hedef: ${r.target}`, milestone: r.milestone }));
   return (
     <>
-      <PageHeader title="Eylem planı" purpose="Bu sayfa istoc.com genel planını gösterir. Her satır tarihli bir eylemi ve ölçülebilir hedefini verir." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
+      <PageHeader title="Eylem planı" purpose="istoc.com genel planı. Her satır tarihli bir eylem ve ölçülebilir bir hedeftir." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
 
       <Section id="gantt" index={1} title="Gantt şeması" desc={`Kesikli çizgiler, 60. gün (${shortDate(dates.day60)}) ve 90. gün (${shortDate(dates.day90)}) kontrollerini gösterir.`}>
         <Chart
@@ -371,7 +371,7 @@ function PendingContent() {
   return (
     <>
       {/* Karar defteri (adım 1a; docs/missings.md MS-13): soru → seçenekler/öneri → etki → karar veren → son tarih → sonuç → yürürlük. */}
-      <PageHeader title="Karar bekleyenler" purpose={`${ozet.bekleyen} karar bekliyor ve bunların ${ozet.gecikmis} tanesi gecikmiş. ${ozet.verilen} karar verildi ve bunların ${ozet.yururlukte} tanesi yürürlükte.`} />
+      <PageHeader title="Karar bekleyenler" purpose={`${ozet.bekleyen} karar bekliyor, bunların ${ozet.gecikmis} tanesi gecikmiş. ${ozet.verilen} karar verildi, ${ozet.yururlukte} tanesi yürürlükte.`} />
 
       <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Son tarihi geçen karar “gecikti” olarak işaretlenir. Karar girilmeden hiçbir kayıt “verildi” olarak gösterilmez.">
         <Chart
@@ -571,7 +571,7 @@ function PendingContent() {
           id="fazla-calisma"
           title="Kişi başı kümülatif fazla çalışma"
           note={`Kesikli çizgi, Dönem 1 düzeni sürseydi tavanın ${crossWeek}. haftada (${shortDate(addDays(dates.firstDay, (crossWeek - 1) * 7))}) dolacağını gösterir.`}
-          summary={`Program başında başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir; tavan ${OVERTIME_CAP} saat. Dönem 1 düzeni sürseydi tavan ${crossWeek}. haftada dolardı.`}
+          summary={`Program başında başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir. Yasal tavan ${OVERTIME_CAP} saattir. Dönem 1 düzeni sürseydi tavan ${crossWeek}. haftada dolardı.`}
           spec={{
             kind: 'cumulative',
             labels: weekLabels,
@@ -667,7 +667,7 @@ function GrowthContent() {
 export function ArchivePage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
-      <PageHeader title="Arşiv: tahtadan karara" purpose="Bu sayfa 19 Ekim tahta notlarının plandaki karşılığını gösterir. Toplantı için gerekli değildir, kayıt amacıyla tutulur." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
+      <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığı. Toplantı için gerekmez, kayıt için tutulur." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
       <DataTable<BoardRow>
         id="tahta"
         title="Tahta notu → karar → sayfa"

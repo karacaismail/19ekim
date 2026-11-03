@@ -620,12 +620,12 @@ export type KayitDurum = 'yok' | 'kayitli' | 'kaydedildi' | 'kaydedilemedi';
 export function KayitDurumu({ kapsam, durum, zaman, etki, className }: { kapsam: string; durum: KayitDurum; zaman?: string | null; etki?: string; className?: string }) {
   const metin =
     durum === 'kaydedilemedi'
-      ? `${kapsam}: bu tarayıcıda kaydedilemedi (depolama kapalı); değişiklikler yalnız bu sekme açıkken geçerli.`
+      ? `${kapsam}: bu tarayıcıda kaydedilemedi, çünkü depolama kapalı. Değişiklikler yalnız bu sekme açıkken geçerlidir.`
       : durum === 'kaydedildi'
         ? `${kapsam}: bu tarayıcıda kaydedildi${zaman ? ` ${zaman}` : ''} (yerel depolama).`
         : durum === 'kayitli'
           ? `${kapsam}: bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama).`
-          : `${kapsam}: henüz kayıt yok; değişince bu tarayıcıda saklanır.`;
+          : `${kapsam}: henüz kayıt yok. Bir değer değişince bu tarayıcıda saklanır.`;
   return (
     <p className={`kayit-durumu${className ? ` ${className}` : ''}`} role="status" aria-live="polite" data-durum={durum}>
       {metin}

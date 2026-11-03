@@ -72,7 +72,7 @@ function RoleHero({ role }: { role: Role }) {
         { label: 'Başlangıç', value: role.start },
         { label: 'Bağlı', value: role.reportsTo },
         { label: 'Ücret', value: role.pay },
-        { label: 'Aranan', value: role.seeks.join(' · ') },
+        { label: 'Aranan', value: role.seeks.join(', ') },
       ]}
     />
   );
@@ -87,12 +87,12 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Dönem 1 (${formatDate(p1.from)} – ${formatDate(p1.to)}): hafta içi ${role.hours.weekday}; Cumartesi ${role.hours.saturday}; haftalık ${role.hours.weeklyNet}. Dönem 2 (${formatDate(p2.from)} itibarıyla): ${role.hours.fromFeb} (yıllık fazla çalışma tavanı).`}
+      desc={`Dönem 1 (${formatDate(p1.from)} – ${formatDate(p1.to)}): hafta içi ${role.hours.weekday}, Cumartesi ${role.hours.saturday}. Haftalık süre ${role.hours.weeklyNet}. Dönem 2 (${formatDate(p2.from)} tarihinden itibaren): ${role.hours.fromFeb}. Dönem 2 düzeni, yıllık fazla çalışma tavanı nedeniyle uygulanır.`}
     >
       <Chart
         id="zaman-payi"
         title="Hafta içi zaman payı"
-        note={`En büyük üç blok: ${top.map((t) => `${t.name} ${hours(t.value)}`).join(' · ')}`}
+        note={`En büyük üç blok: ${top.map((t) => `${t.name} ${hours(t.value)}`).join(', ')}`}
         summary={`Hafta içi çalışma süresinin dağılımı: ${share.map((s) => `${s.name} ${hours(s.value)}`).join(', ')}.`}
         spec={{ kind: 'pay', role: role.slug, items: share }}
         size={share.length > 9 ? 'xxl' : share.length > 7 ? 'xl' : 'lg'}
@@ -146,7 +146,7 @@ function DigitalSections({ role }: { role: Role }) {
         id="olcum"
         index={1}
         title="Ölçüm ve entegrasyonlar"
-        desc={`Önce ölçüm: her içerik ve reklamın kayda ve aktif satıcıya etkisi görünür. ${integrations.length} entegrasyon, ${shortDate(last.date)}’e kadar.`}
+        desc={`İlk iş ölçümü kurmaktır. Böylece her içeriğin ve reklamın kayda ve aktif satıcıya etkisi görünür. ${integrations.length} entegrasyon ${shortDate(last.date)} tarihine kadar tamamlanır.`}
       >
         <Chart
           id="entegrasyon"
@@ -173,7 +173,7 @@ function DigitalSections({ role }: { role: Role }) {
         id="otomasyon"
         index={2}
         title="AI-first paylaşım otomasyonu"
-        desc="Uzman içeriği tek tek üretmez; içeriği üreten hattı kurar ve denetler. İnsan iki noktada: senaryo seçimi ve yayın onayı."
+        desc="Uzman içeriği tek tek üretmez. İçeriği üreten hattı kurar ve denetler. İnsan yalnız iki noktada devreye girer: senaryo seçimi ve yayın onayı."
       >
         <Chart
           id="hat"
@@ -198,8 +198,8 @@ function DigitalSections({ role }: { role: Role }) {
         />
         <DataTable<AiTool>
           id="arac"
-          title={`Araçlar · bütçe en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ / ay`}
-          note="Karar 19 Ekim. Tavan aşımı İsmail Karaca onayıyla; 30 Aralık’ta ölçüm panosuyla yeniden bakılır."
+          title={`Araçlar: bütçe en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ / ay`}
+          note="Karar 19 Ekim’de verildi. Bütçe tavanı yalnız İsmail Karaca’nın onayıyla aşılabilir. Bütçe 30 Aralık’ta ölçüm panosuna göre yeniden değerlendirilir."
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
             { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },
@@ -230,7 +230,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<Channel>
           id="kanal"
           title="Kanallar"
-          note="Tüm kanallar tek paylaşım kuyruğundan otomatik beslenir; liste içerik planı v1 ile 6 Kasım’da onaylanır."
+          note="Tüm kanallar tek paylaşım kuyruğundan otomatik beslenir. Kanal listesi, içerik planı v1 ile birlikte 6 Kasım’da onaylanır."
           columns={[
             { key: 'channel', header: 'Kanal', minWidth: '12rem', rowHeader: true, render: (r) => r.channel },
             { key: 'content', header: 'Ne paylaşılır', minWidth: '16rem', render: (r) => r.content },
@@ -244,7 +244,7 @@ function DigitalSections({ role }: { role: Role }) {
         id="icerik-plani"
         index={4}
         title="İçerik planı: ne üreteceğiz"
-        desc={`Ocak’ta haftada ${weekly} video (günde 3 × 6 gün), altı sütun. Ham malzeme ekiplerden gelir; uzman derler, hat üretir ve paylaşır.`}
+        desc={`Ocak’ta haftada ${weekly} video (günde 3 × 6 gün) üretilir ve altı içerik sütununa dağılır. Ham malzeme ekiplerden gelir. Uzman malzemeyi derler, otomasyon hattı videoyu üretir ve paylaşır.`}
       >
         <Chart
           id="icerik-karmasi"
@@ -292,7 +292,7 @@ function DigitalSections({ role }: { role: Role }) {
         <Chart
           id="dijital-gantt"
           title="İş akışı × zaman"
-          summary={digitalPlan.map((p) => `${STREAM_LABELS[p.stream]}, ${shortRange(p)}: ${p.action}; hedef ${p.target}`).join('. ')}
+          summary={digitalPlan.map((p) => `${STREAM_LABELS[p.stream]}, ${shortRange(p)}: ${p.action}, hedef ${p.target}`).join('. ')}
           spec={{
             kind: 'gantt',
             start: planStart,
@@ -337,7 +337,7 @@ function GenericSections({ role }: { role: Role }) {
   if (role.ramp.second) series.push({ name: role.ramp.second.metric, values: role.ramp.second.values });
   return (
     <>
-      <Section id="gorevler" index={1} title="Görevler ve ölçüt" desc="Her görev ölçülebilir bir hedefle tanımlı.">
+      <Section id="gorevler" index={1} title="Görevler ve ölçüt" desc="Her görev ölçülebilir bir hedefle tanımlanır.">
         <DataTable<Task>
           id="gorev"
           title="Görevler"
@@ -363,7 +363,7 @@ function GenericSections({ role }: { role: Role }) {
         <Chart
           id="rol-gantt"
           title="Zaman çizelgesi"
-          summary={role.plan.map((p) => `${range(p)}: ${p.action}; hedef ${p.target}`).join('. ')}
+          summary={role.plan.map((p) => `${range(p)}: ${p.action}, hedef ${p.target}`).join('. ')}
           spec={{
             kind: 'gantt',
             start: role.plan[0].from,
