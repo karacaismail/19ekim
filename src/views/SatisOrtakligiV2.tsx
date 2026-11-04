@@ -179,8 +179,8 @@ function ArkadasiniGetir({ a, g }: { a: Ayar; g: G }) {
       <legend className="v2-so2-kutu-baslik">Arkadaşını getir</legend>
       <p className="v2-so2-kutu-not">Yeni müşterinin ödemesi bu süre içinde tahsil edilirse hakediş oluşur. Her ay 30 gün sayılır.</p>
       <Girdi label="Tahsilat süresi" birim={`ay = ${ayGun(a.tavsiyeSure)} gün`} min={1} value={a.tavsiyeSure} onChange={(v) => g({ tavsiyeSure: Math.min(12, Math.max(1, v)) })} />
-      <Girdi label="Tavsiye edene" birim="ay bedava" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
-      <Girdi label="Yeni müşteriye" birim="ay bedava" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
+      <Girdi label="Tavsiye eden müşteriye" birim="ay bedava" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
+      <Girdi label="Tavsiyeyle gelen müşteriye" birim="ay bedava" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
     </fieldset>
   );
 }

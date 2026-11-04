@@ -205,9 +205,9 @@ test('arkadaşını getir: tahsilat süresi ve bedava ay adedi kenarlıklı tek 
   const sure = kutu.getByRole('textbox', { name: /Tahsilat süresi/ });
   await expect(sure).toHaveValue('3');
   await expect(kutu.locator('label', { hasText: 'Tahsilat süresi' })).toContainText('90 gün');
-  await expect(kutu.getByRole('textbox', { name: /Tavsiye edene/ })).toHaveValue('2');
-  await expect(kutu.getByRole('textbox', { name: /Yeni müşteriye/ })).toHaveValue('1');
-  await expect(kutu.locator('label', { hasText: 'Tavsiye edene' })).toContainText('ay bedava');
+  await expect(kutu.getByRole('textbox', { name: /^Tavsiye eden müşteriye/ })).toHaveValue('2');
+  await expect(kutu.getByRole('textbox', { name: /^Tavsiyeyle gelen müşteriye/ })).toHaveValue('1');
+  await expect(kutu.locator('label', { hasText: 'Tavsiye eden müşteriye' })).toContainText('ay bedava');
   // Süre değişince kural ve sonuç metni aynı hesaptan güncellenir: her ay 30 gün sayılır.
   await sure.fill('2');
   await expect(kutu.locator('label', { hasText: 'Tahsilat süresi' })).toContainText('60 gün');
