@@ -994,7 +994,7 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 
 - `/oyunlastirma/` Pazarlama menüsündedir, Gelir modellerinden sonra gelir. Veri `src/data/oyunlastirma.ts`, görünüm `src/views/OyunlastirmaPage.tsx`, stil `global.css` içindeki `.oy-*` bloğudur. Test: `tests/oyunlastirma.spec.ts`.
 - Her strateji kartta başlık ve özetle durur. Karta basınca Mantine Modal açılır: amaç, ödül, adım adım uygulama yol haritası (ne zaman, kim, ne yapılır, bitti sayılır), başarı ölçütü ve dikkat notu. Dar ekranda pencere tam ekrandır. Pencere kapanınca odak sayfa tarafından açan karta döner.
-- Kartlar öneri sahibini yazıyla etiketler: Claude (`docs/oyunlastirma-yalin/`), ChatGPT (`docs/oyunlastirma/`, S01–S08). Sayfa “Öneri sahibi” süzgeciyle süzülür. Yeni bir analiz eklenirse yeni bir `Kaynak` değeri ve kendi grubu eklenir, eski kartlar değişmez.
+- Kartlar öneri sahibini yazıyla etiketler: Claude (`docs/oyunlastirma-yalin/`), ChatGPT (`docs/oyunlastirma/`, S01–S08), Gemini (sohbete yapıştırılan metin, G1–G5). Gemini kartlarının “Dikkat” alanı, önerinin projedeki bugünkü kararlarla çeliştiği yerleri yansız bir dille yazar: işlem payı, vade, ihracat, söz yerine hedef. Sayfa “Öneri sahibi” süzgeciyle süzülür. Yeni bir analiz eklenirse yeni bir `Kaynak` değeri ve kendi grubu eklenir, eski kartlar değişmez.
 - Rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme platformda çalışmadığı sürece Claude stratejilerinin ödülleri bugün kaydedilebilen olaylara bağlıdır.
 
 ## Gizlilik ve yayın

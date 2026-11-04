@@ -6,17 +6,17 @@ import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { Choice, Section } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
-import { GRUP_BASLIGI, ILKELER, KAYNAK_ADI, TUM_STRATEJILER, type Kaynak, type Strateji, type StratejiGrubu } from '../data/oyunlastirma';
+import { GRUP_BASLIGI, ILKELER, KAYNAK_ADI, KAYNAKLAR, TUM_STRATEJILER, type Kaynak, type Strateji, type StratejiGrubu } from '../data/oyunlastirma';
 
 /**
  * Oyunlaştırma (kullanıcı kararı 2026-11-04, Pazarlama menüsü): 8 strateji iki grupta kart olarak durur. Kart, başlık
  * ve özet gösterir. Karta basınca açılan pencere amaç, ödül, adım adım uygulama yol haritası, başarı ölçütü ve dikkat
  * notunu verir. Pencere kapanınca odak sayfa tarafından açan karta döner (Safari tıklamada düğmeye odak vermez).
  * Aynı gün ikinci karar: ChatGPT'nin 8 stratejisi de eklendi. Kart, öneri sahibini “Claude” ya da “ChatGPT” etiketiyle
- * yazıyla gösterir. Sayfa bu etikete göre süzülebilir.
+ * yazıyla gösterir. Sayfa bu etikete göre süzülebilir. Üçüncü karar: Gemini'nin 5 stratejisi “Gemini” etiketiyle eklendi.
  */
 
-const GRUPLAR: StratejiGrubu[] = ['tavuk-yumurta', 'surdurulebilirlik', 'chatgpt'];
+const GRUPLAR: StratejiGrubu[] = ['tavuk-yumurta', 'surdurulebilirlik', 'chatgpt', 'gemini'];
 type Suzgec = 'hepsi' | Kaynak;
 
 function Kart({ s, ac }: { s: Strateji; ac: (s: Strateji, el: HTMLElement) => void }) {
@@ -108,7 +108,7 @@ function Icerik() {
   const sayi = (k: Kaynak) => TUM_STRATEJILER.filter((s) => s.kaynak === k).length;
   const secenekler = [
     { id: 'hepsi' as Suzgec, name: `Hepsi (${TUM_STRATEJILER.length})` },
-    ...(['claude', 'chatgpt'] as Kaynak[]).map((k) => ({ id: k as Suzgec, name: `${KAYNAK_ADI[k]} (${sayi(k)})` })),
+    ...KAYNAKLAR.map((k) => ({ id: k as Suzgec, name: `${KAYNAK_ADI[k]} (${sayi(k)})` })),
   ];
   const [acik, setAcik] = useState(false);
   const acan = useRef<HTMLElement | null>(null);
@@ -130,7 +130,7 @@ function Icerik() {
       <PageHeader title="Oyunlaştırma" purpose="istoc.com’da alıcı ile satıcının birbirini beklediği başlangıç sorununu çözen ve platformu sürdürülebilir kılan yalın oyunlaştırma stratejilerini gösterir." />
       <div className="oy">
         <p className="oy-uyari">
-          Bu sayfada iki ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude ya da ChatGPT. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmadığı için ödüller bugün kaydedilebilen olaylara bağlıdır. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
+          Bu sayfada iki ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
         </p>
 
         <div className="oy-araclar">
@@ -152,7 +152,7 @@ function Icerik() {
           </Section>
         ))}
 
-        {suzgec === 'chatgpt' ? null : (
+        {suzgec === 'hepsi' || suzgec === 'claude' ? (
           <Section id="ilkeler" title="Claude önerisinin ilkeleri">
             <ul className="oy-ilkeler">
               {ILKELER.map((t) => (
@@ -160,7 +160,7 @@ function Icerik() {
               ))}
             </ul>
           </Section>
-        )}
+        ) : null}
       </div>
 
       <Modal

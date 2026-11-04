@@ -9,9 +9,10 @@
  * özetlendi. Kaynakta adım adım yazılmayan bitiş ölçütleri, kaynağın ilerleme durumlarından türetildi.
  */
 
-export type Kaynak = 'claude' | 'chatgpt';
-export const KAYNAK_ADI: Record<Kaynak, string> = { claude: 'Claude', chatgpt: 'ChatGPT' };
-export type StratejiGrubu = 'tavuk-yumurta' | 'surdurulebilirlik' | 'chatgpt';
+export type Kaynak = 'claude' | 'chatgpt' | 'gemini';
+export const KAYNAK_ADI: Record<Kaynak, string> = { claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini' };
+export const KAYNAKLAR: Kaynak[] = ['claude', 'chatgpt', 'gemini'];
+export type StratejiGrubu = 'tavuk-yumurta' | 'surdurulebilirlik' | 'chatgpt' | 'gemini';
 export type Taraf = 'Satıcı' | 'Alıcı' | 'İki taraf' | 'Eşleşme' | 'Güven';
 export type Sorumlu = 'Yönetim' | 'Saha ekibi' | 'Pazarlama' | 'Yazılım ekibi' | 'Talep sorumlusu' | 'Saha sorumlusu' | 'Alıcı' | 'Satıcı' | 'Alıcı ve satıcı';
 
@@ -57,6 +58,10 @@ export const GRUP_BASLIGI: Record<StratejiGrubu, { baslik: string; aciklama: str
   chatgpt: {
     baslik: 'ChatGPT: gerçek talepten başlayan sekiz görev',
     aciklama: 'ChatGPT önce S01, S02 ve S03’ü aynı küçük ticaret grubunda birlikte denemeyi önerir. Diğer stratejiler belirli bir engel görülünce, birer birer eklenir.',
+  },
+  gemini: {
+    baslik: 'Gemini: komisyon, vade ve lojistikle çalışan beş mekanik',
+    aciklama: 'Gemini, puan ve rozet yerine doğrudan ticari teşvik önerir: komisyon, vade, lojistik, teklif önceliği ve çarşıdaki ada rekabeti. Amaç hem ilk alıcıyı ve satıcıyı bulmak hem de ilk eşleşmeden sonra ticaretin WhatsApp’a ve elden ödemeye kaymasını önlemektir. Gemini ilk adım olarak iki meslek grubuyla pilot yapmayı ve oranları bu grupların kâr marjına göre ayarlamayı önerir. Stratejilerin çoğu, sipariş ve ödemenin platformda çalışmasını gerektirir.',
   },
 };
 
@@ -421,4 +426,125 @@ export const CHATGPT_STRATEJILERI: Strateji[] = [
   },
 ];
 
-export const TUM_STRATEJILER: Strateji[] = [...STRATEJILER, ...CHATGPT_STRATEJILERI];
+
+/**
+ * Gemini'nin ayrı analizi (kullanıcının sohbete yapıştırdığı metin, 2026-11-04): 5 strateji. Gemini'nin dosyaları depoda
+ * yoktur. Adımlar Gemini'nin kademe tablolarından ve saha uygulaması bölümlerinden özetlendi. “Ne zaman” ve “Dikkat”
+ * alanları, önerinin projedeki bugünkü kararlarla (abonelik geliri, platformda olmayan sipariş ve ödeme, hazır olmayan
+ * ihracat, istoc.com'un kendi bilançosundan vade verememesi) karşılaştırılmasıdır. Gemini'nin kaynak göstermediği
+ * yüzdeler alınmadı. Gemini'nin örnek oran ve tutarları örnek olarak yazıldı.
+ */
+export const GEMINI_STRATEJILERI: Strateji[] = [
+  {
+    id: 'gemini-kendi-bayini-getir',
+    kaynak: 'gemini',
+    etiket: 'G1',
+    asama: 'Sipariş ve ödeme platformda çalışınca',
+    no: 1,
+    grup: 'gemini',
+    ad: 'Kendi bayini getir, sıfır komisyonla sat',
+    taraf: 'Alıcı',
+    ozet: 'Satıcı, mevcut bayilerini kendi davet bağlantısıyla platforma getirir ve bu bayilere yaptığı satışlardan komisyon ödemez. Getirdiği aktif bayi sayısı arttıkça yeni ticari ayrıcalıklar açılır.',
+    amac: 'Satıcının yıllardır telefonla ve WhatsApp’la çalıştığı bayi ağını platforma taşıyarak alıcıyı neredeyse maliyetsiz kazanmak. Beklenen etki, bu bayilerin daha sonra başka satıcılardan komisyonlu alım yapmasıdır.',
+    odul: 'Üç kademe önerilir. 1–5 aktif bayide satıcı, getirdiği bayilerden komisyon ödemez ve parasını ertesi gün alır. 15 aktif bayide aramada öne çıkar ve ayda 5 ücretsiz sponsorlu ürün hakkı alır. 30 aktif bayide teklif taleplerini erken görür ve platformun getirdiği müşterilerde %3 komisyon indirimi alır. Alıcı ilk siparişinde kargo ya da ambar desteği alır.',
+    adimlar: [
+      { ad: 'Davet bağlantısını ve QR kartı ver', zaman: 'Hafta 1–2', kim: 'Yazılım ekibi', yapilan: 'Her satıcıya kendi davet bağlantısı ve tezgâh üstüne konacak bir QR kart verilir. Bu bağlantıyla gelen bayi o satıcıya bağlanır.', bitti: 'Bağlantıyla gelen bayi satıcının müşterisi olarak işaretleniyor.' },
+      { ad: 'Bayileri davet et', zaman: 'Hafta 2–6', kim: 'Satıcı', yapilan: 'Satıcı mevcut bayilerine bağlantıyı gönderir. Saha ekibi ilk davetlerde satıcıya yardım eder.', bitti: 'İlk kademe için 5 bayi ilk siparişini platformdan verdi.' },
+      { ad: 'Kötüye kullanımı denetle', zaman: 'Her siparişte', kim: 'Yönetim', yapilan: 'Alıcının ve satıcının vergi numarası, ortaklık yapısı ve cihaz izleri karşılaştırılır. Sıfır komisyon yalnız platforma ilk kez gelen ya da son 6 aydır işlem yapmayan işletmeler için geçerlidir.', bitti: 'Satıcının kendi kendine sipariş vermesi ödül doğurmuyor.' },
+      { ad: 'Kademe çubuğunu göster', zaman: 'Sipariş geldikçe', kim: 'Yazılım ekibi', yapilan: 'Satıcı panelindeki ilerleme çubuğu aktif bayi sayısını gösterir. 15 ve 30 aktif bayide yeni kademe açılır.', bitti: 'Satıcı bir sonraki kademeye kaç bayi kaldığını görüyor.' },
+      { ad: 'Çapraz alımı ölç', zaman: 'Her ay', kim: 'Pazarlama', yapilan: 'Getirilen bayinin ilk 60 gün içinde başka bir satıcıdan alım yapma oranı ölçülür.', bitti: 'Oran aylık raporda yer alıyor.' },
+    ],
+    olcut: 'Satıcı kanalıyla gelen alıcı başına edinme maliyeti ve getirilen alıcının 60 gün içinde başka bir satıcıdan alım yapma oranı.',
+    dikkat: 'Bu strateji işlem başına komisyona dayanır. Projede gelir bugün yalnız abonelikten gelir ve abonelik ile işlem payı arasındaki karar henüz verilmedi. Taksit ve vade için bir finansman kuruluşu gerekir, çünkü istoc.com kendi bilançosundan vade veremez. İhracat taleplerine erken erişim, ihracat altyapısı hazır olmadığı için şimdilik ödül olarak verilemez.',
+  },
+  {
+    id: 'gemini-katalogsuz-baslangic',
+    kaynak: 'gemini',
+    etiket: 'G2',
+    asama: 'Hemen başlayabilir',
+    no: 2,
+    grup: 'gemini',
+    ad: 'Katalogsuz başlangıç: teklif talebi ve beş teklif kontenjanı',
+    taraf: 'Eşleşme',
+    ozet: 'Satıcıdan katalog yüklemesi istenmez. Alıcı tek formla teklif talebi açar ve bu talebe en çok beş satıcı teklif verebilir. Hızlı ve eksiksiz teklif veren satıcı yeni talepleri daha önce görür.',
+    amac: 'Çarşı esnafını yüzlerce ürün yükleme yükünden kurtarıp doğrudan hazır alıcı talepleriyle buluşturmak. Satıcı ilk gün aktif olur ve kataloğu teklif verdikçe kendiliğinden dolar.',
+    odul: 'Yeni satıcı ayda 10 ücretsiz teklif hakkı alır. Taleplere ortalama 2 saatin altında eksiksiz teklif veren “Çevik tedarikçi”, yüksek bütçeli talepleri diğerlerinden 2 saat önce görür. Tekliflerinin en az %25’ini siparişe çeviren “Kategori lideri” sınırsız teklif hakkı alır ve alıcıya önerilen ilk üç tedarikçi arasında gösterilir. Teklifi 48 saat içinde siparişe çeviren alıcı, sonraki alımında nakliye indirimi kazanır.',
+    adimlar: [
+      { ad: 'Kısa kayıt al', zaman: 'Hafta 1', kim: 'Saha ekibi', yapilan: 'Satıcıdan yalnız vergi levhası ve sattığı üç alt kategori istenir. Örnek: hırdavat içinde el aletleri.', bitti: 'Satıcı kendi kategorisindeki talepleri almaya hazır.' },
+      { ad: 'Tek formla talep aç', zaman: 'Hafta 1–2', kim: 'Yazılım ekibi', yapilan: 'Alıcı ürünü, adedi, hedef bütçeyi ve teslim ilini tek formla girer. Örnek: 500 adet promosyon termos, teslim Ankara.', bitti: 'Eksik bilgili talep açılamıyor.' },
+      { ad: 'Beş teklif kontenjanını duyur', zaman: 'Talep açılınca', kim: 'Yazılım ekibi', yapilan: 'Kategorideki satıcılara bildirim gider ve kontenjanın ne kadarının dolduğu gösterilir. Satıcı birim fiyatı, en az sipariş adedini ve teslim süresini tek ekranda girer.', bitti: 'Talebe en çok beş teklif geldi.' },
+      { ad: 'Teklifi kataloğa çevir', zaman: 'Teklif verilince', kim: 'Yazılım ekibi', yapilan: 'Satıcının teklif verdiği ürün ve fotoğraf, mağazasına “Fiyat sorunuz” durumunda taslak ürün kartı olarak eklenir.', bitti: 'Satıcının kataloğu teklif verdikçe doluyor.' },
+      { ad: 'Seviyeleri hesapla', zaman: 'Her ay', kim: 'Yazılım ekibi', yapilan: 'Yanıt süresine ve tekliften siparişe dönüşüm oranına göre satıcının seviyesi belirlenir. Hiçbir teklifi onaylamadan sürekli talep açan alıcının öncelikli talep hakkı kısıtlanır.', bitti: 'Seviye kuralları satıcılara yazılı olarak bildirildi.' },
+    ],
+    olcut: 'Talebe ilk geçerli teklifin gelme süresi (Gemini’nin hedefi 30 dakikanın altıdır), tekliflerden oluşan ürün kartı sayısı ve tekliften siparişe dönüşüm oranı.',
+    dikkat: 'Gemini alıcıya “4 saat içinde en az üç tekliften” söz verilmesini önerir. İlk aylarda bu sözün tutulması zor olabilir ve projede tutulamayacak söz vermek yasaktır. Söz yerine hedef olarak sunulması daha güvenlidir. Bildirimdeki talep tutarı gerçek talepten alınmalıdır. İhracat talepleri, ihracat altyapısı hazır olana kadar gösterilmemelidir.',
+  },
+  {
+    id: 'gemini-kademeli-vade',
+    kaynak: 'gemini',
+    etiket: 'G3',
+    asama: 'Ödeme ve finansman ortağı hazır olunca',
+    no: 3,
+    grup: 'gemini',
+    ad: 'Kademeli vade ve ambar kalkanı',
+    taraf: 'İki taraf',
+    ozet: 'Alıcının vadeli alım limiti ve ücretsiz lojistik hakkı, platformdaki işlem geçmişine bağlanır. Platform dışına çıkan alıcı ve satıcı bu avantajları kaybeder.',
+    amac: 'İlk eşleşmeden sonra alıcı ile satıcının WhatsApp’ta anlaşıp platformu atlamasını önlemek. Alıcının vade ve ucuz nakliye ihtiyacını, satıcının tahsilat güvencesi ihtiyacıyla birlikte karşılamak.',
+    odul: 'Seviye 1’de alıcı ilk siparişte yarı fiyatına kargo ya da ambar desteği ve kredi kartına 3 taksit alır. Üç sorunsuz siparişten sonra Seviye 2’de 30 gün açık hesap limiti ve ayda bir ücretsiz palet sevkiyatı açılır. Altı ay düzenli ve gecikmesiz alımdan sonra Seviye 3’te 60 gün vade ve indirimli ambar tarifesi açılır. Satıcı parasını teslimattan sonra güvenceyle alır. Satıcının komisyonu aylık hacme göre düşer: 250.000 TL’ye kadar %10, 750.000 TL’ye kadar %7, üstünde %4.',
+    adimlar: [
+      { ad: 'Finansman ortağıyla anlaş', zaman: 'Hafta 1–4', kim: 'Yönetim', yapilan: 'Vade, taksit ve satıcıya erken ödeme için bir ödeme ya da finansman kuruluşuyla anlaşılır. Gecikme riskini kimin taşıyacağı yazılır.', bitti: 'Vadenin kim tarafından finanse edildiği sözleşmede yazılı.' },
+      { ad: 'Ambar ve nakliye anlaşmasını yap', zaman: 'Hafta 2–6', kim: 'Yönetim', yapilan: 'Ücretsiz palet ve indirimli ambar tarifesi için çarşıdaki nakliye ve ambar firmalarıyla anlaşılır.', bitti: 'Tarife ve kapasite yazılı.' },
+      { ad: 'Alıcıyı doğrula', zaman: 'İlk siparişte', kim: 'Yazılım ekibi', yapilan: 'Vergi levhası ve ticari doğrulama yapılır. Alıcı Seviye 1’den başlar.', bitti: 'Doğrulanmamış alıcıya vade açılmıyor.' },
+      { ad: 'Seviye çubuğunu göster', zaman: 'Sipariş geldikçe', kim: 'Yazılım ekibi', yapilan: 'Alıcının ekranında puan yerine açık hesap ve lojistik seviyesi görünür. Üç sorunsuz siparişte Seviye 2 açılır.', bitti: 'Alıcı bir sonraki seviyeye ne kaldığını görüyor.' },
+      { ad: 'Seviye kaybını uygula', zaman: '60 gün işlem yoksa', kim: 'Yazılım ekibi', yapilan: 'Alıcıya önce hatırlatma gider. 60 gün platformdan alım yapmayan alıcı bir alt seviyeye düşer.', bitti: 'Kural alıcıya baştan yazılı olarak bildirildi.' },
+    ],
+    olcut: 'İlk siparişten sonraki 90 günde ikinci ve üçüncü siparişi platformdan verme oranı, platform dışına çıkma oranındaki düşüş ve ortalama sepet tutarı.',
+    dikkat: 'Sipariş ve ödeme bugün platformda çalışmıyor. istoc.com kendi bilançosundan vade veremez, bu yüzden bir finansman kuruluşu şarttır. Seviye düşürme kuralı alıcıyı ihtiyacı olmayan alıma itebilir. ChatGPT’nin S06 önerisi ve Claude’un 8. stratejisi bu tür seri baskısına karşı uyarır. Komisyon kademeleri de abonelik ile işlem payı kararına bağlıdır.',
+  },
+  {
+    id: 'gemini-tek-palet',
+    kaynak: 'gemini',
+    etiket: 'G4',
+    asama: 'Sipariş, ödeme ve ambar anlaşması hazır olunca',
+    no: 4,
+    grup: 'gemini',
+    ad: 'İSTOÇ tek palet ve grup barem oyunu',
+    taraf: 'Alıcı',
+    ozet: 'Alıcı farklı İSTOÇ dükkânlarından aldığı ürünleri tek palete birleştirip nakliyeden tasarruf eder. Aynı ürünü isteyen alıcılar siparişlerini birleştirip büyük alım fiyatına ulaşır.',
+    amac: 'Çarşıda farklı dükkânlardan mal toplayıp tek ambarla gönderme alışkanlığını dijital sepete taşımak. Sipariş başına mağaza sayısını ve sepet tutarını artırmak.',
+    odul: 'Tek palet oyununda iki mağazadan 25.000 TL’lik sepette ürünler ücretsiz birleştirilir ve nakliye %35 indirimli olur. Üç ya da daha fazla mağazadan 50.000 TL’lik sepette ambar teslimi ücretsizdir ve sepete %2 ek indirim uygulanır. Barem oyununda 72 saat içinde toplam talep 100 koliyi geçerse bütün katılımcılar 100 koli fiyatından alır.',
+    adimlar: [
+      { ad: 'Toplama noktasıyla anlaş', zaman: 'Hafta 1–4', kim: 'Yönetim', yapilan: 'Çarşıdaki nakliye, hamaliye ve ambar noktalarıyla ürünleri toplayıp tek palete birleştirme anlaşması yapılır.', bitti: 'Toplama noktası, ücret ve kapasite yazılı.' },
+      { ad: 'Palet çubuğunu sepete koy', zaman: 'Hafta 3–6', kim: 'Yazılım ekibi', yapilan: 'Sepette palet doluluk çubuğu görünür. Standart sepet kuralları yeterlidir, ayrı bir oyun motoru gerekmez.', bitti: 'Çubuk sepet tutarına göre doluyor.' },
+      { ad: 'Tamamlayıcı ürünü öner', zaman: 'Sepet dolarken', kim: 'Yazılım ekibi', yapilan: 'Çubuk, bir sonraki indirim eşiğine ne kadar kaldığını ve komşu adadaki tamamlayıcı kategoriyi gösterir.', bitti: 'Alıcı bir sonraki eşiği görüyor.' },
+      { ad: 'Barem kampanyası aç', zaman: 'Satıcı isterse', kim: 'Satıcı', yapilan: 'Satıcı ürüne kademeli fiyat ve 72 saatlik süre koyar. Örnek: 1–19 koli 1.000 TL, 20–99 koli 900 TL, 100 koli ve üstü 780 TL.', bitti: 'Kampanya kuralları alıcıya baştan görünüyor.' },
+      { ad: 'Baremi sonuçlandır', zaman: '72 saat sonunda', kim: 'Yazılım ekibi', yapilan: 'Hedef aşılırsa bütün katılımcılar en düşük fiyattan alır. Aşılmazsa baştan ilan edilen kural uygulanır.', bitti: 'Her katılımcı sonucu ve ödeyeceği fiyatı biliyor.' },
+    ],
+    olcut: 'Sipariş başına mağaza sayısı (Gemini’nin hedefi 1,2’den 2,5’in üstüne çıkmaktır) ve açılan barem kampanyalarının hedefe ulaşma oranı.',
+    dikkat: 'Sepet, ödeme ve karttan ön provizyon platformda çalışmadan bu oyun uygulanamaz. Barem tutmazsa ne olacağı kampanya açılmadan alıcıya yazılmalıdır. İndirim oranları ve tutarlar Gemini’nin örnekleridir. Maliyetleri ambar ve nakliye teklifleriyle doğrulanmalıdır.',
+  },
+  {
+    id: 'gemini-ada-kontenjani',
+    kaynak: 'gemini',
+    etiket: 'G5',
+    asama: 'Hemen başlayabilir',
+    no: 5,
+    grup: 'gemini',
+    ad: 'Ada kontenjanı ve doğrulanmış İSTOÇ tedarikçisi',
+    taraf: 'Satıcı',
+    ozet: 'Her alt kategoride yalnız 10 kurucu tedarikçi yeri açılır. Komşu dükkânla rekabet ve sınırlı kontenjan, ilk satıcıların hızla katılmasını sağlar.',
+    amac: 'Çarşıdaki komşuluk rekabetini kullanarak ilk çekirdek satıcıları kazanmak. Sanal puan ve QR damgası yerine prestij ve sınırlı kontenjan kullanmak.',
+    odul: 'Kontenjana giren satıcının 20 ürünü saha ekibi tarafından ücretsiz fotoğraflanır ve yüklenir. Satıcı 6 ay boyunca kategori sayfasındaki kurucu mağazalar vitrininde yer alır. İlk 14 gün içinde en az üç nitelikli alıcı talebiyle eşleştirilir. Dükkân camına doğrulanmış tedarikçi plaketi asılır.',
+    adimlar: [
+      { ad: 'Pilot kategorileri seç', zaman: 'Hafta 1', kim: 'Yönetim', yapilan: 'Kontenjanın açılacağı alt kategoriler seçilir. Örnek: hırdavat içinde bağlantı elemanları, züccaciye içinde cam ürünleri.', bitti: 'Pilot kategoriler yazılı.' },
+      { ad: 'Kontenjanı sahada sun', zaman: 'Hafta 2–6', kim: 'Saha ekibi', yapilan: 'Saha ekibi herkesi üye yapmaya çalışmaz. Her alt kategoride yalnız 10 kurucu yer olduğunu anlatır.', bitti: 'Kategori başına dolu ve boş yer sayısı güncel.' },
+      { ad: 'Çekirdek kataloğu hazırla', zaman: 'Kayıttan sonra', kim: 'Saha ekibi', yapilan: 'Saha ekibi dükkânda 20 çekirdek ürünü fotoğraflar ve kataloğa girer.', bitti: '20 ürün yayında.' },
+      { ad: 'Plaketi ve QR’ı as', zaman: 'Kayıttan sonra', kim: 'Pazarlama', yapilan: 'Dükkân camına plaket asılır. QR, satıcının kataloğuna ve davet bağlantısına açılır.', bitti: 'Plaket asılı ve QR doğru sayfayı açıyor.' },
+      { ad: 'İlk 14 günü takip et', zaman: 'İlk 14 gün', kim: 'Pazarlama', yapilan: 'Yeni satıcı alıcı talepleriyle eşleştirilir. Saha ekibinin primi açtığı mağaza sayısına değil, ilk 14 günde ilk siparişi ya da teklifi alan satıcı sayısına bağlanır.', bitti: 'Her yeni satıcının ilk 14 gün sonucu kayıtlı.' },
+    ],
+    olcut: 'Yeni satıcının ilk siparişe ya da teklife ulaşma süresi (Gemini’nin hedefi ilk 14 günde %75’in üstüdür) ve kategori kontenjanının dolma hızı.',
+    dikkat: 'Bu strateji Claude’un 1. ve 7. stratejisine yakındır. “İhracat tedarikçisi” ya da “global tedarikçi” unvanı verilmemelidir, çünkü ihracat altyapısı hazır değildir. Plaketin adı çarşı yönetimiyle netleşmeden kullanılmamalıdır. “14 günde üç talep” söz olarak değil hedef olarak verilmelidir.',
+  },
+];
+
+export const TUM_STRATEJILER: Strateji[] = [...STRATEJILER, ...CHATGPT_STRATEJILERI, ...GEMINI_STRATEJILERI];

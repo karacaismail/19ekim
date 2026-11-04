@@ -5,9 +5,10 @@ import { expect, test, type Page } from '@playwright/test';
  * kılan 8 strateji Pazarlama menüsünde. Her strateji kartta başlık ve özetle görünür. Karta basınca açılan pencere
  * stratejinin adım adım uygulama yol haritasını verir. Kaynak metin docs/oyunlastirma-yalin/ içindedir.
  * Aynı gün ikinci karar: ChatGPT'nin 8 stratejisi (docs/oyunlastirma/) da aynı biçimde eklenir. Kartlar öneri sahibini
- * “Claude” ya da “ChatGPT” etiketiyle gösterir ve sayfa bu etikete göre süzülebilir.
+ * “Claude” ya da “ChatGPT” etiketiyle gösterir ve sayfa bu etikete göre süzülebilir. Üçüncü karar: Gemini'nin 5 stratejisi
+ * “Gemini” etiketiyle aynı biçimde eklenir.
  */
-const STRATEJI_SAYISI = 16;
+const STRATEJI_SAYISI = 21;
 
 async function ac(page: Page, genislik: number, yukseklik = 900) {
   await page.setViewportSize({ width: genislik, height: yukseklik });
@@ -38,6 +39,7 @@ for (const genislik of [320, 390, 1280]) {
     // Öneri sahibinin etiketi kartın üzerinde yazıyla okunur.
     await expect(page.locator('#tavuk-yumurta .oy-kart-kaynak, #surdurulebilirlik .oy-kart-kaynak')).toHaveText(Array(8).fill('Claude'));
     await expect(page.locator('#chatgpt .oy-kart-kaynak')).toHaveText(Array(8).fill('ChatGPT'));
+    await expect(page.locator('#gemini .oy-kart-kaynak')).toHaveText(Array(5).fill('Gemini'));
     for (const k of await kartlar.all()) {
       await expect(k.locator('.oy-kart-ad')).not.toBeEmpty();
       await expect(k.locator('.oy-kart-ozet')).not.toBeEmpty();
@@ -122,8 +124,11 @@ test('öneri sahibi süzgeci: ChatGPT seçilince yalnız ChatGPT kartları kalı
   await expect(page.locator('.oy-kart-kaynak')).toHaveText(Array(8).fill('ChatGPT'));
   await suzgec.getByRole('button', { name: /^Claude/ }).click();
   await expect(page.locator('.oy-kart-kaynak')).toHaveText(Array(8).fill('Claude'));
+  await suzgec.getByRole('button', { name: /^Gemini/ }).click();
+  await expect(page.locator('.oy-kart-kaynak')).toHaveText(Array(5).fill('Gemini'));
+  await expect(page.locator('#ilkeler')).toHaveCount(0);
   await suzgec.getByRole('button', { name: /^Hepsi/ }).click();
-  await expect(page.locator('.oy-kart')).toHaveCount(16);
+  await expect(page.locator('.oy-kart')).toHaveCount(STRATEJI_SAYISI);
 });
 
 test('ChatGPT kartı da adım adım yol haritasını açar, kaynağı pencerede yazar', async ({ page }) => {
@@ -204,4 +209,16 @@ test('yatay telefon (844 × 390): pencere tam ekran, taşma yok', async ({ page 
   await expect(pencere).toBeVisible();
   await expect.poll(async () => (await pencere.boundingBox())!.width).toBeGreaterThanOrEqual(843);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('Gemini kartı yol haritasını açar, kaynağı ve projeyle çelişen noktaları pencerede yazar', async ({ page }) => {
+  await ac(page, 1280);
+  await kart(page, 'Kendi bayini getir').click();
+  const pencere = page.getByRole('dialog', { name: /Kendi bayini getir/ });
+  await expect(pencere).toBeVisible();
+  await expect(pencere.locator('.oy-pencere-kaynak')).toContainText('Gemini');
+  expect(await pencere.locator('.oy-adim').count()).toBeGreaterThanOrEqual(4);
+  // Gemini'nin işlem payı, vade ve ihracat varsayımları projenin bugünkü kararlarıyla karşılaştırılır.
+  await expect(pencere.locator('.oy-dikkat')).toContainText('abonelik');
+  await expect(pencere).not.toContainText(/[;—]/);
 });

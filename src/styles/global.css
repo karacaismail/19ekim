@@ -9863,6 +9863,10 @@ html[data-focus-mode='keyboard'] .oy-kart:focus-visible {
   background-color: var(--surface-selected);
 }
 
+.oy-kart-kaynak[data-kaynak='gemini'] {
+  background-color: var(--surface-hover);
+}
+
 .oy-kart-no {
   margin-inline-end: auto;
 }
