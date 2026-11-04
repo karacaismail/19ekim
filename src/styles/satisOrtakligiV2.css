@@ -355,8 +355,41 @@ html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .v2-so2-json-i
 }
 .v2-so2-grup-alanlar > .v2-so2-sec,
 .v2-so2-grup-alanlar > .v2-so2-kademe,
-.v2-so2-grup-alanlar > .secim {
+.v2-so2-grup-alanlar > .secim,
+.v2-so2-grup-alanlar > .v2-so2-kutu {
   grid-column: 1 / -1;
+}
+
+/*
+ * Kenarlıklı ayar kutusu (kullanıcı kararı 2026-11-04): birbirine bağlı girdileri, örneğin Arkadaşını getir kampanyasının
+ * süresini ve bedava ay adedini, tek kutuda toplar. Kenarlık nötr çizgi rengindedir ve köşesi yuvarlatılmaz.
+ */
+.v2-so2-kutu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-3) var(--space-4);
+  align-items: end;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: var(--hairline) solid var(--rule-strong);
+  border-radius: 0;
+}
+
+.v2-so2-kutu-baslik {
+  padding: 0 var(--space-2);
+  margin-inline-start: calc(var(--space-2) * -1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.v2-so2-kutu-not {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
 }
 
 .v2-so2-girdi-ad {

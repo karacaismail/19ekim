@@ -66,6 +66,7 @@ function sonucVerisi(a: Ayar, secili: RolMetni, rol: RolId) {
       ozet,
       ek: `Ayda ortalama ${tl(m.yillikKredi / 12)} değerinde ücretsiz kullanım eder.`,
       satirlar: [
+        { ad: 'Hakediş için tahsilat süresi', deger: `${m.sureGun} gün` },
         { ad: 'Krediye çevrilen tavsiye', deger: `${sayi(m.sayilan)} / yıl`, kapali: m.sayilan === 0 },
         { ad: 'Ortak olursa satış komisyonu', deger: `${tl(m.ortakOlursa.satisKazanci)} / ay` },
       ] as Satir[],

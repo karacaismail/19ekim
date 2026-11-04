@@ -189,6 +189,36 @@ test('marka elçisi: kimlerle çalışırız etiketleri gerçek karşılıklar, 
   await expect(page.locator('.v2-adalet-baslik')).toHaveText('Ortak olursa ne kazanır?');
 });
 
+test('arkadaşını getir: tahsilat süresi ve bedava ay adedi kenarlıklı tek kutuda, kural 90 gün', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
+  await ac(page);
+  const kutu = page.getByRole('group', { name: 'Arkadaşını getir', exact: true });
+  await expect(kutu).toBeVisible();
+  // Kullanıcı kararı 2026-11-04: kutu kenarlıkla ayrılır, köşesi yuvarlatılmaz.
+  const stil = await kutu.evaluate((el) => {
+    const c = getComputedStyle(el);
+    return { kenar: c.borderTopStyle, kalinlik: parseFloat(c.borderTopWidth), radius: c.borderTopLeftRadius };
+  });
+  expect(stil.kenar).toBe('solid');
+  expect(stil.kalinlik).toBeGreaterThan(0);
+  expect(stil.radius).toBe('0px');
+  const sure = kutu.getByRole('textbox', { name: /Tahsilat süresi/ });
+  await expect(sure).toHaveValue('3');
+  await expect(kutu.locator('label', { hasText: 'Tahsilat süresi' })).toContainText('90 gün');
+  await expect(kutu.getByRole('textbox', { name: /Tavsiye edene/ })).toHaveValue('2');
+  await expect(kutu.getByRole('textbox', { name: /Yeni müşteriye/ })).toHaveValue('1');
+  await expect(kutu.locator('label', { hasText: 'Tavsiye edene' })).toContainText('ay bedava');
+  // Süre değişince kural ve sonuç metni aynı hesaptan güncellenir: her ay 30 gün sayılır.
+  await sure.fill('2');
+  await expect(kutu.locator('label', { hasText: 'Tahsilat süresi' })).toContainText('60 gün');
+  await sekme(page, 'tavsiye').click();
+  await expect(page.locator('.v2-kp-liste')).toContainText('2 ay (60 gün) içinde tahsil edilirse');
+  await expect(page.locator('.v2-kp-liste')).toContainText('her ay 30 gün sayılır');
+  await expect(page.locator('.v2-so2-sonuc')).toContainText('60 gün içinde tahsil edilirse');
+  // Süre koşulu tutarı değiştirmez: 3 tavsiye × 2 ay kredi.
+  expect(await sekmeTutari(page, 'tavsiye')).toBe(134064);
+});
+
 test('kadrolu ve müşteri hesabı; bize kalan ağ payı düşülerek', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
   await ac(page);

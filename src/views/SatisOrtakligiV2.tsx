@@ -26,6 +26,7 @@ import {
   SEVIYE_ADI,
   SOZLESME_ADI,
   VARSAYILAN_AYAR,
+  ayGun,
   bagimsizKazanc,
   donemKazanci,
   ilkYilAy,
@@ -160,12 +161,27 @@ function StandartAyarlar({ a, g }: { a: Ayar; g: G }) {
       <Grup baslik="Kampanyalar">
         <Girdi label="İlk 90 gün ek oran" yuzdeMi value={a.hizliBaslangic} onChange={(v) => g({ hizliBaslangic: Math.min(1, v) })} />
         {a.marka === 'istoc' ? <Girdi label="Kurumsal paket ek oranı" yuzdeMi value={a.kurumsalEk} onChange={(v) => g({ kurumsalEk: Math.min(1, v) })} /> : null}
-        <Girdi label="Arkadaşını getir: tavsiye edene" birim="ay" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
-        <Girdi label="Arkadaşını getir: yeni müşteriye" birim="ay" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
+        <ArkadasiniGetir a={a} g={g} />
         <Girdi label="Yılda en çok tavsiye" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
       </Grup>
       <FiyatAyarlari a={a} g={g} />
     </>
+  );
+}
+
+/**
+ * Arkadaşını getir (kullanıcı kararı 2026-11-04): hakediş koşulu bir süre, ödül bir adettir. İkisi kenarlıklı tek kutuda
+ * durur. Süre, yeni müşterinin ödemesinin tahsil edilmesi gereken aydır. Her ay 30 gün sayılır. Adet, bedava ay sayısıdır.
+ */
+function ArkadasiniGetir({ a, g }: { a: Ayar; g: G }) {
+  return (
+    <fieldset className="v2-so2-kutu">
+      <legend className="v2-so2-kutu-baslik">Arkadaşını getir</legend>
+      <p className="v2-so2-kutu-not">Yeni müşterinin ödemesi bu süre içinde tahsil edilirse hakediş oluşur. Her ay 30 gün sayılır.</p>
+      <Girdi label="Tahsilat süresi" birim={`ay = ${ayGun(a.tavsiyeSure)} gün`} min={1} value={a.tavsiyeSure} onChange={(v) => g({ tavsiyeSure: Math.min(12, Math.max(1, v)) })} />
+      <Girdi label="Tavsiye edene" birim="ay bedava" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
+      <Girdi label="Yeni müşteriye" birim="ay bedava" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
+    </fieldset>
   );
 }
 
@@ -583,7 +599,9 @@ function MusteriSonuc({ a }: { a: Ayar }) {
         aciklama={
           <>
             Müşteri yılda {sayi(m.yillikTavsiye)} yeni müşteri getirir. Bunların {sayi(m.sayilan)} tanesi krediye çevrilir. Her tavsiye {a.krediAy} ay, yani {tl(m.tavsiyeBasi)} değerinde ücretsiz kullanımdır.
-            <span className="v2-so2-bize">Yeni müşteri de {a.yeniKrediAy} ay ücretsiz kullanım kazanır.</span>
+            <span className="v2-so2-bize">
+              Hakediş, yeni müşterinin ödemesi {m.sureGun} gün içinde tahsil edilirse oluşur. Hesap, ödemenin bu sürede alındığını varsayar. Yeni müşteri de {a.yeniKrediAy} ay bedava kullanır.
+            </span>
           </>
         }
       />
@@ -640,7 +658,11 @@ function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
   }
   if (sozlesme === 'musteri') {
     const m = musteriKazanc(a);
-    return [{ ad: 'Tavsiye başı kredi', formul: `${tl(m.kendiAylik)} × ${a.krediAy} ay`, sonuc: tl(m.tavsiyeBasi) }, { ad: 'Krediye çevrilen tavsiye', formul: `En çok ${a.tavsiyeSinir}`, sonuc: sayi(m.sayilan) }];
+    return [
+      { ad: 'Hakediş için tahsilat süresi', formul: `${sayi(a.tavsiyeSure)} ay × 30 gün`, sonuc: `${m.sureGun} gün` },
+      { ad: 'Tavsiye başı kredi', formul: `${tl(m.kendiAylik)} × ${a.krediAy} ay`, sonuc: tl(m.tavsiyeBasi) },
+      { ad: 'Krediye çevrilen tavsiye', formul: `En çok ${a.tavsiyeSinir}`, sonuc: sayi(m.sayilan) },
+    ];
   }
   const b = bagimsizKazanc(a);
   return [
@@ -704,7 +726,7 @@ function kararVerisi(a: Ayar, rol: RolId) {
     kazanc: {
       bagimsiz: { oran: b.oran, komisyon: r(b.komisyon), kurumsalKampanya: r(b.kurumsal), ag1: r(b.k1), ag2: r(b.k2), aylik: r(b.aylik), hizliBaslangicIlk3Ay: r(b.hizli), yenilemePayi: r(b.yenilemePay), bizeKalan: r(b.bize) },
       kadrolu: { basamak: KARIYER_ADI[k.sg.seviye], alan: ALAN_ADI[a.kadroluAlan], maas: k.maas, kota: r(k.kota), prim: r(k.prim), ekipPayi: r(k.ekip), toplam: r(k.toplam) },
-      musteri: { yillikTavsiye: m.yillikTavsiye, krediyeCevrilen: m.sayilan, yillikKredi: r(m.yillikKredi), ortakOlursaAylik: r(m.ortakOlursa.aylik) },
+      musteri: { hakedisTahsilatSuresiGun: m.sureGun, yillikTavsiye: m.yillikTavsiye, krediyeCevrilen: m.sayilan, yillikKredi: r(m.yillikKredi), ortakOlursaAylik: r(m.ortakOlursa.aylik) },
     },
     kampanyalar: kampanyalar(a, rol).map((x) => ({ ad: x.ad, ozet: x.ozet(a) })),
     ozelProgramlar: kosulOzeti(a),

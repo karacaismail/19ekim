@@ -84,7 +84,12 @@ export interface Ayar {
   hizliBaslangic: number;
   /** Kurumsal paket hızlandırıcı (iStoc): Kurumsal paket satışına ek oran. */
   kurumsalEk: number;
-  /** Arkadaşını getir: tavsiye edene ve yeni müşteriye kaç ay ücretsiz kullanım, yılda en çok kaç tavsiye. */
+  /**
+   * Arkadaşını getir (kullanıcı kararı 2026-11-04): yeni müşterinin ödemesi tavsiyeden sonraki `tavsiyeSure` ay içinde
+   * tahsil edilirse hakediş oluşur. Süre hesabında her ay 30 gün sayılır. Hakedişte tavsiye eden `krediAy`, yeni müşteri
+   * `yeniKrediAy` ay bedava kullanır. Yılda en çok `tavsiyeSinir` tavsiye krediye çevrilir.
+   */
+  tavsiyeSure: number;
   krediAy: number;
   yeniKrediAy: number;
   tavsiyeSinir: number;
@@ -172,6 +177,7 @@ export const VARSAYILAN_AYAR: Ayar = {
   agAltSatis: 1,
   hizliBaslangic: 0.03,
   kurumsalEk: 0.02,
+  tavsiyeSure: 3,
   krediAy: 2,
   yeniKrediAy: 1,
   tavsiyeSinir: 3,
@@ -215,6 +221,12 @@ export const ALAN_ADI: Record<KadroluAlan, string> = { saha: 'Saha satışı', i
 export const SOZLESME_ADI: Record<Sozlesme, string> = { bagimsiz: 'Bağımsız ortak', kadrolu: 'Kadrolu çalışan', musteri: 'Müşteri' };
 
 const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+/** Süre hesabında her ay 30 gün sayılır (kullanıcı kararı 2026-11-04). 3 ay = 90 gün. */
+export const AY_GUN = 30;
+export const ayGun = (ay: number) => Math.round(ay * AY_GUN);
+/** “3 ay (90 gün)” biçiminde süre. */
+export const sureMetni = (ay: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(ay)} ay (${ayGun(ay)} gün)`;
+
 const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
 const sayi = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
 
@@ -431,6 +443,8 @@ export function kadroluKazanc(a: Ayar) {
 /**
  * Mevcut müşteri: “Arkadaşını getir” kampanyasıyla hizmet kredisi kazanır. Robotun satışı, müşterinin tavsiyesiyle gelen
  * yeni müşteri sayısıdır. Yılda en çok `tavsiyeSinir` tavsiye krediye çevrilir; daha fazlası ortaklık hacmidir.
+ * Hakediş, yeni müşterinin ödemesi `tavsiyeSure` ay içinde tahsil edilince oluşur. Hesap, ödemenin bu sürede alındığını
+ * varsayar; süre tutarı değil hakediş koşulunu belirler.
  */
 export function musteriKazanc(a: Ayar) {
   const s = satisOzeti(a);
@@ -438,7 +452,7 @@ export function musteriKazanc(a: Ayar) {
   const yillikTavsiye = s.adet * 12;
   const sayilan = Math.min(yillikTavsiye, a.tavsiyeSinir);
   const tavsiyeBasi = kendiAylik * a.krediAy;
-  return { s, kendiAylik, yillikTavsiye, sayilan, tavsiyeBasi, yillikKredi: sayilan * tavsiyeBasi, fazla: Math.max(0, yillikTavsiye - a.tavsiyeSinir), ortakOlursa: bagimsizKazanc(a) };
+  return { s, kendiAylik, yillikTavsiye, sayilan, tavsiyeBasi, yillikKredi: sayilan * tavsiyeBasi, sureGun: ayGun(a.tavsiyeSure), fazla: Math.max(0, yillikTavsiye - a.tavsiyeSinir), ortakOlursa: bagimsizKazanc(a) };
 }
 
 export interface DonemSatiri {
@@ -588,7 +602,8 @@ export const KAMPANYALAR: Kampanya[] = [
     ad: 'Arkadaşını getir',
     kimler: ['tavsiye'],
     marka: ['istoc', 'segika'],
-    ozet: (a) => `Tavsiye eden müşteri ${a.krediAy} ay, yeni müşteri ${a.yeniKrediAy} ay ücretsiz kullanım kazanır. Yılda en çok ${a.tavsiyeSinir} tavsiye krediye çevrilir.`,
+    ozet: (a) =>
+      `Yeni müşterinin ödemesi tavsiyeden sonraki ${sureMetni(a.tavsiyeSure)} içinde tahsil edilirse hakediş oluşur. Bu durumda tavsiye eden müşteri ${a.krediAy} ay, yeni müşteri ${a.yeniKrediAy} ay bedava kullanır. Ödeme bu sürede tahsil edilmezse hakediş oluşmaz. Süre hesabında her ay 30 gün sayılır. Yılda en çok ${a.tavsiyeSinir} tavsiye krediye çevrilir.`,
   },
 ];
 

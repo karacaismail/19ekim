@@ -8,7 +8,7 @@
  */
 import { karsilastir, type OrtakId, type Sonuc as MotorSonuc } from './affilateV2';
 import { baslangicKurgu, senaryoKur } from './affilateKurguV2';
-import { agBirimPaylari, aylikFiyat, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligiV2';
+import { agBirimPaylari, aylikFiyat, sureMetni, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligiV2';
 
 export type KaynakSayfa = 'Satış ortaklığı' | 'Temsilci ağı' | 'İş ortaklığı' | 'Affilate';
 
@@ -308,7 +308,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
       ozetBirim: '',
       donemler: [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye`, yillik: birim * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(birim)}` }],
       hesap: [{ ad: 'İlk faturadan', formul: `${t(yillik)} × ${yuzde(a.tekSeferOran)}`, sonuc: t(birim) }],
-      kurallar: ['Komisyon, müşteri ödeyince kazanılır ve aynı ay ödenir.', 'Komisyon yalnız ilk fatura için ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Müşteri desteğini Segika verir.'],
+      kurallar: [`Müşterinin ilk ödemesi tavsiyeden sonraki ${sureMetni(a.tavsiyeSure)} içinde tahsil edilirse komisyon kazanılır ve aynı ay ödenir. Süre hesabında her ay 30 gün sayılır.`, 'Komisyon yalnız ilk fatura için ödenir.', 'Ödeme bu sürede tahsil edilmezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Müşteri desteğini Segika verir.'],
       veri: { oran: a.tekSeferOran, tavsiyeBasina: Math.round(birim) },
     };
   }
