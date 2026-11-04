@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { OyunlastirmaPage } from '../views/OyunlastirmaPage';
+---
+
+<BaseLayout title="Oyunlaştırma">
+  <OyunlastirmaPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

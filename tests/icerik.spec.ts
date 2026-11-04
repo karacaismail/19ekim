@@ -29,7 +29,7 @@ test.describe('içerik envanteri', () => {
     const yollar = sayfaYollari();
     const kayitli = YAYIMLANAN.map((k) => k.path).sort();
     expect(kayitli).toEqual(yollar);
-    expect(YAYIMLANAN).toHaveLength(27); // 404 dahil 25 sayfa (contents.md §1, 61fd2ff) + Satış ortaklığı + Değer önerisi + Gelir modelleri + Kadro kapasitesi − İş ortaklığı − Affilate (2026-11-03: satış ortaklığına taşındı) − karar sayfaları tek sayfa (Kararlar)
+    expect(YAYIMLANAN).toHaveLength(28); // 404 dahil 25 sayfa (contents.md §1, 61fd2ff) + Satış ortaklığı + Değer önerisi + Gelir modelleri + Oyunlaştırma + Kadro kapasitesi − İş ortaklığı − Affilate (2026-11-03: satış ortaklığına taşındı) − karar sayfaları tek sayfa (Kararlar)
     for (const k of ICERIK) {
       expect(k.kullaniciSorusu.length, k.id).toBeGreaterThan(10);
       expect(k.kullaniciSorusu.trim().endsWith('?'), k.id).toBe(true);

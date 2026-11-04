@@ -9779,3 +9779,322 @@ html[data-focus-mode='keyboard'] :where(.ks-secenek, .ks-liste-oge):focus-visibl
   padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--rule);
 }
+
+/*
+ * Oyunlaştırma sayfası (/oyunlastirma/, kullanıcı kararı 2026-11-04): strateji kartları kenarlıksızdır, yüzey tonu
+ * ve boşlukla ayrılır. Kartın tamamı pencereyi açan düğmedir. Pencerede uygulama adımları numaralı ve dikey bir çizgiyle
+ * bağlı sırayla durur. Klavye odağı kartın sol kenarında düz bir çubuktur, kartı çevrelemez.
+ */
+.oy {
+  max-width: 60rem;
+}
+
+.oy-uyari {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  line-height: var(--leading-body);
+}
+
+.oy-kartlar {
+  display: grid;
+  /* Her grupta 4 kart: geniş ekranda 2 × 2, dar ekranda tek sütun. Üç sütunda dördüncü kart yalnız kalırdı. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oy-kart-oge {
+  display: grid;
+  min-width: 0;
+}
+
+.oy-kart {
+  /* Sütun düzeni: “Eylem planını gör” aynı satırdaki kartlarda alta hizalanır. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 0;
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.oy-kart:hover {
+  background-color: var(--surface-hover);
+}
+
+html[data-focus-mode='keyboard'] .oy-kart:focus-visible {
+  text-decoration: none;
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
+.oy-kart-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+/* Öneri sahibi etiketi: yazıyla okunur, renk yalnız destekler. Kenarlık yok, yüzey tonuyla ayrılır. */
+.oy-kart-kaynak {
+  padding: 0 var(--space-2);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.oy-kart-kaynak[data-kaynak='chatgpt'] {
+  background-color: var(--surface-selected);
+}
+
+.oy-kart-no {
+  margin-inline-end: auto;
+}
+
+.oy-kart-asama {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.oy-araclar {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+.oy-sayac {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.oy-pencere-kaynak {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.oy-kart-ad {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.oy-kart-ozet {
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+}
+
+.oy-kart-ac {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  color: var(--text-link);
+  font-weight: var(--weight-semibold);
+}
+
+.oy-ilkeler {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  line-height: var(--leading-body);
+}
+
+.oy-pencere {
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+}
+
+.oy-pencere-ust {
+  min-height: var(--hit-min);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+  background-color: var(--surface-page);
+  border-bottom: var(--hairline) solid var(--rule);
+}
+
+.oy-pencere-baslik {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.oy-pencere-kapat {
+  flex-shrink: 0;
+  min-width: var(--hit-min);
+  min-height: var(--hit-min);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.oy-pencere-kapat:hover {
+  background-color: var(--surface-hover);
+}
+
+html[data-focus-mode='keyboard'] .oy-pencere-kapat:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
+.oy-pencere-govde {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+.oy-pencere-giris {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.oy-amac,
+.oy-odul {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.oy-etiket {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.oy-plan {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.oy-plan-baslik {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.oy-adimlar {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oy-adim {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+}
+
+/* Adımları bağlayan düz dikey çizgi: numara kutusunun ortasından bir sonraki adıma iner. */
+.oy-adim:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--hit-min) 0;
+  inset-inline-start: calc(var(--hit-min) / 2);
+  inline-size: var(--hairline);
+  background-color: var(--rule-strong);
+}
+
+.oy-adim:last-child {
+  padding-bottom: 0;
+}
+
+.oy-adim-no {
+  display: grid;
+  place-items: center;
+  inline-size: var(--hit-min);
+  block-size: var(--hit-min);
+  background-color: var(--surface-selected);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.oy-adim-icerik {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  padding-top: var(--space-2);
+}
+
+.oy-adim-ad {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.oy-adim-bilgi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.oy-adim-yapilan,
+.oy-adim-bitti {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.oy-adim-bitti {
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--surface-sunken);
+}
+
+.oy-son {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.oy-son dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.oy-son dd {
+  margin: var(--space-1) 0 0;
+  line-height: var(--leading-body);
+}
+
+@media (width < 48em), (height < 32em) {
+  .oy-pencere-ust {
+    padding-inline-start: var(--space-4);
+  }
+
+  .oy-pencere-govde {
+    padding: var(--space-4);
+  }
+
+  .oy-kart {
+    padding: var(--space-4);
+  }
+}
