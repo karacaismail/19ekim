@@ -241,7 +241,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
       {surum}
 
       <p className="iv2-uyari">
-        Bu sürüm, mevcut istihdam takvimindeki {eskiSayisi} rolü değiştirmeden korur ve “Eski” etiketiyle gösterir. Üstüne 11 kümede {yeniSayisi} yeni pozisyon ekler. Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan yüzde 25 artış varsayar ve net asgari ücreti {tl(asgari.net)} alır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
+        Bu sürüm, mevcut istihdam takvimindeki {eskiSayisi} rolü değiştirmeden korur ve “Eski” etiketiyle gösterir. Üstüne 11 kümede {yeniSayisi} yeni pozisyon ekler. Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, Google Sheets gider tablosundaki gibi {asgari.varsayilanArtis} artış (yıllık TÜFE) varsayar ve net asgari ücreti {tl(asgari.net)} alır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
       </p>
 
       <Section

@@ -22,8 +22,8 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     // Veri ve bağlantı testleri tarayıcıdan bağımsızdır; yalnız Chromium projesinde bir kez çalışır.
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, testIgnore: /(data|opex-motor|opex-script|applet-model|affilate-model|icerik|css-mimari|istihdam-v2-veri)\.spec\.ts/ },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] }, testIgnore: /(data|opex-motor|opex-script|applet-model|affilate-model|icerik|css-mimari|istihdam-v2-veri)\.spec\.ts/ },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, testIgnore: /(data|opex-motor|opex-script|applet-model|affilate-model|icerik|css-mimari|istihdam-v2-veri|butce-2027-veri)\.spec\.ts/ },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] }, testIgnore: /(data|opex-motor|opex-script|applet-model|affilate-model|icerik|css-mimari|istihdam-v2-veri|butce-2027-veri)\.spec\.ts/ },
   ],
   // Üretim derlemesi (dist) üzerinde çalışır: önce `npm run build`.
   webServer: {

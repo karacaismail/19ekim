@@ -13,9 +13,9 @@
   "asgariUcret2027": {
    "aciklandi": false,
    "durum": "5 Kasım 2026 itibarıyla 2027 asgari ücreti açıklanmadı. Asgari Ücret Tespit Komisyonu Aralık 2026’da toplanır ve yeni ücret 1 Ocak 2027’de yürürlüğe girer.",
-   "varsayilanArtis": "yüzde 25",
-   "net": 35094.38,
-   "brut": 41287.5,
+   "varsayilanArtis": "yüzde 29,73",
+   "net": 36422.35,
+   "brut": 42849.82,
    "aralik": {
     "dusuk": {
      "artis": "yüzde 21 (OVP 2027 enflasyon hedefi)",
@@ -26,7 +26,7 @@
      "net": 36498
     }
    },
-   "gerekce": "Son iki yılda asgari ücret artışı gerçekleşen yıllık enflasyonun altında kaldı. 2026 artışı yüzde 27 oldu. 2026 yıl sonu enflasyon beklentisi yüzde 28 ile 29,6 arasında, OVP 2027 hedefi ise yüzde 21’dir. Yüzde 25, bu aralığın ortasında bir varsayımdır ve haberlerde aktarılan uzman beklentilerinden biriyle aynıdır.",
+   "gerekce": "Kullanıcı kararıyla (5 Kasım 2026) Google Sheets gider tablosundaki varsayım kullanılır. Tablo 2027 artışını Eylül 2026 yıllık TÜFE (tüketici fiyat endeksi) değeriyle, yüzde 29,73 alır. Böylece kadro planı ile gider planı aynı asgari ücreti kullanır. 2026 artışı yüzde 27 oldu. Haberlerde aktarılan beklentiler yüzde 21 ile 30 arasındadır.",
    "kaynak": [
     "milligazete-2027-asgari",
     "politikam-asgari-senaryo",
@@ -54,8 +54,8 @@
    ]
   },
   "maasArtisi": {
-   "oran": "yüzde 25",
-   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 25 artırıldı ve yuvarlandı. Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar (dijital pazarlama 1,25 kat, asistan 1,5 kat) varsayılan asgari ücretle hesaplandı.",
+   "oran": "yüzde 29,73",
+   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı ve 50 TL’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar (dijital pazarlama 1,25 kat, asistan 1,5 kat) varsayılan asgari ücretle hesaplandı.",
    "sinir": "eleman.net verisi iş ilanı ve özgeçmişteki ücret beyanından hesaplanır ve net mi brüt mü olduğunu yazmaz. Bu plan tutarları net kabul eder. Kariyer.net sayfaları erişime kapalı olduğu için arama sonucundaki özetler yalnız kontrol amacıyla kullanıldı. Michael Page, Hays ve Youthall’ın 2026 Türkiye ücret rehberleri bu çalışmada bulunamadı.",
    "kaynak": [
     "eleman-net-2026"
@@ -223,8 +223,8 @@
     "KVKK ve bilgi güvenliği uygulamaları",
     "İyi düzeyde İngilizce"
    ],
-   "netMaas2027": 200000,
-   "maasDayanagi": "eleman.net 2026 verisinde Yazılım Mühendisi için en yüksek ücret 128.600 TL, DevOps Mühendisi için 139.200 TL görünür. Direktör için 160.000 TL alınıp yüzde 25 artırıldı. Tahmindir.",
+   "netMaas2027": 207550,
+   "maasDayanagi": "eleman.net 2026 verisinde Yazılım Mühendisi için en yüksek ücret 128.600 TL, DevOps Mühendisi için 139.200 TL görünür. Direktör için 160.000 TL alınıp yüzde 29,73 artırıldı. Tahmindir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -244,10 +244,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 4000000
+     "yillikMaliyet2027": 4151000
     }
    },
-   "aylikMaliyet": 400000
+   "aylikMaliyet": 415100
   },
   {
    "id": "istoc-masa-basi",
@@ -265,8 +265,8 @@
     "CRM (müşteri ilişkileri yönetimi yazılımı) kullanabilme",
     "Esnafla rahat iletişim kurabilme"
    ],
-   "netMaas2027": 43750,
-   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 25 artışla 43.750 TL. 2026 tutarı 2027 asgari ücret varsayımının (net 35.094 TL) altında kaldığı için artış kararı zorunludur.",
+   "netMaas2027": 45405.5,
+   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 29,73 artışla 45.405,50 TL. 2026 tutarı 2027 asgari ücret varsayımının (net 36.422 TL) altında kaldığı için artış zorunludur. Bu tutar Google Sheets’teki 2027 tutarıyla aynıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -274,7 +274,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     },
     "medyan": {
      "kisi": 1,
@@ -282,7 +282,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     },
     "guclu": {
      "kisi": 1,
@@ -290,11 +290,11 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     }
    },
    "planTarihi": "2026-11-23",
-   "aylikMaliyet": 87500
+   "aylikMaliyet": 90811
   },
   {
    "id": "istoc-saha-ekibi",
@@ -312,8 +312,8 @@
     "İSTOÇ ya da benzer çarşı esnafını tanıma",
     "Günlük rota ve CRM kaydı disiplini"
    ],
-   "netMaas2027": 62500,
-   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 25 artışla 62.500 TL.",
+   "netMaas2027": 64865,
+   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 29,73 artışla 64.865 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 2,
@@ -322,7 +322,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3000000
+     "yillikMaliyet2027": 3113520
     },
     "medyan": {
      "kisi": 2,
@@ -331,7 +331,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3000000
+     "yillikMaliyet2027": 3113520
     },
     "guclu": {
      "kisi": 2,
@@ -340,11 +340,11 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3000000
+     "yillikMaliyet2027": 3113520
     }
    },
    "planTarihi": "2026-11-23",
-   "aylikMaliyet": 125000
+   "aylikMaliyet": 129730
   },
   {
    "id": "ucuncu-saha-personeli",
@@ -360,8 +360,8 @@
     "Saha ekibiyle aynı nitelikler",
     "Koşullar sağlanınca alınır"
    ],
-   "netMaas2027": 62500,
-   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 25 artışla 62.500 TL.",
+   "netMaas2027": 64865,
+   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 29,73 artışla 64.865 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -369,7 +369,7 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     },
     "medyan": {
      "kisi": 1,
@@ -377,7 +377,7 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     },
     "guclu": {
      "kisi": 1,
@@ -385,11 +385,11 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     }
    },
    "planTarihi": "2026-12-01",
-   "aylikMaliyet": 125000
+   "aylikMaliyet": 129730
   },
   {
    "id": "ek-saha-personeli",
@@ -404,8 +404,8 @@
     "Saha ekibiyle aynı nitelikler",
     "Tercihen İSTOÇ dışındaki toptan merkezlerini tanıma"
    ],
-   "netMaas2027": 62500,
-   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 25 artışla 62.500 TL.",
+   "netMaas2027": 64865,
+   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 29,73 artışla 64.865 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -425,10 +425,10 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1000000
+     "yillikMaliyet2027": 1037840
     }
    },
-   "aylikMaliyet": 125000
+   "aylikMaliyet": 129730
   },
   {
    "id": "masa-basi-satis-uzmani-ek",
@@ -445,8 +445,8 @@
     "CRM ve WhatsApp Business kullanabilme",
     "Günde 60 aramayı sürdürebilme"
    ],
-   "netMaas2027": 43750,
-   "maasDayanagi": "İstoç masa başıyla aynı: 2026 net 35.000 TL, yüzde 25 artışla 43.750 TL.",
+   "netMaas2027": 45405.5,
+   "maasDayanagi": "İstoç masa başıyla aynı: 2026 net 35.000 TL, yüzde 29,73 artışla yaklaşık 45.406 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -460,7 +460,7 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 787500
+     "yillikMaliyet2027": 817299
     },
     "guclu": {
      "kisi": 2,
@@ -469,10 +469,10 @@
       "2027-07"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1400000
+     "yillikMaliyet2027": 1452976
     }
    },
-   "aylikMaliyet": 87500
+   "aylikMaliyet": 90811
   },
   {
    "id": "satis-ekip-lideri",
@@ -489,8 +489,8 @@
     "CRM raporlarını okuyabilme",
     "Tercihen mevcut ekipten terfi"
    ],
-   "netMaas2027": 75000,
-   "maasDayanagi": "Saha maaşı 62.500 TL ile projedeki 10.000 TL liderlik farkının yüzde 25 artırılmış hâli olan 12.500 TL toplanır.",
+   "netMaas2027": 77838,
+   "maasDayanagi": "Saha maaşı 64.865 TL ile projedeki 10.000 TL liderlik farkının yüzde 29,73 artırılmış hâli olan 12.973 TL toplanır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -504,7 +504,7 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     },
     "guclu": {
      "kisi": 1,
@@ -512,10 +512,10 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1650000
+     "yillikMaliyet2027": 1712436
     }
    },
-   "aylikMaliyet": 150000
+   "aylikMaliyet": 155676
   },
   {
    "id": "kurumsal-satis-yoneticisi",
@@ -532,8 +532,8 @@
     "Teklif hazırlama ve sözleşme görüşmesi",
     "İyi düzeyde İngilizce tercih sebebidir"
    ],
-   "netMaas2027": 75000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, Bölge Satış Müdürü 95.000 TL. İkisinin arasındaki 60.000 TL düzeyi yüzde 25 artırıldı.",
+   "netMaas2027": 77850,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, Bölge Satış Müdürü 95.000 TL. İkisinin arasındaki 60.000 TL düzeyi yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -547,7 +547,7 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089900
     },
     "guclu": {
      "kisi": 1,
@@ -555,10 +555,10 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1350000
+     "yillikMaliyet2027": 1401300
     }
    },
-   "aylikMaliyet": 150000
+   "aylikMaliyet": 155700
   },
   {
    "id": "satis-muduru",
@@ -575,8 +575,8 @@
     "Abonelik ya da üyelik satışı deneyimi",
     "Kota, prim ve satış tahmini kurma"
    ],
-   "netMaas2027": 115000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Satış Müdürü 91.800 TL, yüzde 25 artışla yaklaşık 115.000 TL.",
+   "netMaas2027": 119350,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Satış Müdürü 91.800 TL, yüzde 29,73 artışla yaklaşık 119.350 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -596,10 +596,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2300000
+     "yillikMaliyet2027": 2387000
     }
    },
-   "aylikMaliyet": 230000
+   "aylikMaliyet": 238700
   },
   {
    "id": "liste-arastirma-elemani",
@@ -615,8 +615,8 @@
     "Excel ya da Google Sheets kullanabilme",
     "Dikkatli veri girişi"
    ],
-   "netMaas2027": 40000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL. Giriş düzeyi için 32.000 TL alınıp yüzde 25 artırıldı. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
+   "netMaas2027": 41500,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL. Giriş düzeyi için 32.000 TL alınıp yüzde 29,73 artırıldı. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -630,7 +630,7 @@
       "2027-02"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 440000
+     "yillikMaliyet2027": 456500
     },
     "guclu": {
      "kisi": 1,
@@ -638,10 +638,10 @@
       "2027-01"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 480000
+     "yillikMaliyet2027": 498000
     }
    },
-   "aylikMaliyet": 80000
+   "aylikMaliyet": 83000
   },
   {
    "id": "segika-masa-basi",
@@ -657,8 +657,8 @@
     "Masa başı rolüyle aynı nitelikler",
     "SGK ve bordro konularına ilgi"
    ],
-   "netMaas2027": 43750,
-   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 25 artışla 43.750 TL.",
+   "netMaas2027": 45405.5,
+   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 29,73 artışla 45.405,50 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -666,7 +666,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     },
     "medyan": {
      "kisi": 1,
@@ -674,7 +674,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     },
     "guclu": {
      "kisi": 1,
@@ -682,11 +682,11 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089732
     }
    },
    "planTarihi": "2026-11-23",
-   "aylikMaliyet": 87500
+   "aylikMaliyet": 90811
   },
   {
    "id": "satici-uyum-uzmani",
@@ -703,8 +703,8 @@
     "Satıcı paneli ve ürün yükleme süreçlerini anlatabilme",
     "Telefon ve yüz yüze eğitim verebilme"
    ],
-   "netMaas2027": 62500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması E-ticaret Uzmanı 49.900 TL, yüzde 25 artışla yaklaşık 62.500 TL.",
+   "netMaas2027": 64850,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması E-ticaret Uzmanı 49.900 TL, yüzde 29,73 artışla yaklaşık 64.850 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -712,7 +712,7 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556400
     },
     "medyan": {
      "kisi": 2,
@@ -721,7 +721,7 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2500000
+     "yillikMaliyet2027": 2594000
     },
     "guclu": {
      "kisi": 3,
@@ -731,10 +731,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3625000
+     "yillikMaliyet2027": 3761300
     }
    },
-   "aylikMaliyet": 125000
+   "aylikMaliyet": 129700
   },
   {
    "id": "katalog-operatoru",
@@ -750,8 +750,8 @@
     "Ürün fotoğrafı düzenleme ve toplu ürün yükleme (Excel şablonu)",
     "Kategori ve ürün özelliği girişinde dikkat"
    ],
-   "netMaas2027": 50000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İçerik Editörü 46.800 TL. Giriş düzeyi için 40.000 TL alınıp yüzde 25 artırıldı.",
+   "netMaas2027": 51900,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İçerik Editörü 46.800 TL. Giriş düzeyi için 40.000 TL alınıp yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -759,7 +759,7 @@
       "2027-03"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 500000
+     "yillikMaliyet2027": 519000
     },
     "medyan": {
      "kisi": 1,
@@ -767,7 +767,7 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1100000
+     "yillikMaliyet2027": 1141800
     },
     "guclu": {
      "kisi": 2,
@@ -776,10 +776,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1800000
+     "yillikMaliyet2027": 1868400
     }
    },
-   "aylikMaliyet": 100000
+   "aylikMaliyet": 103800
   },
   {
    "id": "satici-basari-yoneticisi",
@@ -796,8 +796,8 @@
     "Kayıp riski taşıyan müşteriyi veriden okuyabilme",
     "Esnafla güven ilişkisi kurabilme"
    ],
-   "netMaas2027": 71000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 25 artışla yaklaşık 71.000 TL.",
+   "netMaas2027": 73700,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 29,73 artışla yaklaşık 73.700 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -805,7 +805,7 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1136000
+     "yillikMaliyet2027": 1179200
     },
     "medyan": {
      "kisi": 2,
@@ -814,7 +814,7 @@
       "2027-08"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2130000
+     "yillikMaliyet2027": 2211000
     },
     "guclu": {
      "kisi": 3,
@@ -824,10 +824,10 @@
       "2027-09"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2982000
+     "yillikMaliyet2027": 3095400
     }
    },
-   "aylikMaliyet": 142000
+   "aylikMaliyet": 147400
   },
   {
    "id": "alici-talep-sorumlusu",
@@ -844,8 +844,8 @@
     "Toptan alıcı segmentlerini (perakendeci, bayi, kurumsal satın alma) tanıma",
     "İyi düzeyde İngilizce tercih sebebidir"
    ],
-   "netMaas2027": 71000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 25 artışla yaklaşık 71.000 TL.",
+   "netMaas2027": 73700,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 29,73 artışla yaklaşık 73.700 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -853,7 +853,7 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1704000
+     "yillikMaliyet2027": 1768800
     },
     "medyan": {
      "kisi": 1,
@@ -861,7 +861,7 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1704000
+     "yillikMaliyet2027": 1768800
     },
     "guclu": {
      "kisi": 1,
@@ -869,10 +869,10 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1704000
+     "yillikMaliyet2027": 1768800
     }
    },
-   "aylikMaliyet": 142000
+   "aylikMaliyet": 147400
   },
   {
    "id": "teklif-operasyon-uzmani",
@@ -889,8 +889,8 @@
     "Ürün ve kategori bilgisi",
     "Telefon ve yazılı iletişimde netlik"
    ],
-   "netMaas2027": 52750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 25 artışla 52.750 TL.",
+   "netMaas2027": 54750,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 29,73 artışla yaklaşık 54.750 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -904,7 +904,7 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 949500
+     "yillikMaliyet2027": 985500
     },
     "guclu": {
      "kisi": 2,
@@ -913,10 +913,10 @@
       "2027-07"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1688000
+     "yillikMaliyet2027": 1752000
     }
    },
-   "aylikMaliyet": 105500
+   "aylikMaliyet": 109500
   },
   {
    "id": "kurumsal-alici-yoneticisi",
@@ -932,8 +932,8 @@
     "En az 4 yıl kurumsal satış ya da satın alma deneyimi",
     "Satın alma birimleriyle çalışma ve ihale süreçlerini bilme"
    ],
-   "netMaas2027": 75000,
-   "maasDayanagi": "Kurumsal satış yöneticisiyle aynı: 60.000 TL düzeyi yüzde 25 artırıldı.",
+   "netMaas2027": 77850,
+   "maasDayanagi": "Kurumsal satış yöneticisiyle aynı: 60.000 TL düzeyi yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -947,7 +947,7 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1050000
+     "yillikMaliyet2027": 1089900
     },
     "guclu": {
      "kisi": 2,
@@ -956,10 +956,10 @@
       "2027-08"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2100000
+     "yillikMaliyet2027": 2179800
     }
    },
-   "aylikMaliyet": 150000
+   "aylikMaliyet": 155700
   },
   {
    "id": "dijital-pazarlama-uzmani",
@@ -976,8 +976,8 @@
     "Meta ve Google reklam yönetimi",
     "Kısa video üretimi ve ölçüm araçları"
    ],
-   "netMaas2027": 43868,
-   "maasDayanagi": "2026 kararı asgari ücretin 1,25 katıdır. 2027 asgari ücret varsayımıyla 1,25 x 35.094 TL yaklaşık 43.868 TL eder.",
+   "netMaas2027": 45527.94,
+   "maasDayanagi": "2026 kararı asgari ücretin 1,25 katıdır. 2027 asgari ücret varsayımıyla 1,25 x 36.422 TL yaklaşık 45.528 TL eder.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -985,7 +985,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1052832
+     "yillikMaliyet2027": 1092671
     },
     "medyan": {
      "kisi": 1,
@@ -993,7 +993,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1052832
+     "yillikMaliyet2027": 1092671
     },
     "guclu": {
      "kisi": 1,
@@ -1001,11 +1001,11 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1052832
+     "yillikMaliyet2027": 1092671
     }
    },
    "planTarihi": "2026-11-23",
-   "aylikMaliyet": 87736
+   "aylikMaliyet": 91056
   },
   {
    "id": "etkinlik-organizatoru",
@@ -1022,8 +1022,8 @@
     "Esnafla iletişim",
     "Salon, izin ve ikram planlaması"
    ],
-   "netMaas2027": 62500,
-   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 25 artışla 62.500 TL.",
+   "netMaas2027": 64865,
+   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 29,73 artışla 64.865 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1031,7 +1031,7 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     },
     "medyan": {
      "kisi": 1,
@@ -1039,7 +1039,7 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     },
     "guclu": {
      "kisi": 1,
@@ -1047,11 +1047,11 @@
       "2026-12"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1500000
+     "yillikMaliyet2027": 1556760
     }
    },
    "planTarihi": "2026-12-01",
-   "aylikMaliyet": 125000
+   "aylikMaliyet": 129730
   },
   {
    "id": "egitmen",
@@ -1123,8 +1123,8 @@
     "Güler yüzlü karşılama ve kayıt alma",
     "Akşam saatlerinde çalışabilme"
    ],
-   "netMaas2027": 35094.38,
-   "maasDayanagi": "2027 asgari ücret varsayımı net 35.094 TL. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
+   "netMaas2027": 36422.35,
+   "maasDayanagi": "2027 asgari ücret varsayımı net 36.422 TL. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1138,7 +1138,7 @@
       "2027-02"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 386038
+     "yillikMaliyet2027": 400646
     },
     "guclu": {
      "kisi": 1,
@@ -1146,10 +1146,10 @@
       "2027-01"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 421133
+     "yillikMaliyet2027": 437068
     }
    },
-   "aylikMaliyet": 70189
+   "aylikMaliyet": 72845
   },
   {
    "id": "performans-pazarlama-uzmani",
@@ -1166,8 +1166,8 @@
     "GA4 (Google Analytics 4), piksel ve UTM (kampanya izleme etiketi) kurulumu",
     "Kayıt başına maliyet ve dönüşüm raporlama"
    ],
-   "netMaas2027": 71250,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Dijital Pazarlama Uzmanı 57.000 TL, yüzde 25 artışla 71.250 TL.",
+   "netMaas2027": 73950,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Dijital Pazarlama Uzmanı 57.000 TL, yüzde 29,73 artışla yaklaşık 73.950 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1181,7 +1181,7 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1425000
+     "yillikMaliyet2027": 1479000
     },
     "guclu": {
      "kisi": 1,
@@ -1189,10 +1189,10 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1567500
+     "yillikMaliyet2027": 1626900
     }
    },
-   "aylikMaliyet": 142500
+   "aylikMaliyet": 147900
   },
   {
    "id": "seo-icerik-uzmani",
@@ -1209,8 +1209,8 @@
     "Google Search Console ve teknik SEO bilgisi",
     "Kategori metni ve rehber içerik yazabilme"
    ],
-   "netMaas2027": 85500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması SEO Uzmanı 68.400 TL, yüzde 25 artışla 85.500 TL.",
+   "netMaas2027": 88750,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması SEO Uzmanı 68.400 TL, yüzde 29,73 artışla yaklaşık 88.750 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1224,7 +1224,7 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1368000
+     "yillikMaliyet2027": 1420000
     },
     "guclu": {
      "kisi": 1,
@@ -1232,10 +1232,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1710000
+     "yillikMaliyet2027": 1775000
     }
    },
-   "aylikMaliyet": 171000
+   "aylikMaliyet": 177500
   },
   {
    "id": "video-grafik-uretici",
@@ -1251,8 +1251,8 @@
     "Temel grafik tasarım (Figma ya da Canva)",
     "Telefonla çekim ve dikey video formatları"
    ],
-   "netMaas2027": 70000,
-   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması Grafik Tasarımcı 76.000 TL, en düşük 53.200 TL. Orta düzey 56.000 TL alınıp yüzde 25 artırıldı. Serbest çalışan bedeli ayda 30.000 ile 45.000 TL varsayılmıştır (tahmin).",
+   "netMaas2027": 72650,
+   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması Grafik Tasarımcı 76.000 TL, en düşük 53.200 TL. Orta düzey 56.000 TL alınıp yüzde 29,73 artırıldı. Serbest çalışan bedeli ayda 30.000 ile 45.000 TL varsayılmıştır (tahmin).",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1278,10 +1278,10 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1680000
+     "yillikMaliyet2027": 1743600
     }
    },
-   "aylikMaliyet": 140000
+   "aylikMaliyet": 145300
   },
   {
    "id": "pazarlama-muduru",
@@ -1298,8 +1298,8 @@
     "B2B ya da pazar yeri büyüme deneyimi",
     "Bütçe ve kanal performansı yönetimi"
    ],
-   "netMaas2027": 128000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Pazarlama Müdürü 102.300 TL, yüzde 25 artışla yaklaşık 128.000 TL.",
+   "netMaas2027": 132850,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Pazarlama Müdürü 102.300 TL, yüzde 29,73 artışla yaklaşık 132.850 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1319,10 +1319,10 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2304000
+     "yillikMaliyet2027": 2391300
     }
    },
-   "aylikMaliyet": 256000
+   "aylikMaliyet": 265700
   },
   {
    "id": "iletisim-ajansi",
@@ -1377,8 +1377,8 @@
    "nitelikler": [
     "Mevcut ekip"
    ],
-   "netMaas2027": 98000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 25 artışla 98.000 TL. Ekibin gerçek ücretleri Google Sheets’tedir ve burada kullanılmadı.",
+   "netMaas2027": 101700,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 29,73 artışla yaklaşık 101.700 TL. Ekibin gerçek ücretleri Google Sheets’tedir ve burada kullanılmadı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 4,
@@ -1389,7 +1389,7 @@
       "2026-10"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 9408000
+     "yillikMaliyet2027": 9763200
     },
     "medyan": {
      "kisi": 4,
@@ -1400,7 +1400,7 @@
       "2026-10"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 9408000
+     "yillikMaliyet2027": 9763200
     },
     "guclu": {
      "kisi": 4,
@@ -1411,10 +1411,10 @@
       "2026-10"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 9408000
+     "yillikMaliyet2027": 9763200
     }
    },
-   "aylikMaliyet": 196000
+   "aylikMaliyet": 203400
   },
   {
    "id": "urun-yoneticisi",
@@ -1431,8 +1431,8 @@
     "Kullanıcı araştırması ve veriyle önceliklendirme",
     "Scrum ekibiyle çalışma"
    ],
-   "netMaas2027": 121500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ürün Müdürü 97.200 TL, yüzde 25 artışla 121.500 TL. Kariyer.net 2026 Ürün Geliştirme Yöneticisi ortalaması 97.004 TL ile uyumludur.",
+   "netMaas2027": 126100,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ürün Müdürü 97.200 TL, yüzde 29,73 artışla yaklaşık 126.100 TL. Kariyer.net 2026 Ürün Geliştirme Yöneticisi ortalaması 97.004 TL ile uyumludur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1446,7 +1446,7 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2673000
+     "yillikMaliyet2027": 2774200
     },
     "guclu": {
      "kisi": 1,
@@ -1454,10 +1454,10 @@
       "2027-01"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2916000
+     "yillikMaliyet2027": 3026400
     }
    },
-   "aylikMaliyet": 243000
+   "aylikMaliyet": 252200
   },
   {
    "id": "yazilim-gelistirici-ek",
@@ -1474,8 +1474,8 @@
     "Ödeme sistemi entegrasyonu ve veritabanı deneyimi",
     "Test yazma ve kod incelemesi alışkanlığı"
    ],
-   "netMaas2027": 98000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 25 artışla 98.000 TL.",
+   "netMaas2027": 101700,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 29,73 artışla yaklaşık 101.700 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1490,7 +1490,7 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3332000
+     "yillikMaliyet2027": 3457800
     },
     "guclu": {
      "kisi": 4,
@@ -1501,10 +1501,10 @@
       "2027-09"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 6272000
+     "yillikMaliyet2027": 6508800
     }
    },
-   "aylikMaliyet": 196000
+   "aylikMaliyet": 203400
   },
   {
    "id": "ui-ux-tasarimci",
@@ -1521,8 +1521,8 @@
     "Figma ve kullanılabilirlik testi",
     "Erişilebilirlik kurallarını bilme"
    ],
-   "netMaas2027": 85000,
-   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. Grafik Tasarımcı (76.000 TL) ve Yazılım Mühendisi (78.400 TL) 2026 İstanbul ortalamalarının altında 68.000 TL alınıp yüzde 25 artırıldı. Tahmindir.",
+   "netMaas2027": 88200,
+   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. Grafik Tasarımcı (76.000 TL) ve Yazılım Mühendisi (78.400 TL) 2026 İstanbul ortalamalarının altında 68.000 TL alınıp yüzde 29,73 artırıldı. Tahmindir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1536,7 +1536,7 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1530000
+     "yillikMaliyet2027": 1587600
     },
     "guclu": {
      "kisi": 1,
@@ -1544,10 +1544,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1700000
+     "yillikMaliyet2027": 1764000
     }
    },
-   "aylikMaliyet": 170000
+   "aylikMaliyet": 176400
   },
   {
    "id": "veri-analisti",
@@ -1563,8 +1563,8 @@
     "SQL ve Google Sheets ya da Looker Studio",
     "Kohort (aynı ay gelen müşteri grubu) ve yenileme analizi"
    ],
-   "netMaas2027": 90000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Veri Analisti 71.900 TL, yüzde 25 artışla yaklaşık 90.000 TL.",
+   "netMaas2027": 93400,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Veri Analisti 71.900 TL, yüzde 29,73 artışla yaklaşık 93.400 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1578,7 +1578,7 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1440000
+     "yillikMaliyet2027": 1494400
     },
     "guclu": {
      "kisi": 1,
@@ -1586,10 +1586,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1800000
+     "yillikMaliyet2027": 1868000
     }
    },
-   "aylikMaliyet": 180000
+   "aylikMaliyet": 186800
   },
   {
    "id": "test-uzmani",
@@ -1605,8 +1605,8 @@
     "En az 2 yıl web ve mobil test deneyimi",
     "Otomatik test aracı (ör. Playwright) kullanabilme"
    ],
-   "netMaas2027": 81000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Test Uzmanı 64.700 TL, yüzde 25 artışla yaklaşık 81.000 TL.",
+   "netMaas2027": 84050,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Test Uzmanı 64.700 TL, yüzde 29,73 artışla yaklaşık 84.050 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1626,10 +1626,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1134000
+     "yillikMaliyet2027": 1176700
     }
    },
-   "aylikMaliyet": 162000
+   "aylikMaliyet": 168100
   },
   {
    "id": "devops-muhendisi",
@@ -1645,8 +1645,8 @@
     "Yedekleme, izleme ve otomatik yayına alma (CI/CD) kurulumu",
     "Güvenlik güncellemelerini takip etme"
    ],
-   "netMaas2027": 112500,
-   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması DevOps Mühendisi 89.900 TL, yüzde 25 artışla yaklaşık 112.500 TL. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
+   "netMaas2027": 116750,
+   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması DevOps Mühendisi 89.900 TL, yüzde 29,73 artışla yaklaşık 116.750 TL. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1674,10 +1674,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1575000
+     "yillikMaliyet2027": 1634500
     }
    },
-   "aylikMaliyet": 225000
+   "aylikMaliyet": 233500
   },
   {
    "id": "sizma-testi",
@@ -1736,8 +1736,8 @@
     "Tercihen pazar yeri, e-ticaret ya da abonelik işi deneyimi",
     "Süreç yazma ve hedef takibi"
    ],
-   "netMaas2027": 142500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Operasyon Müdürü 113.800 TL, yüzde 25 artışla yaklaşık 142.500 TL.",
+   "netMaas2027": 147900,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Operasyon Müdürü 113.800 TL, yüzde 29,73 artışla yaklaşık 147.900 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1751,7 +1751,7 @@
       "2027-04"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2565000
+     "yillikMaliyet2027": 2662200
     },
     "guclu": {
      "kisi": 1,
@@ -1759,10 +1759,10 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 3135000
+     "yillikMaliyet2027": 3253800
     }
    },
-   "aylikMaliyet": 285000
+   "aylikMaliyet": 295800
   },
   {
    "id": "musteri-hizmetleri-temsilcisi",
@@ -1779,8 +1779,8 @@
     "Yazılı Türkçede özen",
     "Destek talebi yazılımı kullanabilme"
    ],
-   "netMaas2027": 52750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 25 artışla 52.750 TL.",
+   "netMaas2027": 54750,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 29,73 artışla yaklaşık 54.750 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1788,7 +1788,7 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1055000
+     "yillikMaliyet2027": 1095000
     },
     "medyan": {
      "kisi": 2,
@@ -1797,7 +1797,7 @@
       "2027-07"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1793500
+     "yillikMaliyet2027": 1861500
     },
     "guclu": {
      "kisi": 3,
@@ -1807,10 +1807,10 @@
       "2027-09"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2426500
+     "yillikMaliyet2027": 2518500
     }
    },
-   "aylikMaliyet": 105500
+   "aylikMaliyet": 109500
   },
   {
    "id": "moderasyon-dogrulama-uzmani",
@@ -1827,8 +1827,8 @@
     "Marka ve taklit ürün konusunda temel bilgi",
     "Kurallara bağlı karar verme ve kayıt tutma"
    ],
-   "netMaas2027": 60000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalamaları Müşteri Temsilcisi 42.200 TL ve Kalite Kontrol Uzmanı 55.500 TL arasından 48.000 TL alınıp yüzde 25 artırıldı.",
+   "netMaas2027": 62250,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalamaları Müşteri Temsilcisi 42.200 TL ve Kalite Kontrol Uzmanı 55.500 TL arasından 48.000 TL alınıp yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1842,7 +1842,7 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1200000
+     "yillikMaliyet2027": 1245000
     },
     "guclu": {
      "kisi": 2,
@@ -1851,10 +1851,10 @@
       "2027-07"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2040000
+     "yillikMaliyet2027": 2116500
     }
    },
-   "aylikMaliyet": 120000
+   "aylikMaliyet": 124500
   },
   {
    "id": "mali-musavir-bordro",
@@ -1917,8 +1917,8 @@
     "En az 2 yıl ön muhasebe ve tahsilat deneyimi",
     "e-Fatura ve muhasebe yazılımı (ör. Logo, Paraşüt) kullanabilme"
    ],
-   "netMaas2027": 54250,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Muhasebe Elemanı 43.400 TL, yüzde 25 artışla 54.250 TL.",
+   "netMaas2027": 56300,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Muhasebe Elemanı 43.400 TL, yüzde 29,73 artışla yaklaşık 56.300 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1926,7 +1926,7 @@
       "2027-02"
      ],
      "bicim": "Yarı zamanlı",
-     "yillikMaliyet2027": 596750
+     "yillikMaliyet2027": 619300
     },
     "medyan": {
      "kisi": 1,
@@ -1934,7 +1934,7 @@
       "2027-02"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1193500
+     "yillikMaliyet2027": 1238600
     },
     "guclu": {
      "kisi": 2,
@@ -1943,10 +1943,10 @@
       "2027-07"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1844500
+     "yillikMaliyet2027": 1914200
     }
    },
-   "aylikMaliyet": 108500
+   "aylikMaliyet": 112600
   },
   {
    "id": "finans-muduru",
@@ -1963,8 +1963,8 @@
     "Girişim ya da yatırım almış şirket deneyimi",
     "Nakit akışı ve bütçe modeli kurma"
    ],
-   "netMaas2027": 118500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Finans Müdürü 94.800 TL, yüzde 25 artışla 118.500 TL.",
+   "netMaas2027": 123000,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Finans Müdürü 94.800 TL, yüzde 29,73 artışla yaklaşık 123.000 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1984,10 +1984,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1659000
+     "yillikMaliyet2027": 1722000
     }
    },
-   "aylikMaliyet": 237000
+   "aylikMaliyet": 246000
   },
   {
    "id": "ik-uzmani",
@@ -2004,8 +2004,8 @@
     "4857 sayılı İş Kanunu ve SGK işlemleri bilgisi",
     "Yapılandırılmış mülakat yürütebilme"
    ],
-   "netMaas2027": 63750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İnsan Kaynakları Uzmanı 51.000 TL, yüzde 25 artışla 63.750 TL.",
+   "netMaas2027": 66150,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İnsan Kaynakları Uzmanı 51.000 TL, yüzde 29,73 artışla yaklaşık 66.150 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2019,7 +2019,7 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1275000
+     "yillikMaliyet2027": 1323000
     },
     "guclu": {
      "kisi": 2,
@@ -2028,10 +2028,10 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 2422500
+     "yillikMaliyet2027": 2513700
     }
    },
-   "aylikMaliyet": 127500
+   "aylikMaliyet": 132300
   },
   {
    "id": "isg-hizmeti",
@@ -2093,7 +2093,7 @@
     "Marka ve KVKK konusunda çalışmış olma"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "İstanbul Barosu 2026 tavsiye çizelgesinde limited şirket için aylık sürekli danışmanlık 79.750 TL’dir. Yüzde 25 artışla 2027 için yaklaşık 100.000 TL varsayılmıştır. Dava ücretleri ayrıdır.",
+   "maasDayanagi": "İstanbul Barosu 2026 tavsiye çizelgesinde limited şirket için aylık sürekli danışmanlık 79.750 TL’dir. Yüzde 29,73 artışla 2027 için yaklaşık 103.500 TL varsayılmıştır. Dava ücretleri ayrıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2101,8 +2101,8 @@
       "2026-11"
      ],
      "bicim": "Dış hizmet",
-     "aylikHizmetBedeli": 100000,
-     "yillikMaliyet2027": 1200000
+     "aylikHizmetBedeli": 103500,
+     "yillikMaliyet2027": 1242000
     },
     "medyan": {
      "kisi": 1,
@@ -2110,8 +2110,8 @@
       "2026-11"
      ],
      "bicim": "Dış hizmet",
-     "aylikHizmetBedeli": 100000,
-     "yillikMaliyet2027": 1200000
+     "aylikHizmetBedeli": 103500,
+     "yillikMaliyet2027": 1242000
     },
     "guclu": {
      "kisi": 1,
@@ -2119,8 +2119,8 @@
       "2026-11"
      ],
      "bicim": "Dış hizmet",
-     "aylikHizmetBedeli": 100000,
-     "yillikMaliyet2027": 1200000
+     "aylikHizmetBedeli": 103500,
+     "yillikMaliyet2027": 1242000
     }
    },
    "aylikMaliyet": null
@@ -2182,8 +2182,8 @@
     "En az 3 yıl KVKK, tüketici ya da e-ticaret mevzuatı",
     "Sözleşme taslağı hazırlama"
    ],
-   "netMaas2027": 84500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Avukat 67.700 TL, yüzde 25 artışla yaklaşık 84.500 TL.",
+   "netMaas2027": 87700,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Avukat 67.700 TL, yüzde 29,73 artışla yaklaşık 87.700 TL.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2203,10 +2203,10 @@
       "2027-05"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1352000
+     "yillikMaliyet2027": 1403200
     }
    },
-   "aylikMaliyet": 169000
+   "aylikMaliyet": 175400
   },
   {
    "id": "sgk-danismani",
@@ -2269,8 +2269,8 @@
     "Ofis yazılımları ve takvim yönetimi",
     "Gizlilik ve düzen"
    ],
-   "netMaas2027": 52642,
-   "maasDayanagi": "2026 kararı asgari ücretin 1,5 katıdır. 2027 asgari ücret varsayımıyla 1,5 x 35.094 TL yaklaşık 52.642 TL eder.",
+   "netMaas2027": 54633.52,
+   "maasDayanagi": "2026 kararı asgari ücretin 1,5 katıdır. 2027 asgari ücret varsayımıyla 1,5 x 36.422 TL yaklaşık 54.634 TL eder.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2278,7 +2278,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1263408
+     "yillikMaliyet2027": 1311204
     },
     "medyan": {
      "kisi": 1,
@@ -2286,7 +2286,7 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1263408
+     "yillikMaliyet2027": 1311204
     },
     "guclu": {
      "kisi": 1,
@@ -2294,11 +2294,11 @@
       "2026-11"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1263408
+     "yillikMaliyet2027": 1311204
     }
    },
    "planTarihi": "2026-11-23",
-   "aylikMaliyet": 105284
+   "aylikMaliyet": 109267
   },
   {
    "id": "idari-isler-satin-alma-uzmani",
@@ -2315,8 +2315,8 @@
     "Fiyat karşılaştırma ve tedarikçi takibi",
     "Demirbaş ve hesap (yazılım lisansı) envanteri tutma"
    ],
-   "netMaas2027": 58375,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL, yüzde 25 artışla 58.375 TL. Satın Alma Uzmanı ortalaması 61.500 TL’dir.",
+   "netMaas2027": 60600,
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL, yüzde 29,73 artışla yaklaşık 60.600 TL. Satın Alma Uzmanı ortalaması 61.500 TL’dir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2330,7 +2330,7 @@
       "2027-06"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 817250
+     "yillikMaliyet2027": 848400
     },
     "guclu": {
      "kisi": 1,
@@ -2338,10 +2338,10 @@
       "2027-03"
      ],
      "bicim": "Tam zamanlı",
-     "yillikMaliyet2027": 1167500
+     "yillikMaliyet2027": 1212000
     }
    },
-   "aylikMaliyet": 116750
+   "aylikMaliyet": 121200
   }
  ],
  "secenekler": {
@@ -2354,18 +2354,18 @@
    "yeniKadroKisi": 6,
    "disHizmetSayisi": 6,
    "serbestCalisanSayisi": 4,
-   "toplamMaliyet2027": 29375990,
-   "kadroMaliyeti2027": 26315990,
-   "disHizmetVeSerbestMaliyeti2027": 3060000,
+   "toplamMaliyet2027": 30413279,
+   "kadroMaliyeti2027": 27311279,
+   "disHizmetVeSerbestMaliyeti2027": 3102000,
    "kirilim": {
-    "eskiPlanRolleri": 10416240,
-    "mevcutDigerKadro": 9408000,
-    "yeniPozisyonlar": 9551750
+    "eskiPlanRolleri": 10810379,
+    "mevcutDigerKadro": 9763200,
+    "yeniPozisyonlar": 9839700
    },
-   "aylikMaliyetAralik2027": 2525770,
+   "aylikMaliyetAralik2027": 2615165,
    "gelirHedefi2027": 32242641,
-   "gelirPayi": 91.1,
-   "medyanGelireGorePay": 43.1,
+   "gelirPayi": 94.3,
+   "medyanGelireGorePay": 44.6,
    "hedefler": {
     "yeniAktifSatici2027": 355,
     "odeyenSaticiAralik2027": 133,
@@ -2382,37 +2382,37 @@
     "satis": {
      "kadroKisi": 5,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 6600000
+     "yillikMaliyet2027": 6849744
     },
     "satici-basarisi": {
      "kadroKisi": 3,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 3136000
+     "yillikMaliyet2027": 3254600
     },
     "alici-talep": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 1704000
+     "yillikMaliyet2027": 1768800
     },
     "pazarlama": {
      "kadroKisi": 2,
      "disHizmetVeSerbest": 4,
-     "yillikMaliyet2027": 3392832
+     "yillikMaliyet2027": 3489431
     },
     "urun-teknoloji": {
      "kadroKisi": 4,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 9408000
+     "yillikMaliyet2027": 9763200
     },
     "operasyon": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 1055000
+     "yillikMaliyet2027": 1095000
     },
     "finans": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 956750
+     "yillikMaliyet2027": 979300
     },
     "insan-kaynaklari": {
      "kadroKisi": 0,
@@ -2422,16 +2422,16 @@
     "hukuk-uyum": {
      "kadroKisi": 0,
      "disHizmetVeSerbest": 3,
-     "yillikMaliyet2027": 1740000
+     "yillikMaliyet2027": 1782000
     },
     "idari-isler": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 1263408
+     "yillikMaliyet2027": 1311204
     }
    },
    "gelirAralik2027": 4107419,
-   "aralikGelirPayi": 61.5,
+   "aralikGelirPayi": 63.7,
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "medyan": {
@@ -2443,18 +2443,18 @@
    "yeniKadroKisi": 27,
    "disHizmetSayisi": 7,
    "serbestCalisanSayisi": 5,
-   "toplamMaliyet2027": 57893528,
-   "kadroMaliyeti2027": 54033528,
-   "disHizmetVeSerbestMaliyeti2027": 3860000,
+   "toplamMaliyet2027": 59979384,
+   "kadroMaliyeti2027": 56077384,
+   "disHizmetVeSerbestMaliyeti2027": 3902000,
    "kirilim": {
-    "eskiPlanRolleri": 10416240,
-    "mevcutDigerKadro": 9408000,
-    "yeniPozisyonlar": 38069288
+    "eskiPlanRolleri": 10810379,
+    "mevcutDigerKadro": 9763200,
+    "yeniPozisyonlar": 39405805
    },
-   "aylikMaliyetAralik2027": 5735031,
+   "aylikMaliyetAralik2027": 5943341,
    "gelirHedefi2027": 68205762,
-   "gelirPayi": 84.9,
-   "medyanGelireGorePay": 84.9,
+   "gelirPayi": 87.9,
+   "medyanGelireGorePay": 87.9,
    "hedefler": {
     "yeniAktifSatici2027": 634,
     "odeyenSaticiAralik2027": 304,
@@ -2471,56 +2471,56 @@
     "satis": {
      "kadroKisi": 9,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 10377500
+     "yillikMaliyet2027": 10770203
     },
     "satici-basarisi": {
      "kadroKisi": 5,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 5730000
+     "yillikMaliyet2027": 5946800
     },
     "alici-talep": {
      "kadroKisi": 3,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 3703500
+     "yillikMaliyet2027": 3844200
     },
     "pazarlama": {
      "kadroKisi": 5,
      "disHizmetVeSerbest": 5,
-     "yillikMaliyet2027": 6991870
+     "yillikMaliyet2027": 7209077
     },
     "urun-teknoloji": {
      "kadroKisi": 9,
      "disHizmetVeSerbest": 2,
-     "yillikMaliyet2027": 18583000
+     "yillikMaliyet2027": 19277200
     },
     "operasyon": {
      "kadroKisi": 4,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 5558500
+     "yillikMaliyet2027": 5768700
     },
     "finans": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 1673500
+     "yillikMaliyet2027": 1718600
     },
     "insan-kaynaklari": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 1455000
+     "yillikMaliyet2027": 1503000
     },
     "hukuk-uyum": {
      "kadroKisi": 0,
      "disHizmetVeSerbest": 3,
-     "yillikMaliyet2027": 1740000
+     "yillikMaliyet2027": 1782000
     },
     "idari-isler": {
      "kadroKisi": 2,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 2080658
+     "yillikMaliyet2027": 2159604
     }
    },
    "gelirAralik2027": 9432233,
-   "aralikGelirPayi": 60.8,
+   "aralikGelirPayi": 63,
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "guclu": {
@@ -2532,18 +2532,18 @@
    "yeniKadroKisi": 48,
    "disHizmetSayisi": 6,
    "serbestCalisanSayisi": 5,
-   "toplamMaliyet2027": 89729873,
-   "kadroMaliyeti2027": 85029873,
-   "disHizmetVeSerbestMaliyeti2027": 4700000,
+   "toplamMaliyet2027": 92987999,
+   "kadroMaliyeti2027": 88245999,
+   "disHizmetVeSerbestMaliyeti2027": 4742000,
    "kirilim": {
-    "eskiPlanRolleri": 10416240,
-    "mevcutDigerKadro": 9408000,
-    "yeniPozisyonlar": 69905633
+    "eskiPlanRolleri": 10810379,
+    "mevcutDigerKadro": 9763200,
+    "yeniPozisyonlar": 72414420
    },
-   "aylikMaliyetAralik2027": 9337531,
+   "aylikMaliyetAralik2027": 9678482,
    "gelirHedefi2027": 106586176,
-   "gelirPayi": 84.2,
-   "medyanGelireGorePay": 131.6,
+   "gelirPayi": 87.2,
+   "medyanGelireGorePay": 136.3,
    "hedefler": {
     "yeniAktifSatici2027": 878,
     "odeyenSaticiAralik2027": 509,
@@ -2555,61 +2555,61 @@
     "yonetim": {
      "kadroKisi": 2,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 4000000
+     "yillikMaliyet2027": 4151000
     },
     "satis": {
      "kadroKisi": 12,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 14780000
+     "yillikMaliyet2027": 15339296
     },
     "satici-basarisi": {
      "kadroKisi": 8,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 8407000
+     "yillikMaliyet2027": 8725100
     },
     "alici-talep": {
      "kadroKisi": 5,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 5492000
+     "yillikMaliyet2027": 5700600
     },
     "pazarlama": {
      "kadroKisi": 7,
      "disHizmetVeSerbest": 6,
-     "yillikMaliyet2027": 12335465
+     "yillikMaliyet2027": 12723299
     },
     "urun-teknoloji": {
      "kadroKisi": 13,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 25005000
+     "yillikMaliyet2027": 25941600
     },
     "operasyon": {
      "kadroKisi": 6,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 7601500
+     "yillikMaliyet2027": 7888800
     },
     "finans": {
      "kadroKisi": 3,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 4163500
+     "yillikMaliyet2027": 4296200
     },
     "insan-kaynaklari": {
      "kadroKisi": 2,
      "disHizmetVeSerbest": 1,
-     "yillikMaliyet2027": 2722500
+     "yillikMaliyet2027": 2813700
     },
     "hukuk-uyum": {
      "kadroKisi": 1,
      "disHizmetVeSerbest": 2,
-     "yillikMaliyet2027": 2792000
+     "yillikMaliyet2027": 2885200
     },
     "idari-isler": {
      "kadroKisi": 2,
      "disHizmetVeSerbest": 0,
-     "yillikMaliyet2027": 2430908
+     "yillikMaliyet2027": 2523204
     }
    },
    "gelirAralik2027": 15806950,
-   "aralikGelirPayi": 59.1,
+   "aralikGelirPayi": 61.2,
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   }
  },

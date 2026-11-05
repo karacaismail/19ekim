@@ -1,0 +1,67 @@
+/*
+ * 2027 bütçesi (kullanıcı kararı 2026-11-05). Bu dosyadaki her seçici `b27-` önekli bir sınıfa bağlıdır
+ * (tests/css-mimari.spec.ts). Tablo, bölüm, istatistik, seçim ve anahtar bileşenleri ortak stillerini global.css'ten
+ * alır. Ayrım boşluk ve yüzey tonuyla kurulur. Dekoratif kenarlık yoktur.
+ */
+
+.b27-uyari {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  line-height: var(--leading-body);
+}
+
+.b27-uyari p {
+  margin: 0;
+}
+
+.b27-durum {
+  font-weight: var(--weight-semibold);
+}
+
+.b27-araclar {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.b27-anahtarlar {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--prose-max);
+}
+
+.b27-not {
+  max-width: var(--prose-max);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-selected);
+  line-height: var(--leading-body);
+}
+
+.b27-liste {
+  display: grid;
+  gap: var(--space-5);
+  max-width: var(--prose-max);
+  margin: var(--space-4) 0 0;
+}
+
+.b27-liste dt {
+  font-weight: var(--weight-semibold);
+}
+
+.b27-liste dd {
+  margin: var(--space-1) 0 0;
+  line-height: var(--leading-body);
+}
+
+/* Tablo hücresindeki kaynak bağlantısı tek başına durur. Dokunma alanı en az 44 px'tir. */
+.b27-kaynak {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
+}

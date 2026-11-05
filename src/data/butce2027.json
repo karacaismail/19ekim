@@ -1,0 +1,668 @@
+{
+ "tarih": "2026-11-05",
+ "artis2027": 0.2973,
+ "parametreler": [
+  {
+   "id": "is-gunu-ay",
+   "ad": "Aylık iş günü",
+   "deger": 22,
+   "birim": "gün",
+   "dayanak": "Görevde verilen varsayımdır ve yemek ile yol hesaplarında kullanılmıştır."
+  },
+  {
+   "id": "usd-try",
+   "ad": "ABD doları satış kuru",
+   "deger": 50.0489,
+   "birim": "TL",
+   "dayanak": "TCMB gösterge kuru, 5 Kasım 2026.",
+   "kaynak": "https://www.tcmb.gov.tr/kurlar/today.xml"
+  },
+  {
+   "id": "ofis-alani-kisi",
+   "ad": "Kişi başına ofis alanı",
+   "deger": 10,
+   "birim": "m²/kişi",
+   "dayanak": "Fransız AFNOR NF X35-102 önerisine göre tek kişilik ofiste 10 m², paylaşımlı ofiste 11 m², çağrı merkezi gibi gürültülü alanlarda 15 m² önerilir. Bu öneri bağlayıcı değildir ve Türkiye için resmi bir oran bulunamamıştır.",
+   "kaynak": "https://deskeo.com/en/blog/advice/what-is-the-minimum-surface-area-required-for-a-workstation"
+  },
+  {
+   "id": "mevcut-ofis-kira",
+   "ad": "Mevcut ofis kirası (aidat dahil)",
+   "deger": 200000,
+   "birim": "TL/ay",
+   "dayanak": "Görevde verilen mevcut şirket bilgisidir."
+  }
+ ],
+ "kalemler": [
+  {
+   "id": "laptop-ofis",
+   "tur": "capex",
+   "ad": "Ofis çalışanı için iş dizüstü bilgisayarı (Lenovo ThinkPad E14 Gen 7, Ultra 5 225U, 16 GB, 512 GB, Windows 11 Pro)",
+   "birim": "adet",
+   "fiyat2026": 75199.06,
+   "fiyat2027": 97555.74,
+   "kdv": "dahil",
+   "dayanak": "Akakçe fiyat karşılaştırma sitesinde bu model 5 satıcıda listelenir ve en düşük fiyatı 75.199 TL'dir. İşletim sistemi olmayan (FreeDOS) eşdeğer model 63.920 TL'den bulunur, kurumsal lisans zaten varsa bu seçenek kullanılabilir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, ThinkPad E14 Gen 7 21SX007DTX",
+     "url": "https://www.akakce.com/laptop-notebook/en-ucuz-lenovo-thinkpad-e14-gen-7-intel-core-ultra-5-225u-16gb-512gb-ssd-14-wuxga-w11p-laptop-notebook-21sx007dtx-008-fiyati,1633563833.html",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, ThinkPad E14 16GB 512GB",
+     "url": "https://www.akakce.com/arama/?q=thinkpad+e14+16gb+512gb",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "laptop-gelistirici-air",
+   "tur": "capex",
+   "ad": "Geliştirici ve tasarımcı için MacBook Air 13 inç (M5, 16 GB, 512 GB)",
+   "birim": "adet",
+   "fiyat2026": 89999,
+   "fiyat2027": 116755.7,
+   "kdv": "dahil",
+   "dayanak": "Apple Türkiye mağazasında bu yapılandırmanın liste fiyatı 89.999 TL'dir ve sayfa yüzde 20 KDV'nin dahil olduğunu belirtir. Akakçe'de aynı modelin en düşük satıcı fiyatı 81.779 TL'dir.",
+   "kaynaklar": [
+    {
+     "ad": "Apple Türkiye, MacBook Air satın al",
+     "url": "https://www.apple.com/tr/shop/buy-mac/macbook-air",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, MacBook Air M5",
+     "url": "https://www.akakce.com/arama/?q=macbook+air+m5+16gb+512gb",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "monitor-27-ekonomik",
+   "tur": "capex",
+   "ad": "27 inç IPS monitör, ekonomik (Philips 27B2N2100, Full HD, 100 Hz)",
+   "birim": "adet",
+   "fiyat2026": 6831.98,
+   "fiyat2027": 8863.13,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de bu model 12 satıcıda listelenir ve en düşük fiyatı 6.832 TL'dir. Ofis ve çağrı ekibi için yeterli bir ekrandır.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Philips 27B2N2100/93",
+     "url": "https://www.akakce.com/monitor/en-ucuz-philips-27b2n2100-93-27-4-ms-full-hd-ips-100-hz-fiyati,1600820599.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "kulaklik-cagri",
+   "tur": "capex",
+   "ad": "Çağrı ekibi için mikrofonlu USB kulaklık (Jabra Evolve2 30)",
+   "birim": "adet",
+   "fiyat2026": 4147.49,
+   "fiyat2027": 5380.54,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de Jabra Evolve2 30 USB çağrı merkezi kulaklığı 9 satıcıda listelenir ve en düşük fiyatı 4.147 TL'dir. Daha ucuz seçenek olarak Logitech H390 USB kulaklık 48 satıcıda 1.978 TL'den bulunur.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Jabra Evolve2 30 USB",
+     "url": "https://www.akakce.com/cagri-merkezi-kulakligi/en-ucuz-jabra-evolve2-30-usb-kablolu-fiyati,794774508.html",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe, Logitech H390",
+     "url": "https://www.akakce.com/kulaklik/en-ucuz-logitech-h390-981-001286-beyaz-mikrofonlu-kulak-ustu-fiyati,417420952.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "klavye-mouse-seti",
+   "tur": "capex",
+   "ad": "Kablosuz klavye ve mouse seti (Logitech MK295, Türkçe Q)",
+   "birim": "adet",
+   "fiyat2026": 2499,
+   "fiyat2027": 3241.95,
+   "kdv": "dahil",
+   "dayanak": "Akakçe aramasında Logitech MK295 Türkçe Q set birden çok satıcıda 2.499 TL'den listelenir. Bazı satıcılar aynı seti 3.100 ile 3.700 TL arasında satar.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe arama, Logitech MK295",
+     "url": "https://www.akakce.com/arama/?q=logitech+mk295+klavye+mouse+set",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "telefon-android-orta",
+   "tur": "capex",
+   "ad": "Saha ve çağrı ekibi için orta seviye Android telefon (Samsung Galaxy A37, 128 GB, 6 GB)",
+   "birim": "adet",
+   "fiyat2026": 20099,
+   "fiyat2027": 26074.43,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de Galaxy A37 128 GB 6 GB modeli 16 satıcıda listelenir ve en düşük fiyatı 20.099 TL'dir. 8 GB bellekli sürüm yaklaşık 21.800 TL'dir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Samsung Galaxy A37 128 GB 6 GB",
+     "url": "https://www.akakce.com/cep-telefonu/en-ucuz-samsung-galaxy-a37-128-gb-6-gb-yesil-fiyati,1469473887.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "calisma-masasi",
+   "tur": "capex",
+   "ad": "Çalışma masası 160x80 cm (Karr Office Firmus)",
+   "birim": "adet",
+   "fiyat2026": 5774,
+   "fiyat2027": 7490.61,
+   "kdv": "dahil",
+   "dayanak": "Akakçe aramasında Karr Office Firmus 160x80 cm masa 7 satıcıda 5.774 TL'den listelenir. Kurumsal ofis mobilyası firmalarından toplu alımda fiyat farklı olabilir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe arama, çalışma masası 160x80",
+     "url": "https://www.akakce.com/arama/?q=çalışma+masası+160x80+ofis",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "ofis-koltugu-ergonomik",
+   "tur": "capex",
+   "ad": "Ergonomik file sırtlı çalışma koltuğu (Metis Plus, multitilt mekanizma)",
+   "birim": "adet",
+   "fiyat2026": 12126.24,
+   "fiyat2027": 15731.37,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de bu koltuk 4 satıcıda listelenir ve en düşük fiyatı 12.126 TL'dir. Aynı aramada benzer file sırtlı koltuklar 6.600 ile 22.000 TL arasında değişir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Metis Plus çalışma koltuğu",
+     "url": "https://www.akakce.com/calisma-koltugu/en-ucuz-metis-plus-ofis-sandalyesi-bilgisayar-koltugu-multitilt-mekanizma-file-sirt-ergonomik-tasarim-701-siyah-fiyati,1767376856.html",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, ergonomik ofis koltuğu",
+     "url": "https://www.akakce.com/arama/?q=ergonomik+ofis+koltuğu+file+sırt",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "toplanti-odasi-seti",
+   "tur": "capex",
+   "ad": "Toplantı odası takımı: 240 cm masa ve 8 konferans sandalyesi",
+   "birim": "takım",
+   "fiyat2026": 44958,
+   "fiyat2027": 58324.01,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de 240 cm toplantı masası 17.226 TL'den, 2'li konferans sandalyesi seti 6.933 TL'den listelenir. Takım fiyatı bir masa ve 8 sandalye toplanarak hesaplanmıştır.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe arama, toplantı masası 240",
+     "url": "https://www.akakce.com/arama/?q=toplantı+masası+240",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, konferans sandalyesi",
+     "url": "https://www.akakce.com/arama/?q=konferans+sandalyesi",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "ofis-tadilat-m2",
+   "tur": "capex",
+   "ad": "Temel açık ofis tadilatı (boya, elektrik, ağ kablolaması, hafif bölme)",
+   "birim": "m²",
+   "fiyat2026": 4000,
+   "fiyat2027": 5189.2,
+   "kdv": "hariç",
+   "dayanak": "Bu rakam bir tahmindir. Armut'ta Bağcılar'da 100 m² ofis tadilatı için 240.000 TL (yaklaşık 2.400 TL/m²) bütçeli bir talep vardır, Cushman and Wakefield ise İstanbul'da orta seviye tam dekorasyonu 2025 için 1.550 Euro/m² olarak verir, bu nedenle temel işler için 4.000 TL/m² ara bir varsayım olarak seçilmiştir.",
+   "kaynaklar": [
+    {
+     "ad": "Armut, İstanbul ofis tadilat fiyatları",
+     "url": "https://armut.com/fiyatlari/istanbul-ofis-tadilat_494_34",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Ekonomist, İstanbul ofis dekorasyon maliyeti (Cushman and Wakefield 2025)",
+     "url": "https://www.ekonomist.com.tr/makale/istanbul-ofis-dekorasyon-maliyeti-artisinda-avrupa-22-incisi-oldu-63832",
+     "tarih": "2025-08-14"
+    }
+   ],
+   "tahmin": true
+  },
+  {
+   "id": "etkinlik-tv-65",
+   "tur": "capex",
+   "ad": "Etkinlik ekranı 65 inç 4K televizyon (Samsung Crystal 65U8000H)",
+   "birim": "adet",
+   "fiyat2026": 41799,
+   "fiyat2027": 54225.84,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de bu model 32 satıcıda listelenir ve en düşük fiyatı 41.799 TL'dir. Ayaklı TV standı bu fiyata dahil değildir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Samsung 65U8000H",
+     "url": "https://www.akakce.com/televizyon/en-ucuz-samsung-crystal-65u8000h-4k-ultra-hd-65-165-ekran-uydu-alicili-smart-led-tv-fiyati,1599029603.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "etkinlik-ses-sistemi",
+   "tur": "capex",
+   "ad": "Taşınabilir ses sistemi ve 2 kablosuz mikrofon (JBL PartyBox Encore 2)",
+   "birim": "adet",
+   "fiyat2026": 43608.22,
+   "fiyat2027": 56572.94,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de JBL PartyBox Encore 2 mikrofonlu sürüm yalnız 1 satıcıda 43.608 TL'dir, bu nedenle fiyat zayıf bir göstergedir. Daha ucuz bir kurulum için çiftli UHF kablosuz el mikrofonu seti 4.805 TL'den bulunur.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, JBL PartyBox Encore 2",
+     "url": "https://www.akakce.com/bluetooth-hoparlor/en-ucuz-jbl-partybox-encore-2-fiyati,1041363642.html",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, çiftli UHF mikrofon",
+     "url": "https://www.akakce.com/arama/?q=kablosuz+el+mikrofonu+çiftli+uhf",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "etkinlik-katlanir-sandalye-50",
+   "tur": "capex",
+   "ad": "Etkinlik için 50 adet minderli katlanır metal sandalye",
+   "birim": "50 adet",
+   "fiyat2026": 55199.5,
+   "fiyat2027": 71610.31,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de minderli katlanır metal sandalye 4 satıcıda tanesi 1.104 TL'den listelenir ve 50 adet için toplam hesaplanmıştır. İstiflenebilir konferans sandalyesi tercih edilirse tanesi yaklaşık 3.467 TL olur.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Retodesign katlanır metal sandalye",
+     "url": "https://www.akakce.com/mutfak-sandalyesi/en-ucuz-retodesign-1-adet-katlanir-kirmizi-metal-sandalye-minderli-bistro-sandalye-2024k-fiyati,702165120.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "roll-up-banner",
+   "tur": "capex",
+   "ad": "Baskılı roll-up banner 85x200 cm",
+   "birim": "adet",
+   "fiyat2026": 3139,
+   "fiyat2027": 4072.22,
+   "kdv": "dahil",
+   "dayanak": "Akakçe aramasında logolu ve baskılı 85x200 cm roll-up 3.139 TL'den listelenir. Baskısız mekanizma 1.500 ile 2.300 TL arasındadır.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe arama, roll up banner",
+     "url": "https://www.akakce.com/arama/?q=roll+up+banner",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "video-kamera",
+   "tur": "capex",
+   "ad": "Video için aynasız fotoğraf makinesi (Sony ZV-E10 II ve 16-50 mm lens)",
+   "birim": "adet",
+   "fiyat2026": 55459.15,
+   "fiyat2027": 71947.16,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de bu set 9 satıcıda listelenir ve en düşük fiyatı 55.459 TL'dir. Telefonla çekim yapılacaksa bu kalem yerine yalnız gimbal alınabilir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, Sony ZV-E10 II kit",
+     "url": "https://www.akakce.com/fotograf-makinesi/en-ucuz-sony-zv-e10-ii-16-50mm-lens-siyah-aynasiz-fiyati,1652495106.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "video-gimbal",
+   "tur": "capex",
+   "ad": "Telefon gimbalı (DJI Osmo Mobile 8)",
+   "birim": "adet",
+   "fiyat2026": 7439,
+   "fiyat2027": 9650.61,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de DJI Osmo Mobile 8 takip setli sürümü 56 satıcıda listelenir ve en düşük fiyatı 7.439 TL'dir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, DJI Osmo Mobile 8",
+     "url": "https://www.akakce.com/gimbal/en-ucuz-dji-osmo-mobile-8-advanced-tracking-combo-fiyati,1675025876.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "video-isik-seti",
+   "tur": "capex",
+   "ad": "Video ışık seti, 2 adet LED softbox",
+   "birim": "takım",
+   "fiyat2026": 8771.62,
+   "fiyat2027": 11379.42,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de 2'li 120 W LED softbox çekim ışığı seti 8.772 TL'dir ve yalnız 1 satıcı vardır. Tek bir Godox LDX50Bi LED panel 9.718 TL'dir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, GDX Pro TLB-500 2'li ışık seti",
+     "url": "https://www.akakce.com/softbox/en-ucuz-gdx-pro-tlb-500-rgb-2-li-cekim-isik-seti-120w-studyo-video-fotograf-isigi-fiyati,1435658185.html",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Akakçe arama, Godox LED video ışık",
+     "url": "https://www.akakce.com/arama/?q=godox+led+video+ışık+seti",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "video-yaka-mikrofonu",
+   "tur": "capex",
+   "ad": "Kablosuz yaka mikrofonu, 2 kişilik (DJI Mic Mini 2S)",
+   "birim": "takım",
+   "fiyat2026": 9179.15,
+   "fiyat2027": 11908.11,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de DJI Mic Mini 2S 2 kişilik set 83 satıcıda listelenir ve en düşük fiyatı 9.179 TL'dir. Rode Wireless GO Gen 3 2'li set 12.506 TL'dir.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, DJI Mic Mini 2S 2 kişilik",
+     "url": "https://www.akakce.com/yaka-mikrofonu/en-ucuz-dji-mic-mini-2s-2-kisilik-mikrofon-seti-fiyati,1640455577.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "marka-tescil-3-sinif",
+   "tur": "capex",
+   "ad": "TÜRKPATENT marka başvurusu ve tescili, 3 sınıf",
+   "birim": "marka",
+   "fiyat2026": 15800,
+   "fiyat2027": 20497.34,
+   "kdv": "hariç",
+   "dayanak": "Toplam, ilk sınıf 2.820 TL, ikinci sınıf 2.820 TL, üçüncü sınıf 3.150 TL ve tescil ücreti 7.010 TL toplanarak 15.800 TL bulunmuştur. Üçüncü sınıf ücreti ikincil kaynaktan alınmıştır ve resmi cetvelden ayrıca doğrulanmalıdır.",
+   "kaynaklar": [
+    {
+     "ad": "eleman.net, Patent ücretleri 2026",
+     "url": "https://www.eleman.net/is-rehberi/maaslar-ve-ucretler/patent-ucretleri-2026-ne-kadar-h18087",
+     "tarih": "2026-01-06"
+    },
+    {
+     "ad": "QUASA, marka sınıfı ve 2026 ücretleri",
+     "url": "https://quasa.io/tr/media/marka-sinifini-yanlis-secmeyin-eksik-ucret-basvuruyu-daraltabilir",
+     "tarih": "2026-10-06"
+    },
+    {
+     "ad": "Alomaliye, 2026 tarife tam metin PDF",
+     "url": "https://www.alomaliye.com/wp-content/uploads/2025/12/2026-turk-patent.pdf",
+     "tarih": "2025-12-31"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "switch-24-port-poe",
+   "tur": "capex",
+   "ad": "Yönetilebilir 24 port PoE switch (TP-Link Omada TL-SG3428MP)",
+   "birim": "adet",
+   "fiyat2026": 27155,
+   "fiyat2027": 35228.18,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de bu switch 24 satıcıda listelenir ve en düşük fiyatı 27.155 TL'dir. PoE (ağ kablosundan elektrik verme) özelliği erişim noktalarını ayrı adaptörsüz besler.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe arama, TL-SG3428",
+     "url": "https://www.akakce.com/arama/?q=tp-link+tl-sg3428",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "wifi-erisim-noktasi",
+   "tur": "capex",
+   "ad": "Tavan tipi Wi-Fi 6 erişim noktası (TP-Link Omada EAP673)",
+   "birim": "adet",
+   "fiyat2026": 15407.23,
+   "fiyat2027": 19987.8,
+   "kdv": "dahil",
+   "dayanak": "Akakçe'de EAP673 35 satıcıda listelenir ve en düşük fiyatı 15.407 TL'dir. Açık ofiste kabaca her 20 ile 30 kişi için bir erişim noktası planlanır, bu oran bir varsayımdır.",
+   "kaynaklar": [
+    {
+     "ad": "Akakçe, TP-Link Omada EAP673",
+     "url": "https://www.akakce.com/access-point/en-ucuz-tp-link-omada-eap673-5400-mbps-tavan-tipi-fiyati,693725227.html",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "yemek-karti-aylik",
+   "tur": "opex",
+   "ad": "Yemek kartı, istisna sınırında aylık tutar (22 iş günü)",
+   "birim": "kişi/ay",
+   "fiyat2026": 6600,
+   "fiyat2027": 8562.18,
+   "kdv": "hariç",
+   "dayanak": "Tutar, günlük 300 TL istisna tutarı ile ayda 22 iş günü çarpılarak bulunmuştur. Şirketler genelde yemek kartını tam istisna sınırında yükler, bu bir uygulama varsayımıdır.",
+   "kaynaklar": [
+    {
+     "ad": "Forbes Türkiye, 2026 istisna tutarları",
+     "url": "https://www.forbes.com.tr/ekonomi/2026-yili-gelir-vergisi-tarifesi-ve-istisna-tutarlari-belirlendi",
+     "tarih": "2026-01-01"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "istanbulkart-abonman",
+   "tur": "opex",
+   "ad": "İstanbulkart Mavi Kart aylık tam abonman",
+   "birim": "kişi/ay",
+   "fiyat2026": 3628,
+   "fiyat2027": 4706.6,
+   "kdv": "dahil",
+   "dayanak": "İBB'nin yüzde 10 zammı ile Mavi Kart tam aylık abonman 20 Temmuz 2026'dan itibaren 3.298 TL'den 3.628 TL'ye çıkmıştır. İstanbul'da toplu taşımaya genelde yılda bir ile iki kez zam yapılır, bu nedenle 2027 tutarı varsayımdan yüksek çıkabilir.",
+   "kaynaklar": [
+    {
+     "ad": "Habertürk, tam ve öğrenci akbil ücretleri",
+     "url": "https://www.haberturk.com/tam-ve-ogrenci-akbil-ne-kadar-oldu-aylik-abonman-ucreti-kac-tl-2026-istanbul-da-tam-ve-ogrenci-akbil-ne-kadar-oldu-3899253",
+     "tarih": "2026-07-18"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "mobil-hat-kurumsal-20gb",
+   "tur": "opex",
+   "ad": "Kurumsal mobil hat, 20 GB internet ve 1000 dakika (Türk Telekom Cepte Dijital)",
+   "birim": "hat/ay",
+   "fiyat2026": 470,
+   "fiyat2027": 609.73,
+   "kdv": "bilinmiyor",
+   "dayanak": "Türk Telekom kurumsal tarifeler sayfasında 12 ay taahhütlü 20 GB paket aylık 470 TL, 40 GB ve 3000 dakikalık paket 640 TL'dir. Sayfa, telsiz kullanım ücreti ve yeni hatta alınan ruhsatname ile özel iletişim vergisinin bu ücrete dahil olmadığını yazar.",
+   "kaynaklar": [
+    {
+     "ad": "Türk Telekom Kurumsal, mobil kurumsal tarifeler",
+     "url": "https://kurumsal.turktelekom.com.tr/mobil/kurumsal-tarifeler",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "microsoft-365-business-standard",
+   "tur": "opex",
+   "ad": "Microsoft 365 Business Standard lisansı",
+   "birim": "kullanıcı/ay",
+   "fiyat2026": 735.72,
+   "fiyat2027": 954.45,
+   "kdv": "hariç",
+   "dayanak": "Turkcell kurumsal sayfasında yıllık taahhüt ve aylık ödeme ile kullanıcı başına aylık 14,70 ABD dolarıdır, aylık abonelikte 16,80 dolardır ve fiyatlar 1 Temmuz 2026'da güncellenmiştir. TL karşılığı 5 Kasım 2026 TCMB kuru 50,0489 ile hesaplanmıştır ve fatura her ay kura göre değişir.",
+   "kaynaklar": [
+    {
+     "ad": "Turkcell Kurumsal, Office 365 fiyatları",
+     "url": "https://www.turkcell.com.tr/kurumsal/dijital-is-servisleri/is-uygulamalari/office-365",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "TCMB, günlük gösterge kurlar",
+     "url": "https://www.tcmb.gov.tr/kurlar/today.xml",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "etkinlik-salon-yarim-gun",
+   "tur": "opex",
+   "ad": "Etkinlik salonu, yarım gün, 30 ile 50 kişi (Mahmutbey çevresi otel)",
+   "birim": "etkinlik",
+   "fiyat2026": 30000,
+   "fiyat2027": 38919,
+   "kdv": "hariç",
+   "dayanak": "Bu rakam bir tahmindir, çünkü otellerin yarım gün toplantı fiyatları internette yayımlanmaz. Mahmutbey'de Centro WestSide ve Clarion Hotel gibi birden çok toplantı salonu olan oteller vardır ve gerçek fiyat için yazılı teklif alınmalıdır.",
+   "kaynaklar": [
+    {
+     "ad": "Cvent, Centro WestSide toplantı alanları",
+     "url": "https://www.cvent.com/venues/tr-TR/istanbul/hotel/centro-westside/venue-940cc907-da33-4e33-ae7f-a8b938a114c9",
+     "tarih": "2026-11-05"
+    },
+    {
+     "ad": "Cvent, Clarion Hotel İstanbul Mahmutbey",
+     "url": "https://www.cvent.com/venues/tr-TR/istanbul/hotel/clarion-hotel-istanbul-mahmutbey/venue-bc543ce7-d501-4f3d-afc3-e5939683fec7",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": true
+  },
+  {
+   "id": "etkinlik-coffee-break-50",
+   "tur": "opex",
+   "ad": "Coffee break ikramı, 50 kişiye kadar (standart paket)",
+   "birim": "etkinlik",
+   "fiyat2026": 24000,
+   "fiyat2027": 31135.2,
+   "kdv": "hariç",
+   "dayanak": "RB Organizasyon'un İstanbul kampanya sayfasında 50 kişiye kadar standart coffee break paketi 24.000 TL artı KDV'den başlar, bu 50 kişide kişi başı 480 TL eder. 30 kişiye kadar mini paket 17.000 TL artı KDV'dir.",
+   "kaynaklar": [
+    {
+     "ad": "RB Organizasyon, coffee break catering kampanyaları",
+     "url": "https://www.rb-organizasyon.com/coffee-break-catering-kampanyalari/",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "ofis-kira-m2-mahmutbey",
+   "tur": "opex",
+   "ad": "Ofis kirası, Mahmutbey ve İSTOÇ çevresi",
+   "birim": "m²/ay",
+   "fiyat2026": 482,
+   "fiyat2027": 625.3,
+   "kdv": "bilinmiyor",
+   "dayanak": "Emlakjet'te Ekim 2026'da Bağcılar Mahmutbey'deki Ağaoğlu My Office 212 ilanlarının ortanca kirası m² başına aylık yaklaşık 482 TL'dir. Aynı listede İSTOÇ sitesindeki 1.000 m² hazır ofis aylık 300.000 TL ile m² başına 300 TL'dir, ilanların bir kısmı KDV'li olduğunu belirtir.",
+   "kaynaklar": [
+    {
+     "ad": "Emlakjet, İstanbul Bağcılar kiralık ofis ilanları",
+     "url": "https://www.emlakjet.com/kiralik-ofis/istanbul-bagcilar",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "tamamlayici-saglik-sigortasi",
+   "tur": "opex",
+   "ad": "Tamamlayıcı sağlık sigortası, ayakta ve yatarak, İstanbul, 25 ile 34 yaş",
+   "birim": "kişi/yıl",
+   "fiyat2026": 23222,
+   "fiyat2027": 30125.9,
+   "kdv": "dahil",
+   "dayanak": "Sigortam.net'in 1 Nisan ile 30 Haziran 2026 arasında satılan tek kişilik poliçelerin ortanca fiyatına göre İstanbul'da 25 ile 34 yaş için kadınlarda 24.442 TL, erkeklerde 22.002 TL'dir ve tutar bu ikisinin ortalamasıdır. Sigorta primlerinde KDV uygulanmaz, gösterilen tutar ödenecek toplam primdir ve grup poliçeleri genelde daha ucuzdur.",
+   "kaynaklar": [
+    {
+     "ad": "Sigortam.net, tamamlayıcı sağlık sigortası medyan fiyatları",
+     "url": "https://www.sigortam.net/tamamlayici-saglik-sigortasi",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "isyeri-paket-sigortasi",
+   "tur": "opex",
+   "ad": "İşyeri paket sigortası (yangın, hırsızlık, elektronik cihaz, işveren mali mesuliyet)",
+   "birim": "yıl",
+   "fiyat2026": 46000,
+   "fiyat2027": 59675.8,
+   "kdv": "bilinmiyor",
+   "dayanak": "Garanti BBVA İş Yeri Koruma Paketi'nde Standart Paket Ekstra yıllık 46.000 TL brüt primdir, yangın ve hırsızlık limiti 1.900.000 TL, işveren mali mesuliyet limiti 222.000 TL'dir. Aynı sayfada en küçük paket 12.500 TL, Plus paket 20.000 TL'dir ve sayfa tarih vermez.",
+   "kaynaklar": [
+    {
+     "ad": "Garanti BBVA, İş Yeri Koruma Paketi",
+     "url": "https://www.garantibbva.com.tr/isim-icin/diger-urunler/is-yeri-koruma-paketi",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "kariyer-net-ilan",
+   "tur": "opex",
+   "ad": "Kariyer.net garantili tek iş ilanı",
+   "birim": "ilan",
+   "fiyat2026": 4099,
+   "fiyat2027": 5317.63,
+   "kdv": "hariç",
+   "dayanak": "Kariyer.net işveren sayfasında ilk kez müşteri olacak firmalar için Garantili Tek İlan 4.099 TL, Avantajlı İlan 2.099 TL'dir ve sayfa ilan fiyatlarına KDV'nin dahil olmadığını yazar. Mevcut müşteriler ve toplu paketler için fiyat farklı olabilir.",
+   "kaynaklar": [
+    {
+     "ad": "Kariyer.net, iş ilanı ver",
+     "url": "https://www.kariyer.net/isveren/is-ilani-ver",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "tahmin": false
+  },
+  {
+   "id": "egitim-butcesi-kisi-yil",
+   "tur": "opex",
+   "ad": "Çalışan başına yıllık eğitim bütçesi",
+   "birim": "kişi/yıl",
+   "fiyat2026": 10000,
+   "fiyat2027": 12973,
+   "kdv": "hariç",
+   "dayanak": "Bu rakam bir tahmindir, çünkü Türkiye'de şirketlerin çalışan başına eğitim harcamasını veren güncel bir kaynak bulunamamıştır. Tutar, kişi başına bir çevrim içi eğitim aboneliği ve bir kısa kurs karşılayacak düzeyde varsayılmıştır.",
+   "kaynaklar": [],
+   "tahmin": true
+  }
+ ]
+}

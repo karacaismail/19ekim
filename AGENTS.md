@@ -1032,13 +1032,31 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   güçlü). Her seçenek gelir planının bir senaryosuna (kötümser, medyan, iyimser) göre kurulmuştur. Mevcut takvimdeki 7 rol
   değiştirilmeden üç seçenekte de bulunur ve “Eski” hapıyla görünür. Kurucu ve yazılım ekibi “Mevcut kadro” hapı taşır.
 - Veri `src/data/istihdamV2.json` (araştırma çıktısı, kaynaklar dosyada), tipler ve hesap `src/data/istihdamV2.ts`
-  (`aylikGider`, `takvim2027`). Maaşlar 2027 tahminidir. 2027 asgari ücreti açıklanmadı ve plan yüzde 25 artış varsayar.
+  (`aylikGider`, `takvim2027`). Maaşlar 2027 tahminidir. 2027 asgari ücreti açıklanmadı. Plan, Sheets gider tablosundaki 2027 artışını (yıllık TÜFE yüzde 29,73, net asgari 36.422,35 ₺) kullanır (kullanıcı kararı 2026-11-05). Mevcut rollerin tutarları Sheets'tekiyle aynıdır.
   Asgari ücret açıklanınca veri yeniden üretilmelidir. İşveren maliyeti net maaş × 2, yarı zamanlı yarım maliyet, dış
   hizmet ve serbest çalışan bedeli fatura tutarıdır. DevOps hizmetinin bedeli ekonomik ve medyan seçenekte bilinmiyor
   ve toplama eklenmedi.
 - Stil `src/styles/istihdamV2.css`, önek `iv2-` (`tests/css-mimari.spec.ts`). Testler: `tests/istihdam-v2.spec.ts`
   (sürüm geçişi, seçenek, “Eski” hapı, ayrıntı penceresi, 320/390/768 px denetimi) ve `tests/istihdam-v2-veri.spec.ts`
   (eski rollerin korunması, aylık ve yıllık giderin tutarlılığı, metin kuralı; yalnız Chromium).
+
+### 2027 bütçesi: OPEX ve CAPEX (kullanıcı kararı 2026-11-05)
+
+- Adres `/butce-2027/`, Finans menüsünde “2027 bütçesi” (`src/views/Butce2027Page.tsx`, hesap `src/data/butce2027.ts`,
+  birim fiyatlar `src/data/butce2027.json`, stil `src/styles/butce2027.css`, önek `b27-`).
+- Kullanıcı kararı: taban, Google Sheets gider tablosundaki 2027 planıdır. Sayfa açılırken bir kez okunur (`useOpexOnce`)
+  ve tutarlar repoya yazılmaz. Üstüne İstihdam takvimi v2'nin seçili seçeneğindeki yeni kadro ve hizmetler, kişi başı
+  giderler (lisans, hat, ulaşım, eğitim, ilan), pazarlama ve etkinlik, ofis büyümesi, diğer kalemler ve yüzde 5
+  öngörülemeyen pay eklenir. CAPEX: yeni kişiye işe alım ayında ekipman, etkinlik ve video ekipmanı, ek ofis tadilatı,
+  marka tescili.
+- Sheets'te olan roller (`SHEETSTE_OLAN`: kurucu, yazılım ekibi, Kasım 2026 dalgası) eklenmez. Aralık 2026 dalgası
+  (organizatör, 3. saha) eklenir. Sheets'teki kişi sayısı 11 bordrolu ve 4 faturalıdan farklıysa sayfa çift sayım
+  uyarısı verir. 2027 öncesi başlayan kişiye 2027'de ekipman alınmaz.
+- Asgari ücret ve fiyat artışı Sheets'teki gibi yüzde 29,73'tür (net asgari 36.422,35 ₺). Yatırım kalemleri KDV hariç
+  yazılır. Dolar fiyatlı lisans Sheets'teki gibi sabit kurla çevrilir. Ofis kapasitesi bugünkü kira ÷ bölge m² kirası ÷
+  kişi başı 10 m² ile tahmin edilir ve doğrulanmalıdır. Yemek kartı ve sağlık sigortası politika anahtarıdır, varsayılan kapalı.
+- Testler: `tests/butce-2027-veri.spec.ts` (model, yalnız Chromium) ve `tests/butce-2027.spec.ts` (sayfa, sahte Sheets yanıtıyla).
+- Nakit akış tablosu bu eklemeleri henüz içermez.
 
 ## Sayfa ekleme ve bozulma koruması (kullanıcı kararı 2026-11-05)
 

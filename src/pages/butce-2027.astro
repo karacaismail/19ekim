@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Butce2027Page } from '../views/Butce2027Page';
+---
+
+<BaseLayout>
+  <Butce2027Page client:load pathname={Astro.url.pathname} />
+</BaseLayout>

@@ -5,7 +5,8 @@ import veri from './istihdamV2.json' with { type: 'json' };
  * güçlü), 11 küme ve pozisyon başına gerekçe, nitelik, 2027 işe alım ayı ve maliyet. Mevcut istihdam takvimindeki
  * 7 rol (`eski`) değiştirilmeden üç seçenekte de yer alır. Kurucu ve yazılım ekibi `mevcut` kadrodur.
  * Veri `istihdamV2.json` içindedir ve araştırma betiğinden üretilmiştir (kaynaklar dosyada). Maaşlar 2027 tahminidir:
- * 2027 asgari ücreti açıklanmadı, plan yüzde 25 artış varsayar. İşveren maliyeti net maaşın 2 katıdır (costFactor).
+ * 2027 asgari ücreti açıklanmadı. Plan, Google Sheets gider tablosundaki 2027 artışını (yıllık TÜFE, yüzde 29,73) kullanır
+ * (kullanıcı kararı 2026-11-05). İşveren maliyeti net maaşın 2 katıdır (costFactor).
  * Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Yarı zamanlı çalışan yarım maliyettir.
  */
 
@@ -79,7 +80,7 @@ export interface Kaynak {
 interface Veri {
   olusturma: string;
   varsayimlar: {
-    asgariUcret2027: { net: number; brut: number; durum: string; gerekce: string; aralik: { dusuk: { artis: string; net: number }; yuksek: { artis: string; net: number } } };
+    asgariUcret2027: { net: number; brut: number; varsayilanArtis: string; durum: string; gerekce: string; aralik: { dusuk: { artis: string; net: number }; yuksek: { artis: string; net: number } } };
     enflasyon: { tcmb2026III: { yilSonu2027: string }; ovp2027_2029: { hedef2027: string }; sonVeri: string };
     maasArtisi: { yontem: string; sinir: string };
   };
@@ -153,15 +154,18 @@ export function takvim2027(s: SecenekId): TakvimAyi[] {
 
 export const seceneginPozisyonlari = (s: SecenekId) => POZISYONLAR.filter((p) => p.secenekler[s].kisi > 0);
 
+const yuzdeTam = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v);
+/** Seçeneklerin gider ÷ gelir aralığı: “yüzde 87 ile 94’ü” biçiminde (veriden). */
+function payAraligi() {
+  const paylar = SECENEKLER.map((s) => SECENEK_OZETI[s].gelirPayi);
+  return `yüzde ${yuzdeTam(Math.min(...paylar))} ile ${yuzdeTam(Math.max(...paylar))}’ü`;
+}
+
 /** Projenin bugünkü kararlarıyla çelişen ya da karar bekleyen noktalar (araştırma notlarından, 2026-11-05). */
 export const DIKKAT: { baslik: string; metin: string }[] = [
   {
-    baslik: 'Masa başı maaşı asgari ücretin altına düşebilir',
-    metin: 'Masa başı ve Segika masa başı için 2026 kararı net 35.000 TL’dir. 2027 asgari ücret varsayımı net 35.094 TL’dir. Bu yüzden Ocak 2027’de maaş artışı kararı gerekir. Plan bütün sabit maaşları yüzde 25 artırır.',
-  },
-  {
     baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
-    metin: 'Üç seçenekte de 2027 kadro ve hizmet gideri, dayandığı senaryonun 2027 abonelik gelirinin yüzde 84 ile 91’i arasındadır. Reklam, prim, ofis ve yazılım araçları eklenince 2027 zarar yılıdır. Parametrelerde yatırım girişi 0 TL’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.',
+    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları eklenince 2027 zarar yılıdır. Parametrelerde yatırım girişi 0 TL’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
   },
   {
     baslik: 'Saha personeli sayısı iki planda farklı',
