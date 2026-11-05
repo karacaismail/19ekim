@@ -1645,13 +1645,18 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
       expect(sizes.length, path).toBeGreaterThan(0);
       expect(Math.min(...sizes), `${path} grafik metni`).toBeGreaterThanOrEqual(14);
     }
+    expect(errors).toEqual([]);
+  });
+
+  test('grafiksiz listedeki sayfalar grafik çizmez (liste iki yönden denetlenir)', async ({ page }) => {
+    // Ayrı test: grafik testine eklenince CI'daki Firefox ve WebKit 30 sn sınırını aştı (2026-11-05).
+    test.slow();
     for (const path of GRAFIKSIZ.filter((p) => p !== 'giderler/')) {
       await page.goto(path);
       await icerik(page);
       await hydrated(page);
       await expect(page.locator('.chart-canvas'), `${path} grafiksiz listede ama grafik çiziyor`).toHaveCount(0);
     }
-    expect(errors).toEqual([]);
   });
 
   for (const width of [320, 390]) {
