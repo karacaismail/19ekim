@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { GelirModelleriPage } from '../views/GelirModelleriPage';
 ---
 
-<BaseLayout title="Gelir modelleri">
+<BaseLayout>
   <GelirModelleriPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

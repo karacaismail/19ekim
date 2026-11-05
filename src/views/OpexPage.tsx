@@ -30,7 +30,6 @@ import {
   type Donem,
   type Plan,
   type PlanAy,
-  type Kume3,
   type OpexModel,
   type Satir,
   type Tesvik,
@@ -335,7 +334,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
   const message = problem || error;
   return (
     <form className="opex-connect" onSubmit={submit} noValidate aria-describedby={message ? errorId : undefined}>
-      <h3 className="block-title">Google Sheets bağlantısı</h3>
+      <h2 className="block-title">Google Sheets bağlantısı</h2>
       <p className="opex-connect-lead">
         Bu sayfa verileri saklamaz. Veriler, Google Sheets’e bağlı Apps Script web uygulamasından okunur. Sheets’te erişim “Anahtarla”
         olarak ayarlıysa anahtar girmeniz gerekir. Anahtar yalnız bu tarayıcıda tutulur ve sayfa adresine eklenmez.
@@ -1429,9 +1428,9 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             </Popover>
           </div>
           {/* Tablo filtreleri (kullanıcı kararı 2026-10-21): sütun filtrelerinden ayrı, tüm tabloya uygulanır. */}
-          <h4 className="opex-filtreler-baslik" id="tablo-filtreleri">
+          <h3 className="opex-filtreler-baslik" id="tablo-filtreleri">
             Tablo filtreleri
-          </h4>
+          </h3>
           <div className="opex-filtreler" role="group" aria-labelledby="tablo-filtreleri">
             {coklu('Kategori', [...katRenk.keys()], kategoriSec, setKategoriSec)}
             {buAyVar ? coklu('Bu ay', secenek(all.map((r) => r.durum?.ad ?? '').filter(Boolean)), durumSec, setDurumSec) : null}

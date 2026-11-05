@@ -59,7 +59,7 @@ import {
   type SeviyeSeti,
 } from '../data/applet';
 import { ornekDegerlereDon, useAppletKaydi, useAppletOzeti, useDilim } from '../lib/appletStore';
-import { int, num, pct, times, tl, tlExact } from '../lib/format';
+import { int, num, pct, times, tlExact } from '../lib/format';
 
 /* ---------- Ortak ---------- */
 

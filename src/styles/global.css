@@ -1250,11 +1250,6 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
 }
 
 /* En dar telefonda “Sheets” sözcüğü görünmez (saat ve güncelleme biçimi kalır; tamamı ekran okuyucuda). */
-@media (max-width: 29.99em) {
-  .header-tools .opex-live-kaynak {
-    display: none;
-  }
-}
 
 /* Döviz kurları: kırıntı satırının sağında, sayfa başlığı hizasında (kullanıcı kararı 2026-10-21). */
 .opex-kur {
@@ -1554,103 +1549,6 @@ html:not([data-js]) .chart-scroll .chart-canvas,
   color: var(--text-secondary);
 }
 
-/* ---------- İstihdam: takvim (Mantine dates Month) ---------- */
-.cal-grid {
-  display: grid;
-  gap: var(--space-8) var(--gap-normal);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  margin-top: var(--space-6);
-}
-
-.cal {
-  padding: var(--space-4);
-  border-radius: var(--radius-surface);
-  background: var(--surface-raised);
-}
-
-.cal-title {
-  margin: 0 0 var(--space-3);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-}
-
-.cal-month {
-  width: 100%;
-}
-
-.cal-weekday {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-}
-
-.cal-day {
-  width: 100%;
-  min-width: 2.25rem;
-  height: 2.5rem;
-  border-radius: var(--radius-control);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-}
-
-.cal-day[data-weekend] {
-  color: var(--text-secondary);
-}
-
-.cal-day[data-event] {
-  background: var(--tone-bg);
-  color: var(--tone-fg);
-  font-weight: var(--weight-bold);
-}
-
-.cal-events {
-  display: grid;
-  gap: var(--space-3);
-  margin: var(--space-4) 0 0;
-  padding: var(--space-4) 0 0;
-  list-style: none;
-  border-top: var(--hairline) solid var(--rule);
-}
-
-.cal-events li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: var(--space-3);
-}
-
-.cal-events li::before {
-  content: '';
-  grid-row: span 3;
-  width: 0.75rem;
-  height: 0.75rem;
-  margin-top: 0.35rem;
-  border-radius: 50%;
-  background: var(--tone);
-}
-
-.cal-event-date {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-}
-
-.cal-event-title {
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
-.cal-event-detail {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
-}
-
-.cal-empty {
-  margin: var(--space-4) 0 0;
-  color: var(--text-secondary);
-}
-
 .data-table tr[data-tone='break'] > * {
   color: var(--text-secondary);
 }
@@ -1878,19 +1776,6 @@ html:not([data-js]) .chart-scroll .chart-canvas,
 
 .data-table thead th[data-role] {
   color: var(--tone-fg);
-}
-
-.table-hint {
-  display: block;
-  margin: 0 0 var(--space-2);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
-
-@media (min-width: 48em) {
-  .table-hint {
-    display: none;
-  }
 }
 
 /* ---------- Kayıt görünümü (ux.md §8.2, M09 RecordAccordion) ----------
@@ -2765,6 +2650,7 @@ html[data-focus-mode='keyboard'] .param-ara-alan:has(:focus-visible) .param-labe
 
 .note-btn {
   min-height: var(--hit-min);
+  min-inline-size: var(--hit-min);
   padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--radius-surface);
@@ -2835,6 +2721,13 @@ html[data-focus-mode='keyboard'] .param-ara-alan:has(:focus-visible) .param-labe
 
 .note-check-input {
   cursor: pointer;
+}
+
+/* Etiket de tıklama alanıdır. Kısa notta da en az 44 px yüksek olur (UX denetimi 2026-11-05). */
+.note-check .note-text {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
 }
 
 .note-check-input:focus {
@@ -3355,8 +3248,7 @@ html:not([data-js]) .email-btn {
 }
 
 .opex-tepsi .opex-filtreler,
-.opex-tepsi .opex-filtreler-baslik,
-.opex-tepsi .table-hint {
+.opex-tepsi .opex-filtreler-baslik {
   margin: 0;
 }
 
@@ -4019,11 +3911,6 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
   font-weight: var(--weight-semibold);
 }
 
-.opex-controls {
-  display: grid;
-  gap: 0 var(--space-6);
-}
-
 .opex-connect {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -4041,8 +3928,7 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
   margin: 0;
 }
 
-.opex-connect-lead,
-.opex-connect-note {
+.opex-connect-lead {
   margin: 0;
   color: var(--text-secondary);
 }
@@ -4093,6 +3979,9 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
 }
 
 .opex-check-label {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
   font-size: var(--text-md);
 }
 
@@ -4123,11 +4012,6 @@ html[data-focus-mode='keyboard'] .opex-check:has(:focus-visible) .opex-check-lab
 
 .opex-steps li + li {
   margin-top: var(--space-1);
-}
-
-.opex-wait {
-  margin-top: var(--space-8);
-  color: var(--text-secondary);
 }
 
 .opex-failed,
@@ -4165,6 +4049,7 @@ html[data-focus-mode='keyboard'] .opex-check:has(:focus-visible) .opex-check-lab
 }
 
 .opex-icon-btn {
+  flex-shrink: 0;
   display: inline-grid;
   place-items: center;
   inline-size: var(--hit-min);
@@ -4246,11 +4131,6 @@ p.opex-live-stale {
 .opex-source {
   max-width: var(--prose-max);
   margin: var(--space-4) 0 0;
-}
-
-.opex-param {
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
 }
 
 .opex-warnings {
@@ -5243,391 +5123,6 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 }
 
 /* ---------- İş ortaklığı programı (/partnership/; kullanıcı kararı 2026-10-27) ---------- */
-/*
- * İki program sekmesi (Giderler yıl sekmesiyle aynı kalıp: seçili sekme panele bitişik, radyo işareti seçim durumu),
- * panelde sekiz bölüm sekmesi (yatay şerit; dar ekranda kayar, geniş ekranda sarılır) ve bir anda tek bölüm.
- * Dar ekran tabandır; geniş ekran kuralları üstüne eklenir.
- */
-.ortak-kume {
-  margin-top: var(--space-8);
-}
-
-.ortak-sekmeler {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
-  gap: var(--space-2);
-}
-
-@media (min-width: 48em) {
-  .ortak-sekmeler {
-    grid-template-columns: repeat(2, minmax(0, 20rem));
-  }
-}
-
-.ortak-sekme {
-  display: grid;
-  align-content: start;
-  justify-items: start;
-  gap: var(--space-1);
-  min-height: var(--hit-min);
-  margin-bottom: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: var(--hairline) solid var(--rule-strong);
-  border-radius: var(--radius-surface);
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-  transition-property: background-color, border-color, color;
-  transition-duration: var(--motion-duration-base);
-  transition-timing-function: var(--motion-ease-standard);
-  transition-delay: var(--motion-delay-none);
-}
-
-.ortak-sekme:hover {
-  background: var(--surface-control-hover);
-}
-
-/* Seçili sekme panele bitişik: alt köşeler düz, panelle aynı zemin, kenarlık yok. */
-.ortak-sekme[aria-selected='true'],
-.ortak-sekme[aria-selected='true']:hover {
-  margin-bottom: 0;
-  padding-bottom: calc(2 * var(--space-2));
-  border-color: transparent;
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
-  background: var(--surface-sunken);
-  cursor: default;
-}
-
-.ortak-sekme-bas {
-  display: flex;
-  flex-wrap: wrap-reverse;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-2);
-  justify-self: stretch;
-}
-
-.ortak-sekme-ad {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-}
-
-.ortak-sekme[aria-selected='true'] .ortak-sekme-ad {
-  font-weight: var(--weight-bold);
-}
-
-.ortak-sekme-alt {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-snug);
-}
-
-.ortak-radio {
-  flex: none;
-  margin-inline-start: auto;
-  width: var(--radio-size);
-  height: var(--radio-size);
-  transition-property: color;
-  transition-duration: var(--motion-duration-base);
-  transition-timing-function: var(--motion-ease-standard);
-}
-
-.ortak-radio-ring {
-  fill: none;
-  stroke: currentColor;
-}
-
-.ortak-radio-dot {
-  fill: currentColor;
-  transform: scale(0);
-  transform-box: fill-box;
-  transform-origin: center;
-  transition-property: transform;
-  transition-duration: var(--motion-duration-base);
-  transition-timing-function: var(--motion-ease-standard);
-}
-
-.ortak-sekme[aria-selected='true'] .ortak-radio {
-  color: var(--radio-checked);
-}
-
-.ortak-sekme[aria-selected='true'] .ortak-radio-dot {
-  transform: scale(1);
-}
-
-.ortak-panel {
-  padding: var(--space-2) var(--space-3) var(--space-6);
-  border-radius: var(--radius-surface);
-  background: var(--surface-sunken);
-}
-
-.ortak-kume:has(.ortak-sekme:first-child[aria-selected='true']) .ortak-panel {
-  border-start-start-radius: 0;
-}
-
-@media (min-width: 48em) {
-  .ortak-panel {
-    padding-inline: var(--space-5);
-  }
-}
-
-/* Bölüm sekmeleri: yatay şerit; dar ekranda kayar ve seçili sekme görünür alana getirilir. */
-.ortak-alt {
-  display: flex;
-  gap: var(--space-1);
-  margin: 0 calc(-1 * var(--space-3));
-  padding: var(--space-2) var(--space-3);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-}
-
-@media (min-width: 48em) {
-  .ortak-alt {
-    flex-wrap: wrap;
-    margin: 0 calc(-1 * var(--space-5));
-    padding-inline: var(--space-5);
-  }
-}
-
-.ortak-alt-sekme {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--hit-min);
-  padding: var(--space-2) var(--space-4);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-snug);
-  white-space: nowrap;
-  cursor: pointer;
-  transition-property: background-color, color;
-  transition-duration: var(--motion-duration-fast);
-  transition-timing-function: var(--motion-ease-standard);
-  transition-delay: var(--motion-delay-none);
-}
-
-.ortak-alt-sekme:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
-}
-
-.ortak-alt-sekme[aria-selected='true'],
-.ortak-alt-sekme[aria-selected='true']:hover {
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  font-weight: var(--weight-semibold);
-  box-shadow: var(--shadow-soft);
-  cursor: default;
-}
-
-.ortak-alt-no {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-control);
-  background: var(--surface-control);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
-.ortak-alt-sekme[aria-selected='true'] .ortak-alt-no {
-  background: var(--tone-bg);
-  color: var(--tone-fg);
-}
-
-.ortak-bolum {
-  margin-top: var(--space-2);
-}
-
-.ortak-bolum-ust {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-}
-
-.ortak-bolum-program {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.75rem;
-  padding: 0.1rem 0.65rem;
-  border-radius: var(--radius-pill);
-  background: var(--tone-bg);
-  color: var(--tone-fg);
-  font-weight: var(--weight-semibold);
-}
-
-.ortak-bolum > .section:first-of-type {
-  margin-top: var(--space-4);
-}
-
-.ortak-blok {
-  margin-top: var(--space-8);
-}
-
-/* Özet kartları: istek, ihtiyaç, teşhis, yaklaşım */
-.ortak-kartlar {
-  display: grid;
-  gap: var(--gap-normal);
-  /* 320 px’te tek sütun, tablette iki, geniş ekranda dört kart yan yana (3 + 1 kırılmaz). */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  margin-top: var(--space-6);
-}
-
-.ortak-kart {
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-surface);
-  background: var(--surface-raised);
-}
-
-.ortak-kart p {
-  margin: 0;
-  line-height: var(--leading-body);
-}
-
-.ortak-kart .ortak-kart-baslik {
-  margin-bottom: var(--space-2);
-  color: var(--accent-strong);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-}
-
-/* Aşama listesi (zaman çizelgesi içinde) */
-.ortak-asama-is {
-  margin-top: var(--space-2);
-}
-
-/* Geçitler: 14 / 30 / 60 / 90. gün kartları; üst kenar programın tonunda (kenar sistemi). */
-.ortak-gecitler {
-  display: grid;
-  gap: var(--gap-normal);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  margin-top: var(--space-6);
-}
-
-.ortak-gecit {
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-4) var(--space-5);
-  /* Üst kenar renkli çizgi (kenar sistemi): üst köşeler düz, yalnız alt köşeler yuvarlak. */
-  border-end-start-radius: var(--radius-surface);
-  border-end-end-radius: var(--radius-surface);
-  background: var(--surface-raised);
-}
-
-.ortak-gecit-gun {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-2);
-  margin: 0;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-}
-
-.ortak-gecit-tarih {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0;
-}
-
-.ortak-gecit-baslik {
-  margin: var(--space-1) 0 0;
-  color: var(--tone-fg);
-  font-weight: var(--weight-semibold);
-}
-
-.ortak-gecit-liste {
-  margin: var(--space-3) 0 0;
-  padding-inline-start: 1.15rem;
-  line-height: var(--leading-snug);
-}
-
-.ortak-gecit-liste li + li {
-  margin-top: var(--space-1);
-}
-
-.ortak-gecit-liste li::marker {
-  color: var(--tone);
-}
-
-.ortak-gecit-degilse {
-  margin: auto 0 0;
-  padding-top: var(--space-3);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
-}
-
-/* Bölüm sırası: önceki / sonraki bölüm düğmeleri (sunum sırası pager’ı ile aynı dil). */
-.ortak-sira {
-  display: grid;
-  gap: var(--gap-normal);
-  grid-template-columns: minmax(0, 1fr);
-  margin-top: var(--space-10);
-}
-
-@media (min-width: 40em) {
-  .ortak-sira {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.ortak-sira-dugme {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
-  min-height: var(--hit-min);
-  padding: var(--space-3) var(--space-4);
-  border: 0;
-  border-radius: var(--radius-surface);
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-  transition-property: background-color;
-  transition-duration: var(--motion-duration-fast);
-  transition-timing-function: var(--motion-ease-standard);
-  transition-delay: var(--motion-delay-none);
-}
-
-.ortak-sira-dugme:hover {
-  background: var(--surface-control-hover);
-}
-
-.ortak-sira-dugme[data-next] {
-  grid-column: -2;
-  align-items: flex-end;
-  text-align: end;
-}
 
 /* ---------- Nakit akış tablosu (/nakit-akisi/; kullanıcı kararı 2026-10-27) ---------- */
 .nakit-kaynak,
@@ -5636,16 +5131,6 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   max-width: var(--prose-max);
   color: var(--text-secondary);
   font-size: var(--text-sm);
-}
-
-/* Korunan kayıt sorunu (Affilate, MS-04): açıklama ve iki eylem; otomatik yazım kapalıyken görünür. */
-.af-kayit-sorun {
-  max-width: var(--prose-max);
-  margin: var(--space-2) 0 var(--space-4);
-}
-
-.af-kayit-sorun p {
-  margin: 0 0 var(--space-2);
 }
 
 /* Karar defteri (adım 1a): hücre içi seçenek ve ilgili sayfa listeleri sıkı. */
@@ -5858,10 +5343,6 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   margin-top: var(--space-4);
 }
 
-.araclar.gelir-zaman-araclar {
-  margin-top: var(--space-8);
-}
-
 /* ---------- Seçim grupları: senaryo (kötümser · medyan · iyimser), grafik modu, başabaş filtreleri ----------
  * Segmentli anahtar: seçenekler tek zemin (iz) üzerinde; seçili olanın altında kayan topuz (ölçülen konum/genişlik).
  */
@@ -5926,7 +5407,9 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   z-index: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: var(--hit-min);
+  min-inline-size: var(--hit-min);
   padding: var(--space-2) var(--space-3);
   border: 0;
   border-radius: var(--radius-control);
@@ -5962,6 +5445,17 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 
 .secim-iz[data-sunum='liste'] .secim-dugme {
   justify-content: flex-start;
+}
+
+/* Liste ya da seçim kutusu kipinde grup etiketi kendi satırında, kontrolün üstünde durur. Kontrol grubun tüm genişliğini
+   kullanır. Etiket alt alta dizilmiş seçeneklerin yanında, ortalarına denk gelecek biçimde kalmaz (kullanıcı kararı 2026-11-05). */
+.secim:is([data-sunum='liste'], [data-sunum='secim']) > .secim-etiket {
+  flex-basis: 100%;
+  margin-inline-end: 0;
+}
+
+.secim[data-sunum='liste'] > .secim-iz {
+  flex: 1 1 100%;
 }
 
 .secim-iz[data-sunum='secim'] {
@@ -6027,13 +5521,6 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   white-space: normal;
 }
 
-/* İş ortaklığı dar ekran bölüm gezgini (F10 / C154). */
-.ortak-gezgin {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-3) 0;
-}
-
 /* Giderler dar ekran araçları (F09): sıralama seçimleri ve etkin filtre listesi arama kutusunun altında. */
 .opex-kayit-arac {
   display: grid;
@@ -6063,7 +5550,7 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 .bolum-dizini ol {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  gap: 0 var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -6072,6 +5559,14 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 .section-geri {
   margin: var(--space-4) 0 0;
   font-size: var(--text-sm);
+}
+
+/* Dizin ve dönüş bağlantıları tek başına durur. Dokunma alanı en az 44 px yüksektir (UX denetimi 2026-11-05). */
+.bolum-dizini a,
+.section-geri a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
 }
 
 /* Bağlantıyla gelen bölüm yapışkan üst bant ve özetin altında kalmaz (tarayıcı kenar boşluğunu da sayar: bant + 2rem yeter). */
@@ -6613,153 +6108,6 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   text-transform: uppercase;
 }
 
-
-/* ---------- Affilate (docs/affilate.md; kullanıcı kararı 2026-10-28) ----------
- * Taban dar ekrandır: tek sütun, sıkı boşluk, büyük hedef; ≥ 48em yalnız satır düzenlerini yan yana açar. */
-.af-baslik {
-  margin-top: var(--space-8);
-}
-
-.af-not {
-  margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-body);
-}
-
-.af-turetilen {
-  margin-top: var(--space-4);
-}
-
-.af-musteri,
-.af-ortak,
-.af-araclar,
-.af-neden-sarmal {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.af-neden-sarmal {
-  justify-items: start;
-}
-
-.af-neden {
-  width: 100%;
-  padding: var(--space-4);
-  border-radius: var(--radius-surface);
-  background: var(--surface-raised);
-}
-
-.af-neden-liste {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-}
-
-.af-neden-liste dt {
-  font-weight: var(--weight-semibold);
-}
-
-.af-neden-liste dd {
-  margin: var(--space-1) 0 0;
-  color: var(--text-secondary);
-}
-
-.af-satir {
-  display: grid;
-  gap: var(--space-3) var(--gap-normal);
-  grid-template-columns: minmax(0, 1fr);
-  align-items: end;
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: var(--hairline) solid var(--rule);
-}
-
-.af-donem {
-  display: grid;
-  gap: var(--space-3) var(--gap-normal);
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
-  padding-top: var(--space-2);
-  border-top: var(--hairline) solid var(--rule);
-}
-
-.af-anahtar,
-.af-istisnalar,
-.af-ortaklar {
-  margin-top: var(--space-4);
-}
-
-.af-ay-gezgin {
-  display: grid;
-  gap: var(--space-3);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
-  margin-top: var(--space-4);
-}
-
-.af-ay-gezgin .param-field {
-  grid-column: 1 / -1;
-  grid-row: 1;
-}
-
-.af-kayit-durum,
-.af-durum {
-  margin: var(--space-3) 0 0;
-}
-
-.af-durum:empty {
-  display: none;
-}
-
-.af-kayitli {
-  display: grid;
-  gap: var(--space-2);
-  margin: var(--space-4) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.af-kayitli li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
-  align-items: center;
-}
-
-.af-kayitli-ad {
-  margin-inline-end: auto;
-  font-weight: var(--weight-medium);
-}
-
-.af-dosya {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.af-sozluk {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding-inline-start: 1.1em;
-}
-
-@media (min-width: 48em) {
-  .af-satir {
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)) auto;
-  }
-
-  .af-ay-gezgin {
-    grid-template-columns: auto minmax(12rem, 1fr) auto;
-  }
-
-  .af-ay-gezgin .param-field {
-    grid-column: auto;
-    grid-row: auto;
-  }
-}
-
 /* ---------- Satış ortaklığı programı (/satis-ortakligi/; kullanıcı kararı 2026-11-03) ----------
  * Sıra: ürün ve ödeme seçimi → rol sekmeleri (her birinde örnek kazanç) → seçili rol (kim, sonuç, hedef, kurallar)
  * ve sağda o rolün ayarları. Yüzeyler köşesiz; seçili sekme kenar sistemiyle (üstte düz çizgi).
@@ -7233,9 +6581,6 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 }
 
 /* Affilate sade görünüm: üç model sekmesi, yıllara dağılım */
-.so2-roller-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 
 .so2-asamalar[data-n='1'] {
   grid-template-columns: minmax(0, 1fr);
@@ -7247,10 +6592,6 @@ html[data-focus-mode='keyboard'] .so2-girdi:has(:focus-visible) .so2-girdi-ad {
 
 .so2-asamalar[data-n='3'] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.so2-ayrinti {
-  margin: var(--space-6) 0 0;
 }
 
 /*
@@ -7693,8 +7034,7 @@ html[data-bant-gizli] .so2-duzen {
     font-variant-numeric: tabular-nums;
   }
 
-  .so2-roller,
-  .so2-roller-3 {
+  .so2-roller {
     grid-template-columns: none;
     grid-auto-flow: column;
     grid-auto-columns: minmax(11rem, 1fr);
@@ -8053,6 +7393,11 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 .dg-adim-bag a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--hit-min);
+  min-inline-size: var(--hit-min);
   color: var(--text-link);
 }
 
@@ -8489,6 +7834,9 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 .gm-oncelik-ad a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
   color: var(--text-link);
 }
 

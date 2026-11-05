@@ -4,6 +4,8 @@
   "exclude": ["dist", "test-results", "playwright-report"],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   }
 }

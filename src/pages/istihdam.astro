@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { HiringPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="İstihdam takvimi">
+<BaseLayout>
   <HiringPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

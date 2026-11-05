@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { BcgPage } from '../views/BcgPage';
 ---
 
-<BaseLayout title="BCG matrisi eğitimi">
+<BaseLayout>
   <BcgPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

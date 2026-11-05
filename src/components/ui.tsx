@@ -290,10 +290,13 @@ export function KayitListesi({
   className,
   label,
   labelledBy,
+  duzey = 4,
 }: {
   kayitlar: Kayit[];
   acik: string[];
   onChange: (acik: string[]) => void;
+  /** Kayıt başlıklarının düzeyi: üstteki başlığın bir altı (tablo h3 ise 4). Başlık sırası atlamaz. */
+  duzey?: 3 | 4 | 5;
   className?: string;
   label?: string;
   labelledBy?: string;
@@ -305,7 +308,7 @@ export function KayitListesi({
         multiple
         value={acik}
         onChange={onChange}
-        order={4}
+        order={duzey}
         transitionDuration={sure}
         // Kapalı panel içeriği DOM’da hazır ve display:none (odak/erişilebilirlik ağacı dışında): React Activity’nin
         // ertelenmiş çizimi yavaş motorda (CI WebKit) panel alanlarını geç kuruyor, denetim boş kayıt görüyordu.
@@ -411,9 +414,12 @@ export function DataTable<T>({
   ozetYok = false,
   eksenEtiketi,
   kiyas = false,
+  baslikDuzeyi = 3,
 }: {
   id: string;
   title: string;
+  /** Tablo başlığının düzeyi. Bölüm içindeki tablo h3, sayfada doğrudan duran tablo h2 olur (başlık sırası atlamaz). */
+  baslikDuzeyi?: 2 | 3;
   note?: ReactNode;
   /** Tablonun altındaki yöntem notu: görünüm varyantına göre değişebilir; başlık, üst not ve araç çubuğu sabit kalır (gorsel_algi.md F15). */
   altNot?: ReactNode;
@@ -440,6 +446,7 @@ export function DataTable<T>({
 }) {
   void ozetYok;
   const titleId = `${id}-tablo`;
+  const Baslik = baslikDuzeyi === 2 ? 'h2' : 'h3';
   const sarmal = useRef<HTMLDivElement>(null);
   const kaydiran = useRef<HTMLDivElement>(null);
   const [acik, setAcik] = useState<string[]>([]);
@@ -486,9 +493,9 @@ export function DataTable<T>({
 
   return (
     <div className="table-block" ref={sarmal} data-kabuk={mod}>
-      <h3 className="block-title" id={titleId}>
+      <Baslik className="block-title" id={titleId}>
         {title}
-      </h3>
+      </Baslik>
       {note ? <p className="table-note">{note}</p> : null}
       {tools}
       {mod === 'kayit' && kayitlar.every((k) => k.fields.length === 0) ? (
@@ -511,7 +518,7 @@ export function DataTable<T>({
       ) : mod === 'kayit' && kayit === 'matris' ? (
         <MatrisKiyas columns={columns} rows={rows} keyOf={keyOf} baslik={baslikMetni} labelledBy={titleId} eksenEtiketi={eksenEtiketi ?? (typeof baslikSutunu.header === 'string' ? baslikSutunu.header : 'Satır')} />
       ) : mod === 'kayit' ? (
-        <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} />
+        <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} duzey={baslikDuzeyi === 2 ? 3 : 4} />
       ) : (
         <div className="table-frame">
           <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0} ref={kaydiran}>
@@ -897,7 +904,8 @@ function Ajanda({ titleId, rows, marks }: { titleId: string; rows: GanttRow[]; m
           multiple
           value={acik}
           onChange={setAcik}
-          order={4}
+          // Grafik başlığı başlık öğesi değildir. En yakın başlık bölümün h2'sidir, kayıtlar bu yüzden h3 olur.
+          order={3}
           transitionDuration={sure}
           classNames={{
             root: 'kayitlar',
@@ -1019,7 +1027,9 @@ function gerekenGenislik(iz: HTMLElement, options: { name: string }[]): number |
   const izSt = getComputedStyle(iz);
   const bosluk = parseFloat(izSt.columnGap) || 0;
   const izYatay = (parseFloat(izSt.paddingLeft) || 0) + (parseFloat(izSt.paddingRight) || 0);
-  return options.reduce((t, o) => t + Math.ceil(tuval.measureText(o.name).width) + yatay, 0) + bosluk * Math.max(0, options.length - 1) + izYatay;
+  // Kısa etiketli düğme en az dokunma hedefi genişliğindedir (min-inline-size). Ölçüm bunu da sayar.
+  const enAz = parseFloat(st.minInlineSize) || 0;
+  return options.reduce((t, o) => t + Math.max(enAz, Math.ceil(tuval.measureText(o.name).width) + yatay), 0) + bosluk * Math.max(0, options.length - 1) + izYatay;
 }
 
 /** Grubun kullanabileceği genişlik: esnek satırda (araç çubuğu) ebeveynin iç genişliği, ızgara/blok bağlamında kendi genişliği. */
@@ -1108,7 +1118,7 @@ export function Choice<T extends string>({
     };
   }, [etiketler, options]);
   return (
-    <div className="secim" role="group" aria-label={label} aria-describedby={note ? notId : undefined} ref={root}>
+    <div className="secim" role="group" aria-label={label} aria-describedby={note ? notId : undefined} data-sunum={sunum} ref={root}>
       <span className="secim-etiket">{label}</span>
       <div className="secim-iz" ref={track} data-olculdu={thumb ? '' : undefined} data-sunum={sunum}>
         {sunum === 'secim' ? (

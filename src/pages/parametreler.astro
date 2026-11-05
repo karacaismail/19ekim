@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { ParamsPage } from '../views/ParamsPage';
 ---
 
-<BaseLayout title="Parametreler">
+<BaseLayout>
   <ParamsPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

@@ -1,36 +1,26 @@
 import { expect, test, type Page } from '@playwright/test';
+import { YAYIMLANAN } from '../src/data/icerik';
 import { PARAM_GROUPS } from '../src/data/params';
+import { meta } from '../src/data/program';
+import { NAV_GROUPS } from '../src/data/tree';
 
-const PAGES = [
-  '',
-  'istihdam/',
-  'hedefler/',
-  'gelir-plani/',
-  'eylem-plani/',
-  'karar/',
-  'buyume-modeli/',
-  'roller/dijital-pazarlama/',
-  'roller/pazarlamaci/',
-  'roller/saha-uzmani/',
-  'roller/ekip-lideri/',
-  'roller/organizator/',
-  'roller/asistan/',
-  'roller/segika/',
-  'bcg/',
-  'applet/',
-  'parametreler/',
-  'notlar/',
-  'giderler/',
-  'nakit-akisi/',
-  'arsiv/',
-  'email/',
-  'gelir-modelleri/',
-  'oyunlastirma/',
-];
+/**
+ * Denetlenen sayfalar içerik kaydından türer (kullanıcı kararı 2026-11-05: yeni ya da güncellenen sayfa diğerlerini
+ * bozmamalı). Elle tutulan liste kayıttan kopmuştu ve dört sayfa ortak denetimlerin dışında kalmıştı. Rotalar ile kayıt
+ * arasındaki birebir eşleşmeyi icerik.spec.ts IA-01 denetler. Bu yüzden yeni sayfa kaydedildiği anda bu denetimlere girer.
+ */
+const PAGES = YAYIMLANAN.map((k) => k.path.slice(1));
+/** Çekmecedeki bağlantı sayısı menü ağacından türer. Menüye sayfa eklenince elle güncellenecek sayı yok. */
+const MENU_BAGLANTI = NAV_GROUPS.flatMap((g) => g.items).length;
 
-/** Grafikli sayfalar (ECharts yalnız bunlarda yüklenir). */
-// Giderler grafikleri yalnız Sheets bağlantısıyla çizilir; ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
-const CHART_PAGES = PAGES.filter((p) => !['istihdam/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'nakit-akisi/', 'email/', 'applet/', 'gelir-modelleri/', 'oyunlastirma/'].includes(p));
+/**
+ * Grafiksiz sayfalar. Geri kalan her kayıtlı sayfa grafikli sayılır (ECharts yalnız bunlarda yüklenir). Liste iki yönden
+ * denetlenir: grafikli sayfada en az bir grafik, grafiksiz sayfada hiç grafik olmamalı. Yeni sayfa eklenince bu yüzden
+ * sessizce denetim dışında kalmaz.
+ * Giderler grafikleri yalnız Sheets bağlantısıyla çizilir. Ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
+ */
+const GRAFIKSIZ = ['istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', '404/'];
+const CHART_PAGES = PAGES.filter((p) => !GRAFIKSIZ.includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
 test.beforeEach(async ({ page }) => {
@@ -89,13 +79,13 @@ async function audit(page: Page) {
       .filter((r) => r.scrollWidth > r.clientWidth + 1)
       .map((r) => document.getElementById(r.getAttribute('aria-labelledby') ?? '')?.textContent?.trim() ?? r.getAttribute('aria-label') ?? '?');
     const chartScroll = document.querySelectorAll('.chart-scroll').length;
-    // ux_v2.md §3.2 / §5.2 (MUST): kayıt başlığı (h4 > button) içinde girdi, seçim, onay, düğme ya da bağlantı bulunmaz;
+    // ux_v2.md §3.2 / §5.2 (MUST): kayıt başlığı (başlık öğesi > button; düzey üst başlığa göre h3 ya da h4) içinde girdi, seçim, onay, düğme ya da bağlantı bulunmaz;
     // düzenleyici alanlar yalnız açılan paneldedir (başlıkta düzenleyici = özet ile editörün karışması).
-    const basliktaGirdi = document.querySelectorAll('.kayit h4 button :is(input, select, textarea, button, a[href], [role="switch"], [role="checkbox"], [role="combobox"])').length;
-    // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık h4 içinde düğme (aria-expanded, aria-controls → panel),
+    const basliktaGirdi = document.querySelectorAll('.kayit .kayit-h button :is(input, select, textarea, button, a[href], [role="switch"], [role="checkbox"], [role="combobox"])').length;
+    // Kayıt görünümü sözleşmesi (ux.md §8.2, M09): başlık öğesi (h3 ya da h4) içinde düğme (aria-expanded, aria-controls → panel),
     // alanlar dl/dt/dd ile etiketli, hedef alanı en az 44 CSS px.
     const records = [...document.querySelectorAll<HTMLElement>('.kayit')].map((k) => {
-      const btn = k.querySelector<HTMLButtonElement>('h4 button');
+      const btn = k.querySelector<HTMLButtonElement>(':is(h3, h4, h5).kayit-h > button, :is(h3, h4, h5).kayit-h button');
       const controls = btn?.getAttribute('aria-controls') ?? '';
       return {
         button: !!btn,
@@ -107,6 +97,93 @@ async function audit(page: Page) {
       };
     });
     return { overflow: doc.scrollWidth - window.innerWidth, small, light, headerOverflow, breaking, regions, tableOverflow, chartScroll, records, basliktaGirdi };
+  });
+}
+
+test.describe('her kayıtlı sayfa', () => {
+  // Yeni ya da güncellenen sayfa için temel sözleşme (kullanıcı kararı 2026-11-05): sayfa hatasız açılır, tek h1 taşır ve
+  // sekme başlığı içerik kaydındaki ad, menü adı ya da h1 ile aynıdır. Liste kayıttan türediği için yeni sayfa kendiliğinden girer.
+  test('hatasız açılır, tek h1 taşır, sekme başlığı kayıttaki adla tutarlı', async ({ page }) => {
+    test.slow();
+    const hatalar: string[] = [];
+    page.on('pageerror', (e) => hatalar.push(`${page.url()}: ${e.message}`));
+    for (const k of YAYIMLANAN) {
+      await page.goto(k.path.slice(1));
+      await icerik(page);
+      await hydrated(page);
+      const h1 = page.getByRole('heading', { level: 1 });
+      await expect(h1, `${k.path}: tek h1`).toHaveCount(1);
+      const baslik = (await h1.innerText()).trim();
+      const sekme = (await page.title()).split(' · ')[0];
+      const kabul = [k.baslik, k.menu, baslik, k.path === '/' ? meta.siteTitle : undefined].filter(Boolean);
+      expect(kabul, `${k.path}: sekme başlığı “${sekme}”`).toContain(sekme);
+      const duzeyler = await page.locator('h1, h2, h3, h4, h5, h6').evaluateAll((els) => els.filter((h) => h.getClientRects().length).map((h) => Number(h.tagName[1])));
+      const atlama = duzeyler.findIndex((d, i) => i > 0 && d > duzeyler[i - 1] + 1);
+      expect(atlama, `${k.path}: başlık düzeyleri ${duzeyler.join(' ')}`).toBe(-1);
+    }
+    expect(hatalar).toEqual([]);
+  });
+});
+
+for (const width of [320, 390]) {
+  test(`${width} px: her kayıtlı sayfada dokunma hedefi en az 44 × 44 px, başlık düzeyi atlamaz`, async ({ page }) => {
+    // Kullanıcı kararı 2026-11-05 (UX denetimi): küçük hedef yalnız tek bir sayfada değil her sayfada aranır. Düzyazı
+    // içindeki satır içi bağlantı istisnadır. Onay kutusu ve radyo düğmesi etiketiyle birlikte ölçülür.
+    test.slow();
+    await page.setViewportSize({ width, height: 800 });
+    const kucuk: string[] = [];
+    for (const path of PAGES) {
+      await page.goto(path);
+      await icerik(page);
+      await hydrated(page);
+      const bulunan = await page.evaluate(() => {
+        const gorunur = (el: Element) => {
+          const cs = getComputedStyle(el);
+          return el.getClientRects().length > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && !el.closest('.visually-hidden, [inert], [aria-hidden="true"]');
+        };
+        const secici = 'a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=switch], [role=checkbox], [role=radio]';
+        const out: string[] = [];
+        for (const el of document.querySelectorAll<HTMLElement>(secici)) {
+          if (!gorunur(el)) continue;
+          let r = el.getBoundingClientRect();
+          let w = r.width;
+          let h = r.height;
+          if (el instanceof HTMLInputElement && el.labels?.length) {
+            for (const l of el.labels) {
+              const b = l.getBoundingClientRect();
+              const sol = Math.min(r.left, b.left);
+              const ust = Math.min(r.top, b.top);
+              w = Math.max(r.right, b.right) - sol;
+              h = Math.max(r.bottom, b.bottom) - ust;
+              r = new DOMRect(sol, ust, w, h);
+            }
+          }
+          if (w >= 43.5 && h >= 43.5) continue;
+          const ebeveyn = el.parentElement?.innerText.trim().length ?? 0;
+          const satirIci = el.tagName === 'A' && getComputedStyle(el).display === 'inline' && ebeveyn > el.innerText.trim().length + 15;
+          if (satirIci) continue;
+          const ad = (el.getAttribute('aria-label') ?? el.innerText ?? '').trim().slice(0, 30);
+          out.push(`${el.tagName.toLowerCase()}.${[...el.classList].join('.')} “${ad}” ${Math.round(w)}×${Math.round(h)}`);
+        }
+        return out;
+      });
+      for (const b of bulunan) kucuk.push(`${path || '/'}: ${b}`);
+      // Başlık sırası: görünür başlıklar bir düzey birden fazla atlamaz (h2'den h4'e geçilmez).
+      const atlama = await page.evaluate(() => {
+        const out: string[] = [];
+        let onceki = 0;
+        for (const h of document.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, h6')) {
+          // Görsel olarak gizli başlık da ekran okuyucunun başlık listesindedir. Bu yüzden sayılır.
+          if (!h.getClientRects().length || h.closest('[aria-hidden="true"]')) continue;
+          const d = Number(h.tagName[1]);
+          if (onceki && d > onceki + 1) out.push(`h${onceki} → h${d} “${h.innerText.trim().slice(0, 30)}”`);
+          onceki = d;
+        }
+        return out;
+      });
+      for (const a of atlama) kucuk.push(`${path || '/'}: başlık ${a}`);
+    }
+    expect(kucuk).toEqual([]);
   });
 }
 
@@ -189,13 +266,13 @@ async function kayitListesi(blok: ReturnType<Page['locator']>) {
 }
 
 test.describe('uyarlanır veri görünümü (ux.md §8, M08/M09)', () => {
-  test('320 px eylem planı: kayıt başlığı h4 içinde düğme; Enter/Space açar kapatır; kapalı panele Tab gitmez; alanlar dl ile etiketli (UX-01, UX-07)', async ({ page }) => {
+  test('320 px eylem planı: kayıt başlığı başlık öğesinde düğme; Enter/Space açar kapatır; kapalı panele Tab gitmez; alanlar dl ile etiketli (UX-01, UX-07)', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto('eylem-plani/');
     await icerik(page);
     await hydrated(page);
     const kayit = page.locator('.table-block').first().locator('.kayit').first();
-    const dugme = kayit.locator('h4 button');
+    const dugme = kayit.locator(':is(h3, h4, h5).kayit-h button');
     await expect(dugme).toHaveAttribute('aria-expanded', 'false');
     const panelId = await dugme.getAttribute('aria-controls');
     expect(panelId).toBeTruthy();
@@ -448,9 +525,9 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
       expect(m.role, m.name).not.toBe('');
       expect(m.range, m.name).toMatch(/ – /);
     }
-    // Kayıt sözleşmesi: h4 içinde düğme, Enter açar (Açıklama + Tarih + Sorumlu), Space kapatır, hedef ≥ 44 px.
+    // Kayıt sözleşmesi: başlık öğesi içinde düğme, Enter açar (Açıklama + Tarih + Sorumlu), Space kapatır, hedef ≥ 44 px.
     const madde = ajanda.locator('.ajanda-madde').first();
-    const dugme = madde.locator('h4 button');
+    const dugme = madde.locator(':is(h3, h4, h5).kayit-h button');
     await expect(dugme).toHaveAttribute('aria-expanded', 'false');
     expect((await dugme.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await dugme.focus();
@@ -475,7 +552,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     const adimlar = await ajandaOku(rolAjanda);
     expect(adimlar.maddeler.length).toBeGreaterThan(1);
     expect(adimlar.maddeler.map((m) => m.name)).toEqual(adimlar.maddeler.map((_, i) => `${i + 1}. adım`));
-    expect(await rolAjanda.locator('h4 button').count()).toBe(adimlar.maddeler.length);
+    expect(await rolAjanda.locator(':is(h3, h4, h5).kayit-h button').count()).toBe(adimlar.maddeler.length);
 
     // Dijital pazarlama: 1280’de son tarih grafiği (deadlines) ECharts; 320’de düz ajanda — aynı ad ve tarihler.
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -951,7 +1028,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
       const cekmece = page.getByRole('dialog', { name: 'Menü' });
       await expect(cekmece).toBeVisible();
       const nav = cekmece.getByRole('navigation', { name: 'Ana gezinme' });
-      await expect(nav.getByRole('link')).toHaveCount(24);
+      await expect(nav.getByRole('link')).toHaveCount(MENU_BAGLANTI);
       await expect(nav.getByRole('link', { name: 'Asistan' })).toHaveAttribute('aria-current', 'page');
       await expect(nav.locator('.cekmece-grup-ad')).toHaveText(['İstihdam', 'Pazarlama', 'Finans', 'Yönetim', 'Yardımcı']);
       await expect(nav.locator('.tree-no')).toHaveCount(7);
@@ -1295,9 +1372,9 @@ test.describe('etkileşim alanı ve tema', () => {
     await page.getByRole('button', { name: 'Menü', exact: true }).click();
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
-    await expect(cekmece.getByRole('link')).toHaveCount(24);
+    await expect(cekmece.getByRole('link')).toHaveCount(MENU_BAGLANTI);
     const linkler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(linkler.length).toBe(24);
+    expect(linkler.length).toBe(MENU_BAGLANTI);
     expect(Math.min(...linkler)).toBeGreaterThanOrEqual(44);
   });
 
@@ -1368,7 +1445,7 @@ test.describe('dokunmatik cihaz', () => {
     const cekmece = page.getByRole('dialog', { name: 'Menü' });
     await expect(cekmece).toBeVisible();
     const ogeler = await cekmece.getByRole('link').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(ogeler.length).toBe(24);
+    expect(ogeler.length).toBe(MENU_BAGLANTI);
     expect(Math.min(...ogeler)).toBeGreaterThanOrEqual(48);
     expect((await cekmece.getByRole('button', { name: 'Menüyü kapat' }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });
@@ -1459,7 +1536,7 @@ test.describe('köşe sözleşmesi (ux.md §6.3)', () => {
         await page.goto(path);
         await icerik(page);
         const bad = await page.evaluate(() => {
-          const PILL = '.chip, .opex-state, .opex-pill, .yapiskan-ad, .bcg-flow-chip, .ortak-bolum-program';
+          const PILL = '.chip, .opex-state, .opex-pill, .yapiskan-ad, .bcg-flow-chip';
           const SWITCH = '.theme-track, .theme-thumb, [role="switch"] *';
           const out: string[] = [];
           for (const el of document.querySelectorAll<HTMLElement>('body *')) {
@@ -1567,6 +1644,12 @@ test.describe('bağımsız bağlantılar ve grafikler', () => {
       );
       expect(sizes.length, path).toBeGreaterThan(0);
       expect(Math.min(...sizes), `${path} grafik metni`).toBeGreaterThanOrEqual(14);
+    }
+    for (const path of GRAFIKSIZ.filter((p) => p !== 'giderler/')) {
+      await page.goto(path);
+      await icerik(page);
+      await hydrated(page);
+      await expect(page.locator('.chart-canvas'), `${path} grafiksiz listede ama grafik çiziyor`).toHaveCount(0);
     }
     expect(errors).toEqual([]);
   });

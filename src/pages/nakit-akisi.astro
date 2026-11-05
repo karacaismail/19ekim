@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { CashflowPage } from '../views/CashflowPage';
 ---
 
-<BaseLayout title="Nakit akış tablosu">
+<BaseLayout>
   <CashflowPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

@@ -5,6 +5,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { AppletPage } from '../views/AppletPage';
 ---
 
-<BaseLayout title="Ücret ve performans applet’leri">
+<BaseLayout>
   <AppletPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

@@ -157,29 +157,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     hareket tokenıyla; `Combobox.layer.css` BaseLayout’ta), anahtar `role="switch"`. Tablo hücresindeki etiketsiz
     alanın klavye odağı sol kenarda düz çubuk (değdiği köşeler o an radiussuz), etiketsiz onay kutusunda kutunun altında
     düz çizgi; etiketli alanda etiketin alt çizgisi.
-  - `/partnership/` iş ortaklığı programı (kullanıcı kararı 2026-10-27; adres İngilizce `partnership`, Pazarlama
-    menüsünde “İş ortaklığı”, sunum sırasında Eylem planı ile Karar yetkisi arasında): Segika ve iStoc için iki ayrı
-    90 günlük program; iki ana sekme (APG tablist, Giderler yıl sekmesi kalıbı: seçili sekme panele bitişik, radyo
-    işareti) ve her programda sekiz bölüm sekmesi (Özet, Teşhis, Kime, Program, Kanal, Ölçüm, Takvim, Risk; yatay
-    şerit, dar ekranda kayar, geniş ekranda sarılır). Bir anda tek program ve tek bölüm çizilir; adres
-    `#<program>-<bölüm>` (derin bağlantı, geri/ileri; #’siz adres Segika · Özet); bölüm sonunda önceki/sonraki,
-    programın sonunda diğer programın Özet’i. Veri `src/data/partnership.ts` → `makePartnership(params, program)`
-    (model üzerinden; tarihler program başlangıcından kayar: T0 = ilk iş günü, 13 hafta, geçitler 14/30/60/90. gün =
-    `startDate + 13`, `dates.day30/60/90`). İçerik dört kaynak araştırmanın (Segika ve iStoc için Claude ve ChatGPT
-    web araştırmaları, 27 Ekim 2026) sentezidir; akademik atıf, kaynakça, düşünür adı ve bağlantı YOK
-    (`tests/data.spec.ts` ve `tests/partnership.spec.ts` reddeder). Sayılar başlangıç tasarımıdır (14. günde gerçek
-    veriyle yazılır); tutar örnekleri yalnız hesap yöntemini gösterir, gerçek tarife değildir; Segika liste fiyatı ve
-    hacmi kamuya açık siteden. Grafikler: `mix` (ilk dalga ortak karması), `chain` (Segika: başvurudan yenilemeye;
-    iStoc: likidite oyun kitabı), `opex-bilesim` (ekonomi örneği), `huni`, `hedef-adim` (yeni tür: geçit hedefleri,
-    yatay gruplanmış çubuk, değer etiketi uçta), `gantt` (iş paketleri; geçit işaretleri; eksen sonuna yakın biten
-    kısa çubukta tarih etiketi solda) ve `pay` (kapasite; `Capacity.short` kısa etiket); Mantine `Timeline` (beş
-    aşama, `hire-*` sınıfları). Stil `.ortak-*` (global.css). Testler: her programın her bölümü 320/390/1280 px’te
-    taşma, 14 px, 44 px hedef ve grafik metni; sekme/adres/klavye; veri tutarlılığı (huni azalan, geçit hedefleri
-    artan, puan kartları 100, kapasite 52 ve 83 saat/hafta, takvim bitişik, tarih kayması).
-  - `/affilate/` Affilate (kullanıcı kararı 2026-10-28; Pazarlama menüsünde “Affilate”, sunum sırasında İş ortaklığı ile
-    Karar yetkisi arasında): Segika satış ortaklığı komisyon simülasyonu — üç ortak modeli aynı müşteri ve aynı satış
-    koşulları üzerinden; saf motor `src/data/affilate.ts`, kurgu `src/data/affilateKurgu.ts`, saklama
-    `src/lib/affilateStore.ts` (`segika-affilate-v1`), görünüm `src/views/AffilatePage.tsx`. Ayrıntı: “affilate.md” bölümü.
+  - `/partnership/` (İş ortaklığı) ve `/affilate/` (Affilate) sayfaları 2026-11-03 kararıyla kaldırıldı. İçerikleri
+    `/satis-ortakligi/` sayfasına taşındı. Kullanılmayan `.ortak-*` ve `.af-*` stilleri 2026-11-05'te silindi.
   - `/nakit-akisi/` nakit akış tablosu (kullanıcı kararı 2026-10-27; “Finans” açılır menüsünde “Nakit akışı” — 2026-10-27’de
     açılan “Giderler” menüsü 2026-10-28 kararıyla (docs/contents.md §5.2, CA-1) Finans oldu, `FINANCE_NAV`: Gelir planı,
     Giderler, Nakit akışı; `COMMON_NAV` kalktı, Notlar Yardımcı menüsünde —, sunum sırasında Giderler’den sonra, kırıntı
@@ -833,7 +812,7 @@ tanımlar) içerik taşınana kadar dosya olarak açılmaz (boş kabuk yok, §8)
 kayıttan okur: öneri (İş ortaklığı), eğitim (BCG), örnek (Applet, Affilate), kişisel taslak (Notlar, E-posta) artık
 “kesinleşen karar” varsayılanıyla sunulmaz; finans sayfaları koşullu tahmin, Giderler Sheets planı (plan ≠ ödeme;
 kaynak kurum Türksab, markaya dağıtım belirlenmedi → F16 karar kaydı). Kırıntı yardımcıları (`kirinti`) hazır; etkin
-kullanım CA-1’de (F15). Testler: `tests/icerik.spec.ts` (yalnız Chromium): sayfa ↔ kayıt birebir (26 sayfa, 404 dahil),
+kullanım CA-1’de (F15). Testler: `tests/icerik.spec.ts` (yalnız Chromium): sayfa ↔ kayıt birebir (404 dahil; sayı elle yazılmaz),
 tekil kimlik/yol, ilişkiler çözülür, planlanan sayfa dosyasız, Applet/BCG/arşiv/e-posta konumları, F10 kapsam cümleleri,
 F15 kırıntı; `tests/gorsel-algi.spec.ts` F18 alt bilgi beklentileri yeni cümlelere göre.
 
@@ -843,7 +822,7 @@ takvim, Applet — 2026-10-20/21 kararları korunur), Pazarlama (Temsilci ağı,
 Giderler, Nakit akışı), Yönetim (Hedefler, Eylem planı, Kararlar, Karar yetkisi), Yardımcı (Varsayımlar ve ayarlar, Notlar,
 Arşiv). Menü etiketi ve yol içerik kaydından (`menu`, `path`; `icerikKaydi`), grup adı `GRUP_ADI` (“Yardımcı”, §5.2’deki
 “Yardımcı erişim”in kısa adı; kırıntıyla aynı sözcük). Eski “Pazarlama” (dokuz öğe) ve “Giderler” menüleri ile ayrık
-Notlar bağlantısı (`COMMON_NAV`, `NavItem`) kalktı; çekmecede beş grup, 22 bağlantı. Geniş ekranda (≥ 80em; içerik
+Notlar bağlantısı (`COMMON_NAV`, `NavItem`) kalktı; çekmecede beş grup (bağlantı sayısı testte `NAV_GROUPS`'tan hesaplanır). Geniş ekranda (≥ 80em; içerik
 genişliği 74rem) beş menü, Giderler canlı durum şeridiyle tek satırda ve gezinme ortalı kalsın (2026-10-21) diye menü
 öğesi dolgusu/simge aralığı, bant sütun aralığı ve işaretçili ekranda şerit simge düğmelerinin genişliği (36 px;
 yükseklik 44, dokunmatikte 44) bir kademe sıkı (`global.css` ≥ 80em blokları; tablet 48–80em değişmedi). Kırıntı (`PageHeader`) artık
@@ -1041,6 +1020,34 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - **Commit kimliği (kullanıcı yönergesi 2026-10-28, docs/missings.md MS-23):** yazar ve committer
   `karacaismail <35493655+karacaismail@users.noreply.github.com>` (depo yerel `git config`); AI ortak yazar satırı
   (`Co-Authored-By`) ya da üretim imzası eklenmez; geçmiş yeniden yazılmaz (eski commit’ler olduğu gibi kalır). `3d10eff`’ten itibaren.
+
+## Sayfa ekleme ve bozulma koruması (kullanıcı kararı 2026-11-05)
+
+Yeni bir sayfa eklendiğinde ya da mevcut sayfa güncellendiğinde diğer sayfalar ve içerikler bozulmamalıdır. Bunun
+için şu kurallar ve testler geçerlidir:
+
+- **Yeni sayfa için dokunulan yerler:** rota `src/pages/<ad>.astro`, görünüm `src/views/<Ad>Page.tsx`, kayıt
+  `src/data/icerik.ts` ve menüde görünecekse `src/data/tree.ts`. Sekme başlığı kayıttaki `baslik` alanından türer
+  (`BaseLayout.astro`). Rotada `title` yalnız kayıttan farklı bir ad gerekiyorsa yazılır.
+- **Testler sayfa listesini elle tutmaz.** `tests/ui.spec.ts` denetlediği sayfaları `YAYIMLANAN` kaydından, menü
+  bağlantı sayısını `NAV_GROUPS`'tan türetir. `tests/icerik.spec.ts` IA-01 `src/pages` klasörünü alt klasörleriyle
+  birlikte okur ve her rotanın tek kaydı olmasını ister. Bu yüzden kaydedilen yeni sayfa kendiliğinden yerleşim,
+  14 px, ağırlık, kenar, köşe ve "her kayıtlı sayfa" denetimlerine girer.
+- **Grafik listesi iki yönden denetlenir.** Grafiksiz sayfa `tests/ui.spec.ts → GRAFIKSIZ` listesine yazılır. Listede
+  olan sayfa grafik çizerse, listede olmayan sayfa grafik çizmezse test düşer.
+- **Her kayıtlı sayfa:** hatasız açılır (`pageerror` yok), tek h1 taşır ve sekme başlığı kayıttaki ad, menü adı ya da
+  h1 ile aynıdır.
+- **Stil yalıtımı (`tests/css-mimari.spec.ts`):** yeni sayfanın stilleri tercihen kendi dosyasında
+  (`src/styles/<ad>.css`, görünümden import edilir) ve kendi önekiyle yazılır. Dosya `SAYFA_ONEKI` tablosuna eklenir.
+  Dosyadaki her seçici önekli bir sınıfa bağlı olmalıdır. Kayıtsız stil dosyası ya da başka sayfanın öğesini seçen
+  kural testi düşürür. `global.css` yalnız ortak bileşenler ve henüz taşınmamış eski sayfalar içindir.
+- **Ölü stil yok:** kaynakta hiç geçmeyen sınıf için yazılan kural testi düşürür. Sayfa ya da bileşen silinince
+  stilleri de silinir.
+- **Ortak bileşen değişikliği:** `src/components/ui.tsx` gibi ortak bir bileşen değişince yalnız bir sayfayı değil,
+  bileşeni kullanan bütün sayfaları etkiler. Düzeltme bileşenin kendisinde yapılır ve ortak testlere (ör.
+  `gorsel-algi.spec.ts` V06/V08 seçim sunumu) eklenir.
+- **Derleyici:** `tsconfig.json` içinde `noUnusedLocals` ve `noUnusedParameters` açıktır. Kullanılmayan kod
+  `npm run check` adımında hata verir.
 
 ## Komutlar
 

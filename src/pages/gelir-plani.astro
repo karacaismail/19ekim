@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { RevenuePage } from '../views/RevenuePage';
 ---
 
-<BaseLayout title="Gelir planı">
+<BaseLayout>
   <RevenuePage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

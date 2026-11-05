@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { GoalsPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="90 gün hedefleri">
+<BaseLayout>
   <GoalsPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 

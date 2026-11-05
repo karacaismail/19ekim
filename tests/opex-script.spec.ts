@@ -752,7 +752,7 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
           getName: () => 'Teşvikler',
           getLastRow: () => 2 + kaynak.length,
           getLastColumn: () => 9 + (ek[0]?.length ?? 0),
-          getRange: (r: number, c: number) =>
+          getRange: (_r: number, c: number) =>
             c > 9
               ? { getValues: () => Array.from({ length: 2 + kaynak.length }, (_, i) => ek[i] ?? Array(ek[0]?.length ?? 0).fill('')) }
               : {

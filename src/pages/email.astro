@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { EmailPage } from '../views/EmailPage';
 ---
 
-<BaseLayout title="E-posta">
+<BaseLayout>
   <EmailPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

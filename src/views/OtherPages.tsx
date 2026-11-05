@@ -678,6 +678,7 @@ export function ArchivePage({ pathname }: { pathname: string }) {
       <DataTable<BoardRow>
         id="tahta"
         title="Tahta notu → karar → sayfa"
+        baslikDuzeyi={2}
         columns={[
           { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },
           { key: 'decision', header: 'Plandaki karar', summary: true, minWidth: '18rem', render: (r) => r.decision },

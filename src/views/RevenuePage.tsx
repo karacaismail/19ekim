@@ -31,7 +31,6 @@ const kisaGun = (d: string | null) => (d ? shortDate(d) : 'Dönem içinde yok');
 const ayAdi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 const yuzde = (v: number) => `%${Math.round(v * 100)}`;
 const binTl = (v: number) => Math.round(v / 1000);
-const kucuk = (s: string) => s.toLocaleLowerCase('tr-TR');
 /** Kartın büyük sayısı: para hedefleri milyon ₺ (“3 M₺”), adetler “100 aktif” / “500 üye”. */
 const esik = (m: Milestone) => (m.kind === 'gelir' ? `${(m.threshold / 1_000_000).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} M₺` : `${int(m.threshold)} ${m.kind === 'uye' ? 'üye' : 'aktif'}`);
 
@@ -111,7 +110,6 @@ function Icerik() {
   const sim = be.sim;
   const by = (id: string, ms: Milestone[] = sim.milestones) => ms.find((x) => x.id === id)!;
   const aktif100 = by('aktif100');
-  const uye = by('uye');
   const gelir3m = by('gelir3m');
   const on2 = months.slice(0, 12);
   const kaynaklar = useMemo(() => buildSources(params, m, months, inputs), [params, m, months, inputs]);
@@ -202,7 +200,6 @@ function Icerik() {
   };
   const kumGelir = kum(be.gelir);
   const kumGider = kum(be.gider);
-  const ayRows = on2.map((ay, t) => ({ ay, yeni: sim.yeniAktif[t], kayit: sim.kayit[t], odeyen: sim.odeyen[t], gelir: sim.gelir[t], kum: sim.kumulatif[t] }));
   const tumAyRows = months.map((ay, t) => ({ ay, t }));
   const beRows = months.map((ay, t) => ({ ay, t }));
   const senaryoRows = ustUste.map((x) => ({

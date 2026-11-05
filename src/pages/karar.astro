@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { KararPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="Kararlar">
+<BaseLayout>
   <KararPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

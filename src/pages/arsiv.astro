@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { ArchivePage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="Arşiv: tahtadan karara">
+<BaseLayout>
   <ArchivePage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

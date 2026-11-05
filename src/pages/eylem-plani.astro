@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { PlanPage } from '../views/OtherPages';
 ---
 
-<BaseLayout title="Eylem planı">
+<BaseLayout>
   <PlanPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
 

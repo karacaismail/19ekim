@@ -3,7 +3,7 @@
  * kopyasıdır. v2 değişiklikleri yalnız bu dosyada yapılır; global.css'teki v1 stillerine dokunulmaz.
  */
 
-html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .v2-so2-json-icerik):focus-visible {
+html[data-focus-mode='keyboard'] .v2-so2-json-icerik:focus-visible {
   box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
 }
 .v2-so2-arac {
@@ -155,46 +155,6 @@ html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .v2-so2-json-i
   font-size: var(--text-lg);
 }
 
-.v2-so2-asamalar {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin: var(--space-8) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.v2-so2-asama {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  background-color: var(--surface-sunken);
-}
-
-.v2-so2-asama-sure {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
-
-.v2-so2-asama-ad {
-  font-weight: var(--weight-semibold);
-}
-
-.v2-so2-asama-hedef {
-  font-size: var(--text-sm);
-}
-
-.v2-so2-asama-tutar {
-  margin-top: var(--space-2);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
-.v2-so2-asama[data-aktif] .v2-so2-asama-tutar {
-  color: var(--accent-strong);
-}
-
 .v2-so2-kota {
   margin-top: var(--space-8);
 }
@@ -239,14 +199,8 @@ html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .v2-so2-json-i
   text-transform: uppercase;
 }
 
-.v2-so2-ortaklar,
-.v2-so2-musavir {
+.v2-so2-ortaklar {
   margin-top: var(--space-8);
-}
-
-.v2-so2-musavir p:last-child {
-  margin: 0;
-  font-size: var(--text-lg);
 }
 
 .v2-so2-etiketler {
@@ -261,28 +215,6 @@ html[data-focus-mode='keyboard'] :where(.app-main, .mainnav-list, .v2-so2-json-i
 .v2-so2-etiketler li {
   padding: var(--space-2) var(--space-3);
   background-color: var(--surface-sunken);
-}
-
-.v2-so2-ikili {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-8);
-}
-
-.v2-so2-ikili > div {
-  padding: var(--space-4) var(--space-5);
-  background-color: var(--surface-sunken);
-}
-
-.v2-so2-ikili p {
-  margin: 0;
-}
-
-.v2-so2-ikili-deger {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
 }
 
 .v2-so2-kurallar {
@@ -498,25 +430,6 @@ html[data-focus-mode='keyboard'] .v2-so2-girdi:has(:focus-visible) .v2-so2-girdi
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
 }
-.v2-so2-roller-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.v2-so2-asamalar[data-n='1'] {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.v2-so2-asamalar[data-n='2'] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.v2-so2-asamalar[data-n='3'] {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.v2-so2-ayrinti {
-  margin: var(--space-6) 0 0;
-}
 .v2-so2-rol,
 .v2-so2-sec-dugme,
 .v2-so2-hazir-dugme,
@@ -567,8 +480,7 @@ html[data-focus-mode='keyboard'] .v2-so2-girdi:has(:focus-visible) .v2-so2-girdi
   }
 }
 
-.v2-so2-kota-dolgu,
-.v2-so2-asama .v2-so2-kota-dolgu {
+.v2-so2-kota-dolgu {
   transition-property: width, fill;
   transition-duration: var(--motion-duration-theme);
   transition-timing-function: var(--motion-ease-standard);
@@ -633,12 +545,6 @@ html[data-focus-mode='keyboard'] .v2-so2-girdi:has(:focus-visible) .v2-so2-girdi
   display: block;
   margin-top: var(--space-1);
   color: var(--text-secondary);
-}
-
-.v2-so2-asama-tutar small {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
 }
 .v2-so2-kota-ust small {
   display: block;
@@ -873,9 +779,6 @@ html[data-bant-gizli] .v2-so2-duzen {
   color: var(--text-secondary);
   font-size: var(--text-sm);
 }
-.v2-so2-ayarlar-ozet {
-  display: none;
-}
 
 @media (width < 64em) {
   .v2-so2-duzen {
@@ -909,20 +812,7 @@ html[data-bant-gizli] .v2-so2-duzen {
     box-shadow: 0 var(--hairline) 0 var(--rule);
   }
 
-  .v2-so2-ayarlar-ozet {
-    display: block;
-    flex-basis: 100%;
-    margin: 0;
-    color: var(--text-secondary);
-  }
-
-  .v2-so2-ayarlar-ozet strong {
-    color: var(--accent-strong);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .v2-so2-roller,
-  .v2-so2-roller-3 {
+  .v2-so2-roller {
     grid-template-columns: none;
     grid-auto-flow: column;
     grid-auto-columns: minmax(11rem, 1fr);
@@ -945,11 +835,6 @@ html[data-bant-gizli] .v2-so2-duzen {
     margin: 0;
     text-align: start;
   }
-
-  .v2-so2-asamalar,
-  .v2-so2-asamalar[data-n] {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-  }
 }
 @media (max-width: 47.99em), (max-height: 39.99em) {
   html .v2-so2-duzen,
@@ -959,7 +844,6 @@ html[data-bant-gizli] .v2-so2-duzen {
 }
 
 @media (max-width: 47.99em) {
-  .v2-so2-ikili,
   .v2-so2-kademe {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -3,6 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { KadroKapasitesiPage } from '../views/IstihdamPlani';
 ---
 
-<BaseLayout title="Kadro kapasitesi">
+<BaseLayout>
   <KadroKapasitesiPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>

@@ -222,3 +222,25 @@ test('Gemini kartı yol haritasını açar, kaynağı ve projeyle çelişen nokt
   await expect(pencere.locator('.oy-dikkat')).toContainText('abonelik');
   await expect(pencere).not.toContainText(/[;—]/);
 });
+
+test('uyarı metni üç kaynağı ve “üç ayrı analiz” ifadesini doğru sayar', async ({ page }) => {
+  await ac(page, 1280);
+  const uyari = page.locator('.oy-uyari');
+  await expect(uyari).toContainText('üç ayrı analizin');
+  for (const ad of ['Claude', 'ChatGPT', 'Gemini']) await expect(uyari).toContainText(ad);
+});
+
+for (const genislik of [320, 390]) {
+  test(`${genislik} px: “Öneri sahibi” etiketi seçeneklerin üstünde, seçenekler tam genişlikte alt alta`, async ({ page }) => {
+    await ac(page, genislik);
+    const grup = page.getByRole('group', { name: 'Öneri sahibi' });
+    await expect(grup.locator('.secim-iz')).toHaveAttribute('data-sunum', 'liste');
+    const etiket = (await grup.locator('.secim-etiket').boundingBox())!;
+    const iz = (await grup.locator('.secim-iz').boundingBox())!;
+    const kutu = (await grup.boundingBox())!;
+    // Etiket kendi satırında, listenin üstünde durur. Liste grubun tüm genişliğini kullanır.
+    expect(etiket.y + etiket.height).toBeLessThanOrEqual(iz.y + 0.5);
+    expect(Math.abs(iz.width - kutu.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(etiket.x - iz.x)).toBeLessThanOrEqual(1);
+  });
+}

@@ -130,7 +130,7 @@ function Icerik() {
       <PageHeader title="Oyunlaştırma" purpose="istoc.com’da alıcı ile satıcının birbirini beklediği başlangıç sorununu çözen ve platformu sürdürülebilir kılan yalın oyunlaştırma stratejilerini gösterir." />
       <div className="oy">
         <p className="oy-uyari">
-          Bu sayfada iki ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
+          Bu sayfada üç ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
         </p>
 
         <div className="oy-araclar">

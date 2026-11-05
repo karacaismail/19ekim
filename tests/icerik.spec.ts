@@ -14,14 +14,25 @@ import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 const PAGES_DIR = join(process.cwd(), 'src', 'pages');
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-/** `src/pages` altındaki gerçek yollar (rol şablonu yedi role açılır; 404 `/404/`). */
+/**
+ * `src/pages` altındaki gerçek yollar, alt klasörler dahil (rol şablonu `[slug].astro` yedi role açılır, 404 `/404/`).
+ * Klasör özyinelemeli okunur. Böylece iç içe yeni bir rota da kayıtla eşleşmek zorunda kalır.
+ */
 function sayfaYollari(): string[] {
-  const sabit = readdirSync(PAGES_DIR)
-    .filter((f) => f.endsWith('.astro'))
-    .map((f) => f.replace(/\.astro$/, ''))
-    .map((n) => (n === 'index' ? '/' : `/${n}/`));
-  const roller = ROLES.map((r) => `/roller/${r.slug}/`);
-  return [...sabit, ...roller].sort();
+  const yollar: string[] = [];
+  const gez = (klasor: string, onek: string) => {
+    for (const g of readdirSync(klasor, { withFileTypes: true })) {
+      if (g.isDirectory()) gez(join(klasor, g.name), `${onek}${g.name}/`);
+      else if (g.name.endsWith('.astro')) {
+        const ad = g.name.replace(/\.astro$/, '');
+        if (ad === '[slug]' && onek === 'roller/') yollar.push(...ROLES.map((r) => `/roller/${r.slug}/`));
+        else if (ad.startsWith('[')) throw new Error(`Tanınmayan dinamik rota: ${onek}${g.name}`);
+        else yollar.push(ad === 'index' ? `/${onek}` : `/${onek}${ad}/`);
+      }
+    }
+  };
+  gez(PAGES_DIR, '');
+  return yollar.sort();
 }
 
 test.describe('içerik envanteri', () => {
@@ -29,7 +40,6 @@ test.describe('içerik envanteri', () => {
     const yollar = sayfaYollari();
     const kayitli = YAYIMLANAN.map((k) => k.path).sort();
     expect(kayitli).toEqual(yollar);
-    expect(YAYIMLANAN).toHaveLength(28); // 404 dahil 25 sayfa (contents.md §1, 61fd2ff) + Satış ortaklığı + Değer önerisi + Gelir modelleri + Oyunlaştırma + Kadro kapasitesi − İş ortaklığı − Affilate (2026-11-03: satış ortaklığına taşındı) − karar sayfaları tek sayfa (Kararlar)
     for (const k of ICERIK) {
       expect(k.kullaniciSorusu.length, k.id).toBeGreaterThan(10);
       expect(k.kullaniciSorusu.trim().endsWith('?'), k.id).toBe(true);

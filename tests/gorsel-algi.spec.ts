@@ -125,6 +125,12 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
           expect(sunum, `${ad}: sunum`).toBe('secim');
           await expect(g.getByRole('combobox')).toHaveCount(1);
         }
+        // Liste ve seçim kutusu kipinde etiket kontrolün üstünde, kendi satırındadır (kullanıcı kararı 2026-11-05).
+        if (sunum !== 'segment') {
+          const etiket = (await g.locator('.secim-etiket').boundingBox())!;
+          const iz = (await g.locator('.secim-iz').boundingBox())!;
+          expect(etiket.y + etiket.height, `${ad}: etiket üstte`).toBeLessThanOrEqual(iz.y + 0.5);
+        }
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
       // V08: seçim değişince grubun ve komşu hedeflerin geometrisi oynamaz (ağırlık değişimi yok).

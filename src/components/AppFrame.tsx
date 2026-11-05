@@ -261,7 +261,6 @@ export function AppFrame({
 }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
-  const stop = index >= 0 ? SEQUENCE[index] : null;
   const prev = index > 0 ? SEQUENCE[index - 1] : null;
   const next = index >= 0 && index < SEQUENCE.length - 1 ? SEQUENCE[index + 1] : null;
   // Sayfa başlığı ve kırıntılar içerikteki `PageHeader`’da (ux.md M03, kullanıcı kararı 2026-10-27); yol bağlamla verilir.

@@ -684,7 +684,7 @@ function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
 }
 
 /** Özel programın sonucu: kaynak, büyük sonuç, dönemler, hesap ve kurallar. */
-function ProgramPaneli({ a, ks, ad, ek }: { a: Ayar; ks: KosulSonuc; ad: string; ek?: ReactNode }) {
+function ProgramPaneli({ ks, ad, ek }: { ks: KosulSonuc; ad: string; ek?: ReactNode }) {
   return (
     <>
       <p className="v2-so2-kaynak">Özel program: {ad}. Standart programın yerine geçer.</p>
@@ -1004,7 +1004,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
               <p className="v2-so2-kim">{secili.kim}</p>
               <Kimler liste={secili.kimler} />
               {ks ? (
-                <ProgramPaneli a={a} ks={ks} ad={kosulTanim.ad} ek={model ? <AffilateMotoru a={a} id={model} /> : null} />
+                <ProgramPaneli ks={ks} ad={kosulTanim.ad} ek={model ? <AffilateMotoru a={a} id={model} /> : null} />
               ) : (
                 <>
                   {secili.sozlesme === 'kadrolu' ? <KadroluSonuc a={a} /> : secili.sozlesme === 'musteri' ? <MusteriSonuc a={a} /> : <BagimsizSonuc a={a} persona={secili} />}

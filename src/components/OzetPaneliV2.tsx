@@ -13,7 +13,6 @@ import {
   type Ayar,
   type RolId,
   type RolMetni,
-  type SegmentSonucu,
 } from '../data/satisOrtakligiV2';
 import { kosulSonucu, seciliKosul } from '../data/kosullarV2';
 import { personaOzeti, segmentDurumu } from '../data/ozetV2';

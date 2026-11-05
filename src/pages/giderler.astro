@@ -7,9 +7,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { OpexPage } from '../views/OpexPage';
 ---
 
-<BaseLayout
-  title="Giderler (OPEX)"
-  page="giderler"
->
+<BaseLayout page="giderler">
   <OpexPage client:load pathname={Astro.url.pathname} />
 </BaseLayout>
