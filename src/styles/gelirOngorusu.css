@@ -1,0 +1,96 @@
+/*
+ * 2027 gelir öngörüsü (kullanıcı kararı 2026-11-05). Bu dosyadaki her seçici `go27-` önekli bir sınıfa bağlıdır
+ * (tests/css-mimari.spec.ts). Tablo, bölüm, istatistik ve seçim bileşenleri ortak stillerini global.css'ten alır.
+ * Risk haritası düzeyleri yüzey tonuyla ayrılır. Dekoratif kenarlık yoktur, hücre ızgarası işlevseldir.
+ */
+
+.go27-uyari {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface-sunken);
+  line-height: var(--leading-body);
+}
+
+.go27-uyari p {
+  margin: 0;
+}
+
+.go27-araclar {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.go27-ozet {
+  display: grid;
+  gap: var(--space-4);
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+}
+
+.go27-ozet dt {
+  font-weight: var(--weight-semibold);
+}
+
+.go27-ozet dd {
+  margin: var(--space-1) 0 0;
+  line-height: var(--leading-body);
+}
+
+.go27-not {
+  max-width: var(--prose-max);
+  margin: var(--space-4) 0 0;
+  line-height: var(--leading-body);
+}
+
+/* Risk haritası: 6 sütunlu ızgara, başlıklar kısa sayılardır. 320 px'te de kaymadan sığar. */
+.go27-harita-kap {
+  max-width: 40rem;
+  margin-top: var(--space-4);
+}
+
+.go27-harita {
+  inline-size: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.go27-harita :is(th, td) {
+  padding: var(--space-2);
+  border: var(--hairline) solid var(--rule);
+  font-size: var(--text-sm);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.go27-harita th {
+  font-weight: var(--weight-semibold);
+}
+
+.go27-harita td {
+  block-size: 3rem;
+  font-weight: var(--weight-semibold);
+}
+
+.go27-harita td[data-duzey='Yüksek'] {
+  background-color: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
+}
+
+.go27-harita td[data-duzey='Orta'] {
+  background-color: var(--surface-selected);
+}
+
+.go27-harita td[data-duzey='Düşük'] {
+  background-color: var(--surface-raised);
+}
+
+/* Tablo hücresindeki kaynak bağlantısı tek başına durur. Dokunma alanı en az 44 px'tir. */
+.go27-kaynak {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--hit-min);
+}

@@ -1,0 +1,850 @@
+{
+ "tarih": "2026-11-05",
+ "kalemler": [
+  {
+   "id": "takvim.2027.yilbasi",
+   "konu": "1 Ocak 2027 Yılbaşı",
+   "deger": "2027-01-01 Cuma",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Ulusal Bayram ve Genel Tatiller Hakkında Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "Yılbaşı 2027'de Cuma gününe denk gelir. Bu gün hafta içinde tam gün tatildir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.ramazan_bayrami",
+   "konu": "Ramazan Bayramı 2027 (arife yarım gün ve 3 gün)",
+   "deger": "Arife 2027-03-08 Pazartesi (yarım gün), bayram 2027-03-09 Salı, 2027-03-10 Çarşamba, 2027-03-11 Perşembe",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "Evrensel, Diyanet 2027 takvimini duyurdu",
+     "url": "https://www.evrensel.net/haber/5997565/diyanet-2027-takvimini-duyurdu-ramazan-ne-zaman-basliyor",
+     "tarih": "2026-08-24"
+    },
+    {
+     "ad": "2429 sayılı Kanun, arife saat 13.00 kuralı",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "Diyanet takvimine göre Ramazan 8 Şubat 2027'de başlar ve bayram 9 ile 11 Mart arasındadır. Bu bayram hafta içinde 3 tam gün ve 1 yarım gün iş kaybı yaratır.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.23_nisan",
+   "konu": "23 Nisan Ulusal Egemenlik ve Çocuk Bayramı",
+   "deger": "2027-04-23 Cuma",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "23 Nisan 2027 Cuma gününe denk gelir. Bu gün hafta içinde tam gün tatildir ve hafta sonuyla birleşerek 3 günlük bir ara oluşturur.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.1_mayis",
+   "konu": "1 Mayıs Emek ve Dayanışma Günü",
+   "deger": "2027-05-01 Cumartesi",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "1 Mayıs 2027 Cumartesi gününe denk gelir. Bu yüzden Pazartesi ile Cuma arasında çalışan bir ekip için iş günü kaybı yoktur.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.kurban_bayrami",
+   "konu": "Kurban Bayramı 2027 (arife yarım gün ve 4 gün) ile 19 Mayıs",
+   "deger": "Arife 2027-05-15 Cumartesi, bayram 2027-05-16 Pazar, 2027-05-17 Pazartesi, 2027-05-18 Salı, 2027-05-19 Çarşamba",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "Milli Gazete, 2027 Kurban Bayramı tatili (Diyanet takvimine dayanır)",
+     "url": "https://www.milligazete.com.tr/2027-kurban-bayrami-tatili-9-gun-mu-olacak-kac-gun-surecek-mayis-ayi-resmi-tatil-ve-arife-tarihleri",
+     "tarih": "2026-10-31"
+    },
+    {
+     "ad": "Internethaber, 2027 bayram tatili kaç gün",
+     "url": "https://www.internethaber.com/kurban-bayrami-icin-tatil-planlari-basladi-2027-bayram-tatili-kac-gun-arefe-ne-zaman-foto-galerisi-2463926.htm",
+     "tarih": "2026"
+    }
+   ],
+   "aciklama": "Arife ve bayramın ilk günü hafta sonuna denk gelir. Bayramın son günü 19 Mayıs ile çakıştığı için ek tatil oluşmaz ve hafta içinde 3 tam gün kaybedilir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.15_temmuz",
+   "konu": "15 Temmuz Demokrasi ve Millî Birlik Günü",
+   "deger": "2027-07-15 Perşembe",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "15 Temmuz 2027 Perşembe gününe denk gelir. Cuma günü izin alanlar için 4 günlük bir ara oluşabilir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.30_agustos",
+   "konu": "30 Ağustos Zafer Bayramı",
+   "deger": "2027-08-30 Pazartesi",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "30 Ağustos 2027 Pazartesi gününe denk gelir. Bu gün hafta içinde tam gün tatildir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.cumhuriyet_bayrami",
+   "konu": "28 Ekim (yarım gün) ve 29 Ekim Cumhuriyet Bayramı",
+   "deger": "2027-10-28 Perşembe yarım gün, 2027-10-29 Cuma tam gün",
+   "birim": "tarih",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "1981-03-17"
+    }
+   ],
+   "aciklama": "28 Ekim saat 13.00'ten sonra ve 29 Ekim tam gün tatildir. 2027'de ikisi de hafta içinde olduğu için 1,5 iş günü kaybedilir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.hafta_ici_gun",
+   "konu": "2027 toplam hafta içi gün sayısı",
+   "deger": 261,
+   "birim": "gün",
+   "kaynaklar": [
+    {
+     "ad": "Gregoryen takvim hesabı (Python datetime ile hesaplandı)",
+     "url": "",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "aciklama": "2027 yılı Cuma günü başlar ve 365 gün sürer. Pazartesi ile Cuma arasında 261 gün vardır.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.tatil_hafta_ici",
+   "konu": "2027 hafta içine denk gelen resmi tatil günleri",
+   "deger": 12,
+   "birim": "iş günü eşdeğeri",
+   "aralik": "11 tam gün ve 2 yarım gün",
+   "kaynaklar": [
+    {
+     "ad": "2429 sayılı Kanun ve Diyanet 2027 takvimi üzerinden hesap",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.2429.pdf",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "aciklama": "Hafta içine 11 tam tatil günü ve 2 yarım gün düşer. Yarım günler 0,5 sayıldığında toplam kayıp 12 iş günüdür.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.is_gunu",
+   "konu": "2027 resmi tatiller sonrası iş günü",
+   "deger": 249,
+   "birim": "iş günü",
+   "kaynaklar": [
+    {
+     "ad": "Bu araştırmadaki takvim hesabı",
+     "url": "",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "aciklama": "261 hafta içi günden 12 iş günü eşdeğeri tatil düşülünce 249 iş günü kalır. Bu sayı yıllık izin, hastalık ve olası köprü günlerini henüz düşmez.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.brut_saat",
+   "konu": "2027 brüt çalışma saati (haftada 45 saat, 5 gün, günde 9 saat)",
+   "deger": 2241,
+   "birim": "saat/kişi",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu madde 63 ve bu araştırmadaki takvim hesabı",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2003-06-10"
+    }
+   ],
+   "aciklama": "249 iş günü günde 9 saatle çarpılınca 2.241 saat eder. Bu değer yasal üst sınıra göre kurulmuş brüt bir tavandır ve izin ile devamsızlık düşülmemiştir.",
+   "tahmin": false
+  },
+  {
+   "id": "takvim.2027.kopru_gunleri",
+   "konu": "2027 olası köprü günleri ve idari izin",
+   "deger": "Bilinmiyor",
+   "birim": "gün",
+   "aralik": "0 ile 3 gün (12 Mart Cuma, 20 ve 21 Mayıs Perşembe ile Cuma, 16 Temmuz Cuma adaydır)",
+   "kaynaklar": [
+    {
+     "ad": "Milli Gazete, 2027 Kurban Bayramı için idari izin kararı yok",
+     "url": "https://www.milligazete.com.tr/2027-kurban-bayrami-tatili-9-gun-mu-olacak-kac-gun-surecek-mayis-ayi-resmi-tatil-ve-arife-tarihleri",
+     "tarih": "2026-10-31"
+    },
+    {
+     "ad": "GZT, 2026 Kurban Bayramı idari izinle 9 gün oldu",
+     "url": "https://www.gzt.com/gundem/kurban-bayrami-tatili-ne-zaman-basliyor-2026-bayram-tatili-kimlere-9-gun-oldu-4225204",
+     "tarih": "2026-05"
+    }
+   ],
+   "aciklama": "Hükümet bayramları sık sık idari izinle 9 güne uzatır ve 2026 Kurban Bayramı'nda da bunu yaptı. Bu karar kamu çalışanları içindir, özel sektörü bağlamaz, ama özel şirketlerde fiili izin talebini artırır.",
+   "tahmin": true
+  },
+  {
+   "id": "takvim.2027.ramazan_ayi",
+   "konu": "2027 Ramazan ayı dönemi",
+   "deger": "2027-02-08 ile 2027-03-08 arası",
+   "birim": "tarih aralığı",
+   "kaynaklar": [
+    {
+     "ad": "Evrensel, Diyanet 2027 takvimi",
+     "url": "https://www.evrensel.net/haber/5997565/diyanet-2027-takvimini-duyurdu-ramazan-ne-zaman-basliyor",
+     "tarih": "2026-08-24"
+    }
+   ],
+   "aciklama": "Oruç 8 Şubat 2027 Pazartesi başlar ve arife 8 Mart'tadır. İstanbul'da bu dönemde oruç süresi yaklaşık 12 ile 13 saattir, bu süre gün uzunluğundan yapılmış kaba bir tahmindir.",
+   "tahmin": false
+  },
+  {
+   "id": "is_hukuku.haftalik_sure",
+   "konu": "Haftalık azami çalışma süresi",
+   "deger": 45,
+   "birim": "saat/hafta",
+   "aralik": "Günlük en fazla 11 saat, yıllık fazla çalışma en fazla 270 saat",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu madde 41 ve 63",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2003-06-10"
+    }
+   ],
+   "aciklama": "Genel bir kural olarak çalışma süresi haftada en çok 45 saattir. Beş günlük düzende bu süre günde 9 saate karşılık gelir ve ara dinlenmeleri bu süreye dahil değildir.",
+   "tahmin": false
+  },
+  {
+   "id": "is_hukuku.yillik_izin",
+   "konu": "Yıllık ücretli izin süresi (kıdeme göre)",
+   "deger": 14,
+   "birim": "iş günü/yıl",
+   "aralik": "1 ile 5 yıl (5 dahil) 14 gün, 5 ile 15 yıl arası 20 gün, 15 yıl ve üstü 26 gün, 18 yaş altı ve 50 yaş üstü en az 20 gün",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu madde 53",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2003-06-10"
+    }
+   ],
+   "aciklama": "Çalışan, deneme süresi dahil en az 1 yıl çalıştıktan sonra yıllık izne hak kazanır. Bu yüzden 2027'de işe giren biri o yıl içinde yasal yıllık izin kullanmaz, işveren isterse avans izin verebilir.",
+   "tahmin": false
+  },
+  {
+   "id": "is_hukuku.mazeret_izinleri",
+   "konu": "Ücretli mazeret izinleri (İş Kanunu ek madde 2)",
+   "deger": "Evlilik 3 gün, evlat edinme 3 gün, ölüm 3 gün, babalık 10 gün, engelli veya süreğen hastalığı olan çocuk için yılda 10 güne kadar",
+   "birim": "gün",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu ek madde 2",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2003-06-10"
+    },
+    {
+     "ad": "Forbes Türkiye, 7578 sayılı Kanunla analık ve babalık izinleri uzatıldı",
+     "url": "https://www.forbes.com.tr/hukuk/beklenen-duzenleme-yururluge-girdi-analik-ve-babalik-izinlerinde-sureler-uzatildi",
+     "tarih": "2026-06-23"
+    }
+   ],
+   "aciklama": "Ölüm izni anne, baba, eş, kardeş veya çocuğun ölümünde verilir. 1 Mayıs 2026'da yürürlüğe giren 7578 sayılı Kanun babalık iznini 5 günden 10 güne çıkardı.",
+   "tahmin": false
+  },
+  {
+   "id": "is_hukuku.analik_izni",
+   "konu": "Analık (doğum) izni",
+   "deger": 24,
+   "birim": "hafta",
+   "aralik": "Tekil gebelikte doğumdan önce 8, sonra 16 hafta. Çoğul gebelikte toplam 26 hafta",
+   "kaynaklar": [
+    {
+     "ad": "Forbes Türkiye, 7578 sayılı Kanun (Resmî Gazete 1 Mayıs 2026, sayı 33240)",
+     "url": "https://www.forbes.com.tr/hukuk/beklenen-duzenleme-yururluge-girdi-analik-ve-babalik-izinlerinde-sureler-uzatildi",
+     "tarih": "2026-06-23"
+    }
+   ],
+   "aciklama": "7578 sayılı Kanun doğum sonrası izni 8 haftadan 16 haftaya çıkardı. Kadın çalışanı olan küçük bir ekipte tek bir doğum izni yaklaşık 6 aylık kapasite boşluğu yaratır.",
+   "tahmin": false
+  },
+  {
+   "id": "is_hukuku.rapor_odemesi",
+   "konu": "Hastalık raporunda SGK geçici iş göremezlik ödeneği",
+   "deger": "Raporun 3. gününden itibaren",
+   "birim": "kural",
+   "aralik": "Ayakta tedavide günlük kazancın 2/3'ü, yatarak tedavide 1/2'si. Son 1 yılda en az 90 gün kısa vadeli sigorta primi şartı vardır",
+   "kaynaklar": [
+    {
+     "ad": "5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu madde 18",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.5510.pdf",
+     "tarih": "2006-05-31"
+    },
+    {
+     "ad": "PwC Türkiye, Geçici iş göremezlik ödeneği nedir",
+     "url": "https://www.pwc.com.tr/tr/medya/kose-yazilari/celal-ozcan/gecici-is-goremezlik-odenegi-nedir-kimler-yararlanabilir.html",
+     "tarih": "2024"
+    }
+   ],
+   "aciklama": "SGK hastalık raporunun ilk 2 günü için ödeme yapmaz. Yasa işverene bu 2 günü ödeme zorunluluğu getirmez, ancak iş sözleşmesi veya toplu sözleşme bunu öngörebilir ve birçok işveren uygulamada öder.",
+   "tahmin": false
+  },
+  {
+   "id": "hastalik.turkiye_gun",
+   "konu": "Türkiye'de çalışan başına yıllık hastalık izni",
+   "deger": 4.6,
+   "birim": "gün/çalışan/yıl",
+   "aralik": "Modelde 4 ile 8 gün arası önerilir",
+   "kaynaklar": [
+    {
+     "ad": "Mercer Pan-European Health and Benefits Report, Personnel Today haberi",
+     "url": "https://www.personneltoday.com/hr/healthy-uk-workers-are-europes-least-sickly/",
+     "tarih": "2009-01-08"
+    },
+    {
+     "ad": "Bianet, DİSK-AR Çalışma Süreleri Raporu",
+     "url": "https://bianet.org/haber/turkish-workers-many-hours-little-leave-129742",
+     "tarih": "2011-05-04"
+    }
+   ],
+   "aciklama": "Türkiye için güncel ve resmi bir çalışan başına rapor günü istatistiği bulunamadı. 4,6 gün 2009 tarihli, işverenlerin bildirdiği eski bir değerdir ve kısa hastalıkların kayda girmemesi nedeniyle düşük kalabilir.",
+   "tahmin": true
+  },
+  {
+   "id": "hastalik.almanya_gun",
+   "konu": "Almanya'da çalışan başına yıllık hastalık izni (AB karşılaştırması)",
+   "deger": 15.1,
+   "birim": "iş günü/çalışan/yıl",
+   "aralik": "2021'de yaklaşık 11,1 gün",
+   "kaynaklar": [
+    {
+     "ad": "Destatis, Staff on sick leave (IAB çalışma hacmi hesabı)",
+     "url": "https://www.destatis.de/EN/Themes/Labour/Labour-Market/Quality-Employment/Dimension2/2_3_StaffSickLeave.html",
+     "tarih": "2023 verisi"
+    }
+   ],
+   "aciklama": "Almanya'da çalışan başına hastalık izni 2023'te 15,1 iş günüdür. Almanya'da işveren ilk 6 haftayı öder ve elektronik rapor kaydı vardır, bu yüzden değer Türkiye ile doğrudan kıyaslanmamalıdır.",
+   "tahmin": false
+  },
+  {
+   "id": "hastalik.avrupa_presenteizm",
+   "konu": "Avrupa'da hastayken çalışma (presenteizm) oranı",
+   "deger": 39,
+   "birim": "% (hasta olunan günlerin işte geçirilen payı)",
+   "aralik": "2010 anketinde çalışanların yaklaşık %40'ı son 12 ayda hastayken çalıştığını söyledi",
+   "kaynaklar": [
+    {
+     "ad": "Eurofound European Working Conditions Survey 2015 üzerine hakemli çalışma (PMC)",
+     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6572370",
+     "tarih": "2019"
+    }
+   ],
+   "aciklama": "Avrupalı çalışanlar hasta oldukları günlerin yaklaşık %39'unda yine de işe gitti. Bu yüzden hastalık maliyeti yalnız devamsızlıkla ölçülürse olduğundan düşük görünür.",
+   "tahmin": false
+  },
+  {
+   "id": "grip.yetiskin_atak_orani",
+   "konu": "Mevsimsel gribin yetişkinlerde semptomlu görülme oranı",
+   "deger": 5.1,
+   "birim": "% / sezon",
+   "aralik": "Yetişkinlerde %3,6 ile 6,6. Tüm yaşlarda ortalama %8, sezona göre %3 ile 11",
+   "kaynaklar": [
+    {
+     "ad": "Tokars, Olsen, Reed. Seasonal Incidence of Symptomatic Influenza in the United States. Clinical Infectious Diseases 66(10):1511-1518",
+     "url": "https://doi.org/10.1093/cid/cix1060",
+     "tarih": "2018"
+    }
+   ],
+   "aciklama": "ABD'de 2010 ile 2016 arasında yetişkinlerin her sezon yaklaşık %5'i semptomlu grip geçirdi. 40 kişilik bir ekipte bu oran sezon başına yaklaşık 2 vaka demektir.",
+   "tahmin": false
+  },
+  {
+   "id": "grip.turkiye_sezon",
+   "konu": "Türkiye grip sezonu",
+   "deger": "Ekim başı ile Mayıs ortası arası (40. hafta ile 20. hafta)",
+   "birim": "dönem",
+   "aralik": "Yoğunluk genellikle Aralık ile Şubat arasında yükselir",
+   "kaynaklar": [
+    {
+     "ad": "Sağlık Bakanlığı Haftalık Solunum Yolu Virüsleri Sürveyans Raporu 2025 15. hafta",
+     "url": "https://grip.saglik.gov.tr/depo/influenza-raporu/2025/Haftalik_Solunum_Yolu_Virusleri_Surveyans_Raporu_2025_15._Hafta.pdf",
+     "tarih": "2025-04"
+    }
+   ],
+   "aciklama": "Sağlık Bakanlığı grip sezonunu 40. haftadan ertesi yılın 20. haftasına kadar izler. Tepe ayların Aralık ile Şubat arası olması Avrupa'daki genel örüntüye dayanan bir tahmindir.",
+   "tahmin": true
+  },
+  {
+   "id": "grip.is_gunu_kaybi",
+   "konu": "Grip veya grip benzeri hastalık başına kaybedilen iş günü",
+   "deger": "2-3",
+   "birim": "gün/vaka",
+   "aralik": "Çalışmalar arasında ortalama 0,5 ile 5,3 gün. Hastaların %42 ile 89'u hastayken çalıştı, verim kaybı 0,3 ile 4,4 gün",
+   "kaynaklar": [
+    {
+     "ad": "Blanchet Zumofen, Frimpter, Hansen. Impact of Influenza and Influenza-Like Illness on Work Productivity Outcomes: A Systematic Literature Review. PharmacoEconomics 41(3):253-273",
+     "url": "https://link.springer.com/article/10.1007/s40273-022-01224-9",
+     "tarih": "2022-12-14"
+    }
+   ],
+   "aciklama": "63 çalışmayı tarayan bu derlemeye göre hasta çalışan genellikle 2 ile 3 gün işe gelmez. Çoğu çalışan hastayken de çalışır ve bu günlerde verimi düşer.",
+   "tahmin": false
+  },
+  {
+   "id": "regl.devamsizlik",
+   "konu": "Regl belirtileri nedeniyle devamsızlık",
+   "deger": 1.3,
+   "birim": "gün/kadın/yıl",
+   "aralik": "Kadınların %13,8'i regl döneminde en az bir kez işe veya okula gitmedi, %3,4'ü bunu her döngüde veya çoğu döngüde yaşadı",
+   "kaynaklar": [
+    {
+     "ad": "Schoep ve diğerleri. Productivity loss due to menstruation-related symptoms: a nationwide cross-sectional survey among 32 748 women. BMJ Open 9(6):e026186",
+     "url": "https://bmjopen.bmj.com/content/9/6/e026186",
+     "tarih": "2019-06-27"
+    }
+   ],
+   "aciklama": "Hollanda'da 15 ile 45 yaş arası 32.748 kadınla yapılan çevrim içi ankette ortalama devamsızlık yılda 1,3 gündür. Örneklem sosyal medyadan toplandığı için belirtisi olan kadınlar fazla temsil edilmiş olabilir.",
+   "tahmin": false
+  },
+  {
+   "id": "regl.verim_kaybi",
+   "konu": "Regl belirtileri nedeniyle toplam verim kaybı",
+   "deger": 8.9,
+   "birim": "gün/kadın/yıl",
+   "aralik": "Kadınların %80,7'si işte verim düşüşü bildirdi. Bu düşüş yılda ortalama 23,2 gün sürdü ve o günlerde verim yaklaşık %33 azaldı",
+   "kaynaklar": [
+    {
+     "ad": "Schoep ve diğerleri, BMJ Open 2019",
+     "url": "https://bmjopen.bmj.com/content/9/6/e026186",
+     "tarih": "2019-06-27"
+    },
+    {
+     "ad": "Radboudumc basın bülteni",
+     "url": "https://www.radboudumc.nl/en/news/2019/the-real-impact-of-menstrual-complaints-on-work-and-school-productivity",
+     "tarih": "2019-07-08"
+    }
+   ],
+   "aciklama": "Toplam 8,9 günlük kaybın büyük kısmı işe gelip düşük verimle çalışmaktan, küçük kısmı devamsızlıktan gelir. Kadınların %67,7'si regl döneminde iş ve saat esnekliği istedi, rapor alanların yalnız %20,1'i gerçek nedeni işverene söyledi.",
+   "tahmin": false
+  },
+  {
+   "id": "regl.dismenore",
+   "konu": "Dismenore (ağrılı regl) yaygınlığı",
+   "deger": "16-91",
+   "birim": "% (üreme çağındaki kadınlar)",
+   "aralik": "Şiddetli ağrı %2 ile 29",
+   "kaynaklar": [
+    {
+     "ad": "Ju, Jones, Mishra. The prevalence and risk factors of dysmenorrhea. Epidemiologic Reviews 36:104-113",
+     "url": "https://doi.org/10.1093/epirev/mxt009",
+     "tarih": "2014"
+    }
+   ],
+   "aciklama": "15 çalışmayı inceleyen derlemeye göre dismenore yaygınlığı ölçüm yöntemine göre çok değişir. Günlük işleri kısıtlayan şiddetli ağrı daha az görülür ve kadınların yaklaşık %2 ile 29'unu etkiler.",
+   "tahmin": false
+  },
+  {
+   "id": "regl.yasal_izin_turkiye",
+   "konu": "Türkiye'de yasal regl izni",
+   "deger": "Yok",
+   "birim": "kural",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu (ek madde 2 dahil mazeret izinleri listesi)",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2026-05-01 itibarıyla güncel metin"
+    }
+   ],
+   "aciklama": "İş Kanunu'nun izin hükümleri ve mazeret izinleri listesi regl iznini içermez. Bu konuda TBMM'de yasalaşmış bir düzenleme de bulunamadı, şirketler isterse gönüllü politika uygulayabilir.",
+   "tahmin": false
+  },
+  {
+   "id": "regl.diger_ulkeler",
+   "konu": "Başka ülkelerde regl izni ve kullanım oranı",
+   "deger": "İspanya 2023'ten beri yasal, Japonya 1947'den beri yasal",
+   "birim": "kural",
+   "aralik": "Japonya'da kadın çalışanların yaklaşık %0,9'u kullandı (2017 hükümet anketi, ikincil kaynak)",
+   "kaynaklar": [
+    {
+     "ad": "İspanya Ley Orgánica 1/2023 (BOE)",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2023-5364",
+     "tarih": "2023-02-28"
+    },
+    {
+     "ad": "Malay Mail, The global push for paid menstrual leave",
+     "url": "https://www.malaymail.com/news/life/2023/02/17/the-global-push-for-paid-menstrual-leave/55371",
+     "tarih": "2023-02-17"
+    }
+   ],
+   "aciklama": "İspanya'da izin hekim raporuna bağlıdır ve 1 Haziran 2023'te başladı. Japonya'da kullanım çok düşüktür, bu da yasal iznin tek başına verim kaybını çözmediğini, esnek çalışmanın daha çok istendiğini gösterir.",
+   "tahmin": true
+  },
+  {
+   "id": "regl.esneklik_calismasi",
+   "konu": "Esnek çalışma saatleri ve regl döneminde verim",
+   "deger": "Anlamlı olumlu ilişki",
+   "birim": "nitel bulgu",
+   "kaynaklar": [
+    {
+     "ad": "Chuo Üniversitesi, Japonya'da 911 beyaz yakalı kadınla anket",
+     "url": "https://chuo-u.repo.nii.ac.jp/records/2000687",
+     "tarih": "2024"
+    }
+   ],
+   "aciklama": "Bu ankette çalışma saatlerinde yüksek esneklik, regl veya menopoz belirtileri sırasında verimin korunmasıyla anlamlı biçimde ilişkiliydi. Çalışma kesitseldir ve neden sonuç ilişkisi kanıtlamaz.",
+   "tahmin": true
+  },
+  {
+   "id": "isgucu.kadin_katilim",
+   "konu": "Türkiye'de kadınların işgücüne katılma oranı",
+   "deger": 36.2,
+   "birim": "%",
+   "aralik": "Erkeklerde %71,3. Kadın istihdam oranı %32,1. 2024'te kadın katılımı %36,8 idi",
+   "kaynaklar": [
+    {
+     "ad": "TÜİK İşgücü İstatistikleri 2025, Alomaliye haberi",
+     "url": "https://www.alomaliye.com/2026/03/25/tuik-2025-isgucu-istatistikleri-issizlik-yuzde-8-3e-geriledi-atil-isgucu-yuzde-29-7ye-yukseldi/",
+     "tarih": "2026-03-25"
+    },
+    {
+     "ad": "TÜİK ve UN Women, Türkiye'de İstatistiklerle Kadın 2025",
+     "url": "https://eca.unwomen.org/sites/default/files/2026-04/turkiyede_istatistiklerle_kadin_2025_dijital.pdf",
+     "tarih": "2026-04"
+    }
+   ],
+   "aciklama": "TÜİK verisine göre 2025'te 15 yaş üstü kadınların %36,2'si işgücündeydi. Bu oran TÜİK bülteninden doğrudan değil haber kaynağından alındı, bu yüzden kullanmadan önce TÜİK veri portalından teyit edilmelidir.",
+   "tahmin": false
+  },
+  {
+   "id": "verim.satis_zamani",
+   "konu": "Satış temsilcilerinin satışa ayırdığı zaman payı",
+   "deger": 30,
+   "birim": "% çalışma süresi",
+   "aralik": "Satış dışı işler %70. Önceki baskıda satış payı %28",
+   "kaynaklar": [
+    {
+     "ad": "Salesforce State of Sales, 6. baskı (27 ülkede 5.500 satış profesyoneli, 8 Mart ile 18 Nisan 2024 arası anket)",
+     "url": "https://www.salesforce.com/news/stories/sales-ai-statistics-2024/",
+     "tarih": "2024-07-25"
+    }
+   ],
+   "aciklama": "Satış temsilcileri zamanlarının %70'ini idari işlere, toplantı hazırlığına ve diğer satış dışı işlere harcıyor. Bu ankette satış payı doğrudan yazmaz, %30 değeri %70'ten çıkarılır ve bir CRM satıcısının anketi olduğu unutulmamalıdır.",
+   "tahmin": false
+  },
+  {
+   "id": "verim.bilgi_calisani_iletisim",
+   "konu": "Bilgi çalışanlarının iletişime ayırdığı zaman",
+   "deger": 57,
+   "birim": "% (Microsoft 365 içindeki süre)",
+   "aralik": "Toplantı %23, sohbet %19, e-posta %15. Doküman ve tablo üretimi %43",
+   "kaynaklar": [
+    {
+     "ad": "Microsoft Work Trend Index 2023, Will AI Fix Work",
+     "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/will-ai-fix-work",
+     "tarih": "2023-05-09"
+    },
+    {
+     "ad": "The Register haberi",
+     "url": "https://www.theregister.com/2023/05/10/microsoft_work_trend_index/",
+     "tarih": "2023-05-10"
+    }
+   ],
+   "aciklama": "Microsoft 365 kullanım kayıtlarına göre çalışanlar sürenin %57'sini toplantı, sohbet ve e-postada geçirir. CRM ve diğer uygulamalar bu ölçüme dahil değildir.",
+   "tahmin": false
+  },
+  {
+   "id": "verim.mckinsey_eposta_arama",
+   "konu": "Bilgi çalışanlarının e-posta ve bilgi aramaya ayırdığı süre",
+   "deger": "28 ve 19",
+   "birim": "% çalışma haftası",
+   "aralik": "E-posta %28, bilgi arama yaklaşık %19 ile 20, iç iletişim %14",
+   "kaynaklar": [
+    {
+     "ad": "McKinsey Global Institute, The social economy",
+     "url": "https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/the-social-economy",
+     "tarih": "2012-07"
+    }
+   ],
+   "aciklama": "McKinsey'e göre bilgi çalışanı haftasının yaklaşık %28'ini e-postaya, %19'unu bilgi aramaya harcar. Veri 2012 tarihlidir ve bugünkü sohbet araçlarını kapsamaz.",
+   "tahmin": false
+  },
+  {
+   "id": "verim.kesinti",
+   "konu": "Kesintiye uğrayan işe geri dönme süresi",
+   "deger": "23 dakika 15 saniye",
+   "birim": "dakika",
+   "aralik": "2005 CHI çalışmasında 25 dakika 26 saniye",
+   "kaynaklar": [
+    {
+     "ad": "Gloria Mark, UC Irvine KM Forum 2008 sunumu",
+     "url": "https://isr.uci.edu/events/KM-Forum-2008/presentations/Mark-KM-Forum08.pdf",
+     "tarih": "2008"
+    }
+   ],
+   "aciklama": "Gözlem çalışmasında kesilen işe aynı gün ortalama 23 dakika sonra dönüldü, bu sürede başka işler de yapıldı. 2008 laboratuvar deneyinde kesintiye uğrayanlar işi hızlı bitirdi ama daha çok stres bildirdi.",
+   "tahmin": false
+  },
+  {
+   "id": "verim.model_araligi",
+   "konu": "Modelde önerilen verimli çekirdek iş payı",
+   "deger": "30-45 satış, 40-60 diğer roller",
+   "birim": "% net çalışma süresi",
+   "kaynaklar": [
+    {
+     "ad": "Salesforce 2024, Microsoft WTI 2023 ve McKinsey 2012 verilerinden türetilmiştir",
+     "url": "",
+     "tarih": "2026-11-05"
+    }
+   ],
+   "aciklama": "Saha ve telefon satışında çekirdek satış zamanı için %30 ile 45 aralığı savunulabilir. Yazılım, pazarlama ve müşteri başarısı için çekirdek üretim zamanını %40 ile 60 almak makuldür, bu aralık bir varsayımdır.",
+   "tahmin": true
+  },
+  {
+   "id": "devir.turkiye_genel",
+   "konu": "Türkiye'de yıllık çalışan devir oranı (genel)",
+   "deger": "25-30",
+   "birim": "%/yıl",
+   "kaynaklar": [
+    {
+     "ad": "Capital, Sirkülasyonda kritik seviye (ManpowerGroup Türkiye ve T4 People Analytics görüşleri)",
+     "url": "https://www.capital.com.tr/yonetim/insan-kaynaklari/sirkulasyonda-kritik-seviye",
+     "tarih": "2025-04-22"
+    }
+   ],
+   "aciklama": "ManpowerGroup Türkiye genel müdürü 2024 devir oranını %25 olarak verdi, haber metni ortalamayı yaklaşık %30 olarak anlatır. Bunlar sektör yöneticisi görüşleridir, resmi istatistik değildir.",
+   "tahmin": true
+  },
+  {
+   "id": "devir.cagri_merkezi",
+   "konu": "Çağrı merkezlerinde yıllık devir oranı",
+   "deger": 45,
+   "birim": "%/yıl",
+   "aralik": "2025 için yaklaşık %35 beklentisi",
+   "kaynaklar": [
+    {
+     "ad": "Capital, Sirkülasyonda kritik seviye (Ali Tuncel, T4 People Analytics)",
+     "url": "https://www.capital.com.tr/yonetim/insan-kaynaklari/sirkulasyonda-kritik-seviye",
+     "tarih": "2025-04-22"
+    }
+   ],
+   "aciklama": "Telefonla satış ve destek rollerine en yakın ölçüt çağrı merkezleridir. Bu sektörde devir oranı %45 olarak verildi ve 2025'te %35'e inmesi bekleniyordu.",
+   "tahmin": true
+  },
+  {
+   "id": "devir.perakende",
+   "konu": "Perakendede yıllık devir oranı",
+   "deger": 55,
+   "birim": "%/yıl",
+   "aralik": "Genellikle %50'nin üzerinde. Kabul edilebilir eşik %10 ile 15",
+   "kaynaklar": [
+    {
+     "ad": "Capital, Sirkülasyonda kritik seviye (Ali Tuncel ve Ergene İK'dan Yasemin Avcı)",
+     "url": "https://www.capital.com.tr/yonetim/insan-kaynaklari/sirkulasyonda-kritik-seviye",
+     "tarih": "2025-04-22"
+    }
+   ],
+   "aciklama": "Saha satış elemanları perakende ve mağaza ortamına yakın bir iş gücü havuzundan gelir. Perakendede devir oranı %55 olarak verildi, giriş seviyesi yazılım rollerinde ise %40'ın üzerindeydi.",
+   "tahmin": true
+  },
+  {
+   "id": "ise_alim.doldurma_suresi",
+   "konu": "Açık pozisyonu doldurma süresi",
+   "deger": 44,
+   "birim": "takvim günü",
+   "aralik": "Yönetici dışı rollerde medyan 44 gün, yönetici rollerinde 45 gün",
+   "kaynaklar": [
+    {
+     "ad": "SHRM 2025 Recruiting Benchmarking Report",
+     "url": "https://www.shrm.org/content/dam/en/shrm/research/2025-recruiting-benchmarking-report.pdf",
+     "tarih": "2025"
+    }
+   ],
+   "aciklama": "Süre, kadro talebinden teklifin kabulüne kadar geçen takvim günüdür. Değer ABD verisidir ve rapor PDF'i doğrudan okunamadığı için ikincil özetlerden alındı.",
+   "tahmin": true
+  },
+  {
+   "id": "ise_alim.ramp_suresi",
+   "konu": "Yeni satış temsilcisinin tam verime ulaşma süresi",
+   "deger": 5.7,
+   "birim": "ay",
+   "aralik": "2022'de 5,3 ay, 2020'de 4,3 ay. Daha basit telefon ve randevu rolleri için yaklaşık 3 ay",
+   "kaynaklar": [
+    {
+     "ad": "Bridge Group 2024 SaaS AE Report özeti",
+     "url": "https://daffodil-greyhound-ashp.squarespace.com/blog/5-essential-learnings-from-the-2024-saas-ae-report-bridge-group",
+     "tarih": "2024-03"
+    }
+   ],
+   "aciklama": "ABD'deki yazılım şirketlerinde müşteri temsilcisi tam kotaya ortalama 5,7 ayda ulaşır. Toptancı esnafına yapılan basit satışta bu süre kısa olabilir, bu yüzden modelde 2 ile 6 ay aralığı kullanılmalıdır.",
+   "tahmin": true
+  },
+  {
+   "id": "risk.istanbul_trafik",
+   "konu": "İstanbul'da yoğun saat trafiğinde kaybedilen zaman",
+   "deger": 112,
+   "birim": "saat/sürücü/yıl",
+   "aralik": "INRIX 2025 ölçümünde 118 saat. Ortalama sıkışıklık %123,3, 10 km yol yaklaşık 32,6 dakika",
+   "kaynaklar": [
+    {
+     "ad": "TomTom Traffic Index, Istanbul",
+     "url": "https://www.tomtom.com/traffic-index/istanbul-traffic/",
+     "tarih": "2025 verisi"
+    },
+    {
+     "ad": "INRIX 2025 Global Traffic Scorecard (Global News haberi)",
+     "url": "https://globalnews.ca/news/11559376/traffic-congestion-cities-world-ranking",
+     "tarih": "2025"
+    }
+   ],
+   "aciklama": "TomTom'a göre İstanbul'da düzenli işe giden bir sürücü 2025'te yoğun saatlerde 112 saat kaybetti. Bu kayıp çoğunlukla mesai dışında olur, ama saha satış ziyaretlerinde gün içi trafik ziyaret sayısını doğrudan düşürür.",
+   "tahmin": false
+  },
+  {
+   "id": "risk.istanbul_toplu_tasima",
+   "konu": "İstanbul'da toplu taşımayla ortalama işe gidiş süresi",
+   "deger": 77,
+   "birim": "dakika",
+   "kaynaklar": [
+    {
+     "ad": "Moovit Global Public Transport Report 2022 (ITS International haberi)",
+     "url": "https://www.itsinternational.com/istanbul-tops-worlds-commute-times-moovit",
+     "tarih": "2023"
+    }
+   ],
+   "aciklama": "Moovit'in 99 şehirlik raporunda İstanbul en uzun toplu taşıma yolculuğuna sahip şehirdi. Uzun yolculuk yorgunluğu ve geç kalma riskini artırır.",
+   "tahmin": true
+  },
+  {
+   "id": "risk.deprem_olasiligi",
+   "konu": "İstanbul'u etkileyecek M7,3 üstü deprem olasılığı (30 yıl)",
+   "deger": "35-47",
+   "birim": "% / 30 yıl",
+   "aralik": "Parsons 2004 tahmini %41 artı eksi 14",
+   "kaynaklar": [
+    {
+     "ad": "Murru ve diğerleri. M≥7 earthquake rupture forecast and time-dependent probability for the Sea of Marmara region, Turkey. JGR Solid Earth",
+     "url": "https://pubs.usgs.gov/publication/70174292",
+     "tarih": "2016"
+    },
+    {
+     "ad": "Parsons. Recalculated probability of M≥7 earthquakes beneath the Sea of Marmara. JGR",
+     "url": "https://pubs.usgs.gov/publication/70027244",
+     "tarih": "2004"
+    }
+   ],
+   "aciklama": "Zamandan bağımsız modelde 30 yıllık olasılık %35, zamana bağlı modelde %47'dir. Bu yaklaşık yılda %1 ile 2 olasılık demektir, kesin bir öngörü değildir ve modele göre değişir.",
+   "tahmin": false
+  },
+  {
+   "id": "risk.silivri_depremi",
+   "konu": "23 Nisan 2025 Silivri açıkları depremi",
+   "deger": 6.2,
+   "birim": "büyüklük (Mw)",
+   "kaynaklar": [
+    {
+     "ad": "Al Jazeera, Magnitude 6.2 earthquake jolts Turkiye's Istanbul",
+     "url": "https://www.aljazeera.com/news/2025/4/23/powerful-6-2-magnitude-earthquake-shakes-turkiyes-istanbul",
+     "tarih": "2025-04-23"
+    },
+    {
+     "ad": "İTÜ Maden Fakültesi hızlı değerlendirme",
+     "url": "https://mines.itu.edu.tr/en/home/2025/07/09/a-rapid-assessment-following-the-23-april-2025-mw6.2-silivri-earthquake-nearby-i-stanbul",
+     "tarih": "2025-07-09"
+    }
+   ],
+   "aciklama": "Deprem öğle saatinde oldu ve insanlar binalardan çıkıp açık alanlarda bekledi. Büyük hasar olmasa da gün içinde iş akışı durdu, bu tür olaylar için iş sürekliliği planı gerekir.",
+   "tahmin": false
+  },
+  {
+   "id": "risk.ramazan_verim",
+   "konu": "Ramazan orucunun ekonomik çıktıya etkisi",
+   "deger": "Olumsuz",
+   "birim": "nitel bulgu",
+   "aralik": "Oruç süresi uzadıkça Müslüman çoğunluklu ülkelerde GSYH büyümesi düşer",
+   "kaynaklar": [
+    {
+     "ad": "Campante ve Yanagizawa-Drott. Does Religion Affect Economic Growth and Happiness? Evidence from Ramadan. Quarterly Journal of Economics 130(2):615-658",
+     "url": "https://econpapers.repec.org/RePEc:oup:qjecon:v:130:y:2015:i:2:p:615-658",
+     "tarih": "2015"
+    }
+   ],
+   "aciklama": "Çalışma oruç süresi uzadıkça büyümenin düştüğünü, ama öznel mutluluğun arttığını bulur. Etki ülke düzeyindedir, bir ekibin günlük verimine birebir aktarılamaz ve 2027'de oruç kış sonuna denk geldiği için kısa sürer.",
+   "tahmin": true
+  },
+  {
+   "id": "risk.ramazan_mesai",
+   "konu": "Ramazan'da özel sektör için yasal mesai kısaltması",
+   "deger": "Yok",
+   "birim": "kural",
+   "kaynaklar": [
+    {
+     "ad": "4857 sayılı İş Kanunu (çalışma süresi hükümleri)",
+     "url": "https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf",
+     "tarih": "2003-06-10"
+    }
+   ],
+   "aciklama": "İş Kanunu Ramazan için özel sektöre mesai kısaltması öngörmez. Mesai düzenlemesi işverenin takdirindedir ve oruç tutan çalışanlarda öğleden sonra enerji düşüşü beklenebilir.",
+   "tahmin": true
+  },
+  {
+   "id": "risk.okul_tatilleri",
+   "konu": "2026-2027 okul tatilleri (MEB)",
+   "deger": "Yarıyıl 2027-01-25 ile 2027-02-05, ara tatil 2027-03-08 ile 2027-03-12, yaz tatili 2027-06-26'dan itibaren",
+   "birim": "tarih aralığı",
+   "aralik": "Kasım ara tatili 2026-11-16 ile 2026-11-20. 2027-2028 takvimi henüz yayımlanmadı",
+   "kaynaklar": [
+    {
+     "ad": "MEB, 2026-2027 Eğitim Öğretim Yılı Takvimi Açıklandı",
+     "url": "https://meb.gov.tr/20262027egitimogretimyilitakvimiaciklandi/haber/41057/tr",
+     "tarih": "2026-06-13"
+    }
+   ],
+   "aciklama": "Mart ara tatili Ramazan Bayramı haftasıyla tam çakışır, bu yüzden çocuklu çalışanlar 12 Mart Cuma'yı izin olarak isteyebilir. Yarıyıl ve yaz tatilinde yıllık izin talepleri yoğunlaşır.",
+   "tahmin": false
+  },
+  {
+   "id": "risk.toptan_yaz_durgunlugu",
+   "konu": "İstanbul toptan ticaretinde yaz durgunluğu",
+   "deger": "Ölçülmedi",
+   "birim": "nitel",
+   "aralik": "Temmuz ve Ağustos aylarında talep düşüşü varsayımı",
+   "kaynaklar": [
+    {
+     "ad": "Ekonomi Gazetesi, Ticarete festival dopingi (İSTOÇ FEST)",
+     "url": "https://www.ekonomigazetesi.com/sektor-haberleri/ticarete-festival-dopingi-51655",
+     "tarih": "tarih doğrulanmadı"
+    }
+   ],
+   "aciklama": "İSTOÇ'a özgü aylık satış veya ziyaretçi verisi bulunamadı. Haziranda ticareti canlandırmak için festival düzenlenmesi dolaylı bir işarettir, yaz durgunluğu modelde varsayım olarak kalmalı ve ekibin kendi verisiyle kontrol edilmelidir.",
+   "tahmin": true
+  }
+ ]
+}

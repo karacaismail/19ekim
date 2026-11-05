@@ -1058,6 +1058,26 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Testler: `tests/butce-2027-veri.spec.ts` (model, yalnız Chromium) ve `tests/butce-2027.spec.ts` (sayfa, sahte Sheets yanıtıyla).
 - Nakit akış tablosu bu eklemeleri henüz içermez.
 
+### 2027 gelir öngörüsü (kullanıcı kararı 2026-11-05)
+
+- Adres `/gelir-ongorusu-2027/`, Finans menüsünde (`src/views/GelirOngorusuPage.tsx`, model `src/data/gelir2027.ts`,
+  kaynaklı veriler `src/data/gelir2027Kaynak.json`, ChatGPT karşılaştırması `src/data/gelir2027ChatGPT.ts`, stil
+  `src/styles/gelirOngorusu.css`, önek `go27-`). Raporlar ve ham veri `docs/gelir-ongorusu-2027/`.
+- Saat: 2027'de 249 iş günü. Yasal üst sınır haftada 45 saat, plan 40 saat, aradaki 5 saat çavuş payı. Yıllık izin
+  14 gün, hastalık 6 gün, grip (atak yüzde 8, vaka 3,5 gün), regl politikası, mazeret 1 gün düşülür. 40 saatin yüzde
+  75'i verimli sayılır. Kapasite çarpanı = aylık verimli saat ÷ 125 (projenin tam kapasite tanımı).
+- Regl: kadın oranı yüzde 50 planlama varsayımıdır, kişi bazında değerlendirme yapılmaz. Kaynak Schoep 2019. Politika
+  (yok, evden çalışma, ücretli izin, ikisi) maaştan düşmez, yalnız kapasiteye girer. Varsayılan “ikisi”.
+- Satış: doğrudan katkı parametrelerden (saha 8, masa başı 4, organizatör 6), kurumsal satış, SEO, performans
+  pazarlama ve ekip lideri katkısı varsayımdır. Destek rolleri aylık elde tutmaya en çok 8 puan katar (varsayım).
+  Segika masa başı istoc.com gelirine sayılmaz. Gelir motoru gelir planıyla aynıdır. Ciro (tahsilat) ve kazanılmış
+  gelir (yıllık peşin bedel 12 aya yayılır) ayrı gösterilir.
+- Öngörüler: medyan = beklenen değerle plan hesabı. Kötümser, ortanca, iyimser = Monte Carlo (1.000 olası yıl, sabit
+  tohum 2027) yüzde 10, 50, 90 noktaları. Risk payı = 1 eksi medyan ÷ risksiz plan.
+- ChatGPT analizi Codex CLI ile terminalden, ortak girdi paketiyle ve Claude sonuçlarını görmeden yapıldı. Ona kişi adı
+  ve gerçek ücret gönderilmez. Karşılaştırma rakamları 5 Kasım 2026 hesabıdır, model değişirse güncellenmelidir.
+- Testler: `tests/gelir-2027-veri.spec.ts` (yalnız Chromium) ve `tests/gelir-2027.spec.ts`.
+
 ## Sayfa ekleme ve bozulma koruması (kullanıcı kararı 2026-11-05)
 
 Yeni bir sayfa eklendiğinde ya da mevcut sayfa güncellendiğinde diğer sayfalar ve içerikler bozulmamalıdır. Bunun

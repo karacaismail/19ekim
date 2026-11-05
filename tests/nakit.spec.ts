@@ -82,7 +82,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(tetik).toHaveAttribute('data-section', 'true');
     await tetik.click();
     const menu = page.getByRole('menu', { name: 'Finans' });
-    await expect(menu.getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi']);
+    await expect(menu.getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
     await expect(menu.getByRole('menuitem', { name: 'Nakit akışı' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
 

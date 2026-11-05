@@ -131,7 +131,7 @@ const menu = (id: string): NavLink => {
  * Ölçüm, Genel bakış, Kaynaklar) içerik taşınınca ilgili gruba girer.
  */
 export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('satis-ortakligi'), menu('deger-onerisi'), menu('gelir-modelleri'), menu('oyunlastirma')];
-export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi'), menu('butce-2027')];
+export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi'), menu('butce-2027'), menu('gelir-ongorusu-2027')];
 export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar')];
 export const HELPER_NAV: NavLink[] = [menu('parametreler'), menu('notlar'), menu('arsiv')];
 

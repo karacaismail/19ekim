@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { GelirOngorusuPage } from '../views/GelirOngorusuPage';
+---
+
+<BaseLayout>
+  <GelirOngorusuPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

@@ -1,0 +1,1855 @@
+{
+ "aciklama": "istoc.com (Türkiye, İSTOÇ toptan ticaret merkezi etrafında B2B pazar yeri) 2027 kadro ve gelir modeli girdileri. Tutarlar TL. Gelir yalnız satıcı aboneliğidir: 399 EUR/ay ya da yıllık peşin 10 aylık ücret.",
+ "gelirParametreleri": {
+  "sahaActivesMonthly": 8,
+  "crmActivesMonthly": 4,
+  "organizatorActivesMonthly": 6,
+  "dijitalCostPerLead": 600,
+  "dijitalLeadToActive": 8,
+  "dijitalOrganicActivesMonthly": 2,
+  "metaWeekly": 5000,
+  "annualShare": 20,
+  "annualMonths": 10,
+  "eurTry": 55.31,
+  "eurTryGrowth": 25,
+  "planRetention": 70,
+  "pessimisticRetention": 50,
+  "repCap": 24,
+  "pessimisticFactor": 60
+ },
+ "kapasiteTanimi": "Projede bir kişinin tam kapasitesi ayda net 125 üretken saattir. Saha personeli tam kapasitede ayda 8, CRM masa başı 4, etkinlik organizatörü 6 yeni aktif (ilk ödemesini yapmış) satıcı getirir. Yeni kişi ilk ay yüzde 50, ikinci ay yüzde 75 kapasitededir. Aylık elde tutma (yenileme) oranı medyan senaryoda yüzde 70dir.",
+ "mevcutGelirModeli2027": {
+  "kaynaklar": [
+   {
+    "id": "saha1",
+    "ad": "Saha personeli 1",
+    "baslangic": "2026-11-01",
+    "tamKapasite": 8,
+    "yeniAktif2027": [
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8
+    ]
+   },
+   {
+    "id": "saha2",
+    "ad": "Saha personeli 2 (sistem oturunca)",
+    "baslangic": "2027-01-01",
+    "tamKapasite": 8,
+    "yeniAktif2027": [
+     4,
+     6,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8,
+     8
+    ]
+   },
+   {
+    "id": "sahaBuyume",
+    "ad": "Büyüme: saha personeli (+1, her 6 ayda)",
+    "baslangic": "2027-07-01",
+    "tamKapasite": 8,
+    "yeniAktif2027": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     4,
+     6,
+     8,
+     8,
+     8,
+     8
+    ]
+   },
+   {
+    "id": "crm",
+    "ad": "CRM masa başı pazarlama",
+    "baslangic": "2026-11-01",
+    "tamKapasite": 4,
+    "yeniAktif2027": [
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   {
+    "id": "org",
+    "ad": "Organizatör",
+    "baslangic": "2026-12-01",
+    "tamKapasite": 6,
+    "yeniAktif2027": [
+     4.5,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6,
+     6
+    ]
+   },
+   {
+    "id": "dijital",
+    "ad": "Dijital pazarlama (reklam + içerik)",
+    "baslangic": "2026-12-01",
+    "tamKapasite": 18,
+    "yeniAktif2027": [
+     4,
+     5.5,
+     8,
+     8,
+     8,
+     11,
+     11,
+     11,
+     15.5,
+     15.5,
+     15.5,
+     18
+    ]
+   },
+   {
+    "id": "rep",
+    "ad": "Bağımsız temsilciler (MLM ağı)",
+    "baslangic": "2026-12-01",
+    "tamKapasite": 24,
+    "yeniAktif2027": [
+     2,
+     4,
+     6,
+     8,
+     10,
+     12,
+     14,
+     16,
+     18,
+     20,
+     22,
+     24
+    ]
+   }
+  ],
+  "senaryolar": {
+   "kotumser": {
+    "kapasiteCarpani": 0.6,
+    "aylikYenileme": 0.5,
+    "aciklama": "Kapasitenin yüzde 60 kadarı kullanılır, aylık yenileme %50 olur ve saha kadrosu büyümez.",
+    "odeyenAralik2026": 10.2,
+    "yeniAktif2027": [
+     15.9,
+     20.1,
+     24,
+     25.2,
+     26.4,
+     29.4,
+     30.6,
+     31.8,
+     35.7,
+     36.9,
+     38.1,
+     40.8
+    ],
+    "gelir2027Aylik": [
+     1131271,
+     1536197,
+     1923228,
+     2128587,
+     2308801,
+     2607965,
+     2796752,
+     2977885,
+     3362501,
+     3578162,
+     3783873,
+     4107419
+    ],
+    "abonelikFiyatiTl2027": [
+     23335,
+     23773,
+     24219,
+     24674,
+     25137,
+     25608,
+     26089,
+     26579,
+     27078,
+     27586,
+     28104,
+     28631
+    ]
+   },
+   "medyan": {
+    "kapasiteCarpani": 1,
+    "aylikYenileme": 0.7,
+    "aciklama": "Plan senaryosudur: tam kapasite kullanılır ve aylık yenileme %70 olur. İkinci saha çalışanından sonra her 6 ayda bir saha çalışanı eklenir.",
+    "odeyenAralik2026": 17.79,
+    "yeniAktif2027": [
+     26.5,
+     33.5,
+     40,
+     42,
+     44,
+     49,
+     55,
+     59,
+     67.5,
+     69.5,
+     71.5,
+     76
+    ],
+    "gelir2027Aylik": [
+     1959890,
+     2745518,
+     3534516,
+     4040541,
+     4500214,
+     5145250,
+     5897180,
+     6549806,
+     7551954,
+     8146932,
+     8701727,
+     9432233
+    ],
+    "abonelikFiyatiTl2027": [
+     23335,
+     23773,
+     24219,
+     24674,
+     25137,
+     25608,
+     26089,
+     26579,
+     27078,
+     27586,
+     28104,
+     28631
+    ]
+   },
+   "iyimser": {
+    "kapasiteCarpani": 1.3,
+    "aylikYenileme": 0.7999999999999999,
+    "aciklama": "Kapasitenin yüzde 130 kadarı kullanılır ve aylık yenileme %80 olur, yani plan senaryosundan 10 yüzde puan yüksektir. İkinci saha çalışanından sonra her 4 ayda bir saha çalışanı eklenir.",
+    "odeyenAralik2026": 23.63,
+    "yeniAktif2027": [
+     34.45,
+     43.55,
+     52,
+     54.6,
+     62.4,
+     71.5,
+     76.7,
+     79.3,
+     92.95,
+     98.15,
+     103.35,
+     109.2
+    ],
+    "gelir2027Aylik": [
+     2599963,
+     3707603,
+     4860505,
+     5680591,
+     6825606,
+     8132988,
+     9246760,
+     10175948,
+     11905226,
+     13181627,
+     14462409,
+     15806950
+    ],
+    "abonelikFiyatiTl2027": [
+     23335,
+     23773,
+     24219,
+     24674,
+     25137,
+     25608,
+     26089,
+     26579,
+     27078,
+     27586,
+     28104,
+     28631
+    ]
+   }
+  }
+ },
+ "kadroSecenekleri": {
+  "aciklama": "Üç kadro seçeneği (ekonomik, medyan, güçlü). iseAlim kişi başına başlangıç ayıdır. Segika masa başı ayrı şirkete (Segika SaaS) satış yapar, istoc.com gelirine katkısı yoktur.",
+  "kadro": [
+   {
+    "id": "kurucu-genel-mudur",
+    "unvan": "Kurucu ve genel müdür (CEO, şirketin en üst yöneticisi)",
+    "kume": "yonetim",
+    "seviye": "Yönetim",
+    "eski": false,
+    "mevcut": true,
+    "netMaas2027": 0,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "teknoloji-direktoru",
+    "unvan": "Teknoloji direktörü (CTO)",
+    "kume": "yonetim",
+    "seviye": "Yönetim",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 207550,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "istoc-masa-basi",
+    "unvan": "İstoç masa başı",
+    "kume": "satis",
+    "seviye": "Uzman yardımcısı",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 45405.5,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "istoc-saha-ekibi",
+    "unvan": "İstoç saha ekibi",
+    "kume": "satis",
+    "seviye": "Uzman",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 64865,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 2,
+      "iseAlim": [
+       "2026-11",
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 2,
+      "iseAlim": [
+       "2026-11",
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2026-11",
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "ucuncu-saha-personeli",
+    "unvan": "3. saha personeli",
+    "kume": "satis",
+    "seviye": "Uzman",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 64865,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "ek-saha-personeli",
+    "unvan": "Ek saha personeli",
+    "kume": "satis",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 64865,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "masa-basi-satis-uzmani-ek",
+    "unvan": "Masa başı satış uzmanı (ek)",
+    "kume": "satis",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 45405.5,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-03",
+       "2027-07"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "satis-ekip-lideri",
+    "unvan": "Satış ekip lideri",
+    "kume": "satis",
+    "seviye": "Ekip lideri",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 77838,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "kurumsal-satis-yoneticisi",
+    "unvan": "Kurumsal satış yöneticisi (büyük hesaplar)",
+    "kume": "satis",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 77850,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "satis-muduru",
+    "unvan": "Satış müdürü",
+    "kume": "satis",
+    "seviye": "Yönetici",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 119350,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "liste-arastirma-elemani",
+    "unvan": "Liste araştırma ve veri girişi elemanı",
+    "kume": "satis",
+    "seviye": "Destek",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 41500,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Yarı zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Yarı zamanlı"
+     }
+    }
+   },
+   {
+    "id": "segika-masa-basi",
+    "unvan": "Segika masa başı",
+    "kume": "satis",
+    "seviye": "Uzman yardımcısı",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 45405.5,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "satici-uyum-uzmani",
+    "unvan": "Satıcı uyum (onboarding) uzmanı",
+    "kume": "satici-basarisi",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 64850,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-01",
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 3,
+      "iseAlim": [
+       "2027-01",
+       "2027-03",
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "katalog-operatoru",
+    "unvan": "Katalog operatörü",
+    "kume": "satici-basarisi",
+    "seviye": "Operasyon",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 51900,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Yarı zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-02",
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "satici-basari-yoneticisi",
+    "unvan": "Satıcı başarı yöneticisi",
+    "kume": "satici-basarisi",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 73700,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-03",
+       "2027-08"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 3,
+      "iseAlim": [
+       "2027-03",
+       "2027-06",
+       "2027-09"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "alici-talep-sorumlusu",
+    "unvan": "Alıcı ve talep sorumlusu",
+    "kume": "alici-talep",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 73700,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "teklif-operasyon-uzmani",
+    "unvan": "Teklif talebi (RFQ) operasyon uzmanı",
+    "kume": "alici-talep",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 54750,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-03",
+       "2027-07"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "kurumsal-alici-yoneticisi",
+    "unvan": "Kurumsal alıcı yöneticisi",
+    "kume": "alici-talep",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 77850,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-04",
+       "2027-08"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "dijital-pazarlama-uzmani",
+    "unvan": "Dijital pazarlama uzmanı",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 45527.94,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "etkinlik-organizatoru",
+    "unvan": "Etkinlik organizatörü",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 64865,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-12"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "egitmen",
+    "unvan": "Sözleşmeli eğitmen ve içerik sahibi",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 3,
+      "iseAlim": [
+       "2026-12",
+       "2026-12",
+       "2027-01"
+      ],
+      "bicim": "Serbest çalışan"
+     },
+     "medyan": {
+      "kisi": 4,
+      "iseAlim": [
+       "2026-12",
+       "2026-12",
+       "2027-01",
+       "2027-03"
+      ],
+      "bicim": "Serbest çalışan"
+     },
+     "guclu": {
+      "kisi": 5,
+      "iseAlim": [
+       "2026-12",
+       "2026-12",
+       "2027-01",
+       "2027-02",
+       "2027-03"
+      ],
+      "bicim": "Serbest çalışan"
+     }
+    }
+   },
+   {
+    "id": "karsilama-destegi",
+    "unvan": "Etkinlik karşılama desteği",
+    "kume": "pazarlama",
+    "seviye": "Destek",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 36422.35,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Yarı zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Yarı zamanlı"
+     }
+    }
+   },
+   {
+    "id": "performans-pazarlama-uzmani",
+    "unvan": "Performans pazarlama uzmanı",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 73950,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "seo-icerik-uzmani",
+    "unvan": "SEO ve içerik uzmanı",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 88750,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "video-grafik-uretici",
+    "unvan": "Video ve grafik üretici",
+    "kume": "pazarlama",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 72650,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Serbest çalışan"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Serbest çalışan"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "pazarlama-muduru",
+    "unvan": "Pazarlama müdürü",
+    "kume": "pazarlama",
+    "seviye": "Yönetici",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 132850,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "iletisim-ajansi",
+    "unvan": "Kurumsal iletişim ve basın ajansı",
+    "kume": "pazarlama",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "yazilim-ekibi-mevcut",
+    "unvan": "Yazılım geliştirici (mevcut Scrum ekibi)",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": true,
+    "netMaas2027": 101700,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 4,
+      "iseAlim": [
+       "2026-10",
+       "2026-10",
+       "2026-10",
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 4,
+      "iseAlim": [
+       "2026-10",
+       "2026-10",
+       "2026-10",
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 4,
+      "iseAlim": [
+       "2026-10",
+       "2026-10",
+       "2026-10",
+       "2026-10"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "urun-yoneticisi",
+    "unvan": "Ürün yöneticisi",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 126100,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-01"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "yazilim-gelistirici-ek",
+    "unvan": "Yazılım geliştirici (ek)",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 101700,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-03",
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 4,
+      "iseAlim": [
+       "2027-02",
+       "2027-03",
+       "2027-06",
+       "2027-09"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "ui-ux-tasarimci",
+    "unvan": "Arayüz ve kullanıcı deneyimi (UI/UX) tasarımcısı",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 88200,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "veri-analisti",
+    "unvan": "Veri analisti",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 93400,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "test-uzmani",
+    "unvan": "Yazılım test uzmanı",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 84050,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "devops-muhendisi",
+    "unvan": "DevOps ve altyapı mühendisi",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 116750,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-10"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-10"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "sizma-testi",
+    "unvan": "Bağımsız güvenlik (sızma) testi",
+    "kume": "urun-teknoloji",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-09"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "operasyon-muduru",
+    "unvan": "Operasyon müdürü",
+    "kume": "operasyon",
+    "seviye": "Yönetici",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 147900,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-04"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "musteri-hizmetleri-temsilcisi",
+    "unvan": "Müşteri hizmetleri temsilcisi",
+    "kume": "operasyon",
+    "seviye": "Operasyon",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 54750,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-02",
+       "2027-07"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 3,
+      "iseAlim": [
+       "2027-02",
+       "2027-05",
+       "2027-09"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "moderasyon-dogrulama-uzmani",
+    "unvan": "Güven, doğrulama ve moderasyon uzmanı",
+    "kume": "operasyon",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 62250,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-02",
+       "2027-07"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "mali-musavir-bordro",
+    "unvan": "Mali müşavir ve bordro hizmeti",
+    "kume": "finans",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "muhasebe-tahsilat-uzmani",
+    "unvan": "Muhasebe ve tahsilat uzmanı",
+    "kume": "finans",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 56300,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Yarı zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-02"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-02",
+       "2027-07"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "finans-muduru",
+    "unvan": "Finans müdürü",
+    "kume": "finans",
+    "seviye": "Yönetici",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 123000,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "ik-uzmani",
+    "unvan": "İnsan kaynakları ve işe alım uzmanı",
+    "kume": "insan-kaynaklari",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 66150,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 2,
+      "iseAlim": [
+       "2027-01",
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "isg-hizmeti",
+    "unvan": "İş sağlığı ve güvenliği hizmeti (OSGB)",
+    "kume": "insan-kaynaklari",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "avukat-danismanlik",
+    "unvan": "Avukat (sürekli danışmanlık)",
+    "kume": "hukuk-uyum",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "kvkk-danismani",
+    "unvan": "KVKK danışmanı",
+    "kume": "hukuk-uyum",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     }
+    }
+   },
+   {
+    "id": "hukuk-uyum-uzmani",
+    "unvan": "Hukuk ve uyum uzmanı",
+    "kume": "hukuk-uyum",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 87700,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-05"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "sgk-danismani",
+    "unvan": "SGK danışmanı",
+    "kume": "hukuk-uyum",
+    "seviye": "Uzman",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": null,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Dış hizmet"
+     }
+    }
+   },
+   {
+    "id": "yonetici-operasyon-asistani",
+    "unvan": "Yönetici ve operasyon asistanı",
+    "kume": "idari-isler",
+    "seviye": "Destek",
+    "eski": true,
+    "mevcut": false,
+    "netMaas2027": 54633.52,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2026-11"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   },
+   {
+    "id": "idari-isler-satin-alma-uzmani",
+    "unvan": "İdari işler ve satın alma uzmanı",
+    "kume": "idari-isler",
+    "seviye": "Uzman yardımcısı",
+    "eski": false,
+    "mevcut": false,
+    "netMaas2027": 60600,
+    "secenekler": {
+     "ekonomik": {
+      "kisi": 0,
+      "iseAlim": [],
+      "bicim": null
+     },
+     "medyan": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-06"
+      ],
+      "bicim": "Tam zamanlı"
+     },
+     "guclu": {
+      "kisi": 1,
+      "iseAlim": [
+       "2027-03"
+      ],
+      "bicim": "Tam zamanlı"
+     }
+    }
+   }
+  ]
+ }
+}
