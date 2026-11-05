@@ -988,6 +988,9 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   2026: 28.075,50 ₺) çarpanı yalnız dijital 1,25 ve asistan 1,5 için sürer. Yatırımcının adı yazılmaz (rol: “Yatırımcı”). Tahtadaki
   “Pazarlama çözümleri 30K / 90K / 500K” notu yalnız değerlendirmeydi; kullanıcı kararıyla yok sayılır, sitede yer almaz.
   Kur yalnız oran olarak (≈ 55,31 ₺/€) tutulur; kaynağındaki toplam tutarlar yazılmaz.
+  Kullanıcı kararı 2026-11-05: İstihdam takvimi v2'deki 2027 pozisyon maaşları ve maliyetleri siteye yazılır. Bu tutarlar
+  gerçek kişilerin ücreti değildir. Piyasa araştırmasından türetilmiş tahmini pozisyon maaşlarıdır (`src/data/istihdamV2.json`).
+  Haberde adı geçen uzman, analist gibi üçüncü kişilerin adları bu veride de yazılmaz.
 - Asistan kararı netleşmemiştir; asistansız senaryoda dijital pazarlama 1 Ocak 2027’de başlar. Bu koşul kişi adı
   verilmeden yazılır.
 - Mesai modeli 4857 sayılı İş Kanunu tavanlarına göre (`workPeriods`, `LEGAL_LIMITS`): Dönem 1 (2 Kasım–30 Ocak)
@@ -1020,6 +1023,22 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - **Commit kimliği (kullanıcı yönergesi 2026-10-28, docs/missings.md MS-23):** yazar ve committer
   `karacaismail <35493655+karacaismail@users.noreply.github.com>` (depo yerel `git config`); AI ortak yazar satırı
   (`Co-Authored-By`) ya da üretim imzası eklenmez; geçmiş yeniden yazılmaz (eski commit’ler olduğu gibi kalır). `3d10eff`’ten itibaren.
+
+### İstihdam takvimi v1 ve v2 (kullanıcı kararı 2026-11-05)
+
+- `/istihdam/` sayfasında sürüm seçici vardır (`src/views/IstihdamSurumleri.tsx`, ortak kanca `src/lib/surum.ts`, anahtar
+  `turksab-istihdam-surum`, adres `?surum=v2`). v1 bugünkü takvimdir (`OtherPages.tsx → HiringContent`) ve varsayılandır.
+- v2 (`src/views/IstihdamV2.tsx`) istoc.com için 2027 kadro planıdır: 11 küme, 49 pozisyon (7 eski, 2 mevcut kadro, 40 yeni), üç seçenek (ekonomik, medyan,
+  güçlü). Her seçenek gelir planının bir senaryosuna (kötümser, medyan, iyimser) göre kurulmuştur. Mevcut takvimdeki 7 rol
+  değiştirilmeden üç seçenekte de bulunur ve “Eski” hapıyla görünür. Kurucu ve yazılım ekibi “Mevcut kadro” hapı taşır.
+- Veri `src/data/istihdamV2.json` (araştırma çıktısı, kaynaklar dosyada), tipler ve hesap `src/data/istihdamV2.ts`
+  (`aylikGider`, `takvim2027`). Maaşlar 2027 tahminidir. 2027 asgari ücreti açıklanmadı ve plan yüzde 25 artış varsayar.
+  Asgari ücret açıklanınca veri yeniden üretilmelidir. İşveren maliyeti net maaş × 2, yarı zamanlı yarım maliyet, dış
+  hizmet ve serbest çalışan bedeli fatura tutarıdır. DevOps hizmetinin bedeli ekonomik ve medyan seçenekte bilinmiyor
+  ve toplama eklenmedi.
+- Stil `src/styles/istihdamV2.css`, önek `iv2-` (`tests/css-mimari.spec.ts`). Testler: `tests/istihdam-v2.spec.ts`
+  (sürüm geçişi, seçenek, “Eski” hapı, ayrıntı penceresi, 320/390/768 px denetimi) ve `tests/istihdam-v2-veri.spec.ts`
+  (eski rollerin korunması, aylık ve yıllık giderin tutarlılığı, metin kuralı; yalnız Chromium).
 
 ## Sayfa ekleme ve bozulma koruması (kullanıcı kararı 2026-11-05)
 

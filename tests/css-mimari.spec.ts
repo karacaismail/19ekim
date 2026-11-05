@@ -19,6 +19,7 @@ const ORTAK = ['tokens.css', 'global.css'];
 const SAYFA_ONEKI: Record<string, string> = {
   'satisOrtakligiV2.css': 'v2-',
   'ozetPaneliV2.css': 'v2-',
+  'istihdamV2.css': 'iv2-',
 };
 
 function dosyalar(klasor: string): string[] {

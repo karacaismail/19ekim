@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import {
   Chart,
@@ -35,7 +35,8 @@ const shortDate = (iso: string) =>
 
 /* ---------- İstihdam takvimi: plan görünümü (IstihdamPlani.tsx) ve kadro katkısı ---------- */
 
-function HiringContent() {
+/** İstihdam takvimi v1. `surum`: sürüm seçicisi, başlığın altında (IstihdamSurumleri.tsx). */
+export function HiringContent({ surum }: { surum?: ReactNode }) {
   const m = useModel();
   const [sid, setSid] = useScenario();
   const st = m.staffing.byId[sid];
@@ -45,6 +46,7 @@ function HiringContent() {
   return (
     <>
       <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
+      {surum}
 
       <IstihdamPlanGorunumu />
 
@@ -699,14 +701,6 @@ export function NotFoundPage({ pathname }: { pathname: string }) {
           Organizasyon şemasına dön
         </TextLink>
       </p>
-    </AppFrame>
-  );
-}
-
-export function HiringPage({ pathname }: { pathname: string }) {
-  return (
-    <AppFrame pathname={pathname}>
-      <HiringContent />
     </AppFrame>
   );
 }
