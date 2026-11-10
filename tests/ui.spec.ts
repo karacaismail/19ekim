@@ -19,7 +19,7 @@ const MENU_BAGLANTI = NAV_GROUPS.flatMap((g) => g.items).length;
  * sessizce denetim dışında kalmaz.
  * Giderler grafikleri yalnız Sheets bağlantısıyla çizilir. Ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
  */
-const GRAFIKSIZ = ['istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', '404/'];
+const GRAFIKSIZ = ['istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', 'onboarding/', '404/'];
 const CHART_PAGES = PAGES.filter((p) => !GRAFIKSIZ.includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
@@ -921,7 +921,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu.getByRole('menuitem', { name: 'Kararlar' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Pazarlama' }).click();
-    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma']);
+    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Onboarding']);
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Finans' }).click();
     await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);

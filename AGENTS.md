@@ -976,6 +976,29 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Kartlar öneri sahibini yazıyla etiketler: Claude (`docs/oyunlastirma-yalin/`), ChatGPT (`docs/oyunlastirma/`, S01–S08), Gemini (sohbete yapıştırılan metin, G1–G5). Gemini kartlarının “Dikkat” alanı, önerinin projedeki bugünkü kararlarla çeliştiği yerleri yansız bir dille yazar: işlem payı, vade, ihracat, söz yerine hedef. Sayfa “Öneri sahibi” süzgeciyle süzülür. Yeni bir analiz eklenirse yeni bir `Kaynak` değeri ve kendi grubu eklenir, eski kartlar değişmez.
 - Rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme platformda çalışmadığı sürece Claude stratejilerinin ödülleri bugün kaydedilebilen olaylara bağlıdır.
 
+### Yeni kayıt iş akışları (kullanıcı kararları 2026-11-10)
+
+- `/onboarding/` Pazarlama menüsünde “Onboarding” adıyla, Oyunlaştırma’dan sonra gelir. Başlık “Yeni kayıt iş akışları”.
+  Veri `src/data/onboarding.ts`, görünüm `src/views/OnboardingPage.tsx`, stil `src/styles/onboarding.css` (önek `ob-`).
+- Okuyucu CRM masası sorumlusudur. Kullanıcı kararı: yöneticiye öğreten metin, gerekçe, ikna ilkesi ya da karar listesi
+  yazılmaz. Yalnız durumlar ve her durum için yalın, sıralı adımlar ile kayıt kartına yazılacak sonuç yazılır.
+- Ana akış dört aşamadır: İlk temas, Kurulum, Takip, Karar. Kullanıcı kararı: her aşamanın nerede başlayıp nerede bittiği
+  ve sonra hangi aşamanın geldiği görünür olmalıdır. Bu yüzden her aşamada “Başlar” kutusu, numaralı durumlar (1.1,
+  1.2…), solda aşamanın sonuna inen çizgi ve “Biter” kutusu vardır. Biter kutusu her çıkış için koşulu, kayıt kartı
+  durumunu ve sonraki aşamayı verir. Sayfanın başındaki aşama haritası dört aşamayı ve sürecin sonunu sırayla gösterir.
+  Kaydın aşaması kayıt kartındaki durumdan anlaşılır (`ASAMALAR.kartDurumu`, `KAPANIS_DURUMLARI`).
+- Itirazlar ve özel durumlar aşamaya bağlı değildir (`yer: 'her-an'`) ve sayfanın sonunda numarasız durur.
+- Durumlar `details` ile kapalı gelir. Başka duruma geçiş bağlantısı hedefi açar ve odağı başlığına taşır. Hazır metinler
+  ilgili durumun içinde “Metni kopyala” düğmesiyle durur. Paket ücretleri `paketler(params)` ve kur Parametreler’den gelir.
+  Hiçbir adım satış, sipariş ya da indirim sözü vermez.
+- Aşama sınırı tek anlamlıdır: bir aşamanın ileri çıkış koşulu sonraki aşamanın başlama koşuludur ve çıkışın kart
+  durumu sonraki aşamanın kart durumudur (`tests/onboarding.spec.ts` veri testi). “Şimdi değil” kapanış değildir, kayıt
+  bekler (`bekler: true`, `BEKLEME_NOTU`). Aşama başlığı h2 “Aşama n: ad”, Başlar ve Biter h3’tür. Adres `#durum-…` ise
+  durum açılır (`useAdrestekiDurum`).
+- İçerik kullanıcı tarafından 2026-11-10’da onaylandı. Test: `npm run build` sonra
+  `npx playwright test tests/onboarding.spec.ts --project=chromium --project=webkit`. Firefox kullanıcı kararıyla
+  çalıştırılmaz. WebKit’te summary klavye odağı ve pano okuma testleri atlanır (not_run).
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

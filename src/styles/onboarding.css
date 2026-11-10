@@ -1,0 +1,425 @@
+/*
+ * Yeni kayıt iş akışları (kullanıcı kararları 2026-11-10). Bu dosyadaki her seçici `ob-` önekli bir sınıfa bağlıdır
+ * (tests/css-mimari.spec.ts). Mobil önce yazıldı: temel kurallar tek sütundur, geniş ekran kuralları sondadır.
+ * Aşamanın sınırı üç işaretle görünür: numaralı başlık, solda aşamanın sonuna kadar inen düz çizgi, başta “Başlar” ve
+ * sonda “Biter” kutusu. Köşe yarıçapı yoktur. Çizgi nötr renktedir ve bir kutunun kenarı değildir.
+ */
+
+.ob-sayfa {
+  display: grid;
+}
+
+.ob-giris {
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+}
+
+.ob-bolum-baslik {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.ob-etiket {
+  display: block;
+  margin: 0 0 var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+}
+
+/* Aşama haritası: dört aşama ve sürecin sonu, sırayla. */
+
+.ob-harita {
+  margin-top: var(--space-8);
+}
+
+.ob-harita-liste {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ob-harita-bag {
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  line-height: var(--leading-snug);
+  text-decoration: none;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+a.ob-harita-bag:hover {
+  background-color: var(--surface-hover);
+}
+
+.ob-harita-oge[data-son] .ob-harita-bag {
+  background-color: var(--surface-sunken);
+}
+
+.ob-harita-no {
+  display: grid;
+  grid-row: 1 / span 4;
+  place-items: center;
+  width: var(--hit-min);
+  height: var(--hit-min);
+  background-color: var(--surface-accent);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.ob-harita-ad {
+  grid-column: 2;
+  font-weight: var(--weight-semibold);
+}
+
+.ob-harita-satir {
+  grid-column: 2;
+  color: var(--text-secondary);
+}
+
+.ob-harita-not {
+  max-width: var(--prose-max);
+  margin: var(--space-4) 0 0;
+  line-height: var(--leading-body);
+}
+
+/* Her durumda geçerli kurallar. */
+
+.ob-kurallar {
+  margin-top: var(--space-10);
+  padding: var(--space-5);
+  background-color: var(--surface-sunken);
+}
+
+.ob-kurallar-liste {
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--prose-max);
+  margin: var(--space-3) 0 0;
+  padding-inline-start: var(--space-5);
+  line-height: var(--leading-body);
+}
+
+/* Aşama: numaralı başlık, solda çizgi, Başlar ve Biter kutuları. */
+
+.ob-asama {
+  margin-top: var(--space-16);
+}
+
+.ob-asama-bas {
+  display: grid;
+  grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.ob-asama-no {
+  display: grid;
+  place-items: center;
+  width: var(--hit-min);
+  height: var(--hit-min);
+  background-color: var(--text-primary);
+  color: var(--surface-page);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+}
+
+.ob-asama-baslik {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ob-asama-gun {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.ob-asama-ad {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.ob-asama-govde {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  max-width: 56rem;
+  margin-top: var(--space-4);
+  padding-inline-start: calc(var(--hit-min) / 2 + var(--space-3));
+}
+
+.ob-asama-govde::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--hit-min) / 2 - 1px);
+  width: 2px;
+  background-color: var(--rule-strong);
+}
+
+.ob-sinir {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  line-height: var(--leading-body);
+}
+
+.ob-sinir p {
+  margin: 0;
+}
+
+.ob-sinir[data-tur='baslar'] {
+  background-color: var(--surface-sunken);
+}
+
+.ob-sinir[data-tur='biter'] {
+  background-color: var(--surface-accent);
+}
+
+.ob-sinir-etiket {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.ob-cikislar {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ob-cikis {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-raised);
+}
+
+.ob-cikis-kosul {
+  font-weight: var(--weight-semibold);
+}
+
+.ob-cikis-sonra {
+  font-weight: var(--weight-medium);
+}
+
+.ob-durumlar-baslik {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+/* Durumlar: kapalı gelir, başlığa basınca adımlar açılır. */
+
+.ob-durumlar {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ob-durum {
+  background-color: var(--surface-raised);
+}
+
+.ob-durum-ozet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  line-height: var(--leading-snug);
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.ob-durum-ozet[data-no] {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.ob-durum-ozet::-webkit-details-marker {
+  display: none;
+}
+
+.ob-durum-ozet::after {
+  content: '+';
+  content: '+' / '';
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+}
+
+.ob-durum[open] > .ob-durum-ozet::after {
+  content: '−';
+  content: '−' / '';
+}
+
+.ob-durum-ozet:hover {
+  background-color: var(--surface-hover);
+}
+
+.ob-durum-no {
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ob-durum-ad {
+  font-weight: var(--weight-semibold);
+}
+
+.ob-durum-govde {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-1) var(--space-4) var(--space-5);
+}
+
+.ob-adimlar {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  line-height: var(--leading-body);
+}
+
+/* Geçiş ve sonraki aşama bağlantıları: dokunma hedefi en az --hit-min yüksekliğinde, kendi satırında. */
+.ob-git,
+.ob-sonra-bag {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--hit-min);
+}
+
+.ob-kart {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-selected);
+  line-height: var(--leading-body);
+}
+
+/* Hazır metin. */
+
+.ob-sablon {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ob-sablon-konu {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+
+.ob-sablon-metin {
+  margin: 0;
+  padding: var(--space-4);
+  background-color: var(--surface-sunken);
+  line-height: var(--leading-body);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.ob-sablon-arac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.ob-kopyala {
+  min-height: var(--hit-min);
+  padding: var(--space-2) var(--space-5);
+  border: 0;
+  background-color: var(--surface-control);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-standard);
+}
+
+.ob-kopyala:hover {
+  background-color: var(--surface-control-hover);
+}
+
+.ob-kopya-durum {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* Her aşamada olabilecek durumlar. */
+
+.ob-her-an {
+  margin-top: var(--space-16);
+}
+
+.ob-her-an .ob-durumlar {
+  max-width: 56rem;
+  margin-top: var(--space-4);
+}
+
+.ob-her-an-not {
+  max-width: var(--prose-max);
+  margin: var(--space-3) 0 0;
+  line-height: var(--leading-body);
+}
+
+/* Geniş ekran: harita yan yana, aşama içeriği numaranın altındaki çizgiye hizalı. */
+
+@media (min-width: 48em) {
+  .ob-harita-liste {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ob-asama-bas {
+    gap: var(--space-4);
+  }
+
+  .ob-asama-govde {
+    padding-inline-start: calc(var(--hit-min) + var(--space-4));
+  }
+}
+
+@media (min-width: 72em) {
+  .ob-harita-liste {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .ob-harita-bag {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ob-harita-no {
+    grid-row: auto;
+  }
+
+  .ob-harita-ad,
+  .ob-harita-satir {
+    grid-column: 1;
+  }
+}
