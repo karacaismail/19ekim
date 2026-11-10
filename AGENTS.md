@@ -990,7 +990,13 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Itirazlar ve özel durumlar aşamaya bağlı değildir (`yer: 'her-an'`) ve sayfanın sonunda numarasız durur.
 - Durumlar `details` ile kapalı gelir. Başka duruma geçiş bağlantısı hedefi açar ve odağı başlığına taşır. Hazır metinler
   ilgili durumun içinde “Metni kopyala” düğmesiyle durur. Paket ücretleri `paketler(params)` ve kur Parametreler’den gelir.
-  Hiçbir adım satış, sipariş ya da indirim sözü vermez.
+  Hiçbir adım satıcıya satış ya da sipariş sözü vermez.
+- **Fiyat kuralı (kullanıcı kararı 2026-11-10, kesin):** fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Ürün
+  bir SaaS aboneliğidir. Fiyat pazarlıkla değişmez ve indirim verilmez. “Ücret sorarsa söz vermeyin” ya da “İsmail
+  Karaca’ya sorun” gibi fiyatı erteleyen veya birine yönlendiren adım yazılmaz. CRM sorumlusu fiyatı tablodan aylık ve
+  yıllık peşin olarak kendisi söyler. İndirim ya da pazarlık isteyene fiyatın herkes için aynı olduğu söylenir, talep
+  kimseye iletilmez. “Bilmediğiniz konuda İsmail Karaca’ya sorun” kuralı fiyatı kapsamaz (“Fiyat dışında…”). Ekranda tutar
+  ile para birimi bölünmez (`tutarBitisik`). Testler: `onboarding.spec.ts` “fiyat:” ve “tutar ile para birimi” testleri.
 - Aşama sınırı tek anlamlıdır: bir aşamanın ileri çıkış koşulu sonraki aşamanın başlama koşuludur ve çıkışın kart
   durumu sonraki aşamanın kart durumudur (`tests/onboarding.spec.ts` veri testi). “Şimdi değil” kapanış değildir, kayıt
   bekler (`bekler: true`, `BEKLEME_NOTU`). Aşama başlığı h2 “Aşama n: ad”, Başlar ve Biter h3’tür. Adres `#durum-…` ise

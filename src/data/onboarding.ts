@@ -4,8 +4,10 @@
  * bitiyor, sonra hangisi başlıyor belli olsun”). Kayıt kartındaki durum, kaydın hangi aşamada olduğunu gösterir. Her
  * aşamada olabilen durumlar ayrı tutulur. Her durum için yalın, sıralı adımlar ve kayıt kartına yazılacak sonuç verilir. Yöneticiye yönelik açıklama, gerekçe ve öğretici metin
  * yazılmaz (kullanıcı kararı: “bana öğretme, CRM sorumlusuna öğret, uzun metin değil yalın adımlar”). Adımlar kısa ve
- * tam cümledir, noktalı virgül ve uzun çizgi kullanılmaz. Paket ücretleri Parametreler’den gelir. Sipariş ve ödeme
- * platformda olmadığı için hiçbir adım satış, sipariş ya da indirim sözü vermez.
+ * tam cümledir, noktalı virgül ve uzun çizgi kullanılmaz. Paket ücretleri Parametreler’den gelir.
+ * Fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Kullanıcı kararı 2026-11-10: fiyat pazarlıkla değişmez,
+ * indirim verilmez, fiyat sorusu “söz vermeyin” ya da “birine sorun” diye ertelenmez. CRM sorumlusu fiyatı tablodan
+ * söyler. Ürün bir SaaS aboneliğidir. Hiçbir adım satıcıya satış ya da sipariş sözü vermez.
  */
 import type { Params } from './params';
 import { eur, paketler } from './gelirModelleri';
@@ -20,8 +22,9 @@ export const BEKLEME_NOTU = 'Şimdi değil diyen kayıt bekler. Hatırlatma tari
 export const HER_DURUMDA: string[] = [
   'Her temastan sonra kayıt kartını güncelleyin.',
   'Sonraki adım alanını tarihiyle doldurun. Bu alan boş kalmaz.',
-  'Satış, sipariş ya da indirim sözü vermeyin.',
-  'Bilmediğiniz konuda tahmin etmeyin. İsmail Karaca’ya sorun.',
+  'Fiyat, fiyat tablosundaki fiyattır. Pazarlık yapılmaz ve indirim verilmez.',
+  'Satıcıya satış ya da sipariş sözü vermeyin.',
+  'Fiyat dışında bilmediğiniz bir konu olursa tahmin etmeyin. İsmail Karaca’ya sorun.',
   'İzin olmayan kanaldan aramayın ve yazmayın.',
   'Uygun arama saati: 10.00 ile 12.00 ve 14.00 ile 17.00 arası. Satıcı başka bir saat söylediyse onu kullanın.',
 ];
@@ -122,6 +125,11 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
   const std = paketler(p).find((k) => k.id === 'standart')!;
   const aylik = std.aylikEur!;
   const yillik = std.yillikEur!;
+  // Fiyat tablosu: fiyatı yazılı paketler (Standart, Pro). Liste “A ve B” biçiminde yazılır.
+  const tablo = paketler(p).filter((k) => k.aylikEur !== null);
+  const ve = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ve ${xs.at(-1)}`);
+  const tabloAylik = ve(tablo.map((k) => `${k.ad} paket aylık ${eur(k.aylikEur!)}`));
+  const tabloYillik = ve(tablo.map((k) => `${k.ad} ${eur(k.yillikEur!)}`));
   return [
     {
       id: 'yeni-kayit',
@@ -206,7 +214,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         'Listeyi aldığınızı aynı gün yazın.',
         'Ürünleri yükleyin ya da yükleyecek kişiye iletin.',
         'Yükleme bitince vitrin bağlantısını satıcıya gönderin.',
-        'Ücret sorarsa söz vermeyin. İsmail Karaca’ya sorun.',
+        { metin: 'Ücret sorarsa bu akışa geçin:', git: 'fiyat' },
       ],
       kart: 'Yükleme tarihini ve ürün sayısını yazın.',
     },
@@ -334,8 +342,13 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
     {
       id: 'fiyat',
       yer: 'her-an',
-      ad: 'Fiyatı erken sordu',
-      adimlar: [`Fiyatı açıkça söyleyin: ${std.ad} paket aylık ${eur(aylik)}.`, '“Önce vitrininizi açalım, 14. gün sonucuna birlikte bakalım” deyin.'],
+      ad: 'Fiyatı sordu',
+      adimlar: [
+        `Fiyat tablosundaki fiyatı söyleyin: ${tabloAylik}.`,
+        `Yıllık peşin fiyatı söyleyin: ${tabloYillik}. Bu tutar 12 ay için ${p.annualMonths} ayın ücretidir.`,
+        'Türk lirası karşılığının ödeme günündeki kurla hesaplandığını söyleyin.',
+        'Kayıt Aşama 4’ten önceyse “Önce vitrininizi açalım, 14. gün sonucuna birlikte bakalım” deyin.',
+      ],
       kart: 'Fiyatın söylendiğini yazın.',
     },
     {
@@ -354,9 +367,18 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
     {
       id: 'indirim',
       yer: 'her-an',
-      ad: 'İndirim istedi',
-      adimlar: ['Söz vermeyin.', 'Yıllık peşin seçeneğini söyleyin.', 'Talebi İsmail Karaca’ya iletin.', 'Satıcıya ne zaman döneceğinizi söyleyin.'],
-      kart: 'İndirim talebini ve dönüş tarihini yazın.',
+      ad: 'İndirim ya da pazarlık istedi',
+      adimlar: [
+        '“Fiyatlarımız herkes için aynıdır, pazarlıkla değişmez” deyin.',
+        `Fiyat tablosunu tekrar söyleyin: ${tabloAylik}.`,
+        `Yıllık peşin fiyatı söyleyin: ${tabloYillik}.`,
+        'Özel fiyat önermeyin. Talebi kimseye iletmeyin.',
+        'Bu fiyatla devam etmek isteyip istemediğini sorun.',
+        { metin: 'Evet derse:', git: 'evet' },
+        { metin: 'Düşüneyim derse:', git: 'dusuneyim' },
+        { metin: 'Hayır derse:', git: 'hayir' },
+      ],
+      kart: 'İndirim istediğini ve fiyat tablosunun söylendiğini yazın.',
     },
     {
       id: 'dusuneyim',

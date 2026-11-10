@@ -44,11 +44,14 @@ function useAdrestekiDurum() {
   }, []);
 }
 
+/** Tutar ile para birimi aynı satırda kalır (“3.990 €” bölünmez). Yalnız ekrandaki metne uygulanır, panoya giden metne değil. */
+const tutarBitisik = (s: string) => s.replace(/(\d) ([€₺])/g, '$1 $2');
+
 function AdimMetni({ a, adOf }: { a: Adim; adOf: (id: string) => string }) {
-  if (typeof a === 'string') return <>{a}</>;
+  if (typeof a === 'string') return <>{tutarBitisik(a)}</>;
   return (
     <>
-      {a.metin}
+      {tutarBitisik(a.metin)}
       <a className="text-link ob-git" href={`#${durumId(a.git)}`} onClick={() => durumuAc(a.git)}>
         {adOf(a.git)}
       </a>
@@ -74,7 +77,7 @@ function HazirMetin({ s }: { s: Sablon }) {
     <div className="ob-sablon">
       <p className="ob-etiket">Hazır metin: {s.ad}</p>
       {s.konu ? <p className="ob-sablon-konu">Konu: {s.konu}</p> : null}
-      <p className="ob-sablon-metin">{s.metin}</p>
+      <p className="ob-sablon-metin">{tutarBitisik(s.metin)}</p>
       <div className="ob-sablon-arac">
         <button type="button" className="ob-kopyala" onClick={kopyala}>
           Metni kopyala
@@ -105,7 +108,7 @@ function DurumKarti({ d, no, adOf, sablon }: { d: Durum; no?: string; adOf: (id:
           </ol>
           <p className="ob-kart">
             <span className="ob-etiket">Kayıt kartına yazın</span>
-            {d.kart}
+            {tutarBitisik(d.kart)}
           </p>
           {sablon ? <HazirMetin s={sablon} /> : null}
         </div>

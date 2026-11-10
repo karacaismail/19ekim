@@ -50,6 +50,43 @@ test('veri: geçişler, hazır metinler, aşama sınırları ve kapanış duruml
   expect(HER_DURUMDA.join(' ')).not.toMatch(YASAK);
 });
 
+/**
+ * Kullanıcı kararı 2026-11-10: fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Pazarlıkla değişmez, indirim
+ * verilmez. Fiyat sorusu “söz vermeyin” ya da “İsmail Karaca’ya sorun” diye ertelenmez. Fiyatı CRM sorumlusu tablodan söyler.
+ */
+test('fiyat: tablodaki fiyat söylenir, pazarlık ve indirim yok, fiyat sorusu kimseye yönlendirilmez', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'veri testi tarayıcıdan bağımsızdır, yalnız Chromium’da çalışır');
+  const metniOf = (id: string) => {
+    const d = TUM.find((x) => x.id === id)!;
+    return [d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : a.metin))].join(' ');
+  };
+  const FIYAT = /fiyat|ücret|indirim|pahal|pazarl/i;
+  for (const d of TUM) {
+    const metin = metniOf(d.id);
+    if (!FIYAT.test(metin)) continue;
+    expect(metin, `${d.id}: fiyat konusu kimseye yönlendirilmez`).not.toMatch(/İsmail Karaca/);
+    expect(metin, `${d.id}: fiyat sorusu ertelenmez`).not.toMatch(/söz vermeyin/i);
+  }
+  const kurallar = HER_DURUMDA.join(' ');
+  expect(kurallar).toMatch(/fiyat tablosundaki fiyattır/i);
+  expect(kurallar).toMatch(/pazarlık yapılmaz/i);
+  expect(kurallar).not.toMatch(/indirim sözü/i);
+  for (const k of HER_DURUMDA.filter((x) => x.includes('İsmail Karaca'))) expect(k, 'İsmail Karaca kuralı fiyatı kapsamaz').toMatch(/^Fiyat dışında/);
+
+  // Fiyat ve indirim akışları tablodaki her fiyatı aylık ve yıllık peşin olarak söyler.
+  const tablo = paketler(DEFAULT_PARAMS).filter((p) => p.aylikEur !== null);
+  for (const id of ['fiyat', 'indirim']) {
+    const metin = metniOf(id);
+    for (const p of tablo) {
+      expect(metin, `${id}: ${p.ad} aylık`).toContain(eur(p.aylikEur!));
+      expect(metin, `${id}: ${p.ad} yıllık peşin`).toContain(eur(p.yillikEur!));
+    }
+  }
+  expect(metniOf('indirim')).toMatch(/pazarlıkla değişmez/i);
+  // Ücret soran satıcı fiyat akışına gider.
+  expect(TUM.find((d) => d.id === 'liste-gonderdi')!.adimlar.some((a) => typeof a !== 'string' && a.git === 'fiyat')).toBe(true);
+});
+
 test('Pazarlama menüsünde Oyunlaştırma’dan sonra “Onboarding” var ve etkin', async ({ page }) => {
   await ac(page, 1280);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Yeni kayıt iş akışları');
@@ -190,7 +227,7 @@ test('klavye: geçiş bağlantısı Enter ile hedef durumu açar ve odağı baş
   await ac(page, 390);
   const kaynak = page.locator('#durum-pahali');
   await kaynak.locator('summary').click();
-  const bag = kaynak.getByRole('link', { name: 'İndirim istedi' });
+  const bag = kaynak.getByRole('link', { name: 'İndirim ya da pazarlık istedi' });
   await bag.focus();
   await page.keyboard.press('Enter');
   const hedef = page.locator('#durum-indirim');
@@ -204,6 +241,14 @@ test('doğrudan bağlantı ve adres değişimi durumu açar', async ({ page }) =
   await expect(page.locator('#durum-pahali .ob-adim').first()).toBeInViewport();
   await page.evaluate(() => (location.hash = '#durum-siparis'));
   await expect(page.locator('#durum-siparis')).toHaveAttribute('open', '');
+});
+
+test('375 px: tutar ile para birimi ayrı satıra bölünmez', async ({ page }) => {
+  await ac(page, 375);
+  const metinler = await page.locator('.ob-adim, .ob-kart, .ob-sablon-metin').allTextContents();
+  const tutarli = metinler.filter((m) => /\d\s[€₺]/.test(m));
+  expect(tutarli.length, 'tutar içeren metin var').toBeGreaterThan(0);
+  for (const m of tutarli) expect(m, m).not.toMatch(/\d [€₺]/);
 });
 
 test('karar görüşmesi paket ücretini Parametreler’den yazar', async ({ page }) => {
