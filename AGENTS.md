@@ -1133,7 +1133,7 @@ için şu kurallar ve testler geçerlidir:
 
 | Amaç | Komut |
 |---|---|
-| Geliştirme sunucusu | `npm run dev` (adres: `http://localhost:4321/19ekim/`) |
+| Geliştirme sunucusu | `npm run dev` (adres: `http://localhost:4321/19ekim/`. Kök adres `http://localhost:4321/` yalnız geliştirmede buraya yönlenir, `astro.config.mjs → kokuTabanaYonlendir`) |
 | Tip, Astro ve UI kapısı | `npm run check` (`astro check` + `scripts/check-ui-gates.mjs`) |
 | Yalnız UI kapısı | `npm run gates` |
 | Üretim derlemesi | `npm run build` |
