@@ -976,9 +976,10 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Kartlar öneri sahibini yazıyla etiketler: Claude (`docs/oyunlastirma-yalin/`), ChatGPT (`docs/oyunlastirma/`, S01–S08), Gemini (sohbete yapıştırılan metin, G1–G5). Gemini kartlarının “Dikkat” alanı, önerinin projedeki bugünkü kararlarla çeliştiği yerleri yansız bir dille yazar: işlem payı, vade, ihracat, söz yerine hedef. Sayfa “Öneri sahibi” süzgeciyle süzülür. Yeni bir analiz eklenirse yeni bir `Kaynak` değeri ve kendi grubu eklenir, eski kartlar değişmez.
 - Rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme platformda çalışmadığı sürece Claude stratejilerinin ödülleri bugün kaydedilebilen olaylara bağlıdır.
 
-### Yeni kayıt iş akışları (kullanıcı kararları 2026-11-10)
+### Yeni kayıt adımları (kullanıcı kararları 2026-11-10)
 
-- `/onboarding/` Pazarlama menüsünde “Onboarding” adıyla, Oyunlaştırma’dan sonra gelir. Başlık “Yeni kayıt iş akışları”.
+- `/onboarding/` Pazarlama menüsünde “Yeni kayıtlar” adıyla, Oyunlaştırma’dan sonra gelir. Başlık “Yeni kayıt gelince ne yapılır?”.
+  Adres değişmedi. Menü adı genel yazım politikası gereği Türkçedir: politika “onboarding” kelimesi yerine Türkçe anlatım ister.
   Veri `src/data/onboarding.ts`, görünüm `src/views/OnboardingPage.tsx`, stil `src/styles/onboarding.css` (önek `ob-`).
 - Okuyucu CRM masası sorumlusudur. Kullanıcı kararı: yöneticiye öğreten metin, gerekçe, ikna ilkesi ya da karar listesi
   yazılmaz. Yalnız durumlar ve her durum için yalın, sıralı adımlar ile kayıt kartına yazılacak sonuç yazılır.
@@ -1013,6 +1014,11 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   `baslar` alanı aynı sabittir (`KURULUM_GUNU`, `VITRIN_HAZIR`, `KARAR_GUNU`). Her aşamanın tek kart durumu vardır: Yeni,
   Kurulumda, Etkin, Karar bekliyor. Eski “Ulaşıldı” durumu kaldırıldı. Günler “3. gün” biçiminde yazılır. Kayıt kartı
   talimatı “Durumu “Etkin” yapın.” gibi cümledir, “Durum: Etkin.” yazılmaz. Test: `onboarding.spec.ts` “dil:” testi.
+  Genel yazım politikası (Claude ve Codex ortak kural seti, 2026-11-10) bütün metne uygulanır: talimat en çok 10,
+  açıklama en çok 15 kelime. Ölçüt, okurken desteğe ihtiyaç duyan kişinin metni ilk okuyuşta anlamasıdır. Adımlar ve kayıt
+  kartı talimattır. Kurallar, aşama cümleleri ve hazır e-postalar açıklamadır. Test: `onboarding.spec.ts` “dil: talimat
+  cümlesi en çok 10…” testi. Sayfadaki geçişlerin adı her yerde “durum”dur, “akış” yazılmaz. Hazır metin satırı tam
+  cümledir: “Bu durumda “X” hazır metnini kullanın.” Fiyat listesi “Standart 399 €, Pro 599 €” biçimindedir.
 - Aşama sınırı tek anlamlıdır: bir aşamanın ileri çıkış koşulu sonraki aşamanın başlama koşuludur ve çıkışın kart
   durumu sonraki aşamanın kart durumudur (`tests/onboarding.spec.ts` veri testi). “Şimdi değil” kapanış değildir, kayıt
   bekler (`bekler: true`, `BEKLEME_NOTU`). Aşama başlığı h2 “Aşama n: ad”, Başlar ve Biter h3’tür. Adres `#durum-…` ise

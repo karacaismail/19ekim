@@ -351,7 +351,7 @@ export const ICERIK: IcerikKaydi[] = [
     path: '/onboarding/',
     turetim: 'oneri',
     sinif: ['operasyon'],
-    baslik: 'Yeni kayıt iş akışları',
+    baslik: 'Yeni kayıt gelince ne yapılır?',
     kullaniciSorusu: 'CRM masası sorumlusu yeni bir kayıtla karşılaştığı her durumda hangi adımları izler, kayıt hangi aşamada ve aşama ne zaman biter?',
     grup: 'pazarlama',
     marka: ['istoc'],
@@ -364,7 +364,7 @@ export const ICERIK: IcerikKaydi[] = [
     duzenleme: 'yok',
     kapsam: `Akış öneridir. Gün sayıları ve 10 ürün hedefi pilotta ayarlanacak başlangıç değerleridir. ${PARAM_NOTU}`,
     iliskili: ['deger-onerisi', 'gelir-modelleri', 'hedefler'],
-    menu: 'Onboarding',
+    menu: 'Yeni kayıtlar',
   },
 
   {

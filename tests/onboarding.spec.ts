@@ -80,6 +80,44 @@ test('dil: açıklamalar tam cümledir, etiket dizisi ve “Gün n” kalıbı y
 });
 
 /**
+ * Genel yazım politikası (Claude ve Codex ortak kural seti, 10 Kasım 2026): talimatta en çok 10, açıklamada en çok 15
+ * kelime. Sayım boşluk temellidir: kesme işareti ve sayı içindeki nokta kelimeyi bölmez, ayrı yazılan birim (€) sayılır.
+ * Adımlar ve kayıt kartı talimattır. Kurallar, aşama cümleleri ve hazır e-postalar açıklamadır.
+ */
+const kelimeSay = (cumle: string) =>
+  cumle
+    .split(/\s+/)
+    .map((k) => k.replace(/^[“”"'‘’()[\]:,.!?…]+|[“”"'‘’()[\]:,.!?…]+$/gu, ''))
+    .filter((k) => /[\p{L}\p{N}\p{Sc}]/u.test(k)).length;
+const cumleler = (metin: string) =>
+  metin
+    .replace(/(\d)\.(\d)/g, '$1§$2')
+    .replace(/(\d+)\.(\s+)(?=[a-zçğıöşü“"])/gu, '$1§$2')
+    .split(/(?<=[.!?…]["”’']?)\s+(?=["“'‘(]?[\p{Lu}\d"“[])/u)
+    .map((c) => c.replace(/§/g, '.').trim())
+    .filter((c) => /\p{L}/u.test(c));
+
+test('dil: talimat cümlesi en çok 10, açıklama cümlesi en çok 15 kelime', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'veri testi tarayıcıdan bağımsızdır, yalnız Chromium’da çalışır');
+  const asan: string[] = [];
+  const denetle = (metin: string, sinir: number, yer: string) => {
+    for (const c of cumleler(metin)) if (kelimeSay(c) > sinir) asan.push(`${yer} (${kelimeSay(c)} > ${sinir}): ${c}`);
+  };
+  for (const d of TUM) {
+    for (const a of d.adimlar) denetle(typeof a === 'string' ? a : a.metin, 10, `${d.id} adım`);
+    denetle(d.kart, 10, `${d.id} kart`);
+  }
+  for (const k of HER_DURUMDA) denetle(k, 10, 'kural');
+  denetle(BEKLEME_NOTU, 15, 'bekleme notu');
+  for (const a of ASAMALAR) {
+    denetle(`${a.baslar} başlar.`, 15, `Aşama ${a.no} başlar`);
+    for (const c of a.cikislar) denetle(`${c.kosul} ${c.sonuc}. ${c.sonra ?? ''}`, 15, `Aşama ${a.no} çıkış`);
+  }
+  for (const s of Object.values(METINLER)) for (const satir of s.metin.split('\n')) denetle(satir.replace(/^- /, ''), 15, `${s.id} e-posta`);
+  expect(asan, asan.join('\n')).toEqual([]);
+});
+
+/**
  * Kullanıcı kararı 2026-11-10: fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Pazarlıkla değişmez, indirim
  * verilmez. Fiyat sorusu “söz vermeyin” ya da “İsmail Karaca’ya sorun” diye ertelenmez. Fiyatı CRM sorumlusu tablodan söyler.
  */
@@ -174,12 +212,12 @@ test('fiyat: benzer fiyat durumları akışla karşılanır, hiçbir metin indir
 
 test('Pazarlama menüsünde Oyunlaştırma’dan sonra “Onboarding” var ve etkin', async ({ page }) => {
   await ac(page, 1280);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Yeni kayıt iş akışları');
-  await expect(page).toHaveTitle(/^Yeni kayıt iş akışları/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Yeni kayıt gelince ne yapılır?');
+  await expect(page).toHaveTitle(/^Yeni kayıt gelince ne yapılır\?/);
   await page.getByRole('button', { name: 'Pazarlama' }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Onboarding']);
-  await expect(menu.getByRole('menuitem', { name: 'Onboarding' })).toHaveAttribute('aria-current', 'page');
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar']);
+  await expect(menu.getByRole('menuitem', { name: 'Yeni kayıtlar' })).toHaveAttribute('aria-current', 'page');
 });
 
 for (const [genislik, yukseklik] of [
@@ -310,7 +348,7 @@ test('durum açılınca adımlar ve kayıt kartı satırı görünür, geçiş b
   await ilkArama.locator('summary').click();
   await expect(ilkArama.locator('.ob-adim').first()).toBeVisible();
   await expect(ilkArama.locator('.ob-kart')).toContainText('Kayıt kartında');
-  await expect(ilkArama.locator('.ob-sablon')).toContainText('Hazır metin: Görüşme özeti');
+  await expect(ilkArama.locator('.ob-sablon')).toContainText('Bu durumda “Görüşme özeti” hazır metnini kullanın.');
 
   const hedef = page.locator('#durum-musait-degil');
   await expect(hedef).not.toHaveAttribute('open', '');

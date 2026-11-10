@@ -6,7 +6,7 @@ import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablo
 import '../styles/onboarding.css';
 
 /**
- * Yeni kayıt iş akışları (kullanıcı kararları 2026-11-10): CRM masası sorumlusu için. Sıra: giriş cümlesi → aşama
+ * Yeni kayıt adımları (kullanıcı kararları 2026-11-10): CRM masası sorumlusu için. Sıra: giriş cümlesi → aşama
  * haritası (dört aşama ve sürecin sonu) → her durumda geçerli kurallar → aşamalar → her aşamada olabilen durumlar.
  * Her aşama “Başlar” kutusuyla açılır, durumları listeler ve “Biter” kutusuyla kapanır. Bitiş kutusu kayıt kartına
  * yazılacak durumu ve sonraki aşamayı gösterir. Durumlar `details` ile kapalı gelir. Başka bir duruma geçiş bağlantısı
@@ -78,7 +78,7 @@ function HazirMetin({ s }: { s: Sablon }) {
   };
   return (
     <div className="ob-sablon">
-      <p className="ob-etiket">Hazır metin: {s.ad}</p>
+      <p className="ob-etiket">Bu durumda “{s.ad}” hazır metnini kullanın.</p>
       {s.konu ? <p className="ob-sablon-konu">Konu: {s.konu}</p> : null}
       <p className="ob-sablon-metin">{tutarBitisik(s.metin)}</p>
       <div className="ob-sablon-arac">
@@ -219,7 +219,7 @@ function AsamaBolumu({ a, durumListesi, adOf, sablonOf }: { a: Asama; durumListe
                   </p>
                 ) : c.durum ? (
                   <p className="ob-cikis-sonra">
-                    {c.sonra ?? 'Sonra şu akışı izleyin:'}
+                    {c.sonra ?? 'Sonra şu duruma geçin:'}
                     <a className="text-link ob-git" href={`#${durumId(c.durum)}`} onClick={() => durumuAc(c.durum!)}>
                       {tutarBitisik(adOf(c.durum))}
                     </a>
@@ -247,7 +247,7 @@ function Icerik() {
 
   return (
     <>
-      <PageHeader title="Yeni kayıt iş akışları" purpose="Yeni kaydolan satıcıyla karşılaştığınız her durumda ne yapacağınızı adım adım gösterir." />
+      <PageHeader title="Yeni kayıt gelince ne yapılır?" purpose="Yeni kaydolan satıcıyla karşılaştığınız her durumda ne yapacağınızı adım adım gösterir." />
       <div className="ob-sayfa">
         <p className="ob-giris">
           Bu sayfa, istoc.com’a yeni kaydolan bir satıcıyı ilk günden ücretli pakete kadar nasıl takip edeceğinizi gösterir. Süreç dört aşamadan oluşur. Satıcının hangi aşamada olduğunu, CRM (müşteri ilişkileri yönetimi) programındaki kayıt kartında yazan durumdan anlarsınız. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
