@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { eur, paketler } from '../src/data/gelirModelleri';
-import { ASAMALAR, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar } from '../src/data/onboarding';
+import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar } from '../src/data/onboarding';
 import { DEFAULT_PARAMS } from '../src/data/params';
 
 /**
@@ -36,13 +36,16 @@ test('veri: geçişler, hazır metinler, aşama sınırları ve kapanış duruml
     expect(TUM.filter((d) => d.yer === a.no).length, `Aşama ${a.no} durumları`).toBeGreaterThan(0);
     for (const c of a.cikislar) {
       if (c.durum) expect(idler.has(c.durum), `Aşama ${a.no} çıkışı → ${c.durum}`).toBe(true);
-      expect([c.kosul, c.kart, c.sonra].join(' ')).not.toMatch(YASAK);
+      expect([c.kosul, c.sonuc, c.kart, c.sonra ?? ''].join(' ')).not.toMatch(YASAK);
+      // Görünüm “{koşul} {sonuç}.” cümlesini kurar: koşul noktasız biter, sonuç küçük harfle başlar.
+      expect(c.kosul, 'koşul cümlenin başıdır').not.toMatch(/[.:]$/);
+      expect(c.sonuc, 'sonuç cümlenin sonudur').toMatch(/^[a-zçğıöşü]/);
       if (!c.git) continue;
       // Aşama sınırı tek anlamlıdır: ileri çıkışın koşulu sonraki aşamanın başlama koşulu, kartı sonraki aşamanın kartıdır.
       expect(c.git, `Aşama ${a.no} çıkışı bir sonraki aşamaya gider`).toBe(a.no + 1);
       const sonraki = ASAMALAR.find((x) => x.no === c.git)!;
-      expect(sonraki.baslar.startsWith(c.kosul.replace(/\.$/, '')), `Aşama ${c.git} başlangıcı “${sonraki.baslar}” ≠ çıkış “${c.kosul}”`).toBe(true);
-      expect(sonraki.kartDurumu.startsWith(c.kart), `Aşama ${c.git} kartı “${sonraki.kartDurumu}” ≠ çıkış kartı “${c.kart}”`).toBe(true);
+      expect(sonraki.baslar, `Aşama ${c.git} başlangıcı`).toBe(c.kosul);
+      expect(sonraki.kartDurumu, `Aşama ${c.git} kartı`).toBe(c.kart);
     }
     expect([a.ad, a.gun, a.baslar, a.kartDurumu].join(' ')).not.toMatch(YASAK);
   }
@@ -50,6 +53,30 @@ test('veri: geçişler, hazır metinler, aşama sınırları ve kapanış duruml
   const kapanan = new Set(ASAMALAR.flatMap((a) => a.cikislar.filter((c) => !c.git && !c.bekler).map((c) => c.kart)));
   expect([...kapanan].sort()).toEqual([...KAPANIS_DURUMLARI].sort());
   expect(HER_DURUMDA.join(' ')).not.toMatch(YASAK);
+});
+
+/**
+ * Kullanıcı kararı 2026-11-10: metin CRM sorumlusunun ilk okuyuşta rahatça anlayacağı yalın Türkçe olmalı. “Biter:”,
+ * “Kayıt kartı:”, “Durum: Yeni.” gibi etiket dizileri ve “Gün 3” gibi çeviri kokan kalıplar cümle yerine geçmez.
+ */
+test('dil: açıklamalar tam cümledir, etiket dizisi ve “Gün n” kalıbı yok', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'veri testi tarayıcıdan bağımsızdır, yalnız Chromium’da çalışır');
+  const tum = [
+    ...HER_DURUMDA,
+    BEKLEME_NOTU,
+    ...ASAMALAR.flatMap((a) => [a.gun, a.baslar, ...a.cikislar.flatMap((c) => [c.kosul, c.sonuc, c.sonra ?? ''])]),
+    ...TUM.flatMap((d) => [d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : a.metin))]),
+    ...Object.values(METINLER).flatMap((s) => [s.ad, s.konu ?? '', s.metin]),
+  ];
+  for (const m of tum) expect(m, 'gün “3. gün” biçiminde yazılır').not.toMatch(/\bGün \d/);
+  // “1. ile 3. gün” iki ayrı gün gibi okunur, aralık “1. günden 3. güne kadar” yazılır (bağımsız okuma bulgusu).
+  for (const m of tum) expect(m, 'gün aralığı').not.toMatch(/\d\. ile \d+\. gün/);
+  // “Sonraki adım” bir kart alanıdır: “Sonraki adım olarak … yazın” yerine “Sonraki adım” alanına … girin.”
+  for (const m of tum) expect(m, '“Sonraki adım” alanı').not.toMatch(/Sonraki adım olarak/);
+  // Kayıt kartı talimatı cümledir: “Durumu “Etkin” yapın.” Etiketle başlayan parça kabul edilmez.
+  const ETIKET = /(^|[.!?] )(Durum|Sonraki adım|Ret nedeni|Not|Kayıt kartı|Biter|Başka sonuç|Sonra): /;
+  for (const d of TUM) expect(d.kart, `${d.id} kayıt kartı`).not.toMatch(ETIKET);
+  for (const a of ASAMALAR) for (const c of a.cikislar) expect(`${c.kosul} ${c.sonuc}. ${c.sonra ?? ''}`, `Aşama ${a.no}`).not.toMatch(ETIKET);
 });
 
 /**
@@ -123,7 +150,7 @@ test('fiyat: benzer fiyat durumları akışla karşılanır, hiçbir metin indir
   const parcalar = [
     ...HER_DURUMDA,
     ...TUM.flatMap((d) => [d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : `${a.metin} ${TUM.find((x) => x.id === a.git)!.ad}`))]),
-    ...ASAMALAR.flatMap((a) => [a.baslar, a.kartDurumu, ...a.cikislar.flatMap((c) => [c.kosul, c.kart, c.sonra])]),
+    ...ASAMALAR.flatMap((a) => [a.baslar, a.kartDurumu, ...a.cikislar.flatMap((c) => [`${c.kosul} ${c.sonuc}.`, c.kart, c.sonra ?? ''])]),
   ];
   const cumleler = parcalar.flatMap((m) => kucuk(m).split(/(?<=[.!?”])\s+/));
   let denetlenen = 0;
@@ -170,7 +197,13 @@ for (const [genislik, yukseklik] of [
     // Harita: dört aşama ve sürecin sonu, sırayla.
     const harita = page.locator('.ob-harita-oge');
     await expect(harita).toHaveCount(ASAMALAR.length + 1);
-    for (const [i, a] of ASAMALAR.entries()) await expect(harita.nth(i).locator('.ob-harita-ad')).toHaveText(`Aşama ${a.no}: ${a.ad}`);
+    for (const [i, a] of ASAMALAR.entries()) {
+      const oge = harita.nth(i);
+      await expect(oge.locator('.ob-harita-ad')).toHaveText(`Aşama ${a.no}: ${a.ad}`);
+      // Harita kartı tam cümlelerle konuşur: ne zaman biter ve başka hangi sonuç olabilir.
+      for (const c of a.cikislar) await expect(oge).toContainText(`${c.kosul} ${c.sonuc}.`);
+      await expect(oge).not.toContainText(/Kayıt kartı:|Biter:|Başka sonuç:/);
+    }
     await expect(harita.last().locator('.ob-harita-ad')).toHaveText('Süreç biter');
 
     // Her aşama: başlık “Aşama n: ad”, gövdenin ilk çocuğu Başlar, son çocuğu Biter, durum numaraları aşama numarasıyla başlar.
@@ -227,7 +260,13 @@ test('başlık sırası: her aşamada h2 aşama adı, ardından Başlar, durumla
   await ac(page, 390);
   for (const a of ASAMALAR) {
     const basliklar = await page.locator(`#asama-${a.no}`).locator('h2, h3').allInnerTexts();
-    expect(basliklar).toEqual([`Aşama ${a.no}: ${a.ad}`, 'Başlar', 'Bu aşamadaki durumlar', 'Biter']);
+    expect(basliklar).toEqual([`Aşama ${a.no}: ${a.ad}`, 'Başlar', 'Bu aşamada karşılaşacağınız durumlar', 'Biter']);
+    // Başlar ve Biter kutuları tam cümledir.
+    await expect(page.locator(`#asama-${a.no} [data-tur="baslar"]`)).toContainText(`${a.baslar} başlar.`);
+    for (const c of a.cikislar) {
+      await expect(page.locator(`#asama-${a.no} [data-tur="biter"]`)).toContainText(`${c.kosul} ${c.sonuc}.`);
+      await expect(page.locator(`#asama-${a.no} [data-tur="biter"]`)).toContainText(`Kayıt kartında durumu “${c.kart}” yapın.`);
+    }
   }
   // Açıp kapama işareti erişilebilir ada girmez.
   await expect(page.locator('#durum-yeni-kayit summary')).toHaveAccessibleName('1.1 Yeni kayıt geldi');
@@ -238,21 +277,21 @@ test('Biter bölümü sonraki aşamaya ve gereken akışa bağlanır, bağlantı
   for (const a of ASAMALAR) {
     for (const c of a.cikislar.filter((x) => x.git)) {
       const ad = ASAMALAR.find((x) => x.no === c.git)!.ad;
-      const bag = page.locator(`#asama-${a.no} .ob-cikis`).getByRole('link', { name: `Sonra: Aşama ${c.git}, ${ad}` });
+      const bag = page.locator(`#asama-${a.no} .ob-cikis`).getByRole('link', { name: `Aşama ${c.git}: ${ad}` });
       await expect(bag).toHaveAttribute('href', `#asama-${c.git}`);
     }
     for (const c of a.cikislar.filter((x) => x.durum)) {
       await expect(page.locator(`#asama-${a.no} .ob-cikis`).locator(`a[href="#durum-${c.durum}"]`)).toHaveCount(1);
     }
   }
-  await page.locator('#asama-1 .ob-cikis').getByRole('link', { name: 'Sonra: Aşama 2, Kurulum' }).click();
+  await page.locator('#asama-1 .ob-cikis').getByRole('link', { name: 'Aşama 2: Kurulum' }).click();
   await expect(page).toHaveURL(/#asama-2$/);
   await expect(page.locator('#asama-2-baslik')).toBeInViewport();
 });
 
 test('1280 px: sonraki aşamaya gidince başlık yapışık kırıntı satırının altında kalmaz', async ({ page }) => {
   await ac(page, 1280, 900);
-  await page.locator('#asama-1 .ob-cikis').getByRole('link', { name: 'Sonra: Aşama 2, Kurulum' }).click();
+  await page.locator('#asama-1 .ob-cikis').getByRole('link', { name: 'Aşama 2: Kurulum' }).click();
   await expect(page).toHaveURL(/#asama-2$/);
   await expect
     .poll(() =>
@@ -270,7 +309,7 @@ test('durum açılınca adımlar ve kayıt kartı satırı görünür, geçiş b
   await expect(ilkArama.locator('.ob-adimlar')).toBeHidden();
   await ilkArama.locator('summary').click();
   await expect(ilkArama.locator('.ob-adim').first()).toBeVisible();
-  await expect(ilkArama.locator('.ob-kart')).toContainText('Kayıt kartına yazın');
+  await expect(ilkArama.locator('.ob-kart')).toContainText('Kayıt kartında');
   await expect(ilkArama.locator('.ob-sablon')).toContainText('Hazır metin: Görüşme özeti');
 
   const hedef = page.locator('#durum-musait-degil');
@@ -303,10 +342,11 @@ test('doğrudan bağlantı ve adres değişimi durumu açar', async ({ page }) =
 
 test('375 px: tutar ile para birimi ayrı satıra bölünmez', async ({ page }) => {
   await ac(page, 375);
-  const metinler = await page.locator('.ob-adim, .ob-kart, .ob-sablon-metin').allTextContents();
+  const metinler = await page.locator('.ob-adim, .ob-kart, .ob-sablon-metin, .ob-harita-satir, .ob-asama-gun, .ob-durum-ad').allTextContents();
   const tutarli = metinler.filter((m) => /\d\s[€₺]/.test(m));
   expect(tutarli.length, 'tutar içeren metin var').toBeGreaterThan(0);
   for (const m of tutarli) expect(m, m).not.toMatch(/\d [€₺]/);
+  for (const m of metinler) expect(m, `gün sırası bölünmez: ${m}`).not.toMatch(/\d\. gün/);
 });
 
 test('karar görüşmesi paket ücretini Parametreler’den yazar', async ({ page }) => {

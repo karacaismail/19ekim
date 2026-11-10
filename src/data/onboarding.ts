@@ -16,36 +16,45 @@ import { eur, paketler } from './gelirModelleri';
 
 export const tl = (n: number) => `${Math.round(n).toLocaleString('tr-TR')} ₺`;
 
+/** “A, B ve C” biçiminde liste. */
+export const ve = (xs: string[], baglac = 've') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${baglac} ${xs.at(-1)}`);
+
 /** Süreç bittiğinde kayıt kartında kalan durumlar. “Şimdi değil” kapanış değildir, bekleyen kayıttır. */
 export const KAPANIS_DURUMLARI = ['Ücretli', 'Uygun değil', 'Ulaşılamadı', 'Alıcı'];
-export const BEKLEME_NOTU = 'Şimdi değil diyen kayıt bekler. Hatırlatma tarihinde Aşama 4’e döner.';
+export const BEKLEME_NOTU = '“Şimdi değil” diyen satıcının kaydı kapanmaz. Hatırlatma tarihi gelince satıcıyı yeniden arayın ve Aşama 4’ten devam edin.';
 
-/** Her durumda geçerli kurallar. */
+/** Her zaman geçerli kurallar. */
 export const HER_DURUMDA: string[] = [
-  'Her temastan sonra kayıt kartını güncelleyin.',
-  'Sonraki adım alanını tarihiyle doldurun. Bu alan boş kalmaz.',
+  'Satıcıyla her konuşmadan ve yazışmadan sonra kayıt kartını güncelleyin.',
+  'Kayıt kartındaki “Sonraki adım” alanını boş bırakmayın. Bu alana sıradaki işi ve tarihini girin.',
   'Fiyat, fiyat tablosundaki fiyattır. İndirim yoktur ve pazarlık yapılmaz.',
   'Ücretsiz ay, ek süre, özel fiyat ya da tablo dışında bir ödeme koşulu önermeyin.',
-  'Satıcıya satış ya da sipariş sözü vermeyin.',
+  'Satıcıya “satış yaparsınız” ya da “sipariş alırsınız” diye söz vermeyin.',
   'Fiyat dışında bilmediğiniz bir konu olursa tahmin etmeyin. İsmail Karaca’ya sorun.',
-  'İzin olmayan kanaldan aramayın ve yazmayın.',
-  'Uygun arama saati: 10.00 ile 12.00 ve 14.00 ile 17.00 arası. Satıcı başka bir saat söylediyse onu kullanın.',
+  'Satıcının izin vermediği kanaldan aramayın ve yazmayın. Örneğin WhatsApp izni yoksa WhatsApp’tan yazmayın.',
+  'Satıcıyı 10.00 ile 12.00 arasında ya da 14.00 ile 17.00 arasında arayın. Satıcı başka bir saat söylediyse o saatte arayın.',
 ];
 
 /** Ana akışın aşaması (1–4) ya da her aşamada olabilen durum. */
 export type AsamaNo = 1 | 2 | 3 | 4;
 export type Yer = AsamaNo | 'her-an';
 
+/**
+ * Aşamanın bir sonu. Görünüm iki cümle kurar: “{kosul} {sonuc}.” ve “Kayıt kartında durumu “{kart}” yapın.”
+ * Kullanıcı kararı 2026-11-10: etiket dizisi (“Biter:”, “Kayıt kartı:”) cümle yerine geçmez, metin yalın Türkçedir.
+ */
 export interface Cikis {
-  /** Aşamayı bitiren koşul. */
+  /** Cümlenin başı, “-ınca” ya da “-rsa” ile biter, noktasızdır. İleri çıkışta sonraki aşamanın `baslar` alanıyla aynıdır. */
   kosul: string;
-  /** Kayıt kartına yazılacak durum. */
+  /** Cümlenin sonu, küçük harfle başlar: “bu aşama biter”, “kayıt kapanır”. */
+  sonuc: string;
+  /** Kayıt kartında yapılacak durum. */
   kart: string;
-  /** Sonra ne olur. */
-  sonra: string;
+  /** Ek talimat, tam cümle (varsa). */
+  sonra?: string;
   /** Sonraki aşama (varsa). */
   git?: AsamaNo;
-  /** Sonra uygulanacak durum akışı (varsa). */
+  /** Sonra izlenecek durum akışı (varsa). */
   durum?: string;
   /** Kayıt kapanmaz, bekler (Şimdi değil). */
   bekler?: true;
@@ -54,58 +63,71 @@ export interface Cikis {
 export interface Asama {
   no: AsamaNo;
   ad: string;
+  /** Kayıttan sonraki günler. */
   gun: string;
   /** Bu aşamadayken kayıt kartındaki durum. */
   kartDurumu: string;
+  /** Cümlenin başı: görünüm “{baslar} başlar.” yazar. */
   baslar: string;
   cikislar: Cikis[];
 }
+
+const KURULUM_GUNU = 'Satıcıyla kurulum görüşmesinin günü ve saati belli olunca';
+const VITRIN_HAZIR = 'Profil tamamlanıp en az 10 ürün yayına girince';
+const KARAR_GUNU = 'Satıcıyla karar görüşmesinin günü ve saati belli olunca';
 
 export const ASAMALAR: Asama[] = [
   {
     no: 1,
     ad: 'İlk temas',
-    gun: 'Gün 0 ile Gün 5 arası',
+    gun: 'Kayıt gününden en geç 5. güne kadar',
     kartDurumu: 'Yeni',
-    baslar: 'Yeni bir kayıt geldiğinde başlar.',
+    baslar: 'Yeni bir kayıt gelince',
     cikislar: [
-      { kosul: 'Kurulum görüşmesi için gün ve saat alındı.', kart: 'Ulaşıldı', sonra: 'Aşama 2 başlar.', git: 2 },
-      { kosul: 'Üç arama ve bir e-postaya cevap gelmedi.', kart: 'Ulaşılamadı', sonra: 'Kayıt kapanır.' },
-      { kosul: 'Kayıt alıcı çıktı.', kart: 'Alıcı', sonra: 'Bu akışı uygulayın:', durum: 'alici' },
+      { kosul: KURULUM_GUNU, sonuc: 'bu aşama biter', kart: 'Kurulumda', git: 2 },
+      { kosul: 'Üç aramaya ve bir e-postaya cevap gelmezse', sonuc: 'kayıt kapanır', kart: 'Ulaşılamadı' },
+      { kosul: 'Kaydı yapan kişi satıcı değil de alıcıysa', sonuc: 'bu süreç onun için biter', kart: 'Alıcı', durum: 'alici' },
     ],
   },
   {
     no: 2,
     ad: 'Kurulum',
-    gun: 'Gün 1 ile Gün 3 arası',
-    kartDurumu: 'Ulaşıldı, kurulum görüşmesi başlayınca Kurulumda',
-    baslar: 'Kurulum görüşmesi için gün ve saat alındığında başlar.',
+    gun: 'Kayıttan sonraki 1. günden 3. güne kadar',
+    kartDurumu: 'Kurulumda',
+    baslar: KURULUM_GUNU,
     cikislar: [
-      { kosul: 'Profil tamam ve en az 10 ürün yayında.', kart: 'Etkin', sonra: 'Aşama 3 başlar.', git: 3 },
-      { kosul: 'Satıcı vazgeçti.', kart: 'Uygun değil', sonra: 'Kayıt kapanır.' },
+      { kosul: VITRIN_HAZIR, sonuc: 'bu aşama biter', kart: 'Etkin', git: 3 },
+      { kosul: 'Satıcı vazgeçerse', sonuc: 'kayıt kapanır', kart: 'Uygun değil' },
     ],
   },
   {
     no: 3,
     ad: 'Takip',
-    gun: 'Gün 3 ile Gün 12 arası',
+    gun: 'Kayıttan sonraki 3. günden 12. güne kadar',
     kartDurumu: 'Etkin',
-    baslar: 'Profil tamam ve en az 10 ürün yayında olduğunda başlar.',
+    baslar: VITRIN_HAZIR,
     cikislar: [
-      { kosul: 'Karar görüşmesi için gün ve saat alındı.', kart: 'Karar bekliyor', sonra: 'Aşama 4 başlar.', git: 4 },
-      { kosul: 'Satıcının ilgisi kalmadı.', kart: 'Uygun değil', sonra: 'Kayıt kapanır.' },
+      { kosul: KARAR_GUNU, sonuc: 'bu aşama biter', kart: 'Karar bekliyor', git: 4 },
+      { kosul: 'Satıcının ilgisi kalmazsa', sonuc: 'kayıt kapanır', kart: 'Uygun değil' },
     ],
   },
   {
     no: 4,
     ad: 'Karar',
-    gun: 'Gün 12 ile Gün 14 arası',
+    gun: 'Kayıttan sonraki 12. günden 14. güne kadar',
     kartDurumu: 'Karar bekliyor',
-    baslar: 'Karar görüşmesi için gün ve saat alındığında başlar.',
+    baslar: KARAR_GUNU,
     cikislar: [
-      { kosul: 'Ödeme geldi.', kart: 'Ücretli', sonra: 'Süreç biter. Ayda bir arayın.' },
-      { kosul: 'Satıcı “şimdi değil” dedi.', kart: 'Şimdi değil', sonra: 'Kayıt bekler. Hatırlatma tarihi gelince bu akışı uygulayın:', durum: 'hatirlatma', bekler: true },
-      { kosul: 'Satıcı “hayır” dedi.', kart: 'Uygun değil', sonra: 'Kayıt kapanır.' },
+      { kosul: 'Ödeme gelince', sonuc: 'satıcı ücretli pakete geçer ve süreç biter', kart: 'Ücretli', sonra: 'Bundan sonra satıcıyı ayda bir arayın.' },
+      {
+        kosul: 'Satıcı “şimdi değil” derse',
+        sonuc: 'kayıt kapanmaz ve hatırlatma tarihine kadar bekler',
+        kart: 'Şimdi değil',
+        sonra: 'Hatırlatma tarihi gelince şu akışı izleyin:',
+        durum: 'hatirlatma',
+        bekler: true,
+      },
+      { kosul: 'Satıcı “hayır” derse', sonuc: 'kayıt kapanır', kart: 'Uygun değil' },
     ],
   },
 ];
@@ -130,43 +152,44 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
   const yillik = std.yillikEur!;
   // Fiyat tablosu: fiyatı yazılı paketler (Standart, Pro). Liste “A ve B” biçiminde yazılır.
   const tablo = paketler(p).filter((k) => k.aylikEur !== null);
-  const ve = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ve ${xs.at(-1)}`);
   const tabloAylik = ve(tablo.map((k) => `${k.ad} paket aylık ${eur(k.aylikEur!)}`));
-  const tabloYillik = ve(tablo.map((k) => `${k.ad} ${eur(k.yillikEur!)}`));
+  const tabloYillik = ve(tablo.map((k) => `${k.ad} paket ${eur(k.yillikEur!)}`));
   return [
     {
       id: 'yeni-kayit',
       yer: 1,
       ad: 'Yeni kayıt geldi',
       adimlar: [
+        'Kayıt birkaç gün önce geldiyse de bu adımlara bugün başlayın.',
         'Kayıt kartını açın.',
-        'Türü, işletmeyi, yetkiliyi, telefonu, e-postayı, sektörü, şehri ve iletişim izinlerini yazın.',
-        { metin: 'Kayıt alıcıysa bu akışa geçin:', git: 'alici' },
+        'Kaydı yapanın satıcı mı alıcı mı olduğunu yazın.',
+        'İşletmenin adını, yetkiliyi, telefonu, e-postayı, sektörü ve şehri yazın.',
+        'Satıcının hangi kanallardan iletişime izin verdiğini yazın.',
+        { metin: 'Kaydı yapan alıcıysa bu akışa geçin:', git: 'alici' },
         'Hoş geldin e-postasını gönderin.',
-        'Bir iki saat sonra arayın.',
-        'Kayıt birkaç gün önce geldiyse de bugün başlayın.',
+        'Bir iki saat sonra satıcıyı arayın.',
       ],
-      kart: 'Durum: Yeni. Sonraki adım: ilk arama, bugün.',
+      kart: 'Durumu “Yeni” yapın. “Sonraki adım” alanına bugünkü ilk aramayı girin.',
       sablon: 'hosgeldin',
     },
     {
       id: 'acti',
       yer: 1,
-      ad: 'İlk arama: telefonu açtı',
+      ad: 'İlk aramada telefonu açtı',
       adimlar: [
         'Kendinizi tanıtın ve on dakikası olup olmadığını sorun.',
         { metin: 'Müsait değilse bu akışa geçin:', git: 'musait-degil' },
         'Ne sattığını sorun.',
         'Kime sattığını ve müşterilerinin hangi şehirlerden geldiğini sorun.',
-        'Yeni toptan müşteriyi bugün nasıl bulduğunu sorun.',
+        'Yeni toptan müşterileri şu anda nasıl bulduğunu sorun.',
         'Neden kaydolduğunu sorun.',
-        'Ürün listesi, fotoğraflar ve toptan fiyatlar hazır mı, sorun.',
+        'Ürün listesinin, fotoğrafların ve toptan fiyatların hazır olup olmadığını sorun.',
         { metin: 'Kararı başka biri veriyorsa bu akışa geçin:', git: 'karar-veren' },
         'Kurulum için iki seçenek önerin, örneğin “Yarın 11.00 mi, perşembe 15.00 mi?”',
         'WhatsApp ile yazmak için izin isteyin.',
         'Bir saat içinde görüşme özetini e-postayla gönderin.',
       ],
-      kart: 'Durum: Ulaşıldı. Sonraki adım: kurulum görüşmesi, gün ve saatiyle.',
+      kart: 'Kurulum günü ve saati belli olunca durumu “Kurulumda” yapın. “Sonraki adım” alanına kurulum görüşmesini gün ve saatiyle girin.',
       sablon: 'ozet',
     },
     {
@@ -174,12 +197,13 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 1,
       ad: 'Telefonu açmadı',
       adimlar: [
-        'Kısa mesaj bırakın: adınızı ve istoc.com kaydı için aradığınızı yazın.',
-        'Yeniden arayın: Gün 1 öğleden sonra, Gün 3 sabah.',
-        'Üç arama da cevapsızsa Gün 5’te “Size ulaşamadım” e-postasını gönderin.',
-        'Cevap gelmezse aramayı bırakın.',
+        'Satıcıya SMS ile kısa bir mesaj gönderin. Mesajda adınızı ve istoc.com kaydı için aradığınızı yazın.',
+        'Kayıttan sonraki 1. gün öğleden sonra yeniden arayın.',
+        'Açmazsa 3. gün sabah bir kez daha arayın.',
+        'Üç arama da cevapsız kalırsa 5. gün “Size ulaşamadım” e-postasını gönderin.',
+        'E-postaya da cevap gelmezse aramayı bırakın.',
       ],
-      kart: 'Her denemeyi tarihiyle yazın. Cevap yoksa durum: Ulaşılamadı.',
+      kart: 'Her aramayı tarihiyle yazın. E-postaya da cevap gelmezse durumu “Ulaşılamadı” yapın.',
       sablon: 'ulasilamadi',
     },
     {
@@ -187,7 +211,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 1,
       ad: '“Şimdi müsait değilim” dedi',
       adimlar: ['Hangi gün ve saatte aramanızı istediğini sorun.', 'Teşekkür edip kapatın.', 'O gün ve saatte arayın.'],
-      kart: 'Sonraki adım: arama, söylenen gün ve saatle.',
+      kart: '“Sonraki adım” alanına satıcının söylediği gün ve saatteki aramayı girin.',
     },
     {
       id: 'karar-veren',
@@ -203,11 +227,11 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       adimlar: [
         'Bir saat önce kısa bir hatırlatma mesajı gönderin.',
         'Profili satıcıyla birlikte doldurun.',
-        'İlk ürünleri birlikte yükleyin. Hedef en az 10 ürün.',
-        'Eksik kalanları satıcıya yazılı olarak gönderin.',
-        'Satıcı İstoç’taysa ve isterse saha satış uzmanıyla yerinde kurulum ayarlayın.',
+        'İlk ürünleri birlikte yükleyin. En az 10 ürün yüklemeye çalışın.',
+        'Satıcının tamamlaması gereken işlerin listesini ona yazılı olarak gönderin.',
+        'Satıcının dükkânı İstoç’taysa ve isterse saha satış uzmanıyla yerinde kurulum ayarlayın.',
       ],
-      kart: 'Durum: Kurulumda. En az 10 ürün yayındaysa Etkin. Sonraki adım: ilk sonuç mesajı, Gün 3.',
+      kart: 'Profil tamamlanıp en az 10 ürün yayına girince durumu “Etkin” yapın. “Sonraki adım” alanına 3. gün gönderilecek “Vitrin yayında” mesajını girin.',
     },
     {
       id: 'liste-gonderdi',
@@ -225,8 +249,8 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       id: 'gelmedi',
       yer: 2,
       ad: 'Kurulum görüşmesine gelmedi',
-      adimlar: ['Aynı gün arayın ve yeni gün ve saat isteyin.', { metin: 'İkinci kez gelmezse ürün listesini istemek için bu akışa geçin:', git: 'liste-gonderdi' }],
-      kart: 'Sonraki adım: yeni kurulum tarihi.',
+      adimlar: ['Aynı gün arayın ve yeni bir gün ve saat isteyin.', { metin: 'İkinci kez de gelmezse ürün listesini göndermesini isteyin. Liste gelince bu akışa geçin:', git: 'liste-gonderdi' }],
+      kart: '“Sonraki adım” alanına yeni kurulum gününü ve saatini girin.',
     },
     {
       id: 'teknik',
@@ -237,9 +261,9 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         'Çözebiliyorsanız hemen çözün.',
         'Çözemiyorsanız yazılım ekibine iletin.',
         'Satıcıya ne zaman döneceğinizi söyleyin.',
-        'Söylediğiniz zamanda dönün, sorun sürse bile.',
+        'Sorun sürse bile söylediğiniz zamanda satıcıya dönün.',
       ],
-      kart: 'Sorunu, iletildiği kişiyi ve dönüş tarihini yazın.',
+      kart: 'Sorunu, sorunu ilettiğiniz kişiyi ve dönüş tarihini yazın.',
     },
     {
       id: 'hareketsiz',
@@ -247,56 +271,56 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       ad: 'Kurulumdan sonra ürün yüklemiyor',
       adimlar: [
         'Kurulumdan iki gün sonra arayın.',
-        'Neyin engel olduğunu sorun.',
-        { metin: 'Zamanı yoksa ürün listesini isteyin:', git: 'liste-gonderdi' },
+        'Ürün yüklemesini neyin engellediğini sorun.',
+        { metin: 'Zamanı yoksa ürün listesini göndermesini isteyin. Liste gelince bu akışa geçin:', git: 'liste-gonderdi' },
         'İlgisi kalmadıysa teşekkür edin ve kaydı kapatın.',
       ],
-      kart: 'Engeli yazın. İlgisi kalmadıysa durum: Uygun değil.',
+      kart: 'Satıcının söylediği engeli yazın. İlgisi kalmadıysa durumu “Uygun değil” yapın.',
     },
     {
       id: 'ilk-sonuc',
       yer: 3,
-      ad: 'Vitrin yayında (Gün 3 ile Gün 4 arası)',
+      ad: 'Vitrin yayına girdi (3. ya da 4. gün)',
       adimlar: [
-        'Vitrin bağlantısını WhatsApp ile gönderin. İzin yoksa e-postayla gönderin.',
-        'Ölçülüyorsa görüntülenme, mesaj ve talep sayısını ekleyin.',
-        'Ölçülmeyen rakamı yazmayın.',
-        'Eksik ürün grubunu eklemeyi önerin.',
+        'Vitrin bağlantısını WhatsApp ile gönderin. WhatsApp izni yoksa e-postayla gönderin.',
+        'Görüntülenme, mesaj ve talep sayıları ölçülüyorsa bunları da mesaja ekleyin.',
+        'Ölçülmeyen bir rakamı mesaja yazmayın.',
+        'Eksik kalan ürün grubunu da eklemeyi önerin.',
       ],
-      kart: 'Sonraki adım: ara kontrol araması, Gün 7.',
+      kart: '“Sonraki adım” alanına 7. gündeki kontrol aramasını girin.',
       sablon: 'ilk-sonuc',
     },
     {
       id: 'ara-kontrol',
       yer: 3,
-      ad: 'Ara kontrol (Gün 7)',
+      ad: 'Kontrol araması (7. gün)',
       adimlar: [
-        'Arayın. Görüşme on dakikayı geçmesin.',
-        'Ne işe yaradığını, neyin eksik olduğunu ve sorun olup olmadığını sorun.',
-        'Bir sonraki hedefi söyleyin, örneğin bütün ürün grubunu yüklemek.',
+        'Satıcıyı arayın. Görüşme on dakikayı geçmesin.',
+        'Neyin iyi gittiğini, neyin eksik kaldığını ve bir sorun olup olmadığını sorun.',
+        'Sıradaki hedefi birlikte belirleyin, örneğin ürün grubunun tamamını yüklemek.',
       ],
-      kart: 'Notları ve bir sonraki hedefi yazın. Sonraki adım: değer özeti, Gün 10.',
+      kart: 'Notları ve sıradaki hedefi yazın. “Sonraki adım” alanına 10. gün gönderilecek özet e-postasını girin.',
     },
     {
       id: 'deger-ozeti',
       yer: 3,
-      ad: 'Değer özeti (Gün 10 ile Gün 12 arası)',
+      ad: 'İlk günlerin özeti (10. günden 12. güne kadar)',
       adimlar: [
-        'Yayındaki ürün sayısını yazın.',
-        'Ölçülüyorsa görüntülenme, mesaj ve talep sayısını yazın.',
-        'Özeti e-postayla gönderin.',
-        'Karar görüşmesi için gün ve saat önerin.',
-        'Satıcı kabul edince saati takvime yazın.',
+        'Özet e-postasına yayındaki ürün sayısını yazın.',
+        'Görüntülenme, mesaj ve talep sayıları ölçülüyorsa bunları da e-postaya ekleyin.',
+        'Özeti satıcıya e-postayla gönderin.',
+        'Karar görüşmesi için bir gün ve saat önerin.',
+        'Satıcı kabul edince görüşmeyi takvime yazın.',
       ],
-      kart: 'Satıcı saati kabul edince durum: Karar bekliyor. Sonraki adım: karar görüşmesi, Gün 14.',
+      kart: 'Satıcı karar görüşmesinin gününü ve saatini kabul edince durumu “Karar bekliyor” yapın. “Sonraki adım” alanına 14. gündeki karar görüşmesini girin.',
       sablon: 'deger-ozeti',
     },
     {
       id: 'karar',
       yer: 4,
-      ad: 'Karar görüşmesi (Gün 14)',
+      ad: 'Karar görüşmesi (14. gün)',
       adimlar: [
-        'İlk günlerin sonucunu iki cümleyle özetleyin.',
+        'İlk günlerde neler olduğunu iki cümleyle özetleyin.',
         `${std.ad} paketi önerin: aylık ${eur(aylik)}, yaklaşık ${tl(aylik * p.eurTry)}.`,
         `Yıllık peşin seçeneğini söyleyin: ${eur(yillik)}. 12 ay için ${p.annualMonths} ayın ücreti ödenir.`,
         'Türk lirası karşılığının ödeme günündeki kurla hesaplandığını söyleyin.',
@@ -305,14 +329,14 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         { metin: 'Şimdi değil derse:', git: 'simdi-degil' },
         { metin: 'Hayır derse:', git: 'hayir' },
       ],
-      kart: 'Sonucu yazın: Ücretli, Şimdi değil ya da Uygun değil.',
+      kart: 'Satıcının cevabını yazın.',
     },
     {
       id: 'evet',
       yer: 4,
       ad: '“Evet” dedi',
-      adimlar: ['Teklif e-postasını ve ödeme adımını aynı gün gönderin.', 'Ödeme gelince teşekkür edin.', 'Ayda bir arama tarihi belirleyin.'],
-      kart: 'Durum: Ücretli. Sonraki adım: aylık arama.',
+      adimlar: ['Teklif e-postasını aynı gün gönderin. E-postadaki [ödeme adımı] yerine satıcının nasıl ödeyeceğini yazın.', 'Ödeme gelince satıcıya teşekkür edin.', 'Her ay için bir arama tarihi belirleyin.'],
+      kart: 'Ödeme gelince durumu “Ücretli” yapın. “Sonraki adım” alanına bir ay sonraki aramayı girin.',
       sablon: 'teklif',
     },
     {
@@ -320,7 +344,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 4,
       ad: '“Şimdi değil” dedi',
       adimlar: ['Nedenini sorun.', 'Ne zaman yeniden konuşmak istediğini sorun.', 'Teşekkür e-postasını gönderin.'],
-      kart: 'Durum: Şimdi değil. Nedeni ve 30, 60 ya da 90 gün sonraki hatırlatma tarihini yazın.',
+      kart: 'Durumu “Şimdi değil” yapın. Nedenini yazın. Hatırlatma tarihini, satıcının yeniden konuşmak istediği zamana göre 30, 60 ya da 90 gün sonrasına koyun.',
       sablon: 'simdi-degil',
     },
     {
@@ -328,20 +352,21 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 4,
       ad: '“Hayır” dedi',
       adimlar: ['Teşekkür edin ve görüşmeyi kapatın.', 'Israr etmeyin.', 'Kararı değiştirmek için indirim ya da ücretsiz süre önermeyin.'],
-      kart: 'Durum: Uygun değil. Ret nedeni: fiyat, alıcı yok, ihtiyaç yok, zaman yok ya da diğer.',
+      kart: 'Durumu “Uygun değil” yapın. Satıcının neden hayır dediğini yazın: fiyat, alıcı yok, ihtiyaç yok, zaman yok ya da başka bir neden.',
     },
     {
       id: 'hatirlatma',
       yer: 4,
       ad: 'Hatırlatma tarihi geldi',
       adimlar: [
-        'Karttaki notları okuyun.',
-        'Arayın ve erteleme nedeninin değişip değişmediğini sorun.',
-        'Geri kazanmak için indirim ya da ücretsiz süre önermeyin.',
-        { metin: 'Değiştiyse bu akışa geçin:', git: 'karar' },
-        'Değişmediyse yeni bir tarih isteyin ya da kaydı kapatın.',
+        'Kayıt kartındaki notları okuyun.',
+        'Satıcıyı arayın. “Şimdi değil” dediği zamanki engelin hâlâ sürüp sürmediğini sorun.',
+        'Satıcıyı ikna etmek için indirim ya da ücretsiz süre önermeyin.',
+        { metin: 'Engel kalktıysa bu akışa geçin:', git: 'karar' },
+        'Engel sürüyorsa yeniden konuşmak için yeni bir tarih isteyin.',
+        'Satıcı artık ilgilenmediğini söylerse kaydı kapatın.',
       ],
-      kart: 'Yeni tarihi ya da Uygun değil durumunu yazın.',
+      kart: 'Yeni hatırlatma tarihini yazın. Kaydı kapattıysanız durumu “Uygun değil” yapın.',
     },
     {
       id: 'fiyat',
@@ -349,11 +374,11 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       ad: 'Fiyatı sordu',
       adimlar: [
         `Fiyat tablosundaki fiyatı söyleyin: ${tabloAylik}.`,
-        `Yıllık peşin fiyatı söyleyin: ${tabloYillik}. Bu tutar 12 ay için ${p.annualMonths} ayın ücretidir.`,
+        `Yıllık peşin fiyatı söyleyin: ${tabloYillik}. Bu tutarlar 12 ay için ${p.annualMonths} ayın ücretidir.`,
         'Türk lirası karşılığının ödeme günündeki kurla hesaplandığını söyleyin.',
-        'Kayıt Aşama 4’ten önceyse “Önce vitrininizi açalım, 14. gün sonucuna birlikte bakalım” deyin.',
+        'Satıcı henüz Aşama 4’e gelmediyse “Önce vitrininizi açalım, kaydınızın 14. gününde sonuçlara birlikte bakalım” deyin.',
       ],
-      kart: 'Fiyatın söylendiğini yazın.',
+      kart: 'Fiyatı söylediğinizi yazın.',
     },
     {
       id: 'pahali',
@@ -361,8 +386,8 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       ad: '“Pahalı” dedi',
       adimlar: [
         'Düzenli bir toptan müşterinin ayda ne kadar kâr bıraktığını sorun.',
-        `Paketin aylık bedelini (yaklaşık ${tl(aylik * p.eurTry)}) bu kâra bölün.`,
-        'Sonucu söyleyin: paket bedelini kaç müşteri karşılıyor.',
+        `Paketin aylık bedeli yaklaşık ${tl(aylik * p.eurTry)}. Bu tutarı, bir müşterinin bıraktığı aylık kâra bölün.`,
+        'Çıkan sayıyı satıcıya söyleyin. Bu sayı, paketin bedelini kaç müşterinin karşıladığını gösterir.',
         'Yıllık peşin seçeneğini söyleyin.',
         { metin: 'İndirim isterse bu akışa geçin:', git: 'indirim' },
       ],
@@ -382,7 +407,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         { metin: 'Düşüneyim derse:', git: 'dusuneyim' },
         { metin: 'Hayır derse:', git: 'hayir' },
       ],
-      kart: 'İndirim istediğini ve fiyat tablosunun söylendiğini yazın.',
+      kart: 'Satıcının indirim istediğini ve ona fiyat tablosunu söylediğinizi yazın.',
     },
     {
       id: 'ucretsiz-sure',
@@ -396,7 +421,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         { metin: 'Düşüneyim derse:', git: 'dusuneyim' },
         { metin: 'Hayır derse:', git: 'hayir' },
       ],
-      kart: 'Ücretsiz süre istediğini ve fiyat tablosunun söylendiğini yazın.',
+      kart: 'Satıcının ücretsiz süre istediğini ve ona fiyat tablosunu söylediğinizi yazın.',
     },
     {
       id: 'rakip-ucuz',
@@ -413,9 +438,9 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
     {
       id: 'odeme-kosulu',
       yer: 'her-an',
-      ad: 'Taksit, vade ya da sonra ödeme istedi',
+      ad: 'Taksit, vade ya da ödemeyi erteleme istedi',
       adimlar: [
-        'Fiyat tablosundaki seçenekleri söyleyin: aylık ödeme ya da yıllık peşin ödeme.',
+        '“Ödemeyi fiyat tablosundaki iki seçenekten biriyle yaparsınız: aylık ödeme ya da yıllık peşin ödeme” deyin.',
         `Yıllık peşin fiyatı söyleyin: ${tabloYillik}.`,
         'Bu iki seçenekten biriyle devam etmek isteyip istemediğini sorun.',
         { metin: 'Evet derse:', git: 'evet' },
@@ -429,7 +454,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       ad: '“Bana indirim sözü verilmişti” dedi',
       adimlar: [
         'Yanlış bilgi için özür dileyin.',
-        '“İndirim yapmıyoruz. Fiyat, fiyat tablosundaki fiyattır” deyin.',
+        '“İndirim yapmıyoruz. Fiyatımız herkes için aynıdır” deyin.',
         `Fiyat tablosunu söyleyin: ${tabloAylik}.`,
         'Bu sözü kimin ve ne zaman verdiğini sorun.',
       ],
@@ -439,22 +464,26 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       id: 'dusuneyim',
       yer: 'her-an',
       ad: '“Düşüneyim” dedi',
-      adimlar: ['Kararını en çok neyin etkilediğini sorun: fiyat mı, alıcı mı, zaman mı?', 'Eksik bilgiyi verin.', 'Yeniden konuşmak için tarih alın.'],
-      kart: 'Tarihsiz kapatmayın. Sonraki adımı ve tarihini yazın.',
+      adimlar: ['Kararını en çok neyin etkilediğini sorun: fiyat mı, alıcı mı, zaman mı?', 'Eksik kalan bilgiyi verin.', 'Yeniden konuşmak için bir gün ve saat alın.'],
+      kart: '“Sonraki adım” alanına yeniden konuşacağınız günü ve saati girin.',
     },
     {
       id: 'satis-gelir-mi',
       yer: 'her-an',
       ad: '“Satış gelir mi, alıcı var mı?” diye sordu',
-      adimlar: ['Satış garantisi vermeyin.', 'Ölçülen rakamları söyleyin. Ölçülmeyeni söylemeyin.', '“İlk 14 günde ne olduğunu birlikte görelim” deyin.'],
-      kart: 'Soruyu yazın.',
+      adimlar: ['Satış garantisi vermeyin.', 'Yalnız ölçülen rakamları söyleyin. Ölçülmeyen bir rakamı tahminle söylemeyin.', '“İlk 14 günde ne olduğunu birlikte görelim” deyin.'],
+      kart: 'Satıcının sorusunu yazın.',
     },
     {
       id: 'siparis',
       yer: 'her-an',
-      ad: '“Sipariş ve ödeme var mı?” diye sordu',
-      adimlar: ['“Henüz yok” deyin.', 'Kesin tarih bilmiyorsanız tarih vermeyin.', 'Bugün platformun ne yaptığını söyleyin.'],
-      kart: 'Soruyu yazın.',
+      ad: '“Platformdan sipariş ve ödeme alabilir miyim?” diye sordu',
+      adimlar: [
+        '“Platformda şu anda sipariş verme ve ödeme alma özelliği yok” deyin.',
+        'Bu özelliğin ne zaman geleceğini kesin bilmiyorsanız tarih vermeyin.',
+        'Platformun şu anda ne yaptığını anlatın.',
+      ],
+      kart: 'Satıcının sorusunu yazın.',
     },
     {
       id: 'baska-platform',
@@ -462,40 +491,40 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       ad: '“Başka platformdayım” ya da “Kendi müşterim var” dedi',
       adimlar: [
         'Diğer platformu kötülemeyin.',
-        'istoc.com’un mevcut müşterilerin yanına yeni bir toptan alıcı kanalı eklediğini söyleyin.',
-        'Bugün ulaşamadığı şehri ya da müşteri grubunu sorun.',
+        'istoc.com’un, satıcının mevcut müşterilerinin yanında yeni toptan alıcılara da görünmesini sağladığını söyleyin.',
+        'Şu anda hangi şehre ya da müşteri grubuna ulaşamadığını sorun.',
       ],
-      kart: 'Kullandığı diğer kanalı yazın.',
+      kart: 'Satıcının kullandığı diğer platformu ya da satış kanalını yazın.',
     },
     {
       id: 'zaman-yok',
       yer: 'her-an',
       ad: '“Zamanım yok” dedi',
-      adimlar: ['Kurulumun yarım saat sürdüğünü söyleyin.', { metin: 'Yine zamanı yoksa ürün listesini isteyin:', git: 'liste-gonderdi' }],
-      kart: 'Sonraki adımı ve tarihini yazın.',
+      adimlar: ['Kurulumun yarım saat sürdüğünü söyleyin.', { metin: 'Yine zamanı yoksa ürün listesini göndermesini isteyin. Liste gelince bu akışa geçin:', git: 'liste-gonderdi' }],
+      kart: '“Sonraki adım” alanına sıradaki işi ve tarihini girin.',
     },
     {
       id: 'alici',
       yer: 'her-an',
-      ad: 'Kayıt alıcı çıktı',
+      ad: 'Kaydı yapan kişi alıcı çıktı',
       adimlar: [
-        'Ne aradığını, kaç adet, hangi şehre ve ne zaman istediğini sorun.',
+        'Ne aradığını, kaç adet istediğini, hangi şehre ve ne zaman istediğini sorun.',
         'Talebi uygun satıcılara iletin.',
-        'Alıcıya paket önermeyin.',
+        'Alıcıya satıcı paketi önermeyin.',
       ],
-      kart: 'Durum: Alıcı. Talebi ve iletildiği satıcıları yazın.',
+      kart: 'Durumu “Alıcı” yapın. Talebi ve talebi ilettiğiniz satıcıları yazın.',
     },
     {
       id: 'istemiyorum',
       yer: 'her-an',
       ad: '“Beni aramayın” ya da “Mesaj istemiyorum” dedi',
       adimlar: ['Hemen kabul edin ve özür dileyin.', 'O kanaldan bir daha aramayın ve yazmayın.'],
-      kart: 'İlgili iletişim iznini kapatın.',
+      kart: 'O kanalın iletişim iznini kapatın.',
     },
     {
       id: 'sikayet',
       yer: 'her-an',
-      ad: 'Şikâyet etti ya da kızgın',
+      ad: 'Şikâyet etti ya da kızdı',
       adimlar: [
         'Sözünü kesmeden dinleyin.',
         'Sorunu kendi cümlelerinizle tekrar edin.',
@@ -503,14 +532,14 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         'Çözemiyorsanız aynı gün İsmail Karaca’ya iletin.',
         'Satıcıya ne zaman döneceğinizi söyleyin ve o zaman dönün.',
       ],
-      kart: 'Şikâyeti, iletildiği kişiyi ve dönüş tarihini yazın.',
+      kart: 'Şikâyeti, şikâyeti ilettiğiniz kişiyi ve dönüş tarihini yazın.',
     },
     {
       id: 'yanlis-numara',
       yer: 'her-an',
       ad: 'Yanlış numara ya da şüpheli kayıt',
-      adimlar: ['Kayıttaki e-postaya bir kez yazın ve doğru numarayı isteyin.', 'Cevap gelmezse kaydı kapatın.'],
-      kart: 'Durum: Ulaşılamadı. Not: yanlış numara.',
+      adimlar: ['Kayıttaki e-posta adresine bir kez yazın ve doğru numarayı isteyin.', 'Cevap gelmezse kaydı kapatın.'],
+      kart: 'Durumu “Ulaşılamadı” yapın. Not olarak “yanlış numara” yazın.',
     },
   ];
 }
@@ -547,9 +576,9 @@ export function sablonlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): 
     },
     {
       id: 'deger-ozeti',
-      ad: 'Değer özeti',
+      ad: 'İlk günlerin özeti',
       konu: 'istoc.com’daki ilk günlerinizin özeti',
-      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nİlk günlerinizin özeti:\n- Yayındaki ürün: [n]\n- Vitrin görüntülenmesi: [n]\n- Gelen mesaj ya da talep: [n]\n\nBaşlangıç döneminiz [tarih] tarihinde bitiyor. O gün on beş dakika konuşalım. [Gün] günü saat [saat] size uygun mu?\n\n${IMZA}`,
+      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nİlk günlerinizin özeti:\n- Yayındaki ürün: [n]\n- Vitrin görüntülenmesi: [n]\n- Gelen mesaj ya da talep: [n]\n\nKaydınızın ilk 14 günü [tarih] tarihinde doluyor. O gün on beş dakika konuşalım. [Gün] günü saat [saat] size uygun mu?\n\n${IMZA}`,
     },
     {
       id: 'teklif',

@@ -1005,6 +1005,14 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   ya da satıcının isteğini anlatmalı, hazır metinlerde bu kavramlar hiç geçmemeli, metindeki her euro tutarı fiyat
   tablosunda olmalı. Karşılaştırma Türkçe küçük harfle yapılır (`kucuk`), çünkü JavaScript’in `i` bayrağı “İ” ile “i”
   harfini eşlemez. Yeni bir fiyat durumu eklenirse bu teste de eklenir.
+- **Yalın dil (kullanıcı kararı 2026-11-10, kesin).** Sayfayı CRM sorumlusu ilk okuyuşta rahatça anlamalıdır. Aşama
+  haritasındaki “Biter: …”, “Kayıt kartı: …”, “Başka sonuç: …” satırları ve “Gün 0 ile Gün 5 arası” kalıbı kullanıcıya
+  İngilizceden kelime kelime çevrilmiş gibi geldi. Bu yüzden etiket dizisi cümle yerine geçmez. Aşamanın her sonu
+  `kosul` ve `sonuc` alanlarından tek cümle olarak kurulur (“Satıcı vazgeçerse kayıt kapanır.”). Ardından “Kayıt
+  kartında durumu “X” yapın.” gelir. Başlar kutusu “{baslar} başlar.” yazar. İleri çıkışın koşulu ile sonraki aşamanın
+  `baslar` alanı aynı sabittir (`KURULUM_GUNU`, `VITRIN_HAZIR`, `KARAR_GUNU`). Her aşamanın tek kart durumu vardır: Yeni,
+  Kurulumda, Etkin, Karar bekliyor. Eski “Ulaşıldı” durumu kaldırıldı. Günler “3. gün” biçiminde yazılır. Kayıt kartı
+  talimatı “Durumu “Etkin” yapın.” gibi cümledir, “Durum: Etkin.” yazılmaz. Test: `onboarding.spec.ts` “dil:” testi.
 - Aşama sınırı tek anlamlıdır: bir aşamanın ileri çıkış koşulu sonraki aşamanın başlama koşuludur ve çıkışın kart
   durumu sonraki aşamanın kart durumudur (`tests/onboarding.spec.ts` veri testi). “Şimdi değil” kapanış değildir, kayıt
   bekler (`bekler: true`, `BEKLEME_NOTU`). Aşama başlığı h2 “Aşama n: ad”, Başlar ve Biter h3’tür. Adres `#durum-…` ise

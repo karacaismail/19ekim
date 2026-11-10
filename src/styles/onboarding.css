@@ -49,6 +49,8 @@
 .ob-harita-bag {
   display: grid;
   grid-template-columns: var(--hit-min) minmax(0, 1fr);
+  /* Satırlar üstten dizilir. Böylece yan yana kartlarda başlıklar aynı hizada başlar. */
+  align-content: start;
   gap: var(--space-1) var(--space-3);
   height: 100%;
   padding: var(--space-4);
@@ -88,6 +90,12 @@ a.ob-harita-bag:hover {
 .ob-harita-satir {
   grid-column: 2;
   color: var(--text-secondary);
+}
+
+/* Aşamanın asıl sonu: diğer sonuçlardan önce ve daha belirgin okunur. */
+.ob-harita-biter {
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
 }
 
 .ob-harita-not {

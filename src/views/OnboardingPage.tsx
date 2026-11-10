@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar, type Adim, type Asama, type Durum, type Sablon } from '../data/onboarding';
+import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar, ve, type Adim, type Asama, type Cikis, type Durum, type Sablon } from '../data/onboarding';
 import '../styles/onboarding.css';
 
 /**
@@ -44,8 +44,11 @@ function useAdrestekiDurum() {
   }, []);
 }
 
-/** Tutar ile para birimi aynı satırda kalır (“3.990 €” bölünmez). Yalnız ekrandaki metne uygulanır, panoya giden metne değil. */
-const tutarBitisik = (s: string) => s.replace(/(\d) ([€₺])/g, '$1 $2');
+/**
+ * Tutar ile para birimi, gün sırası ile “gün” sözü aynı satırda kalır (“3.990 €”, “5. güne” bölünmez). Yalnız ekrandaki
+ * metne uygulanır, panoya giden metne değil.
+ */
+const tutarBitisik = (s: string) => s.replace(/(\d) ([€₺])/g, '$1\u00a0$2').replace(/(\d\.) (gün)/g, '$1\u00a0$2');
 
 function AdimMetni({ a, adOf }: { a: Adim; adOf: (id: string) => string }) {
   if (typeof a === 'string') return <>{tutarBitisik(a)}</>;
@@ -53,7 +56,7 @@ function AdimMetni({ a, adOf }: { a: Adim; adOf: (id: string) => string }) {
     <>
       {tutarBitisik(a.metin)}
       <a className="text-link ob-git" href={`#${durumId(a.git)}`} onClick={() => durumuAc(a.git)}>
-        {adOf(a.git)}
+        {tutarBitisik(adOf(a.git))}
       </a>
     </>
   );
@@ -96,7 +99,7 @@ function DurumKarti({ d, no, adOf, sablon }: { d: Durum; no?: string; adOf: (id:
       <details className="ob-durum" id={durumId(d.id)}>
         <summary className="ob-durum-ozet" data-no={no ? '' : undefined}>
           {no ? <span className="ob-durum-no">{no}</span> : null}
-          <span className="ob-durum-ad">{d.ad}</span>
+          <span className="ob-durum-ad">{tutarBitisik(d.ad)}</span>
         </summary>
         <div className="ob-durum-govde">
           <ol className="ob-adimlar">
@@ -107,7 +110,7 @@ function DurumKarti({ d, no, adOf, sablon }: { d: Durum; no?: string; adOf: (id:
             ))}
           </ol>
           <p className="ob-kart">
-            <span className="ob-etiket">Kayıt kartına yazın</span>
+            <span className="ob-etiket">Kayıt kartında</span>
             {tutarBitisik(d.kart)}
           </p>
           {sablon ? <HazirMetin s={sablon} /> : null}
@@ -116,6 +119,11 @@ function DurumKarti({ d, no, adOf, sablon }: { d: Durum; no?: string; adOf: (id:
     </li>
   );
 }
+
+const SAYI_ADI: Record<number, string> = { 1: 'bir', 2: 'iki', 3: 'üç', 4: 'dört' };
+
+/** Aşamanın bir sonunu tek cümle olarak yazar: “Satıcı vazgeçerse kayıt kapanır.” */
+const cikisCumlesi = (c: Cikis) => `${c.kosul} ${c.sonuc}.`;
 
 function AsamaHaritasi() {
   return (
@@ -133,17 +141,14 @@ function AsamaHaritasi() {
               <span className="ob-harita-ad">
                 Aşama {a.no}: {a.ad}
               </span>
-              <span className="ob-harita-satir">{a.gun}</span>
-              <span className="ob-harita-satir">Kayıt kartı: {a.kartDurumu}</span>
-              <span className="ob-harita-satir">Biter: {a.cikislar[0].kosul}</span>
-              {a.cikislar.length > 1 ? (
-                <span className="ob-harita-satir">
-                  Başka sonuç: {a.cikislar
-                    .slice(1)
-                    .map((c) => c.kart)
-                    .join(' ya da ')}
+              <span className="ob-harita-satir">{tutarBitisik(a.gun)}</span>
+              <span className="ob-harita-satir">Bu aşama boyunca kayıt kartında durum “{a.kartDurumu}” kalır.</span>
+              <span className="ob-harita-satir ob-harita-biter">{cikisCumlesi(a.cikislar[0])}</span>
+              {a.cikislar.slice(1).map((c) => (
+                <span key={c.kosul} className="ob-harita-satir">
+                  {cikisCumlesi(c)}
                 </span>
-              ) : null}
+              ))}
             </a>
           </li>
         ))}
@@ -153,15 +158,17 @@ function AsamaHaritasi() {
               ✓
             </span>
             <span className="ob-harita-ad">Süreç biter</span>
-            <span className="ob-harita-satir">Kayıt kartı: {KAPANIS_DURUMLARI.join(', ')}</span>
+            <span className="ob-harita-satir">
+              Süreç bitince kayıt kartındaki durum {ve(KAPANIS_DURUMLARI.map((d) => `“${d}”`), 'ya da')} olur.
+            </span>
             <span className="ob-harita-satir">{BEKLEME_NOTU}</span>
           </div>
         </li>
       </ol>
       <p className="ob-harita-not">
-        Aşamalar dışında her an olabilecek durumlar sayfanın sonundadır:{' '}
+        Fiyat sorusu gibi, hangi aşamada olursa olsun çıkabilecek durumlar sayfanın sonundadır:{' '}
         <a className="text-link" href="#her-an">
-          Her aşamada olabilecek durumlar
+          Herhangi bir aşamada çıkabilecek durumlar
         </a>
       </p>
     </nav>
@@ -180,16 +187,16 @@ function AsamaBolumu({ a, durumListesi, adOf, sablonOf }: { a: Asama; durumListe
           <h2 className="ob-asama-ad" id={`${asamaId(a.no)}-baslik`}>
             Aşama {a.no}: {a.ad}
           </h2>
-          <p className="ob-asama-gun">{a.gun}</p>
+          <p className="ob-asama-gun">{tutarBitisik(a.gun)}</p>
         </div>
       </header>
       <div className="ob-asama-govde">
         <div className="ob-sinir" data-tur="baslar">
           <h3 className="ob-sinir-etiket">Başlar</h3>
-          <p>{a.baslar}</p>
-          <p>Kayıt kartı: {a.kartDurumu}</p>
+          <p>{a.baslar} başlar.</p>
+          <p>Bu aşama boyunca kayıt kartında durum “{a.kartDurumu}” kalır.</p>
         </div>
-        <h3 className="ob-durumlar-baslik">Bu aşamadaki durumlar</h3>
+        <h3 className="ob-durumlar-baslik">Bu aşamada karşılaşacağınız durumlar</h3>
         <ul className="ob-durumlar">
           {durumListesi.map((d, i) => (
             <DurumKarti key={d.id} d={d} no={`${a.no}.${i + 1}`} adOf={adOf} sablon={sablonOf(d.sablon)} />
@@ -197,28 +204,29 @@ function AsamaBolumu({ a, durumListesi, adOf, sablonOf }: { a: Asama; durumListe
         </ul>
         <div className="ob-sinir" data-tur="biter">
           <h3 className="ob-sinir-etiket">Biter</h3>
-          <p>Bu aşama aşağıdakilerden biri olunca biter.</p>
+          <p>Bu aşama {SAYI_ADI[a.cikislar.length] ?? a.cikislar.length} şekilde bitebilir.</p>
           <ul className="ob-cikislar">
             {a.cikislar.map((c) => (
               <li key={c.kosul} className="ob-cikis">
-                <p className="ob-cikis-kosul">{c.kosul}</p>
-                <p>Kayıt kartı: {c.kart}</p>
-                <p className="ob-cikis-sonra">
-                  {c.git ? (
+                <p className="ob-cikis-kosul">{cikisCumlesi(c)}</p>
+                <p>Kayıt kartında durumu “{c.kart}” yapın.</p>
+                {c.git ? (
+                  <p className="ob-cikis-sonra">
+                    Sonra şu aşama başlar:
                     <a className="text-link ob-sonra-bag" href={`#${asamaId(c.git)}`}>
-                      Sonra: Aşama {c.git}, {adi(c.git)}
+                      Aşama {c.git}: {adi(c.git)}
                     </a>
-                  ) : c.durum ? (
-                    <>
-                      Sonra: {c.sonra}
-                      <a className="text-link ob-git" href={`#${durumId(c.durum)}`} onClick={() => durumuAc(c.durum!)}>
-                        {adOf(c.durum)}
-                      </a>
-                    </>
-                  ) : (
-                    <>Sonra: {c.sonra}</>
-                  )}
-                </p>
+                  </p>
+                ) : c.durum ? (
+                  <p className="ob-cikis-sonra">
+                    {c.sonra ?? 'Sonra şu akışı izleyin:'}
+                    <a className="text-link ob-git" href={`#${durumId(c.durum)}`} onClick={() => durumuAc(c.durum!)}>
+                      {tutarBitisik(adOf(c.durum))}
+                    </a>
+                  </p>
+                ) : c.sonra ? (
+                  <p className="ob-cikis-sonra">{c.sonra}</p>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -239,17 +247,17 @@ function Icerik() {
 
   return (
     <>
-      <PageHeader title="Yeni kayıt iş akışları" purpose="CRM masası için: yeni kayıtla karşılaştığınız her durumda ne yapacağınızı adım adım gösterir." />
+      <PageHeader title="Yeni kayıt iş akışları" purpose="Yeni kaydolan satıcıyla karşılaştığınız her durumda ne yapacağınızı adım adım gösterir." />
       <div className="ob-sayfa">
         <p className="ob-giris">
-          Kaydın hangi aşamada olduğunu kayıt kartındaki durumdan anlarsınız. Her aşama yazılı bir koşulla biter. Koşul gerçekleşince kart durumunu değiştirin. Sonraki aşama o anda başlar.
+          Bu sayfa, istoc.com’a yeni kaydolan bir satıcıyı ilk günden ücretli pakete kadar nasıl takip edeceğinizi gösterir. Süreç dört aşamadan oluşur. Satıcının hangi aşamada olduğunu, CRM (müşteri ilişkileri yönetimi) programındaki kayıt kartında yazan durumdan anlarsınız. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
         </p>
 
         <AsamaHaritasi />
 
         <section className="ob-kurallar" aria-labelledby="ob-kurallar-baslik">
           <h2 className="ob-bolum-baslik" id="ob-kurallar-baslik">
-            Her durumda
+            Her zaman geçerli kurallar
           </h2>
           <ul className="ob-kurallar-liste">
             {HER_DURUMDA.map((k) => (
@@ -264,9 +272,9 @@ function Icerik() {
 
         <section className="ob-her-an" id="her-an" aria-labelledby="her-an-baslik">
           <h2 className="ob-bolum-baslik" id="her-an-baslik">
-            Her aşamada olabilecek durumlar
+            Herhangi bir aşamada çıkabilecek durumlar
           </h2>
-          <p className="ob-her-an-not">Bu durumlar herhangi bir aşamada olabilir. Akış kaydı kapatmıyorsa, bitince kaldığınız aşamaya dönün.</p>
+          <p className="ob-her-an-not">Bu durumlar sürecin herhangi bir yerinde çıkabilir. Adımları bitirdikten sonra kayıt kapanmadıysa kaldığınız aşamadan devam edin.</p>
           <ul className="ob-durumlar">
             {herAn.map((d) => (
               <DurumKarti key={d.id} d={d} adOf={adOf} sablon={sablonOf(d.sablon)} />
