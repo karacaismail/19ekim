@@ -997,6 +997,14 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   yıllık peşin olarak kendisi söyler. İndirim ya da pazarlık isteyene fiyatın herkes için aynı olduğu söylenir, talep
   kimseye iletilmez. “Bilmediğiniz konuda İsmail Karaca’ya sorun” kuralı fiyatı kapsamaz (“Fiyat dışında…”). Ekranda tutar
   ile para birimi bölünmez (`tutarBitisik`). Testler: `onboarding.spec.ts` “fiyat:” ve “tutar ile para birimi” testleri.
+- **İndirim söz konusu değildir (kullanıcı kararı 2026-11-10, kesin).** Ücretsiz ay, ek süre, özel fiyat ve tablo dışı
+  ödeme koşulu da önerilmez. Benzer fiyat durumlarının her biri kendi akışıyla karşılanır: Fiyatı sordu, İndirim ya da
+  pazarlık istedi, Ücretsiz ay ya da ek süre istedi, “Başka yer daha ucuz” dedi, Taksit, vade ya da sonra ödeme istedi,
+  “Bana indirim sözü verilmişti” dedi. “Hayır” ve hatırlatma akışları geri kazanmak için indirim önermez. Önlem testi
+  (“fiyat: benzer fiyat durumları…”) her yeni metni de denetler: fiyatı değiştiren bir kavram geçen her cümle onu reddetmeli
+  ya da satıcının isteğini anlatmalı, hazır metinlerde bu kavramlar hiç geçmemeli, metindeki her euro tutarı fiyat
+  tablosunda olmalı. Karşılaştırma Türkçe küçük harfle yapılır (`kucuk`), çünkü JavaScript’in `i` bayrağı “İ” ile “i”
+  harfini eşlemez. Yeni bir fiyat durumu eklenirse bu teste de eklenir.
 - Aşama sınırı tek anlamlıdır: bir aşamanın ileri çıkış koşulu sonraki aşamanın başlama koşuludur ve çıkışın kart
   durumu sonraki aşamanın kart durumudur (`tests/onboarding.spec.ts` veri testi). “Şimdi değil” kapanış değildir, kayıt
   bekler (`bekler: true`, `BEKLEME_NOTU`). Aşama başlığı h2 “Aşama n: ad”, Başlar ve Biter h3’tür. Adres `#durum-…` ise

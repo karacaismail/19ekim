@@ -13,6 +13,8 @@ const TUM = durumlar(DEFAULT_PARAMS);
 const HER_AN = TUM.filter((d) => d.yer === 'her-an');
 const METINLER = sablonlar(DEFAULT_PARAMS);
 const YASAK = /[;—·→]/;
+/** Türkçe küçük harf: JavaScript’in `i` bayrağı “İ” ile “i” harfini eşlemez. */
+const kucuk = (s: string) => s.toLocaleLowerCase('tr-TR');
 
 async function ac(page: Page, genislik: number, yukseklik = 900, yol = 'onboarding/') {
   await page.setViewportSize({ width: genislik, height: yukseklik });
@@ -58,19 +60,21 @@ test('fiyat: tablodaki fiyat söylenir, pazarlık ve indirim yok, fiyat sorusu k
   test.skip(browserName !== 'chromium', 'veri testi tarayıcıdan bağımsızdır, yalnız Chromium’da çalışır');
   const metniOf = (id: string) => {
     const d = TUM.find((x) => x.id === id)!;
-    return [d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : a.metin))].join(' ');
+    return kucuk([d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : a.metin))].join(' '));
   };
-  const FIYAT = /fiyat|ücret|indirim|pahal|pazarl/i;
+  const FIYAT = /fiyat|ücret|indirim|pahal|pazarl/;
   for (const d of TUM) {
     const metin = metniOf(d.id);
     if (!FIYAT.test(metin)) continue;
-    expect(metin, `${d.id}: fiyat konusu kimseye yönlendirilmez`).not.toMatch(/İsmail Karaca/);
-    expect(metin, `${d.id}: fiyat sorusu ertelenmez`).not.toMatch(/söz vermeyin/i);
+    expect(metin, `${d.id}: fiyat konusu kimseye yönlendirilmez`).not.toMatch(/ismail karaca/);
+    expect(metin, `${d.id}: fiyat sorusu ertelenmez`).not.toMatch(/söz vermeyin/);
   }
-  const kurallar = HER_DURUMDA.join(' ');
-  expect(kurallar).toMatch(/fiyat tablosundaki fiyattır/i);
-  expect(kurallar).toMatch(/pazarlık yapılmaz/i);
-  expect(kurallar).not.toMatch(/indirim sözü/i);
+  const kurallar = kucuk(HER_DURUMDA.join(' '));
+  expect(kurallar).toMatch(/fiyat tablosundaki fiyattır/);
+  expect(kurallar).toMatch(/indirim yoktur/);
+  expect(kurallar).toMatch(/pazarlık yapılmaz/);
+  expect(kurallar).toMatch(/ücretsiz ay, ek süre, özel fiyat/);
+  expect(kurallar).not.toMatch(/indirim sözü/);
   for (const k of HER_DURUMDA.filter((x) => x.includes('İsmail Karaca'))) expect(k, 'İsmail Karaca kuralı fiyatı kapsamaz').toMatch(/^Fiyat dışında/);
 
   // Fiyat ve indirim akışları tablodaki her fiyatı aylık ve yıllık peşin olarak söyler.
@@ -82,9 +86,63 @@ test('fiyat: tablodaki fiyat söylenir, pazarlık ve indirim yok, fiyat sorusu k
       expect(metin, `${id}: ${p.ad} yıllık peşin`).toContain(eur(p.yillikEur!));
     }
   }
-  expect(metniOf('indirim')).toMatch(/pazarlıkla değişmez/i);
+  expect(metniOf('indirim')).toMatch(/pazarlıkla değişmez/);
+  expect(metniOf('indirim')).toMatch(/indirim yapmıyoruz/);
   // Ücret soran satıcı fiyat akışına gider.
   expect(TUM.find((d) => d.id === 'liste-gonderdi')!.adimlar.some((a) => typeof a !== 'string' && a.git === 'fiyat')).toBe(true);
+});
+
+/**
+ * Kullanıcı kararı 2026-11-10: “indirim söz konusu değil”. Benzer fiyat durumlarının her biri kendi akışıyla karşılanır
+ * ve hiçbir metin fiyatı değiştiren bir şey önermez. Bu test yeni eklenen her metni de kapsar.
+ */
+test('fiyat: benzer fiyat durumları akışla karşılanır, hiçbir metin indirim, ücretsiz süre ya da tablo dışı fiyat önermez', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'veri testi tarayıcıdan bağımsızdır, yalnız Chromium’da çalışır');
+  const metniOf = (id: string) => {
+    const d = TUM.find((x) => x.id === id);
+    expect(d, `${id} akışı var`).toBeTruthy();
+    return kucuk([d!.ad, d!.kart, ...d!.adimlar.map((a) => (typeof a === 'string' ? a : a.metin))].join(' '));
+  };
+  const tablo = paketler(DEFAULT_PARAMS).filter((p) => p.aylikEur !== null);
+
+  // Benzer fiyat durumları: her biri var, aşamaya bağlı değildir ve tablodaki fiyatı ya da ödeme seçeneklerini söyler.
+  for (const id of ['ucretsiz-sure', 'soz-verilmis']) {
+    expect(TUM.find((d) => d.id === id)?.yer, id).toBe('her-an');
+    for (const p of tablo) expect(metniOf(id), `${id}: ${p.ad} aylık`).toContain(eur(p.aylikEur!));
+  }
+  expect(metniOf('ucretsiz-sure')).toMatch(/ücretsiz ay ya da ek süre vermiyoruz/);
+  expect(metniOf('soz-verilmis')).toMatch(/indirim yapmıyoruz/);
+  expect(metniOf('rakip-ucuz')).toMatch(/herkes için aynıdır/);
+  expect(metniOf('odeme-kosulu')).toMatch(/aylık ödeme ya da yıllık peşin ödeme/);
+  for (const id of ['hayir', 'hatirlatma']) expect(metniOf(id), `${id}: geri kazanmak için fiyat değişmez`).toMatch(/indirim[^.]*önermeyin/);
+
+  // Tüm metin: fiyatı değiştiren bir kavram geçen her cümle ya onu reddeder ya da satıcının isteğini anlatır.
+  // Karşılaştırma Türkçe küçük harfle yapılır. Böylece “İndirim” ile başlayan cümle de denetlenir.
+  const DEGISIKLIK = /indirim|özel fiyat|pazarlık|ücretsiz|bedava|kampanya|kupon|taksit|vade|ek süre|fiyatı düşür/;
+  const RET_YA_DA_ISTEK = /yok|yapmıyoruz|vermiyoruz|değişmez|verilmez|yapılmaz|önermeyin|iletmeyin|istedi|isterse|istediğini|verilmişti/;
+  const parcalar = [
+    ...HER_DURUMDA,
+    ...TUM.flatMap((d) => [d.ad, d.kart, ...d.adimlar.map((a) => (typeof a === 'string' ? a : `${a.metin} ${TUM.find((x) => x.id === a.git)!.ad}`))]),
+    ...ASAMALAR.flatMap((a) => [a.baslar, a.kartDurumu, ...a.cikislar.flatMap((c) => [c.kosul, c.kart, c.sonra])]),
+  ];
+  const cumleler = parcalar.flatMap((m) => kucuk(m).split(/(?<=[.!?”])\s+/));
+  let denetlenen = 0;
+  for (const c of cumleler) {
+    if (!DEGISIKLIK.test(c)) continue;
+    denetlenen++;
+    expect(c, 'fiyatı değiştiren öneri').toMatch(RET_YA_DA_ISTEK);
+  }
+  expect(denetlenen, 'büyük harfle başlayan cümleler de denetlenir').toBeGreaterThan(5);
+
+  // Satıcıya giden hazır metinlerde bu kavramlar hiç geçmez.
+  for (const s of Object.values(METINLER)) expect(kucuk(`${s.konu ?? ''} ${s.metin}`), s.id).not.toMatch(DEGISIKLIK);
+
+  // Metinde geçen her euro tutarı fiyat tablosundadır.
+  const izinli = new Set(tablo.flatMap((p) => [eur(p.aylikEur!), eur(p.yillikEur!)]));
+  const tum = [...parcalar, ...Object.values(METINLER).map((s) => s.metin)].join(' ');
+  const tutarlar = tum.match(/\d{1,3}(?:\.\d{3})* €/g) ?? [];
+  expect(tutarlar.length).toBeGreaterThan(0);
+  for (const t of tutarlar) expect(izinli.has(t), `${t} fiyat tablosunda yok`).toBe(true);
 });
 
 test('Pazarlama menüsünde Oyunlaştırma’dan sonra “Onboarding” var ve etkin', async ({ page }) => {

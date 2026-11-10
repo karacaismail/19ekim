@@ -5,9 +5,11 @@
  * aşamada olabilen durumlar ayrı tutulur. Her durum için yalın, sıralı adımlar ve kayıt kartına yazılacak sonuç verilir. Yöneticiye yönelik açıklama, gerekçe ve öğretici metin
  * yazılmaz (kullanıcı kararı: “bana öğretme, CRM sorumlusuna öğret, uzun metin değil yalın adımlar”). Adımlar kısa ve
  * tam cümledir, noktalı virgül ve uzun çizgi kullanılmaz. Paket ücretleri Parametreler’den gelir.
- * Fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Kullanıcı kararı 2026-11-10: fiyat pazarlıkla değişmez,
- * indirim verilmez, fiyat sorusu “söz vermeyin” ya da “birine sorun” diye ertelenmez. CRM sorumlusu fiyatı tablodan
- * söyler. Ürün bir SaaS aboneliğidir. Hiçbir adım satıcıya satış ya da sipariş sözü vermez.
+ * Fiyat, fiyat tablosundaki fiyattır (`paketler(params)`). Kullanıcı kararları 2026-11-10: fiyat pazarlıkla değişmez,
+ * “indirim söz konusu değil”, fiyat sorusu “söz vermeyin” ya da “birine sorun” diye ertelenmez. CRM sorumlusu fiyatı
+ * tablodan söyler. Ücretsiz ay, ek süre, özel fiyat ve tablo dışı ödeme koşulu da önerilmez. Benzer fiyat durumlarının
+ * her biri kendi akışıyla karşılanır (fiyat, indirim, ucretsiz-sure, rakip-ucuz, odeme-kosulu, soz-verilmis). Ürün bir
+ * SaaS aboneliğidir. Hiçbir adım satıcıya satış ya da sipariş sözü vermez.
  */
 import type { Params } from './params';
 import { eur, paketler } from './gelirModelleri';
@@ -22,7 +24,8 @@ export const BEKLEME_NOTU = 'Şimdi değil diyen kayıt bekler. Hatırlatma tari
 export const HER_DURUMDA: string[] = [
   'Her temastan sonra kayıt kartını güncelleyin.',
   'Sonraki adım alanını tarihiyle doldurun. Bu alan boş kalmaz.',
-  'Fiyat, fiyat tablosundaki fiyattır. Pazarlık yapılmaz ve indirim verilmez.',
+  'Fiyat, fiyat tablosundaki fiyattır. İndirim yoktur ve pazarlık yapılmaz.',
+  'Ücretsiz ay, ek süre, özel fiyat ya da tablo dışında bir ödeme koşulu önermeyin.',
   'Satıcıya satış ya da sipariş sözü vermeyin.',
   'Fiyat dışında bilmediğiniz bir konu olursa tahmin etmeyin. İsmail Karaca’ya sorun.',
   'İzin olmayan kanaldan aramayın ve yazmayın.',
@@ -324,7 +327,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       id: 'hayir',
       yer: 4,
       ad: '“Hayır” dedi',
-      adimlar: ['Teşekkür edin ve görüşmeyi kapatın.', 'Israr etmeyin.'],
+      adimlar: ['Teşekkür edin ve görüşmeyi kapatın.', 'Israr etmeyin.', 'Kararı değiştirmek için indirim ya da ücretsiz süre önermeyin.'],
       kart: 'Durum: Uygun değil. Ret nedeni: fiyat, alıcı yok, ihtiyaç yok, zaman yok ya da diğer.',
     },
     {
@@ -334,6 +337,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       adimlar: [
         'Karttaki notları okuyun.',
         'Arayın ve erteleme nedeninin değişip değişmediğini sorun.',
+        'Geri kazanmak için indirim ya da ücretsiz süre önermeyin.',
         { metin: 'Değiştiyse bu akışa geçin:', git: 'karar' },
         'Değişmediyse yeni bir tarih isteyin ya da kaydı kapatın.',
       ],
@@ -369,7 +373,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 'her-an',
       ad: 'İndirim ya da pazarlık istedi',
       adimlar: [
-        '“Fiyatlarımız herkes için aynıdır, pazarlıkla değişmez” deyin.',
+        '“İndirim yapmıyoruz. Fiyatlarımız herkes için aynıdır ve pazarlıkla değişmez” deyin.',
         `Fiyat tablosunu tekrar söyleyin: ${tabloAylik}.`,
         `Yıllık peşin fiyatı söyleyin: ${tabloYillik}.`,
         'Özel fiyat önermeyin. Talebi kimseye iletmeyin.',
@@ -379,6 +383,57 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
         { metin: 'Hayır derse:', git: 'hayir' },
       ],
       kart: 'İndirim istediğini ve fiyat tablosunun söylendiğini yazın.',
+    },
+    {
+      id: 'ucretsiz-sure',
+      yer: 'her-an',
+      ad: 'Ücretsiz ay ya da ek süre istedi',
+      adimlar: [
+        '“Ücretsiz ay ya da ek süre vermiyoruz. Fiyatlarımız herkes için aynıdır” deyin.',
+        `Fiyat tablosunu söyleyin: ${tabloAylik}.`,
+        'Bu fiyatla devam etmek isteyip istemediğini sorun.',
+        { metin: 'Evet derse:', git: 'evet' },
+        { metin: 'Düşüneyim derse:', git: 'dusuneyim' },
+        { metin: 'Hayır derse:', git: 'hayir' },
+      ],
+      kart: 'Ücretsiz süre istediğini ve fiyat tablosunun söylendiğini yazın.',
+    },
+    {
+      id: 'rakip-ucuz',
+      yer: 'her-an',
+      ad: '“Başka yer daha ucuz” dedi',
+      adimlar: [
+        'Diğer yeri kötülemeyin.',
+        '“Fiyatımız herkes için aynıdır. Başka bir yerin fiyatına göre değişmez” deyin.',
+        `Fiyat tablosunu söyleyin: ${tabloAylik}.`,
+        { metin: 'Diğer platformdan söz ederse bu akışa geçin:', git: 'baska-platform' },
+      ],
+      kart: 'Karşılaştırdığı yeri ve söylediği fiyatı yazın.',
+    },
+    {
+      id: 'odeme-kosulu',
+      yer: 'her-an',
+      ad: 'Taksit, vade ya da sonra ödeme istedi',
+      adimlar: [
+        'Fiyat tablosundaki seçenekleri söyleyin: aylık ödeme ya da yıllık peşin ödeme.',
+        `Yıllık peşin fiyatı söyleyin: ${tabloYillik}.`,
+        'Bu iki seçenekten biriyle devam etmek isteyip istemediğini sorun.',
+        { metin: 'Evet derse:', git: 'evet' },
+        { metin: 'Hayır derse:', git: 'hayir' },
+      ],
+      kart: 'İstediği ödeme koşulunu ve cevabını yazın.',
+    },
+    {
+      id: 'soz-verilmis',
+      yer: 'her-an',
+      ad: '“Bana indirim sözü verilmişti” dedi',
+      adimlar: [
+        'Yanlış bilgi için özür dileyin.',
+        '“İndirim yapmıyoruz. Fiyat, fiyat tablosundaki fiyattır” deyin.',
+        `Fiyat tablosunu söyleyin: ${tabloAylik}.`,
+        'Bu sözü kimin ve ne zaman verdiğini sorun.',
+      ],
+      kart: 'Sözü kimin ve ne zaman verdiğini yazın.',
     },
     {
       id: 'dusuneyim',
