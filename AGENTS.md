@@ -1209,13 +1209,15 @@ Pages yayınından önce çalıştırır.
   `/politikalar/elci/` mevcut beş persona için çalışma taslağıdır. Yeni kişi hikâyesi eklenmez.
 - Her rehber görev, koşullu iş sırası, hedef kitle, kazanç, sorun ve anlaşma bölümlerini taşır.
   Açık kararlar ile önerilen çalışma düzeni, kabul edilmiş sözleşme gibi sunulmaz.
-- Kaynak `src/data/politikalar/hesap.ts` dosyasıdır. Hesaplar derleme sırasında mevcut motorlardan türetilir.
+- Kaynak `src/data/politikalar/hesap.ts` dosyasıdır. Hesaplar mevcut motorların yayımlanan varsayılanlarından türetilir.
   Birinci sürüm yayımlanan varsayılandır. İkinci sürüm ayrı bölümde karşılaştırılır.
   Kişisel tarayıcı ayarları rehberin veya anlaşmanın koşullarını değiştirmez.
 - Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
 - Ortak kabuk `PolitikaPage.tsx`, metinler beş ayrı veri dosyasıdır. Her rota yalnız kendi belgesini taşır.
   Stil `politikalar.css` içinde `pol-` önekini ve ortak semantik tokenları kullanır.
   Açılan bölümler mevcut Mantine, hareket tokenı ve merkezi klavye odağıyla çalışır.
+- Persona içeriği ve hesap verisi Astro ada özelliklerine yazılmaz. React sayfa girişleri veriyi yükler.
+  Böylece giriş öncesi HTML, mevcut giriş formu sözleşmesini korur.
 - `tests/politikalar.spec.ts` kaynak hesabını, koşulları, rotaları ve sürüm bağlantılarını denetler.
   Klavye, açık bölümler, yön değişimi ve 320 CSS px görünüm aynı testte doğrulanır.
 - Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz. Varsayılan testler Chromium ve WebKit kullanır.

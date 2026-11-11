@@ -79,7 +79,7 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
         <h3>Ödeme ne zaman olur?</h3><Paragraflar metin={hesap.odeme} />
-        <p><a href={`${href('/satis-ortakligi/')}?surum=v1`}>Birinci sürümdeki hesabı açın</a>.</p>
+        <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1`}>Birinci sürümdeki hesabı açın</a>.</p>
       </Bolum>
       <Bolum id="sorunlar" baslik="Bir sorun çıkarsa ne yapacaksınız?">
         <dl className="pol-sorunlar">{p.sorunlar.map((s) => <div key={s.kosul}>
@@ -131,12 +131,12 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
           { id: 'plan', ad: 'Personel veya bütçe değişirse', icerik: <>
             <p>Bu bölüm genel planın yayımlanan varsayılanlarını gösterir. Anlık personel veya bütçe kaydı değildir.</p>
             <Paragraflar metin={hesap.plan} />
-            <p><a href={href('/parametreler/')}>Parametreler sayfasını açın</a>.</p>
+            <p><a className="pol-belge-baglanti" href={href('/parametreler/')}>Parametreler sayfasını açın</a>.</p>
           </> },
           { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
             <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
             {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
-            <p><a href={`${href('/satis-ortakligi/')}?surum=v2`}>İkinci sürümdeki hesabı açın</a>.</p>
+            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2`}>İkinci sürümdeki hesabı açın</a>.</p>
           </> },
           ...hesap.programlar.map((k) => ({ id: `program-${k.id}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
             <p>Bu ayrı bir programdır. Ana programla kendiliğinden birleşmez.</p>
@@ -154,11 +154,11 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
             <p>Hesaplar satış ortaklığı sayfasının yayımlanan değerlerinden üretilmiştir.</p>
             <p>İletişim dayanağı her kişi ve kanal için ayrıca değerlendirilmelidir.</p>
             <p>Alıcı ileti istemezse pazarlama iletilerini durdurun.</p>
-            <p><a href="https://www.ticaret.gov.tr/ic-ticaret/ticari-elektronik-iletiler/genel-bilgiler">Ticaret Bakanlığı ticari ileti açıklaması</a></p>
+            <p><a className="pol-belge-baglanti" href="https://www.ticaret.gov.tr/ic-ticaret/ticari-elektronik-iletiler/genel-bilgiler">Ticaret Bakanlığı ticari ileti açıklaması</a></p>
             <p>Aydınlatma ile açık rızayı aynı işlem saymayın. Veri işleme dayanağını ayrıca belirleyin.</p>
-            <p><a href="https://www.kvkk.gov.tr/Icerik/8710/veri-sorumlulari-tarafindan-acik-riza-ve-aydinlatma-metinlerinin-ayri-ayri-duzenlenmesi-gerektigi-hakkinda-kisisel-verileri-koruma-kurulunun-18-02-2026-tarihli-ve-2026-347-sayili-ilke-kararina-iliskin-kamuoyu-duyurusu">Kişisel Verileri Koruma Kurulunun açıklaması</a></p>
+            <p><a className="pol-belge-baglanti" href="https://www.kvkk.gov.tr/Icerik/8710/veri-sorumlulari-tarafindan-acik-riza-ve-aydinlatma-metinlerinin-ayri-ayri-duzenlenmesi-gerektigi-hakkinda-kisisel-verileri-koruma-kurulunun-18-02-2026-tarihli-ve-2026-347-sayili-ilke-kararina-iliskin-kamuoyu-duyurusu">Kişisel Verileri Koruma Kurulunun açıklaması</a></p>
             <p>Ticari tanıtımı açıkça belirtin. Deneyimlemediğiniz hizmeti kullanmış gibi anlatmayın.</p>
-            <p><a href="https://ticaret.gov.tr/haberler/ticaret-bakanligi-sosyal-medya-etkileyicileri-icin-kilavuz-yayimladi">Ticaret Bakanlığı tanıtım rehberi</a></p>
+            <p><a className="pol-belge-baglanti" href="https://ticaret.gov.tr/haberler/ticaret-bakanligi-sosyal-medya-etkileyicileri-icin-kilavuz-yayimladi">Ticaret Bakanlığı tanıtım rehberi</a></p>
           </> },
         ]} />
       </Bolum>

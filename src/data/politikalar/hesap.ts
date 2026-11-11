@@ -1,4 +1,4 @@
-/** Rehber örnekleri derleme sırasında yayımlanan varsayılanlardan türetilir. Tarayıcı kaydı okunmaz. */
+/** Rehber örnekleri yayımlanan varsayılanlardan türetilir. Tarayıcı kaydı okunmaz. */
 import * as v1 from '../satisOrtakligi';
 import * as v2 from '../satisOrtakligiV2';
 import { KOSULLAR, kosulSonucu } from '../kosullar';
