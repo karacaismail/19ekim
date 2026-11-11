@@ -7,6 +7,7 @@ import type { RolId } from './types';
 
 export const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 export const tl = (n: number) => `${sayi(n)} TL`;
+const acikTerimler = (metin: string) => metin.replaceAll('İK', 'insan kaynakları').replaceAll('OSB', 'organize sanayi bölgesi').replaceAll('SGK’lı', 'sigortalı').replaceAll('MLM fırsatı', 'çok katmanlı pazarlama fırsatı');
 export const yuzde = (n: number) => `%${sayi(n * 100)}`;
 export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: string }[]; aciklama: string[] }
 export interface OzelProgram { id: string; ad: string; urun: string; etiket: string; donem: string; sonuc: string; aciklama: string; hesap: { ad: string; formul: string; sonuc: string }[]; kurallar: string[] }
@@ -21,7 +22,7 @@ function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
   ];
   const aciklama = marka === 'istoc'
     ? [`Aylık liste fiyatı ${sayi(a.istocAyEur)} avrodur. Örnek kur ${tl(a.kur)} olarak alınır.`, `Yıllık paket ${sayi(a.istocYilAy)} aylık bedelle hesaplanır.`]
-    : [`Örnek, ${sayi(a.calisan)} çalışan için ${v1.PAKET_ADI[a.segikaPaket]} paketini kullanır.`, `Fiyat ${sayi(a.blok)} çalışanlık bloklarla hesaplanır. Çalışan sayısı artarsa bedel değişir.`];
+    : [`Örnek, ${sayi(a.calisan)} çalışan için ${v1.PAKET_ADI[a.segikaPaket]} paketini kullanır.`, `Fiyat ${sayi(a.blok)} çalışanlık bloklarla hesaplanır. Çalışan sayısı değişirse bedeli yeniden hesaplayın. Aynı blokta kalan sayılar bedeli değiştirmez.`];
   if (rol === 'kadrolu') {
     const k = v1.kadrolu(a);
     aciklama.push('Kota, prim hesabındaki satış eşiğidir. Yalnız bu eşiği aşan tutar prim hesabına girer.');
@@ -78,6 +79,7 @@ function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
     aciklama.push('Bu hesap satışın gerçekleştiğini kanıtlamaz. Finans ekibi ödeme koşullarını ayrıca doğrular.');
     aciklama.push('Kesintiler sonrası elinize geçecek tutar bu hesapta belirlenmez. Vergi ve belge koşulları ayrıca yazılır.');
   }
+  aciklama.push('KDV, katma değer vergisinin kısa adıdır.');
   return { urun: marka === 'istoc' ? 'iStoc' : 'Segika', satirlar, aciklama };
 }
 
@@ -121,20 +123,20 @@ function ikinciSurum(rol: RolId, marka: v2.Marka): HesapOrnegi {
   return { urun: marka === 'istoc' ? 'iStoc' : 'Segika', satirlar, aciklama };
 }
 
-export function rehberHesabi(rol: RolId): RehberHesabi {
+export function rehberHesabi(rol: RolId, marka: v1.Marka): RehberHesabi {
   const a = v1.VARSAYILAN_AYAR;
-  const programlar = KOSULLAR[rol].filter((k) => k.id !== 'ana').map((k) => {
-    const sonuc = kosulSonucu({ ...a, marka: k.marka[0], kosul: { [rol]: k.id } }, rol)!;
+  const programlar = KOSULLAR[rol].filter((k) => k.id !== 'ana' && k.marka.includes(marka)).map((k) => {
+    const sonuc = kosulSonucu({ ...a, marka, kosul: { [rol]: k.id } }, rol)!;
     // Eski ağ örneğinin kişi adları ve kategorik hukuk iddiası rehbere taşınmaz.
     const kurallar = sonuc.kurallar.map((kural) => kural.includes('6502')
       ? 'Kazanç yalnız gerçek satıştan doğar. Kişi eklemek tek başına kazanç sağlamaz. Hukuki uygunluk ayrıca değerlendirilir.'
       : kural.replace('kademe fiyatı, yalnız onunla ilgilenen bir ortak başarı yöneticisini, ortak pazarlama fonunu ve API erişimini, yani yazılımını doğrudan bağlama imkânını alır.', 'kademe fiyatı alır. Ofise bir ortak başarı yöneticisi atanır. Ofis ortak pazarlama fonunu da kullanır. API erişimiyle yazılımını doğrudan bağlayabilir.'));
-    return { id: k.id, ad: k.ad, urun: k.marka[0] === 'istoc' ? 'iStoc' : 'Segika', etiket: k.id === 'ag' ? 'Aylık örnek ağ kazancı' : sonuc.etiket,
+    return { id: k.id, ad: acikTerimler(k.ad), urun: marka === 'istoc' ? 'iStoc' : 'Segika', etiket: k.id === 'ag' ? 'Aylık örnek ağ kazancı' : sonuc.etiket,
       donem: sonuc.ozetBirim.replace(/^\/\s*/, ''), sonuc: sonuc.deger,
       aciklama: k.id === 'ag'
         ? `Örnekte her ortak ayda ${a.agAltSatis} satış yapar. Her ortak ${a.agAltTemsilci} yeni ortak getirir. Ağ payı ${a.agDerinlik} kademe için hesaplanır.`
-        : sonuc.aciklama,
-      hesap: sonuc.hesap, kurallar };
+        : acikTerimler(sonuc.aciklama),
+      hesap: sonuc.hesap, kurallar: kurallar.map(acikTerimler) };
   });
   const odeme = rol === 'tavsiye'
     ? ['Ücretsiz kullanımın hangi faturaya uygulanacağını finans sorumlusu bildirmelidir.', 'İptal, paket değişimi ve kullanılmayan süre için yazılı kural gerekir.']
@@ -145,9 +147,18 @@ export function rehberHesabi(rol: RolId): RehberHesabi {
          'Gün sayımının hangi olayla başlayacağı açık değildir. Finans sorumlusu başlangıç olayını sözleşmeye yazmalıdır.',
          'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.'];
   return {
-    ornekler: (['istoc', 'segika'] as const).map((m) => ornek(rol, m)), odeme,
-    digerSurum: (['istoc', 'segika'] as const).map((m) => ikinciSurum(rol, m)), programlar,
-    plan: [
+    ornekler: [ornek(rol, marka)], odeme,
+    digerSurum: [ikinciSurum(rol, marka)], programlar,
+    plan: marka === 'segika' ? [
+      `Genel planda Segika ekibi ${DEFAULT_PARAMS.segikaCount} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
+      `Genel kadro planındaki net maaş ${tl(DEFAULT_PARAMS.segikaSalary)} tutarındadır.`,
+      'Bu tutar genel kadro planına aittir. Satış hesabındaki maaşın yerine geçmez.',
+      'Segika için ayrı reklam bütçesi bu kaynakta tanımlı değildir.',
+      'Finans sorumlusu yazılı bütçe vermeden ücretli tanıtım başlatmayın.',
+      'Destek sorumlusu yoksa yeni müşteri için destek tarihi vermeyin.',
+      'Operasyon yöneticisi hizmeti devralacak kişiyi belirlesin.',
+      'Ekip kapasitesi veya başlangıç tarihi değişirse açık işleri yeniden planlayın.',
+    ] : [
       `Genel planda saha satış ekibi ${DEFAULT_PARAMS.sahaCount} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Satıcı kazanımı için aylık reklam planı ${tl(DEFAULT_PARAMS.dijitalAdBudgetMonthly)} tutarındadır. Bu tutar harcama izni değildir.`,
       'Bütçe sıfırsa ücretli reklam başlatmayın. Onaylı bütçe varsa harcama sınırını sorumluyla belirleyin.',

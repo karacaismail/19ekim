@@ -97,7 +97,7 @@ function ThemeToggle() {
 }
 
 /** Parametreler varsayılandan farklıysa her sayfada görünür not. */
-function ParamsNotice() {
+function ParamsNotice({ rehber = false }: { rehber?: boolean }) {
   const { changed } = useParams();
   if (!changed) return null;
   return (
@@ -105,7 +105,7 @@ function ParamsNotice() {
       <div className="wrap">
         {/* Kısa durum + kapsam bağlantısı (gorsel_algi.md F05 / C002): uzun açıklama her sayfada yinelenmez. */}
         <p>
-          {changed} parametre bu tarayıcıda değiştirildi. Sayfalar bu değerlerle hesaplanır.{' '}
+          {changed} parametre bu tarayıcıda değiştirildi. {rehber ? 'Çalışma rehberleri yayımlanan varsayılanları kullanır.' : 'Sayfalar bu değerlerle hesaplanır.'}{' '}
           <a className="text-link" href={href('/parametreler/')}>
             Parametreler
           </a>
@@ -368,7 +368,7 @@ export function AppFrame({
             </div>
           </div>
         </header>
-        {girisli ? <ParamsNotice /> : null}
+        {girisli ? <ParamsNotice rehber={current === normalizePath(href('/politikalar/'))} /> : null}
         <main className="app-main" id="icerik" tabIndex={-1}>
           <div className="wrap" data-wide={wide && girisli ? '' : undefined}>
             {!girisli ? (

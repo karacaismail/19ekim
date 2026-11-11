@@ -1,4 +1,3 @@
-import { PERSONALAR } from './politikalar/types';
 /**
  * İçerik envanteri (docs/contents.md §2.1, §4.2–§4.4, §6; kullanıcı kararı 2026-10-28): her yayımlanan sayfanın tek ana
  * kaydı — içerik sınıfı, kullanıcının sorusu, ana ebeveyn (menü grubu), marka kapsamı, sahip, yaşam döngüsü, kanıt
@@ -97,16 +96,16 @@ const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: 
   iliskili: ['organizasyon', 'istihdam', 'eylem-plani', 'applet'],
 });
 
-const politikaKayitlari: IcerikKaydi[] = PERSONALAR.map((r) => ({
-  id: `politika-${r.id}`, path: `/politikalar/${r.id}/`, sinif: ['politika', 'operasyon'],
-  baslik: `${r.ad}: çalışma rehberi`, kullaniciSorusu: 'Bu işte ne yapacağım, hangi koşulda kazanacağım?',
+const politikaKayitlari: IcerikKaydi[] = [{
+  id: 'politikalar', path: '/politikalar/', sinif: ['politika', 'operasyon'],
+  baslik: 'Çalışma rehberleri', kullaniciSorusu: 'Seçtiğim projede bu rolün işi ve çalışma koşulları nedir?',
   grup: 'pazarlama', ebeveyn: 'satis-ortakligi', turetim: 'oneri', marka: ['istoc', 'segika'],
   sahip: BELIRLENMEDI, durum: 'taslak', kanit: 'ornek',
   kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
-  asOf: '2026-11-11', gozdenGecirme: 'Çalışma kapsamı, hesap veya koşul değişince', duzenleme: 'yok',
-  kapsam: 'Bu çalışma rehberi taslaktır. Hesaplar yayımlanan varsayılanları kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
-  iliskili: ['satis-ortakligi', 'parametreler'], menu: `${r.ad} rehberi`,
-}));
+  asOf: '2026-11-11', gozdenGecirme: 'Projenin çalışma kapsamı, hesabı veya koşulu değişince', duzenleme: 'yok',
+  kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar yayımlanan varsayılanları kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
+  iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri',
+}];
 
 export const ICERIK: IcerikKaydi[] = [
   ...politikaKayitlari,
@@ -758,10 +757,16 @@ const temizle = (path: string) => {
 /** Yayımlanan (dosyası olan) kayıtlar. */
 export const YAYIMLANAN = ICERIK.filter((k) => !k.planlandi);
 
-/** Yola göre kayıt (taban yolu `/19ekim` düşülmüş, sondaki eğik çizgi normalleştirilmiş). */
+/** Eski bağlantılar içerik kopyası oluşturmaz. Tek rehber merkezine açılır. */
+export const ICERIK_YONLENDIRMELERI = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'].map((rol) => ({
+  path: `/politikalar/${rol}/`, hedef: '/politikalar/', rol,
+}));
+
+/** Yola göre kayıt. Eski rehber adresleri ana merkeze çözülür. */
 export function icerikOf(path: string): IcerikKaydi | undefined {
   const p = temizle(path);
-  return ICERIK.find((k) => k.path === p);
+  const hedef = ICERIK_YONLENDIRMELERI.find((k) => k.path === p)?.hedef ?? p;
+  return ICERIK.find((k) => k.path === hedef);
 }
 
 /** Alt bilgi kapsam cümlesi (F10): kaydı olmayan sayfa için genel, kapsamı doğru özetleyen cümle. */

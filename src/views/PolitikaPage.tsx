@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react';
 import { Accordion } from '@mantine/core';
-import { AppFrame } from '../components/AppFrame';
-import { PageHeader } from '../components/PageHeader';
-import { PolitikaBaglantilari } from '../components/PolitikaBaglantilari';
-import type { Politika } from '../data/politikalar/types';
+import type { ProjePolitika } from '../data/politikalar/types';
 import type { HesapOrnegi, RehberHesabi } from '../data/politikalar/hesap';
 import { href } from '../lib/paths';
 import { useMotionMs } from '../lib/motion';
@@ -41,10 +38,11 @@ function Ayrintilar({ items }: { items: { id: string; ad: string; icerik: ReactN
   </Accordion>;
 }
 
-export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: string; politika: Politika; hesap: RehberHesabi }) {
-  return <AppFrame pathname={pathname}>
-    <PageHeader title={`${p.ad}: çalışma rehberi`} purpose={p.amac} />
-    <div className="pol-belge">
+export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitika; hesap: RehberHesabi }) {
+  const proje = p.proje === 'istoc' ? 'iStoc' : 'Segika';
+  return <article className="pol-belge" data-proje={p.proje} data-rol={p.id} aria-labelledby="pol-belge-baslik">
+      <h2 id="pol-belge-baslik">{proje}: {p.ad}</h2>
+      <p className="pol-amac">{p.amac}</p>
       <div className="pol-giris">
         <p className="pol-durum">Çalışma taslağı</p>
         <p>{p.iliski}</p>
@@ -57,13 +55,13 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
       <nav className="pol-bolumler" aria-label="Rehber bölümleri">
         <ul>{bolumler.map(([id, ad]) => <li key={id}><a href={`#${id}`}>{ad}</a></li>)}</ul>
       </nav>
-      <Bolum id="is-akisi" baslik="İşi nasıl yürüteceksiniz?">
+      <Bolum id="is-akisi" baslik="İş adımları nelerdir?">
         <p>Bu sıra, birlikte kabul edilecek çalışma önerisidir.</p>
         <ol className="pol-adimlar">{p.adimlar.map((a) => <li key={a.baslik}>
           <h3>{a.baslik}</h3><Paragraflar metin={a.metin} />
         </li>)}</ol>
       </Bolum>
-      <Bolum id="hedef-kitle" baslik="Kiminle, nasıl görüşeceksiniz?">
+      <Bolum id="hedef-kitle" baslik="Kiminle görüşeceksiniz?">
         <p>Aşağıdaki işletmeler örnek hedef kitlelerdir. Hazır müşteri veya alınmış iletişim izni değildir.</p>
         <p>İletişim sorumlusu, seçilen kanalın yasal koşullarını kontrol etsin. Kişinin iletişim tercihini de kontrol etsin.</p>
         <Ayrintilar items={p.kitleler.map((k, i) => ({ id: `kitle-${i}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
@@ -108,7 +106,7 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
       <Bolum id="ayrintilar" baslik="Diğer koşulları ve açık konuları inceleyin">
         <p>Aşağıdaki konular ana iş sırasını tamamlar. Size uyan başlığı açın.</p>
         <Ayrintilar items={[
-          { id: 'eksikler', ad: 'Başlamadan netleştireceğimiz konular', icerik: <>
+          { id: 'eksikler', ad: 'Başlamadan açık konuları çözün', icerik: <>
             <p>Bu konular henüz tamamlanmış karar değildir. Adı belirtilen görevlerin sahibi şirketçe atanmalıdır.</p>
             {p.acikKonular.map((k) => <div key={k.baslik} className="pol-alt-bolum">
               <h4>{k.baslik}</h4><p>{k.mevcut}</p><p>{k.eksik}</p>
@@ -158,11 +156,9 @@ export function PolitikaPage({ pathname, politika: p, hesap }: { pathname: strin
             <p>Aydınlatma ile açık rızayı aynı işlem saymayın. Veri işleme dayanağını ayrıca belirleyin.</p>
             <p><a className="pol-belge-baglanti" href="https://www.kvkk.gov.tr/Icerik/8710/veri-sorumlulari-tarafindan-acik-riza-ve-aydinlatma-metinlerinin-ayri-ayri-duzenlenmesi-gerektigi-hakkinda-kisisel-verileri-koruma-kurulunun-18-02-2026-tarihli-ve-2026-347-sayili-ilke-kararina-iliskin-kamuoyu-duyurusu">Kişisel Verileri Koruma Kurulunun açıklaması</a></p>
             <p>Ticari tanıtımı açıkça belirtin. Deneyimlemediğiniz hizmeti kullanmış gibi anlatmayın.</p>
-            <p><a className="pol-belge-baglanti" href="https://ticaret.gov.tr/haberler/ticaret-bakanligi-sosyal-medya-etkileyicileri-icin-kilavuz-yayimladi">Ticaret Bakanlığı tanıtım rehberi</a></p>
+            <p><a className="pol-belge-baglanti" href="https://ticaret.gov.tr/haberler/ticaret-bakanligindan-sosyal-medyada-seffaf-reklam-donemi">Ticaret Bakanlığı reklam açıklaması</a></p>
           </> },
         ]} />
       </Bolum>
-      <PolitikaBaglantilari aktif={p.id} />
-    </div>
-  </AppFrame>;
+  </article>;
 }

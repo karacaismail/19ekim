@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { ElciPolitikaPage } from '../../views/politikalar/ElciPolitikaPage';
+import { PolitikaSekmeleriPage } from '../../views/PolitikaSekmeleriPage';
 ---
 
 <BaseLayout>
-  <ElciPolitikaPage client:load pathname={Astro.url.pathname} />
+  <PolitikaSekmeleriPage client:load eskiRol="elci" />
 </BaseLayout>

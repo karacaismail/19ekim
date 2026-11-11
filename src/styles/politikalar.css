@@ -1,5 +1,5 @@
 /* Rehberler ortak marka, odak ve hareket tokenlarını kullanır. */
-.pol-belge { max-inline-size: var(--prose-max); margin-inline: auto; font-size: var(--text-md); line-height: var(--leading-body); }
+.pol-belge { max-inline-size: var(--prose-max); margin-inline: auto; font-size: var(--text-md); line-height: var(--leading-body); overflow-wrap: break-word; }
 .pol-belge p { margin-block: var(--space-3); }
 .pol-giris { padding-block: var(--space-4); }
 .pol-durum { font-weight: var(--weight-semibold); color: var(--accent-strong); }
@@ -39,3 +39,15 @@
 @media (min-width: 48em) {
   .pol-hesap dl > div, .pol-formuller > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); }
 }
+
+/* İki proje ve beş rol aynı sayfada seçilir. Dar ekranda sekmeler satıra sarılır. */
+.pol-merkez { max-inline-size: var(--prose-max); margin-inline: auto; }
+.pol-sekme-listesi { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block-end: var(--space-4); }
+.pol-sekme { display: inline-flex; align-items: center; justify-content: center; min-block-size: var(--hit-min); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-control); background: var(--surface-sunken); color: var(--text-primary); font: inherit; font-size: var(--text-md); line-height: var(--leading-body); cursor: pointer; }
+.pol-sekme { transition-property: background-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-sekme:hover { background: var(--surface-hover); }
+.pol-sekme[aria-selected='true'] { background: var(--surface-selected); color: var(--accent-strong); font-weight: var(--weight-semibold); }
+.pol-sekme-paneli { min-inline-size: 0; }
+.pol-yukleme { padding-block: var(--space-6); }
+.pol-belge > h2 { margin-block: var(--space-8) var(--space-3); font-size: var(--text-2xl); line-height: var(--leading-snug); }
+.pol-amac { font-size: var(--text-lg); }

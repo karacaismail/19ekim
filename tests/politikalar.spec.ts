@@ -1,25 +1,28 @@
 import { expect, test } from '@playwright/test';
 import { ICERIK } from '../src/data/icerik';
 
-const roller = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'];
+const roller = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as const;
+const projeler = ['istoc', 'segika'] as const;
 
-test('beş ayrı çalışma rehberi içerik kaydında bulunur', () => {
-  expect(ICERIK.filter((k) => k.path.startsWith('/politikalar/')).map((k) => k.path).sort())
-    .toEqual(roller.map((id) => `/politikalar/${id}/`).sort());
+test('on rehber içerik kaydında tek menü bağlantısı kullanır', () => {
+  expect(ICERIK.filter((k) => k.path.startsWith('/politikalar/')).map((k) => k.path))
+    .toEqual(['/politikalar/']);
 });
 
-for (const rol of roller) {
-  test(`${rol}: görev, koşul, kazanç ve anlaşma okunabilir`, async ({ page }) => {
+for (const proje of projeler) for (const rol of roller) {
+  test(`${proje} ${rol}: yalnız seçilen projenin görev ve koşulları açılır`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto(`politikalar/${rol}/`);
+    await page.goto(`politikalar/?proje=${proje}&rol=${rol}`);
     const belge = page.locator('.pol-belge');
-    await expect(belge).toBeVisible();
+    await expect(belge).toHaveAttribute('data-proje', proje);
+    await expect(belge).toHaveAttribute('data-rol', rol);
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(belge).not.toContainText(/Ayşe|GAP|unknown/i);
+    await expect(belge).not.toContainText(proje === 'istoc' ? /Segika/i : /iStoc|İstoç/i);
     for (const id of ['gorev', 'is-akisi', 'hedef-kitle', 'kazanc', 'sorunlar', 'anlasma']) {
       await expect(page.locator(`#${id}`)).toBeVisible();
     }
-    await expect(page.getByRole('navigation', { name: 'Çalışma rehberleri' }).getByRole('link')).toHaveCount(5);
+    await expect(page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab')).toHaveCount(5);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
@@ -41,20 +44,20 @@ test('rehber hesapları kaynağın varsayılanını kullanır ve bütün özel p
   const { rehberHesabi, tl } = await import('../src/data/politikalar/hesap');
   const v1 = await import('../src/data/satisOrtakligi');
   const { KOSULLAR } = await import('../src/data/kosullar');
-  const belgeler = await Promise.all([
-    import('../src/data/politikalar/oncu'), import('../src/data/politikalar/kadrolu'),
-    import('../src/data/politikalar/cozum'), import('../src/data/politikalar/tavsiye'), import('../src/data/politikalar/elci'),
-  ]);
-  for (const { politika } of belgeler) {
-    const h = rehberHesabi(politika.id);
-    expect(h.ornekler).toHaveLength(2);
-    expect(Object.keys(politika.programlar).sort()).toEqual(KOSULLAR[politika.id].map((k) => k.id).sort());
-    expect(h.programlar.map((k) => k.id).sort()).toEqual(KOSULLAR[politika.id].filter((k) => k.id !== 'ana').map((k) => k.id).sort());
-    for (const marka of ['istoc', 'segika'] as const) {
-      const a = { ...v1.VARSAYILAN_AYAR, marka };
-      const h = rehberHesabi('kadrolu').ornekler.find((k) => k.urun === (marka === 'istoc' ? 'iStoc' : 'Segika'))!;
-      expect(h.satirlar.find((k) => k.ad === 'Maaş ve prim toplamı')?.deger).toBe(tl(v1.kadrolu(a).toplam));
-    }
+  for (const marka of projeler) for (const rol of roller) {
+    const { politika } = await import(`../src/data/politikalar/${marka}/${rol}`);
+    const h = rehberHesabi(rol, marka);
+    const kosullar = KOSULLAR[rol].filter((k) => k.marka.includes(marka));
+    expect(politika.proje).toBe(marka);
+    expect(h.ornekler).toHaveLength(1);
+    expect(h.digerSurum).toHaveLength(1);
+    expect(Object.keys(politika.programlar).sort()).toEqual(kosullar.map((k) => k.id).sort());
+    expect(h.programlar.map((k) => k.id).sort()).toEqual(kosullar.filter((k) => k.id !== 'ana').map((k) => k.id).sort());
+    expect(politika.kitleler.length).toBeGreaterThanOrEqual(3);
+    expect(politika.kitleler.every((k: { urun: string }) => k.urun === (marka === 'istoc' ? 'iStoc' : 'Segika'))).toBe(true);
+    const a = { ...v1.VARSAYILAN_AYAR, marka };
+    const hesap = rehberHesabi('kadrolu', marka).ornekler[0];
+    expect(hesap.satirlar.find((k) => k.ad === 'Maaş ve prim toplamı')?.deger).toBe(tl(v1.kadrolu(a).toplam));
   }
 });
 
@@ -74,9 +77,10 @@ test('rehber bağlantıları hesaplayıcının iki sürümünde de açılır', a
   for (const surum of ['v1', 'v2']) {
     await page.goto(`satis-ortakligi/?surum=${surum}`);
     const nav = page.getByRole('navigation', { name: 'Çalışma rehberleri' });
-    await expect(nav.getByRole('link')).toHaveCount(5);
-    await nav.getByRole('link', { name: 'Mevcut müşteri', exact: true }).click();
-    await expect(page).toHaveURL(/politikalar\/tavsiye\//);
+    await expect(nav.getByRole('link')).toHaveCount(1);
+    await nav.getByRole('link', { name: 'Çalışma rehberlerini açın', exact: true }).click();
+    await page.getByRole('tab', { name: 'Mevcut müşteri', exact: true }).click();
+    await expect(page).toHaveURL(/politikalar\/\?proje=istoc&rol=tavsiye/);
     await expect(page.locator('.pol-belge')).toBeVisible();
   }
 });
@@ -111,7 +115,7 @@ test('açılan bölümler klavyeyle çalışır ve yön değişince korunur', as
   await buttons.first().click();
   await expect(buttons.first()).toHaveAttribute('aria-expanded', 'false');
   await expect(page.locator('html')).not.toHaveAttribute('data-focus-mode', 'keyboard');
-  const current = page.locator('.pol-roller a[aria-current="page"]');
+  const current = page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab', { selected: true });
   await current.focus();
   const before = await current.evaluate((el) => getComputedStyle(el).textDecorationThickness);
   await page.keyboard.press('Tab');
@@ -128,13 +132,13 @@ test('dar ekran ve açık ayrıntılarda metin okunur, gereksiz grafik indirilme
   page.on('request', (r) => assets.push(r.url()));
   await page.goto('politikalar/cozum/');
   await expect(page.locator('.pol-belge')).toBeVisible();
-  await page.getByRole('button', { name: 'Başlamadan netleştireceğimiz konular', exact: true }).click();
+  await page.getByRole('button', { name: 'Başlamadan açık konuları çözün', exact: true }).click();
   await page.getByRole('button', { name: 'İkinci hesap sürümü seçilirse', exact: true }).click();
   await page.evaluate(() => document.fonts.ready);
   for (const width of [320, 360, 375, 390, 767, 768, 769, 1280]) {
     await page.setViewportSize({ width, height: 720 });
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const result = await page.locator('.pol-belge').evaluate((root) => ({
+    const result = await page.locator('.pol-merkez').evaluate((root) => ({
       overflow: document.documentElement.scrollWidth > innerWidth,
       small: [...root.querySelectorAll('*')].filter((el) => el.getClientRects().length && getComputedStyle(el).display !== 'none'
         && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim()) && parseFloat(getComputedStyle(el).fontSize) < 14).map((el) => el.tagName),
@@ -150,11 +154,11 @@ test('dar ekran ve açık ayrıntılarda metin okunur, gereksiz grafik indirilme
 
 test('özel programın sonuç dönemi ve varsayımları kaybolmaz', async () => {
   const { rehberHesabi } = await import('../src/data/politikalar/hesap');
-  const yillara = rehberHesabi('oncu').programlar.find((p) => p.id === 'yillara')!;
+  const yillara = rehberHesabi('oncu', 'segika').programlar.find((p) => p.id === 'yillara')!;
   expect(yillara.donem).toBe('3 yıl');
   expect(yillara.aciklama).toContain('ayda');
   expect(yillara.kurallar.join(' ')).toContain('her yıl yenilediğini varsayar');
-  const saha = rehberHesabi('kadrolu').programlar.find((p) => p.id === 'saha')!;
+  const saha = rehberHesabi('kadrolu', 'istoc').programlar.find((p) => p.id === 'saha')!;
   expect(saha.donem).toBe('ay');
   expect(saha.aciklama).toContain('satış');
 });
@@ -190,7 +194,7 @@ test('çözüm ortağının eğitim gideri ve müşavir seçeneği ayrı göster
   const { rehberHesabi, tl } = await import('../src/data/politikalar/hesap');
   const v1 = await import('../src/data/satisOrtakligi');
   const a = { ...v1.VARSAYILAN_AYAR, marka: 'segika' as const };
-  const h = rehberHesabi('cozum').ornekler.find((h) => h.urun === 'Segika')!;
+  const h = rehberHesabi('cozum', 'segika').ornekler.find((h) => h.urun === 'Segika')!;
   expect(h.satirlar.find((s) => s.ad.endsWith('ek eğitim düşülünce'))?.deger)
     .toBe(tl(v1.donemKazanci(a, 'cozum').find((s) => s.ad === 'Ek eğitim düşülünce')!.yillik));
   expect(h.aciklama.join(' ')).toContain(`${a.egitimSaat} saat ücretsiz`);

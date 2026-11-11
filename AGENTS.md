@@ -1165,7 +1165,7 @@ için şu kurallar ve testler geçerlidir:
 | Tip, Astro ve UI kapısı | `npm run check` (`astro check` + `scripts/check-ui-gates.mjs`) |
 | Yalnız UI kapısı | `npm run gates` |
 | Üretim derlemesi | `npm run build` |
-| Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
+| Tarayıcı testleri | `npm test` (önce derleme; Chromium ve WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
 | Hepsi | `npm run verify` |
 | Paralel çalışma ağacında test | `PW_PORT=4333 npm test` — aynı makinede ikinci bir worktree test koşuyorsa port çakışmasın: `reuseExistingServer` komşu ağacın 4322 sunucusunu (başka bir `dist`) kullanır ve yanlış paketi test eder (`playwright.config.ts`) |
 | Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
@@ -1203,22 +1203,35 @@ Pages yayınından önce çalıştırır.
 - Görsel referans (snapshot) testleri kurulmadı; gerçek Safari/iOS/Android cihaz kontrolleri yapılmadı.
 - `astro preview` Astro 7’de etkileşimsiz ortamda arka plana geçer; testler bu yüzden `scripts/serve-dist.mjs` kullanır.
 
-## Beş çalışma rehberi
+## Projeye göre çalışma rehberleri
 
-- `/politikalar/oncu/`, `/politikalar/kadrolu/`, `/politikalar/cozum/`, `/politikalar/tavsiye/` ve
-  `/politikalar/elci/` mevcut beş persona için çalışma taslağıdır. Yeni kişi hikâyesi eklenmez.
+- Menüde tek “Çalışma rehberleri” bağlantısı bulunur. Ana adres `/politikalar/` olur.
+- iStoc ve Segika ayrı proje sekmeleridir. Her projede mevcut beş rol bulunur.
+  Toplam on içerik ayrı yazılır. Yeni kişi hikâyesi eklenmez.
+- `?proje=segika&rol=cozum` gibi sorgular seçimi paylaşır.
+  Proje değişince rol korunur. Geri dönüş ve yenileme aynı seçimi açar.
+  Eski beş rol adresi aynı rolün iStoc sekmesine yönelir.
 - Her rehber görev, koşullu iş sırası, hedef kitle, kazanç, sorun ve anlaşma bölümlerini taşır.
-  Açık kararlar ile önerilen çalışma düzeni, kabul edilmiş sözleşme gibi sunulmaz.
-- Kaynak `src/data/politikalar/hesap.ts` dosyasıdır. Hesaplar mevcut motorların yayımlanan varsayılanlarından türetilir.
-  Birinci sürüm yayımlanan varsayılandır. İkinci sürüm ayrı bölümde karşılaştırılır.
+  Açık kararlar ve çalışma önerileri kabul edilmiş sözleşme sayılmaz.
+- Hesap kaynağı `src/data/politikalar/hesap.ts` dosyasıdır.
+  Hesaplar seçilen projenin yayımlanan varsayılanlarından türetilir.
+  Birinci sürüm ana örnektir. İkinci sürüm ayrı bölümde karşılaştırılır.
   Kişisel tarayıcı ayarları rehberin veya anlaşmanın koşullarını değiştirmez.
-- Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
-- Ortak kabuk `PolitikaPage.tsx`, metinler beş ayrı veri dosyasıdır. Her rota yalnız kendi belgesini taşır.
-  Stil `politikalar.css` içinde `pol-` önekini ve ortak semantik tokenları kullanır.
-  Açılan bölümler mevcut Mantine, hareket tokenı ve merkezi klavye odağıyla çalışır.
-- Persona içeriği ve hesap verisi Astro ada özelliklerine yazılmaz. React sayfa girişleri veriyi yükler.
-  Böylece giriş öncesi HTML, mevcut giriş formu sözleşmesini korur.
-- `tests/politikalar.spec.ts` kaynak hesabını, koşulları, rotaları ve sürüm bağlantılarını denetler.
-  Klavye, açık bölümler, yön değişimi ve 320 CSS px görünüm aynı testte doğrulanır.
-- Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz. Varsayılan testler Chromium ve WebKit kullanır.
+  Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
+- `PolitikaSekmeleriPage.tsx` sekmeleri ve adresi yönetir.
+  `PolitikaPage.tsx` seçilen belgeyi gösterir. Metinler proje klasörlerindeki on dosyadadır.
+  Yalnız seçilen içerik yüklenir. Diğer içerikler seçim yapılınca yüklenir.
+  Yükleme hatası ve bekleme durumu görünürdür. Eski proje içeriği yeni seçimde gösterilmez.
+- `politikalar.css`, `pol-` önekini ve ortak semantik tokenları kullanır.
+  Sekmeler dar ekranda sarılır. Metin küçültülmez.
+  Mantine sekmeleri ve açılan bölümler merkezi klavye odağını korur.
+  Hareket iki yönde ortak süre ve eğri kullanır. Hareket azaltma tercihi korunur.
+- İçerik ve hesap verisi Astro ada özelliklerine yazılmaz.
+  Giriş öncesi HTML yalnız mevcut giriş formunu taşır.
+- Kontrol: `npm run check`, `npm run build` ve `npm test`.
+  Hedefli kontrol: `npx playwright test tests/politikalar.spec.ts tests/politika-sekmeler.spec.ts`.
+  Bu testler hesapları, koşulları, sekmeleri, adresleri ve tek menü bağlantısını denetler.
+  Ağ yüklemesi, hata durumu, klavye, yön değişimi ve dar ekranlar da kapsamdadır.
+- Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz.
+  Varsayılan testler Chromium ve WebKit kullanır.
   WebKit sonucu gerçek Safari veya fiziksel cihaz sonucu sayılmaz.

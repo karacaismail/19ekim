@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { CozumPolitikaPage } from '../../views/politikalar/CozumPolitikaPage';
+import { PolitikaSekmeleriPage } from '../../views/PolitikaSekmeleriPage';
 ---
 
 <BaseLayout>
-  <CozumPolitikaPage client:load pathname={Astro.url.pathname} />
+  <PolitikaSekmeleriPage client:load eskiRol="cozum" />
 </BaseLayout>

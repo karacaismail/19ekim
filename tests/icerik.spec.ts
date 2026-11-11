@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { GRUP_ADI, ICERIK, YAYIMLANAN, altBilgiKapsami, altBilgiOnCumle, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
+import { GRUP_ADI, ICERIK, ICERIK_YONLENDIRMELERI, YAYIMLANAN, altBilgiKapsami, altBilgiOnCumle, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
 import { BASE_ROLES as ROLES } from '../src/data/roles';
 import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';
 
@@ -38,7 +38,11 @@ function sayfaYollari(): string[] {
 test.describe('içerik envanteri', () => {
   test('IA-01: her yayımlanan sayfanın bir kaydı var; her kaydın sayfası var; soru, kapsam, sahip ve tarih dolu', () => {
     const yollar = sayfaYollari();
-    const kayitli = YAYIMLANAN.map((k) => k.path).sort();
+    const kayitli = [...YAYIMLANAN.map((k) => k.path), ...ICERIK_YONLENDIRMELERI.map((k) => k.path)].sort();
+    for (const yon of ICERIK_YONLENDIRMELERI) {
+      expect(YAYIMLANAN.some((k) => k.path === yon.hedef)).toBe(true);
+      expect(YAYIMLANAN.some((k) => k.path === yon.path)).toBe(false);
+    }
     expect(kayitli).toEqual(yollar);
     for (const k of ICERIK) {
       expect(k.kullaniciSorusu.length, k.id).toBeGreaterThan(10);

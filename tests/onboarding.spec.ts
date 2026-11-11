@@ -216,7 +216,7 @@ test('Pazarlama menüsünde Oyunlaştırma’dan sonra “Onboarding” var ve e
   await expect(page).toHaveTitle(/^Yeni kayıt gelince ne yapılır\?/);
   await page.getByRole('button', { name: 'Pazarlama' }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Öncü satış ortağı rehberi', 'Kadrolu satış uzmanı rehberi', 'Danışman ve hizmet firması rehberi', 'Mevcut müşteri rehberi', 'Marka elçisi rehberi']);
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
   await expect(menu.getByRole('menuitem', { name: 'Yeni kayıtlar' })).toHaveAttribute('aria-current', 'page');
 });
 

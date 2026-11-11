@@ -24,7 +24,7 @@ test('oyunlaştırma Pazarlama menüsünde, Gelir modellerinden sonra', async ({
   await expect(tetik).toHaveAttribute('data-section', 'true');
   await tetik.click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Öncü satış ortağı rehberi', 'Kadrolu satış uzmanı rehberi', 'Danışman ve hizmet firması rehberi', 'Mevcut müşteri rehberi', 'Marka elçisi rehberi']);
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
   await expect(menu.getByRole('menuitem', { name: 'Oyunlaştırma' })).toHaveAttribute('aria-current', 'page');
 });
 

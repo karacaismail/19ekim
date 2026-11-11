@@ -1,6 +1,6 @@
-import type { RolId } from '../satisOrtakligi';
+import type { Marka, RolId } from '../satisOrtakligi';
 
-export type { RolId };
+export type { Marka, RolId };
 export interface Adim { baslik: string; metin: string[] }
 export interface HedefKitle {
   urun: 'iStoc' | 'Segika';
@@ -47,3 +47,6 @@ export const PERSONALAR = [
   { id: 'tavsiye', ad: 'Mevcut müşteri' },
   { id: 'elci', ad: 'Marka elçisi' },
 ] as const;
+
+/** Aynı rolün iki projede farklı çalışma belgesi bulunur. */
+export interface ProjePolitika extends Politika { proje: Marka }

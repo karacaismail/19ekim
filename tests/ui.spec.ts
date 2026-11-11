@@ -921,7 +921,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu.getByRole('menuitem', { name: 'Kararlar' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Pazarlama' }).click();
-    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Öncü satış ortağı rehberi', 'Kadrolu satış uzmanı rehberi', 'Danışman ve hizmet firması rehberi', 'Mevcut müşteri rehberi', 'Marka elçisi rehberi']);
+    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Finans' }).click();
     await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
