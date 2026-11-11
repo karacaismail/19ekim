@@ -1,7 +1,7 @@
-/** Rehber örnekleri yayımlanan varsayılanlardan türetilir. Tarayıcı kaydı okunmaz. */
+/** Rehber hesabı seçili proje, program ve ortak parametrelerden türetilir. */
 import * as v1 from '../satisOrtakligi';
 import * as v2 from '../satisOrtakligiV2';
-import { KOSULLAR, kosulSonucu } from '../kosullar';
+import { KOSULLAR, kosulSonucu, affilateModeli, affilateHesabi, affilateYillari } from '../kosullar';
 import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 
@@ -13,8 +13,8 @@ export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: stri
 export interface OzelProgram { id: string; ad: string; urun: string; etiket: string; donem: string; sonuc: string; aciklama: string; hesap: { ad: string; formul: string; sonuc: string }[]; kurallar: string[] }
 export interface RehberHesabi { ornekler: HesapOrnegi[]; odeme: string[]; digerSurum: HesapOrnegi[]; programlar: OzelProgram[]; plan: string[] }
 
-function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
-  const a = { ...v1.VARSAYILAN_AYAR, marka };
+function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrnegi {
+  const a = { ...ayar, marka };
   const fiyat = v1.yillikFiyat(a);
   const satirlar = [
     { ad: 'Aylık liste bedeli', deger: tl(v1.aylikFiyat(a)) },
@@ -25,13 +25,13 @@ function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
     : [`Örnek, ${sayi(a.calisan)} çalışan için ${v1.PAKET_ADI[a.segikaPaket]} paketini kullanır.`, `Fiyat ${sayi(a.blok)} çalışanlık bloklarla hesaplanır. Çalışan sayısı değişirse bedeli yeniden hesaplayın. Aynı blokta kalan sayılar bedeli değiştirmez.`];
   if (rol === 'kadrolu') {
     const k = v1.kadrolu(a);
-    aciklama.push('Kota, prim hesabındaki satış eşiğidir. Yalnız bu eşiği aşan tutar prim hesabına girer.');
+    aciklama.push(a.model === 'oran' ? 'Kota, prim hesabındaki satış eşiğidir. Yalnız bu eşiği aşan tutar prim hesabına girer.' : 'Kota dolunca sonraki satışlar için sabit prim hesaplanır.');
     satirlar.push(
       { ad: 'Aylık örnek maaş', deger: tl(a.maas) },
       { ad: 'Bu ay satılan yıllık paket', deger: `${sayi(a.kadroluSatis)} adet` },
       { ad: 'Bu satışların paket bedeli', deger: tl(k.ciro) },
       { ad: 'Aylık kota', deger: `${tl(a.maas)} × ${sayi(a.kotaCarpan)} × ${sayi(1 + a.kotaEk)} = ${tl(k.kota)}` },
-      { ad: 'Örnek prim', deger: `${tl(Math.max(0, k.ciro - k.kota))} × ${yuzde(a.kadroluPrim[marka])} = ${tl(k.prim)}` },
+      { ad: 'Örnek prim', deger: a.model === 'sabit' ? `${sayi(Math.max(0, a.kadroluSatis - k.kotaIcinSatis))} satış × ${tl(a.sabit)} = ${tl(k.prim)}` : `${tl(Math.max(0, k.ciro - k.kota))} × ${yuzde(a.kadroluPrim[marka])} = ${tl(k.prim)}` },
       { ad: 'Maaş ve prim toplamı', deger: tl(k.toplam) },
     );
     aciklama.push('Bu örnek kota uygulanan bir ayı gösterir. Satılan paket yıllık, prim dönemi aylıktır.');
@@ -55,8 +55,8 @@ function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
     const oran = rol === 'cozum' && marka === 'segika' ? a.cozumOran : a.oran[seviye];
     const komisyon = rol === 'cozum' ? v1.cozumKazanci(a) : v1.satisKazanci(a, seviye);
     satirlar.push(
-      { ad: 'Varsayılan katkı', deger: rol === 'cozum' && marka === 'segika' ? 'Müşteri desteğini ortak verir' : v1.SEVIYE_ADI[seviye].replace('Demo', 'Ürün gösterimi') },
-      { ad: 'Bir yıllık paket için komisyon', deger: `${tl(fiyat)} × ${yuzde(oran)} = ${tl(komisyon)}` },
+      { ad: 'Seçili katkı', deger: rol === 'cozum' && marka === 'segika' ? 'Müşteri desteğini ortak verir' : v1.SEVIYE_ADI[seviye].replace('Demo', 'Ürün gösterimi') },
+      { ad: 'Bir yıllık paket için komisyon', deger: a.model === 'sabit' ? tl(komisyon) : `${tl(fiyat)} × ${yuzde(oran)} = ${tl(komisyon)}` },
     );
     if (rol === 'cozum') {
       for (const donem of v1.donemKazanci(a, 'cozum')) {
@@ -123,10 +123,26 @@ function ikinciSurum(rol: RolId, marka: v2.Marka): HesapOrnegi {
   return { urun: marka === 'istoc' ? 'iStoc' : 'Segika', satirlar, aciklama };
 }
 
-export function rehberHesabi(rol: RolId, marka: v1.Marka): RehberHesabi {
-  const a = v1.VARSAYILAN_AYAR;
+export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): RehberHesabi {
+  const a = { ...ayar, marka };
   const programlar = KOSULLAR[rol].filter((k) => k.id !== 'ana' && k.marka.includes(marka)).map((k) => {
     const sonuc = kosulSonucu({ ...a, marka, kosul: { [rol]: k.id } }, rol)!;
+    const model = affilateModeli({ ...a, kosul: { [rol]: k.id } }, rol);
+    if (model) {
+      const motor = affilateHesabi(a, model);
+      const toplam = motor.ortaklar.reduce((sum, o) => sum + o.planlanan, 0) / 100;
+      const politika = a.affPolitika[model];
+      const odemeKurali = politika === 'tahsilatta' ? 'Müşteri ödeme yapınca komisyon oluşur. Örnek hesap ödemeyi aynı aya yerleştirir.'
+        : politika === 'hizmet-ayi' ? 'Komisyon her hizmet ayının sonunda oluşur ve ödenir.'
+          : 'Müşteri ödeme yapınca komisyon oluşur. Şirket komisyonu taksitlerle öder.';
+      return { id: k.id, ad: acikTerimler(k.ad), urun: marka === 'istoc' ? 'iStoc' : 'Segika',
+        etiket: 'Bir müşteri için planlanan komisyon', donem: `${a.affUfukAy} ay`, sonuc: motor.hatalar.length ? 'Hesaplanamadı' : tl(toplam),
+        aciklama: `Örnek, bir müşterinin ${a.affOdeme === 'paket' ? 'yıllık paket' : 'aylık abonelik'} ödemesini kullanır. Hesap süresi ${a.affUfukAy} aydır.`,
+        hesap: affilateYillari(motor, a.affUfukAy).map((tutar, i) => ({ ad: `${i + 1}. hizmet yılı`, formul: 'Seçili ödeme motorunun hesapladığı hakediş', sonuc: tl(tutar / 100) })),
+        kurallar: [odemeKurali, ...(model === 'ayse' ? ['Komisyon yalnız ilk fatura için hesaplanır.'] : []),
+          'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.',
+          'Bu hesap örnektir. Gerçek tahsilatı veya ödemeyi kanıtlamaz.', ...motor.hatalar] };
+    }
     // Eski ağ örneğinin kişi adları ve kategorik hukuk iddiası rehbere taşınmaz.
     const kurallar = sonuc.kurallar.map((kural) => kural.includes('6502')
       ? 'Kazanç yalnız gerçek satıştan doğar. Kişi eklemek tek başına kazanç sağlamaz. Hukuki uygunluk ayrıca değerlendirilir.'
@@ -146,8 +162,13 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka): RehberHesabi {
          `İlk ödeme ${a.ilkGun}. gün, kalan ödeme ${a.kalanGun}. gün olarak gösterilir.`,
          'Gün sayımının hangi olayla başlayacağı açık değildir. Finans sorumlusu başlangıç olayını sözleşmeye yazmalıdır.',
          'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.'];
+  const secili = programlar.find((p) => p.id === a.kosul?.[rol]);
+  const seciliOrnek: HesapOrnegi | null = secili ? { urun: secili.urun,
+    satirlar: [{ ad: 'Seçili çalışma programı', deger: secili.ad }, { ad: secili.etiket, deger: secili.sonuc },
+      ...secili.hesap.map((h) => ({ ad: h.ad, deger: `${h.formul} = ${h.sonuc}` }))],
+    aciklama: [secili.aciklama, ...secili.kurallar] } : null;
   return {
-    ornekler: [ornek(rol, marka)], odeme,
+    ornekler: [seciliOrnek ?? ornek(rol, marka, a)], odeme: secili ? ['Finans sorumlusu seçili programın ödeme koşullarını yazılı anlaşmada doğrulamalıdır.'] : odeme,
     digerSurum: [ikinciSurum(rol, marka)], programlar,
     plan: marka === 'segika' ? [
       `Genel planda Segika ekibi ${DEFAULT_PARAMS.segikaCount} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,

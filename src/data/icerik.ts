@@ -103,7 +103,7 @@ const politikaKayitlari: IcerikKaydi[] = [{
   sahip: BELIRLENMEDI, durum: 'taslak', kanit: 'ornek',
   kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
   asOf: '2026-11-11', gozdenGecirme: 'Projenin çalışma kapsamı, hesabı veya koşulu değişince', duzenleme: 'yok',
-  kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar yayımlanan varsayılanları kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
+  kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar seçili satış parametrelerini kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
   iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri',
 }];
 

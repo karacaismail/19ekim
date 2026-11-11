@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Tabs } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { PERSONALAR, type Marka, type ProjePolitika, type RolId } from '../data/politikalar/types';
-import { rehberHesabi } from '../data/politikalar/hesap';
+import { PERSONALAR, type Marka, type RolId } from '../data/politikalar/types';
+import type { AkisOlustur } from '../data/politikaAkislari/types';
 import { href } from '../lib/paths';
-import { PolitikaBelgesi } from './PolitikaPage';
+import { PolitikaAkisi } from './PolitikaAkisi';
 
 const PROJELER = [{ id: 'istoc', ad: 'iStoc' }, { id: 'segika', ad: 'Segika' }] as const;
 const KISA_ADLAR: Record<RolId, string> = {
@@ -14,17 +14,17 @@ const KISA_ADLAR: Record<RolId, string> = {
 type Secim = { proje: Marka; rol: RolId };
 type Anahtar = `${Marka}/${RolId}`;
 const anahtar = ({ proje, rol }: Secim): Anahtar => `${proje}/${rol}`;
-const yukleyiciler: Record<Anahtar, () => Promise<{ politika: ProjePolitika }>> = {
-  'istoc/oncu': () => import('../data/politikalar/istoc/oncu'),
-  'istoc/kadrolu': () => import('../data/politikalar/istoc/kadrolu'),
-  'istoc/cozum': () => import('../data/politikalar/istoc/cozum'),
-  'istoc/tavsiye': () => import('../data/politikalar/istoc/tavsiye'),
-  'istoc/elci': () => import('../data/politikalar/istoc/elci'),
-  'segika/oncu': () => import('../data/politikalar/segika/oncu'),
-  'segika/kadrolu': () => import('../data/politikalar/segika/kadrolu'),
-  'segika/cozum': () => import('../data/politikalar/segika/cozum'),
-  'segika/tavsiye': () => import('../data/politikalar/segika/tavsiye'),
-  'segika/elci': () => import('../data/politikalar/segika/elci'),
+const yukleyiciler: Record<Anahtar, () => Promise<{ akisOlustur: AkisOlustur }>> = {
+  'istoc/oncu': () => import('../data/politikaAkislari/istoc/oncu'),
+  'istoc/kadrolu': () => import('../data/politikaAkislari/istoc/kadrolu'),
+  'istoc/cozum': () => import('../data/politikaAkislari/istoc/cozum'),
+  'istoc/tavsiye': () => import('../data/politikaAkislari/istoc/tavsiye'),
+  'istoc/elci': () => import('../data/politikaAkislari/istoc/elci'),
+  'segika/oncu': () => import('../data/politikaAkislari/segika/oncu'),
+  'segika/kadrolu': () => import('../data/politikaAkislari/segika/kadrolu'),
+  'segika/cozum': () => import('../data/politikaAkislari/segika/cozum'),
+  'segika/tavsiye': () => import('../data/politikaAkislari/segika/tavsiye'),
+  'segika/elci': () => import('../data/politikaAkislari/segika/elci'),
 };
 function adrestenOku(eskiRol?: RolId): Secim {
   const sorgu = new URLSearchParams(window.location.search);
@@ -41,11 +41,11 @@ function adresYaz(secim: Secim, degistir = false) {
 /** Giriş kapısı açılmadan bu bileşen kurulmaz ve belge yüklenmez. */
 function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
   const [secim, setSecim] = useState<Secim>(() => adrestenOku(eskiRol));
-  const [belge, setBelge] = useState<ProjePolitika | null>(null);
+  const [belge, setBelge] = useState<{ key: Anahtar; olustur: AkisOlustur } | null>(null);
   const [hata, setHata] = useState<Anahtar | null>(null);
-  const onbellek = useRef(new Map<Anahtar, ProjePolitika>());
+  const onbellek = useRef(new Map<Anahtar, AkisOlustur>());
   const secili = anahtar(secim);
-  const etkinBelge = belge && `${belge.proje}/${belge.id}` === secili ? belge : null;
+  const etkinBelge = belge?.key === secili ? belge.olustur : null;
 
   useEffect(() => {
     adresYaz(adrestenOku(eskiRol), true);
@@ -61,23 +61,17 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
   useEffect(() => {
     let gecerli = true;
     const kayit = onbellek.current.get(secili);
-    if (kayit) { setBelge(kayit); return; }
+    if (kayit) { setBelge({ key: secili, olustur: kayit }); return; }
     setHata(null);
-    yukleyiciler[secili]().then(({ politika }) => {
-      onbellek.current.set(secili, politika);
-      if (gecerli) setBelge(politika);
+    yukleyiciler[secili]().then(({ akisOlustur }) => {
+      onbellek.current.set(secili, akisOlustur);
+      if (gecerli) setBelge({ key: secili, olustur: akisOlustur });
     }).catch(() => {
       if (gecerli) setHata(secili);
     });
     return () => { gecerli = false; };
   }, [secili]);
 
-  // Belge sonradan geldiğinde paylaşılmış bölüm adresini de açın.
-  useEffect(() => {
-    if (!etkinBelge || !window.location.hash) return;
-    try { document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView(); }
-    catch { /* Geçersiz bölüm kodu belgeyi açmayı engellemez. */ }
-  }, [etkinBelge]);
 
   function sec(yeni: Secim) {
     if (anahtar(yeni) === secili) return;
@@ -86,7 +80,7 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
   }
   const siniflar = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
   return <>
-    <PageHeader title="Çalışma rehberleri" purpose="Önce projeyi, sonra çalışma rolünü seçin." />
+    <PageHeader title="Çalışma rehberleri" purpose="Projenizi ve rolünüzü seçin. Her adımda durumunuza uyan yanıtı verin." />
     <div className="pol-merkez">
       <Tabs value={secim.proje} onChange={(proje) => { if (proje) sec({ ...secim, proje: proje as Marka }); }}
         keepMounted={false} unstyled classNames={siniflar}>
@@ -100,7 +94,7 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
               {PERSONALAR.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
             </Tabs.List>
             {PERSONALAR.map((p) => <Tabs.Panel key={p.id} value={p.id}>
-              {etkinBelge ? <PolitikaBelgesi key={secili} politika={etkinBelge} hesap={rehberHesabi(secim.rol, secim.proje)} />
+              {etkinBelge ? <PolitikaAkisi key={secili} proje={secim.proje} rol={secim.rol} olustur={etkinBelge} />
                 : hata === secili ? <div className="pol-yukleme" role="alert">
                   <p>Rehber yüklenemedi. İnternet bağlantınızı kontrol edin.</p>
                   <button className="pol-sekme" type="button" onClick={() => window.location.reload()}>Sayfayı yeniden yükle</button>

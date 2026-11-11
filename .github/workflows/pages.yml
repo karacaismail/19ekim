@@ -32,6 +32,8 @@ jobs:
       - run: npm ci
       - name: Tip, Astro ve UI kapısı
         run: npm run check
+      - name: Persona eşitleme sunucusu
+        run: node --test apps-script/test-persona-sync.mjs
       - name: Üretim derlemesi
         run: npm run build
       - name: Playwright tarayıcıları

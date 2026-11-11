@@ -105,7 +105,7 @@ function ParamsNotice({ rehber = false }: { rehber?: boolean }) {
       <div className="wrap">
         {/* Kısa durum + kapsam bağlantısı (gorsel_algi.md F05 / C002): uzun açıklama her sayfada yinelenmez. */}
         <p>
-          {changed} parametre bu tarayıcıda değiştirildi. {rehber ? 'Çalışma rehberleri yayımlanan varsayılanları kullanır.' : 'Sayfalar bu değerlerle hesaplanır.'}{' '}
+          {changed} parametre bu tarayıcıda değiştirildi. {rehber ? 'Çalışma rehberleri satış ortaklığı ayarlarını kullanır.' : 'Sayfalar bu değerlerle hesaplanır.'}{' '}
           <a className="text-link" href={href('/parametreler/')}>
             Parametreler
           </a>

@@ -734,7 +734,7 @@ Kanonik görev tanımı `docs/affilate.md` (Codex raporu; depoda). Sayfa **Pazar
   1 Şubat; hareket Şubat raporunda) — bu yüzden 12 hizmet ayının tamamı 13 takvim aylık ufukta görünür; tek yıllık
   hazır senaryolar yenilemeyi `iptalHizmetAyi: 12` ile kapatır. Aynı tarihte işleme sırası: fatura → tahsilat/iade →
   ay sonu (destek, hakediş) → ortak ödemesi; ödeme kazanılmamış tutarı avans olarak ödemez, eksik kalan plan geri
-  alınacak bakiyeden mahsup edilir. Üç ortak modeli örnek başlangıçtır (Ayşe ilk fatura %10; satış ortağı 12 ay %15 / 12
+  alınacak bakiyeden mahsup edilir. Üç ortak modeli örnek başlangıçtır (ilk fatura tavsiyesi %10; satış ortağı 12 ay %15 / 12
   ay %10 / 12 ay %0; çözüm ortağı 12 ay %25 / 12 ay %15 / 12 ay %0; sonrası %0) — hiçbir yüzde iş kuralı olarak gömülü
   değildir, hepsi girdidir, %0 geçerlidir. Kapsam: ilk fatura (ilk pozitif fatura, ödeme sırasından bağımsız; iade yeni ilk
   fatura doğurmaz) / süreli (oran-dönem matrisi, ardışık, sonrası açık girdi). Politikalar: tahsilatta kazan aynı ay öde ·
@@ -1214,16 +1214,19 @@ Pages yayınından önce çalıştırır.
 - Her rehber görev, koşullu iş sırası, hedef kitle, kazanç, sorun ve anlaşma bölümlerini taşır.
   Açık kararlar ve çalışma önerileri kabul edilmiş sözleşme sayılmaz.
 - Hesap kaynağı `src/data/politikalar/hesap.ts` dosyasıdır.
-  Hesaplar seçilen projenin yayımlanan varsayılanlarından türetilir.
+  Hesaplar seçilen projenin ortak persona parametrelerinden türetilir.
   Birinci sürüm ana örnektir. İkinci sürüm ayrı bölümde karşılaştırılır.
-  Kişisel tarayıcı ayarları rehberin veya anlaşmanın koşullarını değiştirmez.
+  Birinci sürümdeki alan değişiklikleri rehbere yansır. İmzalanmış anlaşma kendiliğinden değişmez.
+  Eski kişisel tarayıcı kaydı ortak tabloya aktarılmaz.
   Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
 - `PolitikaSekmeleriPage.tsx` sekmeleri ve adresi yönetir.
-  `PolitikaPage.tsx` seçilen belgeyi gösterir. Metinler proje klasörlerindeki on dosyadadır.
+  `PolitikaAkisi.tsx` mevcut işi ve önceki yanıtları gösterir.
+  `politikaAkislari` içindeki on dosya koşullu adımları üretir.
+  `PolitikaPage.tsx` istenince açılan kapsamlı belgeyi gösterir.
   Yalnız seçilen içerik yüklenir. Diğer içerikler seçim yapılınca yüklenir.
   Yükleme hatası ve bekleme durumu görünürdür. Eski proje içeriği yeni seçimde gösterilmez.
 - `politikalar.css`, `pol-` önekini ve ortak semantik tokenları kullanır.
-  Sekmeler dar ekranda sarılır. Metin küçültülmez.
+  Rol sekmeleri kendi alanında yatay kayar. Metin küçültülmez.
   Mantine sekmeleri ve açılan bölümler merkezi klavye odağını korur.
   Hareket iki yönde ortak süre ve eğri kullanır. Hareket azaltma tercihi korunur.
 - İçerik ve hesap verisi Astro ada özelliklerine yazılmaz.
@@ -1235,3 +1238,35 @@ Pages yayınından önce çalıştırır.
 - Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz.
   Varsayılan testler Chromium ve WebKit kullanır.
   WebKit sonucu gerçek Safari veya fiziksel cihaz sonucu sayılmaz.
+
+## Ortak persona parametreleri
+
+- Google Sheets, iki projenin parametrelerini ayrı tutar.
+  `personaFields.ts` alanların ve seçeneklerin tek kaynağıdır.
+  Apps Script şeması bu dosyadan üretilir.
+- `personaSync.ts` değişen alanı hemen sıraya alır.
+  Aynı anda yalnız bir istek gönderilir. Yeni girişler bekleyen sırada korunur.
+  Açık sayfa son yanıttan 2,5 saniye sonra tekrar okur.
+  Bu süreye ağ ve Apps Script işlem süresi eklenir.
+  Gizli sekme okuma yapmaz. Sekme açılınca tekrar okur.
+- Başarılı sunucu yanıtı gelmeden kayıt tamamlandı denmez.
+  Okuma başarısı, başarısız yazma uyarısını kaldırmaz.
+  Yeniden deneme aynı işlem kimliğini kullanır.
+  Aynı alan değişmişse kullanıcı kullanılacak değeri seçer.
+  Bekleyen yazılar sekmeye özel depoda tutulur. Başka sekmenin okuması bu kuyruğu silemez.
+  Sayfa yenilenince bekleyen işlem aynı kimlikle geri gelir.
+- `Persona Ayarları` sekmesi ortak değerleri tutar.
+  `Persona İşlemleri` sekmesi tamamlanmış işlem kimliklerini tutar.
+  Kimlikler silinmez. Defter dolarsa yeni yazma reddedilir.
+  OPEX sekmeleri ve dağıtımı bu servisten ayrıdır.
+- Kullanıcı, geliştirme sırasında bağlantıyla düzenlemeyi kabul etti.
+  Bu aşamada servis `development-public` erişimini kullanır.
+  Anahtar ve kişisel kurulum dosyaları Git'e girmez.
+- Değişen parametreler rehberdeki örnek adım yanıtlarını sıfırlar.
+  Bu yanıtlar müşteri kaydı, imza veya ortak operasyon kaydı değildir.
+  Yanıtlar yalnız mevcut tarayıcı sekmesinde saklanır.
+- Sunucu kontrolü: `node --test apps-script/test-persona-sync.mjs`.
+  Bu kontrol Pages iş akışında da çalışır.
+  İstemci kontrolü: `npx playwright test tests/persona-sync.spec.ts`.
+  Rehber kontrolü: `npx playwright test tests/politika-akis.spec.ts tests/politika-hesap.spec.ts`.
+  Gerçek Sheets yazımı ayrıca canlı serviste doğrulanır.

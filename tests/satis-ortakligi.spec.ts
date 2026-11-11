@@ -127,10 +127,12 @@ test('koşul setleri: ana program korunur, kademeli ağ ve diyagram, İş ortakl
   await page.getByRole('button', { name: /Ana program/ }).click();
   await expect(page.locator('.so2-sonuc-deger')).toHaveText('78.000 ₺');
   const veri = JSON.parse((await page.locator('.so2-json-icerik').textContent()) ?? '{}');
-  // iStoc’a özgü ağ seti Segika’da ana programa düşer; seçim ayarlarda saklı kalır.
+  // Projelerin parametreleri ayrıdır. Segika ana programla açılır.
   expect(veri.kosulSetleri.oncu.kosul).toBe('ana');
-  expect(veri.ayarlar.kosul.oncu).toBe('ag');
+  expect(veri.ayarlar.kosul.oncu).toBe('ana');
   expect(veri.secim.seciliKosul).toBe('ana');
+  await page.getByRole('button', { name: 'iStoc', exact: true }).click();
+  await expect(page.locator('.so2-json-ac pre')).toContainText('\"kosul\": \"ag\"');
 });
 
 /** Affilate sayfası satış ortaklığına taşındı (kullanıcı kararı 2026-11-03): Affilate setlerinde ödeme takvimi. */

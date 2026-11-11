@@ -72,8 +72,8 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
         {p.ortakBulma && <><h3>Yeni ortakla nasıl tanışılır?</h3><Paragraflar metin={p.ortakBulma} /></>}
       </Bolum>
       <Bolum id="kazanc" baslik="Kazanç nasıl hesaplanır?">
-        <p>Örnekler, satış hesabının birinci sürümündeki yayımlanan varsayılanlardan gelir.</p>
-        <p>Hesaplayıcıda yaptığınız kişisel değişiklikler bu rehberi veya anlaşmayı değiştirmez.</p>
+        <p>Örnekler, satış hesabının birinci sürümündeki seçili parametrelerden gelir.</p>
+        <p>Parametre değişince bu rehber güncellenir. İmzalanmış anlaşmalar kendiliğinden değişmez.</p>
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
         <h3>Ödeme ne zaman olur?</h3><Paragraflar metin={hesap.odeme} />

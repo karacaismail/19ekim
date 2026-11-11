@@ -13,6 +13,7 @@ for (const proje of projeler) for (const rol of roller) {
   test(`${proje} ${rol}: yalnız seçilen projenin görev ve koşulları açılır`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto(`politikalar/?proje=${proje}&rol=${rol}`);
+    await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
     const belge = page.locator('.pol-belge');
     await expect(belge).toHaveAttribute('data-proje', proje);
     await expect(belge).toHaveAttribute('data-rol', rol);
@@ -67,6 +68,7 @@ test('kişisel hesap ayarı rehberi veya anlaşmayı değiştirmez', async ({ pa
     localStorage.setItem('turksab-satis-ortakligi-v2-segment', JSON.stringify({ maas: 999999 }));
   });
   await page.goto('politikalar/kadrolu/');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.locator('.pol-belge')).toBeVisible();
   await expect(page.locator('#kazanc')).toContainText('50.000 TL');
   await expect(page.locator('#kazanc')).not.toContainText('999.999');
@@ -81,13 +83,14 @@ test('rehber bağlantıları hesaplayıcının iki sürümünde de açılır', a
     await nav.getByRole('link', { name: 'Çalışma rehberlerini açın', exact: true }).click();
     await page.getByRole('tab', { name: 'Mevcut müşteri', exact: true }).click();
     await expect(page).toHaveURL(/politikalar\/\?proje=istoc&rol=tavsiye/);
-    await expect(page.locator('.pol-belge')).toBeVisible();
+    await expect(page.locator('.pol-yol')).toBeVisible();
   }
 });
 
 test('açılan bölümler klavyeyle çalışır ve yön değişince korunur', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto('politikalar/cozum/');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   const buttons = page.locator('#hedef-kitle .pol-ac');
   await buttons.first().focus();
   await page.keyboard.press('Tab');
@@ -131,6 +134,7 @@ test('dar ekran ve açık ayrıntılarda metin okunur, gereksiz grafik indirilme
   const assets: string[] = [];
   page.on('request', (r) => assets.push(r.url()));
   await page.goto('politikalar/cozum/');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.locator('.pol-belge')).toBeVisible();
   await page.getByRole('button', { name: 'Başlamadan açık konuları çözün', exact: true }).click();
   await page.getByRole('button', { name: 'İkinci hesap sürümü seçilirse', exact: true }).click();
@@ -155,9 +159,9 @@ test('dar ekran ve açık ayrıntılarda metin okunur, gereksiz grafik indirilme
 test('özel programın sonuç dönemi ve varsayımları kaybolmaz', async () => {
   const { rehberHesabi } = await import('../src/data/politikalar/hesap');
   const yillara = rehberHesabi('oncu', 'segika').programlar.find((p) => p.id === 'yillara')!;
-  expect(yillara.donem).toBe('3 yıl');
-  expect(yillara.aciklama).toContain('ayda');
-  expect(yillara.kurallar.join(' ')).toContain('her yıl yenilediğini varsayar');
+  expect(yillara.donem).toBe('36 ay');
+  expect(yillara.aciklama).toContain('bir müşterinin');
+  expect(yillara.kurallar.join(' ')).toContain('Gerçek tahsilatı veya ödemeyi kanıtlamaz');
   const saha = rehberHesabi('kadrolu', 'istoc').programlar.find((p) => p.id === 'saha')!;
   expect(saha.donem).toBe('ay');
   expect(saha.aciklama).toContain('satış');
@@ -165,6 +169,7 @@ test('özel programın sonuç dönemi ve varsayımları kaybolmaz', async () => 
 
 test('rehber hareketleri iki yönde ortak eğriyi ve azaltma tercihini kullanır', async ({ page }) => {
   await page.goto('politikalar/oncu/');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   const button = page.locator('#hedef-kitle .pol-ac').first();
   const chevron = button.locator('.mantine-Accordion-chevron');
   const styles = async () => Promise.all([button, chevron].map((el) => el.evaluate((node) => {
