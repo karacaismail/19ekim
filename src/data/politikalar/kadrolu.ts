@@ -122,7 +122,7 @@ export const politika: Politika = {
         "Müşteri ödemeden ve iade süresi geçmeden prim ödenmez.",
         "Dönem sonunda finans ekibinin prim dökümünü inceleyin.",
         "Eksik satış varsa satış kaydıyla birlikte yazılı itiraz edin.",
-        "Finans ekibi itiraz edilen primi kabul edilen prim ekine göre değerlendirsin.",
+        "Finans ekibi, itirazı kabul edilen prim ekine göre değerlendirsin.",
         "Yönetici ve finans ekibi sonucu yazılı açıklasın."
       ]
     }
