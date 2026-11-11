@@ -4,64 +4,103 @@ export const politika: Politika = {
   "id": "cozum",
   "ad": "Danışman ve hizmet firması",
   "amac": "Müşterinizin ihtiyacını ürüne bağlayın ve üstlendiğiniz hizmeti tamamlayın.",
-  "iliski": "Bağımsız hizmet ortağısınız. Kendi hizmetiniz ile ürünün sorumluluğu sözleşmede ayrı yazılır.",
+  "iliski": "Bağımsız hizmet ortağısınız. Şirketin çalışanı değilsiniz. Kendi hizmetiniz ile ürünün sorumluluğu sözleşmede ayrı yazılır. Kazancınızı şirkete fatura keserek alırsınız.",
   "gorev": [
     "Müşterinizin ihtiyacını ve ürünle uyumunu değerlendirin.",
     "Yapacağınız tanıtım, kurulum veya destek işini yazılı belirleyin.",
-    "Müşteri kaydını ortaklık sorumlusuyla doğrulayın."
+    "Müşteri kaydını ortaklık sorumlusuyla doğrulayın.",
+    "Üstlendiğiniz destek işlerini kayıt altında tutun."
   ],
   "sinir": [
     "Müşteri adına yetkiniz yoksa sözleşme kabul edemezsiniz.",
+    "Ürün fiyatını değiştiremezsiniz. Satış veya kazanç garantisi veremezsiniz.",
     "Meslek kuralları değerlendirilmeden komisyon veya müşteri indirimi teklif etmeyin.",
-    "Müşteri şifresi istemeyin. Erişimler yetkili kişi tarafından sınırlandırılsın."
+    "Müşteri şifresi istemeyin. Müşterinin yetkilisi size ayrı ve sınırlı erişim versin.",
+    "Hukuki dayanak yoksa müşteri verisini şirketle paylaşmayın."
   ],
   "adimlar": [
     {
-      "baslik": "Ortaklık türünü seçin",
+      "baslik": "Ortaklık türünü ve programı seçin",
       "metin": [
         "Ortaklık sorumlusu yapacağınız işi sizinle belirler.",
-        "Tanıştırma ile kurulum ve destek aynı kapsam değildir.",
-        "Seçilen programın ücret ve sorumluluk eki hazırlanır."
+        "Tanıştırma ile kurulum ve destek aynı iş değildir.",
+        "Hesaplayıcı her rol için tek program gösterir. Programlar kendiliğinden birleşmez.",
+        "İki programı birlikte istiyorsanız ortaklık sorumlusu yazılı karar versin.",
+        "Ortaklık sorumlusu seçilen programın ücret ve görev ekini hazırlar.",
+        "Ek kabul edilmeden müşteri işine başlamayın."
       ]
     },
     {
-      "baslik": "Müşterinin ihtiyacını doğrulayın",
+      "baslik": "Müşterinin ihtiyacını konuşun",
       "metin": [
-        "Mevcut hizmet ilişkiniz kapsamında ürün ihtiyacını konuşun.",
-        "İletişim veya veri paylaşımı gerekiyorsa uygun dayanağı doğrulayın.",
+        "Mevcut hizmet ilişkiniz içinde ürün ihtiyacını sorun.",
+        "Müşteriye ileti göndermek için uygun dayanağınız olmalıdır.",
+        "Müşteri ileti istemezse yeni ileti göndermeyin.",
         "Müşteri ilgilenirse ortaklık sorumlusuna kayıt açtırın."
       ]
     },
     {
-      "baslik": "Kaydı ve kapsamı kabul ettirin",
+      "baslik": "Müşteri kaydını kabul ettirin",
       "metin": [
+        "Her firma yalnız bir ortağa yazılır.",
         "Ortaklık sorumlusu çakışan müşteri kaydını kontrol eder.",
-        "Kayıt kabul edilince satış ve hizmet katkınızı yazın.",
-        "Teknik bağlantı gerekiyorsa teknik ekip uygunluğu değerlendirsin."
+        "Kayıt kabul edilmeden müşteriyi kendinize ait saymayın.",
+        "Kabul yanıtını kanıt olarak saklayın. Sonra satış ve hizmet katkınızı yazın."
+      ]
+    },
+    {
+      "baslik": "Uygunluğu ve ürün gösterimini planlayın",
+      "metin": [
+        "İhtiyaç ürünle eşleşmiyorsa satışı zorlamayın. Gerekçeyi kayda yazın.",
+        "Teknik bağlantı gerekiyorsa teknik ekip önce uygunluğu değerlendirsin.",
+        "Ürün gösterimini kimin yapacağını ortaklık sorumlusuyla belirleyin.",
+        "Gösterimde gerçek çalışan veya müşteri bilgisi kullanmayın."
       ]
     },
     {
       "baslik": "Teklifi ve sözleşmeyi tamamlayın",
       "metin": [
-        "Yetkili satış sorumlusu ürün teklifini onaylasın.",
-        "Kendi hizmet bedeliniz varsa ayrı ve açık gösterin.",
-        "Müşteri iki tarafın da görevini anlamadan işe başlamayın."
+        "Ürün teklifini yetkili satış sorumlusu onaylar.",
+        "Kendi hizmet bedeliniz varsa teklifte ayrı ve açık gösterin.",
+        "Müşteri iki tarafın da görevini anlamadan işe başlamayın.",
+        "Müşteri sözleşmeyi kabul edince kurulum planına geçin."
       ]
     },
     {
-      "baslik": "Kurulumu ve desteği devredin",
+      "baslik": "Tahsilatı ve ödemenizi izleyin",
+      "metin": [
+        "Sözleşme izin vermiyorsa ürün bedelini kendiniz tahsil etmeyin.",
+        "Finans ekibi tahsilatı ve iade durumunu doğrular.",
+        "Ödeme doğrulanınca kazancınız için şirkete fatura kesersiniz.",
+        "Fatura ve vergi uygulamasını mali müşavir doğrulamalıdır.",
+        "Hakediş dökümünü kendi kayıtlarınızla karşılaştırın."
+      ]
+    },
+    {
+      "baslik": "Kurulumu ve desteği yürütün",
       "metin": [
         "iStoc ana programında kurulumu ve desteği şirket yürütür.",
         "Segika ana programında müşteri desteğini siz üstlenirsiniz.",
+        "Segika için müşteri takip yazılımını şirket sağlar.",
         "Destek kaydında konuyu, sorumluyu ve çözüm durumunu tutun."
       ]
     },
     {
-      "baslik": "Hizmeti ve ödemeyi kontrol edin",
+      "baslik": "Eğitimi planlayın",
       "metin": [
-        "Finans ekibi uygun tahsilatı ve hizmet koşulunu doğrular.",
-        "Belirlenen belgeyi hazırlayın. Hakediş dökümünü kontrol edin.",
-        "Yenileme öncesinde kapsamı ve destek yükünü müşteriyle değerlendirin."
+        "Segika ana programında yılda belirli saat ücretsiz program eğitimi vardır.",
+        "Ücretsiz saatin üstündeki eğitim ücretlidir.",
+        "Hesaplayıcı ek eğitim bedelini kazancınızdan düşer.",
+        "Bu düşüm sözleşmede yazılı değilse finans sorumlusuna sorun.",
+        "Ek eğitim istemeden önce bedelini müşteriyle ve şirketle konuşun."
+      ]
+    },
+    {
+      "baslik": "Yenilemeyi veya ayrılığı yönetin",
+      "metin": [
+        "Yenileme öncesinde kapsamı ve destek yükünü müşteriyle değerlendirin.",
+        "Müşteri yenilemezse gerekçeyi kayda yazın.",
+        "Ortaklık biterse açık işleri kabul eden yeni sorumluya devredin."
       ]
     }
   ],
@@ -86,8 +125,8 @@ export const politika: Politika = {
     },
     {
       "urun": "iStoc",
-      "ad": "Yazılım veya lojistik müşterisi",
-      "ihtiyac": "Müşteri mevcut hizmetini ürün sunumuyla birleştirmek isteyebilir.",
+      "ad": "İşletme yazılımı veya lojistik hizmeti alan toptancı",
+      "ihtiyac": "Müşteri mevcut sistemindeki bilgiyi ürün sunumunda kullanmak isteyebilir.",
       "ulasim": "Hizmet toplantısına işletmenin yetkili kişisini dahil edin.",
       "mesaj": "Mevcut sisteminizle hangi bilgilerin birlikte çalışmasını istiyorsunuz?",
       "uygunluk": "Teknik uyum doğrulanmadan otomatik bağlantı sözü vermeyin.",
@@ -100,7 +139,7 @@ export const politika: Politika = {
       "ulasim": "Hizmet verdiğiniz firmanın insan kaynakları sorumlusuyla süreç görüşmesi yapın.",
       "mesaj": "Kontrolleri hangi aşamada tekrar yapmak zorunda kalıyorsunuz?",
       "uygunluk": "Mesleki ve veri erişim yetkisini doğrulamadan veri almayın.",
-      "sonrasi": "Uygunluk varsa kimliksiz örnekle gösterim yapın."
+      "sonrasi": "Uygunluk varsa gerçek çalışan bilgisi olmadan ürün gösterimi yapın."
     },
     {
       "urun": "Segika",
@@ -123,14 +162,20 @@ export const politika: Politika = {
   ],
   "ortakBulma": [
     "Hizmet tamamlayacak ortakları meslek ağlarından veya mevcut tedarikçilerden bulabilirsiniz.",
+    "Yeni ortağa ulaşırken de iletişim dayanağı kuralları geçerlidir.",
     "Ortaklık sorumlusu yeni firmanın yetkinliğini ve mesleki uygunluğunu incelesin.",
-    "Yeni ortak bulmayı müşteri satışı veya otomatik kazanç saymayın."
+    "Şirket ortak getirmeye para ödemez. Yeni ortağı müşteri satışı saymayın."
   ],
   "sorunlar": [
     {
       "kosul": "Aynı müşteri başka ortağa kayıtlıysa",
       "islem": "Ortaklık sorumlusu kayıt ve hizmet kanıtlarını karşılaştırsın.",
-      "sonuc": "Paylaşım kabul edilmeden iki tarafa ayrı komisyon vaat edilmesin."
+      "sonuc": "Karar iki tarafa yazılı bildirilir. Karar çıkmadan ikinci komisyon vaat edilmez."
+    },
+    {
+      "kosul": "Hakediş tutarına itiraz ederseniz",
+      "islem": "Finans sorumlusu itirazı kaydetsin ve ilgili belgeleri incelesin.",
+      "sonuc": "Finans sorumlusu ödeme kararını kabul edilen sözleşmeye göre yazılı açıklar."
     },
     {
       "kosul": "Teknik bağlantı çalışmıyorsa",
@@ -141,6 +186,16 @@ export const politika: Politika = {
       "kosul": "Destek yükünü karşılayamıyorsanız",
       "islem": "Ortaklık sorumlusuna açık işleri ve kapasite sorununu bildirin.",
       "sonuc": "Yeni destek taahhüdü verilmeden devir planı kabul edilsin."
+    },
+    {
+      "kosul": "Müşteri verisine yetkisiz erişim görülürse",
+      "islem": "Teknik sorumlu erişimi kapatsın ve veri sorumlusuna bildirsin.",
+      "sonuc": "Veri sorumlusu yasal bildirim gerekip gerekmediğini değerlendirir."
+    },
+    {
+      "kosul": "Meslek kuralı komisyonu veya indirimi engellerse",
+      "islem": "Ortaklık sorumlusu uzman görüşüyle uygun programı yeniden belirlesin.",
+      "sonuc": "Uygun model kabul edilene kadar komisyon sözü verilmez."
     },
     {
       "kosul": "Müşteri iade veya hizmet itirazı yaparsa",
@@ -155,33 +210,64 @@ export const politika: Politika = {
   ],
   "anlasma": [
     {
-      "baslik": "İki hizmeti ayırın",
+      "baslik": "Taraflar ve iki hizmet",
       "metin": [
+        "Sözleşmede şirketin ve firmanızın unvanı yazılır.",
         "Ürün satışıyla kendi danışmanlık hizmetinizi ayrı tanımlayın.",
         "Her işin kabulünü ve müşteriye karşı sorumlusunu yazın."
+      ]
+    },
+    {
+      "baslik": "Müşteri kaydı ve yetki",
+      "metin": [
+        "Müşteri kaydının hangi kanıtla kabul edileceğini yazın.",
+        "Fiyat ve teklif onayının kimde olduğunu yazın.",
+        "Müşteri adına imza yetkiniz yoksa bunu açıkça yazın."
+      ]
+    },
+    {
+      "baslik": "Geçerli sürüm ve ödeme",
+      "metin": [
+        "Anlaşmanın hangi hesap sürümüne bağlı olduğunu yazın.",
+        "Hesaplayıcıdaki değişiklik anlaşmayı kendiliğinden değiştirmez.",
+        "Finans sorumlusu ödemeyi doğuran olayı ve ödeme gününü yazsın.",
+        "Finans ekibi fatura, vergi ve döviz uygulamasını açıklamalıdır.",
+        "Ek eğitim bedeli düşülecekse bu düşüm ayrıca yazılmalıdır."
       ]
     },
     {
       "baslik": "Destek ve veri erişimi",
       "metin": [
         "Destek saatleri ve yanıt süresi karşılıklı kararlaştırılmalıdır.",
+        "Müşteri verisine erişimin hukuki dayanağı yazılmalıdır.",
+        "Aydınlatma metni ile açık rıza ayrı değerlendirilmelidir.",
         "Teknik ekip erişim kapsamını ve veri silme yöntemini yazmalıdır.",
         "Müşteri verisinin başka amaçla kullanılması ayrıca değerlendirilmelidir."
       ]
     },
     {
-      "baslik": "Ticari ve mesleki koşullar",
+      "baslik": "İçerik, marka ve meslek kuralları",
       "metin": [
-        "Finans ekibi fatura, vergi ve döviz uygulamasını açıklamalıdır.",
-        "Meslek kurallarına uygunluk ilgili uzman tarafından değerlendirilmelidir.",
-        "Kendi marka kullanımı ve teknik bağlantı ayrı ek gerektirir."
+        "Şirket markasını ve içeriğini hangi izinle kullanacağınızı yazın.",
+        "Kendi marka kullanımı ve teknik bağlantı ayrı ek gerektirir.",
+        "Meslek kurallarına uygunluk ilgili uzman tarafından değerlendirilmelidir."
+      ]
+    },
+    {
+      "baslik": "Değişiklik, sona erme ve itiraz",
+      "metin": [
+        "Değişikliğin nasıl kabul edileceğini yazın.",
+        "Ortaklık biterse müşteri devrini ve açık ödemeleri nasıl sonuçlandıracağınızı yazın.",
+        "İtirazın hangi kanala yapılacağını ve kimin yanıtlayacağını yazın.",
+        "Sözleşme onay sorumlusu kaynakta belli değildir. Bu iş için ortaklık yöneticisi rolünü öneriyoruz.",
+        "Bu metin imzalı veya hukuken onaylı bir sözleşme değildir."
       ]
     }
   ],
   "acikKonular": [
     {
       "baslik": "Destek kimin üzerinde kalacak?",
-      "mevcut": "Segika ana programında desteği ortak üstlenir.",
+      "mevcut": "Segika ana programında desteği ortak üstlenir. İkinci sürümde destek, rozet adaylığı için isteğe bağlıdır.",
       "eksik": "Yanıt süresi ve yedek sorumlu kesinleşmemiştir.",
       "islem": "Ortaklık sorumlusu destek kapsamını sizinle yazılı belirlesin.",
       "kanit": "Örnek destek talebi doğru kişiye ulaşsın ve kapatılsın.",
@@ -199,12 +285,21 @@ export const politika: Politika = {
     },
     {
       "baslik": "Mesleki çıkar çatışması var mı?",
-      "mevcut": "Bazı hedef ortaklar düzenlenmiş mesleklerde çalışır.",
+      "mevcut": "Bazı hedef ortaklar düzenlenmiş mesleklerde çalışır. Mali müşavir için komisyon veya müşteri indirimi seçeneği vardır.",
       "eksik": "Komisyon veya indirim uygunluğu otomatik doğrulanmaz.",
       "islem": "Ortaklık sorumlusu ilgili meslek kuralları için uzman görüşü alsın.",
       "kanit": "Seçilen model için değerlendirme ve karar kaydı bulunsun.",
       "firsat": "Uygun ortaklık biçimi güveni koruyabilir.",
-      "durdur": "Uygunluk netleşmeden komisyon sözü vermeyin."
+      "durdur": "Uygunluk netleşmeden komisyon veya indirim sözü vermeyin."
+    },
+    {
+      "baslik": "Müşteri verisine hangi dayanakla erişeceksiniz?",
+      "mevcut": "Kaynak, veri erişiminin hukuki dayanağını tanımlamaz.",
+      "eksik": "Erişim amacı, süresi ve silme yöntemi yazılı değildir.",
+      "islem": "Hukuk danışmanı dayanağı ve aydınlatma metnini değerlendirsin.",
+      "kanit": "Her müşteri için erişim amacı ve yetkili onayı kayıtlı olsun.",
+      "firsat": "Sınırlı erişimle başlamak riski azaltabilir.",
+      "durdur": "Dayanak belirlenmeden müşteri verisine erişmeyin."
     },
     {
       "baslik": "Genel plan yeterli kaynak ayırıyor mu?",
@@ -233,78 +328,120 @@ export const politika: Politika = {
     },
     {
       "baslik": "Hizmet maliyeti kazancı aşıyor mu?",
-      "sinyal": "Destek talepleri artarken yenilemeler düşebilir.",
+      "sinyal": "Destek talepleri ve ek eğitim istekleri artarken yenilemeler düşebilir.",
       "kontrol": "Ortaklık sorumlusu hizmet süresini yenilenen müşteri sayısıyla karşılaştırsın.",
       "tepki": "Kapsam sürdürülemiyorsa yeni sözleşmelerin kapsamını yeniden belirlesin.",
       "kayit": "Mevcut müşterinin kabul edilmiş haklarını koruyarak karar kaydedin."
+    },
+    {
+      "baslik": "Danışmanlık tavsiyesi satışla karışıyor mu?",
+      "sinyal": "Müşteri, hizmetinizi almak için ürünü zorunlu sanabilir.",
+      "kontrol": "Ortaklık sorumlusu örnek teklifte iki hizmetin ayrımını kontrol etsin.",
+      "tepki": "İki hizmet karışmışsa teklifi düzeltip müşteriye yeniden açıklayın.",
+      "kayit": "Düzeltmeyi ve müşterinin onayını kayda ekleyin."
     }
   ],
   "haftalik": [
-    "Siz açık destek işlerini ve bekleyen müşteri kararlarını gözden geçirin.",
-    "Ortaklık sorumlusu kabul edilen devirleri toplam devirlere bölsün.",
+    "Her hafta açık destek işlerinizi ve bekleyen kararları inceleyin.",
+    "Ortaklık sorumlusu o hafta kabul edilen kayıtları açılan kayıtlarla karşılaştırsın.",
+    "Destek sorumlusu o hafta kapanan talepleri açılan taleplerle karşılaştırsın.",
     "Finans ekibi uygun tahsilatı ve itirazlı tutarı ayrı göstersin.",
-    "Yenileme döneminde yenileyenleri süresi dolan müşterilere göre değerlendirin."
+    "Bir oran iki hafta düşerse ortaklık sorumlusu nedeni sizinle konuşsun.",
+    "Yenileme ayında yenileyen müşterileri süresi dolan müşterilerle karşılaştırın.",
+    "Anlaşmadan önce görevinizi, ödemeyi ve durma koşulunu kendi sözlerinizle anlatın. Ortaklık sorumlusu anlatımınızı dinlesin."
   ],
   "programlar": {
     "ana": [
       "iStoc ana programında kurulumu ve desteği şirket yürütür.",
-      "Segika ana programında desteği siz verirsiniz. Katkı kapsamını sözleşmeye yazın."
+      "Segika ana programında desteği siz verirsiniz. Katkı kapsamını sözleşmeye yazın.",
+      "Segika ana programında ücretsiz eğitim saati vardır. Fazlası ücretlidir.",
+      "Mali müşavir ana programda komisyon veya müşteri indirimi seçeneğini kullanabilir."
     ],
     "yillara": [
-      "Segika için hizmet sürdükçe dönemsel komisyon hesaplanır.",
-      "Destek verilmeyen ayın koşulunu finans sorumlusu ayrıca kontrol eder."
+      "Bu program Segika müşterisine desteği kendisi veren ortak içindir.",
+      "Destek verdiğiniz sürece dönemsel komisyon hesaplanır.",
+      "Destek vermediğiniz ay için komisyon doğmaz.",
+      "Hangi kaydın destek sayılacağını ortaklık sorumlusu yazılı belirlesin.",
+      "Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz."
     ],
     "yonlendirme": [
-      "Segika müşterisini uygun ekibe yönlendirirsiniz. Fiyatı değiştiremez veya tahsilat yapamazsınız.",
-      "Finans ekibi uygun net tahsilatı ve ortaklar arasındaki paylaşımı doğrular."
+      "Bu program müşteriyi yalnız Segika ekibine yönlendiren ortak içindir.",
+      "Fiyatı değiştiremezsiniz. Garanti veremezsiniz. Tahsilat yapamazsınız.",
+      "Ortak puanı ve ortak sayısı sınırlıdır. Ortaklık sorumlusu uygunluğu önce doğrular.",
+      "Finans ekibi uygun net tahsilatı ve ortaklar arasındaki paylaşımı doğrular.",
+      "Aynı müşteride birden çok ortak varsa ortak bütçesi paylaştırılır."
     ],
     "smmm": [
-      "Bu Segika seçeneği mali müşavir ofisine yöneliktir.",
-      "Nakit komisyon yerine toptan çalışma modeli kullanılır.",
+      "Bu Segika seçeneği bordro hizmeti veren mali müşavir ofisine yöneliktir.",
+      "Ofisin uygun muhasebe yazılımını kullanması ve sertifika eğitimini bitirmesi gerekir.",
+      "Bu modelde nakit komisyon, hediye veya indirim yoktur. Toptan fiyat kullanılır.",
+      "Komisyon veya müşteri indirimi istiyorsanız ana program değerlendirilir. İki model birlikte uygulanmaz.",
+      "Aktif mükellef sayısını hangi kaydın kanıtlayacağını ortaklık sorumlusu belirlesin.",
       "Fiyat bandı ve mesleki uygunluk kabul edilmeden müşteriye teklif vermeyin."
     ],
     "altyapi": [
-      "Segika hizmetini kendi markanızla sunmak isterseniz ayrı sözleşme gerekir.",
-      "Yıllık hacmi, destek sorumlusunu ve hizmet sürekliliğini birlikte belirleyin."
+      "Bu program teşvik danışmanlığı veya dış kaynaklı bordro hizmeti veren firma içindir.",
+      "Segika hizmetini kendi markanızla sunarsınız. Bunun için ayrı sözleşme gerekir.",
+      "Yıllık firma taahhüdü ve hizmet seviyesi sözleşmesi yapılır.",
+      "Fiyat iş hacmine göre belirlenir. Kaynakta fiyat tablosu yoktur.",
+      "Taahhüt karşılanmazsa ne olacağını sözleşmeye yazın."
     ],
     "entegrasyon": [
+      "Bu program bordro veya insan kaynakları yazılımı geliştiren firma içindir.",
       "Bordro yazılımıyla Segika bağlantısını teknik ekip doğrulamalıdır.",
+      "Kaynakta bu program için komisyon tutarı tanımlı değildir.",
       "Ortak tanıtım başlamadan veri erişimini ve destek görevlerini yazın."
     ],
     "osgb": [
       "İş sağlığı ve güvenliği hizmeti veren kurum müşterilerini Segika’ya yönlendirebilir.",
+      "Program ikinci dalgada başlar. Başlama tarihi kaynakta yazmıyor.",
+      "Yönlendirmenin ücreti kaynakta tanımlı değildir.",
+      "Kurumun meslek kurallarını ilgili uzman değerlendirsin.",
+      "Çalışanların sağlık kayıtlarını yönlendirme için paylaşmayın.",
       "Programın başlama koşulu sağlanmadan kurum adına teklif vermeyin."
     ],
     "dernek": [
       "Dernek, oda veya sanayi bölgesi üyeleriyle ortak eğitim düzenlenebilir.",
+      "Program ikinci dalgada başlar.",
+      "Eğitim tanıtım içeriyorsa bunu katılımcılara açıkça söyleyin.",
       "Üye listesini topluca paylaşmayın. İlgilenen kişiler kendileri başvursun."
     ],
     "franchise": [
       "Şubeli işletmede merkez sözleşmesiyle Segika kapsamı belirlenir.",
+      "Program ikinci dalgada başlar.",
       "Şubelerin yetkisini, ödeme sorumlusunu ve destek kapsamını ayrı yazın."
     ],
     "gelistirme": [
-      "iStoc için satıcıyı satışa hazır hâle getirirsiniz.",
+      "iStoc için aday satıcıları satışa hazır hâle getirirsiniz.",
+      "Komisyon, satıcının ilk aylarda ödediği ücretten hesaplanır.",
+      "Oran örnektir. Finans sorumlusu oranı kesinleştirmeden iş kabul etmeyin.",
       "Hazır sayılma ölçütünü ve kabul eden kişiyi önceden belirleyin."
     ],
     "arz": [
+      "Bu program satıcı üyeleri olan kurum içindir.",
       "Kuruma bağlı satıcıları iStoc’a getirirsiniz. Bu program nakit komisyon vaat etmez.",
+      "Program, belirli sayıda doğrulanmış vitrin oluşunca etkinleşir.",
       "Üye sonuç raporu ile veri paylaşımı sınırını protokole yazın."
     ],
     "talep": [
       "iStoc için uygun alım taleplerini toplarsınız. Sırf kayıt açmak ücret doğurmaz.",
+      "Talep sahibinin paylaşım izni yoksa talebi iletmeyin.",
+      "Görev ücreti iki parçada ödenir. Biri kapsam kabulünde, diğeri sonuç takibindedir.",
       "Görev kapsamını ve sonuç kabulünü yetkili kişiyle belirleyin."
     ],
     "hizmet": [
-      "iStoc müşterisine lojistik veya benzeri hizmet sunabilirsiniz.",
+      "iStoc müşterisine lojistik, ödeme veya benzeri hizmet sunabilirsiniz.",
+      "Kaynakta gelir paylaşımı oranı tanımlı değildir.",
       "Gelir paylaşımı, sorumluluk ve rozet kullanımı ayrı kabul edilmelidir."
     ],
     "teknoloji": [
-      "iStoc ile yazılım bağlantısı ve ortak tanıtım planlanır.",
+      "Bu program iStoc’a doğrudan bağlanan yazılım firması içindir.",
+      "Program ikinci dalgada başlar.",
       "Teknik kabul ve indirim koşulları kesinleşmeden bağlantı sözü vermeyin."
     ],
     "bolge": [
       "iStoc için belirli bölgede satıcı ağı kurabilirsiniz.",
+      "Bölge temsilciliği tek yetkili olma hakkı vermez.",
       "Programın pazar ve başlama koşulu sağlanmadan bölge yetkisi vaat etmeyin."
     ]
   }

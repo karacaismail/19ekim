@@ -57,6 +57,23 @@ function ornek(rol: RolId, marka: v1.Marka): HesapOrnegi {
       { ad: 'Varsayılan katkı', deger: rol === 'cozum' && marka === 'segika' ? 'Müşteri desteğini ortak verir' : v1.SEVIYE_ADI[seviye].replace('Demo', 'Ürün gösterimi') },
       { ad: 'Bir yıllık paket için komisyon', deger: `${tl(fiyat)} × ${yuzde(oran)} = ${tl(komisyon)}` },
     );
+    if (rol === 'cozum') {
+      for (const donem of v1.donemKazanci(a, 'cozum')) {
+        satirlar.push({ ad: `Yıllık örnek: ${donem.ad.toLocaleLowerCase('tr-TR')}`, deger: tl(donem.yillik) });
+      }
+      aciklama.push(`Yıllık örnek, ${sayi(a.cozumMusteri)} yeni müşteri getirdiğinizi varsayar. Bu sayı gerçekleşmiş satış değildir.`);
+      if (marka === 'segika') {
+        aciklama.push(`Şirket, ortağa ve destek personeline yılda ${sayi(a.egitimSaat)} saat ücretsiz program eğitimi verir.`);
+        aciklama.push(`Ek eğitim saat ücreti ${tl(a.egitimSaatUcret)} tutarındadır.`);
+        aciklama.push(`Örnekte ${sayi(a.ekEgitimSaat)} saat ek eğitim kullanılır. Toplam eğitim gideri ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} tutarındadır.`);
+        aciklama.push('Ek eğitim giderini kabul etmeden eğitim siparişi vermeyin. Vergi uygulamasını finans sorumlusu açıklasın.');
+      }
+      const m = v1.musavir(a);
+      aciklama.push(m.tur === 'indirim'
+        ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır.`
+        : `Mali müşavir seçeneğinde müşteri başına ${tl(m.musteriBasina)} komisyon hesaplanır.`);
+      aciklama.push('Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez. Mesleki uygunluk ayrıca değerlendirilmelidir.');
+    }
     if (rol === 'elci') satirlar.push({ ad: 'Aylık satış örneği', deger: `${sayi(a.elciSatis)} satış × ${tl(komisyon)} = ${tl(a.elciSatis * komisyon)}` });
     aciklama.push('Bu hesap satışın gerçekleştiğini kanıtlamaz. Finans ekibi ödeme koşullarını ayrıca doğrular.');
     aciklama.push('Kesintiler sonrası elinize geçecek tutar bu hesapta belirlenmez. Vergi ve belge koşulları ayrıca yazılır.');

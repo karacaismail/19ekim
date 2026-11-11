@@ -184,3 +184,16 @@ test('rehber hareketleri iki yönde ortak eğriyi ve azaltma tercihini kullanır
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect.poll(async () => (await styles()).map((s) => s.duration)).toEqual([0, 0]);
 });
+
+
+test('çözüm ortağının eğitim gideri ve müşavir seçeneği ayrı gösterilir', async () => {
+  const { rehberHesabi, tl } = await import('../src/data/politikalar/hesap');
+  const v1 = await import('../src/data/satisOrtakligi');
+  const a = { ...v1.VARSAYILAN_AYAR, marka: 'segika' as const };
+  const h = rehberHesabi('cozum').ornekler.find((h) => h.urun === 'Segika')!;
+  expect(h.satirlar.find((s) => s.ad.endsWith('ek eğitim düşülünce'))?.deger)
+    .toBe(tl(v1.donemKazanci(a, 'cozum').find((s) => s.ad === 'Ek eğitim düşülünce')!.yillik));
+  expect(h.aciklama.join(' ')).toContain(`${a.egitimSaat} saat ücretsiz`);
+  expect(h.aciklama.join(' ')).toContain('Müşavir komisyon yerine panel alır.');
+  expect(h.aciklama.join(' ')).toContain('kendiliğinden birleşmez');
+});

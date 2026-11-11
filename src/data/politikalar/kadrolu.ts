@@ -3,64 +3,126 @@ import type { Politika } from './types';
 export const politika: Politika = {
   "id": "kadrolu",
   "ad": "Kadrolu satış uzmanı",
-  "amac": "Müşteri görüşmesini satışa ve doğru kurulum devrine kadar yönetin.",
-  "iliski": "Bu modelde şirket sizi maaşlı ve sigortalı çalıştırır. Göreviniz ve prim koşullarınız iş sözleşmesinin ekinde açıklanır.",
+  "amac": "Size verilen müşteriyi görüşmeden kuruluma ve yenilemeye kadar takip edin.",
+  "iliski": "Bu modelde şirket sizi maaşlı ve sigortalı çalıştırır. Maaşınızı insan kaynakları bordroyla öder. Göreviniz ve prim koşullarınız iş sözleşmesinin ekinde yazılmalıdır.",
   "gorev": [
     "Size verilen müşteri listesini düzenli takip edin.",
     "Müşterinin ihtiyacını anlayın. Uygun ürünü gösterin.",
-    "Satış sonrası kurulumu ilgili ekibe devredin. Devrin kabul edildiğini kontrol edin."
+    "Onaylı teklif ve sözleşmeyle satışı tamamlayın.",
+    "Satış sonrası kurulumu ilgili ekibe devredin. Devrin kabul edildiğini kontrol edin.",
+    "Şirket kurulum, destek ve tahsilat için ayrı ekipler belirler. Siz bu ekiplere doğru bilgiyi iletirsiniz."
   ],
   "sinir": [
     "Onaysız indirim, teslim tarihi veya özellik sözü vermeyin.",
     "Müşteri ödemesini kişisel hesabınıza alamazsınız.",
-    "Çalışma saatleri, izinler ve yan haklar bu hesaplayıcıda belirlenmez."
+    "Şirket adına imza yetkiniz yazılı verilmediyse sözleşme imzalamayın.",
+    "İletişim dayanağı olmayan kişiye pazarlama iletisi göndermeyin.",
+    "Çalışma saatleri, izinler ve yan haklar bu rehberde belirlenmez. Bunları iş sözleşmeniz belirler."
   ],
   "adimlar": [
     {
       "baslik": "Görevinizi yöneticinizle netleştirin",
       "metin": [
+        "Yazılı görev tanımınızı insan kaynaklarından alın.",
         "Satış yöneticisi bölgenizi, ürününüzü ve müşteri listenizi belirler.",
         "Öğrenme dönemindeki görevleri yöneticinizle yazılı olarak planlayın.",
-        "Prim dönemi ve başlangıç koşulları açıklanmadan kazanç sözü vermeyin."
+        "Prim eki yazılmadan kendinize kesin kazanç hesabı yapmayın."
+      ]
+    },
+    {
+      "baslik": "Müşteri kaydını kontrol edin",
+      "metin": [
+        "Yeni firmayla görüşmeden önce müşteri takip sisteminde arayın.",
+        "Firma başka çalışana veya bir ortağa kayıtlıysa görüşmeyi başlatmayın.",
+        "Bu durumda satış yöneticisinden yazılı karar isteyin.",
+        "Kayıt size verilirse iletişim dayanağını ve kişinin tercihini kontrol edin."
       ]
     },
     {
       "baslik": "Görüşmeleri önceliklendirin",
       "metin": [
         "Önce müşteriye verilmiş sözleri ve açık işleri kontrol edin.",
-        "İhtiyacı doğrulanmış işletmelere öncelik verin.",
-        "Aynı firma başka çalışanda görünüyorsa yöneticinizden karar isteyin."
+        "Sonra ihtiyacı doğrulanmış işletmelere öncelik verin.",
+        "Kişi ileti istemezse tercihini kayda yazın. Pazarlama iletisini durdurun."
       ]
     },
     {
       "baslik": "İhtiyacı ve yetkiyi doğrulayın",
       "metin": [
         "Karar veren kişiyle mevcut süreci konuşun.",
-        "İhtiyaç uygunsa ürün gösterimi yapın.",
+        "Görüşmenin sonucunu müşteri kaydına yazın.",
         "Uyum yoksa ret nedenini kaydedin ve görüşmeyi kapatın."
       ]
     },
     {
-      "baslik": "Teklifi hazırlayın",
+      "baslik": "Ürün gösterimi yapın",
       "metin": [
-        "Müşteri isterse onaylı fiyatla teklif hazırlayın.",
-        "Özel şart gerekiyorsa yetkili kişiye onaylatın.",
-        "Kabul edilen kapsamı ve fiyatı sözleşmeye ekleyin."
+        "İhtiyaç ürüne uygunsa ürün gösterimi için randevu alın.",
+        "Gösterimde kimliksiz örnek veri kullanın.",
+        "Üründe bulunmayan özelliği varmış gibi göstermeyin.",
+        "Müşteri ilgilenirse teklif için sonraki görüşmeyi birlikte belirleyin."
+      ]
+    },
+    {
+      "baslik": "Teklifi onaylatın",
+      "metin": [
+        "Müşteri isterse onaylı fiyat listesiyle teklif hazırlayın.",
+        "Özel şart gerekiyorsa satış yöneticisine yazılı onaylatın.",
+        "Onay yazısını teklif kaydına ekleyin.",
+        "Onay gelmezse müşteriye özel şart sözü vermeyin."
+      ]
+    },
+    {
+      "baslik": "Sözleşmeyi tamamlayın",
+      "metin": [
+        "Müşteri teklifi kabul ederse kapsamı ve fiyatı sözleşmeye ekleyin.",
+        "Şirket adına imzayı yetkili kişi atar.",
+        "İmzalı sözleşmeyi müşteri kaydına ekleyin. Sonra finans ekibine haber verin."
+      ]
+    },
+    {
+      "baslik": "Ödemeyi izleyin",
+      "metin": [
+        "Müşteri ödemeyi yalnız şirket hesabına yapar.",
+        "Ödeme durumunu finans ekibinden doğrulayın.",
+        "Ödeme gecikirse finans ekibine bildirin.",
+        "Müşteriye kimin hatırlatma yapacağını finans ekibi belirler."
       ]
     },
     {
       "baslik": "Satışı kuruluma devredin",
       "metin": [
-        "Sözleşme kabul edilince ödeme durumunu finans ekibinden doğrulayın.",
-        "Kurulum ekibine kapsamı, iletişim kişisini ve açık soruları iletin.",
-        "Ekip devri kabul edince müşteriye sonraki adımı bildirin."
+        "Kurulum ekibine kapsamı, iletişim kişisini ve açık soruları yazılı iletin.",
+        "Ekip devri kabul edince müşteriye sonraki adımı bildirin.",
+        "Ekip devri kabul etmezse müşteriye kurulum tarihi vermeyin."
+      ]
+    },
+    {
+      "baslik": "Desteğe geçişi kontrol edin",
+      "metin": [
+        "Segika müşterisine desteği şirketin destek uzmanı verir.",
+        "iStoc için destek sorumlusunu satış yöneticisi yazılı belirlemelidir.",
+        "Müşteri size destek sorusu sorarsa talebi destek ekibine iletin.",
+        "Talep kayda geçince müşteriye bilgi verin."
+      ]
+    },
+    {
+      "baslik": "Yenilemeyi hazırlayın",
+      "metin": [
+        "Yenileme görüşmesinin sorumlusunu satış yöneticisi belirler.",
+        "Görev size verildiyse paket bitmeden kullanım durumunu sorun.",
+        "Müşteri yenilemek istemezse nedenini kayda yazın.",
+        "Yenilemenin prime girip girmediğini prim eki belirlemelidir."
       ]
     },
     {
       "baslik": "Priminizi kontrol edin",
       "metin": [
+        "Kota uygulanan aylarda prim, kotayı aşan satış tutarından doğar. Kota, prim eşiğidir.",
+        "Müşteri ödemeden ve iade süresi geçmeden prim ödenmez.",
         "Dönem sonunda finans ekibinin prim dökümünü inceleyin.",
-        "Eksik satış varsa satış kaydıyla birlikte itiraz edin.",
+        "Eksik satış varsa satış kaydıyla birlikte yazılı itiraz edin.",
+        "Finans ekibi itiraz edilen primi kabul edilen prim ekine göre değerlendirsin.",
         "Yönetici ve finans ekibi sonucu yazılı açıklasın."
       ]
     }
@@ -97,7 +159,7 @@ export const politika: Politika = {
       "urun": "Segika",
       "ad": "Büyüyen insan kaynakları ekibi",
       "ihtiyac": "Ekip işlemleri daha düzenli takip etmek isteyebilir.",
-      "ulasim": "insan kaynakları yöneticisine onaylı tanıtım kanalıyla ulaşın.",
+      "ulasim": "İnsan kaynakları yöneticisine onaylı tanıtım kanalıyla ulaşın.",
       "mesaj": "Hangi işlem yeniden kontrol gerektiriyor?",
       "uygunluk": "Örnek gösterimde gerçek çalışan dosyası istemeyin.",
       "sonrasi": "Kimliksiz örnekle ürünün uygunluğunu gösterin."
@@ -115,7 +177,7 @@ export const politika: Politika = {
       "urun": "Segika",
       "ad": "Birden fazla işyeri olan firma",
       "ihtiyac": "Merkez farklı işyerlerinin kayıtlarını izlemek isteyebilir.",
-      "ulasim": "insan kaynakları ve muhasebe sorumlularını aynı görüşmeye çağırın.",
+      "ulasim": "İnsan kaynakları ve muhasebe sorumlularını aynı görüşmeye çağırın.",
       "mesaj": "İşyeri bilgilerini ortak olarak nasıl takip ediyorsunuz?",
       "uygunluk": "Kapsam ve erişim yetkileri açıklanmadan kurulum tarihi vermeyin.",
       "sonrasi": "İşyeri kapsamını kurulum ekibine yazılı devredin."
@@ -123,19 +185,44 @@ export const politika: Politika = {
   ],
   "sorunlar": [
     {
+      "kosul": "Aynı firma başka çalışana veya ortağa kayıtlıysa",
+      "islem": "Satış yöneticisi kayıt tarihlerine ve görüşme notlarına bakarak karar versin.",
+      "sonuc": "Karar yazılana kadar bu firmaya teklif göndermeyin."
+    },
+    {
+      "kosul": "Müşteri onaysız indirim veya özel şart isterse",
+      "islem": "Talebi satış yöneticisine yazılı iletin.",
+      "sonuc": "Onay gelmezse onaylı fiyat listesi geçerli kalır."
+    },
+    {
+      "kosul": "Kişi pazarlama iletisi istemezse",
+      "islem": "Tercihini müşteri kaydına yazın. Pazarlama iletisini durdurun.",
+      "sonuc": "Şirket bu kişiye yeni pazarlama iletisi göndermez."
+    },
+    {
       "kosul": "Kota altında kalırsanız",
       "islem": "Yöneticiniz görüşme kalitesini ve iş yükünü sizinle incelesin.",
-      "sonuc": "Hesapta prim azalabilir. Maaşın kendiliğinden azalacağı varsayılmaz."
+      "sonuc": "O ay prim oluşmayabilir. Bu rehber maaşta kesinti öngörmez."
     },
     {
       "kosul": "İlk öğrenme dönemindeyseniz",
-      "islem": "Yöneticiniz prim uygulamasını insan kaynaklarıyla yazılı netleştirsin.",
-      "sonuc": "Kotasız dönem için normal ay hesabı kullanılmaz."
+      "islem": "Satış yöneticisi prim uygulamasını insan kaynaklarıyla yazılı netleştirsin.",
+      "sonuc": "Yazılı kural gelene kadar normal ay hesabını bu döneme uygulamayın."
+    },
+    {
+      "kosul": "Müşteri ödemeyi geciktirirse",
+      "islem": "Finans ekibine bildirin. Hatırlatmayı kimin yapacağını finans ekibi belirlesin.",
+      "sonuc": "Bu satışın primi için müşterinin ödeme yapması gerekir."
     },
     {
       "kosul": "Müşteri satışı iptal ederse",
       "islem": "Finans ekibi ilgili primi ve iptal nedenini incelesin.",
-      "sonuc": "Ücretten otomatik kesinti yapılacağı varsayılmaz. Uygulanacak kural açıklanır."
+      "sonuc": "Ücretten otomatik kesinti yapılacağı varsayılmaz. Uygulanacak kuralı insan kaynakları yazılı açıklar."
+    },
+    {
+      "kosul": "Prim dökümüne itiraz ederseniz",
+      "islem": "Satış kaydını ekleyerek finans ekibine yazılı itiraz edin.",
+      "sonuc": "Finans ekibi prim ekini inceler. İnsan kaynakları ve finans ekibi ödeme kararını yazılı açıklar."
     },
     {
       "kosul": "Kurulum ekibi yeni müşteri kabul edemiyorsa",
@@ -150,25 +237,58 @@ export const politika: Politika = {
   ],
   "anlasma": [
     {
-      "baslik": "İş sözleşmesi ve görev",
+      "baslik": "Taraflar ve görev",
       "metin": [
+        "İş sözleşmesinde şirket ve çalışan açıkça yazılmalıdır.",
         "İnsan kaynakları görev, ücret, çalışma düzeni ve yan hakları yazmalıdır.",
         "Hesaplayıcıdaki maaşın net veya brüt olduğu ayrıca belirtilmelidir."
+      ]
+    },
+    {
+      "baslik": "Geçerli sürüm ve program",
+      "metin": [
+        "Prim eki hangi hesap sürümünün geçerli olduğunu yazmalıdır.",
+        "Ana program, saha personeli veya ekip lideri seçeneğinden yalnız biri yazılmalıdır."
       ]
     },
     {
       "baslik": "Prim eki",
       "metin": [
         "Finans ekibi kota dönemini ve prime giren satışları açıklamalıdır.",
+        "Ödeme günü ile iade süresi prim ekinde yazılmalıdır.",
         "Tahsilat, iade, izin ve görev değişikliği ayrı ele alınmalıdır.",
-        "İlk öğrenme dönemindeki prim kuralı yazılı belirlenmelidir."
+        "İlk öğrenme dönemindeki prim kuralı yazılı belirlenmelidir.",
+        "Yenilemenin prime girip girmediği yazılmalıdır."
       ]
     },
     {
-      "baslik": "Yetki ve müşteri devri",
+      "baslik": "Müşteri kaydı ve yetki",
       "metin": [
-        "Yönetici indirim ve sözleşme yetkisini açıklamalıdır.",
-        "Müşteri listesi ile erişimler şirketin belirlediği usulle devredilmelidir."
+        "Satış yöneticisi müşterinin hangi çalışana yazılacağını belirleyen kuralı açıklamalıdır.",
+        "Yönetici indirim ve sözleşme yetkisini yazılı açıklamalıdır."
+      ]
+    },
+    {
+      "baslik": "Bordro ve vergi",
+      "metin": [
+        "Primin bordroya nasıl yansıyacağını insan kaynakları açıklamalıdır.",
+        "Bu rehber bordro kesintisi veya vergi oranı belirlemez."
+      ]
+    },
+    {
+      "baslik": "Veri, içerik ve destek",
+      "metin": [
+        "Hangi müşteri verisine erişeceğiniz yazılı belirlenmelidir.",
+        "Sunum ve tanıtım içeriğini şirketin onayladığı biçimde kullanın.",
+        "Kurulum ve destek ekibinin sorumluluğu yazılmalıdır."
+      ]
+    },
+    {
+      "baslik": "Değişiklik, ayrılma ve itiraz",
+      "metin": [
+        "Prim ekindeki değişiklik yalnız yazılı kabulle geçerli olmalıdır.",
+        "Ayrılmada müşteri listesi ve erişimler şirket usulüyle devredilmelidir.",
+        "Prim itirazının hangi ekibe yapılacağı yazılmalıdır."
       ]
     }
   ],
@@ -183,6 +303,24 @@ export const politika: Politika = {
       "durdur": "Normal ay primini öğrenme dönemine otomatik uygulamayın."
     },
     {
+      "baslik": "Segika'da kotasız başlangıç var mı?",
+      "mevcut": "Birinci sürümün Segika metni kotasız başlangıç süresinden söz etmez.",
+      "eksik": "İkinci sürümdeki ilk iki ay kuralı birinci sürüme aktarılmamıştır.",
+      "islem": "Satış yöneticisi ve insan kaynakları Segika başlangıç kuralını yazsın.",
+      "kanit": "Prim ekinde Segika için başlangıç dönemi ayrıca yazılsın.",
+      "firsat": "İki ürünün başlangıç kuralını aynı yerde göstermek yanlış anlamayı azaltabilir.",
+      "durdur": "Yazılı kural yoksa iStoc kuralını Segika'ya uygulamayın."
+    },
+    {
+      "baslik": "Maaş net mi, brüt mü?",
+      "mevcut": "Hesaplayıcı örnek bir maaş tutarı kullanır.",
+      "eksik": "Bu tutarın net veya brüt olduğu kaynakta belirtilmemiştir.",
+      "islem": "İnsan kaynakları maaşın niteliğini iş sözleşmesine yazsın.",
+      "kanit": "Çalışan örnek bordroyu iş sözleşmesiyle karşılaştırabilsin.",
+      "firsat": "Açık bordro örneği ilk maaş günündeki soruları azaltabilir.",
+      "durdur": "Nitelik yazılmadan hesaplayıcı tutarını sözleşmeye taşımayın."
+    },
+    {
       "baslik": "Tahsilat hangi aya yazılacak?",
       "mevcut": "Prim için tahsilat ve iade koşulları aranır.",
       "eksik": "Geç ödeme ve kısmi ödeme dönemi açık değildir.",
@@ -190,6 +328,15 @@ export const politika: Politika = {
       "kanit": "Aynı satışın iki ayda sayılmadığı gösterilsin.",
       "firsat": "Düzenli döküm prim itirazlarını erken çözebilir.",
       "durdur": "Uyuşmazlıkta yalnız ilgili satış ayrı incelensin."
+    },
+    {
+      "baslik": "Yenileme kimin işi ve prime girer mi?",
+      "mevcut": "Kaynak yalnız yeni yıllık paket satışının primini açıklar.",
+      "eksik": "Yenileme görüşmesinin sorumlusu ve primi yazılı değildir.",
+      "islem": "Satış yöneticisi ve finans ekibi yenileme kuralını prim ekine yazsın.",
+      "kanit": "Yenilenen her paketin sorumlusu müşteri kaydında görünsün.",
+      "firsat": "Kullanım sorunlarını erken görmek yenileme kaybını azaltabilir.",
+      "durdur": "Kural yazılmadan yenilemeyi prim hesabına katmayın."
     },
     {
       "baslik": "Satış yükü kuruluma sığıyor mu?",
@@ -206,8 +353,15 @@ export const politika: Politika = {
       "baslik": "Kota davranışı bozuyor mu?",
       "sinyal": "Ay sonunda erken satış kaydı veya aşırı indirim görülebilir.",
       "kontrol": "Finans ekibi satış tarihini tahsilat ve sözleşmeyle karşılaştırsın.",
-      "tepki": "Uyumsuzluk varsa ilgili primi incelemeye alsın.",
-      "kayit": "Düzeltmenin nedenini ve onaylayan kişiyi kaydedin."
+      "tepki": "Uyumsuzluk varsa yalnız ilgili primi incelemeye alsın.",
+      "kayit": "Düzeltmenin nedenini ve onaylayan görevi kaydedin."
+    },
+    {
+      "baslik": "Ortakların müşterisi çalışan kaydına geçiyor mu?",
+      "sinyal": "Bir ortağın tanıştırdığı firma sonradan çalışan adına kaydedilmiş olabilir.",
+      "kontrol": "Satış yöneticisi itiraz edilen kayıtların ilk kayıt tarihine baksın.",
+      "tepki": "Kayıt kuralı belirsizse yeni atamayı karar yazılana kadar durdursun.",
+      "kayit": "İlk kayıt tarihini, kararı ve kararı veren görevi saklayın."
     },
     {
       "baslik": "Satış sonrası sorunlar saklanıyor mu?",
@@ -215,13 +369,22 @@ export const politika: Politika = {
       "kontrol": "Yönetici destek taleplerini satış kayıtlarıyla karşılaştırsın.",
       "tepki": "Tekrarlayan sorun varsa ilgili satış anlatımını düzeltsin.",
       "kayit": "Devir kabulünü ve ilk kullanım sorununu birlikte saklayın."
+    },
+    {
+      "baslik": "İletişim tercihleri kayda geçiyor mu?",
+      "sinyal": "İleti istemeyen kişi yeniden aranmış veya ileti almış olabilir.",
+      "kontrol": "Satış yöneticisi ret kayıtlarını son gönderilen iletilerle karşılaştırsın.",
+      "tepki": "Ret sonrası ileti varsa ilgili gönderimi hemen durdursun.",
+      "kayit": "Ret tarihini ve durdurma tarihini müşteri kaydında saklayın."
     }
   ],
   "haftalik": [
-    "Siz açık teklifleri ve geciken müşteri sözlerini gözden geçirin.",
-    "Yönetici tahsil edilen satışları kabul edilen tekliflere bölsün.",
-    "Finans ekibi iptal edilen satışları aynı dönemin satışlarıyla karşılaştırsın.",
-    "Oran düşerse yönetici nedenleri ve yapılacak işi kaydetsin."
+    "Haftada bir açık teklifleri ve geciken sözleri gözden geçirin.",
+    "Satış yöneticisi geçen hafta kabul edilen teklifleri saysın. Bunlardan tahsil edilenleri ayrıca saysın.",
+    "Finans ekibi o haftanın iptallerini aynı haftanın satışlarıyla karşılaştırsın.",
+    "Kurulum ekibi kabul ettiği devirleri o haftanın devirleriyle karşılaştırsın.",
+    "Oran önceki haftadan düşükse yönetici nedeni ve çözümü kaydetsin.",
+    "Başlamadan kotayı, prim ödemesini ve durma nedenini kendi sözlerinizle anlatın. Satış yöneticisi farklı anlaşılan yeri metinde düzeltsin."
   ],
   "programlar": {
     "ana": [
