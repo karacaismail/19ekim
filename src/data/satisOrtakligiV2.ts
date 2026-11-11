@@ -552,7 +552,7 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kim: ist
         ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. “Arkadaşını getir” kampanyasıyla para değil ücretsiz kullanım kazanır. Daha fazla tavsiye getirirse ortak olabilir.'
         : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. “Arkadaşını getir” kampanyasıyla ücretsiz kullanım kazanır. Daha fazla tavsiye getirirse ortak olabilir.',
-      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.', 'Tavsiye, müşteri hizmetten doğrulanmış bir sonuç aldıktan sonra istenir.'],
+      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşterinin ödemesi belirlenen tahsilat süresi içinde alınırsa kredi hakkı oluşur.', 'Tavsiye, müşteri hizmetten doğrulanmış bir sonuç aldıktan sonra istenir.'],
       kimler: ist
         ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf', 'Esnaf derneği üyesi']
         : ['Mevcut Segika müşterisi', 'İK yöneticisi', 'Muhasebe yöneticisi', 'Aynı OSB’deki firma', 'Grup şirketleri'],

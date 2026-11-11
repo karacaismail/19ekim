@@ -19,7 +19,7 @@ const MENU_BAGLANTI = NAV_GROUPS.flatMap((g) => g.items).length;
  * sessizce denetim dışında kalmaz.
  * Giderler grafikleri yalnız Sheets bağlantısıyla çizilir. Ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
  */
-const GRAFIKSIZ = ['istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', 'onboarding/', '404/'];
+const GRAFIKSIZ = [...YAYIMLANAN.filter((k) => k.path.startsWith('/politikalar/')).map((k) => k.path.slice(1)), 'istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', 'onboarding/', '404/'];
 const CHART_PAGES = PAGES.filter((p) => !GRAFIKSIZ.includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */

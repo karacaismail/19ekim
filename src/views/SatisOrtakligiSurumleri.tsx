@@ -1,3 +1,5 @@
+import { PolitikaBaglantilari } from '../components/PolitikaBaglantilari';
+import '../styles/politikalar.css';
 import { AppFrame } from '../components/AppFrame';
 import { Choice } from '../components/ui';
 import { SURUM_SECENEKLERI, useSurum, type Surum } from '../lib/surum';
@@ -22,6 +24,7 @@ export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname} wide>
       {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
+      <PolitikaBaglantilari />
     </AppFrame>
   );
 }

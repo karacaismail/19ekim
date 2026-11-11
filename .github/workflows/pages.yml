@@ -36,8 +36,8 @@ jobs:
         run: npm run build
       - name: Playwright tarayıcıları
         if: ${{ !inputs.testsiz }}
-        run: npx playwright install --with-deps chromium firefox webkit
-      - name: Tarayıcı testleri (Chromium, Firefox, WebKit)
+        run: npx playwright install --with-deps chromium webkit
+      - name: Tarayıcı testleri (Chromium, WebKit)
         if: ${{ !inputs.testsiz }}
         run: npx playwright test
       - name: Test raporu

@@ -1202,3 +1202,21 @@ Pages yayınından önce çalıştırır.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.
 - Görsel referans (snapshot) testleri kurulmadı; gerçek Safari/iOS/Android cihaz kontrolleri yapılmadı.
 - `astro preview` Astro 7’de etkileşimsiz ortamda arka plana geçer; testler bu yüzden `scripts/serve-dist.mjs` kullanır.
+
+## Beş çalışma rehberi
+
+- `/politikalar/oncu/`, `/politikalar/kadrolu/`, `/politikalar/cozum/`, `/politikalar/tavsiye/` ve
+  `/politikalar/elci/` mevcut beş persona için çalışma taslağıdır. Yeni kişi hikâyesi eklenmez.
+- Her rehber görev, koşullu iş sırası, hedef kitle, kazanç, sorun ve anlaşma bölümlerini taşır.
+  Açık kararlar ile önerilen çalışma düzeni, kabul edilmiş sözleşme gibi sunulmaz.
+- Kaynak `src/data/politikalar/hesap.ts` dosyasıdır. Hesaplar derleme sırasında mevcut motorlardan türetilir.
+  Birinci sürüm yayımlanan varsayılandır. İkinci sürüm ayrı bölümde karşılaştırılır.
+  Kişisel tarayıcı ayarları rehberin veya anlaşmanın koşullarını değiştirmez.
+- Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
+- Ortak kabuk `PolitikaPage.tsx`, metinler beş ayrı veri dosyasıdır. Her rota yalnız kendi belgesini taşır.
+  Stil `politikalar.css` içinde `pol-` önekini ve ortak semantik tokenları kullanır.
+  Açılan bölümler mevcut Mantine, hareket tokenı ve merkezi klavye odağıyla çalışır.
+- `tests/politikalar.spec.ts` kaynak hesabını, koşulları, rotaları ve sürüm bağlantılarını denetler.
+  Klavye, açık bölümler, yön değişimi ve 320 CSS px görünüm aynı testte doğrulanır.
+- Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz. Varsayılan testler Chromium ve WebKit kullanır.
+  WebKit sonucu gerçek Safari veya fiziksel cihaz sonucu sayılmaz.

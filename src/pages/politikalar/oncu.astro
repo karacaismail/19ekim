@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { PolitikaPage } from '../../views/PolitikaPage';
+import { politika } from '../../data/politikalar/oncu';
+import { rehberHesabi } from '../../data/politikalar/hesap';
+const hesap = rehberHesabi(politika.id);
+---
+
+<BaseLayout>
+  <PolitikaPage client:load pathname={Astro.url.pathname} politika={politika} hesap={hesap} />
+</BaseLayout>

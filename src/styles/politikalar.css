@@ -1,0 +1,40 @@
+/* Rehberler ortak marka, odak ve hareket tokenlarını kullanır. */
+.pol-belge { max-inline-size: var(--prose-max); margin-inline: auto; font-size: var(--text-md); line-height: var(--leading-body); }
+.pol-belge p { margin-block: var(--space-3); }
+.pol-giris { padding-block: var(--space-4); }
+.pol-durum { font-weight: var(--weight-semibold); color: var(--accent-strong); }
+.pol-roller { margin-block: var(--space-6); }
+.pol-roller p { font-weight: var(--weight-semibold); }
+.pol-roller ul, .pol-bolumler ul { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding: 0; margin: 0; }
+.pol-roller a, .pol-bolumler a { display: inline-flex; align-items: center; min-block-size: var(--hit-min); color: var(--text-link); }
+.pol-roller a[aria-current='page'] { font-weight: var(--weight-bold); }
+.pol-bolumler { padding-block: var(--space-4); }
+.pol-bolum { margin-block-start: var(--section-gap); scroll-margin-block-start: var(--space-20); }
+.pol-bolum h2 { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin-block: 0 var(--space-5); }
+.pol-bolum h3 { font-size: var(--text-xl); line-height: var(--leading-snug); margin-block: var(--space-6) var(--space-3); }
+.pol-bolum h4 { font-size: var(--text-lg); line-height: var(--leading-snug); margin-block: var(--space-5) var(--space-2); }
+.pol-adimlar { padding-inline-start: var(--space-6); }
+.pol-adimlar li { padding-inline-start: var(--space-2); margin-block: var(--space-6); }
+.pol-adimlar li::marker { color: var(--accent-strong); font-weight: var(--weight-bold); }
+.pol-hesap { padding-block: var(--space-4); }
+.pol-hesap dl, .pol-formuller { margin: 0; }
+.pol-hesap dl > div, .pol-formuller > div { padding-block: var(--space-3); }
+.pol-hesap dt, .pol-formuller dt { color: var(--text-secondary); }
+.pol-hesap dd, .pol-formuller dd { margin: 0; font-weight: var(--weight-semibold); }
+.pol-sorunlar > div { margin-block: var(--space-6); }
+.pol-sorunlar dt { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+.pol-sorunlar dd { margin: 0; }
+.pol-kontrol { padding-inline-start: var(--space-5); }
+.pol-kontrol li, .pol-panel li { margin-block: var(--space-3); }
+.pol-ayrinti { border: 0; margin-block: var(--space-2); background: var(--surface-sunken); }
+.pol-ac { padding: var(--space-4); min-block-size: var(--hit-min); color: var(--text-primary); border-radius: var(--radius-control); }
+.pol-ac { transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-ok { transition-property: transform; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-ac:hover { background: var(--surface-hover); }
+.pol-ac-etiket { font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-body); padding: 0; }
+.pol-panel { padding: var(--space-1) var(--space-4) var(--space-4); }
+.pol-panel blockquote { margin-inline: 0; padding-inline-start: var(--space-4); font-weight: var(--weight-medium); }
+.pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-8); }
+@media (min-width: 48em) {
+  .pol-hesap dl > div, .pol-formuller > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); }
+}

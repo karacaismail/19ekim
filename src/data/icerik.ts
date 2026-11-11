@@ -1,3 +1,4 @@
+import { PERSONALAR } from './politikalar/types';
 /**
  * İçerik envanteri (docs/contents.md §2.1, §4.2–§4.4, §6; kullanıcı kararı 2026-10-28): her yayımlanan sayfanın tek ana
  * kaydı — içerik sınıfı, kullanıcının sorusu, ana ebeveyn (menü grubu), marka kapsamı, sahip, yaşam döngüsü, kanıt
@@ -96,7 +97,19 @@ const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: 
   iliskili: ['organizasyon', 'istihdam', 'eylem-plani', 'applet'],
 });
 
+const politikaKayitlari: IcerikKaydi[] = PERSONALAR.map((r) => ({
+  id: `politika-${r.id}`, path: `/politikalar/${r.id}/`, sinif: ['politika', 'operasyon'],
+  baslik: `${r.ad}: çalışma rehberi`, kullaniciSorusu: 'Bu işte ne yapacağım, hangi koşulda kazanacağım?',
+  grup: 'pazarlama', ebeveyn: 'satis-ortakligi', turetim: 'oneri', marka: ['istoc', 'segika'],
+  sahip: BELIRLENMEDI, durum: 'taslak', kanit: 'ornek',
+  kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
+  asOf: '2026-11-11', gozdenGecirme: 'Çalışma kapsamı, hesap veya koşul değişince', duzenleme: 'yok',
+  kapsam: 'Bu çalışma rehberi taslaktır. Hesaplar yayımlanan varsayılanları kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
+  iliskili: ['satis-ortakligi', 'parametreler'], menu: `${r.ad} rehberi`,
+}));
+
 export const ICERIK: IcerikKaydi[] = [
+  ...politikaKayitlari,
   {
     id: 'organizasyon',
     path: '/',
