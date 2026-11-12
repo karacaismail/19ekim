@@ -122,7 +122,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 }
 
 /* Boşluk, risk ve fırsat bölümü: başlıklar bölüm düzeyini korur, metin küçülmez. */
-[data-akis-bosluk] > h4 { margin-block: var(--space-6) var(--space-2); font-size: var(--text-lg); line-height: var(--leading-snug); }
-[data-akis-bosluk] > h4:first-child { margin-block-start: 0; }
-[data-akis-bosluk] h5 { margin-block: 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
-[data-akis-bosluk] .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-5); }
+.pol-bosluk > h4 { margin-block: var(--space-6) var(--space-2); font-size: var(--text-lg); line-height: var(--leading-snug); }
+.pol-bosluk > h4:first-child { margin-block-start: 0; }
+.pol-bosluk h5 { margin-block: 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-bosluk .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-5); }
