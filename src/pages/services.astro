@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { HizmetlerPage } from '../views/HizmetlerPage';
+---
+
+<BaseLayout>
+  <HizmetlerPage client:load pathname={Astro.url.pathname} />
+</BaseLayout>

@@ -69,8 +69,9 @@ test('yeni rehber öğesinin noktası yeşil yanıp söner ve ekran okuyucu “Y
   await page.goto('');
   const menu = await pazarlamaMenusu(page);
   // Menü öğelerinin metni değişmez. “Yeni” bilgisi noktanın erişilebilir adıdır.
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
-  await expect(menu.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(1);
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
+  // Pazarlama menüsünde üç yeni öğe var: Hizmetler, Küresel pazaryerleri (2026-11-12) ve Çalışma rehberleri.
+  await expect(menu.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(3);
   const yeni = menu.getByRole('menuitem', { name: /Çalışma rehberleri/ });
   await expect(yeni.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(1);
   const nokta = yeni.locator('.navmenu-bullet');
@@ -116,7 +117,7 @@ test('dar ekran menüsünde de yeni nokta yanıp söner', async ({ page }) => {
   await page.getByRole('button', { name: 'Menü', exact: true }).click();
   const cekmece = page.getByRole('dialog', { name: 'Menü' });
   await expect(cekmece).toBeVisible();
-  await expect(cekmece.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(1);
+  await expect(cekmece.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(3);
   const yeni = cekmece.getByRole('link', { name: /Çalışma rehberleri/ });
   await expect(yeni.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(1);
   const nokta = yeni.locator('.navmenu-bullet');

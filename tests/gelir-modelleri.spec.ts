@@ -86,6 +86,6 @@ test('gelir modelleri: Pazarlama menüsünde Değer önerisinden sonra', async (
   await page.getByRole('button', { name: 'Pazarlama' }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
   // Oyunlaştırma (2026-11-04) Gelir modellerinden sonra gelir.
-  await expect(menu.getByRole('menuitem').nth(3)).toHaveText('Gelir modelleri');
+  await expect(menu.getByRole('menuitem').nth(4)).toHaveText('Gelir modelleri');
   await expect(menu.getByRole('menuitem', { name: 'Gelir modelleri' })).toHaveAttribute('aria-current', 'page');
 });

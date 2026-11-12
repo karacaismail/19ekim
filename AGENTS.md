@@ -969,6 +969,44 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Koşullar penceresi (`components/KosullarV2.tsx`: segment ve kariyer merdiveni, ağ kuralları ve diyagram, kampanyalar) `React.lazy` ile ilk açılışta yüklenir, düğmeye gelince önceden yüklenir. Odak açan düğmeye sayfa tarafından döndürülür (Safari tıklamada odak vermez).
 - Test: `npm run build` sonra `npx playwright test tests/satis-ortakligi-v2.spec.ts tests/satis-ortakligi.spec.ts tests/surum.spec.ts --project=chromium --project=webkit`. Firefox kullanıcı kararıyla çalıştırılmaz.
 
+### Hizmetler ve küresel pazaryerleri sayfaları (kullanıcı kararları 2026-11-12)
+
+- `/kuresel-pazaryerleri/` (menüde “Küresel pazaryerleri”) titanlar.com araştırmasını gösterir: “Küresel B2B Pazaryerleri: Ekosistem,
+  Gelir ve Freemium Mimarisi”, 12 Kasım 2026. Kullanıcı bu belgeyi kesin karar olarak verdi (içerik kaydında durum `onaylandi`).
+  Sayfada üç bilgi türü ayrı etiketle görünür:
+  - Belgeden: rakam, oran ve kaynak bağlantısı belgeden aynen alınır. Cümleler yalın Türkçeyle yeniden yazılır. Sayı aralığı
+    “%5 ile %8 arası” biçimindedir. Belgedeki 33 bağlantının hepsi sayfadadır (`BELGE_BAGLANTILARI`, testle denetlenir).
+  - Belgenin şeması: “3 model, 7 platform” ve “3 faz, 2 kapı” şemaları belgenin metninde yok. Harita, ödeme duvarı şeması ve
+    modül sırası belgenin metninden kurulur. Her birinin önünde bunu söyleyen görünür bir not (`.pz-notlar`) durur.
+  - Sitenin karşılaştırması: istoc.com kutuları, “Bugün burada” işareti ve istoc.com sonucu belgede yoktur. Bu bilgiler
+    “sitenin karşılaştırması” notunu taşır. Değerleri canlı paket verisinden türetilir (`hizmetler.ts → deger()`, `bas()`).
+  - Belgede kaynağı gösterilmeyen cümle (`kaynaksiz`) ayrı notla yazılır. Her bölümde belgenin çıkarımı örneklerden önce gelir.
+  - “İkincil kaynak” etiketi platformun kendi yayını olmayan kaynağı gösterir. Belge beş kaynağı etiketledi. Sayfa dört
+    kaynağı daha etiketledi (`ikincil: 'sayfa'`) ve bunu kaynaklar bölümünde yazar.
+  - Belgenin adlandırması korunur: tanıştıran platformlar “dizin modeli”, ödemeyi taşıyanlar “işlem modeli”dir.
+  Veri `src/data/kuresel.ts`, görünüm `src/views/KureselPazaryerleriPage.tsx`.
+- `/services/` (menüde ve başlıkta “Hizmetler”; adres kullanıcının istediği gibi İngilizce) üç bilgi türünü ayrı gösterir:
+  bugün var (canlı olgu), araştırmanın ilkesi (ücretsiz ve ücretli ayrımı) ve planlanan (`gelirModelleri.ts` hazırlık durumu).
+  Yeşil yalnız bugün ücretsiz olanı gösterir. Planlanan hizmetin hazırlık hapı nötrdür. “Yakında” işaretli özellik tabloda
+  “Var” değil “Yakında” yazar. Paketteki özellik ile planlanan ek hizmet aynı işi anlatıyor gibi görünürse satırda farkları yazılır.
+- Paket fiyatı ve özellikleri istoc.com fiyat planları ucundan okunur. `node scripts/canli-paketler.mjs` komutu ucu canlı okur ve
+  `src/data/canliPaketler.ts` dosyasını üretir. Kaydedilmiş yanıtla çalışırken okunma günü verilir:
+  `node scripts/canli-paketler.mjs yanit.json --okundu=YYYY-AA-GG`. Bu dosya elle değiştirilmez. Metindeki paket adı, sayı,
+  komisyon ve okunma tarihi bu dosyadan türetilir. Elle sayı yazılmaz. Canlı uçta kodu `free` olan paketin adı Basic’tir ve
+  ücretlidir. Gelir modelleri sayfası aynı paketlere Standart, Pro ve Kurumsal der. Hizmetler sayfası bunu not olarak yazar.
+- Menü sırası: Değer önerisi → Hizmetler → Gelir modelleri → Küresel pazaryerleri. İki öğe `yeni` işaretlidir. Öğe artık yeni
+  sayılmayınca `yeni` alanı içerik kaydından silinir ve menü testlerindeki “Yeni” sayısı düşürülür.
+- Ortak stil `src/styles/pazar.css` (`.pz-*`): düz köşeli yüzeyler, kenar sistemi (`data-edge`), tanıştıran küme `--viz-1`,
+  ödemeyi taşıyan küme `--viz-credit`, ücretsiz durum yeşili, ücretli vurgu yüzeyi. Kapı ve duvar anı iki temada da
+  `--surface-changed` yüzeyini kullanır. Renkli ya da gömük kutudaki hap kart yüzeyine çıkar. Hap biçimi yalnız
+  `.chip.pz-cip` etiketlerindedir. Hizmet satırında ad 64em’den itibaren solda, daha dar ekranda üsttedir.
+- Kaynak bağlantıları sitenin geri kalanı gibi yeni sekmede açılır (`target="_blank"`, `rel="noopener noreferrer"`).
+  Düzyazıdaki kaynak cümlenin sonunda satır içi bağlantıdır. Tablodaki ve listedeki kaynak en az 44 px yüksekliktedir.
+- Testler: `tests/kuresel-pazaryerleri.spec.ts` ve `tests/hizmetler.spec.ts`. Genişlikler 320, 360, 375, 390, 768, 1024 ve
+  1280 px ile yatay telefon (844 × 390) olur. Testler taşmayı, en küçük metni ve noktalı virgül ile uzun çizgi yasağını
+  denetler. Canlı paket değerlerini, görünür notları, belgedeki bütün bağlantıları, planlanan hizmetin gelir modeli
+  kartına bağlantısını ve menü yerini de denetler.
+
 ### Oyunlaştırma sayfası (kullanıcı kararları 2026-11-04)
 
 - `/oyunlastirma/` Pazarlama menüsündedir, Gelir modellerinden sonra gelir. Veri `src/data/oyunlastirma.ts`, görünüm `src/views/OyunlastirmaPage.tsx`, stil `global.css` içindeki `.oy-*` bloğudur. Test: `tests/oyunlastirma.spec.ts`.

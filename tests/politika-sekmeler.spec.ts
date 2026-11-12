@@ -13,7 +13,7 @@ test('rehber menüsü tek bağlantıdır ve iki projede beş rol sekmesi vardır
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.getByRole('button', { name: 'Pazarlama', exact: true }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
 });
 
 test('sekmeler adresle eşleşir ve geri dönüş aynı proje ile rolü açar', async ({ page }) => {

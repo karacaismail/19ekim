@@ -25,6 +25,7 @@ const SAYFA_ONEKI: Record<string, string> = {
   'onboarding.css': 'ob-',
   'politikalar.css': 'pol-',
   'personaSync.css': 'persona-',
+  'pazar.css': 'pz-',
 };
 
 function dosyalar(klasor: string): string[] {
