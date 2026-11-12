@@ -24,33 +24,33 @@ export const akisOlustur: AkisOlustur = (a) => {
   const fiyat = segikaAylik(a);
   const primKurali = a.model === 'oran'
     ? `Kotayı aşan satış tutarının ${yuzde(a.kadroluPrim.segika)} kadarı prim olur.`
-    : `Kotayı dolduran satıştan sonraki her satış için ${tl(a.sabit)} prim hesaplanır.`;
+    : `Kota dolduktan sonraki her satış için ${tl(a.sabit)} prim alırsınız.`;
   const ornek = k.prim > 0
-    ? `Örnek ayarda ${sayi(a.kadroluSatis)} satışla prim ${tl(k.prim)} olur.`
-    : `Örnek ayardaki ${sayi(a.kadroluSatis)} satış kotayı aşmaz. Kota için ${sayi(k.kotaIcinSatis)} satış gerekir. Satış işi yine aynı sürer.`;
+    ? `Bu örnekte ${sayi(a.kadroluSatis)} satışla prim ${tl(k.prim)} olur.`
+    : `Bu örnekteki ${sayi(a.kadroluSatis)} satış kotayı aşmaz. Kotayı doldurmak için ${sayi(k.kotaIcinSatis)} satış gerekir. Satış işi yine aynı adımlarla ilerler.`;
 
   const adimlar: AkisAdimi[] = [
     {
       id: 'gorev',
       ad: 'Görevinizi ve prim ekinizi alın',
-      sorumlu: 'İnsan kaynakları sorumlusu',
+      sorumlu: 'Siz ve insan kaynakları sorumlusu',
       yap: [
-        'Yazılı görev tanımınızı alın.',
-        'Prim ekinde başlangıç dönemi kuralını okuyun.',
+        'İnsan kaynakları size yazılı görev tanımı verir.',
+        'Prim ekindeki başlangıç dönemi kuralını okuyun.',
         'Maaşın net mi brüt mü olduğunu sorun.',
       ],
-      dikkat: 'Kaynak bu rol için kotasız başlangıç dönemi tanımlamaz. Böyle bir dönem varsaymayın.',
+      dikkat: 'Şirket bu rol için kotasız başlangıç dönemi belirlemedi. Böyle bir dönem varsaymayın.',
       soru: 'Görev tanımınız ve prim ekiniz hazır mı?',
       ek: 'anlasma',
       secenekler: [
         devam('hazir', 'Görev tanımı ve prim eki elimde', 'kayit'),
         son('bekle', 'ek-yok', 'Görev tanımı var, prim eki yok', 'Prim eki bekleniyor', [
-          'İnsan kaynakları ve finans ekibi prim ekini yazsın.',
+          'İnsan kaynakları ve finans ekibi prim ekini yazar.',
           'Ek gelene kadar kendinize prim hesabı yapmayın.',
-          'Ek gelince bu adıma dönün.',
+          'Prim eki gelince bu adıma dönün.',
         ]),
         son('bekle', 'sozlesme-yok', 'Henüz iş sözleşmem yok', 'İş sözleşmesi bekleniyor', [
-          'İnsan kaynakları iş sözleşmesini hazırlasın.',
+          'İnsan kaynakları iş sözleşmesini hazırlar.',
           'Sözleşme imzalanınca bu adıma dönün.',
         ]),
       ],
@@ -61,16 +61,17 @@ export const akisOlustur: AkisOlustur = (a) => {
       sorumlu: 'Siz',
       yap: [
         'İşvereni müşteri takip sisteminde arayın.',
-        'Mali müşavir veya danışman kaydı olabilir.',
+        'İşverenin mali müşaviri kaydı önceden açmış olabilir.',
         'Kişinin iletişim tercihini kontrol edin.',
       ],
       soru: 'Kayıt aramasında ne buldunuz?',
       ek: 'kitle',
       secenekler: [
         devam('bos', 'İşveren kayıtlı değil, görüşmeyi kabul etti', 'ihtiyac'),
-        son('bekle', 'kayitli', 'İşveren başka çalışana, mali müşavire veya danışmana kayıtlı', 'Kayıt kararı bekleniyor', [
-          'Satış yöneticisi kayıt tarihlerine bakarak karar versin.',
+        son('bekle', 'kayitli', 'İşveren başka çalışana, mali müşavire veya danışmana kayıtlı', 'Kayıt kararını bekleyin', [
+          'Satış yöneticisi kayıt tarihlerine bakıp karar verir.',
           'Karar yazılana kadar teklif göndermeyin.',
+          'Karar gelince bu adıma dönün.',
         ]),
         son('bitir', 'ret', 'Kişi iletişim istemiyor', 'Görüşme kapandı', [
           'Tercihini müşteri kaydına yazın.',
@@ -106,19 +107,19 @@ export const akisOlustur: AkisOlustur = (a) => {
       yap: [
         'Yalnız kimliksiz örnek veri kullanın.',
         'Gerçek çalışan dosyası istemeyin.',
-        'Teşvik tutarı veya sonucu sözü vermeyin.',
+        'Teşvik tutarı veya sonuç sözü vermeyin.',
       ],
       soru: 'Gösterimden sonra işveren ne dedi?',
       ek: 'sinir',
       secenekler: [
         devam('teklif-istedi', 'İşveren teklif istedi', 'teklif'),
-        son('bitir', 'tesvik-tutari', 'İşveren kesin teşvik tutarı istiyor', 'Tutar sözü verilemez', [
+        son('bitir', 'tesvik-tutari', 'İşveren kesin teşvik tutarı istiyor', 'Tutar sözü veremezsiniz', [
           'Tutar sözü veremeyeceğinizi açıkça söyleyin.',
           'İşveren tutarsız devam etmezse görüşmeyi kapatın.',
         ]),
-        son('bekle', 'gercek-dosya', 'İşveren gerçek çalışan dosyası gönderdi', 'Kişisel veri kararı bekleniyor', [
+        son('bekle', 'gercek-dosya', 'İşveren gerçek çalışan dosyası gönderdi', 'Kişisel veri kararını bekleyin', [
           'Dosyayı açmayın ve saklamayın.',
-          'Satış yöneticisi kişisel veri sorumlusuyla sonraki işlemi belirlesin.',
+          'Satış yöneticisi kişisel veri sorumlusuyla sonraki işlemi belirler.',
           'Karar gelince bu adıma dönün.',
         ]),
       ],
@@ -128,23 +129,25 @@ export const akisOlustur: AkisOlustur = (a) => {
       ad: 'Paket ve çalışan sayısıyla teklif hazırlayın',
       sorumlu: 'Siz ve satış yöneticisi',
       yap: [
-        `Örnek hesap ${sayi(a.calisan)} çalışan için ${PAKET[a.segikaPaket]} kullanır.`,
-        `Bu örneğin yıllık paket bedeli ${tl(yillikFiyat(a))} tutarındadır.`,
-        'Çalışan sayısını teklife yazın.',
+        `Bu örnekte işverenin ${sayi(a.calisan)} çalışanı vardır. Örnek ${PAKET[a.segikaPaket]} için hesaplanır.`,
+        `Bu örnekte yıllık paket ${tl(yillikFiyat(a))} eder.`,
+        'Teklife paketi ve çalışan sayısını yazın.',
+        'Fiyat tablodaki fiyattır. İndirim yoktur.',
       ],
-      dikkat: `Fiyat ${sayi(a.blok)} çalışanlık bloklarla hesaplanır. Örnekte ${sayi(fiyat.kisi)} kişilik blok kullanılır. Sayı aynı blokta kalırsa fiyat değişmeyebilir.`,
+      dikkat: `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar. Bu örnek ${sayi(fiyat.kisi)} çalışana göredir. Sayı aynı blokta kalırsa fiyat değişmez.`,
       soru: 'Teklifin durumu nedir?',
       ek: 'kazanc',
       secenekler: [
         devam('kabul', 'İşveren onaylı teklifi kabul etti', 'sozlesme'),
-        son('bekle', 'sayi-degisti', 'Çalışan sayısı teklif sonrası değişti', 'Yeni hesap bekleniyor', [
+        son('bekle', 'sayi-degisti', 'Çalışan sayısı teklif sonrası değişti', 'Güncel teklifi bekleyin', [
           'Yeni sayıyı finans ekibine bildirin.',
-          'Fiyat değişirse satış yöneticisi yeni teklifi onaylasın.',
-          'Onaylı teklif gelince bu adıma dönün.',
+          'Fiyat değişirse satış yöneticisi teklifi tablo fiyatıyla günceller.',
+          'Güncel teklif gelince bu adıma dönün.',
         ]),
-        son('bekle', 'indirim', 'İşveren onaysız indirim istiyor', 'İndirim kararı bekleniyor', [
-          'Talebi satış yöneticisine yazılı iletin.',
-          'Onay gelmezse liste fiyatı geçerli kalır.',
+        son('bekle', 'indirim', 'İşveren indirim istiyor', 'İşverenin kararını bekleyin', [
+          'Fiyatın herkes için aynı olduğunu söyleyin.',
+          'Talebi kimseye iletmeyin. Şirket yeni teklif hazırlamaz.',
+          'İşveren teklifi kabul ederse bu adıma dönün.',
         ]),
         son('bitir', 'red', 'İşveren teklifi reddetti', 'Teklif kapandı', [
           'Ret nedenini müşteri kaydına yazın.',
@@ -156,29 +159,30 @@ export const akisOlustur: AkisOlustur = (a) => {
       ad: 'Sözleşmeyi ve veri metinlerini tamamlayın',
       sorumlu: 'Yetkili imza sahibi ve finans ekibi',
       yap: [
-        'Paketi, çalışan sayısını ve fiyatı sözleşmeye ekleyin.',
-        'Şirketin kişisel veri metinlerini sözleşmeyle verin.',
-        'Ödeme yalnız şirket hesabına yapılır.',
+        'Finans ekibi paketi, çalışan sayısını ve fiyatı sözleşmeye yazar.',
+        'Yetkili imza sahibi sözleşmeyi şirket adına imzalar.',
+        'Siz şirketin kişisel veri metinlerini sözleşmeyle işverene verin.',
+        'İşveren ödemeyi yalnız şirket hesabına yapar.',
       ],
       soru: 'Sözleşme ve ödeme ne durumda?',
       ek: 'anlasma',
       secenekler: [
         devam('odendi', 'Sözleşme imzalı, işveren ödemeyi yaptı', 'devir'),
         son('bekle', 'odeme-bekliyor', 'Sözleşme imzalı, ödeme gelmedi', 'Ödeme bekleniyor', [
-          'Finans ekibine bildirin.',
-          'Hatırlatmayı kimin yapacağını finans ekibi belirlesin.',
+          'Durumu finans ekibine bildirin.',
+          'Hatırlatmayı kimin yapacağını finans ekibi belirler.',
           'Ödeme gelince bu adıma dönün.',
         ]),
         son('bekle', 'imza-yok', 'İmza yetkilisi belli değil', 'İmza yetkilisi bekleniyor', [
-          'Satış yöneticisi imza yetkilisini yazılı belirlesin.',
-          'Yetkili belli olunca bu adıma dönün.',
+          'Satış yöneticisi imza yetkilisini yazılı belirler.',
+          'İmza yetkilisi belli olunca bu adıma dönün.',
         ]),
       ],
     },
     {
       id: 'devir',
       ad: 'Kuruluma ve desteğe devredin',
-      sorumlu: 'Kurulum ekibi',
+      sorumlu: 'Siz ve kurulum ekibi',
       yap: [
         'Paketi, çalışan sayısını ve iletişim kişisini yazılı iletin.',
         'Çalışan verisinin aktarımını kurulum ekibine bırakın.',
@@ -188,14 +192,15 @@ export const akisOlustur: AkisOlustur = (a) => {
       ek: 'plan',
       secenekler: [
         devam('kabul', 'Kurulum ekibi devri kabul etti', 'prim'),
-        son('bekle', 'aktarim-usulu', 'Veri aktarım usulü yazılı değil', 'Aktarım usulü bekleniyor', [
-          'Kişisel veri sorumlusu ve kurulum ekibi usulü yazsın.',
-          'Usul yazılmadan çalışan verisi istemeyin.',
-          'Usul gelince bu adıma dönün.',
+        son('bekle', 'aktarim-usulu', 'Veri aktarım yöntemi yazılı değil', 'Aktarım yöntemini bekleyin', [
+          'Kişisel veri sorumlusu ve kurulum ekibi yöntemi yazar.',
+          'Yöntem yazılmadan çalışan verisi istemeyin.',
+          'Yöntem yazılınca bu adıma dönün.',
         ]),
         son('bekle', 'kapasite', 'Kurulum ekibi şimdi yeni işveren alamıyor', 'Kurulum takvimi bekleniyor', [
           'Satış yöneticisine kapasite sorununu bildirin.',
           'Takvim belli olmadan kurulum tarihi vermeyin.',
+          'Takvim belli olunca bu adıma dönün.',
         ]),
       ],
     },
@@ -204,7 +209,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       ad: 'Prim sonucunu kontrol edin',
       sorumlu: 'Finans ekibi',
       yap: [
-        `Örnek kota ${tl(k.kota)} tutarındadır. Kota, prim eşiğidir.`,
+        `Bu örnekte kota ${tl(k.kota)} olur. Kota, prim eşiğidir.`,
         primKurali,
         odemeKurali,
       ],
@@ -212,10 +217,10 @@ export const akisOlustur: AkisOlustur = (a) => {
       soru: 'Bu satışın prim durumu nedir?',
       ek: 'kazanc',
       secenekler: [
-        son('tamamla', 'asti', 'İade süresi geçti, bu ay kota aşıldı', 'Prim dökümüne geçer', [
-          'Finans ekibi dönem sonunda prim dökümünü hazırlar.',
+        son('tamamla', 'asti', 'İade süresi geçti, bu ay kota aşıldı', 'Prim listesine geçer', [
+          'Finans ekibi dönem sonunda prim listesini hazırlar.',
           'Kesin tutarı yazılı prim eki belirler.',
-          'Döküm hatalıysa satış kaydıyla yazılı itiraz edin.',
+          'Liste hatalıysa satış kaydıyla yazılı itiraz edin.',
         ]),
         son('tamamla', 'asmadi', 'Bu ay kota aşılmadı', 'Satış geçerli, prim oluşmayabilir', [
           'Satış kaydınız geçerli kalır.',
@@ -223,11 +228,11 @@ export const akisOlustur: AkisOlustur = (a) => {
           'Yöneticinizle iş yükünü birlikte inceleyin.',
         ]),
         son('bekle', 'iade', 'İade süresi henüz geçmedi', 'İade süresi bekleniyor', [
-          'Finans ekibi iade süresini izlesin.',
-          'Süre bitince bu adıma dönün.',
+          'Finans ekibi iade süresini izler.',
+          'İade süresi bitince bu adıma dönün.',
         ]),
         son('bekle', 'sayi-farki', 'Kurulumda çalışan sayısı farklı çıktı', 'Bedel ve prim incelemesi bekleniyor', [
-          'Finans ekibi bedeli prim ekine göre yeniden incelesin.',
+          'Finans ekibi bedeli ve primi yeniden inceler.',
           'İnceleme sonucu yazılınca bu adıma dönün.',
         ]),
       ],
@@ -235,7 +240,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   ];
 
   return {
-    baslik: 'Kadrolu satış uzmanı: ana program',
+    baslik: 'Kadrolu satış uzmanının ana programı',
     ozet: 'İşverene teşvik ve bordro işini gösterirsiniz. Prim, kotayı aşan satıştan doğar.',
     hedef: 'İşveren kuruluma devredilsin ve prim durumu netleşsin.',
     ilk: 'gorev',

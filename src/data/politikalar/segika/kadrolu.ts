@@ -5,7 +5,7 @@ export const politika: ProjePolitika = {
   "proje": "segika",
   "ad": "Kadrolu satış uzmanı",
   "amac": "İşverenlere Segika'nın teşvik ve bordro işlerini gösterin, satışı kuruluma devredin.",
-  "iliski": "Bu modelde şirket sizi maaşlı ve sigortalı çalıştırır. Maaşınızı insan kaynakları bordroyla öder. Göreviniz ve prim koşullarınız iş sözleşmesinin ekinde yazılmalıdır.",
+  "iliski": "Bu modelde şirket sizi maaşlı ve sigortalı çalıştırır. Maaşınızı insan kaynakları bordroyla öder. İnsan kaynakları görevinizi ve prim koşullarınızı iş sözleşmesinin ekine yazar.",
   "gorev": [
     "Size verilen işverenlerin teşvik ve bordro ihtiyacını takip edin.",
     "İşverenin sigorta prim teşviki ve bordro sürecini öğrenin.",
@@ -18,10 +18,11 @@ export const politika: ProjePolitika = {
     "Teşvik tutarı veya teşvik sonucu hakkında söz vermeyin.",
     "Teşvik uygunluğu için kesin karar vermeyin.",
     "Gerçek çalışan veya bordro dosyasını kendi cihazınıza almayın.",
-    "Onaysız indirim, kurulum tarihi veya özellik sözü vermeyin.",
+    "Fiyat, fiyat tablosundaki fiyattır. İndirim vermeyin ve pazarlık yapmayın.",
+    "Onaysız kurulum tarihi veya özellik sözü vermeyin.",
     "Müşteri ödemesini kişisel hesabınıza alamazsınız.",
     "Şirket adına imza yetkiniz yazılı verilmediyse sözleşme imzalamayın.",
-    "İletişim dayanağı olmayan kişiye pazarlama iletisi göndermeyin.",
+    "İletişim izni olmayan kişiye pazarlama iletisi göndermeyin.",
     "Çalışma saatleri, izinler ve yan haklar bu rehberde belirlenmez. Bunları iş sözleşmeniz belirler."
   ],
   "adimlar": [
@@ -41,7 +42,7 @@ export const politika: ProjePolitika = {
         "İşverenin mali müşaviri veya bir danışman kaydı daha önce açmış olabilir.",
         "İşveren başka çalışana veya bir ortağa kayıtlıysa görüşmeyi başlatmayın.",
         "Bu durumda satış yöneticisinden yazılı karar isteyin.",
-        "Kayıt size verilirse iletişim dayanağını ve kişinin tercihini kontrol edin."
+        "Kayıt size verilirse kişinin iletişim iznini ve tercihini kontrol edin."
       ]
     },
     {
@@ -74,10 +75,11 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Paket ve çalışan sayısıyla teklif hazırlayın",
       "metin": [
-        "İşveren isterse onaylı fiyat listesiyle teklif hazırlayın.",
+        "İşveren isterse fiyat tablosuyla teklif hazırlayın.",
         "Teklife paketi ve çalışan sayısını yazın.",
         "Çalışan sayısı değişirse finans ekibi bedeli yeniden hesaplasın. Bedel farklıysa müşteri sözleşmesindeki uygulamayı açıklayın.",
-        "Özel şart gerekiyorsa satış yöneticisinden yazılı onay alın.",
+        "Teklife indirim veya tablo dışı fiyat yazmayın.",
+        "Fiyat dışında özel şart gerekiyorsa satış yöneticisinden yazılı onay alın.",
         "Onayı ve çalışan sayısı bilgisini teklif kaydına ekleyin."
       ]
     },
@@ -104,10 +106,10 @@ export const politika: ProjePolitika = {
       "baslik": "Satışı kuruluma devredin",
       "metin": [
         "Kurulum ekibine paketi, çalışan sayısını ve iletişim kişisini yazılı iletin.",
-        "Çalışan verisinin aktarımını kurulum ekibinin yönetmesini öneriyoruz.",
-        "Aktarım usulü yazılmadan veri istemeyin.",
-        "Ekip devri kabul edince işverene sonraki adımı bildirin.",
-        "Ekip devri kabul etmezse işverene kurulum tarihi vermeyin."
+        "Çalışan verisinin aktarımını kurulum ekibine bırakın.",
+        "Aktarım yöntemi yazılmadan veri istemeyin.",
+        "Kurulum ekibi devri kabul edince işverene sonraki adımı bildirin.",
+        "Kurulum ekibi devri kabul etmezse işverene kurulum tarihi vermeyin."
       ]
     },
     {
@@ -126,7 +128,7 @@ export const politika: ProjePolitika = {
         "Görev size verildiyse paket bitmeden kullanım durumunu sorun.",
         "Çalışan sayısı değiştiyse yeni bedeli finans ekibine hesaplatın.",
         "İşveren yenilemek istemezse nedenini kayda yazın.",
-        "Yenilemenin prime girip girmediğini prim eki belirlemelidir."
+        "Prim eki yenilemenin prime girip girmediğini yazmalıdır."
       ]
     },
     {
@@ -134,18 +136,18 @@ export const politika: ProjePolitika = {
       "metin": [
         "Kota uygulanan aylarda prim, kotayı aşan satış tutarından doğar. Kota, prim eşiğidir.",
         "Satış tutarı, paketin çalışan sayısına göre hesaplanan bedelidir.",
-        "İşveren ödemeden ve iade süresi geçmeden prim ödenmez.",
-        "Dönem sonunda prim dökümündeki çalışan sayılarını teklifle karşılaştırın.",
+        "İşveren ödemeden ve iade süresi geçmeden şirket prim ödemez.",
+        "Dönem sonunda prim listesindeki çalışan sayılarını teklifle karşılaştırın.",
         "Eksik satış varsa satış kaydıyla birlikte yazılı itiraz edin.",
-        "Finans ekibi, itirazı kabul edilen prim ekine göre değerlendirsin.",
-        "Yönetici ve finans ekibi sonucu yazılı açıklasın."
+        "Finans ekibi itirazı imzalı prim ekine göre değerlendirir.",
+        "Satış yöneticisi ve finans ekibi sonucu yazılı açıklar."
       ]
     }
   ],
   "kitleler": [
     {
       "urun": "Segika",
-      "ad": "Çalışan sayısı artan üretim işletmesi",
+      "ad": "Çalışan sayısı artan 50 ile 300 çalışanlı üretim işletmesi",
       "ihtiyac": "Yeni işe girişlerde sigorta prim teşviklerini düzenli kontrol etmek isteyebilir.",
       "ulasim": "İnsan kaynakları yöneticisine onaylı tanıtım kanalıyla ulaşın.",
       "mesaj": "Yeni işe girişlerde teşvik kontrolünü kim yapıyor?",
@@ -154,7 +156,7 @@ export const politika: ProjePolitika = {
     },
     {
       "urun": "Segika",
-      "ad": "Bordroyu kendi muhasebe birimi hazırlayan işletme",
+      "ad": "Bordroyu kendi muhasebe birimi hazırlayan 30 ile 150 çalışanlı işletme",
       "ihtiyac": "Bordro ve sigorta bildirimleri muhasebe biriminin iş yükünü artırabilir.",
       "ulasim": "Muhasebe yöneticisiyle planlanmış görüşme yapın.",
       "mesaj": "Bordro ve sigorta işlemlerini hangi araçlarla hazırlıyorsunuz?",
@@ -163,7 +165,7 @@ export const politika: ProjePolitika = {
     },
     {
       "urun": "Segika",
-      "ad": "Birden fazla işyeri olan perakende zinciri",
+      "ad": "5 ile 40 mağazası olan perakende zinciri",
       "ihtiyac": "Merkez farklı işyerlerinin sigorta kayıtlarını birlikte izlemek isteyebilir.",
       "ulasim": "İnsan kaynakları ve muhasebe sorumlularını aynı görüşmeye çağırın.",
       "mesaj": "İşyerlerinin sigorta kayıtlarını merkezden nasıl takip ediyorsunuz?",
@@ -172,7 +174,7 @@ export const politika: ProjePolitika = {
     },
     {
       "urun": "Segika",
-      "ad": "Vardiyalı çalışan hizmet işletmesi",
+      "ad": "Büyükşehirde vardiyalı çalışan 20 ile 200 çalışanlı hizmet işletmesi",
       "ihtiyac": "Sık işe giriş ve çıkış bordro hatası riskini artırabilir.",
       "ulasim": "İşletme sahibinden veya insan kaynakları sorumlusundan randevu alın.",
       "mesaj": "İşe giriş ve çıkış işlemlerinde en çok nerede zorlanıyorsunuz?",
@@ -197,9 +199,9 @@ export const politika: ProjePolitika = {
       "sonuc": "Satış yöneticisi kişisel veri sorumlusuyla sonraki işlemi belirler."
     },
     {
-      "kosul": "İşveren onaysız indirim veya özel şart isterse",
-      "islem": "Talebi satış yöneticisine yazılı iletin.",
-      "sonuc": "Onay gelmezse onaylı fiyat listesi geçerli kalır."
+      "kosul": "İşveren indirim veya tablo dışı fiyat isterse",
+      "islem": "Fiyatın herkes için aynı olduğunu söyleyin. Talebi kimseye aktarmayın.",
+      "sonuc": "Şirket bu talep için yeni teklif hazırlamaz. Fiyat tablosu geçerli kalır."
     },
     {
       "kosul": "Kişi pazarlama iletisi istemezse",
@@ -224,15 +226,15 @@ export const politika: ProjePolitika = {
     {
       "kosul": "Çalışan sayısı satıştan sonra değişirse",
       "islem": "Finans ekibine yeni çalışan sayısını bildirin.",
-      "sonuc": "Finans ekibi bedelin etkisini müşteri sözleşmesine göre açıklar. Prim için kabul edilen prim ekini uygular."
+      "sonuc": "Finans ekibi bedelin etkisini müşteri sözleşmesine göre açıklar. Prim için imzalı prim ekini uygular."
     },
     {
       "kosul": "İşveren satışı iptal ederse",
       "islem": "Finans ekibi ilgili primi ve iptal nedenini incelesin.",
-      "sonuc": "Ücretten otomatik kesinti yapılacağı varsayılmaz. Uygulanacak kuralı insan kaynakları yazılı açıklar."
+      "sonuc": "Bu rehber ücretten kendiliğinden kesinti öngörmez. Uygulanacak kuralı insan kaynakları yazılı açıklar."
     },
     {
-      "kosul": "Prim dökümüne itiraz ederseniz",
+      "kosul": "Prim listesine itiraz ederseniz",
       "islem": "Satış kaydını ekleyerek finans ekibine yazılı itiraz edin.",
       "sonuc": "Finans ekibi prim ekini inceler. İnsan kaynakları ve finans ekibi ödeme kararını yazılı açıklar."
     },
@@ -246,17 +248,17 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Taraflar ve görev",
       "metin": [
-        "İş sözleşmesinde şirket ve çalışan açıkça yazılmalıdır.",
+        "İş sözleşmesi şirketi ve çalışanı açıkça yazmalıdır.",
         "İnsan kaynakları görev, ücret, çalışma düzeni ve yan hakları yazmalıdır.",
         "Görev tanımı teşvik ve bordro konusunda hangi soruları yanıtlayacağınızı yazmalıdır.",
-        "Hesaplayıcıdaki maaşın net veya brüt olduğu ayrıca belirtilmelidir."
+        "İnsan kaynakları maaşın net mi brüt mü olduğunu yazmalıdır."
       ]
     },
     {
       "baslik": "Geçerli sürüm ve program",
       "metin": [
         "Prim eki hangi hesap sürümünün geçerli olduğunu yazmalıdır.",
-        "Bu rolde kaynakta yalnız ana program vardır.",
+        "Bu rolde yalnız ana program vardır.",
         "Prim eki ana programı ve hesap sürümünü birlikte yazmalıdır."
       ]
     },
@@ -264,17 +266,18 @@ export const politika: ProjePolitika = {
       "baslik": "Prim eki",
       "metin": [
         "Finans ekibi kota dönemini ve prime giren satışları açıklamalıdır.",
-        "Ödeme günü ile iade süresi prim ekinde yazılmalıdır.",
-        "Başlangıç döneminin kota ve prim kuralı yazılmalıdır.",
-        "Çalışan sayısı değişiminin prime etkisi yazılmalıdır.",
-        "Yenilemenin prime girip girmediği yazılmalıdır."
+        "Prim eki ödeme gününü ve iade süresini yazmalıdır.",
+        "Prim eki başlangıç döneminin kota ve prim kuralını yazmalıdır.",
+        "Prim eki çalışan sayısı değişiminin prime etkisini yazmalıdır.",
+        "Prim eki yenilemenin prime girip girmediğini yazmalıdır."
       ]
     },
     {
       "baslik": "İşveren kaydı ve yetki",
       "metin": [
         "Satış yöneticisi işverenin hangi çalışana yazılacağını belirleyen kuralı açıklamalıdır.",
-        "Yönetici indirim ve sözleşme yetkisini yazılı açıklamalıdır."
+        "Satış yöneticisi sözleşme yetkisini yazılı açıklamalıdır.",
+        "Kimsenin indirim yetkisi yoktur. Fiyat, fiyat tablosundaki fiyattır."
       ]
     },
     {
@@ -287,18 +290,18 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Çalışan verisi ve destek",
       "metin": [
-        "Hangi müşteri verisine erişeceğiniz yazılı belirlenmelidir.",
-        "Müşterinin çalışan verisini kimin aktaracağı yazılmalıdır.",
+        "İnsan kaynakları hangi müşteri verisine erişeceğinizi yazılı belirlemelidir.",
+        "Sözleşme müşterinin çalışan verisini kimin aktaracağını yazmalıdır.",
         "Sunum ve tanıtım içeriğini şirketin onayladığı biçimde kullanın.",
-        "Kurulum ekibinin ve destek uzmanının sorumluluğu yazılmalıdır."
+        "Sözleşme kurulum ekibinin ve destek uzmanının sorumluluğunu yazmalıdır."
       ]
     },
     {
       "baslik": "Değişiklik, ayrılma ve itiraz",
       "metin": [
         "Prim ekindeki değişiklik yalnız yazılı kabulle geçerli olmalıdır.",
-        "Ayrılmada işveren listesi ve erişimler şirket usulüyle devredilmelidir.",
-        "Prim itirazının hangi ekibe yapılacağı yazılmalıdır."
+        "Ayrılırsanız işveren listesini ve erişimleri şirketin yöntemiyle devredin.",
+        "Prim eki itirazın hangi ekibe yapılacağını yazmalıdır."
       ]
     }
   ],
@@ -306,47 +309,73 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Başlangıçta kotasız dönem var mı?",
       "mevcut": "Birinci sürüm kotasız başlangıçtan söz etmez. İkinci sürüm ilk iki ay kota uygulamaz.",
-      "eksik": "Geçerli sürümde başlangıç kuralı ve bu dönemin primi yazılı değildir.",
+      "eksik": "Şirket geçerli sürümde başlangıç kuralını ve bu dönemin primini henüz yazmadı.",
       "islem": "Satış yöneticisi ve insan kaynakları başlangıç kuralını prim ekine yazsın.",
       "kanit": "Çalışan örnek bordrodaki hesabı kendi sözleriyle anlatsın.",
-      "firsat": "Eğitim hedefiyle satış hedefini ayırmak öğrenmeyi kolaylaştırabilir.",
+      "firsat": "Eğitim hedefini satış hedefinden ayırmak yeni uzmanın ilk satışını hızlandırabilir.",
       "durdur": "Yazılı kural yoksa ikinci sürüm kuralını kendiliğinden uygulamayın."
     },
     {
       "baslik": "Çalışan sayısı değişirse prim ne olur?",
       "mevcut": "Fiyat, çalışan sayısına göre bloklarla hesaplanır.",
-      "eksik": "Satıştan sonra değişen çalışan sayısının prime etkisi yazılı değildir.",
+      "eksik": "Şirket satıştan sonra değişen çalışan sayısının prime etkisini henüz yazmadı.",
       "islem": "Finans ekibi örnek durumlarla prim kuralını belirlesin.",
-      "kanit": "Aynı satışın değişiklik öncesi ve sonrası dökümü gösterilsin.",
-      "firsat": "Açık kural, çalışan sayısının düşük yazılmasını önleyebilir.",
+      "kanit": "Finans ekibi aynı satışın değişiklik öncesi ve sonrası listesini göstersin.",
+      "firsat": "Açık kural, çalışan sayısının doğru yazılmasını sağlar. Doğru sayı, gerçek paket bedelinin faturalanmasını sağlar.",
       "durdur": "Kural yazılmadan değişen bedeli prim hesabına katmayın."
     },
     {
       "baslik": "Maaş net mi, brüt mü?",
-      "mevcut": "Hesaplayıcı örnek bir maaş tutarı kullanır.",
-      "eksik": "Bu tutarın net veya brüt olduğu kaynakta belirtilmemiştir.",
+      "mevcut": "Bu rehberin hesabı örnek bir maaş tutarı kullanır.",
+      "eksik": "Şirket bu tutarın net mi brüt mü olduğunu henüz yazmadı.",
       "islem": "İnsan kaynakları maaşın niteliğini iş sözleşmesine yazsın.",
       "kanit": "Çalışan örnek bordroyu iş sözleşmesiyle karşılaştırabilsin.",
-      "firsat": "Açık bordro örneği ilk maaş günündeki soruları azaltabilir.",
-      "durdur": "Nitelik yazılmadan hesaplayıcı tutarını sözleşmeye taşımayın."
+      "firsat": "Açık maaş bilgisi yeni uzman bulmayı kolaylaştırabilir. Böylece satış ekibi daha hızlı büyür.",
+      "durdur": "Bu bilgi yazılmadan örnek tutarı sözleşmeye taşımayın."
     },
     {
       "baslik": "Çalışan verisi ne zaman aktarılacak?",
       "mevcut": "Gösterimde gerçek çalışan dosyası istenmez.",
-      "eksik": "Sözleşmeden sonra veri aktarımının sorumlusu ve dayanağı yazılı değildir.",
-      "islem": "Kişisel veri sorumlusu ve kurulum ekibi aktarım usulünü yazsın.",
+      "eksik": "Şirket sözleşmeden sonra veri aktarımının sorumlusunu ve yasal dayanağını henüz yazmadı.",
+      "islem": "Kişisel veri sorumlusu ve kurulum ekibi aktarım yöntemini yazsın.",
       "kanit": "Her aktarımın tarihi ve sorumlusu kayıtta görünsün.",
-      "firsat": "Tek aktarım yolu, verinin satış ekibinde kalmasını önleyebilir.",
-      "durdur": "Usul yazılmadan çalışan verisi aktarımı başlatmayın."
+      "firsat": "Tek aktarım yolu kurulumu hızlandırabilir. Hızlı kurulum ilk faturayı öne çeker.",
+      "durdur": "Yöntem yazılmadan çalışan verisi aktarımı başlatmayın."
     },
     {
       "baslik": "Yenileme kimin işi ve prime girer mi?",
-      "mevcut": "Kaynak yalnız yeni yıllık paket satışının primini açıklar.",
-      "eksik": "Yenileme görüşmesinin sorumlusu ve primi yazılı değildir.",
+      "mevcut": "Şirket yalnız yeni yıllık paket satışının primini açıkladı.",
+      "eksik": "Şirket yenileme görüşmesinin sorumlusunu ve primini henüz yazmadı.",
       "islem": "Satış yöneticisi ve finans ekibi yenileme kuralını prim ekine yazsın.",
       "kanit": "Yenilenen her paketin sorumlusu müşteri kaydında görünsün.",
-      "firsat": "Destek taleplerini erken görmek yenileme kaybını azaltabilir.",
+      "firsat": "Destek taleplerini erken görmek yenilenen paket sayısını artırabilir.",
       "durdur": "Kural yazılmadan yenilemeyi prim hesabına katmayın."
+    }
+  ],
+  "firsatlar": [
+    {
+      "baslik": "Toptan pazar yerindeki satıcılara gidin",
+      "neden": "Şirketin toptan pazar yeri ürününde çalışanı olan satıcılar var. Bu satıcılar bordro ve teşvik takibine ihtiyaç duyabilir. Kadrolu uzmanın işveren listesi bu satıcıları henüz kapsamıyor.",
+      "ilkAdim": "Satış yöneticisi pazar yeri ekibinden iletişim izni olan satıcıları ister. Kadrolu uzman bu satıcılara gösterim randevusu önerir.",
+      "olcu": "Bu satıcılardan alınan randevuları sayın. Gösterimleri ve sözleşmeleri ayrıca sayın."
+    },
+    {
+      "baslik": "Tek paketten birleşik pakete geçirin",
+      "neden": "Segika'da teşvik, otomasyon ve ikisini birlikte içeren paket var. Tek paket alan işveren zamanla öbür işe de ihtiyaç duyabilir. Yenilemenin sorumlusu henüz belli değil.",
+      "ilkAdim": "Satış yöneticisi yenileme sorumlusunu atar. Uzman kurulumdan sonraki ilk bordro döneminde işverene ikinci ihtiyacı sorar.",
+      "olcu": "Tek paketten birleşik pakete geçen işverenleri sayın."
+    },
+    {
+      "baslik": "Karar veren mali müşaviri ortak yapın",
+      "neden": "Kayıt aramasında mali müşavir kaydı çıkabiliyor. Bazı işverenlerde kararı mali müşavir veriyor. Bu müşavirler çözüm ortağı programına aday olabilir.",
+      "ilkAdim": "Uzman kararı veren müşavirin ofis adını satış yöneticisine yazar. Ortaklık sorumlusu ofisi çözüm ortağı programına davet eder.",
+      "olcu": "Bu yolla ortaklık görüşmesine gelen ofisleri sayın. Bu ofislerden gelen işveren kayıtlarını ayrıca sayın."
+    },
+    {
+      "baslik": "Perakende zincirlerinde merkezle anlaşın",
+      "neden": "Hedef kitlede çok mağazalı perakende zinciri var. Merkezle yapılan tek sözleşme bütün mağazaları kapsayabilir.",
+      "ilkAdim": "Satış yöneticisi zincir işletmeleri ayrı listeye alır. Uzman merkezin insan kaynakları müdürüyle görüşür.",
+      "olcu": "Merkez sözleşmesiyle kurulan mağaza sayısını sayın."
     }
   ],
   "kesifler": [
@@ -354,28 +383,28 @@ export const politika: ProjePolitika = {
       "baslik": "Teşvik beklentisi iptale yol açıyor mu?",
       "sinyal": "İşveren beklediği teşvik sonucunu göremediği için iptal isteyebilir.",
       "kontrol": "Satış yöneticisi iptal nedenlerini görüşme notlarıyla karşılaştırsın.",
-      "tepki": "Notlarda teşvik sözü varsa ilgili satış anlatımını düzeltsin.",
+      "tepki": "Notlarda teşvik sözü varsa satış yöneticisi ilgili satış anlatımını düzeltsin.",
       "kayit": "İptal nedenini ve görüşmede söylenenleri birlikte saklayın."
     },
     {
       "baslik": "Çalışan verisi satış ekibinde kalıyor mu?",
       "sinyal": "Gerçek bordro dosyası e-postada veya kişisel cihazda bulunabilir.",
       "kontrol": "Kişisel veri sorumlusu satış e-postalarında ek dosya türlerini kontrol etsin.",
-      "tepki": "Gerçek dosya varsa silme ve bildirim usulünü uygulasın.",
+      "tepki": "Gerçek dosya varsa kişisel veri sorumlusu dosyayı sildirsin. Gerekirse bildirim de yapsın.",
       "kayit": "Bulunan dosyanın türünü ve yapılan işlemi kaydedin."
     },
     {
       "baslik": "Çalışan sayısı düşük yazılıyor mu?",
       "sinyal": "Kurulumda bulunan çalışan sayısı tekliften yüksek çıkabilir.",
       "kontrol": "Finans ekibi teklif ve kurulum kayıtlarındaki sayıları karşılaştırsın.",
-      "tepki": "Fark varsa bedeli ve ilgili primi yeniden incelesin.",
+      "tepki": "Fark varsa finans ekibi bedeli ve ilgili primi yeniden incelesin.",
       "kayit": "İki sayıyı ve farkın nedenini saklayın."
     },
     {
       "baslik": "Destek talepleri satıştan sonra birikiyor mu?",
       "sinyal": "Satış tamam görünürken işveren ürünü kullanamıyor olabilir.",
-      "kontrol": "Yönetici destek taleplerini satış kayıtlarıyla karşılaştırsın.",
-      "tepki": "Tekrarlayan sorun varsa ilgili satış anlatımını düzeltsin.",
+      "kontrol": "Satış yöneticisi destek taleplerini satış kayıtlarıyla karşılaştırsın.",
+      "tepki": "Tekrarlayan sorun varsa satış yöneticisi ilgili satış anlatımını düzeltsin.",
       "kayit": "Devir kabulünü ve ilk kullanım sorununu birlikte saklayın."
     }
   ],
@@ -384,13 +413,13 @@ export const politika: ProjePolitika = {
     "Satış yöneticisi geçen hafta yapılan gösterimleri saysın. Bunlardan teklife geçenleri ayrıca saysın.",
     "Satış yöneticisi kabul edilen teklifleri saysın. Bunlardan tahsil edilenleri ayrıca saysın.",
     "Finans ekibi o haftanın iptallerini aynı haftanın satışlarıyla karşılaştırsın.",
-    "Oran önceki haftadan düşükse yönetici nedeni ve çözümü kaydetsin.",
+    "Oran önceki haftadan düşükse satış yöneticisi nedeni ve çözümü kaydetsin.",
     "Başlamadan kotayı, prim ödemesini ve durma nedenini kendi sözlerinizle anlatın. Satış yöneticisi farklı anlaşılan yeri metinde düzeltsin."
   ],
   "programlar": {
     "ana": [
-      "Varsayılan prim yalnız kotanın üzerindeki cirodan hesaplanır.",
-      "Paket bedeli çalışan sayısına göre değişir. Bu nedenle ciro da değişebilir."
+      "Varsayılan prim yalnız kotanın üzerindeki satış tutarından hesaplanır.",
+      "Paket bedeli çalışan sayısına göre değişir. Bu nedenle satış tutarı da değişebilir."
     ]
   }
 };

@@ -37,7 +37,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   };
 
   const firma: AkisAdimi = {
-    id: 'firma', ad: 'Uygun firmayı seçin', sorumlu: 'Siz (mevcut müşteri)', ek: 'kitle',
+    id: 'firma', ad: 'Uygun firmayı seçin', sorumlu: 'Siz', ek: 'kitle',
     yap: [
       'İnsan kaynakları veya muhasebe yöneticisiyle izinli konuşun.',
       'Ödül alabileceğinizi açıkça söyleyin.',
@@ -47,7 +47,7 @@ export const akisOlustur: AkisOlustur = (a) => {
     secenekler: [
       devam('istiyor', 'Firma tanışmak istiyor', 'basvuru'),
       sonlu('bekle', 'tesvik-soru', 'Firma ne kadar teşvik alacağını soruyor', 'Soruyu satış uzmanına bırakın',
-        'Teşvik tahmini vermeyin.', 'Satış uzmanı konuyu firmayla kendisi konuşsun.', 'Firma tanışmak isterse bu adımı yeniden açın.'),
+        'Teşvik tahmini vermeyin.', 'Satış uzmanı bu konuyu firmayla kendisi konuşur.', 'Firma tanışmak isterse bu adımı yeniden açın.'),
       sonlu('bekle', 'dusunuyor', 'Firma düşünmek istiyor', 'Firmanın kararını bekleyin',
         'Israr etmeyin.', 'Firma kendisi dönerse bu adımı yeniden açın.'),
       sonlu('bitir', 'red', 'Firma tanışmak istemiyor', 'Tanıştırma kapandı',
@@ -56,11 +56,11 @@ export const akisOlustur: AkisOlustur = (a) => {
   };
 
   const basvuru: AkisAdimi = {
-    id: 'basvuru', ad: 'Başvuruyu kaydettirin', sorumlu: 'Karşı firma ve müşteri sorumlusu', ek: 'sinir',
+    id: 'basvuru', ad: 'Başvuruyu kaydettirin', sorumlu: 'Karşı firma ve müşteri sorumlusu (önerilen görev)', ek: 'sinir',
     yap: [
-      'Başvuruyu karşı firmanın yetkili yöneticisi yapsın.',
-      'Başvuruya çalışan listesi veya bordro dosyası eklenmesin.',
-      'Müşteri sorumlusu bağlantıyı size yazılı bildirsin.',
+      'Karşı firmanın yetkili yöneticisi başvuruyu yapar.',
+      'Karşı firma başvuruya çalışan listesi veya bordro dosyası eklemez.',
+      'Müşteri sorumlusu tavsiyenin firmanıza bağlandığını yazılı bildirir.',
     ],
     soru: 'Tavsiyenin firmanıza bağlandığını bildiren yazı geldi mi?',
     secenekler: [
@@ -68,7 +68,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       sonlu('bekle', 'yazi-yok', 'Henüz yazı gelmedi', 'Bağlantıyı bekleyin',
         'Müşteri sorumlusuna firma adını ve tarihi iletin.', 'Yazı gelince bu adımı yeniden açın.'),
       sonlu('bekle', 'cakisma', 'Firma kayıtlı, grup şirketi veya başkası tavsiye etmiş', 'Uygunluk incelemesini bekleyin',
-        'Müşteri sorumlusu kayıtları karşılaştırsın.', 'Sonucu size yazılı açıklasın.', 'İnceleme bitmeden ödül sözü verilmez.'),
+        'Müşteri sorumlusu kayıtları karşılaştırır.', 'Müşteri sorumlusu sonucu size yazılı açıklar.', 'İnceleme bitmeden kimse ödül sözü vermez.'),
       sonlu('bekle', 'dosya', 'Firma bize bordro dosyası gönderdi', 'Dosyayı iletmeyin',
         'Dosyayı başkasına göndermeyin.', 'Firmadan şirkete doğrudan göndermesini isteyin.', 'Dosyayı kendi firmanızın veri kuralına göre silin.'),
     ],
@@ -84,22 +84,22 @@ export const akisOlustur: AkisOlustur = (a) => {
             id: 'kosul', ad: 'Yazılı koşulu alın', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'kazanc',
             yap: [
               `Her uygun tavsiye için ${sayi(a.krediAy)} ay ücretsiz kullanım alırsınız.`,
-              `Yılda en çok ${sayi(a.tavsiyeSinir)} tavsiye ödüle çevrilir.`,
-              'Müşteri sorumlusu ödülün işleneceği hesabı yazılı bildirsin.',
+              `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeyi ödüle çevirir.`,
+              'Müşteri sorumlusu ödülün işleneceği hesabı yazılı bildirir.',
             ],
-            dikkat: 'Ana programın ödülü ücretsiz kullanımdır. Nakit ödeme değildir.',
+            dikkat: 'Ödül nakit değil, ücretsiz kullanımdır. Bu ödülü karşı firmaya fiyat avantajı gibi anlatmayın.',
             soru: 'Ödül koşulu firmanıza yazılı ulaştı mı?',
             secenekler: [
               devam('yazili', 'Yazılı koşul elimizde', 'firma'),
               sonlu('bekle', 'sozlu', 'Koşul yalnız sözlü anlatıldı', 'Yazılı koşulu bekleyin',
-                'Sözlü anlatılan koşul esas alınmaz.', 'Müşteri sorumlusundan yazılı koşulu isteyin.', 'Yazı gelince bu adımı yeniden açın.'),
+                'Şirket sözlü anlatılan koşulu esas almaz.', 'Müşteri sorumlusundan yazılı koşulu isteyin.', 'Yazı gelince bu adımı yeniden açın.'),
               sonlu('bekle', 'surum', 'Bize farklı bir sürüm koşulu bildirildi', 'Geçerli sürümü netleştirin',
-                'Bu rehber birinci sürüm koşulunu izler.', 'Müşteri sorumlusu geçerli sürümü yazılı açıklasın.', 'Açıklama gelince adımı yeniden değerlendirin.'),
+                'Bu rehber birinci sürüm koşulunu izler.', 'Müşteri sorumlusu geçerli sürümü yazılı açıklar.', 'Açıklama gelince bu adımı yeniden açın.'),
             ],
           }
         : {
             id: 'kosul', ad: 'Yazılı koşulu alın', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'kazanc',
-            yap: ['Seçili ayarlarda tavsiye eden için ödül yoktur.', 'Müşteri sorumlusu bu durumu yazılı bildirsin.'],
+            yap: ['Şu anki koşullarda tavsiye eden firmaya ödül yoktur.', 'Müşteri sorumlusu bu durumu yazılı bildirir.'],
             soru: 'Ödül olmadan tanıştırma yapmak istiyor musunuz?',
             secenekler: [
               devam('odulsuz', 'Ödülsüz tanıştırma yapacağız', 'firma'),
@@ -113,15 +113,15 @@ export const akisOlustur: AkisOlustur = (a) => {
         id: 'satis', ad: 'Satışı şirkete bırakın', sorumlu: 'Satış uzmanı (önerilen görev)',
         yap: [
           'Satış uzmanı firmanın çalışan sayısına göre teklif verir.',
-          `Fiyat ${sayi(a.blok)} çalışanlık bloklarla değişir.`,
-          'Çalışan sayısı değişse de fiyat aynı blokta kalabilir.',
+          `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar.`,
+          'Fiyat herkes için aynıdır.',
         ],
         dikkat: 'Birinci sürümde yeni müşterinin yıllık paket alması gerekir.',
         soru: 'Firma hangi ödemeyi seçti?',
         secenekler: [
           devam('yillik', 'Firma yıllık paket aldı', 'kullanim'),
           sonlu('bitir', 'aylik', 'Firma aylık ödemeyi seçti', 'Ödül koşulu oluşmadı',
-            'Birinci sürüm koşulu yıllık pakettir.', 'Müşteri sorumlusu durumu size yazılı açıklasın.'),
+            'Birinci sürüm koşulu yıllık pakettir.', 'Müşteri sorumlusu durumu size yazılı açıklar.'),
           sonlu('bekle', 'gorusme', 'Görüşme hâlâ sürüyor', 'Satış kararını bekleyin',
             'Görüşmeyi satış uzmanı yürütür.', 'Karar çıkınca bu adımı yeniden açın.'),
           sonlu('bitir', 'vazgecti', 'Firma almaktan vazgeçti', 'Tavsiye sonuçlanmadı',
@@ -130,26 +130,26 @@ export const akisOlustur: AkisOlustur = (a) => {
       },
       {
         id: 'kullanim', ad: 'Kullanım süresini izleyin', sorumlu: 'Müşteri sorumlusu (önerilen görev)',
-        yap: [kural[1], 'Sürenin kurulumla mı, ilk bordroyla mı başladığı yazılmalıdır.'],
+        yap: [kural[1], 'Şirket bu sürenin başlangıcını henüz belirlemedi.', 'Müşteri sorumlusu başlangıcı kurulum veya ilk bordro olarak yazar.'],
         soru: 'Yeni firmanın kullanım süresi ne durumda?',
         secenekler: [
           devam('doldu', 'Süre doldu, firma kullanmaya devam ediyor', 'sinir'),
           sonlu('bekle', 'baslangic', 'Sürenin başlangıcı bize yazılmadı', 'Başlangıç tarihini öğrenin',
-            'Müşteri sorumlusu başlangıç olayını yazılı tanımlasın.', 'Tarih gelince bu adımı yeniden açın.'),
+            'Müşteri sorumlusu başlangıç olayını yazılı tanımlar.', 'Başlangıç tarihi yazılınca bu adımı yeniden açın.'),
           sonlu('bekle', 'dolmadi', 'Süre henüz dolmadı', 'Süre dolana kadar bekleyin',
-            'Bitiş tarihinde bu adımı yeniden açın.'),
+            'Süre bitince bu adımı yeniden açın.'),
           sonlu('bekle', 'birakti', 'Firma süre dolmadan bıraktı', 'Finans incelemesini bekleyin',
-            'Kaynakta bu durum için kural yoktur.', 'Finans sorumlusu kararını size yazılı açıklasın.'),
+            'Şirket bu durum için henüz kural koymadı.', 'Finans sorumlusu kararını size yazılı açıklar.'),
         ],
       },
       {
         id: 'sinir', ad: 'Yıllık sınırı kontrol edin', sorumlu: 'Müşteri sorumlusu (önerilen görev)',
-        yap: [`Yılda en çok ${sayi(a.tavsiyeSinir)} tavsiye ödüle çevrilir.`, 'Müşteri sorumlusu bu yılki sayınızı bildirsin.'],
+        yap: [`Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeyi ödüle çevirir.`, 'Müşteri sorumlusu bu yılki sayınızı bildirir.'],
         soru: 'Bu yıl ödül alan tavsiyeleriniz sınıra ulaştı mı?',
         secenekler: [
           devam('altinda', 'Sınır henüz dolmadı', 'odul'),
           sonlu('bitir', 'doldu', 'Bu yılki sınır doldu', 'Bu tavsiye ödüle çevrilmez',
-            'Hesaplayıcı yalnız sınır kadar tavsiyeyi ödüle çevirir.', 'Müşteri sorumlusu sonucu yazılı açıklasın.'),
+            'Şirket sınırı aşan tavsiyeyi ödüle çevirmez.', 'Müşteri sorumlusu sonucu yazılı açıklar.'),
           sonlu('bekle', 'bilmiyor', 'Sayımızı bilmiyoruz', 'Sayımı öğrenin',
             'Müşteri sorumlusundan bu yılki sayıyı isteyin.', 'Cevap gelince bu adımı yeniden açın.'),
         ],
@@ -158,20 +158,20 @@ export const akisOlustur: AkisOlustur = (a) => {
         id: 'odul', ad: 'Ücretsiz kullanımı görün', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
         yap: odulVar
           ? [
-              `Örnek ayarda ödülün karşılığı ${tl(kredi)} kullanımdır.`,
-              `Yeni müşteri ${sayi(a.yeniKrediAy)} ay ücretsiz kullanım alır.`,
-              'Firmanızın muhasebe birimi faturayı kontrol etsin.',
+              `Bu örnekte ödülün değeri ${tl(kredi)} kullanımdır.`,
+              `Şirket yeni müşteriye ${sayi(a.yeniKrediAy)} ay ücretsiz kullanım verir. Bunu yeni müşteriye şirket bildirir.`,
+              'Siz faturanızı muhasebe biriminizle kontrol edin.',
             ]
-          : ['Seçili ayarlarda tavsiye eden için ödül yoktur.', `Yeni müşteri ${sayi(a.yeniKrediAy)} ay ücretsiz kullanım alır.`],
-        dikkat: 'Ücretsiz kullanımın vergi ve fatura işlemi henüz karar verilmemiş konudur.',
+          : ['Şu anki koşullarda tavsiye eden firmaya ödül yoktur.', `Şirket yeni müşteriye ${sayi(a.yeniKrediAy)} ay ücretsiz kullanım verir.`],
+        dikkat: 'Finans sorumlusu bu ödülün faturasını henüz belirlemedi.',
         soru: 'Firmanızın faturasında ne görüyorsunuz?',
         secenekler: [
           sonlu('tamamla', 'gorunuyor', 'Ücretsiz süre faturamızda görünüyor', 'Tavsiye işi bitti',
             'Bu tavsiye için rehberin işi tamamlandı.', 'Yeni tavsiye için rehberi baştan başlatın.'),
           sonlu('bekle', 'gorunmuyor', 'Ücretsiz süre faturamızda görünmüyor', 'Fatura düzeltmesini bekleyin',
-            'Muhasebe biriminiz müşteri sorumlusuna yazsın.', 'Finans sorumlusu sonucu yazılı bildirsin.'),
+            'Muhasebe biriminiz durumu müşteri sorumlusuna yazsın.', 'Finans sorumlusu sonucu yazılı bildirir.'),
           sonlu('bekle', 'vergi', 'Ödülün vergi sonucunu soruyoruz', 'Vergi kararını bekleyin',
-            'Bu konu henüz karara bağlanmadı.', 'Finans sorumlusu mali müşavirle kararı yazsın.', 'Karar gelince bu adımı yeniden açın.'),
+            'Şirket bu konuda henüz karar vermedi.', 'Finans sorumlusu kararı mali müşavirle yazar.', 'Karar gelince bu adımı yeniden açın.'),
         ],
       },
     ];
@@ -180,7 +180,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       ozet: 'Başka bir firmayı şirketle tanıştırırsınız. Satışı ve desteği şirket yürütür.',
       hedef: odulVar
         ? 'Yeni firma koşulları sağlarsa firmanız ücretsiz Segika kullanımı alır.'
-        : 'Seçili ayarlarda ödülsüz bir tanıştırma yaparsınız.',
+        : 'Şu anki koşullarda ödülsüz bir tanıştırma yaparsınız.',
       ilk: 'deneyim',
       adimlar,
     };
@@ -196,12 +196,12 @@ export const akisOlustur: AkisOlustur = (a) => {
   const komisyonVar = a.tekSeferOran > 0 && komisyon > 0;
   const tabanMetni = a.affOdeme === 'paket'
     ? 'İlk fatura, yeni müşterinin yıllık paket faturasıdır.'
-    : 'Seçili ayarda ilk fatura bir aylık faturadır.';
+    : 'Bu örnekte ilk fatura bir aylık faturadır.';
   const zamanMetni = odemeAylari.length === 0
-    ? 'Hesap süresi içinde ödeme görünmüyor.'
+    ? 'Bu örnekte hesap süresi içinde ödeme yok.'
     : odemeAylari.length === 1
-      ? (ayniAy ? 'Komisyon tahsilatın yapıldığı ay tek seferde ödenir.' : 'Komisyon tek seferde, hizmet ayından sonra ödenir.')
-      : `Komisyon ${sayi(odemeAylari.length)} aya bölünerek ödenir.`;
+      ? (ayniAy ? 'Şirket komisyonu tahsilat ayında tek seferde öder.' : 'Şirket komisyonu hizmet ayından sonra tek seferde öder.')
+      : `Şirket komisyonu ${sayi(odemeAylari.length)} aya bölerek öder.`;
 
   const adimlar: AkisAdimi[] = [
     deneyim,
@@ -209,27 +209,27 @@ export const akisOlustur: AkisOlustur = (a) => {
       ? {
           id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
           yap: [
-            `Ödül, ilk faturanın ${yuzde(a.tekSeferOran)} oranında nakit komisyondur.`,
-            'Bu seçenek ücretsiz kullanımla kendiliğinden birleşmez.',
-            `Yılda en çok ${sayi(a.tavsiyeSinir)} tavsiye hesaplanır.`,
+            `Ödül, ilk faturanın ${yuzde(a.tekSeferOran)} kadarı nakit komisyondur.`,
+            'Bu seçenek ücretsiz kullanımla birleşmez.',
+            `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeye komisyon öder.`,
           ],
-          dikkat: 'Bu seçenek isteğe bağlıdır. Seçimi müşteri sorumlusu yazılı kaydetsin.',
+          dikkat: 'Bu seçenek isteğe bağlıdır. Müşteri sorumlusu seçiminizi yazılı kaydeder.',
           soru: 'Firmanız hangi ödülü yazılı seçti?',
           secenekler: [
             devam('komisyon', 'Komisyon seçeneğini yazılı seçtik', 'firma'),
             sonlu('bitir', 'kullanim', 'Ücretsiz kullanımı tercih ediyoruz', 'Bu yol kapandı',
-              'Bu rehber komisyon seçeneğini izler.', 'Hesaplayıcıda ana programı seçip yeniden başlayın.'),
+              'Bu rehber komisyon seçeneğini izler.', 'Ücretsiz kullanım için ana programı müşteri sorumlusuyla konuşun.'),
             sonlu('bekle', 'yazisiz', 'Seçim henüz yazılı değil', 'Yazılı seçimi bekleyin',
-              'Müşteri sorumlusu seçimi yazılı kaydetsin.', 'Kayıt gelince bu adımı yeniden açın.'),
+              'Müşteri sorumlusu seçimi yazılı kaydeder.', 'Kayıt gelince bu adımı yeniden açın.'),
           ],
         }
       : {
           id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
-          yap: ['Seçili ayarlarda komisyon tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirsin.'],
+          yap: ['Şu anki koşullarda komisyon tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirir.'],
           soru: 'Komisyon oranı size yazılı bildirildi mi?',
           secenekler: [
             sonlu('bekle', 'oran-yok', 'Oran henüz bildirilmedi', 'Oranı bekleyin',
-              'Oran olmadan komisyon hesaplanmaz.', 'Müşteri sorumlusu oranı yazılı bildirsin.', 'Ayarlar değişince rehberi yeniden açın.'),
+              'Oran olmadan komisyon hesaplanmaz.', 'Müşteri sorumlusu oranı yazılı bildirir.', 'Oran yazılınca bu adımı yeniden açın.'),
             sonlu('bitir', 'vazgec', 'Komisyonsuz tanıştırma yapmayacağız', 'Bu yol kapandı',
               'Komisyon oluşmadığı için tanıştırma yapmadınız.', 'Mevcut hizmetiniz bundan etkilenmez.'),
           ],
@@ -238,7 +238,7 @@ export const akisOlustur: AkisOlustur = (a) => {
     basvuru,
     {
       id: 'satis', ad: 'İlk faturayı izleyin', sorumlu: 'Satış uzmanı (önerilen görev)',
-      yap: ['Satış uzmanı firmaya teklif verir.', tabanMetni, 'Komisyon yalnız ilk fatura için hesaplanır.'],
+      yap: ['Satış uzmanı firmaya tablo fiyatıyla teklif verir.', tabanMetni, 'Şirket komisyonu yalnız ilk fatura için hesaplar.'],
       soru: 'Yeni firmanın ilk faturası ne durumda?',
       secenekler: [
         devam('kesildi', 'İlk faturanın kesildiğini öğrendik', 'tahsilat'),
@@ -250,38 +250,38 @@ export const akisOlustur: AkisOlustur = (a) => {
     },
     {
       id: 'tahsilat', ad: 'Tahsilatı izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-      yap: ['Komisyon, müşteri ilk faturayı ödeyince doğar.', 'Finans sorumlusu tahsilat durumunu size bildirsin.'],
+      yap: ['Komisyon, yeni firma ilk faturayı ödeyince doğar.', 'Finans sorumlusu tahsilat durumunu size bildirir.'],
       soru: 'Yeni firma ilk faturayı ödedi mi?',
       secenekler: [
         devam('odedi', 'Firmanın ödediği bize bildirildi', 'odeme'),
         sonlu('bekle', 'bekliyor', 'Ödeme henüz yapılmadı', 'Tahsilatı bekleyin',
-          'Finans sorumlusu ödeme olunca size bildirsin.', 'Bildirim gelince bu adımı yeniden açın.'),
+          'Finans sorumlusu ödeme olunca size bildirir.', 'Bildirim gelince bu adımı yeniden açın.'),
         sonlu('bitir', 'odemeyecek', 'Firma ödemeyeceğini bildirdi', 'Komisyon doğmadı',
-          'Kaynak koşuluna göre ödeme yoksa komisyon doğmaz.', 'Finans sorumlusu sonucu yazılı açıklasın.'),
+          'Yeni firma ödemezse komisyon doğmaz.', 'Finans sorumlusu sonucu yazılı açıklar.'),
       ],
     },
     {
       id: 'odeme', ad: 'Komisyon ödemesini izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-      yap: [`Seçili ayarda komisyon ${tl(komisyon)} olarak hesaplanır.`, zamanMetni, 'Ödeme belgesi ve vergi işlemi henüz karara bağlanmadı.'],
-      dikkat: 'Ödeme zamanı kabul edilen ödeme kuralına bağlıdır.',
+      yap: [`Bu örnekte komisyonunuz ${tl(komisyon)} olur.`, zamanMetni, 'Finans sorumlusu ödeme belgesini ve vergi işlemini henüz belirlemedi.'],
+      dikkat: 'Ödeme zamanını yazılı tavsiye koşulu belirler.',
       soru: 'Komisyon ödemesi ne durumda?',
       secenekler: [
         devam('geldi', 'Ödeme hesabımıza geçti', 'iade'),
         sonlu('bekle', 'plan-yok', 'Ödeme planı bize bildirilmedi', 'Ödeme planını bekleyin',
-          'Finans sorumlusu ödeme tarihini yazılı bildirsin.', 'Tarihte bu adımı yeniden açın.'),
+          'Finans sorumlusu ödeme tarihini yazılı bildirir.', 'Ödeme tarihi gelince bu adımı yeniden açın.'),
         sonlu('bekle', 'belge', 'Bizden ödeme belgesi istendi', 'Belge kararını bekleyin',
-          'Belge ve vergi işlemi henüz karara bağlanmadı.', 'Finans sorumlusu mali müşavirle kararı yazsın.'),
+          'Şirket belge ve vergi işlemine henüz karar vermedi.', 'Finans sorumlusu kararı mali müşavirle yazar.', 'Karar gelince bu adımı yeniden açın.'),
       ],
     },
     {
       id: 'iade', ad: 'İade durumunu bilin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-      yap: ['Hesaplayıcı koşuluna göre iade olursa komisyon geri alınır.', 'Geri alma şeklini finans sorumlusu yazılı açıklasın.'],
+      yap: ['Yeni firma iade alırsa şirket komisyonu geri alır.', 'Finans sorumlusu geri alma yöntemini yazılı açıklar.'],
       soru: 'Yeni firmanın iade talebi var mı?',
       secenekler: [
         sonlu('tamamla', 'iade-yok', 'Bildiğimiz bir iade talebi yok', 'Tavsiye işi bitti',
           'Bu tavsiye için rehberin işi tamamlandı.', 'Yeni tavsiye için rehberi baştan başlatın.'),
         sonlu('bekle', 'iade-var', 'Firmanın iade istediğini öğrendik', 'Finans incelemesini bekleyin',
-          'Finans sorumlusu kabul edilen koşula göre inceler.', 'Sonucu size yazılı açıklasın.'),
+          'Finans sorumlusu iadeyi yazılı tavsiye koşuluna göre inceler.', 'Finans sorumlusu sonucu size yazılı açıklar.'),
       ],
     },
   ];
@@ -290,7 +290,7 @@ export const akisOlustur: AkisOlustur = (a) => {
     ozet: 'Başka bir firmayı tanıştırırsınız. Ödül ilk faturadan bir kez nakit komisyondur.',
     hedef: komisyonVar
       ? 'Yeni firma ilk faturayı öderse firmanız tek seferlik komisyon alır.'
-      : 'Seçili ayarlarda komisyon oluşmuyor. Önce oranı netleştirin.',
+      : 'Şu anki koşullarda komisyon oluşmuyor. Önce oranı müşteri sorumlusundan öğrenin.',
     ilk: 'deneyim',
     adimlar: komisyonVar ? adimlar : adimlar.slice(0, 2),
   };
