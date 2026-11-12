@@ -22,6 +22,19 @@ export interface AcikKonu {
   durdur: string;
 }
 export interface Kesif { baslik: string; sinyal: string; kontrol: string; tepki: string; kayit: string }
+/**
+ * Boşluk analizinden çıkan ticari fırsat. Risk azaltma değil, yeni satış veya yeni kanal anlatır.
+ * Fiyat, indirim, ücretsiz süre veya tutar sözü içermez.
+ */
+export interface Firsat {
+  baslik: string;
+  /** Bu fırsat hangi boşluktan doğuyor? */
+  neden: string;
+  /** İlk işi kim, ne zaman yapar? */
+  ilkAdim: string;
+  /** Sonuç neyle ölçülür? Hedef sayı uydurulmaz. */
+  olcu: string;
+}
 export interface Politika {
   id: RolId;
   ad: string;
@@ -36,8 +49,12 @@ export interface Politika {
   anlasma: Adim[];
   acikKonular: AcikKonu[];
   kesifler: Kesif[];
+  /** Boşlukları dolduracak ticari fırsatlar. Her rehberde en az üç fırsat bulunur. */
+  firsatlar?: Firsat[];
   haftalik: string[];
   programlar: Record<string, string[]>;
+  /** Ana program dışındaki programların kendi hedef kitleleri. Anahtar, kosullar.ts program kimliğidir. */
+  programKitleleri?: Record<string, HedefKitle[]>;
 }
 
 export const PERSONALAR = [

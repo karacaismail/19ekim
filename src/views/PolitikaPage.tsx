@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Accordion } from '@mantine/core';
-import type { ProjePolitika } from '../data/politikalar/types';
+import type { ProjePolitika, RolId } from '../data/politikalar/types';
+import { KOSULLAR } from '../data/kosullar';
 import type { HesapOrnegi, RehberHesabi } from '../data/politikalar/hesap';
 import { href } from '../lib/paths';
 import { useMotionMs } from '../lib/motion';
@@ -8,7 +9,7 @@ import '../styles/politikalar.css';
 
 const bolumler = [
   ['gorev', 'Göreviniz'], ['is-akisi', 'İş adımları'], ['hedef-kitle', 'Müşteri bulma'],
-  ['kazanc', 'Kazanç'], ['sorunlar', 'Sorun çözme'], ['anlasma', 'Anlaşma'], ['ayrintilar', 'Diğer koşullar'],
+  ['kazanc', 'Kazanç'], ['sorunlar', 'Sorun çözme'], ['anlasma', 'Anlaşma'], ['firsatlar', 'Fırsatlar'], ['ayrintilar', 'Diğer koşullar'],
 ];
 
 function Paragraflar({ metin }: { metin: string[] }) {
@@ -37,6 +38,8 @@ function Ayrintilar({ items }: { items: { id: string; ad: string; icerik: ReactN
     </Accordion.Item>)}
   </Accordion>;
 }
+
+const programAdi = (rol: RolId, id: string) => KOSULLAR[rol].find((k) => k.id === id)?.ad ?? id;
 
 export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitika; hesap: RehberHesabi }) {
   const proje = p.proje === 'istoc' ? 'iStoc' : 'Segika';
@@ -69,6 +72,15 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
           <h4>İlk görüşmede söyleyebilirsiniz</h4><blockquote>{k.mesaj}</blockquote>
           <p>{k.uygunluk}</p><p>{k.sonrasi}</p>
         </> }))} />
+        {p.programKitleleri && Object.keys(p.programKitleleri).length > 0 && <>
+          <h3>Diğer programların hedef kitleleri</h3>
+          <Ayrintilar items={Object.entries(p.programKitleleri).flatMap(([program, kitleler]) => kitleler.map((k, i) => ({ id: `program-kitle-${program}-${i}`,
+            ad: `${programAdi(p.id, program)}: ${k.ad}`, icerik: <>
+              <p>{k.ihtiyac}</p><p>{k.ulasim}</p>
+              <h4>İlk görüşmede söyleyebilirsiniz</h4><blockquote>{k.mesaj}</blockquote>
+              <p>{k.uygunluk}</p><p>{k.sonrasi}</p>
+            </> })))} />
+        </>}
         {p.ortakBulma && <><h3>Yeni ortakla nasıl tanışılır?</h3><Paragraflar metin={p.ortakBulma} /></>}
       </Bolum>
       <Bolum id="kazanc" baslik="Kazanç nasıl hesaplanır?">
@@ -77,7 +89,7 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
         <h3>Ödeme ne zaman olur?</h3><Paragraflar metin={hesap.odeme} />
-        <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1`}>Birinci sürümdeki hesabı açın</a>.</p>
+        <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${p.proje}&rol=${p.id}`}>Birinci sürümdeki hesabı açın</a>.</p>
       </Bolum>
       <Bolum id="sorunlar" baslik="Bir sorun çıkarsa ne yapacaksınız?">
         <dl className="pol-sorunlar">{p.sorunlar.map((s) => <div key={s.kosul}>
@@ -102,6 +114,12 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
         <h3>Anlaşıldığını birlikte kontrol edin</h3>
         <p>Başlamadan görev, kazanç koşulu ve durma nedenini kendi sözlerinizle anlatın.</p>
         <p>Yanıtlar farklıysa sorumlu kişi metni açıklığa kavuştursun. Sonra anlaşmayı değerlendirin.</p>
+      </Bolum>
+      <Bolum id="firsatlar" baslik="Boşlukları hangi fırsatlar doldurabilir?">
+        <p>Bu fırsatlar boşluk analizinden çıktı. Hedef veya kazanç sözü değildir.</p>
+        {(p.firsatlar ?? []).map((f) => <div key={f.baslik} className="pol-alt-bolum">
+          <h3>{f.baslik}</h3><p>{f.neden}</p><p>{f.ilkAdim}</p><p>{f.olcu}</p>
+        </div>)}
       </Bolum>
       <Bolum id="ayrintilar" baslik="Diğer koşulları ve açık konuları inceleyin">
         <p>Aşağıdaki konular ana iş sırasını tamamlar. Size uyan başlığı açın.</p>
@@ -134,7 +152,7 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
           { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
             <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
             {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
-            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2`}>İkinci sürümdeki hesabı açın</a>.</p>
+            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&proje=${p.proje}`}>İkinci sürümdeki hesabı açın</a>.</p>
           </> },
           ...hesap.programlar.map((k) => ({ id: `program-${k.id}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
             <p>Bu ayrı bir programdır. Ana programla kendiliğinden birleşmez.</p>

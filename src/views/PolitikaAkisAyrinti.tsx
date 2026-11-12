@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Ayar, Marka, RolId } from '../data/satisOrtakligi';
 import type { ProjePolitika } from '../data/politikalar/types';
 import { rehberHesabi } from '../data/politikalar/hesap';
+import { seciliKosul } from '../data/kosullar';
 import { PolitikaBelgesi } from './PolitikaPage';
 
 const loaders = {
@@ -32,7 +33,32 @@ export default function PolitikaAkisAyrinti({ proje, rol, ayar, bolum }: { proje
   if (!policy || policy.proje !== proje || policy.id !== rol) return <p role="status">Ayrıntılar yükleniyor.</p>;
   const hesap = rehberHesabi(rol, proje, ayar);
   if (bolum === 'full') return <PolitikaBelgesi politika={policy} hesap={hesap} />;
-  if (bolum === 'kitle') return <>{policy.kitleler.map((k) => <section key={k.ad}><h4>{k.ad}</h4><p>{k.ihtiyac}</p><p>{k.ulasim}</p><blockquote>{k.mesaj}</blockquote><p>{k.uygunluk}</p><p>{k.sonrasi}</p></section>)}</>;
+  const program = seciliKosul(ayar, rol);
+  if (bolum === 'kitle') {
+    // Ana program dışında seçili programın kendi hedef kitlesi gösterilir.
+    const ozel = program.id !== 'ana' ? policy.programKitleleri?.[program.id] : undefined;
+    return <>{ozel && <p>Bu kitleler “{program.ad}” programı içindir.</p>}
+      {(ozel ?? policy.kitleler).map((k) => <section key={k.ad}><h4>{k.ad}</h4><p>{k.ihtiyac}</p><p>{k.ulasim}</p><blockquote>{k.mesaj}</blockquote><p>{k.uygunluk}</p><p>{k.sonrasi}</p></section>)}</>;
+  }
+  if (bolum === 'bosluk') return <div data-akis-bosluk>
+    <h4>Yeni satış fırsatları</h4>
+    <p>Bu fırsatlar boşluk analizinden çıktı. Hedef veya kazanç sözü değildir.</p>
+    {(policy.firsatlar ?? []).map((f) => <section key={f.baslik} className="pol-alt-bolum" data-firsat>
+      <h5>{f.baslik}</h5><p>{f.neden}</p><p>{f.ilkAdim}</p><p>{f.olcu}</p>
+    </section>)}
+    <h4>Başlamadan çözülmesi gereken açık konular</h4>
+    <p>Bu konular henüz karar değildir. Şirket her konunun sahibini atamalıdır.</p>
+    {policy.acikKonular.map((k) => <section key={k.baslik} className="pol-alt-bolum">
+      <h5>{k.baslik}</h5><p>{k.mevcut}</p><p>{k.eksik}</p><p>{k.islem}</p><p>{k.kanit}</p><p>{k.firsat}</p><p>{k.durdur}</p>
+    </section>)}
+    <h4>Gözden kaçabilecek sorunlar</h4>
+    <p>Bütün sorunları önceden bilmiyoruz. Şu kontroller yeni sorunları erken gösterir.</p>
+    {policy.kesifler.map((k) => <section key={k.baslik} className="pol-alt-bolum">
+      <h5>{k.baslik}</h5><p>{k.sinyal}</p><p>{k.kontrol}</p><p>{k.tepki}</p><p>{k.kayit}</p>
+    </section>)}
+    <h4>Bir sorun çıkarsa ne yapacaksınız?</h4>
+    <dl className="pol-sorunlar">{policy.sorunlar.map((s) => <div key={s.kosul}><dt>{s.kosul}</dt><dd><p>{s.islem}</p><p>{s.sonuc}</p></dd></div>)}</dl>
+  </div>;
   if (bolum === 'anlasma') return <>{policy.anlasma.map((a) => <section key={a.baslik}><h4>{a.baslik}</h4>{a.metin.map((p) => <p key={p}>{p}</p>)}</section>)}</>;
   if (bolum === 'sinir') return <>{policy.sinir.map((p) => <p key={p}>{p}</p>)}</>;
   if (bolum === 'plan') return <>{hesap.plan.map((p) => <p key={p}>{p}</p>)}</>;

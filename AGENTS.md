@@ -1229,6 +1229,15 @@ Pages yayınından önce çalıştırır.
   Birinci sürümdeki alan değişiklikleri rehbere yansır. İmzalanmış anlaşma kendiliğinden değişmez.
   Eski kişisel tarayıcı kaydı ortak tabloya aktarılmaz.
   Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
+- Zaman çizelgesi geçmiş adımları, etkin adımı ve "Sonraki olası adımlar" listesini gösterir.
+  Etkin adımda önce "Bu adımda yapılacaklar", sonra soru gelir. Okur önce işi okur, sonra sonucu yanıtlar.
+  Sorumlu bilgisi tam cümledir: "Bu adımı finans sorumlusu yürütür." Atanmamış görev ayrıca söylenir.
+  Adımı okur yapıyorsa veride `sorumlu: 'Siz'` yazılır. Birlikte yapılan işte `'Siz ve <görev>'` yazılır.
+- "Açık konuları, riskleri ve fırsatları görün" bölümü tek tıkla açılır.
+  Bu bölüm fırsatları, açık konuları, gözden kaçabilecek sorunları ve sorun çözme adımlarını gösterir.
+  Her rehberde 3 ile 5 arası ticari fırsat (`firsatlar`) bulunur. Fırsat fiyat, indirim veya ücretsiz süre sözü içermez.
+  Ana program dışındaki her programın kendi hedef kitlesi (`programKitleleri`) vardır.
+  `tests/politika-icerik.spec.ts` bu kuralları ve fiyat kuralını denetler.
 - `PolitikaSekmeleriPage.tsx` sekmeleri ve adresi yönetir.
   `PolitikaAkisi.tsx` mevcut işi ve önceki yanıtları gösterir.
   `politikaAkislari` içindeki on dosya koşullu adımları üretir.
@@ -1287,9 +1296,10 @@ Pages yayınından önce çalıştırır.
   `tests/persona-isolation.spec.ts` bu kuralı bütün test dosyalarında denetler.
 - Hesaplayıcının ikinci sürümü (`?surum=v2`) ayrı bir modeldir.
   Bu sürümün ayarları ortak kayda bağlı değildir. Ayarlar yalnız o tarayıcıda kalır.
-- Değişen parametreler rehberdeki örnek adım yanıtlarını sıfırlar.
+- Yalnız akışın yapısını değiştiren parametre adım yanıtlarını sıfırlar.
+  Örneğin katkı seviyesi gösterim adımını ekler veya kaldırır. Kur ise yalnız metindeki tutarı değiştirir ve ilerlemeyi silmez.
   Bu yanıtlar müşteri kaydı, imza veya ortak operasyon kaydı değildir.
-  Yanıtlar yalnız mevcut tarayıcı sekmesinde saklanır.
+  Yanıtlar okurun kendi cihazında (`localStorage`) saklanır. Sekme kapanınca ilerleme kaybolmaz.
 - Sunucu kontrolü: `node --test apps-script/test-persona-sync.mjs`.
   Bu kontrol Pages iş akışında da çalışır.
   İstemci kontrolü: `npx playwright test tests/persona-sync.spec.ts`.

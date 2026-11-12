@@ -6,7 +6,7 @@ import { Sec } from '../components/sadeKit';
 import { kosulListesi, seciliKosul } from '../data/kosullar';
 import { SEVIYE_ADI, type Marka, type RolId, type Seviye } from '../data/satisOrtakligi';
 import type { AkisOlustur, AkisYaniti } from '../data/politikaAkislari/types';
-import { akisGorunumu, olasiSonrakiler } from '../data/politikaAkislari/motor';
+import { akisGorunumu, olasiSonrakiler, sorumluCumlesi } from '../data/politikaAkislari/motor';
 import { usePersonaAyar } from '../lib/personaStore';
 import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
@@ -26,17 +26,21 @@ function Ayrinti(props: AyrintiProps) {
   const Component = component;
   return Component ? <Component {...props} /> : <p role="status">Ayrıntılar yükleniyor.</p>;
 }
+/** Program adlarındaki kısaltmalar açık yazılır. */
+const acikAd = (ad: string) => ad.replace('OSGB', 'Ortak sağlık ve güvenlik birimi').replace('İK', 'insan kaynakları').replace('OSB', 'organize sanayi bölgesi');
 const EK_ADI = { kitle: 'Hedef kitleyi ve ilk mesajı görün', kazanc: 'Hesabı ve ödeme koşullarını görün', anlasma: 'Anlaşmada yazılacakları görün', sinir: 'Yetkinizin sınırlarını görün', plan: 'İş planını görün' };
 
 export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolId; olustur: AkisOlustur }) {
   const { ayar, guncelle, sync, store, hazir, inputError } = usePersonaAyar(proje);
   const akis = useMemo(() => olustur(ayar), [ayar, olustur]);
-  const fingerprint = JSON.stringify(ayar);
+  // Yalnız akışın yapısı değişince ilerleme sıfırlanır. Kur gibi metindeki sayıyı değiştiren alan ilerlemeyi silmez.
+  const fingerprint = useMemo(() => JSON.stringify([akis.ilk, akis.adimlar.map((a) => [a.id, a.secenekler.map((s) => [s.id, s.tur, s.tur === 'devam' ? s.sonraki : ''])])]), [akis]);
   const cacheKey = `turksab-rehber-adim-v1-${proje}-${rol}`;
   const [record, setRecord] = useState<{ fingerprint: string; answers: AkisYaniti[] }>({ fingerprint, answers: [] });
   const [notice, setNotice] = useState('');
   const [full, setFull] = useState<string | null>(() => window.location.hash ? 'belge' : null);
   const [detail, setDetail] = useState<string | null>(null);
+  const [bosluk, setBosluk] = useState<string | null>(null);
   const focusNext = useRef(false);
   const restored = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -52,13 +56,14 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
       if (record.fingerprint === fingerprint) return;
       if (record.answers.length) setNotice('Koşullar değişti. İş sırasını yeniden kontrol edin.');
       setRecord({ fingerprint, answers: [] }); setDetail(null);
-      try { sessionStorage.removeItem(cacheKey); } catch { /* Bellekte sıfırlandı. */ }
+      try { localStorage.removeItem(cacheKey); sessionStorage.removeItem(cacheKey); } catch { /* Bellekte sıfırlandı. */ }
       return;
     }
     restored.current = true;
     let answers: AkisYaniti[] = [];
     try {
-      const cached: unknown = JSON.parse(sessionStorage.getItem(cacheKey) ?? 'null');
+      // İlerleme bu cihazda saklanır. Eski sürümün sekme kaydı da okunur.
+      const cached: unknown = JSON.parse(localStorage.getItem(cacheKey) ?? sessionStorage.getItem(cacheKey) ?? 'null');
       if (cached && typeof cached === 'object' && 'fingerprint' in cached && cached.fingerprint === fingerprint && 'answers' in cached && Array.isArray(cached.answers)) {
         answers = akisGorunumu(akis, cached.answers.filter((a): a is AkisYaniti => a && typeof a.adim === 'string' && typeof a.secenek === 'string')).yanitlar;
       }
@@ -69,7 +74,7 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
   function yanitla(answers: AkisYaniti[]) {
     const next = { fingerprint, answers };
     focusNext.current = true; setRecord(next); setDetail(null); setNotice('');
-    try { sessionStorage.setItem(cacheKey, JSON.stringify(next)); } catch { setNotice('Adımlar bu sekmede tutuluyor. Tarayıcı kaydı yapılamadı.'); }
+    try { localStorage.setItem(cacheKey, JSON.stringify(next)); } catch { setNotice('Adımlar yalnız bu sekmede tutuluyor. Tarayıcı kaydı yapılamadı.'); }
   }
   const seviyeKey = rol === 'oncu' ? 'oncuSeviye' : rol === 'cozum' ? 'cozumSeviye' : rol === 'elci' ? 'elciSeviye' : null;
   const katkili = seciliKosul(ayar, rol).id === 'ana' && seviyeKey && !(rol === 'cozum' && proje === 'segika');
@@ -95,6 +100,18 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
           </div>
           {etkin.dikkat && <p className="pol-yol-not">{etkin.dikkat}</p>}
           <div className="pol-adim-duzeni">
+            <div className="pol-is-aciklamasi">
+              <h4>Bu adımda yapılacaklar</h4>
+              <p className="pol-sorumlu">{sorumluCumlesi(etkin.sorumlu)}</p>
+              <ol className="pol-yap">{etkin.yap.map((line) => <li key={line}>{line}</li>)}</ol>
+              {etkin.ek && <Accordion key={etkin.id} value={detail} onChange={setDetail} classNames={accordionClasses} transitionDuration={motion}>
+                <Accordion.Item value="ek"><Accordion.Control>{EK_ADI[etkin.ek]}</Accordion.Control>
+                  <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+                    {detail && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum={etkin.ek} />}
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>}
+            </div>
             <div className="pol-karar-alani">
               <fieldset className="pol-karar"><legend>{etkin.soru}</legend>
                 {etkin.secenekler.map((s) => <button type="button" className="pol-yanit" key={s.id} aria-pressed={sonuc?.id === s.id}
@@ -104,18 +121,6 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
                 <h4 className="pol-sonuc-baslik" ref={resultHeading} tabIndex={-1}>{sonuc.sonuc.baslik}</h4>{sonuc.sonuc.metin.map((line) => <p key={line}>{line}</p>)}
                 {sonuc.tur === 'bekle' && <p>Koşul değişince bu soruyu yeniden yanıtlayın.</p>}
               </div>}
-            </div>
-            <div className="pol-is-aciklamasi">
-              <h4>Bu adımda yapılacaklar</h4>
-              <p className="pol-sorumlu"><span>Sorumlu</span> {etkin.sorumlu}</p>
-              <ol className="pol-yap">{etkin.yap.map((line) => <li key={line}>{line}</li>)}</ol>
-              {etkin.ek && <Accordion key={etkin.id} value={detail} onChange={setDetail} classNames={accordionClasses} transitionDuration={motion}>
-                <Accordion.Item value="ek"><Accordion.Control>{EK_ADI[etkin.ek]}</Accordion.Control>
-                  <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
-                    {detail && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum={etkin.ek} />}
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </Accordion>}
             </div>
           </div>
         </div>
@@ -129,19 +134,26 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
         </div>
       </li>}
     </ol>
-    <p className="pol-yol-aciklama">Yanıtlarınız bu sekmedeki örnek süreci gösterir. Müşteri kaydı veya imza oluşturmaz.</p>
+    <p className="pol-yol-aciklama">Yanıtlarınız yalnız bu cihazda saklanır. Müşteri kaydı veya imza oluşturmaz.</p>
     <div className="pol-rehber-ekleri">
       <Accordion classNames={accordionClasses} transitionDuration={motion}>
         <Accordion.Item value="ayar"><Accordion.Control>Görevi ve çalışma koşullarını görün</Accordion.Control>
           <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
             <p>{akis.ozet}</p><p>{akis.hedef}</p>
-            <p>Değişiklikler hesaplayıcıya ve bu projenin rehberlerine yansır.</p>
-            <p>Koşullar değişirse önceki adım yanıtları sıfırlanır.</p>
-            <Sec label="Hangi koşullarla çalışır?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: k.ad }))}
+            <p>Bu seçim ortak ayarı değiştirir. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.</p>
+            <p>Seçim iş sırasını değiştirirse önceki adım yanıtları sıfırlanır.</p>
+            <Sec label="Hangi koşullarla çalışır?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
               onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
             {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo', 'Ürün gösterimi') }))}
               onChange={(value) => guncelle({ [seviyeKey]: value })} />}
             <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Bütün hesap parametrelerini açın</a>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+      <Accordion value={bosluk} onChange={setBosluk} classNames={accordionClasses} transitionDuration={motion}>
+        <Accordion.Item value="bosluk"><Accordion.Control>Açık konuları, riskleri ve fırsatları görün</Accordion.Control>
+          <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+            {bosluk && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum="bosluk" />}
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

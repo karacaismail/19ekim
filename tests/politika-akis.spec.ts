@@ -110,3 +110,71 @@ test('on rehberin sonraki adım zinciri döngüsüz ve sonludur', async ({ brows
     }
   }
 });
+
+test('sorumlu bilgisi tam cümledir', async ({ page }) => {
+  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  const etkin = page.locator('[data-akis-etkin]');
+  await expect(etkin.locator('.pol-sorumlu')).toHaveText('Bu adımı ortaklık sorumlusu yürütür. Şirket bu görevi henüz kimseye atamadı.');
+  await etkin.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await expect(etkin.locator('.pol-sorumlu')).toHaveText('Bu adımı siz yürütürsünüz.');
+});
+
+test('önce yapılacaklar, sonra soru gelir', async ({ page }) => {
+  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await expect(page.locator('[data-akis-etkin] .pol-karar')).toBeVisible();
+  const sira = await page.locator('[data-akis-etkin] .pol-is-aciklamasi, [data-akis-etkin] .pol-karar-alani').evaluateAll((els) => els.map((e) => e.className));
+  expect(sira).toEqual([expect.stringContaining('pol-is-aciklamasi'), expect.stringContaining('pol-karar-alani')]);
+});
+
+test('sekme kapanınca ilerleme bu cihazda korunur', async ({ context }) => {
+  const ilk = await context.newPage();
+  await ilk.goto('politikalar/?proje=istoc&rol=oncu');
+  await ilk.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await expect(ilk.locator('[data-akis-gecmis]')).toHaveCount(1);
+  await ilk.close();
+  const ikinci = await context.newPage();
+  await ikinci.goto('politikalar/?proje=istoc&rol=oncu');
+  await expect(ikinci.locator('[data-akis-gecmis]')).toHaveCount(1);
+});
+
+test('akışı değiştirmeyen ortak değer ilerlemeyi sıfırlamaz, akışı değiştiren sıfırlar', async ({ page, personaServer }) => {
+  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await expect(page.locator('[data-sync-state="synced"]')).toBeVisible();
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
+  personaServer.seed('istoc', { kur: 61 });
+  const kur = () => page.evaluate(() => JSON.parse(localStorage.getItem('turksab-persona-ortak-v1-istoc') ?? '{}')?.snapshot?.fields?.kur);
+  await expect.poll(kur, { timeout: 10000 }).toBe(61);
+  await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
+  await expect(page.getByText('Koşullar değişti. İş sırasını yeniden kontrol edin.')).toHaveCount(0);
+  // Katkı seviyesi gösterim adımını ekler veya kaldırır. Bu, akışın yapısını değiştirir.
+  personaServer.seed('istoc', { oncuSeviye: 'A' });
+  await expect(page.getByText('Koşullar değişti. İş sırasını yeniden kontrol edin.')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-akis-gecmis]')).toHaveCount(0);
+});
+
+test('rehberdeki ayar seçimi herkesi etkilediğini söyler', async ({ page }) => {
+  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await page.getByRole('button', { name: 'Görevi ve çalışma koşullarını görün', exact: true }).click();
+  await expect(page.getByText('Bu seçim ortak ayarı değiştirir. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.')).toBeVisible();
+  await expect(page.getByText('Değişiklikler hesaplayıcıya ve bu projenin rehberlerine yansır.')).toHaveCount(0);
+});
+
+test('açık konular, gözden kaçabilecek sorunlar ve fırsatlar tek tıkla açılır', async ({ page }) => {
+  await page.goto('politikalar/?proje=segika&rol=tavsiye');
+  await page.getByRole('button', { name: 'Açık konuları, riskleri ve fırsatları görün', exact: true }).click();
+  const bolum = page.locator('[data-akis-bosluk]');
+  await expect(bolum.getByRole('heading', { name: 'Yeni satış fırsatları', exact: true })).toBeVisible();
+  await expect(bolum.getByRole('heading', { name: 'Başlamadan çözülmesi gereken açık konular', exact: true })).toBeVisible();
+  await expect(bolum.getByRole('heading', { name: 'Gözden kaçabilecek sorunlar', exact: true })).toBeVisible();
+  await expect(bolum.getByRole('heading', { name: 'Bir sorun çıkarsa ne yapacaksınız?', exact: true })).toBeVisible();
+  expect(await bolum.locator('[data-firsat]').count()).toBeGreaterThanOrEqual(3);
+});
+
+test('Segika rehberindeki hesap bağlantısı Segika hesabını açar', async ({ page }) => {
+  await page.goto('politikalar/?proje=segika&rol=cozum');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Birinci sürümdeki hesabı açın' })).toHaveAttribute('href', /proje=segika/);
+  // İkinci sürüm bağlantısı kapalı bir alt bölümdedir. Bağlantının adresi yine denetlenir.
+  await expect(page.locator('.pol-belge a[href*="surum=v2"]')).toHaveAttribute('href', /proje=segika/);
+});

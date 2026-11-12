@@ -31,12 +31,24 @@ export function olasiSonrakiler(akis: IsAkisi, etkin: AkisAdimi, gecilen: string
   const sonuc: AkisAdimi[] = [];
   let simdiki: AkisAdimi | undefined = etkin;
   while (simdiki) {
-    const devam = simdiki.secenekler.find((s): s is Extract<AkisSecenegi, { tur: 'devam' }> => s.tur === 'devam');
-    const sonraki = devam ? adimlar.get(devam.sonraki) : undefined;
+    const devam: Extract<AkisSecenegi, { tur: 'devam' }> | undefined = simdiki.secenekler.find((s): s is Extract<AkisSecenegi, { tur: 'devam' }> => s.tur === 'devam');
+    const sonraki: AkisAdimi | undefined = devam ? adimlar.get(devam.sonraki) : undefined;
     if (!sonraki || gorulen.has(sonraki.id)) break;
     gorulen.add(sonraki.id);
     sonuc.push(sonraki);
     simdiki = sonraki;
   }
   return sonuc;
+}
+
+/** Sorumlu bilgisini etiket dizisi yerine tam cümle yapar. Atanmamış görev ayrıca söylenir. */
+export function sorumluCumlesi(sorumlu: string): string {
+  const atanmamis = /\s*\(önerilen( görev)?\)\s*$/.test(sorumlu);
+  const ad = sorumlu.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  const kucuk = (metin: string) => metin.charAt(0).toLocaleLowerCase('tr-TR') + metin.slice(1);
+  const ek = atanmamis ? ' Şirket bu görevi henüz kimseye atamadı.' : '';
+  if (/^siz$/i.test(ad)) return `Bu adımı siz yürütürsünüz.${ek}`;
+  const birlikte = /^siz ve (.+)$/i.exec(ad);
+  if (birlikte) return `Bu adımı ${kucuk(birlikte[1])} ile birlikte siz yürütürsünüz.${ek}`;
+  return `Bu adımı ${kucuk(ad)} yürütür.${ek}`;
 }

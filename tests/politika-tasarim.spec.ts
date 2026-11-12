@@ -5,16 +5,21 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://script.google.com/**', (route) => route.abort());
 });
 
-test('320 px: ilk soru ve ilk yanıt kaydırmadan görünür', async ({ page }) => {
+// Okur önce adımda ne yapacağını okur, sonra sonucu yanıtlar (yalın Türkçe kural 15: gereken bilgi önce gelir).
+test('320 px: adımın işi kaydırmadan görünür ve soru işin hemen ardından gelir', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const karar = page.locator('[data-akis-etkin] .pol-karar');
   await expect(karar).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
+  const is = await page.locator('[data-akis-etkin] .pol-is-aciklamasi h4').boundingBox();
+  const ilkIs = await page.locator('[data-akis-etkin] .pol-yap li').first().boundingBox();
   const soru = await karar.locator('legend').boundingBox();
-  const yanit = await karar.getByRole('button').first().boundingBox();
-  expect(soru!.y + soru!.height).toBeLessThanOrEqual(568);
-  expect(yanit!.y + yanit!.height).toBeLessThanOrEqual(640);
+  expect(is!.y + is!.height).toBeLessThanOrEqual(720);
+  expect(ilkIs!.y).toBeLessThanOrEqual(720);
+  expect(soru!.y).toBeGreaterThan(ilkIs!.y);
+  // Soru, işin bitiminden en çok bir ekran aşağıdadır.
+  expect(soru!.y - ilkIs!.y).toBeLessThanOrEqual(720);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -36,7 +41,7 @@ test('klavye ile ilerleyince yeni kararın başlığı görünür odak taşır',
 
 test('önerilen sorumlu atanmış kişi gibi gösterilmez', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
-  await expect(page.locator('[data-akis-etkin] .pol-sorumlu')).toContainText('önerilen görev');
+  await expect(page.locator('[data-akis-etkin] .pol-sorumlu')).toContainText('Şirket bu görevi henüz kimseye atamadı.');
 });
 
 test('dar ekranda doğrudan açılan rolün sekmesi görünür', async ({ page }) => {

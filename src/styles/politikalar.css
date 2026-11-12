@@ -73,7 +73,8 @@
 .pol-zaman-gecmis h3 { font-size: var(--text-lg); margin: 0; line-height: var(--leading-snug); }
 .pol-zaman-gecmis p { margin-block: var(--space-1) 0; color: var(--text-secondary); }
 /* Sonraki olası adımlar: okur önündeki yolu görür. Etkin adımdan sönük durur. */
-.pol-zaman-sonraki > .pol-zaman-sayi { color: var(--text-secondary); }
+.pol-zaman-sonraki > .pol-zaman-sayi { background: transparent; }
+.pol-zaman-sonraki .pol-yol-aciklama { margin-inline: 0; margin-block: var(--space-3) 0; }
 .pol-zaman-sonraki .pol-yol-ust { margin-block: 0 var(--space-2); }
 .pol-sonraki-liste { margin: 0; padding-inline-start: var(--space-5); color: var(--text-secondary); font-size: var(--text-md); line-height: var(--leading-body); }
 .pol-sonraki-liste li + li { margin-block-start: var(--space-1); }
@@ -95,7 +96,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-yanit[aria-pressed='true'] { background: var(--policy-active-surface); border-color: var(--text-primary); }
 .pol-is-aciklamasi h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin: 0; }
 .pol-sorumlu { margin-block: var(--space-2) var(--space-3); color: var(--text-secondary); }
-.pol-sorumlu > span { display: block; font-size: var(--text-sm); }
 .pol-yap { padding-inline-start: var(--space-5); margin-block: var(--space-3); }
 .pol-yap > li { padding-inline-start: var(--space-1); margin-block: var(--space-2); }
 .pol-yap > li::marker { color: var(--text-secondary); }
@@ -120,3 +120,9 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
   .pol-adim-duzeni { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--policy-column-gap); }
   .pol-yol-aciklama, .pol-rehber-ekleri { margin-inline-start: calc(var(--policy-rail) + var(--space-4)); }
 }
+
+/* Boşluk, risk ve fırsat bölümü: başlıklar bölüm düzeyini korur, metin küçülmez. */
+[data-akis-bosluk] > h4 { margin-block: var(--space-6) var(--space-2); font-size: var(--text-lg); line-height: var(--leading-snug); }
+[data-akis-bosluk] > h4:first-child { margin-block-start: 0; }
+[data-akis-bosluk] h5 { margin-block: 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+[data-akis-bosluk] .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-5); }
