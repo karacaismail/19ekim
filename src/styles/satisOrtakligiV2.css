@@ -1972,3 +1972,6 @@ html:has(.v2-so2-alt-cubuk) {
     align-content: center;
   }
 }
+
+/* İkinci sürüm ortak kayda bağlı değildir. Okur bunu ayarları değiştirmeden önce görür. */
+.v2-so2-yerel-not { margin-block: 0 var(--space-4); color: var(--text-secondary); font-size: var(--text-sm); max-inline-size: var(--prose-max); }

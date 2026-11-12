@@ -1272,6 +1272,21 @@ Pages yayınından önce çalıştırır.
 - Kullanıcı, geliştirme sırasında bağlantıyla düzenlemeyi kabul etti.
   Bu aşamada servis `development-public` erişimini kullanır.
   Anahtar ve kişisel kurulum dosyaları Git'e girmez.
+- Servis, kullanıcının hesabındaki ayrı "Persona eşitleme" Apps Script projesinde çalışır.
+  Web uygulaması adresi `src/lib/personaStore.ts` içindeki `PERSONA_ENDPOINT` alanındadır.
+  Adres gizli değildir. Sahip, projenin Google iznini 12 Kasım 2026'da verdi.
+  Canlı ölçüm, 12 Kasım 2026: yazma onayı yaklaşık 4 ile 9 saniye sürdü.
+  Başka tarayıcı aynı değeri yaklaşık 4,5 saniyede gördü.
+  Tablodaki elle değişiklik açık sayfada yaklaşık 3 saniyede göründü.
+  Bu süreler ağa ve Google'a bağlıdır. Sıfır gecikme sözü verilmez.
+- `Persona Ayarları` sekmesinin G sütunu "Nasıl yazılır?" notlarını taşır.
+  Notlar `personaFields.ts` tanımlarından üretildi. Sunucu yalnız A ile F sütunlarını kullanır.
+  Yeni alan eklenirse o satırın notunu da yazın.
+- Sayfa açan her test `tests/fixtures/persona.ts` dosyasından içe aktarır.
+  Bu fixture isteği ağa çıkmadan karşılar. Testler gerçek tabloya yazmaz.
+  `tests/persona-isolation.spec.ts` bu kuralı bütün test dosyalarında denetler.
+- Hesaplayıcının ikinci sürümü (`?surum=v2`) ayrı bir modeldir.
+  Bu sürümün ayarları ortak kayda bağlı değildir. Ayarlar yalnız o tarayıcıda kalır.
 - Değişen parametreler rehberdeki örnek adım yanıtlarını sıfırlar.
   Bu yanıtlar müşteri kaydı, imza veya ortak operasyon kaydı değildir.
   Yanıtlar yalnız mevcut tarayıcı sekmesinde saklanır.
