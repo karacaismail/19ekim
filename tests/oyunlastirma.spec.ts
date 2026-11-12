@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /**
  * Oyunlaştırma (kullanıcı kararı 2026-11-04): istoc.com'un tavuk yumurta sorununu çözen ve platformu sürdürülebilir

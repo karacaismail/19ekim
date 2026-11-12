@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { buildModel as siteModel } from '../src/data/model';
 import { DEFAULT_PARAMS } from '../src/data/params';
 import { tl } from '../src/lib/format';

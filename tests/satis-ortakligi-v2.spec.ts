@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /**
  * Satış ortaklığı v2 (kullanıcı kararı 2026-11-03): persona ayrı, segment ayrı. Aynı satışı yapan bağımsız ortaklar aynı

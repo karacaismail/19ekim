@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { eur, paketler } from '../src/data/gelirModelleri';
 import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar } from '../src/data/onboarding';
 import { DEFAULT_PARAMS } from '../src/data/params';

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 test('rehber yalnız mevcut işi açar ve koşul yanıtıyla ilerler', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
@@ -31,7 +31,8 @@ test('on farklı rehber aynı sayfa içindeki seçimle açılır', async ({ page
   }
 });
 
-test('varsayılandan farklı ortak ayarla ilerleme yenilemede korunur', async ({ page }) => {
+test('varsayılandan farklı ortak ayarla ilerleme yenilemede korunur', async ({ page, personaServer }) => {
+  personaServer.seed('istoc', { kur: 60 });
   const { alanTanimlari } = await import('../src/data/personaFields');
   const fields = Object.fromEntries(alanTanimlari('istoc').map((d) => [d.field, d.value]));
   fields.kur = 60;

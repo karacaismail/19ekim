@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 /** Değer önerisi (kullanıcı kararı 2026-11-03): sözler alıntı olarak alt alta; 9 güçlü söz, 5 adım, 40 öneri, 2 eski söz. */
 for (const genislik of [320, 390, 1512]) {

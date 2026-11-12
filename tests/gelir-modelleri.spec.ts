@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 /**
  * Gelir modelleri (kullanıcı kararı 2026-11-03): bugünkü abonelik modeli (üç paket, Kurumsal teklifle) ve 15 aday ek gelir

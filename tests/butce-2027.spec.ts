@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { BEKLENEN_SHEETS, butce, tabanOf, toplam } from '../src/data/butce2027';
 import { buildModel, reply } from './opex-fixture';
 

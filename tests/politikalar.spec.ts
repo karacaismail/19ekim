@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 import { ICERIK } from '../src/data/icerik';
 
 const roller = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as const;

@@ -5,7 +5,7 @@ import { personaCacheRead, personaCacheWrite } from './personaCache';
 import { PersonaSync, type Reply, type Transport } from './personaSync';
 
 /** Yayımlanan servis adresidir. Erişim anahtarı hiçbir zaman pakete girmez. */
-export const PERSONA_ENDPOINT = '';
+export const PERSONA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwCx1G0smFRWBDcj_489Y8UJn2RF2jwuptjH0ZHm0FmvZE0W0jh8vt3swO9Q7XwsgIY/exec';
 const KEY = 'turksab-persona-erisim-v1';
 const EVENT = 'turksab-persona-erisim';
 const transport: Transport = async (body, signal) => {

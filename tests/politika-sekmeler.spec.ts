@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 test('rehber menüsü tek bağlantıdır ve iki projede beş rol sekmesi vardır', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });

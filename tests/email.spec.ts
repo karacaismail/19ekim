@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { buildEmailHtml, buildEmailText, EMAIL_ROWS, EMAIL_SUBJECT } from '../src/data/email';
 
 /** Gizli sayfa: yalnız adresle açılır. Kopyalanan HTML e-posta istemcilerine uygun kalmalıdır. */

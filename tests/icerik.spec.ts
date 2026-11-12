@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 import { GRUP_ADI, ICERIK, ICERIK_YONLENDIRMELERI, YAYIMLANAN, altBilgiKapsami, altBilgiOnCumle, icerikOf, kirinti, kirintiGrubu } from '../src/data/icerik';
 import { BASE_ROLES as ROLES } from '../src/data/roles';
 import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';

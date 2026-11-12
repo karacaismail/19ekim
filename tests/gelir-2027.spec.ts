@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { ongoru } from '../src/data/gelir2027';
 
 /**

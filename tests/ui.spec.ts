@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { YAYIMLANAN } from '../src/data/icerik';
 import { PARAM_GROUPS } from '../src/data/params';
 import { meta } from '../src/data/program';

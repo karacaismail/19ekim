@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /** Ücret ve performans applet’leri (/applet/): katalog yayılımı, kalıcılık, markalı seçim, anahtar ve klavye odağı. */
 

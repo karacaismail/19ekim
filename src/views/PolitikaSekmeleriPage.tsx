@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Tabs } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
@@ -44,8 +44,28 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
   const [belge, setBelge] = useState<{ key: Anahtar; olustur: AkisOlustur } | null>(null);
   const [hata, setHata] = useState<Anahtar | null>(null);
   const onbellek = useRef(new Map<Anahtar, AkisOlustur>());
+  const merkez = useRef<HTMLDivElement>(null);
   const secili = anahtar(secim);
   const etkinBelge = belge?.key === secili ? belge.olustur : null;
+
+  // Doğrudan adres ve boyut değişimi seçili rolü gizlemesin. Odak yerinde kalır.
+  useLayoutEffect(() => {
+    const list = merkez.current?.querySelector<HTMLElement>('[aria-label="Çalışma rolü"]');
+    const active = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!list || !active) return;
+    const goster = () => {
+      const area = list.getBoundingClientRect();
+      const tab = active.getBoundingClientRect();
+      // Kesirli piksel genişliği sekmenin bir kısmını kesmesin diye kaydırma yukarı yuvarlanır.
+      if (tab.left < area.left) list.scrollLeft -= Math.ceil(area.left - tab.left);
+      else if (tab.right > area.right) list.scrollLeft += Math.ceil(tab.right - area.right);
+    };
+    goster();
+    const observer = new ResizeObserver(goster);
+    observer.observe(list);
+    observer.observe(active);
+    return () => observer.disconnect();
+  }, [secili]);
 
   useEffect(() => {
     adresYaz(adrestenOku(eskiRol), true);
@@ -81,7 +101,7 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
   const siniflar = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
   return <>
     <PageHeader title="Çalışma rehberleri" purpose="Projenizi ve rolünüzü seçin. Her adımda durumunuza uyan yanıtı verin." />
-    <div className="pol-merkez">
+    <div className="pol-merkez" ref={merkez}>
       <Tabs value={secim.proje} onChange={(proje) => { if (proje) sec({ ...secim, proje: proje as Marka }); }}
         keepMounted={false} unstyled classNames={siniflar}>
         <Tabs.List aria-label="Proje">

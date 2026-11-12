@@ -56,6 +56,12 @@
   --policy-max: 58rem;
   --policy-rail: 1.5rem;
   --policy-rail-wide: 2rem;
+  --policy-column-gap: var(--space-8);
+  --policy-step-gap: var(--space-4);
+  --policy-control-padding: var(--space-3);
+  --policy-active-surface: var(--surface-selected);
+  --policy-active-ink: var(--accent-strong);
+  --policy-timeline-line: var(--rule-strong);
   --opacity-disabled: .5;
 
   /* Etkileşim alanı: ince işaretçide 44, kaba işaretçide 48 CSS px */

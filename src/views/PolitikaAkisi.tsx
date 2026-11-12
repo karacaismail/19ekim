@@ -40,6 +40,7 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
   const focusNext = useRef(false);
   const restored = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
+  const resultHeading = useRef<HTMLHeadingElement>(null);
   const motion = useMotionMs('--motion-duration-base');
   const gorunum = akisGorunumu(akis, record.fingerprint === fingerprint ? record.answers : []);
   const { etkin, gecmis, sonuc } = gorunum;
@@ -62,7 +63,7 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
     } catch { /* Kayıt yoksa ilk adım açılır. */ }
     setRecord({ fingerprint, answers });
   }, [hazir, cacheKey, fingerprint, akis, record]);
-  useLayoutEffect(() => { if (focusNext.current) { heading.current?.focus(); focusNext.current = false; } }, [record]);
+  useLayoutEffect(() => { if (focusNext.current) { (resultHeading.current ?? heading.current)?.focus(); focusNext.current = false; } }, [record]);
   function yanitla(answers: AkisYaniti[]) {
     const next = { fingerprint, answers };
     focusNext.current = true; setRecord(next); setDetail(null); setNotice('');
@@ -75,62 +76,73 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
     <header className="pol-yol-giris">
       <h2>{akis.baslik}</h2>
     </header>
-    <Accordion classNames={accordionClasses} transitionDuration={motion}>
-      <Accordion.Item value="ayar"><Accordion.Control>Görevi ve çalışma koşullarını görün</Accordion.Control>
-        <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
-          <p>{akis.ozet}</p><p>{akis.hedef}</p>
-          <p>Değişiklikler hesaplayıcıya ve bu projenin rehberlerine yansır.</p>
-          <p>Koşullar değişirse önceki adım yanıtları sıfırlanır.</p>
-          <Sec label="Hangi koşullarla çalışır?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: k.ad }))}
-            onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
-          {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo', 'Ürün gösterimi') }))}
-            onChange={(value) => guncelle({ [seviyeKey]: value })} />}
-          <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Bütün hesap parametrelerini açın</a>
-        </Accordion.Panel>
-      </Accordion.Item>
-    </Accordion>
     {notice && <p className="pol-yol-not" role="status">{notice}</p>}
     <ol className="pol-zaman" aria-label="İş sırası">
       {gecmis.map(({ adim, yanit }, index) => <li key={adim.id} className="pol-zaman-gecmis" data-akis-gecmis>
         <span className="pol-zaman-sayi" aria-hidden="true">{index + 1}</span>
-        <div><h3>{adim.ad}</h3><p>{yanit.metin}</p>
+        <div className="pol-gecmis-icerik"><div><h3>{adim.ad}</h3><p>{yanit.metin}</p></div>
           <button type="button" className="pol-yol-link" aria-label={`${adim.ad} yanıtını değiştir`} onClick={() => yanitla(gorunum.yanitlar.slice(0, index))}>Yanıtı değiştir</button>
         </div>
       </li>)}
       <li className="pol-zaman-etkin" data-akis-etkin data-step={etkin.id}>
         <span className="pol-zaman-sayi" aria-hidden="true">{gecmis.length + 1}</span>
         <div className="pol-yapilacak">
-          <p className="pol-yol-ust">Şimdi bu adımı değerlendirin</p>
-          <h3 ref={heading} tabIndex={-1}>{etkin.ad}</h3>
-          <p className="pol-sorumlu">Bu adımı {etkin.sorumlu.replace(/\s*\(önerilen görev\)/g, '').toLocaleLowerCase('tr-TR')}{etkin.sorumlu.toLocaleLowerCase('tr-TR').startsWith('siz') ? ' yürüteceksiniz.' : ' yürütür.'}</p>
-          <ol className="pol-yap"><>{etkin.yap.map((line) => <li key={line}>{line}</li>)}</></ol>
+          <div className="pol-adim-basligi">
+            <p className="pol-yol-ust">{sonuc ? 'Yanıtınızı değerlendirin' : 'Sıradaki karar'}</p>
+            <h3 className="pol-etkin-baslik" ref={heading} tabIndex={-1}>{etkin.ad}</h3>
+          </div>
           {etkin.dikkat && <p className="pol-yol-not">{etkin.dikkat}</p>}
-          {etkin.ek && <Accordion key={etkin.id} value={detail} onChange={setDetail} classNames={accordionClasses} transitionDuration={motion}>
-            <Accordion.Item value="ek"><Accordion.Control>{EK_ADI[etkin.ek]}</Accordion.Control>
-              <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
-                {detail && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum={etkin.ek} />}
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>}
-          <fieldset className="pol-karar"><legend>{etkin.soru}</legend>
-            {etkin.secenekler.map((s) => <button type="button" className="pol-yanit" key={s.id} aria-pressed={sonuc?.id === s.id}
-              onClick={() => yanitla([...gorunum.yanitlar.slice(0, gecmis.length), { adim: etkin.id, secenek: s.id }])}>{s.metin}</button>)}
-          </fieldset>
-          {sonuc && <div className="pol-sonuc" data-akis-sonuc={sonuc.tur} role="status">
-            <h4>{sonuc.sonuc.baslik}</h4>{sonuc.sonuc.metin.map((line) => <p key={line}>{line}</p>)}
-            {sonuc.tur === 'bekle' && <p>Koşul değişince bu soruyu yeniden yanıtlayın.</p>}
-          </div>}
+          <div className="pol-adim-duzeni">
+            <div className="pol-karar-alani">
+              <fieldset className="pol-karar"><legend>{etkin.soru}</legend>
+                {etkin.secenekler.map((s) => <button type="button" className="pol-yanit" key={s.id} aria-pressed={sonuc?.id === s.id}
+                  onClick={() => yanitla([...gorunum.yanitlar.slice(0, gecmis.length), { adim: etkin.id, secenek: s.id }])}>{s.metin}</button>)}
+              </fieldset>
+              {sonuc && <div className="pol-sonuc" data-akis-sonuc={sonuc.tur} role="status">
+                <h4 className="pol-sonuc-baslik" ref={resultHeading} tabIndex={-1}>{sonuc.sonuc.baslik}</h4>{sonuc.sonuc.metin.map((line) => <p key={line}>{line}</p>)}
+                {sonuc.tur === 'bekle' && <p>Koşul değişince bu soruyu yeniden yanıtlayın.</p>}
+              </div>}
+            </div>
+            <div className="pol-is-aciklamasi">
+              <h4>Bu adımda yapılacaklar</h4>
+              <p className="pol-sorumlu"><span>Sorumlu</span> {etkin.sorumlu}</p>
+              <ol className="pol-yap">{etkin.yap.map((line) => <li key={line}>{line}</li>)}</ol>
+              {etkin.ek && <Accordion key={etkin.id} value={detail} onChange={setDetail} classNames={accordionClasses} transitionDuration={motion}>
+                <Accordion.Item value="ek"><Accordion.Control>{EK_ADI[etkin.ek]}</Accordion.Control>
+                  <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+                    {detail && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum={etkin.ek} />}
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>}
+            </div>
+          </div>
         </div>
       </li>
     </ol>
     <p className="pol-yol-aciklama">Yanıtlarınız bu sekmedeki örnek süreci gösterir. Müşteri kaydı veya imza oluşturmaz.</p>
-    <PersonaSyncStatus sync={sync} store={store} inputError={inputError} />
-    <Accordion value={full} onChange={setFull} classNames={accordionClasses} transitionDuration={motion}>
-      <Accordion.Item value="belge"><Accordion.Control>Bütün çalışma koşullarını açın</Accordion.Control>
-        <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
-          {full && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum="full" />}
-        </Accordion.Panel>
-      </Accordion.Item>
-    </Accordion>
+    <div className="pol-rehber-ekleri">
+      <Accordion classNames={accordionClasses} transitionDuration={motion}>
+        <Accordion.Item value="ayar"><Accordion.Control>Görevi ve çalışma koşullarını görün</Accordion.Control>
+          <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+            <p>{akis.ozet}</p><p>{akis.hedef}</p>
+            <p>Değişiklikler hesaplayıcıya ve bu projenin rehberlerine yansır.</p>
+            <p>Koşullar değişirse önceki adım yanıtları sıfırlanır.</p>
+            <Sec label="Hangi koşullarla çalışır?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: k.ad }))}
+              onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
+            {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo', 'Ürün gösterimi') }))}
+              onChange={(value) => guncelle({ [seviyeKey]: value })} />}
+            <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Bütün hesap parametrelerini açın</a>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+      <PersonaSyncStatus sync={sync} store={store} inputError={inputError} />
+      <Accordion value={full} onChange={setFull} classNames={accordionClasses} transitionDuration={motion}>
+        <Accordion.Item value="belge"><Accordion.Control>Bütün çalışma koşullarını açın</Accordion.Control>
+          <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
+            {full && <Ayrinti proje={proje} rol={rol} ayar={ayar} bolum="full" />}
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </div>
   </div>;
 }

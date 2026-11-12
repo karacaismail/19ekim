@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 /** Kararlar (kullanıcı kararları 2026-11-03): tek sayfa; karar seçimleri tek soruya odaklı, seçim JSON’a yansır. */
 test('karar seçimleri: seçim ilerlemeyi ve JSON’u günceller, Sonraki ile soru değişir', async ({ page }) => {
