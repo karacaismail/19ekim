@@ -116,10 +116,12 @@ export interface NavLink {
   role?: RoleKey;
   no?: number;
   also?: string[];
+  /** Yeni öğe işareti; içerik kaydının `yeni` alanından gelir. */
+  yeni?: true;
 }
 const menu = (id: string): NavLink => {
   const k = icerikKaydi(id);
-  return { label: k.menu ?? k.baslik, path: k.path };
+  return { label: k.menu ?? k.baslik, path: k.path, ...(k.yeni ? { yeni: k.yeni } : {}) };
 };
 
 /**
