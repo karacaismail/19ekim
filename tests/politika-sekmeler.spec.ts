@@ -142,3 +142,13 @@ test('bölüm bağlantısı paylaşılabilir ve yenilemede hedef bölüm açıl�
   await page.getByRole('tab', { name: 'Marka elçisi', exact: true }).click();
   await expect(page).toHaveURL(/proje=segika&rol=elci$/);
 });
+
+// WebKit başarısız önyüklemeyi önbellekte tutar. Rehber parçaları bu yüzden önyükleme bağlantısı olmadan yüklenir (astro.config.mjs).
+test('rehber parçaları önyükleme bağlantısıyla yüklenmez', async ({ page }) => {
+  await page.goto('politikalar/?proje=segika&rol=tavsiye');
+  await expect(page.locator('.pol-yol')).toHaveAttribute('data-rol', 'tavsiye');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.locator('.pol-belge')).toBeVisible();
+  const baglantilar = await page.locator('link[rel="modulepreload"]').evaluateAll((els) => els.map((e) => (e as HTMLLinkElement).href));
+  expect(baglantilar.filter((h) => /\/(?:oncu|kadrolu|cozum|tavsiye|elci|PolitikaAkisAyrinti)\.[\w-]+\.js$/.test(h))).toEqual([]);
+});
