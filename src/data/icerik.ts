@@ -49,6 +49,11 @@ export interface IcerikKaydi {
   iliskili: string[];
   /** Menü etiketi (grup menüsünde); yoksa doğrudan erişim. */
   menu?: string;
+  /**
+   * Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12): noktası yeşil olur ve yanıp söner, ekran okuyucu “Yeni”
+   * der. Öğe artık yeni sayılmayınca bu alan kayıttan silinir.
+   */
+  yeni?: true;
   /** Henüz içerik taşınmamış, planlanan sayfa (dosyası yok). */
   planlandi?: boolean;
   /** Ara kırıntılar (grup/ebeveyn yerine; son kırıntı başlıktır) — belgeli kullanıcı kararı (Giderler: Finans › OpEx). */
@@ -104,7 +109,7 @@ const politikaKayitlari: IcerikKaydi[] = [{
   kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
   asOf: '2026-11-11', gozdenGecirme: 'Projenin çalışma kapsamı, hesabı veya koşulu değişince', duzenleme: 'yok',
   kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar yayımlanan varsayılanları kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
-  iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri',
+  iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri', yeni: true,
 }];
 
 export const ICERIK: IcerikKaydi[] = [

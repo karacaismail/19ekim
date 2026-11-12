@@ -315,6 +315,8 @@
 
   /* Seçili radyo işareti: sekme yüzeyinde (#ffffff, üzerine gelince #e4e1d8) yeşil, ≥ 3:1 */
   --radio-checked: #0b7a52;
+  /* Menüde yeni öğe noktası (kullanıcı isteği 2026-11-12): menü yüzeyinde ve seçili öğe zemininde yeşil, ≥ 3:1 */
+  --new-mark: #0b7a52;
 }
 
 /* Koyu tema */
@@ -432,4 +434,6 @@
 
   /* Seçili radyo işareti: koyu temada sekme yüzeyinde (#1a1d20, üzerine gelince #31363b) açık yeşil, ≥ 3:1 */
   --radio-checked: #2fc48a;
+  /* Menüde yeni öğe noktası: koyu temada menü yüzeyinde ve seçili öğe zemininde açık yeşil, ≥ 3:1 */
+  --new-mark: #2fc48a;
 }

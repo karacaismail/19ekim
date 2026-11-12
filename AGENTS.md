@@ -334,8 +334,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - Odak: çevreleyen halka yok; yalnız Tab/Shift+Tab görünür odak modunu açar; gösterge tek kenardır (metin alt çizgisi
   veya düz sol çubuk). Tablo bölgelerinde çubuk `.table-frame` üzerinde çizilir.
 - Hareket: `--motion-ease-standard: cubic-bezier(.65, 0, .35, 1)`, süre 120–320 ms; tek belgeli istisna
-  `--motion-duration-loop` (800–2000 ms, Giderler yükleyicisi: sonsuz + alternate + aynı eğri; hareket azaltmada 0; kapı
-  geçişte kullanımını reddeder); ECharts’ta `cubicInOut`
+  `--motion-duration-loop` (800–2000 ms, Giderler yükleyicisi ve menüdeki yeni öğe noktası: sonsuz + alternate + aynı
+  eğri; hareket azaltmada 0; kapı geçişte kullanımını reddeder); ECharts’ta `cubicInOut`
   ve token süresi seri, işaret çizgisi, durum (`stateAnimation`), ipucu işaretçisi ve açıklamaya ayrı ayrı yazılır
   (ECharts varsayılanları doğrusal/1000 ms’dir); hareket azaltma tercihinde animasyon kapanır. Test, çizilen
   grafiklerin modelini okuyarak bunu doğrular.
@@ -1202,6 +1202,16 @@ Pages yayınından önce çalıştırır.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.
 - Görsel referans (snapshot) testleri kurulmadı; gerçek Safari/iOS/Android cihaz kontrolleri yapılmadı.
 - `astro preview` Astro 7’de etkileşimsiz ortamda arka plana geçer; testler bu yüzden `scripts/serve-dist.mjs` kullanır.
+
+## Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12)
+
+- Yeni bir menü öğesinin noktası yeşil olur ve yavaşça yanıp söner. Böylece kullanıcı öğenin yeni olduğunu anlar.
+- Öğeyi yeni yapmak için `src/data/icerik.ts` kaydına `yeni: true` yazın. Öğe artık yeni sayılmayınca alanı silin.
+- İşaret geniş ekran menüsünde ve dar ekran çekmecesinde aynıdır. Öğenin metni değişmez.
+- Ekran okuyucu noktayı “Yeni” diye okur. Renk `--new-mark` tokenından gelir.
+- Nokta hareket azaltma tercihinde yanıp sönmez, yeşil kalır.
+- Nokta yalnız menü açıkken görünür. Menü kapanınca yanıp sönme de durur.
+- `tests/yeni-isaret.spec.ts` bu davranışı iki temada ve 3:1 karşıtlıkla denetler.
 
 ## Projeye göre çalışma rehberleri
 

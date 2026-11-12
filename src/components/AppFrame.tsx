@@ -130,6 +130,16 @@ function durumOf(item: NavLink, current: string) {
   return { ...item, exact, inSection };
 }
 
+/**
+ * Menü öğesinin solundaki işaret: numaralı öğede numara rozeti, diğerlerinde sade nokta. Yeni öğenin noktası yeşil olur
+ * ve yanıp söner (kullanıcı isteği 2026-11-12). Ekran okuyucu bu noktayı “Yeni” diye okur. Öğenin metni değişmez.
+ */
+function MenuIsareti({ item }: { item: NavLink }) {
+  if (item.no) return <span className="tree-no">{item.no}</span>;
+  if (item.yeni) return <span className="navmenu-bullet" data-yeni="true" role="img" aria-label="Yeni" />;
+  return <span className="navmenu-bullet" aria-hidden="true" />;
+}
+
 /** Grup simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
 const GRUP_SIMGESI: Record<string, Icon> = { istihdam: IconUsersGroup, pazarlama: IconSpeakerphone, finans: IconReceipt2, yonetim: IconChecklist, yardimci: IconSettings };
 /** Üst gezinme (kullanıcı kararı 2026-10-28, docs/contents.md §5.2): beş grup menüsü; kapsam `src/data/tree.ts NAV_GROUPS`. */
@@ -173,7 +183,7 @@ function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: {
             data-section={item.inSection ? 'true' : undefined}
           >
             {/* Numarasız öğede aynı sade nokta (numara rozetiyle aynı genişlikte; yazılar hizalı). */}
-            {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
+            <MenuIsareti item={item} />
             {item.label}
           </Menu.Item>,
         ])}
@@ -229,7 +239,7 @@ function CekmeceGezinme({ current }: { current: string }) {
                     return (
                       <li key={item.path}>
                         <a className="cekmece-link" href={href(item.path)} data-role={item.role} aria-current={item.exact ? 'page' : undefined} data-section={item.inSection ? 'true' : undefined}>
-                          {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
+                          <MenuIsareti item={item} />
                           {item.label}
                         </a>
                       </li>
