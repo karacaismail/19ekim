@@ -18,8 +18,8 @@ export const politika: ProjePolitika = {
     "Başka işletmenin ürün bilgisini kendi kataloğunuza yüklemeyin.",
     "Kendi alıcı listenizi ve fiyatlarınızı tavsiye için paylaşmayın.",
     "Katalog kurulumu, ürün gösterimi ve destek sizin göreviniz değildir.",
-    "Şirket adına fiyat, indirim veya süre sözü vermeyin.",
-    "Ödül ücretsiz iStoc kullanımıdır. Nakit ödeme değildir."
+    "Fiyat herkes için aynıdır. Şirket adına indirim veya ek süre sözü vermeyin.",
+    "Ödül ücretsiz iStoc kullanımıdır. Nakit ödeme değildir. Ödülü fiyat avantajı gibi anlatmayın."
   ],
   "adimlar": [
     {
@@ -45,7 +45,7 @@ export const politika: ProjePolitika = {
         "Tanıdığınız işletmeye ürünlerini nasıl sunduğunu sorun.",
         "Ürün bilgisini düzenli paylaşma ihtiyacı varsa tanıştırmayı teklif edin.",
         "Ödül alabileceğinizi bu konuşmada açıkça söyleyin.",
-        "İşletme istemezse konuyu kapatın. Bilgisini kimseye iletmeyin."
+        "İşletme istemezse konuyu kapatın. Bilgisini kimseye vermeyin."
       ]
     },
     {
@@ -60,9 +60,9 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Satışı ve ürün bilgisi işini şirkete bırakın",
       "metin": [
-        "Satış uzmanı işletmenin ürün yapısını değerlendirir ve teklif verir.",
+        "Satış uzmanı işletmenin ürün yapısını değerlendirir. Teklifi fiyat tablosundaki fiyatla verir.",
         "Şirketin yetkili kişisi sözleşmeyi hazırlar.",
-        "Ürün bilgisinin nasıl yükleneceğini satış uzmanı işletmeye açıklar.",
+        "Satış uzmanı ürün bilgisinin nasıl yükleneceğini işletmeye açıklar.",
         "Siz işletme adına karar vermezsiniz. Görüşmeleri takip etmek zorunda değilsiniz."
       ]
     },
@@ -70,11 +70,11 @@ export const politika: ProjePolitika = {
       "baslik": "Ödül koşulunu kontrol edin",
       "metin": [
         "Birinci sürümde yeni müşterinin yıllık paket alması gerekir.",
-        "Birinci sürümde yeni müşteri 60 gün kullanmaya devam etmelidir.",
-        "Bu iki koşul sağlanırsa ücretsiz kullanım hesabınıza yazılır.",
-        "İkinci sürüm seçildiyse ödeme belirlenen süre içinde alınmalıdır.",
-        "Ödeme bu sürede alınmazsa ikinci sürümde ödül hakkı oluşmaz.",
-        "Yeni müşterinin kendi ödülünü şirket ona ayrıca bildirir."
+        "Birinci sürümde yeni müşteri iStoc’u 60 gün kullanmaya devam etmelidir. Müşteri sorumlusu 60 günün hangi tarihten sayılacağını yazar.",
+        "Bu iki koşul sağlanırsa şirket ücretsiz kullanımı hesabınıza yazar.",
+        "İkinci sürüm seçildiyse şirketin ödemeyi belirlenen süre içinde tahsil etmesi gerekir.",
+        "Şirket ödemeyi bu sürede tahsil edemezse ikinci sürümde ödül hakkı oluşmaz.",
+        "Şirket yeni müşterinin kendi ödülünü ona ayrıca bildirir."
       ]
     },
     {
@@ -82,7 +82,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Finans sorumlusu ödülün yansıdığı dükkân faturasını size bildirsin.",
         "Ödül görünmüyorsa müşteri sorumlusuna dükkân adını ve tarihi iletin.",
-        "İş burada biter. Yeni tavsiye için aynı sıra yeniden başlar."
+        "Ödül görününce bu tavsiyenin işi biter. Yeni tavsiye için aynı sıra yeniden başlar."
       ]
     }
   ],
@@ -90,7 +90,7 @@ export const politika: ProjePolitika = {
     {
       "urun": "iStoc",
       "ad": "Çarşıdaki komşu dükkân",
-      "ihtiyac": "Komşu dükkân ürünlerini alıcılara düzenli göstermek isteyebilir.",
+      "ihtiyac": "Örneğin bu dükkân aynı çarşıda 1 ile 5 çalışanla sizinle benzer ürün grubunu satabilir. Komşu dükkân ürünlerini alıcılara düzenli göstermek isteyebilir.",
       "ulasim": "Dükkân sahibiyle mevcut komşuluk ilişkiniz içinde yüz yüze konuşun.",
       "mesaj": "Ürünlerimi iStoc ile nasıl sunduğumu görmek ister misiniz?",
       "uygunluk": "İlgilenmiyorsa iletişim bilgisini şirkete vermeyin.",
@@ -99,7 +99,7 @@ export const politika: ProjePolitika = {
     {
       "urun": "iStoc",
       "ad": "Aynı bloktaki toptancı",
-      "ihtiyac": "Toptancı çok sayıda ürünün bilgisini güncel tutmakta zorlanabilir.",
+      "ihtiyac": "Örneğin bu toptancı aynı blokta 2 ile 10 çalışanla çok sayıda ürün kalemi satabilir. Ürünlerinin bilgisini güncel tutmakta zorlanabilir.",
       "ulasim": "Uygun bir anda dükkânında kısa bir görüşme isteyin.",
       "mesaj": "Ürün listemi güncel tutmak için iStoc kullanıyorum. Anlatmamı ister misiniz?",
       "uygunluk": "Kendi fiyatlarınızı veya alıcılarınızı örnek olarak göstermeyin.",
@@ -108,7 +108,7 @@ export const politika: ProjePolitika = {
     {
       "urun": "iStoc",
       "ad": "Mal aldığınız tedarikçi esnaf",
-      "ihtiyac": "Tedarikçi güncel kataloğunu alıcılarına ulaştırmakta zorlanabilir.",
+      "ihtiyac": "Örneğin bu tedarikçi başka bir ilde atölye veya depo işletebilir. Birçok dükkâna mal verebilir. Güncel kataloğunu alıcılarına ulaştırmakta zorlanabilir.",
       "ulasim": "Sipariş görüşmesinin uygun bir anında izin isteyin.",
       "mesaj": "Kataloğunuzu paylaşmak için başka bir yöntem arıyor musunuz?",
       "uygunluk": "Siparişinizi tavsiye kabulüne bağlamayın.",
@@ -117,10 +117,10 @@ export const politika: ProjePolitika = {
     {
       "urun": "iStoc",
       "ad": "Sizden mal alan esnaf",
-      "ihtiyac": "Alıcınız kendi ürünlerini başka alıcılara sunmak isteyebilir.",
+      "ihtiyac": "Örneğin bu esnaf ilçede veya başka bir ilde küçük bir toptancı ya da perakendeci olabilir. Kendi ürünlerini başka alıcılara sunmak isteyebilir.",
       "ulasim": "Alışveriş sonrasında, baskı kurmadan deneyiminizi anlatın.",
       "mesaj": "Ürünlerinizi göstermek için kullandığım yöntemi merak eder misiniz?",
-      "uygunluk": "Alıcınıza indirimi tavsiye kabulüne bağlı sunmayın.",
+      "uygunluk": "Kendi satış fiyatınızı tavsiye kabulüne bağlamayın.",
       "sonrasi": "İlgilenirse şirketle kendisi iletişim kursun."
     }
   ],
@@ -128,17 +128,17 @@ export const politika: ProjePolitika = {
     {
       "kosul": "Tavsiye size bağlanmamışsa",
       "islem": "Müşteri sorumlusuna başvuru bilgisini ve tanıştırma tarihini iletin.",
-      "sonuc": "Sorumlu kaydı inceler. Sonucu size yazılı açıklar."
+      "sonuc": "Müşteri sorumlusu kaydı inceler. Sonucu size yazılı açıklar."
     },
     {
       "kosul": "İşletme zaten iStoc müşterisi veya kayıtlı aday ise",
       "islem": "Müşteri sorumlusu yeni müşteri koşulunu kontrol etsin.",
-      "sonuc": "Uygunluk doğrulanmadan ödül sözü verilmez."
+      "sonuc": "Müşteri sorumlusu uygunluğu doğrulamadan ödül sözü vermez."
     },
     {
       "kosul": "Aynı dükkânı iki kişi tavsiye ettiyse",
       "islem": "Müşteri sorumlusu iki kaydın tarihini karşılaştırsın.",
-      "sonuc": "Karar ve gerekçesi iki tarafa da yazılı bildirilir."
+      "sonuc": "Müşteri sorumlusu kararı ve gerekçesini iki tarafa da yazılı bildirir."
     },
     {
       "kosul": "İşletme ürünlerini sizin yüklemenizi isterse",
@@ -151,94 +151,99 @@ export const politika: ProjePolitika = {
       "sonuc": "Satış uzmanı hizmetin neyi kapsadığını işletmeye kendisi anlatır."
     },
     {
+      "kosul": "İşletme indirim veya ek süre isterse",
+      "islem": "Fiyatın herkes için aynı olduğunu söyleyin. Talebi kimseye iletmeyin.",
+      "sonuc": "İşletme fiyat tablosundaki fiyatla başvurur. Şirket yeni teklif hazırlamaz."
+    },
+    {
       "kosul": "Yıllık tavsiye sınırına ulaştıysanız",
       "islem": "Müşteri sorumlusundan kalan hakkınızı öğrenin.",
-      "sonuc": "Hesaplayıcı yalnız sınır kadar tavsiyeyi ödüle çevirir. Fazlasının sonucunu sorumlu yazılı açıklasın."
+      "sonuc": "Şirket yalnız sınır kadar tavsiyeyi ödüle çevirir. Müşteri sorumlusu fazlasının sonucunu yazılı açıklasın."
     },
     {
       "kosul": "Yeni müşteri 60 gün dolmadan bırakırsa veya ödemezse",
       "islem": "Finans sorumlusu ilgili ödülün koşullarını yeniden incelesin.",
-      "sonuc": "Kaynakta iptal kuralı yoktur. Finans sorumlusu kararı size yazılı açıklasın."
+      "sonuc": "Şirket bu durum için henüz iptal kuralı koymadı. Finans sorumlusu kararı size yazılı açıklasın."
     },
     {
       "kosul": "Bir tavsiyenin ödülüne itiraz ederseniz",
       "islem": "Müşteri sorumlusuna itirazınızı ve tavsiye tarihini yazılı iletin.",
-      "sonuc": "Finans sorumlusu ilgili ödülü inceler. Kararını kabul edilen tavsiye koşullarına göre yazılı açıklar."
+      "sonuc": "Finans sorumlusu ilgili ödülü inceler. Kararını yazılı tavsiye koşullarına göre açıklar."
     },
     {
       "kosul": "Tanıştırdığınız işletme iletişim istemezse",
       "islem": "Müşteri sorumlusu bu işletmeye pazarlama iletisi göndermeyi durdursun.",
-      "sonuc": "Ret kaydedilir. İşletmeye yeniden pazarlama iletisi gönderilmez."
+      "sonuc": "Müşteri sorumlusu reddi kaydeder. Şirket işletmeye yeniden pazarlama iletisi göndermez."
     },
     {
       "kosul": "Tavsiyeden vazgeçmek isterseniz",
       "islem": "Müşteri sorumlusuna vazgeçtiğinizi bildirin.",
-      "sonuc": "Açık tavsiyelerin durumu size yazılı açıklanır. Mevcut hizmetiniz bundan etkilenmez."
+      "sonuc": "Müşteri sorumlusu açık tavsiyelerin durumunu size yazılı açıklar. Mevcut hizmetiniz bundan etkilenmez."
     }
   ],
   "anlasma": [
     {
       "baslik": "Taraflar ve kapsam",
       "metin": [
-        "Şirket sizi tanıştırma yapan iStoc müşterisi olarak yazmalıdır.",
-        "Satış, sözleşme ve desteğin şirkette olduğu yazılmalıdır.",
-        "Yeni işletmenin ürün bilgisini kimin yükleyeceği yazılmalıdır.",
-        "Size çalışan veya satış görevi verilmediği açıkça belirtilmelidir."
+        "Şirket sizi tanıştırma yapan iStoc müşterisi olarak yazar.",
+        "Şirket satışın, sözleşmenin ve desteğin kendisinde olduğunu yazar.",
+        "Şirket yeni işletmenin ürün bilgisini kimin yükleyeceğini yazar.",
+        "Şirket size çalışan veya satış görevi vermediğini açıkça yazar."
       ]
     },
     {
       "baslik": "Kampanya koşulları",
       "metin": [
-        "Şirket hangi satıcıların katılabileceğini açıkça yazmalıdır.",
-        "Yeni müşteri tanımı, kayıt tarihi ve sınırın dönemi belirtilmelidir.",
-        "Geçerli hesap sürümü ve yürürlük tarihi yazılmalıdır.",
-        "Birinci sürümde yıllık paket ve 60 gün kullanım koşulu yazılmalıdır."
+        "Şirket hangi satıcıların katılabileceğini açıkça yazar.",
+        "Şirket yeni müşteri tanımını, kayıt tarihini ve sınırın dönemini yazar.",
+        "Şirket geçerli hesap sürümünü ve yürürlük tarihini yazar.",
+        "Birinci sürümde şirket yıllık paket ve 60 gün kullanım koşulunu yazar."
       ]
     },
     {
       "baslik": "Tavsiyenin size bağlanması",
       "metin": [
-        "Şirket tavsiyenin hangi kayıtla size bağlanacağını yazmalıdır.",
-        "Aynı dükkân için birden çok kayıt varsa karar kuralı yazılmalıdır.",
-        "Aynı sahibin başka dükkânının nasıl sayılacağı yazılmalıdır."
+        "Şirket tavsiyenin hangi kayıtla size bağlanacağını yazar.",
+        "Şirket aynı dükkân için birden çok kayıt varsa karar kuralını yazar.",
+        "Şirket aynı sahibin başka dükkânının nasıl sayılacağını yazar."
       ]
     },
     {
       "baslik": "Ücretsiz kullanım",
       "metin": [
-        "Finans sorumlusu ücretsiz sürenin hangi pakete uygulanacağını yazmalıdır.",
-        "Paket değişimi, iptal ve kullanılmayan süre ayrıca açıklanmalıdır.",
-        "Nakit dönüşüm varsa ayrı onaylı program gerekir."
+        "Finans sorumlusu ücretsiz sürenin hangi pakete uygulanacağını yazar.",
+        "Finans sorumlusu paket değişimini, iptali ve kullanılmayan süreyi ayrıca açıklar.",
+        "Ödülü nakde çevirmek için ayrı bir onaylı program gerekir."
       ]
     },
     {
       "baslik": "Vergi ve fatura",
       "metin": [
-        "Ücretsiz kullanımın faturada nasıl görüneceği henüz karar verilmemiş konudur.",
-        "Finans sorumlusu mali müşavirle bu işlemi yazılı belirlemelidir."
+        "Finans sorumlusu ücretsiz kullanımın faturada nasıl görüneceğine henüz karar vermedi.",
+        "Finans sorumlusu bu işlemi mali müşavirle yazılı belirler."
       ]
     },
     {
       "baslik": "Tanıtım ve ürün bilgisi",
       "metin": [
-        "Tavsiye ilişkisini açıkça belirtme kuralı yazılmalıdır.",
-        "Kendi katalog görünümünüzü örnek gösterme izni ayrıca yazılmalıdır.",
-        "Başka işletmenin ürün bilgisi sizin aracılığınızla toplanmamalıdır."
+        "Şirket tavsiye ilişkisini açıkça belirtme kuralını yazar.",
+        "Şirket kendi katalog görünümünüzü örnek gösterme iznini ayrıca yazar.",
+        "Başka işletmenin ürün bilgisini siz toplamazsınız."
       ]
     },
     {
       "baslik": "Veri ve iletişim",
       "metin": [
-        "Şirket tavsiye kaydında hangi bilgiyi tutacağını açıklamalıdır.",
-        "Tanıştırılan işletme iletişim tercihini kendisi bildirebilmelidir."
+        "Şirket tavsiye kaydında hangi bilgiyi tutacağını açıklar.",
+        "Tanıştırılan işletme iletişim tercihini kendisi bildirebilir."
       ]
     },
     {
       "baslik": "Değişiklik, ayrılma ve itiraz",
       "metin": [
-        "Şirket koşulları değiştirirse yeni koşulu önceden yazılı bildirmelidir.",
-        "Açık tavsiyelerin hangi koşulla sonuçlanacağı yazılmalıdır.",
-        "İtirazı inceleyecek rol yazılmalıdır. Önerilen rol müşteri sorumlusudur."
+        "Şirket koşulları değiştirirse yeni koşulu önceden yazılı bildirir.",
+        "Şirket açık tavsiyelerin hangi koşulla sonuçlanacağını yazar.",
+        "Şirket itirazı inceleyecek görevi yazar. Önerilen görev müşteri sorumlusudur."
       ]
     }
   ],
@@ -249,52 +254,52 @@ export const politika: ProjePolitika = {
       "eksik": "Her satıcının kabul ettiği sürüm kayıtlı olmayabilir.",
       "islem": "Müşteri sorumlusu geçerli sürümü tavsiye öncesinde yazılı bildirsin.",
       "kanit": "Tavsiye kaydında kabul edilen koşulun tarihi bulunsun.",
-      "firsat": "Kısa koşul özeti yanlış beklentiyi azaltabilir.",
+      "firsat": "Kısa koşul özeti yanlış beklentiyi azaltır. Satıcı koşulu bildiği için tavsiyeyi güvenle yapar.",
       "durdur": "Sürüm seçilmeden ödül tarihi vaat etmeyin."
     },
     {
       "baslik": "60 gün ne zaman başlar?",
       "mevcut": "Birinci sürüm 60 gün kullanmaya devam etme koşulunu koyar.",
-      "eksik": "Sürenin hangi tarihte başladığı yazılmamıştır.",
+      "eksik": "Şirket sürenin hangi tarihte başladığını henüz yazmadı.",
       "islem": "Müşteri sorumlusu başlangıç olayını yazılı tanımlasın.",
       "kanit": "Tavsiye kaydında başlangıç ve bitiş tarihi görülsün.",
-      "firsat": "Açık tarih, ödül sorularını azaltabilir.",
+      "firsat": "Açık tarih ödül sorularını azaltır. Müşteri sorumlusu bu zamanı yeni tavsiye çağrısına ayırır.",
       "durdur": "Başlangıç belirsizse ödül tarihi söylemeyin."
     },
     {
       "baslik": "Aynı sahibin başka dükkânı sayılıyor mu?",
       "mevcut": "Program yeni müşterinin tavsiyesini ödüllendirir.",
-      "eksik": "Şube, ortak dükkân ve yinelenen başvuru ölçütü net değildir.",
+      "eksik": "Şirket şube, ortak dükkân ve yinelenen başvuru için ölçüt koymadı.",
       "islem": "Müşteri sorumlusu yeni müşteri kontrolünü yazılı tanımlasın.",
-      "kanit": "Aynı işletmenin tekrar sayılmadığı örnekle doğrulansın.",
-      "firsat": "Düzgün kayıt ödül itirazlarını azaltabilir.",
+      "kanit": "Müşteri sorumlusu aynı işletmenin tekrar sayılmadığını bir örnekle doğrulasın.",
+      "firsat": "Düzgün kayıt ödül itirazlarını azaltır. Ödülünü sorunsuz alan satıcı yeniden tavsiye yapabilir.",
       "durdur": "Çakışan kayıtta ödül uygulamasını inceleme bitene kadar bekletin."
     },
     {
       "baslik": "Ücretsiz süre nereye yazılacak?",
-      "mevcut": "Hesaplayıcı ücretsiz kullanım tutarını gösterir.",
-      "eksik": "Paket değişimi ve kullanılmayan süre açıklanmamıştır.",
+      "mevcut": "Satış ortaklığı hesabı ücretsiz kullanımın tutarını gösterir.",
+      "eksik": "Şirket paket değişimini ve kullanılmayan süreyi henüz açıklamadı.",
       "islem": "Finans sorumlusu fatura örneğiyle uygulamayı belirlesin.",
       "kanit": "Örnek faturada ücretsiz süre ve kalan ödeme görülsün.",
-      "firsat": "Hesap özeti satıcının kalan hakkını kolayca görmesini sağlayabilir.",
+      "firsat": "Hesap özeti satıcının kalan tavsiye hakkını gösterir. Hakkı kalan satıcı yeni tavsiye yapabilir.",
       "durdur": "Belirsiz tutarı kesin kazanılmış hak gibi göstermeyin."
     },
     {
       "baslik": "Vergi ve fatura işlemi nasıl olacak?",
-      "mevcut": "Kaynak ödülün nakit olmadığını söyler. Vergi işlemini açıklamaz.",
-      "eksik": "Ücretsiz kullanımın faturadaki karşılığı belirlenmemiştir.",
+      "mevcut": "Şirket ödülün nakit olmadığını söyler. Vergi işlemini henüz açıklamadı.",
+      "eksik": "Finans sorumlusu ücretsiz kullanımın faturadaki karşılığını henüz belirlemedi.",
       "islem": "Finans sorumlusu bu konuyu mali müşavirle yazılı karara bağlasın.",
       "kanit": "Karar, örnek bir faturayla birlikte saklansın.",
-      "firsat": "Tek bir açıklama, satıcı sorularını azaltabilir.",
+      "firsat": "Tek açıklama satıcı sorularını azaltır. Müşteri sorumlusu vergi sorusu yerine yeni tavsiyelerle ilgilenir.",
       "durdur": "Karar yazılmadan ödülün vergi sonucunu anlatmayın."
     },
     {
       "baslik": "Yeni müşteri bırakırsa ne olacak?",
-      "mevcut": "Kaynak, ana programda iptal ve iade kuralı vermez.",
+      "mevcut": "Şirket ana programda iptal ve iade kuralı koymadı.",
       "eksik": "Kullanılmış ücretsiz sürenin geri alınıp alınmayacağı belli değildir.",
       "islem": "Finans sorumlusu bu kuralı tavsiye başlamadan yazsın.",
       "kanit": "Kural, satıcıya verilen koşul yazısında bulunsun.",
-      "firsat": "Açık kural sonradan çıkacak itirazları azaltabilir.",
+      "firsat": "Açık kural sonradan çıkacak itirazları azaltır. Satıcı ödül kuralını önceden bildiği için tavsiyeye daha istekli olur.",
       "durdur": "Kural yazılmadan kullanılmış süreyi geri almayın."
     }
   ],
@@ -303,39 +308,65 @@ export const politika: ProjePolitika = {
       "baslik": "Tavsiye komşuluk ilişkisini bozuyor mu?",
       "sinyal": "Tanıştırılan komşu dükkân, sizinle aynı alıcılara satış yapıyor olabilir.",
       "kontrol": "Müşteri sorumlusu tavsiye eden satıcıya memnuniyetini sorsun.",
-      "tepki": "Çatışma işareti varsa yeni tavsiye çağrısını o satıcıya göndermesin.",
+      "tepki": "Çatışma işareti varsa müşteri sorumlusu bu satıcıdan yeni tavsiye istemesin.",
       "kayit": "Görüşme tarihini ve kısa sonucu kaydedin."
     },
     {
       "baslik": "Tavsiye alıcıya baskıya dönüşüyor mu?",
       "sinyal": "Alıcı esnaf, sipariş için tavsiye kabul etmesi gerektiğini düşünebilir.",
       "kontrol": "Müşteri sorumlusu ilk görüşmede işletmenin gönüllü geldiğini sorsun.",
-      "tepki": "Baskı işareti varsa başvuruyu bekletsin. Tavsiye edenle konuşsun.",
+      "tepki": "Baskı işareti varsa müşteri sorumlusu başvuruyu bekletsin. Tavsiye edenle konuşsun.",
       "kayit": "Gönüllü katılımın nasıl doğrulandığını kaydedin."
     },
     {
       "baslik": "Ürün bilgisi izinsiz mi geliyor?",
       "sinyal": "Başvuruda işletmenin bilmediği ürün listesi veya fiyat görülebilir.",
       "kontrol": "Müşteri sorumlusu ürün bilgisinin işletmeden geldiğini doğrulasın.",
-      "tepki": "Doğrulanmazsa bilgiyi kullanmasın. Kayıttan silsin.",
+      "tepki": "Doğrulanmazsa müşteri sorumlusu bilgiyi kullanmasın. Kayıttan silsin.",
       "kayit": "Silme tarihini ve nedenini kaydedin."
     },
     {
       "baslik": "Tavsiye ilişkisi gizleniyor mu?",
       "sinyal": "Dükkândaki tanıtım, ödül ilişkisini belirtmeden bağımsız görüş gibi görünebilir.",
       "kontrol": "Müşteri sorumlusu açık tanıtımlardan küçük bir örneğe baksın.",
-      "tepki": "İlişki belirtilmemişse satıcıdan tanıtımı düzeltmesini istesin.",
+      "tepki": "İlişki belirtilmemişse müşteri sorumlusu satıcıdan tanıtımı düzeltmesini istesin.",
       "kayit": "İstek tarihini ve düzeltme sonucunu kaydedin."
+    }
+  ],
+  "firsatlar": [
+    {
+      "baslik": "Memnun satıcılardan zamanında tavsiye isteyin",
+      "neden": "Kural, tavsiyenin müşteri doğrulanmış bir sonuç aldıktan sonra istenmesini söyler. Bugün bu anı kimse izlemez.",
+      "ilkAdim": "Müşteri sorumlusu kataloğunu düzenli kullanan satıcıları ayda bir listeler. Tavsiye çağrısını yalnız bu satıcılara yapar.",
+      "olcu": "Müşteri sorumlusu çağrı yapılan satıcıları ve bu satıcılardan gelen tavsiyeleri sayar."
+    },
+    {
+      "baslik": "Bir blokta tanıtım günü düzenleyin",
+      "neden": "Tavsiye bugün tek tek dükkânlar üzerinden ilerler. Aynı bloktaki komşu dükkânlar en doğal kitledir.",
+      "ilkAdim": "Müşteri sorumlusu gönüllü bir satıcıyla bloğunda kısa bir tanıtım günü planlar. Katılım isteğe bağlıdır.",
+      "olcu": "Müşteri sorumlusu tanıtım gününe katılan dükkânları ve başvuran dükkânları sayar."
+    },
+    {
+      "baslik": "Tedarikçi esnafı tanıştırma kanalı yapın",
+      "neden": "Satıcıların mal aldığı tedarikçiler çok sayıda dükkâna mal verir. Bu tedarikçilerin katalogları büyük olabilir. Yıllık paket bu tedarikçilere uygun olabilir.",
+      "ilkAdim": "Müşteri sorumlusu tavsiye eden satıcıya tedarikçi tanıştırması için kısa bir bilgi notu verir. Satıcı siparişini tavsiyeye bağlamaz.",
+      "olcu": "Müşteri sorumlusu tedarikçiden gelen başvuruları ve yıllık paket alan tedarikçileri sayar."
+    },
+    {
+      "baslik": "Çalışanı olan müşterileri bordro ürünüyle tanıştırın",
+      "neden": "Mevcut iStoc müşterilerinin çalışanı olup olmadığı kayıtlı değildir. Şirketin SGK teşvik ve bordro ürünü bu müşterilere uyabilir.",
+      "ilkAdim": "Müşteri sorumlusu memnuniyet görüşmesinde müşteriye bordro ürünü hakkında bilgi isteyip istemediğini sorar. Çalışan adı veya kişisel bilgi istemez.",
+      "olcu": "Müşteri sorumlusu bilgi isteyen müşterileri ve bordro ürünü ekibine devredilen müşterileri sayar."
     }
   ],
   "haftalik": [
     "Müşteri sorumlusu o hafta gelen tavsiyeleri saysın.",
-    "Bu tavsiyelerden kaçının size bağlandığını ayrıca saysın.",
-    "60 günlük kullanım süresi devam eden tavsiyeleri ayrı saysın.",
+    "Müşteri sorumlusu bu tavsiyelerden kaçının size bağlandığını ayrıca saysın.",
+    "Müşteri sorumlusu 60 günü dolmayan tavsiyeleri ayrı saysın.",
     "Finans sorumlusu koşulu tamamlanan tavsiyeleri saysın.",
-    "Ödülü faturaya yansıyan tavsiyeleri de ayrıca saysın.",
-    "Bağlanmayan veya bekleyen tavsiye artarsa sorumlu nedenini incelesin.",
-    "Gecikme varsa sorumlu satıcıya nedeni ve sonraki adımı bildirsin.",
+    "Finans sorumlusu ödülü faturaya yansıyan tavsiyeleri de ayrıca saysın.",
+    "Bağlanmayan veya bekleyen tavsiye artarsa müşteri sorumlusu nedenini incelesin.",
+    "Gecikme varsa müşteri sorumlusu satıcıya nedeni ve sonraki adımı bildirsin.",
     "Sizin satış hedefiniz veya haftalık çalışma zorunluluğunuz yoktur."
   ],
   "programlar": {
