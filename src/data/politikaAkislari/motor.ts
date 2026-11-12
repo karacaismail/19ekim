@@ -23,3 +23,20 @@ export function akisGorunumu(akis: IsAkisi, yanitlar: AkisYaniti[]): AkisGorunum
   }
   return { gecmis, etkin, yanitlar: kabul };
 }
+
+/** Okur önündeki yolu görür. Her adımda ilk "devam" yanıtı izlenir. Başka bir yanıt bu sırayı değiştirebilir. */
+export function olasiSonrakiler(akis: IsAkisi, etkin: AkisAdimi, gecilen: string[] = []): AkisAdimi[] {
+  const adimlar = new Map(akis.adimlar.map((a) => [a.id, a]));
+  const gorulen = new Set([...gecilen, etkin.id]);
+  const sonuc: AkisAdimi[] = [];
+  let simdiki: AkisAdimi | undefined = etkin;
+  while (simdiki) {
+    const devam = simdiki.secenekler.find((s): s is Extract<AkisSecenegi, { tur: 'devam' }> => s.tur === 'devam');
+    const sonraki = devam ? adimlar.get(devam.sonraki) : undefined;
+    if (!sonraki || gorulen.has(sonraki.id)) break;
+    gorulen.add(sonraki.id);
+    sonuc.push(sonraki);
+    simdiki = sonraki;
+  }
+  return sonuc;
+}

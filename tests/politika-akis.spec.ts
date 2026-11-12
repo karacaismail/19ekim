@@ -81,3 +81,32 @@ test('adım ayrıntısı iki yönde pozitif süre ve hareket azaltma tercihi kul
   await button.click();
   await expect.poll(() => transition.evaluate((el) => parseFloat(getComputedStyle(el).transitionDuration))).toBe(0);
 });
+
+test('zaman çizelgesi sıradaki olası adımları gösterir ve yanıtla günceller', async ({ page }) => {
+  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  const sonraki = page.locator('[data-akis-sonraki]');
+  await expect(sonraki).toContainText('Sonraki olası adımlar');
+  await expect(sonraki.locator('li').first()).toHaveText('Dükkânı kaydedin');
+  await expect(sonraki).toContainText('Yanıtınız bu sırayı değiştirebilir.');
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await expect(sonraki).not.toContainText('Dükkânı kaydedin');
+  await expect(sonraki.locator('li').first()).toHaveText('İşletmeyle görüşün');
+  // Bekleme yanıtı seçilince ileriki adımlar gösterilmez. Okur önce koşulun değişmesini bekler.
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Başka ortak bu dükkânı bildirmiş', exact: true }).click();
+  await expect(sonraki).toHaveCount(0);
+});
+
+test('on rehberin sonraki adım zinciri döngüsüz ve sonludur', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'Veri denetimi bir kez çalışır.');
+  const { olasiSonrakiler } = await import('../src/data/politikaAkislari/motor');
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  for (const proje of ['istoc', 'segika']) for (const rol of ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci']) {
+    const modul = await import(`../src/data/politikaAkislari/${proje}/${rol}.ts`);
+    const akis = modul.akisOlustur({ ...VARSAYILAN_AYAR, marka: proje });
+    for (const adim of akis.adimlar) {
+      const zincir = olasiSonrakiler(akis, adim).map((a: { id: string }) => a.id);
+      expect(new Set(zincir).size, `${proje}/${rol}/${adim.id}`).toBe(zincir.length);
+      expect(zincir, `${proje}/${rol}/${adim.id}`).not.toContain(adim.id);
+    }
+  }
+});

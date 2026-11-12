@@ -6,7 +6,7 @@ import { Sec } from '../components/sadeKit';
 import { kosulListesi, seciliKosul } from '../data/kosullar';
 import { SEVIYE_ADI, type Marka, type RolId, type Seviye } from '../data/satisOrtakligi';
 import type { AkisOlustur, AkisYaniti } from '../data/politikaAkislari/types';
-import { akisGorunumu } from '../data/politikaAkislari/motor';
+import { akisGorunumu, olasiSonrakiler } from '../data/politikaAkislari/motor';
 import { usePersonaAyar } from '../lib/personaStore';
 import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
@@ -44,6 +44,8 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
   const motion = useMotionMs('--motion-duration-base');
   const gorunum = akisGorunumu(akis, record.fingerprint === fingerprint ? record.answers : []);
   const { etkin, gecmis, sonuc } = gorunum;
+  // Bekleme veya bitiş yanıtında ileriki adımlar gösterilmez. Okur önce koşulun değişmesini bekler.
+  const sonrakiler = sonuc ? [] : olasiSonrakiler(akis, etkin, gecmis.map((g) => g.adim.id));
   useEffect(() => {
     if (!hazir) return;
     if (restored.current) {
@@ -118,6 +120,14 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
           </div>
         </div>
       </li>
+      {sonrakiler.length > 0 && <li className="pol-zaman-sonraki" data-akis-sonraki>
+        <span className="pol-zaman-sayi" aria-hidden="true" />
+        <div>
+          <p className="pol-yol-ust">Sonraki olası adımlar</p>
+          <ol className="pol-sonraki-liste" start={gecmis.length + 2}>{sonrakiler.map((a) => <li key={a.id}>{a.ad}</li>)}</ol>
+          <p className="pol-yol-aciklama">Yanıtınız bu sırayı değiştirebilir.</p>
+        </div>
+      </li>}
     </ol>
     <p className="pol-yol-aciklama">Yanıtlarınız bu sekmedeki örnek süreci gösterir. Müşteri kaydı veya imza oluşturmaz.</p>
     <div className="pol-rehber-ekleri">
