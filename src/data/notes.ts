@@ -47,7 +47,12 @@ export const DEFAULT_NOTES: NotesState = {
 
 const isState = (value: unknown): value is NotesState => {
   const v = value as NotesState;
-  return !!v && Array.isArray(v.lists) && Array.isArray(v.notes) && v.lists.every((l) => typeof l.id === 'string' && typeof l.name === 'string');
+  return !!v && Array.isArray(v.lists) && Array.isArray(v.notes) && v.lists.every((l) => !!l && typeof l.id === 'string' && typeof l.name === 'string');
+};
+
+const isNote = (n: unknown): n is Note => {
+  const v = n as Note;
+  return !!v && typeof v.id === 'string' && typeof v.list === 'string' && typeof v.text === 'string' && typeof v.done === 'boolean' && typeof v.created === 'string';
 };
 
 export function loadNotes(): NotesState | null {
@@ -55,7 +60,8 @@ export function loadNotes(): NotesState | null {
     const raw = localStorage.getItem(NOTES_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
-    return isState(parsed) ? parsed : null;
+    // Bozuk not öğeleri atlanır. Böylece sağlam notlar kaybolmaz ve sayfa çökmez.
+    return isState(parsed) ? { lists: parsed.lists, notes: parsed.notes.filter(isNote) } : null;
   } catch {
     return null;
   }

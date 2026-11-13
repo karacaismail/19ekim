@@ -22,7 +22,9 @@ function useCevaplar() {
   useEffect(() => {
     try {
       const k = localStorage.getItem(ANAHTAR);
-      if (k) setC(JSON.parse(k) as Cevaplar);
+      const kayit = k ? (JSON.parse(k) as unknown) : null;
+      // Yalnız nesne biçimindeki kayıt okunur. `null`, dizi ya da düz değer boş başlangıç sayılır.
+      if (kayit && typeof kayit === 'object' && !Array.isArray(kayit)) setC(kayit as Cevaplar);
     } catch {
       /* kayıt okunamazsa boş başlar */
     }

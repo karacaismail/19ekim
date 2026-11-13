@@ -1464,6 +1464,59 @@ Pages yayınından önce çalıştırır.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.
 - Görsel referans (snapshot) testleri kurulmadı; gerçek Safari/iOS/Android cihaz kontrolleri yapılmadı.
 - `astro preview` Astro 7’de etkileşimsiz ortamda arka plana geçer; testler bu yüzden `scripts/serve-dist.mjs` kullanır.
+- Satış ortaklığı 1. sürümünde bozuk yerel önbellek uyarısı (“Bu cihazdaki kayıt okunamadı”) ekranda görünmez. `connect()`
+  uyarıyı hemen siler. Önbellekte gönderilmemiş değişiklik varsa sessizce kaybolur.
+- 1. sürümün girdi uyarısı “Ortak kayıt” alanındadır. Uyarı alana `aria-invalid` ya da `aria-describedby` ile bağlı değildir.
+- Applet kaydında iç içe alanın türü denetlenmez (`appletStore.ts → dilimBirlestir`). Örneğin metin olan ücret “NaN” gösterir.
+- `/gelir-ongorusu-2027/` modeli ve `/butce-2027/` geliri varsayılan parametrelerle hesaplanır. `/gelir-plani/` bu
+  tarayıcıda kaydedilen parametreleri kullanır. Parametre değişince sayfalar farklı gelir gösterir. Hangisinin doğru
+  olduğu kullanıcı kararıdır.
+
+## Davranış testleri ve düzeltmeler (13 Kasım 2026)
+
+Testsiz kalan davranışlar tarandı. Her sayfa için yeni test dosyası yazıldı. Beklenen değerler kaynaktaki model
+işlevlerinden hesaplanır. Ekrandaki değer kopyalanmaz. Yeni dosyalar:
+
+| Dosya | Kapsam |
+|---|---|
+| `tests/rehber-hesap-baglantisi.spec.ts` | Rehberden hesaplayıcıya giden bağlantılar |
+| `tests/karar-kayit.spec.ts` | Karar seçimlerinin saklanması, notlar, mesai hesabı, bozuk kayıt |
+| `tests/notlar-davranis.spec.ts` | Yeni liste, düzenleme tuşları, sayaçlar, bozuk kayıt, kapalı depolama |
+| `tests/planlama-hesap.spec.ts` | İstihdam, hedefler, parametreler, kadro kapasitesi, rol sayfası hesapları ve tarihe bağlı durumlar |
+| `tests/surum-kayit.spec.ts` | Sürüm seçiminin saklanması ve adresin önceliği |
+| `tests/kabuk.spec.ts` | “İçeriğe geç” bağlantısı ve 404 sayfası |
+| `tests/applet-davranis.spec.ts` | Applet sonuçları, satır ekleme ve silme, hazır kümeler, kayıt |
+| `tests/bicim.spec.ts` | Sayı biçimi ve CSV dosyası (veri testi) |
+| `tests/gelir-plani-davranis.spec.ts` | CSV içeriği, seçenek etkisi, başabaş, adres seçenekleri, iki sekme |
+| `tests/giderler-ek.spec.ts` | Giderler süzgeçleri, sütun araması, teşvik tablosu, hata durumları |
+| `tests/finans-durumlar.spec.ts` | Sheets yüklenirken ve hata verince nakit, gelir ve bütçe sayfaları |
+| `tests/butce-gelir-2027-ek.spec.ts` | 2027 bütçesi ve gelir öngörüsü tabloları, risk haritası |
+| `tests/persona-durum.spec.ts` | Ortak kayıt durumları: bekleyen, hata, çakışma, erişim anahtarı |
+| `tests/satis-ortakligi-ek.spec.ts` | Hesaplayıcı sonuçları, girdi denetimi, Segika fiyatı, sekme tuşları |
+
+Testlerin bulduğu hatalar düzeltildi. Geçerli kurallar şunlardır:
+
+- Sayı biçiminde (`src/lib/format.ts`) eksi ve artı tutar aynı kuralla yuvarlanır. Yarım değer sıfırdan uzağa gider.
+  Sıfıra yuvarlanan değer eksi işareti almaz. Eksi yüzde “-%5” yazılır. Sayı olmayan değerin yerine tablolardaki boş
+  değer işareti yazılır (`BILINMIYOR`).
+- CSV dosyasında (`src/lib/csv.ts`) sayı hücresi virgüllü ondalıkla yazılır, örneğin “26,5”. Türkçe Excel bunu sayı okur.
+- Senaryo seçeneklerinde (`src/lib/scenarioOptions.ts`) aralık dışı değer adresten ve kayıttan okunmaz. Örneğin
+  `?kapasite=-5` ve `?eldetutma=2` yok sayılır. Boş değer “verilmedi” sayılır. Bozuk kayıt “kayıtlı” gösterilmez.
+  Başka sekmeden gelen değişiklik depoya geri yazılmaz. Seçenekler de sekmeler arasında eşitlenir.
+- Sürüm seçiminde (`src/lib/surum.ts`) adres önce okunur. Depolama kapalıyken de `?surum=v2` bağlantısı 2. sürümü açar.
+- Satış ortaklığı 2. sürümü rehber bağlantısındaki ürünü okur. `?surum=v2&urun=segika` ürünü bir kez seçer ve 2. sürümün
+  kaydına yazar. Sayfa `proje` okumaz, çünkü 1. sürüm onu adrese yazar ve iki sürümün ayarları ayrı kalmalıdır.
+- Satış ortaklığı 1. sürümünde (`src/lib/personaStore.ts`) reddedilen değerin uyarısı alana bağlıdır. Başka alandaki
+  geçerli değişiklik bu uyarıyı silmez.
+- Kararlar ve Notlar sayfasında bozuk kayıt sayfayı çökertmez. Notlarda bozuk not öğesi atlanır, sağlam notlar kalır.
+- Giderler sayfasında “2027 artışı” süzgeci adı tam eşleştirir. “Maaş zammı” seçilince “Maaş zammı yok” satırı gelmez.
+- Nakit akışı sayfası Sheets verisi yüklenirken “okunamadı” demez. Sonuç kutusu “okunuyor” der.
+- İstihdam 2. sürümünde Aralık 2027 aylık gideri ve oranı takvimden hesaplanır (`istihdamV2.ts → SECENEK_OZETI`).
+  Bir kerelik hizmet yalnız başladığı aya yazılır.
+- Hedefler sayfasında üye satıcı notundaki sayı “Üye satıcı hedefi” parametresinden gelir.
+
+Birden çok çalışma ağacı aynı klasörde test koşarsa `test-results/` klasörü çakışır. Kendi çıktı klasörünüzü verin:
+`PW_PORT=4341 npx playwright test --output=<klasör>`.
 
 ## Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12)
 

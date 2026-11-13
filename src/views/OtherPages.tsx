@@ -118,7 +118,7 @@ function GoalsContent() {
   const plan = payments(m.planRetention);
   const options = [
     { option: 'Yıllık peşin (10 ay ücreti, 2 ay bedava)', unit: lira(ANNUAL_TRY), count: Math.ceil(gap / (ANNUAL_TRY - SUBSCRIPTION_TRY)), note: 'Aylık yerine peşin ödeyen aktif satıcı' },
-    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: `500 üyenin ${pct(gapMonths / 500)} kadarı` },
+    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: `${m.params.memberTarget} üyenin ${pct(gapMonths / m.params.memberTarget)} kadarı` },
   ];
 
   return (

@@ -902,6 +902,8 @@ const SUTUN_GRUPLARI: { id: SutunGrubu; ad: string }[] = [
 ];
 
 /** Aramada büyük/küçük harf ve ı/i farkı yok (“Instagram” → “insta”, “İnternet” → “internet”). */
+/** “2027 artışı” değerinin adı: “Kur +%12” → “Kur”. Filtre seçenekleri ve süzgeç aynı adı kullanır. */
+const artisAdi = (artis: string) => artis.replace(/ [+−]?%[\d,]+$/, '');
 const katla = (s: string) => s.toLocaleLowerCase('tr-TR').replace(/ı/g, 'i');
 /** “1.000,50” → 1000.5 (Türkçe sayı yazımı). */
 const sayiOku = (s: string) => Number(s.replace(/\s|₺|\$|€/g, '').replace(/\./g, '').replace(',', '.'));
@@ -1170,7 +1172,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
 
   const kumeSay = (k: KumeKod) => all.filter((r) => r.kume === k).length;
   const secenek = (xs: string[]) => [...new Set(xs)].sort((a, b) => a.localeCompare(b, 'tr'));
-  const ARTIS_SECENEK = secenek(all.map((r) => r.artis.replace(/ [+−]?%[\d,]+$/, '')));
+  const ARTIS_SECENEK = secenek(all.map((r) => artisAdi(r.artis)));
   /** Liste filtresi seçenekleri: tüm satırlardaki değerler ve sayıları (süzgeçten bağımsız). */
   const secenekler = (s: Sutun): [string, number][] => {
     const map = new Map<string, number>();
@@ -1189,7 +1191,8 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
       if (durumSec.length && !durumSec.includes(r.durum?.ad ?? '')) return false;
       if (turSec.length && !turSec.includes(r.tur)) return false;
       if (paraSec.length && !paraSec.includes(r.para)) return false;
-      if (artisSec.length && !artisSec.some((a) => r.artis.startsWith(a))) return false;
+      // Seçenek adı tam eşleşir. “Maaş zammı” seçilince “Maaş zammı yok” satırı gelmez.
+      if (artisSec.length && !artisSec.includes(artisAdi(r.artis))) return false;
       if (enAz !== '' && r.donem < enAz) return false;
       if (enCok !== '' && r.donem > enCok) return false;
       for (const [id, f] of Object.entries(kolon)) {

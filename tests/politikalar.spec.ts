@@ -62,9 +62,9 @@ test('rehber hesapları kaynağın varsayılanını kullanır ve bütün özel p
   }
 });
 
-test('kişisel hesap ayarı rehberi veya anlaşmayı değiştirmez', async ({ page }) => {
+// Rehber 1. sürümün ortak kaydını izler (tests/persona-durum.spec.ts). 2. sürümün bu tarayıcıdaki ayarı rehberi değiştirmez.
+test('ikinci sürümün kişisel hesap ayarı rehberi veya anlaşmayı değiştirmez', async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem('turksab-satis-ortakligi-v1', '{bozuk');
     localStorage.setItem('turksab-satis-ortakligi-v2-segment', JSON.stringify({ maas: 999999 }));
   });
   await page.goto('politikalar/kadrolu/');
@@ -72,7 +72,7 @@ test('kişisel hesap ayarı rehberi veya anlaşmayı değiştirmez', async ({ pa
   await expect(page.locator('.pol-belge')).toBeVisible();
   await expect(page.locator('#kazanc')).toContainText('50.000 ₺');
   await expect(page.locator('#kazanc')).not.toContainText('999.999');
-  expect(await page.evaluate(() => localStorage.getItem('turksab-satis-ortakligi-v1'))).toBe('{bozuk');
+  expect(JSON.parse((await page.evaluate(() => localStorage.getItem('turksab-satis-ortakligi-v2-segment'))) ?? '{}').maas).toBe(999999);
 });
 
 test('rehber bağlantıları hesaplayıcının iki sürümünde de açılır', async ({ page }) => {

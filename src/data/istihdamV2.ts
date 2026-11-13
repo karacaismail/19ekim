@@ -93,7 +93,7 @@ interface Veri {
 const V = veri as unknown as Veri;
 export const KUMELER: Kume[] = V.kumeler;
 export const POZISYONLAR: Pozisyon[] = V.pozisyonlar;
-export const SECENEK_OZETI: Record<SecenekId, SecenekOzeti> = V.secenekler;
+const HAM_OZET: Record<SecenekId, SecenekOzeti> = V.secenekler;
 export const VARSAYIMLAR = V.varsayimlar;
 export const KAYNAKLAR: Kaynak[] = V.kaynaklar;
 export const HESAP_TARIHI = '2026-11-05';
@@ -151,6 +151,18 @@ export function takvim2027(s: SecenekId): TakvimAyi[] {
     return { ay, baslayanlar, yeniKisi, kadro, gider };
   });
 }
+
+/**
+ * Seçenek özeti (veri dosyasından). Aralık 2027 aylık gideri ve oranı takvimden hesaplanır. Veri dosyası bir kerelik
+ * hizmeti (sızma testi) 12 aya yayıyordu. Bu yüzden aynı sayfada Aralık için iki farklı tutar görünüyordu. Bir kerelik
+ * hizmet yalnız başladığı aya yazılır (`aylikGider`).
+ */
+export const SECENEK_OZETI = Object.fromEntries(
+  SECENEKLER.map((s) => {
+    const aralik = takvim2027(s)[11].gider;
+    return [s, { ...HAM_OZET[s], aylikMaliyetAralik2027: aralik, aralikGelirPayi: Math.round((aralik / HAM_OZET[s].gelirAralik2027) * 1000) / 10 }];
+  }),
+) as Record<SecenekId, SecenekOzeti>;
 
 export const seceneginPozisyonlari = (s: SecenekId) => POZISYONLAR.filter((p) => p.secenekler[s].kisi > 0);
 

@@ -11,11 +11,15 @@ const gecerli = (v: string | null): v is Surum => v === 'v1' || v === 'v2';
 export function useSurum(anahtar: string) {
   const [surum, setSurum] = useState<Surum>('v1');
   useEffect(() => {
+    // Adres ayrı okunur. Depolama kapalıyken `localStorage` hata verse de `?surum=v2` bağlantısı çalışır.
+    const adres = new URLSearchParams(window.location.search).get('surum');
+    if (gecerli(adres)) {
+      setSurum(adres);
+      return;
+    }
     try {
-      const adres = new URLSearchParams(window.location.search).get('surum');
       const kayit = localStorage.getItem(anahtar);
-      if (gecerli(adres)) setSurum(adres);
-      else if (gecerli(kayit)) setSurum(kayit);
+      if (gecerli(kayit)) setSurum(kayit);
     } catch {
       /* okunamazsa v1 */
     }
@@ -24,11 +28,15 @@ export function useSurum(anahtar: string) {
     setSurum(v);
     try {
       localStorage.setItem(anahtar, v);
+    } catch {
+      /* depolama kapalı: seçim adreste ve bu oturumda kalır */
+    }
+    try {
       const url = new URL(window.location.href);
       url.searchParams.set('surum', v);
       window.history.replaceState(null, '', url);
     } catch {
-      /* depolama kapalı: seçim bu oturumda kalır */
+      /* adres yazılamadı */
     }
   };
   return [surum, sec] as const;

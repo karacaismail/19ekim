@@ -144,9 +144,12 @@ function Icerik() {
           etiket: 'Nakit açığı tavanı',
           deger: acikYaz(cf),
           // Sheets yokken eksik gider kapsamı tam finansman hesabı gibi sunulmaz (B2c, MS-02).
+          // Yüklenirken “okunamadı” denmez: veri henüz gelmedi, hata yok.
           aciklama: cf.sheets
             ? 'Kasadaki para hiçbir ay eksiye düşmesin diye en az bu kadar ek para gerekir. Bu tutar, açığın en büyük olduğu ayın açığıdır. Yatırım girişi ve başlangıç nakdi bu tutarı değiştirir.'
-            : 'Sheets gider verisi okunamadı. Bu tutar yalnız plan kalemleriyle hesaplandı, bu yüzden tam finansman ihtiyacı değildir.',
+            : durum.status === 'loading'
+              ? 'Sheets gider verisi okunuyor. Bu tutar şimdilik yalnız plan kalemleriyle hesaplandı. Veri gelince tutar güncellenir.'
+              : 'Sheets gider verisi okunamadı. Bu tutar yalnız plan kalemleriyle hesaplandı, bu yüzden tam finansman ihtiyacı değildir.',
         }}
         durum={sonucDurum}
         tools={aciklamaliSecici}
@@ -161,7 +164,9 @@ function Icerik() {
         kaynak={`Tablodaki girişler iStoc girişleridir, yani abonelik gelirleridir. Giderler ise Türksab’ın Sheets’teki ortak gider planının tamamıdır. Giderlerin markaya dağıtımı henüz belirlenmedi. Yani bu giderlerin ne kadarının iStoc’a ait olduğu henüz belli değil. ${
           cf.sheets
             ? 'Plan kalemleri, Sheets’te olmayan ama hesaba eklenen giderlerdir. Bunlar eklenen saha personeli, Meta işe alım reklamı, satıcı kazanım reklamı ve satış primidir.'
-            : 'Sheets gider verisi okunamadı. Bu yüzden çıkışlar yalnız plan kalemlerinden oluşur ve tablo eksiktir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
+            : durum.status === 'loading'
+              ? 'Sheets gider verisi okunuyor. Veri gelene kadar çıkışlar yalnız plan kalemlerinden oluşur. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
+              : 'Sheets gider verisi okunamadı. Bu yüzden çıkışlar yalnız plan kalemlerinden oluşur ve tablo eksiktir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
         }`}
       />
       <Section

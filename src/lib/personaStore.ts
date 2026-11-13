@@ -38,12 +38,15 @@ export function personaBaglan(key: string) {
 
 export function usePersonaAyar(project: Marka) {
   const store = useMemo(() => getStore(project), [project]);
-  const [inputError, setInputError] = useState('');
+  // Reddedilen değerin uyarısı alana bağlıdır. Başka alandaki geçerli değişiklik bu uyarıyı silmez. Aksi hâlde kutuda
+  // hesaba girmeyen değer uyarısız kalır (sessiz düzeltme, docs/gorsel_algi.md V20).
+  const [hatalar, setHatalar] = useState<Record<string, string>>({});
   const [hazirProje, setHazirProje] = useState<Marka | null>(null);
   const view = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
   useEffect(() => {
     try { const raw = personaCacheRead(project, localStorage, sessionStorage); if (raw) store.restore(raw); } catch { /* Bozuk önbellek ortak kaydı değiştirmez. */ }
     setHazirProje(project);
+    setHatalar({});
     const connect = () => { if (PERSONA_ENDPOINT) store.connect(memoryKey || keyRead()); };
     const visible = () => store.setVisible(document.visibilityState !== 'hidden');
     const online = () => store.retry();
@@ -58,9 +61,19 @@ export function usePersonaAyar(project: Marka) {
   }, [store, project]);
   const ayar = useMemo(() => alanlardanAyar(project, view.fields), [project, view.fields]);
   const guncelle = (patch: Partial<Ayar>) => {
-    try { store.update(alanlaraAyir(patch)); setInputError(''); }
-    catch (error) { setInputError(error instanceof Error ? error.message : 'Alan değeri geçerli değil.'); }
+    const alan = Object.keys(patch).sort().join(',');
+    try {
+      store.update(alanlaraAyir(patch));
+      setHatalar((h) => { if (!(alan in h)) return h; const kalan = { ...h }; delete kalan[alan]; return kalan; });
+    } catch (error) {
+      const mesaj = error instanceof Error ? error.message : 'Alan değeri geçerli değil.';
+      setHatalar((h) => ({ ...h, [alan]: mesaj }));
+    }
   };
-  const sifirla = () => store.update(alanlaraAyir({ ...VARSAYILAN_AYAR, kosul: { oncu: 'ana', kadrolu: 'ana', cozum: 'ana', tavsiye: 'ana', elci: 'ana' } }));
+  const sifirla = () => {
+    store.update(alanlaraAyir({ ...VARSAYILAN_AYAR, kosul: { oncu: 'ana', kadrolu: 'ana', cozum: 'ana', tavsiye: 'ana', elci: 'ana' } }));
+    setHatalar({});
+  };
+  const inputError = Object.values(hatalar).join(' ');
   return { ayar, guncelle, sifirla, inputError, sync: view, store, hazir: hazirProje === project };
 }

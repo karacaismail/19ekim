@@ -1,6 +1,8 @@
 /** CSV dışa aktarma (kurumsal olgunluk, kullanıcı kararı 2026-10-27): tablo satırları tarayıcıdan indirilir; sunucu yok. */
+// Türkçe Excel ondalık ayırıcı olarak virgül bekler. Sayı hücresi “26,5” yazılır, “26.5” metin ya da tarih sanılır.
+// Binlik ayırıcı yazılmaz: Excel “70188,75” değerini sayı olarak okur.
 const esc = (v: string | number | null | undefined) => {
-  const s = v === null || v === undefined ? '' : String(v);
+  const s = v === null || v === undefined ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : String(v);
   return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 
