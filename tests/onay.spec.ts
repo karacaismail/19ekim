@@ -8,6 +8,7 @@ import { expect, test, type Page } from './fixtures/persona';
  * - İlk basış veriyi değiştirmez. Düğmenin yazısı onay cümlesine döner, yanında “Vazgeç” çıkar.
  * - Onay süreye bağlı değildir. İkinci basış işi yapar. “Vazgeç” onayı kapatır.
  * - Onay bekleyen düğme her sayfada aynı uyarı tonundadır.
+ * - “Vazgeç” onay düğmesinin hemen yanındadır ve her sayfada aynı görünüştedir. Escape de onayı kapatır.
  * - Tarayıcının onay penceresi (`window.confirm`) hiçbir yerde açılmaz.
  */
 
@@ -67,6 +68,20 @@ async function ikiAdim(page: Page, ad: string | RegExp, onay: string | RegExp) {
   expect(pay.ust, 'üstte boşluk').toBeGreaterThanOrEqual(3);
   expect(pay.alt, 'altta boşluk').toBeGreaterThanOrEqual(3);
   expect(Math.min(pay.sol, pay.sag), 'yanlarda boşluk').toBeGreaterThanOrEqual(8);
+  // Vazgeç onay düğmesinin hemen yanında, aynı satırda ve ortak görünüştedir.
+  const vazgec = page.getByRole('button', { name: 'Vazgeç' });
+  await expect(vazgec).toHaveClass(/\bonay-vazgec\b/);
+  const [a, v] = await Promise.all([onayDugmesi.boundingBox(), vazgec.boundingBox()]);
+  const arada = v!.x - (a!.x + a!.width);
+  expect(arada, 'Vazgeç onayın hemen sağında').toBeGreaterThanOrEqual(0);
+  expect(arada, 'Vazgeç onaydan uzak değil').toBeLessThanOrEqual(16);
+  expect(Math.abs(v!.y + v!.height / 2 - (a!.y + a!.height / 2)), 'iki düğme aynı satırda').toBeLessThanOrEqual(a!.height / 2);
+  // Escape onayı kapatır, odak ana düğmeye döner. Sonra onay yeniden açılır.
+  await onayDugmesi.press('Escape');
+  await expect(page.getByRole('button', { name: onay }), 'Escape onayı kapatır').toHaveCount(0);
+  await expect(page.getByRole('button', { name: ad }).first(), 'Escape sonrası odak ana düğmede').toBeFocused();
+  await page.getByRole('button', { name: ad }).first().click();
+  await expect(page.getByRole('button', { name: onay })).toBeVisible();
   await page.getByRole('button', { name: 'Vazgeç' }).click();
   await expect(page.getByRole('button', { name: onay }), 'Vazgeç onayı kapatır').toHaveCount(0);
   await expect(page.getByRole('button', { name: ad }).first(), 'odak ana düğmeye döner').toBeFocused();
@@ -110,8 +125,8 @@ for (const genislik of [1024, 1512]) test(`satış ortaklığı 1. sürüm ${gen
   await expect(sonuc, 'onaydan sonra ayarlar varsayılana döner').toHaveText(once ?? '');
 });
 
-test('satış ortaklığı 2. sürüm: “Başa dön” onay ister, onaydan önce veri değişmez', async ({ page }) => {
-  await page.setViewportSize({ width: 1512, height: 945 });
+for (const genislik of [1280, 1512]) test(`satış ortaklığı 2. sürüm ${genislik} px: “Başa dön” onay ister, onaydan önce veri değişmez`, async ({ page }) => {
+  await page.setViewportSize({ width: genislik, height: 945 });
   await page.goto('satis-ortakligi/?surum=v2');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   const basic = page.getByRole('textbox', { name: /Basic paket/ }).first();
@@ -124,8 +139,8 @@ test('satış ortaklığı 2. sürüm: “Başa dön” onay ister, onaydan önc
   await expect(basic, 'onaydan sonra ayarlar varsayılana döner').not.toHaveValue('7');
 });
 
-test('notlar: silme ve varsayılana dönme aynı onay tonunu kullanır', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
+for (const genislik of [320, 1280]) test(`notlar ${genislik} px: varsayılana dönme aynı onay kalıbını kullanır`, async ({ page }) => {
+  await page.setViewportSize({ width: genislik, height: 900 });
   await page.goto('notlar/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await ikiAdim(page, 'Varsayılan notlara dön', 'Varsayılan notlara dön (onayla)');

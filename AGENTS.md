@@ -1315,10 +1315,11 @@ genişlikte açar. Chromium ve WebKit’te çalışır. Token değerleri sayfada
   - Sayfanın öne çıkan kartı `--inset-xl` kullanır. Boşluk telefonda 20, 48em’den itibaren 32 px olur.
 - **Onay.** Veri silen ya da sıfırlayan her düğme `OnayDugmesi` bileşenini kullanır. Tarayıcının onay penceresi
   açılmaz. Test `tests/onay.spec.ts` dosyasıdır.
-  1. İlk basış hiçbir şeyi değiştirmez. Düğme onay cümlesini gösterir ve yanında “Vazgeç” çıkar.
-  2. Onay süreye bağlı değildir. İkinci basış işi yapar.
-  3. “Vazgeç” onayı kapatır. Odak ana düğmeye döner.
-  4. Onay bekleyen düğme her sayfada aynı uyarı tonundadır. Onay cümlesi ekran okuyucuya duyurulur.
+  1. İlk basış hiçbir şeyi değiştirmez. Düğme onay cümlesini gösterir ve hemen yanında “Vazgeç” çıkar.
+  2. İki düğme tek kümede yan yana durur (`.onay-kume`). “Vazgeç” her sayfada aynı görünüştedir (`.onay-vazgec`).
+  3. Onay süreye bağlı değildir. İkinci basış işi yapar.
+  4. “Vazgeç” ya da Escape onayı kapatır. Odak ana düğmeye döner.
+  5. Onay bekleyen düğme her sayfada aynı uyarı tonundadır. Onay cümlesi ekran okuyucuya duyurulur.
 
 Yeni sayfa bu iskeletle kurulur. Yeni bir başlık, not ya da kart biçimi gerekirse önce ortak bileşen genişletilir.
 Sayfaya özel kopya yazılmaz.

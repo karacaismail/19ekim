@@ -136,7 +136,6 @@ function Sifirla() {
     <div className="param-sifirla">
       <OnayDugmesi
         className="param-reset"
-        vazgecClassName="param-vazgec"
         disabled={!changed}
         onay="Genel ayarları sıfırla (onayla)"
         onOnay={() => {

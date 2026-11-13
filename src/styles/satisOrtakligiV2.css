@@ -1918,7 +1918,7 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   gap: var(--space-6);
 }
 
-.v2-cekmece-bolum > .v2-so2-sifirla {
+.v2-cekmece-bolum > .onay-kume:has(.v2-so2-sifirla) {
   justify-self: start;
 }
 

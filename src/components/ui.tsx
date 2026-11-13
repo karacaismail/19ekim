@@ -693,11 +693,12 @@ export function SayfaNotu({ children }: { children: ReactNode }) {
 /**
  * İki adımlı onay düğmesi (gorsel_algi.md F14, WCAG 2.2.1; iskelet sözleşmesi, 13 Kasım 2026). Veri silen ya da
  * sıfırlayan her düğme bu bileşeni kullanır. Tarayıcının onay penceresi (`window.confirm`) kullanılmaz.
- * - İlk basış veriyi değiştirmez. Düğmenin yazısı onay cümlesine döner ve yanında “Vazgeç” çıkar.
- * - Onay süreye bağlı değildir. İkinci basış işi yapar, “Vazgeç” onayı kapatır.
+ * - İlk basış veriyi değiştirmez. Düğmenin yazısı onay cümlesine döner ve hemen yanında “Vazgeç” çıkar.
+ * - İki düğme tek kümede (`.onay-kume`) yan yana durur. “Vazgeç” her sayfada aynı görünüştedir (`.onay-vazgec`).
+ * - Onay süreye bağlı değildir. İkinci basış işi yapar. “Vazgeç” ya da Escape onayı kapatır.
+ * - Onay kapanınca odak ana düğmeye döner. Klavye kullanıcısı yerini kaybetmez.
  * - Onay cümlesi neyin değişeceğini söyler. Örnek: “Ortak ayarları varsayılana döndür (onayla)”.
  * - Onay bekleyen düğme uyarı tonundadır (`.onay-dugmesi[data-armed]`). `kapsam` verilirse onay sırasında görünür.
- * - “Vazgeç” kaybolunca odak ana düğmeye döner. Klavye kullanıcısı yerini kaybetmez.
  * - Düğme devre dışı kalırsa bekleyen onay kapanır.
  * - Onay cümlesi ekran okuyucuya kalıcı bir canlı bölgeden duyurulur.
  */
@@ -706,7 +707,6 @@ export function OnayDugmesi({
   onay,
   onOnay,
   className,
-  vazgecClassName,
   disabled = false,
   gizliAd,
   gizliAdOnayda = true,
@@ -716,9 +716,8 @@ export function OnayDugmesi({
   /** Onay adımının tam yazısı: nesne ve kapsam, sonunda “(onayla)”. */
   onay: string;
   onOnay: () => void;
+  /** Ana düğmenin sayfaya özel sınıfı (boyut ve zemin). “Vazgeç” her yerde ortak sınıfı kullanır. */
   className?: string;
-  /** “Vazgeç” düğmesinin sınıfı; verilmezse ana düğmenin sınıfı kullanılır. */
-  vazgecClassName?: string;
   disabled?: boolean;
   /** Ekranda görünmeyen ek ad (ör. silinecek notun kısa metni). Erişilebilir ada eklenir. */
   gizliAd?: string;
@@ -732,39 +731,46 @@ export function OnayDugmesi({
   useEffect(() => {
     if (disabled) setArmed(false);
   }, [disabled]);
+  const vazgec = () => {
+    setArmed(false);
+    ana.current?.focus();
+  };
+  // Escape onayı kapatır. Olay yukarı çıkmaz, böylece düğmeyi taşıyan çekmece kapanmaz.
+  const tus = (e: { key: string; preventDefault: () => void; stopPropagation: () => void }) => {
+    if (e.key !== 'Escape' || !armed) return;
+    e.preventDefault();
+    e.stopPropagation();
+    vazgec();
+  };
   return (
     <>
-      <button
-        ref={ana}
-        type="button"
-        className={className ? `onay-dugmesi ${className}` : 'onay-dugmesi'}
-        disabled={disabled}
-        data-armed={armed ? '' : undefined}
-        onClick={() => {
-          if (armed) {
-            setArmed(false);
-            onOnay();
-          } else setArmed(true);
-        }}
-      >
-        {armed ? onay : children}
-        {gizliAd && (!armed || gizliAdOnayda) ? <span className="visually-hidden"> {gizliAd}</span> : null}
-      </button>
+      <span className="onay-kume">
+        <button
+          ref={ana}
+          type="button"
+          className={className ? `onay-dugmesi ${className}` : 'onay-dugmesi'}
+          disabled={disabled}
+          data-armed={armed ? '' : undefined}
+          onKeyDown={tus}
+          onClick={() => {
+            if (armed) {
+              setArmed(false);
+              onOnay();
+            } else setArmed(true);
+          }}
+        >
+          {armed ? onay : children}
+          {gizliAd && (!armed || gizliAdOnayda) ? <span className="visually-hidden"> {gizliAd}</span> : null}
+        </button>
+        {armed ? (
+          <button type="button" className="onay-vazgec" onKeyDown={tus} onClick={vazgec}>
+            Vazgeç
+          </button>
+        ) : null}
+      </span>
       <span className="visually-hidden" role="status">
         {armed ? onay : ''}
       </span>
-      {armed ? (
-        <button
-          type="button"
-          className={vazgecClassName ?? className}
-          onClick={() => {
-            setArmed(false);
-            ana.current?.focus();
-          }}
-        >
-          Vazgeç
-        </button>
-      ) : null}
       {armed ? kapsam : null}
     </>
   );

@@ -268,7 +268,7 @@ export function Eylem({
   const onayMetni = onay ?? `${metin}${ad ? `: ${ad}` : ''} (onayla)`;
   if (ikiAdim)
     return (
-      <OnayDugmesi className="applet-eylem" vazgecClassName="applet-eylem applet-vazgec" disabled={disabled} onay={onayMetni} gizliAd={ad} gizliAdOnayda={false} onOnay={onClick}>
+      <OnayDugmesi className="applet-eylem" disabled={disabled} onay={onayMetni} gizliAd={ad} gizliAdOnayda={false} onOnay={onClick}>
         {children}
       </OnayDugmesi>
     );
