@@ -32,7 +32,7 @@ export type ChartSpec =
   | { kind: 'gelir-ay'; months: string[]; first: number[]; renew: number[]; target: number }
   | { kind: 'kaynak-ay'; months: string[]; unit: string; series: { name: string; role: RoleKey; values: number[] }[] }
   | { kind: 'checkpoint'; days: string[]; aktif: number[]; ciro: number[]; target: number }
-  | { kind: 'deadlines'; start: string; end: string; items: { name: string; date: string; role: RoleKey }[] }
+  | { kind: 'deadlines'; start: string; end: string; items: { name: string; date: string; role: RoleKey }[]; /** Bugün (ISO). Verilirse grafikte “Bugün” çizgisi görünür. */ today?: string }
   | { kind: 'piramit'; items: { name: string; count: number; role: RoleKey }[] }
   | { kind: 'huni'; items: { name: string; value: number }[]; role: RoleKey }
   /** Doğrusal hat: adımlar yukarıdan aşağı zincir olarak çizilir. */

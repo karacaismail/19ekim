@@ -55,6 +55,21 @@ function boslukOlc() {
     }
     return false;
   };
+  /**
+   * Yazı ile ölçülen öğe arasında açılır bir katman var mı? Katman mutlak konumludur ve kendi zemini vardır (ör. yapışık
+   * şeridin altında açılan liste). Katmandaki yazı katmana aittir. Katman kendi kutusu olarak ayrıca ölçülür.
+   */
+  const katmanIcinde = (ic: Element, dis: Element) => {
+    const d = dis.getBoundingClientRect();
+    for (let e: Element | null = ic; e && e !== dis; e = e.parentElement) {
+      const c = getComputedStyle(e);
+      if (!((c.position === 'absolute' || c.position === 'fixed') && (rgba(c.backgroundColor)?.a ?? 0) > 0.05)) continue;
+      // Yalnız ölçülen öğenin dışına taşan katman sayılır. Kutunun içindeki rozet (ör. köşedeki numara) ölçüme katılır.
+      const k = e.getBoundingClientRect();
+      if (k.top < d.top - 0.5 || k.bottom > d.bottom + 0.5 || k.left < d.left - 0.5 || k.right > d.right + 0.5) return true;
+    }
+    return false;
+  };
   /** Yazı ile ölçülen öğe arasındaki atalardan taşmayı gizleyenlerin kesişim alanı. Yoksa null. */
   const kirpmaAlani = (ic: Element, dis: Element) => {
     let alan: { left: number; right: number; top: number; bottom: number } | null = null;
@@ -154,7 +169,7 @@ function boslukOlc() {
       const sus = ebeveyn.closest('[aria-hidden="true"]');
       if (sus && el.contains(sus) && getComputedStyle(sus).position === 'absolute') continue;
       // Kendi içinde kayan kutudaki yazı o kutuya aittir. Kayan kutu kenara kadar içerik gösterebilir (tablo kaydırma).
-      if (kayanKutuIcinde(ebeveyn, el)) continue;
+      if (kayanKutuIcinde(ebeveyn, el) || katmanIcinde(ebeveyn, el)) continue;
       // Kapalı `details` içindeki yazı (özet satırı dışında) görünmez.
       const ayrinti = ebeveyn.closest('details');
       if (ayrinti && !ayrinti.open && !ebeveyn.closest('summary')) continue;
@@ -170,7 +185,7 @@ function boslukOlc() {
     // Simgeler de içeriktir. Grafik çizimi (büyük SVG) ölçülmez, iç düzeni grafik kütüphanesi kurar.
     // Simge de yazı gibi süzülür: kayan kutudaki ve kırpılan simge ölçülmez (ör. kayan listedeki onay işaretleri).
     for (const s of el.querySelectorAll('svg')) {
-      if (s.parentElement?.closest('svg') || !s.parentElement || kayanKutuIcinde(s.parentElement, el)) continue;
+      if (s.parentElement?.closest('svg') || !s.parentElement || kayanKutuIcinde(s.parentElement, el) || katmanIcinde(s.parentElement, el)) continue;
       const r = s.getBoundingClientRect();
       const kirpma = kirpmaAlani(s.parentElement, el);
       if (kirpma && (r.right <= kirpma.left + 0.5 || r.left >= kirpma.right - 0.5 || r.bottom <= kirpma.top + 0.5 || r.top >= kirpma.bottom - 0.5)) continue;

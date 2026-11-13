@@ -681,6 +681,30 @@ html[data-bant-gizli] .v2-so2-duzen {
   background-color: var(--surface-hover);
 }
 
+/* Kapalı panelde “+”, açık panelde “−” görünür. Okur panelin açılabildiğini anlar. */
+.v2-so2-json-baslik {
+  justify-content: space-between;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.v2-so2-json-baslik::-webkit-details-marker {
+  display: none;
+}
+
+.v2-so2-json-baslik::after {
+  content: '+';
+  content: '+' / '';
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+}
+
+.v2-so2-json-ac[open] > .v2-so2-json-baslik::after {
+  content: '−';
+  content: '−' / '';
+}
+
 .v2-so2-json-icerik {
   max-height: 32rem;
   margin: 0;
@@ -1472,12 +1496,13 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
  * sekmeler yatay kayar ve ekranın büyük kısmını kaplamamalıdır. Sütunlar yapışık bölümün altından başlar.
  */
 @media (min-width: 64em) and (min-height: 40em) {
+  /* Kırıntı satırı kayınca üstten bir boşluk aşağıda durur (--kirinti-ek, global.css). Şeritler onun altından başlar. */
   .v2-so2 {
-    --v2-yapis-ust: calc(var(--bant-h, 0px) + var(--v2-kirinti-h, 0px));
+    --v2-yapis-ust: calc(var(--bant-h, 0px) + var(--v2-kirinti-h, 0px) + var(--kirinti-ek, 0px));
   }
 
   html[data-bant-gizli] .v2-so2 {
-    --v2-yapis-ust: var(--v2-kirinti-h, 0px);
+    --v2-yapis-ust: calc(var(--v2-kirinti-h, 0px) + var(--kirinti-ek, 0px));
   }
 
   .v2-so2-arac {

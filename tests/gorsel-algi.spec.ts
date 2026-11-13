@@ -495,6 +495,49 @@ test.describe('gorsel_algi GA-4b: dar ekranda karar araçları — Giderler sır
     await expect(ozet.getByRole('button', { name: /Diğer/ })).toHaveCount(0);
   });
 
+  test('Görsel inceleme 13 Kasım 2026: telefonda açılan özet listesi şeridi büyütmez ve sayfa kayınca kapanır', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('gelir-plani/');
+    await icerik(page);
+    await hydrated(page);
+    const ozet = page.locator('.yapiskan');
+    const kapaliBoy = await ozet.evaluate((el) => el.getBoundingClientRect().height);
+    // Düğmenin adı açılınca değişir (“Gizle”). Bu yüzden düğme sınıfıyla bulunur.
+    const dugme = ozet.locator('.yapiskan-digerleri-dugme');
+    await expect(dugme).toHaveAccessibleName('Diğer 5 sonuç');
+    await dugme.click();
+    await expect(ozet.locator('.yapiskan-digerleri .yapiskan-cip')).toHaveCount(5);
+    // Liste şeridin altında açılır. Yapışık şeridin kendi boyu değişmez, içerik aşağı itilmez.
+    expect(await ozet.evaluate((el) => el.getBoundingClientRect().height)).toBeLessThanOrEqual(kapaliBoy + 1);
+    const liste = await ozet.locator('.yapiskan-digerleri').boundingBox();
+    expect(liste!.y).toBeGreaterThanOrEqual((await ozet.boundingBox())!.y + kapaliBoy - 1);
+    // Okur sayfayı kaydırınca liste kapanır. Ekranın büyük kısmı kapalı kalmaz.
+    await page.mouse.wheel(0, 400);
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    await expect(ozet.locator('.yapiskan-digerleri')).toHaveCount(0);
+    // Escape tuşu da listeyi kapatır.
+    await dugme.click();
+    await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Escape');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    // Odak şeridin dışına çıkınca liste kapanır. Liste odaklanan öğeyi örtmez.
+    await dugme.click();
+    await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Tab');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    // Şeridin dışına dokunulunca liste kapanır.
+    await dugme.click();
+    await expect(dugme).toHaveAttribute('aria-expanded', 'true');
+    // Gerçek tıklama sayfadaki bir bağlantıya denk gelebilir. Bu yüzden olay sayfa gövdesine gönderilir.
+    await page.locator('main').dispatchEvent('pointerdown');
+    await expect(dugme).toHaveAttribute('aria-expanded', 'false');
+    // Liste uzunsa kendi içinde kayar. Ekranın dışına taşmaz.
+    await dugme.click();
+    const kutu = (await ozet.locator('.yapiskan-digerleri').boundingBox())!;
+    expect(kutu.y + kutu.height).toBeLessThanOrEqual(812 + 1);
+    expect(await ozet.locator('.yapiskan-digerleri').evaluate((e) => getComputedStyle(e).overflowY)).toBe('auto');
+  });
+
 });
 
 test.describe('gorsel_algi GA-5a: gezinti sözlüğü, bölüm dizini, oran çubuğu, kısa durum, uzun etiket', () => {

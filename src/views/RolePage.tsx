@@ -94,8 +94,18 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Dönem 1, ${formatDate(p1.from)} tarihinden ${formatDate(p1.to)} tarihine kadar sürer. ${role.hours.weekday} ${role.hours.saturday} ${role.hours.weeklyNet} Dönem 2, ${formatDate(p2.from)} tarihinde başlar. ${role.hours.fromFeb} Fazla çalışmanın yıllık bir üst sınırı vardır. Dönem 2 düzeni bu sınır yüzünden uygulanır.`}
+      desc="Çalışma saatleri iki dönemde farklıdır."
     >
+      {/* İki dönem ayrı maddededir. Saatler tek paragrafta birleşip metin duvarına dönüşmez. */}
+      <ul className="bullets rol-donemler">
+        <li>
+          <strong>Dönem 1:</strong> {formatDate(p1.from)} tarihinden {formatDate(p1.to)} tarihine kadar sürer. {role.hours.weekday} {role.hours.saturday} {role.hours.weeklyNet}
+        </li>
+        <li>
+          <strong>Dönem 2:</strong> {formatDate(p2.from)} tarihinde başlar. {role.hours.fromFeb}
+        </li>
+        <li>Fazla çalışmanın yıllık bir üst sınırı vardır. Dönem 2 düzeni bu sınır yüzünden uygulanır.</li>
+      </ul>
       <Chart
         id="zaman-payi"
         title="Hafta içi zaman payı"

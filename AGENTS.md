@@ -84,7 +84,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     (m kalem)” (dönem toplamı, iki kabukta; UX-12); boş sonuçta “Bu filtrelerle kalem yok.” ve Filtreleri temizle
     (UX-13). Açık kayıtlar kalıcı kimlikle saklanır (`kimlik`: id güvenli anahtar); kabuk değişince süzgeç, sıra, arama
     ve açık kayıtlar korunur (UX-02). Sütun filtreleri/aramaları yalnız tablo başlığındadır; dar ekranda sıralama ölçütü
-    ve yönü ile etkin filtre listesi kayıt kabuğunun araçlarında (`.opex-kayit-arac`, GA-4b; durum iki kabukta ortak). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı; sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
+    ve yönü ile etkin filtre listesi kayıt kabuğunun araçlarında (`.opex-kayit-arac`, GA-4b; durum iki kabukta ortak). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı (dar ekranda tablo kaymaz; 13 Kasım 2026’dan beri DataTable ≥ 48em’de taşarsa yeni yazılı ipucu çıkar, bkz. “Görsel inceleme kararları”); sonra yıl seçici (iki büyük sekme, APG Tabs: **2026** rapor ayından Aralık’a, **2027** 12 ay) ve
     seçili yılın bölümleri (`donemOf`, `kisiDonem`): özet, personel giderleri (özet ve bordro grafikleri; kişi tablosu kalemlerde), netten brüte aylık bordro (kümülatif GV,
     asgari ücret istisnası, SGK tavanı), 2027 varsayımları, SGK teşvikleri. Sayfada Parametreler bölümü yok (değerler
     Sheets → Parametreler’de); sayfa sonunda yalnız hesap damgası (zaman, motor sürümü, özet). Veri repoda yoktur: Google Sheets → Apps Script web
@@ -448,7 +448,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   §8.5 PeriodExplorer; senaryo kıyas tablolarında (nakit üç senaryo, gelir planı senaryolar) `ozetSatir` seçili senaryoyu
   özet yapar ve panel üç senaryoyu art arda gösterir (ux_v2 §3.1 ölçüt bazlı kıyas; nakit kıyasında ölçüt sırası riske
   göre: en düşük nakit, açık tavanı, toparlanma, dönem sonu, sonra akışlar). Geniş alanda semantik tablo; yalnız ≥ 48em’de gerekirse kendi kutusunda kayar (sabit Kalem
-  sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. Kabuk seçimi (`useKabuk`) ve kayıt listesi (`KayitListesi`,
+  sütunu). “Tabloyu yatay kaydırabilirsiniz” ipucu kaldırıldı. 13 Kasım 2026’dan beri ≥ 48em’de taşan tabloda yazılı
+  ipucu ve kenar gölgesi vardır (`useYanTasma`, bkz. “Görsel inceleme kararları”). Kabuk seçimi (`useKabuk`) ve kayıt listesi (`KayitListesi`,
   `Kayit` modeli) dışa açıktır: Giderler kalemler tablosu (`KalemTablosu`, `.opex-veri`) kendi süzgeç/sıra/sütun
   durumuyla aynı kalıbı kullanır (P4; davranış `/giderler/` maddesinde). Testler: `tests/ui.spec.ts` (320/360/375/390’da
   kayan tablo yok — `.opex-veri` dışlanmaz —, kayıt sözleşmesi, Enter/Space/Tab, 1280 ↔ 320 bilgi eşdeğerliği),
@@ -651,8 +652,9 @@ yönü (“Yön”: artan / azalan) ile etkin filtre listesi (`.opex-etkin-filtr
 kategori / bu ay / tür / para birimi / 2027 artışı, toplam ₺ sınırları, hızlı filtreler; her satırda “Kaldır”); durum
 kabuğun dışında, iki kabuk aynı sırayı ve süzgeci paylaşır. **Yapışkan özet (F10 / C017):** < 48em yalnız öncelikli sonuç
 (`YapiskanOzet.oncelikli`, gelir planında “En yüksek birikmiş açık”) tek satırda senaryo adı ile “Diğer n” düğmesi
-arasında (etiket sarar, şerit kaydırmaz; çubuk ≈ 77 px, 320×480 ilk ekranda ana sonuç görünür kalır), açılan liste alt
-satırda (`.yapiskan-digerleri`, `aria-expanded`); yardımcı teknolojiye
+arasında (etiket sarar, şerit kaydırmaz; çubuk ≈ 77 px, 320×480 ilk ekranda ana sonuç görünür kalır), açılan liste
+13 Kasım 2026’dan beri şeridin altında katmandır (`.yapiskan-digerleri`, `aria-expanded`; sayfa kayınca, Escape, dışarı
+dokununca ya da odak çıkınca kapanır; uzun liste kendi içinde kayar); yardımcı teknolojiye
 yalnız ad ve öncelikli sonuç bildirilir (gizli `role="status"`; F23). ≥ 48em bütün çipler tek satırda (eski görünüm).
 **İş ortaklığı bölüm gezgini (F10 / C154; 2026-10-28 kararıyla önceki yatay şerit kararı güncellendi):** < 48em
 `BolumGezgini` — markalı seçim kutusunda konum ve ad (“6 / 8 · Ölçüm”), bütün bölümlere açık erişim; panel `role="region"`
@@ -1142,6 +1144,31 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   `npx playwright test tests/bosluk.spec.ts --project=chromium`.
 - Geniş ekranda üst menü ayırıcısının iki yanında 4 px boşluk vardır. Bant araçları varken (Giderler) bu boşluk sıfırdır.
   Böylece gezinme tek satıra sığar ve ortalı kalır.
+- Açılır katman (mutlak konumlu ve kendi zemini olan alt öğe) kendi kutusu olarak ölçülür. Katmandaki yazı üst öğenin
+  ölçümüne katılmaz (`katmanIcinde`). Örnek: yapışık özet şeridinin altında açılan liste.
+
+### Görsel inceleme kararları (13 Kasım 2026)
+
+Kullanıcı bütün sayfa görsellerinin incelenmesini istedi. İnceleme bulguları `reports/gorsel-inceleme/bulgular/`
+içindedir. Uygulanan kalıcı kararlar şunlardır:
+
+- Kırıntı ayracı “›” önceki öğenin sonundadır. Satır sarınca ayraç yeni satırın başında tek kalmaz.
+- Kırıntı satırı kayınca üst kenardan bir iç boşluk (`--kirinti-ek`) aşağıda durur. Zemini bu boşluğu kırpma alanıyla
+  örter. Satırın boyu değişmez, sayfa kaymaz. Alttaki yapışık şeritler (`.yapiskan`, hesap araçları menüsü, satış
+  ortaklığı v2) `--kirinti-h` ve `--kirinti-ek` toplamının altında durur. `--kirinti-h` AppFrame’de ölçülür.
+- Tablo kutuya sığmazsa tablonun hemen altında yazılı ipucu çıkar: “Tablo ekrana sığmıyor. Diğer sütunları görmek için tabloyu
+  yana kaydırın.” Gizli sütunun olduğu yanda yumuşak gölge görünür (`useYanTasma`, `.tablo-golge`). İpucu altta durur,
+  çünkü ipucu çıkınca başlık ve araç çubuğu yerinden kaymamalıdır (`tests/gelir.spec.ts`).
+- Tablo hücresindeki rozet sarabilir. Sarılan rozetin yüksekliği serbesttir ve iç boşluğu büyür.
+- Telefondaki kayıt kartında başlık anlamlı ad olur, tarih değil. Örneğin Kararlar sayfasında kart başlığı sorudur.
+  Tarih özet satırındadır. Uzun özet değeri sağa yaslanmaz, satırın başından okunur.
+- Gecikmiş karar uyarı rengiyle yazılır. “Gecikti” sözü metinde de vardır.
+- Son tarih grafiğinde “Bugün” çizgisi vardır. Bugün son tarihten sonraysa grafik bugünü de gösterir.
+- Gantt çubuğunun etiketi kısa tarih aralığıdır (“1 Ara – 26 Ara”). Uzun aralık metni özet ve listede kalır.
+- İşveren maliyeti bileşim grafiğinde gelir vergisi ile damga vergisi tek dilimdir (aynı ton). Ayrıntı özet cümlesindedir.
+- Yapışık özet şeridinde telefonda açılan liste şeridin altında katman olarak açılır. Sayfa kayınca ya da Escape ile kapanır.
+- JSON panelinde kapalıyken “+”, açıkken “−” görünür.
+- Hesap araçları yan menüsünde gizli öğe varsa alt ya da üst kenarda yumuşak gölge görünür.
 
 ### Gelir modelleri sayfa düzeni (kullanıcı kararı 13 Kasım 2026)
 
@@ -1159,6 +1186,19 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   gerekenler “Kimin ödediğini ve riskleri görün” panelindedir. Kart tıklanmaz, bu yüzden üzerine gelince zemini değişmez.
 - Test `tests/gelir-modelleri.spec.ts` dosyasıdır. Test bölüm sırasını, özet sayılarını, grupları, paneli ve 320, 390,
   1280 px genişlikte taşmayı denetler.
+- Model kartı 13 Kasım 2026’da görsel olarak yenilendi. Kullanıcı güçlü bir estetik ve birden fazla küçük parça istedi.
+  Kart kenarlıksızdır, yüzey tonu ve `--shadow-soft` ile ayrılır. Kartın parçaları şunlardır:
+  - Üst çizgi hazırlık rengindedir. Çizgi kenar sistemiyle düz çizilir (`data-edge="top"`, `--edge-color`).
+  - Simge kutusu modelin simgesidir (`SIMGE` eşlemesi, Tabler). Yeni modelde madeni para simgesi görünür. Simge süstür.
+  - Hazırlık etiketi üç çizgili ölçek taşır: “Hazır” 3, “Yakında” 2, “Hazır değil” 1 dolu çizgi. Durumu yazı söyler.
+  - Öncelik bayrak simgesiyle yazılır. “İlk denenecek” vurgu rengindedir.
+  - İlk fiyat etikettir: küçük dönem (“Ayda”) ve büyük tutar (“50 €”). Okunan metin aynı kalır.
+  - Örnek hesap fiş biçimlidir: kesikli üst çizgi, hesap makinesi simgesi, uyarı satırı. Tutar ve yüzde kalın yazılır.
+  - “Kimin ödediğini ve riskleri görün” kartın alt şerididir. Şerit kartın iki kenarına uzanır, yazı içerik hizasındadır.
+    Sağdaki ok kutusu 32 px’tir.
+  - Panelde dört simgeli bilgi kutusu vardır. Risk kutusu sıcak tondadır. Geniş kartta kutular ikişerli dizilir.
+- Kart genişliği `gm-modeller` kapsayıcısına göre ölçülür (container query, 46rem). Geniş kartta örnek hesap sağ
+  sütundadır. Okuma ve DOM sırası değişmez: ad, açıklama, fiyat, örnek hesap, ayrıntı.
 
 ### Paket kararları, ilk fiyatlar ve yazılım durumu (kullanıcı kararları 13 Kasım 2026)
 

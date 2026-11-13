@@ -138,7 +138,8 @@ function axis(): Opt {
   const muted = token('--text-secondary');
   return {
     // Satır yüksekliği: sarılan eksen etiketinin satırları her motorda birbirine binmez.
-    axisLabel: { color: muted, fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 6 },
+    // Sayı ekseni Türkçe biçimdedir (“10.000”, “10,000” değil). Kategori ekseninin yazısı aynen kalır.
+    axisLabel: { color: muted, fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 6, formatter: (v: unknown) => (typeof v === 'number' ? number.format(v) : String(v)) },
     nameTextStyle: { color: muted, fontSize: FONT_SIZE },
     axisLine: { lineStyle: { color: token('--rule-strong') } },
     splitLine: { lineStyle: { color: token('--rule') } },
@@ -247,10 +248,14 @@ function wrap(text: string, max: number): string[] {
   return lines;
 }
 
-function treeSeries(root: ChartTreeNode, orient: 'TB' | 'LR', size: [number, number]): Opt {
+function treeSeries(root: ChartTreeNode, orient: 'TB' | 'LR', boyut: [number, number]): Opt {
   const tb = orient === 'TB';
   // Satır başına karakter, yazı boyutuna göre (kullanıcı kök boyutu büyütürse satırlar kısalır).
-  const max = Math.floor((size[0] - 16) / (FONT_SIZE * 0.57));
+  const max = Math.floor((boyut[0] - 16) / (FONT_SIZE * 0.57));
+  // Kutu yüksekliği en uzun kutunun satır sayısına göre büyür. Yazı kutunun kenarından taşmaz (iç boşluk 8 px).
+  const satir = (d: ChartTreeNode): number =>
+    Math.max(wrap(d.name, max).length + (d.sub ? wrap(d.sub, max).length : 0), ...(d.children ?? []).map(satir));
+  const size: [number, number] = [boyut[0], Math.max(boyut[1], satir(root) * (FONT_SIZE + 4) + 16)];
   const line = { fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 4, width: size[0] - 16, align: 'center' };
   return {
     type: 'tree',
@@ -342,7 +347,10 @@ function build(spec: ChartSpec, width: number): Opt {
               position: 'insideLeft',
               fontSize: FONT_SIZE,
               fontWeight: 600,
-              formatter: (p: { data: { range: string } }) => p.data.range,
+              // Çubuk içindeki yazı kısa biçimdedir (“30 Kasım – 26 Aralık”). Tam cümle (“… ile … arası”) ipucunda ve
+              // ajandadadır. Yazı ile çubuk kenarı arasında 8 px boşluk kalır.
+              distance: 8,
+              formatter: (p: { data: { etiket: string } }) => p.data.etiket,
             },
             data: spec.rows.map((r) => {
               const t = tone(r.role);
@@ -350,13 +358,15 @@ function build(spec: ChartSpec, width: number): Opt {
               const days = (ms(r.to) - ms(r.from)) / DAY + 1;
               // Kısa çubukta tarih etiketi çubuğun sağına taşınır (sığmayan metin kesilmez); eksenin sonuna yakın biten
               // kısa çubukta (ör. 13. hafta) etiket sola alınır, SVG dışına taşmaz.
-              const short = days / span < 0.16;
+              // Yazı çubuğa sığmayacaksa çubuğun yanına taşınır. Eşik, kısa tarih yazısının yaklaşık genişliğine göredir.
+              const short = days / span < 0.3;
               const late = (ms(r.to) - start) / DAY > span * 0.8;
               return {
                 value: days,
                 name: r.name,
                 text: r.text,
                 range: `${gunAy(ms(r.from))} ile ${gunAy(ms(r.to))} arası`,
+                etiket: `${gunAy(ms(r.from))} – ${gunAy(ms(r.to))}`,
                 itemStyle: { color: t.fill, borderColor: t.line, borderWidth: r.milestone ? 3 : 2, borderRadius: 0 },
                 label: short ? { position: late ? 'left' : 'right', color: text } : { color: t.text },
               };
@@ -513,7 +523,8 @@ function build(spec: ChartSpec, width: number): Opt {
             lineStyle: { color: text, width: 2 },
             itemStyle: { color: text },
             tooltip: { valueFormatter: (v: number) => lira(v) },
-            markLine: targetLine(spec.target, 'insideEndTop'),
+            // Hedef yazısı soldadır. Sağdaki uzun sütunun sayısıyla çakışmaz.
+            markLine: targetLine(spec.target),
           },
         ],
       };
@@ -522,7 +533,8 @@ function build(spec: ChartSpec, width: number): Opt {
       const start = ms(spec.start);
       return {
         ...base(),
-        grid: { left: 4, right: 40, top: 16, bottom: 4, containLabel: true },
+        // “Bugün” yazısı için üstte yer açılır.
+        grid: { left: 4, right: 40, top: spec.today ? 32 : 16, bottom: 4, containLabel: true },
         tooltip: {
           ...(base().tooltip as Opt),
           trigger: 'item',
@@ -557,6 +569,16 @@ function build(spec: ChartSpec, width: number): Opt {
                 label: { show: true, position: 'right', fontSize: FONT_SIZE, color: t.text, formatter: gunAy(ms(item.date)) },
               };
             }),
+            // Bugün çizgisi: okur hangi son tarihin geçtiğini çizgiye bakarak görür.
+            markLine: spec.today
+              ? {
+                  symbol: 'none',
+                  silent: true,
+                  data: [{ xAxis: (ms(spec.today) - start) / DAY }],
+                  lineStyle: { color: token('--accent-strong'), type: 'dashed', width: 2 },
+                  label: { formatter: 'Bugün', color: token('--accent-strong'), fontSize: FONT_SIZE, position: 'start' },
+                }
+              : undefined,
           },
         ],
       };
@@ -567,7 +589,8 @@ function build(spec: ChartSpec, width: number): Opt {
         ...base(),
         tooltip: { ...(base().tooltip as Opt), trigger: 'item' },
         legend: { show: false },
-        series: [{ type: 'funnel', sort: 'ascending', left: '4%', right: '4%', top: 8, bottom: 8, minSize: '22%', maxSize: '100%', gap: 4, data: [] }],
+        // Dar ekranda en dar katman da etiketi taşıyacak genişliktedir. Etiket katmanın kenarına taşmaz.
+        series: [{ type: 'funnel', sort: 'ascending', left: '4%', right: '4%', top: 8, bottom: 8, minSize: width < 600 ? '70%' : '22%', maxSize: '100%', gap: 4, data: [] }],
       };
 
     case 'chain': {
@@ -737,7 +760,8 @@ function build(spec: ChartSpec, width: number): Opt {
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(v)} ${spec.unit}` },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false } },
-        yAxis: { type: 'value', max: Math.ceil(Math.max(spec.cap * 1.15, ...spec.series.flatMap((x) => x.values)) / 50) * 50, ...axis() },
+        // Üst sınır 100’ün katıdır. Böylece son eksen etiketi (ör. 450) bir öncekine (400) sıkışmaz.
+        yAxis: { type: 'value', max: Math.ceil(Math.max(spec.cap * 1.15, ...spec.series.flatMap((x) => x.values)) / 100) * 100, ...axis() },
         series: spec.series.map((x, i) => ({
           name: x.name,
           type: 'line',
@@ -1138,7 +1162,8 @@ function build(spec: ChartSpec, width: number): Opt {
             right: '4%',
             top: 8,
             bottom: 8,
-            minSize: '28%',
+            // Dar ekranda alt katmanlar da etiketi taşıyacak genişlikte kalır.
+            minSize: width < 600 ? '75%' : '28%',
             gap: 4,
             label: { show: true, position: 'inside', fontSize: FONT_SIZE, fontWeight: 600, color: t.text, formatter: label },
             itemStyle: { color: t.fill, borderColor: t.line, borderWidth: 2 },

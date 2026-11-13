@@ -420,7 +420,17 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     };
     await asagi();
     await expect.poll(() => alt('.topbar')).toBeLessThanOrEqual(0);
-    await expect.poll(() => ust('.crumbs-row')).toBe(0);
+    // Yapışık kırıntı satırı üst kenara değmez: bir iç boşluk (--clear-block) aşağıda durur (görsel inceleme, 13 Kasım 2026).
+    const ek = await page.evaluate(() => {
+      const olcu = document.createElement('div');
+      olcu.style.height = 'var(--clear-block)';
+      document.body.append(olcu);
+      const h = Math.round(olcu.getBoundingClientRect().height);
+      olcu.remove();
+      return h;
+    });
+    expect(ek).toBeGreaterThan(0);
+    await expect.poll(() => ust('.crumbs-row')).toBe(ek);
     await expect(page.locator('.crumbs-row .opex-kur')).toBeInViewport();
     for (let i = 0; i < 3; i++) {
       await page.mouse.wheel(0, -80);
@@ -429,7 +439,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await expect(html).not.toHaveAttribute('data-bant-gizli', '');
     await expect.poll(() => ust('.topbar')).toBe(0);
     const bantAlt = await alt('.topbar');
-    await expect.poll(() => ust('.crumbs-row')).toBe(bantAlt);
+    await expect.poll(() => ust('.crumbs-row')).toBe(bantAlt + ek);
     // Gizliyken odak banda girerse bant görünür.
     await asagi();
     await page.locator('.brand').focus();
@@ -983,7 +993,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
   });
 
   // Kullanıcı kararı 2026-10-21: köprü yerine tek yığılmış çubuk; parçaların tutarı ve payı açıklamada.
-  test('netten işveren maliyetine: tek yığılmış çubuk, 5 parça; açıklamada tutar ve pay (toplam %100), toplam notta (320, 1280)', async ({ page }) => {
+  test('netten işveren maliyetine: tek yığılmış çubuk, 4 parça (iki vergi tek dilim); açıklamada tutar ve pay (toplam %100), toplam notta (320, 1280)', async ({ page }) => {
     for (const width of [320, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.unrouteAll({ behavior: 'ignoreErrors' });
@@ -1004,7 +1014,9 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       const paylar = [...hepsi.matchAll(/%([\d,]+)/g)].map((x) => Number(x[1].replace(',', '.')));
       // Sayılar satır sonunda bölünmez (“%56,” / “5)” gibi).
       expect(metin.filter((t) => /[,%]$/.test(t)), `${width} px`).toEqual([]);
-      expect(paylar, `${width} px`).toHaveLength(5);
+      // Gelir ve damga vergisi aynı tondadır, tek dilimdir (görsel inceleme, 13 Kasım 2026). Kişi grafiğiyle aynıdır.
+      expect(paylar, `${width} px`).toHaveLength(4);
+      expect(hepsi, `${width} px`).toContain('Gelir ve damga vergisi');
       expect(Math.abs(paylar.reduce((a, b) => a + b, 0) - 100), `${width} px payların toplamı`).toBeLessThan(0.6);
       // Değer ekseni yok (0, 1 Mn ₺ …).
       expect(metin.filter((t) => t === '0'), `${width} px`).toEqual([]);

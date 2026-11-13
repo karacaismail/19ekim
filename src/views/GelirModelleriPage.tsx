@@ -1,8 +1,36 @@
 import { Accordion } from '@mantine/core';
+import {
+  IconAddressBook,
+  IconAlertTriangle,
+  IconCalculator,
+  IconCalendarDollar,
+  IconCertificate,
+  IconChartBar,
+  IconChecklist,
+  IconChevronDown,
+  IconCircleCheck,
+  IconCoin,
+  IconFlag,
+  IconInfoCircle,
+  IconLayoutGrid,
+  IconMessageDollar,
+  IconPercentage,
+  IconPuzzle,
+  IconRosetteDiscountCheck,
+  IconShieldLock,
+  IconSpeakerphone,
+  IconTag,
+  IconTool,
+  IconTruckDelivery,
+  IconUmbrella,
+  IconUser,
+  IconUsersGroup,
+  IconWorld,
+} from '@tabler/icons-react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { Section } from '../components/ui';
+import { paraBolunmez, Section } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
 import {
   ARASTIRMA_NOTU,
@@ -49,12 +77,103 @@ function hazirOzeti(hazirlar: GelirModeli[]) {
 /** Açıklamanın ilk cümlesi: özet maddesinde hizmetin ne olduğunu tek cümleyle söyler. Geriye bakış kullanılmaz. */
 const ilkCumle = (metin: string) => metin.match(/^.*?\.(?=\s|$)/)?.[0] ?? metin;
 
+/** Her modelin simgesi. Simge yalnız süstür (aria-hidden). Yeni model eklenirse madeni para simgesi görünür. */
+const SIMGE: Record<string, typeof IconCoin> = {
+  'islem-komisyonu': IconPercentage,
+  'guvenli-odeme': IconShieldLock,
+  'vadeli-satis': IconCalendarDollar,
+  'sponsorlu-urun': IconSpeakerphone,
+  'kategori-vitrini': IconLayoutGrid,
+  'yetkili-satici': IconCertificate,
+  'dogrulanmis-tedarikci': IconRosetteDiscountCheck,
+  rfq: IconMessageDollar,
+  eklentiler: IconPuzzle,
+  'kurulum-egitim': IconTool,
+  'crm-eki': IconAddressBook,
+  lojistik: IconTruckDelivery,
+  'veri-raporlari': IconChartBar,
+  'eslestirme-etkinlikleri': IconUsersGroup,
+  'beyaz-etiket': IconTag,
+  'alacak-sigortasi': IconUmbrella,
+  ihracat: IconWorld,
+};
+
+/** Hazırlık ölçeği: üç çizgiden kaçı dolu? Hazır 3, Yakında 2, Hazır değil 1. Durum yazıyla da söylenir. */
+const HAZIRLIK_DOLU: Record<Hazirlik, number> = { hazir: 3, yakinda: 2, 'hazir-degil': 1 };
+
+/** Hazırlık etiketi: üç çizgili küçük ölçek ve durum adı. Ölçek süstür, anlamı yazı taşır. */
+function HazirlikEtiketi({ h }: { h: Hazirlik }) {
+  return (
+    <span className="gm-hazirlik" data-durum={h}>
+      <span className="gm-olcek" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <span key={i} data-dolu={i < HAZIRLIK_DOLU[h] ? '' : undefined} />
+        ))}
+      </span>
+      {HAZIRLIK_ADI[h]}
+    </span>
+  );
+}
+
+/** Tutar ve yüzde kalın yazılır. Okur örnek hesaptaki sayıları hemen görür. Metin değişmez. */
+const SAYI = /(\d[\d.,]*\u00a0(?:€|₺|TL)|%\d[\d.,]*)/u;
+function SayiVurgulu({ metin }: { metin: string }) {
+  return (
+    <>
+      {paraBolunmez(metin)
+        .split(SAYI)
+        .map((p, i) =>
+          i % 2 ? (
+            <strong key={i} className="gm-sayi">
+              {p}
+            </strong>
+          ) : (
+            p
+          ),
+        )}
+    </>
+  );
+}
+
+/** İlk fiyat: önce dönem (“Ayda”), sonra büyük tutar (“50 €”). Okunan metin aynı kalır: “Ayda 50 €”. */
+function IlkFiyat({ metin }: { metin: string }) {
+  const parca = metin.match(/^(.*?)\s*(\d[\d.,]*\s?€)$/);
+  return (
+    <dl className="gm-fiyat">
+      <dt>
+        <IconTag className="gm-fiyat-simge" size={16} stroke={2} aria-hidden="true" />
+        İlk fiyat
+      </dt>
+      <dd>
+        {parca ? (
+          <>
+            {parca[1] ? <span className="gm-fiyat-donem">{parca[1]} </span> : null}
+            <span className="gm-fiyat-tutar">{paraBolunmez(parca[2])}</span>
+          </>
+        ) : (
+          metin
+        )}
+      </dd>
+    </dl>
+  );
+}
+
+/** Açılan paneldeki dört bilgi. Her bilginin kendi simgesi vardır. Risk ayrı tonda durur. */
+const BILGILER: { tur: string; ad: string; Simge: typeof IconCoin; deger: (m: GelirModeli) => string }[] = [
+  { tur: 'kim', ad: 'Kim öder?', Simge: IconUser, deger: (m) => m.kimOder },
+  { tur: 'uygunluk', ad: 'istoc.com’a uyar mı?', Simge: IconCircleCheck, deger: (m) => m.uygunluk },
+  { tur: 'risk', ad: 'Risk', Simge: IconAlertTriangle, deger: (m) => m.risk },
+  { tur: 'gereken', ad: 'Başlamak için ne gerekir?', Simge: IconChecklist, deger: (m) => m.gereken },
+];
+
 function Ayrintilar({ m }: { m: GelirModeli }) {
   const sure = useMotionMs('--motion-duration-base');
   return (
     <Accordion
       transitionDuration={sure}
       keepMountedMode="display-none"
+      chevronSize={32}
+      chevron={<IconChevronDown size={16} stroke={2} aria-hidden="true" />}
       classNames={{ root: 'gm-ayrinti', item: 'gm-ayrinti-oge', control: 'gm-ac', chevron: 'gm-ok', label: 'gm-ac-etiket', content: 'gm-panel' }}
     >
       <Accordion.Item value="ayrinti">
@@ -62,22 +181,17 @@ function Ayrintilar({ m }: { m: GelirModeli }) {
         <Accordion.Control aria-label={`Kimin ödediğini ve riskleri görün: ${m.ad}`}>Kimin ödediğini ve riskleri görün</Accordion.Control>
         <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
           <dl className="gm-bilgi">
-            <div>
-              <dt>Kim öder?</dt>
-              <dd>{m.kimOder}</dd>
-            </div>
-            <div>
-              <dt>istoc.com’a uyar mı?</dt>
-              <dd>{m.uygunluk}</dd>
-            </div>
-            <div>
-              <dt>Risk</dt>
-              <dd>{m.risk}</dd>
-            </div>
-            <div>
-              <dt>Başlamak için ne gerekir?</dt>
-              <dd>{m.gereken}</dd>
-            </div>
+            {BILGILER.map(({ tur, ad, Simge, deger }) => (
+              <div key={tur} className="gm-bilgi-oge" data-tur={tur}>
+                <dt>
+                  <span className="gm-bilgi-simge" aria-hidden="true">
+                    <Simge size={16} stroke={2} />
+                  </span>
+                  {ad}
+                </dt>
+                <dd>{deger(m)}</dd>
+              </div>
+            ))}
           </dl>
         </Accordion.Panel>
       </Accordion.Item>
@@ -85,30 +199,45 @@ function Ayrintilar({ m }: { m: GelirModeli }) {
   );
 }
 
+/**
+ * Model kartı. Üstte simge, ad, hazırlık ölçeği ve öncelik durur. Altında nasıl çalıştığı, ilk fiyat ve örnek hesap
+ * gelir. En altta “Kimin ödediğini ve riskleri görün” düğmesi vardır. Kartın üst çizgisi hazırlık rengindedir (düz
+ * çizgi, kenar sistemi). Geniş kartta örnek hesap sağ sütundadır. Okuma sırası değişmez.
+ */
 function ModelKarti({ m }: { m: GelirModeli }) {
+  const Simge = SIMGE[m.id] ?? IconCoin;
   return (
-    <li className="gm-model" id={`model-${m.id}`}>
+    <li className="gm-model" id={`model-${m.id}`} data-durum={m.hazirlik} data-edge="top">
       <div className="gm-model-ust">
-        <h4 className="gm-model-ad">{m.ad}</h4>
-        <span className="gm-hazirlik" data-durum={m.hazirlik}>
-          {HAZIRLIK_ADI[m.hazirlik]}
+        <span className="gm-simge" aria-hidden="true">
+          <Simge size={26} stroke={1.75} />
         </span>
-        <span className="gm-oncelik" data-oncelik={m.oncelik}>
-          {ONCELIK_ADI[m.oncelik]}
-        </span>
+        <div className="gm-model-baslik">
+          <h4 className="gm-model-ad">{m.ad}</h4>
+          <p className="gm-model-etiketler">
+            <HazirlikEtiketi h={m.hazirlik} />
+            <span className="gm-oncelik" data-oncelik={m.oncelik}>
+              <IconFlag size={16} stroke={2} aria-hidden="true" />
+              {ONCELIK_ADI[m.oncelik]}
+            </span>
+          </p>
+        </div>
       </div>
       <p className="gm-nasil">{m.nasil}</p>
-      {m.fiyat ? (
-        <dl className="gm-fiyat">
-          <dt>İlk fiyat</dt>
-          <dd>{m.fiyat}</dd>
-        </dl>
-      ) : null}
+      {m.fiyat ? <IlkFiyat metin={m.fiyat} /> : null}
       <div className="gm-ornek">
-        <p className="gm-ornek-ad">Örnek hesap</p>
+        <p className="gm-ornek-ad">
+          <IconCalculator size={18} stroke={2} aria-hidden="true" />
+          Örnek hesap
+        </p>
         {/* Uyarı sayıdan önce okunur. */}
-        <p className="gm-ornek-not">Bu hesap bir varsayımdır, söz değildir.</p>
-        <p className="gm-ornek-metin">{m.ornek}</p>
+        <p className="gm-ornek-not">
+          <IconInfoCircle size={16} stroke={2} aria-hidden="true" />
+          Bu hesap bir varsayımdır, söz değildir.
+        </p>
+        <p className="gm-ornek-metin">
+          <SayiVurgulu metin={m.ornek} />
+        </p>
       </div>
       <Ayrintilar m={m} />
     </li>

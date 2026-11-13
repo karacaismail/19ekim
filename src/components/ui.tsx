@@ -278,6 +278,39 @@ export function useKabuk(sarmal: RefObject<HTMLElement | null>, kaydiran: RefObj
 }
 
 /**
+ * Tablo kutusuna sığmıyorsa hangi yanda gizli sütun kaldığını ölçer. Kutu kaydıkça ve boyutu değişince yeniden ölçülür.
+ * Sonuç tabloya yazılı ipucu ve kenar gölgesi olarak yansır (okur tablonun yana kaydığını görür).
+ */
+function useYanTasma(kaydiran: RefObject<HTMLElement | null>, etkin: boolean): { sol: boolean; sag: boolean; sabit: number } {
+  const [tasma, setTasma] = useState({ sol: false, sag: false, sabit: 0 });
+  // Ölçüm boyamadan önce yapılır (useKabuk gibi). İpucu sonradan çıkıp tabloyu aşağı itmez.
+  useLayoutEffect(() => {
+    const el = kaydiran.current;
+    if (!etkin || !el) return undefined;
+    const olc = () => {
+      const fazla = el.scrollWidth - el.clientWidth;
+      const konum = Math.abs(el.scrollLeft);
+      // Sabit ilk sütun varsa sol gölge o sütunun sağından başlar. Gizli sütunlar sabit sütunun arkasındadır.
+      const sabit = Math.round(el.querySelector<HTMLElement>('thead .cell-sticky')?.getBoundingClientRect().width ?? 0);
+      const yeni = { sol: fazla > 1 && konum > 1, sag: fazla > 1 && konum < fazla - 1, sabit };
+      setTasma((eski) => (eski.sol === yeni.sol && eski.sag === yeni.sag && eski.sabit === yeni.sabit ? eski : yeni));
+    };
+    olc();
+    el.addEventListener('scroll', olc, { passive: true });
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(olc);
+    ro?.observe(el);
+    if (el.firstElementChild) ro?.observe(el.firstElementChild);
+    return () => {
+      el.removeEventListener('scroll', olc);
+      ro?.disconnect();
+      // Kabuk kayıt listesine geçerse eski ölçüm kalmaz. Tabloya dönünce ölçüm yeniden yapılır.
+      setTasma({ sol: false, sag: false, sabit: 0 });
+    };
+  }, [kaydiran, etkin]);
+  return tasma;
+}
+
+/**
  * Kayıt listesi (M09 RecordAccordion): Mantine Accordion, birden çok kayıt açık kalabilir (süre `--motion-duration-base`,
  * eğri `--motion-ease-standard`). Her kayıt başlığı h4 içinde düğme (aria-expanded, aria-controls → role="region" panel):
  * kayıt adı + tek özet alan; açılan panelde alanlar dl/dt/dd ile etiketli. Açık kayıtlar çağıranın durumudur (`acik`:
@@ -451,6 +484,7 @@ export function DataTable<T>({
   const kaydiran = useRef<HTMLDivElement>(null);
   const [acik, setAcik] = useState<string[]>([]);
   const mod = useKabuk(sarmal, kaydiran, columns.map((c) => c.minWidth));
+  const yan = useYanTasma(kaydiran, mod === 'tablo');
 
   const keyOf = (row: T, index: number) => (rowKey ? rowKey(row, index) : String(index));
   const baslikSutunu = columns.find((c) => c.rowHeader) ?? columns[0];
@@ -520,7 +554,10 @@ export function DataTable<T>({
       ) : mod === 'kayit' ? (
         <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} duzey={baslikDuzeyi === 2 ? 3 : 4} />
       ) : (
-        <div className="table-frame">
+        <div className="table-frame" style={yan.sabit ? ({ '--sabit-sutun': `${yan.sabit}px` } as CSSProperties) : undefined}>
+          {/* Gölgeler hep yerindedir. Görünürlükleri hareket tokenıyla iki yönde değişir. */}
+          <span className="tablo-golge" data-yan="sol" data-gorunur={yan.sol ? '' : undefined} aria-hidden="true" />
+          <span className="tablo-golge" data-yan="sag" data-gorunur={yan.sag ? '' : undefined} aria-hidden="true" />
           <div className="table-scroll" role="region" aria-labelledby={titleId} tabIndex={0} ref={kaydiran}>
             <Table className="data-table" withRowBorders withTableBorder={false} verticalSpacing="sm" horizontalSpacing="md">
               <Table.Thead>
@@ -558,6 +595,9 @@ export function DataTable<T>({
           </div>
         </div>
       )}
+      {/* Tablo kutuya sığmayınca okur bunu yazıdan da anlar. Yalnız gölgeye güvenilmez. İpucu tablonun hemen altındadır.
+          Böylece ipucu çıkınca ya da kalkınca başlık, araç çubuğu ve tablo yerinden kaymaz. */}
+      {mod === 'tablo' && (yan.sol || yan.sag) ? <p className="table-kaydir-ipucu">Tablo ekrana sığmıyor. Diğer sütunları görmek için tabloyu yana kaydırın.</p> : null}
       {altNot ? <p className="table-note table-note-alt">{altNot}</p> : null}
     </div>
   );
@@ -580,6 +620,9 @@ export function Target({ row }: { row: { target: string; milestone?: boolean } }
 
 /* ---------- Sayısal hedefler ---------- */
 
+/** Sayı ile para birimi arasındaki boşluğu bölünmez yapar. Dar kutuda “₺” işareti tek başına alt satıra inmez. */
+export const paraBolunmez = (metin: string) => metin.replace(/(\d) (?=[₺€$]|TL\b)/gu, '$1\u00a0');
+
 export function Stats({ items }: { items: { label: string; value: string; note?: string }[] }) {
   return (
     <dl className="stats">
@@ -587,7 +630,8 @@ export function Stats({ items }: { items: { label: string; value: string; note?:
         <div className="stat" key={item.label} data-edge="top">
           <dt>{item.label}</dt>
           <dd>
-            <span className="stat-value">{item.value}</span>
+            {/* Tutar ile para birimi aynı satırda kalır (bölünmez boşluk): “46.922 ₺”. */}
+            <span className="stat-value">{paraBolunmez(item.value)}</span>
             {item.note ? <span className="stat-note">{item.note}</span> : null}
           </dd>
         </div>
@@ -813,7 +857,8 @@ function grafikEsdegeri(spec: ChartSpec, titleId: string): ReactNode | null {
     case 'gantt':
       return <Ajanda titleId={titleId} rows={spec.rows} marks={spec.marks} />;
     case 'deadlines':
-      return <Ajanda titleId={titleId} rows={spec.items.map((i) => ({ name: i.name, from: i.date, to: i.date, role: i.role, text: '' }))} marks={[]} />;
+      // Dar ekrandaki liste de “Bugün” işaretini taşır. Grafikle aynı bilgi verilir.
+      return <Ajanda titleId={titleId} rows={spec.items.map((i) => ({ name: i.name, from: i.date, to: i.date, role: i.role, text: '' }))} marks={spec.today ? [{ date: spec.today, label: 'Bugün' }] : []} />;
     case 'org':
     case 'gov':
       return <Hiyerarsi titleId={titleId} root={spec.root} />;

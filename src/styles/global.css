@@ -35,6 +35,11 @@ dd {
   text-wrap: pretty;
 }
 
+/* Tarayıcının varsayılan 40 px girintisi tanım değerinde yoktur. Sınıf kuralları bunu ezebilir (özgüllük sıfır). */
+:where(dd) {
+  margin-inline-start: 0;
+}
+
 /* ---------- Odak sistemi ----------
  * Görünür odak modu kapalı başlar; yalnız Tab/Shift+Tab açar (BaseLayout betiği).
  * Normal temalarda çevreleyen halka yoktur. Gösterge yalnız klavye modu + :focus-visible
@@ -204,6 +209,24 @@ html[data-focus-mode='keyboard'] .skip-link:focus-visible {
 
   html[data-kaydirildi] .crumbs-row::after {
     opacity: 1;
+  }
+
+  /*
+   * Yapışık satırda başlık ekranın üst kenarına değmez. Satır üst kenardan bir boşluk aşağıda durur. Zemini bu boşluğu
+   * kırpma alanıyla örter. Satırın boyu ve dış boşluğu değişmez, bu yüzden sayfa akışı kaymaz. Alttaki yapışık şeritler
+   * bu ek boşluğu --kirinti-ek ile hesaba katar.
+   */
+  html[data-kaydirildi] {
+    --kirinti-ek: var(--clear-block);
+  }
+
+  html[data-kaydirildi] .crumbs-row {
+    top: calc(var(--bant-h, 0px) + var(--kirinti-ek));
+    clip-path: inset(calc(-1 * var(--kirinti-ek)) -100vmax 0);
+  }
+
+  html[data-kaydirildi][data-bant-gizli] .crumbs-row {
+    top: var(--kirinti-ek);
   }
 }
 
@@ -1349,9 +1372,10 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
   font-size: var(--text-crumb);
 }
 
-.crumbs li + li::before {
+/* Ayraç önceki öğenin sonundadır. Satır sarınca “›” yeni satırın başında tek kalmaz. */
+.crumbs li:not(:last-child)::after {
   content: '›';
-  margin-inline-end: var(--space-2);
+  margin-inline-start: var(--space-2);
   color: var(--rule-strong);
 }
 
@@ -1458,6 +1482,8 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
 
 .chart-note {
   display: block;
+  /* Uzun not satırı okunur genişlikte kalır. */
+  max-width: var(--prose-max);
   color: var(--text-secondary);
 }
 
@@ -1652,7 +1678,7 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
 }
 
 .kpi-unit {
-  margin-inline-start: 0.35rem;
+  /* Değer ile birim arasındaki boşluk metindedir (KpiGrid). Birim alt satıra inerse girintisiz başlar. */
   color: var(--text-secondary);
   font-size: var(--text-md);
   font-weight: var(--weight-regular);
@@ -1780,6 +1806,26 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   scrollbar-width: thin;
 }
 
+/* Bölüm başlığından sonraki ilk içerik başlığa yapışmaz (kart, liste, tablo). */
+.section > .section-head + * {
+  margin-top: var(--space-5);
+}
+
+/*
+ * Tablo hücresindeki rozet sarabilir. Uzun rozet tabloyu kutusundan taşırmaz. Sarılan rozetin yüksekliği serbesttir,
+ * iç boşluğu da büyür. Yazı rozetin kenarına yapışmaz.
+ */
+.data-table :is(td, th):not(.cell-nowrap) .chip {
+  height: auto;
+  padding: var(--clear-block) var(--clear-inline);
+  white-space: normal;
+}
+
+/* Rozetin iç parçaları (yazı ve nokta) da sarabilir. Sarmayan sütundaki rozet (ör. “Karar veren”) tek satırda kalır. */
+.data-table :is(td, th):not(.cell-nowrap) .chip > * {
+  white-space: normal;
+}
+
 .data-table {
   --table-border-color: var(--rule);
   width: 100%;
@@ -1813,6 +1859,15 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   white-space: nowrap;
 }
 
+/*
+ * Sarmayan sütunda yalnız asıl değer tek satırda kalır. Başlık ve hücre altı açıklama sarabilir. Böylece kısa sayı
+ * sütunu, uzun başlığı ya da açıklaması yüzünden tabloyu kutusundan taşırmaz.
+ */
+.data-table thead th.cell-nowrap,
+.data-table .cell-nowrap .cell-sub {
+  white-space: normal;
+}
+
 @media (min-width: 48em) {
   .data-table .cell-sticky {
     position: sticky;
@@ -1824,6 +1879,48 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
 
 .table-frame {
   position: relative;
+}
+
+/* Tablo kutuya sığmayınca tablonun altında görünen yazılı ipucu. */
+.table-kaydir-ipucu {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/*
+ * Gizli sütun olan yanda yumuşak gölge görünür. Gölge çizgi değildir ve tıklamayı engellemez. Sabit ilk sütun varsa
+ * sol gölge o sütunun sağından başlar (--sabit-sutun, useYanTasma). Gölge sabit hücrenin de üstündedir.
+ */
+.tablo-golge {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  inline-size: var(--space-8);
+  pointer-events: none;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-standard);
+  transition-delay: var(--motion-delay-none);
+}
+
+.tablo-golge[data-gorunur] {
+  opacity: 1;
+}
+
+.tablo-golge[data-yan='sol'] {
+  inset-inline-start: var(--sabit-sutun, 0px);
+  border-start-start-radius: var(--radius-surface);
+  border-end-start-radius: var(--radius-surface);
+  background: linear-gradient(to right, var(--surface-raised), transparent);
+}
+
+.tablo-golge[data-yan='sag'] {
+  inset-inline-end: 0;
+  border-start-end-radius: var(--radius-surface);
+  border-end-end-radius: var(--radius-surface);
+  background: linear-gradient(to left, var(--surface-raised), transparent);
 }
 
 .data-table .cell-sub {
@@ -1922,6 +2019,16 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   justify-content: space-between;
   gap: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
+}
+
+/*
+ * Kısa özet değeri etiketle aynı satırda, sağdadır (space-between). Uzun değer alt satıra iner ve satırın başından, sola
+ * yaslı okunur. Uzun cümle sağa yaslanmaz ve içeriden başlamaz, çünkü öyle bir paragraf zor okunur.
+ */
+
+/* Kayıt başlığındaki ikinci bilgi ayrı satırdadır (“26 Ekim” ile “Gecikti” birleşmez). */
+.kayit-ad .cell-sub {
+  display: block;
 }
 
 .kayit-ozet-etiket {
@@ -2032,6 +2139,13 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
+}
+
+/* Gecikmiş karar uyarı rengiyle yazılır. “Gecikti” sözü de metinde vardır, yalnız renge güvenilmez. */
+.cell-sub[data-durum='gecikti'],
+:is(.kayit-alanlar, .kayit-ozet) .cell-sub[data-durum='gecikti'] {
+  color: var(--pill-missing-fg);
+  font-weight: var(--weight-semibold);
 }
 
 /* ---------- Grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21; P5) ----------
@@ -5170,15 +5284,24 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   }
 }
 
-/* Yan menü yapışık: bant görünürken onun altında, gizliyken en üstte; uzun menü kendi içinde kayar. */
+/*
+ * Yan menü yapışık: bant ve yapışık kırıntı satırının altında durur. Uzun menü kendi içinde kayar. Menünün altında ya da
+ * üstünde gizli öğe varsa o kenarda yumuşak gölge görünür (gölge yalnız kaydırınca kaybolur, içerik üstünde durmaz).
+ */
 @media (min-width: 64em) and (min-height: 40em) {
   .applet-gezgin {
     position: sticky;
-    top: calc(var(--bant-h, 0px) + var(--space-4));
-    max-height: calc(100dvh - var(--bant-h, 0px) - var(--space-8));
+    top: calc(var(--bant-h, 0px) + var(--kirinti-h, 0px) + var(--kirinti-ek, 0px) + var(--space-4));
+    max-height: calc(100dvh - var(--bant-h, 0px) - var(--kirinti-h, 0px) - var(--kirinti-ek, 0px) - var(--space-8));
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
+    background:
+      linear-gradient(var(--surface-raised) 40%, transparent) top / 100% var(--space-8) no-repeat local,
+      linear-gradient(transparent, var(--surface-raised) 60%) bottom / 100% var(--space-8) no-repeat local,
+      linear-gradient(var(--scroll-shadow), transparent) top / 100% var(--space-3) no-repeat scroll,
+      linear-gradient(transparent, var(--scroll-shadow)) bottom / 100% var(--space-3) no-repeat scroll,
+      var(--surface-raised);
     transition-property: top, max-height;
     transition-duration: var(--motion-duration-base);
     transition-timing-function: var(--motion-ease-standard);
@@ -5186,8 +5309,8 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
   }
 
   html[data-bant-gizli] .applet-gezgin {
-    top: var(--space-4);
-    max-height: calc(100dvh - var(--space-8));
+    top: calc(var(--kirinti-h, 0px) + var(--kirinti-ek, 0px) + var(--space-4));
+    max-height: calc(100dvh - var(--kirinti-h, 0px) - var(--kirinti-ek, 0px) - var(--space-8));
   }
 }
 
@@ -5573,14 +5696,26 @@ html[data-focus-mode='keyboard'] .applet-panel:focus-visible {
 }
 
 
+/*
+ * Açılan liste şeridin altında, içeriğin üstünde durur. Yapışık şeridin boyu değişmez, içerik aşağı itilmez. Liste sayfa
+ * kayınca ya da Escape tuşuyla kapanır (SenaryoKurucu.tsx → YapiskanOzet).
+ */
 .yapiskan .yapiskan-digerleri {
-  flex: 1 1 100%;
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
   display: grid;
   gap: var(--space-2);
   margin: 0;
-  padding: var(--space-2) 0 var(--space-1);
+  padding: var(--clear-block) var(--clear-inline);
   list-style: none;
   border-top: var(--hairline) solid var(--rule);
+  background-color: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
+  /* Uzun liste ekrandan taşmaz, kendi içinde kayar. Listenin kayması sayfayı kaydırmaz, liste açık kalır. */
+  max-block-size: calc(100dvh - var(--space-20));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .yapiskan .yapiskan-digerleri .yapiskan-cip {
@@ -5938,8 +6073,20 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 }
 
 @media (min-width: 48em) and (min-height: 40em) {
+  /*
+   * Özet şeridi yapışık kırıntı satırının hemen altında durur. Arada içerik görünen boşluk kalmaz. Bant gizlenip
+   * görününce şerit kırıntı satırıyla aynı süre ve eğriyle kayar.
+   */
   .yapiskan {
-    top: var(--bant-h, 0px);
+    top: calc(var(--bant-h, 0px) + var(--kirinti-h, 0px) + var(--kirinti-ek, 0px));
+    transition-property: top;
+    transition-duration: var(--motion-duration-base);
+    transition-timing-function: var(--motion-ease-standard);
+    transition-delay: var(--motion-delay-none);
+  }
+
+  html[data-bant-gizli] .yapiskan {
+    top: calc(var(--kirinti-h, 0px) + var(--kirinti-ek, 0px));
   }
 }
 
@@ -6950,6 +7097,30 @@ html[data-bant-gizli] .so2-duzen {
   background-color: var(--surface-hover);
 }
 
+/* Kapalı panelde “+”, açık panelde “−” görünür. Okur panelin açılabildiğini anlar. */
+.so2-json-baslik {
+  justify-content: space-between;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.so2-json-baslik::-webkit-details-marker {
+  display: none;
+}
+
+.so2-json-baslik::after {
+  content: '+';
+  content: '+' / '';
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+}
+
+.so2-json-ac[open] > .so2-json-baslik::after {
+  content: '−';
+  content: '−' / '';
+}
+
 .so2-json-icerik {
   max-height: 32rem;
   margin: 0;
@@ -7895,29 +8066,6 @@ html[data-bant-gizli] .so2-duzen {
   font-variant-numeric: tabular-nums;
 }
 
-/* Onaylanan ilk fiyat: açıklamadan sonra, örnek hesaptan önce. */
-.gm-fiyat {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin: 0;
-}
-
-.gm-fiyat dt {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.gm-fiyat dd {
-  margin: 0;
-  color: var(--accent-strong);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Bölüm başlığı ile içerik arasında boşluk (Section başlık bloğunun hemen altı). */
 .gm .section-head + .gm-ozet,
 .gm .section-head + .gm-paketler,
@@ -8045,11 +8193,27 @@ html[data-bant-gizli] .so2-duzen {
   font-weight: var(--weight-semibold);
 }
 
+/*
+ * Model kartı (görsel yenileme, 13 Kasım 2026). Kart kenarlıksızdır. Yüzey tonu ve yumuşak gölgeyle sayfadan ayrılır.
+ * Üst çizgi hazırlık rengindedir ve kenar sistemiyle düz çizilir (data-edge="top"). Küçük parçalar şunlardır: simge
+ * kutusu, üç çizgili hazırlık ölçeği, öncelik bayrağı, fiyat etiketi, fiş biçimli örnek hesap ve simgeli bilgi kutuları.
+ * Geniş kartta örnek hesap sağ sütuna geçer. Okuma sırası (ad, açıklama, fiyat, örnek, ayrıntı) değişmez.
+ */
+.gm-modeller {
+  container: gm-modeller / inline-size;
+}
+
 .gm-model {
+  --gm-ic: var(--space-6);
+  --gm-ton: var(--text-secondary);
+  --gm-ton-zemin: var(--surface-sunken);
+  --edge-color: var(--gm-ton);
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-6);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  padding: var(--gm-ic);
   background-color: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
   scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
   transition-property: background-color;
   transition-duration: var(--motion-duration-base);
@@ -8057,30 +8221,74 @@ html[data-bant-gizli] .so2-duzen {
   transition-delay: var(--motion-delay-none);
 }
 
-/* Bağlantıyla gelinen kart vurgulanır. Seçili yüzey “Yakında” rozetiyle aynı renkte olduğu için değişen yüzey kullanılır. */
+.gm-model[data-durum='hazir'] {
+  --gm-ton: var(--hazirlik-hazir-fg);
+  --gm-ton-zemin: var(--hazirlik-hazir-bg);
+}
+
+.gm-model[data-durum='yakinda'] {
+  --gm-ton: var(--hazirlik-yakinda-fg);
+  --gm-ton-zemin: var(--hazirlik-yakinda-bg);
+}
+
+.gm-model[data-durum='hazir-degil'] {
+  --gm-ton: var(--hazirlik-degil-fg);
+  --gm-ton-zemin: var(--hazirlik-degil-bg);
+}
+
+/* Bağlantıyla gelinen kart vurgulanır. Vurgu adres değişene kadar kalır. */
 .gm-model:target {
   background-color: var(--surface-changed);
 }
 
+/* Üst bölüm: simge kutusu, ad ve iki küçük etiket. */
 .gm-model-ust {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.gm-simge {
+  display: grid;
+  place-items: center;
+  inline-size: var(--space-12);
+  block-size: var(--space-12);
+  background-color: var(--gm-ton-zemin);
+  color: var(--gm-ton);
+}
+
+.gm-model-baslik {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .gm-model-ad {
-  flex: 1 1 16rem;
   margin: 0;
   font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
+  text-wrap: balance;
 }
 
+.gm-model-etiketler {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+/* Hazırlık etiketi: üç çizgili ölçek ve durum adı. Ölçek süstür, durumu yazı söyler. */
 .gm-hazirlik {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--clear-block-sm) var(--clear-inline-sm);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
   white-space: nowrap;
 }
 
@@ -8099,42 +8307,203 @@ html[data-bant-gizli] .so2-duzen {
   color: var(--hazirlik-degil-fg);
 }
 
+.gm-olcek {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--hairline);
+}
+
+.gm-olcek > span {
+  inline-size: var(--space-1);
+  background-color: currentColor;
+  opacity: var(--opacity-disabled);
+}
+
+.gm-olcek > span:nth-child(1) {
+  block-size: var(--space-2);
+}
+
+.gm-olcek > span:nth-child(2) {
+  block-size: var(--space-3);
+}
+
+.gm-olcek > span:nth-child(3) {
+  block-size: var(--space-4);
+}
+
+.gm-olcek > span[data-dolu] {
+  opacity: 1;
+}
+
+/* Öncelik: bayrak simgesi ve yazı. İlk denenecek model vurgu rengindedir. */
 .gm-oncelik {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
 }
 
+.gm-oncelik[data-oncelik='1'] {
+  color: var(--accent-strong);
+  font-weight: var(--weight-semibold);
+}
+
 .gm-nasil {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+
+/* Fiyat etiketi: küçük ad, dönem ve büyük tutar. */
+.gm-fiyat {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
   margin: 0;
 }
 
+.gm-fiyat dt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.gm-fiyat-simge {
+  color: var(--accent-strong);
+}
+
+.gm-fiyat dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--surface-accent);
+  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-fiyat-donem {
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.gm-fiyat-tutar {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
+}
+
+/* Örnek hesap: fiş biçimli kutu. Üstte simgeli ad ve uyarı, altta sayıları kalın yazılmış hesap. */
 .gm-ornek {
   display: grid;
-  gap: var(--space-1);
-  padding: var(--space-4);
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border-top: var(--hairline) dashed var(--rule-strong);
   background-color: var(--surface-sunken);
 }
 
 .gm-ornek-ad {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-}
-
-.gm-ornek-metin {
-  margin: 0;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .gm-ornek-not {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--text-sm);
 }
 
-/* Ayrıntı paneli: kim öder, uygunluk, risk ve gerekenler düğmeyle açılır. */
+.gm-ornek-not svg {
+  flex: none;
+  margin-block-start: 0.15em;
+}
+
+.gm-ornek-metin {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-sayi {
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+/* Geniş kart: açıklama ve fiyat solda, örnek hesap sağda. Ayrıntı düğmesi iki sütunun altındadır. */
+@container gm-modeller (min-width: 46rem) {
+  .gm-model {
+    --gm-ic: var(--space-8);
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'ust ust'
+      'nasil ornek'
+      'fiyat ornek'
+      'ayrinti ayrinti';
+    column-gap: var(--space-8);
+  }
+
+  .gm-model-ust {
+    grid-area: ust;
+  }
+
+  .gm-nasil {
+    grid-area: nasil;
+  }
+
+  .gm-fiyat {
+    grid-area: fiyat;
+    align-self: start;
+  }
+
+  .gm-ornek {
+    grid-area: ornek;
+    align-self: start;
+  }
+
+  .gm-ayrinti {
+    grid-area: ayrinti;
+  }
+
+  /* Dört bilgi kutusu ikişerli iki satırdır. Boş hücre kalmaz. Temel kural dosyada sonra gelir, seçici bu yüzden güçlüdür. */
+  .gm-model .gm-bilgi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/*
+ * Ayrıntı düğmesi kartın alt şerididir. Şerit kartın iki kenarına kadar uzanır. Yazı, kartın içerik hizasında başlar.
+ * Sağdaki ok kutusu panel açılınca döner.
+ */
+.gm-ayrinti {
+  margin: 0 calc(-1 * var(--gm-ic)) calc(-1 * var(--gm-ic));
+  border-top: var(--hairline) solid var(--rule);
+}
+
 .gm-ayrinti-oge {
   border: 0;
   background: transparent;
@@ -8142,11 +8511,9 @@ html[data-bant-gizli] .so2-duzen {
 
 .gm-ac {
   min-block-size: var(--hit-min);
-  padding: var(--clear-block) var(--clear-inline);
-  margin-inline: calc(-1 * var(--clear-inline));
-  inline-size: calc(100% + 2 * var(--clear-inline));
+  padding: var(--space-3) var(--gm-ic);
   color: var(--text-link);
-  border-radius: var(--radius-control);
+  background-color: transparent;
   transition-property: background-color;
   transition-duration: var(--motion-duration-fast);
   transition-timing-function: var(--motion-ease-standard);
@@ -8154,46 +8521,90 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 .gm-ac:hover {
-  background: var(--surface-hover);
+  background-color: var(--surface-hover);
 }
 
 .gm-ac-etiket {
+  /* Klavye odağındaki alt çizgi kırpılmaz. */
+  overflow: visible;
   padding: 0;
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-body);
 }
 
-.gm-ok {
-  transition-property: transform;
+.gm-ac .gm-ok {
+  display: grid;
+  place-content: center;
+  place-items: center;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  background-color: var(--surface-control);
+  color: var(--text-primary);
+  transition-property: transform, background-color;
   transition-duration: var(--motion-duration-base);
   transition-timing-function: var(--motion-ease-standard);
   transition-delay: var(--motion-delay-none);
 }
 
-.gm-panel {
-  padding: var(--space-2) 0 0;
+.gm-ac:hover .gm-ok {
+  background-color: var(--surface-control-hover);
 }
 
+.gm-panel {
+  padding: var(--space-2) var(--gm-ic) var(--gm-ic);
+}
+
+/* Bilgi kutuları: her kutuda simge, küçük başlık ve açıklama vardır. Risk kutusu sıcak tondadır. */
 .gm-bilgi {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4) var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-3);
   margin: 0;
 }
 
-.gm-bilgi dt,
-.gm-kisaltmalar dd {
-  color: var(--text-secondary);
+.gm-bilgi-oge {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+.gm-bilgi-oge[data-tur='risk'] {
+  background-color: var(--surface-accent);
 }
 
 .gm-bilgi dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
+.gm-bilgi-simge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  background-color: var(--surface-raised);
+  color: var(--text-secondary);
+}
+
+.gm-bilgi-oge[data-tur='risk'] .gm-bilgi-simge {
+  color: var(--accent-strong);
+}
+
 .gm-bilgi dd {
-  margin: var(--space-1) 0 0;
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.gm-kisaltmalar dd {
+  color: var(--text-secondary);
 }
 
 .gm-oncelik-oge {
@@ -8263,9 +8674,14 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 @media (max-width: 47.99em) {
-  .gm-model,
   .gm-paket {
     padding: var(--space-5) var(--space-4);
+  }
+
+  /* Kartın iç boşluğu tek değişkenden gelir. Alt şerit kartın kenarına tam oturur, dışarı taşmaz. */
+  .gm-model {
+    --gm-ic: var(--space-4);
+    padding: var(--gm-ic);
   }
 
   .gm-bilgi {
@@ -8683,6 +9099,7 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
 }
 
 .tk-olay-aciklama {
+  max-width: var(--prose-max);
   margin: 0;
   color: var(--text-secondary);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import { NO_SECOND_SAHA, SENS_RETENTIONS } from '../data/breakeven';
 import type { Params } from '../data/params';
@@ -253,6 +253,38 @@ export function YapiskanOzet({ ad, role, cipler, oncelikli, children }: { ad: st
   const genis = useMediaQuery('(min-width: 48em)', true, { getInitialValueInEffect: false });
   const [acik, setAcik] = useState(false);
   const listeId = useId();
+  const kok = useRef<HTMLDivElement>(null);
+  // Açık liste şeridin altında, içeriğin üstünde durur (görsel inceleme, 13 Kasım 2026). Liste şu durumlarda kapanır:
+  // okur sayfayı kaydırır, Escape tuşuna basar, şeridin dışına dokunur ya da odak şeridin dışına çıkar. Böylece liste
+  // ekranın büyük kısmını ya da odaklanan öğeyi örtmez.
+  useEffect(() => {
+    const el = kok.current;
+    if (!acik || !el) return undefined;
+    const baslangic = window.scrollY;
+    const kaydir = () => {
+      if (Math.abs(window.scrollY - baslangic) > 32) setAcik(false);
+    };
+    const tus = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !e.defaultPrevented) setAcik(false);
+    };
+    const disari = (e: PointerEvent) => {
+      if (!el.contains(e.target as Node)) setAcik(false);
+    };
+    const odak = (e: FocusEvent) => {
+      const hedef = e.relatedTarget as Node | null;
+      if (hedef && !el.contains(hedef)) setAcik(false);
+    };
+    window.addEventListener('scroll', kaydir, { passive: true });
+    document.addEventListener('keydown', tus);
+    document.addEventListener('pointerdown', disari);
+    el.addEventListener('focusout', odak);
+    return () => {
+      window.removeEventListener('scroll', kaydir);
+      document.removeEventListener('keydown', tus);
+      document.removeEventListener('pointerdown', disari);
+      el.removeEventListener('focusout', odak);
+    };
+  }, [acik]);
   const ana = cipler.find((c) => c.etiket === oncelikli) ?? cipler[cipler.length - 1];
   const digerleri = cipler.filter((c) => c !== ana);
   const cip = (c: OzetCip) => (
@@ -262,7 +294,7 @@ export function YapiskanOzet({ ad, role, cipler, oncelikli, children }: { ad: st
     </li>
   );
   return (
-    <div className="yapiskan" aria-label="Seçili senaryonun özeti" data-role={role}>
+    <div ref={kok} className="yapiskan" aria-label="Seçili senaryonun özeti" data-role={role}>
       <span className="yapiskan-ad">{ad}</span>
       <p className="visually-hidden" role="status" aria-live="polite">
         {ana ? `${ad}: ${ana.etiket} ${ana.deger}` : ad}

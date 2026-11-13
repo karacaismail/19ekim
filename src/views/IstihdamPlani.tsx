@@ -58,8 +58,9 @@ function DurumEtiketi({ durum }: { durum: Durum | null }) {
 
 /* ---------- Zaman çizelgesi ---------- */
 
-const GG = 960;
-const SOL = 210;
+// Ad sütunu en uzun aşama adını taşır (“Aşama 4: Düzenli takip toplantıları”). Ad, çubuk alanına taşmaz.
+const GG = 1040;
+const SOL = 290;
 const SATIR = 40;
 
 function AsamaCubuklari({ bugun }: { bugun: string | null }) {
@@ -95,7 +96,8 @@ function AsamaCubuklari({ bugun }: { bugun: string | null }) {
         {bugunX !== null ? (
           <g className="tk-gantt-bugun">
             <line x1={bugunX} y1={26} x2={bugunX} y2={yukseklik} />
-            <text x={bugunX + 6} y={yukseklik - 8}>
+            {/* Sağ kenara yakın çizgide yazı çizginin soluna geçer, kesilmez. */}
+            <text x={bugunX > GG - 70 ? bugunX - 6 : bugunX + 6} y={yukseklik - 8} textAnchor={bugunX > GG - 70 ? 'end' : 'start'}>
               Bugün
             </text>
           </g>

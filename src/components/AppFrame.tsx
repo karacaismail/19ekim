@@ -302,10 +302,17 @@ export function AppFrame({
     const root = document.documentElement;
     const bant = document.querySelector<HTMLElement>('.topbar');
     if (!bant) return;
-    const olc = () => root.style.setProperty('--bant-h', `${bant.offsetHeight}px`);
+    // Kırıntı satırının boyu da ölçülür: sayfadaki ikinci yapışık şerit (senaryo özeti) onun hemen altında durur.
+    const kirinti = document.querySelector<HTMLElement>('.crumbs-row');
+    const olc = () => {
+      root.style.setProperty('--bant-h', `${bant.offsetHeight}px`);
+      if (kirinti) root.style.setProperty('--kirinti-h', `${kirinti.offsetHeight}px`);
+    };
     olc();
     const gozlem = new ResizeObserver(olc);
     gozlem.observe(bant);
+    // Kenarlık kutusu izlenir. Satırın iç boşluğu değişirse yükseklik yine doğru ölçülür.
+    if (kirinti) gozlem.observe(kirinti, { box: 'border-box' });
     let son = window.scrollY;
     let bekliyor = false;
     const guncelle = () => {

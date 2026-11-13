@@ -1682,8 +1682,8 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
   // İşveren maliyetinin parçaları (kullanıcı kararı 2026-10-21: tek yığılmış çubuk): net + vergiler + işçi SGK = brüt; + işveren payı (teşvik sonrası).
   const bilesim: { name: string; value: number; tone: OpexTone }[] = [
     { name: 'Net ücret', value: b.net, tone: 'net' },
-    { name: 'Gelir vergisi', value: b.gv, tone: 'tax' },
-    { name: 'Damga vergisi', value: b.dv, tone: 'tax' },
+    // İki vergi aynı renk tonundadır. Bu yüzden diğer grafiklerdeki gibi tek dilimdir; ayrıntı özet cümlesindedir.
+    { name: 'Gelir ve damga vergisi', value: b.gv + b.dv, tone: 'tax' },
     { name: 'SGK ve işsizlik (işçi)', value: b.sgkIsci + b.issizlikIsci, tone: 'sgk' },
     { name: 'İşveren payı (teşvik sonrası)', value: b.sgkIsveren + b.issizlikIsveren - b.tesvik, tone: 'employer' },
   ];

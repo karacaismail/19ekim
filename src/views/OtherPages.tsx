@@ -71,11 +71,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
         <DataTable
           id="istihdam-katki"
           title={`Rol, görev, gider ve gelire katkı, ${H} ay (${sc.name.toLocaleLowerCase('tr-TR')})`}
-          tools={
-            <Araclar role={sc.role}>
-              <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
-            </Araclar>
-          }
+          /* Senaryo seçicisi bölümün başında bir kez durur. Tabloda ikinci kopyası yoktur. */
           columns={[
             { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: StaffResult) => <RoleChip role={x.role.role} label={x.role.name} /> },
             { key: 'g', header: 'Görev', minWidth: '20rem', render: (x) => x.role.gorev },
@@ -354,7 +350,11 @@ function PendingContent() {
   const COMMISSION_PER_SALE = params.commission;
   // Bugün (gecikme ve yürürlük için) yalnız istemcide: sunucu ve ilk çizim tarihsiz (“bekliyor”), hidrasyon bozulmaz.
   const [bugun, setBugun] = useState('');
-  useEffect(() => setBugun(new Date().toISOString().slice(0, 10)), []);
+  // Yerel gün kullanılır. UTC kullanılsaydı İstanbul’da gece 00.00 ile 03.00 arası bir önceki gün sayılırdı.
+  useEffect(() => {
+    const d = new Date();
+    setBugun(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+  }, []);
   const gorunum = (k: KararKaydi) => kararDurumu(k, bugun);
   const gecikmeGun = (k: KararKaydi) => (k.sonTarih && bugun ? Math.round((Date.UTC(+bugun.slice(0, 4), +bugun.slice(5, 7) - 1, +bugun.slice(8, 10)) - Date.UTC(+k.sonTarih.slice(0, 4), +k.sonTarih.slice(5, 7) - 1, +k.sonTarih.slice(8, 10))) / 86_400_000) : 0);
   const bekleyenler = kararlar.kayitlar.filter((k) => k.durum === 'bekliyor').sort((a, b) => (a.sonTarih ?? '9999').localeCompare(b.sonTarih ?? '9999'));
@@ -369,6 +369,8 @@ function PendingContent() {
   const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(addDays(dates.firstDay, w * 7)));
   const decWeek = Math.max(1, Math.round((new Date(dates.dec).getTime() - new Date(dates.firstDay).getTime()) / (7 * 86_400_000)) + 1);
   const deadlines = sorted.map((d) => d.sonTarih!);
+  // Grafik son tarihten 14 gün sonra biter. Bugün daha ileriyse grafik bugünü de gösterir (gecikme görünür).
+  const sonGun = addDays(deadlines[deadlines.length - 1], 14);
   const crossWeek = Math.ceil(OVERTIME_CAP / Math.max(1, p1.overtimePerWeek));
   const monthlyOvertime = Math.round((p1.overtimePerWeek * 52) / 12);
   return (
@@ -386,8 +388,8 @@ function PendingContent() {
         <Chart
           id="son-tarih"
           title="Bekleyen kararların son tarihleri"
-          summary={sorted.map((d) => `“${d.soru}” kararının son tarihi ${shortDate(d.sonTarih!)}. Kararı veren: ${ROLE_LABELS[d.sahip]}`).join('. ')}
-          spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.soru, date: d.sonTarih!, role: d.sahip })) }}
+          summary={`${sorted.map((d) => `“${d.soru}” kararının son tarihi ${shortDate(d.sonTarih!)}. Kararı veren: ${ROLE_LABELS[d.sahip]}`).join('. ')}.${bugun ? ` Bugün ${shortDate(bugun)}.` : ''}`}
+          spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: bugun && bugun > sonGun ? addDays(bugun, 7) : sonGun, today: bugun || undefined, items: sorted.map((d) => ({ name: d.soru, date: d.sonTarih!, role: d.sahip })) }}
           size="md"
           wide
         />
@@ -399,7 +401,8 @@ function PendingContent() {
               key: 'sonTarih',
               header: 'Son tarih',
               nowrap: true,
-              rowHeader: true,
+              // Telefondaki kartta soru başlıktır. Son tarih ve durum başlığın altında özet olarak görünür.
+              summary: true,
               render: (d) => (
                 <>
                   {d.sonTarih ? shortDate(d.sonTarih) : 'Son tarih yok'}
@@ -409,7 +412,7 @@ function PendingContent() {
                 </>
               ),
             },
-            { key: 'soru', header: 'Soru', minWidth: '14rem', render: (d) => d.soru },
+            { key: 'soru', header: 'Soru', minWidth: '14rem', rowHeader: true, render: (d) => d.soru },
             {
               key: 'oneri',
               header: 'Öneri veya seçenekler',
@@ -429,7 +432,6 @@ function PendingContent() {
             {
               key: 'sahip',
               header: 'Karar veren',
-              summary: true,
               nowrap: true,
               render: (d) => (
                 <>
@@ -449,12 +451,12 @@ function PendingContent() {
           id="verilen"
           title="Verilen kararların listesi"
           columns={[
-            { key: 'kararTarihi', header: 'Karar tarihi', nowrap: true, rowHeader: true, render: (d) => longDate(d.kararTarihi!) },
-            { key: 'soru', header: 'Konu', minWidth: '12rem', render: (d) => d.soru },
+            // Telefondaki kartta konu başlıktır, karar tarihi özettir. Uzun karar metni kart açılınca okunur.
+            { key: 'kararTarihi', header: 'Karar tarihi', nowrap: true, summary: true, render: (d) => longDate(d.kararTarihi!) },
+            { key: 'soru', header: 'Konu', minWidth: '12rem', rowHeader: true, render: (d) => d.soru },
             {
               key: 'sonuc',
               header: 'Karar',
-              summary: true,
               minWidth: '24rem',
               render: (d) => (
                 <>
