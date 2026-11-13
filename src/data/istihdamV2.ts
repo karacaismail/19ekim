@@ -165,7 +165,7 @@ function payAraligi() {
 export const DIKKAT: { baslik: string; metin: string }[] = [
   {
     baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
-    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları eklenince 2027 zarar yılıdır. Parametrelerde yatırım girişi 0 TL’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
+    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları eklenince 2027 zarar yılıdır. Parametrelerde yatırım girişi 0 TL’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
   },
   {
     baslik: 'Saha personeli sayısı iki planda farklı',
@@ -173,7 +173,7 @@ export const DIKKAT: { baslik: string; metin: string }[] = [
   },
   {
     baslik: 'Güçlü seçenek 50 çalışan eşiğini aşar',
-    metin: 'Bu eşikte VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydı, yüzde 3 engelli çalışan yükümlülüğü ve iş sağlığı ve güvenliği kurulu gündeme gelir. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
+    metin: 'Bu eşikte üç yükümlülük gündeme gelir. Birincisi VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydıdır. İkincisi yüzde 3 engelli çalışan yükümlülüğüdür. Üçüncüsü iş sağlığı ve güvenliği kuruludur. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
   },
   {
     baslik: 'İhracat ve bağımsız temsilciler kadroda yok',

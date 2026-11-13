@@ -627,12 +627,12 @@ export type KayitDurum = 'yok' | 'kayitli' | 'kaydedildi' | 'kaydedilemedi';
 export function KayitDurumu({ kapsam, durum, zaman, etki, className }: { kapsam: string; durum: KayitDurum; zaman?: string | null; etki?: string; className?: string }) {
   const metin =
     durum === 'kaydedilemedi'
-      ? `${kapsam}: bu tarayıcıda kaydedilemedi, çünkü depolama kapalı. Değişiklikler yalnız bu sekme açıkken geçerlidir.`
+      ? `${kapsam} bu tarayıcıda kaydedilemedi, çünkü depolama kapalı. Değişiklikler yalnız bu sekme açıkken geçerlidir.`
       : durum === 'kaydedildi'
-        ? `${kapsam}: bu tarayıcıda kaydedildi${zaman ? ` ${zaman}` : ''} (yerel depolama).`
+        ? `${kapsam} bu tarayıcıda kaydedildi${zaman ? ` ${zaman}` : ''} (yerel depolama).`
         : durum === 'kayitli'
-          ? `${kapsam}: bu tarayıcıda kayıtlı (önceki oturumdan, yerel depolama).`
-          : `${kapsam}: henüz kayıt yok. Bir değer değişince bu tarayıcıda saklanır.`;
+          ? `${kapsam} bu tarayıcıda kayıtlı. Kayıt önceki oturumdan kaldı (yerel depolama).`
+          : `${kapsam} henüz kaydedilmedi. Bir değer değişince bu tarayıcıda saklanır.`;
   return (
     <p className={`kayit-durumu${className ? ` ${className}` : ''}`} role="status" aria-live="polite" data-durum={durum}>
       {metin}
@@ -837,7 +837,7 @@ function Ajanda({ titleId, rows, marks }: { titleId: string; rows: GanttRow[]; m
     if (m.tur === 'isaret') {
       icerik.push(
         <p key={m.key} className="ajanda-isaret">
-          {m.label} · {kisaTarih(m.tarih)}
+          {m.label} ({kisaTarih(m.tarih)})
         </p>,
       );
       continue;
@@ -976,7 +976,7 @@ function Degerler({ titleId, spec }: { titleId: string; spec: Extract<ChartSpec,
                   <li key={i.name} className="degerler-madde">
                     <span className="kayit-ad">{i.name}</span>
                     <span className="degerler-sayilar">
-                      Pazar büyümesi %{sayi.format(i.growth)} · Göreli pay {sayi.format(i.share)}× · Ciro {sayi.format(i.revenue)} milyon ₺
+                      Pazar büyümesi %{sayi.format(i.growth)}, göreli pay {sayi.format(i.share)}×, ciro {sayi.format(i.revenue)} milyon ₺
                     </span>
                   </li>
                 ))}

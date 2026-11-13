@@ -77,7 +77,7 @@ function Oncu({ a }: { a: Ayar }) {
   return (
     <>
       <Sonuc
-        etiket={'Ortağın aylık kazancı\u00a0· 90. günden sonra'}
+        etiket={'Ortağın aylık kazancı (90. günden sonra)'}
         deger={tl(enIyi)}
         aciklama={
           <>

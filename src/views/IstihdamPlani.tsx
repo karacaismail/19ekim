@@ -368,12 +368,8 @@ function KadroIcerik() {
                 {i + 1}
               </span>
               <p className="tk-adim-ne">{a.ne}</p>
-              <p>
-                <strong>Personel:</strong> {a.personel}
-              </p>
-              <p>
-                <strong>Yönetici:</strong> {a.yonetici}
-              </p>
+              <p>{a.personel}</p>
+              <p>{a.yonetici}</p>
             </li>
           ))}
         </ol>
@@ -395,7 +391,12 @@ function KadroIcerik() {
                   </span>
                 </p>
                 <p className="tk-karar-neden">{k.neden}</p>
-                <p className="tk-karar-kim">Sorumlu: {k.kim}</p>
+                <dl className="tk-rol-bilgi tk-karar-kim">
+                  <div>
+                    <dt>Sorumlu</dt>
+                    <dd>{k.kim}</dd>
+                  </div>
+                </dl>
               </div>
             </li>
           ))}
@@ -422,9 +423,16 @@ function KadroIcerik() {
                   <li key={r.ad} className="tk-ek-rol">
                     <p className="tk-ek-ad">{r.ad}</p>
                     <p>{r.neden}</p>
-                    <p className="tk-ek-meta">
-                      Ne zaman: {r.tetik}. Çalışma biçimi: {r.model}.
-                    </p>
+                    <dl className="tk-rol-bilgi tk-ek-meta">
+                      <div>
+                        <dt>Ne zaman</dt>
+                        <dd>{r.tetik}</dd>
+                      </div>
+                      <div>
+                        <dt>Çalışma biçimi</dt>
+                        <dd>{r.model}</dd>
+                      </div>
+                    </dl>
                   </li>
                 ))}
               </ul>
@@ -490,7 +498,7 @@ export function GuncelPlan() {
       </ol>
       <p>
         <TextLink to="/karar/#secimler" standalone>
-          Karar seçimleri: başlangıç tarihi ve diğer açık sorular
+          Karar seçimlerinde başlangıç tarihini ve diğer açık soruları görün
         </TextLink>
       </p>
     </Section>

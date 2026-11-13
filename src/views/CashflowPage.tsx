@@ -127,37 +127,37 @@ function Icerik() {
     <>
       <PageHeader
         title="Nakit akış tablosu"
-        purpose={`${cf.aylar.length} ay için nakit girişini, çıkışını, dönem sonu nakdini ve nakit açığını kapatmak için gereken ek nakdi gösterir.`}
+        purpose={`${cf.aylar.length} ay için nakit girişini, çıkışını, dönem sonu nakdini ve gereken ek nakdi gösterir.`}
         meta={[
-          { label: 'Dönem', value: `${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay` },
-          { label: 'Kaynak', value: 'Girişler: gelir planının senaryo ve seçenekleri. Çıkışlar: Google Sheets ve plan kalemleri.' },
+          { label: 'Dönem', value: `${ilk.ad} – ${son.ad} (${cf.aylar.length} ay)` },
+          { label: 'Kaynak', value: 'Girişler gelir planının senaryo ve seçeneklerinden gelir. Çıkışlar Google Sheets ve plan kalemlerinden gelir.' },
         ]}
       />
       <ResultSummary
         baslik="Sonuç"
         senaryo={{ ad: senaryoAdi, role: senaryoRol }}
-        donem={`${ilk.ad} – ${son.ad} · ${cf.aylar.length} ay`}
+        donem={`${ilk.ad} – ${son.ad} (${cf.aylar.length} ay)`}
         ana={{
           etiket: 'Nakit açığı tavanı',
           deger: acikYaz(cf),
           // Sheets yokken eksik gider kapsamı tam finansman hesabı gibi sunulmaz (B2c, MS-02).
           aciklama: cf.sheets
-            ? 'Bu tutar, dönem sonu nakdin hiçbir ay sıfırın altına düşmemesi için gereken en küçük ek nakittir. Yatırım girişi ve başlangıç nakdi parametresi bu tutarı değiştirir.'
+            ? 'Bu tutar gereken en küçük ek nakittir. Bu ek nakitle dönem sonu nakdi hiçbir ay sıfırın altına düşmez. Yatırım girişi ve başlangıç nakdi parametresi bu tutarı değiştirir.'
             : 'Sheets gider verisi okunamadı. Bu tutar yalnız plan kalemleriyle hesaplandı, bu yüzden tam finansman ihtiyacı değildir.',
         }}
         durum={sonucDurum}
         tools={secici}
         kiyas={{ temel: 'Aynı Sheets giderleri ve aynı seçeneklerle üç temel senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
         ikincil={[
-          { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} · ${cf.enDusuk.ay.kisa}` },
+          { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.kisa})` },
           { etiket: 'Kalıcı toparlanma', deger: toparlanmaYaz(cf) },
           { etiket: `Dönem sonu nakit (${son.kisa})`, deger: tl(cf.donemSonu[cf.donemSonu.length - 1]) },
           { etiket: `Net nakit akışı, ${cf.aylar.length} ay`, deger: tl(cf.toplam.net) },
         ]}
         // Kapsam ana sonucun bağlamında (B2c, MS-10): yalnız iStoc girişleri, ortak gider planının tamamı; markaya dağıtım belirlenmedi — “Türksab toplam” denmez.
-        kaynak={`Kapsam: iStoc girişleri (abonelik) ve Sheets’teki ortak gider planının tamamı. Gider planının kaynak kurumu Türksab’dır ve giderlerin markaya dağıtımı henüz belirlenmedi. ${
+        kaynak={`Tablo iStoc girişlerini (abonelik) ve Sheets’teki ortak gider planının tamamını kapsar. Gider planının kaynak kurumu Türksab’dır. Giderlerin markaya dağıtımı henüz belirlenmedi. ${
           cf.sheets
-            ? 'Çıkışlar, Google Sheets gider planından ve plan kalemlerinden (eklenen saha personeli, satıcı kazanım reklamı, satış primi) gelir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
+            ? 'Çıkışlar Google Sheets gider planından ve plan kalemlerinden gelir. Plan kalemleri eklenen saha personeli, satıcı kazanım reklamı ve satış primidir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
             : 'Sheets gider verisi okunamadı. Bu yüzden çıkışlar yalnız plan kalemlerinden oluşur ve tablo eksiktir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
         }`}
       />
@@ -169,9 +169,9 @@ function Icerik() {
       >
         <Stats
           items={[
-            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `${senaryoAdi} · 15 ay toplamı` },
+            { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `15 ay toplamı (${senaryoAdi})` },
             { label: 'Nakit çıkışı', value: tl(cf.toplam.cikis), note: cf.sheets ? 'Sheets + plan kalemleri' : 'Yalnız plan kalemleri' },
-            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `${senaryoAdi} · 15 ay toplamı` },
+            { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `15 ay toplamı (${senaryoAdi})` },
             { label: 'En düşük nakit', value: tl(cf.enDusuk.deger), note: `${cf.enDusuk.ay.ad} sonu` },
             { label: 'Nakit açığı tavanı', value: cf.acik ? tl(cf.acik) : '0 ₺', note: cf.acik ? 'Dönem sonu nakdi sıfırın altına düşürmeyen en küçük ek nakit' : 'Dönem sonu nakit hiç negatife düşmüyor' },
           ]}
@@ -199,7 +199,7 @@ function Icerik() {
           columns={[
             // Ölçüt sırası riske göre (ux_v2.md §3.1): önce en düşük nakit ve ayı, açık tavanı, toparlanma, dönem sonu; akışlar sonra.
             { key: 'n', header: 'Senaryo', nowrap: true, rowHeader: true, render: (x: (typeof karsilastirma)[number]) => <RoleChip role={x.s.role} label={x.s.name} /> },
-            { key: 'd', header: 'En düşük nakit', nowrap: true, summary: true, render: (x) => `${tl(x.cf.enDusuk.deger)} · ${x.cf.enDusuk.ay.kisa}` },
+            { key: 'd', header: 'En düşük nakit', nowrap: true, summary: true, render: (x) => `${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa})` },
             { key: 'a', header: 'Nakit açığı tavanı', nowrap: true, render: (x) => (x.cf.acik ? tl(x.cf.acik) : '0 ₺') },
             { key: 't', header: 'Kalıcı toparlanma', nowrap: true, render: (x) => toparlanmaYaz(x.cf) },
             { key: 's', header: 'Dönem sonu (Ara 2027)', nowrap: true, render: (x) => tl(x.cf.donemSonu[x.cf.donemSonu.length - 1]) },
@@ -233,7 +233,7 @@ function Icerik() {
           summary={
             mod === 'secili'
               ? `${cf.aylar.length} ay: nakit girişi ${tl(cf.toplam.giris)}, nakit çıkışı ${tl(cf.toplam.cikis)}, net ${tl(cf.toplam.net)}. En düşük dönem sonu nakit ${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.ad}). Son dönem sonu nakit ${tl(cf.donemSonu[cf.donemSonu.length - 1])} (${son.ad}).`
-              : karsilastirma.map((x) => `${x.s.name}: en düşük ${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa}), ${son.kisa} sonu ${tl(x.cf.donemSonu[x.cf.donemSonu.length - 1])}`).join('; ')
+              : karsilastirma.map((x) => `${x.s.name}: en düşük ${tl(x.cf.enDusuk.deger)} (${x.cf.enDusuk.ay.kisa}), ${son.kisa} sonu ${tl(x.cf.donemSonu[x.cf.donemSonu.length - 1])}`).join('. ')
           }
           tools={cubuk(<ModSecimi value={mod} onChange={setMod} />)}
           spec={

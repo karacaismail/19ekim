@@ -289,7 +289,7 @@ function Loader() {
         </p>
         {/* Geçen süre ilerleme oranı değildir (gorsel_algi.md F23 / C097); uzun beklemede uygulanabilir sonraki adım. */}
         <p className="opex-loader-meta" aria-hidden="true">
-          {seconds} sn geçti · ilerleme oranı değil{seconds >= 6 ? ' · Apps Script ilk istekte birkaç saniye sürebilir.' : ''}
+          {seconds} sn geçti. Bu süre ilerleme oranı değildir.{seconds >= 6 ? ' Apps Script ilk istekte birkaç saniye sürebilir.' : ''}
           {seconds >= 20 ? ' Yükleme uzun sürüyor. Bağlantı ayarından adresi ve Sheets paylaşımını kontrol edin ya da “Şimdi yenile” düğmesine basın.' : ''}
         </p>
       </div>
@@ -405,16 +405,16 @@ function LiveStrip({ live, settingsOpen, onRefresh, onSettings }: { live: Extrac
   // Yalnız istemcide (veri gelince) çizilir: hedef ilk çizimde bulunur, şerit gövdede bir an görünmez.
   const [host] = useState<HTMLElement | null>(() => document.getElementById(HEADER_TOOLS_ID));
   const guncelleme = live.push ? 'anlık' : `${OPEX_POLL_MS / 1000} sn’de bir`;
-  const detay = `Erişim: ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'} · Son denetim ${clock(live.checked)} · Sheets’te son değişiklik ${clock(live.data.degisti)} · Güncelleme ${guncelleme}`;
+  const detay = `Erişim ${live.data.model.erisim === 'Herkese açık' ? 'herkese açık' : 'anahtarla'}. Son denetim ${clock(live.checked)}. Sheets’te son değişiklik ${clock(live.data.degisti)}. Güncelleme ${guncelleme}.`;
   const strip = (
     <div className="opex-live" data-state={live.stale ? 'stale' : 'live'}>
       <p className="opex-live-status" title={detay}>
         <span className="opex-live-dot" aria-hidden="true" />
         <span className="opex-live-label">{live.stale ? 'Bağlantı sorunu' : 'Sheets'}</span>
         <span className="opex-live-meta">
-          {clock(live.data.degisti)} · {guncelleme}
+          {clock(live.data.degisti)} ({guncelleme})
         </span>
-        <span className="visually-hidden"> · {detay}</span>
+        <span className="visually-hidden">. {detay}</span>
       </p>
       <button type="button" className="opex-icon-btn" aria-label="Şimdi yenile" title="Şimdi yenile" onClick={onRefresh}>
         <IconRefresh size={20} stroke={1.75} aria-hidden="true" />
@@ -503,7 +503,7 @@ function YearTabs({ value, onChange, donemler }: { value: Yil; onChange: (y: Yil
             </svg>
           </span>
           <span className="opex-year-sub">
-            {d.etiket.replace(` ${d.yil}`, '')} · <span className="opex-year-total">{tl(d.toplam.toplam)}</span>
+            {d.etiket.replace(` ${d.yil}`, '')}: <span className="opex-year-total">{tl(d.toplam.toplam)}</span>
           </span>
         </button>
       ))}
@@ -550,12 +550,12 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <div className="opex-kpis">
         <div className="opex-hero" data-edge="top">
-          <p className="opex-hero-label">{d.etiket} · toplam OPEX</p>
+          <p className="opex-hero-label">{d.etiket} için toplam OPEX</p>
           <Value className="opex-hero-value">{tl(total)}</Value>
           <p className="opex-hero-note">
-            Aylık ortalama {tl(d.ortalama.toplam)} · {d.aySayisi} ay
-            {d.yil === 2026 && m.donem.yil === 2026 ? ` · ${m.donem.etiket} (bu ay) ${tl(m.ozet.buAy.toplam)}` : ''}
-            {onceki ? ` · 2026 (${onceki.etiket.replace(' 2026', '')}) aylık ortalamasına göre ${change(d.ortalama.toplam, onceki.ortalama.toplam)}` : ''}
+            Aylık ortalama {tl(d.ortalama.toplam)} ({d.aySayisi} ay).
+            {d.yil === 2026 && m.donem.yil === 2026 ? ` ${m.donem.etiket} (bu ay): ${tl(m.ozet.buAy.toplam)}.` : ''}
+            {onceki ? ` 2026 (${onceki.etiket.replace(' 2026', '')}) aylık ortalamasına göre değişim ${change(d.ortalama.toplam, onceki.ortalama.toplam)}.` : ''}
           </p>
         </div>
         <ul className="opex-tiles">
@@ -568,7 +568,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
               <Value className="opex-tile-value">{tl(d.toplam[t.kume])}</Value>
               <ShareBar ratio={total ? d.toplam[t.kume] / total : 0} tone={t.tone} />
               <p className="opex-tile-note">
-                Payı {pct2(total ? d.toplam[t.kume] / total : 0)} · aylık {tl(d.ortalama[t.kume])}
+                Payı {pct2(total ? d.toplam[t.kume] / total : 0)} (aylık {tl(d.ortalama[t.kume])})
               </p>
             </li>
           ))}
@@ -581,7 +581,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
           note={`${d.etiket} toplamı, ₺ ve pay`}
           size="sm"
           rows={GRUPLAR.length}
-          summary={GRUPLAR.map((t) => `${KUME_AD[t.kume]} ${tl(d.toplam[t.kume])}`).join('; ')}
+          summary={GRUPLAR.map((t) => `${KUME_AD[t.kume]} ${tl(d.toplam[t.kume])}`).join('. ')}
           spec={{ kind: 'opex-bar', share: total, items: GRUPLAR.map((t) => ({ name: KUME_AD[t.kume], value: d.toplam[t.kume], tone: t.tone })).sort((a, b) => b.value - a.value) }}
         />
         <Chart
@@ -590,7 +590,7 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
           note={`${d.etiket} toplamı. Renk, kategorinin grubunu gösterir.`}
           size="lg"
           rows={kats.length}
-          summary={kats.map((k) => `${k.name} ${tl(k.value)}`).join('; ')}
+          summary={kats.map((k) => `${k.name} ${tl(k.value)}`).join('. ')}
           spec={{ kind: 'opex-bar', share: total, items: kats.map((k) => ({ name: k.name, value: k.value, tone: KUME_TONE[k.kume] })) }}
         />
       </div>
@@ -612,7 +612,7 @@ function Plan({ p }: { p: Plan }) {
         items={[
           { label: `Toplam (${p.aySayisi} ay)`, value: tl(p.toplam.toplam) },
           { label: 'Aylık ortalama', value: tl(p.ortalama.toplam) },
-          { label: 'En yüksek ay', value: `${enYuksek.ad} · ${tl(enYuksek.toplam)}` },
+          { label: 'En yüksek ay', value: `${enYuksek.ad}: ${tl(enYuksek.toplam)}` },
           ...(sinir > 0 ? [{ label: `${p.aylar[sinir - 1].ad} → ${p.aylar[sinir].ad}`, value: change(p.aylar[sinir].toplam, p.aylar[sinir - 1].toplam) }] : []),
         ]}
       />
@@ -624,7 +624,7 @@ function Plan({ p }: { p: Plan }) {
         size="sm"
         rows={p.aySayisi}
         shortLabels
-        summary={p.aylar.map((a) => `${a.ad} ${tl(a.toplam)}`).join('; ')}
+        summary={p.aylar.map((a) => `${a.ad} ${tl(a.toplam)}`).join('. ')}
         spec={{
           kind: 'opex-stack',
           categories: p.aylar.map(ayKisa),
@@ -809,7 +809,7 @@ function KolonFiltresi({ ad, tur, secenekler, deger, onChange }: { ad: string; t
                 .map(([v, n]) => (
                   <Checkbox
                     key={v}
-                    label={`${v || '(boş)'} · ${n}`}
+                    label={`${v || '(boş)'} (${n})`}
                     checked={!liste || liste.secili.includes(v)}
                     onChange={(e) => isaretle(v, e.currentTarget.checked)}
                     classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }}
@@ -1215,7 +1215,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     yillar: p.donemler.map((_, y) => xs.reduce((t, r) => t + r.yillar[y], 0)),
     donem: xs.reduce((t, r) => t + r.donem, 0),
   });
-  const toplam: AltSatir = { tur: 'toplam', ad: `Toplam · ${suzulmus.length} kalem`, ...topla(suzulmus) };
+  const toplam: AltSatir = { tur: 'toplam', ad: `Toplam (${suzulmus.length} kalem)`, ...topla(suzulmus) };
   const kumeler = GRUPLAR.filter((t) => suzulmus.some((r) => r.kume === t.kume));
   // Grup ara toplamları birden çok grup listelenirken (tek grupta toplamla aynı olurdu).
   const altlar: AltSatir[] = [
@@ -1345,15 +1345,15 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     ...hizli.map((kod) => ({ ad: `Hızlı: ${HIZLI.find((h) => h.kod === kod)?.ad ?? kod}`, kaldir: () => setHizli((h) => h.filter((x) => x !== kod)) })),
   ];
   const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
-  const tabloAdi = `Kalemler · ${p.etiket}`;
+  const tabloAdi = `Kalemler (${p.etiket})`;
   return (
     <>
       {/* Döviz kurları kırıntı satırında (Kurlar); burada yalnız bu ayın ödeme durumu. */}
       {buAyVar && odemeTakibi ? (
         <FactsRow
           items={[
-            { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} · ${m.ozet.odeme.adetOdenen} kalem` },
-            { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} · ${m.ozet.odeme.adetBekleyen} kalem` },
+            { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} (${m.ozet.odeme.adetOdenen} kalem)` },
+            { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} (${m.ozet.odeme.adetBekleyen} kalem)` },
           ]}
         />
       ) : null}
@@ -1464,12 +1464,12 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             {/* Kapsam (UX-12): süzgeç kalemleri azaltınca süzülmüş ve genel dönem toplamı birlikte, iki kabukta da. */}
             {suzulmus.length !== all.length ? (
               <p className="opex-veri-kapsam">
-                Süzülmüş toplam {tl(toplam.donem)} ({suzulmus.length} kalem) · Genel toplam {tl(genel.donem)} ({all.length} kalem)
+                Süzülmüş toplam {tl(toplam.donem)} ({suzulmus.length} kalem). Genel toplam {tl(genel.donem)} ({all.length} kalem).
               </p>
             ) : null}
             {/* Kısa sembol efsanesi (gorsel_algi.md F17): yoğun tabloda “—” korunur, anlamı görünür ve yereldir. */}
             <p className="opex-sembol-efsanesi">
-              — : o ay bu kalemde gider yok (0 ₺). Personel sütunlarında (brüt, kesintiler, işveren payı, teşvik, KDV) bu işaret “uygulanmıyor” demektir, çünkü bordrosuz kalemde bu alan yoktur.
+              “—” işareti, o ay bu kalemde gider olmadığını gösterir (0 ₺). Personel sütunlarında bu işaret “uygulanmıyor” demektir. Bu sütunlar brüt, kesintiler, işveren payı, teşvik ve KDV’dir. Bordrosuz kalemde bu alanlar yoktur.
             </p>
           </div>
         </div>
@@ -1525,7 +1525,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             ) : (
               <p className="opex-kayit-bos">Bu filtrelerle kalem yok.</p>
             )}
-            <KayitListesi className="opex-kayitlar-ozet kayitlar-ozet" label={`Toplamlar · ${p.etiket}`} kayitlar={ozetKayitlar} acik={acik} onChange={setAcik} />
+            <KayitListesi className="opex-kayitlar-ozet kayitlar-ozet" label={`Toplamlar (${p.etiket})`} kayitlar={ozetKayitlar} acik={acik} onChange={setAcik} />
           </>
         ) : (
           <div className="table-frame">
@@ -1659,7 +1659,7 @@ function TechVendors({ m, p }: { m: OpexModel; p: Plan }) {
       note={`${p.etiket} toplamı (₺). Aynı sağlayıcının hesapları birleştirildi.`}
       size="md"
       rows={tech.length}
-      summary={tech.map(([n, v]) => `${n} ${tl(v)}`).join('; ')}
+      summary={tech.map(([n, v]) => `${n} ${tl(v)}`).join('. ')}
       spec={{ kind: 'opex-bar', items: tech.map(([name, value]) => ({ name, value, tone: 'tech' as const })) }}
     />
   );
@@ -1686,8 +1686,8 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <FactsRow
         items={[
-          { label: `Bordrolu işveren maliyeti (${d.aySayisi} ay)`, value: `${tl(b.maliyet)} · ${staff.length} kişi` },
-          { label: 'Freelancer faturaları (KDV dahil)', value: `${tl(sum('fatura', free))} · ${free.length} kişi` },
+          { label: `Bordrolu işveren maliyeti (${d.aySayisi} ay)`, value: `${tl(b.maliyet)} (${staff.length} kişi)` },
+          { label: 'Freelancer faturaları (KDV dahil)', value: `${tl(sum('fatura', free))} (${free.length} kişi)` },
           { label: 'Freelancer KDV hariç / KDV', value: `${tl(sum('kdvHaric', free))} / ${tl(sum('kdv', free))}` },
           { label: 'Teşvik ve destekler', value: tl(b.tesvik) },
         ]}
@@ -1758,7 +1758,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <Toggles label="Kişi" value={String(person.satir)} onChange={setWho} options={staff.map((k) => ({ value: String(k.satir), label: k.ad }))} />
       <FactsRow
         items={[
-          { label: 'Ücret esası', value: `${person.esas} · ${tlExact(d.yil === 2027 ? person.tutar2027 : person.tutar)}` },
+          { label: 'Ücret esası', value: `${person.esas}: ${tlExact(d.yil === 2027 ? person.tutar2027 : person.tutar)}` },
           { label: `${d.seri[0].ad} → ${d.seri[d.seri.length - 1].ad} brüt`, value: `${tl(first.brut)} → ${tl(last.brut)}` },
           { label: `${d.etiket} işveren maliyeti`, value: tl(pd.toplam.maliyet) },
           { label: 'Aylık ortalama maliyet', value: tl(pd.toplam.maliyet / d.aySayisi) },
@@ -1771,7 +1771,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
         size="lg"
         rows={d.aySayisi}
         shortLabels
-        summary={`${person.ad}, ${d.etiket}: brüt ${d.seri[0].ad} ${tl(first.brut)}, ${d.seri[d.seri.length - 1].ad} ${tl(last.brut)}; işveren maliyeti ${tl(pd.toplam.maliyet)}.`}
+        summary={`${person.ad}, ${d.etiket}: brüt ${d.seri[0].ad} ${tl(first.brut)}, ${d.seri[d.seri.length - 1].ad} ${tl(last.brut)}. İşveren maliyeti ${tl(pd.toplam.maliyet)}.`}
         spec={{
           kind: 'opex-stack-h',
           categories: d.seri.map((a) => a.kisa),
@@ -1785,7 +1785,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       />
       <DataTable
         id={`bordro-ay-${d.yil}`}
-        title={`${person.ad} · ${d.etiket} bordro`}
+        title={`${person.ad}, ${d.etiket} bordrosu`}
         note={`SGK tavanı ${tl(asg.tavan)}. Asgari ücret ${tlExact(asg.brut)} brüt, ${tlExact(asg.net)} net. Asgari ücrete denk gelen tutar gelir vergisi ve damga vergisinden istisnadır.${d.yil === 2026 && d.aySayisi < 12 ? ' Kümülatif matrah Ocak 2026’dan hesaplanır.' : ''}`}
         columns={columns /* summary: 'İşveren maliyeti' (sütun tanımında, F07) */}
         rows={rows}
@@ -1828,16 +1828,16 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <FactsRow
         items={[
-          { label: 'Ücret zammı', value: `${m.zam.esas} · ${pct2(m.zam.oran)}${exempt.length ? ` · hariç: ${exempt.join(', ')}` : ''}` },
+          { label: 'Ücret zammı', value: `${m.zam.esas} ${pct2(m.zam.oran)}${exempt.length ? ` (hariç: ${exempt.join(', ')})` : ''}` },
           { label: 'Kira artışı', value: pct2(m.artis2027.kira) },
           { label: 'Faturalar ve ofis', value: pct2(m.artis2027.genel) },
-          { label: 'Döviz kalemleri (₺)', value: `${pct2(m.artis2027.kur)} · kur varsayımı` },
-          { label: 'Asgari ücret 2027', value: `${tl(m.asgari.y2027.brut)} brüt · ${tl(m.asgari.y2027.net)} net` },
+          { label: 'Döviz kalemleri (₺)', value: `${pct2(m.artis2027.kur)} (kur varsayımı)` },
+          { label: 'Asgari ücret 2027', value: `${tl(m.asgari.y2027.brut)} brüt, ${tl(m.asgari.y2027.net)} net` },
         ]}
       />
       <p className="opex-source">
-        2026 enflasyonu ({e.donem}): yıllık TÜFE {pct2(e.yillik)}, aylık TÜFE {pct2(e.aylik)}, 12 aylık ortalama TÜFE {pct2(e.ortalama12)}, Yİ-ÜFE
-        aylık {pct2(e.yiufeAylik)}.{' '}
+        2026 enflasyonu {e.donem} verisidir. Yıllık TÜFE {pct2(e.yillik)}, aylık TÜFE {pct2(e.aylik)} olur. 12 aylık ortalama TÜFE {pct2(e.ortalama12)},
+        Yİ-ÜFE aylık {pct2(e.yiufeAylik)} olur.{' '}
         <a className="text-link" href={e.kaynak} target="_blank" rel="noopener noreferrer">
           Kaynak arama bağlantısı
         </a>{' '}
@@ -1846,10 +1846,10 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
       <Chart
         id="kisi-2027"
         title="Kişi maliyeti: 2026 ve 2027"
-        note={`Aylık ortalama: 2026 (${once.etiket.replace(' 2026', '')}) ve 2027`}
+        note={`2026 (${once.etiket.replace(' 2026', '')}) ve 2027 aylık ortalamaları`}
         size="xl"
         rows={m.kisiler.length}
-        summary={m.kisiler.map((k) => `${k.ad}: ${tl(kisiDonem(k, once).toplam.maliyet / once.aySayisi)} → ${tl(kisiDonem(k, d).toplam.maliyet / d.aySayisi)}`).join('; ')}
+        summary={m.kisiler.map((k) => `${k.ad}: ${tl(kisiDonem(k, once).toplam.maliyet / once.aySayisi)} → ${tl(kisiDonem(k, d).toplam.maliyet / d.aySayisi)}`).join('. ')}
         spec={{
           kind: 'opex-group',
           categories: m.kisiler.map((k) => k.ad),
@@ -1876,8 +1876,8 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
         <>
           {t.ad}
           <span className="cell-sub">
-            {t.kod} · {t.kapsam}
-            {t.etkin ? '' : ' · kapalı'}
+            {t.kod} ({t.kapsam}
+            {t.etkin ? ')' : ', kapalı)'}
           </span>
         </>
       ),
@@ -1888,12 +1888,13 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
       ? { key: 'bu', header: <Num>{`Bu ay (${m.donem.ayAdi})`}</Num>, nowrap: true, render: (t) => <Num>{tlExact(t.buAy)}</Num> }
       : { key: 'ort', header: <Num>2027 aylık ort.</Num>, nowrap: true, render: (t) => <Num>{tl(t.yil2027 / 12)}</Num> },
     { key: 'yil', header: <Num>{`${d.yil} yıllık`}</Num>, nowrap: true, render: (t) => <Num>{tl(d.yil === 2027 ? t.yil2027 : t.yil2026)}</Num> },
-    { key: 'kosul', header: 'Koşul ve dayanak', minWidth: '22rem', render: (t) => t.kosul },
+    // Koşul metni Google Sheets’ten gelir (Parametreler H:P). Site metni değildir, yalın Türkçe testi bu hücreyi atlar.
+    { key: 'kosul', header: 'Koşul ve dayanak', minWidth: '22rem', render: (t) => <span data-kaynak="sheets">{t.kosul}</span> },
   ];
   return (
     <DataTable
       id={`tesvikler-${d.yil}`}
-      title={`SGK teşvik ve destekleri · ${d.yil}`}
+      title={`SGK teşvik ve destekleri (${d.yil})`}
       note="Standart teşvikler, koşulu sağlayan herkese parametreyle uygulanır. Koşullu teşvikler yalnız Sheets’te kişinin satırına teşvik kodu yazılınca uygulanır. Tutarları mali müşavirle doğrulayın."
       columns={columns /* summary: 'Tür ve değer' (sütun tanımında, F07) */}
       rows={m.tesvikler}
@@ -1949,10 +1950,10 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
           </ul>
         </Note>
       ) : null}
-      <Section id="plan-bolum" index={1} title={`Aylık plan · ${p.etiket}`} desc="Her ay için teknoloji, ofis ve işletme ile personel giderleri ayrı hesaplanır.">
+      <Section id="plan-bolum" index={1} title={`Aylık plan (${p.etiket})`} desc="Her ay için teknoloji, ofis ve işletme ile personel giderleri ayrı hesaplanır.">
         <Plan p={p} />
       </Section>
-      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Kalemler üç gruba ayrılır: ofis (kira ve aidat, internet, telefon, elektrik, ofis ihtiyaçları), teknoloji (yazılım, yapay zekâ, sunucu, API, AWS vb.) ve personel (bordro ve freelancer).">
+      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Kalemler üç gruba ayrılır. Ofis grubu kira ve aidat, internet, telefon, elektrik ve ofis ihtiyaçlarıdır. Teknoloji grubu yazılım, yapay zekâ, sunucu, API ve AWS gibi kalemlerdir. Personel grubu bordro ve freelancer giderleridir.">
         <KalemTablosu m={m} p={p} />
         {/* Tablo ile grafik arasında ayırıcı (kullanıcı kararı 2026-10-21). */}
         <hr className="opex-ayrac opex-ayrac-arada" />
@@ -1972,7 +1973,7 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
         </div>
       </div>
       <p className="opex-source">
-        Hesaplandı: {stamp(m.hesaplandi)} · Motor sürümü {m.surum} · Özet {data.ozet}
+        Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. Motor sürümü {m.surum}, özet kodu {data.ozet}.
       </p>
     </OzetContext.Provider>
   );

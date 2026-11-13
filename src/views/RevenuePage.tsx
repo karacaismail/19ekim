@@ -293,7 +293,7 @@ function Icerik() {
       <ResultSummary
         baslik="Sonuç"
         senaryo={{ ad: senaryoAdi, role: senaryoRol }}
-        donem={`${r.labels.start} – ${r.labels.end} · ${H} ay`}
+        donem={`${r.labels.start} – ${r.labels.end} (${H} ay)`}
         ana={{
           etiket: 'En yüksek birikmiş açık',
           deger: fon,
@@ -301,7 +301,7 @@ function Icerik() {
           aciklama: `Model açığıdır, gereken finansman ${tl(Math.abs(Math.min(0, be.enDusuk.deger)))} kadardır (gider kaynağı: ${be.kaynak === 'sheets' ? 'Sheets' : 'plan kadrosu'}). En düşük nokta: ${months[be.enDusuk.t].ad}.`,
         }}
         durum={sonucDurum}
-        kiyas={{ temel: 'Hazır senaryolarda aynı ölçü, yani en yüksek birikmiş açık gösterilir. Nakit akışı sayfasındaki nakit açığı tavanı ayrı bir ölçüttür, çünkü başlangıç nakdini ve yatırım girişini de sayar.', satirlar: sonucKiyas }}
+        kiyas={{ temel: 'Hazır senaryolarda aynı ölçü, yani en yüksek birikmiş açık gösterilir. Nakit akışı sayfasındaki nakit açığı tavanı ayrı bir ölçüttür. Bu ölçü başlangıç nakdini ve yatırım girişini de sayar.', satirlar: sonucKiyas }}
         ikincil={ozet.slice(0, 5)}
         strip={<YapiskanOzet ad={senaryoAdi} role={senaryoRol} cipler={ozet} oncelikli="En yüksek birikmiş açık" />}
       />
@@ -320,14 +320,14 @@ function Icerik() {
         <HedefKartlari milestones={sim.milestones} digerleri={digerleri} son={son} />
         <Note title={`90 günde ${int(params.activeTarget)} aktif satıcıya ulaşılır mı?`}>
           <p>
-            Plan hedefine göre {longDate(r.planDay90)} tarihine kadar, yani 90 günde {int(params.activeTarget)} aktif satıcıya ulaşılmalıdır. Bunun için ayda en az {r.need90} yeni aktif satıcı gerekir. Kadro (1 saha,
-            1 CRM masa başı, Aralık’tan itibaren organizatör, dijital kanal ve temsilciler) ilk üç satış ayında {int(Math.round(sim.yeniAktif.slice(1, 4).reduce((a, b) => a + b, 0)))} yeni aktif satıcı getirir.{' '}
-            {int(params.activeTarget)}. aktif satıcıya ulaşma tarihi: {gun(aktif100.date, son)}
-            {aktif100.days !== null ? ` (${sure(aktif100.days)})` : ''}. Bu süreyi üstteki seçeneklerle kısaltabilirsiniz: ikinci saha personelini erken almak, ek saha personeli, saha büyümesi ve reklam bütçesi.
+            Plan hedefine göre {longDate(r.planDay90)} tarihine kadar, yani 90 günde {int(params.activeTarget)} aktif satıcıya ulaşılmalıdır. Bunun için ayda en az {r.need90} yeni aktif satıcı gerekir. Kadroda 1 saha ve 1 CRM masa başı personeli vardır. Aralık’tan
+            itibaren organizatör, dijital kanal ve temsilciler de çalışır. Bu kadro ilk üç satış ayında {int(Math.round(sim.yeniAktif.slice(1, 4).reduce((a, b) => a + b, 0)))} yeni aktif satıcı getirir.{' '}
+            {int(params.activeTarget)}. aktif satıcıya ulaşma tarihi şudur: {gun(aktif100.date, son)}
+            {aktif100.days !== null ? ` (${sure(aktif100.days)})` : ''}. Bu süreyi üstteki seçeneklerle kısaltabilirsiniz. Örneğin ikinci saha personelini erken alabilirsiniz. Ek saha personeli, saha büyümesi ve reklam bütçesi de süreyi kısaltır.
           </p>
           <p>
-            Gelir hedefi ayrı izlenir. Bu senaryoda yeni satıcıların yüzde {Math.round(inputs.annualShare * 100)} kadarının yıllık peşin ödediği varsayılır. Buna göre {tl(params.ciroTarget)} kümülatif gelire ulaşma
-            tarihi: {gun(gelir3m.date, son)}
+            Gelir hedefi ayrı izlenir. Bu senaryoda yeni satıcıların yüzde {Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder. Kümülatif gelir hedefi {tl(params.ciroTarget)} olur.
+            Bu hedefe şu tarihte ulaşılır: {gun(gelir3m.date, son)}
             {gelir3m.days !== null ? ` (${sure(gelir3m.days)})` : ''}. Herkes aylık ödeseydi bu tarih şöyle olurdu: {gun(monthlyOnly.gelir3m.date, son)}.
           </p>
         </Note>
@@ -341,11 +341,11 @@ function Icerik() {
                   {i + 1}
                 </span>
               }
-              title={`${ms.name} · ${kisaGun(ms.date)}`}
+              title={`${ms.name} (${kisaGun(ms.date)})`}
             >
               <p className="hire-date">{ms.days === null ? `${son} sonuna kadar ulaşılmıyor` : sure(ms.days)}</p>
               <p className="hire-note">
-                Aylık gelir {tl(ms.aylikGelir)}, kümülatif gelir {tl(ms.kumulatif)}, {int(Math.round(ms.kumAktif))} aktif ve {int(Math.round(ms.kumKayit))} üye satıcı, ödemeye devam eden {int(Math.round(ms.odeyen))} satıcı.
+                Aylık gelir {tl(ms.aylikGelir)}, kümülatif gelir {tl(ms.kumulatif)} olur. {int(Math.round(ms.kumAktif))} aktif ve {int(Math.round(ms.kumKayit))} üye satıcı vardır. Ödemeye devam eden satıcı sayısı {int(Math.round(ms.odeyen))} olur.
               </p>
             </Timeline.Item>
           ))}
@@ -358,13 +358,13 @@ function Icerik() {
         dizin
         index={2}
         title="Kadronun görevi, gideri ve gelire katkısı"
-        desc={`Önce 1 saha personeli satış sistemini kurar. Sistem oturunca ikinci saha personeli başlar, kârlı senaryolarda büyüme kuralıyla yenileri eklenir. CRM (müşteri ilişkileri yönetimi) masa başı personeli soğuk arama ve e-postayla kayıt toplar, dijital kanaldan gelen kayıtları arar. Organizatör İstoç çarşısındaki toptancıları bir araya getirir. Dijital pazarlama uzmanı ölçümü, reklamı ve içerik hattını yürütür. Modeldeki katkı, ilgili satış kaynağı çıkarılınca ${H} aylık tahmini abonelik ödemesinin ne kadar azaldığını gösterir. Bu değer gerçekleşmiş kişisel performans ölçümü değildir.`}
+        desc={`Önce 1 saha personeli satış sistemini kurar. Sistem oturunca ikinci saha personeli başlar. Kârlı senaryolarda büyüme kuralıyla yeni kişiler eklenir. CRM (müşteri ilişkileri yönetimi) masa başı personeli soğuk arama ve e-postayla kayıt toplar. Bu personel dijital kanaldan gelen kayıtları da arar. Organizatör İstoç çarşısındaki toptancıları bir araya getirir. Dijital pazarlama uzmanı ölçümü, reklamı ve içerik hattını yürütür. Modeldeki katkı, ilgili satış kaynağı çıkarılınca ${H} aylık tahmini abonelik ödemesinin ne kadar azaldığını gösterir. Bu değer gerçekleşmiş kişisel performans ölçümü değildir.`}
         tools={cubuk()}
       >
         <DataTable
           id="kaynak"
           title="Satış kanalları: başlangıç, düzen ve ayda beklenen yeni satıcı"
-          note={`Tam kapasite kişi başına verilir. İlk 3 satış ayı ve 12 ay toplamları seçili kapasite çarpanına (${yuzde(inputs.factor)}) ve ilk satış tarihine göre hesaplanır.`}
+          note={`Tam kapasite kişi başına verilir. İlk 3 satış ayı ve 12 ay toplamları iki değere göre hesaplanır. Bu değerler seçili kapasite çarpanı (${yuzde(inputs.factor)}) ve ilk satış tarihidir.`}
           tools={cubuk()}
           columns={[
             { key: 'n', header: 'Kaynak', minWidth: '12rem', rowHeader: true, render: (x: (typeof kaynaklar)[number]) => <RoleChip role={x.role} label={x.name} /> },
@@ -383,8 +383,8 @@ function Icerik() {
           altNot={modKadro === 'secili' ? `Kaynaklara göre (${senaryoAdi}): her satış kanalının aylık yeni satıcı sayısı üst üste gösterilir.` : 'Senaryolara göre: aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla.'}
           summary={
             modKadro === 'secili'
-              ? kaynaklar.map((x) => `${x.short}: ${on2.map((_, t) => int(Math.round(x.values[t] * inputs.factor * r.satis[t]))).join(', ')}`).join('; ')
-              : ustUste.map((x) => `${x.name}: ${on2.map((_, t) => int(Math.round(x.be.sim.yeniAktif[t]))).join(', ')}`).join('; ')
+              ? kaynaklar.map((x) => `${x.short}: ${on2.map((_, t) => int(Math.round(x.values[t] * inputs.factor * r.satis[t]))).join(', ')}`).join('. ')
+              : ustUste.map((x) => `${x.name}: ${on2.map((_, t) => int(Math.round(x.be.sim.yeniAktif[t]))).join(', ')}`).join('. ')
           }
           tools={cubuk(<ModSecimi value={modKadro} onChange={setModKadro} label="Grafik görünümü" />)}
           spec={
@@ -396,7 +396,7 @@ function Icerik() {
         />
         <Stats
           items={[
-            { label: `Kadro gideri, ${H} ay`, value: tl(st.toplam.gider), note: `${senaryoAdi}: maaşlı roller, reklam bütçesi ve temsilci primi` },
+            { label: `Kadro gideri, ${H} ay`, value: tl(st.toplam.gider), note: `Maaşlı roller, reklam bütçesi ve temsilci primi (${senaryoAdi})` },
             { label: `Gelire katkı, ${H} ay`, value: tl(st.toplam.katki), note: `Kaynakların toplamı ${H} aylık gelire eşittir: ${tl(st.toplam.gelir)}` },
             { label: 'Net (katkı − gider)', value: tl(st.toplam.net), note: 'Ofis, yazılım ekibi ve yapay zekâ araçları dahil değildir.' },
             { label: 'Dolaylı roller', value: `${katkiRows.filter((x) => !x.dogrudan).length} rol`, note: 'Model asistan, Segika CRM ve ekip lideri için ayrı satış katkısı hesaplamıyor. Bu, bu rollerin işletmeye katkısı olmadığı anlamına gelmez.' },
@@ -444,8 +444,8 @@ function Icerik() {
         <Chart
           id="katki-grafik"
           title={`Gelire katkı, ${H} ay: rol × hazır senaryo (bin ₺)`}
-          note="Grafikte yalnız doğrudan katkısı olan roller yer alır. Kısa adlar: Saha 1 ve 2, büyüme saha, CRM, organizatör, dijital uzman (organik içerik), reklam (satıcı kazanım bütçesi) ve temsilciler. Temsilciler maaş almaz, prim alır."
-          summary={stUc.senaryolar.map((sn) => `${sn.scenario.name}: ${sn.rows.filter((x) => x.dogrudan).map((x) => `${x.role.short} ${tl(x.katki)}`).join(', ')}`).join('; ')}
+          note="Grafikte yalnız doğrudan katkısı olan roller yer alır. Roller şunlardır: Saha 1 ve 2, büyüme saha, CRM, organizatör, dijital uzman, reklam ve temsilciler. “Dijital uzman” organik içeriği gösterir. “Reklam” satıcı kazanım bütçesini gösterir. Temsilciler maaş almaz, prim alır."
+          summary={stUc.senaryolar.map((sn) => `${sn.scenario.name}: ${sn.rows.filter((x) => x.dogrudan).map((x) => `${x.role.short} ${tl(x.katki)}`).join(', ')}`).join('. ')}
           tools={cubuk()}
           spec={{
             kind: 'hedef-adim',
@@ -457,10 +457,11 @@ function Icerik() {
         />
         <Note title="“Sistem oturdu” ne demek?">
           <p>
-            İkinci saha personeli üç koşul sağlanınca alınır. Birincisi, CRM aşamaları (aday → randevu → kayıt → kullanıma başlatma → ödeme) çalışır ve her kaydın kaynağı yazılıdır. İkincisi, ziyaret
-            rotası ve kayıt kontrol listesi birinci saha personeliyle iki ay denenmiştir. Üçüncüsü, birinci saha personeli art arda iki ay tam kapasiteye ({int(params.sahaActivesMonthly)} yeni aktif satıcı / ay)
-            ulaşmıştır. Varsayılan tarih bir parametredir ({longDate(params.secondSahaDate)}). Senaryo kurucudaki “İkinci saha personeli”, “Ek saha personeli” ve “Saha büyümesi” seçenekleriyle farklı
-            durumları deneyebilirsiniz.
+            İkinci saha personeli üç koşul sağlanınca alınır. Birincisi, CRM aşamaları çalışır. Bu aşamalar aday, randevu, kayıt, kullanıma başlatma ve
+            ödemedir. Her kaydın kaynağı da yazılıdır. İkincisi, ziyaret rotası ve kayıt kontrol listesi birinci saha personeliyle iki ay denenmiştir.
+            Üçüncüsü, birinci saha personeli art arda iki ay tam kapasiteye ulaşmıştır. Tam kapasite ayda {int(params.sahaActivesMonthly)} yeni aktif satıcıdır.
+            Varsayılan tarih bir parametredir ({longDate(params.secondSahaDate)}). Senaryo kurucuda üç seçenek var: “İkinci saha personeli”, “Ek saha personeli” ve
+            “Saha büyümesi”. Farklı durumları bu seçeneklerle deneyebilirsiniz.
           </p>
         </Note>
       </Section>
@@ -476,7 +477,7 @@ function Icerik() {
       >
         <Stats
           items={[
-            { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Başlangıç: ${d.adStart}. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe ölçeklenmiyor.'}` },
+            { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Reklam ${d.adStart} tarihinde başlar. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe ölçeklenmiyor.'}` },
             { label: 'Kayıt', value: `${zincir.kayit.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (ölçek öncesi)` },
             { label: 'Yeni aktif satıcı', value: `${zincir.aktif.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `Kayıttan ödemeye %${params.dijitalLeadToActive} × kapasite ${yuzde(inputs.factor)}` },
             { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? 'Uygulanmıyor' : tl(zincir.cac), note: 'Bütçe ÷ yeni aktif' },
@@ -500,7 +501,7 @@ function Icerik() {
           id="dijital-kademe"
           title={`Reklam bütçesi kademeleri: ${d.window} ayda gelire katkı (bin ₺), hazır senaryolar`}
           note="Aynı simülasyon bir kez bütçeyle, bir kez bütçesiz çalıştırılır. Aradaki fark reklamın getirdiği gelirdir. Ölçek kuralı sağlanıyorsa kademe, başlangıç bütçesini gösterir."
-          summary={d.byScenario.map((x) => `${x.scenario.name}: ${x.tiers.map((t) => `${tierAd(t.butce)} → ${tl(t.katki)}`).join(', ')}`).join('; ')}
+          summary={d.byScenario.map((x) => `${x.scenario.name}: ${x.tiers.map((t) => `${tierAd(t.butce)} → ${tl(t.katki)}`).join(', ')}`).join('. ')}
           tools={cubuk()}
           spec={{ kind: 'hedef-adim', steps: d.tierBudgets.map(tierAd), series: d.byScenario.map((x) => ({ name: x.scenario.name, role: x.scenario.role, values: x.tiers.map((t) => binTl(t.katki)) })) }}
           size="lg"
@@ -572,8 +573,8 @@ function Icerik() {
           altNot={modGelir === 'secili' ? `İlk ödemeler, yenilemeler ve kümülatif gelir (${senaryoAdi}).` : 'Hazır senaryolar yan yana: aynı ayın aylık geliri.'}
           summary={
             modGelir === 'secili'
-              ? `${months.map((a, t) => `${a.kisa}: ${tl(sim.gelir[t])}`).join('; ')}. ${son} sonu kümülatif ${tl(sim.kumulatif[H - 1])}.`
-              : ustUste.map((x) => `${x.name}: ${months.map((a, t) => `${a.kisa} ${tl(x.be.sim.gelir[t])}`).join(', ')}`).join('; ')
+              ? `${months.map((a, t) => `${a.kisa}: ${tl(sim.gelir[t])}`).join('. ')}. ${son} sonu kümülatif ${tl(sim.kumulatif[H - 1])}.`
+              : ustUste.map((x) => `${x.name}: ${months.map((a, t) => `${a.kisa} ${tl(x.be.sim.gelir[t])}`).join(', ')}`).join('. ')
           }
           tools={cubuk(<ModSecimi value={modGelir} onChange={setModGelir} label="Grafik ve tablo görünümü" />)}
           spec={
@@ -631,7 +632,7 @@ function Icerik() {
         <Chart
           id="senaryo"
           title={`Kümülatif gelir, ${son} sonuna kadar (hedef ${tl(params.ciroTarget)})`}
-          summary={ustUste.map((x) => `${x.name}: 12. ayda ${tl(x.be.sim.kumulatif[11])}, ${son} sonu ${tl(x.be.sim.kumulatif[H - 1])}`).join('; ')}
+          summary={ustUste.map((x) => `${x.name}: 12. ayda ${tl(x.be.sim.kumulatif[11])}, ${son} sonu ${tl(x.be.sim.kumulatif[H - 1])}`).join('. ')}
           tools={cubuk()}
           spec={{ kind: 'kumulatif-tl', labels: months.map((a) => a.kisa), target: params.ciroTarget, targetLabel: `Hedef ${tl(params.ciroTarget)}`, series: ustUste.map((x) => ({ name: x.name, role: x.role, values: x.be.sim.kumulatif, dashed: x.name !== senaryoAdi })) }}
           size="lg"
@@ -640,7 +641,7 @@ function Icerik() {
           id="odeyen"
           title={`Ödemeye devam eden satıcı, ${son} sonuna kadar`}
           note="Aylık ödeyenler ile son 12 ayda yıllık peşin ödeyenler birlikte sayılır. Eğriler arasındaki fark elde tutma oranından gelir."
-          summary={ustUste.map((x) => `${x.name}: 6. ayda ${int(Math.round(x.be.sim.odeyen[5]))}, 12. ayda ${int(Math.round(x.be.sim.odeyen[11]))}, ${H}. ayda ${int(Math.round(x.be.sim.odeyen[H - 1]))}`).join('; ')}
+          summary={ustUste.map((x) => `${x.name}: 6. ayda ${int(Math.round(x.be.sim.odeyen[5]))}, 12. ayda ${int(Math.round(x.be.sim.odeyen[11]))}, ${H}. ayda ${int(Math.round(x.be.sim.odeyen[H - 1]))}`).join('. ')}
           tools={cubuk()}
           spec={{ kind: 'seri-cizgi', labels: months.map((a) => a.kisa), unit: 'satıcı', series: ustUste.map((x) => ({ name: x.name, role: x.role, values: x.be.sim.odeyen.map((v) => Math.round(v)), dashed: x.name !== senaryoAdi })) }}
           size="lg"
@@ -713,14 +714,14 @@ function Icerik() {
         dizin
         index={7}
         title="Üye, aktif ve devam eden satıcı"
-        desc={`${int(params.memberTarget)} üyeden ${int(params.activeTarget)} aktif satıcı hedeflenir. Grafik, seçili elde tutma oranıyla (${yuzde(inputs.retention)}) bu ${int(params.activeTarget)} satıcıdan kaçının 3., 6. ve 12. ayda hâlâ ödediğini gösterir. Elde tutma olmadan aktif satıcı sayısı azalır. Bu yüzden yenileme çağrısı ve aylık değer raporu planın parçasıdır.`}
+        desc={`${int(params.memberTarget)} üyeden ${int(params.activeTarget)} aktif satıcı hedeflenir. Grafik, bu ${int(params.activeTarget)} satıcıdan kaçının 3., 6. ve 12. ayda hâlâ ödediğini gösterir. Hesap seçili elde tutma oranını (${yuzde(inputs.retention)}) kullanır. Elde tutma olmadan aktif satıcı sayısı azalır. Bu yüzden yenileme çağrısı ve aylık değer raporu planın parçasıdır.`}
         tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} label="Grafik görünümü" />)}
       >
         <Chart
           id="huni"
           title="Kayıttan devam eden ödemeye"
           altNot={modHuni === 'secili' ? `Seçili senaryo (${senaryoAdi}): üye, aktif ve ödemeye devam eden satıcı.` : 'Hazır senaryolar yan yana.'}
-          summary={modHuni === 'secili' ? funnel.map((x) => `${x.name}: ${int(x.value)}`).join('; ') : r.scenarios.map((x) => `${x.name}: ${r.funnels[x.id].map((y) => int(y.value)).join(', ')}`).join('; ')}
+          summary={modHuni === 'secili' ? funnel.map((x) => `${x.name}: ${int(x.value)}`).join('. ') : r.scenarios.map((x) => `${x.name}: ${r.funnels[x.id].map((y) => int(y.value)).join(', ')}`).join('. ')}
           tools={cubuk(<ModSecimi value={modHuni} onChange={setModHuni} label="Grafik görünümü" />)}
           spec={
             modHuni === 'secili'
@@ -750,7 +751,7 @@ function Icerik() {
               label: 'Aylık başabaş',
               value: be.nokta ? shortDate(be.nokta.date) : be.ongoru.nokta ? `≈ ${shortDate(be.ongoru.nokta.date)}` : `${son} sonuna kadar kapanmıyor`,
               note: be.nokta
-                ? `${senaryoAdi}: gelir ${ayAdi(months[Math.min(H - 1, Math.round(be.nokta.t))].iso)} ayında gideri geçer.`
+                ? `${senaryoAdi} senaryosunda gelir ${ayAdi(months[Math.min(H - 1, Math.round(be.nokta.t))].iso)} ayında gideri geçer.`
                 : be.ongoru.nokta
                   ? `${son} sonuna kadar gerçekleşmiyor. Eğilime göre aylık açık ${tl(-be.ongoru.sonNet)} ve açık her ay ${tl(be.ongoru.egim)} daralıyor.`
                   : `Açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}). Bu durum sürdürülebilir değil.`,
@@ -783,7 +784,7 @@ function Icerik() {
           title={`Gelir ve gider, ${son} sonuna kadar`}
           altNot={modBas === 'aylik' ? `Aylık gelir ve aylık gider (${senaryoAdi}). Kesişim noktası aylık başabaştır.` : `Kümülatif gelir ve kümülatif gider (${senaryoAdi}). Kesişim noktası birikmiş açığın kapanışıdır.`}
           note={modBas === 'aylik' ? `Kesikli çizgi başabaş ayını gösterir: ${noktaMetni}.` : `Kümülatif çizgiler kesişince birikmiş açık kapanır (geri ödeme): ${be.geriOdeme ? longDate(be.geriOdeme.date) : be.ongoru.geriOdeme ? `${son} sonuna kadar kapanmıyor, son ayın netiyle ≈ ${longDate(be.ongoru.geriOdeme.date)}` : 'kapanmıyor'}.`}
-          summary={modBas === 'aylik' ? `${months.map((a, t) => `${a.kisa}: gelir ${tl(be.gelir[t])}, gider ${tl(be.gider[t])}`).join('; ')}. Başabaş: ${noktaMetni}.` : `${months.map((a, t) => `${a.kisa}: kümülatif gelir ${tl(kumGelir[t])}, kümülatif gider ${tl(kumGider[t])}`).join('; ')}. Geri ödeme: ${be.geriOdeme ? longDate(be.geriOdeme.date) : `${son} sonuna kadar kapanmıyor`}.`}
+          summary={modBas === 'aylik' ? `${months.map((a, t) => `${a.kisa}: gelir ${tl(be.gelir[t])}, gider ${tl(be.gider[t])}`).join('. ')}. Başabaş: ${noktaMetni}.` : `${months.map((a, t) => `${a.kisa}: kümülatif gelir ${tl(kumGelir[t])}, kümülatif gider ${tl(kumGider[t])}`).join('. ')}. Geri ödeme: ${be.geriOdeme ? longDate(be.geriOdeme.date) : `${son} sonuna kadar kapanmıyor`}.`}
           tools={cubuk(<Choice label="Eksen" value={modBas} options={[{ id: 'aylik', name: 'Aylık' }, { id: 'kumulatif', name: 'Kümülatif' }]} onChange={setModBas} />)}
           spec={
             modBas === 'aylik'
@@ -799,8 +800,8 @@ function Icerik() {
           note="Sıfır çizgisinin altı birikmiş açığı gösterir. Gereken finansman bu açığın büyüklüğüdür. Çizginin üstü, açık kapandıktan sonraki birikimdir."
           summary={
             modKum === 'secili'
-              ? `${months.map((a, t) => `${a.kisa}: ${tl(be.kumNet[t])}`).join('; ')}. En düşük ${tl(be.enDusuk.deger)} (${months[be.enDusuk.t].ad}).`
-              : ustUste.map((x) => `${x.name}: en düşük ${tl(x.be.enDusuk.deger)}, ${son} sonu ${tl(x.be.kumNet[H - 1])}, geri ödeme ${tarihYaz(x.be.ongoru.geriOdeme)}`).join('; ')
+              ? `${months.map((a, t) => `${a.kisa}: ${tl(be.kumNet[t])}`).join('. ')}. En düşük ${tl(be.enDusuk.deger)} (${months[be.enDusuk.t].ad}).`
+              : ustUste.map((x) => `${x.name}: en düşük ${tl(x.be.enDusuk.deger)}, ${son} sonu ${tl(x.be.kumNet[H - 1])}, geri ödeme ${tarihYaz(x.be.ongoru.geriOdeme)}`).join('. ')
           }
           tools={cubuk(<ModSecimi value={modKum} onChange={setModKum} label="Grafik görünümü" />)}
           spec={{
@@ -815,7 +816,7 @@ function Icerik() {
         <Chart
           id="basabas-adet"
           title="Başabaş noktası: ödeyen satıcı adedine göre"
-          note={`Yatay eksen ödeyen satıcı sayısını gösterir. Gelir doğrusu satıcı başına ayda ${tl(be.adet.gelirBirim)} artar. Bu tutar kararlı dönemin fiyatıdır ve yıllık peşin payını da içerir. Gider doğrusu kararlı dönemin sabit gideri olan ${tl(be.adet.sabit)} ile başlar ve satıcı başına ${tl(be.adet.degisken)} artar. Bu ek tutar, kaybedilen satıcıların yerine yenilerini getiren primdir.`}
+          note={`Yatay eksen ödeyen satıcı sayısını gösterir. Gelir doğrusu satıcı başına ayda ${tl(be.adet.gelirBirim)} artar. Bu tutar kararlı dönemin fiyatıdır ve yıllık peşin payını da içerir. Gider doğrusu ${tl(be.adet.sabit)} ile başlar. Bu tutar kararlı dönemin sabit gideridir. Gider doğrusu satıcı başına ${tl(be.adet.degisken)} artar. Bu ek tutar, kaybedilen satıcıların yerine yenilerini getiren primdir.`}
           summary={be.adet.nokta === null ? 'Satıcı başına gelir değişken gideri karşılamıyor. Başabaş noktası yok.' : `Başabaş noktası ${int(Math.ceil(be.adet.nokta))} ödeyen satıcıdır. ${be.adet.ulasir ? `Bu sayıya ${shortDate(be.adet.ulasir.date)} tarihinde ulaşılır` : `${son} sonuna kadar bu sayıya ulaşılmıyor`}.`}
           tools={cubuk()}
           spec={{ kind: 'basabas-adet', unit: 'ödeyen satıcı', n: be.adet.n, gelir: be.adet.gelir.map(Math.round), gider: be.adet.gider.map(Math.round), nokta: be.adet.nokta, noktaLabel: be.adet.nokta === null ? '' : `Başabaş ${int(Math.ceil(be.adet.nokta))} satıcı` }}
@@ -847,7 +848,7 @@ function Icerik() {
           kayit="matris"
           eksenEtiketi="Kapasite çarpanı"
           columns={[
-            { key: 'f', header: 'Kapasite ↓ · Elde tutma →', nowrap: true, rowHeader: true, render: (x: { factor: number; cells: (string | null)[] }) => yuzde(x.factor) },
+            { key: 'f', header: 'Kapasite (satır), elde tutma (sütun)', nowrap: true, rowHeader: true, render: (x: { factor: number; cells: (string | null)[] }) => yuzde(x.factor) },
             ...SENS_RETENTIONS.map((ret, j) => ({ key: `r${j}`, header: yuzde(ret), nowrap: true, render: (x: { factor: number; cells: (string | null)[] }) => kisaGun(x.cells[j]) })),
           ]}
           rows={SENS_FACTORS.map((factor, i) => ({ factor, cells: duyarlilik[i] }))}
@@ -857,8 +858,9 @@ function Icerik() {
         <Note title="Okuma">
           <p>
             {be.kaynakNotu} Gelir simülasyonu gelir planıyla aynıdır ve seçili senaryoyla seçenekleri kullanır. Başabaş noktası (adet) kararlı dönem için hesaplanır. Sabit gider ve fiyat, son 12 ayın
-            ortalamasıdır. Satıcı başına aylık gelir, aylık ücret ile yıllık peşin ücretin on ikide birinin yıllık peşin payına göre karışımıdır. Değişken gider, elde tutma kaybını yerine koymak için
-            gereken yeni satış primidir: (1 − elde tutma) × {tl(params.commission)}.
+            ortalamasıdır. Satıcı başına aylık gelir iki ücretin karışımıdır. Biri aylık ücret, diğeri yıllık peşin ücretin on ikide biridir. Karışım
+            yıllık peşin payına göre yapılır. Değişken gider yeni satış primidir. Bu prim, elde tutma kaybını yerine koymak için gerekir. Formül şudur:
+            (1 − elde tutma) × {tl(params.commission)}.
           </p>
         </Note>
       </Section>

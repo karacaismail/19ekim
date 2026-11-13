@@ -516,7 +516,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     expect(adaGore(okunan.maddeler.map(({ name, range, text }) => ({ name, range, text })))).toEqual(adaGore(gantt!.rows));
     // Tarih sırası (başlangıca göre), kontrol noktaları tarihlerine göre araya girer, ay başlıkları yıl taşır.
     expect(okunan.maddeler.map((m) => m.from)).toEqual([...okunan.maddeler.map((m) => m.from)].sort());
-    expect(okunan.isaretler.map((i) => i.split(' · ')[0])).toEqual(gantt!.marks);
+    expect(okunan.isaretler.map((i) => i.split(' (')[0])).toEqual(gantt!.marks);
     expect(okunan.aylar.length).toBeGreaterThanOrEqual(3);
     for (const ay of okunan.aylar) expect(ay).toMatch(/^[A-ZÇĞİÖŞÜ][a-zçğıöşü]+ 20\d\d$/);
     expect(okunan.sira[0]).toBe('ay');
@@ -576,7 +576,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     // 90 günlük plan Gantt’ı: açılır ajanda, 60. ve 90. gün işaretleri.
     const plan = ajandalar.nth(1);
     await expect(plan).toHaveAttribute('data-tur', 'gorev');
-    expect((await ajandaOku(plan)).isaretler.map((i) => i.split(' · ')[0])).toEqual(['60. gün', '90. gün']);
+    expect((await ajandaOku(plan)).isaretler.map((i) => i.split(' (')[0])).toEqual(['60. gün', '90. gün']);
   });
 
   test('karar bekleyenler ve BCG: 320 px’te son tarih ajandası ve kutuya göre değer listesi ECharts verisiyle aynı', async ({ page }) => {
@@ -618,7 +618,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     // Her ürün kendi kutusunda; sayılar madde içinde (büyüme, göreli pay, ciro).
     const kutuAdi = (key: string) => bcg!.quadrants[['yildiz', 'soru', 'inek', 'kopek'].indexOf(key)];
     for (const i of bcg!.items) expect(kutular.find((k) => k.items.includes(i.name))?.name, i.name).toBe(kutuAdi(i.quadrant));
-    for (const s of await degerler.locator('.degerler-sayilar').allTextContents()) expect(s).toMatch(/Pazar büyümesi .* Göreli pay .* Ciro .* milyon ₺/);
+    for (const s of await degerler.locator('.degerler-sayilar').allTextContents()) expect(s).toMatch(/Pazar büyümesi .*, göreli pay .*, ciro .* milyon ₺/);
   });
 
   test('kabuk kapsayıcıya göre: 768 px’te (kapsayıcı 48em’den dar) ajanda; 900 px’te ECharts Gantt kendi kutusunda, klavyeyle kayar (ux.md §8.7, Y-01 daraltıldı)', async ({ page, browserName }) => {
@@ -1792,7 +1792,7 @@ test.describe('parametreler', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.getByText('70.000 ₺ maaş / ay').first()).toBeVisible();
-    await expect(page.getByText('Kota: ay içinde 140.000 ₺ satış', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('Kota ay içinde 140.000 ₺ satıştır', { exact: false }).first()).toBeVisible();
     await expect(page.locator('.params-notice')).toBeVisible();
 
     await page.goto('roller/saha-uzmani/');

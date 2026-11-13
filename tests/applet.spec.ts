@@ -53,15 +53,15 @@ test.describe('applet sayfası', () => {
     await ac(page);
     await expect(page.getByRole('navigation', { name: 'Applet’ler' })).toBeHidden();
     const secim = page.getByRole('combobox', { name: 'Applet' });
-    await expect(secim).toHaveValue('1 · Meslek ve seviye kataloğu');
+    await expect(secim).toHaveValue('1. Meslek ve seviye kataloğu');
     await secim.click();
-    await page.getByRole('option', { name: '13 · Prim ödeme eğrisi' }).click();
+    await page.getByRole('option', { name: '13. Prim ödeme eğrisi' }).click();
     await expect(page.locator('section#prim-egrisi')).toBeVisible();
     await expect(page).toHaveURL(/#prim-egrisi$/);
     const sonraki = page.getByRole('button', { name: 'Sonraki' });
     await sonraki.click();
     await expect(page.locator('section#prim-havuzu')).toBeVisible();
-    await expect(secim).toHaveValue('14 · Şirket × takım × birey');
+    await expect(secim).toHaveValue('14. Şirket × takım × birey');
     await page.getByRole('button', { name: 'Önceki' }).click();
     await expect(page.locator('section#prim-egrisi')).toBeVisible();
   });

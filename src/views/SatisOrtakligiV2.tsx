@@ -501,7 +501,7 @@ function SegmentOzeti({ sg, tur, ac }: { sg: SegmentSonucu; tur: Tur; ac: (acan:
         })}
       </ol>
       <p className="v2-sg-durum">
-        <strong>{sg.basamaklar[sg.seviye].ad}</strong> <Canli deger={durum}>{durum}</Canli>
+        {tur === 'bagimsiz' ? 'Ortak' : 'Çalışan'} şu anda <strong>{sg.basamaklar[sg.seviye].ad}</strong> basamağındadır. <Canli deger={durum}>{durum}</Canli>
       </p>
       <button type="button" className="v2-so2-ikincil" aria-haspopup="dialog" onPointerEnter={onYukle} onFocus={onYukle} onClick={(e) => ac(e.currentTarget)}>
         Bütün koşulları gör
@@ -523,7 +523,7 @@ function BagimsizSonuc({ a, persona }: { a: Ayar; persona: RolMetni }) {
           b.aktif ? (
             <>
               {persona.ad} ayda {sayi(b.s.adet)} yeni müşteri getirir ve {tl(b.s.ciro)} ciro yapar. {seg} olarak, satışta “{katki}” katkısıyla cironun {yuzde(b.oran)} kadarını alır.
-              <span className="v2-so2-bize">Komisyon, kampanya ve üstteki 2 kademenin ağ payı düşülünce bu satıştan bize en az {tl(b.bize)} kalır.</span>
+              <span className="v2-so2-bize">Bu satıştan üç kalem düşülür: komisyon, kampanya ve üstteki 2 kademenin ağ payı. Geriye bize en az {tl(b.bize)} kalır.</span>
             </>
           ) : (
             'Bu ay satış yok. Satış olmadan komisyon da ağ payı da doğmaz.'
@@ -583,7 +583,7 @@ function KadroluSonuc({ a }: { a: Ayar }) {
         ]}
       />
       <Adalet baslik="Neden bağımsız ortaktan farklı?">
-        Kadrolu çalışan maaş ve SGK güvencesi alır. Bu yüzden primi bağımsız ortağın komisyonundan düşüktür. Aynı satışı bağımsız ortak olarak yapan biri ayda {tl(b.satisKazanci)} satış komisyonu alır, ama maaşı ve güvencesi yoktur.
+        Kadrolu çalışan maaş ve SGK güvencesi alır. Bu yüzden primi bağımsız ortağın komisyonundan düşüktür. Aynı satışı bağımsız ortak olarak yapan biri ayda {tl(b.satisKazanci)} satış komisyonu alır. Ama bu kişinin maaşı ve güvencesi yoktur.
       </Adalet>
     </>
   );
@@ -607,7 +607,7 @@ function MusteriSonuc({ a }: { a: Ayar }) {
       />
       <Adalet baslik="Ortak olursa ne kazanır?">
         {m.fazla > 0
-          ? `Sınırı aşan ${sayi(m.fazla)} tavsiye artık bir ortaklık hacmidir. Bağımsız ortak olursa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır ve ${SEGMENT_ADI[m.ortakOlursa.sg.seviye]} olarak başlar.`
+          ? `Sınırı aşan ${sayi(m.fazla)} tavsiye artık bir ortaklık hacmidir. Bağımsız ortak olursa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır. Bu kişi ${SEGMENT_ADI[m.ortakOlursa.sg.seviye]} olarak başlar.`
           : `Müşteri ortaklık sözleşmesi imzalarsa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır. Kampanya kredisi ise yalnız müşteriler içindir.`}
       </Adalet>
     </>
@@ -897,7 +897,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const model = affilateModeli(a, rol);
   return (
     <div className="v2-so2" ref={kok}>
-      <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla ne kazandığını, hangi segmentte olduğunu ve bir üst segmente nasıl geçeceğini gösterir." />
+      <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla kazancını, segmentini ve üst segmente geçme yolunu gösterir." />
       <div className="v2-so2-iskelet" ref={iskelet}>
       <div className="v2-so2-ana">
       <div className="v2-so2-arac">

@@ -352,21 +352,21 @@ export function degisiklikler(k: Kurgu, taban: Kurgu): Degisiklik[] {
     const a = taban.ortaklar[id];
     const b = k.ortaklar[id];
     const ad = b.ad;
-    f(`${ad} · kapsam`, a.kapsam === 'ilk-fatura' ? 'İlk fatura' : 'Süreli', b.kapsam === 'ilk-fatura' ? 'İlk fatura' : 'Süreli');
+    f(`${ad}, kapsam`, a.kapsam === 'ilk-fatura' ? 'İlk fatura' : 'Süreli', b.kapsam === 'ilk-fatura' ? 'İlk fatura' : 'Süreli');
     const n = Math.max(a.donemler.length, b.donemler.length);
     for (let i = 0; i < n; i++) {
       const da = a.donemler[i];
       const db = b.donemler[i];
-      f(`${ad} · ${i + 1}. dönem oranı`, da ? yuzde(da.oranBp) : 'Yok', db ? yuzde(db.oranBp) : 'Yok');
-      f(`${ad} · ${i + 1}. dönem süresi`, da ? ay(da.ay) : 'Yok', db ? ay(db.ay) : 'Yok');
+      f(`${ad}, ${i + 1}. dönem oranı`, da ? yuzde(da.oranBp) : 'Yok', db ? yuzde(db.oranBp) : 'Yok');
+      f(`${ad}, ${i + 1}. dönem süresi`, da ? ay(da.ay) : 'Yok', db ? ay(db.ay) : 'Yok');
     }
-    f(`${ad} · sonraki dönemlerin oranı`, yuzde(a.sonrakiOranBp), yuzde(b.sonrakiOranBp));
-    f(`${ad} · kazanma ve ödeme`, POLITIKA_ADI[a.politika], POLITIKA_ADI[b.politika]);
-    f(`${ad} · taksit sayısı`, `${a.taksit}`, `${b.taksit}`);
-    f(`${ad} · ödeme gecikmesi`, ay(a.gecikmeAy), ay(b.gecikmeAy));
-    f(`${ad} · destek sorumlusu`, a.destekSorumlusu === 'ortak' ? 'Ortak' : 'Segika', b.destekSorumlusu === 'ortak' ? 'Ortak' : 'Segika');
-    f(`${ad} · destek ihlali`, a.destekIhlali === 'beklet' ? 'Beklet' : 'Kazandırmaz', b.destekIhlali === 'beklet' ? 'Beklet' : 'Kazandırmaz');
-    f(`${ad} · destek maliyeti`, a.destekMaliyeti === null ? 'Girilmedi' : kurusFormat(a.destekMaliyeti, pb), b.destekMaliyeti === null ? 'Girilmedi' : kurusFormat(b.destekMaliyeti, pb));
+    f(`${ad}, sonraki dönemlerin oranı`, yuzde(a.sonrakiOranBp), yuzde(b.sonrakiOranBp));
+    f(`${ad}, kazanma ve ödeme`, POLITIKA_ADI[a.politika], POLITIKA_ADI[b.politika]);
+    f(`${ad}, taksit sayısı`, `${a.taksit}`, `${b.taksit}`);
+    f(`${ad}, ödeme gecikmesi`, ay(a.gecikmeAy), ay(b.gecikmeAy));
+    f(`${ad}, destek sorumlusu`, a.destekSorumlusu === 'ortak' ? 'Ortak' : 'Segika', b.destekSorumlusu === 'ortak' ? 'Ortak' : 'Segika');
+    f(`${ad}, destek ihlali`, a.destekIhlali === 'beklet' ? 'Beklet' : 'Kazandırmaz', b.destekIhlali === 'beklet' ? 'Beklet' : 'Kazandırmaz');
+    f(`${ad}, destek maliyeti`, a.destekMaliyeti === null ? 'Girilmedi' : kurusFormat(a.destekMaliyeti, pb), b.destekMaliyeti === null ? 'Girilmedi' : kurusFormat(b.destekMaliyeti, pb));
   }
   const mA = taban.musteriler;
   const mB = k.musteriler;
@@ -374,18 +374,18 @@ export function degisiklikler(k: Kurgu, taban: Kurgu): Degisiklik[] {
   for (const m of mB) {
     const o = mA.find((x) => x.id === m.id);
     if (!o) {
-      out.push({ alan: `${m.ad}`, once: 'Yok', simdi: `${m.adet} × ${m.odeme === 'aylik' ? 'aylık' : 'paket'} · ${k.ortaklar[m.ortak].ad}` });
+      out.push({ alan: `${m.ad}`, once: 'Yok', simdi: `${m.adet} × ${m.odeme === 'aylik' ? 'aylık' : 'paket'} (${k.ortaklar[m.ortak].ad})` });
       continue;
     }
-    f(`${m.ad} · adet`, `${o.adet}`, `${m.adet}`);
-    f(`${m.ad} · başlangıç`, o.baslangic, m.baslangic);
-    f(`${m.ad} · ödeme düzeni`, o.odeme === 'aylik' ? 'Aylık' : 'Paket', m.odeme === 'aylik' ? 'Aylık' : 'Paket');
-    f(`${m.ad} · ortak`, k.ortaklar[o.ortak].ad, k.ortaklar[m.ortak].ad);
-    f(`${m.ad} · iptal`, o.iptalHizmetAyi === null ? 'Yok' : `${o.iptalHizmetAyi + 1}. hizmet ayından itibaren`, m.iptalHizmetAyi === null ? 'Yok' : `${m.iptalHizmetAyi + 1}. hizmet ayından itibaren`);
-    f(`${m.ad} · tahsilat düzeni`, tahsilatMetni(o.tahsilat), tahsilatMetni(m.tahsilat));
-    f(`${m.ad} · iadeler`, `${o.iadeler.length}`, `${m.iadeler.length}`);
-    f(`${m.ad} · destek kayıtları`, `${o.destek.length}`, `${m.destek.length}`);
-    f(`${m.ad} · hariç kalem`, yuzde(o.haricBp), yuzde(m.haricBp));
+    f(`${m.ad}, adet`, `${o.adet}`, `${m.adet}`);
+    f(`${m.ad}, başlangıç`, o.baslangic, m.baslangic);
+    f(`${m.ad}, ödeme düzeni`, o.odeme === 'aylik' ? 'Aylık' : 'Paket', m.odeme === 'aylik' ? 'Aylık' : 'Paket');
+    f(`${m.ad}, ortak`, k.ortaklar[o.ortak].ad, k.ortaklar[m.ortak].ad);
+    f(`${m.ad}, iptal`, o.iptalHizmetAyi === null ? 'Yok' : `${o.iptalHizmetAyi + 1}. hizmet ayından itibaren`, m.iptalHizmetAyi === null ? 'Yok' : `${m.iptalHizmetAyi + 1}. hizmet ayından itibaren`);
+    f(`${m.ad}, tahsilat düzeni`, tahsilatMetni(o.tahsilat), tahsilatMetni(m.tahsilat));
+    f(`${m.ad}, iadeler`, `${o.iadeler.length}`, `${m.iadeler.length}`);
+    f(`${m.ad}, destek kayıtları`, `${o.destek.length}`, `${m.destek.length}`);
+    f(`${m.ad}, hariç kalem`, yuzde(o.haricBp), yuzde(m.haricBp));
   }
   return out;
 }

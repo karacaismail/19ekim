@@ -221,3 +221,21 @@ html[data-focus-mode='keyboard'] .iv2-pencere-kapat:focus-visible {
     padding: var(--space-4);
   }
 }
+
+/* Ad listeleri cümle içinde virgülle değil, madde listesiyle yazılır (yalın Türkçe kuralı, 11 Kasım 2026). */
+.iv2-hucre-liste {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}
+
+.iv2-hucre-liste li + li {
+  margin-top: var(--space-1);
+}
+
+.iv2-disarida {
+  margin-top: var(--space-3);
+}
+
+.iv2-disarida .bullets {
+  margin-top: var(--space-2);
+}

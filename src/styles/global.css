@@ -7326,9 +7326,13 @@ html[data-bant-gizli] .so2-duzen {
   color: var(--text-secondary);
 }
 
-.dg-guclu-taraf strong {
+.dg-guclu-taraf dt {
   color: var(--text-primary);
   font-weight: var(--weight-semibold);
+}
+
+.dg-guclu-taraf dd {
+  margin: 0;
 }
 
 .dg-ortak {

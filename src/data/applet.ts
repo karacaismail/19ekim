@@ -40,7 +40,7 @@ export type SeviyeSeti = 'kademeli' | 'gitlab' | 'codacy' | 'ilk';
 
 export const SEVIYE_SETLERI: Record<SeviyeSeti, { ad: string; dayanak: string; seviyeler: Seviye[] }> = {
   kademeli: {
-    ad: 'Kademeli P1–P6 · M1–M4',
+    ad: 'Kademeli P1–P6 ve M1–M4',
     dayanak: 'Radford ve WTW, uzman (P) ve yönetici (M) için iki paralel hat kullanır. Seviyeler arası adım yaklaşık %20–25’tir (GitLab ve 37signals aralığı).',
     seviyeler: [
       { kod: 'P1', ad: 'Giriş (junior)', hat: 'IC', carpan: 0.8 },
@@ -57,7 +57,7 @@ export const SEVIYE_SETLERI: Record<SeviyeSeti, { ad: string; dayanak: string; s
   },
   gitlab: {
     ad: 'GitLab seviye faktörü',
-    dayanak: 'GitLab el kitabındaki seviye faktörleri: junior 0,8 · intermediate 1,0 · senior 1,2 · staff 1,4 · manager 1,4.',
+    dayanak: 'GitLab el kitabındaki seviye faktörleri: junior 0,8×, intermediate 1,0×, senior 1,2×, staff 1,4×, manager 1,4×.',
     seviyeler: [
       { kod: 'P1', ad: 'Junior', hat: 'IC', carpan: 0.8 },
       { kod: 'P2', ad: 'Intermediate', hat: 'IC', carpan: 1 },
@@ -68,7 +68,7 @@ export const SEVIYE_SETLERI: Record<SeviyeSeti, { ad: string; dayanak: string; s
   },
   codacy: {
     ad: 'Codacy kıdem çarpanı',
-    dayanak: 'Codacy’nin herkese açık ücret hesaplayıcısındaki kıdem çarpanları: junior 0,7 · intermediate 1,0 · senior 1,3 · lead 1,6 · director 1,9.',
+    dayanak: 'Codacy’nin herkese açık ücret hesaplayıcısındaki kıdem çarpanları: junior 0,7×, intermediate 1,0×, senior 1,3×, lead 1,6×, director 1,9×.',
     seviyeler: [
       { kod: 'P1', ad: 'Junior', hat: 'IC', carpan: 0.7 },
       { kod: 'P2', ad: 'Intermediate', hat: 'IC', carpan: 1 },
@@ -147,10 +147,10 @@ export const VARSAYILAN_MESLEKLER: Meslek[] = [
 
 /** Buffer yaşam maliyeti bantları (1,00 / 0,90 / 0,85 / 0,75); GitLab global alt sınırı 0,70. */
 export const VARSAYILAN_LOKASYONLAR: Secenek[] = [
-  { id: 'a', ad: 'A · Referans pazar', carpan: 1 },
-  { id: 'b', ad: 'B · Orta-üst maliyet', carpan: 0.9 },
-  { id: 'c', ad: 'C · Ortalama maliyet', carpan: 0.85 },
-  { id: 'd', ad: 'D · Düşük maliyet', carpan: 0.75 },
+  { id: 'a', ad: 'A: Referans pazar', carpan: 1 },
+  { id: 'b', ad: 'B: Orta-üst maliyet', carpan: 0.9 },
+  { id: 'c', ad: 'C: Ortalama maliyet', carpan: 0.85 },
+  { id: 'd', ad: 'D: Düşük maliyet', carpan: 0.75 },
 ];
 
 /** GitLab “contract factor”: serbest çalışan kendi vergi, sigorta ve izin maliyetini taşır (örnek değer). */
@@ -161,9 +161,9 @@ export const VARSAYILAN_SOZLESMELER: Secenek[] = [
 
 /** Band içi kademe (L1–L3): öğrenen, yetkin, bir üst seviyeye hazır. */
 export const BAND_KADEMELERI: { id: string; ad: string; carpan: number }[] = [
-  { id: 'L1', ad: 'L1 · Öğrenen', carpan: 0.9 },
-  { id: 'L2', ad: 'L2 · Yetkin', carpan: 1 },
-  { id: 'L3', ad: 'L3 · Üst seviyeye hazır', carpan: 1.1 },
+  { id: 'L1', ad: 'L1: Öğrenen', carpan: 0.9 },
+  { id: 'L2', ad: 'L2: Yetkin', carpan: 1 },
+  { id: 'L3', ad: 'L3: Üst seviyeye hazır', carpan: 1.1 },
 ];
 
 /* ---------- Ortak yardımcılar ---------- */
@@ -347,7 +347,7 @@ export function tabanZinciri(g: ZincirGirdi) {
   const adimlar: [string, string, number][] = [
     ['Baz birim', 'Başlangıç', 1],
     ['Meslek katsayısı', g.meslek.ad, g.meslek.katsayi],
-    ['Seviye çarpanı', `${g.seviye.kod} · ${g.seviye.ad}`, g.seviye.carpan],
+    ['Seviye çarpanı', `${g.seviye.kod}: ${g.seviye.ad}`, g.seviye.carpan],
     ['Uzmanlık çarpanı', g.uzmanlik?.ad ?? 'Yok', g.uzmanlik?.carpan ?? 1],
     ['Lokasyon faktörü', lokNot, lok],
     ['Sözleşme faktörü', g.sozlesme.ad, g.sozlesme.carpan],
@@ -423,7 +423,7 @@ export function bolge(compa: number): Bolge {
 /** Compa-ratio sütun sınırları: < 0,85 | 0,85–0,95 | 0,95–1,05 | 1,05–1,15 | ≥ 1,15 */
 export const COMPA_SINIRLARI = [0.85, 0.95, 1.05, 1.15];
 export const COMPA_ETIKETLERI = ['< 0,85', '0,85–0,95', '0,95–1,05', '1,05–1,15', '≥ 1,15'];
-export const PERF_ADLARI = ['1 · Karşılamıyor', '2 · Kısmen karşılıyor', '3 · Karşılıyor', '4 · Beklentinin üstünde', '5 · Olağanüstü'];
+export const PERF_ADLARI = ['1: Karşılamıyor', '2: Kısmen karşılıyor', '3: Karşılıyor', '4: Beklentinin üstünde', '5: Olağanüstü'];
 
 /** Satır: performans puanı 1…5, sütun: compa-ratio bandı; değer: zam yüzdesi. Ravio örneği gibi en yüksek %14. */
 export const VARSAYILAN_MERIT: number[][] = [
@@ -1064,7 +1064,7 @@ export function yapiDenetimi(g: { meslekler: Meslek[]; seviyeler: Seviye[]; kade
     },
     {
       ad: 'Uzman hattı yönetici hattına yetişiyor',
-      deger: enUstUzman && hedefYonetici ? `${enUstUzman.kod} ${kat(enUstUzman.carpan)} · ${hedefYonetici.kod} ${kat(hedefYonetici.carpan)}` : 'Yönetici hattı yok',
+      deger: enUstUzman && hedefYonetici ? `${enUstUzman.kod} ${kat(enUstUzman.carpan)}, ${hedefYonetici.kod} ${kat(hedefYonetici.carpan)}` : 'Yönetici hattı yok',
       durum: enUstUzman && hedefYonetici && enUstUzman.carpan >= hedefYonetici.carpan - 1e-9 ? 'gecti' : 'uyari',
       aciklama: 'En üst uzman seviyesi, en az ikinci yönetici seviyesi kadar ücret almalı. İyi bir uzman daha çok kazanmak için yönetici olmak zorunda kalmamalı.',
       dayanak: 'Radford ve WTW’nin paralel uzman (P) ve yönetici (M) hatları. Google ve Meta’daki staff ve principal seviyeleri.',

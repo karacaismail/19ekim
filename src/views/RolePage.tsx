@@ -87,12 +87,12 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Dönem 1 (${formatDate(p1.from)} – ${formatDate(p1.to)}): hafta içi ${role.hours.weekday}, Cumartesi ${role.hours.saturday}. Haftalık süre ${role.hours.weeklyNet}. Dönem 2 (${formatDate(p2.from)} tarihinden itibaren): ${role.hours.fromFeb}. Dönem 2 düzeni, yıllık fazla çalışma tavanı nedeniyle uygulanır.`}
+      desc={`Dönem 1, ${formatDate(p1.from)} ile ${formatDate(p1.to)} arasıdır. Bu dönemde hafta içi düzen ${role.hours.weekday} olur. Cumartesi düzeni ${role.hours.saturday} olur. Haftalık süre ${role.hours.weeklyNet}. Dönem 2, ${formatDate(p2.from)} tarihinde başlar. Dönem 2 düzeni şudur: ${role.hours.fromFeb}. Dönem 2 düzeni, yıllık fazla çalışma tavanı nedeniyle uygulanır.`}
     >
       <Chart
         id="zaman-payi"
         title="Hafta içi zaman payı"
-        note={`En büyük üç blok: ${top.map((t) => `${t.name} ${hours(t.value)}`).join(', ')}`}
+        note={top.map((t, i) => `${['En büyük', 'İkinci', 'Üçüncü'][i]} blok ${t.name} (${hours(t.value)}).`).join(' ')}
         summary={`Hafta içi çalışma süresinin dağılımı: ${share.map((s) => `${s.name} ${hours(s.value)}`).join(', ')}.`}
         spec={{ kind: 'pay', role: role.slug, items: share }}
         size={share.length > 9 ? 'xxl' : share.length > 7 ? 'xl' : 'lg'}
@@ -151,7 +151,7 @@ function DigitalSections({ role }: { role: Role }) {
         <Chart
           id="entegrasyon"
           title="Entegrasyon × tamamlanma tarihi"
-          summary={integrations.map((i) => `${i.name}: ${shortDate(i.date)}`).join('; ')}
+          summary={integrations.map((i) => `${i.name}: ${shortDate(i.date)}`).join('. ')}
           spec={{ kind: 'deadlines', start: integrationDates[0], end: addDays(integrationDates[integrationDates.length - 1], 4), items: integrations.map((i) => ({ name: i.name, date: i.date, role: role.slug })) }}
           size="lg"
           wide
@@ -178,7 +178,7 @@ function DigitalSections({ role }: { role: Role }) {
         <Chart
           id="hat"
           title="Kaynaktan ölçüme hat"
-          summary={pipeline.map((p, i) => `${i + 1}. ${p.step} (${STEP_MODE_LABELS[p.mode]}): ${p.measure}`).join('; ')}
+          summary={pipeline.map((p, i) => `${i + 1}. ${p.step} (${STEP_MODE_LABELS[p.mode]}): ${p.measure}`).join('. ')}
           spec={{
             kind: 'chain',
             steps: pipeline.map((p, i) => ({ name: `${i + 1}. ${p.step}`, sub: STEP_MODE_LABELS[p.mode], role: p.mode === 'otomatik' ? role.slug : 'yonetici' })),
@@ -249,7 +249,7 @@ function DigitalSections({ role }: { role: Role }) {
         <Chart
           id="icerik-karmasi"
           title="Haftalık içerik karması (Ocak)"
-          summary={contentPlan.map((p) => `${p.pillar}: haftada ${p.perWeek}`).join('; ')}
+          summary={contentPlan.map((p) => `${p.pillar}: haftada ${p.perWeek}`).join('. ')}
           spec={{ kind: 'mix', unit: '/ hafta', items: contentPlan.map((p) => ({ name: p.pillar, value: p.perWeek, role: p.source })) }}
           size="lg"
         />
@@ -265,7 +265,7 @@ function DigitalSections({ role }: { role: Role }) {
               render: (r) => (
                 <>
                   {r.what}
-                  <span className="cell-sub">Örnek: {r.example}</span>
+                  <span className="cell-sub">Örneğin {r.example}</span>
                 </>
               ),
             },
@@ -298,11 +298,11 @@ function DigitalSections({ role }: { role: Role }) {
             start: planStart,
             end: planEnd,
             rows: digitalPlan.map((p, i) => ({
-              name: `${STREAM_LABELS[p.stream]} · ${digitalPlan.slice(0, i + 1).filter((r) => r.stream === p.stream).length}`,
+              name: `${STREAM_LABELS[p.stream]} ${digitalPlan.slice(0, i + 1).filter((r) => r.stream === p.stream).length}`,
               from: p.from,
               to: p.to,
               role: role.slug,
-              text: `${p.action} · Hedef: ${p.target}`,
+              text: `${p.action}. Hedef: ${p.target}`,
               milestone: p.milestone,
             })),
             marks,

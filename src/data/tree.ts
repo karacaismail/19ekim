@@ -20,7 +20,7 @@ export interface OrgNode {
 export function makeOrg(p: Params, _roles: Role[]): OrgNode {
   const node = (slug: RoleKey, name: string, count: number, date: string, extra: Partial<OrgNode> = {}): OrgNode => ({
     name,
-    sub: `${count} kişi · ${shortDate(date)}`,
+    sub: `${count} kişi, ${shortDate(date)}`,
     role: slug,
     href: `/roller/${slug}/`,
     ...extra,
@@ -30,26 +30,26 @@ export function makeOrg(p: Params, _roles: Role[]): OrgNode {
     sub: 'Strateji ve operasyon',
     role: 'yonetici',
     children: [
-      node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi · ${shortDate(p.startDate)} (onay bekliyor)` }),
-      { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi · Scrum`, role: 'yazilim' },
-      node('dijital-pazarlama', 'Ağaç 1 · Dijital pazarlama', p.dijitalCount, p.startDate),
-      node('pazarlamaci', 'Ağaç 2 · Masa başı (CRM)', p.masaCount, p.startDate),
+      node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi, ${shortDate(p.startDate)} (onay bekliyor)` }),
+      { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi, Scrum`, role: 'yazilim' },
+      node('dijital-pazarlama', 'Ağaç 1: Dijital pazarlama', p.dijitalCount, p.startDate),
+      node('pazarlamaci', 'Ağaç 2: Masa başı (CRM)', p.masaCount, p.startDate),
       {
-        name: 'Ağaç 3 · Saha satış',
-        sub: 'Kayıt · abonelik · ağ',
+        name: 'Ağaç 3: Saha satış',
+        sub: 'Kayıt, abonelik ve ağ',
         role: 'saha-uzmani',
         href: '/roller/saha-uzmani/',
         children: [
           node('saha-uzmani', 'Saha ekibi', p.sahaCount + p.sahaDecCount, p.startDate, {
-            sub: `${p.sahaCount + p.sahaDecCount} kişi · ${p.sahaCount} + ${p.sahaDecCount} (${shortDate(p.decStartDate)})`,
+            sub: `${p.sahaCount + p.sahaDecCount} kişi: ${p.sahaCount} + ${p.sahaDecCount} (${shortDate(p.decStartDate)})`,
           }),
           node('ekip-lideri', 'Ekip lideri', 1, p.decStartDate, {
-            children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2 · 90. günde ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
+            children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2, 90. günde ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
           }),
         ],
       },
-      node('organizator', 'Ağaç 4 · Organizatör', p.organizatorCount, p.decStartDate),
-      node('segika', 'Segika · Masa başı (CRM)', p.segikaCount, p.startDate),
+      node('organizator', 'Ağaç 4: Organizatör', p.organizatorCount, p.decStartDate),
+      node('segika', 'Segika: Masa başı (CRM)', p.segikaCount, p.startDate),
     ],
   };
 }
@@ -70,14 +70,14 @@ export interface Stop {
 /** Doğrusal sunum sırası (önceki / sonraki). Menü `NAV_GROUPS`, kırıntı içerik kaydı: üçü ayrı tanımlanır (F15). */
 export const SEQUENCE: Stop[] = [
   { path: '/', label: 'Organizasyon şeması' },
-  { path: '/roller/dijital-pazarlama/', label: 'Ağaç 1 · Dijital pazarlama', tam: 'Dijital pazarlama uzmanı' },
-  { path: '/roller/pazarlamaci/', label: 'Ağaç 2 · Masa başı pazarlama', tam: 'Masa başı pazarlama (CRM)' },
-  { path: '/roller/saha-uzmani/', label: 'Ağaç 3 · Saha ekibi', tam: 'Saha pazarlama ekibi' },
-  { path: '/roller/ekip-lideri/', label: 'Ağaç 3 · Ekip lideri', tam: 'Satış-pazarlama ekip lideri' },
-  { path: '/buyume-modeli/', label: 'Ağaç 3 · Çok katmanlı pazarlama ağı', tam: 'Çok katmanlı pazarlama ağı (MLM)' },
-  { path: '/roller/organizator/', label: 'Ağaç 4 · Organizatör', tam: 'Organizatör' },
-  { path: '/roller/segika/', label: 'Segika · Masa başı (CRM)', tam: 'Segika masa başı pazarlama (CRM)' },
-  { path: '/roller/asistan/', label: 'Kurmay · Asistan', tam: 'Yönetici asistanı' },
+  { path: '/roller/dijital-pazarlama/', label: 'Ağaç 1: Dijital pazarlama', tam: 'Dijital pazarlama uzmanı' },
+  { path: '/roller/pazarlamaci/', label: 'Ağaç 2: Masa başı pazarlama', tam: 'Masa başı pazarlama (CRM)' },
+  { path: '/roller/saha-uzmani/', label: 'Ağaç 3: Saha ekibi', tam: 'Saha pazarlama ekibi' },
+  { path: '/roller/ekip-lideri/', label: 'Ağaç 3: Ekip lideri', tam: 'Satış-pazarlama ekip lideri' },
+  { path: '/buyume-modeli/', label: 'Ağaç 3: Çok katmanlı pazarlama ağı', tam: 'Çok katmanlı pazarlama ağı (MLM)' },
+  { path: '/roller/organizator/', label: 'Ağaç 4: Organizatör', tam: 'Organizatör' },
+  { path: '/roller/segika/', label: 'Segika: Masa başı (CRM)', tam: 'Segika masa başı pazarlama (CRM)' },
+  { path: '/roller/asistan/', label: 'Kurmay: Asistan', tam: 'Yönetici asistanı' },
   { path: '/istihdam/', label: 'İstihdam takvimi' },
   { path: '/hedefler/', label: '90 gün hedefleri' },
   // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.

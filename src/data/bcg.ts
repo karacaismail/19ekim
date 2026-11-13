@@ -37,7 +37,7 @@ export const QUADRANTS: Quadrant[] = [
     name: 'Soru işareti',
     english: 'Question mark',
     rule: 'Hızlı pazar, düşük pay',
-    short: 'Seç: yatırım yap ya da bırak',
+    short: 'Yatırım yap ya da bırak',
     growth: 'Hızlı',
     share: 'Düşük (henüz küçüğüz)',
     cash: 'Çok harcar, az kazanır',
@@ -81,7 +81,7 @@ export const FLOWS: { from: QuadrantKey; to: QuadrantKey; text: string }[] = [
 export const PURPOSES = [
   '“Hangi ürüne para koyalım, hangisinden nakit toplayalım, hangisinden çıkalım?” sorusunu tek resimde yanıtlar.',
   'Bütün ürünleri aynı iki ölçüyle karşılaştırır. Böylece tartışmayı “hissiyat”tan sayılara taşır.',
-  'Portföyün, yani ürünlerin bütününün dengesini gösterir: geleceği besleyen ürünler var mı, bugünü finanse eden ürünler var mı?',
+  'Portföyün, yani ürünlerin bütününün dengesini gösterir. Geleceği besleyen ürünler var mı? Bugünü finanse eden ürünler var mı?',
 ];
 
 export const AXES = [

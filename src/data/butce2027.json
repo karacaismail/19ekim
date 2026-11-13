@@ -22,7 +22,7 @@
    "ad": "Kişi başına ofis alanı",
    "deger": 10,
    "birim": "m²/kişi",
-   "dayanak": "Fransız AFNOR NF X35-102 önerisine göre tek kişilik ofiste 10 m², paylaşımlı ofiste 11 m², çağrı merkezi gibi gürültülü alanlarda 15 m² önerilir. Bu öneri bağlayıcı değildir ve Türkiye için resmi bir oran bulunamamıştır.",
+   "dayanak": "Fransız AFNOR NF X35-102 önerisi kişi başı alan verir. Tek kişilik ofiste 10 m², paylaşımlı ofiste 11 m² önerilir. Çağrı merkezi gibi gürültülü alanlarda 15 m² önerilir. Bu öneri bağlayıcı değildir ve Türkiye için resmi bir oran bulunamamıştır.",
    "kaynak": "https://deskeo.com/en/blog/advice/what-is-the-minimum-surface-area-required-for-a-workstation"
   },
   {
@@ -37,12 +37,12 @@
   {
    "id": "laptop-ofis",
    "tur": "capex",
-   "ad": "Ofis çalışanı için iş dizüstü bilgisayarı (Lenovo ThinkPad E14 Gen 7, Ultra 5 225U, 16 GB, 512 GB, Windows 11 Pro)",
+   "ad": "Ofis çalışanı için iş dizüstü bilgisayarı. Lenovo ThinkPad E14 Gen 7, Ultra 5 225U, 16 GB, 512 GB, Windows 11 Pro",
    "birim": "adet",
    "fiyat2026": 75199.06,
    "fiyat2027": 97555.74,
    "kdv": "dahil",
-   "dayanak": "Akakçe fiyat karşılaştırma sitesinde bu model 5 satıcıda listelenir ve en düşük fiyatı 75.199 TL'dir. İşletim sistemi olmayan (FreeDOS) eşdeğer model 63.920 TL'den bulunur, kurumsal lisans zaten varsa bu seçenek kullanılabilir.",
+   "dayanak": "Akakçe fiyat karşılaştırma sitesinde bu model 5 satıcıda listelenir ve en düşük fiyatı 75.199 TL'dir. İşletim sistemi olmayan (FreeDOS) eşdeğer model 63.920 TL'den bulunur. Kurumsal lisans zaten varsa bu seçenek kullanılabilir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, ThinkPad E14 Gen 7 21SX007DTX",
@@ -65,7 +65,7 @@
    "fiyat2026": 89999,
    "fiyat2027": 116755.7,
    "kdv": "dahil",
-   "dayanak": "Apple Türkiye mağazasında bu yapılandırmanın liste fiyatı 89.999 TL'dir ve sayfa yüzde 20 KDV'nin dahil olduğunu belirtir. Akakçe'de aynı modelin en düşük satıcı fiyatı 81.779 TL'dir.",
+   "dayanak": "Apple Türkiye mağazasında bu yapılandırmanın liste fiyatı 89.999 TL'dir. Sayfa, fiyata yüzde 20 KDV'nin dahil olduğunu belirtir. Akakçe'de aynı modelin en düşük satıcı fiyatı 81.779 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Apple Türkiye, MacBook Air satın al",
@@ -106,7 +106,7 @@
    "fiyat2026": 4147.49,
    "fiyat2027": 5380.54,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de Jabra Evolve2 30 USB çağrı merkezi kulaklığı 9 satıcıda listelenir ve en düşük fiyatı 4.147 TL'dir. Daha ucuz seçenek olarak Logitech H390 USB kulaklık 48 satıcıda 1.978 TL'den bulunur.",
+   "dayanak": "Akakçe'de Jabra Evolve2 30 USB çağrı merkezi kulaklığı 9 satıcıda listelenir. En düşük fiyatı 4.147 TL'dir. Daha ucuz seçenek olarak Logitech H390 USB kulaklık 48 satıcıda 1.978 TL'den bulunur.",
    "kaynaklar": [
     {
      "ad": "Akakçe, Jabra Evolve2 30 USB",
@@ -142,12 +142,12 @@
   {
    "id": "telefon-android-orta",
    "tur": "capex",
-   "ad": "Saha ve çağrı ekibi için orta seviye Android telefon (Samsung Galaxy A37, 128 GB, 6 GB)",
+   "ad": "Saha ve çağrı ekibi için orta seviye Android telefon. Samsung Galaxy A37, 128 GB, 6 GB",
    "birim": "adet",
    "fiyat2026": 20099,
    "fiyat2027": 26074.43,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de Galaxy A37 128 GB 6 GB modeli 16 satıcıda listelenir ve en düşük fiyatı 20.099 TL'dir. 8 GB bellekli sürüm yaklaşık 21.800 TL'dir.",
+   "dayanak": "Akakçe'de Galaxy A37 128 GB 6 GB modeli 16 satıcıda listelenir. En düşük fiyatı 20.099 TL'dir. 8 GB bellekli sürüm yaklaşık 21.800 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, Samsung Galaxy A37 128 GB 6 GB",
@@ -229,7 +229,7 @@
    "fiyat2026": 4000,
    "fiyat2027": 5189.2,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir. Armut'ta Bağcılar'da 100 m² ofis tadilatı için 240.000 TL (yaklaşık 2.400 TL/m²) bütçeli bir talep vardır, Cushman and Wakefield ise İstanbul'da orta seviye tam dekorasyonu 2025 için 1.550 Euro/m² olarak verir, bu nedenle temel işler için 4.000 TL/m² ara bir varsayım olarak seçilmiştir.",
+   "dayanak": "Bu rakam bir tahmindir. Armut'ta Bağcılar'da 100 m² ofis tadilatı için bir talep vardır. Talebin bütçesi 240.000 TL, yani yaklaşık 2.400 TL/m²'dir. Cushman and Wakefield, İstanbul'da orta seviye tam dekorasyonu 2025 için 1.550 Euro/m² verir. Bu nedenle temel işler için 4.000 TL/m² ara varsayım olarak seçilmiştir.",
    "kaynaklar": [
     {
      "ad": "Armut, İstanbul ofis tadilat fiyatları",
@@ -270,7 +270,7 @@
    "fiyat2026": 43608.22,
    "fiyat2027": 56572.94,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de JBL PartyBox Encore 2 mikrofonlu sürüm yalnız 1 satıcıda 43.608 TL'dir, bu nedenle fiyat zayıf bir göstergedir. Daha ucuz bir kurulum için çiftli UHF kablosuz el mikrofonu seti 4.805 TL'den bulunur.",
+   "dayanak": "Akakçe'de JBL PartyBox Encore 2 mikrofonlu sürüm yalnız 1 satıcıda 43.608 TL'dir. Bu nedenle fiyat zayıf bir göstergedir. Daha ucuz bir kurulum için çiftli UHF kablosuz el mikrofonu seti 4.805 TL'den bulunur.",
    "kaynaklar": [
     {
      "ad": "Akakçe, JBL PartyBox Encore 2",
@@ -293,7 +293,7 @@
    "fiyat2026": 55199.5,
    "fiyat2027": 71610.31,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de minderli katlanır metal sandalye 4 satıcıda tanesi 1.104 TL'den listelenir ve 50 adet için toplam hesaplanmıştır. İstiflenebilir konferans sandalyesi tercih edilirse tanesi yaklaşık 3.467 TL olur.",
+   "dayanak": "Akakçe'de minderli katlanır metal sandalye 4 satıcıda tanesi 1.104 TL'den listelenir. Toplam 50 adet için hesaplanmıştır. İstiflenebilir konferans sandalyesi tercih edilirse tanesi yaklaşık 3.467 TL olur.",
    "kaynaklar": [
     {
      "ad": "Akakçe, Retodesign katlanır metal sandalye",
@@ -347,7 +347,7 @@
    "fiyat2026": 7439,
    "fiyat2027": 9650.61,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de DJI Osmo Mobile 8 takip setli sürümü 56 satıcıda listelenir ve en düşük fiyatı 7.439 TL'dir.",
+   "dayanak": "Akakçe'de DJI Osmo Mobile 8 takip setli sürümü 56 satıcıda listelenir. En düşük fiyatı 7.439 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, DJI Osmo Mobile 8",
@@ -365,7 +365,7 @@
    "fiyat2026": 8771.62,
    "fiyat2027": 11379.42,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de 2'li 120 W LED softbox çekim ışığı seti 8.772 TL'dir ve yalnız 1 satıcı vardır. Tek bir Godox LDX50Bi LED panel 9.718 TL'dir.",
+   "dayanak": "Akakçe'de 2'li 120 W LED softbox çekim ışığı seti 8.772 TL'dir. Bu setin yalnız 1 satıcısı vardır. Tek bir Godox LDX50Bi LED panel 9.718 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, GDX Pro TLB-500 2'li ışık seti",
@@ -388,7 +388,7 @@
    "fiyat2026": 9179.15,
    "fiyat2027": 11908.11,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de DJI Mic Mini 2S 2 kişilik set 83 satıcıda listelenir ve en düşük fiyatı 9.179 TL'dir. Rode Wireless GO Gen 3 2'li set 12.506 TL'dir.",
+   "dayanak": "Akakçe'de DJI Mic Mini 2S 2 kişilik set 83 satıcıda listelenir. En düşük fiyatı 9.179 TL'dir. Rode Wireless GO Gen 3 2'li set 12.506 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, DJI Mic Mini 2S 2 kişilik",
@@ -406,7 +406,7 @@
    "fiyat2026": 15800,
    "fiyat2027": 20497.34,
    "kdv": "hariç",
-   "dayanak": "Toplam, ilk sınıf 2.820 TL, ikinci sınıf 2.820 TL, üçüncü sınıf 3.150 TL ve tescil ücreti 7.010 TL toplanarak 15.800 TL bulunmuştur. Üçüncü sınıf ücreti ikincil kaynaktan alınmıştır ve resmi cetvelden ayrıca doğrulanmalıdır.",
+   "dayanak": "Toplam 15.800 TL'dir. İlk sınıf 2.820 TL, ikinci sınıf 2.820 TL, üçüncü sınıf 3.150 TL'dir. Tescil ücreti 7.010 TL'dir. Üçüncü sınıf ücreti ikincil kaynaktan alınmıştır ve resmi cetvelden ayrıca doğrulanmalıdır.",
    "kaynaklar": [
     {
      "ad": "eleman.net, Patent ücretleri 2026",
@@ -452,7 +452,7 @@
    "fiyat2026": 15407.23,
    "fiyat2027": 19987.8,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de EAP673 35 satıcıda listelenir ve en düşük fiyatı 15.407 TL'dir. Açık ofiste kabaca her 20 ile 30 kişi için bir erişim noktası planlanır, bu oran bir varsayımdır.",
+   "dayanak": "Akakçe'de EAP673 35 satıcıda listelenir ve en düşük fiyatı 15.407 TL'dir. Açık ofiste kabaca her 20 ile 30 kişi için bir erişim noktası planlanır. Bu oran bir varsayımdır.",
    "kaynaklar": [
     {
      "ad": "Akakçe, TP-Link Omada EAP673",
@@ -488,7 +488,7 @@
    "fiyat2026": 3628,
    "fiyat2027": 4706.6,
    "kdv": "dahil",
-   "dayanak": "İBB'nin yüzde 10 zammı ile Mavi Kart tam aylık abonman 20 Temmuz 2026'dan itibaren 3.298 TL'den 3.628 TL'ye çıkmıştır. İstanbul'da toplu taşımaya genelde yılda bir ile iki kez zam yapılır, bu nedenle 2027 tutarı varsayımdan yüksek çıkabilir.",
+   "dayanak": "İBB yüzde 10 zam yaptı. Mavi Kart tam aylık abonman 20 Temmuz 2026'dan itibaren 3.298 TL'den 3.628 TL'ye çıktı. İstanbul'da toplu taşımaya genelde yılda bir ile iki kez zam yapılır. Bu nedenle 2027 tutarı varsayımdan yüksek çıkabilir.",
    "kaynaklar": [
     {
      "ad": "Habertürk, tam ve öğrenci akbil ücretleri",
@@ -506,7 +506,7 @@
    "fiyat2026": 470,
    "fiyat2027": 609.73,
    "kdv": "bilinmiyor",
-   "dayanak": "Türk Telekom kurumsal tarifeler sayfasında 12 ay taahhütlü 20 GB paket aylık 470 TL, 40 GB ve 3000 dakikalık paket 640 TL'dir. Sayfa, telsiz kullanım ücreti ve yeni hatta alınan ruhsatname ile özel iletişim vergisinin bu ücrete dahil olmadığını yazar.",
+   "dayanak": "Türk Telekom kurumsal tarifeleri 12 ay taahhütlüdür. 20 GB paket aylık 470 TL'dir. 40 GB ve 3000 dakikalık paket 640 TL'dir. Sayfa, bazı vergi ve ücretlerin fiyata dahil olmadığını yazar. Bunlar telsiz kullanım ücreti, yeni hatta alınan ruhsatname ve özel iletişim vergisidir.",
    "kaynaklar": [
     {
      "ad": "Türk Telekom Kurumsal, mobil kurumsal tarifeler",
@@ -524,7 +524,7 @@
    "fiyat2026": 735.72,
    "fiyat2027": 954.45,
    "kdv": "hariç",
-   "dayanak": "Turkcell kurumsal sayfasında yıllık taahhüt ve aylık ödeme ile kullanıcı başına aylık 14,70 ABD dolarıdır, aylık abonelikte 16,80 dolardır ve fiyatlar 1 Temmuz 2026'da güncellenmiştir. TL karşılığı 5 Kasım 2026 TCMB kuru 50,0489 ile hesaplanmıştır ve fatura her ay kura göre değişir.",
+   "dayanak": "Turkcell kurumsal sayfası yıllık taahhütlü ve aylık ödemeli fiyat verir. Bu fiyat kullanıcı başına aylık 14,70 ABD dolarıdır. Aylık abonelikte fiyat 16,80 dolardır. Fiyatlar 1 Temmuz 2026'da güncellenmiştir. TL karşılığı 5 Kasım 2026 TCMB kuruyla (50,0489) hesaplanmıştır. Fatura her ay kura göre değişir.",
    "kaynaklar": [
     {
      "ad": "Turkcell Kurumsal, Office 365 fiyatları",
@@ -547,7 +547,7 @@
    "fiyat2026": 30000,
    "fiyat2027": 38919,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir, çünkü otellerin yarım gün toplantı fiyatları internette yayımlanmaz. Mahmutbey'de Centro WestSide ve Clarion Hotel gibi birden çok toplantı salonu olan oteller vardır ve gerçek fiyat için yazılı teklif alınmalıdır.",
+   "dayanak": "Bu rakam bir tahmindir, çünkü otellerin yarım gün toplantı fiyatları internette yayımlanmaz. Mahmutbey'de birden çok toplantı salonu olan oteller vardır. Centro WestSide ve Clarion Hotel bunlara örnektir. Gerçek fiyat için yazılı teklif alınmalıdır.",
    "kaynaklar": [
     {
      "ad": "Cvent, Centro WestSide toplantı alanları",
@@ -570,7 +570,7 @@
    "fiyat2026": 24000,
    "fiyat2027": 31135.2,
    "kdv": "hariç",
-   "dayanak": "RB Organizasyon'un İstanbul kampanya sayfasında 50 kişiye kadar standart coffee break paketi 24.000 TL artı KDV'den başlar, bu 50 kişide kişi başı 480 TL eder. 30 kişiye kadar mini paket 17.000 TL artı KDV'dir.",
+   "dayanak": "RB Organizasyon'un İstanbul kampanya sayfasında 50 kişilik standart coffee break paketi vardır. Paket 24.000 TL artı KDV'den başlar. Bu tutar 50 kişide kişi başı 480 TL eder. 30 kişiye kadar mini paket 17.000 TL artı KDV'dir.",
    "kaynaklar": [
     {
      "ad": "RB Organizasyon, coffee break catering kampanyaları",
@@ -588,7 +588,7 @@
    "fiyat2026": 482,
    "fiyat2027": 625.3,
    "kdv": "bilinmiyor",
-   "dayanak": "Emlakjet'te Ekim 2026'da Bağcılar Mahmutbey'deki Ağaoğlu My Office 212 ilanlarının ortanca kirası m² başına aylık yaklaşık 482 TL'dir. Aynı listede İSTOÇ sitesindeki 1.000 m² hazır ofis aylık 300.000 TL ile m² başına 300 TL'dir, ilanların bir kısmı KDV'li olduğunu belirtir.",
+   "dayanak": "Emlakjet'te Ekim 2026 ilanlarına göre Ağaoğlu My Office 212 (Bağcılar Mahmutbey) ortanca kirası belli oldu. Kira m² başına aylık yaklaşık 482 TL'dir. Aynı listede İSTOÇ sitesinde 1.000 m² hazır ofis vardır. Bu ofisin kirası aylık 300.000 TL, yani m² başına 300 TL'dir. İlanların bir kısmı fiyatın KDV'li olduğunu belirtir.",
    "kaynaklar": [
     {
      "ad": "Emlakjet, İstanbul Bağcılar kiralık ofis ilanları",
@@ -606,7 +606,7 @@
    "fiyat2026": 23222,
    "fiyat2027": 30125.9,
    "kdv": "dahil",
-   "dayanak": "Sigortam.net'in 1 Nisan ile 30 Haziran 2026 arasında satılan tek kişilik poliçelerin ortanca fiyatına göre İstanbul'da 25 ile 34 yaş için kadınlarda 24.442 TL, erkeklerde 22.002 TL'dir ve tutar bu ikisinin ortalamasıdır. Sigorta primlerinde KDV uygulanmaz, gösterilen tutar ödenecek toplam primdir ve grup poliçeleri genelde daha ucuzdur.",
+   "dayanak": "Kaynak, Sigortam.net'te tek kişilik poliçelerin ortanca fiyatıdır. Veri 1 Nisan ile 30 Haziran 2026 arasındaki satışları kapsar. İstanbul'da 25 ile 34 yaş için fiyat kadınlarda 24.442 TL'dir. Erkeklerde fiyat 22.002 TL'dir. Tutar bu ikisinin ortalamasıdır. Sigorta primlerinde KDV uygulanmaz. Gösterilen tutar ödenecek toplam primdir. Grup poliçeleri genelde daha ucuzdur.",
    "kaynaklar": [
     {
      "ad": "Sigortam.net, tamamlayıcı sağlık sigortası medyan fiyatları",
@@ -624,7 +624,7 @@
    "fiyat2026": 46000,
    "fiyat2027": 59675.8,
    "kdv": "bilinmiyor",
-   "dayanak": "Garanti BBVA İş Yeri Koruma Paketi'nde Standart Paket Ekstra yıllık 46.000 TL brüt primdir, yangın ve hırsızlık limiti 1.900.000 TL, işveren mali mesuliyet limiti 222.000 TL'dir. Aynı sayfada en küçük paket 12.500 TL, Plus paket 20.000 TL'dir ve sayfa tarih vermez.",
+   "dayanak": "Garanti BBVA İş Yeri Koruma Paketi'nde Standart Paket Ekstra yıllık 46.000 TL brüt primdir. Yangın ve hırsızlık limiti 1.900.000 TL'dir. İşveren mali mesuliyet limiti 222.000 TL'dir. Aynı sayfada en küçük paket 12.500 TL, Plus paket 20.000 TL'dir. Sayfa tarih vermez.",
    "kaynaklar": [
     {
      "ad": "Garanti BBVA, İş Yeri Koruma Paketi",
@@ -642,7 +642,7 @@
    "fiyat2026": 4099,
    "fiyat2027": 5317.63,
    "kdv": "hariç",
-   "dayanak": "Kariyer.net işveren sayfasında ilk kez müşteri olacak firmalar için Garantili Tek İlan 4.099 TL, Avantajlı İlan 2.099 TL'dir ve sayfa ilan fiyatlarına KDV'nin dahil olmadığını yazar. Mevcut müşteriler ve toplu paketler için fiyat farklı olabilir.",
+   "dayanak": "Kariyer.net işveren sayfası ilk kez müşteri olacak firmalara fiyat verir. Garantili Tek İlan 4.099 TL, Avantajlı İlan 2.099 TL'dir. Sayfa, ilan fiyatlarına KDV'nin dahil olmadığını yazar. Mevcut müşteriler ve toplu paketler için fiyat farklı olabilir.",
    "kaynaklar": [
     {
      "ad": "Kariyer.net, iş ilanı ver",
@@ -660,7 +660,7 @@
    "fiyat2026": 10000,
    "fiyat2027": 12973,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir, çünkü Türkiye'de şirketlerin çalışan başına eğitim harcamasını veren güncel bir kaynak bulunamamıştır. Tutar, kişi başına bir çevrim içi eğitim aboneliği ve bir kısa kurs karşılayacak düzeyde varsayılmıştır.",
+   "dayanak": "Bu rakam bir tahmindir. Türkiye'de çalışan başına eğitim harcamasını veren güncel bir kaynak bulunamamıştır. Tutar, kişi başına bir çevrim içi eğitim aboneliği ve bir kısa kurs karşılayacak düzeyde varsayılmıştır.",
    "kaynaklar": [],
    "tahmin": true
   }

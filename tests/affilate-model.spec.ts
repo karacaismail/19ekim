@@ -574,7 +574,7 @@ test.describe('Affilate kurgu — hazır senaryolar ve JSON', () => {
     k.ortaklar.cozum.donemler[1].oranBp = 1000;
     expect(hazirEslesen(k)).toBeNull();
     const d = degisiklikler(k, baslangicKurgu());
-    expect(d).toEqual([{ alan: 'Çözüm ortağı · 2. dönem oranı', once: '%15', simdi: '%10' }]);
+    expect(d).toEqual([{ alan: 'Çözüm ortağı, 2. dönem oranı', once: '%15', simdi: '%10' }]);
     expect(degisiklikler(baslangicKurgu(), baslangicKurgu())).toEqual([]);
   });
 });

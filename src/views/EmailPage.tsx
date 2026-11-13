@@ -149,7 +149,7 @@ function EmailContent() {
 
   return (
     <>
-      <PageHeader title="Görüşme özeti" purpose="Konuyu ve iletiyi ayrı ayrı kopyalayıp Apple Mail’de yeni iletiye yapıştırın." />
+      <PageHeader title="Görüşme özeti" purpose="Konuyu ve iletiyi Apple Mail’de yeni iletiye ayrı ayrı yapıştırın." />
       <div className="email">
         <div className="email-compose">
           <section className="email-step" aria-labelledby="email-konu">

@@ -122,7 +122,7 @@ export const ICERIK: IcerikKaydi[] = [
   rol('saha-uzmani', 'Saha pazarlama ekibi', 'Saha ekibi ne teslim eder ve kaydı CRM’e nasıl aktarır?', 'Rol profili planlanan sorumlulukları anlatır. Temsilci ağı modeli ayrı bir sayfada anlatılır.'),
   rol('ekip-lideri', 'Satış-pazarlama ekip lideri', 'Ekip lideri hangi kararları kendisi verir, hangilerini bir üst role iletir?', 'Rol profili planlanan sorumlulukları anlatır. Ağ modeli ayrı bir sayfada anlatılır.'),
   rol('organizator', 'Organizatör', 'Organizatör hangi etkinlik sonuçlarından sorumludur ve katılım ile aktivasyon nasıl ayrılır?', 'Rol profili planlanan sorumlulukları anlatır. Toplantı programı Eylem planında ortak bir etkinlik olarak yer alır.'),
-  rol('segika', 'Segika masa başı pazarlama (CRM)', 'Segika satış ve CRM rolü neyi üstlenir? Demo, ilk değer ve destek devri nasıl işler?', 'Rol profili planlanan sorumlulukları anlatır. Segika’ya özgü müşteri, demo ve destek devri kuralları henüz netleşmedi. iStoc için tanımlanan olaylar Segika’ya kopyalanmaz.', ['segika']),
+  rol('segika', 'Segika masa başı pazarlama (CRM)', 'Segika satış ve CRM rolü neyi üstlenir? Demo, ilk değer ve destek devri nasıl işler?', 'Rol profili planlanan sorumlulukları anlatır. Segika’ya özgü müşteri, demo ve destek devri kuralları henüz netleşmedi. Bu yüzden iStoc için tanımlanan olaylar Segika’ya kopyalanmaz.', ['segika']),
   rol('asistan', 'Yönetici asistanı', 'Asistan hangi işlerde destek verir, talebi kim iletir ve işin yapıldığı nasıl kanıtlanır?', 'Rol profili planlanan sorumlulukları anlatır ve henüz onay bekler. Şirketin karar listesi Kararlar sayfasındadır.', ['istoc', 'segika']),
   {
     id: 'istihdam',

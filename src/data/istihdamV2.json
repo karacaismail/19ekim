@@ -55,8 +55,8 @@
   },
   "maasArtisi": {
    "oran": "yüzde 29,73",
-   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı ve 50 TL’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar (dijital pazarlama 1,25 kat, asistan 1,5 kat) varsayılan asgari ücretle hesaplandı.",
-   "sinir": "eleman.net verisi iş ilanı ve özgeçmişteki ücret beyanından hesaplanır ve net mi brüt mü olduğunu yazmaz. Bu plan tutarları net kabul eder. Kariyer.net sayfaları erişime kapalı olduğu için arama sonucundaki özetler yalnız kontrol amacıyla kullanıldı. Michael Page, Hays ve Youthall’ın 2026 Türkiye ücret rehberleri bu çalışmada bulunamadı.",
+   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı ve 50 TL’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar varsayılan asgari ücretle hesaplandı. Dijital pazarlama maaşı asgari ücretin 1,25 katı, asistan maaşı 1,5 katıdır.",
+   "sinir": "Ücret verisini eleman.net, iş ilanı ve özgeçmişteki ücret beyanından hesaplar. Veri, tutarın net mi brüt mü olduğunu yazmaz. Bu plan tutarları net kabul eder. Kariyer.net sayfaları erişime kapalı olduğu için arama sonucundaki özetler yalnız kontrol amacıyla kullanıldı. Michael Page, Hays ve Youthall’ın 2026 Türkiye ücret rehberleri bu çalışmada bulunamadı.",
    "kaynak": [
     "eleman-net-2026"
    ]
@@ -2435,7 +2435,7 @@
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "medyan": {
-   "aciklama": "Gelir planının medyan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yöneticiye ya da uzmana kavuşur ve sipariş ile ödeme akışı için ek 2 geliştirici alınır. 2027 ilk çeyreğinde 50 aktif satıcıya ulaşılırsa ve yatırım bu gideri karşılıyorsa bu seçenek seçilir.",
+   "aciklama": "Gelir planının medyan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yönetici ya da uzman alır. Sipariş ve ödeme akışı için 2 ek geliştirici alınır. 2027 ilk çeyreğinde 50 aktif satıcıya ulaşılırsa ve yatırım bu gideri karşılıyorsa bu seçenek seçilir.",
    "dayandigiSenaryo": "Medyan",
    "toplamKisi": 40,
    "toplamKisiAciklama": "Aralık 2027 sonunda bordrodaki kişi sayısıdır. Kurucu ve mevcut 4 kişilik yazılım ekibi dahildir. Yarı zamanlı çalışanlar 1 kişi sayılır.",

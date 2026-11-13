@@ -173,7 +173,7 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
       values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + sahaEk[m.t] + f.ekSabit)),
       kaynak: 'sheets',
       fallback: false,
-      note: `Sabit giderler Google Sheets’ten alınır. Bu veri Giderler sayfasıyla aynıdır: bordrolu personelin teşvik düşüldükten sonraki işveren maliyeti, teknoloji ve ofis kalemleri. 2028 ayları için 2027 ortalaması kullanılır. Sheets’te olmayan kalemler ayrıca eklenir: Meta işe alım reklamı, satıcı kazanım reklam bütçesi (başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay, kural sağlanırsa ölçeklenir) ve ikinci, ek ve büyüme saha personelinin başladıkları aydan itibaren işveren maliyeti (maaş × ${p.costFactor.toLocaleString('tr-TR')}).`,
+      note: `Sabit giderler Google Sheets’ten alınır. Bu veri Giderler sayfasıyla aynıdır. Veri bordrolu personelin işveren maliyetini, teknoloji ve ofis kalemlerini kapsar. Personel maliyetinden teşvik düşülür. 2028 ayları için 2027 ortalaması kullanılır. Sheets’te olmayan üç kalem ayrıca eklenir. Birincisi Meta işe alım reklamıdır. İkincisi satıcı kazanım reklam bütçesidir. Bu bütçe başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay olur ve kural sağlanırsa büyür. Üçüncüsü ikinci, ek ve büyüme saha personelinin işveren maliyetidir. Bu maliyet kişinin başladığı aydan itibaren sayılır ve maaş × ${p.costFactor.toLocaleString('tr-TR')} olur.`,
     };
   }
   const kadro = staffCosts(p, prog, months, inputs);

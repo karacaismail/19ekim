@@ -63,8 +63,8 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
       >
         <Stats
           items={[
-            { label: `Kadro gideri, ${H} ay`, value: lira(st.toplam.gider), note: `${sc.name} · maaşlı roller + reklam bütçesi + temsilci primi` },
-            { label: `Gelire katkı, ${H} ay`, value: lira(st.toplam.katki), note: `${sc.name} · kaynakların toplamı` },
+            { label: `Kadro gideri, ${H} ay`, value: lira(st.toplam.gider), note: `Maaşlı roller, reklam bütçesi ve temsilci primi (${sc.name})` },
+            { label: `Gelire katkı, ${H} ay`, value: lira(st.toplam.katki), note: `Kaynakların toplamı (${sc.name})` },
             { label: 'Net (katkı − gider)', value: lira(st.toplam.net), note: 'Ofis, yazılım ekibi ve yapay zekâ araçları hariç' },
           ]}
         />
@@ -141,7 +141,7 @@ function GoalsContent() {
         <Chart
           id="kopru"
           title="Aylık elde tutma oranına göre 90 günlük ciro"
-          summary={scenarios.map((s) => `${SCENARIO_LABEL(s.r)}: ${lira(s.ciro)}`).join('; ')}
+          summary={scenarios.map((s) => `${SCENARIO_LABEL(s.r)}: ${lira(s.ciro)}`).join('. ')}
           spec={{
             kind: 'kopru',
             scenarios: scenarios.map((s) => pct(s.r)),
@@ -182,11 +182,11 @@ function GoalsContent() {
         />
       </Section>
 
-      <Section id="aylik" index={3} title="Aylık ciro" desc={`Plan senaryosu: aylık elde tutma ${pct(m.planRetention)}.`}>
+      <Section id="aylik" index={3} title="Aylık ciro" desc={`Plan senaryosunda aylık elde tutma ${pct(m.planRetention)} olur.`}>
         <Chart
           id="gelir-ay"
           title="İlk ödemeler, yenilemeler ve kümülatif ciro"
-          summary={`${MONTHS.map((m, i) => `${m}: ${lira(plan.monthly[i] * SUBSCRIPTION_TRY)}`).join('; ')}. Toplam ${lira(plan.total * SUBSCRIPTION_TRY)}.`}
+          summary={`${MONTHS.map((m, i) => `${m}: ${lira(plan.monthly[i] * SUBSCRIPTION_TRY)}`).join('. ')}. Toplam ${lira(plan.total * SUBSCRIPTION_TRY)}.`}
           spec={{
             kind: 'gelir-ay',
             months: MONTHS,
@@ -197,11 +197,11 @@ function GoalsContent() {
         />
       </Section>
 
-      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, kaynaklara göre yeni aktif satıcı ve kayıt sayısını gösterir. Kapasite açığı (45 kayıt, 8 aktif satıcı), ${shortDate(dates.dec)} tarihinden itibaren Aralık takviyesiyle (${labels.sahaDecLabel || "yok"}) kapanır.`}>
+      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, kaynaklara göre yeni aktif satıcı ve kayıt sayısını gösterir. Kapasite açığı 45 kayıt ve 8 aktif satıcıdır. Bu açık ${shortDate(dates.dec)} tarihinden itibaren Aralık takviyesiyle kapanır (${labels.sahaDecLabel || "yok"}).`}>
         <Chart
           id="kaynak-ay"
           title="Yeni aktif satıcı: kaynak × ay"
-          summary={targetPlan.map((t) => `${t.source}: ${t.aktif.join(', ')}`).join('; ')}
+          summary={targetPlan.map((t) => `${t.source}: ${t.aktif.join(', ')}`).join('. ')}
           spec={{ kind: 'kaynak-ay', months: MONTHS, unit: 'Aktif satıcı', series: targetPlan.map((t) => ({ name: t.short, role: t.role, values: t.aktif })) }}
         />
         <DataTable
@@ -239,13 +239,13 @@ function PlanContent() {
   const m = useModel();
   const { managerPlan, roles, dates } = m;
   const actionRows: ActionRow[] = [
-    ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca · ${i + 1}`, ...p })),
-    ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle} · ${i + 1}`, ...p }))),
+    ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca ${i + 1}`, ...p })),
+    ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle} ${i + 1}`, ...p }))),
   ];
 
   const start = actionRows.reduce((min, r) => (r.from < min ? r.from : min), actionRows[0].from);
   const end = actionRows.reduce((max, r) => (r.to > max ? r.to : max), actionRows[0].to);
-  const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action} · Hedef: ${r.target}`, milestone: r.milestone }));
+  const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action}. Hedef: ${r.target}`, milestone: r.milestone }));
   return (
     <>
       <PageHeader title="Eylem planı" purpose="istoc.com genel planını, her satırda tarihli bir eylem ve ölçülebilir bir hedefle gösterir." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
@@ -303,7 +303,7 @@ function AuthorityContent({ ilkNo }: { ilkNo: number }) {
       <Section id="yetki" index={ilkNo} title="Karar yetkisi" desc="Kimin neye karar verdiğini gösterir.">
         <Chart
           id="yetki"
-          title="Yatırımcı → İsmail Karaca → kararlar"
+          title="Yatırımcıdan İsmail Karaca’ya karar yetkisi"
           summary={`Yatırımcı ürün, bütçe ve kayıp tavanına karar verir. İsmail Karaca maliyet, kanıt ve kapasiteyi yönetir. Harcama yetki sınırı içinde İsmail Karaca, sınırı aşarsa yatırımcı karar verir. Kanal olarak yalnız A (iç satış ve saha, seçilen kanal) veya B (dijital müşteri edinme) kullanılır. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} tarihlerinde yapılır. Her kontrolde planı sürdürme, iyileştirme veya durdurma kararı verilir.`}
           spec={{ kind: 'gov', root: govChart(governanceTree) }}
           size="xxl"
@@ -315,14 +315,14 @@ function AuthorityContent({ ilkNo }: { ilkNo: number }) {
         <Chart
           id="kontrol"
           title="Kümülatif aktif satıcı ve ciro"
-          summary={checkpoints.map((c) => `${c.day} (${formatDate(c.date)}): ${c.aktif} aktif satıcı, ${lira(c.ciro)}`).join('; ')}
+          summary={checkpoints.map((c) => `${c.day} (${formatDate(c.date)}): ${c.aktif} aktif satıcı, ${lira(c.ciro)}`).join('. ')}
           spec={{ kind: 'checkpoint', days: checkpoints.map((c) => c.day), aktif: checkpoints.map((c) => c.aktif), ciro: checkpoints.map((c) => c.ciro), target: CIRO_TARGET }}
         />
         <DataTable
           id="kontrol"
           title="Eşik ve karar"
           columns={[
-            { key: 'd', header: 'Kontrol', nowrap: true, rowHeader: true, render: (c: (typeof checkpoints)[number]) => `${c.day} · ${shortDate(c.date)}` },
+            { key: 'd', header: 'Kontrol', nowrap: true, rowHeader: true, render: (c: (typeof checkpoints)[number]) => `${c.day} (${shortDate(c.date)})` },
             { key: 'a', header: 'Aktif satıcı', nowrap: true, render: (c) => `≥ ${c.aktif}` },
             { key: 'k', header: 'Kayıt', nowrap: true, render: (c) => `≥ ${c.kayit}` },
             { key: 'c', header: 'Kümülatif ciro', nowrap: true, render: (c) => `≥ ${lira(c.ciro)}` },
@@ -386,7 +386,7 @@ function PendingContent() {
         <Chart
           id="son-tarih"
           title="Karar × son tarih"
-          summary={sorted.map((d) => `${d.soru}: ${shortDate(d.sonTarih!)}, ${ROLE_LABELS[d.sahip]}`).join('; ')}
+          summary={sorted.map((d) => `${d.soru}: ${shortDate(d.sonTarih!)}, ${ROLE_LABELS[d.sahip]}`).join('. ')}
           spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.soru, date: d.sonTarih!, role: d.sahip })) }}
           size="md"
           wide
@@ -404,7 +404,7 @@ function PendingContent() {
                 <>
                   {d.sonTarih ? shortDate(d.sonTarih) : 'Son tarih yok'}
                   <span className="cell-sub" data-durum={gorunum(d)}>
-                    {gorunum(d) === 'gecikti' ? `${KARAR_DURUM_ADI.gecikti} · ${gecikmeGun(d)} gün` : KARAR_DURUM_ADI[gorunum(d)]}
+                    {gorunum(d) === 'gecikti' ? `${KARAR_DURUM_ADI.gecikti} (${gecikmeGun(d)} gün)` : KARAR_DURUM_ADI[gorunum(d)]}
                   </span>
                 </>
               ),
@@ -468,7 +468,7 @@ function PendingContent() {
               key: 'durum',
               header: 'Durum',
               nowrap: true,
-              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} · ${shortDate(d.yururlukTarihi!)}` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi} · yürürlük ${shortDate(d.yururlukTarihi)}` : `${KARAR_DURUM_ADI.verildi} · uygulama bekliyor`),
+              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} (${shortDate(d.yururlukTarihi!)})` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi}, yürürlük ${shortDate(d.yururlukTarihi)}` : `${KARAR_DURUM_ADI.verildi}, uygulama bekliyor`),
             },
             {
               key: 'ilgili',
@@ -516,7 +516,7 @@ function PendingContent() {
             90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} kadarı saha ekibine aittir ({params.sahaCount} kişi 3 ay, {params.sahaDecCount} kişi {m.decMonths} ay).
           </p>
           <p>
-            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)}: temsilci {lira(params.commission)} + sponsor {lira(params.sponsorShare)} + ekip lideri {lira(params.leadTeamShare)}.
+            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Formül şudur: temsilci {lira(params.commission)} + sponsor {lira(params.sponsorShare)} + ekip lideri {lira(params.leadTeamShare)}.
           </p>
         </Note>
       </Section>
@@ -525,7 +525,7 @@ function PendingContent() {
         <Chart
           id="crm-asamalari"
           title="Adaydan yenilemeye"
-          summary={crmStages.map((c, i) => `${i + 1}. ${c.stage}${c.commission ? ' (prim kriteri)' : ''}`).join('; ')}
+          summary={crmStages.map((c, i) => `${i + 1}. ${c.stage}${c.commission ? ' (prim kriteri)' : ''}`).join('. ')}
           spec={{
             kind: 'chain',
             steps: crmStages.map((c, i) => ({
@@ -623,7 +623,7 @@ function GrowthContent() {
         <Chart
           id="piramit"
           title="Kademe piramidi"
-          summary={levels.map((l) => `${l.level} ${l.name}: ${l.count} kişi`).join('; ')}
+          summary={levels.map((l) => `${l.level} ${l.name}: ${l.count} kişi`).join('. ')}
           spec={{ kind: 'piramit', items: levels.map((l, i) => ({ name: l.name, count: l.count, role: LEVEL_ROLES[i] })) }}
         />
         <DataTable
@@ -642,7 +642,7 @@ function GrowthContent() {
         <Chart
           id="huni"
           title="Başvurudan aktif temsilciye (haftalık)"
-          summary={recruitmentFunnel.map((f) => `${f.stage}: ${new Intl.NumberFormat('tr-TR').format(f.value)}`).join('; ')}
+          summary={recruitmentFunnel.map((f) => `${f.stage}: ${new Intl.NumberFormat('tr-TR').format(f.value)}`).join('. ')}
           spec={{ kind: 'huni', role: 'ekip-lideri', items: recruitmentFunnel.map((f) => ({ name: f.stage, value: f.value })) }}
           size="lg"
         />
@@ -679,7 +679,7 @@ export function ArchivePage({ pathname }: { pathname: string }) {
       <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığını toplantı için değil, kayıt için gösterir." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
       <DataTable<BoardRow>
         id="tahta"
-        title="Tahta notu → karar → sayfa"
+        title="Tahta notundan karara ve sayfaya"
         baslikDuzeyi={2}
         columns={[
           { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },

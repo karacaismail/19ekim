@@ -137,21 +137,29 @@ function KumeTablosu({ kumeId, secili, ac }: { kumeId: string; secili: SecenekId
   const tumu = POZISYONLAR.filter((p) => p.kume === kumeId);
   const satirlar = tumu.filter((p) => p.secenekler[secili].kisi > 0);
   const disarida = tumu.filter((p) => p.secenekler[secili].kisi === 0);
-  const notMetni: ReactNode = (
-    <>
-      {kume.aciklama}
-      {disarida.length ? ` Bu seçenekte yer almayan pozisyonlar: ${disarida.map((p) => p.unvan).join(', ')}.` : null}
-    </>
-  );
+  const notMetni: ReactNode = kume.aciklama;
+  // Ad listesi cümle içinde değil, madde listesi olarak yazılır (yalın Türkçe: uzun virgül zinciri kurulmaz).
+  const disaridaListesi = disarida.length ? (
+    <div className="iv2-disarida">
+      <p className="table-note">Bu seçenekte yer almayan pozisyonlar şunlardır:</p>
+      <ul className="bullets">
+        {disarida.map((p) => (
+          <li key={p.id}>{p.unvan}</li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
   if (!satirlar.length) {
     return (
       <div className="iv2-kume-bos">
         <h3 className="block-title">{kume.ad}</h3>
         <p className="table-note">{notMetni} Bu kümede seçili seçenek için pozisyon yok.</p>
+        {disaridaListesi}
       </div>
     );
   }
   return (
+    <>
     <DataTable<Pozisyon>
       id={`kume-${kumeId}`}
       title={kume.ad}
@@ -201,6 +209,8 @@ function KumeTablosu({ kumeId, secili, ac }: { kumeId: string; secili: SecenekId
       ]}
       rows={satirlar}
     />
+    {disaridaListesi}
+    </>
   );
 }
 
@@ -232,7 +242,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
     <>
       <PageHeader
         title="İstihdam takvimi"
-        purpose="istoc.com için 2027 kadro planını üç seçenekle gösterir: hangi kümede hangi pozisyon, kaç kişi, ne zaman ve hangi maliyetle."
+        purpose="istoc.com 2027 kadro planının kümelerini, pozisyonlarını, kişi sayısını, tarihini ve maliyetini üç seçenekle gösterir."
         meta={[
           { label: 'Hesap tarihi', value: tarih(HESAP_TARIHI) },
           { label: 'Maliyet', value: 'Net maaş × 2' },
@@ -241,7 +251,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
       {surum}
 
       <p className="iv2-uyari">
-        Bu sürüm, mevcut istihdam takvimindeki {eskiSayisi} rolü değiştirmeden korur ve “Eski” etiketiyle gösterir. Üstüne 11 kümede {yeniSayisi} yeni pozisyon ekler. Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, Google Sheets gider tablosundaki gibi {asgari.varsayilanArtis} artış (yıllık TÜFE) varsayar ve net asgari ücreti {tl(asgari.net)} alır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
+        Bu sürüm, mevcut istihdam takvimindeki {eskiSayisi} rolü değiştirmeden korur ve “Eski” etiketiyle gösterir. Üstüne 11 kümede {yeniSayisi} yeni pozisyon ekler. Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
       </p>
 
       <Section
@@ -286,7 +296,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         />
       </Section>
 
-      <Section id="takvim" index={3} title="2027 işe alım takvimi" desc={`${SECENEK_ADI[secili]} seçeneğinde her ay kimin başladığını, ay sonundaki kadroyu ve o ayın kadro ve hizmet giderini gösterir. 2027’den önce başlayanlar Ocak ayının kadrosunda sayılır.`}>
+      <Section id="takvim" index={3} title="2027 işe alım takvimi" desc={`Tablo, ${SECENEK_ADI[secili]} seçeneğinde her ay kimin başladığını gösterir. Tablo ay sonundaki kadroyu ve o ayın kadro ve hizmet giderini de gösterir. 2027’den önce başlayanlar Ocak ayının kadrosunda sayılır.`}>
         <DataTable<(typeof takvim)[number]>
           id="takvim-2027"
           title={`${SECENEK_ADI[secili]} seçeneği, ay ay`}
@@ -297,7 +307,17 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
               key: 'baslayan',
               header: 'Başlayanlar',
               minWidth: '16rem',
-              render: (a) => (a.baslayanlar.length ? a.baslayanlar.map((b) => (b.adet > 1 ? `${b.pozisyon.unvan} (${b.adet})` : b.pozisyon.unvan)).join(', ') : 'Yeni başlayan yok'),
+              text: (a) => (a.baslayanlar.length ? a.baslayanlar.map((b) => (b.adet > 1 ? `${b.pozisyon.unvan} (${b.adet})` : b.pozisyon.unvan)).join(', ') : 'Yeni başlayan yok'),
+              render: (a) =>
+                a.baslayanlar.length ? (
+                  <ul className="iv2-hucre-liste">
+                    {a.baslayanlar.map((b) => (
+                      <li key={b.pozisyon.id}>{b.adet > 1 ? `${b.pozisyon.unvan} (${b.adet})` : b.pozisyon.unvan}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  'Yeni başlayan yok'
+                ),
             },
             { key: 'yeni', header: 'Yeni kişi', nowrap: true, render: (a) => int(a.yeniKisi) },
             { key: 'kadro', header: 'Ay sonu kadro', nowrap: true, render: (a) => `${int(a.kadro)} kişi` },
@@ -351,7 +371,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         <h3 className="block-title">Kaynaklar</h3>
         <ul className="iv2-kaynaklar">
           {KAYNAKLAR.map((k) => (
-            <li key={k.id}>
+            <li key={k.id} data-yalin="kunye">
               {k.url ? (
                 <a className="text-link" href={k.url} rel="noopener noreferrer" target="_blank">
                   {k.ad}

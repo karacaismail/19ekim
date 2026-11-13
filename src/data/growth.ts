@@ -52,7 +52,7 @@ export function makeGrowth(p: Params, prog: Program) {
   ];
 
   const compliance = [
-    `Kazanç yalnız gerçek satıştan doğar. Temsilci satış başına ${tl(p.commission)}, sponsor ise tek seviyede ${tl(p.sponsorShare)} alır. Giriş ücreti, zorunlu alım, kayıt primi veya kişi getirme primi yoktur, çünkü piramit satış 6502 sayılı Kanun’la yasaktır.`,
+    `Kazanç yalnız gerçek satıştan doğar. Temsilci satış başına ${tl(p.commission)}, sponsor ise tek seviyede ${tl(p.sponsorShare)} alır. Giriş ücreti, zorunlu alım, kayıt primi veya kişi getirme primi yoktur. Piramit satış 6502 sayılı Kanun’la yasaktır.`,
     'Temsilci çalışan değildir. Kendi şirketini kurar ve hizmet faturası keser. Temsilciye mesai, çalışma yeri veya talimat verilmez. Verilirse ilişki gizli işçilik (muvazaa) sayılabilir.',
     t('Kazanç planı ve sözleşme, 14 Kasım tarihine kadar hukuk danışmanına ve mali müşavire onaylatılır.'),
     'Meta reklamında ürün ve yapılacak iş açıkça anlatılır. Reklamda gelir vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',

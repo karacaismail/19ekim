@@ -31,7 +31,7 @@ function Kart({ s, ac }: { s: Strateji; ac: (s: Strateji, el: HTMLElement) => vo
           <span className="oy-kart-no">{s.etiket}</span>
           <span className="oy-kart-taraf">{s.taraf}</span>
         </span>
-        {s.asama ? <span className="oy-kart-asama">Ne zaman: {s.asama}</span> : null}
+        {s.asama ? <span className="oy-kart-asama">{s.asama}.</span> : null}
         <span className="oy-kart-ad" id={`oy-ad-${s.id}`}>
           {s.ad}
         </span>
@@ -50,7 +50,7 @@ function YolHaritasi({ s }: { s: Strateji }) {
       <div className="oy-pencere-giris">
         <p className="oy-pencere-kaynak">
           {KAYNAK_ADI[s.kaynak]} önerisi.
-          {s.asama ? ` Ne zaman: ${s.asama}.` : null}
+          {s.asama ? ` ${s.asama}.` : null}
         </p>
         <p className="oy-amac">
           <span className="oy-etiket">Amaç</span>
@@ -127,7 +127,7 @@ function Icerik() {
 
   return (
     <>
-      <PageHeader title="Oyunlaştırma" purpose="istoc.com’da alıcı ile satıcının birbirini beklediği başlangıç sorununu çözen ve platformu sürdürülebilir kılan yalın oyunlaştırma stratejilerini gösterir." />
+      <PageHeader title="Oyunlaştırma" purpose="istoc.com’da alıcıyı ve satıcıyı buluşturan, platformu sürdüren oyunlaştırma stratejilerini gösterir." />
       <div className="oy">
         <p className="oy-uyari">
           Bu sayfada üç ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.

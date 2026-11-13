@@ -105,7 +105,7 @@ function BcgContent() {
     <>
       <PageHeader
         title="BCG matrisi"
-        purpose="Büyüme–pay matrisi bir şirketin ürünlerini iki soruyla dört kutuya ayırır ve her ürün için “yatırım mı, nakit mi, çıkış mı?” kararını kolaylaştırır."
+        purpose="Büyüme–pay matrisi, ürünleri iki soruyla dört kutuya ayırarak yatırım kararını kolaylaştırır."
         meta={[
           { label: 'Kaynak', value: 'Boston Consulting Group, 1970' },
           { label: 'Okuma', value: 'Yaklaşık 10 dakika' },
@@ -135,7 +135,7 @@ function BcgContent() {
         <DataTable
           id="goreli-pay"
           title="Göreli pazar payı nasıl hesaplanır?"
-          note="Formül: bizim pazar payımız ÷ en büyük rakibin pazar payı. Lider bizsek ikinci büyük oyuncuyla karşılaştırırız."
+          note="Göreli pay şöyle hesaplanır: bizim pazar payımız ÷ en büyük rakibin pazar payı. Lider bizsek ikinci büyük oyuncuyla karşılaştırırız."
           columns={[
             { key: 'case', header: 'Durum', minWidth: '15rem', rowHeader: true, render: (r: (typeof SHARE_EXAMPLES)[number]) => r.case },
             { key: 'calc', header: 'Hesap', nowrap: true, render: (r) => r.calc },
@@ -178,7 +178,7 @@ function BcgContent() {
       </Section>
 
       <Section id="adimlar" index={5} title="Adım adım uygulama">
-        <Chart id="adim" title="Sekiz adım" summary={STEPS.map((s) => `${s.name}: ${s.sub}`).join('; ')} spec={{ kind: 'chain', steps: STEPS.map((s) => ({ name: s.name, sub: s.sub, role: 'pazarlamaci' })) }} size="xxl" />
+        <Chart id="adim" title="Sekiz adım" summary={STEPS.map((s) => `${s.name}: ${s.sub}`).join('. ')} spec={{ kind: 'chain', steps: STEPS.map((s) => ({ name: s.name, sub: s.sub, role: 'pazarlamaci' })) }} size="xxl" />
       </Section>
 
       <Section
@@ -205,7 +205,7 @@ function BcgContent() {
           id="ornek-matris"
           title="Örnek matris"
           note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşiklerdir: göreli pay 1×, pazar büyümesi %10. Yatay eksen logaritmik ölçeklidir."
-          summary={rows.map((r) => `${r.name}: büyüme %${r.growth}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('; ')}
+          summary={rows.map((r) => `${r.name}: büyüme %${r.growth}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('. ')}
           spec={{
             kind: 'bcg-num',
             quadrants: quadrantSpec,

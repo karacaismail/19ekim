@@ -22,6 +22,11 @@ export const basamakDurumu = (sg: SegmentSonucu, i: number) => (i < sg.seviye ? 
 
 export function segmentDurumu(sg: SegmentSonucu, tur: Tur) {
   const sonraki = sg.basamaklar[sg.seviye + 1];
-  const birlestir = (l: string[]) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} ve ${l[l.length - 1]}`);
-  return sonraki ? `${sonraki.ad} olmak için ${birlestir(sg.eksikler)} gerekir.` : tur === 'bagimsiz' ? 'Ortak en üst segmenttedir. Rozet her yıl yeniden değerlendirilir.' : 'Çalışan en üst basamaktadır.';
+  if (!sonraki) return tur === 'bagimsiz' ? 'Ortak en üst segmenttedir. Rozet her yıl yeniden değerlendirilir.' : 'Çalışan en üst basamaktadır.';
+  const e = sg.eksikler;
+  if (e.length <= 1) return e.length ? `${sonraki.ad} olmak için ${e[0]} gerekir.` : `${sonraki.ad} için koşullar sağlanıyor.`;
+  // Birden çok koşul tek uzun cümleye dizilmez. Her koşul ayrı cümledir (yalın Türkçe, 11 Kasım 2026).
+  const sira = ['Birincisi', 'İkincisi', 'Üçüncüsü', 'Dördüncüsü', 'Beşincisi'];
+  const ad = (x: string) => x.replace(/(mak|mek)$/u, (m) => `${m}${m === 'mak' ? 'tır' : 'tir'}`);
+  return `${sonraki.ad} olmak için ${e.length} koşul gerekir. ${e.map((x, i) => `${sira[i] ?? `${i + 1}. koşul`} ${ad(x)}.`).join(' ')}`;
 }

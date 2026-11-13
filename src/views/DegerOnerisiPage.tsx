@@ -92,9 +92,10 @@ function Icerik() {
               <div className="dg-guclu-govde">
                 <h3 className="dg-guclu-baslik">{s.baslik}</h3>
                 <Alinti>{s.soz}</Alinti>
-                <p className="dg-guclu-taraf">
-                  <strong>Güçlü tarafı:</strong> {s.gucluTarafi}
-                </p>
+                <dl className="dg-guclu-taraf">
+                  <dt>Güçlü tarafı</dt>
+                  <dd>{s.gucluTarafi}</dd>
+                </dl>
               </div>
             </li>
           ))}

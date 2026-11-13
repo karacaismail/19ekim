@@ -31,7 +31,7 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
   **değişiklik özeti** (`.param-degisiklikler`: alan · grup, varsayılan → yeni, “Alana git” grubu açıp alanı odaklar,
   “Bu alanı geri al”) → **arama** (`role="search"`, “Parametre ara”: etiket, yardım, birim ve grup adında; eşleşen
   gruplar açılır, eşleşmeyenler gizlenir; sonuç sayısı `aria-live`) → **görev grupları** (`PARAM_GROUPS` → Mantine
-  `Accordion`, h2 içinde düğme, `aria-expanded`, panel `region`; başlıkta “n alan · k değişiklik”; hepsi kapalı gelir,
+  `Accordion`, h2 içinde düğme, `aria-expanded`, panel `region`; başlıkta “n alan, k değişiklik”; hepsi kapalı gelir,
   açılışta değiştirilmiş alanı olan gruplar açık; panelde grup açıklaması ve `fieldset`) → Türetilen değerler. Grup
   numarası yok. 320×480’de belge 12.683 px’ten ≈ 2.000 px’e indi, kapalı grupta görünür girdi yok
   (`ui.spec.ts → parametreler: görev grupları…`).
@@ -77,10 +77,10 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
     gizliyse ya da rapor ayı ızgara dışındaysa Toplam ₺ —; açılan panelde Kategori, Tür, Tutar (kaynak para birimi), Bu
     ay, 2027 artışı, Toplam ₺, yıl toplamları, 15 ay (— = o ay gider yok), uygulanabilen personel alanları (— olanlar
     sunulmaz) ve “Faturayı aç” bağlantısı (başlık düğmesinin içinde bağlantı olmaz). Alt satırlar listenin sonunda özet
-    kayıtları (`.opex-kayitlar-ozet`: grup ara toplamları, Toplam · n kalem `data-tone="total"`, Önceki aya göre; kalın
+    kayıtları (`.opex-kayitlar-ozet`: grup ara toplamları, Toplam (n kalem) `data-tone="total"`, Önceki aya göre; kalın
     koyu ayırıcı, gövdeden ayrı zemin). Tepsi (grup, hızlı filtreler, tablo filtreleri, Sütunlar, sayaç, Filtreleri
     temizle) iki kabukta ortak; kayıt kabuğunda ayrıca “Kalem ara” kutusu (Kalem sütunu aramasıyla aynı durum). Süzgeç
-    kalemleri azaltınca durum satırında kapsam notu `.opex-veri-kapsam` “Süzülmüş toplam … (n kalem) · Genel toplam …
+    kalemleri azaltınca durum satırında kapsam notu `.opex-veri-kapsam` “Süzülmüş toplam … (n kalem). Genel toplam …
     (m kalem)” (dönem toplamı, iki kabukta; UX-12); boş sonuçta “Bu filtrelerle kalem yok.” ve Filtreleri temizle
     (UX-13). Açık kayıtlar kalıcı kimlikle saklanır (`kimlik`: id güvenli anahtar); kabuk değişince süzgeç, sıra, arama
     ve açık kayıtlar korunur (UX-02). Sütun filtreleri/aramaları yalnız tablo başlığındadır; dar ekranda sıralama ölçütü
@@ -623,7 +623,7 @@ Notlar `ConfirmButton` 4 sn zamanlayıcısı kalktı; onay etiketi nesne ve kaps
 `{eylem}: {ad} (onayla)`), yanında “Vazgeç”; ilk basış veri değiştirmez; applet çizim hatası (`AppletHata`) gerçek
 nedeni yazar, kayıt bozulması teşhisini kesinleştirmez ve toplu sıfırlamanın kapsamını (bütün applet’ler) açık ve
 onaylı sunar. **Durum mesajı (F15):** senaryo bağlantısı kopyalama hatası durum satırında kalır (başarı 2,5 sn),
-düğmeler yer değiştirmez (V23). **Bekleme (F23):** Giderler yüklenirken “N sn geçti · ilerleme oranı değil”, 20 sn
+düğmeler yer değiştirmez (V23). **Bekleme (F23):** Giderler yüklenirken “N sn geçti. Bu süre ilerleme oranı değildir.”, 20 sn
 sonra sonraki adım (Bağlantı / Şimdi yenile). **Uzun içerik (F12):** not düzenleyici çok satırlı Mantine `Textarea`
 (autosize; Enter satır, Kaydet ya da Ctrl/Cmd+Enter kaydeder, Esc vazgeçer), sil düğmesinin erişilebilir adı notun kısa
 tanımını taşır. Kalan: `GirisEkrani` bekleme nedeni, OPEX eski veri / yeniden bağlanma ekranı (F23) ve `Secim` /
@@ -1026,6 +1026,28 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - İçerik kullanıcı tarafından 2026-11-10’da onaylandı. Test: `npm run build` sonra
   `npx playwright test tests/onboarding.spec.ts --project=chromium --project=webkit`. Firefox kullanıcı kararıyla
   çalıştırılmaz. WebKit’te summary klavye odağı ve pano okuma testleri atlanır (not_run).
+
+### Bütün sayfalarda yalın Türkçe (kullanıcı kararı 2026-11-11)
+
+- Genel yazım politikası onboarding dışındaki bütün sayfalara da uygulandı. Ölçüt, okurken desteğe ihtiyaç duyan kişinin
+  metni ilk okuyuşta anlamasıdır.
+- Test `tests/yalin-turkce.spec.ts` dosyasıdır. Test her kayıtlı sayfayı 1280 px ve 375 px genişlikte açar. Kapalı
+  panelleri, anahtarları ve sekmeleri tek tek açar. Ana içeriği ve alt bilgiyi denetler. Applet’lerin her biri kendi
+  adresinde denetlenir. İstihdam ve satış ortaklığı sayfalarında v2 de denetlenir.
+- Testin kuralları şunlardır: noktalı virgül, uzun çizgi ve orta nokta yok. “Gün 30” ve “1. ile 3. gün” kalıbı yok.
+  Tam cümlede okla fikir bağlanmaz. Açıklama en çok 15, talimat en çok 10 kelimedir. Açıklama “Etiket: açıklama.”
+  biçiminde kurulmaz. Kısa değer alanı (en çok 3 kelime) ve yüklemli giriş (“… şunlardır:”) serbesttir.
+- Başlık ve grafik özeti yalnız işaretler için denetlenir. Grafik özeti bir veri listesidir. Bu yüzden özet maddeleri
+  `join('. ')` ile ayrılır, noktalı virgül kullanılmaz.
+- Kesin istisnalar (kullanıcı kararı 2026-11-11): Arşiv sayfası tahta notlarının aynen kopyasıdır ve değiştirilmez.
+  Boş hücredeki tek `—` işareti veri işaretidir. Bu işareti anlatan açıklama işareti tırnak içinde yazar (“—”).
+  Kaynak künyesi `data-yalin="kunye"` taşır. Google Sheets’ten gelen metin `data-kaynak="sheets"` taşır ve Sheets’te
+  düzeltilir. Örneğin teşvik koşulları Sheets verisidir.
+- Yazım biçimleri: değer ile açıklama orta noktayla bağlanmaz. Kısa değerde parantez kullanılır: “Toplam (15 kalem)”,
+  “Yürürlükte (3 Kasım)”. Ad listesi cümle içinde virgülle uzatılmaz, madde listesi olur. Parametre yardımı önce
+  açıklamayı, sonra “Varsayılan değer: …” alanını yazar. Kayıt alanı “Sorumlu”, “Ne zaman” gibi etiketlerle `dl` olur.
+- Test: `npm run build` sonra `npx playwright test tests/yalin-turkce.spec.ts --project=chromium`. Metin tarayıcıdan
+  bağımsızdır, bu yüzden test yalnız Chromium’da çalışır.
 
 ## Gizlilik ve yayın
 

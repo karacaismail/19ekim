@@ -115,7 +115,7 @@ export function buildEmailHtml(): string {
 /** Düz metin: biçim kabul etmeyen alanlar ve düz metin e-posta için aynı içerik. */
 export function buildEmailText(): string {
   const rows = EMAIL_ROWS.map((row) => {
-    const extra = [row.valueNote, row.labelNote].filter(Boolean).join('; ');
+    const extra = [row.valueNote, row.labelNote].filter(Boolean).join(', ');
     return `${row.label}: ${row.value}${extra ? ` (${extra})` : ''}`;
   });
   return [EMAIL_GREETING, EMAIL_INTRO, rows.join('\n'), ...EMAIL_CLOSING_PARAGRAPHS, EMAIL_SIGN_OFF.join('\n')].join('\n\n');

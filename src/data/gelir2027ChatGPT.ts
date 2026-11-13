@@ -5,9 +5,9 @@
  * evden çalışma ya da ücretli izin politikası). Rakamlar 5 Kasım 2026 hesabıdır, model değişirse güncellenmelidir.
  */
 export const CHATGPT = {
-  ozet: 'ChatGPT aynı girdi paketiyle, bu sayfanın sonuçlarını görmeden bağımsız bir model kurdu ve her kadro için 20.000 olası yıl simüle etti. Çalışma saatinde iki analiz neredeyse aynıdır. Gelirdeki fark üç varsayımdan gelir: temsilci ağının gerçekleşme oranı, destek rollerinin elde tutmaya katkısı ve uyum ekibinin kapasite sınırı.',
+  ozet: 'ChatGPT aynı girdi paketiyle bağımsız bir model kurdu. ChatGPT bu sayfanın sonuçlarını görmedi. Model her kadro için 20.000 olası yıl simüle etti. Çalışma saatinde iki analiz neredeyse aynıdır. Gelirdeki fark üç varsayımdan gelir. Birincisi temsilci ağının gerçekleşme oranıdır. İkincisi destek rollerinin elde tutmaya katkısıdır. Üçüncüsü uyum ekibinin kapasite sınırıdır.',
   satirlar: [
-    { ad: 'İzin sonrası yıllık çalışma', claude: '1.880 saat', chatgpt: '1.880 saat', not: 'Aynı: 249 iş günü × 8 saat, eksi 14 gün izin.' },
+    { ad: 'İzin sonrası yıllık çalışma', claude: '1.880 saat', chatgpt: '1.880 saat', not: 'İki analiz aynıdır: 249 iş günü × 8 saat, eksi 14 gün izin.' },
     { ad: 'Verimli saat (yıl)', claude: '1.345 saat', chatgpt: '1.463 saat', not: 'Claude 40 saatin yüzde 75’ini, ChatGPT yüzde 80’ini verimli sayar.' },
     { ad: 'Hastalık', claude: '6 gün ve ayrıca grip', chatgpt: '5 gün, grip dahil', not: 'İkisi de varsayımdır. Türkiye için güncel resmî veri yok.' },
     { ad: 'Regl politikasının etkisi', claude: 'Gelirde yüzde 1’in altında', chatgpt: 'Gelirde yüzde 1’in altında', not: 'Aynı sonuç. Kadın oranı Claude’da yüzde 50, ChatGPT’de yüzde 40 varsayıldı.' },

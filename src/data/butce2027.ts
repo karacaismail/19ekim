@@ -235,10 +235,10 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   if (e.dis) ekle({ id: 'etkinlik-salon', grup: 'pazarlama', tur: 'opex', ad: 'Dış salon kirası', kural: `Ayda ${e.dis} etkinlik dış salonda, yarım gün. Diğerleri ofiste ya da İSTOÇ'ta.`, fiyatId: 'etkinlik-salon-yarim-gun', aylik: sifir().map(() => e.dis * fiyat('etkinlik-salon-yarim-gun')) });
   const ekipman = sifir();
   ekipman[0] = fiyat('etkinlik-tv-65') + fiyat('etkinlik-ses-sistemi') + fiyat('etkinlik-katlanir-sandalye-50') + 2 * fiyat('roll-up-banner');
-  ekle({ id: 'etkinlik-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Etkinlik ekipmanı', kural: 'Ocak’ta bir kez: 65 inç ekran, ses sistemi ve 2 mikrofon, 50 katlanır sandalye, 2 roll-up.', aylik: ekipman });
+  ekle({ id: 'etkinlik-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Etkinlik ekipmanı', kural: 'Ocak’ta bir kez alınır. 65 inç ekran, ses sistemi ve 2 mikrofon alınır. 50 katlanır sandalye ve 2 roll-up alınır.', aylik: ekipman });
   const video = sifir();
   video[0] = fiyat('video-gimbal') + fiyat('video-isik-seti') + fiyat('video-yaka-mikrofonu') + (s === 'ekonomik' ? 0 : fiyat('video-kamera'));
-  ekle({ id: 'video-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Video çekim ekipmanı', kural: s === 'ekonomik' ? 'Ocak’ta bir kez: telefon gimbalı, ışık seti, yaka mikrofonu. Çekim telefonla yapılır.' : 'Ocak’ta bir kez: aynasız fotoğraf makinesi, telefon gimbalı, ışık seti, yaka mikrofonu.', aylik: video });
+  ekle({ id: 'video-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Video çekim ekipmanı', kural: s === 'ekonomik' ? 'Ocak’ta bir kez alınır: telefon gimbalı, ışık seti ve yaka mikrofonu. Çekim telefonla yapılır.' : 'Ocak’ta bir kez alınır: aynasız fotoğraf makinesi, telefon gimbalı, ışık seti, yaka mikrofonu.', aylik: video });
 
   // 5. Ekipman: yeni kişiye işe alım ayında (2027 öncesi başlayanlar 2026 bütçesindedir).
   const pc = sifir();

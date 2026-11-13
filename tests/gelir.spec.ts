@@ -152,7 +152,7 @@ test.describe('gelir planı', () => {
     await expect(kayit).toContainText('Nakit akışı');
     await expect(kayit).not.toContainText('kaydedilemedi');
     // B2c (MS-02): “aynen / aynı etkin girdiler” yerine kapsamı doğru cümle — hesap seçenekleri aynı, gider kaynağı hariç.
-    await expect(kayit).toContainText(/gider kaynağı hariç/);
+    await expect(kayit).toContainText(/Gider kaynağı seçeneği bunun dışındadır/);
     await expect(page.locator('.kurucu-kapsam')).toContainText(/gider kaynağı seçeneği/i);
     await expect(page.locator('.kurucu-kapsam')).not.toContainText('aynı etkin girdiler');
     await page.evaluate(() => {

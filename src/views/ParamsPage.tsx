@@ -39,7 +39,9 @@ function Field({ def }: { def: ParamDef }) {
   const value = params[def.key];
   const fallback = DEFAULT_PARAMS[def.key];
   const changed = value !== fallback;
-  const description = `${changed ? 'Değiştirildi · ' : ''}Varsayılan: ${format(def, fallback)}${def.help ? ` · ${def.help}` : ''}`;
+  // Yardım cümlesi önce gelir, varsayılan değer sonra (yalın Türkçe: açıklama etiketle başlamaz, orta noktayla bağlanmaz).
+  const yardim = def.help ? (/[.!?)]$/.test(def.help) ? def.help : `${def.help}.`) : '';
+  const description = [changed ? 'Bu değer değiştirildi.' : '', yardim, `Varsayılan değer: ${format(def, fallback)}`].filter(Boolean).join(' ');
   const common = {
     id: alanKimligi(def.key),
     className: 'param-field',
@@ -251,7 +253,7 @@ function Derived() {
     { label: 'Hedef için gereken satıcı-ay', value: int(Math.ceil(m.CIRO_TARGET / m.SUBSCRIPTION_TRY)) },
     { label: 'Gereken aylık elde tutma', value: m.retentionThreshold === null ? 'Abonelik tek başına yetmez' : `≥ ${pct(m.retentionThreshold)}` },
     { label: 'Meta reklam bütçesi (aylık)', value: tl((p.metaWeekly * 52) / 12) },
-    { label: '60. ve 90. gün kontrolleri', value: `${longDate(m.dates.day60)} · ${longDate(m.dates.day90)}` },
+    { label: '60. ve 90. gün kontrolleri', value: `${longDate(m.dates.day60)} ve ${longDate(m.dates.day90)}` },
     { label: 'Dönem 2 mesai düzeni', value: `${longDate(m.dates.period2Start)} itibarıyla` },
   ];
   return (
@@ -322,7 +324,7 @@ function Gruplar({ acik, setAcik, sorgu, setSorgu }: { acik: string[]; setAcik: 
               <Accordion.Control>
                 <span className="pgrup-ad">{g.title}</span>
                 <span className="pgrup-ozet">
-                  {fields.length} alan{degisen ? ` · ${degisen} değişiklik` : ''}
+                  {fields.length} alan{degisen ? `, ${degisen} değişiklik` : ''}
                 </span>
               </Accordion.Control>
               {/* Collapse zamanlama eğrisi hareket tokenından (Panel bunu Collapse’a aktarır; tipinde yok). */}
@@ -387,7 +389,7 @@ function ParamsContent() {
     <DatesProvider settings={{ locale: 'tr', firstDayOfWeek: 1 }}>
       <PageHeader
         title="Parametreler"
-        purpose="Planın tarih, kişi sayısı, ücret, prim, kota, bütçe ve hedef değerlerini buradan değiştirirsiniz ve değişiklik bütün sayfalara hemen yansır."
+        purpose="Burada değiştirdiğiniz tarih, kişi, ücret, bütçe ve hedef değerleri bütün sayfalara hemen yansır."
         meta={[
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı (yerel depolama)' },
           { label: 'Yayın', value: 'Herkes varsayılan değerleri görür' },

@@ -92,7 +92,7 @@ export const channels: Channel[] = [
   { channel: 'TikTok', content: 'Dikey videoların aynısı', frequency: 'Günde 1–2' },
   { channel: 'LinkedIn', content: 'Ürün yenilikleri ve pazar içgörüsü (kurumsal dil)', frequency: 'Haftada 3' },
   { channel: 'Facebook sayfası ve satıcı grupları', content: 'Nasıl yapılır videoları ve eğitim davetleri', frequency: 'Haftada 5' },
-  { channel: 'istoc.com blog', content: 'Tam makale: nasıl yapılır ve pazar içgörüsü', frequency: 'Haftada 3 (Ocak)' },
+  { channel: 'istoc.com blog', content: 'Tam makale (nasıl yapılır ve pazar içgörüsü)', frequency: 'Haftada 3 (Ocak)' },
 ];
 
 /* ---------- 4. İçerik planı: ne üreteceğiz ---------- */
@@ -146,7 +146,7 @@ const BASE_DIGITAL_PLAN: DigitalPlanRow[] = [
   { stream: 'otomasyon', from: '2026-11-02', to: '2026-11-27', action: 'Araçlar kurulur (n8n, Claude, ElevenLabs, CapCut, Canva, Metricool). Hat v1 kaynaktan senaryoya ve üretime kadar yarı otomatik çalışır.', target: 'Paylaşımların %30’u otomatik, araç gideri tavanın içinde' },
   { stream: 'otomasyon', from: '2026-11-30', to: '2026-12-26', action: 'Hat v2: zamanlayıcı eklenir, yorumlar otomatik olarak CRM’e aktarılır.', target: 'Paylaşımların %60’ı otomatik, talep 24 saatte iletilir' },
   { stream: 'otomasyon', from: '2026-12-28', to: '2027-01-30', action: 'Hat v3: çok dilli altyazı ve tam otomatik zamanlama', target: 'Paylaşımların %80’i otomatik', milestone: true },
-  { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar: ürün yenilikleri ve nasıl yapılır videoları', target: 'Günde 1 video' },
+  { stream: 'uretim', from: '2026-11-09', to: '2026-11-28', action: 'İlk yayınlar (ürün yenilikleri ve nasıl yapılır videoları)', target: 'Günde 1 video' },
   { stream: 'uretim', from: '2026-11-30', to: '2026-12-26', action: 'Satıcı hikâyeleri ve eğitim davetleri eklenir', target: 'Günde 2 video, haftada 5 talep' },
   { stream: 'uretim', from: '2026-12-28', to: '2027-01-30', action: 'Altı içerik sütununun tamamı yayında', target: 'Günde 3 video, haftada 10 talep', milestone: true },
   { stream: 'plan', from: '2026-11-02', to: '2026-11-06', action: 'İçerik planı v1: 6 sütun, kanallar ve haftalık takvim', target: 'İsmail Karaca onayı: 6 Kasım', milestone: true },

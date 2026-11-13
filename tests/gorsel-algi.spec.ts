@@ -219,7 +219,7 @@ test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlü
     expect(await nakitTablo.locator('td', { hasText: /^0 ₺$/ }).count()).toBeGreaterThan(0);
     expect(await page.locator('main').innerText()).not.toMatch(/“—” sıfır/);
     await giderlerAc(page);
-    await expect(page.locator('.opex-sembol-efsanesi')).toContainText(/— : o ay bu kalemde gider yok \(0 ₺\)/);
+    await expect(page.locator('.opex-sembol-efsanesi')).toContainText(/“—” işareti, o ay bu kalemde gider olmadığını gösterir \(0 ₺\)/);
     await expect(page.locator('.opex-sembol-efsanesi')).toContainText(/uygulanmıyor/i);
   });
 
@@ -386,8 +386,8 @@ test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay,
     });
     await page.goto('giderler/');
     await hydrated(page);
-    await expect(page.locator('.opex-loader-meta')).toContainText(/sn geçti · ilerleme oranı değil/);
-    await expect(page.getByRole('region', { name: /^Kalemler · / })).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('.opex-loader-meta')).toContainText(/sn geçti\. Bu süre ilerleme oranı değildir/);
+    await expect(page.getByRole('region', { name: /^Kalemler \(/ })).toBeVisible({ timeout: 15_000 });
   });
 });
 

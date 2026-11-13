@@ -104,7 +104,7 @@ export const PLAN_ROLLERI: PlanRolu[] = [
     saat: 158,
     oneriSaat: 126,
     hedef: 'Günde 60 arama ve 3 randevu (İsmail Karaca hedefi).',
-    baslangic: 'Günlük arama sayısı 2. haftada 20, 3. haftada 40, 4. haftada 50, 8. haftada 60 olur. İlk 30 günde günde 1 ya da 2 randevu ölçülür.',
+    baslangic: 'Günlük arama sayısı adım adım artar. 2. haftada 20, 3. haftada 40 olur. 4. haftada 50, 8. haftada 60 olur. İlk 30 günde günde 1 ya da 2 randevu ölçülür.',
     kosul: 'Aktif satıcı uyumu ayrı bir sorumluya geçerse yük 126 saate iner.',
   },
   {
@@ -160,7 +160,7 @@ export const PLAN_ROLLERI: PlanRolu[] = [
     saat: 100,
     hedef: 'Saha ekibiyle aynı hedef.',
     baslangic: 'Koşullar sağlanmadan kendiliğinden işe alınmaz.',
-    kosul: '10 iş günlük veri, ölçülmüş dönüşüm, uygun uyum kuyruğu, rota kapasitesi ve olumlu net katkı gerekir.',
+    kosul: '10 iş günlük veri ve ölçülmüş dönüşüm gerekir. Uyum kuyruğu ve rota kapasitesi uygun olmalıdır. Net katkı olumlu olmalıdır.',
   },
 ];
 
@@ -168,12 +168,12 @@ export const PLAN_ROLLERI: PlanRolu[] = [
 export const YONETICI_YUKU = { saat: 206, iseAlim: 96, yonetim: 110 };
 
 export const ILK_60_GUN: { ne: string; personel: string; yonetici: string }[] = [
-  { ne: 'İşe girişten önce', personel: 'Evrak ve hesap bilgilerini verir.', yonetici: 'Mali müşavir SGK işlemini, asistan erişimleri hazırlar.' },
-  { ne: '1. hafta', personel: 'Ürün, müşteri, KVKK ve araç eğitimi alır. İlk rol oyunlarını yapar.', yonetici: 'Hedefi, yetkiyi ve kırmızı çizgileri yazılı anlatır.' },
-  { ne: '2. hafta', personel: 'Gözetim altında gerçek işe başlar.', yonetici: 'Her gün kısa koçluk yapar, ilk çağrıları ve ziyaretleri izler.' },
-  { ne: '3. ve 4. hafta', personel: 'Hedefin yüzde 50 ile 80’ine çıkar.', yonetici: 'Haftalık birebir görüşmede göstergeleri inceler ve engelleri çözer.' },
-  { ne: '30. gün', personel: 'Kendi verisini sunar.', yonetici: 'Devam, koçluk ya da rol değişikliği kararı verir.' },
-  { ne: '60. gün', personel: 'Tam hedefe yaklaşır.', yonetici: 'Deneme süresi bitmeden son kararı verir.' },
+  { ne: 'İşe girişten önce', personel: 'Personel evrak ve hesap bilgilerini verir.', yonetici: 'Mali müşavir SGK işlemini hazırlar. Asistan erişimleri hazırlar.' },
+  { ne: '1. hafta', personel: 'Personel ürün, müşteri, KVKK ve araç eğitimi alır. Personel ilk rol oyunlarını yapar.', yonetici: 'Yönetici hedefi, yetkiyi ve kırmızı çizgileri yazılı anlatır.' },
+  { ne: '2. hafta', personel: 'Personel gözetim altında gerçek işe başlar.', yonetici: 'Yönetici her gün kısa koçluk yapar. Yönetici ilk çağrıları ve ziyaretleri izler.' },
+  { ne: '3. ve 4. hafta', personel: 'Personel hedefin yüzde 50 ile 80’ine çıkar.', yonetici: 'Yönetici haftalık birebir görüşmede göstergeleri inceler ve engelleri çözer.' },
+  { ne: '30. gün', personel: 'Personel kendi verisini sunar.', yonetici: 'Yönetici devam, koçluk ya da rol değişikliği kararı verir.' },
+  { ne: '60. gün', personel: 'Personel tam hedefe yaklaşır.', yonetici: 'Yönetici deneme süresi bitmeden son kararı verir.' },
 ];
 
 export type Seviye = 'Kritik' | 'Yüksek' | 'Orta';
@@ -200,7 +200,7 @@ export const ACIK_SORULAR = [
   '45 kayıt ve 8 aktif satıcı ekibin toplam hedefi mi, kişi başı hedef mi?',
   'Haftada 5 etkinlikteki 50 kişi etkinlik başına mı, toplam katılım mı?',
   'Öksüzoğlu Plaza’daki salon en çok kaç kişi alıyor ve akşam kullanımına izin var mı?',
-  'Eğitmenlik görevi kimde: organizatör, İsmail Karaca ya da dış uzman?',
+  'Eğitmenlik görevini kim üstlenecek? Organizatör mü, İsmail Karaca mı, dış uzman mı?',
   'Segika’nın mevcut müşteri desteğini bugün kim veriyor?',
   'Güncel istoc.com fiyatı ve ödeme akışı satışa hazır mı?',
   'Dijital pazarlama uzmanının kapsamı yalnız istoc.com mu, Segika da dâhil mi?',

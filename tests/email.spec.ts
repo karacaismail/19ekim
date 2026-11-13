@@ -74,7 +74,7 @@ test.describe('e-posta sayfası', () => {
     expect(report.rows).toBe(EMAIL_ROWS.length);
 
     const text = buildEmailText();
-    expect(text).toContain('Aylık net maaş: 5.000 USD (beş bin dolar; ABD doları olarak ödenir)');
+    expect(text).toContain('Aylık net maaş: 5.000 USD (beş bin dolar, ABD doları olarak ödenir)');
     expect(text).toContain('Başarı primi: 1.000.000 TL');
     expect(text).toContain('Uygulama başlangıcı: 1 Kasım 2026');
     expect(text).toContain('1 Kasım 2026’dan itibaren');

@@ -88,16 +88,16 @@ function Icerik({ pathname }: { pathname: string }) {
     <>
       <PageHeader
         title={kayit.baslik}
-        purpose="Kadronun 2027’de kaç saat ve ne verimle çalışacağını, satışa katkısını, riskleri ve bunların sonucunda abonelik gelirini gösterir."
+        purpose="Kadronun 2027 çalışma saatini, verimini, satış katkısını, risklerini ve abonelik gelirini gösterir."
         meta={[
           { label: 'Dönem', value: 'Ocak ile Aralık 2027' },
           { label: 'Simülasyon', value: `${int(KOSU_SAYISI)} olası yıl` },
         ]}
       />
       <div className="go27-uyari">
-        <p>Gelir, satıcı abonelik ödemesidir ve gelir planıyla aynı kurallarla hesaplanır: aylık ya da yıllık peşin ödeme, aylık yenileme ve kurla büyüyen ₺ fiyat. Kadro, İstihdam takvimi v2’deki seçenektir.</p>
+        <p>Gelir, satıcı abonelik ödemesidir. Gelir, gelir planıyla aynı kurallarla hesaplanır. Bu kurallar aylık ya da yıllık peşin ödeme, aylık yenileme ve kurla büyüyen ₺ fiyattır. Kadro, İstihdam takvimi v2’deki seçenektir.</p>
         <p>
-          Dört öngörü vardır. <strong>Medyan</strong>, risklerin beklenen değeriyle yapılan plan hesabıdır. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong>, {int(KOSU_SAYISI)} olası 2027 yılının simülasyonundan gelir: olası yılların yüzde 10’u kötümserin altında, yarısı ortancanın altında, yüzde 90’ı iyimserin altında kalır.
+          Dört öngörü vardır. <strong>Medyan</strong>, risklerin beklenen değeriyle yapılan plan hesabıdır. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong>, {int(KOSU_SAYISI)} olası 2027 yılının simülasyonundan gelir. Olası yılların yüzde 10’u kötümserin altında kalır. Yarısı ortancanın, yüzde 90’ı iyimserin altında kalır.
         </p>
       </div>
 
@@ -124,7 +124,7 @@ function Icerik({ pathname }: { pathname: string }) {
         <DataTable<(typeof ongoruSatirlari)[number]>
           id="ciro-gelir"
           title="Ciro ve kazanılmış gelir"
-          note="Ciro, yıl içinde tahsil edilen abonelik ödemesidir. Kazanılmış gelir, hizmeti 2027’de verilen kısımdır: yıllık peşin bedel 12 aya yayılır, 2026’da peşin ödeyenlerin 2027’ye düşen payı eklenir."
+          note="Ciro, yıl içinde tahsil edilen abonelik ödemesidir. Kazanılmış gelir, hizmeti 2027’de verilen kısımdır. Yıllık peşin bedel bu hesapta 12 aya yayılır. 2026’da peşin ödeyenlerin 2027’ye düşen payı da eklenir."
           rowKey={(x) => x.ad}
           columns={[
             { key: 'ad', header: 'Öngörü', rowHeader: true, minWidth: '10rem', render: (x) => x.ad },
@@ -190,7 +190,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="regl" index={3} title="Regl politikası karşılaştırması" desc="Kaynak: 32.748 kadınla yapılan bir çalışmada (Schoep, BMJ Open 2019) kadın başı yılda 1,3 gün devamsızlık ve 8,9 gün toplam verim kaybı bulundu. Kaybın çoğu işe gelip düşük verimle çalışmaktan gelir. Politikaların etkisi varsayımdır. Hiçbir politika maaşı etkilemez.">
+      <Section id="regl" index={3} title="Regl politikası karşılaştırması" desc="Bu bölüm bir çalışmaya dayanır (Schoep, BMJ Open 2019). Çalışmaya 32.748 kadın katıldı. Kadın başı yılda 1,3 gün devamsızlık bulundu. Toplam verim kaybı yılda 8,9 gündü. Kaybın çoğu işe gelip düşük verimle çalışmaktan gelir. Politikaların etkisi varsayımdır. Hiçbir politika maaşı etkilemez.">
         <DataTable<ReglPolitikasi>
           id="regl-politika"
           title="Politikaya göre kayıp"
@@ -313,7 +313,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="zaman" index={8} title="Risklerin zaman tüneli" desc="Her ay hangi risklerin etkili olduğu, ortalama bir çalışanın kayıp saati ve satış dönüşümüne mevsim etkisi.">
+      <Section id="zaman" index={8} title="Risklerin zaman tüneli" desc="Bölüm her ay etkili olan riskleri gösterir. Ortalama bir çalışanın kayıp saatini de gösterir. Mevsimin satış dönüşümüne etkisi de görünür.">
         <DataTable<{ ay: string; i: number }>
           id="zaman-tuneli"
           title="2027, ay ay"
@@ -377,14 +377,15 @@ function Icerik({ pathname }: { pathname: string }) {
           rowKey={(k) => k.id}
           columns={[
             { key: 'konu', header: 'Konu', rowHeader: true, minWidth: '12rem', render: (k) => k.konu },
-            { key: 'deger', header: 'Değer', minWidth: '9rem', summary: true, render: (k) => `${k.deger}${k.birim ? ` ${k.birim}` : ''}${k.tahmin ? ' (tahmin)' : ''}` },
+            { key: 'deger', header: 'Değer', minWidth: '9rem', summary: true, // Birim yalnız sayıyla biten değere eklenir (“12 gün”). Sözel değerin sonuna “dönem”, “nitel” gibi birim adı yazılmaz.
+            render: (k) => `${k.deger}${k.birim && /\d$/.test(String(k.deger).trim()) ? ` ${k.birim}` : ''}${k.tahmin ? ' (tahmin)' : ''}` },
             {
               key: 'kaynak',
               header: 'Kaynak',
               minWidth: '10rem',
               render: (k) =>
                 k.kaynaklar[0] ? (
-                  <a className="text-link go27-kaynak" href={k.kaynaklar[0].url} rel="noopener noreferrer" target="_blank">
+                  <a className="text-link go27-kaynak" data-yalin="kunye" href={k.kaynaklar[0].url} rel="noopener noreferrer" target="_blank">
                     {k.kaynaklar[0].ad}
                   </a>
                 ) : (

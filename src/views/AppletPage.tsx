@@ -78,7 +78,7 @@ function useBaz() {
 const KURUSLU = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const meslekVerisi = (ms: Meslek[]): SecimVerisi => ms.map((m) => ({ value: m.id, label: m.ad }));
 const uzmanlikVerisi = (m: Meslek | undefined): SecimVerisi => (m?.uzmanliklar ?? []).map((u) => ({ value: u.id, label: u.ad }));
-const seviyeVerisi = (ss: Seviye[]): SecimVerisi => ss.map((s) => ({ value: s.kod, label: `${s.kod} · ${s.ad}` }));
+const seviyeVerisi = (ss: Seviye[]): SecimVerisi => ss.map((s) => ({ value: s.kod, label: `${s.kod}: ${s.ad}` }));
 const HAT_ADI: Record<Hat, string> = { IC: 'Uzman', M: 'Yönetici' };
 const isaretli = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${pct(Math.abs(v))}`;
 const yeniId = (on: string) => `${on}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`;
@@ -455,11 +455,11 @@ function IsDegerleme() {
   const pozGuncelle = (id: string, patch: Partial<AppletDurum['degerleme']['pozisyonlar'][number]>) => setD({ ...d, pozisyonlar: d.pozisyonlar.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
   type Poz = AppletDurum['degerleme']['pozisyonlar'][number];
   return (
-    <Bolum id="is-degerleme" dayanak="ILO’nun (Uluslararası Çalışma Örgütü) puan-faktör yöntemi, Korn Ferry Hay yöntemi (bilgi, problem çözme, hesap verebilirlik ve %15 adım kuralı), Mercer IPE ve WTW GGS. Bu yöntemlerde kişi değil, pozisyon puanlanır.">
+    <Bolum id="is-degerleme" dayanak="Bu hesap dört yönteme dayanır. Birincisi ILO’nun puan-faktör yöntemidir. ILO, Uluslararası Çalışma Örgütüdür. Diğerleri Korn Ferry Hay yöntemi, Mercer IPE ve WTW GGS’dir. Hay yöntemi bilgi, problem çözme ve hesap verebilirliği puanlar. Hay yöntemi %15 adım kuralını da kullanır. Bu yöntemlerde kişi değil, pozisyon puanlanır.">
       <DataTable
         id="faktor"
         title="Faktörler ve ağırlıklar"
-        note={`Ağırlık toplamı ${int(agirlikToplam)}; hesapta 100’e ölçeklenir.`}
+        note={`Ağırlık toplamı ${int(agirlikToplam)}. Hesap bu toplamı 100’e ölçekler.`}
         rowKey={(f) => f.id}
         columns={[
           { key: 'ad', editor: true, text: (f) => f.ad, header: 'Faktör', minWidth: '13rem', rowHeader: true, render: (f: AppletDurum['degerleme']['faktorler'][number]) => <Metin gizliEtiket label={`${d.faktorler.indexOf(f) + 1}. faktör adı`} value={f.ad} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, ad: v } : x)) })} /> },
@@ -612,7 +612,7 @@ function BandKonumu() {
   const kisiGuncelle = (id: string, patch: Partial<Kisi>) => setB({ ...b, kisiler: b.kisiler.map((k) => (k.id === id ? { ...k, ...patch } : k)) });
   const hedef = (k: Kisi) => min + (max - min) * kbfOrani(b.kriterler, k.puan);
   return (
-    <Bolum id="band-konumu" dayanak="Compa-ratio = ücret ÷ band orta noktası (SHRM). Kişinin band içindeki yeri kritik başarı faktörü puanıyla bulunur: en az + (en çok − en az) × puan.">
+    <Bolum id="band-konumu" dayanak="Compa-ratio = ücret ÷ band orta noktası (SHRM). Kişinin band içindeki yeri kritik başarı faktörü puanıyla bulunur. Formül şudur: en az + (en çok − en az) × puan.">
       <Girdiler>
         <HucreSecimi meslekId={b.meslekId} uzmanlikId={b.uzmanlikId} seviyeKod={b.seviyeKod} onChange={(p) => setB({ ...b, ...p })} />
         <Sayi label="Band yarı genişliği (±)" yuzde ondalik={1} value={b.yariGenislik} min={1} max={60} onChange={(v) => setB({ ...b, yariGenislik: v })} />
@@ -623,7 +623,7 @@ function BandKonumu() {
       <Ozet
         items={[
           { label: 'Band en azı', value: para(min), note: times(min) },
-          { label: 'Orta nokta', value: para(orta), note: `${meslek.ad} · ${sev.kod}` },
+          { label: 'Orta nokta', value: para(orta), note: `${meslek.ad}, ${sev.kod}` },
           { label: 'Band en çoğu', value: para(max), note: times(max) },
         ]}
       />
@@ -676,7 +676,7 @@ function LiyakatMatrisi() {
   const kisiGuncelle = (id: string, patch: Partial<Kisi>) => setMr({ ...mr, kisiler: mr.kisiler.map((k) => (k.id === id ? { ...k, ...patch } : k)) });
   const satirlar = [5, 4, 3, 2, 1];
   return (
-    <Bolum id="liyakat-matrisi" dayanak="Liyakat matrisi (merit matrix), performans puanına ve compa-ratio’ya göre zam yüzdesini verir (Workday ve Ravio örneğinde en çok %14). Bütçe = bordro × liyakat zammı oranı (Mercer 2026 verisinde ABD için %3,2–3,3).">
+    <Bolum id="liyakat-matrisi" dayanak="Liyakat matrisi (merit matrix) zam yüzdesini verir. Yüzde, performans puanına ve compa-ratio’ya göre değişir. Workday ve Ravio örneğinde zam en çok %14’tür. Bütçe = bordro × liyakat zammı oranı (Mercer 2026 verisinde ABD için %3,2–3,3).">
       <DataTable<number>
         id="merit-matris"
         title="Matris (zam yüzdesi)"
@@ -745,7 +745,7 @@ function YillikZam() {
   const artisToplam = s.adimlar.reduce((n, a) => n + a.tutar, 0);
   const g = (patch: Partial<AppletDurum['zam']>) => setZ({ ...z, ...patch });
   return (
-    <Bolum id="yillik-zam" dayanak="Zam bileşenleri ayrı bütçelerden karşılanır: yapı (band) düzeltmesi, genel zam, piyasa düzeltmesi, liyakat zammı ve terfi. Salary.com 2026 verisinde liyakat zammı %3,3, genel zam %1,7, piyasa ve eşitlik düzeltmesi %0,7’dir. Kıdem adımı Buffer’ın 2015 formülünden alınmıştır.">
+    <Bolum id="yillik-zam" dayanak="Zam bileşenleri ayrı bütçelerden karşılanır. Bileşenler yapı (band) düzeltmesi, genel zam, piyasa düzeltmesi, liyakat zammı ve terfidir. Salary.com 2026 verisinde liyakat zammı %3,3, genel zam %1,7, piyasa ve eşitlik düzeltmesi %0,7’dir. Kıdem adımı Buffer’ın 2015 formülünden alınmıştır.">
       <Girdiler baslik="Kişi ve band">
         <Sayi label="Mevcut ücret" birim="× baz" value={z.ucret} min={0.1} step={0.05} onChange={(v) => g({ ucret: v })} />
         <Sayi label="Band orta noktası" birim="× baz" value={z.orta} min={0.1} step={0.05} onChange={(v) => g({ orta: v })} />
@@ -847,7 +847,7 @@ function TerfiKapisi() {
       <DataTable<string>
         id="terfi-kriter"
         ozetYok
-        title={`Değerlendirme ölçütleri: ${hedefSev ? `${hedefSev.kod} · ${hedefSev.ad}` : 'üst seviye'} beklentileri karşılandı mı?`}
+        title={`Değerlendirme: ${hedefSev ? `${hedefSev.kod} (${hedefSev.ad})` : 'üst seviye'} beklentileri karşılandı mı?`}
         rowKey={(r) => r}
         columns={[
           { key: 'kriter', header: 'Kriter', minWidth: '12rem', rowHeader: true, render: (r) => r },
@@ -912,7 +912,7 @@ function KademeAdimlari() {
   const son = satirlar[satirlar.length - 1];
   const g = (patch: Partial<AppletDurum['adim']>) => setA({ ...a, ...patch });
   return (
-    <Bolum id="kademe-adimlari" dayanak="ABD kamu ücret cetveli General Schedule’da her derecede 10 kademe vardır. Bekleme süresi 1. ile 4. kademe arasında 52, 4. ile 7. arasında 104, 7. ile 10. arasında 156 haftadır (toplam 18 yıl). Bir kademe yaklaşık %3’tür. Üstün performansta kişi beklemeden kademe atlar (Quality Step Increase).">
+    <Bolum id="kademe-adimlari" dayanak="ABD kamu ücret cetveli General Schedule’da her derecede 10 kademe vardır. 1. kademeden 4. kademeye kadar her adımda bekleme 52 haftadır. 4. kademeden 7. kademeye kadar bekleme 104 haftadır. 7. kademeden 10. kademeye kadar bekleme 156 haftadır. Toplam bekleme 18 yıldır. Bir kademe yaklaşık %3’tür. Üstün performansta kişi beklemeden kademe atlar (Quality Step Increase).">
       <Girdiler>
         <Sayi label="1. kademe ücreti" birim="× baz" value={a.baslangic} min={0.1} step={0.05} onChange={(v) => g({ baslangic: v })} />
         <Sayi label="Kademe sayısı" value={a.adet} min={2} max={15} step={1} ondalik={0} onChange={(v) => g({ adet: v })} />
@@ -1021,7 +1021,7 @@ function SprintSkoru() {
     render: (r: (typeof seri)[number]) => <Sayi gizliEtiket label={`${r.sprint.ad}: ${ad}`} value={r.sprint[alan]} max={999} step={1} ondalik={0} onChange={(v) => sg(r.sprint.id, { [alan]: v })} />,
   });
   return (
-    <Bolum id="sprint-skoru" dayanak="Story point (iş büyüklüğü puanı) paraya bağlanınca şişer (Kerievsky 2012, Scrum.org, Asana ve DORA uyarıları). Bu yüzden ürün sahibinin kabul ettiği taahhüt, kalite ve takım hedefi ölçülür.">
+    <Bolum id="sprint-skoru" dayanak="Story point (iş büyüklüğü puanı) paraya bağlanınca şişer. Kerievsky 2012, Scrum.org, Asana ve DORA bu konuda uyarır. Bu yüzden ürün sahibinin kabul ettiği taahhüt, kalite ve takım hedefi ölçülür.">
       <Girdiler baslik="Ağırlıklar ve kurallar">
         <Sayi label="Teslim ağırlığı" value={a.wTeslim} ondalik={0} step={5} onChange={(v) => ayar({ wTeslim: v })} />
         <Sayi label="Kalite ağırlığı" value={a.wKalite} ondalik={0} step={5} onChange={(v) => ayar({ wKalite: v })} />
@@ -1029,7 +1029,7 @@ function SprintSkoru() {
         <Sayi label="Kaçan hata ağırlığı" birim="× geri dönen" value={a.hataAgirligi} max={10} step={0.5} ondalik={1} onChange={(v) => ayar({ hataAgirligi: v })} />
         <Sayi label="Sprint hedefi tutmazsa takım puanı" value={a.hedefYoksa} max={100} step={5} ondalik={0} onChange={(v) => ayar({ hedefYoksa: v })} />
         <Sayi label="Teslim puanı tavanı" value={a.teslimTavan} min={100} max={200} step={5} ondalik={0} onChange={(v) => ayar({ teslimTavan: v })} />
-        <Sayi label="Şişme eşiği: SP artışı" yuzde ondalik={0} value={a.sismeEsik} max={200} onChange={(v) => ayar({ sismeEsik: v })} aciklama="SP bu oranın üstünde artar ve kabul artışı ikinci eşiğin altında kalırsa sprint şişme olarak işaretlenir." />
+        <Sayi label="Şişme eşiği: SP artışı" yuzde ondalik={0} value={a.sismeEsik} max={200} onChange={(v) => ayar({ sismeEsik: v })} aciklama="İki koşul birlikte olursa sprint şişme olarak işaretlenir. SP bu oranın üstünde artar. Kabul artışı ikinci eşiğin altında kalır." />
         <Sayi label="Şişme eşiği: kabul artışı" yuzde ondalik={0} value={a.akisEsik} max={200} onChange={(v) => ayar({ akisEsik: v })} />
         <Sayi label="Kayan ortalama penceresi" birim="sprint" value={a.pencere} min={1} max={6} step={1} ondalik={0} onChange={(v) => ayar({ pencere: v })} />
       </Girdiler>
@@ -1053,7 +1053,7 @@ function SprintSkoru() {
           sayiHucre('kacanHata', 'Kaçan hata'),
           { key: 'hedef', editor: true, header: 'Hedef tuttu', nowrap: true, render: (r) => <Onay gizliEtiket label={`${r.sprint.ad}: sprint hedefi tuttu`} checked={r.sprint.hedef} onChange={(v) => sg(r.sprint.id, { hedef: v })} /> },
           sayiHucre('sp', 'SP'),
-          { key: 'skor', header: 'Skor', summary: true, nowrap: true, render: (r) => <>{num(Math.round(r.skor * 10) / 10)}<span className="cell-sub">{int(r.teslim)} · {int(r.kalite)} · {int(r.takim)}</span></> },
+          { key: 'skor', header: 'Skor', summary: true, nowrap: true, render: (r) => <>{num(Math.round(r.skor * 10) / 10)}<span className="cell-sub">Teslim {int(r.teslim)}, kalite {int(r.kalite)}, takım {int(r.takim)}</span></> },
           { key: 'kayan', header: 'Kayan ortalama', nowrap: true, render: (r) => num(Math.round(r.kayan * 10) / 10) },
           { key: 'artis', header: 'SP / kabul artışı', nowrap: true, render: (r) => (r.spArtis === null || r.akisArtis === null ? 'Uygulanmıyor' : `${isaretli(r.spArtis)} / ${isaretli(r.akisArtis)}`) },
           { key: 'sisme', header: 'Şişme', nowrap: true, render: (r) => (r.sisme ? <DurumHapi durum="uyari">İncele</DurumHapi> : 'Yok') },
@@ -1307,7 +1307,7 @@ function YapiDenetimi() {
   const kontroller = yapiDenetimi({ meslekler: ortak.meslekler, seviyeler: ortak.seviyeler, kademe: k, tabanCarpani: ortak.tabanCarpani });
   const say = (d: 'gecti' | 'uyari' | 'kaldi') => kontroller.filter((x) => x.durum === d).length;
   return (
-    <Bolum id="yapi-denetimi" dayanak="Bu denetim katalog, rütbe matrisi ve kademe serisini dünyadaki örneklerin aralıklarıyla karşılaştırır: Mondragon, GitLab, Buffer, 37signals, Mercer, WorldatWork, Radford ve WTW.">
+    <Bolum id="yapi-denetimi" dayanak="Bu denetim katalog, rütbe matrisi ve kademe serisini dünyadaki örneklerin aralıklarıyla karşılaştırır. Örnekler Mondragon, GitLab, Buffer, 37signals, Mercer, WorldatWork, Radford ve WTW’dir.">
       <Ozet
         items={[
           { label: 'Geçti', value: int(say('gecti')) },
@@ -1356,7 +1356,7 @@ function ToplamOdul() {
       </Girdiler>
       <DataTable
         id="odul"
-        title={`${meslek.ad}${uzm ? ` · ${uzm.ad}` : ''}: seviyeye göre toplam ödül (yıllık)`}
+        title={`${meslek.ad}${uzm ? ` (${uzm.ad})` : ''}: seviyeye göre toplam ödül (yıllık)`}
         note="Değişken payı toplam hedef nakdin yüzdesidir: taban ÷ (1 − pay) = toplam hedef nakit."
         rowKey={(r) => r.seviye.kod}
         columns={[
@@ -1447,7 +1447,7 @@ function Secici({ aktif, sec }: { aktif: string; sec: (id: string, odakla?: bool
   const i = IDLER.indexOf(aktif);
   const onceki = APPLETLER[i - 1];
   const sonraki = APPLETLER[i + 1];
-  const veri = MOTOR_SIRASI.map((m) => ({ group: MOTORLAR[m], items: APPLETLER.flatMap((a, j) => (a.motor === m ? [{ value: a.id, label: `${j + 1} · ${a.ad}` }] : [])) }));
+  const veri = MOTOR_SIRASI.map((m) => ({ group: MOTORLAR[m], items: APPLETLER.flatMap((a, j) => (a.motor === m ? [{ value: a.id, label: `${j + 1}. ${a.ad}` }] : [])) }));
   return (
     <div className="applet-secici">
       <Secim label="Applet" value={aktif} data={veri} onChange={(v) => sec(v, false)} />
@@ -1476,7 +1476,7 @@ function Sira({ aktif, sec }: { aktif: string; sec: (id: string) => void }) {
         <a className="pager-link" href={`#${onceki.id}`} rel="prev" onClick={(e) => sayfaIci(e, () => sec(onceki.id))}>
           <span className="pager-dir">← Önceki</span>
           <span className="pager-label">
-            {i} · {onceki.ad}
+            {i}. {onceki.ad}
           </span>
         </a>
       ) : (
@@ -1486,7 +1486,7 @@ function Sira({ aktif, sec }: { aktif: string; sec: (id: string) => void }) {
         <a className="pager-link pager-next" href={`#${sonraki.id}`} rel="next" onClick={(e) => sayfaIci(e, () => sec(sonraki.id))}>
           <span className="pager-dir">Sonraki →</span>
           <span className="pager-label">
-            {i + 2} · {sonraki.ad}
+            {i + 2}. {sonraki.ad}
           </span>
         </a>
       ) : null}
@@ -1597,7 +1597,7 @@ function AppletIcerik() {
     <div className="applet-sayfa">
       <PageHeader
         title="Ücret ve performans applet’leri"
-        purpose="Rütbe (sabit ücret) ve efor (zam, performans, prim) için 17 küçük İK hesap aracı (applet) sunar ve katalog değişince hepsi yeniden hesaplanır."
+        purpose="Sabit ücret (rütbe) ve performans (efor) için 17 küçük İK hesap aracı sunar."
         meta={[
           { label: 'Kapsam', value: 'Modeller meslekten bağımsızdır. Tutarlar baz birimin katıdır ve kişiler kurgusaldır.' },
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı' },

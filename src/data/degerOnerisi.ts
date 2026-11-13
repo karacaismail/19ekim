@@ -66,7 +66,7 @@ export const GUCLU_SOZLER: GucluSoz[] = [
   },
   {
     baslik: 'Büyük kurumsal satın alma taleplerine erişin',
-    soz: 'Otellerin, restoran zincirlerinin, fabrikaların, okulların ve şirketlerin toplu alım ihtiyaçlarına teklif verin.',
+    soz: 'Kurumların toplu alım ihtiyaçlarına teklif verin. Oteller, restoran zincirleri, fabrikalar, okullar ve şirketler bu kurumlardandır.',
     gucluTarafi: 'Esnafı tek başına ulaşamadığı, yüksek hacimli kurumsal müşterilerle buluşturur.',
   },
   {
@@ -76,7 +76,7 @@ export const GUCLU_SOZLER: GucluSoz[] = [
   },
   {
     baslik: 'Herkese açık fiyat, müşteri grubuna özel fiyat',
-    soz: 'Standart fiyatınızı ve adede göre değişen fiyatınızı herkes görsün. Kendi müşterileriniz ve müşteri gruplarınız ise yalnız kendilerine özel fiyatı görsün.',
+    soz: 'Standart fiyatınızı ve adede göre değişen fiyatınızı herkes görsün. Kendi müşterileriniz ve gruplarınız yalnız kendi özel fiyatını görsün.',
     gucluTarafi: 'Alıcı fiyatı görünce karar verir, bu yüzden platform alıcı kaybetmez. Satıcı da bayilerini ve sadık müşterilerini özel fiyatla korur.',
   },
   {
@@ -102,7 +102,7 @@ export const KATEGORILER: Kategori[] = [
         sikinti: 'Karşılıksız çek ve tahsil edilemeyen alacak',
         platform: 'Lisanslı bir ödeme kuruluşuyla güvenli havuz ödeme (escrow) kurmalı. Güvenli ödeme alıcıyı da platforma çeker.',
         ilkGun: 'ortakla',
-        risk: 'Düşük ile orta. Ödeme kuruluşu komisyon alır. ETK Ek 1/2-a, pazar yerinin satış bedelini sipariş alıcıya ulaştıktan sonra 5 iş günü içinde satıcıya ödemesini zaten şart koşuyor.',
+        risk: 'Düşük ile orta. Ödeme kuruluşu komisyon alır. ETK Ek 1/2-a zaten bir ödeme süresi koyuyor. Pazar yeri satış bedelini 5 iş günü içinde satıcıya öder. Süre, sipariş alıcıya ulaştıktan sonra başlar.',
         dayanak: 'Alibaba Trade Assurance, Faire, ETK Ek 1',
       },
       {
@@ -117,7 +117,7 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 3,
-        soz: 'Bugünkü müşterilerinize kestiğiniz vadeli faturayı isterseniz birkaç gün içinde nakde çevirin.',
+        soz: 'Müşterilerinize kestiğiniz vadeli faturayı isterseniz birkaç günde nakde çevirin.',
         persona: ['P1', 'P3', 'P4'],
         sikinti: 'Mevcut alacakların uzun vadesi',
         platform: 'Figopara gibi fatura finansmanı platformlarıyla entegrasyon kurmalı. Platformda alıcı olmasa da bu hizmet işe yarar.',
@@ -223,7 +223,7 @@ export const KATEGORILER: Kategori[] = [
     oneriler: [
       {
         no: 12,
-        soz: 'Yurt dışındaki alıcınıza koliyi gümrük müşaviri tutmadan, kargo şirketi üzerinden mikro ihracatla gönderin. Evrakı biz hazırlıyoruz.',
+        soz: 'Yurt dışındaki alıcınıza koliyi mikro ihracatla, kargo şirketiyle gönderin. Gümrük müşaviri tutmanız gerekmez. Evrakı biz hazırlıyoruz.',
         persona: ['P4', 'P6', 'P2'],
         sikinti: 'Gümrük işlemlerinin karmaşası',
         platform: 'Hızlı kargo şirketleriyle ETGB anlaşması yapmalı. Fatura ve beyan şablonu hazırlamalı.',
@@ -233,13 +233,13 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 13,
-        soz: 'Devletin e-ihracat desteklerinden (reklam, komisyon ve depolama giderinin yüzde 50’si, hedef ülkelerde yüzde 70’e kadar) yararlanmanız için başvuruyu birlikte hazırlayalım.',
+        soz: 'Devletin e-ihracat desteklerine başvuruyu birlikte hazırlayalım. Destek reklam, komisyon ve depolama giderinin yüzde 50’sini karşılar. Hedef ülkelerde destek yüzde 70’e kadar çıkar.',
         persona: ['P4', 'P6'],
         sikinti: 'Pazarlama bütçesinin olmaması',
         platform: 'Destek başvurusunda danışmanlık vermeli. istoc.com da işletmeler arası platformlara verilen e-ihracat tanıtım desteğine başvurabilir. Bu destek yurt dışından alıcı kazanmayı finanse eder.',
         ilkGun: 'kismen',
         risk: 'Düşük. Kesin destek sözü verilmemeli, çünkü onayı Bakanlık verir.',
-        dayanak: '5986 sayılı Karar. 2026 tablosuna göre işletmeler arası platformlar için e-ihracat tanıtım desteğinin yıllık tavanı 19.728.673 TL, hedef ülke sayısı 35.',
+        dayanak: '5986 sayılı Karar. 2026 tablosu işletmeler arası platformlar için tavan koyar. E-ihracat tanıtım desteğinin yıllık tavanı 19.728.673 TL’dir. Hedef ülke sayısı 35’tir.',
       },
       {
         no: 14,
@@ -253,7 +253,7 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 15,
-        soz: 'Eskiden dükkânınıza gelen yabancı tüccar artık telefondan sipariş versin, parayı güvenle ödesin, malı kolide alsın.',
+        soz: 'Dükkânınıza gelen yabancı tüccar artık telefondan sipariş versin. Parayı güvenle ödesin, malı kolide alsın.',
         persona: ['P6'],
         sikinti: 'Bavul ticaretinin düşmesi',
         platform: 'Mevcut yabancı müşteriler için uzaktan sipariş, döviz tahsilatı ve toplu kargo sunmalı. Yabancı alıcılar böylece ağa katılır.',
@@ -358,7 +358,7 @@ export const KATEGORILER: Kategori[] = [
     oneriler: [
       {
         no: 24,
-        soz: 'Elinizde kalan parti malı, fiyat açık piyasada düşmeden yalnız doğrulanmış toptan alıcılara kapalı vitrinde satın.',
+        soz: 'Parti malınızı kapalı vitrinde yalnız doğrulanmış toptan alıcılara satın. Böylece açık piyasada fiyat düşmez.',
         persona: ['P7', 'P3'],
         sikinti: 'Ölü stok ve fiyatın bozulması korkusu',
         platform: 'Kapalı bir “parti mal” vitrini açmalı. Bu vitrin fırsat arayan alıcıları çeker.',
@@ -541,7 +541,7 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 40,
-        soz: 'Bugün Türkiye’nin dört bir yanına satın, yarın sınırların ötesine hazır olun.',
+        soz: 'Bugün Türkiye’nin dört bir yanına satın. Yarın sınırların ötesine hazır olun.',
         persona: ['Hepsi'],
         sikinti: 'Büyümenin yönünü görememek',
         platform: 'Yurt içi büyümeyi ihracat hedefine bağlayan bir yol haritası paylaşmalı.',
@@ -563,12 +563,12 @@ export const ILK_30_SANIYE: { ad: string; oneriler: number[]; soz: string }[] = 
 ];
 
 export const BASLANGIC_NOTU =
-  'P1 ve P5 esnafına para ve sıfır risk sözleriyle, P2 esnafına araç ve ihracata hazırlık sözleriyle, P4 ve P6 esnafına ihracata hazırlık sözleriyle başlayın. İhracat altyapısı hazır olmadığı için ihracat hizmeti vaat edilmez. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
+  'P1 ve P5 esnafına para ve sıfır risk sözleriyle başlayın. P2 esnafına araç ve ihracata hazırlık sözleriyle başlayın. P4 ve P6 esnafına ihracata hazırlık sözleriyle başlayın. İhracat altyapısı hazır olmadığı için ihracat hizmeti vaat edilmez. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
 
 export const ESKI_SOZLER: { eski: string; yeni: string; neden: string; not?: string }[] = [
   {
     eski: '%100 satış garantisi',
-    yeni: 'Platformdan gelen siparişin parası garanti. İlk 90 günde size yeni alıcıdan sipariş gelmezse hiçbir ücret ödemezsiniz.',
+    yeni: 'Platformdan gelen siparişin parası garanti. Yeni alıcıdan ilk 90 günde sipariş gelmezse hiçbir ücret ödemezsiniz.',
     neden: 'Bu söz tutulabilir. Risk, ödeme ortağında ve platformun kendi gelirinde kalır. Faire’in “her sipariş garantili satış” anlayışına denk düşer.',
   },
   {

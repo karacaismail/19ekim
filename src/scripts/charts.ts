@@ -639,7 +639,7 @@ function build(spec: ChartSpec, width: number): Opt {
           trigger: 'item',
           formatter: (p: { data?: { name?: string; value?: number[]; revenue?: number; quadrant?: string } }) =>
             p.data?.value
-              ? `${p.data.name}<br/>Pazar büyümesi %${number.format(p.data.value[1])} · Göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺ · ${name(p.data.quadrant ?? '')}`
+              ? `${p.data.name}<br/>Pazar büyümesi %${number.format(p.data.value[1])}, göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺, ${name(p.data.quadrant ?? '')}`
               : '',
         },
         xAxis: {
@@ -648,7 +648,7 @@ function build(spec: ChartSpec, width: number): Opt {
           min: xMin,
           max: xMax,
           inverse: true,
-          name: 'Göreli pazar payı  (← yüksek · düşük →)',
+          name: 'Göreli pazar payı (solda yüksek, sağda düşük)',
           nameLocation: 'middle',
           nameGap: FONT_SIZE * 2.4,
           nameTextStyle: axisName,
@@ -972,7 +972,7 @@ function build(spec: ChartSpec, width: number): Opt {
 
     case 'opex-bar': {
       const narrow = width < OPEX_NARROW;
-      const label = (v: number) => (spec.share ? `${lira(v)} · ${ratio(v / spec.share)}` : lira(v));
+      const label = (v: number) => (spec.share ? `${lira(v)} (${ratio(v / spec.share)})` : lira(v));
       const labels = spec.items.map((i) => label(i.value));
       return {
         ...base(),
@@ -1102,7 +1102,7 @@ function build(spec: ChartSpec, width: number): Opt {
           trigger: 'item',
           formatter: (p: { seriesIndex: number }) => {
             const x = spec.parts[p.seriesIndex];
-            return x ? `${esc(x.name)}<br/>${lira(x.value)} · ${ratio(toplam ? x.value / toplam : 0)}` : '';
+            return x ? `${esc(x.name)}<br/>${lira(x.value)} (${ratio(toplam ? x.value / toplam : 0)})` : '';
           },
         },
         grid: { left: 4, right: 4, top: bilesimUst(adlar, width), bottom: 4, containLabel: false },
@@ -1175,7 +1175,7 @@ function finalize(spec: ChartSpec, options: Opt) {
       value: i + 1,
       count: item.count,
       itemStyle: { color: t.fill, borderColor: t.line, borderWidth: 2 },
-      label: { color: t.text, formatter: `${item.name} · ${item.count}` },
+      label: { color: t.text, formatter: `${item.name}: ${item.count}` },
     };
   });
   series.label = { show: true, position: 'inside', fontSize: FONT_SIZE, fontWeight: 600 };
@@ -1229,7 +1229,7 @@ function bilesimAdlari(spec: Extract<ChartSpec, { kind: 'opex-bilesim' }>, width
   const toplam = spec.total.value;
   const pay = (v: number) => ratio(toplam ? v / toplam : 0);
   // Dar grafikte iki satır: ad, altında tutar ve pay (sayı satır sonunda bölünmez).
-  return spec.parts.map((x) => (width < OPEX_NARROW ? `${x.name}\n${shortLira(x.value)} · ${pay(x.value)}` : `${x.name} · ${lira(x.value)} (${pay(x.value)})`));
+  return spec.parts.map((x) => (width < OPEX_NARROW ? `${x.name}\n${shortLira(x.value)} (${pay(x.value)})` : `${x.name}: ${lira(x.value)} (${pay(x.value)})`));
 }
 
 /**

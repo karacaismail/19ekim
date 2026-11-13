@@ -180,7 +180,10 @@ export function KararSecimleri() {
                 Not ekle
               </button>
             )}
-            <p className="ks-etki">Etkilediği yer: {k.q.etki}</p>
+            <dl className="ks-etki">
+              <dt>Etkilediği yer</dt>
+              <dd>{k.q.etki}</dd>
+            </dl>
           </div>
           <div className="ks-alt">
             <button type="button" className="ks-dugme" data-ikincil="" disabled={i === 0} onClick={() => git(i - 1)}>

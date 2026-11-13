@@ -31,9 +31,9 @@ const WIDTHS = [320, 360, 375, 390, 768, 1280];
 const hero26 = (m: typeof MODEL) => lira(donemOf(m, 2026).toplam.toplam);
 /** Yıl ayrımı olmayan plan (Ekim 2026 – Aralık 2027): birleşik kalemler tablosu ve aylık plan bu etiketi taşır. */
 const planEtiket = (m: typeof MODEL) => planOfModel(m).etiket;
-const KALEMLER = `Kalemler · ${planEtiket(MODEL)}`;
+const KALEMLER = `Kalemler (${planEtiket(MODEL)})`;
 /** Kalemler tablosunun alt satırları (kullanıcı kararı 2026-10-21: aylık gider planı tablosu kalemlerle birleşti). */
-const ALT_SATIRLAR = ['Teknoloji', 'Ofis ve işletme', 'Personel', /^Toplam · \d+ kalem$/, 'Önceki aya göre'];
+const ALT_SATIRLAR = ['Teknoloji', 'Ofis ve işletme', 'Personel', /^Toplam \(\d+ kalem\)$/, 'Önceki aya göre'];
 const altSatir = (region: Locator, ad: string) => region.locator('tfoot tr').filter({ has: region.page().locator('th', { hasText: new RegExp(`^${ad}`) }) });
 /** Tablo gövdesinde başlığı verilen sütunun td sırası (satır başlığı th sayılmaz). */
 const sutun = (region: Locator, header: string | RegExp) =>
@@ -659,10 +659,10 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const tabs = page.getByRole('tablist', { name: 'Yıl' }).getByRole('tab');
     await expect(tabs).toHaveCount(2);
     await expect(tabs.nth(0)).toContainText('2026');
-    await expect(tabs.nth(0)).toContainText(`Ekim – Aralık · ${hero26(MODEL)}`);
-    await expect(tabs.nth(1)).toContainText(`Ocak – Aralık · ${lira(donemOf(MODEL, 2027).toplam.toplam)}`);
+    await expect(tabs.nth(0)).toContainText(`Ekim – Aralık: ${hero26(MODEL)}`);
+    await expect(tabs.nth(1)).toContainText(`Ocak – Aralık: ${lira(donemOf(MODEL, 2027).toplam.toplam)}`);
     // Ay sayısı özet kutusunda.
-    await expect(page.locator('.opex-hero-note')).toContainText('· 3 ay');
+    await expect(page.locator('.opex-hero-note')).toContainText('(3 ay)');
     // Plan yıl ayrımı olmadan ve ayrı tablo değil: kalemler tablosunun 15 ay sütunu + alt satırlarda grup toplamları,
     // toplam ve önceki aya göre değişim.
     await expect(page.getByRole('region', { name: /^Aylık gider planı/ })).toHaveCount(0);
@@ -805,7 +805,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     expect(d.toplam.toplam).not.toBe(donemOf(MODEL, 2026).toplam.toplam);
     await expect(page.locator('.opex-hero-value')).toHaveText(hero26(grid));
     // Kalem bilgisi ve ay ay tutarlar tek tabloda (kullanıcı kararı 2026-10-20): 2026’nın 3 ayı ve 2027’nin 12 ayı.
-    const items = page.getByRole('region', { name: `Kalemler · ${planEtiket(grid)}` });
+    const items = page.getByRole('region', { name: `Kalemler (${planEtiket(grid)})` });
     const basliklar = await items.locator('thead th').allTextContents();
     expect(basliklar.slice(0, 4)).toEqual(['Kalem', 'Kategori', 'Tutar', 'Bu ay']);
     expect(basliklar.slice(4, 7)).toEqual(['Eki ’26Ekim 2026', 'Kas ’26Kasım 2026', 'Ara ’26Aralık 2026']);
@@ -844,7 +844,7 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     await hydrated(page);
     await connect(page);
     // Kasım toplamı 0: Aralık’ın önceki aya göre değişimi hesaplanamaz → “Uygulanmıyor” (gorsel_algi.md F17).
-    const items = page.getByRole('region', { name: `Kalemler · ${planEtiket(zero)}` });
+    const items = page.getByRole('region', { name: `Kalemler (${planEtiket(zero)})` });
     await expect(altSatir(items, 'Önceki aya göre').locator('td').nth(await sutun(items, 'Ara ’26Aralık 2026'))).toHaveText('Uygulanmıyor');
     expect(await page.locator('.app-main').innerText()).not.toMatch(/∞|NaN|Infinity/);
   });
@@ -887,11 +887,11 @@ test.describe('Giderler: bağlantı ve canlı veri', () => {
     const uzman = group.getByRole('button', { name: 'Örnek Uzman' });
     await uzman.click();
     await expect(uzman).toHaveAttribute('aria-pressed', 'true');
-    const r26 = page.getByRole('region', { name: 'Örnek Uzman · Ekim – Aralık 2026 bordro' });
+    const r26 = page.getByRole('region', { name: 'Örnek Uzman, Ekim – Aralık 2026 bordrosu' });
     await expect(r26.locator('tbody th')).toHaveText(['Ekim 2026', 'Kasım 2026', 'Aralık 2026', 'Dönem toplamı']);
     await page.getByRole('tab', { name: /^2027/ }).click();
     await page.getByRole('group', { name: 'Kişi' }).getByRole('button', { name: 'Örnek Uzman' }).click();
-    await expect(page.getByRole('region', { name: 'Örnek Uzman · Ocak – Aralık 2027 bordro' }).locator('tbody th')).toHaveCount(13);
+    await expect(page.getByRole('region', { name: 'Örnek Uzman, Ocak – Aralık 2027 bordrosu' }).locator('tbody th')).toHaveCount(13);
   });
 });
 
@@ -1000,7 +1000,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       const metin = (await svg.locator('text').allTextContents()).map((t) => t.trim()).filter(Boolean);
       // Dar grafikte açıklama satırları sözcük arasından sarılır (ayrı metin düğümleri): birleştirilip sayılır.
       const hepsi = metin.join(' ');
-      expect(hepsi, `${width} px`).toMatch(/^Net ücret /);
+      expect(hepsi, `${width} px`).toMatch(/^Net ücret:? /);
       const paylar = [...hepsi.matchAll(/%([\d,]+)/g)].map((x) => Number(x[1].replace(',', '.')));
       // Sayılar satır sonunda bölünmez (“%56,” / “5)” gibi).
       expect(metin.filter((t) => /[,%]$/.test(t)), `${width} px`).toEqual([]);
@@ -1184,7 +1184,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     const brut = await tablo.locator('tbody tr').first().locator('td').nth(await sutun(tablo, 'Brüt')).innerText();
     expect(brut).toMatch(/₺/);
     // Tek grup listelenince grup ara toplamı yok: yalnız toplam ve önceki aya göre.
-    await expect(tablo.locator('tfoot th')).toHaveText([/^Toplam · \d+ kalem$/, 'Önceki aya göre']);
+    await expect(tablo.locator('tfoot th')).toHaveText([/^Toplam \(\d+ kalem\)$/, 'Önceki aya göre']);
     await page.getByRole('button', { name: 'Filtreleri temizle' }).click();
     // Sütun grupları: ay sütunları gizlenir ve geri gelir.
     await page.getByRole('button', { name: 'Sütunlar' }).click();
@@ -1218,7 +1218,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await expect(sayac).toHaveText(`0 / ${hepsi} kalem`);
     const kategori = MODEL.giderler[0].kategori;
     const beklenen = MODEL.giderler.filter((g) => g.kategori === kategori).length;
-    await panel.getByRole('checkbox', { name: new RegExp(`^${kategori} · `) }).check();
+    await panel.getByRole('checkbox', { name: new RegExp(`^${kategori} \\(`) }).check();
     await expect(sayac).toHaveText(`${beklenen} / ${hepsi} kalem`);
     const katSutun = await sutun(tablo, 'Kategori');
     const katlar = await tablo.locator('tbody tr').evaluateAll((trs, i) => trs.map((tr) => tr.querySelectorAll('td')[i]?.textContent ?? ''), katSutun);
@@ -1321,7 +1321,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
     await mockScript(page, { ozet: 'ham', model }, 'open');
     await page.goto(PATH);
     await hydrated(page);
-    const tablo = page.getByRole('region', { name: `Kalemler · ${planEtiket(model)}` });
+    const tablo = page.getByRole('region', { name: `Kalemler (${planEtiket(model)})` });
     const sayac = page.locator('.opex-veri-sayi');
     const hepsi = model.giderler.length + model.kisiler.length;
     // Binlik noktalı tutar yazılırken kutu boşalmaz; filtre uygulanır.
@@ -1506,7 +1506,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
         await expect(kira.locator('.kayit-ozet-deger')).toHaveText(lira(60000));
         // Alt satırlar listenin sonunda özet kayıtları (kalemlerin altında).
         const ozetler = page.locator(OZET_KAYIT);
-        expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual(['Teknoloji', 'Ofis ve işletme', 'Personel', `Toplam · ${HEPSI} kalem`, 'Önceki aya göre']);
+        expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual(['Teknoloji', 'Ofis ve işletme', 'Personel', `Toplam (${HEPSI} kalem)`, 'Önceki aya göre']);
         const [sonKalem, ilkOzet] = [await kayitlar.last().boundingBox(), await ozetler.first().boundingBox()];
         expect(ilkOzet!.y).toBeGreaterThanOrEqual(sonKalem!.y + sonKalem!.height - 1);
         expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
@@ -1644,8 +1644,8 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       expect(Math.abs(sayi(m![1]) - teknoloji)).toBeLessThanOrEqual(1);
       expect(Math.abs(sayi(m![2]) - genel)).toBeLessThanOrEqual(1);
       // Özet kayıtları: tek grup listelenince grup ara toplamı yok; toplam kaydı vurgulu; başlıkta rapor ayı toplamı.
-      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam · ${TEKNOLOJI} kalem`, 'Önceki aya göre']);
-      const toplamKaydi = ozetler.filter({ hasText: /^Toplam ·/ });
+      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam (${TEKNOLOJI} kalem)`, 'Önceki aya göre']);
+      const toplamKaydi = ozetler.filter({ hasText: /^Toplam \(/ });
       await expect(toplamKaydi).toHaveAttribute('data-tone', 'total');
       await expect(toplamKaydi.locator('.kayit-ozet-etiket')).toHaveText('Ekim 2026');
       expect(Math.abs(sayi(await yazi(toplamKaydi.locator('.kayit-ozet-deger'))) - donemOf(MODEL, 2026).seri[0].teknoloji)).toBeLessThanOrEqual(1);
@@ -1659,7 +1659,7 @@ test.describe('Giderler: yerleşim, yazı ve grafikler', () => {
       await expect(ilk.locator('.kayit-ozet-etiket')).toHaveText('Toplam ₺');
       await ilk.locator('h4 button').click();
       expect((await alanlar(await paneli(ilk))).map(([dt]) => dt)).not.toContain('Ekim 2026');
-      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam · ${TEKNOLOJI} kalem`]);
+      expect(await yazilar(ozetler.locator('.kayit-ad'))).toEqual([`Toplam (${TEKNOLOJI} kalem)`]);
       await page.getByRole('button', { name: 'Sütunlar' }).click();
       await page.getByRole('checkbox', { name: /Ay sütunları/ }).check();
       await page.keyboard.press('Escape');

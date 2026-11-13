@@ -263,7 +263,7 @@
   {
    "id": "is_hukuku.mazeret_izinleri",
    "konu": "Ücretli mazeret izinleri (İş Kanunu ek madde 2)",
-   "deger": "Evlilik 3 gün, evlat edinme 3 gün, ölüm 3 gün, babalık 10 gün, engelli veya süreğen hastalığı olan çocuk için yılda 10 güne kadar",
+   "deger": "Evlilik, evlat edinme ve ölüm için 3 gün. Babalık için 10 gün. Engelli veya süreğen hastalığı olan çocuk için yılda 10 güne kadar.",
    "birim": "gün",
    "kaynaklar": [
     {
