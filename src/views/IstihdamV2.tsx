@@ -3,7 +3,7 @@ import { Modal } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import '@mantine/core/styles/Modal.layer.css';
 import { PageHeader } from '../components/PageHeader';
-import { Choice, DataTable, Section, Stats } from '../components/ui';
+import { Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
 import { int, tl } from '../lib/format';
 import {
@@ -250,9 +250,11 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
       />
       {surum}
 
-      <p className="iv2-uyari">
-        Bu sürüm, 1. sürümdeki {eskiSayisi} rolü aynen korur. Bu roller “Eski” etiketiyle görünür. Bu sürüm 11 kümede {yeniSayisi} yeni pozisyon ekler. Her seçenek bu pozisyonların bir kısmını kullanır. Dış hizmetler ve serbest çalışanlar kişi sayısına girmez.</p><p className="iv2-uyari">Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
+      <SayfaNotu>
+      <p>
+        Bu sürüm, 1. sürümdeki {eskiSayisi} rolü aynen korur. Bu roller “Eski” etiketiyle görünür. Bu sürüm 11 kümede {yeniSayisi} yeni pozisyon ekler. Her seçenek bu pozisyonların bir kısmını kullanır. Dış hizmetler ve serbest çalışanlar kişi sayısına girmez.</p><p>Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
       </p>
+      </SayfaNotu>
 
       <Section
         id="secenek"

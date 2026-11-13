@@ -116,13 +116,6 @@ html[data-focus-mode='keyboard'] .v2-so2-json-icerik:focus-visible {
   background-color: var(--surface-raised);
 }
 
-.v2-so2-baslik {
-  margin: 0;
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tight);
-}
-
 .v2-so2-kim {
   max-width: 60ch;
   margin: var(--space-3) 0 0;
@@ -1150,19 +1143,12 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
   border-top: var(--hairline) solid var(--rule-strong);
 }
 
-.v2-so2-ozel-baslik {
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-}
-
 .v2-so2-ozel-yok {
   margin: 0;
   color: var(--text-secondary);
 }
 
 .v2-so2-sozlesme {
-  margin: var(--space-3) 0 0;
   color: var(--text-secondary);
 }
 
@@ -1743,12 +1729,6 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
   margin-bottom: var(--space-6);
 }
 
-.v2-so2-standart-baslik {
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-}
-
 .v2-so2-standart-not {
   flex: 1 1 16rem;
   margin: 0;
@@ -2049,4 +2029,10 @@ html:has(.v2-so2-alt-cubuk) {
   .v2-so2-sag .v2-so2-rol-ad {
     white-space: nowrap;
   }
+}
+
+/* Rol panelindeki ortak bölüm başlığı panelin üstünde boşluksuz ve çizgisiz başlar (iskelet sözleşmesi K2). */
+.v2-so2-gecis > .section-head {
+  padding-top: 0;
+  border-top: 0;
 }

@@ -225,7 +225,7 @@ test('Gemini kartı yol haritasını açar, kaynağı ve projeyle çelişen nokt
 
 test('uyarı metni üç kaynağı ve “üç ayrı analiz” ifadesini doğru sayar', async ({ page }) => {
   await ac(page, 1280);
-  const uyari = page.locator('.oy-uyari');
+  const uyari = page.locator('.sayfa-notu');
   await expect(uyari).toContainText('üç ayrı analizin');
   for (const ad of ['Claude', 'ChatGPT', 'Gemini']) await expect(uyari).toContainText(ad);
 });

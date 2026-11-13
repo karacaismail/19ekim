@@ -20,11 +20,13 @@ body {
   font-feature-settings: 'tnum' 0;
 }
 
+/* Başlık ölçeği (iskelet sözleşmesi): bütün başlıklar yarı kalındır. Boyutu bölüm, panel ve blok sınıfları verir. */
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
   text-wrap: balance;
 }
@@ -872,7 +874,7 @@ html:not([data-js]) .giris-form {
 
 @media (min-width: 48em) {
   .section-head[data-index] {
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: var(--section-index-w) minmax(0, 1fr);
     align-items: baseline;
   }
 
@@ -890,7 +892,7 @@ html:not([data-js]) .giris-form {
   }
 
   .section-head[data-index] {
-    grid-template-columns: 4rem fit-content(60%) minmax(0, 1fr);
+    grid-template-columns: var(--section-index-w) fit-content(60%) minmax(0, 1fr);
   }
 
   .section-head .section-desc {
@@ -900,6 +902,23 @@ html:not([data-js]) .giris-form {
   .section-head[data-index] .section-desc {
     grid-column: 3;
   }
+}
+
+/*
+ * Panel başlığı (iskelet sözleşmesi): araç sayfasında yan yana duran panellerin, sonuç kartının, senaryo kurucunun ve
+ * değişiklik kutusunun h2 başlığı. Bölüm başlığından küçüktür, blok başlığıyla aynı boydadır.
+ */
+.panel-baslik {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* Sekme panelindeki bölüm başlığı (satış ortaklığı rol paneli): panelin üstünde boşluksuz ve çizgisiz başlar. */
+.so2-gecis > .section-head {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .block-title {
@@ -1433,7 +1452,7 @@ html[data-focus-mode='keyboard'] .cekmece-kapat:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--inset-md);
   border-radius: var(--radius-surface);
   background-color: var(--surface-raised);
   color: var(--text-primary);
@@ -1691,7 +1710,7 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--inset-md);
   border-radius: var(--radius-surface);
   background: var(--surface-raised);
 }
@@ -1797,13 +1816,14 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
 .note {
   margin-top: var(--space-6);
   max-width: var(--prose-max);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--inset-md);
   border-radius: var(--radius-surface);
   background: var(--surface-accent);
 }
 
 .note-title {
-  margin: 0 0 var(--space-1);
+  margin: 0;
+  font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
 }
 
@@ -1813,6 +1833,37 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
 
 .note p + p {
   margin-top: var(--space-2);
+}
+
+/* Sayfa notu (iskelet sözleşmesi): sayfa başındaki tek uyarı kutusu. Sayfaya özel uyarı sınıfı yazılmaz. */
+.sayfa-notu {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+  padding: var(--inset-md);
+  border-radius: var(--radius-surface);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  line-height: var(--leading-body);
+}
+
+.sayfa-notu > p {
+  margin: 0;
+}
+
+/*
+ * İki adımlı onay (OnayDugmesi): onay bekleyen düğme her sayfada aynı uyarı tonundadır. Üzerine gelince de değişmez.
+ * Onay cümlesi uzunsa satır sarar. Dikey iç boşluk her durumda vardır, bu yüzden onaylanınca düğmenin yeri oynamaz.
+ */
+button.onay-dugmesi {
+  padding-block: var(--clear-block-sm);
+}
+
+.onay-dugmesi[data-armed],
+.onay-dugmesi[data-armed]:hover:not(:disabled) {
+  background-color: var(--status-bekliyor-bg);
+  color: var(--status-bekliyor-fg);
 }
 
 /* ---------- Tablolar: sütunlar sıkışmaz, tablo kendi kapsayıcısında kayar ---------- */
@@ -2530,9 +2581,6 @@ html[data-focus-mode='keyboard'] .param-field:has(:focus-visible) .param-label {
 
 .param-degisiklik-baslik {
   margin: 0 0 var(--space-2);
-  font-size: var(--text-md);
-  line-height: var(--leading-snug);
-  font-weight: var(--weight-semibold);
 }
 
 .param-degisiklikler ul {
@@ -2793,6 +2841,11 @@ html[data-focus-mode='keyboard'] .param-ara-alan:has(:focus-visible) .param-labe
   }
 }
 
+/* Not listesi ortak Section'dır. İki sütunlu düzende liste sütununun üstüyle hizalı başlar. */
+.notes > .section {
+  margin-top: 0;
+}
+
 .note-lists ul {
   display: flex;
   flex-wrap: wrap;
@@ -2883,12 +2936,6 @@ html[data-focus-mode='keyboard'] .param-ara-alan:has(:focus-visible) .param-labe
   outline: none;
 }
 
-.note-title {
-  margin: 0;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-}
-
 .note-btn {
   min-height: var(--hit-min);
   min-inline-size: var(--hit-min);
@@ -2913,10 +2960,6 @@ html[data-focus-mode='keyboard'] .param-ara-alan:has(:focus-visible) .param-labe
 .note-btn:disabled {
   color: var(--text-secondary);
   cursor: default;
-}
-
-.note-btn[data-armed] {
-  color: var(--status-bekliyor-fg);
 }
 
 .note-btn-primary {
@@ -3483,7 +3526,7 @@ html:not([data-js]) .email-btn {
 .opex-tepsi {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4) var(--space-4);
+  padding: var(--inset-sm);
   border-radius: var(--radius-surface) var(--radius-surface) 0 0;
   background-color: var(--surface-sunken);
 }
@@ -3597,7 +3640,7 @@ html:not([data-js]) .email-btn {
 
 .opex-filtreler-baslik {
   margin: var(--space-4) 0 0;
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
 }
 
@@ -5033,11 +5076,6 @@ html[data-focus-mode='keyboard'] .applet-hucre .param-input:focus-visible {
   cursor: default;
 }
 
-.applet-eylem[data-armed] {
-  background-color: var(--status-bekliyor-bg);
-  color: var(--status-bekliyor-fg);
-}
-
 /* Payın yazısı ve çubuğu yan yana (çubuk tek başına bilgi taşımaz). */
 .applet-pay {
   display: grid;
@@ -6077,13 +6115,6 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   margin-bottom: var(--space-4);
 }
 
-.kurucu-baslik {
-  margin: 0;
-  font-size: var(--text-xl);
-  line-height: var(--leading-snug);
-  font-weight: var(--weight-semibold);
-}
-
 .kurucu-aciklama {
   margin: var(--space-2) 0 0;
   max-width: var(--prose-max);
@@ -6235,10 +6266,6 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  margin: 0;
-  font-size: var(--text-lg);
-  line-height: var(--leading-snug);
-  font-weight: var(--weight-semibold);
 }
 
 .sonuc-donem {
@@ -6492,23 +6519,8 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 
 .so2-panel {
   min-height: 32rem;
-  padding: var(--space-8);
+  padding: var(--inset-xl);
   background-color: var(--surface-raised);
-}
-
-.so2-baslik {
-  margin: 0;
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tight);
-}
-
-.so2-kim {
-  max-width: 60ch;
-  margin: var(--space-3) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
 }
 
 .so2-sonuc {
@@ -6552,7 +6564,7 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
 .so2-asama {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-sunken);
 }
 
@@ -6686,7 +6698,7 @@ html[data-focus-mode='keyboard'] .anahtar:focus-visible .anahtar-ad {
   gap: var(--space-6);
   max-height: calc(100dvh - var(--bant-h, 0px) - var(--space-8));
   overflow-y: auto;
-  padding: var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   scrollbar-width: thin;
 }
@@ -7349,7 +7361,7 @@ html[data-bant-gizli] .so2-duzen {
   }
 
   .so2-panel {
-    padding: var(--space-6) var(--space-4);
+    padding: var(--inset-lg);
   }
 
   .so2-fiyat {
@@ -7475,15 +7487,9 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 /* ---------- Değer önerisi sayfası (/deger-onerisi/) ---------- */
-.dg {
+/* Değer önerisi: bölüm başlığı tam genişliktedir, kartlar okuma genişliğinde kalır. */
+.dg .section > :not(.section-head) {
   max-width: 54rem;
-}
-
-.dg-uyari {
-  margin: var(--space-6) 0 0;
-  padding: var(--space-4) var(--space-5);
-  background-color: var(--surface-sunken);
-  color: var(--text-primary);
 }
 
 .dg-bolum {
@@ -7549,7 +7555,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   transition-property: background-color;
   transition-duration: var(--motion-duration-base);
@@ -7618,7 +7624,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   grid-template-columns: var(--hit-min) minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   transition-property: background-color;
   transition-duration: var(--motion-duration-base);
@@ -7681,7 +7687,7 @@ html[data-bant-gizli] .so2-duzen {
 .dg-oneri {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
   transition-property: background-color;
@@ -7769,7 +7775,7 @@ html[data-bant-gizli] .so2-duzen {
 .dg-eski {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -7800,7 +7806,7 @@ html[data-bant-gizli] .so2-duzen {
   .dg-guclu {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
-    padding: var(--space-5) var(--space-4);
+    padding: var(--inset-lg);
   }
 
   .dg-guclu-no {
@@ -7809,11 +7815,11 @@ html[data-bant-gizli] .so2-duzen {
 
   .dg-oneri,
   .dg-eski {
-    padding: var(--space-5) var(--space-4);
+    padding: var(--inset-lg);
   }
 
   .dg-adim {
-    padding: var(--space-4);
+    padding: var(--inset-lg);
   }
 
   /* Dar ekranda tırnak işareti metnin üstündeki boşluğa yerleşir; metin bütün genişliği kullanır. */
@@ -7880,7 +7886,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: var(--space-2);
-  padding: var(--space-5);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -7936,7 +7942,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   align-content: start;
   gap: var(--space-2);
-  padding: var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -8011,7 +8017,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   align-content: start;
   gap: var(--space-2);
-  padding: var(--space-5);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
 }
@@ -8026,7 +8032,7 @@ html[data-bant-gizli] .so2-duzen {
 .gm-karar-ad {
   flex: 1 1 14rem;
   margin: 0;
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
 }
@@ -8065,7 +8071,7 @@ html[data-bant-gizli] .so2-duzen {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
   gap: var(--space-1) var(--space-6);
   margin: var(--space-2) 0 0;
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-sunken);
 }
 
@@ -8226,7 +8232,7 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 .gm-model {
-  --gm-ic: var(--space-6);
+  --gm-ic: var(--inset-lg);
   --gm-ton: var(--text-secondary);
   --gm-ton-zemin: var(--surface-sunken);
   --edge-color: var(--gm-ton);
@@ -8432,7 +8438,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   align-content: start;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--inset-md);
   border-top: var(--hairline) dashed var(--rule-strong);
   background-color: var(--surface-sunken);
 }
@@ -8478,7 +8484,7 @@ html[data-bant-gizli] .so2-duzen {
 /* Geniş kart: açıklama ve fiyat solda, örnek hesap sağda. Ayrıntı düğmesi iki sütunun altındadır. */
 @container gm-modeller (min-width: 46rem) {
   .gm-model {
-    --gm-ic: var(--space-8);
+    --gm-ic: var(--inset-xl);
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
     grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
@@ -8633,7 +8639,7 @@ html[data-bant-gizli] .so2-duzen {
   display: grid;
   grid-template-columns: var(--hit-min) minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -8697,12 +8703,12 @@ html[data-bant-gizli] .so2-duzen {
 
 @media (max-width: 47.99em) {
   .gm-paket {
-    padding: var(--space-5) var(--space-4);
+    padding: var(--inset-lg);
   }
 
   /* Kartın iç boşluğu tek değişkenden gelir. Alt şerit kartın kenarına tam oturur, dışarı taşmaz. */
   .gm-model {
-    --gm-ic: var(--space-4);
+    --gm-ic: var(--inset-lg);
     padding: var(--gm-ic);
   }
 
@@ -8713,7 +8719,7 @@ html[data-bant-gizli] .so2-duzen {
   .gm-oncelik-oge {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--inset-lg);
   }
 }
 
@@ -9054,7 +9060,7 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--inset-md);
   background-color: var(--surface-raised);
   transition-property: background-color;
   transition-duration: var(--motion-duration-base);
@@ -9346,7 +9352,7 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
   .tk-olay {
     grid-template-columns: 3.25rem minmax(0, 1fr);
     gap: var(--space-3);
-    padding: var(--space-4) var(--space-3);
+    padding: var(--inset-sm);
   }
 }
 
@@ -9674,13 +9680,13 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
   color: var(--text-on-accent);
 }
 
-.ks-dugme[data-ikincil] {
+.ks-dugme-ikincil {
   border-color: var(--rule-strong);
   background-color: transparent;
   color: var(--text-primary);
 }
 
-.ks-dugme[data-ikincil]:hover:not(:disabled) {
+.ks-dugme-ikincil:hover:not(:disabled) {
   background-color: var(--surface-hover);
   color: var(--text-primary);
 }
@@ -9778,7 +9784,7 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
 .ks-soru-panel {
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-8);
+  padding: var(--inset-xl);
   background-color: var(--surface-raised);
 }
 
@@ -9808,7 +9814,7 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
 
 .ks-soru {
   margin: 0;
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
   text-wrap: balance;
@@ -9949,7 +9955,7 @@ html[data-focus-mode='keyboard'] :where(.ks-secenek, .ks-liste-oge):focus-visibl
   }
 
   .ks-soru-panel {
-    padding: var(--space-5) var(--space-4);
+    padding: var(--inset-lg);
   }
 }
 
@@ -9968,14 +9974,6 @@ html[data-focus-mode='keyboard'] :where(.ks-secenek, .ks-liste-oge):focus-visibl
  */
 .oy {
   max-width: 60rem;
-}
-
-.oy-uyari {
-  margin: var(--space-6) 0 0;
-  padding: var(--space-4) var(--space-5);
-  background-color: var(--surface-sunken);
-  color: var(--text-primary);
-  line-height: var(--leading-body);
 }
 
 .oy-kartlar {

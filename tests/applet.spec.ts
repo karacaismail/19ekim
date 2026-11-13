@@ -77,7 +77,7 @@ test.describe('applet sayfası', () => {
         await expect(page.locator(`section#${id}`)).toBeVisible();
         const r = await page.evaluate(() => {
           const gorunur = (el: Element) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
-          const metin = [...document.querySelectorAll('.applet-sayfa *')].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim()) && gorunur(el) && !el.closest('.visually-hidden'));
+          const metin = [...document.querySelectorAll('main *')].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim()) && gorunur(el) && !el.closest('.visually-hidden'));
           return {
             tasma: document.documentElement.scrollWidth - window.innerWidth,
             kucuk: metin.filter((el) => parseFloat(getComputedStyle(el).fontSize) < 14).map((el) => el.className),
@@ -245,7 +245,7 @@ test.describe('applet sayfası', () => {
       await icerik(page);
       await expect(page.locator(`section#${id}`)).toBeVisible();
       const olcu = await page
-        .locator('.applet-dugme, .applet-eylem, .applet-anahtar, .applet-onay-alan, .applet-sayfa .param-input')
+        .locator('.applet-dugme, .applet-eylem, .applet-anahtar, .applet-onay-alan, main .param-input')
         .evaluateAll((els) => els.filter((el) => el.getClientRects().length).map((el) => { const r = el.getBoundingClientRect(); return { h: r.height, w: r.width, c: el.className }; }));
       expect(olcu.length, id).toBeGreaterThan(0);
       for (const o of olcu) {

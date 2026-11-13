@@ -1,7 +1,7 @@
 import { Alinti } from '../components/Alinti';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { BolumDizini, Section } from '../components/ui';
+import { BolumDizini, SayfaNotu, Section } from '../components/ui';
 import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, KATEGORILER, KISALTMALAR, ORTAK_NOKTA, type Oneri } from '../data/degerOnerisi';
 
 /**
@@ -60,12 +60,16 @@ function OneriKarti({ o }: { o: Oneri }) {
 
 function Icerik() {
   return (
-    <div className="dg">
+    <>
       <PageHeader title="Değer önerisi" purpose="Saha ekibinin esnafa vereceği sözleri ve her söz için platformun yapacağı işi gösterir." />
 
-      <p className="dg-uyari">
-        Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir. Bunlar geliştirilmesi gereken önerilerdir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
-      </p>
+      <SayfaNotu>
+        <p>
+          Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir. Bunlar geliştirilmesi gereken önerilerdir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
+        </p>
+      </SayfaNotu>
+
+      <div className="dg">
 
       <BolumDizini bolumler={ICINDEKILER} />
 
@@ -174,6 +178,7 @@ function Icerik() {
         </dl>
       </Section>
     </div>
+    </>
   );
 }
 

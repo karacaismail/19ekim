@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Anahtar, Choice, DataTable, Section, Stats } from '../components/ui';
+import { Anahtar, Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { icerikOf } from '../data/icerik';
 import { AYLAR_2027, SECENEKLER, SECENEK_ADI, SECENEK_OZETI, type SecenekId } from '../data/istihdamV2';
 import {
@@ -79,7 +79,7 @@ function Icerik({ pathname }: { pathname: string }) {
         ]}
       />
 
-      <div className="b27-uyari">
+      <SayfaNotu>
         <p>
           İşletme gideri her ay tekrarlanır. Maaş, kira, lisans ve reklam işletme gideridir. Yatırım harcaması bir kez yapılır. Alınan şey yıllarca kullanılır. Bilgisayar, mobilya ve tadilat yatırım harcamasıdır. Bütçe iki parçadan oluşur. İlk parça, Google Sheets gider tablosundaki 2027 planıdır. Bu sayfada bu parçaya “Mevcut plan” denir. Mevcut plan sayfa açılırken okunur. İkinci parça, seçilen kadro seçeneğinin eklediği giderlerdir. Eklemeler iki bilgiyle hesaplanır. Biri seçilen kadro seçeneğidir. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir. Diğeri kaynağı gösterilen birim fiyatlardır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Bu oran Sheets gider tablosundaki 2027 artışıdır. Yatırım kalemleri bütçeye KDV’siz tutarla girer. Çünkü şirketin bu KDV’yi vergi borcundan düşebileceği varsayılır. Fiyatı KDV dahil olan kalemde tutar 1,2’ye bölünür.
         </p>
@@ -90,7 +90,7 @@ function Icerik({ pathname }: { pathname: string }) {
             Sheets’te {taban!.bordrolu} bordrolu ve {taban!.faturali} faturalı kişi var. Plan {BEKLENEN_SHEETS.bordrolu} bordrolu ve {BEKLENEN_SHEETS.faturali} faturalı kişi bekler. Bir rol hem Sheets’te hem “İstihdam takvimi” sayfasında olabilir. Bu durumda rol bütçede iki kez sayılıyor olabilir.
           </p>
         ) : null}
-      </div>
+      </SayfaNotu>
 
       <Section
         id="secenek"

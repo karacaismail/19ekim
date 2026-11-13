@@ -68,7 +68,7 @@ export function ResultSummary({
       <section className="sonuc" id={id} aria-labelledby={`${id}-baslik`} data-role={senaryo.role} data-ust-kutu="">
         <div className="sonuc-govde">
           <div className="sonuc-ust">
-            <h2 className="sonuc-baslik" id={`${id}-baslik`}>
+            <h2 className="panel-baslik sonuc-baslik" id={`${id}-baslik`}>
               {baslik} <RoleChip role={senaryo.role ?? 'yonetici'} label={senaryo.ad} />
             </h2>
             <p className="sonuc-donem">{donem}</p>

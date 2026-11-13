@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Checkbox, NumberInput, Select, TextInput } from '@mantine/core';
 import { useMotionMs } from '../lib/motion';
+import { OnayDugmesi } from './ui';
 import { yuvarla, type Durum } from '../data/applet';
 
 /**
@@ -263,32 +264,19 @@ export function Eylem({
   /** Onay adımının tam etiketi (kapsamla), ör. “3 applet’i örnek değerlere döndür (onayla)”. */
   onay?: string;
 }) {
-  const [armed, setArmed] = useState(false);
   const metin = typeof children === 'string' ? children : 'Uygula';
   const onayMetni = onay ?? `${metin}${ad ? `: ${ad}` : ''} (onayla)`;
+  if (ikiAdim)
+    return (
+      <OnayDugmesi className="applet-eylem" vazgecClassName="applet-eylem applet-vazgec" disabled={disabled} onay={onayMetni} gizliAd={ad} gizliAdOnayda={false} onOnay={onClick}>
+        {children}
+      </OnayDugmesi>
+    );
   return (
-    <>
-      <button
-        type="button"
-        className="applet-eylem"
-        data-armed={armed ? '' : undefined}
-        disabled={disabled}
-        onClick={() => {
-          if (!ikiAdim || armed) {
-            setArmed(false);
-            onClick();
-          } else setArmed(true);
-        }}
-      >
-        {armed ? onayMetni : children}
-        {ad && !armed ? <span className="visually-hidden"> {ad}</span> : null}
-      </button>
-      {armed ? (
-        <button type="button" className="applet-eylem applet-vazgec" onClick={() => setArmed(false)}>
-          Vazgeç
-        </button>
-      ) : null}
-    </>
+    <button type="button" className="applet-eylem" disabled={disabled} onClick={onClick}>
+      {children}
+      {ad ? <span className="visually-hidden"> {ad}</span> : null}
+    </button>
   );
 }
 

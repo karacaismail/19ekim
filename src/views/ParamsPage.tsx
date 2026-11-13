@@ -5,7 +5,7 @@ import { DateInput, DatesProvider } from '@mantine/dates';
 import { AppFrame } from '../components/AppFrame';
 import { useModel, useParams } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { DataTable, Section } from '../components/ui';
+import { DataTable, OnayDugmesi, Section } from '../components/ui';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type ParamDef, type ParamKey, type Params, paramEtiketi } from '../data/params';
 import { longDate } from '../lib/dates';
 import { int, num, pct, times, tl, tlExact } from '../lib/format';
@@ -128,32 +128,29 @@ function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; 
  */
 function Sifirla() {
   const { params, reset, restore, changed } = useParams();
-  const [confirming, setConfirming] = useState(false);
   const [onceki, setOnceki] = useState<Params | null>(null);
   useEffect(() => {
     if (changed) setOnceki(null);
   }, [changed]);
   return (
     <div className="param-sifirla">
-      <button
-        type="button"
+      <OnayDugmesi
         className="param-reset"
+        vazgecClassName="param-vazgec"
         disabled={!changed}
-        onClick={() => {
-          if (confirming) {
-            setOnceki(params);
-            reset();
-            setConfirming(false);
-          } else setConfirming(true);
+        onay="Genel ayarları sıfırla (onayla)"
+        onOnay={() => {
+          setOnceki(params);
+          reset();
         }}
+        kapsam={
+          <p className="param-reset-kapsam" role="status">
+            Genel plan ayarlarındaki {changed} alan varsayılan değerine dönecek. Bu değişiklik yalnız bu tarayıcıda geçerlidir. Gelir planı senaryo seçenekleri, notlar, tema ve Sheets dosyası değişmez. Onaylamak için “Genel ayarları sıfırla” düğmesine, iptal etmek için “Vazgeç” düğmesine basın. Sıfırladıktan sonra “Geri al” düğmesi önceki değerleri geri getirir.
+          </p>
+        }
       >
-        {confirming ? 'Genel ayarları sıfırla (onayla)' : 'Varsayılanlara dön'}
-      </button>
-      {confirming ? (
-        <button type="button" className="param-vazgec" onClick={() => setConfirming(false)}>
-          Vazgeç
-        </button>
-      ) : null}
+        Varsayılanlara dön
+      </OnayDugmesi>
       {onceki ? (
         <button
           type="button"
@@ -165,11 +162,6 @@ function Sifirla() {
         >
           Geri al
         </button>
-      ) : null}
-      {confirming ? (
-        <p className="param-reset-kapsam" role="status">
-          Genel plan ayarlarındaki {changed} alan varsayılan değerine dönecek. Bu değişiklik yalnız bu tarayıcıda geçerlidir. Gelir planı senaryo seçenekleri, notlar, tema ve Sheets dosyası değişmez. Onaylamak için “Genel ayarları sıfırla” düğmesine, iptal etmek için “Vazgeç” düğmesine basın. Sıfırladıktan sonra “Geri al” düğmesi önceki değerleri geri getirir.
-        </p>
       ) : null}
     </div>
   );
@@ -210,7 +202,7 @@ function Degisiklikler({ hedefle }: { hedefle: (key: ParamKey) => void }) {
   const satirlar = PARAM_GROUPS.flatMap((g) => g.fields.filter((d) => params[d.key] !== DEFAULT_PARAMS[d.key]).map((d) => ({ g, d })));
   return (
     <section className="param-degisiklikler" aria-labelledby="degisiklikler-baslik" data-ust-kutu="">
-      <h2 className="param-degisiklik-baslik" id="degisiklikler-baslik">
+      <h2 className="panel-baslik param-degisiklik-baslik" id="degisiklikler-baslik">
         Değişiklikler ({changed})
       </h2>
       <ul>

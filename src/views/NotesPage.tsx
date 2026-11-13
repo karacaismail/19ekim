@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Checkbox, Textarea, TextInput } from '@mantine/core';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
+import { OnayDugmesi, Section } from '../components/ui';
 import { clearNotes, DEFAULT_NOTES, INBOX, loadNotes, newId, saveNotes, today, type Note, type NotesState } from '../data/notes';
 
 const ALL = 'tumu';
@@ -41,38 +42,6 @@ function useNotes() {
 /** İki adımlı düğme: ilk basış onay ister, 4 sn içinde ikinci basış uygular. */
 /** Notun kısa tanımı (erişilebilir adda hedef). */
 const kisalt = (t: string) => (t.length > 60 ? `${t.slice(0, 57)}…` : t);
-
-/**
- * İki adımlı onay (gorsel_algi.md F14, WCAG 2.2.1; Parametreler’deki sözleşmeyle aynı): süreye bağlı değil; onay etiketi
- * nesneyi ve kapsamı söyler; “Vazgeç” kapatır; ilk basış veriyi değiştirmez. `ad`: hedef notun kısa tanımı (erişilebilir ad).
- */
-function ConfirmButton({ label, confirm, onConfirm, className = 'note-btn', disabled, ad }: { label: string; confirm: string; onConfirm: () => void; className?: string; disabled?: boolean; ad?: string }) {
-  const [armed, setArmed] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        className={className}
-        disabled={disabled}
-        data-armed={armed ? '' : undefined}
-        onClick={() => {
-          if (armed) {
-            setArmed(false);
-            onConfirm();
-          } else setArmed(true);
-        }}
-      >
-        {armed ? confirm : label}
-        {ad ? <span className="visually-hidden"> Not: {ad}</span> : null}
-      </button>
-      {armed ? (
-        <button type="button" className={className} onClick={() => setArmed(false)}>
-          Vazgeç
-        </button>
-      ) : null}
-    </>
-  );
-}
 
 function NoteRow({ note, listName, onToggle, onEdit, onRemove }: { note: Note; listName?: string; onToggle: () => void; onEdit: (text: string) => void; onRemove: () => void }) {
   const [editing, setEditing] = useState(false);
@@ -160,7 +129,9 @@ function NoteRow({ note, listName, onToggle, onEdit, onRemove }: { note: Note; l
         >
           Düzenle
         </button>
-        <ConfirmButton label="Sil" confirm="Notu sil (onayla)" ad={kisalt(note.text)} onConfirm={onRemove} />
+        <OnayDugmesi className="note-btn" onay="Notu sil (onayla)" gizliAd={`Not: ${kisalt(note.text)}`} onOnay={onRemove}>
+          Sil
+        </OnayDugmesi>
       </div>
     </li>
   );
@@ -238,10 +209,7 @@ function NotesContent() {
           </form>
         </nav>
 
-        <section className="note-main" aria-labelledby="not-listesi">
-          <h2 className="note-title" id="not-listesi">
-            {title}
-          </h2>
+        <Section id="not-listesi" className="note-main" title={title}>
           <form className="note-add" onSubmit={submit}>
             <TextInput
               className="note-field"
@@ -280,9 +248,11 @@ function NotesContent() {
                 ? `Notlar bu tarayıcıda saklanır. ${state.notes.filter((n) => !n.done).length} açık ve ${state.notes.filter((n) => n.done).length} tamamlanmış not var. “Varsayılan notlara dön” düğmesi eklediğiniz notları ve yaptığınız değişiklikleri siler.`
                 : 'Tarayıcı depolaması kapalı. Değişiklikler yalnız bu sayfa açık kaldığı sürece geçerlidir.'}
             </p>
-            <ConfirmButton label="Varsayılan notlara dön" confirm="Varsayılan notlara dön (onayla)" onConfirm={reset} />
+            <OnayDugmesi className="note-btn" onay="Varsayılan notlara dön (onayla)" onOnay={reset}>
+              Varsayılan notlara dön
+            </OnayDugmesi>
           </div>
-        </section>
+        </Section>
       </div>
     </>
   );

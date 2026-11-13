@@ -11,7 +11,7 @@ test('masaüstü: beş rol sekmesi, ürün ve rol değişir, ayar sonucu güncel
   await page.getByRole('button', { name: 'Segika' }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');
   await page.getByRole('tab', { name: /Kadrolu/ }).click();
-  await expect(page.locator('.so2-baslik')).toHaveText('Kadrolu satış uzmanı');
+  await expect(page.locator('#so2-rol-baslik')).toHaveText('Kadrolu satış uzmanı');
   const maas = page.getByRole('textbox', { name: 'Aylık maaş' });
   await maas.fill('60000');
   await expect(page.locator('.so2-sonuc-deger')).toHaveText('60.000 ₺');
@@ -64,7 +64,7 @@ for (const [sayfa, yol] of [
       await expect(page.locator('.so2-panel')).toBeVisible();
       const olcum = await page.evaluate(() => {
         const kutu = (s: string) => document.querySelector(s)!.getBoundingClientRect();
-        const kucuk = [...document.querySelectorAll<HTMLElement>('.so2 *, .so2-json *')]
+        const kucuk = [...document.querySelectorAll<HTMLElement>('main *')]
           .filter((e) => e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) && e.getClientRects().length)
           .filter((e) => parseFloat(getComputedStyle(e).fontSize) < 14)
           .map((e) => e.className || e.tagName);

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ComponentProps } from 'react';
 import { Accordion } from '@mantine/core';
-import { Choice } from '../components/ui';
+import { Choice, Section } from '../components/ui';
 import { PersonaSyncStatus } from '../components/PersonaSyncStatus';
 import { Sec } from '../components/sadeKit';
 import { kosulListesi, seciliKosul } from '../data/kosullar';
@@ -78,10 +78,7 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
   const seviyeKey = rol === 'oncu' ? 'oncuSeviye' : rol === 'cozum' ? 'cozumSeviye' : rol === 'elci' ? 'elciSeviye' : null;
   const katkili = seciliKosul(ayar, rol).id === 'ana' && seviyeKey && !(rol === 'cozum' && proje === 'segika');
   const accordionClasses = { item: 'pol-ayrinti', control: 'pol-ac', label: 'pol-ac-etiket', chevron: 'pol-ok', content: 'pol-panel' };
-  return <div className="pol-yol" data-proje={proje} data-rol={rol}>
-    <header className="pol-yol-giris">
-      <h2>{akis.baslik}</h2>
-    </header>
+  return <div className="pol-yol" data-proje={proje} data-rol={rol}><Section id="rehber-akisi" title={akis.baslik}>
     {notice && <p className="pol-yol-not" role="status">{notice}</p>}
     <ol className="pol-zaman" aria-label="İş sırası">
       {gecmis.map(({ adim, yanit }, index) => <li key={adim.id} className="pol-zaman-gecmis" data-akis-gecmis>
@@ -165,5 +162,5 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
         </Accordion.Item>
       </Accordion>
     </div>
-  </div>;
+  </Section></div>;
 }

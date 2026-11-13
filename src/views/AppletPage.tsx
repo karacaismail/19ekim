@@ -1594,7 +1594,7 @@ function AppletIcerik() {
   const Bilesen = BILESENLER[aktif] ?? KatalogApplet;
 
   return (
-    <div className="applet-sayfa">
+    <>
       <PageHeader
         title="Ücret ve performans hesap araçları"
         purpose="Sabit ücret (rütbe) ve performans (efor) için 17 küçük insan kaynakları hesap aracı sunar."
@@ -1605,6 +1605,7 @@ function AppletIcerik() {
       >
         <AppletAraclari />
       </PageHeader>
+      <div className="applet-sayfa">
       <Note title="Tasarım ilkesi">
         <p>
           Fatura kesen serbest çalışan ağı için sabit ücret ve performans ayrı hesaplanır. “Rütbe motoru” sabit ücret oranını belirler. Bu oran performansla düşmez.
@@ -1623,7 +1624,8 @@ function AppletIcerik() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

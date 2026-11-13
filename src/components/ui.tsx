@@ -113,6 +113,30 @@ export function BolumDizini({ bolumler }: { bolumler: { id: string; baslik: stri
   );
 }
 
+/**
+ * Bölüm başlığı (iskelet sözleşmesi K2): h2 ile isteğe bağlı sıra numarası ve açıklama. `Section` bunu kullanır.
+ * Sekme paneli gibi kendi kapsayıcısı olan yerde (satış ortaklığı rol paneli) doğrudan kullanılır.
+ */
+export function BolumBasligi({ id, index, title, desc }: { id: string; index?: number | string; title: string; desc?: ReactNode }) {
+  return (
+    <div className="section-head" data-index={index === undefined ? undefined : ''}>
+      {index === undefined ? null : (
+        <span className="section-index" aria-hidden="true">
+          {typeof index === 'number' ? String(index).padStart(2, '0') : index}
+        </span>
+      )}
+      <Title order={2} className="section-title" id={id}>
+        {title}
+      </Title>
+      {desc ? (
+        <Text component="p" className="section-desc">
+          {desc}
+        </Text>
+      ) : null}
+    </div>
+  );
+}
+
 export function Section({
   id,
   index,
@@ -120,9 +144,12 @@ export function Section({
   desc,
   tools,
   dizin = false,
+  className,
   children,
 }: {
   id: string;
+  /** Sayfaya özel ek sınıf (önekli). Bölümün iskeleti ve başlığı değişmez, yalnız içerik biçimlenir. */
+  className?: string;
   /** Sıra numarası; yalnız bölümlerin sırası anlamlıysa verilir. */
   index?: number | string;
   title: string;
@@ -134,22 +161,8 @@ export function Section({
   children?: ReactNode;
 }) {
   return (
-    <section className="section" id={id} aria-labelledby={`${id}-baslik`}>
-      <div className="section-head" data-index={index === undefined ? undefined : ''}>
-        {index === undefined ? null : (
-          <span className="section-index" aria-hidden="true">
-            {typeof index === 'number' ? String(index).padStart(2, '0') : index}
-          </span>
-        )}
-        <Title order={2} className="section-title" id={`${id}-baslik`}>
-          {title}
-        </Title>
-        {desc ? (
-          <Text component="p" className="section-desc">
-            {desc}
-          </Text>
-        ) : null}
-      </div>
+    <section className={className ? `section ${className}` : 'section'} id={id} aria-labelledby={`${id}-baslik`}>
+      <BolumBasligi id={`${id}-baslik`} index={index} title={title} desc={desc} />
       {tools}
       {children}
       {dizin ? (
@@ -447,12 +460,9 @@ export function DataTable<T>({
   ozetYok = false,
   eksenEtiketi,
   kiyas = false,
-  baslikDuzeyi = 3,
 }: {
   id: string;
   title: string;
-  /** Tablo başlığının düzeyi. Bölüm içindeki tablo h3, sayfada doğrudan duran tablo h2 olur (başlık sırası atlamaz). */
-  baslikDuzeyi?: 2 | 3;
   note?: ReactNode;
   /** Tablonun altındaki yöntem notu: görünüm varyantına göre değişebilir; başlık, üst not ve araç çubuğu sabit kalır (gorsel_algi.md F15). */
   altNot?: ReactNode;
@@ -479,7 +489,6 @@ export function DataTable<T>({
 }) {
   void ozetYok;
   const titleId = `${id}-tablo`;
-  const Baslik = baslikDuzeyi === 2 ? 'h2' : 'h3';
   const sarmal = useRef<HTMLDivElement>(null);
   const kaydiran = useRef<HTMLDivElement>(null);
   const [acik, setAcik] = useState<string[]>([]);
@@ -527,9 +536,9 @@ export function DataTable<T>({
 
   return (
     <div className="table-block" ref={sarmal} data-kabuk={mod}>
-      <Baslik className="block-title" id={titleId}>
+      <h3 className="block-title" id={titleId}>
         {title}
-      </Baslik>
+      </h3>
       {note ? <p className="table-note">{note}</p> : null}
       {tools}
       {mod === 'kayit' && kayitlar.every((k) => k.fields.length === 0) ? (
@@ -552,7 +561,7 @@ export function DataTable<T>({
       ) : mod === 'kayit' && kayit === 'matris' ? (
         <MatrisKiyas columns={columns} rows={rows} keyOf={keyOf} baslik={baslikMetni} labelledBy={titleId} eksenEtiketi={eksenEtiketi ?? (typeof baslikSutunu.header === 'string' ? baslikSutunu.header : 'Satır')} />
       ) : mod === 'kayit' ? (
-        <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} duzey={baslikDuzeyi === 2 ? 3 : 4} />
+        <KayitListesi kayitlar={kayitlar} acik={acik} onChange={setAcik} labelledBy={titleId} duzey={4} />
       ) : (
         <div className="table-frame" style={yan.sabit ? ({ '--sabit-sutun': `${yan.sabit}px` } as CSSProperties) : undefined}>
           {/* Gölgeler hep yerindedir. Görünürlükleri hareket tokenıyla iki yönde değişir. */}
@@ -669,6 +678,95 @@ export function Note({ title, children }: { title: string; children: ReactNode }
       <p className="note-title">{title}</p>
       {children}
     </aside>
+  );
+}
+
+/**
+ * Sayfa notu (sayfa iskeleti sözleşmesi K5, kullanıcı kararı 13 Kasım 2026). Sayfa başında, ilk bölümden önce duran
+ * uyarı ya da açıklama kutusudur. Bütün sayfalar aynı bileşeni kullanır. Sayfaya özel uyarı sınıfı yazılmaz.
+ * İçindeki paragraflar aynı kutuda alt alta durur.
+ */
+export function SayfaNotu({ children }: { children: ReactNode }) {
+  return <div className="sayfa-notu">{children}</div>;
+}
+
+/**
+ * İki adımlı onay düğmesi (gorsel_algi.md F14, WCAG 2.2.1; iskelet sözleşmesi, 13 Kasım 2026). Veri silen ya da
+ * sıfırlayan her düğme bu bileşeni kullanır. Tarayıcının onay penceresi (`window.confirm`) kullanılmaz.
+ * - İlk basış veriyi değiştirmez. Düğmenin yazısı onay cümlesine döner ve yanında “Vazgeç” çıkar.
+ * - Onay süreye bağlı değildir. İkinci basış işi yapar, “Vazgeç” onayı kapatır.
+ * - Onay cümlesi neyin değişeceğini söyler. Örnek: “Ortak ayarları varsayılana döndür (onayla)”.
+ * - Onay bekleyen düğme uyarı tonundadır (`.onay-dugmesi[data-armed]`). `kapsam` verilirse onay sırasında görünür.
+ * - “Vazgeç” kaybolunca odak ana düğmeye döner. Klavye kullanıcısı yerini kaybetmez.
+ * - Düğme devre dışı kalırsa bekleyen onay kapanır.
+ * - Onay cümlesi ekran okuyucuya kalıcı bir canlı bölgeden duyurulur.
+ */
+export function OnayDugmesi({
+  children,
+  onay,
+  onOnay,
+  className,
+  vazgecClassName,
+  disabled = false,
+  gizliAd,
+  gizliAdOnayda = true,
+  kapsam,
+}: {
+  children: ReactNode;
+  /** Onay adımının tam yazısı: nesne ve kapsam, sonunda “(onayla)”. */
+  onay: string;
+  onOnay: () => void;
+  className?: string;
+  /** “Vazgeç” düğmesinin sınıfı; verilmezse ana düğmenin sınıfı kullanılır. */
+  vazgecClassName?: string;
+  disabled?: boolean;
+  /** Ekranda görünmeyen ek ad (ör. silinecek notun kısa metni). Erişilebilir ada eklenir. */
+  gizliAd?: string;
+  /** Onay cümlesi adı zaten içeriyorsa `false` verilir. Böylece erişilebilir ad iki kez okunmaz. */
+  gizliAdOnayda?: boolean;
+  /** Onay sırasında görünen kapsam açıklaması: ne değişir, ne değişmez. */
+  kapsam?: ReactNode;
+}) {
+  const [armed, setArmed] = useState(false);
+  const ana = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (disabled) setArmed(false);
+  }, [disabled]);
+  return (
+    <>
+      <button
+        ref={ana}
+        type="button"
+        className={className ? `onay-dugmesi ${className}` : 'onay-dugmesi'}
+        disabled={disabled}
+        data-armed={armed ? '' : undefined}
+        onClick={() => {
+          if (armed) {
+            setArmed(false);
+            onOnay();
+          } else setArmed(true);
+        }}
+      >
+        {armed ? onay : children}
+        {gizliAd && (!armed || gizliAdOnayda) ? <span className="visually-hidden"> {gizliAd}</span> : null}
+      </button>
+      <span className="visually-hidden" role="status">
+        {armed ? onay : ''}
+      </span>
+      {armed ? (
+        <button
+          type="button"
+          className={vazgecClassName ?? className}
+          onClick={() => {
+            setArmed(false);
+            ana.current?.focus();
+          }}
+        >
+          Vazgeç
+        </button>
+      ) : null}
+      {armed ? kapsam : null}
+    </>
   );
 }
 

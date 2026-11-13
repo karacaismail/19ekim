@@ -40,7 +40,7 @@
 .pz-giris {
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-6) var(--space-5);
+  padding: var(--inset-xl);
   background-color: var(--surface-raised);
   box-shadow: var(--shadow-soft);
   --edge-color: var(--accent);
@@ -90,7 +90,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-1);
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-raised);
 }
 
@@ -120,7 +120,7 @@
   display: grid;
   gap: var(--space-2);
   margin: var(--space-6) 0 0;
-  padding: var(--space-5) var(--space-5) var(--space-5) var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-sunken);
   --edge-color: var(--accent);
 }
@@ -153,7 +153,7 @@
   gap: var(--space-3);
   align-items: start;
   margin: 0 0 var(--space-5);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--inset-sm);
   background-color: var(--surface-sunken);
   color: var(--text-secondary);
 }
@@ -268,7 +268,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-sunken);
   --edge-color: var(--viz-1);
 }
@@ -318,7 +318,7 @@
 .pz-platform {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-raised);
 }
 
@@ -390,7 +390,7 @@
 .pz-katman {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -447,7 +447,7 @@
 .pz-istoc {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-sunken);
 }
 
@@ -481,7 +481,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -514,7 +514,7 @@
 .pz-duvar-satir {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-raised);
 }
 
@@ -526,7 +526,7 @@
 .pz-duvar-bolge {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--inset-sm);
   background-color: var(--status-karar-bg);
   color: var(--status-karar-fg);
 }
@@ -556,7 +556,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--inset-sm);
   background-color: var(--surface-changed);
   color: var(--text-primary);
 }
@@ -588,7 +588,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -620,7 +620,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--inset-sm);
   background-color: var(--surface-changed);
   color: var(--text-primary);
 }
@@ -693,7 +693,7 @@
 .pz-sonuc {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-5) var(--space-5) var(--space-6);
+  padding: var(--inset-lg);
   background-color: var(--surface-accent);
   --edge-color: var(--accent);
 }
@@ -717,7 +717,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
   --edge-color: var(--status-karar-fg);
 }
@@ -799,7 +799,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -943,7 +943,7 @@
 .pz-hizmet {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--inset-lg);
   background-color: var(--surface-raised);
 }
 
@@ -984,7 +984,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--inset-sm);
   background-color: var(--surface-sunken);
 }
 
@@ -1091,7 +1091,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--status-karar-bg);
 }
 
@@ -1157,7 +1157,7 @@
 /* Geniş ekran düzenleri */
 @media (min-width: 48em) {
   .pz-giris {
-    padding: var(--space-8) var(--space-8) var(--space-6);
+    padding: var(--inset-xl);
   }
 
   .pz-rakamlar {

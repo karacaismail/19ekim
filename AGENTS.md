@@ -1289,6 +1289,40 @@ ve Notlar) gövde kendi aracıdır. Bu sayfalarda bölüm kuralı aranmaz. Sayfa
 sayfa başı, bölümler, sekme panelleri ve sayfa sonu 16 px sol kenarda başlar. Sayfa yana taşmaz. Giderler’deki yıl
 sekmesinin içindeki bölümler panelin yüzeyine göre içeride durur.
 
+**Ortak parçalar.** Aynı testin ikinci bölümü ortak parçaları denetler. Bu bölüm her sayfayı 375, 768 ve 1280 px
+genişlikte açar. Chromium ve WebKit’te çalışır. Token değerleri sayfada ölçülür, testte elle yazılmaz.
+
+- **Kabuk.** Sayfada tek `main` ve onun içinde tek `.wrap` vardır. Sayfa başının iki kutusu `.wrap` öğesinin doğrudan
+  çocuğudur. Sayfaya özel sarmalayıcı başlıktan sonra başlar. Örnekler `.dg`, `.tk`, `.so2` ve `.applet-sayfa`dır.
+- **Başlıklar.** Görünen her h2 ya bölüm başlığıdır ya da panel başlığıdır.
+  - Bölüm başlığı `.section-head > h2.section-title` yapısıdır. Sekme panelinde aynı başlık `BolumBasligi` ile kurulur.
+    Örneğin satış ortaklığı rol panelinin başlığı böyledir.
+  - Panel başlığı `h2.panel-baslik` sınıfını taşır. `data-ust-kutu` kutularında ve araç sayfasının panellerinde
+    kullanılır. Örnekler satış ortaklığı v2’deki “Standart ayarlar” ve “Özet” panelleridir.
+  - Bölüm başlığı `--text-2xl`, panel başlığı `--text-lg` boyutundadır. h3 ve h4 ya `--text-lg` ya da `--text-xl`
+    boyutundadır. Bütün başlıklar yarı kalındır. Bu kalınlık `global.css` içindeki ortak başlık kuralından gelir.
+  - Kayıt listesinin başlığı (`.kayit-h`) kendi biçimini korur.
+- **Ritim.** Ardışık iki bölüm arasında tam `--section-gap` boşluk vardır. Numaralı başlıkta numara sütunu
+  `--section-index-w` genişliğindedir.
+- **Sayfa notu.** Sayfa başındaki uyarı ve açıklama kutusu `SayfaNotu` bileşenidir (`.sayfa-notu`). Sayfaya özel uyarı
+  sınıfı (`*-uyari`) yazılmaz.
+- **Bölüm dizini.** Sayfa düzeyindeki içindekiler listesi `BolumDizini` bileşenidir. Bölümün içindeki bağlantı listesi
+  o bölümün aracıdır. Örnekler hazırlık grupları ve aşama haritasıdır.
+- **Kart iç boşluğu.** Zemini ya da gölgesi olan başlıklı kart dört kademeden birini kullanır:
+  - Küçük bilgi kutusu `--inset-sm` kullanır. Dikeyde 12, yatayda 16 px boşluk kalır.
+  - Not, uyarı ve küçük kart `--inset-md` kullanır. Dikeyde 16, yatayda 20 px boşluk kalır.
+  - Başlıklı içerik kartı `--inset-lg` kullanır. Boşluk telefonda 16, 48em’den itibaren 24 px olur.
+  - Sayfanın öne çıkan kartı `--inset-xl` kullanır. Boşluk telefonda 20, 48em’den itibaren 32 px olur.
+- **Onay.** Veri silen ya da sıfırlayan her düğme `OnayDugmesi` bileşenini kullanır. Tarayıcının onay penceresi
+  açılmaz. Test `tests/onay.spec.ts` dosyasıdır.
+  1. İlk basış hiçbir şeyi değiştirmez. Düğme onay cümlesini gösterir ve yanında “Vazgeç” çıkar.
+  2. Onay süreye bağlı değildir. İkinci basış işi yapar.
+  3. “Vazgeç” onayı kapatır. Odak ana düğmeye döner.
+  4. Onay bekleyen düğme her sayfada aynı uyarı tonundadır. Onay cümlesi ekran okuyucuya duyurulur.
+
+Yeni sayfa bu iskeletle kurulur. Yeni bir başlık, not ya da kart biçimi gerekirse önce ortak bileşen genişletilir.
+Sayfaya özel kopya yazılmaz.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

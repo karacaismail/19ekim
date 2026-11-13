@@ -12,13 +12,6 @@
   color: var(--text-primary);
 }
 
-.v2-oz-baslik {
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
 .v2-oz-bolum {
   display: grid;
   gap: var(--space-2);
@@ -30,7 +23,7 @@
 .v2-oz-alt {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--text-sm);
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
 }

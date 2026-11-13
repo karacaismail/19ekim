@@ -1,7 +1,7 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { AJAN_KARARLARI, SORULAR, type AnketSorusu } from '../data/kararAnketi';
 import { KararJson } from './sadeKit';
-import { Section } from './ui';
+import { OnayDugmesi, Section } from './ui';
 
 /**
  * Karar seçimleri (kullanıcı kararları 2026-11-03): sahip açık soruları seçer, ajanın verdiği kararları onaylar ya da
@@ -107,9 +107,9 @@ export function KararSecimleri() {
           <button type="button" className="ks-dugme" onClick={onerileriSec}>
             Cevapsız sorulara öneriyi seç
           </button>
-          <button type="button" className="ks-dugme" data-ikincil="" onClick={() => yaz({})}>
+          <OnayDugmesi className="ks-dugme ks-dugme-ikincil" onay="Bu tarayıcıdaki bütün seçimleri ve notları sil (onayla)" onOnay={() => yaz({})}>
             Bütün seçimleri ve notları sil
-          </button>
+          </OnayDugmesi>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ export function KararSecimleri() {
             </dl>
           </div>
           <div className="ks-alt">
-            <button type="button" className="ks-dugme" data-ikincil="" disabled={i === 0} onClick={() => git(i - 1)}>
+            <button type="button" className="ks-dugme ks-dugme-ikincil" disabled={i === 0} onClick={() => git(i - 1)}>
               Önceki
             </button>
             <button type="button" className="ks-dugme" disabled={i === KALEMLER.length - 1} onClick={() => git(i + 1)}>

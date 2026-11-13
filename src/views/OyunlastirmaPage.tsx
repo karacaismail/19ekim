@@ -4,7 +4,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import '@mantine/core/styles/Modal.layer.css';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Choice, Section } from '../components/ui';
+import { Choice, SayfaNotu, Section } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
 import { GRUP_BASLIGI, ILKELER, KAYNAK_ADI, KAYNAKLAR, TUM_STRATEJILER, type Kaynak, type Strateji, type StratejiGrubu } from '../data/oyunlastirma';
 
@@ -129,9 +129,11 @@ function Icerik() {
     <>
       <PageHeader title="Oyunlaştırma" purpose="Bu sayfa alıcıyı ve satıcıyı platforma çekecek ve orada tutacak oyunları gösterir." />
       <div className="oy">
-        <p className="oy-uyari">
+        <SayfaNotu>
+        <p>
           Oyunlaştırmada satıcı ya da alıcı belirli bir işi yapınca ödül kazanır. Bu sayfada üç ayrı analizin stratejileri var. Kartın üstündeki etiket, öneriyi yapan yapay zekâ programını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir. Rakamlar örnektir. Rakamlar ilk küçük denemede yeniden ayarlanacak. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
         </p>
+        </SayfaNotu>
 
         <div className="oy-araclar">
           <Choice<Suzgec> label="Öneri sahibi" value={suzgec} options={secenekler} onChange={setSuzgec} />

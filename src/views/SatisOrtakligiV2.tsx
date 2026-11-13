@@ -13,7 +13,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { AffilateMotoru } from '../components/AffilateMotoruV2';
 import { OzetPaneli } from '../components/OzetPaneliV2';
 import { PageHeader } from '../components/PageHeader';
-import { Choice } from '../components/ui';
+import { BolumBasligi, Choice, OnayDugmesi } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
 import type { KosulBolum } from '../components/KosullarV2';
 import { Adalet, Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKitV2';
@@ -247,7 +247,7 @@ function ProgramKurallari({ a, g }: { a: Ayar; g: G }) {
   const esikYaz = (i: number, p: Partial<{ musteri: number; ciro: number }>) => g({ segmentEsik: { ...a.segmentEsik, [a.marka]: esik.map((e, j) => (j === i ? { ...e, ...p } : e)) } });
   return (
     <section className="v2-so2-kurallar-bolum" aria-labelledby="v2-so2-kurallar-baslik">
-      <h2 className="v2-so2-ozel-baslik" id="v2-so2-kurallar-baslik">
+      <h2 className="panel-baslik" id="v2-so2-kurallar-baslik">
         Program kuralları: oranlar ve eşikler
       </h2>
       <div className="v2-so2-kurallar-icerik">
@@ -454,7 +454,7 @@ function OzelKosullar({ rol, persona, a, g }: { rol: RolId; persona: RolMetni; a
     );
   return (
     <section className="v2-so2-ozel" aria-labelledby="v2-so2-ozel-baslik">
-      <h2 className="v2-so2-ozel-baslik" id="v2-so2-ozel-baslik">
+      <h2 className="panel-baslik" id="v2-so2-ozel-baslik">
         Özel koşullar: {persona.ad}
       </h2>
       {icerik ?? <p className="v2-so2-ozel-yok">{persona.ad} yalnız standart koşullarla çalışır. Özel koşulu yoktur.</p>}
@@ -792,9 +792,9 @@ function AyarCekmecesi({ acik, kapat, a, g, rol, persona, ozet, sifirla }: { aci
           <>
             <p className="v2-so2-standart-not">Bu ayarlar bütün personalarda aynıdır. Aynı satış, aynı sonucu verir.</p>
             <StandartAyarlar a={a} g={g} />
-            <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
+            <OnayDugmesi className="v2-so2-sifirla" onay="Bu sürümün ayarlarını varsayılana döndür (onayla)" onOnay={sifirla}>
               Başa dön
-            </button>
+            </OnayDugmesi>
           </>
         ) : bolum === 'persona' ? (
           <OzelKosullar rol={rol} persona={persona} a={a} g={g} />
@@ -905,8 +905,9 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const ozet = personaOzeti(a, secili);
   const model = affilateModeli(a, rol);
   return (
+    <>
+    <PageHeader title="Satış ortaklığı programı" purpose="Bu sayfa beş satış rolünün aynı satıştan kazancını ve kariyer basamağını gösterir." />
     <div className="v2-so2" ref={kok}>
-      <PageHeader title="Satış ortaklığı programı" purpose="Bu sayfa beş satış rolünün aynı satıştan kazancını ve kariyer basamağını gösterir." />
       <p className="v2-so2-yerel-not" data-v2-yerel-not>Bu sürümde yaptığınız ayarlar yalnız bu tarayıcıda saklanır. Ortak kayda yalnız 1. sürümün ayarları kaydedilir.</p>
       <div className="v2-so2-iskelet" ref={iskelet}>
       <div className="v2-so2-ana">
@@ -945,13 +946,13 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
       {genis ? (
       <section className="v2-so2-standart" aria-labelledby="v2-so2-standart-baslik">
         <div className="v2-so2-standart-ust">
-          <h2 className="v2-so2-standart-baslik" id="v2-so2-standart-baslik">
+          <h2 className="panel-baslik" id="v2-so2-standart-baslik">
             Standart ayarlar
           </h2>
           <p className="v2-so2-standart-not">Bu ayarlar bütün personalarda aynıdır. Aynı satış, aynı sonucu verir.</p>
-          <button type="button" className="v2-so2-sifirla" onClick={sifirla}>
+          <OnayDugmesi className="v2-so2-sifirla" onay="Bu sürümün ayarlarını varsayılana döndür (onayla)" onOnay={sifirla}>
             Başa dön
-          </button>
+          </OnayDugmesi>
         </div>
         <div className="v2-so2-standart-gruplar">
           <StandartAyarlar a={a} g={g} />
@@ -1007,10 +1008,15 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           </div>
           <section className="v2-so2-panel" id="v2-so2-panel" role="tabpanel" aria-labelledby={`v2-so2-sekme-${rol}`}>
             <div className="v2-so2-gecis" key={`${a.marka}-${rol}-${kosulTanim.id}`}>
-              <h2 className="v2-so2-baslik">{secili.ad}</h2>
-              <p className="v2-so2-sozlesme">
-                <strong>{SOZLESME_ADI[secili.sozlesme]}</strong> {SOZLESME_NOTU[secili.sozlesme]}
-              </p>
+              <BolumBasligi
+                id="v2-so2-rol-baslik"
+                title={secili.ad}
+                desc={
+                  <span className="v2-so2-sozlesme">
+                    <strong>{SOZLESME_ADI[secili.sozlesme]}</strong> {SOZLESME_NOTU[secili.sozlesme]}
+                  </span>
+                }
+              />
               <p className="v2-so2-kim">{secili.kim}</p>
               <Kimler liste={secili.kimler} />
               {ks ? (
@@ -1077,6 +1083,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </Suspense>
       ) : null}
     </div>
+    </>
   );
 }
 

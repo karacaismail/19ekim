@@ -46,7 +46,7 @@
   align-content: start;
   gap: var(--space-1) var(--space-3);
   height: 100%;
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-raised);
   color: var(--text-primary);
   line-height: var(--leading-snug);
@@ -176,7 +176,7 @@ a.ob-harita-bag:hover {
 .ob-sinir {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--inset-md);
   line-height: var(--leading-body);
 }
 
@@ -195,7 +195,7 @@ a.ob-harita-bag:hover {
 .ob-sinir-etiket {
   margin: 0;
   font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
 }
 
 .ob-cikislar {
@@ -209,7 +209,7 @@ a.ob-harita-bag:hover {
 .ob-cikis {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--inset-sm);
   background-color: var(--surface-raised);
 }
 
@@ -316,7 +316,7 @@ a.ob-harita-bag:hover {
 
 .ob-kart {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--inset-sm);
   background-color: var(--surface-selected);
   line-height: var(--leading-body);
 }
@@ -335,7 +335,7 @@ a.ob-harita-bag:hover {
 
 .ob-sablon-metin {
   margin: 0;
-  padding: var(--space-4);
+  padding: var(--inset-md);
   background-color: var(--surface-sunken);
   line-height: var(--leading-body);
   white-space: pre-wrap;

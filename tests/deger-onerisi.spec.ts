@@ -15,7 +15,7 @@ for (const genislik of [320, 390, 1512]) {
     await expect(page.locator('figure.alinti blockquote')).toHaveCount(57);
     const olcum = await page.evaluate(() => ({
       tasma: document.documentElement.scrollWidth - innerWidth,
-      kucuk: [...document.querySelectorAll<HTMLElement>('.dg *')]
+      kucuk: [...document.querySelectorAll<HTMLElement>('main *')]
         .filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) && e.getClientRects().length)
         .filter((e) => parseFloat(getComputedStyle(e).fontSize) < 14 || Number(getComputedStyle(e).fontWeight) < 300)
         .map((e) => e.className || e.tagName),
@@ -41,7 +41,7 @@ test('değer önerisi: ilk 30 saniye bağlantısı ilgili öneriye gider', async
 test('değer önerisi: aylık ücret, kurulum ücreti ve komisyon kararlarıyla çelişen söz yok', async ({ page }) => {
   await page.goto('deger-onerisi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
-  const metin = (await page.locator('.dg').innerText()).replace(/\s+/g, ' ');
+  const metin = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
   expect(metin).not.toMatch(/aylık ücret yok/i);
   expect(metin).not.toMatch(/satış (yoksa|olmazsa) (ödeme yok|bize hiçbir şey)/i);
   expect(metin).not.toMatch(/ücretsiz kurulum|dükkânınızda ücretsiz/i);

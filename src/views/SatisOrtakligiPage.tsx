@@ -4,7 +4,7 @@ import { PersonaSyncStatus } from '../components/PersonaSyncStatus';
 import { AffilateMotoru } from '../components/AffilateMotoru';
 import { AgDiyagrami } from '../components/AgDiyagrami';
 import { PageHeader } from '../components/PageHeader';
-import { Choice } from '../components/ui';
+import { BolumBasligi, Choice, OnayDugmesi } from '../components/ui';
 import { Canli, Donemler, Girdi, Grup, Hesap, KararJson, Kimler, Kurallar, Sec, Sonuc, useSeciliSekmeGorunur, useYapisikSutunlar } from '../components/sadeKit';
 import {
   ASAMA_ADI,
@@ -664,8 +664,9 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
   const ks = kosulSonucu(a, rol);
   const kosulTanim = seciliKosul(a, rol);
   return (
-    <div className="so2">
+    <>
       <PageHeader title="Satış ortaklığı programı" purpose="Bu sayfa beş ortak rolünü ve her rolün kazancını gösterir." />
+      <div className="so2">
 
       {surum}
       <PersonaSyncStatus sync={sync} store={store} inputError={inputError} />
@@ -699,9 +700,9 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
         <aside className="so2-ayarlar" aria-label="Ayarlar">
           <div className="so2-ayarlar-ust">
             <p className="so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="so2-sifirla" onClick={() => { if (window.confirm('Bu projenin ortak ayarları varsayılana dönecek. Devam edilsin mi?')) sifirla(); }}>
+            <OnayDugmesi className="so2-sifirla" onay="Bu projenin ortak ayarlarını varsayılana döndür (onayla)" onOnay={sifirla}>
               Başa dön
-            </button>
+            </OnayDugmesi>
             <p className="so2-ayarlar-ozet">
               {secili.ad}{' '}
               <strong>
@@ -746,8 +747,7 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
       </div>
           <section className="so2-panel" id="so2-panel" role="tabpanel" aria-labelledby={`so2-sekme-${rol}`}>
           <div className="so2-gecis" key={`${a.marka}-${rol}-${kosulTanim.id}`}>
-          <h2 className="so2-baslik">{secili.ad}</h2>
-          <p className="so2-kim">{secili.kim}</p>
+          <BolumBasligi id="so2-rol-baslik" title={secili.ad} desc={secili.kim} />
           <Kimler liste={secili.kimler} />
           {ks ? (
             <KosulPaneli a={a} ks={ks} kaynak={kosulTanim.kaynak} ek={rol === 'oncu' && kosulTanim.id === 'ag' ? <AgDiyagrami a={a} /> : affilateModeli(a, rol) ? <AffilateMotoru a={a} id={affilateModeli(a, rol)!} /> : null} />
@@ -764,6 +764,7 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
         </div>
       </div>
       <KararJson veri={kararVerisi(a, rol)} dosyaAdi="satis-ortakligi" />
-    </div>
+      </div>
+    </>
   );
 }

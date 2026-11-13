@@ -82,7 +82,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
   return (
     <section className="kurucu" aria-labelledby="kurucu-baslik" data-ust-kutu="">
       <div className="kurucu-bas">
-        <h2 className="kurucu-baslik" id="kurucu-baslik">
+        <h2 className="panel-baslik" id="kurucu-baslik">
           Senaryo kurucu
         </h2>
         <p className="kurucu-aciklama">Önce hazır bir senaryo seçin. İsterseniz seçenekleri de değiştirebilirsiniz. Aşağıdaki her bölüm, tablo ve grafik bu seçime göre aynı anda yeniden hesaplanır.</p>

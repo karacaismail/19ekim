@@ -308,8 +308,9 @@ function KadroIcerik() {
   const bugun = useBugun();
   const kararlar = [...KARARLAR].sort((a, b) => (a.tarih ?? '9999').localeCompare(b.tarih ?? '9999'));
   return (
-    <div className="tk">
+    <>
       <PageHeader title="Kadro kapasitesi" purpose="Her rolün başlangıcını, iş yükünü, hedefini ve verilecek kararları gösterir." />
+      <div className="tk">
 
       <Section id="roller" index={1} title="Roller ve kapasite" desc={`Bir kişinin ayda işe ayırabileceği süre ${NET_SAAT} saattir. Çubuk gereken saati, dik çizgi ${NET_SAAT} saatlik sınırı gösterir.`}>
         <ul className="tk-roller">
@@ -448,6 +449,7 @@ function KadroIcerik() {
         </p>
       </Section>
     </div>
+    </>
   );
 }
 

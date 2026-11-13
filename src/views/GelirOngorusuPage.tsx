@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Choice, DataTable, Section, Stats } from '../components/ui';
+import { Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { icerikOf } from '../data/icerik';
 import { AYLAR_2027, POZISYONLAR, SECENEKLER, SECENEK_ADI, type SecenekId } from '../data/istihdamV2';
 import {
@@ -94,12 +94,12 @@ function Icerik({ pathname }: { pathname: string }) {
           { label: 'Hesap sayısı', value: `2027 yılı ${int(KOSU_SAYISI)} kez hesaplandı` },
         ]}
       />
-      <div className="go27-uyari">
+      <SayfaNotu>
         <p>Gelir, satıcıların abonelik ödemesidir. Gelir, “Gelir planı” sayfasıyla aynı kurallarla hesaplanır. Satıcı aylık ya da yıllık peşin öder. Aylık ödeyen satıcı aboneliğini her ay yeniler. Aylık elde tutma, bir ay ödeyen satıcılardan sonraki ay da ödeyenlerin oranıdır. Fiyatın ₺ karşılığı döviz kuru arttıkça artar. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir.</p>
         <p>
           Dört öngörü vardır. <strong>Plan</strong> öngörüsü tek bir hesaptır. Bu hesap risklerin ortalama etkisini kullanır. Bilgisayar 2027 yılını {int(KOSU_SAYISI)} kez hesapladı. Her hesapta riskler rastgele farklı çıktı. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong> öngörüler bu sonuçlardan gelir. Olası yılların %10’u kötümserin altında kalır. Olası yılların yarısı ortancanın altında kalır. Olası yılların %90’ı iyimserin altında kalır.
         </p>
-      </div>
+      </SayfaNotu>
 
       <Section
         id="ongoru"

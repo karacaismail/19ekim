@@ -4,15 +4,6 @@
  * Ayrım boşluk ve yüzey tonuyla kurulur. Dekoratif kenarlık yoktur. Klavye odağı global kuraldaki alt çizgidir.
  */
 
-.iv2-uyari {
-  max-width: var(--prose-max);
-  margin: var(--space-6) 0 0;
-  padding: var(--space-4) var(--space-5);
-  background-color: var(--surface-sunken);
-  color: var(--text-primary);
-  line-height: var(--leading-body);
-}
-
 .iv2-araclar {
   display: flex;
   flex-wrap: wrap;

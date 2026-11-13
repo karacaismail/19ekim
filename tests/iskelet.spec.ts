@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures/persona';
+import { expect, test, type Page } from './fixtures/persona';
 import { buildModel, reply } from './opex-fixture';
 import { TUM_SAYFALAR } from './sayfa-gezgini';
 import { SEQUENCE } from '../src/data/tree';
@@ -110,4 +110,174 @@ test.describe('sayfa iskeleti: bütün sayfalar aynı düzeni izler', () => {
     }
     expect(sapan).toEqual([]);
   });
+});
+
+/**
+ * Ortak parçalar (aynı kullanıcı isteği, ikinci bölüm). Yukarıdaki düzen kuralları sayfanın sırasını denetler. Aşağıdaki
+ * kurallar ortak parçaların her sayfada aynı kalmasını denetler:
+ *
+ *   main > .wrap > PageHeader (iki kutu) > sayfa önü > Section … > sayfa sonu
+ *
+ * K1 Kabuk: sayfada tek `main` ve onun içinde tek `.wrap` vardır. Sayfa başlığının iki kutusu (`[data-page-header]`)
+ *    `.wrap` öğesinin doğrudan çocuğudur. Böylece kırıntı satırı her sayfada aynı yerde ve yapışık durur.
+ * K2 Bölüm: içerik `Section` bileşeniyle bölünür. Görünen her h2 ya bölüm başlığıdır (`.section-head > h2.section-title`)
+ *    ya da panel başlığıdır (`h2.panel-baslik`). Panel başlığı araç sayfasında yan yana duran panellerde ve sayfanın
+ *    üstündeki kutularda (`data-ust-kutu`: sonuç kartı, senaryo kurucu, Parametreler değişiklik kutusu) kullanılır. Panel
+ *    başlığı `--text-lg` boyutundadır.
+ * K3 Başlık ölçeği: bölüm başlığı (h2) `--text-2xl` boyutundadır. h3 ve h4 ya `--text-lg` (blok başlığı) ya da
+ *    `--text-xl` (kart başlığı) boyutundadır. Böylece alt düzey başlık bölüm başlığından hep küçüktür. Bütün başlıklar
+ *    `--weight-semibold` kalınlığındadır. Alt düzey başlık kendinden önceki üst düzey başlıktan büyük olmaz.
+ *    Kayıt listesinin başlığı (`.kayit-h`) ortak bileşendir. Kendi biçimi vardır, ölçeğe katılmaz.
+ * K4 Ritim: ardışık iki üst düzey bölüm arasında tam `--section-gap` boşluk vardır.
+ * K5 Sayfa notu: sayfa başındaki uyarı ve bilgi kutusu ortak `SayfaNotu` bileşenidir (`.sayfa-notu`). Sayfaya özel uyarı
+ *    sınıfı (`*-uyari`) kullanılmaz.
+ * K6 Bölüm dizini: sayfa düzeyindeki içindekiler listesi ortak `BolumDizini` bileşenidir (`nav.bolum-dizini`). Bölümün
+ *    içindeki bağlantı listesi o bölümün aracıdır (ör. hazırlık grupları, aşama haritası) ve sayılmaz. Başka gezinme öğesi
+ *    yalnız kendi işini yapar (kırıntı, sayfa sonu, hesap araçları gezgini, rehber sekmeleri).
+ * K7 Kart iç boşluğu: zemini ya da gölgesi olan başlıklı kart (içinde h3 ya da h4 olan yüzey) dört kenarında iç boşluk
+ *    ölçeğinin bir kademesini kullanır: `--inset-sm`, `--inset-md`, `--inset-lg` ya da `--inset-xl`. Kayıt listesi, tablo ve form
+ *    denetimi bu kurala girmez, çünkü kendi bileşen ölçüleri vardır.
+ *
+ * Test derlenmiş bütün sayfaları üç genişlikte açar: 375, 768 ve 1280 px. Token değerleri sayfada ölçülür, elle yazılmaz.
+ */
+
+/** Sayfa içi (#) bağlantı taşıyabilen gezinme öğeleri (K6). */
+const GEZINME_IZINLI = '.crumbs, .pager, .bolum-dizini, .applet-gezgin, .pol-roller, [role="tablist"]';
+
+function iskeletOlc(gezinmeIzinli: string) {
+  const gorunur = (e: Element) => {
+    const r = e.getBoundingClientRect();
+    return r.width > 1 && r.height > 1 && getComputedStyle(e).visibility !== 'hidden';
+  };
+  const ad = (e: Element) => `${e.tagName.toLowerCase()}${typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\s+/).filter((c) => !/^m_|^mantine-/.test(c)).join('.') : ''} “${(e.textContent ?? '').trim().slice(0, 40)}”`;
+  const hata: string[] = [];
+  const main = document.querySelectorAll('main');
+  if (main.length !== 1) hata.push(`K1: ${main.length} main`);
+  const wrap = document.querySelectorAll('main .wrap');
+  if (wrap.length !== 1) hata.push(`K1: main içinde ${wrap.length} .wrap`);
+  const kutular = [...document.querySelectorAll('[data-page-header]')];
+  if (!kutular.length) hata.push('K1: sayfa başlığı yok');
+  for (const k of kutular) if (!k.parentElement?.matches('main > .wrap')) hata.push(`K1: başlık kutusu .wrap altında değil, ebeveyni ${ad(k.parentElement!)}`);
+
+  // Token değerleri: ölçüm kutusu sayfanın kendi stiliyle çözülür.
+  const olcu = document.createElement('div');
+  olcu.style.cssText = 'position:absolute;visibility:hidden;';
+  document.querySelector('main .wrap')!.append(olcu);
+  const tok = (ozellik: string, deger: string) => {
+    olcu.style.setProperty(ozellik, deger);
+    const v = getComputedStyle(olcu).getPropertyValue(ozellik);
+    olcu.style.removeProperty(ozellik);
+    return v;
+  };
+  const t2xl = parseFloat(tok('font-size', 'var(--text-2xl)'));
+  const txl = parseFloat(tok('font-size', 'var(--text-xl)'));
+  const tlg = parseFloat(tok('font-size', 'var(--text-lg)'));
+  const yari = tok('font-weight', 'var(--weight-semibold)');
+  const aralik = parseFloat(tok('margin-top', 'var(--section-gap)'));
+  const olcek = ['sm', 'md', 'lg', 'xl'].map((k) => {
+    olcu.style.setProperty('padding', `var(--inset-${k})`);
+    const c = getComputedStyle(olcu);
+    const v = `${c.paddingTop} ${c.paddingRight} ${c.paddingBottom} ${c.paddingLeft}`;
+    olcu.style.removeProperty('padding');
+    return v;
+  });
+  olcu.remove();
+
+  // K2 ve K3
+  for (const h of document.querySelectorAll<HTMLElement>('main h2, main h3, main h4')) {
+    if (!gorunur(h)) continue;
+    const cs = getComputedStyle(h);
+    const boy = parseFloat(cs.fontSize);
+    const duzey = +h.tagName[1];
+    const panel = h.matches('h2.panel-baslik');
+    if (duzey === 2 && !panel && !h.matches('.section-head > h2.section-title')) hata.push(`K2: bölüm ya da panel başlığı olmayan h2 ${ad(h)}`);
+    if (h.matches('.kayit-h')) continue;
+    if (cs.fontWeight !== yari) hata.push(`K3: ${ad(h)} kalınlığı ${cs.fontWeight}, beklenen ${yari}`);
+    if (duzey === 2 && panel && Math.abs(boy - tlg) > 0.5) hata.push(`K3: panel başlığı ${ad(h)} ${boy}px, beklenen ${tlg}px`);
+    if (duzey === 2 && !panel && Math.abs(boy - t2xl) > 0.5) hata.push(`K3: h2 ${ad(h)} ${boy}px, beklenen ${t2xl}px`);
+    if (duzey > 2 && Math.abs(boy - tlg) > 0.5 && Math.abs(boy - txl) > 0.5) hata.push(`K3: h${duzey} ${ad(h)} ${boy}px, beklenen ${tlg} ya da ${txl}px`);
+  }
+
+  // K3: alt düzey başlık, kendinden önceki üst düzey başlıktan büyük olmaz (kayıt başlığı hariç).
+  const sira = [...document.querySelectorAll<HTMLElement>('main h2, main h3, main h4')].filter((h) => gorunur(h) && !h.matches('.kayit-h'));
+  for (const [i, h] of sira.entries()) {
+    const duzey = +h.tagName[1];
+    const ust = sira.slice(0, i).reverse().find((x) => +x.tagName[1] < duzey);
+    if (ust && parseFloat(getComputedStyle(h).fontSize) > parseFloat(getComputedStyle(ust).fontSize) + 0.5) hata.push(`K3: ${ad(h)} kendinden önceki üst başlıktan büyük: ${ad(ust)}`);
+  }
+
+  // K4: ardışık üst düzey bölümler
+  const bolumler = [...document.querySelectorAll<HTMLElement>('main section.section')].filter((s) => !s.parentElement!.closest('section.section') && gorunur(s));
+  for (let i = 1; i < bolumler.length; i++) {
+    const once = bolumler[i - 1];
+    if (once.nextElementSibling !== bolumler[i]) continue;
+    const bosluk = bolumler[i].getBoundingClientRect().top - once.getBoundingClientRect().bottom;
+    if (Math.abs(bosluk - aralik) > 1) hata.push(`K4: “${bolumler[i - 1].id}” ile “${bolumler[i].id}” arası ${Math.round(bosluk)}px, beklenen ${aralik}px`);
+  }
+
+  // K7: başlıklı kart. Zemin ya da gölge kendisinden gelir, ebeveyninden değil.
+  const zeminli = (e: Element) => {
+    const c = getComputedStyle(e);
+    const bg = c.backgroundColor !== 'rgba(0, 0, 0, 0)' && c.backgroundColor !== 'transparent';
+    // Kendi renginde geniş gölgeyle sayfa kenarına uzanan bant (tam genişlik hilesi) kart sayılmaz.
+    const golge = c.boxShadow !== 'none' && !/ 0px 0px 0px \d{3,}px/.test(c.boxShadow);
+    return bg || golge;
+  };
+  for (const e of document.querySelectorAll<HTMLElement>('main div, main li, main section, main article, main aside')) {
+    if (!gorunur(e) || e.matches('.section, .table-block, .table-frame, .kayit, .kayit-liste, .chart, .chart-canvas, [role="tabpanel"], [role="dialog"]') || e.closest('table, form, fieldset, .kayit-liste, .mantine-Accordion-panel, details')) continue;
+    if (!zeminli(e)) continue;
+    const r = e.getBoundingClientRect();
+    if (r.width < 160 || r.height < 64) continue;
+    const baslik = [...e.querySelectorAll('h3, h4')].find((h) => gorunur(h) && (h.closest('div, li, section, article, aside') === e || h.parentElement?.parentElement === e));
+    if (!baslik) continue;
+    const c = getComputedStyle(e);
+    const deger = `${c.paddingTop} ${c.paddingRight} ${c.paddingBottom} ${c.paddingLeft}`;
+    if (!olcek.includes(deger)) hata.push(`K7: kart ${ad(e)} iç boşluğu ${deger}, ölçek ${olcek.join(' | ')}`);
+  }
+
+  // K5
+  for (const e of document.querySelectorAll('main [class*="-uyari"]')) {
+    if (!gorunur(e)) continue;
+    const sinif = [...e.classList].find((c) => /-uyari$/.test(c));
+    if (sinif) hata.push(`K5: sayfaya özel uyarı kutusu .${sinif}`);
+  }
+
+  // K6
+  for (const n of document.querySelectorAll('main nav')) {
+    if (!gorunur(n) || n.matches(gezinmeIzinli) || n.closest(gezinmeIzinli) || n.closest('section.section')) continue;
+    const baglantilar = [...n.querySelectorAll('a[href]')];
+    if (baglantilar.length > 1 && baglantilar.every((a) => (a.getAttribute('href') ?? '').startsWith('#'))) hata.push(`K6: sayfa içi bağlantı listesi BolumDizini değil: ${ad(n)}`);
+  }
+  return hata;
+}
+
+async function yukle(page: Page, yol: string) {
+  await page.goto(yol.slice(1));
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  await page.waitForSelector('.app-footer', { state: 'attached' });
+  await page.waitForLoadState('networkidle');
+}
+
+test.describe('sayfa iskeleti: ortak parçalar her sayfada aynı', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(([endpoint, key]) => localStorage.setItem('istoc-opex-baglanti', JSON.stringify({ endpoint, key })), [ENDPOINT, KEY]);
+    await page.route('https://script.google.com/**', (route) =>
+      (route.request().postData() ?? '').includes('"service":"persona"')
+        ? route.fallback()
+        : route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(MODEL, 'ozet-1')) }).catch(() => undefined),
+    );
+  });
+
+  for (const yol of SAYFALAR) {
+    test(`${yol}: kabuk, bölüm, başlık ölçeği, ritim, sayfa notu, bölüm dizini ve kart boşluğu ortak kalıpta`, async ({ page }) => {
+      test.setTimeout(90_000);
+      const hatalar: string[] = [];
+      for (const genislik of [1280, 768, 375]) {
+        await page.setViewportSize({ width: genislik, height: 900 });
+        await yukle(page, yol);
+        for (const h of await page.evaluate(iskeletOlc, GEZINME_IZINLI)) hatalar.push(`${genislik} px ${h}`);
+      }
+      expect([...new Set(hatalar)], 'iskelet sözleşmesi').toEqual([]);
+    });
+  }
 });

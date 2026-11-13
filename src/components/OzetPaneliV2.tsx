@@ -100,7 +100,7 @@ export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosu
   const dagilim = s.paketler.map((p) => `${sayi(p.adet)} ${p.ad}`).join(', ');
   return (
     <aside className="v2-oz" aria-label="Özet">
-      <h2 className="v2-oz-baslik">Özet</h2>
+      <h2 className="panel-baslik">Özet</h2>
 
       <section className="v2-oz-bolum" aria-labelledby="v2-oz-secimler">
         <h3 className="v2-oz-alt" id="v2-oz-secimler">

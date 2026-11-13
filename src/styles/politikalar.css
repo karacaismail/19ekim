@@ -70,9 +70,9 @@
 .pol-sekme-listesi[aria-label='Çalışma rolü'] .pol-sekme[aria-selected='true']::after { opacity: 1; }
 
 /* Yalnız yanıtlanan kararlar ve mevcut iş çizilir. Gelecek yol yanıta bağlıdır. */
-.pol-yol { overflow-wrap: break-word; margin-block: var(--space-4); }
-.pol-yol-giris { margin-block-end: var(--space-4); max-inline-size: var(--prose-max); }
-.pol-yol-giris h2 { font-size: var(--text-2xl); line-height: var(--leading-tight); margin: 0; }
+.pol-yol { overflow-wrap: break-word; }
+/* Akış bölümü rol sekmelerinin hemen altındadır. Sekme, akışı seçen araçtır. Bu yüzden bölüm aralığı burada kısadır. */
+.pol-yol > .section { margin-block-start: var(--space-6); }
 .pol-yol-ust { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--policy-active-ink); }
 .pol-zaman { list-style: none; padding: 0; margin-block: 0 var(--space-5); }
 .pol-zaman > li { display: grid; grid-template-columns: var(--policy-rail) minmax(0, 1fr); gap: var(--space-2); position: relative; }
@@ -92,7 +92,7 @@
 .pol-yapilacak { min-inline-size: 0; }
 .pol-adim-basligi { margin-block-end: var(--space-3); }
 .pol-adim-basligi > .pol-yol-ust { margin-block: 0 var(--space-1); }
-.pol-etkin-baslik { font-size: var(--text-2xl); line-height: var(--leading-snug); margin: 0; scroll-margin-block: var(--space-20); }
+.pol-etkin-baslik { font-size: var(--text-xl); line-height: var(--leading-snug); margin: 0; scroll-margin-block: var(--space-20); }
 html[data-focus-mode='keyboard'] .pol-etkin-baslik:focus-visible,
 html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decoration-line: underline; text-decoration-color: var(--focus-indicator); text-decoration-thickness: var(--focus-indicator-width); text-underline-offset: var(--focus-indicator-offset); }
 .pol-adim-duzeni { display: grid; gap: var(--space-5); align-items: start; }
@@ -124,8 +124,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
   html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decoration: none; }
 }
 @media (min-width: 48em) {
-  .pol-yol { --policy-rail: var(--policy-rail-wide); margin-block-start: var(--space-5); }
-  .pol-yol-giris { margin-block-end: var(--space-5); }
+  .pol-yol { --policy-rail: var(--policy-rail-wide); }
   .pol-zaman > li { gap: var(--space-4); }
   .pol-adim-duzeni { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--policy-column-gap); }
   .pol-yol-aciklama, .pol-rehber-ekleri { margin-inline-start: calc(var(--policy-rail) + var(--space-4)); }
