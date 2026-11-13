@@ -448,7 +448,7 @@ export function AppFrame({
  */
 function IlgiliSayfalar({ current }: { current: string }) {
   const kayit = icerikOf(current);
-  const ilgili = (kayit?.iliskili ?? []).map((id) => ICERIK.find((k) => k.id === id)).filter((k) => k && !k.planlandi) as typeof ICERIK;
+  const ilgili = (kayit?.iliskili ?? []).map((id) => ICERIK.find((k) => k.id === id)).filter((k) => k && !k.planlandi && !k.gizli) as typeof ICERIK;
   if (!ilgili.length) return null;
   return (
     <nav aria-labelledby="ilgili-sayfalar-baslik" className="pager" data-tur="ilgili">

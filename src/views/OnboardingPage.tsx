@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { Section } from '../components/ui';
+import { SayfaGirisi, Section } from '../components/ui';
 import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar, ve, type Adim, type Asama, type Cikis, type Durum, type Sablon } from '../data/onboarding';
 import '../styles/onboarding.css';
 
@@ -249,9 +249,11 @@ function Icerik() {
     <>
       <PageHeader title="Yeni kayıt gelince ne yapılır?" purpose="Yeni kaydolan satıcıyla karşılaştığınız her durumda ne yapacağınızı adım adım gösterir." />
       <div className="ob-sayfa">
-        <p className="ob-giris">
+        <SayfaGirisi>
+          <p>
           Bu sayfa, istoc.com’a yeni kaydolan bir satıcıyı ilk günden ücretli pakete kadar nasıl takip edeceğinizi gösterir. Süreç dört aşamadan oluşur. Satıcının hangi aşamada olduğunu, CRM (müşteri ilişkileri yönetimi) programındaki kayıt kartında yazan durumdan anlarsınız. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
-        </p>
+          </p>
+        </SayfaGirisi>
 
         <Section id="asamalar" title="Aşamalar" desc="Her kart bir aşamayı ve aşamanın nasıl bittiğini gösterir.">
           <AsamaHaritasi />

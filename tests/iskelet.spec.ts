@@ -134,6 +134,16 @@ test.describe('sayfa iskeleti: bütün sayfalar aynı düzeni izler', () => {
  * K6 Bölüm dizini: sayfa düzeyindeki içindekiler listesi ortak `BolumDizini` bileşenidir (`nav.bolum-dizini`). Bölümün
  *    içindeki bağlantı listesi o bölümün aracıdır (ör. hazırlık grupları, aşama haritası) ve sayılmaz. Başka gezinme öğesi
  *    yalnız kendi işini yapar (kırıntı, sayfa sonu, hesap araçları gezgini, rehber sekmeleri).
+ * K8 Sıra: `main > .wrap` içindeki parçalar şu sırayla gelir. Sayfaya özel sarmalayıcı (`.dg`, `.gm` gibi) açılır ve
+ *    içindekiler aynı sırayla denetlenir.
+ *    1. Sayfa başı: `[data-page-header]` kutuları.
+ *    2. Sayfa önü: üst kutu (`[data-ust-kutu]`), yapışık özet (`.yapiskan`), sürüm seçici (`.so-surum`), bölüm dizini
+ *       (`.bolum-dizini`), sayfa notu (`.sayfa-notu`) ve giriş paragrafı (`.sayfa-giris`).
+ *    3. Gövde: yalnız bölümler (`section.section`). Uygulama sayfasında gövde aracın kendisidir.
+ *    4. Sayfa sonu: sayfa kaynağı (`.sayfa-kaynagi`) ve `nav.pager`.
+ *    Sayfaya özel giriş paragrafı, kart ya da araç bölümlerin dışında durmaz. Bütün bölümlere uygulanan araç (süzgeç,
+ *    özet sayıları) sayfa başının içindedir (`PageHeader` çocukları). Sekmeli bölüm kümesi (sekme paneli içinde bölümler,
+ *    Giderler’in yıl kümesi gibi) gövdenin parçasıdır. Uygulama sayfasının sarmalayıcısı açılmaz, araç bir bütündür.
  * K7 Kart iç boşluğu: zemini ya da gölgesi olan başlıklı kart (içinde h3 ya da h4 olan yüzey) dört kenarında iç boşluk
  *    ölçeğinin bir kademesini kullanır: `--inset-sm`, `--inset-md`, `--inset-lg` ya da `--inset-xl`. Kayıt listesi, tablo ve form
  *    denetimi bu kurala girmez, çünkü kendi bileşen ölçüleri vardır.
@@ -251,10 +261,53 @@ function iskeletOlc(gezinmeIzinli: string) {
   return hata;
 }
 
+/** K8: sayfa parçalarının sırası. */
+function siraOlc(uygulama: boolean) {
+  const hata: string[] = [];
+  const ad = (e: Element) => `${e.tagName.toLowerCase()}${typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\s+/).filter((c) => !/^m_|^mantine-/.test(c)).join('.') : ''} “${(e.textContent ?? '').trim().slice(0, 40)}”`;
+  const ONU = '[data-ust-kutu], .yapiskan, .so-surum, .bolum-dizini, .sayfa-notu, .sayfa-giris';
+  const gorunur = (e: Element) => e.getClientRects().length > 0 && !e.matches('.visually-hidden, script, style, template');
+  const sira: Element[] = [];
+  const gez = (k: Element) => {
+    for (const c of k.children) {
+      if (!gorunur(c)) continue;
+      // Sayfaya özel sarmalayıcı: kendisi bilinen bir parça değil ama içinde bölüm ya da sayfa önü parçası var.
+      const kume = c.querySelector(':scope > [role="tabpanel"]');
+      if (!uygulama && !kume && c.tagName === 'DIV' && !c.matches(`${ONU}, [data-page-header]`) && c.querySelector(`:scope > section.section, :scope > div section.section, ${ONU}`)) gez(c);
+      else sira.push(c);
+    }
+  };
+  gez(document.querySelector('main > .wrap')!);
+  const asama = (e: Element) =>
+    e.matches('[data-page-header]') ? 1 : e.matches(ONU) ? 2 : e.matches('section.section') || e.querySelector(':scope > [role="tabpanel"] section.section') ? 3 : e.matches('nav.pager, .sayfa-kaynagi') ? 4 : uygulama ? 3 : 0;
+  // Metin sayfasında bölüm başlığının çizgisi içerik alanının tamamı kadardır (okuma sütunu yalnız içeriği daraltır).
+  if (!uygulama) {
+    const wrap = document.querySelector('main > .wrap')!;
+    const cs = getComputedStyle(wrap);
+    const icGenislik = wrap.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    for (const s of sira.filter((e) => e.matches('section.section'))) {
+      const bas = s.querySelector(':scope > .section-head')!.getBoundingClientRect().width;
+      if (Math.abs(bas - icGenislik) > 1) hata.push(`K8: “${s.id}” bölüm başlığı ${Math.round(bas)}px, içerik alanı ${Math.round(icGenislik)}px`);
+    }
+  }
+  let son = 1;
+  for (const e of sira) {
+    const a = asama(e);
+    if (a === 0) hata.push(`K8: bölüm dışında sayfaya özel parça: ${ad(e)}`);
+    else if (a < son) hata.push(`K8: sıra bozuk, ${ad(e)} ${['', 'sayfa başı', 'sayfa önü', 'gövde', 'sayfa sonu'][a]} ama ${['', 'sayfa başı', 'sayfa önü', 'gövde', 'sayfa sonu'][son]} sonrasında`);
+    else son = a;
+  }
+  return hata;
+}
+
 async function yukle(page: Page, yol: string) {
   await page.goto(yol.slice(1));
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await page.waitForSelector('.app-footer', { state: 'attached' });
+  // Sürüm seçici v2'ye etkiden sonra geçer. Giderler bölümleri veri gelince çizilir. Ölçüm çizimden sonra yapılır.
+  if (yol === '/satis-ortakligi/?surum=v2') await page.waitForSelector('main .v2-so2', { state: 'attached' });
+  if (yol === '/istihdam/?surum=v2') await page.waitForSelector('main [class*="iv2-"]', { state: 'attached' });
+  if (yol === '/giderler/') await page.waitForSelector('#plan-bolum');
   await page.waitForLoadState('networkidle');
 }
 
@@ -276,6 +329,7 @@ test.describe('sayfa iskeleti: ortak parçalar her sayfada aynı', () => {
         await page.setViewportSize({ width: genislik, height: 900 });
         await yukle(page, yol);
         for (const h of await page.evaluate(iskeletOlc, GEZINME_IZINLI)) hatalar.push(`${genislik} px ${h}`);
+        for (const h of await page.evaluate(siraOlc, UYGULAMA.has(yol))) hatalar.push(`${genislik} px ${h}`);
       }
       expect([...new Set(hatalar)], 'iskelet sözleşmesi').toEqual([]);
     });

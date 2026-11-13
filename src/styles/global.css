@@ -1852,6 +1852,32 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   margin: 0;
 }
 
+.sayfa-notu > .sayfa-notu-baslik {
+  font-weight: var(--weight-semibold);
+}
+
+/* Sayfa girişi (iskelet sözleşmesi K8): amaç satırından sonraki açıklama. Okuma genişliğinde, büyük gövde yazısıyla. */
+.sayfa-giris {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--prose-max);
+  margin: var(--space-6) 0 0;
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+}
+
+.sayfa-giris > p {
+  margin: 0;
+}
+
+/* Sayfa kaynağı (iskelet sözleşmesi K8): son bölümden sonra, sayfa sonu gezinmesinden önce. */
+.sayfa-kaynagi {
+  max-width: var(--prose-max);
+  margin: var(--section-gap) 0 0;
+  color: var(--text-secondary);
+}
+
 /*
  * İki adımlı onay (OnayDugmesi): onay bekleyen düğme her sayfada aynı uyarı tonundadır. Üzerine gelince de değişmez.
  * Onay cümlesi uzunsa satır sarar. Dikey iç boşluk her durumda vardır, bu yüzden onaylanınca düğmenin yeri oynamaz.
@@ -4237,10 +4263,6 @@ html[data-focus-mode='keyboard'] .opex-btn[data-primary]:focus-visible {
   border-radius: var(--radius-surface);
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
-}
-
-.opex-connect .block-title {
-  margin: 0;
 }
 
 .opex-connect-lead {
@@ -7513,9 +7535,14 @@ html[data-bant-gizli] .so2-duzen {
 }
 
 /* ---------- Değer önerisi sayfası (/deger-onerisi/) ---------- */
-/* Değer önerisi: bölüm başlığı tam genişliktedir, kartlar okuma genişliğinde kalır. */
-.dg .section > :not(.section-head) {
-  max-width: 54rem;
+/*
+ * Okuma sütunu (iskelet sözleşmesi): kart listesi olan metin sayfalarında bölüm başlığı tam genişliktedir. Bölüm
+ * içeriği ortak okuma genişliğinde kalır. Değer önerisi, gelir modelleri ve oyunlaştırma bu kuralı kullanır.
+ */
+.dg .section > :not(.section-head),
+.gm .section > :not(.section-head),
+.oy .section > :not(.section-head) {
+  max-width: var(--okuma-max);
 }
 
 .dg-bolum {
@@ -7877,27 +7904,6 @@ html[data-bant-gizli] .so2-duzen {
  * paketler, öncelik ve hazırlık grupları kenarlıksızdır. Ayrım yüzey tonu ve boşlukla kurulur. Hazırlık durumu metinle
  * okunur, renk yalnız destekler (`--hazirlik-*` tokenları). Kartlar tıklanmaz, bu yüzden üzerine gelince zemin değişmez.
  */
-.gm {
-  max-width: 54rem;
-}
-
-/* Rol sayfası: başlıktaki ilk cümleden sonra görev tanımının kalanı. */
-.rol-gorev-ozeti {
-  max-width: 62ch;
-  margin: var(--space-4) 0 0;
-  color: var(--text-primary);
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
-}
-
-.gm-giris {
-  max-width: 62ch;
-  margin: var(--space-6) 0 0;
-  color: var(--text-primary);
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
-}
-
 /* Kısa özet: üç madde, her biri bir soruya cevap verir ve ilgili bölüme götürür. */
 .gm-ozet {
   display: grid;
@@ -9998,10 +10004,6 @@ html[data-focus-mode='keyboard'] :where(.ks-secenek, .ks-liste-oge):focus-visibl
  * ve boşlukla ayrılır. Kartın tamamı pencereyi açan düğmedir. Pencerede uygulama adımları numaralı ve dikey bir çizgiyle
  * bağlı sırayla durur. Klavye odağı kartın sol kenarında düz bir çubuktur, kartı çevrelemez.
  */
-.oy {
-  max-width: 60rem;
-}
-
 .oy-kartlar {
   display: grid;
   /* Her grupta 4 kart: geniş ekranda 2 × 2, dar ekranda tek sütun. Üç sütunda dördüncü kart yalnız kalırdı. */

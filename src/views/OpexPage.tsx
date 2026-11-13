@@ -4,7 +4,7 @@ import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { Chart, Choice, DataTable, FactsRow, KayitListesi, Note, Section, useKabuk, type Column, type Kayit } from '../components/ui';
+import { Chart, Choice, DataTable, FactsRow, KayitListesi, Note, SayfaKaynagi, Section, useKabuk, type Column, type Kayit } from '../components/ui';
 import {
   OPEX_ENDPOINT,
   OPEX_MIN_GAP_MS,
@@ -338,7 +338,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
   const message = problem || error;
   return (
     <form className="opex-connect" onSubmit={submit} noValidate aria-describedby={message ? errorId : undefined} data-ust-kutu="">
-      <h2 className="block-title">Google Sheets bağlantısı</h2>
+      <h2 className="panel-baslik">Google Sheets bağlantısı</h2>
       <p className="opex-connect-lead">
         Bu sayfa verileri saklamaz. Veriler, Google Sheets’e bağlı Apps Script web uygulamasından okunur. Sheets’te erişim “Anahtarla”
         olarak ayarlıysa anahtar girmeniz gerekir. Anahtar yalnız bu tarayıcıda tutulur ve sayfa adresine eklenmez.
@@ -1980,9 +1980,9 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
           <YearPanel key={d.yil} m={m} d={d} start={3} />
         </div>
       </div>
-      <p className="opex-source">
+      <SayfaKaynagi>
         Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. Hesap aracının sürümü <code>{m.surum}</code>, özet kodu <code>{data.ozet}</code> olur.
-      </p>
+      </SayfaKaynagi>
     </OzetContext.Provider>
   );
 }

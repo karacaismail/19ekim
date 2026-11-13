@@ -56,6 +56,8 @@ export interface IcerikKaydi {
   yeni?: true;
   /** Henüz içerik taşınmamış, planlanan sayfa (dosyası yok). */
   planlandi?: boolean;
+  /** Yalnız adresle açılan kişisel sayfa: hiçbir menüde, ilgili sayfa listesinde ya da bağlantıda görünmez. */
+  gizli?: true;
   /** Ara kırıntılar (grup/ebeveyn yerine; son kırıntı başlıktır) — belgeli kullanıcı kararı (Giderler: Finans › OpEx). */
   kirintiYolu?: string[];
 }
@@ -610,6 +612,7 @@ export const ICERIK: IcerikKaydi[] = [
   {
     id: 'email',
     path: '/email/',
+    gizli: true,
     sinif: ['kisisel'],
     baslik: 'E-posta',
     kullaniciSorusu: 'Kişisel görüşme ve e-posta taslağım nerede?',

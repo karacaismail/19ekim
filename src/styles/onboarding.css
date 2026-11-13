@@ -9,13 +9,6 @@
   display: grid;
 }
 
-.ob-giris {
-  max-width: var(--prose-max);
-  margin: var(--space-6) 0 0;
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
-}
-
 .ob-etiket {
   display: block;
   margin: 0 0 var(--space-1);

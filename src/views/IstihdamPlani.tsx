@@ -242,21 +242,28 @@ function Takvim({ bugun }: { bugun: string | null }) {
 
 type Gorunum = 'zaman' | 'takvim';
 
-export function IstihdamPlanGorunumu() {
+/** İstihdam takviminin özet sayıları: sayfa başının parçasıdır (iskelet sözleşmesi K8; Hedefler sayfasındaki gibi). */
+export function IstihdamOzeti() {
   const bugun = useBugun();
-  const [gorunum, setGorunum] = useState<Gorunum>('zaman');
   const etkin = bugun ? ASAMALAR.filter((a) => a.bas <= bugun && bugun <= a.son && a.id.startsWith('f')) : [];
   const siradaki = bugun ? OLAYLAR.find((o) => o.tarih >= bugun) : OLAYLAR[0];
   return (
+    <Stats
+      items={[
+        { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => `“${a.ad.split(': ')[1]}”`).join(' ve ') : 'Plan 3 Kasım 2026 Salı günü başlar.' },
+        { label: 'Sıradaki adım', value: siradaki ? uzunTarih(siradaki.tarih) : 'Yok', note: siradaki?.baslik },
+        { label: 'Birinci dalga', value: '23 Kasım 2026 Pazartesi', note: 'Bu tarihte 6 kişi birlikte işe başlar.' },
+        { label: 'İkinci dalga', value: '1 Aralık 2026 Salı', note: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar.' },
+      ]}
+    />
+  );
+}
+
+export function IstihdamPlanGorunumu() {
+  const bugun = useBugun();
+  const [gorunum, setGorunum] = useState<Gorunum>('zaman');
+  return (
     <>
-      <Stats
-        items={[
-          { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => `“${a.ad.split(': ')[1]}”`).join(' ve ') : 'Plan 3 Kasım 2026 Salı günü başlar.' },
-          { label: 'Sıradaki adım', value: siradaki ? uzunTarih(siradaki.tarih) : 'Yok', note: siradaki?.baslik },
-          { label: 'Birinci dalga', value: '23 Kasım 2026 Pazartesi', note: 'Bu tarihte 6 kişi birlikte işe başlar.' },
-          { label: 'İkinci dalga', value: '1 Aralık 2026 Salı', note: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar.' },
-        ]}
-      />
       <Section
         id="plan"
         index={1}

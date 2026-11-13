@@ -686,8 +686,30 @@ export function Note({ title, children }: { title: string; children: ReactNode }
  * uyarı ya da açıklama kutusudur. Bütün sayfalar aynı bileşeni kullanır. Sayfaya özel uyarı sınıfı yazılmaz.
  * İçindeki paragraflar aynı kutuda alt alta durur.
  */
-export function SayfaNotu({ children }: { children: ReactNode }) {
-  return <div className="sayfa-notu">{children}</div>;
+export function SayfaNotu({ children, baslik }: { children: ReactNode; /** Kutunun adı (ör. “Kavramlar”). Verilirse kutu adıyla bulunur. */ baslik?: string }) {
+  if (!baslik) return <div className="sayfa-notu">{children}</div>;
+  return (
+    <aside className="sayfa-notu" aria-label={baslik}>
+      <p className="sayfa-notu-baslik">{baslik}</p>
+      {children}
+    </aside>
+  );
+}
+
+/**
+ * Sayfa girişi (iskelet sözleşmesi K8): başlıktaki tek cümlelik amaçtan sonra gelen açıklama paragrafları. Sayfa
+ * önünde, ilk bölümden önce durur. Bütün sayfalar aynı okuma genişliğini ve yazı boyunu kullanır.
+ */
+export function SayfaGirisi({ children }: { children: ReactNode }) {
+  return <div className="sayfa-giris">{children}</div>;
+}
+
+/**
+ * Sayfa kaynağı (iskelet sözleşmesi K8): sayfanın hesabının ne zaman ve hangi sürümle yapıldığını söyleyen son not.
+ * Son bölümden sonra, sayfa sonu gezinmesinden önce durur.
+ */
+export function SayfaKaynagi({ children }: { children: ReactNode }) {
+  return <p className="sayfa-kaynagi">{children}</p>;
 }
 
 /**

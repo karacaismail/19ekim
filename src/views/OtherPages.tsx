@@ -12,7 +12,7 @@ import {
   TextLink,
 } from '../components/ui';
 import { PageHeader } from '../components/PageHeader';
-import { GuncelPlan, IstihdamPlanGorunumu } from './IstihdamPlani';
+import { GuncelPlan, IstihdamOzeti, IstihdamPlanGorunumu } from './IstihdamPlani';
 import { KararSecimleri } from '../components/KararSecimleri';
 import { boardMapping, type BoardRow } from '../data/archive';
 import type { CrmStage, GovNode, PayRule, WorkPeriod } from '../data/program';
@@ -49,7 +49,9 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
   const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
   return (
     <>
-      <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
+      <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir.">
+        <IstihdamOzeti />
+      </PageHeader>
       {surum}
 
       <IstihdamPlanGorunumu />

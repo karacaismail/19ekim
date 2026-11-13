@@ -9,6 +9,8 @@ import {
   KpiGrid,
   Note,
   RoleChip,
+  SayfaGirisi,
+  SayfaNotu,
   Section,
   StatusChip,
   TextLink,
@@ -421,7 +423,7 @@ function RolKavramlari({ role }: { role: Role }) {
   const kavramlar = metindekiKavramlar(JSON.stringify(role));
   if (!kavramlar.length) return null;
   return (
-    <Note title="Kavramlar">
+    <SayfaNotu baslik="Kavramlar">
       <dl className="rol-kavramlar">
         {kavramlar.map((k) => (
           <div key={k.terim}>
@@ -430,7 +432,7 @@ function RolKavramlari({ role }: { role: Role }) {
           </div>
         ))}
       </dl>
-    </Note>
+    </SayfaNotu>
   );
 }
 
@@ -440,8 +442,12 @@ function RoleContent({ slug }: { slug: string }) {
     <>
       <RoleHero role={role} />
       {/* Görev tanımının ve ücretin kalanı başlığın altında tam cümlelerle okunur. Başlık kısa kalır. */}
-      {gorevParcalari(role.mission)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.mission)[1]}</p> : null}
-      {gorevParcalari(role.pay)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.pay)[1]}</p> : null}
+      {gorevParcalari(role.mission)[1] || gorevParcalari(role.pay)[1] ? (
+        <SayfaGirisi>
+          {gorevParcalari(role.mission)[1] ? <p>{gorevParcalari(role.mission)[1]}</p> : null}
+          {gorevParcalari(role.pay)[1] ? <p>{gorevParcalari(role.pay)[1]}</p> : null}
+        </SayfaGirisi>
+      ) : null}
       <RolKavramlari role={role} />
       {role.slug === 'dijital-pazarlama' ? <DigitalSections role={role} /> : <GenericSections role={role} />}
     </>

@@ -1265,9 +1265,14 @@ Kullanıcı bütün sayfaların iskeletinin ve düzeninin standartlaşmasını i
 Testi `tests/iskelet.spec.ts` dosyasıdır. Bu test her sayfayı 1280 px ve 375 px genişlikte denetler.
 
 1. **Sayfa başı.** `PageHeader` kırıntı satırında tek h1 gösterir. Altında tek cümlelik amaç durur. Giderler sayfasında
-   amaç satırı yoktur (2026-10-21 kararı). Üç kutu sayfa başının parçasıdır. Bunlar sonuç kutusu (`ResultSummary`),
-   senaryo kurucu (`SenaryoKurucu`) ve Parametreler’deki değişiklik özetidir. Bu kutular `data-ust-kutu` taşır.
-   Başlıkları bölüm dışında h2 olabilir.
+   amaç satırı yoktur (2026-10-21 kararı). Üst kutular sayfa başının parçasıdır ve `data-ust-kutu` taşır. Beş üst kutu
+   vardır:
+   - sonuç kutusu (`ResultSummary`),
+   - senaryo kurucu (`SenaryoKurucu`),
+   - Parametreler’deki değişiklik özeti,
+   - Giderler’deki bağlantı formu,
+   - Hizmetler ve Küresel pazaryerleri sayfalarındaki giriş kartı.
+   Üst kutunun h2 başlığı bölüm dışında durabilir. Bu başlık panel başlığıdır (`h2.panel-baslik`).
 2. **Gövde.** Metin düzenindeki sayfanın gövdesi ortak `Section` bölümlerinden oluşur. Her bölümün h2 başlığı ve kısa
    açıklaması (`desc`) vardır. Bölüm dışında h2 yoktur. Bölüm başlıkları her sayfada aynı boydadır (1280 px’te 32 px).
    Numara yalnız sırası anlamlı sayfada kullanılır (ux.md §3, P6.1). Bir sayfada ya bütün bölümler numaralıdır ya da
@@ -1304,8 +1309,22 @@ genişlikte açar. Chromium ve WebKit’te çalışır. Token değerleri sayfada
   - Kayıt listesinin başlığı (`.kayit-h`) kendi biçimini korur.
 - **Ritim.** Ardışık iki bölüm arasında tam `--section-gap` boşluk vardır. Numaralı başlıkta numara sütunu
   `--section-index-w` genişliğindedir.
-- **Sayfa notu.** Sayfa başındaki uyarı ve açıklama kutusu `SayfaNotu` bileşenidir (`.sayfa-notu`). Sayfaya özel uyarı
-  sınıfı (`*-uyari`) yazılmaz.
+- **Sıra.** `main > .wrap` içindeki parçalar şu sırayla gelir. Sayfaya özel sarmalayıcı açılır, içindekiler de aynı
+  sırayla denetlenir.
+  1. Önce sayfa başı gelir. Sayfa başında kırıntı satırı ve amaç satırı durur. Bütün bölümlere uygulanan süzgeç ve özet
+     sayıları da `PageHeader` içindedir. Örnekler Oyunlaştırma süzgeci ve İstihdam takviminin sayılarıdır.
+  2. Sonra sayfa önü gelir. Sayfa önünde üst kutu (`data-ust-kutu`), yapışık özet ve sürüm seçici durabilir. Bölüm
+     dizini, sayfa notu ve sayfa girişi de burada durur.
+  3. Sonra gövde gelir. Gövdede yalnız bölümler durur. Sekmeli bölüm kümesi de gövdenin parçasıdır. Örneği Giderler’in
+     yıl kümesidir.
+  4. En sonda sayfa sonu gelir. Sayfa sonunda sayfa kaynağı (`SayfaKaynagi`) ve sayfa sonu gezinmesi durur.
+  Uygulama sayfasında gövde aracın kendisidir. Hizmetler ve Küresel pazaryerleri sayfalarındaki giriş kartı üst kutudur.
+- **Sayfa notu ve sayfa girişi.** Sayfa başındaki uyarı ve açıklama kutusu `SayfaNotu` bileşenidir (`.sayfa-notu`).
+  Adlı kutu `baslik` alır ve adıyla bulunur. Örneği rol sayfalarındaki “Kavramlar” kutusudur. Amaç satırından sonraki
+  açıklama paragrafları `SayfaGirisi` bileşenidir (`.sayfa-giris`). Sayfaya özel uyarı (`*-uyari`) ya da giriş
+  (`*-giris`) sınıfı yazılmaz.
+- **Okuma sütunu.** Kart listesi olan metin sayfasında bölüm başlığı tam genişliktedir. Bölüm içeriği `--okuma-max`
+  genişliğinde kalır. Örnekler Değer önerisi, Gelir modelleri ve Oyunlaştırma sayfalarıdır.
 - **Bölüm dizini.** Sayfa düzeyindeki içindekiler listesi `BolumDizini` bileşenidir. Bölümün içindeki bağlantı listesi
   o bölümün aracıdır. Örnekler hazırlık grupları ve aşama haritasıdır.
 - **Kart iç boşluğu.** Zemini ya da gölgesi olan başlıklı kart dört kademeden birini kullanır:
@@ -1320,6 +1339,9 @@ genişlikte açar. Chromium ve WebKit’te çalışır. Token değerleri sayfada
   3. Onay süreye bağlı değildir. İkinci basış işi yapar.
   4. “Vazgeç” ya da Escape onayı kapatır. Odak ana düğmeye döner.
   5. Onay bekleyen düğme her sayfada aynı uyarı tonundadır. Onay cümlesi ekran okuyucuya duyurulur.
+
+Yalnız adresle açılan kişisel sayfanın içerik kaydı `gizli: true` taşır. Bu kayıt hiçbir menüde ve ilgili sayfa
+listesinde görünmez (`tests/icerik.spec.ts`).
 
 Yeni sayfa bu iskeletle kurulur. Yeni bir başlık, not ya da kart biçimi gerekirse önce ortak bileşen genişletilir.
 Sayfaya özel kopya yazılmaz.

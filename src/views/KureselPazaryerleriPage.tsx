@@ -199,7 +199,7 @@ function Icerik() {
         ]}
       />
       <div className="pz-sayfa">
-        <div className="pz-giris" data-edge="top">
+        <div className="pz-giris" data-edge="top" data-ust-kutu="">
           <div className="pz-giris-blok">
             <p className="pz-etiket">Araştırmanın ana fikri</p>
             <p className="pz-iddia">Satıcı bir platformda üç sebeple kalır. Alıcıların ne aradığını görür. Parasını güvenle alır. Parasını hızlı ya da önceden alabilir.</p>

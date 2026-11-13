@@ -31,7 +31,7 @@ import {
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
-import { paraBolunmez, Section } from '../components/ui';
+import { paraBolunmez, SayfaGirisi, Section } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
 import {
   ARASTIRMA_NOTU,
@@ -291,9 +291,11 @@ function Icerik() {
     <>
       <PageHeader title="Gelir modelleri" purpose="istoc.com’un bugün nasıl gelir elde ettiğini ve esnafa bugün neyi sunabileceğinizi gösterir." />
       <div className="gm">
-        <p className="gm-giris">
+        <SayfaGirisi>
+          <p>
           istoc.com, İstoç çarşısı esnafı için bir toptan pazar yeridir. Burada işletmeler işletmelere satış yapar. Buna B2B (işletmeden işletmeye) satış denir.
-        </p>
+          </p>
+        </SayfaGirisi>
 
         <Section id="kisa-ozet" title="Kısa özet" desc="Bu bölüm bugün neyin satıldığını ve neyin satılamadığını gösterir.">
           <ol className="gm-ozet">

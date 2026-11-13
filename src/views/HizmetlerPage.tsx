@@ -201,7 +201,7 @@ function Icerik() {
         ]}
       />
       <div className="pz-sayfa">
-        <div className="pz-giris" data-edge="top">
+        <div className="pz-giris" data-edge="top" data-ust-kutu="">
           <div className="pz-giris-blok">
             <p className="pz-etiket">{ILKE.etiket}</p>
             <p className="pz-iddia">{ILKE.baslik}</p>

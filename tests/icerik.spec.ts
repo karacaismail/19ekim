@@ -183,6 +183,17 @@ test('B2c (MS-11): her kaydın türetim kaynağı var; ön cümle yalnız tahtad
   expect(nakit).not.toMatch(/ayrıca gösterilir/);
 });
 
+test('gizli kayıt hiçbir listede yok: menü, sunum sırası ve ilgili sayfalar', () => {
+  const gizli = ICERIK.filter((k) => k.gizli);
+  expect(gizli.length, 'en az bir gizli kayıt').toBeGreaterThan(0);
+  for (const g of gizli) {
+    expect(g.menu, `${g.id} menüde yok`).toBeUndefined();
+    expect(SEQUENCE.some((s) => s.path === g.path), `${g.id} sunum sırasında yok`).toBe(false);
+    expect(NAV_GROUPS.flatMap((n) => n.items).some((i) => i.path === g.path), `${g.id} gezinmede yok`).toBe(false);
+    expect(ICERIK.filter((k) => k.iliskili?.includes(g.id)).map((k) => k.id), `${g.id} hiçbir ilgili sayfa listesinde yok`).toEqual([]);
+  }
+});
+
 test.describe('içerik envanteri — sayfada', () => {
   test('F10 / IA-18: alt bilgi kaydın kapsam cümlesini söyler; öneri, eğitim, örnek ve taslak “kesinleşen” demez; ön cümle yalnız tahta kaynaklı sayfada', async ({ page }) => {
     for (const id of ['bcg', 'applet', 'notlar', 'eylem-plani', 'giderler']) {
