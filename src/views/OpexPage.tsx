@@ -901,9 +901,9 @@ const SUTUN_GRUPLARI: { id: SutunGrubu; ad: string }[] = [
   { id: 'personel', ad: 'Personel ayrıntıları' },
 ];
 
-/** Aramada büyük/küçük harf ve ı/i farkı yok (“Instagram” → “insta”, “İnternet” → “internet”). */
 /** “2027 artışı” değerinin adı: “Kur +%12” → “Kur”. Filtre seçenekleri ve süzgeç aynı adı kullanır. */
 const artisAdi = (artis: string) => artis.replace(/ [+−]?%[\d,]+$/, '');
+/** Aramada büyük/küçük harf ve ı/i farkı yok (“Instagram” → “insta”, “İnternet” → “internet”). */
 const katla = (s: string) => s.toLocaleLowerCase('tr-TR').replace(/ı/g, 'i');
 /** “1.000,50” → 1000.5 (Türkçe sayı yazımı). */
 const sayiOku = (s: string) => Number(s.replace(/\s|₺|\$|€/g, '').replace(/\./g, '').replace(',', '.'));

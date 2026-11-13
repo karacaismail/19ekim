@@ -181,9 +181,10 @@ function Icerik() {
     : be.ongoru.nokta
       ? `${son} sonuna kadar gerçekleşmiyor. Son 6 ayın eğilimine göre ≈ ${longDate(be.ongoru.nokta.date)} günü beklenir (aylık açık ${tl(-be.ongoru.sonNet)}, açık her ay ${tl(be.ongoru.egim)} daralıyor)`
       : `${son} sonuna kadar gelir gideri geçmiyor ve açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}). Bu seçeneklerle plan sürdürülebilir değil`;
+  // Yuvarlanınca sıfır kalan fark “0 ₺” yazılır. “+0 ₺” ya da “−0 ₺” yazılmaz.
   const fark = (a: number, b: number) => {
     const v = b - a;
-    return v === 0 ? '0 ₺' : `${v > 0 ? '+' : '−'}${tl(Math.abs(v))}`;
+    return tl(Math.abs(v)) === tl(0) ? '0 ₺' : `${v > 0 ? '+' : '−'}${tl(Math.abs(v))}`;
   };
   const farkGun = (a: { date: string } | null, b: { date: string } | null) => (a && b ? (a.date === b.date ? 'Aynı' : `${kisaGun(a.date)} → ${kisaGun(b.date)}`) : `${a ? kisaGun(a.date) : 'yok'} → ${b ? kisaGun(b.date) : 'yok'}`);
   const etkiRows = [

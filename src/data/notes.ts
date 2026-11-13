@@ -45,9 +45,9 @@ export const DEFAULT_NOTES: NotesState = {
   ],
 };
 
-const isState = (value: unknown): value is NotesState => {
-  const v = value as NotesState;
-  return !!v && Array.isArray(v.lists) && Array.isArray(v.notes) && v.lists.every((l) => !!l && typeof l.id === 'string' && typeof l.name === 'string');
+const isList = (l: unknown): l is NoteList => {
+  const v = l as NoteList;
+  return !!v && typeof v.id === 'string' && typeof v.name === 'string';
 };
 
 const isNote = (n: unknown): n is Note => {
@@ -55,13 +55,25 @@ const isNote = (n: unknown): n is Note => {
   return !!v && typeof v.id === 'string' && typeof v.list === 'string' && typeof v.text === 'string' && typeof v.done === 'boolean' && typeof v.created === 'string';
 };
 
+/**
+ * Kayıt öğe öğe okunur. Bozuk liste ve bozuk not atlanır, sağlam olanlar kalır. Böylece tek bozuk öğe bütün notları
+ * varsayılana döndürmez. İlk düzenleme de varsayılanları kayıtlı notların üstüne yazmaz. Gelen kutusu her zaman vardır.
+ * Listesi silinmiş not gelen kutusuna taşınır.
+ */
 export function loadNotes(): NotesState | null {
   try {
     const raw = localStorage.getItem(NOTES_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    // Bozuk not öğeleri atlanır. Böylece sağlam notlar kaybolmaz ve sayfa çökmez.
-    return isState(parsed) ? { lists: parsed.lists, notes: parsed.notes.filter(isNote) } : null;
+    const parsed = JSON.parse(raw) as Partial<Record<keyof NotesState, unknown>> | null;
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.lists) || !Array.isArray(parsed.notes)) return null;
+    const lists = parsed.lists.filter(isList);
+    const sagNotlar = parsed.notes.filter(isNote);
+    // Hiç sağlam öğe kalmadıysa kayıt bozuktur ve varsayılan notlar kullanılır. Gerçek kayıtta gelen kutusu her zaman vardır.
+    if (!lists.length && !sagNotlar.length) return null;
+    if (!lists.some((l) => l.id === INBOX)) lists.unshift(DEFAULT_NOTES.lists[0]);
+    const ids = new Set(lists.map((l) => l.id));
+    const notes = sagNotlar.map((n) => (ids.has(n.list) ? n : { ...n, list: INBOX }));
+    return { lists, notes };
   } catch {
     return null;
   }

@@ -228,6 +228,8 @@ export function growthHires(p: Params, months: RevMonth[], inp: Pick<SimInputs, 
   for (let k = 1; k <= slots; k++) {
     const t = secondT + k * inp.sahaGrowthEvery;
     if (t >= months.length) break;
+    // Ay sırası tam sayı ve plan içinde olmalıdır. Geçmiş tarih ya da kesirli aralık sayfayı çökertmez, o ay atlanır.
+    if (t < 0 || !Number.isInteger(t)) continue;
     out.push(t);
   }
   return out;

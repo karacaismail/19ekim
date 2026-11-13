@@ -7,6 +7,9 @@ import { longDate } from '../src/lib/dates';
 import { ASAMALAR, KARARLAR, NET_SAAT, OLAYLAR, PLAN_ROLLERI, TAKVIM_BAS, TAKVIM_SON, YONETICI_YUKU } from '../src/data/istihdamPlani';
 import { KUMELER, POZISYONLAR, SECENEKLER, SECENEK_ADI, SECENEK_OZETI, takvim2027, type SecenekId } from '../src/data/istihdamV2';
 
+/** Parametre grubunu açan düğme. Başlık düzeyine bağlı değildir (grup başlığı h2 ya da h3 olabilir). */
+const grupDugmesi = (page: Page, ad: string) => page.getByRole('heading', { name: new RegExp(`^${ad}`) }).getByRole('button');
+
 /**
  * Planlama sayfalarında görünümün kendisinin hesapladığı sayılar. Beklenen değerler modelden ve veriden hesaplanır.
  * Sayfadaki bugünkü çıktı kopyalanmaz. Sayfalar: İstihdam takvimi (1. ve 2. sürüm), 90 gün hedefleri, Parametreler,
@@ -320,11 +323,11 @@ test.describe('Parametreler: türetilen değerler', () => {
   test('türetilen değerler modelden; çarpan ve abonelik değişince tablo hemen güncellenir', async ({ page }) => {
     await ac(page, 'parametreler/');
     await turetilenDenetle(page, DEFAULT_PARAMS);
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await grupDugmesi(page, 'Ücret').click();
     const carpan = page.getByLabel('İşveren maliyeti çarpanı', { exact: true });
     await carpan.fill('2,5');
     await carpan.blur();
-    await page.locator('.pgrup h2 button', { hasText: '90 gün hedefleri' }).click();
+    await grupDugmesi(page, '90 gün hedefleri').click();
     const abonelik = page.getByLabel('Aktif satıcı aboneliği', { exact: true });
     await abonelik.fill('299');
     await abonelik.blur();
@@ -343,7 +346,7 @@ test.describe('Parametreler: türetilen değerler', () => {
     await ac(page, 'hedefler/');
     await expect(page.locator('.page-meta')).toContainText(`${longDate(once.dates.start)} ile ${longDate(once.dates.day90)} arası`);
     await ac(page, 'parametreler/');
-    await page.locator('.pgrup h2 button', { hasText: 'Takvim' }).click();
+    await grupDugmesi(page, 'Takvim').click();
     const alan = page.getByLabel('Program başlangıcı');
     await expect(alan).toBeVisible();
     await expect(alan).toHaveValue('1 Kasım 2026');

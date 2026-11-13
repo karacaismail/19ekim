@@ -207,6 +207,28 @@ test.describe('notlar: sayaçlar, bozuk kayıt ve kapalı depolama', () => {
     expect(hatalar).toEqual([]);
   });
 
+  // Tek bozuk liste öğesi bütün kaydı varsayılana döndürmemeli. Yoksa ilk düzenleme varsayılanları kayıtlı notların üstüne yazar.
+  test('bozuk liste öğesi sağlam listeleri ve notları silmez; listesi olmayan not gelen kutusuna geçer', async ({ page }) => {
+    const hatalar: string[] = [];
+    page.on('pageerror', (e) => hatalar.push(e.message));
+    const kayit = {
+      lists: [{ id: INBOX, name: 'Gelen kutusu' }, { id: 'is', name: 'İş listesi' }, null, { id: 5 }],
+      notes: [
+        { id: 'n1', list: 'is', text: 'Kayıtlı iş notu', done: false, created: '2026-11-13' },
+        { id: 'n2', list: 'silinen', text: 'Listesi olmayan not', done: false, created: '2026-11-13' },
+      ],
+    };
+    await page.addInitScript(([k, v]) => localStorage.setItem(k, v), [NOTES_KEY, JSON.stringify(kayit)]);
+    await ac(page);
+    await expect(listeDugmesi(page, 'İş listesi')).toBeVisible();
+    await expect(satir(page, 'Kayıtlı iş notu')).toHaveCount(1);
+    // Varsayılan notlar gelmez: kayıt korunur.
+    await expect(satir(page, ORNEK.text)).toHaveCount(0);
+    await listeDugmesi(page, 'Gelen kutusu').click();
+    await expect(satir(page, 'Listesi olmayan not')).toHaveCount(1);
+    expect(hatalar).toEqual([]);
+  });
+
   test('depolama kapalıyken değişiklik ekranda kalır ve durum satırı bunu söyler', async ({ page }) => {
     await page.addInitScript((k) => {
       const asil = Storage.prototype.setItem;

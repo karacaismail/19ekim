@@ -160,6 +160,29 @@ test('birinci sürüm reddedilen oran kutuda kaldıkça uyarı da görünür kal
   await expect.poll(async () => { const d = await durum(); return d.kutu === uygulanan || d.uyari ? 'tutarlı' : `kutu ${d.kutu}, uyarı yok`; }).toBe('tutarlı');
 });
 
+// Kardeş oran kutuları aynı nesneyi gönderir (`oran.A`, `oran.B`, `oran.C`). Uyarı yaprak alana bağlıdır:
+// B kutusundaki geçerli değişiklik A kutusunun uyarısını silmez.
+test('birinci sürüm kardeş oran kutusundaki geçerli değer reddedilen kutunun uyarısını silmez', async ({ page, personaServer }) => {
+  await birinciSurum(page);
+  const uyari = kayit(page).getByRole('alert');
+  const a = kutu(page, 'Yalnız tanıştırırsa');
+  const b = kutu(page, 'Ürünü de gösterirse');
+  const eskiA = personaServer.snapshot('istoc').fields['oran.A'];
+  await a.fill('150');
+  await expect(uyari).toBeVisible();
+  await b.fill('30');
+  await b.blur();
+  await expect.poll(() => personaServer.snapshot('istoc').fields['oran.B']).toBe(0.3);
+  // A kutusunda %150 duruyor. Uyarı da duruyor ve ortak kayıtta A değişmedi.
+  await expect(a).toHaveValue('%150');
+  await expect(uyari).toBeVisible();
+  expect(personaServer.snapshot('istoc').fields['oran.A']).toBe(eskiA);
+  // A kutusu geçerli değere dönünce uyarı kalkar.
+  await a.fill('10');
+  await expect(uyari).toHaveCount(0);
+  await expect.poll(() => personaServer.snapshot('istoc').fields['oran.A']).toBe(0.1);
+});
+
 /* ---------- Segika fiyatı ---------- */
 
 test('birinci sürüm Segika fiyatı: hazır çalışan sayıları, indirim kademeleri ve kademe satırları', async ({ page, personaServer }) => {

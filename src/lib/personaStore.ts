@@ -61,19 +61,25 @@ export function usePersonaAyar(project: Marka) {
   }, [store, project]);
   const ayar = useMemo(() => alanlardanAyar(project, view.fields), [project, view.fields]);
   const guncelle = (patch: Partial<Ayar>) => {
-    const alan = Object.keys(patch).sort().join(',');
+    // Uyarı yaprak alana bağlanır (örnek: `oran.A`). Kardeş kutular aynı nesneyi gönderir: `{ oran: { ...a.oran, B: v } }`.
+    // Bu yüzden değişen yaprak, şimdiki değerden farklı olan yapraktır. Hiçbir yaprak değişmediyse kişi kutuya kayıtlı değeri
+    // yeniden yazmıştır. Hangi kutu olduğu bilinmez. O zaman bu nesnenin bütün yapraklarının uyarısı kalkar.
+    const yapraklar = alanlaraAyir(patch);
+    const simdiki = alanlaraAyir(ayar);
+    const degisen = Object.keys(yapraklar).filter((f) => yapraklar[f] !== simdiki[f]);
+    const hedef = degisen.length ? degisen : Object.keys(yapraklar);
     try {
-      store.update(alanlaraAyir(patch));
-      setHatalar((h) => { if (!(alan in h)) return h; const kalan = { ...h }; delete kalan[alan]; return kalan; });
+      store.update(yapraklar);
+      setHatalar((h) => { if (!hedef.some((f) => f in h)) return h; const kalan = { ...h }; for (const f of hedef) delete kalan[f]; return kalan; });
     } catch (error) {
       const mesaj = error instanceof Error ? error.message : 'Alan değeri geçerli değil.';
-      setHatalar((h) => ({ ...h, [alan]: mesaj }));
+      setHatalar((h) => ({ ...h, ...Object.fromEntries(hedef.map((f) => [f, mesaj])) }));
     }
   };
   const sifirla = () => {
     store.update(alanlaraAyir({ ...VARSAYILAN_AYAR, kosul: { oncu: 'ana', kadrolu: 'ana', cozum: 'ana', tavsiye: 'ana', elci: 'ana' } }));
     setHatalar({});
   };
-  const inputError = Object.values(hatalar).join(' ');
+  const inputError = [...new Set(Object.values(hatalar))].join(' ');
   return { ayar, guncelle, sifirla, inputError, sync: view, store, hazir: hazirProje === project };
 }

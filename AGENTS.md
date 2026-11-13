@@ -1468,6 +1468,8 @@ Pages yayınından önce çalıştırır.
   uyarıyı hemen siler. Önbellekte gönderilmemiş değişiklik varsa sessizce kaybolur.
 - 1. sürümün girdi uyarısı “Ortak kayıt” alanındadır. Uyarı alana `aria-invalid` ya da `aria-describedby` ile bağlı değildir.
 - Applet kaydında iç içe alanın türü denetlenmez (`appletStore.ts → dilimBirlestir`). Örneğin metin olan ücret “NaN” gösterir.
+- Yaklaşık 15 sayfa kendi `tl` kopyasını kullanır (örnek `SatisOrtakligiV2.tsx`). Bu kopyalar `src/lib/format.ts`
+  kuralına uymaz. Eksi yarım değeri sıfıra doğru yuvarlar ve “-0” yazabilir. Ortak işleve taşınmaları ayrı bir iştir.
 - `/gelir-ongorusu-2027/` modeli ve `/butce-2027/` geliri varsayılan parametrelerle hesaplanır. `/gelir-plani/` bu
   tarayıcıda kaydedilen parametreleri kullanır. Parametre değişince sayfalar farklı gelir gösterir. Hangisinin doğru
   olduğu kullanıcı kararıdır.
@@ -1500,20 +1502,26 @@ Testlerin bulduğu hatalar düzeltildi. Geçerli kurallar şunlardır:
   Sıfıra yuvarlanan değer eksi işareti almaz. Eksi yüzde “-%5” yazılır. Sayı olmayan değerin yerine tablolardaki boş
   değer işareti yazılır (`BILINMIYOR`).
 - CSV dosyasında (`src/lib/csv.ts`) sayı hücresi virgüllü ondalıkla yazılır, örneğin “26,5”. Türkçe Excel bunu sayı okur.
-- Senaryo seçeneklerinde (`src/lib/scenarioOptions.ts`) aralık dışı değer adresten ve kayıttan okunmaz. Örneğin
-  `?kapasite=-5` ve `?eldetutma=2` yok sayılır. Boş değer “verilmedi” sayılır. Bozuk kayıt “kayıtlı” gösterilmez.
-  Başka sekmeden gelen değişiklik depoya geri yazılmaz. Seçenekler de sekmeler arasında eşitlenir.
+- Senaryo seçeneklerinde (`src/lib/scenarioOptions.ts`) adres ve kayıt aynı denetimden geçer (`gecerliDeger`). Aralık
+  dışı değer okunmaz. Örneğin `?kapasite=-5` ve `?eldetutma=2` yok sayılır. Ek saha ve büyüme aralığı tam sayı olmalıdır,
+  bu yüzden `?buyume=0.5` da yok sayılır. Boş değer “verilmedi” sayılır. Bozuk kayıt “kayıtlı” gösterilmez.
+- Başka sekmeden gelen değişiklik depoya geri yazılmaz. Seçenekler de sekmeler arasında eşitlenir. Zaten seçili senaryoya
+  tıklamak sekmeyi “kendi değişikliği var” durumunda bırakmaz.
+- Büyüme kuralının işe alım ayları (`revenue.ts → growthHires`) plan dışında kalırsa atlanır. Geçmiş tarihli ikinci saha
+  personeli sayfayı çökertmez.
 - Sürüm seçiminde (`src/lib/surum.ts`) adres önce okunur. Depolama kapalıyken de `?surum=v2` bağlantısı 2. sürümü açar.
 - Satış ortaklığı 2. sürümü rehber bağlantısındaki ürünü okur. `?surum=v2&urun=segika` ürünü bir kez seçer ve 2. sürümün
   kaydına yazar. Sayfa `proje` okumaz, çünkü 1. sürüm onu adrese yazar ve iki sürümün ayarları ayrı kalmalıdır.
-- Satış ortaklığı 1. sürümünde (`src/lib/personaStore.ts`) reddedilen değerin uyarısı alana bağlıdır. Başka alandaki
-  geçerli değişiklik bu uyarıyı silmez.
-- Kararlar ve Notlar sayfasında bozuk kayıt sayfayı çökertmez. Notlarda bozuk not öğesi atlanır, sağlam notlar kalır.
+- Satış ortaklığı 1. sürümünde (`src/lib/personaStore.ts`) reddedilen değerin uyarısı yaprak alana bağlıdır, örneğin
+  `oran.A`. Başka alandaki ya da kardeş kutudaki geçerli değişiklik bu uyarıyı silmez.
+- Kararlar ve Notlar sayfasında bozuk kayıt sayfayı çökertmez. Notlarda bozuk liste ve bozuk not atlanır, sağlam
+  olanlar kalır. Gelen kutusu her zaman vardır. Listesi olmayan not gelen kutusuna geçer.
 - Giderler sayfasında “2027 artışı” süzgeci adı tam eşleştirir. “Maaş zammı” seçilince “Maaş zammı yok” satırı gelmez.
 - Nakit akışı sayfası Sheets verisi yüklenirken “okunamadı” demez. Sonuç kutusu “okunuyor” der.
 - İstihdam 2. sürümünde Aralık 2027 aylık gideri ve oranı takvimden hesaplanır (`istihdamV2.ts → SECENEK_OZETI`).
   Bir kerelik hizmet yalnız başladığı aya yazılır.
-- Hedefler sayfasında üye satıcı notundaki sayı “Üye satıcı hedefi” parametresinden gelir.
+- Hedefler sayfasında üye satıcı notundaki sayı “Üye satıcı hedefi” parametresinden gelir. Hedef 0 ise oran yazılmaz.
+- Gelir planının “Seçeneklerin etkisi” tablosunda yuvarlanınca sıfır kalan fark “0 ₺” yazılır.
 
 Birden çok çalışma ağacı aynı klasörde test koşarsa `test-results/` klasörü çakışır. Kendi çıktı klasörünüzü verin:
 `PW_PORT=4341 npx playwright test --output=<klasör>`.

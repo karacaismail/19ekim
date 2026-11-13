@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KayitDurum } from '../components/ui';
-import { defaultFilters, type BreakevenFilters, type GiderKaynak } from '../data/breakeven';
+import { defaultFilters, type BreakevenFilters } from '../data/breakeven';
 import type { Params } from '../data/params';
 import type { RoleKey } from '../data/types';
 import { SCENARIO_IDS, SCENARIO_KEY, useScenario, type ScenarioId } from './scenario';
@@ -74,21 +74,30 @@ const ARALIK: Partial<Record<keyof ScenarioOptions, [number, number]>> = {
   sahaGrowthEvery: [0, Infinity],
   ekSabit: [0, Infinity],
 };
+/** Kişi ve ay sayısı tam sayıdır. `?buyume=0.5` işe alım ayını kesirli yapar ve sayfa çizilemez. */
+const TAM_SAYI = new Set<keyof ScenarioOptions>(['extraSaha', 'sahaGrowthEvery']);
+/** Varsayılanı `null` (kaynağı izle) olan alanlar. Başka alan `null` alamaz. */
+const BOS_OLABILIR = new Set<keyof ScenarioOptions>(['factor', 'retention', 'fxGrowth', 'sahaGrowthEvery']);
+
 const aralikta = (key: keyof ScenarioOptions, n: number) => {
   const [en, ust] = ARALIK[key] ?? [-Infinity, Infinity];
-  return Number.isFinite(n) && n >= en && n <= ust;
+  return Number.isFinite(n) && n >= en && n <= ust && (!TAM_SAYI.has(key) || Number.isInteger(n));
 };
 
+/** Adresten ve kayıttan gelen her değer aynı kuralla denetlenir. */
+function gecerliDeger(key: keyof ScenarioOptions, v: unknown, d: ScenarioOptions): boolean {
+  if (v === null) return BOS_OLABILIR.has(key);
+  if (key === 'kaynak') return v === 'plan' || v === 'sheets';
+  if (key === 'secondSahaIso') return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  if (typeof d[key] === 'boolean') return typeof v === 'boolean';
+  return typeof v === 'number' && aralikta(key, v);
+}
+
 function dec(key: keyof ScenarioOptions, raw: string, d: ScenarioOptions): ScenarioOptions[keyof ScenarioOptions] | undefined {
-  if (raw === 'param') return key === 'factor' || key === 'retention' || key === 'fxGrowth' || key === 'sahaGrowthEvery' ? null : undefined;
-  const ref = d[key];
-  if (typeof ref === 'boolean') return raw === '1';
-  if (key === 'kaynak') return raw === 'plan' || raw === 'sheets' ? (raw as GiderKaynak) : undefined;
-  if (key === 'secondSahaIso') return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : undefined;
+  if (raw === 'param') return BOS_OLABILIR.has(key) ? null : undefined;
   // Boş değer “verilmedi” sayılır. `Number('')` 0 verdiği için ayrıca denetlenir.
-  if (raw.trim() === '') return undefined;
-  const n = Number(raw);
-  return aralikta(key, n) ? n : undefined;
+  const v: unknown = typeof d[key] === 'boolean' ? raw === '1' : key === 'kaynak' || key === 'secondSahaIso' ? raw : raw.trim() === '' ? undefined : Number(raw);
+  return v !== undefined && gecerliDeger(key, v, d) ? (v as ScenarioOptions[keyof ScenarioOptions]) : undefined;
 }
 
 /** Saklanan seçenekleri okur. Türü ya da aralığı uymayan alan varsayılanda kalır. Kayıt yoksa ya da bozuksa `null`. */
@@ -102,13 +111,12 @@ function kayitliSecenekler(raw: string | null, d: ScenarioOptions): ScenarioOpti
   }
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return null;
   const next = { ...d };
-  // Saklanan değer türü varsayılanla uyuşmalı; varsayılanı `null` (kaynağı izle) olan alanlarda sabitlenmiş sayı da geçerlidir
+  // Saklanan değer adresle aynı kuralla denetlenir. Varsayılanı `null` olan alanlarda sabitlenmiş sayı da geçerlidir
   // (gorsel_algi.md F02 / V03, 2026-10-28: sabit değer yeniden açılışta ve başka sayfadan senaryo değişince korunur).
   for (const k of KEYS) {
     if (!(k in saved)) continue;
     const v = saved[k];
-    if (typeof v === 'number' && !aralikta(k, v)) continue;
-    if (v === null || typeof v === typeof d[k] || (d[k] === null && typeof v === 'number')) (next as unknown as Record<string, unknown>)[k] = v;
+    if (gecerliDeger(k, v, d)) (next as unknown as Record<string, unknown>)[k] = v;
   }
   return next;
 }
@@ -218,8 +226,10 @@ export function useScenarioOptions(p: Params) {
   // Başka sekmede seçenekler değişince bu sekme de aynı seçenekleri gösterir (temel senaryo `useScenario` ile gelir).
   useEffect(() => {
     const on = (e: StorageEvent) => {
-      if (e.key !== OPTIONS_KEY && e.key !== null) return;
-      setOptsState(kayitliSecenekler(e.key === null ? null : e.newValue, d) ?? d);
+      if (e.key !== OPTIONS_KEY && e.key !== SCENARIO_KEY && e.key !== null) return;
+      // Başka sekmeden gelen değişiklik bu sekmenin değişikliği değildir. Bekleyen bayrak varsa silinir.
+      yerel.current = false;
+      if (e.key !== SCENARIO_KEY) setOptsState(kayitliSecenekler(e.key === null ? null : e.newValue, d) ?? d);
     };
     window.addEventListener('storage', on);
     return () => window.removeEventListener('storage', on);
@@ -267,10 +277,12 @@ export function useScenarioOptions(p: Params) {
   }, []);
   const setBaseYerel = useCallback(
     (id: ScenarioId) => {
+      // Zaten seçili senaryoya tıklamak durum değiştirmez. Etki çalışmaz, bayrak da kalmamalı.
+      if (id === base) return;
       yerel.current = true;
       setBase(id);
     },
-    [setBase],
+    [base, setBase],
   );
   const applyPreset = useCallback(
     (id: string) => {

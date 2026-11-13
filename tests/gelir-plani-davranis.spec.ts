@@ -341,7 +341,9 @@ test.describe('gelir planı davranışı', () => {
 
   // Seçeneklerin geçerli aralığı: kapasite çarpanı eksi olamaz; elde tutma ve yıllık peşin payı 0 ile 1 arasıdır
   // (src/data/breakeven.ts BreakevenFilters: annualShare “0–1”). Boş değer “verilmedi” sayılır.
-  const gecersizler: { sorgu: string; alan: 'factor' | 'retention' | 'annualShare'; gecerli: (v: unknown) => boolean; kural: string }[] = [
+  const gecersizler: { sorgu: string; alan: 'factor' | 'retention' | 'annualShare' | 'sahaGrowthEvery' | 'extraSaha'; gecerli: (v: unknown) => boolean; kural: string }[] = [
+    { sorgu: 'buyume=0.5', alan: 'sahaGrowthEvery', gecerli: (v) => v === null || (typeof v === 'number' && Number.isInteger(v)), kural: 'büyüme aralığı tam ay sayısıdır' },
+    { sorgu: 'eksaha=1.5', alan: 'extraSaha', gecerli: (v) => typeof v === 'number' && Number.isInteger(v), kural: 'ek saha personeli tam kişi sayısıdır' },
     { sorgu: 'kapasite=-5', alan: 'factor', gecerli: (v) => v === null || (typeof v === 'number' && v >= 0), kural: 'kapasite eksi olamaz' },
     { sorgu: 'eldetutma=2', alan: 'retention', gecerli: (v) => v === null || (typeof v === 'number' && v >= 0 && v <= 1), kural: 'elde tutma %100’ü geçemez' },
     { sorgu: 'kapasite=', alan: 'factor', gecerli: (v) => v === null, kural: 'boş değer 0 sayılmaz, yok sayılır' },
@@ -349,14 +351,27 @@ test.describe('gelir planı davranışı', () => {
   ];
   for (const g of gecersizler) {
     test(`adres çubuğu: “?${g.sorgu}” olduğu gibi kabul edilmez ve saklanmaz (${g.kural})`, async ({ page }) => {
+      const hatalar: string[] = [];
+      page.on('pageerror', (e) => hatalar.push(e.message));
       await sheetsYok(page);
       await ac(page, `?senaryo=medyan&${g.sorgu}`);
+      expect(hatalar).toEqual([]);
       const kayit = JSON.parse((await kayitliSecenekler(page))!) as Record<string, unknown>;
       expect(g.gecerli(kayit[g.alan]), `saklanan ${g.alan}: ${JSON.stringify(kayit[g.alan])}`).toBe(true);
       // Sayfa adresi yeniden yazılır; geçersiz değer adreste kalmaz.
       expect(new URL(page.url()).search).not.toContain(g.sorgu.endsWith('=') ? `${g.sorgu}0` : g.sorgu);
     });
   }
+
+  // Geçmiş tarihli ikinci saha personeli (plan başlamadan önce) sayfayı çökertmez. Plan dışındaki işe alım ayları atlanır.
+  test('adres çubuğu: geçmiş tarihli ikinci saha ve büyüme kuralı sayfayı çökertmez', async ({ page }) => {
+    const hatalar: string[] = [];
+    page.on('pageerror', (e) => hatalar.push(e.message));
+    await sheetsYok(page);
+    await ac(page, '?senaryo=medyan&saha2=2020-01-01&buyume=3');
+    expect(hatalar).toEqual([]);
+    await expect(page.locator('main h1')).toBeVisible();
+  });
 
   test('bozuk seçenek kaydı “kayıtlı” göstermez; geçerli kayıt gösterir', async ({ page, context }) => {
     // Karşı deneme önce: geçerli bir kayıt “kayıtlı” gösterir. Böylece test iki durumu ayırt eder.
@@ -417,6 +432,27 @@ test.describe('gelir planı davranışı', () => {
     await expect(c.locator('.yapiskan .yapiskan-ad')).toHaveText(yatirimli.name);
     expect(JSON.parse((await kayitliSecenekler(c))!)).toEqual(presetOptions(P, yatirimli));
     expect(await c.evaluate((k) => localStorage.getItem(k), SCENARIO_KEY)).toBe(yatirimli.base);
+  });
+
+  // Zaten seçili senaryoya tıklamak durum değiştirmez. Bu tıklama sekmeyi “kendi değişikliği var” durumunda bırakmamalı.
+  // Yoksa öteki sekmeden gelen temel senaryoyla birlikte kendi eski seçeneklerini depoya yazar ve hazır senaryo kaybolur.
+  test('iki sekme: Nakit akışında seçili senaryoya tıklamak öteki sekmenin hazır senaryosunu bozmaz', async ({ page, context }) => {
+    await sheetsYok(page);
+    await ac(page);
+    const nakit = await context.newPage();
+    await sheetsYok(nakit);
+    await nakit.goto('nakit-akisi/');
+    await nakit.waitForSelector('html[data-hydrated]', { state: 'attached' });
+    await nakit.getByRole('group', { name: 'Senaryo' }).first().getByRole('button', { pressed: true }).click();
+    const yatirimli = PRESETS.find((x) => x.id === 'yatirimli')!;
+    await hazirDugme(page, yatirimli.name).click();
+    await expect(page.locator('.yapiskan .yapiskan-ad')).toHaveText(yatirimli.name);
+    // Nakit sekmesi değişikliği alır, kendi eski seçeneklerini geri yazmaz.
+    await expect.poll(() => nakit.evaluate((k) => localStorage.getItem(k), SCENARIO_KEY)).toBe(yatirimli.base);
+    await nakit.waitForTimeout(300);
+    expect(JSON.parse((await kayitliSecenekler(page))!)).toEqual(presetOptions(P, yatirimli));
+    expect(await page.evaluate((k) => localStorage.getItem(k), SCENARIO_KEY)).toBe(yatirimli.base);
+    await expect(page.locator('.yapiskan .yapiskan-ad')).toHaveText(yatirimli.name);
   });
 
   test('Sheets verisi gelince başabaş Sheets giderleriyle hesaplanır; kaynak notu Google Sheets der', async ({ page }) => {

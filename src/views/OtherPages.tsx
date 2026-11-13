@@ -24,6 +24,7 @@ import { useModel } from '../components/ModelContext';
 import { Araclar, SenaryoSecimi } from '../components/Senaryo';
 import type { StaffResult } from '../data/staffing';
 import { addDays, longDate } from '../lib/dates';
+import { int } from '../lib/format';
 import { useScenario } from '../lib/scenario';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
@@ -118,7 +119,7 @@ function GoalsContent() {
   const plan = payments(m.planRetention);
   const options = [
     { option: 'Yıllık peşin (10 ay ücreti, 2 ay bedava)', unit: lira(ANNUAL_TRY), count: Math.ceil(gap / (ANNUAL_TRY - SUBSCRIPTION_TRY)), note: 'Aylık yerine peşin ödeyen aktif satıcı' },
-    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: `${m.params.memberTarget} üyenin ${pct(gapMonths / m.params.memberTarget)} kadarı` },
+    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: m.params.memberTarget > 0 ? `${int(m.params.memberTarget)} üyenin ${pct(gapMonths / m.params.memberTarget)} kadarı` : 'Üye satıcı hedefi 0 olduğu için oran hesaplanmaz.' },
   ];
 
   return (
