@@ -335,7 +335,7 @@ export const ICERIK: IcerikKaydi[] = [
     sahip: BELIRLENMEDI,
     durum: 'taslak',
     kanit: 'varsayilmis',
-    kaynak: 'src/data/gelirModelleri.ts (kullanıcı kararı 3 Kasım 2026; Standart paket ücreti Parametreler)',
+    kaynak: 'src/data/gelirModelleri.ts (kullanıcı kararları 3 ve 13 Kasım 2026; Basic paket ücreti Parametreler)',
     asOf: '2026-11-03',
     gozdenGecirme: 'Bir gelir modeli hazır olunca ya da paket fiyatı değişince',
     duzenleme: 'yok',

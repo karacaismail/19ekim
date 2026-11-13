@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures/persona';
 import { CANLI_GRUPLAR, CANLI_PAKETLER } from '../src/data/canliPaketler';
-import { ALICI_UCRETSIZ, OKUNDU, PAKET_ADI_NOTU, SATICI_UCRETSIZ, YAZILIM_DURUMU, YAZILIM_KAYNAGI, hizmetHaritasi, paketKartlari } from '../src/data/hizmetler';
+import { ALICI_KARARI, ALICI_UCRETSIZ, OKUNDU, SATICI_UCRETSIZ, YAZILIM_DURUMU, YAZILIM_KAYNAGI, hizmetHaritasi, paketKartlari } from '../src/data/hizmetler';
 import { HAZIRLIK_ADI, MODELLER } from '../src/data/gelirModelleri';
 
 /**
@@ -43,7 +43,8 @@ for (const [genislik, yukseklik] of GENISLIKLER) {
     await expect(paketler.nth(1)).toContainText('599 €');
     await expect(paketler.nth(2).locator('.pz-paket-tutar')).toHaveText('Teklif');
     await expect(page.locator('.pz-paket[data-one]')).toHaveCount(1);
-    await expect(page.locator('#paketler')).toContainText(PAKET_ADI_NOTU);
+    // Kullanıcı kararı 13 Kasım 2026 (5.3): iki sayfa da istoc.com’daki paket adlarını kullanır. Ad notu kalktı.
+    await expect(page.locator('#paketler')).not.toContainText('Standart, Pro ve Kurumsal');
 
     const harita = hizmetHaritasi();
     await expect(page.locator('.pz-hizmet')).toHaveCount(harita.length);
@@ -236,5 +237,11 @@ test('hizmetler: 13 Kasım 2026 kararları ve yeni ek hizmetler görünür', asy
   await expect(page.locator('#paketler .pz-karar')).toContainText('Ücretsiz paket');
   await expect(page.locator('.pz-karar .chip').first()).toHaveText('Karar');
   await expect(page.locator('#hizmet-ekip .pz-planlanan a[href$="#model-crm-eki"]')).toHaveCount(1);
-  await expect(page.locator('#hizmet-gorunurluk .pz-planlanan a[href$="#model-yetkili-satici"]')).toHaveCount(1);
+  await expect(page.locator('#hizmet-gorunurluk .pz-planlanan a[href$="#model-marka-sahibi"]')).toHaveCount(1);
+  await expect(page.locator('#hizmet-gorunurluk .pz-planlanan a[href$="#model-marka-vitrini"]')).toHaveCount(1);
+  await expect(page.locator('a[href$="#model-yetkili-satici"]')).toHaveCount(0);
+  // 9.7: satıştan komisyon alınmaz, emanet ödeme ileride gelir.
+  await expect(page.locator('#hizmet-odeme .pz-karar')).toContainText('Satıştan komisyon alınmayacak');
+  // 9.4: alıcı paketi ileride gelir. Karar alıcı şeridinde yazar.
+  await expect(page.locator('#serit-alici').locator('xpath=ancestor::section[1]').locator('.pz-karar')).toContainText(ALICI_KARARI);
 });

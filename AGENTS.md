@@ -995,7 +995,9 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   `src/data/canliPaketler.ts` dosyasını üretir. Kaydedilmiş yanıtla çalışırken okunma günü verilir:
   `node scripts/canli-paketler.mjs yanit.json --okundu=YYYY-AA-GG`. Bu dosya elle değiştirilmez. Metindeki paket adı, sayı,
   komisyon ve okunma tarihi bu dosyadan türetilir. Elle sayı yazılmaz. Canlı uçta kodu `free` olan paketin adı Basic’tir ve
-  ücretlidir. Gelir modelleri sayfası aynı paketlere Standart, Pro ve Kurumsal der. Hizmetler sayfası bunu not olarak yazar.
+  ücretlidir. Kullanıcı kararı 13 Kasım 2026 (5.3): bütün sayfalar istoc.com’daki adları yazar: Basic, Platinium, Enterprise.
+  Adlar canlı paket verisinden gelir (`gelirModelleri.ts → BASIC`, `PLATINIUM`, `ENTERPRISE`). İç kimlikler (`standart`,
+  `pro`, `kurumsal`) onboarding için kalır.
 - Menü sırası: Değer önerisi → Hizmetler → Gelir modelleri → Küresel pazaryerleri. İki öğe `yeni` işaretlidir. Öğe artık yeni
   sayılmayınca `yeni` alanı içerik kaydından silinir ve menü testlerindeki “Yeni” sayısı düşürülür.
 - Ortak stil `src/styles/pazar.css` (`.pz-*`): düz köşeli yüzeyler, kenar sistemi (`data-edge`), tanıştıran küme `--viz-1`,
@@ -1207,11 +1209,17 @@ içindedir. Uygulanan kalıcı kararlar şunlardır:
   Her karar işi kimin yapacağını söyler: “Yönetici ayarı yeter”, “Yazılım işi gerekir” ya da “Değişiklik yok”.
 - Kararlar şunlardır:
   - Ücretsiz paket gelecek. Sınırları `UCRETSIZ_SINIRLAR` içindedir. Paket bugün yazılımda açılamaz.
-  - Pro paket teklif isteğine yanıt verecek.
-  - Standart pakete CRM eki ayda 99 € ile satılır (`CRM_EKI_AYLIK_EUR`). Bu tutarı kullanıcı ajana bıraktı.
-  - Standart pakette beden ve renk seçeneği yoktur.
-  - Buybox önceliği yalnız onaylı markalara “Yetkili satıcı önceliği” adıyla satılır. “Buybox” adı sitede kullanılmaz.
+  - Platinium paket teklif isteğine yanıt verecek.
+  - Basic pakete CRM eki ayda 99 € ile satılır (`CRM_EKI_AYLIK_EUR`). Bu tutarı kullanıcı ajana bıraktı.
+  - Basic pakette beden ve renk seçeneği yoktur.
+  - Buybox önceliği yalnız onaylı markaya satılır ve marka sahibine verilir (9.1, 9.2). Model adı “Marka sahibi önceliği”dir.
+    Bu karar ilk “Yetkili satıcı önceliği” kararının yerini aldı. “Buybox” adı sitede kullanılmaz.
+  - Marka kendi vitrininde ürün seçebilir. Bu ayrı ve ücretli bir haktır (9.3, model `marka-vitrini`).
   - “Öne çıkan” kutusunu yalnız İstoç çalışanı işaretler. Satıcı önce ücreti öder.
+  - Alıcı paketi ileri tarihli bir gelir modelidir (9.4, model `alici-paketi`). Paket ek özellik verir. Yazılım işi otomatik
+    test ve yayın düzeni bitince başlar.
+  - Satıştan komisyon alınmaz (9.7). İşlem komisyonu modeli sayfadan çıktı. Emanet ödeme ileri tarihli bir özelliktir.
+  - Değer önerisi bu kararlarla çelişen söz taşımaz: aylık ücret 399 €, kurulum bir kez 150 €, komisyon yok (5.1, 5.2).
 - Ek hizmetlerin ilk fiyatları onaylandı (`ILK_FIYAT_EUR`). Fiyat kartta “İlk fiyat” olarak örnek hesaptan önce görünür.
 - Hizmetler sayfasındaki karşılaştırma tablosu kod incelemesinin bulduğu satırları işaretler (`YAZILIM_DURUMU`). Kod
   incelemesi 22 madde buldu, bunlar canlı tabloda 25 satırdır. Kullanıcı bu satırların silinmesini değil işaretlenmesini istedi.

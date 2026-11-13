@@ -31,5 +31,22 @@ test('değer önerisi: ilk 30 saniye bağlantısı ilgili öneriye gider', async
   await page.locator('.dg-adim').first().getByRole('link', { name: 'Öneri 6' }).click();
   await expect(page).toHaveURL(/#oneri-6$/);
   await expect(page.locator('#oneri-6')).toBeInViewport();
-  await expect(page.locator('#oneri-6 blockquote')).toContainText('Kendi müşterinizi getirirseniz');
+  await expect(page.locator('#oneri-6 blockquote')).toContainText('Satışlarınızdan komisyon almayız');
+});
+
+/**
+ * Kullanıcı kararları 13 Kasım 2026: satıcı Basic paket için aylık ücret öder (5.1). Kurulum ücretlidir, bir kez 150 €
+ * (5.2). Satıştan komisyon alınmaz (9.7). Değer önerisi bu üç olguyla çelişen söz taşımaz.
+ */
+test('değer önerisi: aylık ücret, kurulum ücreti ve komisyon kararlarıyla çelişen söz yok', async ({ page }) => {
+  await page.goto('deger-onerisi/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const metin = (await page.locator('.dg').innerText()).replace(/\s+/g, ' ');
+  expect(metin).not.toMatch(/aylık ücret yok/i);
+  expect(metin).not.toMatch(/satış (yoksa|olmazsa) (ödeme yok|bize hiçbir şey)/i);
+  expect(metin).not.toMatch(/ücretsiz kurulum|dükkânınızda ücretsiz/i);
+  expect(metin).not.toMatch(/komisyonu (sadece|yalnız) bizim getirdiğimiz/i);
+  expect(metin).not.toMatch(/o satıştan pay alırız/i);
+  expect(metin).toContain('399 €');
+  expect(metin).toContain('150 €');
 });

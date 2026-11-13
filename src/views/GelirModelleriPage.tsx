@@ -2,6 +2,7 @@ import { Accordion } from '@mantine/core';
 import {
   IconAddressBook,
   IconAlertTriangle,
+  IconBuildingStore,
   IconCalculator,
   IconCalendarDollar,
   IconCertificate,
@@ -14,10 +15,10 @@ import {
   IconInfoCircle,
   IconLayoutGrid,
   IconMessageDollar,
-  IconPercentage,
   IconPuzzle,
   IconRosetteDiscountCheck,
   IconShieldLock,
+  IconShoppingBag,
   IconSpeakerphone,
   IconTag,
   IconTool,
@@ -79,12 +80,12 @@ const ilkCumle = (metin: string) => metin.match(/^.*?\.(?=\s|$)/)?.[0] ?? metin;
 
 /** Her modelin simgesi. Simge yalnız süstür (aria-hidden). Yeni model eklenirse madeni para simgesi görünür. */
 const SIMGE: Record<string, typeof IconCoin> = {
-  'islem-komisyonu': IconPercentage,
   'guvenli-odeme': IconShieldLock,
   'vadeli-satis': IconCalendarDollar,
   'sponsorlu-urun': IconSpeakerphone,
   'kategori-vitrini': IconLayoutGrid,
-  'yetkili-satici': IconCertificate,
+  'marka-sahibi': IconCertificate,
+  'marka-vitrini': IconBuildingStore,
   'dogrulanmis-tedarikci': IconRosetteDiscountCheck,
   rfq: IconMessageDollar,
   eklentiler: IconPuzzle,
@@ -94,6 +95,7 @@ const SIMGE: Record<string, typeof IconCoin> = {
   'veri-raporlari': IconChartBar,
   'eslestirme-etkinlikleri': IconUsersGroup,
   'beyaz-etiket': IconTag,
+  'alici-paketi': IconShoppingBag,
   'alacak-sigortasi': IconUmbrella,
   ihracat: IconWorld,
 };

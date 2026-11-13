@@ -6,6 +6,7 @@ import { BolumDizini, Choice, DataTable, Section, type Column } from '../compone
 import { CANLI_DENEME_GUN, CANLI_PAKETLER, type CanliOzellik, type PaketId } from '../data/canliPaketler';
 import { HAZIRLIK_ADI } from '../data/gelirModelleri';
 import {
+  ALICI_KARARI,
   ALICI_UCRETSIZ,
   BUGUNKU_YOL,
   BUGUN_RAKAMLAR,
@@ -16,7 +17,6 @@ import {
   ODEME_NOTU,
   OKUNDU,
   OZELLIK_NOTU,
-  PAKET_ADI_NOTU,
   PAKET_KARARI,
   PAKET_SIRASI,
   SATICI_UCRETSIZ,
@@ -238,6 +238,7 @@ function Icerik() {
                 </span>
               </div>
               <FaydaListesi faydalar={ALICI_UCRETSIZ} />
+              <KararNotu>{ALICI_KARARI}</KararNotu>
             </section>
             <section className="pz-serit" data-edge="top" aria-labelledby="serit-satici">
               <div className="pz-serit-ust">
@@ -300,7 +301,6 @@ function Icerik() {
               </li>
             ))}
           </ul>
-          <p className="pz-not">{PAKET_ADI_NOTU}</p>
           <KararNotu>
             {PAKET_KARARI}{' '}
             <a className="text-link" href={href('/gelir-modelleri/#karar-ucretsiz')}>

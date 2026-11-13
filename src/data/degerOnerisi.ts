@@ -2,7 +2,16 @@
  * Değer önerisi (kullanıcı kararı 2026-11-03): saha ekibinin esnafa söyleyeceği sözler ve her sözü tutmak için
  * platformun yapması gerekenler. Kaynak: kullanıcının paylaştığı araştırma raporu (bölüm 1, 5 ve 6). Sözler tek hitapla
  * (“siz”) yazıldı; açıklamalar tam cümledir. Persona kodları (P1–P7) raporun 3. bölümündeki esnaf tipleridir.
+ *
+ * Kullanıcı kararları 13 Kasım 2026 (karar listesi 5.1, 5.2 ve 9.7): satıcı Basic paket için aylık ücret öder. Kurulum
+ * ücretlidir, bir kez 150 €. Satıştan komisyon alınmaz. Bu üç olguyla çelişen söz yazılmaz (`tests/deger-onerisi.spec.ts`).
  */
+import { CANLI_DENEME_GUN, CANLI_PAKETLER } from './canliPaketler';
+import { ILK_FIYAT_EUR, eur } from './gelirModelleri';
+
+const BASIC_PAKET = CANLI_PAKETLER.find((p) => p.id === 'basic')!;
+const BASIC_AYLIK = eur(BASIC_PAKET.aylikEur ?? 0);
+const KURULUM = eur(ILK_FIYAT_EUR.kurulum);
 
 export interface GucluSoz {
   baslik: string;
@@ -155,23 +164,23 @@ export const KATEGORILER: Kategori[] = [
     oneriler: [
       {
         no: 6,
-        soz: 'Kendi müşterinizi getirirseniz hiç komisyon ödemezsiniz. Komisyonu sadece bizim getirdiğimiz yeni alıcıdan alırız.',
+        soz: 'Satışlarınızdan komisyon almayız. Kendi müşterilerinizi de platforma getirebilirsiniz.',
         persona: ['Hepsi'],
         sikinti: 'Platforma para kaptırma korkusu',
         platform: 'Satıcıya özel davet bağlantısı ve kodu vermeli. Esnaf kendi bayilerini platforma getirir. Böylece platformda ilk günden alıcı olur.',
         ilkGun: 'evet',
-        risk: 'Platformdaki satışların toplam tutarına GMV denir. istoc.com kısa sürede bu satışlardan gelir elde etmez. Ama zamanla platforma çok sayıda alıcı gelir.',
+        risk: 'istoc.com satışlardan gelir elde etmez. Gelir paketten ve ek hizmetlerden gelir. Ama zamanla platforma çok sayıda alıcı gelir.',
         dayanak: 'Faire Direct %0, Ankorstore Lift %0',
       },
       {
         no: 7,
-        soz: 'Liste ücreti yok, aylık ücret yok. Satış olmazsa bize hiçbir şey ödemezsiniz.',
+        soz: `Paketi ${CANLI_DENEME_GUN} gün ücretsiz deneyin. Sonra ${BASIC_PAKET.ad} paket için ayda ${BASIC_AYLIK} ödersiniz. Satışlarınızdan komisyon almayız.`,
         persona: ['P5', 'P1'],
         sikinti: 'Sabit gider korkusu',
-        platform: 'Yalnız başarılı satıştan komisyon almalı. Böylece satıcının giriş engeli kalkar.',
+        platform: 'Deneme süresini ve aylık ücreti açıkça yazmalı. Ücretsiz paket açılınca satıcı ücretsiz başlayabilir.',
         ilkGun: 'evet',
-        risk: 'Abonelik geliri gecikir.',
-        dayanak: 'Alibaba’nın ilk dönemdeki ücretsiz üyeliği',
+        risk: 'Aylık ücret küçük esnafı korkutabilir. Ücretsiz paket bu korkuyu azaltır, ama yazılım işi bitmeden açılamaz.',
+        dayanak: 'istoc.com satıcı paketleri ve 13 Kasım 2026 kararları',
       },
       {
         no: 8,
@@ -311,7 +320,7 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 20,
-        soz: 'Ürünlerinizin fotoğrafını ekibimiz dükkânınızda ücretsiz çeksin, mağazanızı bir günde açalım.',
+        soz: `Ürünlerinizin fotoğrafını ekibimiz dükkânınızda çeksin, mağazanızı bir günde açalım. Bu hizmet bir kez ${KURULUM} tutar.`,
         persona: ['P1', 'P5'],
         sikinti: 'Zaman ve dijital beceri eksikliği',
         platform: 'Dükkânda mağaza kuran bir saha ekibi kurmalı. İçeriği dolu mağaza alıcıyı çeker.',
@@ -555,15 +564,15 @@ export const KATEGORILER: Kategori[] = [
 
 /** Esnaf kapısında ilk 30 saniye: kaynaklı acı noktalarına ve ilk günden verilebilirliğe göre sıra. */
 export const ILK_30_SANIYE: { ad: string; oneriler: number[]; soz: string }[] = [
-  { ad: 'Açılış', oneriler: [6, 7], soz: 'Kendi müşterilerinizden siparişi burada alın, komisyon sıfır. Biz yeni müşteri getirirsek sadece o satıştan pay alırız. Satış yoksa ödeme yok.' },
+  { ad: 'Açılış', oneriler: [6, 7], soz: `Kendi müşterilerinizden siparişi burada alın. Satışlarınızdan komisyon almayız. Paketi ${CANLI_DENEME_GUN} gün ücretsiz deneyin.` },
   { ad: 'Para', oneriler: [1], soz: 'Platformdan gelen siparişin parası güvende. Çek ve senet derdi yok.' },
   { ad: 'Zaman', oneriler: [17, 18, 19], soz: 'WhatsApp’tan gelen siparişleri tek ekranda görürsünüz. Fiyatları tek tuşla güncellersiniz. Faturalar kendiliğinden kesilir.' },
-  { ad: 'Ücretsiz kurulum', oneriler: [20], soz: 'Fotoğrafı biz çekeriz, mağazanız bugün açılır.' },
+  { ad: 'Kurulum', oneriler: [20], soz: `Fotoğrafı biz çekeriz, mağazanız bugün açılır. Kurulum bir kez ${KURULUM} tutar.` },
   { ad: 'İhracata ilgi duyan esnafa', oneriler: [36, 40], soz: 'İhracat hedefimiz var. Bugün katılırsanız, altyapımız hazır olduğunda ilk sırada siz olursunuz.' },
 ];
 
 export const BASLANGIC_NOTU =
-  'P1 ve P5 esnafına para ve sıfır risk sözleriyle başlayın. P2 esnafına araç ve ihracata hazırlık sözleriyle başlayın. P4 ve P6 esnafına ihracata hazırlık sözleriyle başlayın. İhracat altyapısı hazır olmadığı için ihracat hizmeti vaat edilmez. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
+  'P1 ve P5 esnafına para sözleriyle ve ücretsiz denemeyle başlayın. P2 esnafına araç ve ihracata hazırlık sözleriyle başlayın. P4 ve P6 esnafına ihracata hazırlık sözleriyle başlayın. İhracat altyapısı hazır olmadığı için ihracat hizmeti vaat edilmez. Bütün esnaf için ortak açılış sözü “sıfır komisyonla kendi müşteriniz” olmalı. Bu söz ilk günden tutulabilir ve alıcı tarafını esnafın kendi müşterileriyle doldurur.';
 
 export const ESKI_SOZLER: { eski: string; yeni: string; neden: string; not?: string }[] = [
   {
@@ -585,7 +594,6 @@ export const KISALTMALAR: { kisa: string; acik: string }[] = [
   { kisa: 'Escrow', acik: 'Güvenli havuz ödeme. Alıcının parası teslimata kadar aracı kuruluşta bekler.' },
   { kisa: 'ETGB', acik: 'Elektronik ticaret gümrük beyannamesi. Mikro ihracatta kullanılan basit beyandır.' },
   { kisa: 'ETK', acik: '6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun. Ek 1. madde pazar yerlerinin satıcıya karşı yükümlülüklerini düzenler.' },
-  { kisa: 'GMV', acik: 'Platformda yapılan satışların toplam tutarı.' },
   { kisa: 'KVKK', acik: '6698 sayılı Kişisel Verilerin Korunması Kanunu.' },
   { kisa: 'POS', acik: 'Kartla ödeme alan cihaz.' },
   { kisa: 'RFQ', acik: 'Teklif isteği. Alıcı ihtiyacını yazar, satıcılar fiyat verir.' },

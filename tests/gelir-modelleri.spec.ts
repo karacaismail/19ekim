@@ -14,7 +14,7 @@ import { CRM_EKI_AYLIK_EUR, MODELLER, UCRETSIZ_SINIRLAR, eur, paketKararlari } f
  * Kart kısa başlar: ad, hazırlık etiketi, nasıl çalıştığı ve örnek hesap. Kim öder, risk ve gerekenler açılan panelde
  * durur. Kart tıklanmaz, bu yüzden üzerine gelince zemini değişmez.
  */
-const MODEL_SAYISI = 17;
+const MODEL_SAYISI = 18;
 const HAZIRLIK = ['Hazır', 'Yakında', 'Hazır değil'];
 const BOLUMLER = ['kisa-ozet', 'bugunku-model', 'oncelik-onerisi', 'aday-modeller', 'arastirma-notu', 'kisaltmalar'];
 
@@ -31,7 +31,8 @@ for (const genislik of [320, 390, 1280]) {
 
     const paketler = page.locator('.gm-paket');
     await expect(paketler).toHaveCount(3);
-    await expect(paketler.locator('.gm-paket-ad')).toHaveText(['Standart', 'Pro', 'Kurumsal']);
+    // Kullanıcı kararı 13 Kasım 2026 (5.3): paket adları istoc.com’daki gibidir.
+    await expect(paketler.locator('.gm-paket-ad')).toHaveText(['Basic', 'Platinium', 'Enterprise']);
     await expect(paketler.nth(0)).toContainText('399 €');
     await expect(paketler.nth(0)).toContainText('3.990 €');
     await expect(paketler.nth(1)).toContainText('599 €');
@@ -77,10 +78,10 @@ test('gelir modelleri: kısa özet bugün satılanı, bugün eklenebileni ve sat
   await expect(ozet).toHaveCount(3);
   await expect(ozet.nth(0)).toHaveAttribute('data-durum', 'hazir');
   await expect(ozet.nth(0)).toContainText('abonelik');
-  // 17 modelden 2’si hazır: kurulum ve CRM eki (kullanıcı kararı 13 Kasım 2026). Kalan 15 model bugün satılamaz.
-  // Bunların 8’i yakında, 7’si hazır değil.
+  // 18 modelden 2’si hazır: kurulum ve CRM eki. Kalan 16 model bugün satılamaz. Bunların 9’u yakında, 7’si hazır değil.
+  // İşlem komisyonu çıktı, marka vitrini ve alıcı paketi girdi (kullanıcı kararları 13 Kasım 2026, 9.3, 9.4 ve 9.7).
   await expect(ozet.nth(1)).toContainText('2 ek hizmet bugün satılabilir');
-  await expect(ozet.nth(2)).toContainText('15 model bugün satılamaz');
+  await expect(ozet.nth(2)).toContainText('16 model bugün satılamaz');
   await expect(ozet.nth(2)).toContainText('söz vermeyin');
   // Her özet maddesi ilgili bölüme götürür. Üçüncü madde iki gruba da bağlanır.
   await expect(ozet.nth(2).getByRole('link')).toHaveText(['Yakında gelecek modelleri görün', 'Hazır olmayan modelleri görün']);
@@ -113,7 +114,7 @@ test('gelir modelleri: modeller hazırlık durumuna göre üç grupta ve her gru
 
 test('gelir modelleri: kart kısa başlar, ayrıntılar düğmeyle açılır ve kapanır', async ({ page }) => {
   await ac(page, 390);
-  const kart = page.locator('#model-islem-komisyonu');
+  const kart = page.locator('#model-guvenli-odeme');
   const dugme = kart.getByRole('button', { name: 'Kimin ödediğini ve riskleri görün' });
   await expect(dugme).toHaveAttribute('aria-expanded', 'false');
   await expect(kart.locator('.gm-bilgi')).toBeHidden();
@@ -195,7 +196,12 @@ test('gelir modelleri: 13 Kasım 2026 paket kararları bugünkü paketlerden ayr
   await expect(crm.locator('.gm-karar-durum')).toHaveText('Yönetici ayarı yeter');
   await expect(crm).toContainText(eur(CRM_EKI_AYLIK_EUR));
   await expect(crm).toContainText(eur(CRM_EKI_AYLIK_EUR * DEFAULT_PARAMS.annualMonths));
-  await expect(page.locator('#karar-pro-teklif')).toContainText('teklif isteğine yanıt');
+  await expect(page.locator('#karar-teklif-yaniti')).toContainText('Platinium paket de teklif isteğine yanıt verecek');
+  await expect(page.locator('#karar-komisyon .gm-karar-durum')).toHaveText('Değişiklik yok');
+  await expect(page.locator('#karar-komisyon')).toContainText('Satıştan komisyon alınmayacak');
+  await expect(page.locator('#karar-alici-paketi .gm-karar-durum')).toHaveText('Yazılım işi gerekir');
+  // Eski paket adları sayfada geçmez.
+  await expect(page.locator('.gm')).not.toContainText(/\b(Standart|Pro|Kurumsal) paket/);
   await expect(page.locator('#karar-varyant .gm-karar-durum')).toHaveText('Değişiklik yok');
   // Tablodaki karşılıksız satırlar Hizmetler sayfasında işaretlidir. Karar o tabloya bağlanır.
   await expect(page.locator('#karar-tablo a')).toHaveAttribute('href', /\/services\/#karsilastirma$/);
@@ -220,12 +226,22 @@ test('gelir modelleri: onaylanan ilk fiyat kartta örnek hesaptan önce görün�
   await expect(page.locator('#aday-modeller .gm-araclar')).toContainText('İlk fiyatlar 13 Kasım 2026');
 });
 
-test('gelir modelleri: CRM eki hazır, yetkili satıcı önceliği yakında ve öne çıkan kutusu kararı yazılı', async ({ page }) => {
+test('gelir modelleri: CRM eki hazır, marka hakları yakında, alıcı paketi hazır değil, işlem komisyonu yok', async ({ page }) => {
   await ac(page);
   await expect(page.locator('#grup-hazir #model-crm-eki .gm-hazirlik')).toHaveText('Hazır');
-  await expect(page.locator('#grup-yakinda #model-yetkili-satici .gm-hazirlik')).toHaveText('Yakında');
-  await expect(page.locator('#model-yetkili-satici')).toContainText('Yetkili satıcı');
-  await expect(page.locator('#model-yetkili-satici')).not.toContainText(/buybox/i);
+  // Kullanıcı kararı 13 Kasım 2026 (9.1, 9.2): öncelik yalnız onaylı markaya satılır ve marka sahibine verilir.
+  await expect(page.locator('#grup-yakinda #model-marka-sahibi .gm-hazirlik')).toHaveText('Yakında');
+  await expect(page.locator('#model-marka-sahibi .gm-model-ad')).toHaveText('Marka sahibi önceliği');
+  await expect(page.locator('#model-marka-sahibi')).toContainText('onaylı');
+  await expect(page.locator('#model-yetkili-satici')).toHaveCount(0);
+  await expect(page.locator('.gm')).not.toContainText(/buybox|yetkili satıcı/i);
+  // 9.3: marka kendi vitrininde ürün seçer. Bu ayrı ve ücretli bir haktır.
+  await expect(page.locator('#grup-yakinda #model-marka-vitrini .gm-hazirlik')).toHaveText('Yakında');
+  // 9.4: alıcı paketi ileri tarihli bir gelir modelidir.
+  await expect(page.locator('#grup-hazir-degil #model-alici-paketi .gm-hazirlik')).toHaveText('Hazır değil');
+  // 9.7: satıştan komisyon alınmaz. İşlem komisyonu modeli sayfada yoktur.
+  await expect(page.locator('#model-islem-komisyonu')).toHaveCount(0);
+  await expect(page.locator('#oncelik-onerisi .gm-not')).toContainText('Satıştan komisyon alınmayacak');
   const kart = page.locator('#model-sponsorlu-urun');
   await kart.getByRole('button', { name: /^Kimin ödediğini ve riskleri görün/ }).click();
   await expect(kart.locator('.gm-bilgi')).toContainText('yalnız İstoç çalışanı');

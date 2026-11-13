@@ -332,7 +332,8 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       planlanan: [
         model('sponsorlu-urun', 'Satıcı ürününü belirli bir süre ya da tıklama başına ücretle öne çıkarır. Alıcı bu sonucu “Sponsorlu” etiketiyle görür.'),
         model('kategori-vitrini', 'Bir kategorinin vitrini belirli bir süre için tek bir satıcıya kiralanır.'),
-        model('yetkili-satici', 'Markanın yetki verdiği satıcı ürün sayfasında ilk sırada görünür. Alıcı bunu “Yetkili satıcı” yazısıyla görür.'),
+        model('marka-sahibi', 'Ürünü markanın sahibi de satıyorsa ürün sayfasında ilk sırada görünür. Alıcı bunu “Marka sahibi” yazısıyla görür.'),
+        model('marka-vitrini', 'Onaylı marka kendi vitrin sayfasında öne çıkacak ürünleri seçer ve sıralar.'),
       ],
       fark: 'Paket tablosundaki reklam hakları bugün çalışmıyor. Planlanan öne çıkarma paketten ayrı satılır. Satıcı gösterim raporu alır.',
       karar: '“Öne çıkan” kutusunu yalnız İstoç çalışanı işaretleyecek. Satıcı önce ücreti öder.',
@@ -374,6 +375,7 @@ export function hizmetHaritasi(): HizmetSatiri[] {
         model('alacak-sigortasi', 'Vadeli satışta satıcının alıcıdan alacağı para bir sigorta şirketiyle güvenceye alınır.'),
       ],
       katman: 'finansman',
+      karar: 'Satıştan komisyon alınmayacak. Emanet ödeme ileride ayrı bir özellik olarak gelecek.',
     },
     {
       id: 'lojistik',
@@ -452,7 +454,8 @@ export const YOL_KARARI =
   'Ücretsiz paket gelecek. Satıcı ücretsiz başlar. Satıcı teklif isteklerini görür. Teklif vermek için satıcı ücretli paket alır. Bu yol araştırmanın kuralına yakındır. Paket bugün açık değildir.';
 
 export const SAYFA_KAYNAGI = `Paket fiyatları ve özellikleri istoc.com satıcı paketlerinden ${OKUNDU} günü okundu.`;
-export const PAKET_ADI_NOTU = 'Gelir modelleri sayfası aynı paketlere Standart, Pro ve Kurumsal der. Bu sayfa istoc.com’daki adları kullanır.';
+/** Alıcı paketi kararı (kullanıcı kararı 13 Kasım 2026, 9.4). Paket ileri tarihli bir gelir modelidir. */
+export const ALICI_KARARI = 'Alıcı paketi ileride gelecek. Paket ek özellikler içerecek. Alıcının bugünkü ücretsiz kullanımı sürecek.';
 export const OZELLIK_NOTU = 'Satıcı paketleri sayfası bir paketin içeriğini listeler. Bu liste, bir özelliğin bugün çalıştığını tek başına göstermez.';
 
 /** Yıllık peşin ödemenin kaç aylık ücrete eşit olduğu. Tam sayı değilse null döner. */
