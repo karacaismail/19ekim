@@ -153,7 +153,7 @@ function Icerik() {
         ))}
 
         {suzgec === 'hepsi' || suzgec === 'claude' ? (
-          <Section id="ilkeler" title="Claude önerisinin ilkeleri">
+          <Section id="ilkeler" title="Claude önerisinin ilkeleri" desc="Bu kurallar Claude önerisindeki bütün oyunlar için geçerlidir.">
             <ul className="oy-ilkeler">
               {ILKELER.map((t) => (
                 <li key={t}>{t}</li>

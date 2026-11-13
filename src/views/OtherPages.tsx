@@ -251,7 +251,7 @@ function PlanContent() {
 
       <GuncelPlan />
 
-      <Section id="gantt" index={1} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} günü 60. gündür. ${longDate(dates.day90)} günü 90. gündür.`}>
+      <Section id="gantt" index={2} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} günü 60. gündür. ${longDate(dates.day90)} günü 90. gündür.`}>
         <Chart
           id="gantt"
           title="Kişilere göre zaman çizelgesi"
@@ -272,7 +272,7 @@ function PlanContent() {
         />
       </Section>
 
-      <Section id="tablo" index={2} title="Eylemler">
+      <Section id="tablo" index={3} title="Eylemler" desc="Tablo her eylemin sahibini, tarihini ve hedefini gösterir.">
         <DataTable<ActionRow>
           id="eylem"
           title="Eylem, tarih ve hedef"
@@ -387,7 +387,7 @@ function PendingContent() {
 
       <KararSecimleri />
 
-      <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Site, son tarihi geçen kararı “Gecikti” diye işaretler. Bir kayıt ancak karar yazılınca “Verildi” olur.">
+      <Section id="bekleyen" index={2} title="Bekleyen kararlar" desc="Site, son tarihi geçen kararı “Gecikti” diye işaretler. Bir kayıt ancak karar yazılınca “Verildi” olur.">
         <Chart
           id="son-tarih"
           title="Bekleyen kararların son tarihleri"
@@ -449,7 +449,7 @@ function PendingContent() {
         />
       </Section>
 
-      <Section id="kesin" index={2} title="Verilen kararlar" desc="Tablo üç günün kararlarını listeler. İlk kararlar 19 Ekim 2026 Pazartesi günü alındı. Sonrakiler 28 Ekim 2026 Çarşamba ve 3 Kasım 2026 Salı günleri alındı. 19 Ekim Pazartesi kararları “Arşiv” sayfasındaki tahta notlarına dayanır. 28 Ekim Çarşamba ve 3 Kasım Salı kararlarını sahip verdi. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
+      <Section id="kesin" index={3} title="Verilen kararlar" desc="Tablo üç günün kararlarını listeler. İlk kararlar 19 Ekim 2026 Pazartesi günü alındı. Sonrakiler 28 Ekim 2026 Çarşamba ve 3 Kasım 2026 Salı günleri alındı. 19 Ekim Pazartesi kararları “Arşiv” sayfasındaki tahta notlarına dayanır. 28 Ekim Çarşamba ve 3 Kasım Salı kararlarını sahip verdi. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
         <DataTable<KararKaydi>
           id="verilen"
           title="Verilen kararların listesi"
@@ -510,7 +510,7 @@ function PendingContent() {
 
       <Section
         id="ucret"
-        index={3}
+        index={4}
         title="Ücret ve prim"
         desc={`İşveren maliyeti maaşın ${params.costFactor.toLocaleString('tr-TR')} katıdır. Bu tutara SGK, yemek, bilgisayar, vergi ve diğer giderler dahildir. Prim yalnız CRM’deki ${crmStages.filter((c) => c.commission).length} prim koşulu tamamlanan satış için ödenir. Bu koşullar bir sonraki bölümde yazılı. Saha kotası, ay içinde ${lira(m.quota)} tutarında satıştır.`}
       >
@@ -536,7 +536,7 @@ function PendingContent() {
         </Note>
       </Section>
 
-      <Section id="crm" index={4} title="CRM aşamaları ve prim koşulları" desc="CRM aracı olarak Frappe CRM kullanılır. Prim koşulları CRM aşamalarıyla aynıdır. Şu dört aşama tamamlanınca prim hak edilir: “Onboarding”, “Mağaza açıldı”, “İlk ürünler” ve “Ödeme”. Bu aşamaların sorumlusu saha ekibi ya da temsilcidir.">
+      <Section id="crm" index={5} title="CRM aşamaları ve prim koşulları" desc="CRM aracı olarak Frappe CRM kullanılır. Prim koşulları CRM aşamalarıyla aynıdır. Şu dört aşama tamamlanınca prim hak edilir: “Onboarding”, “Mağaza açıldı”, “İlk ürünler” ve “Ödeme”. Bu aşamaların sorumlusu saha ekibi ya da temsilcidir.">
         <Chart
           id="crm-asamalari"
           title="Adaydan yenilemeye"
@@ -566,7 +566,7 @@ function PendingContent() {
 
       <Section
         id="mesai"
-        index={5}
+        index={6}
         title="Mesai modeli: yasal tavan"
         desc={`Bu kurallar 4857 sayılı İş Kanunu’na dayanır. Yıllık fazla çalışma en çok ${OVERTIME_CAP} saat olabilir. ${OVERTIME_CAP} saat, işçinin işe girdiği günden sonraki 12 ay içinde sayılır. Kanunun en güvenli okuması budur.`}
       >
@@ -663,7 +663,7 @@ function GrowthContent() {
         />
       </Section>
 
-      <Section id="hedef" index={3} title="Ağ hedefleri">
+      <Section id="hedef" index={3} title="Ağ hedefleri" desc="Tablo her ölçüt için hedefi ve hedefin tarihini gösterir.">
         <DataTable
           id="ag-hedef"
           title="Ölçüt, hedef, zaman"
@@ -692,17 +692,18 @@ export function ArchivePage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
       <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim Pazartesi tahta notlarının plandaki karşılığını toplantı için değil, kayıt için gösterir." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 Pazartesi tahta notları' }]} />
-      <DataTable<BoardRow>
-        id="tahta"
-        title="Tahta notundan karara ve sayfaya"
-        baslikDuzeyi={2}
-        columns={[
-          { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },
-          { key: 'decision', header: 'Plandaki karar', summary: true, minWidth: '18rem', render: (r) => r.decision },
-          { key: 'where', header: 'Sayfa', nowrap: true, render: (r) => <TextLink to={r.where.path}>{r.where.label}</TextLink> },
-        ]}
-        rows={boardMapping}
-      />
+      <Section id="tahta-bolum" title="Tahta notundan karara ve sayfaya" desc="Tablo her tahta notunun plandaki kararını ve kararın yazıldığı sayfayı gösterir.">
+        <DataTable<BoardRow>
+          id="tahta"
+          title="Notlar ve kararlar"
+          columns={[
+            { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },
+            { key: 'decision', header: 'Plandaki karar', summary: true, minWidth: '18rem', render: (r) => r.decision },
+            { key: 'where', header: 'Sayfa', nowrap: true, render: (r) => <TextLink to={r.where.path}>{r.where.label}</TextLink> },
+          ]}
+          rows={boardMapping}
+        />
+      </Section>
     </AppFrame>
   );
 }
@@ -741,7 +742,7 @@ export function KararPage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
       <PendingContent />
-      <AuthorityContent ilkNo={6} />
+      <AuthorityContent ilkNo={7} />
     </AppFrame>
   );
 }

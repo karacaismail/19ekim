@@ -337,7 +337,7 @@ function ConnectForm({ initial, error, onConnect, onCancel }: { initial: OpexCon
   };
   const message = problem || error;
   return (
-    <form className="opex-connect" onSubmit={submit} noValidate aria-describedby={message ? errorId : undefined}>
+    <form className="opex-connect" onSubmit={submit} noValidate aria-describedby={message ? errorId : undefined} data-ust-kutu="">
       <h2 className="block-title">Google Sheets bağlantısı</h2>
       <p className="opex-connect-lead">
         Bu sayfa verileri saklamaz. Veriler, Google Sheets’e bağlı Apps Script web uygulamasından okunur. Sheets’te erişim “Anahtarla”
@@ -1913,7 +1913,7 @@ function YearPanel({ m, d, start }: { m: OpexModel; d: Donem; start: number }) {
   const no = () => (n += 1);
   return (
     <>
-      <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`}>
+      <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`} desc="Bu bölüm yılın toplam giderini ve üç grubun payını gösterir.">
         <Overview m={m} d={d} />
       </Section>
       <Section id={`ucretler-${d.yil}-bolum`} index={no()} title="Personel giderleri" desc="Bordrolu personel için hesap net maaştan başlar. Net maaş, çalışanın eline geçen paradır. Hesap vergileri ve kesintileri ekleyerek brüt maaşı bulur. Sonra işverenin ödediği primleri ekler. Freelancer maliyeti KDV dahil fatura tutarıdır.">
@@ -1927,7 +1927,7 @@ function YearPanel({ m, d, start }: { m: OpexModel; d: Donem; start: number }) {
           <Assumptions m={m} d={d} />
         </Section>
       ) : null}
-      <Section id={`tesvikler-${d.yil}-bolum`} index={no()} title="SGK teşvik ve destekleri">
+      <Section id={`tesvikler-${d.yil}-bolum`} index={no()} title="SGK teşvik ve destekleri" desc="Bu bölüm personel giderini düşüren SGK teşviklerini gösterir.">
         <Incentives m={m} d={d} />
       </Section>
     </>

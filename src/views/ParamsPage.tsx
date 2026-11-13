@@ -209,7 +209,7 @@ function Degisiklikler({ hedefle }: { hedefle: (key: ParamKey) => void }) {
   if (!changed) return null;
   const satirlar = PARAM_GROUPS.flatMap((g) => g.fields.filter((d) => params[d.key] !== DEFAULT_PARAMS[d.key]).map((d) => ({ g, d })));
   return (
-    <section className="param-degisiklikler" aria-labelledby="degisiklikler-baslik">
+    <section className="param-degisiklikler" aria-labelledby="degisiklikler-baslik" data-ust-kutu="">
       <h2 className="param-degisiklik-baslik" id="degisiklikler-baslik">
         Değişiklikler ({changed})
       </h2>
@@ -261,8 +261,7 @@ function Derived() {
   return (
     <DataTable
       id="turetilen"
-      title="Türetilen değerler"
-      note="Bu değerler parametrelerden hesaplanır ve tüm sayfalarda kullanılır."
+      title="Hesaplanan sonuçlar"
       columns={[
         { key: 'label', header: 'Değer', minWidth: '16rem', rowHeader: true, render: (r: (typeof rows)[number]) => r.label },
         { key: 'value', header: 'Sonuç', summary: true, minWidth: '12rem', render: (r) => r.value },
@@ -315,7 +314,7 @@ function Gruplar({ acik, setAcik, sorgu, setSorgu }: { acik: string[]; setAcik: 
         onChange={(v) => {
           if (!q) setAcik(v);
         }}
-        order={2}
+        order={3}
         transitionDuration={sure}
         classNames={{ root: 'pgruplar', item: 'pgrup', itemTitle: 'pgrup-h', control: 'pgrup-baslik', label: 'pgrup-etiket', chevron: 'pgrup-ok', panel: 'pgrup-panel', content: 'pgrup-icerik' }}
       >
@@ -403,8 +402,10 @@ function ParamsContent() {
         </div>
       </PageHeader>
       <Degisiklikler hedefle={hedefle} />
-      <Gruplar acik={acik} setAcik={setAcik} sorgu={sorgu} setSorgu={setSorgu} />
-      <Section id="turetilen" title="Türetilen değerler">
+      <Section id="parametre-gruplari" title="Değerler" desc="Değerler konularına göre gruplara ayrıldı. Örneğin maaşlar “Ücret” grubundadır.">
+        <Gruplar acik={acik} setAcik={setAcik} sorgu={sorgu} setSorgu={setSorgu} />
+      </Section>
+      <Section id="turetilen" title="Türetilen değerler" desc="Site bu değerleri yukarıdaki değerlerden hesaplar. Bütün sayfalar bu sonuçları kullanır.">
         <Derived />
       </Section>
     </DatesProvider>

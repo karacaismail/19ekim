@@ -16,13 +16,6 @@
   line-height: var(--leading-body);
 }
 
-.ob-bolum-baslik {
-  margin: 0;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-}
-
 .ob-etiket {
   display: block;
   margin: 0 0 var(--space-1);
@@ -35,7 +28,7 @@
 /* Aşama haritası: dört aşama ve sürecin sonu, sırayla. */
 
 .ob-harita {
-  margin-top: var(--space-8);
+  margin-top: var(--space-4);
 }
 
 .ob-harita-liste {
@@ -106,25 +99,24 @@ a.ob-harita-bag:hover {
 
 /* Her durumda geçerli kurallar. */
 
-.ob-kurallar {
-  margin-top: var(--space-10);
-  padding: var(--space-5);
-  background-color: var(--surface-sunken);
-}
-
+/* Kurallar ortak bölümün içinde, gömük yüzeyde durur. */
 .ob-kurallar-liste {
   display: grid;
   gap: var(--space-2);
   max-width: var(--prose-max);
-  margin: var(--space-3) 0 0;
-  padding-inline-start: var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-5) var(--space-5) var(--space-5) calc(var(--space-5) * 2);
+  background-color: var(--surface-sunken);
   line-height: var(--leading-body);
 }
 
 /* Aşama: numaralı başlık, solda çizgi, Başlar ve Biter kutuları. */
 
-.ob-asama {
-  margin-top: var(--space-16);
+/* Aşamalar ortak bölümün içinde alt alta durur. Aşama başlığı bölüm başlığından bir basamak küçüktür (h3). */
+.ob-asamalar {
+  display: grid;
+  gap: var(--space-16);
+  margin-top: var(--space-6);
 }
 
 .ob-asama-bas {
@@ -158,7 +150,7 @@ a.ob-harita-bag:hover {
 
 .ob-asama-ad {
   margin: 0;
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
 }
@@ -382,19 +374,9 @@ a.ob-harita-bag:hover {
 
 /* Her aşamada olabilecek durumlar. */
 
-.ob-her-an {
-  margin-top: var(--space-16);
-}
-
-.ob-her-an .ob-durumlar {
+.ob-her-an-liste {
   max-width: 56rem;
   margin-top: var(--space-4);
-}
-
-.ob-her-an-not {
-  max-width: var(--prose-max);
-  margin: var(--space-3) 0 0;
-  line-height: var(--leading-body);
 }
 
 /* Geniş ekran: harita yan yana, aşama içeriği numaranın altındaki çizgiye hizalı. */

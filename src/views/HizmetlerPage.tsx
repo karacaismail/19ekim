@@ -55,7 +55,6 @@ const BOLUMLER = [
   { id: 'karsilastirma', baslik: 'Paket karşılaştırması' },
   { id: 'hizmet-haritasi', baslik: 'Hizmet haritası' },
   { id: 'odeme-ne-zaman', baslik: 'Ödeme ne zaman başlar?' },
-  { id: 'ilgili', baslik: 'İlgili sayfalar' },
 ];
 
 function KaynakBaglantisi({ k }: { k: Kaynak }) {
@@ -411,29 +410,6 @@ function Icerik() {
             <p className="pz-cikarim-metin">{YOL_NOTU}</p>
           </aside>
           <KararNotu>{YOL_KARARI}</KararNotu>
-        </Section>
-
-        <Section id="ilgili" title={BOLUMLER[5].baslik} dizin>
-          <ul className="pz-ilgili" aria-label="İlgili sayfalar">
-            <li>
-              <a href={href('/kuresel-pazaryerleri/')}>
-                <span className="pz-ilgili-ad">Küresel B2B pazaryerleri</span>
-                <span className="pz-ilgili-metin">Yedi platformun neyi ücretsiz verdiğini ve ödemenin ne zaman başladığını gösterir.</span>
-              </a>
-            </li>
-            <li>
-              <a href={href('/gelir-modelleri/')}>
-                <span className="pz-ilgili-ad">Gelir modelleri</span>
-                <span className="pz-ilgili-metin">Planlanan ek hizmetlerin nasıl gelir getireceğini ve hazırlık durumunu anlatır.</span>
-              </a>
-            </li>
-            <li>
-              <a href={href('/deger-onerisi/')}>
-                <span className="pz-ilgili-ad">Değer önerisi</span>
-                <span className="pz-ilgili-metin">Saha ekibinin esnafa verebileceği sözleri ve her sözün koşulunu gösterir.</span>
-              </a>
-            </li>
-          </ul>
         </Section>
       </div>
     </>

@@ -343,7 +343,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         ))}
       </Section>
 
-      <Section id="varsayimlar" index={5} title="Maaş ve maliyet varsayımları">
+      <Section id="varsayimlar" index={5} title="Maaş ve maliyet varsayımları" desc="Bu bölüm maaş ve maliyet hesabının dayandığı kabulleri ve kaynakları gösterir.">
         <dl className="iv2-varsayim">
           <div>
             <dt>2027 asgari ücreti</dt>

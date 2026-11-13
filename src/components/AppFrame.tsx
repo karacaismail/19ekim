@@ -5,7 +5,7 @@ import { IconChecklist, IconChevronDown, IconMenu2, IconMoon, IconReceipt2, Icon
 import { BrandMark } from './BrandMark';
 import { CikisDugmesi, GirisEkrani } from './Giris';
 import { ModelProvider, useParams } from './ModelContext';
-import { altBilgiKapsami, altBilgiOnCumle } from '../data/icerik';
+import { altBilgiKapsami, altBilgiOnCumle, ICERIK, icerikOf } from '../data/icerik';
 import { NAV_GROUPS, SEQUENCE, type NavLink } from '../data/tree';
 import { FrameContext } from '../lib/frame';
 import { cssVariablesResolver, theme } from '../lib/theme';
@@ -410,7 +410,9 @@ export function AppFrame({
                       </a>
                     ) : null}
                   </nav>
-                ) : null}
+                ) : (
+                  <IlgiliSayfalar current={current} />
+                )}
               </>
             )}
           </div>
@@ -436,5 +438,33 @@ export function AppFrame({
       </FrameContext.Provider>
       </ModelProvider>
     </MantineProvider>
+  );
+}
+
+/**
+ * Sayfa sonu gezinmesi (sayfa iskeleti sözleşmesi, kullanıcı isteği 13 Kasım 2026): sunum sırasında olmayan sayfa
+ * “Önceki / Sonraki” yerine ilgili sayfaları gösterir. Liste içerik kaydındaki `iliskili` alanından gelir. Her bağlantıda
+ * sayfanın adı ve okurun o sayfada cevap aradığı soru yazar. Böylece her sayfa aynı biçimde biter.
+ */
+function IlgiliSayfalar({ current }: { current: string }) {
+  const kayit = icerikOf(current);
+  const ilgili = (kayit?.iliskili ?? []).map((id) => ICERIK.find((k) => k.id === id)).filter((k) => k && !k.planlandi) as typeof ICERIK;
+  if (!ilgili.length) return null;
+  return (
+    <nav aria-labelledby="ilgili-sayfalar-baslik" className="pager" data-tur="ilgili">
+      <p className="pager-baslik" id="ilgili-sayfalar-baslik">
+        İlgili sayfalar
+      </p>
+      <ul className="pager-ilgili">
+        {ilgili.map((k) => (
+          <li key={k.id}>
+            <a className="pager-link" href={href(k.path)}>
+              <span className="pager-label">{k.baslik}</span>
+              <span className="pager-dir">{k.kullaniciSorusu}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

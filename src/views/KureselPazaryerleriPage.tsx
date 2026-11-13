@@ -57,7 +57,6 @@ import {
   type Ornek,
   type Platform,
 } from '../data/kuresel';
-import { href } from '../lib/paths';
 import '../styles/pazar.css';
 
 /**
@@ -472,7 +471,7 @@ function Icerik() {
           </ol>
         </Section>
 
-        <Section id="istoc-yeri" title={ISTOC_SONUC.baslik} desc="Bu bölüm belgenin kurallarını istoc.com’un bugünkü olgularıyla karşılaştırır." dizin>
+        <Section id="istoc-yeri" index={6} title={ISTOC_SONUC.baslik} desc="Bu bölüm belgenin kurallarını istoc.com’un bugünkü olgularıyla karşılaştırır." dizin>
           <div className="pz-sonuc" data-edge="start">
             <p className="pz-etiket">{ISTOC_SONUC.etiket}</p>
             <ol>
@@ -481,29 +480,9 @@ function Icerik() {
               ))}
             </ol>
           </div>
-          <ul className="pz-ilgili" aria-label="İlgili sayfalar">
-            <li>
-              <a href={href('/services/')}>
-                <span className="pz-ilgili-ad">Hizmetler</span>
-                <span className="pz-ilgili-metin">Neyin ücretsiz, neyin ücretli olduğunu paket paket gösterir.</span>
-              </a>
-            </li>
-            <li>
-              <a href={href('/gelir-modelleri/')}>
-                <span className="pz-ilgili-ad">Gelir modelleri</span>
-                <span className="pz-ilgili-metin">Abonelikten sonra eklenebilecek gelir yollarını hazırlık durumuyla listeler.</span>
-              </a>
-            </li>
-            <li>
-              <a href={href('/deger-onerisi/')}>
-                <span className="pz-ilgili-ad">Değer önerisi</span>
-                <span className="pz-ilgili-metin">Saha ekibinin esnafa verebileceği sözleri ve her sözün koşulunu gösterir.</span>
-              </a>
-            </li>
-          </ul>
         </Section>
 
-        <Section id="kaynaklar" title="Kaynaklar" desc={KAYNAK_NOTU} dizin>
+        <Section id="kaynaklar" index={7} title="Kaynaklar" desc={KAYNAK_NOTU} dizin>
           <Notlar notlar={[IKINCIL_NOTU]} />
           <ul className="pz-kaynaklar">
             {OKUNAN_KAYNAKLAR.map((g) => (

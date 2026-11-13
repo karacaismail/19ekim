@@ -248,7 +248,8 @@ for (const [genislik, yukseklik] of [
     await expect(page.locator('.ob-asama')).toHaveCount(ASAMALAR.length);
     for (const a of ASAMALAR) {
       const bolum = page.locator(`#asama-${a.no}`);
-      await expect(bolum.getByRole('heading', { level: 2 })).toHaveText(`Aşama ${a.no}: ${a.ad}`);
+      // Aşama başlığı “Aşamalar adım adım” bölümünün (h2) içinde h3’tür (sayfa iskeleti, 13 Kasım 2026).
+      await expect(bolum.getByRole('heading', { level: 3 })).toHaveText(`Aşama ${a.no}: ${a.ad}`);
       const sira = await bolum.locator('.ob-asama-govde').evaluate((g) => [...g.children].map((c) => (c as HTMLElement).dataset.tur ?? c.className));
       expect(sira[0], `Aşama ${a.no} Başlar ile açılır`).toBe('baslar');
       expect(sira.at(-1), `Aşama ${a.no} Biter ile kapanır`).toBe('biter');
@@ -294,10 +295,13 @@ for (const [genislik, yukseklik] of [
   });
 }
 
-test('başlık sırası: her aşamada h2 aşama adı, ardından Başlar, durumlar ve Biter h3', async ({ page }) => {
+test('başlık sırası: her aşamada h3 aşama adı, ardından Başlar, durumlar ve Biter h4', async ({ page }) => {
   await ac(page, 390);
+  // Aşamalar “Aşamalar adım adım” bölümünün (h2) içindedir. Başlık düzeyi atlamaz.
+  await expect(page.locator('#asama-ayrintisi > .section-head h2')).toHaveText('Aşamalar adım adım');
   for (const a of ASAMALAR) {
-    const basliklar = await page.locator(`#asama-${a.no}`).locator('h2, h3').allInnerTexts();
+    await expect(page.locator(`#asama-${a.no} h3`)).toHaveText(`Aşama ${a.no}: ${a.ad}`);
+    const basliklar = await page.locator(`#asama-${a.no}`).locator('h3, h4').allInnerTexts();
     expect(basliklar).toEqual([`Aşama ${a.no}: ${a.ad}`, 'Başlar', 'Bu aşamada karşılaşacağınız durumlar', 'Biter']);
     // Başlar ve Biter kutuları tam cümledir.
     await expect(page.locator(`#asama-${a.no} [data-tur="baslar"]`)).toContainText(`${a.baslar} başlar.`);

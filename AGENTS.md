@@ -1259,6 +1259,36 @@ içindedir. Uygulanan kalıcı kararlar şunlardır:
 - `canliPaketler.ts` elle değiştirilmez. İşaretler ayrı listede tutulur. Paket kartları yalnız çalışan özelliği sayar.
 - Küresel pazaryerleri sayfası aynı paket verisini `bas()` ile kullanır ve bu işaretleri henüz göstermez.
 
+### Sayfa iskeleti sözleşmesi (kullanıcı isteği 13 Kasım 2026)
+
+Kullanıcı bütün sayfaların iskeletinin ve düzeninin standartlaşmasını istedi. Her sayfa aynı üç parçadan kurulur.
+Testi `tests/iskelet.spec.ts` dosyasıdır. Bu test her sayfayı 1280 px ve 375 px genişlikte denetler.
+
+1. **Sayfa başı.** `PageHeader` kırıntı satırında tek h1 gösterir. Altında tek cümlelik amaç durur. Giderler sayfasında
+   amaç satırı yoktur (2026-10-21 kararı). Üç kutu sayfa başının parçasıdır. Bunlar sonuç kutusu (`ResultSummary`),
+   senaryo kurucu (`SenaryoKurucu`) ve Parametreler’deki değişiklik özetidir. Bu kutular `data-ust-kutu` taşır.
+   Başlıkları bölüm dışında h2 olabilir.
+2. **Gövde.** Metin düzenindeki sayfanın gövdesi ortak `Section` bölümlerinden oluşur. Her bölümün h2 başlığı ve kısa
+   açıklaması (`desc`) vardır. Bölüm dışında h2 yoktur. Bölüm başlıkları her sayfada aynı boydadır (1280 px’te 32 px).
+   Numara yalnız sırası anlamlı sayfada kullanılır (ux.md §3, P6.1). Bir sayfada ya bütün bölümler numaralıdır ya da
+   hiçbiri. Numaralı sayfada sıra 01’den başlar ve atlamaz. Örneğin Kararlar sayfasında “Karar seçimleri” 01’dir.
+   Bölümün içindeki alt başlık h3 olur. Örneğin Onboarding’deki aşama başlıkları ve Değer önerisi’ndeki kategoriler h3’tür.
+3. **Sayfa sonu.** Sunum sırasındaki (`SEQUENCE`) sayfa “Önceki” ve “Sonraki” bağlantılarını gösterir. Öteki her sayfa “İlgili sayfalar”
+   gösterir. Bu liste `AppFrame` içindedir ve içerik kaydının `iliskili` alanından gelir. Yayımlanmamış kayıt listede
+   görünmez. Her bağlantıda sayfanın adı ve kayıttaki okur sorusu (`kullaniciSorusu`) yazar. Okur sorusu artık ekranda
+   göründüğü için her cümlesi en çok 15 kelimedir (`tests/icerik.spec.ts`). Sayfa içinde ayrı “İlgili sayfalar” listesi
+   yazılmaz. Hizmetler ve Küresel pazaryerleri sayfalarındaki eski listeler bu yüzden kaldırıldı.
+
+İç bağlantıları `tests/baglantilar.spec.ts` denetler. Her iç bağlantının hedef sayfası ve `#bölüm` adresi var olmalıdır.
+Applet adresindeki `#…` bir hesap aracının kimliğidir (`APPLETLER`). Hiçbir sayfa e-posta sayfasına bağlantı vermez.
+Bu test ilk çalışmada Arşiv’de eski `/karar-bekleyenler/` adresine giden kırık bağlantıyı buldu. Bağlantı `/karar/#bekleyen` oldu.
+
+İki düzen vardır. Metin düzeni varsayılandır ve 1280 px’te sol kenar 80 px’tir. Uygulama düzeni (`data-wide`) yalnız
+organizasyon şeması, Applet ve satış ortaklığı sayfalarındadır. Uygulama sayfalarında (bu üç sayfa, çalışma rehberleri
+ve Notlar) gövde kendi aracıdır. Bu sayfalarda bölüm kuralı aranmaz. Sayfa başı ve sayfa sonu yine aynıdır. 375 px’te
+sayfa başı, bölümler, sekme panelleri ve sayfa sonu 16 px sol kenarda başlar. Sayfa yana taşmaz. Giderler’deki yıl
+sekmesinin içindeki bölümler panelin yüzeyine göre içeride durur.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe

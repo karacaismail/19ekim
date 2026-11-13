@@ -84,6 +84,7 @@ export function KararSecimleri() {
   return (
     <Section
       id="secimler"
+      index={1}
       title="Karar seçimleri"
       desc="Çelişen ya da belirsiz konularda seçiminizi yapın. Bitince JSON dosyasını indirip bana verin, ben de sistemi buna göre güncelleyeyim."
     >

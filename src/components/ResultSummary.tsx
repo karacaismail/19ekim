@@ -65,7 +65,7 @@ export function ResultSummary({
   return (
     <>
       {strip}
-      <section className="sonuc" id={id} aria-labelledby={`${id}-baslik`} data-role={senaryo.role}>
+      <section className="sonuc" id={id} aria-labelledby={`${id}-baslik`} data-role={senaryo.role} data-ust-kutu="">
         <div className="sonuc-govde">
           <div className="sonuc-ust">
             <h2 className="sonuc-baslik" id={`${id}-baslik`}>

@@ -1,6 +1,7 @@
 import { Alinti } from '../components/Alinti';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
+import { BolumDizini, Section } from '../components/ui';
 import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, KATEGORILER, KISALTMALAR, ORTAK_NOKTA, type Oneri } from '../data/degerOnerisi';
 
 /**
@@ -11,11 +12,11 @@ import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, 
 const iki = (n: number) => String(n).padStart(2, '0');
 
 const ICINDEKILER = [
-  { id: 'en-guclu', ad: `En güçlü ${GUCLU_SOZLER.length} söz` },
-  { id: 'ilk-30-saniye', ad: 'Kapıda ilk 30 saniye' },
-  ...KATEGORILER.map((k) => ({ id: k.id, ad: k.ad })),
-  { id: 'eski-sozler', ad: 'Eski sözlerin güçlü hâli' },
-  { id: 'kisaltmalar', ad: 'Kısaltmalar' },
+  { id: 'en-guclu', baslik: `En güçlü ${GUCLU_SOZLER.length} söz` },
+  { id: 'ilk-30-saniye', baslik: 'Kapıda ilk 30 saniye' },
+  { id: 'butun-oneriler', baslik: 'Bütün öneriler' },
+  { id: 'eski-sozler', baslik: 'Eski sözlerin güçlü hâli' },
+  { id: 'kisaltmalar', baslik: 'Kısaltmalar' },
 ];
 
 function OneriKarti({ o }: { o: Oneri }) {
@@ -66,23 +67,9 @@ function Icerik() {
         Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir. Bunlar geliştirilmesi gereken önerilerdir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
       </p>
 
-      <nav className="dg-icindekiler" aria-label="Sayfa bölümleri">
-        <ol>
-          {ICINDEKILER.map((b) => (
-            <li key={b.id}>
-              <a href={`#${b.id}`}>{b.ad}</a>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <BolumDizini bolumler={ICINDEKILER} />
 
-      <section className="dg-bolum" id="en-guclu" aria-labelledby="en-guclu-baslik">
-        <header className="dg-bolum-ust">
-          <h2 id="en-guclu-baslik" className="dg-bolum-baslik">
-            En güçlü {GUCLU_SOZLER.length} söz
-          </h2>
-          <p className="dg-bolum-giris">Bu sözlerin çoğu bugün tutulamaz. Saha ekibi bir sözü yalnız hizmet hazırsa kullanır.</p>
-        </header>
+      <Section id="en-guclu" title={`En güçlü ${GUCLU_SOZLER.length} söz`} desc="Bu sözlerin çoğu bugün tutulamaz. Saha ekibi bir sözü yalnız hizmet hazırsa kullanır." dizin>
         <ol className="dg-guclu-liste">
           {GUCLU_SOZLER.map((s, i) => (
             <li key={s.baslik} className="dg-guclu">
@@ -104,15 +91,9 @@ function Icerik() {
           <p className="dg-ortak-ad">Bu sözlerin ortak noktası</p>
           <Alinti boyut="buyuk">{ORTAK_NOKTA}</Alinti>
         </div>
-      </section>
+      </Section>
 
-      <section className="dg-bolum" id="ilk-30-saniye" aria-labelledby="ilk-30-saniye-baslik">
-        <header className="dg-bolum-ust">
-          <h2 id="ilk-30-saniye-baslik" className="dg-bolum-baslik">
-            Kapıda ilk 30 saniye
-          </h2>
-          <p className="dg-bolum-giris">Bu sıra, esnafın en çok yaşadığı sıkıntılara ve ilk günden verilebilen hizmetlere göre kuruldu.</p>
-        </header>
+      <Section id="ilk-30-saniye" title="Kapıda ilk 30 saniye" desc="Bu sıra, esnafın en çok yaşadığı sıkıntılara ve ilk günden verilebilen hizmetlere göre kuruldu." dizin>
         <ol className="dg-adimlar">
           {ILK_30_SANIYE.map((a, i) => (
             <li key={a.ad} className="dg-adim">
@@ -139,42 +120,32 @@ function Icerik() {
         <p className="dg-not">
           <strong>Hangisiyle başlanır?</strong> {BASLANGIC_NOTU}
         </p>
-      </section>
+      </Section>
 
-      <div className="dg-katalog-ust">
-        <h2 className="dg-katalog-baslik">Bütün öneriler</h2>
-        <p className="dg-bolum-giris">
-          {KATEGORILER.reduce((n, k) => n + k.oneriler.length, 0)} öneri {KATEGORILER.length} başlıkta toplandı. “Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar, araştırma raporundaki esnaf tiplerini gösterir. Bu tiplerin tanımları sayfaya henüz eklenmedi.
-        </p>
-      </div>
+      <Section id="butun-oneriler" title="Bütün öneriler" desc={`${KATEGORILER.reduce((n, k) => n + k.oneriler.length, 0)} öneri ${KATEGORILER.length} başlıkta toplandı.`} dizin>
+        <p className="dg-bolum-giris">“Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar, araştırma raporundaki esnaf tiplerini gösterir. Bu tiplerin tanımları sayfaya henüz eklenmedi.</p>
+        {KATEGORILER.map((k) => (
+          <section key={k.id} className="dg-bolum dg-kategori" id={k.id} aria-labelledby={`${k.id}-baslik`}>
+            <header className="dg-bolum-ust">
+              <span className="dg-harf" aria-hidden="true">
+                {k.harf}
+              </span>
+              <h3 id={`${k.id}-baslik`} className="dg-bolum-baslik">
+                {k.ad}
+              </h3>
+              <p className="dg-bolum-sayi">{k.oneriler.length} öneri</p>
+              {k.giris ? <p className="dg-bolum-giris">{k.giris}</p> : null}
+            </header>
+            <ol className="dg-oneriler">
+              {k.oneriler.map((o) => (
+                <OneriKarti key={o.no} o={o} />
+              ))}
+            </ol>
+          </section>
+        ))}
+      </Section>
 
-      {KATEGORILER.map((k) => (
-        <section key={k.id} className="dg-bolum dg-kategori" id={k.id} aria-labelledby={`${k.id}-baslik`}>
-          <header className="dg-bolum-ust">
-            <span className="dg-harf" aria-hidden="true">
-              {k.harf}
-            </span>
-            <h3 id={`${k.id}-baslik`} className="dg-bolum-baslik">
-              {k.ad}
-            </h3>
-            <p className="dg-bolum-sayi">{k.oneriler.length} öneri</p>
-            {k.giris ? <p className="dg-bolum-giris">{k.giris}</p> : null}
-          </header>
-          <ol className="dg-oneriler">
-            {k.oneriler.map((o) => (
-              <OneriKarti key={o.no} o={o} />
-            ))}
-          </ol>
-        </section>
-      ))}
-
-      <section className="dg-bolum" id="eski-sozler" aria-labelledby="eski-sozler-baslik">
-        <header className="dg-bolum-ust">
-          <h2 id="eski-sozler-baslik" className="dg-bolum-baslik">
-            Eski sözlerin güçlü hâli
-          </h2>
-          <p className="dg-bolum-giris">Bu bölüm, tutulamayacak iki sözün yerine tutulabilecek iki söz önerir.</p>
-        </header>
+      <Section id="eski-sozler" title="Eski sözlerin güçlü hâli" desc="Bu bölüm, tutulamayacak iki sözün yerine tutulabilecek iki söz önerir." dizin>
         <ol className="dg-eskiler">
           {ESKI_SOZLER.map((e) => (
             <li key={e.eski} className="dg-eski">
@@ -190,14 +161,9 @@ function Icerik() {
             </li>
           ))}
         </ol>
-      </section>
+      </Section>
 
-      <section className="dg-bolum" id="kisaltmalar" aria-labelledby="kisaltmalar-baslik">
-        <header className="dg-bolum-ust">
-          <h2 id="kisaltmalar-baslik" className="dg-bolum-baslik">
-            Kısaltmalar
-          </h2>
-        </header>
+      <Section id="kisaltmalar" title="Kısaltmalar" desc="Bu bölüm sayfada geçen kısaltmaların açık adını verir." dizin>
         <dl className="dg-kisaltmalar">
           {KISALTMALAR.map((k) => (
             <div key={k.kisa}>
@@ -206,7 +172,7 @@ function Icerik() {
             </div>
           ))}
         </dl>
-      </section>
+      </Section>
     </div>
   );
 }

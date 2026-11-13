@@ -71,6 +71,26 @@ test.describe('içerik envanteri', () => {
     for (const r of ROLES) expect(icerikOf(`/roller/${r.slug}/`)?.ebeveyn).toBe('organizasyon');
   });
 
+  test('sayfa iskeleti: sunum sırasında olmayan her yayımlanan sayfanın en az bir yayımlanan ilgili sayfası var', () => {
+    // Sayfa sonu (AppFrame `IlgiliSayfalar`, 13 Kasım 2026): sunum sırası dışındaki sayfa “İlgili sayfalar” listesiyle biter.
+    // Liste yalnız yayımlanan kayıtları gösterir. Bu yüzden her kayıtta en az bir yayımlanan ilgili sayfa olmalıdır.
+    const sirada = new Set(SEQUENCE.map((s) => s.path));
+    const yayimda = new Set(YAYIMLANAN.map((k) => k.id));
+    const disarida = new Set(['sayfa-bulunamadi', 'email']);
+    for (const k of YAYIMLANAN.filter((x) => !sirada.has(x.path) && !disarida.has(x.id))) {
+      expect(k.iliskili.filter((i) => yayimda.has(i)).length, `${k.id}: yayımlanan ilgili sayfa`).toBeGreaterThan(0);
+    }
+  });
+
+  test('sayfa iskeleti: “İlgili sayfalar” listesinde görünen okur sorusu kısa cümlelerden oluşur', () => {
+    // Okur sorusu sayfa sonundaki bağlantıda görünür. Açıklama cümlesi en çok 15 kelimedir (yalın Türkçe kuralı 3).
+    for (const k of YAYIMLANAN) {
+      for (const cumle of k.kullaniciSorusu.split(/(?<=[.?!])\s+/)) {
+        expect(cumle.split(/\s+/).filter(Boolean).length, `${k.id}: ${cumle}`).toBeLessThanOrEqual(15);
+      }
+    }
+  });
+
   test('IA-04: planlanan sayfaların dosyası yok (boş kabuk yok); yayımlanan sayfalar sunum sırası ve menülerle tutarlı', () => {
     for (const k of ICERIK.filter((x) => x.planlandi)) {
       expect(k.durum, k.id).toBe('taslak');

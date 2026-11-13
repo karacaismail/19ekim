@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
+import { Section } from '../components/ui';
 import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar, ve, type Adim, type Asama, type Cikis, type Durum, type Sablon } from '../data/onboarding';
 import '../styles/onboarding.css';
 
 /**
  * Yeni kayıt adımları (kullanıcı kararları 2026-11-10): CRM masası sorumlusu için. Sıra: giriş cümlesi → aşama
  * haritası (dört aşama ve sürecin sonu) → her durumda geçerli kurallar → aşamalar → her aşamada olabilen durumlar.
+ * Sayfa iskeleti (13 Kasım 2026): bu dört parça ortak `Section` kalıbındadır (h2, kısa açıklama). Aşama başlıkları
+ * “Aşamalar adım adım” bölümünün içinde h3 olur. Numaralı aşama başlığı, çizgi ve Başlar / Biter kutuları değişmez.
  * Her aşama “Başlar” kutusuyla açılır, durumları listeler ve “Biter” kutusuyla kapanır. Bitiş kutusu kayıt kartına
  * yazılacak durumu ve sonraki aşamayı gösterir. Durumlar `details` ile kapalı gelir. Başka bir duruma geçiş bağlantısı
  * hedef durumu açar ve odağı onun başlığına taşır. Mobil önce yazıldı.
@@ -127,10 +130,7 @@ const cikisCumlesi = (c: Cikis) => `${c.kosul} ${c.sonuc}.`;
 
 function AsamaHaritasi() {
   return (
-    <nav className="ob-harita" aria-labelledby="ob-harita-baslik">
-      <h2 className="ob-bolum-baslik" id="ob-harita-baslik">
-        Aşamalar
-      </h2>
+    <nav className="ob-harita" aria-label="Aşama haritası">
       <ol className="ob-harita-liste">
         {ASAMALAR.map((a) => (
           <li key={a.no} className="ob-harita-oge">
@@ -184,26 +184,26 @@ function AsamaBolumu({ a, durumListesi, adOf, sablonOf }: { a: Asama; durumListe
           {a.no}
         </span>
         <div className="ob-asama-baslik">
-          <h2 className="ob-asama-ad" id={`${asamaId(a.no)}-baslik`}>
+          <h3 className="ob-asama-ad" id={`${asamaId(a.no)}-baslik`}>
             Aşama {a.no}: {a.ad}
-          </h2>
+          </h3>
           <p className="ob-asama-gun">{tutarBitisik(a.gun)}</p>
         </div>
       </header>
       <div className="ob-asama-govde">
         <div className="ob-sinir" data-tur="baslar">
-          <h3 className="ob-sinir-etiket">Başlar</h3>
+          <h4 className="ob-sinir-etiket">Başlar</h4>
           <p>{a.baslar} başlar.</p>
           <p>Bu aşama boyunca kayıt kartında durum “{a.kartDurumu}” kalır.</p>
         </div>
-        <h3 className="ob-durumlar-baslik">Bu aşamada karşılaşacağınız durumlar</h3>
+        <h4 className="ob-durumlar-baslik">Bu aşamada karşılaşacağınız durumlar</h4>
         <ul className="ob-durumlar">
           {durumListesi.map((d, i) => (
             <DurumKarti key={d.id} d={d} no={`${a.no}.${i + 1}`} adOf={adOf} sablon={sablonOf(d.sablon)} />
           ))}
         </ul>
         <div className="ob-sinir" data-tur="biter">
-          <h3 className="ob-sinir-etiket">Biter</h3>
+          <h4 className="ob-sinir-etiket">Biter</h4>
           <p>Bu aşama {SAYI_ADI[a.cikislar.length] ?? a.cikislar.length} şekilde bitebilir.</p>
           <ul className="ob-cikislar">
             {a.cikislar.map((c) => (
@@ -253,34 +253,33 @@ function Icerik() {
           Bu sayfa, istoc.com’a yeni kaydolan bir satıcıyı ilk günden ücretli pakete kadar nasıl takip edeceğinizi gösterir. Süreç dört aşamadan oluşur. Satıcının hangi aşamada olduğunu, CRM (müşteri ilişkileri yönetimi) programındaki kayıt kartında yazan durumdan anlarsınız. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
         </p>
 
-        <AsamaHaritasi />
+        <Section id="asamalar" title="Aşamalar" desc="Her kart bir aşamayı ve aşamanın nasıl bittiğini gösterir.">
+          <AsamaHaritasi />
+        </Section>
 
-        <section className="ob-kurallar" aria-labelledby="ob-kurallar-baslik">
-          <h2 className="ob-bolum-baslik" id="ob-kurallar-baslik">
-            Her zaman geçerli kurallar
-          </h2>
+        <Section id="kurallar" title="Her zaman geçerli kurallar" desc="Bu kurallar her aşamada geçerlidir.">
           <ul className="ob-kurallar-liste">
             {HER_DURUMDA.map((k) => (
               <li key={k}>{k}</li>
             ))}
           </ul>
-        </section>
+        </Section>
 
-        {ASAMALAR.map((a) => (
-          <AsamaBolumu key={a.no} a={a} durumListesi={tum.filter((d) => d.yer === a.no)} adOf={adOf} sablonOf={sablonOf} />
-        ))}
+        <Section id="asama-ayrintisi" title="Aşamalar adım adım" desc="Her aşama “Başlar” kutusuyla açılır ve “Biter” kutusuyla kapanır.">
+          <div className="ob-asamalar">
+            {ASAMALAR.map((a) => (
+              <AsamaBolumu key={a.no} a={a} durumListesi={tum.filter((d) => d.yer === a.no)} adOf={adOf} sablonOf={sablonOf} />
+            ))}
+          </div>
+        </Section>
 
-        <section className="ob-her-an" id="her-an" aria-labelledby="her-an-baslik">
-          <h2 className="ob-bolum-baslik" id="her-an-baslik">
-            Herhangi bir aşamada çıkabilecek durumlar
-          </h2>
-          <p className="ob-her-an-not">Bu durumlar sürecin herhangi bir yerinde çıkabilir. Adımları bitirdikten sonra kayıt kapanmadıysa kaldığınız aşamadan devam edin.</p>
-          <ul className="ob-durumlar">
+        <Section id="her-an" title="Herhangi bir aşamada çıkabilecek durumlar" desc="Bu durumlar sürecin herhangi bir yerinde çıkabilir. Adımları bitirdikten sonra kayıt kapanmadıysa kaldığınız aşamadan devam edin.">
+          <ul className="ob-durumlar ob-her-an-liste">
             {herAn.map((d) => (
               <DurumKarti key={d.id} d={d} adOf={adOf} sablon={sablonOf(d.sablon)} />
             ))}
           </ul>
-        </section>
+        </Section>
       </div>
     </>
   );

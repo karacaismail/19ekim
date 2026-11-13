@@ -112,7 +112,7 @@ function BcgContent() {
         ]}
       />
 
-      <Section id="ne-ise-yarar" index={1} title="Ne işe yarar?">
+      <Section id="ne-ise-yarar" index={1} title="Ne işe yarar?" desc="BCG matrisi, hangi ürüne para ayıracağınıza karar vermenize yardım eder.">
         <ul className="bullets">
           {PURPOSES.map((p) => (
             <li key={p}>{p}</li>
@@ -177,7 +177,7 @@ function BcgContent() {
         />
       </Section>
 
-      <Section id="adimlar" index={5} title="Adım adım uygulama">
+      <Section id="adimlar" index={5} title="Adım adım uygulama" desc="Matrisi sekiz adımda kurarsınız. Adımları sırayla izleyin.">
         <Chart id="adim" title="Sekiz adım" summary={STEPS.map((s) => `${s.name}: ${s.sub}`).join('. ')} spec={{ kind: 'chain', steps: STEPS.map((s) => ({ name: s.name, sub: s.sub, role: 'pazarlamaci' })) }} size="xxl" />
       </Section>
 
@@ -236,7 +236,7 @@ function BcgContent() {
         </Note>
       </Section>
 
-      <Section id="hatalar" index={7} title="Sık yapılan hatalar">
+      <Section id="hatalar" index={7} title="Sık yapılan hatalar" desc="Tablo her hatanın yanında doğru yolu gösterir.">
         <DataTable
           id="hata"
           title="Hata ve doğrusu"
@@ -248,7 +248,7 @@ function BcgContent() {
         />
       </Section>
 
-      <Section id="sinirlar" index={8} title="Sınırlar ve alternatifler">
+      <Section id="sinirlar" index={8} title="Sınırlar ve alternatifler" desc="Matris her soruyu cevaplamaz. Bu bölüm matrisin eksiklerini ve yerine kullanılabilecek yöntemleri gösterir.">
         <ul className="bullets">
           {LIMITS.map((l) => (
             <li key={l}>{l}</li>

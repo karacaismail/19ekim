@@ -1782,7 +1782,7 @@ test.describe('parametreler', () => {
     await icerik(page);
     await hydrated(page);
     // P6.3: gruplar kapalı gelir; alan grubunu açarak erişilir.
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Ücret' }).click();
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
     await expect(salary).toHaveValue(/70\.000/);
@@ -1834,7 +1834,7 @@ test.describe('parametreler', () => {
     await page.goto('parametreler/');
     await icerik(page);
     await hydrated(page);
-    await page.locator('.pgrup h2 button', { hasText: 'Takvim' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Takvim' }).click();
     // Panel açılış geçişi bitmeden odak verilemez: alan görünür olunca.
     await expect(page.getByLabel('Program başlangıcı')).toBeVisible();
     await page.getByLabel('Program başlangıcı').focus();
@@ -1879,8 +1879,8 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     // Gruplar: her PARAM_GROUP bir açılır grup (h2 içinde düğme, aria-expanded, panel region); hepsi kapalı.
     const gruplar = page.locator('.pgrup');
     await expect(gruplar).toHaveCount(PARAM_GROUPS.length);
-    for (const g of PARAM_GROUPS) await expect(page.locator('.pgrup').filter({ has: page.locator('h2 button', { hasText: g.title }) })).toHaveCount(1);
-    const dugmeler = page.locator('.pgrup h2 button');
+    for (const g of PARAM_GROUPS) await expect(page.locator('.pgrup').filter({ has: page.locator('h3 button', { hasText: g.title }) })).toHaveCount(1);
+    const dugmeler = page.locator('.pgrup h3 button');
     await expect(dugmeler).toHaveCount(PARAM_GROUPS.length);
     for (const b of await dugmeler.all()) await expect(b).toHaveAttribute('aria-expanded', 'false');
     expect(await gorunurGirdi(page), 'kapalı gruplarda görünür girdi yok').toBe(0);
@@ -1888,7 +1888,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     expect(yukseklik, 'belge yüksekliği 320 px (önce 12.683)').toBeLessThan(4_000);
     // Grup başlığında alan sayısı; dokunma hedefi ≥ 44 px; açılınca yalnız o grubun alanları görünür, panel region.
     const ucret = PARAM_GROUPS.find((g) => g.id === 'ucret')!;
-    const ucretDugme = page.locator('.pgrup h2 button', { hasText: ucret.title });
+    const ucretDugme = page.locator('.pgrup h3 button', { hasText: ucret.title });
     await expect(ucretDugme).toContainText(`${ucret.fields.length} alan`);
     expect((await ucretDugme.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await ucretDugme.click();
@@ -1909,7 +1909,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     await expect(page.locator('.param-ara-sonuc')).toHaveAttribute('aria-live', 'polite');
     await expect(page.locator('.pgrup:visible')).toHaveCount(eslesen.length);
     expect(await gorunurGirdi(page)).toBe(beklenen);
-    for (const b of await page.locator('.pgrup:visible h2 button').all()) await expect(b).toHaveAttribute('aria-expanded', 'true');
+    for (const b of await page.locator('.pgrup:visible h3 button').all()) await expect(b).toHaveAttribute('aria-expanded', 'true');
     await ara.fill('xyzqq');
     await expect(page.locator('.param-ara-sonuc')).toContainText('0 alan');
     await expect(page.locator('.pgrup:visible')).toHaveCount(0);
@@ -1925,7 +1925,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     await hydrated(page);
     await expect(page.locator('.param-status')).toContainText('Tüm değerler varsayılan');
     await expect(page.locator('.param-degisiklikler')).toHaveCount(0);
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Ücret' }).click();
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
     await salary.blur();
@@ -1944,18 +1944,18 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     await expect(durum).toContainText(/bu tarayıcıya son kayıt \d{2}:\d{2}:\d{2}/);
     await expect(durum).toContainText('yerel depolama');
     // Grup kapatılıp özetten “alana git”: grup açılır, alan odaklanır.
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Ücret' }).click();
     await expect(salary).toBeHidden();
     await satir.first().getByRole('button', { name: /Alana git/ }).click();
     await expect(salary).toBeVisible();
     await expect(salary).toBeFocused();
     // Tek alanı geri al: yalnız o alan varsayılana döner.
-    await page.locator('.pgrup h2 button', { hasText: 'Prim ve kota' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Prim ve kota' }).click();
     const prim = page.getByLabel('Satış başına prim');
     await prim.fill('3000');
     await prim.blur();
     await expect(satir).toHaveCount(2);
-    await expect(page.locator('.pgrup h2 button', { hasText: 'Prim ve kota' })).toContainText('1 değişiklik');
+    await expect(page.locator('.pgrup h3 button', { hasText: 'Prim ve kota' })).toContainText('1 değişiklik');
     await satir.filter({ hasText: 'Saha satış maaşı' }).getByRole('button', { name: /Bu alanı geri al/ }).click();
     await expect(satir).toHaveCount(1);
     await expect(satir.first()).toContainText('Satış başına prim');
@@ -1967,7 +1967,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     await page.goto('parametreler/');
     await icerik(page);
     await hydrated(page);
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Ücret' }).click();
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
     await salary.blur();
@@ -2006,7 +2006,7 @@ test.describe('parametreler: görev grupları, değişiklik özeti, kayıt ve s�
     await page.goto('parametreler/');
     await icerik(page);
     await hydrated(page);
-    await page.locator('.pgrup h2 button', { hasText: 'Ücret' }).click();
+    await page.locator('.pgrup h3 button', { hasText: 'Ücret' }).click();
     const salary = page.getByLabel('Saha satış maaşı');
     await salary.fill('70000');
     await salary.blur();

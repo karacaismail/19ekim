@@ -295,7 +295,7 @@ function Icerik() {
           istoc.com, İstoç çarşısı esnafı için bir toptan pazar yeridir. Burada işletmeler işletmelere satış yapar. Buna B2B (işletmeden işletmeye) satış denir.
         </p>
 
-        <Section id="kisa-ozet" title="Kısa özet">
+        <Section id="kisa-ozet" title="Kısa özet" desc="Bu bölüm bugün neyin satıldığını ve neyin satılamadığını gösterir.">
           <ol className="gm-ozet">
             <li className="gm-ozet-oge" data-durum="hazir">
               <h3 className="gm-ozet-baslik">Bugün yalnız abonelik satılıyor</h3>
@@ -422,7 +422,7 @@ function Icerik() {
           ))}
         </Section>
 
-        <Section id="arastirma-notu" title="Araştırma notu">
+        <Section id="arastirma-notu" title="Araştırma notu" desc="Bu bölüm başka pazar yerlerinin nasıl para kazandığını özetler.">
           <div className="gm-arastirma">
             {ARASTIRMA_NOTU.map((t) => (
               <p key={t}>{t}</p>
@@ -430,7 +430,7 @@ function Icerik() {
           </div>
         </Section>
 
-        <Section id="kisaltmalar" title="Kısaltmalar">
+        <Section id="kisaltmalar" title="Kısaltmalar" desc="Bu bölüm sayfada geçen kısaltmaların açık adını verir.">
           <dl className="gm-kisaltmalar">
             {KISALTMALAR.map((k) => (
               <div key={k.kisa}>

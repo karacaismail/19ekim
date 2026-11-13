@@ -132,8 +132,8 @@ test('küresel pazaryerleri: belgedeki bütün bağlantılar sayfada, dış bağ
   }
   await expect(page.locator('.pz-kaynak .chip', { hasText: 'İkincil kaynak' }).first()).toBeVisible();
   await expect(page.locator('.pz-ornek-metin', { hasText: '(ikincil kaynak)' }).first()).toBeVisible();
-  // İlgili sayfalar: hizmetler, gelir modelleri ve değer önerisi.
-  const ilgili = await page.locator('.pz-ilgili a').evaluateAll((els) => els.map((a) => a.getAttribute('href')));
+  // İlgili sayfalar sayfanın sonundadır (ortak sayfa sonu gezinmesi): hizmetler, gelir modelleri ve değer önerisi.
+  const ilgili = await page.getByRole('navigation', { name: 'İlgili sayfalar' }).locator('a').evaluateAll((els) => els.map((a) => a.getAttribute('href')));
   expect(ilgili).toEqual(['/19ekim/services/', '/19ekim/gelir-modelleri/', '/19ekim/deger-onerisi/']);
 });
 

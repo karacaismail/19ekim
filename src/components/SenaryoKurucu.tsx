@@ -80,7 +80,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
     }
   };
   return (
-    <section className="kurucu" aria-labelledby="kurucu-baslik">
+    <section className="kurucu" aria-labelledby="kurucu-baslik" data-ust-kutu="">
       <div className="kurucu-bas">
         <h2 className="kurucu-baslik" id="kurucu-baslik">
           Senaryo kurucu

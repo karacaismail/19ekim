@@ -479,6 +479,7 @@ export function GuncelPlan() {
   return (
     <Section
       id="guncel"
+      index={1}
       title="Güncel plan (3 Kasım 2026 Salı)"
       desc="Bu adımlar 3 Kasım 2026 Salı günü hazırlanan iki plandan gelir. Biri “Kadro kapasitesi” sayfasındaki plandır. Diğeri, bugünkü durum ile hedef arasındaki farkı kapatan eylem planıdır. Dalga, aynı gün işe başlayan kişi grubudur. Birinci dalga 23 Kasım 2026 Pazartesi günü, ikinci dalga 1 Aralık 2026 Salı günü başlar. Dalgaların gün sırası, dalganın işe başladığı günden sayılır. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır. Başlangıç tarihi kararı verilince bu satırlar güncellenir."
     >
