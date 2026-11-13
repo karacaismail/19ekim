@@ -64,6 +64,27 @@
   --policy-timeline-line: var(--rule-strong);
   --opacity-disabled: .5;
 
+  /*
+   * Hazırlık durumu (gelir modelleri, 13 Kasım 2026): renk yalnız destekler, durum her zaman metinle de yazılır. Hazır
+   * yeşil, yakında turuncu, hazır değil kırmızı tondadır. Değerler durum tokenlarından gelir, koyu temada da geçerlidir.
+   */
+  --hazirlik-hazir-bg: var(--status-karar-bg);
+  --hazirlik-hazir-fg: var(--status-karar-fg);
+  --hazirlik-yakinda-bg: var(--status-oneri-bg);
+  --hazirlik-yakinda-fg: var(--status-oneri-fg);
+  --hazirlik-degil-bg: var(--status-bekliyor-bg);
+  --hazirlik-degil-fg: var(--status-bekliyor-fg);
+
+  /*
+   * İç boşluk (clear space, kullanıcı kararı 13 Kasım 2026): zemin alan öğede yazı ve simge kenara yapışmaz. Zemin
+   * kalıcı da olabilir, üzerine gelince ya da açılınca da gelebilir. Satır, kart ve panelde yatay 12 px, dikey 8 px
+   * boşluk kalır. Düğme, rozet ve hücrede yatay 8 px, dikey 4 px boşluk kalır. Denetim: tests/bosluk.spec.ts.
+   */
+  --clear-inline: var(--space-3);
+  --clear-block: var(--space-2);
+  --clear-inline-sm: var(--space-2);
+  --clear-block-sm: var(--space-1);
+
   /* Etkileşim alanı: ince işaretçide 44, kaba işaretçide 48 CSS px */
   --hit-min: 44px;
 

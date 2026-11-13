@@ -29,7 +29,7 @@ test('Kadro kapasitesi: 7 rol ve yönetici, kapasite aşımı, 15 karar, 14 ek r
   await page.goto('kadro-kapasitesi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await expect(page.locator('.tk-rol')).toHaveCount(8);
-  await expect(page.locator('.tk-rol').filter({ hasText: 'İstoç masa başı' })).toContainText('Kapasiteyi yüzde 26 aşar.');
+  await expect(page.locator('.tk-rol').filter({ hasText: 'İstoç masa başı' })).toContainText('Kapasiteyi %26 aşar.');
   await expect(page.locator('.tk-karar')).toHaveCount(15);
   await expect(page.locator('.tk-ek-rol')).toHaveCount(14);
 });

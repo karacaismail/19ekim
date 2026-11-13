@@ -32,7 +32,7 @@ test.describe('giriş kapısı', () => {
       expect(html, yol).toContain('giris-form');
       for (const yok of ['mainnav-list', 'class="crumbs', 'app-footer', 'pager-link', '₺', 'Bordro', 'İsmail Karaca', '3.000.000']) expect(html, `${yol}: ${yok}`).not.toContain(yok);
       // Sayfa açıklaması da veri taşımaz (tüm sayfalarda genel); arama motorları dizinlemez.
-      expect(html, yol).toContain('content="Türksab pazarlama ve finansal planlama. Görmek için giriş gerekir."');
+      expect(html, yol).toContain('content="Bu site Türksab’ın pazarlama ve finansal planlamasını gösterir. Görmek için giriş yapın."');
       expect(html, yol).toContain('noindex, nofollow');
     }
   });
@@ -109,7 +109,7 @@ test.describe('giriş kapısı', () => {
     const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
     await page.goto('istihdam/');
-    await expect(page.getByText('Giriş için tarayıcıda JavaScript açık olmalı.')).toBeVisible();
+    await expect(page.getByText('Giriş yapmak için tarayıcınızda JavaScript açık olmalı.')).toBeVisible();
     await expect(page.locator('.giris-form')).toBeHidden();
     await expect(page.getByRole('navigation', { name: 'Ana gezinme' })).toHaveCount(0);
     await context.close();

@@ -113,7 +113,7 @@ export const akisOlustur: AkisOlustur = (a) => {
         id: 'satis', ad: 'Satışı şirkete bırakın', sorumlu: 'Satış uzmanı (önerilen görev)',
         yap: [
           'Satış uzmanı firmanın çalışan sayısına göre teklif verir.',
-          `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar.`,
+          `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar.`,
           'Fiyat herkes için aynıdır.',
         ],
         dikkat: 'Birinci sürümde yeni müşterinin yıllık paket alması gerekir.',

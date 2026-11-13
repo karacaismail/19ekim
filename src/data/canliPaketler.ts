@@ -104,7 +104,7 @@ export const CANLI_GRUPLAR: CanliGrup[] = [
       },
       {
         "anahtar": "quota.api_rate_limit",
-        "ad": "API istek sınırı",
+        "ad": "Yazılım bağlantısı (API) istek sınırı",
         "deger": {
           "basic": false,
           "platinium": "60",

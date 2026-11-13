@@ -114,7 +114,7 @@ test.describe('her kayıtlı sayfa', () => {
       const h1 = page.getByRole('heading', { level: 1 });
       await expect(h1, `${k.path}: tek h1`).toHaveCount(1);
       const baslik = (await h1.innerText()).trim();
-      const sekme = (await page.title()).split(' · ')[0];
+      const sekme = (await page.title()).split(' - ')[0];
       const kabul = [k.baslik, k.menu, baslik, k.path === '/' ? meta.siteTitle : undefined].filter(Boolean);
       expect(kabul, `${k.path}: sekme başlığı “${sekme}”`).toContain(sekme);
       const duzeyler = await page.locator('h1, h2, h3, h4, h5, h6').evaluateAll((els) => els.filter((h) => h.getClientRects().length).map((h) => Number(h.tagName[1])));
@@ -523,7 +523,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     // Her maddede sorumlu çipi (rol) ve tarih aralığı.
     for (const m of okunan.maddeler) {
       expect(m.role, m.name).not.toBe('');
-      expect(m.range, m.name).toMatch(/ – /);
+      expect(m.range, m.name).toMatch(/^\d+ \p{L}+ ile \d+ \p{L}+ arası$/u);
     }
     // Kayıt sözleşmesi: başlık öğesi içinde düğme, Enter açar (Açıklama + Tarih + Sorumlu), Space kapatır, hedef ≥ 44 px.
     const madde = ajanda.locator('.ajanda-madde').first();
@@ -576,7 +576,7 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     // 90 günlük plan Gantt’ı: açılır ajanda, 60. ve 90. gün işaretleri.
     const plan = ajandalar.nth(1);
     await expect(plan).toHaveAttribute('data-tur', 'gorev');
-    expect((await ajandaOku(plan)).isaretler.map((i) => i.split(' (')[0])).toEqual(['60. gün', '90. gün']);
+    expect((await ajandaOku(plan)).isaretler.map((i) => i.split(' (')[0])).toEqual(['Planın 60. günü', 'Planın 90. günü']);
   });
 
   test('karar bekleyenler ve BCG: 320 px’te son tarih ajandası ve kutuya göre değer listesi ECharts verisiyle aynı', async ({ page }) => {
@@ -759,7 +759,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu).toBeVisible();
     const ogeler = menu.getByRole('menuitem');
     // Kullanıcı kararı 2026-10-21: 1–7 sıralı numara, roller pozisyon adıyla; numarasız öğede aynı sade nokta.
-    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Kadro kapasitesi', 'Applet']);
+    await expect(ogeler).toHaveText(['1Organizasyon şeması', '2Dijital pazarlama uzmanı', '3İstoç Pazarlama CRM uzmanı', '4Saha satış uzmanı', '5Organizatör', '6Segika CRM', '7Asistan', 'İstihdam takvimi', 'Kadro kapasitesi', 'Hesap araçları']);
     await expect(menu.getByRole('menuitem', { name: 'Segika CRM' })).toHaveAttribute('aria-current', 'page');
     await expect(menu.locator('.tree-no')).toHaveCount(7);
     await expect(menu.getByRole('menuitem', { name: 'İstihdam takvimi' }).locator('.navmenu-bullet')).toHaveCount(1);
@@ -787,7 +787,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await page.goto('istihdam/');
     await icerik(page);
     await page.getByRole('button', { name: 'İstihdam' }).click();
-    await page.getByRole('menuitem', { name: 'Applet', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Hesap araçları', exact: true }).click();
     await expect(page).toHaveURL(/\/applet\/$/);
     await expect(page.locator('section#katalog')).toBeVisible();
     await page.goto('applet/#is-degerleme');
@@ -795,7 +795,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     const tetik = page.getByRole('button', { name: 'İstihdam' });
     await expect(tetik).toHaveAttribute('data-section', 'true');
     await tetik.click();
-    await expect(page.getByRole('menuitem', { name: 'Applet', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('menuitem', { name: 'Hesap araçları', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('klavye: Tab ile tetikleyici, Enter açar, oklar ögeler arasında gezer; odak alt çizgiyle (halka yok)', async ({ page }) => {
@@ -1140,7 +1140,8 @@ test.describe('başlık ve İstihdam menüsü', () => {
     });
     expect(st.tema).toBe(true);
     expect(st.bg).toContain('linear-gradient');
-    expect(st.boy).toMatch(/^56px 3px$/);
+    // Çubuk anahtar genişliğindedir (3,625rem = 58 px). Genişlik simgenin raydan 8 px içeride durması için arttı (iç boşluk).
+    expect(st.boy).toMatch(/^58px 3px$/);
     expect(st.halka).toBe('none');
   });
 
@@ -1222,7 +1223,7 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
       await expect(page.locator('.crumbs-row h1.crumbs-title')).toHaveCount(1);
       await expect(page.locator('.hero, .eyebrow, .display, .lead')).toHaveCount(0);
       // Kırıntılı sayfada h1 son kırıntıdır (aria-current="page"); kırıntısız sayfada (ana sayfa, doğrudan erişilen BCG) tek başına.
-      // Applet İstihdam grubunda: kırıntı “İstihdam › Ücret ve performans applet’leri” (docs/contents.md F15, 2026-10-28).
+      // Hesap araçları İstihdam grubunda: kırıntı “İstihdam › Ücret ve performans hesap araçları” (docs/contents.md F15, 2026-10-28).
       const kirintili = !['', 'bcg/'].includes(path);
       await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveCount(kirintili ? 1 : 0);
       await expect(page.locator('.crumbs')).toHaveCount(kirintili ? 1 : 0);
@@ -1284,7 +1285,7 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
     await expect(son.locator('.avatar')).toHaveCount(1);
     await expect(son.locator('.chip')).toHaveCount(1);
     await expect(page.locator('.page-purpose')).toContainText('İstoç’ta');
-    await expect(page.locator('.page-meta dt')).toHaveText(['Kişi', 'Başlangıç', 'Bağlı', 'Ücret', 'Aranan']);
+    await expect(page.locator('.page-meta dt')).toHaveText(['Kişi', 'Başlangıç', 'Yönetici', 'Ücret', 'Aranan özellikler']);
   });
 
   test('bölüm başlığı: hairline üst çizgi, numara ikincil renkte ve yalnız sıralı sayfalarda (parametreler ve nakit akışında yok)', async ({ page }) => {
@@ -1397,7 +1398,7 @@ test.describe('yatay telefon (alçak ekran)', () => {
     await icerik(page);
     await hydrated(page);
     await page.getByRole('button', { name: 'İstihdam' }).click();
-    const son = page.getByRole('menuitem', { name: 'Applet', exact: true });
+    const son = page.getByRole('menuitem', { name: 'Hesap araçları', exact: true });
     await son.scrollIntoViewIfNeeded();
     const box = await son.boundingBox();
     expect(box).not.toBeNull();
@@ -1791,7 +1792,7 @@ test.describe('parametreler', () => {
     await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.getByText('70.000 ₺ maaş / ay').first()).toBeVisible();
+    await expect(page.getByText('Ayda 70.000 ₺ maaş').first()).toBeVisible();
     await expect(page.getByText('Kota ay içinde 140.000 ₺ satıştır', { exact: false }).first()).toBeVisible();
     await expect(page.locator('.params-notice')).toBeVisible();
 
@@ -1811,7 +1812,7 @@ test.describe('parametreler', () => {
     await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.getByText('50.000 ₺ maaş / ay').first()).toBeVisible();
+    await expect(page.getByText('Ayda 50.000 ₺ maaş').first()).toBeVisible();
     await expect(page.locator('.params-notice')).toHaveCount(0);
   });
 
@@ -2225,7 +2226,7 @@ test.describe('karar defteri — sayfada (adım 1a)', () => {
     await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.locator('[data-page-header]').last()).toContainText(/\d+ bekliyor/);
+    await expect(page.locator('[data-page-header]').last()).toContainText(/\d+ karar bekliyor/);
     await expect(page.locator('[data-page-header]').last()).toContainText(/gecikmiş/);
     const bekleyen = page.locator('.table-block:has(#karar-tablo)');
     await expect(bekleyen.locator('tbody tr')).toHaveCount(await bekleyen.locator('tbody tr').count());
@@ -2243,7 +2244,7 @@ test.describe('karar defteri — sayfada (adım 1a)', () => {
     await expect(komisyon).toContainText('%15');
     await expect(komisyon).toContainText(/Verildi/);
     await expect(komisyon).toContainText(/28 Ekim 2026/);
-    await expect(komisyon).toContainText(/Açık:/);
+    await expect(komisyon).toContainText(/Cevap bekleyen sorular şunlardır:/);
     const aktarim = verilen.locator('tbody tr', { hasText: 'Gelir planı seçenekleri' });
     await expect(aktarim).toContainText(/Yürürlükte/);
     // Verilen karar sonuç metni kullanıcıya “onaylı politika” demez; iş modeli satırı strateji onayı üretmez.

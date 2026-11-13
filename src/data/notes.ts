@@ -29,7 +29,7 @@ export const DEFAULT_NOTES: NotesState = {
   lists: [
     { id: INBOX, name: 'Gelen kutusu' },
     { id: 'partner', name: 'Partner ağı' },
-    { id: 'ik', name: 'İK yönetimi' },
+    { id: 'ik', name: 'İnsan kaynakları yönetimi' },
   ],
   notes: [
     { id: 'p1', list: 'partner', text: 'Yeni görev tanımı: partner ağı geliştirmek', done: false, created: '2026-10-19' },
@@ -38,8 +38,8 @@ export const DEFAULT_NOTES: NotesState = {
     { id: 'p4', list: 'partner', text: 'Sertifikalı ve sertifikasız partner ağı', done: false, created: '2026-10-19' },
     { id: 'p5', list: 'partner', text: 'Partner ağı için yeni personel istihdam etmiyoruz', done: false, created: '2026-10-19' },
     { id: 'i1', list: 'ik', text: 'Asgari ücret çarpanları bize uygun mu?', done: false, created: '2026-10-19' },
-    { id: 'i2', list: 'ik', text: 'İK yönetiminde daha gelişmiş bir ücret matrisi belirlemeli', done: false, created: '2026-10-19' },
-    { id: 'i3', list: 'ik', text: 'İK yönetiminde ECA rules belirlemeli', done: false, created: '2026-10-19' },
+    { id: 'i2', list: 'ik', text: 'İnsan kaynakları yönetiminde daha gelişmiş bir ücret matrisi belirlemeli', done: false, created: '2026-10-19' },
+    { id: 'i3', list: 'ik', text: 'İnsan kaynakları yönetiminde ECA kurallarını belirlemeli', done: false, created: '2026-10-19' },
     { id: 'i4', list: 'ik', text: 'Prim sistemi eklemeli', done: false, created: '2026-10-19' },
     { id: 'i5', list: 'ik', text: 'Efor sistemi eklemeli', done: false, created: '2026-10-19' },
   ],

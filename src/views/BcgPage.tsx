@@ -41,7 +41,7 @@ function BcgMatrix() {
         <span className="chart-title" id="bcg-matrix-baslik">
           Dört kutu
         </span>
-        <span className="chart-note">Dikey eksen pazar büyüme hızını gösterir, yukarısı hızlıdır. Yatay eksen göreli pazar payını gösterir. Klasik BCG yerleşiminde sol taraf yüksek paydır.</span>
+        <span className="chart-note">Dikey eksen pazar büyüme hızını gösterir, yukarısı hızlıdır. Yatay eksen göreli pazar payını gösterir. Bu çizim klasik BCG yerleşimini kullanır. Dikkat edin, sol taraf yüksek payı gösterir. Sağ taraf düşük payı gösterir.</span>
       </figcaption>
       <div className="bcg-frame">
         <div className="bcg-y" aria-hidden="true">
@@ -105,7 +105,7 @@ function BcgContent() {
     <>
       <PageHeader
         title="BCG matrisi"
-        purpose="Büyüme–pay matrisi, ürünleri iki soruyla dört kutuya ayırarak yatırım kararını kolaylaştırır."
+        purpose="Boston Consulting Group’un (BCG) büyüme ve pay matrisi, ürünleri iki soruyla dört kutuya ayırır."
         meta={[
           { label: 'Kaynak', value: 'Boston Consulting Group, 1970' },
           { label: 'Okuma', value: 'Yaklaşık 10 dakika' },
@@ -135,7 +135,7 @@ function BcgContent() {
         <DataTable
           id="goreli-pay"
           title="Göreli pazar payı nasıl hesaplanır?"
-          note="Göreli pay şöyle hesaplanır: bizim pazar payımız ÷ en büyük rakibin pazar payı. Lider bizsek ikinci büyük oyuncuyla karşılaştırırız."
+          note="Göreli pay, bizim pazar payımızın en büyük rakibin payına bölümüdür. Lider bizsek kendimizi ikinci büyük şirketle karşılaştırırız."
           columns={[
             { key: 'case', header: 'Durum', minWidth: '15rem', rowHeader: true, render: (r: (typeof SHARE_EXAMPLES)[number]) => r.case },
             { key: 'calc', header: 'Hesap', nowrap: true, render: (r) => r.calc },
@@ -153,7 +153,7 @@ function BcgContent() {
           id="kutu"
           title="Kutu, durum ve yapılacak iş"
           columns={[
-            { key: 'name', header: 'Kutu', nowrap: true, rowHeader: true, render: (r) => <>{r.name}<span className="cell-sub">{r.english}</span></> },
+            { key: 'name', header: 'Kutu', nowrap: true, rowHeader: true, render: (r) => <>{r.name}<span className="cell-sub"> (İngilizcesi {r.english})</span></> },
             { key: 'growth', header: 'Pazar büyümesi', nowrap: true, render: (r) => r.growth },
             { key: 'share', header: 'Göreli pay', minWidth: '10rem', render: (r) => r.share },
             { key: 'cash', header: 'Nakit', minWidth: '12rem', render: (r) => r.cash },
@@ -164,7 +164,7 @@ function BcgContent() {
         />
       </Section>
 
-      <Section id="stratejiler" index={4} title="Dört strateji" desc="Kutu ürünün durumunu teşhis eder. Strateji ise tedaviyi seçer.">
+      <Section id="stratejiler" index={4} title="Dört strateji" desc="Kutu, ürünün bugünkü durumunu gösterir. Strateji, bu ürün için ne yapacağınızı söyler.">
         <DataTable
           id="strateji"
           title="Strateji, anlamı ve uygun kutu"
@@ -185,14 +185,14 @@ function BcgContent() {
         id="ornek"
         index={6}
         title="Çalışılmış örnek"
-        desc={`“Örnek Ev Aletleri A.Ş.” kurgusal bir şirkettir. Sayılar yalnız yöntemi göstermek içindir. Eşikler: pazar büyümesi %${GROWTH_SPLIT}, göreli pay ${SHARE_SPLIT}.`}
+        desc={`“Örnek Ev Aletleri A.Ş.” kurgusal bir şirkettir. Sayılar yalnız yöntemi göstermek içindir. Bu örnekte pazar büyümesi için eşik değeri %${GROWTH_SPLIT} olarak alınır. Göreli pay için eşik değeri ${SHARE_SPLIT} olarak alınır.`}
       >
         <DataTable
           id="ornek"
           title="Hesap tablosu"
           columns={[
             { key: 'name', header: 'Ürün', nowrap: true, rowHeader: true, render: (r: (typeof rows)[number]) => r.name },
-            { key: 'growth', header: 'Pazar büyümesi', nowrap: true, render: (r) => `%${num(r.growth)}` },
+            { key: 'growth', header: 'Pazar büyümesi', nowrap: true, render: (r) => `${r.growth < 0 ? '−' : ''}%${num(Math.abs(r.growth))}` },
             { key: 'our', header: 'Bizim pay', nowrap: true, render: (r) => `%${num(r.ourShare)}` },
             { key: 'rival', header: 'En büyük rakip', nowrap: true, render: (r) => `%${num(r.rivalShare)}` },
             { key: 'rel', header: 'Göreli pay', nowrap: true, render: (r) => `${num(r.ourShare)} ÷ ${num(r.rivalShare)} = ${num(Math.round(r.rel * 100) / 100)}` },
@@ -204,8 +204,8 @@ function BcgContent() {
         <Chart
           id="ornek-matris"
           title="Örnek matris"
-          note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşiklerdir: göreli pay 1×, pazar büyümesi %10. Yatay eksen logaritmik ölçeklidir."
-          summary={rows.map((r) => `${r.name}: büyüme %${r.growth}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('. ')}
+          note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşikleri gösterir. Göreli pay için eşik 1’dir. Pazar büyümesi için eşik %10’dur. Yatay eksende aralıklar oranı gösterir. Örneğin 0,1 ile 1 arası, 1 ile 10 arası kadar yer kaplar."
+          summary={rows.map((r) => `${r.name}: büyüme ${r.growth < 0 ? '−' : ''}%${Math.abs(r.growth)}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('. ')}
           spec={{
             kind: 'bcg-num',
             quadrants: quadrantSpec,
@@ -230,8 +230,8 @@ function BcgContent() {
           <p>
             Cironun %{num(Math.round((cow / total) * 100))}’i tek Nakit ineğinden, yani kahve makinesinden geliyor. İki Soru işaretini bu
             nakit finanse eder. Termostat lidere yakın olduğu için büyütülmeye değer. Scooter’da lider 10 kat büyük, bu yüzden ya güçlü
-            yatırım ya da çıkış gerekir. DVD oynatıcının pazarı küçülüyor, bu yüzden ürün hasat edilip kapatılır. Portföy dengelidir:
-            bugünü finanse eden ve geleceği taşıyan ürünler birlikte var.
+            yatırım ya da çıkış gerekir. DVD oynatıcının pazarı küçülüyor, bu yüzden ürün hasat edilip kapatılır. Portföy dengelidir.
+            Bugün para kazandıran ve yarın para kazandıracak ürünler birlikte var.
           </p>
         </Note>
       </Section>
@@ -256,7 +256,7 @@ function BcgContent() {
         </ul>
       </Section>
 
-      <Section id="sinav" index={9} title="Kendini sına" desc="Önce kutuyu kendin bul, sonra cevaba bak.">
+      <Section id="sinav" index={9} title="Kendinizi deneyin" desc="Önce kutuyu kendiniz bulun. Sonra cevaba bakın.">
         <div className="quiz">
           {QUIZ.map((q, i) => (
             <details key={q.situation} className="quiz-item">

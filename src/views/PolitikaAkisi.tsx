@@ -10,6 +10,7 @@ import { akisGorunumu, olasiSonrakiler, sorumluCumlesi } from '../data/politikaA
 import { usePersonaAyar } from '../lib/personaStore';
 import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
+import { acikAd } from '../data/politikalar/terimler';
 import '../styles/politikalar.css';
 
 type AyrintiProps = ComponentProps<typeof import('./PolitikaAkisAyrinti').default>;
@@ -26,8 +27,6 @@ function Ayrinti(props: AyrintiProps) {
   const Component = component;
   return Component ? <Component {...props} /> : <p role="status">Ayrıntılar yükleniyor.</p>;
 }
-/** Program adlarındaki kısaltmalar açık yazılır. */
-const acikAd = (ad: string) => ad.replace('OSGB', 'Ortak sağlık ve güvenlik birimi').replace('İK', 'insan kaynakları').replace('OSB', 'organize sanayi bölgesi');
 const EK_ADI = { kitle: 'Hedef kitleyi ve ilk mesajı görün', kazanc: 'Hesabı ve ödeme koşullarını görün', anlasma: 'Anlaşmada yazılacakları görün', sinir: 'Yetkinizin sınırlarını görün', plan: 'İş planını görün' };
 
 export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolId; olustur: AkisOlustur }) {
@@ -134,19 +133,19 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
         </div>
       </li>}
     </ol>
-    <p className="pol-yol-aciklama">Yanıtlarınız yalnız bu cihazda saklanır. Müşteri kaydı veya imza oluşturmaz.</p>
+    <p className="pol-yol-aciklama">Adımlarda verdiğiniz yanıtlar yalnız bu cihazda kalır. Bu yanıtlar müşteri kaydı açmaz. İmza yerine de geçmez.</p>
     <div className="pol-rehber-ekleri">
       <Accordion classNames={accordionClasses} transitionDuration={motion}>
         <Accordion.Item value="ayar"><Accordion.Control>Görevi ve çalışma koşullarını görün</Accordion.Control>
           <Accordion.Panel {...({ transitionTimingFunction: 'var(--motion-ease-standard)' } as object)}>
             <p>{akis.ozet}</p><p>{akis.hedef}</p>
-            <p>Bu seçim ortak ayarı değiştirir. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.</p>
+            <p>Aşağıdaki seçimler bu cihazda kalmaz. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.</p>
             <p>Seçim iş sırasını değiştirirse önceki adım yanıtları sıfırlanır.</p>
-            <Sec label="Hangi koşullarla çalışır?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
+            <Sec label="Hangi programla çalışırsınız?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
               onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
-            {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo', 'Ürün gösterimi') }))}
+            {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo da', 'Ürün gösterimi de') }))}
               onChange={(value) => guncelle({ [seviyeKey]: value })} />}
-            <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Bütün hesap parametrelerini açın</a>
+            <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Hesapta kullanılan bütün değerleri açın</a>
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

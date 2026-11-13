@@ -24,7 +24,7 @@ const ODEME_ZAMANI: Record<Ayar['affPolitika']['satis'], string> = {
 
 /** Fiyat kuralı: fiyat tablodaki fiyattır ve herkes için aynıdır. */
 function fiyatNotu(a: Ayar): string {
-  return `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar. Bu örnek ${sayi(segikaAylik(a).kisi)} çalışana göredir. Fiyat herkes için aynıdır.`;
+  return `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar. Bu örnek ${sayi(segikaAylik(a).kisi)} çalışana göredir. Fiyat herkes için aynıdır.`;
 }
 
 const kayitAdimi = (sonraki: string): AkisAdimi => ({
@@ -247,7 +247,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   return {
     baslik: 'Öncü satış ortağının ana programı',
     ozet: SEVIYE_METNI[a.oncuSeviye],
-    hedef: 'Uygun işveren onaylı teklifle satışa ve kuruluma ulaşsın.',
+    hedef: 'Bu programın amacı, uygun işverenin onaylı teklifle satın almasıdır. Satıştan sonra kurulum başlar.',
     ilk: 'anlasma',
     adimlar: anaAkis(a),
   };

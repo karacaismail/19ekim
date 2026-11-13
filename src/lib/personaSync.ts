@@ -53,7 +53,7 @@ export class PersonaSync {
     for (const fn of this.listeners) fn();
   }
   private validate(snapshot: Snapshot): Snapshot {
-    if (!snapshot || typeof snapshot.revision !== 'string' || typeof snapshot.updatedAt !== 'string' || !snapshot.fields || typeof snapshot.fields !== 'object') throw new PersonaDataError('Ortak kayıt yanıtı geçerli değil.');
+    if (!snapshot || typeof snapshot.revision !== 'string' || typeof snapshot.updatedAt !== 'string' || !snapshot.fields || typeof snapshot.fields !== 'object') throw new PersonaDataError('Ortak kayıttan gelen yanıt okunamadı. “Yeniden dene” düğmesine basın.');
     for (const def of this.definitions) if (!Object.hasOwn(snapshot.fields, def.field) || !alanGecerli(def, snapshot.fields[def.field])) throw new PersonaDataError(`${def.label} ortak kayıtta geçerli değil.`);
     if (Object.keys(snapshot.fields).length !== this.definitions.length) throw new PersonaDataError('Ortak kaydın alanları değişmiş. Sayfayı yenileyin.');
     return { revision: snapshot.revision, updatedAt: snapshot.updatedAt, readAt: typeof snapshot.readAt === 'string' ? snapshot.readAt : '', fields: { ...snapshot.fields } };

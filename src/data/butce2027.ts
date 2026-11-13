@@ -23,7 +23,8 @@ export interface Fiyat {
   birim: string;
   fiyat2026: number;
   fiyat2027: number;
-  kdv: 'dahil' | 'hariç' | 'bilinmiyor';
+  /** Kaynak fiyatındaki KDV. Sigorta primi gibi KDV’siz kalemde “uygulanmaz” yazılır. */
+  kdv: 'dahil' | 'hariç' | 'bilinmiyor' | 'uygulanmaz';
   dayanak: string;
   kaynaklar: FiyatKaynagi[];
   tahmin: boolean;
@@ -161,7 +162,7 @@ export const ETKINLIK: Record<SecenekId, { ic: number; dis: number }> = {
 export const ONGORULEMEYEN = 0.05;
 
 const sifir = () => AYLAR_2027.map(() => 0);
-const ayAdi = (i: number) => new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(new Date(2027, i, 1));
+const ayAdi = (i: number) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(2027, i, 1)).replace(/^./, (c) => c.toLocaleUpperCase('tr-TR'));
 
 /** Ofis kapasitesi (masa): Sheets'teki kira ÷ bölge m² kirası ÷ kişi başı m². Tahmindir, doğrulanmalıdır. */
 export function ofisKapasitesi(taban: Taban | null) {
@@ -191,9 +192,9 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
 
   // 1. Mevcut plan (Sheets): küme toplamları.
   if (taban) {
-    ekle({ id: 'taban-insan', grup: 'mevcut', tur: 'opex', ad: 'Personel (Sheets)', kural: `Sheets'teki ${taban.bordrolu} bordrolu ve ${taban.faturali} faturalı kişinin 2027 maliyeti. Bordro hesabı Sheets'tedir.`, aylik: taban.aylar.map((a) => a.insan) });
-    ekle({ id: 'taban-teknoloji', grup: 'mevcut', tur: 'opex', ad: 'Teknoloji (Sheets)', kural: 'Yapay zekâ araçları, sunucu ve bulut, lisanslar.', aylik: taban.aylar.map((a) => a.teknoloji) });
-    ekle({ id: 'taban-ofis', grup: 'mevcut', tur: 'opex', ad: 'Ofis ve işletme (Sheets)', kural: 'Kira ve aidat, faturalar, ofis ihtiyaçları. Kira 2027 artışı Sheets parametresindedir.', aylik: taban.aylar.map((a) => a.ofis) });
+    ekle({ id: 'taban-insan', grup: 'mevcut', tur: 'opex', ad: 'Personel (Sheets)', kural: `Sheets’teki ${taban.bordrolu} bordrolu ve ${taban.faturali} faturalı kişinin 2027 maliyetidir. Bordro hesabı Sheets’tedir.`, aylik: taban.aylar.map((a) => a.insan) });
+    ekle({ id: 'taban-teknoloji', grup: 'mevcut', tur: 'opex', ad: 'Teknoloji (Sheets)', kural: 'Yapay zekâ araçları, sunucu, bulut ve lisans giderleri bu kalemdedir.', aylik: taban.aylar.map((a) => a.teknoloji) });
+    ekle({ id: 'taban-ofis', grup: 'mevcut', tur: 'opex', ad: 'Ofis ve işletme (Sheets)', kural: 'Kira ve aidat, faturalar ve ofis ihtiyaçları bu kalemdedir. Kiranın 2027 artış oranı Sheets’teki bir ayarda yazılıdır.', aylik: taban.aylar.map((a) => a.ofis) });
   }
 
   // 2. Yeni kadro ve hizmetler (İstihdam v2).
@@ -205,8 +206,8 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
     const hedef = hizmet(p.secenekler[s].bicim) ? hizmetler : kadro;
     a.forEach((v, i) => (hedef[i] += v));
   }
-  ekle({ id: 'kadro-maas', grup: 'kadro', tur: 'opex', ad: 'Yeni kadro maaş maliyeti', kural: `${kisiler.length} kişi. İstihdam takvimi v2'nin seçili seçeneğindeki yeni pozisyonlar ile Sheets'te olmayan Aralık dalgası. Maliyet net maaşın 2 katı, işe alım ayından itibaren.`, aylik: kadro });
-  ekle({ id: 'kadro-hizmet', grup: 'kadro', tur: 'opex', ad: 'Dış hizmet ve serbest çalışanlar', kural: 'Mali müşavir, avukat, KVKK ve SGK danışmanı, iş sağlığı ve güvenliği, eğitmen, video ve benzeri. Aylık fatura bedeli.', aylik: hizmetler });
+  ekle({ id: 'kadro-maas', grup: 'kadro', tur: 'opex', ad: 'Yeni kadro maaş maliyeti', kural: `Bu kalem ${kisiler.length} yeni kişinin maaş maliyetidir. Kişiler “Kadro seçeneği” seçiminden gelir. Aralık 2026’da işe başlayan dalga da bu kaleme girer. Bu dalgada organizatör ve 3. saha personeli vardır. Bu kişiler Sheets’te yoktur. Her kişinin maliyeti net maaşının 2 katı sayılır. Maliyet kişinin işe alındığı aydan başlar.`, aylik: kadro });
+  ekle({ id: 'kadro-hizmet', grup: 'kadro', tur: 'opex', ad: 'Dış hizmet ve serbest çalışanlar', kural: 'Mali müşavir, avukat, eğitmen ve video hizmetleri bu kalemdedir. Kişisel veri (KVKK) ve SGK danışmanı da buradadır. İş sağlığı ve güvenliği ile benzer hizmetler de buradadır. Hesap, her ay ödenen fatura bedellerine dayanır. Satırdaki tutar bu bedellerin 2027 toplamıdır.', aylik: hizmetler });
 
   // 3. Kişi başı giderler (yeni kadro, işe alım ayından itibaren).
   const aktif = (filtre: (y: YeniKisi) => boolean, agirlik = (y: YeniKisi) => (y.yari ? 0.5 : 1)) =>
@@ -214,31 +215,31 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   const tumu = aktif(() => true, () => 1);
   const hatli = aktif((y) => ['saha', 'cagri'].includes(rolOf(y.pozisyon)) || ['Yönetici', 'Yönetim'].includes(y.pozisyon.seviye), () => 1);
   const saha = aktif((y) => rolOf(y.pozisyon) === 'saha', () => 1);
-  ekle({ id: 'lisans', grup: 'kisi', tur: 'opex', ad: 'Microsoft 365 lisansı', kural: 'Her yeni kişiye 1 lisans. Dolar fiyatı sabit kurla.', fiyatId: 'microsoft-365-business-standard', aylik: tumu.map((n) => n * fiyat('microsoft-365-business-standard')) });
-  ekle({ id: 'hat', grup: 'kisi', tur: 'opex', ad: 'Kurumsal mobil hat', kural: 'Saha, çağrı ve satış ekibi ile yöneticilere 1 hat.', fiyatId: 'mobil-hat-kurumsal-20gb', aylik: hatli.map((n) => n * fiyat('mobil-hat-kurumsal-20gb')) });
-  ekle({ id: 'ulasim', grup: 'kisi', tur: 'opex', ad: 'Saha ulaşımı (İstanbulkart)', kural: 'Yeni saha personeline aylık abonman. Saha işi İSTOÇ içinde yürüdüğü için araç kiralanmaz.', fiyatId: 'istanbulkart-abonman', aylik: saha.map((n) => n * fiyat('istanbulkart-abonman')) });
-  ekle({ id: 'egitim', grup: 'kisi', tur: 'opex', ad: 'Eğitim bütçesi', kural: 'Yeni kişi başına yıllık bütçenin aylık payı.', fiyatId: 'egitim-butcesi-kisi-yil', aylik: tumu.map((n) => (n * fiyat('egitim-butcesi-kisi-yil')) / 12) });
+  ekle({ id: 'lisans', grup: 'kisi', tur: 'opex', ad: 'Microsoft 365 lisansı', kural: 'Her yeni kişiye 1 lisans alınır. Lisansın fiyatı dolarla belirlenir. Bu yüzden 2027 için %29,73 artış uygulanmaz. Hesapta 5 Kasım 2026 kuruyla bulunan fiyat kullanılır. “Kullanılan fiyatlar” tablosundaki 2027 fiyatı bu kalemde kullanılmaz.', fiyatId: 'microsoft-365-business-standard', aylik: tumu.map((n) => n * fiyat('microsoft-365-business-standard')) });
+  ekle({ id: 'hat', grup: 'kisi', tur: 'opex', ad: 'Kurumsal mobil hat', kural: 'Saha, çağrı ve satış ekibine 1 hat alınır. Yöneticilere de 1 hat alınır.', fiyatId: 'mobil-hat-kurumsal-20gb', aylik: hatli.map((n) => n * fiyat('mobil-hat-kurumsal-20gb')) });
+  ekle({ id: 'ulasim', grup: 'kisi', tur: 'opex', ad: 'Saha ulaşımı (İstanbulkart)', kural: 'Yeni saha personeline aylık İstanbulkart aboneliği alınır. Saha işi İSTOÇ içinde yürür. Bu yüzden araç kiralanmaz.', fiyatId: 'istanbulkart-abonman', aylik: saha.map((n) => n * fiyat('istanbulkart-abonman')) });
+  ekle({ id: 'egitim', grup: 'kisi', tur: 'opex', ad: 'Eğitim bütçesi', kural: 'Her yeni kişi için yıllık eğitim bütçesi ayrılır. Hesap her ay bu bütçenin 12’de 1’ini sayar.', fiyatId: 'egitim-butcesi-kisi-yil', aylik: tumu.map((n) => (n * fiyat('egitim-butcesi-kisi-yil')) / 12) });
   const ilan = sifir();
   for (const y of kisiler) if (!y.oncedenBasladi) ilan[y.ay] += fiyat('kariyer-net-ilan');
-  ekle({ id: 'ilan', grup: 'kisi', tur: 'opex', ad: 'İşe alım ilanı', kural: '2027’de işe alınan her kişi için 1 ilan, işe alım ayında.', fiyatId: 'kariyer-net-ilan', aylik: ilan });
+  ekle({ id: 'ilan', grup: 'kisi', tur: 'opex', ad: 'İşe alım ilanı', kural: '2027’de işe alınan her kişi için 1 ilan verilir. İlan, kişinin işe alındığı ayda verilir.', fiyatId: 'kariyer-net-ilan', aylik: ilan });
   const yeniBordrolu = aktif(() => true);
   const bordroluSayisi = AYLAR_2027.map((_, i) => (taban?.bordrolu ?? 0) + yeniBordrolu[i]);
-  if (ayar.yemek) ekle({ id: 'yemek', grup: 'kisi', tur: 'opex', ad: 'Yemek kartı', kural: 'Bütün bordrolu kadroya, günlük istisna tutarı × 22 iş günü. Yarı zamanlı yarım.', fiyatId: 'yemek-karti-aylik', aylik: bordroluSayisi.map((n) => n * fiyat('yemek-karti-aylik')) });
-  if (ayar.saglik) ekle({ id: 'saglik', grup: 'kisi', tur: 'opex', ad: 'Tamamlayıcı sağlık sigortası', kural: 'Bütün bordrolu kadroya, yıllık primin aylık payı.', fiyatId: 'tamamlayici-saglik-sigortasi', aylik: bordroluSayisi.map((n) => (n * fiyat('tamamlayici-saglik-sigortasi')) / 12) });
+  if (ayar.yemek) ekle({ id: 'yemek', grup: 'kisi', tur: 'opex', ad: 'Yemek kartı', kural: 'Bütün bordrolu çalışanlara verilir. Aylık tutar, vergiden muaf günlük tutarın 22 iş günüyle çarpımıdır. Yarı zamanlı çalışana bu tutarın yarısı verilir.', fiyatId: 'yemek-karti-aylik', aylik: bordroluSayisi.map((n) => n * fiyat('yemek-karti-aylik')) });
+  if (ayar.saglik) ekle({ id: 'saglik', grup: 'kisi', tur: 'opex', ad: 'Tamamlayıcı sağlık sigortası', kural: 'Bütün bordrolu çalışanlara yapılır. Hesap her ay yıllık primin 12’de 1’ini sayar.', fiyatId: 'tamamlayici-saglik-sigortasi', aylik: bordroluSayisi.map((n) => (n * fiyat('tamamlayici-saglik-sigortasi')) / 12) });
 
   // 4. Pazarlama ve etkinlik.
   const meta = (DEFAULT_PARAMS.metaWeekly * 52) / 12;
-  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `Parametrelerdeki haftalık ${new Intl.NumberFormat('tr-TR').format(DEFAULT_PARAMS.metaWeekly)} ₺, yılda 52 hafta. Sheets planında yoktur.`, aylik: sifir().map(() => meta) });
+  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `“Parametreler” sayfasında haftalık reklam bütçesi ${new Intl.NumberFormat('tr-TR').format(DEFAULT_PARAMS.metaWeekly)} ₺’dir. Tutar yılda 52 hafta için hesaplanır. Bu kalem Sheets planında yoktur.`, aylik: sifir().map(() => meta) });
   const e = ETKINLIK[s];
   const ikram = fiyat('etkinlik-coffee-break-50');
-  ekle({ id: 'etkinlik-ikram', grup: 'pazarlama', tur: 'opex', ad: 'Etkinlik ikramı', kural: `Ayda ${e.ic + e.dis} satıcı eğitimi, her birinde 50 kişilik coffee break paketi.`, fiyatId: 'etkinlik-coffee-break-50', aylik: sifir().map(() => (e.ic + e.dis) * ikram) });
-  if (e.dis) ekle({ id: 'etkinlik-salon', grup: 'pazarlama', tur: 'opex', ad: 'Dış salon kirası', kural: `Ayda ${e.dis} etkinlik dış salonda, yarım gün. Diğerleri ofiste ya da İSTOÇ'ta.`, fiyatId: 'etkinlik-salon-yarim-gun', aylik: sifir().map(() => e.dis * fiyat('etkinlik-salon-yarim-gun')) });
+  ekle({ id: 'etkinlik-ikram', grup: 'pazarlama', tur: 'opex', ad: 'Etkinlik ikramı', kural: `Her ay ${e.ic + e.dis} satıcı eğitimi yapılır. Her eğitimde 50 kişilik kahve arası ikramı verilir.`, fiyatId: 'etkinlik-coffee-break-50', aylik: sifir().map(() => (e.ic + e.dis) * ikram) });
+  if (e.dis) ekle({ id: 'etkinlik-salon', grup: 'pazarlama', tur: 'opex', ad: 'Dış salon kirası', kural: `Her ay ${e.dis} etkinlik dış salonda yapılır. Salon yarım gün kiralanır. Diğer etkinlikler ofiste ya da İSTOÇ’ta yapılır.`, fiyatId: 'etkinlik-salon-yarim-gun', aylik: sifir().map(() => e.dis * fiyat('etkinlik-salon-yarim-gun')) });
   const ekipman = sifir();
   ekipman[0] = fiyat('etkinlik-tv-65') + fiyat('etkinlik-ses-sistemi') + fiyat('etkinlik-katlanir-sandalye-50') + 2 * fiyat('roll-up-banner');
-  ekle({ id: 'etkinlik-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Etkinlik ekipmanı', kural: 'Ocak’ta bir kez alınır. 65 inç ekran, ses sistemi ve 2 mikrofon alınır. 50 katlanır sandalye ve 2 roll-up alınır.', aylik: ekipman });
+  ekle({ id: 'etkinlik-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Etkinlik ekipmanı', kural: 'Ocak 2027’de bir kez alınır. 65 inç ekran, ses sistemi ve 2 mikrofon alınır. 50 katlanır sandalye ve 2 tanıtım afişi (roll-up) alınır.', aylik: ekipman });
   const video = sifir();
   video[0] = fiyat('video-gimbal') + fiyat('video-isik-seti') + fiyat('video-yaka-mikrofonu') + (s === 'ekonomik' ? 0 : fiyat('video-kamera'));
-  ekle({ id: 'video-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Video çekim ekipmanı', kural: s === 'ekonomik' ? 'Ocak’ta bir kez alınır: telefon gimbalı, ışık seti ve yaka mikrofonu. Çekim telefonla yapılır.' : 'Ocak’ta bir kez alınır: aynasız fotoğraf makinesi, telefon gimbalı, ışık seti, yaka mikrofonu.', aylik: video });
+  ekle({ id: 'video-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Video çekim ekipmanı', kural: s === 'ekonomik' ? 'Ocak 2027’de bir kez alınır. Telefon sabitleyicisi (gimbal), ışık seti ve yaka mikrofonu alınır. Çekim telefonla yapılır.' : 'Ocak 2027’de bir kez alınır. Aynasız fotoğraf makinesi ve telefon sabitleyicisi (gimbal) alınır. Işık seti ve yaka mikrofonu da alınır.', aylik: video });
 
   // 5. Ekipman: yeni kişiye işe alım ayında (2027 öncesi başlayanlar 2026 bütçesindedir).
   const pc = sifir();
@@ -253,9 +254,9 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
     }
     if (rol === 'saha' || rol === 'cagri' || ['Yönetici', 'Yönetim'].includes(y.pozisyon.seviye)) tel[y.ay] += fiyat('telefon-android-orta');
   }
-  ekle({ id: 'bilgisayar', grup: 'kisi', tur: 'capex', ad: 'Bilgisayar, monitör ve aksesuar', kural: 'Masa başı yeni kişiye iş dizüstü bilgisayarı, geliştirici ve tasarımcıya MacBook Air. Monitör, klavye ve fare, çağrı ekibine kulaklık. Saha personeline bilgisayar alınmaz.', aylik: pc });
-  ekle({ id: 'mobilya', grup: 'kisi', tur: 'capex', ad: 'Masa ve koltuk', kural: 'Masa başı yeni kişiye çalışma masası ve ergonomik koltuk.', aylik: masa });
-  ekle({ id: 'telefon', grup: 'kisi', tur: 'capex', ad: 'Cep telefonu', kural: 'Saha, çağrı ve satış ekibi ile yöneticilere orta seviye Android telefon.', fiyatId: 'telefon-android-orta', aylik: tel });
+  ekle({ id: 'bilgisayar', grup: 'kisi', tur: 'capex', ad: 'Bilgisayar, monitör ve aksesuar', kural: 'Masa başında çalışan her yeni kişiye dizüstü bilgisayar alınır. Geliştirici ve tasarımcıya MacBook Air alınır. Bu kişilere monitör, klavye ve fare de alınır. Çağrı ekibine ayrıca kulaklık alınır. Saha personeline bilgisayar alınmaz.', aylik: pc });
+  ekle({ id: 'mobilya', grup: 'kisi', tur: 'capex', ad: 'Masa ve koltuk', kural: 'Masa başında çalışan her yeni kişiye çalışma masası ve ergonomik koltuk alınır.', aylik: masa });
+  ekle({ id: 'telefon', grup: 'kisi', tur: 'capex', ad: 'Cep telefonu', kural: 'Saha, çağrı ve satış ekibine orta seviye Android telefon alınır. Yöneticilere de bu telefon alınır.', fiyatId: 'telefon-android-orta', aylik: tel });
 
   // 6. Ofis büyümesi: kişi sayısı kapasiteyi aşarsa ek alan kiralanır ve hazırlanır. Kiralanan alan yıl içinde küçülmez.
   const kapasite = ofisKapasitesi(taban);
@@ -277,20 +278,20 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
     if (!onceki) hazirlik[i] += fiyat('switch-24-port-poe') + fiyat('toplanti-odasi-seti');
   });
   const ilkAy = ekM2.findIndex((m2) => m2 > 0);
-  const ofisNotu = ilkAy < 0 ? `Kişi sayısı tahmini kapasiteyi (${kapasite.masa} masa) aşmıyor.` : `${ayAdi(ilkAy)} ayında kişi sayısı tahmini kapasiteyi (${kapasite.masa} masa) aşar. Kişi başı ${KISI_BASI_M2} m², 50 m²'lik bloklarla.`;
-  ekle({ id: 'ofis-kira', grup: 'ofis', tur: 'opex', ad: 'Ek ofis alanı kirası', kural: `${ofisNotu} Yıl sonunda ${ekM2[11]} m² ek alan.`, fiyatId: 'ofis-kira-m2-mahmutbey', aylik: kira });
-  ekle({ id: 'ofis-hazirlik', grup: 'ofis', tur: 'capex', ad: 'Ek alan tadilatı ve ağ', kural: 'Ek m² başına temel tadilat, her 100 m² için 1 Wi-Fi erişim noktası. İlk genişlemede 1 switch ve 1 toplantı odası takımı.', fiyatId: 'ofis-tadilat-m2', aylik: hazirlik });
+  const ofisNotu = ilkAy < 0 ? `Ofise tahminen ${kapasite.masa} masa sığar. Kişi sayısı bu kapasiteyi aşmıyor.` : `Ofise tahminen ${kapasite.masa} masa sığar. Kişi sayısı ${ayAdi(ilkAy)} ayında bu kapasiteyi aşar. Her kişi için ${KISI_BASI_M2} m² alan sayılır. Ek alan 50 m²’lik parçalar hâlinde kiralanır.`;
+  ekle({ id: 'ofis-kira', grup: 'ofis', tur: 'opex', ad: 'Ek ofis alanı kirası', kural: `${ofisNotu} Yıl sonunda ${ekM2[11]} m² ek alan olur.`, fiyatId: 'ofis-kira-m2-mahmutbey', aylik: kira });
+  ekle({ id: 'ofis-hazirlik', grup: 'ofis', tur: 'capex', ad: 'Ek alan tadilatı ve ağ', kural: 'Her ek m² için temel tadilat yapılır. Her 100 m² için 1 kablosuz internet erişim noktası alınır. İlk genişlemede 1 ağ anahtarı (switch) ve 1 toplantı odası takımı alınır.', fiyatId: 'ofis-tadilat-m2', aylik: hazirlik });
 
   // 7. Diğer.
   const sigorta = sifir();
   sigorta[0] = fiyat('isyeri-paket-sigortasi');
-  ekle({ id: 'isyeri-sigorta', grup: 'diger', tur: 'opex', ad: 'İşyeri paket sigortası', kural: 'Ocak’ta yıllık prim. Sheets planında yoktur.', fiyatId: 'isyeri-paket-sigortasi', aylik: sigorta });
+  ekle({ id: 'isyeri-sigorta', grup: 'diger', tur: 'opex', ad: 'İşyeri paket sigortası', kural: 'Yıllık prim Ocak 2027’de ödenir. Bu kalem Sheets planında yoktur.', fiyatId: 'isyeri-paket-sigortasi', aylik: sigorta });
   const marka = sifir();
   marka[1] = fiyat('marka-tescil-3-sinif');
-  ekle({ id: 'marka', grup: 'diger', tur: 'capex', ad: 'Marka tescili', kural: 'Şubat’ta 1 marka, 3 sınıf. Tescil zaten yapıldıysa çıkarılır.', fiyatId: 'marka-tescil-3-sinif', aylik: marka });
+  ekle({ id: 'marka', grup: 'diger', tur: 'capex', ad: 'Marka tescili', kural: 'Şubat 2027’de 1 marka için 3 sınıfta başvuru yapılır. Sınıf, markanın korunacağı ürün ya da hizmet grubudur. Marka zaten tescil edildiyse bu kalem bütçeden çıkarılmalı.', fiyatId: 'marka-tescil-3-sinif', aylik: marka });
   const ekler = k.filter((x) => x.grup !== 'mevcut');
   const pay = AYLAR_2027.map((_, i) => ekler.reduce((t, x) => t + x.aylik[i], 0) * ONGORULEMEYEN);
-  ekle({ id: 'ongorulemeyen', grup: 'diger', tur: 'opex', ad: 'Öngörülemeyen giderler', kural: `Taban dışındaki eklemelerin yüzde ${ONGORULEMEYEN * 100}'i.`, aylik: pay });
+  ekle({ id: 'ongorulemeyen', grup: 'diger', tur: 'opex', ad: 'Öngörülemeyen giderler', kural: `Tutar, “Mevcut plan” dışındaki eklemelerin %${ONGORULEMEYEN * 100}’idir.`, aylik: pay });
 
   const topla = (tur: Kalem['tur']) => AYLAR_2027.map((_, i) => k.filter((x) => x.tur === tur).reduce((t, x) => t + x.aylik[i], 0));
   return { kalemler: k, opex: topla('opex'), capex: topla('capex'), tabanVar: !!taban, kadroAylik: kisiSayisi, kapasite, ekM2, gelir2027: SECENEK_OZETI[s].gelirHedefi2027 };

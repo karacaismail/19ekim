@@ -17,7 +17,7 @@ export const politika: ProjePolitika = {
     "Fiyat, fiyat tablosundaki fiyattır. Fiyat herkes için aynıdır.",
     "Ürün fiyatını değiştiremezsiniz. Müşteriden ürün bedeli alamazsınız.",
     "Alıcı bulma, sipariş veya satış garantisi veremezsiniz.",
-    "Müşterinin izni olmadan ürün görselini veya katalogunu paylaşmayın.",
+    "Müşterinin izni olmadan ürün görselini veya kataloğunu paylaşmayın.",
     "Kendi adınıza iStoc kurulum veya destek sözü vermeyin. Bu işleri şirket yapar."
   ],
   "adimlar": [
@@ -26,8 +26,8 @@ export const politika: ProjePolitika = {
       "metin": [
         "Ortaklık sorumlusu yapacağınız işi sizinle belirler.",
         "Yalnız tanıştırma, ürün gösterimi ve satışı kapatma farklı katkılardır.",
-        "Komisyon hesabı bu katkı düzeyine bağlıdır.",
-        "Katkı düzeyi yazılmadan müşteri işine başlamayın."
+        "Komisyon hesabı bu katkı seviyesine bağlıdır.",
+        "Katkı seviyesi yazılmadan müşteri işine başlamayın."
       ]
     },
     {
@@ -61,7 +61,7 @@ export const politika: ProjePolitika = {
       "baslik": "Ürün gösterimini yapın veya devredin",
       "metin": [
         "Katkınız ürün gösterimini kapsıyorsa gösterimi siz yapın.",
-        "Katkınız gösterimi kapsamıyorsa ürün uzmanıyla ortak görüşme planlayın.",
+        "Katkınız gösterimi kapsamıyorsa ürün uzmanıyla birlikte bir görüşme planlayın.",
         "Gösterimde işletmenin kendi ürünlerinden izinli örnek kullanın.",
         "Görüşme notunu kayda ekleyin."
       ]
@@ -87,10 +87,10 @@ export const politika: ProjePolitika = {
       "baslik": "Tahsilatı ve ödemenizi izleyin",
       "metin": [
         "Finans ekibi işletmenin ödemesini ve iade durumunu doğrular.",
-        "Finans ekibi komisyonu yazılı katkı düzeyinize göre hesaplar.",
+        "Finans ekibi komisyonu yazılı katkı seviyenize göre hesaplar.",
         "Ödeme doğrulanınca kazancınız için şirkete fatura kesersiniz.",
         "Fatura, vergi ve stopaj uygulamasını mali müşaviriniz doğrulasın. Stopaj, ödemeden yapılan vergi kesintisidir.",
-        "Şirketin komisyon listesindeki katkı düzeyini kendi kaydınızla karşılaştırın."
+        "Şirketin komisyon listesindeki katkı seviyesini kendi kaydınızla karşılaştırın."
       ]
     },
     {
@@ -98,7 +98,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Yenileme öncesinde işletmenin alıcı görüşmelerini birlikte değerlendirin.",
         "Müşteri yenilemezse gerekçeyi kayda yazın.",
-        "Ortaklık biterse açık işleri ortaklık sorumlusuna devredin."
+        "Ortaklık biterse bekleyen işleri ortaklık sorumlusuna devredin."
       ]
     }
   ],
@@ -108,9 +108,9 @@ export const politika: ProjePolitika = {
       "ad": "Katalog stüdyosundan hizmet alan toptancı",
       "ihtiyac": "Örneğin bu toptancı her sezon 50 ile 300 ürünlük yeni katalog çektirebilir. Toptancı hazırlanan ürün bilgisini alıcılarla düzenli paylaşmak isteyebilir.",
       "ulasim": "Katalog teslim toplantısında işletme sahibine sorun.",
-      "mesaj": "Hazırladığımız katalogu alıcılarınızla nasıl paylaşıyorsunuz?",
-      "uygunluk": "Katalog hizmetini iStoc satışına bağlı zorunlu paket yapmayın.",
-      "sonrasi": "Toptancı ilgilenirse ürün uzmanıyla ortak görüşme planlayın."
+      "mesaj": "Hazırladığımız kataloğu alıcılarınızla nasıl paylaşıyorsunuz?",
+      "uygunluk": "Katalog hizmetini iStoc’u alma şartına bağlamayın.",
+      "sonrasi": "Toptancı ilgilenirse ürün uzmanıyla birlikte bir görüşme planlayın."
     },
     {
       "urun": "iStoc",
@@ -206,9 +206,9 @@ export const politika: ProjePolitika = {
         "urun": "iStoc",
         "ad": "Şehir dışına sevkiyat yapan toptancı",
         "ihtiyac": "Örneğin bu toptancı 3 ile 20 çalışanla haftada birkaç kez başka illere koli gönderebilir. Toptancı sevkiyatı siparişle birlikte izlemek isteyebilir.",
-        "ulasim": "Rozet izni aldıktan sonra iStoc’taki hizmet sayfanızda tanıtım yapın.",
+        "ulasim": "Önce şirketten “iStoc Onaylı Hizmet” rozetini kullanma izni alın. Sonra iStoc’taki hizmet sayfanızda tanıtım yapın.",
         "mesaj": "Şehir dışı siparişlerinizin sevkiyatını nasıl planlıyorsunuz?",
-        "uygunluk": "Hizmetinizi iStoc kullanımına bağlı zorunlu paket yapmayın.",
+        "uygunluk": "Hizmetinizi iStoc’u kullanma şartına bağlamayın.",
         "sonrasi": "Satıcı isterse hizmeti iStoc üzerinden sunun. Sonucu kayda yazın."
       },
       {
@@ -226,7 +226,7 @@ export const politika: ProjePolitika = {
         "urun": "iStoc",
         "ad": "Stok programı kullanan toptancı",
         "ihtiyac": "Örneğin bu toptancı 5 ile 30 çalışanla ürün kodlarını ve stoğunu programınızda tutabilir. Aynı ürün bilgisini iki yere ayrı ayrı girmek istemeyebilir.",
-        "ulasim": "Kendi müşteri duyurunuzda bağlantıyı tanıtın. Duyuruda reklam olduğunu belirtin.",
+        "ulasim": "Kendi müşteri duyurunuzda iStoc ile yazılım bağlantısını tanıtın. Duyuruda reklam olduğunu belirtin.",
         "mesaj": "Stok listeniz iStoc kataloğunuza kendiliğinden aktarılsın ister misiniz?",
         "uygunluk": "Teknik ekip onay vermeden bu özelliği duyurmayın. Müşteri fiyat tablosundaki fiyatı öder.",
         "sonrasi": "İlgilenen müşteri iStoc’a kendisi başvursun."
@@ -245,7 +245,7 @@ export const politika: ProjePolitika = {
       {
         "urun": "iStoc",
         "ad": "Üretim ağırlıklı ildeki sanayi sitesi işletmeleri",
-        "ihtiyac": "Örneğin Kayseri, Denizli veya Gaziantep gibi bir ilde 5 ile 30 çalışanlı üreticiler olabilir. Bu işletmeler büyük şehirdeki toptancılara ulaşmak isteyebilir.",
+        "ihtiyac": "Örneğin Kayseri, Denizli ya da Gaziantep’teki üreticiler olabilir. Bu üreticilerde 5 ile 30 çalışan olabilir. Bu işletmeler büyük şehirdeki toptancılara ulaşmak isteyebilir.",
         "ulasim": "İl ticaret odasının veya sanayi sitesi yönetiminin tanıştırmasıyla ziyaret edin.",
         "mesaj": "Ürünlerinizi büyük şehirlerdeki alıcılara nasıl ulaştırıyorsunuz?",
         "uygunluk": "Bölgede tek yetkili olduğunuzu söylemeyin.",
@@ -311,13 +311,13 @@ export const politika: ProjePolitika = {
     },
     {
       "kosul": "Ortaklık sona ererse",
-      "islem": "Açık kayıtları ve katalog işlerini ortaklık sorumlusuna devredin.",
+      "islem": "Bekleyen kayıtları ve katalog işlerini ortaklık sorumlusuna devredin.",
       "sonuc": "Şirket erişimleri kapatsın. Finans sorumlusu açık ödemeleri sözleşmeye göre sonuçlandırsın."
     }
   ],
   "anlasma": [
     {
-      "baslik": "Taraflar ve katkı düzeyi",
+      "baslik": "Taraflar ve katkı seviyesi",
       "metin": [
         "Sözleşmede şirketin ve firmanızın unvanı yer alır.",
         "Katkı düzeyinizi ve komisyonun hangi katkıya bağlı olduğunu yazın.",
@@ -345,7 +345,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Anlaşmanın hangi hesap sürümüne bağlı olduğunu yazın.",
         "Satış ortaklığı hesabındaki bir değişiklik imzalı anlaşmayı kendiliğinden değiştirmez.",
-        "Finans sorumlusu ödemeyi doğuran olayı ve ödeme gününü yazsın.",
+        "Finans sorumlusu, ödemenin hangi olaydan sonra yapılacağını yazsın. Ödeme gününü de yazsın.",
         "Finans ekibi fatura, vergi ve döviz uygulamasını açıklasın."
       ]
     },
@@ -374,9 +374,9 @@ export const politika: ProjePolitika = {
       "mevcut": "Komisyon, tanıştırma, ürün gösterimi veya satışı kapatma katkısına göre değişir.",
       "eksik": "Şirket hangi kaydın hangi katkıyı kanıtladığını henüz yazmadı.",
       "islem": "Ortaklık sorumlusu her katkı için kanıt türünü belirlesin.",
-      "kanit": "Örnek bir müşteride iki taraf katkı düzeyini aynı okusun.",
-      "firsat": "Açık kanıt ödeme günündeki katkı tartışmasını azaltır. Danışman komisyonunu beklemeden alır ve yeni müşteri getirmeye devam eder.",
-      "durdur": "Kanıt türü belirlenmeden üst katkı düzeyi vaat edilmesin."
+      "kanit": "Örnek bir müşteride iki taraf katkı seviyesini aynı okusun.",
+      "firsat": "Net bir kanıt ödeme günündeki katkı tartışmasını azaltır. Danışman komisyonunu beklemeden alır ve yeni müşteri getirmeye devam eder.",
+      "durdur": "Kanıt türü belirlenmeden ortaklık sorumlusu üst katkı seviyesi vaat etmesin."
     },
     {
       "baslik": "Ürün bilgisinin doğruluğundan kim sorumlu?",
@@ -389,11 +389,11 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Mali müşavir seçeneği burada nasıl uygulanır?",
-      "mevcut": "Satış ortaklığı hesabının iStoc görünümü de mali müşavir seçeneğini gösterir. Bu, tamamlanmış bir uygulama kararı değildir.",
+      "mevcut": "Satış ortaklığı hesabında iStoc seçilince mali müşavir seçeneği de görünür. Bu, tamamlanmış bir uygulama kararı değildir.",
       "eksik": "Şirket seçeneğin iStoc müşterisinde nasıl uygulanacağını henüz yazmadı.",
       "islem": "Finans sorumlusu seçeneğin uygulanıp uygulanmayacağını yazılı belirlesin.",
       "kanit": "Karar kaydı ve meslek kuralı değerlendirmesi bulunsun.",
-      "firsat": "Açık karar mali müşavir ofislerini yeni bir ortak kanalı yapar. Ofisler müşterilerine iStoc’u güvenle önerebilir.",
+      "firsat": "Net bir karar mali müşavir ofislerini yeni bir ortak kanalı yapar. Ofisler müşterilerine iStoc’u güvenle önerebilir.",
       "durdur": "Karar yazılmadan mali müşavire komisyon veya indirim sözü vermeyin."
     },
     {
@@ -412,21 +412,21 @@ export const politika: ProjePolitika = {
       "sinyal": "Aynı ürün bilgisi farklı ortaklardan gelebilir.",
       "kontrol": "Ortaklık sorumlusu yeni kaydı mevcut kayıtlarla karşılaştırsın.",
       "tepki": "Çakışma varsa ortaklık sorumlusu kaydı karar çıkana kadar bekletsin.",
-      "kayit": "Karşılaştırmayı ve kararı kayda yazın."
+      "kayit": "Ortaklık sorumlusu karşılaştırmayı ve kararı kayda yazsın."
     },
     {
       "baslik": "Alıcı görüşmesi beklentisi gerçekçi mi?",
       "sinyal": "İşletme kısa sürede sipariş bekleyebilir.",
       "kontrol": "Ürün uzmanı ilk görüşmede beklentiyi işletmeye sorsun.",
       "tepki": "Beklenti gerçekçi değilse ürün uzmanı sonuç garantisi olmadığını yazılı açıklasın.",
-      "kayit": "Açıklamayı ve işletmenin yanıtını kayda ekleyin."
+      "kayit": "Ürün uzmanı açıklamayı ve işletmenin yanıtını kayda eklesin."
     },
     {
       "baslik": "Kurulum devrinde bilgi kayboluyor mu?",
       "sinyal": "Kurulum ekibi aynı soruları işletmeye yeniden sorabilir.",
       "kontrol": "Operasyon yöneticisi örnek bir devir notunu incelesin.",
       "tepki": "Not eksikse operasyon yöneticisi devir notu biçimini sizinle düzeltsin.",
-      "kayit": "Eksik alanları ve düzeltmeyi kayda yazın."
+      "kayit": "Operasyon yöneticisi eksik alanları ve düzeltmeyi kayda yazsın."
     }
   ],
   "firsatlar": [
@@ -438,7 +438,7 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Yazılım bayilerini teknoloji ortaklığına hazırlayın",
-      "neden": "Yazılım ve kasa sistemi bayileri ana programda müşteri getirir. Bugün kimse otomatik bağlantı sözü veremez. Teknoloji programı ikinci dalgada başlar.",
+      "neden": "Yazılım ve kasa sistemi bayileri ana programda müşteri getirir. Bugün kimse otomatik bağlantı sözü veremez. Teknoloji programı ikinci aşamada başlar.",
       "ilkAdim": "Ortaklık sorumlusu ana programdaki yazılım bayilerini listeler. Teknoloji programı başlayınca teknik ekip önce bu bayilerle görüşür.",
       "olcu": "Ortaklık sorumlusu listedeki bayileri ve teknik incelemeye alınan bağlantıları sayar."
     },
@@ -451,18 +451,18 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Çarşı dernekleriyle kurumsal satıcı programını başlatın",
       "neden": "Çarşı dernekleri ve üretici birlikleri rehberde yeni ortak kaynağıdır. Kurumsal satıcı programı satıcı üyeleri olan kurumlar içindir.",
-      "ilkAdim": "Ortaklık sorumlusu bir çarşı derneğiyle protokol görüşmesi planlar. Dernek üyelerine duyuruyu kendisi yapar.",
-      "olcu": "Ortaklık sorumlusu protokol imzalayan kurumları ve bu kurumlardan açılan mağaza sayfalarını sayar."
+      "ilkAdim": "Ortaklık sorumlusu bir çarşı derneğiyle iş birliği anlaşması (protokol) için görüşme planlar. Dernek üyelerine duyuruyu kendisi yapar.",
+      "olcu": "Ortaklık sorumlusu iş birliği anlaşması imzalayan kurumları ve bu kurumlardan açılan mağaza sayfalarını sayar."
     },
     {
       "baslik": "Mali müşavirleri bordro ürününe yönlendirin",
-      "neden": "Mali müşavir seçeneğinin iStoc’ta nasıl uygulanacağı belli değildir. Mali müşavirler şirketin SGK teşvik ve bordro ürünü için daha uygun bir kanal olabilir.",
+      "neden": "Mali müşavir seçeneğinin iStoc’ta nasıl uygulanacağı belli değildir. Mali müşavirler, şirketin SGK teşvik ve bordro ürünü için daha uygun bir yol olabilir.",
       "ilkAdim": "Finans sorumlusu mali müşavir seçeneğinin hangi üründe uygulanacağını yazar. Ortaklık sorumlusu iStoc’a gelen müşavirleri bordro ürünü ekibiyle tanıştırır.",
       "olcu": "Ortaklık sorumlusu tanıştırılan müşavir ofislerini ve açılan ortaklık kayıtlarını sayar."
     }
   ],
   "haftalik": [
-    "Her hafta açık müşteri kayıtlarınızı ve bekleyen kararları inceleyin.",
+    "Her hafta bekleyen müşteri kayıtlarınızı ve kararları inceleyin.",
     "Ortaklık sorumlusu o hafta kabul edilen kayıtları açılan kayıtlarla karşılaştırsın.",
     "Operasyon ekibi o hafta tamamlanan kurulumları devredilen müşterilerle karşılaştırsın.",
     "Finans ekibi uygun tahsilatı ve itirazlı tutarı ayrı göstersin.",
@@ -472,20 +472,20 @@ export const politika: ProjePolitika = {
   "programlar": {
     "ana": [
       "İşletmeyi iStoc ile tanıştırırsınız. Kurulumu ve desteği şirket yapar.",
-      "Finans ekibi komisyonu yazılı katkı düzeyinize göre hesaplar.",
+      "Finans ekibi komisyonu yazılı katkı seviyenize göre hesaplar.",
       "Şirket ortak getirmeye para ödemez."
     ],
     "gelistirme": [
       "Bu programda aday satıcıları iStoc’ta satışa hazır hâle getirirsiniz.",
       "Şirket komisyonu satıcının ilk aylarda ödediği ücretten hesaplar.",
       "Oran örnektir. Finans sorumlusu oranı kesinleştirmeden iş kabul etmeyin.",
-      "Hazır sayılma ölçütünü ve kabul eden kişiyi önceden belirleyin."
+      "Satıcının ne zaman “satışa hazır” sayılacağını önceden yazın. Bunu kimin onaylayacağını da yazın."
     ],
     "arz": [
       "Bu program satıcı üyeleri olan kurum içindir.",
       "Kuruma bağlı satıcıları iStoc’a getirirsiniz. Bu programda şirket nakit ödeme yapmaz.",
-      "Program, şirketin doğruladığı belirli sayıda mağaza sayfası açılınca başlar.",
-      "Üye sonuç raporunu ve veri paylaşımı sınırını protokole yazın."
+      "Program, şirket yeterli sayıda mağaza sayfasını doğrulayınca başlar. Gereken sayı program koşullarında yazar.",
+      "Üye sonuç raporunu ve veri sınırını iş birliği anlaşmasına yazın."
     ],
     "talep": [
       "Bu programda alıcıların satın alma taleplerini toplarsınız.",
@@ -501,7 +501,7 @@ export const politika: ProjePolitika = {
     ],
     "teknoloji": [
       "Bu program iStoc’a doğrudan bağlanan yazılım firması içindir.",
-      "Program ikinci dalgada başlar.",
+      "Program ikinci aşamada başlar.",
       "Teknik kabul ve ticari koşullar kesinleşmeden bağlantı sözü vermeyin.",
       "Müşterilerinize indirim sözü vermeyin. Müşteri fiyat tablosundaki fiyatı öder."
     ],

@@ -62,12 +62,12 @@ function anaAkis(a: Ayar): IsAkisi {
   const adimlar: AkisAdimi[] = [
     {
       id: 'anlasma', ad: 'Katkı anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-      yap: ['Ortaklık sorumlusu katkı düzeyinizi sizinle yazılı belirler.', SEVIYE_METNI[s], 'Kurulumu ve desteği şirket yapar.'],
+      yap: ['Ortaklık sorumlusu katkı seviyenizi sizinle yazılı belirler.', SEVIYE_METNI[s], 'Kurulumu ve desteği şirket yapar.'],
       soru: 'Ortaklık anlaşmanız ne durumda?',
       secenekler: [
         devam('var', 'Yazılı anlaşmam var', 'kayit'),
         son('bekle', 'yok', 'Henüz anlaşma yok', 'Anlaşma bekleniyor',
-          'Ortaklık sorumlusu katkı düzeyinizi ve ödeme koşulunu yazar.', 'Bu sırada işletmeye ortaklıktan söz etmeyin.', 'Metin hazır olunca bu adıma dönün.'),
+          'Ortaklık sorumlusu katkı seviyenizi ve ödeme koşulunu yazar.', 'Bu sırada işletmeye ortaklıktan söz etmeyin.', 'Metin hazır olunca bu adıma dönün.'),
       ],
     },
     {
@@ -313,11 +313,11 @@ function arzAkis(a: Ayar): IsAkisi {
 
 function talepAkis(a: Ayar): IsAkisi {
   const p = 'talep';
-  const esik = kuralSayisi(a, p, 'Aktivasyon');
+  const esik = kuralSayisi(a, p, 'başlaması için');
   const aylik = kuralSayisi(a, p, 'ayda en az');
   const [ilkPay, kalanPay] = kuralSayilari(a, p, 'Görev ücretinin');
   const ucretKurali = ilkPay && kalanPay
-    ? `Şirket görev ücretinin yüzde ${ilkPay} kadarını kapsam kabul edilince öder. Kalan yüzde ${kalanPay} kadarını sonuç takibinde öder.`
+    ? `Şirket görev ücretinin %${ilkPay} kadarını kapsam kabul edilince öder. Kalan %${kalanPay} kadarını sonuç takibinde öder.`
     : 'Şirket görev ücretini iki parçada öder.';
   return {
     baslik: 'Alım talebi toplayan ortak',
@@ -428,12 +428,12 @@ function teknolojiAkis(): IsAkisi {
   return {
     baslik: 'Teknoloji ortağı',
     ozet: 'Yazılımınızı iStoc’a doğrudan bağlarsınız. Kataloglar otomatik eşitlenir.',
-    hedef: 'Bağlantı doğrulansın ve ortak tanıtım yazılı plana bağlansın.',
+    hedef: 'Bağlantı doğrulansın. Birlikte yapılacak tanıtım yazılı bir plana bağlansın.',
     ilk: 'baslangic',
     adimlar: [
       {
         id: 'baslangic', ad: 'Başlangıcı doğrulayın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        yap: ['Bu program ilk dönemde açılmaz. Şirket programı ikinci dalgada başlatır.', 'Ortaklık sorumlusu başlangıcı size yazılı bildirir.'],
+        yap: ['Bu program ilk dönemde açılmaz. Şirket programı ikinci aşamada başlatır.', 'Ortaklık sorumlusu başlangıcı size yazılı bildirir.'],
         soru: 'Program başlangıcı bildirildi mi?',
         secenekler: [
           devam('basladi', 'Başlangıç yazılı bildirildi', 'teknik'),
@@ -476,8 +476,8 @@ function bolgeAkis(a: Ayar): IsAkisi {
   const p = 'bolge';
   const baslangicAyi = kuralSayisi(a, p, 'başlar');
   const baslangicKurali = baslangicAyi
-    ? `Bu ortaklık en erken ${baslangicAyi}. aydan sonra başlar. Şirket önce pazarın canlı olduğunu kanıtlar.`
-    : 'Şirket önce pazarın canlı olduğunu kanıtlar. Program bundan sonra başlar.';
+    ? `Bu ortaklık en erken ${baslangicAyi}. aydan sonra başlar. Şirket önce pazarın çalıştığını kanıtlar.`
+    : 'Şirket önce pazarın çalıştığını kanıtlar. Program bundan sonra başlar.';
   return {
     baslik: 'Bölge temsilcisi',
     ozet: 'Belirli bir bölgede iStoc satıcı ağı kurarsınız. Şirket size tek yetkili olma hakkı vermez.',

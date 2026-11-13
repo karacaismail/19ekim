@@ -31,9 +31,12 @@ const lira = (value: number) =>
   value >= 1_000_000
     ? `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(value / 1_000_000)} milyon ₺`
     : `${number.format(Math.round(value))} ₺`;
-const millions = (v: number) => (v === 0 ? '0' : `${v / 1_000_000} M`);
+// Eksen değeri “3,6 milyon” biçimindedir: ondalık virgül, kısaltma yok.
+const millions = (v: number) => (v === 0 ? '0' : `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon`);
 const ms = (iso: string) => new Date(`${iso}T00:00:00`).getTime();
 const shortDate = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(t));
+/** Okunan tarih: ay adı tam yazılır (“2 Kasım”). Kısa biçim yalnız eksen etiketinde kalır, çünkü orada yer dardır. */
+const gunAy = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(t));
 
 /** --text-sm (rem) → px; kök yazı boyutu büyütülürse grafik metni de büyür. Alt sınır 14 CSS px. */
 function fontPx() {
@@ -353,7 +356,7 @@ function build(spec: ChartSpec, width: number): Opt {
                 value: days,
                 name: r.name,
                 text: r.text,
-                range: `${shortDate(ms(r.from))} – ${shortDate(ms(r.to))}`,
+                range: `${gunAy(ms(r.from))} ile ${gunAy(ms(r.to))} arası`,
                 itemStyle: { color: t.fill, borderColor: t.line, borderWidth: r.milestone ? 3 : 2, borderRadius: 0 },
                 label: short ? { position: late ? 'left' : 'right', color: text } : { color: t.text },
               };
@@ -523,7 +526,7 @@ function build(spec: ChartSpec, width: number): Opt {
         tooltip: {
           ...(base().tooltip as Opt),
           trigger: 'item',
-          formatter: (p: { data: { name: string; value: number[] } }) => `${p.data.name}<br/>${shortDate(start + p.data.value[0] * DAY)}`,
+          formatter: (p: { data: { name: string; value: number[] } }) => `${p.data.name}<br/>${gunAy(start + p.data.value[0] * DAY)}`,
         },
         xAxis: {
           type: 'value',
@@ -551,7 +554,7 @@ function build(spec: ChartSpec, width: number): Opt {
                 name: item.name,
                 value: [(ms(item.date) - start) / DAY, i],
                 itemStyle: { color: t.line },
-                label: { show: true, position: 'right', fontSize: FONT_SIZE, color: t.text, formatter: shortDate(ms(item.date)) },
+                label: { show: true, position: 'right', fontSize: FONT_SIZE, color: t.text, formatter: gunAy(ms(item.date)) },
               };
             }),
           },
@@ -639,7 +642,7 @@ function build(spec: ChartSpec, width: number): Opt {
           trigger: 'item',
           formatter: (p: { data?: { name?: string; value?: number[]; revenue?: number; quadrant?: string } }) =>
             p.data?.value
-              ? `${p.data.name}<br/>Pazar büyümesi %${number.format(p.data.value[1])}, göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺, ${name(p.data.quadrant ?? '')}`
+              ? `${p.data.name}<br/>Pazar büyümesi ${p.data.value[1] < 0 ? '−' : ''}%${number.format(Math.abs(p.data.value[1]))}, göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺, ${name(p.data.quadrant ?? '')}`
               : '',
         },
         xAxis: {

@@ -9,7 +9,7 @@ test('karar seçimleri: seçim ilerlemeyi ve JSON’u günceller, Sonraki ile so
   await expect(panel.locator('.ks-soru')).toHaveText('Sitenin bütün hesaplarındaki başlangıç tarihi ne olsun?');
   await panel.getByRole('radio', { name: /1 Kasım kalsın/ }).click();
   await expect(panel.getByRole('radio', { name: /1 Kasım kalsın/ })).toHaveAttribute('aria-checked', 'true');
-  await expect(page.locator('.ks-ilerleme-metin')).toContainText('1 / 16');
+  await expect(page.locator('.ks-ilerleme-metin')).toContainText('16 açık sorudan 1 tanesi cevaplandı');
   await page.getByRole('button', { name: 'Sonraki' }).click();
   await expect(panel.locator('.ks-soru')).toHaveText('Temsilci ağı sayfası ne olsun?');
   await page.locator('#secimler').getByText('Karar verisi (JSON)').click();

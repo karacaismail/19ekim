@@ -95,7 +95,9 @@ function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; 
       max={def.max}
       step={def.step}
       clampBehavior="blur"
-      suffix={def.unit ? ` ${def.unit}` : undefined}
+      // Yüzde işareti sayıdan önce yazılır (“%70”). Diğer birimler sayıdan sonra gelir (“2.500 ₺”).
+      prefix={def.unit === '%' ? '%' : undefined}
+      suffix={def.unit && def.unit !== '%' ? ` ${def.unit}` : undefined}
       onChange={(next) => {
         setTaslak(next);
         setDuzeltme(null);
@@ -240,21 +242,21 @@ function Derived() {
   const p = m.params;
   const rows = [
     { label: 'Saha kotası (prim eşiği)', value: `${tl(m.quota)} satış / ay` },
-    { label: 'Saha satış maaşı → işveren maliyeti', value: `${tl(m.salaries.saha)} → ${tl(m.salaries.saha * p.costFactor)}` },
-    { label: 'Ekip lideri maaşı → işveren maliyeti', value: `${tl(m.salaries.lead)} → ${tl(m.salaries.lead * p.costFactor)}` },
-    { label: 'Masa başı (CRM) maaşı → işveren maliyeti', value: `${tl(m.salaries.masa)} → ${tl(m.salaries.masa * p.costFactor)}` },
-    { label: 'Segika (CRM) maaşı → işveren maliyeti', value: `${tl(m.salaries.segika)} → ${tl(m.salaries.segika * p.costFactor)}` },
-    { label: 'Dijital pazarlama maaşı → işveren maliyeti', value: `${tl(m.salaries.dijital)} → ${tl(m.salaries.dijital * p.costFactor)}` },
-    { label: 'Asistan maaşı → işveren maliyeti', value: `${tl(m.salaries.asistan)} → ${tl(m.salaries.asistan * p.costFactor)}` },
-    { label: 'Organizatör maaşı → işveren maliyeti', value: `${tl(m.salaries.organizator)} → ${tl(m.salaries.organizator * p.costFactor)}` },
+    { label: 'Saha satış: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.saha)}, işveren maliyeti ${tl(m.salaries.saha * p.costFactor)}` },
+    { label: 'Ekip lideri: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.lead)}, işveren maliyeti ${tl(m.salaries.lead * p.costFactor)}` },
+    { label: 'Masa başı (CRM): maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.masa)}, işveren maliyeti ${tl(m.salaries.masa * p.costFactor)}` },
+    { label: 'Segika (CRM): maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.segika)}, işveren maliyeti ${tl(m.salaries.segika * p.costFactor)}` },
+    { label: 'Dijital pazarlama: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.dijital)}, işveren maliyeti ${tl(m.salaries.dijital * p.costFactor)}` },
+    { label: 'Asistan: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.asistan)}, işveren maliyeti ${tl(m.salaries.asistan * p.costFactor)}` },
+    { label: 'Organizatör: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.organizator)}, işveren maliyeti ${tl(m.salaries.organizator * p.costFactor)}` },
     { label: '90 günlük personel maliyeti (işveren)', value: tl(m.staffCost90) },
     { label: 'Bir satışta en çok prim', value: tl(m.maxPayout) },
-    { label: 'Abonelik (aylık / yıllık peşin)', value: `${tl(m.SUBSCRIPTION_TRY)} / ${tl(m.ANNUAL_TRY)}` },
-    { label: 'Hedef için gereken satıcı-ay', value: int(Math.ceil(m.CIRO_TARGET / m.SUBSCRIPTION_TRY)) },
-    { label: 'Gereken aylık elde tutma', value: m.retentionThreshold === null ? 'Abonelik tek başına yetmez' : `≥ ${pct(m.retentionThreshold)}` },
+    { label: 'Aylık abonelik', value: tl(m.SUBSCRIPTION_TRY) }, { label: 'Yıllık peşin abonelik', value: tl(m.ANNUAL_TRY) },
+    { label: `${tl(m.CIRO_TARGET)} hedefi için gereken aylık ödeme sayısı`, value: int(Math.ceil(m.CIRO_TARGET / m.SUBSCRIPTION_TRY)) },
+    { label: 'Ciro hedefi için gereken aylık elde tutma', value: m.retentionThreshold === null ? 'Abonelik tek başına yetmez' : `En az ${pct(m.retentionThreshold)}` },
     { label: 'Meta reklam bütçesi (aylık)', value: tl((p.metaWeekly * 52) / 12) },
     { label: '60. ve 90. gün kontrolleri', value: `${longDate(m.dates.day60)} ve ${longDate(m.dates.day90)}` },
-    { label: 'Dönem 2 mesai düzeni', value: `${longDate(m.dates.period2Start)} itibarıyla` },
+    { label: 'Dönem 2 mesai düzeni (haftada 45 saat)', value: `${longDate(m.dates.period2Start)} tarihinden başlar` },
   ];
   return (
     <DataTable
@@ -389,9 +391,9 @@ function ParamsContent() {
     <DatesProvider settings={{ locale: 'tr', firstDayOfWeek: 1 }}>
       <PageHeader
         title="Parametreler"
-        purpose="Burada değiştirdiğiniz tarih, kişi, ücret, bütçe ve hedef değerleri bütün sayfalara hemen yansır."
+        purpose="Burada değiştirdiğiniz tarih, ücret, bütçe ve hedef değerleri bütün sayfalara hemen yansır."
         meta={[
-          { label: 'Kayıt', value: 'Yalnız bu tarayıcı (yerel depolama)' },
+          { label: 'Kayıt', value: 'Yalnız bu tarayıcıda kalır' },
           { label: 'Yayın', value: 'Herkes varsayılan değerleri görür' },
         ]}
       >

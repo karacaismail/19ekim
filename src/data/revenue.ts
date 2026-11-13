@@ -267,7 +267,7 @@ export function buildSources(p: Params, prog: ProgramModel, months: RevMonth[], 
           role: 'yatirimci',
           start: months[hires[0]].iso,
           capacity: p.sahaActivesMonthly * hires.length,
-          routine: `İkinci saha personelinden sonra her ${inp.sahaGrowthEvery} ayda 1 saha personeli eklenir (${hires.map((t) => months[t].kisa).join(', ')}). Bu, büyüme kuralıdır. Saha personeli sayısı en çok ${p.sahaMaxCount} olur. Kötümser senaryoda büyüme yoktur.`,
+          routine: `İkinci saha personelinden sonra her ${inp.sahaGrowthEvery} ayda 1 saha personeli eklenir. Başlangıç ayları şunlardır: ${hires.map((t) => months[t].ad).join(', ')}. Bu, büyüme kuralıdır. Saha personeli sayısı en çok ${p.sahaMaxCount} olur. Kötümser senaryoda büyüme yoktur.`,
           values: months.map((m) => r2(hires.reduce((t, h) => t + ramp(m.t - h), 0) * p.sahaActivesMonthly)),
         },
       ]
@@ -291,7 +291,7 @@ export function buildSources(p: Params, prog: ProgramModel, months: RevMonth[], 
       role: 'ekip-lideri',
       start: monthStart(inp.secondSahaIso),
       capacity: p.sahaActivesMonthly,
-      routine: 'Birinci saha personelinin rotasını ve kontrol listesini devralır ve ikinci bölgede çalışır. Sistem oturunca başlar, başlangıç tarihi bir parametredir.',
+      routine: 'Birinci saha personelinin rotasını ve kontrol listesini devralır ve ikinci bölgede çalışır. Sistem oturunca başlar. Başlangıç tarihini “Parametreler” sayfasında değiştirebilirsiniz.',
       values: months.map((m) => ramp(m.t - secondSaha) * p.sahaActivesMonthly),
     },
     ...ek,
@@ -313,7 +313,7 @@ export function buildSources(p: Params, prog: ProgramModel, months: RevMonth[], 
       role: 'organizator',
       start: p.decStartDate,
       capacity: p.organizatorActivesMonthly,
-      routine: `Ayda 2 etkinlik düzenler, her birine İstoç çarşısından yaklaşık 25 kişi katılır. Bu etkinliklerden yaklaşık ${Math.round(p.organizatorActivesMonthly * ratio)} kayıt ve ayda ${p.organizatorActivesMonthly} ilk ödeme beklenir. Şirket içi eğitimler ve toptancı buluşmaları yapar, CRM masa başı personeli destek verir.`,
+      routine: `Ayda 2 etkinlik düzenler. Her etkinliğe İstoç çarşısından yaklaşık 25 kişi katılır. Bu etkinliklerden yaklaşık ${Math.round(p.organizatorActivesMonthly * ratio)} kayıt ve ayda ${p.organizatorActivesMonthly} ilk ödeme beklenir. Organizatör şirket içi eğitimler ve toptancı buluşmaları yapar. CRM masa başı personeli bu işlerde ona destek verir.`,
       values: months.map((m) => ramp(m.t - orgStart) * p.organizatorActivesMonthly),
     },
     {
@@ -323,7 +323,7 @@ export function buildSources(p: Params, prog: ProgramModel, months: RevMonth[], 
       role: 'dijital-pazarlama',
       start: monthStart(p.dijitalAdStartDate < p.dijitalOrganicStartDate ? p.dijitalAdStartDate : p.dijitalOrganicStartDate),
       capacity: r2(adCapacity(p, inp.dijitalBudget) * carpanSon(dij.carpan) + p.dijitalOrganicActivesMonthly),
-      routine: `Satıcı kazanım reklamı ${longDate(monthStart(p.dijitalAdStartDate))} tarihinde başlar. Ayda ${inp.dijitalBudget.toLocaleString('tr-TR')} ₺ ÷ ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺/kayıt = yaklaşık ${Math.round(p.dijitalCostPerLead > 0 ? inp.dijitalBudget / p.dijitalCostPerLead : 0)} kayıt gelir. Dönüşüm %${p.dijitalLeadToActive} olunca yaklaşık ${adCapacity(p, inp.dijitalBudget).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ilk ödeme beklenir. ${dij.scales ? `LTV ÷ CAC oranı ${dij.cac ? (dij.ltv / dij.cac).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) : 'hesaplanamıyor'}. Oran en az ${SCALE_RULE.threshold} olduğu için bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok ${p.dijitalScaleMax} katına ulaşır.` : 'Ölçek kuralı sağlanmadığı için bütçe sabit kalır.'} Organik içerik günde 3 video ve haftada 10 CRM talebi demektir. Organik içerik ${longDate(monthStart(p.dijitalOrganicStartDate))} tarihinden itibaren ayda ${p.dijitalOrganicActivesMonthly} yeni aktif satıcı getirir. Kayıtları CRM masa başı personeli arar.`,
+      routine: `Satıcı kazanım reklamı ${longDate(monthStart(p.dijitalAdStartDate))} tarihinde başlar. Reklama ayda ${inp.dijitalBudget.toLocaleString('tr-TR')} ₺ harcanır. Bir kayıt ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺’ye gelir. Bu bütçe ayda yaklaşık ${Math.round(p.dijitalCostPerLead > 0 ? inp.dijitalBudget / p.dijitalCostPerLead : 0)} kayıt getirir. Kayıt olanların yüzde ${p.dijitalLeadToActive} kadarı ödemeye geçerse yaklaşık ${adCapacity(p, inp.dijitalBudget).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ilk ödeme beklenir. ${dij.scales ? `LTV ÷ CAC oranı ${dij.cac ? (dij.ltv / dij.cac).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) : 'hesaplanamıyor'}. Oran en az ${SCALE_RULE.threshold} olduğu için bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok ${p.dijitalScaleMax} katına ulaşır.` : 'Bütçe artırma kuralı sağlanmadığı için bütçe sabit kalır.'} Organik içerik günde 3 video ve haftada 10 CRM talebi demektir. Organik içerik ${longDate(monthStart(p.dijitalOrganicStartDate))} tarihinden itibaren ayda ${p.dijitalOrganicActivesMonthly} yeni aktif satıcı getirir. Kayıtları CRM masa başı personeli arar.`,
       values: months.map((m) => r2(dij.reklam[m.t] + dij.organik[m.t])),
     },
     {
@@ -347,8 +347,8 @@ function milestoneDefs(p: Params): { id: string; name: string; kind: MilestoneKi
     { id: 'aktif50', name: '50 aktif satıcı', kind: 'aktif', threshold: 50, role: 'saha-uzmani' },
     { id: 'aktif100', name: `${p.activeTarget} aktif satıcı`, kind: 'aktif', threshold: p.activeTarget, role: 'ekip-lideri' },
     { id: 'uye', name: `${p.memberTarget} üye satıcı`, kind: 'uye', threshold: p.memberTarget, role: 'pazarlamaci' },
-    { id: 'gelir1m', name: '1 M₺ kümülatif gelir', kind: 'gelir', threshold: 1_000_000, role: 'organizator' },
-    { id: 'gelir3m', name: `${(p.ciroTarget / 1_000_000).toLocaleString('tr-TR')} M₺ kümülatif gelir`, kind: 'gelir', threshold: p.ciroTarget, role: 'yatirimci' },
+    { id: 'gelir1m', name: '1 milyon ₺ toplam gelir', kind: 'gelir', threshold: 1_000_000, role: 'organizator' },
+    { id: 'gelir3m', name: `${(p.ciroTarget / 1_000_000).toLocaleString('tr-TR')} milyon ₺ toplam gelir`, kind: 'gelir', threshold: p.ciroTarget, role: 'yatirimci' },
     { id: 'aktif200', name: `${p.activeTarget * 2} aktif satıcı`, kind: 'aktif', threshold: p.activeTarget * 2, role: 'segika' },
   ];
 }
@@ -415,7 +415,7 @@ export function makeRevenue(p: Params, prog: ProgramModel) {
   const optRetention = Math.min(0.9, prog.planRetention + 0.1);
   const scenarios: Scenario[] = [
     { id: 'kotumser', name: 'Kötümser', role: 'dijital-pazarlama', factor: p.pessimisticFactor / 100, retention: p.pessimisticRetention / 100, sahaGrowthEvery: 0, desc: `Kapasitenin yüzde ${p.pessimisticFactor} kadarı kullanılır. Aylık yenileme %${p.pessimisticRetention} olur. Saha kadrosu büyümez.` },
-    { id: 'medyan', name: 'Medyan', role: 'saha-uzmani', factor: 1, retention: prog.planRetention, sahaGrowthEvery: 6, desc: `Tam kapasite kullanılır ve aylık yenileme %${Math.round(prog.planRetention * 100)} olur. İkinci saha çalışanından sonra her 6 ayda bir saha çalışanı eklenir. Bu, plan senaryosudur.` },
+    { id: 'medyan', name: 'Medyan', role: 'saha-uzmani', factor: 1, retention: prog.planRetention, sahaGrowthEvery: 6, desc: `Satış kanalları tam kapasiteyle çalışır. Aylık abonelerin %${Math.round(prog.planRetention * 100)} kadarı her ay aboneliğini yeniler. İkinci saha çalışanından sonra her 6 ayda 1 saha çalışanı eklenir. Planın esas aldığı senaryo budur.` },
     { id: 'iyimser', name: 'İyimser', role: 'pazarlamaci', factor: 1.3, retention: optRetention, sahaGrowthEvery: 4, desc: `Kapasitenin yüzde 130 kadarı kullanılır. Aylık yenileme %${Math.round(optRetention * 100)} olur. Bu oran plan senaryosundan 10 yüzde puan yüksektir. İkinci saha çalışanından sonra her 4 ayda bir saha çalışanı eklenir.` },
   ];
   const inputsFor = (sc: Scenario, override: Partial<SimInputs> = {}): SimInputs => ({
@@ -459,17 +459,17 @@ export function makeRevenue(p: Params, prog: ProgramModel) {
 
   const pricing = [
     { paket: 'Aylık abonelik', fiyat: `${p.subscriptionEur} € / ay`, tl: prog.SUBSCRIPTION_TRY, note: `Her ay yenilenir ve elde tutma oranına bağlıdır. ₺ karşılığı kurla birlikte yılda %${p.eurTryGrowth} artar.` },
-    { paket: 'Yıllık peşin', fiyat: `${p.subscriptionEur * p.annualMonths} € / yıl`, tl: prog.ANNUAL_TRY, note: `${p.annualMonths} aylık ücret ödenir, ${12 - p.annualMonths} ay ücretsizdir. Nakit önden gelir ve yıl içinde abonelik kaybı olmaz.` },
+    { paket: 'Yıllık peşin', fiyat: `${(p.subscriptionEur * p.annualMonths).toLocaleString('tr-TR')} € / yıl`, tl: prog.ANNUAL_TRY, note: `${p.annualMonths} aylık ücret ödenir, ${12 - p.annualMonths} ay ücretsizdir. Nakit önden gelir ve yıl içinde abonelik kaybı olmaz.` },
   ];
 
   const assumptions = [
-    `Tüm senaryolar ${longDate(p.simStartDate)} tarihinde başlar. Senaryolar ${longDate(p.simEndDate)} tarihinde biter (${months.length} ay). İlk satış ${longDate(p.firstSaleDate)} tarihindedir. Bu tarihten önce satışa bağlı gelir 0 ₺ sayılır. İlk satış ayında ayın kalan günlerinin oranı kullanılır. Aktif satıcı, ilk ödemesini yapan satıcıdır (hedefler sayfasıyla aynı tanım). Üye satıcı kayıt olan satıcıdır. Her aktif satıcıya ${ratio.toLocaleString('tr-TR')} kayıt düşer (${p.memberTarget} üye ve ${p.activeTarget} aktif).`,
-    `Aylık abonelik ${p.subscriptionEur} €, yani ${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺ olur (kur ${p.eurTry.toLocaleString('tr-TR')} ₺/€). Yıllık ödeme ${p.subscriptionEur * p.annualMonths} €, yani ${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺ olur. Yeni satıcıların yüzde ${p.annualShare} kadarı yıllık peşin öder. Bu oran bir parametredir. Peşin tutar ödendiği ayda bütünüyle sayılır. Kur yılda %${p.eurTryGrowth} artar. € fiyat sabit kalır. Fiyatın ₺ karşılığı her ay bileşik olarak büyür.`,
+    `Tüm senaryolar ${longDate(p.simStartDate)} tarihinde başlar. Senaryolar ${longDate(p.simEndDate)} tarihinde biter (${months.length} ay). İlk satış ${longDate(p.firstSaleDate)} tarihindedir. Bu tarihten önce satışa bağlı gelir 0 ₺ sayılır. İlk satış ayında satış yalnız ayın kalan günleri için sayılır. Aktif satıcı, ilk ödemesini yapan satıcıdır (hedefler sayfasıyla aynı tanım). Üye satıcı kayıt olan satıcıdır. Her aktif satıcıya ${ratio.toLocaleString('tr-TR')} kayıt düşer (${p.memberTarget} üye ve ${p.activeTarget} aktif).`,
+    `Aylık abonelik ${p.subscriptionEur} €, yani ${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺ olur (kur ${p.eurTry.toLocaleString('tr-TR')} ₺/€). Yıllık ödeme ${(p.subscriptionEur * p.annualMonths).toLocaleString('tr-TR')} €, yani ${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺ olur. Yeni satıcıların yüzde ${p.annualShare} kadarı yıllık peşin öder. Bu oran bir parametredir. Peşin tutar ödendiği ayda bütünüyle sayılır. Kur yılda %${p.eurTryGrowth} artar. Abonelik fiyatı euro olarak değişmez. Kur artışı her ay bir önceki ayın kuruna eklenir. Bu yüzden fiyatın TL karşılığı her ay büyür.`,
     `Tam kapasitede saha personeli ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir. CRM masa başı personeli ayda ${p.crmActivesMonthly}, organizatör ayda ${p.organizatorActivesMonthly} yeni aktif satıcı getirir. Her kişi ilk ay kapasitesinin yüzde 50’si, ikinci ay yüzde 75’i ile çalışır. İkinci saha personeli ${longDate(monthStart(p.secondSahaDate))} tarihinde, organizatör ve temsilciler ${longDate(p.decStartDate)} tarihinde başlar. Medyan senaryoda her 6 ayda 1 saha personeli eklenir. İyimser senaryoda her 4 ayda 1 saha personeli eklenir. Saha personeli en çok ${p.sahaMaxCount} kişi olur. Kötümser senaryoda kadro büyümez.`,
     `Satıcı kazanım reklamı ${longDate(monthStart(p.dijitalAdStartDate))} tarihinde başlar. Aylık bütçe ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ olur. Kayıt başına maliyet ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺, kayıttan ilk ödemeye dönüşüm %${p.dijitalLeadToActive} olur. Bu durumda tam hızda ayda ${adCapacity(p, p.dijitalAdBudgetMonthly).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} yeni aktif satıcı gelir. LTV ÷ CAC en az ${SCALE_RULE.threshold} ise bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok ${p.dijitalScaleMax} katına ulaşır. Organik içerik ${longDate(monthStart(p.dijitalOrganicStartDate))} tarihinden itibaren ayda ${p.dijitalOrganicActivesMonthly} yeni aktif satıcı getirir. Reklam bütçesi nakit akışında ve başabaş hesabında gider olarak sayılır.`,
     `Bağımsız temsilci ağına her ay ${p.repPerMonth} yeni temsilci katılır. Ağ en çok ${p.repCap} temsilciye ulaşır. Temsilci başına ayda ${REP_SALES} ilk ödeme beklenir.`,
     `Kötümser senaryoda kapasitenin yüzde ${p.pessimisticFactor} kadarı kullanılır. Bu senaryoda elde tutma %${p.pessimisticRetention} olur ve kadro büyümez. Medyan senaryo plan senaryosudur. Medyan senaryoda kapasite tam, elde tutma %${Math.round(prog.planRetention * 100)} olur. Her 6 ayda 1 ek saha personeli gelir. İyimser senaryoda kapasite yüzde 130, elde tutma %${Math.round(optRetention * 100)} olur. Her 4 ayda 1 saha personeli eklenir. Seçilen senaryo gelir planı, nakit akış tablosu ve istihdam takviminde ortaktır. Seçim bu tarayıcıda saklanır.`,
-    'Gelir iki parçadan oluşur. Birinci parça, o ay yıllık peşin ödeyenler × yıllık ücrettir. İkinci parça, aylık ödeyen satıcı-ay × aylık ücrettir. Hesap o ayın ₺ fiyatını kullanır. KDV (katma değer vergisi) ve tahsilat gecikmesi modele dahil değildir. Hedef tarihleri ay içinde doğrusal olarak hesaplanır.',
+    'Gelir iki parçadan oluşur. Birinci parça yıllık peşin ödemelerdir. Hesap, o ay yıllık peşin ödeyen her satıcı için bir yıllık ücret sayar. İkinci parça aylık ödemelerdir. Hesap, o ay ödeyen her aylık abone için bir aylık ücret sayar. Hesap o ayın ₺ fiyatını kullanır. KDV (katma değer vergisi) ve tahsilat gecikmesi hesaba dahil değildir. Hesap, ayın sonucunu günlere eşit bölerek hedef gününü bulur.',
   ];
 
   return {

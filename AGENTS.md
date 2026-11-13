@@ -1086,6 +1086,79 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   açıklamayı, sonra “Varsayılan değer: …” alanını yazar. Kayıt alanı “Sorumlu”, “Ne zaman” gibi etiketlerle `dl` olur.
 - Test: `npm run build` sonra `npx playwright test tests/yalin-turkce.spec.ts --project=chromium`. Metin tarayıcıdan
   bağımsızdır, bu yüzden test yalnız Chromium’da çalışır.
+- Sayfa listesi ve gezinme `tests/sayfa-gezgini.ts` dosyasındadır. Liste derlenmiş `dist` klasöründen okunur. Böylece
+  `/politikalar/cozum/` gibi alt sayfalar da denetlenir. Yalın Türkçe ve boşluk testleri aynı gezgini kullanır.
+- Okunur değer yazımı (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027, Cumartesi” biçimindedir. “2027-05-01”
+  yazılmaz. Ondalık ayırıcı virgüldür: “3,5”. Yüzde işareti sayıdan öncedir: “%20”. Birimler eğik çizgiyle zincir
+  yapılmaz, cümle yazılır. Kaynak tablosundaki değer için `metin` alanı vardır (`gelir2027Kaynak.json`). Test bu biçimleri
+  künye dışındaki bütün metinde arar.
+- Kısaltma kuralı (kullanıcı kararı 13 Kasım 2026): her kısaltma sayfasında en az bir kez açılır. Tercih edilen açılış
+  önce Türkçe adı, sonra kısaltmayı yazar: “kişisel veri (KVKK)”. Kısaltma önce gelirse açılış hemen ardından
+  parantezde ve bir kelimeyle başlar: “B2B (işletmeden işletmeye)”. Sözlükteki terim (`dt`) ve tanımı (`dd`) da açılış
+  sayılır. Virgüllü liste açılış sayılmaz: “(GA4, Yandex Metrica, GTM)”. Kısaltma en az iki büyük harf taşır. Örneğin
+  B2B, GA4 ve OpEx de kısaltmadır. Okurun her gün gördüğü kısaltmalar (TL, KDV, SGK, CRM, USD, EUR) ve marka adları serbesttir.
+  Listeler testin başındadır (`BILINEN`, `ADLAR`). Anlamı kaynakta yazmayan kısaltma uydurularak açılmaz. Kullanıcıya
+  sorulur ve o sürece `SORULACAK` listesinde durur. Örneğin notlardaki “ECA” böyledir.
+- Test ana içeriğin yanında sekme adını, sayfa açıklamasını, ipuçlarını (`title`), grafik yazılarını, açılır pencereleri
+  ve seçim listelerini de okur. Ana sayfada üst menüler ve menü çekmecesi açılır. Giriş ekranı ve bulunamayan sayfa
+  ayrı testte okunur.
+- Satır içi kaynak bağlantısı da `data-yalin="kunye"` taşır. Test bu bağlantıyı cümlede yer tutucuyla değiştirir.
+  Böylece yayın adındaki kısaltma ya da işaret metin kuralına takılmaz.
+- Politika rehberindeki program adları `src/data/politikalar/terimler.ts` ile açık yazılır (`acikAd`). Örneğin “OSGB”
+  yerine “Ortak sağlık ve güvenlik birimi” görünür. Akış görünümü ve rehber aynı işlevi kullanır.
+
+### Bütün sayfaların okur gözüyle okunması (13 Kasım 2026)
+
+- Otomatik test her şeyi yakalamaz. Örneğin küçük harfli İngilizce terimleri ve çelişen bilgileri yakalamaz. Bu yüzden
+  her sayfa bir kez baştan sona okundu. Döküm betiği `reports/yalin-turkce/site-dokum/butun-durumlar.mjs` dosyasıdır.
+- Okuma bulguları `reports/yalin-turkce/okuma-bulgulari/`, uygulanan düzeltme listeleri `reports/yalin-turkce/yamalar/`
+  klasöründedir. Ürün kararı isteyen sorular `reports/yalin-turkce/karar-listesi.md` dosyasındadır.
+- Menüdeki “Applet” adı “Hesap araçları” oldu. Adres `/applet/` olarak kaldı.
+- Sayfa başlığındaki amaç satırı tek cümledir (ux.md P6.1). Rol sayfasında görev tanımının ve ücretin yalnız ilk cümlesi
+  başlıkta durur. Kalan cümleler başlığın hemen altındaki paragraftadır (`.rol-gorev-ozeti`).
+- Yüzde alanında işaret sayıdan önce gelir (“%70”). Giderler sayfasında tutar simgesi sayıdan sonra gelir
+  (“50,00 €”). Para birimi süzgecinde “TRY” yerine “TL” görünür. Veri kodu “TRY” kalır.
+- Ajandada tarih ay adıyla yazılır (“2 Kasım”). Aralık “2 Kasım ile 27 Kasım arası” biçimindedir.
+- Başabaş kesişimi, değerin ilk kez sıfıra indiği ayın içindedir (`breakeven.ts` `crossing()`). Eski kod tarihi bir ay
+  erken gösteriyordu. Test `tests/data.spec.ts` “başabaş kesişimi” testidir.
+- Çalışma rehberlerinde proje ayrımı korunur. iStoc rehberinde “Segika”, Segika rehberinde “iStoc” adı geçmez
+  (`tests/politikalar.spec.ts`).
+- Gizli `/email/` sayfasına hiçbir yerden bağlantı verilmez. Kararlar sayfasındaki bağlantı kaldırıldı.
+
+### Boşluk: zeminli öğede iç boşluk (kullanıcı kararı 13 Kasım 2026)
+
+- Zemin alan her öğede yazı ve simge kenara yapışmaz. Zemin kalıcı olabilir, üzerine gelince ya da açılınca da
+  gelebilir. Örneğin açılır panel düğmesinin gri üzerine gelme zemini iç boşluk ister.
+- Değerler `tokens.css` içindeki `--clear-*` tokenlarıdır. Kart ve panelde yatay 12 px, dikey 8 px boşluk kalır.
+  Düğme, rozet ve hücrede yatay 8 px, dikey 4 px boşluk kalır. Bileşen içinde sabit değer yazılmaz.
+- Panel başlığı iç boşluk alınca panel içeriği de aynı boşlukla içeri alınır. Böylece başlık ve içerik aynı çizgide kalır.
+- Boş durumdaki grafik yedek metni JavaScript çalışırken gizlidir. Grafik çizilemezse yedek metin görünür. Özet her
+  durumda `aria-label` içindedir.
+- Test `tests/bosluk.spec.ts` dosyasıdır. Test bütün sayfaları dört genişlikte gezer: 1280, 768, 375 ve 320 px.
+  Paneller, sekmeler, açılır pencereler, seçim listeleri, üst menüler ve menü çekmecesi açılır. Zemin rengi, durum
+  kuralındaki zemin (`:hover`, `[aria-expanded]`, `[open]`, `:checked` gibi), gölge ve kenarlık ölçülür.
+- Test 48 px’ten alçak öğede yatay 8, dikey 3 px arar. Dikeydeki 1 px, yazı kutusunun yuvarlama payıdır. Daha yüksek
+  öğede yatay 12, dikey 8 px arar. Süsleme katmanı (`::before`, `::after`) ölçülmez. Test:
+  `npx playwright test tests/bosluk.spec.ts --project=chromium`.
+- Geniş ekranda üst menü ayırıcısının iki yanında 4 px boşluk vardır. Bant araçları varken (Giderler) bu boşluk sıfırdır.
+  Böylece gezinme tek satıra sığar ve ortalı kalır.
+
+### Gelir modelleri sayfa düzeni (kullanıcı kararı 13 Kasım 2026)
+
+- Sayfa okurun sorularını sırayla cevaplar. Bölümlerin sırası şöyledir:
+  1. kısa özet,
+  2. bugünkü abonelik paketleri,
+  3. önce denenecek üç model,
+  4. bütün modeller,
+  5. araştırma notu ve kısaltmalar.
+- Kısa özet üç maddedir. Birinci madde bugünkü geliri, ikinci madde bugün satılabilen hizmeti söyler. Üçüncü madde
+  satılamayan model sayısını söyler. Sayılar `MODELLER` verisinden hesaplanır, elle yazılmaz.
+- Modeller hazırlık durumuna göre üç gruptadır: “Hazır”, “Yakında”, “Hazır değil”. Her grup okura ne yapacağını söyler
+  (`HAZIRLIK_EYLEMI`). Örneğin “Esnafa söz vermeyin.” Grup rengi `--hazirlik-*` tokenlarındadır, durum metinle de yazılır.
+- Kartın başında ad, hazırlık etiketi, öncelik etiketi, açıklama ve örnek hesap durur. Kim öder, uygunluk, risk ve
+  gerekenler “Kimin ödediğini ve riskleri görün” panelindedir. Kart tıklanmaz, bu yüzden üzerine gelince zemini değişmez.
+- Test `tests/gelir-modelleri.spec.ts` dosyasıdır. Test bölüm sırasını, özet sayılarını, grupları, paneli ve 320, 390,
+  1280 px genişlikte taşmayı denetler.
 
 ## Gizlilik ve yayın
 

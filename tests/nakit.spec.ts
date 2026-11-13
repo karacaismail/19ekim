@@ -101,7 +101,7 @@ test.describe('nakit akış tablosu', () => {
     expect(n).toBeGreaterThan(8);
     await expect(satirlar.first().locator('th')).toContainText('Abonelik: ilk ödemeler');
     await expect(satirlar.locator('th', { hasText: 'Bordrolu personel' })).toHaveCount(1);
-    await expect(satirlar.locator('th', { hasText: 'Meta reklamları' })).toHaveCount(1);
+    await expect(satirlar.locator('th', { hasText: 'Meta işe alım reklamı' })).toHaveCount(1);
     await expect(satirlar.locator('th', { hasText: 'Satıcı kazanım reklamı' })).toHaveCount(1);
     // Ayrıntılı satırların toplam sütunu: kalem toplamları ara toplamı verir (ilk ay sütunu).
     const sayi = (s: string) => (s.trim() === '—' ? 0 : Number(s.replace(/[^\d-]/g, '')));
@@ -146,10 +146,10 @@ test.describe('nakit akış tablosu', () => {
     const girisSutunu = (await page.locator('.table-block:has(#senaryo-karsilastirma-tablo) thead th').allTextContents()).findIndex((t) => t.trim() === 'Nakit girişi') - 1;
     const satirGiris = sayi((await karsilastirma.nth(0).locator('td').nth(girisSutunu).textContent()) ?? '0');
     expect(satirGiris).toBe(kotumser);
-    // Üçü üst üste: tek grafik kutusu, türü değişir.
+    // Üç senaryo: tek grafik kutusu, türü değişir.
     const canvas = page.locator('.chart-canvas');
     await expect(canvas).toHaveAttribute('data-kind', 'nakit-ay');
-    await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üçü üst üste' }).click();
+    await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(canvas).toHaveAttribute('data-kind', 'kumulatif-tl');
     await expect(canvas.locator('svg')).toBeVisible({ timeout: 10_000 });
     await expect(canvas).toHaveCount(1);
@@ -171,7 +171,7 @@ test.describe('nakit akış tablosu', () => {
         expect(d.headerOverflow).toEqual([]);
       }
       expect(await grafik(page), `${width}px grafik`).toEqual([]);
-      await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üçü üst üste' }).click();
+      await page.getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üç senaryo' }).click();
       await expect(page.locator('.chart-canvas')).toHaveAttribute('data-kind', 'kumulatif-tl');
       expect(await grafik(page), `${width}px üst üste grafik`).toEqual([]);
       const hit = await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).evaluate((el) => el.getBoundingClientRect().height);
@@ -374,7 +374,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(page.locator('.sonuc-aciklama')).toContainText('tam finansman ihtiyacı değildir');
     await page.getByRole('switch', { name: 'Ayrıntılı görünüm' }).click();
     await expect(page.locator('.data-table tbody th', { hasText: 'Bordrolu personel' })).toHaveCount(0);
-    await expect(page.locator('.data-table tbody th', { hasText: 'Meta reklamları' })).toHaveCount(1);
+    await expect(page.locator('.data-table tbody th', { hasText: 'Meta işe alım reklamı' })).toHaveCount(1);
     await expect(page.locator('.table-block:has(#senaryo-karsilastirma-tablo) tbody tr')).toHaveCount(3);
   });
 });

@@ -47,7 +47,7 @@ export function GirisEkrani() {
         Giriş
       </h1>
       <p className="giris-aciklama">Bu plan ekip içindir. Görmek için kullanıcı adı ve parolayla giriş yapın.</p>
-      <p className="giris-jsyok">Giriş için tarayıcıda JavaScript açık olmalı.</p>
+      <p className="giris-jsyok">Giriş yapmak için tarayıcınızda JavaScript açık olmalı. Kapalıysa tarayıcı ayarlarından açın.</p>
       <form
         className="giris-form"
         noValidate

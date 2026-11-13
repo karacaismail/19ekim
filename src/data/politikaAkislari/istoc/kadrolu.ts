@@ -60,7 +60,7 @@ export const akisOlustur: AkisOlustur = (a) => {
     ad: 'Görevinizi ve prim ekinizi alın',
     sorumlu: 'İnsan kaynakları sorumlusu',
     yap: [
-      'İnsan kaynakları sorumlusu yazılı görev tanımınızı size verir.',
+      'İnsan kaynakları sorumlusu yazılı görev tanımınızı size verir.', 'Prim eki, iş sözleşmenize eklenen prim belgesidir. Primin nasıl hesaplanacağını ve ne zaman ödeneceğini yazar.',
       `İnsan kaynakları sorumlusu prim ekine “${programAdi}” adını yazar.`,
       'Siz maaşın net mi brüt mü olduğunu sorun.',
     ],
@@ -174,7 +174,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       devam('teklif-istedi', 'Satıcı teklif istedi', 'teklif'),
       son('bitir', 'garanti', 'Satıcı sipariş garantisi istiyor', 'Garanti veremezsiniz', [
         'Garanti veremeyeceğinizi açıkça söyleyin.',
-        'Satıcı garantisiz devam etmezse görüşmeyi kapatın.',
+        'Satıcı garanti olmadan devam etmezse görüşmeyi bitirin.',
       ]),
       son('bekle', 'dusunecek', 'Satıcı daha sonra düşünecek', 'Satıcının kararı bekleniyor', [
         'Satıcıyla yeni görüşme tarihi belirleyin.',

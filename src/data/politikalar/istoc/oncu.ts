@@ -35,7 +35,7 @@ export const politika: ProjePolitika = {
       ]
     },
     {
-      "baslik": "Dükkânı kayda geçirin",
+      "baslik": "Dükkânı kaydedin",
       "metin": [
         "Görüşmeden önce işletmenin kayıtlı olup olmadığını sorun.",
         "Kayıt yoksa işletmeyi kendi adınıza bildirin. Bildirim tarihini saklayın.",
@@ -60,7 +60,7 @@ export const politika: ProjePolitika = {
         "Ürün gruplarını, alıcı türünü ve sipariş alma yolunu kaydedin.",
         "Karar veren kişiyi ve ürün bilgisini hazırlayan kişiyi yazın.",
         "Ürün bilgisi hazırlanamıyorsa bunu açıkça kaydedin.",
-        "İhtiyaç uygunsa ürün gösterimi için randevu alın."
+        "Ürün işletmenin ihtiyacını karşılıyorsa ürün gösterimi için randevu alın."
       ]
     },
     {
@@ -115,7 +115,7 @@ export const politika: ProjePolitika = {
       "ulasim": "İşletme sahibiyle dükkânda yoğun olmayan bir saatte görüşme isteyin.",
       "mesaj": "Ürünlerinizi yeni alıcılara şu an nasıl gösteriyorsunuz?",
       "uygunluk": "Ürün listesini güncelleyecek kişi yoksa kurulum sözü vermeyin.",
-      "sonrasi": "İhtiyaç uygunsa işletmenin kendi ürünleriyle gösterim ayarlayın."
+      "sonrasi": "Ürün işletmenin ihtiyacını karşılıyorsa işletmenin kendi ürünleriyle gösterim ayarlayın."
     },
     {
       "urun": "iStoc",
@@ -132,8 +132,8 @@ export const politika: ProjePolitika = {
       "ihtiyac": "Örneğin bu işletme il merkezinde kendi deposuyla 5 ile 20 bayiye mal verebilir. İşletme bayilerine güncel ürün ve fiyat bilgisi göndermek zorundadır.",
       "ulasim": "Tanıdığınız bir esnaftan işletme sahibine tanıştırma isteyin.",
       "mesaj": "Bayilerinize güncel ürün bilgisini nasıl gönderiyorsunuz?",
-      "uygunluk": "Ürün işletmenin bu ihtiyacını karşılamıyorsa görüşmeyi kapatın.",
-      "sonrasi": "Uyum varsa işletme sahibini satış uzmanıyla buluşturun."
+      "uygunluk": "Ürün işletmenin bu ihtiyacını karşılamıyorsa görüşmeyi bitirin.",
+      "sonrasi": "Ürün işletmenin ihtiyacını karşılıyorsa işletme sahibini satış uzmanıyla buluşturun."
     },
     {
       "urun": "iStoc",
@@ -169,7 +169,7 @@ export const politika: ProjePolitika = {
   },
   "ortakBulma": [
     "Yeni ortak aramak işletme bulmaktan ayrı bir iştir.",
-    "Ana program yeni ortak getirmek için ödeme tanımlamaz.",
+    "Ana programda yeni ortak getirene ödeme yapılmaz.",
     "Adaydan giriş ücreti veya ürün alımı istemeyin.",
     "Uygun adaylar üniversite öğrencileri ve yeni mezunlar olabilir.",
     "Ticarete ilgi duyan ve yarı zamanlı çalışmak isteyen kişiler de olabilir.",
@@ -293,11 +293,11 @@ export const politika: ProjePolitika = {
   "acikKonular": [
     {
       "baslik": "Hangi hizmetleri bugün anlatabilirsiniz?",
-      "mevcut": "Bazı hizmetler yol haritasındadır. Ortak bunları kapıda söz olarak vermez.",
+      "mevcut": "Bazı hizmetler henüz hazır değil. Şirket bu hizmetleri ileride sunmayı planlıyor. Ortak bu hizmetler için işletmeye söz vermez.",
       "eksik": "Şirket ortağın anlatabileceği hazır hizmetlerin listesini henüz yazmadı.",
       "islem": "Satış yöneticisi hazır hizmetlerin kısa listesini hazırlasın.",
       "kanit": "Eğitmen bir örnek görüşmeyi bu listeye göre değerlendirsin.",
-      "firsat": "Açık liste iptali azaltır. İptal etmeyen işletme yenileme görüşmesine kadar müşteri kalır.",
+      "firsat": "Net bir liste iptali azaltır. İptal etmeyen işletme yenileme görüşmesine kadar müşteri kalır.",
       "durdur": "Liste hazır değilse ortak yalnız tanıştırma yapsın."
     },
     {
@@ -307,33 +307,33 @@ export const politika: ProjePolitika = {
       "islem": "Ortaklık sorumlusu kısa görüşme kayıt şablonu hazırlasın.",
       "kanit": "Şablon gösterimde işletmenin kendi ürünlerinin kullanıldığını göstersin.",
       "firsat": "Aynı kayıt kurulum ekibine hazır bilgi verir. Katalog daha erken yayına çıkar.",
-      "durdur": "Kanıt olmadan yüksek katkı oranı uygulanmasın."
+      "durdur": "Kanıt yoksa finans sorumlusu yüksek katkı oranı uygulamasın."
     },
     {
       "baslik": "İşletme kaydı kime ait olacak?",
       "mevcut": "Kayıt kazanç hesabını etkiler. Çarşıda aynı işletmeye birçok ortak gidebilir.",
       "eksik": "Şirket ana programın kayıt koruma süresini henüz yazmadı.",
       "islem": "Ortaklık sorumlusu süreyi ve itiraz yolunu sözleşmeye eklesin.",
-      "kanit": "Taraflar aynı kayıt örneğinde aynı sonuca ulaşsın.",
+      "kanit": "Ortaklık sorumlusu örnek bir kaydı iki tarafa göstersin. İki taraf aynı sonuca ulaşırsa kural yeterince açıktır.",
       "firsat": "Çarşıyı bloklara bölmek çakışmayı azaltır. Her ortak kendi bloğundaki bütün dükkânları ziyaret edebilir.",
-      "durdur": "Karar çıkmadan ilgili kazanç iki kişiye birden vaat edilmesin."
+      "durdur": "Karar çıkmadan ortaklık sorumlusu aynı kazancı iki kişiye vaat etmesin."
     },
     {
       "baslik": "Kazancınızı hangi belgeyle alacaksınız?",
-      "mevcut": "Ağ programı hizmet faturası ister. Ana program belge türünü açıklamaz.",
+      "mevcut": "Kademeli ağ programı hizmet faturası ister. Ana program belge türünü açıklamaz.",
       "eksik": "Şirketi olmayan öğrenci ortağın ödeme yolu belirsizdir.",
       "islem": "Mali müşavir uygun belgeyi ve olası kesintileri belirlesin.",
       "kanit": "Finans sorumlusu bu kurala göre örnek bir ödeme hazırlasın.",
-      "firsat": "Açık kural ilk ödemeyi hızlandırır. Ödemesini zamanında alan ortak yeni işletme ziyaretlerine devam eder.",
+      "firsat": "Net bir kural ilk ödemeyi hızlandırır. Ödemesini zamanında alan ortak yeni işletme ziyaretlerine devam eder.",
       "durdur": "Belge türü netleşmeden ortakla sözleşme imzalanmasın."
     },
     {
       "baslik": "İade olursa komisyon ne olacak?",
-      "mevcut": "Finans sorumlusu ödemeyi tahsilat ve iade koşulları doğrulanınca kesinleştirir.",
+      "mevcut": "Tahsilat ve iade koşulları doğrulanınca finans sorumlusu ödemeyi kesinleştirir.",
       "eksik": "Şirket ana programda iade süresini ve komisyonun geri alınma yöntemini henüz yazmadı.",
       "islem": "Finans sorumlusu iade kuralını sözleşmeye yazsın.",
-      "kanit": "Taraflar örnek bir iadede aynı tutara ulaşsın.",
-      "firsat": "Bölünmüş ödeme iade olursa geri istenecek tutarı küçültür. Ortak komisyonun ilk kısmını yine erken alır.",
+      "kanit": "Finans sorumlusu örnek bir iadeyi iki tarafa göstersin. İki taraf aynı tutara ulaşırsa kural yeterince açıktır.",
+      "firsat": "Şirket komisyonu iki parçada öderse iade olunca daha az para geri ister. Ortak ilk parçayı yine erken alır.",
       "durdur": "İade kuralı yazılmadan ortakla sözleşme imzalanmasın."
     }
   ],
@@ -343,35 +343,35 @@ export const politika: ProjePolitika = {
       "sinyal": "Satış kapanır ama ürün bilgisi uzun süre gelmeyebilir.",
       "kontrol": "Kurulum ekibi bekleyen kurulumları ve nedenlerini incelesin.",
       "tepki": "Neden tekrarlanırsa satış yöneticisi ilk görüşme sorularını güncellesin.",
-      "kayit": "Bekleme nedenini ve hazırlık tarihini saklayın."
+      "kayit": "Kurulum ekibi bekleme nedenini ve hazırlık tarihini saklasın."
     },
     {
       "baslik": "Ortak hazır olmayan hizmeti anlatıyor mu?",
       "sinyal": "İşletme sözleşmede olmayan bir hizmeti bekleyebilir.",
       "kontrol": "Eğitmen ilk görüşmelerin işletme özetlerini karşılaştırsın.",
       "tepki": "Yanlış anlatım görülürse eğitmen tanıtımı durdursun ve metni düzeltsin.",
-      "kayit": "Düzeltme metnini ve işletmenin bilgilendirildiğini kaydedin."
+      "kayit": "Eğitmen düzeltme metnini ve işletmenin bilgilendirildiğini kaydetsin."
     },
     {
       "baslik": "Aynı çarşıda çakışma artıyor mu?",
       "sinyal": "Aynı işletmeyi iki ortağın bildirdiği durumlar artabilir.",
       "kontrol": "Ortaklık sorumlusu çakışan kayıtları ve yerlerini incelesin.",
       "tepki": "Çakışma tekrarlanırsa ortaklık sorumlusu çarşı paylaşımını değerlendirsin.",
-      "kayit": "Kayıt tarihlerini ve verilen kararı saklayın."
+      "kayit": "Ortaklık sorumlusu kayıt tarihlerini ve verilen kararı saklasın."
     },
     {
       "baslik": "Ortak adayları kazanç beklentisiyle mi geliyor?",
       "sinyal": "Öğrenci adaylar ilk görüşmede kesin kazanç veya kadro sorabilir.",
       "kontrol": "Ortaklık sorumlusu adaylara verilen tanıtım metinlerini incelesin.",
       "tepki": "Metinde kazanç vaadi varsa ortaklık sorumlusu tanıtımı durdursun. Sonra metni düzeltsin.",
-      "kayit": "Eski metni, düzeltilmiş metni ve tarihini saklayın."
+      "kayit": "Ortaklık sorumlusu eski metni, düzeltilmiş metni ve tarihini saklasın."
     },
     {
       "baslik": "Esnaf ziyaretten rahatsız oluyor mu?",
       "sinyal": "İşletmeler sık ziyaret veya mesajdan şikâyet edebilir.",
       "kontrol": "İletişim sorumlusu ret kayıtlarını ve şikâyetleri karşılaştırsın.",
       "tepki": "Retten sonra ziyaret veya ileti olmuş olabilir. Bu durumda iletişim sorumlusu işletmeyle iletişimi durdursun.",
-      "kayit": "Ret tarihini, kanalı ve yapılan düzeltmeyi saklayın."
+      "kayit": "İletişim sorumlusu ret tarihini, kanalı ve yapılan düzeltmeyi saklasın."
     }
   ],
   "firsatlar": [
@@ -402,11 +402,11 @@ export const politika: ProjePolitika = {
   ],
   "haftalik": [
     "Siz her hafta görüştüğünüz işletmeleri ve gösterimleri sayın.",
-    "Satış yöneticisi aynı haftanın kabul edilen gösterimlerini görüşme sayısına bölsün.",
+    "Satış yöneticisi o hafta kabul edilen gösterimlerin görüşmelere oranını hesaplasın.",
     "Kurulum ekibi ürün bilgisi bekleyen satışları saysın.",
     "Ortaklık sorumlusu aynı haftanın çakışan kayıtlarını ve ret kayıtlarını saysın.",
-    "Oran düşerse yönetici ret nedenlerini sizinle incelesin.",
-    "Açık her görüşme için sonraki işi ve sorumlusunu yazın."
+    "Bu oran düşerse satış yöneticisi ret nedenlerini sizinle incelesin.",
+    "Bekleyen her görüşme için sonraki işi ve sorumlusunu yazın."
   ],
   "programlar": {
     "ana": [
@@ -414,11 +414,11 @@ export const politika: ProjePolitika = {
       "Komisyon müşterinin ödemesine ve iade koşullarına bağlıdır."
     ],
     "ag": [
-      "Bu ayrı bir seçenektir. Ana programla kendiliğinden birleşmez.",
-      "Bu seçenekte temsilci kendi şirketi olan bağımsız bir iş insanıdır.",
+      "Bu programda satışı yapan ortak komisyon alır. Onu programa getiren ortak bir üst kademededir. Belirli sayıda üst kademedeki ortak da bu satıştan pay alır.",
+      "Bu programda temsilci kendi şirketi olan bağımsız bir iş insanıdır.",
       "Kazanç gerçek satıştan doğar. Üye kaydetmek tek başına kazanç sağlamaz.",
       "Hukuk danışmanı kademe sayısını onaylar.",
-      "Ortaklık sorumlusu ağ yapısını ve ödeme tavanını ayrıca onaylatır.",
+      "Ortaklık sorumlusu ağ yapısını ve ödeme üst sınırını ayrıca onaylatır.",
       "Sözleşme ve hukuki değerlendirme bitmeden ağ payı vaat etmeyin."
     ]
   }

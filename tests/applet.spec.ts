@@ -13,7 +13,7 @@ async function ac(page: Page, applet = '') {
 
 /** Rütbe matrisinde bir seviye satırının Yazılım hücresi (Seviye başlığından sonra: Çarpan, Yazılım). */
 const yazilimHucresi = (page: Page, kod: string) =>
-  page.getByRole('region', { name: 'Meslek × seviye' }).locator('tbody tr', { has: page.locator('th', { hasText: new RegExp(`^${kod}`) }) }).locator('td').nth(1);
+  page.getByRole('region', { name: 'Meslek ve seviye' }).locator('tbody tr', { has: page.locator('th', { hasText: new RegExp(`^${kod}`) }) }).locator('td').nth(1);
 
 test.describe('applet sayfası', () => {
   test('bir anda tek applet: yan menü, adres (#), geri tuşu ve sıradaki applet', async ({ page }) => {
@@ -21,7 +21,7 @@ test.describe('applet sayfası', () => {
     await ac(page);
     await expect(page.locator('section.section')).toHaveCount(1);
     await expect(page.locator('section#katalog')).toBeVisible();
-    const menu = page.getByRole('navigation', { name: 'Applet’ler' });
+    const menu = page.getByRole('navigation', { name: 'Hesap araçları' });
     await expect(menu.getByRole('link')).toHaveCount(17);
     await expect(menu.getByRole('link', { name: 'Meslek ve seviye kataloğu' })).toHaveAttribute('aria-current', 'true');
 
@@ -37,7 +37,7 @@ test.describe('applet sayfası', () => {
     await page.goBack();
     await expect(page.locator('section#katalog')).toBeVisible();
 
-    await page.getByRole('navigation', { name: 'Applet sırası' }).getByRole('link', { name: /Sonraki/ }).click();
+    await page.getByRole('navigation', { name: 'Hesap aracı sırası' }).getByRole('link', { name: /Sonraki/ }).click();
     await expect(page.locator('section#rutbe-matrisi')).toBeVisible();
 
     // Derin bağlantı doğrudan açılır.
@@ -51,8 +51,8 @@ test.describe('applet sayfası', () => {
   test('dar ekran: yan menü yerine gruplu seçim ve önceki/sonraki', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await ac(page);
-    await expect(page.getByRole('navigation', { name: 'Applet’ler' })).toBeHidden();
-    const secim = page.getByRole('combobox', { name: 'Applet' });
+    await expect(page.getByRole('navigation', { name: 'Hesap araçları' })).toBeHidden();
+    const secim = page.getByRole('combobox', { name: 'Hesap aracı' });
     await expect(secim).toHaveValue('1. Meslek ve seviye kataloğu');
     await secim.click();
     await page.getByRole('option', { name: '13. Prim ödeme eğrisi' }).click();
@@ -99,9 +99,9 @@ test.describe('applet sayfası', () => {
     await ac(page);
     const katsayi = page.getByRole('textbox', { name: 'Yazılım katsayısı' });
     await katsayi.fill('2');
-    await page.getByRole('navigation', { name: 'Applet’ler' }).getByRole('link', { name: 'Rütbe matrisi' }).click();
+    await page.getByRole('navigation', { name: 'Hesap araçları' }).getByRole('link', { name: 'Rütbe matrisi' }).click();
     await expect(yazilimHucresi(page, 'P2')).toContainText('2 ×');
-    await expect(page.getByRole('status').filter({ hasText: 'applet örnek değerlerden farklı' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'hesap aracının değerleri örnek değerlerden farklı' })).toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem('turksab-applet'))).toContain('"katsayi":2');
 
     await page.reload();
@@ -113,7 +113,7 @@ test.describe('applet sayfası', () => {
     // gorsel_algi.md F14 (2026-10-28): onay nesne ve kapsamla (“N applet’i örnek değerlere döndür (onayla)”), süresiz.
     await page.getByRole('button', { name: /örnek değerlere döndür \(onayla\)/ }).click();
     await expect(yazilimHucresi(page, 'P2')).toContainText('1,8 ×');
-    await page.getByRole('navigation', { name: 'Applet’ler' }).getByRole('link', { name: 'Meslek ve seviye kataloğu' }).click();
+    await page.getByRole('navigation', { name: 'Hesap araçları' }).getByRole('link', { name: 'Meslek ve seviye kataloğu' }).click();
     await expect(page.getByRole('textbox', { name: 'Yazılım katsayısı' })).toHaveValue('1,8');
     expect(await page.evaluate(() => localStorage.getItem('turksab-applet'))).toBeNull();
   });
@@ -279,7 +279,7 @@ test.describe('applet sayfası', () => {
     const terfi = page.locator('#terfi-kapisi');
     const karar = terfi.locator('.stat', { hasText: 'Karar' });
     await expect(karar).toContainText('Koşullu: 1 koşul eksik');
-    await page.getByRole('checkbox', { name: 'Otonomi: son dönem' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Kendi başına çalışabilme: son dönem' }).uncheck();
     await page.getByRole('checkbox', { name: 'Etki: son dönem' }).uncheck();
     await expect(karar).toContainText('Hazır değil: 2 koşul eksik');
   });

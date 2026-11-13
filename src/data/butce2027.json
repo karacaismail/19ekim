@@ -65,7 +65,7 @@
    "fiyat2026": 89999,
    "fiyat2027": 116755.7,
    "kdv": "dahil",
-   "dayanak": "Apple Türkiye mağazasında bu yapılandırmanın liste fiyatı 89.999 TL'dir. Sayfa, fiyata yüzde 20 KDV'nin dahil olduğunu belirtir. Akakçe'de aynı modelin en düşük satıcı fiyatı 81.779 TL'dir.",
+   "dayanak": "Apple Türkiye mağazasında bu yapılandırmanın liste fiyatı 89.999 TL'dir. Sayfa, fiyata %20 KDV’nin dahil olduğunu belirtir. Akakçe'de aynı modelin en düşük satıcı fiyatı 81.779 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Apple Türkiye, MacBook Air satın al",
@@ -124,7 +124,7 @@
   {
    "id": "klavye-mouse-seti",
    "tur": "capex",
-   "ad": "Kablosuz klavye ve mouse seti (Logitech MK295, Türkçe Q)",
+   "ad": "Kablosuz klavye ve fare seti (Logitech MK295, Türkçe Q)",
    "birim": "adet",
    "fiyat2026": 2499,
    "fiyat2027": 3241.95,
@@ -229,7 +229,7 @@
    "fiyat2026": 4000,
    "fiyat2027": 5189.2,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir. Armut'ta Bağcılar'da 100 m² ofis tadilatı için bir talep vardır. Talebin bütçesi 240.000 TL, yani yaklaşık 2.400 TL/m²'dir. Cushman and Wakefield, İstanbul'da orta seviye tam dekorasyonu 2025 için 1.550 Euro/m² verir. Bu nedenle temel işler için 4.000 TL/m² ara varsayım olarak seçilmiştir.",
+   "dayanak": "Armut’ta Bağcılar’da 100 m² ofis tadilatı için bir talep vardır. Talebin bütçesi 240.000 TL, yani m² başına yaklaşık 2.400 TL’dir. Cushman and Wakefield, İstanbul’da orta seviye tam dekorasyon için 2025’te m² başına 1.550 Euro verir. Temel tadilatın fiyatı bu iki değerin arasında kalır. Bu yüzden m² başına 4.000 TL varsayıldı.",
    "kaynaklar": [
     {
      "ad": "Armut, İstanbul ofis tadilat fiyatları",
@@ -306,12 +306,12 @@
   {
    "id": "roll-up-banner",
    "tur": "capex",
-   "ad": "Baskılı roll-up banner 85x200 cm",
+   "ad": "Baskılı tanıtım afişi (roll-up), 85x200 cm",
    "birim": "adet",
    "fiyat2026": 3139,
    "fiyat2027": 4072.22,
    "kdv": "dahil",
-   "dayanak": "Akakçe aramasında logolu ve baskılı 85x200 cm roll-up 3.139 TL'den listelenir. Baskısız mekanizma 1.500 ile 2.300 TL arasındadır.",
+   "dayanak": "Akakçe aramasında logolu ve baskılı 85x200 cm tanıtım afişi (roll-up) 3.139 TL'den listelenir. Baskısız mekanizma 1.500 ile 2.300 TL arasındadır.",
    "kaynaklar": [
     {
      "ad": "Akakçe arama, roll up banner",
@@ -329,7 +329,7 @@
    "fiyat2026": 55459.15,
    "fiyat2027": 71947.16,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de bu set 9 satıcıda listelenir ve en düşük fiyatı 55.459 TL'dir. Telefonla çekim yapılacaksa bu kalem yerine yalnız gimbal alınabilir.",
+   "dayanak": "Akakçe'de bu set 9 satıcıda listelenir ve en düşük fiyatı 55.459 TL'dir. Telefonla çekim yapılacaksa bu kalem yerine yalnız telefon sabitleyicisi (gimbal) alınabilir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, Sony ZV-E10 II kit",
@@ -342,7 +342,7 @@
   {
    "id": "video-gimbal",
    "tur": "capex",
-   "ad": "Telefon gimbalı (DJI Osmo Mobile 8)",
+   "ad": "Telefon sabitleyicisi (gimbal), DJI Osmo Mobile 8",
    "birim": "adet",
    "fiyat2026": 7439,
    "fiyat2027": 9650.61,
@@ -360,12 +360,12 @@
   {
    "id": "video-isik-seti",
    "tur": "capex",
-   "ad": "Video ışık seti, 2 adet LED softbox",
+   "ad": "Video ışık seti, 2 adet LED ışık kutusu (softbox)",
    "birim": "takım",
    "fiyat2026": 8771.62,
    "fiyat2027": 11379.42,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de 2'li 120 W LED softbox çekim ışığı seti 8.772 TL'dir. Bu setin yalnız 1 satıcısı vardır. Tek bir Godox LDX50Bi LED panel 9.718 TL'dir.",
+   "dayanak": "Akakçe'de 2'li 120 W LED çekim ışığı seti (ışık kutusu, softbox) 8.772 TL'dir. Bu setin yalnız 1 satıcısı vardır. Tek bir Godox LDX50Bi LED panel 9.718 TL'dir.",
    "kaynaklar": [
     {
      "ad": "Akakçe, GDX Pro TLB-500 2'li ışık seti",
@@ -406,7 +406,7 @@
    "fiyat2026": 15800,
    "fiyat2027": 20497.34,
    "kdv": "hariç",
-   "dayanak": "Toplam 15.800 TL'dir. İlk sınıf 2.820 TL, ikinci sınıf 2.820 TL, üçüncü sınıf 3.150 TL'dir. Tescil ücreti 7.010 TL'dir. Üçüncü sınıf ücreti ikincil kaynaktan alınmıştır ve resmi cetvelden ayrıca doğrulanmalıdır.",
+   "dayanak": "Toplam 15.800 TL'dir. İlk sınıf 2.820 TL, ikinci sınıf 2.820 TL, üçüncü sınıf 3.150 TL'dir. Tescil ücreti 7.010 TL'dir. Üçüncü sınıfın ücreti resmî olmayan bir kaynaktan alındı. Bu ücret TÜRKPATENT’in resmî ücret listesinden kontrol edilmeli.",
    "kaynaklar": [
     {
      "ad": "eleman.net, Patent ücretleri 2026",
@@ -429,12 +429,12 @@
   {
    "id": "switch-24-port-poe",
    "tur": "capex",
-   "ad": "Yönetilebilir 24 port PoE switch (TP-Link Omada TL-SG3428MP)",
+   "ad": "Yönetilebilir 24 portlu PoE ağ anahtarı (switch), TP-Link Omada TL-SG3428MP",
    "birim": "adet",
    "fiyat2026": 27155,
    "fiyat2027": 35228.18,
    "kdv": "dahil",
-   "dayanak": "Akakçe'de bu switch 24 satıcıda listelenir ve en düşük fiyatı 27.155 TL'dir. PoE (ağ kablosundan elektrik verme) özelliği erişim noktalarını ayrı adaptörsüz besler.",
+   "dayanak": "Akakçe'de bu ağ anahtarı 24 satıcıda listelenir ve en düşük fiyatı 27.155 TL'dir. PoE (ağ kablosundan elektrik verme) özelliği erişim noktalarını ayrı adaptörsüz besler.",
    "kaynaklar": [
     {
      "ad": "Akakçe arama, TL-SG3428",
@@ -465,12 +465,12 @@
   {
    "id": "yemek-karti-aylik",
    "tur": "opex",
-   "ad": "Yemek kartı, istisna sınırında aylık tutar (22 iş günü)",
+   "ad": "Yemek kartı, vergiden muaf sınırda aylık tutar (22 iş günü)",
    "birim": "kişi/ay",
    "fiyat2026": 6600,
    "fiyat2027": 8562.18,
    "kdv": "hariç",
-   "dayanak": "Tutar, günlük 300 TL istisna tutarı ile ayda 22 iş günü çarpılarak bulunmuştur. Şirketler genelde yemek kartını tam istisna sınırında yükler, bu bir uygulama varsayımıdır.",
+   "dayanak": "Tutar, vergiden muaf günlük 300 TL ile ayda 22 iş günü çarpılarak bulundu. Şirketler yemek kartına genelde vergiden muaf sınır kadar para yükler. Bu bir varsayımdır.",
    "kaynaklar": [
     {
      "ad": "Forbes Türkiye, 2026 istisna tutarları",
@@ -483,12 +483,12 @@
   {
    "id": "istanbulkart-abonman",
    "tur": "opex",
-   "ad": "İstanbulkart Mavi Kart aylık tam abonman",
+   "ad": "İstanbulkart Mavi Kart, aylık tam abonelik",
    "birim": "kişi/ay",
    "fiyat2026": 3628,
    "fiyat2027": 4706.6,
    "kdv": "dahil",
-   "dayanak": "İBB yüzde 10 zam yaptı. Mavi Kart tam aylık abonman 20 Temmuz 2026'dan itibaren 3.298 TL'den 3.628 TL'ye çıktı. İstanbul'da toplu taşımaya genelde yılda bir ile iki kez zam yapılır. Bu nedenle 2027 tutarı varsayımdan yüksek çıkabilir.",
+   "dayanak": "İBB %10 zam yaptı. Mavi Kart tam aylık abonelik 20 Temmuz 2026'dan itibaren 3.298 TL'den 3.628 TL'ye çıktı. İstanbul'da toplu taşımaya genelde yılda bir ile iki kez zam yapılır. Bu nedenle 2027 tutarı varsayımdan yüksek çıkabilir.",
    "kaynaklar": [
     {
      "ad": "Habertürk, tam ve öğrenci akbil ücretleri",
@@ -524,7 +524,7 @@
    "fiyat2026": 735.72,
    "fiyat2027": 954.45,
    "kdv": "hariç",
-   "dayanak": "Turkcell kurumsal sayfası yıllık taahhütlü ve aylık ödemeli fiyat verir. Bu fiyat kullanıcı başına aylık 14,70 ABD dolarıdır. Aylık abonelikte fiyat 16,80 dolardır. Fiyatlar 1 Temmuz 2026'da güncellenmiştir. TL karşılığı 5 Kasım 2026 TCMB kuruyla (50,0489) hesaplanmıştır. Fatura her ay kura göre değişir.",
+   "dayanak": "Turkcell kurumsal sayfası yıllık taahhütlü ve aylık ödemeli fiyat verir. Bu fiyat kullanıcı başına aylık 14,70 ABD dolarıdır. Aylık abonelikte fiyat 16,80 dolardır. Fiyatlar 1 Temmuz 2026'da güncellenmiştir. TL karşılığı 5 Kasım 2026 Merkez Bankası (TCMB) kuruyla (50,0489) hesaplanmıştır. Fatura her ay kura göre değişir.",
    "kaynaklar": [
     {
      "ad": "Turkcell Kurumsal, Office 365 fiyatları",
@@ -547,7 +547,7 @@
    "fiyat2026": 30000,
    "fiyat2027": 38919,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir, çünkü otellerin yarım gün toplantı fiyatları internette yayımlanmaz. Mahmutbey'de birden çok toplantı salonu olan oteller vardır. Centro WestSide ve Clarion Hotel bunlara örnektir. Gerçek fiyat için yazılı teklif alınmalıdır.",
+   "dayanak": "Otellerin yarım gün toplantı fiyatları internette yayımlanmaz. Mahmutbey'de birden çok toplantı salonu olan oteller vardır. Centro WestSide ve Clarion Hotel bunlara örnektir. Gerçek fiyat için yazılı teklif alınmalıdır.",
    "kaynaklar": [
     {
      "ad": "Cvent, Centro WestSide toplantı alanları",
@@ -565,12 +565,12 @@
   {
    "id": "etkinlik-coffee-break-50",
    "tur": "opex",
-   "ad": "Coffee break ikramı, 50 kişiye kadar (standart paket)",
+   "ad": "Kahve arası ikramı, 50 kişiye kadar (standart paket)",
    "birim": "etkinlik",
    "fiyat2026": 24000,
    "fiyat2027": 31135.2,
    "kdv": "hariç",
-   "dayanak": "RB Organizasyon'un İstanbul kampanya sayfasında 50 kişilik standart coffee break paketi vardır. Paket 24.000 TL artı KDV'den başlar. Bu tutar 50 kişide kişi başı 480 TL eder. 30 kişiye kadar mini paket 17.000 TL artı KDV'dir.",
+   "dayanak": "RB Organizasyon'un İstanbul kampanya sayfasında 50 kişilik standart kahve arası (coffee break) paketi vardır. Paket 24.000 TL artı KDV'den başlar. Bu tutar 50 kişide kişi başı 480 TL eder. 30 kişiye kadar mini paket 17.000 TL artı KDV'dir.",
    "kaynaklar": [
     {
      "ad": "RB Organizasyon, coffee break catering kampanyaları",
@@ -588,7 +588,7 @@
    "fiyat2026": 482,
    "fiyat2027": 625.3,
    "kdv": "bilinmiyor",
-   "dayanak": "Emlakjet'te Ekim 2026 ilanlarına göre Ağaoğlu My Office 212 (Bağcılar Mahmutbey) ortanca kirası belli oldu. Kira m² başına aylık yaklaşık 482 TL'dir. Aynı listede İSTOÇ sitesinde 1.000 m² hazır ofis vardır. Bu ofisin kirası aylık 300.000 TL, yani m² başına 300 TL'dir. İlanların bir kısmı fiyatın KDV'li olduğunu belirtir.",
+   "dayanak": "Emlakjet’teki Ekim 2026 ilanlarına bakıldı. Ağaoğlu My Office 212 binası Bağcılar Mahmutbey’dedir. Bu binada ortanca kira m² başına aylık yaklaşık 482 TL’dir. Aynı listede İSTOÇ sitesinde 1.000 m² hazır ofis vardır. Bu ofisin kirası aylık 300.000 TL, yani m² başına 300 TL'dir. İlanların bir kısmı fiyatın KDV'li olduğunu belirtir.",
    "kaynaklar": [
     {
      "ad": "Emlakjet, İstanbul Bağcılar kiralık ofis ilanları",
@@ -605,8 +605,8 @@
    "birim": "kişi/yıl",
    "fiyat2026": 23222,
    "fiyat2027": 30125.9,
-   "kdv": "dahil",
-   "dayanak": "Kaynak, Sigortam.net'te tek kişilik poliçelerin ortanca fiyatıdır. Veri 1 Nisan ile 30 Haziran 2026 arasındaki satışları kapsar. İstanbul'da 25 ile 34 yaş için fiyat kadınlarda 24.442 TL'dir. Erkeklerde fiyat 22.002 TL'dir. Tutar bu ikisinin ortalamasıdır. Sigorta primlerinde KDV uygulanmaz. Gösterilen tutar ödenecek toplam primdir. Grup poliçeleri genelde daha ucuzdur.",
+   "kdv": "uygulanmaz",
+   "dayanak": "Fiyat, Sigortam.net’te satılan tek kişilik poliçelerin ortanca fiyatıdır. Veri 1 Nisan ile 30 Haziran 2026 arasındaki satışları kapsar. İstanbul'da 25 ile 34 yaş için fiyat kadınlarda 24.442 TL'dir. Erkeklerde fiyat 22.002 TL'dir. Tutar bu ikisinin ortalamasıdır. Sigorta primlerinde KDV uygulanmaz. Gösterilen tutar ödenecek toplam primdir. Grup poliçeleri genelde daha ucuzdur.",
    "kaynaklar": [
     {
      "ad": "Sigortam.net, tamamlayıcı sağlık sigortası medyan fiyatları",
@@ -624,7 +624,7 @@
    "fiyat2026": 46000,
    "fiyat2027": 59675.8,
    "kdv": "bilinmiyor",
-   "dayanak": "Garanti BBVA İş Yeri Koruma Paketi'nde Standart Paket Ekstra yıllık 46.000 TL brüt primdir. Yangın ve hırsızlık limiti 1.900.000 TL'dir. İşveren mali mesuliyet limiti 222.000 TL'dir. Aynı sayfada en küçük paket 12.500 TL, Plus paket 20.000 TL'dir. Sayfa tarih vermez.",
+   "dayanak": "Garanti BBVA İş Yeri Koruma Paketi’nde Standart Paket Ekstra’nın yıllık brüt primi 46.000 TL’dir. Yangın ve hırsızlık limiti 1.900.000 TL’dir. İşveren mali mesuliyet teminatı, iş kazasında işverenin ödeyeceği tazminatı karşılar. Bu teminatın limiti 222.000 TL’dir. Aynı sayfada en küçük paket 12.500 TL, Plus paket 20.000 TL'dir. Sayfa tarih vermez.",
    "kaynaklar": [
     {
      "ad": "Garanti BBVA, İş Yeri Koruma Paketi",
@@ -660,7 +660,7 @@
    "fiyat2026": 10000,
    "fiyat2027": 12973,
    "kdv": "hariç",
-   "dayanak": "Bu rakam bir tahmindir. Türkiye'de çalışan başına eğitim harcamasını veren güncel bir kaynak bulunamamıştır. Tutar, kişi başına bir çevrim içi eğitim aboneliği ve bir kısa kurs karşılayacak düzeyde varsayılmıştır.",
+   "dayanak": "Türkiye'de çalışan başına eğitim harcamasını veren güncel bir kaynak bulunamamıştır. Tutar, kişi başına bir çevrim içi eğitim aboneliği ve bir kısa kurs karşılayacak düzeyde varsayılmıştır.",
    "kaynaklar": [],
    "tahmin": true
   }

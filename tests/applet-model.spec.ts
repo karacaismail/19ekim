@@ -195,7 +195,7 @@ test.describe('applet modelleri (saf hesap)', () => {
     expect(varsayilan.filter((k) => k.durum === 'kaldi')).toEqual([]);
     const ilk = yapiDenetimi({ meslekler: V.ortak.meslekler, seviyeler: SEVIYE_SETLERI.ilk.seviyeler, kademe: V.kademe, tabanCarpani: V.ortak.tabanCarpani });
     const durum = (ad: string) => ilk.find((k) => k.ad.startsWith(ad))?.durum;
-    expect(durum('Uzman hattında en büyük seviye sıçraması')).toBe('kaldi');
+    expect(durum('Uzman hattında en büyük seviye adımı')).toBe('kaldi');
     expect(durum('Girişten kıdemliye')).toBe('kaldi');
   });
 

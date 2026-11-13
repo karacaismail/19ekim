@@ -61,12 +61,12 @@ function sonucVerisi(a: Ayar, secili: RolMetni, rol: RolId) {
   if (secili.sozlesme === 'musteri') {
     const m = musteriKazanc(a);
     return {
-      etiket: 'Yıllık hizmet kredisi',
+      etiket: 'Yıllık ücretsiz kullanımın değeri',
       ozet,
       ek: `Ayda ortalama ${tl(m.yillikKredi / 12)} değerinde ücretsiz kullanım eder.`,
       satirlar: [
         { ad: 'Hakediş için tahsilat süresi', deger: `${m.sureGun} gün` },
-        { ad: 'Krediye çevrilen tavsiye', deger: `${sayi(m.sayilan)} / yıl`, kapali: m.sayilan === 0 },
+        { ad: 'Ödül kazandıran tavsiye', deger: `${sayi(m.sayilan)} / yıl`, kapali: m.sayilan === 0 },
         { ad: 'Ortak olursa satış komisyonu', deger: `${tl(m.ortakOlursa.satisKazanci)} / ay` },
       ] as Satir[],
     };
@@ -153,7 +153,7 @@ export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosu
             </dd>
           </div>
           <div className="v2-oz-satir">
-            <dt>Aylık satış cirosu</dt>
+            <dt>Bu ayki satışların tutarı</dt>
             <dd className="v2-oz-sayi">
               <Canli deger={s.ciro}>{tl(s.ciro)}</Canli>
             </dd>
@@ -199,7 +199,7 @@ export function OzetPaneli({ a, rol, onKosullar }: { a: Ayar; rol: RolId; onKosu
             <Canli deger={sonrakiAdim}>{sonrakiAdim}</Canli>
           </p>
           <button type="button" className="v2-oz-dugme" aria-haspopup="dialog" onClick={(e) => onKosullar(e.currentTarget)}>
-            Koşulları gör
+            Bütün koşulları gör
           </button>
         </section>
       ) : null}

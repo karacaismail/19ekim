@@ -42,7 +42,7 @@ for (const [genislik, yukseklik] of GENISLIKLER) {
     await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Küresel B2B pazaryerleri');
     // Ana fikir belgenin üç unsurunu söyler.
-    await expect(page.locator('.pz-iddia')).toHaveText('Satıcıyı talep verisi, ödeme güvencesi ve nakit akışı tutar.');
+    await expect(page.locator('.pz-iddia')).toHaveText('Satıcı bir platformda üç sebeple kalır. Alıcıların ne aradığını görür. Parasını güvenle alır. Parasını hızlı ya da önceden alabilir.');
 
     // Harita: iki küme, yedi platform ve istoc.com tanıştıran kümede.
     await expect(page.locator('.pz-kume')).toHaveCount(2);
@@ -113,7 +113,7 @@ test('küresel pazaryerleri: belgede olmayan şemalar ve sitenin karşılaştır
   // Belgede kaynağı olmayan cümle ayrı bir notla görünür.
   await expect(page.locator('.pz-ornek-kaynaksiz', { hasText: KAYNAKSIZ_NOTU })).toHaveCount(1);
   // Ödeme duvarı şeması bugünkü anı ve belgenin önerisini ayrı yazar.
-  await expect(page.locator('.pz-duvar-satir').nth(1)).toContainText('alıcıya erişim genişleyince');
+  await expect(page.locator('.pz-duvar-satir').nth(1)).toContainText('daha çok alıcıya ulaşmak isteyince');
   await expect(page.locator('.pz-duvar-satir').nth(1)).toContainText('ilk nitelikli talebe');
 });
 

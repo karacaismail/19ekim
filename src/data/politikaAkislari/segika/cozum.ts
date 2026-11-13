@@ -92,7 +92,7 @@ function anaAkis(a: Ayar): IsAkisi {
   return {
     baslik: 'Desteği veren danışman',
     ozet: 'Hizmet verdiğiniz işverene Segika’yı önerirsiniz. Müşteri desteğini siz verirsiniz.',
-    hedef: 'İşveren doğru paketi alsın, desteği kayıtlı olsun ve komisyonunuz izlensin.',
+    hedef: 'İşveren doğru paketi alsın. Verdiğiniz destek kayda geçsin. Komisyonunuz da izlensin.',
     ilk: 'anlasma',
     adimlar: [
       {
@@ -167,7 +167,7 @@ function anaAkis(a: Ayar): IsAkisi {
           son('bekle', 'odemedi', 'Müşteri henüz ödemedi', 'Tahsilat bekleniyor', 'Müşteri ödemeden komisyon kesinleşmez.', 'Finans sorumlusu tahsilatı izler.',
             'Ödeme gelince bu adıma dönün.'),
           son('bekle', 'kapasite', 'Destek yükünü karşılayamıyorum', 'Destek devrini planlayın',
-            'Ortaklık sorumlusuna açık işleri bildirin.', 'Ortaklık sorumlusu devir planını sizinle yazar.', 'Plan yazılmadan yeni destek sözü vermeyin.'),
+            'Ortaklık sorumlusuna bekleyen işleri bildirin.', 'Ortaklık sorumlusu devir planını sizinle yazar.', 'Plan yazılmadan yeni destek sözü vermeyin.'),
           itiraz,
         ],
       },
@@ -265,7 +265,7 @@ function yonlendirmeAkis(a: Ayar): IsAkisi {
     adimlar: [
       {
         id: 'uygunluk', ad: 'Uygunluğu doğrulatın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'sinir',
-        yap: [kural(a, p, 'Ortak puanı', 'Ortak puanı ve ortak sayısı sınırlıdır.'), kural(a, p, 'fiyatı değiştiremez', 'Fiyatı değiştiremez ve tahsilat yapamazsınız.'),
+        yap: [kural(a, p, 'Ortak puanı', 'Ortak sayısının üst sınırı var. Ortak puanının da alt sınırı var.'), kural(a, p, 'fiyatı değiştiremez', 'Fiyatı değiştiremez ve tahsilat yapamazsınız.'),
           'Ortaklık sorumlusu puanınızı değerlendirir.'],
         soru: 'Uygunluk değerlendirmesi ne durumda?',
         secenekler: [
@@ -307,7 +307,7 @@ function yonlendirmeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'odeme', ad: 'Komisyonu izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: [kural(a, p, 'net tahsilat', 'Komisyon uygun net tahsilattan hesaplanır.'), kural(a, p, 'Ödeme, takip eden', 'Finans sorumlusu ödeme gününü yazılı bildirir.')],
+        yap: [kural(a, p, 'vergi ve iadeler', 'Komisyon, müşterinin ödediği tutardan vergi ve iadeler düşülerek hesaplanır.'), kural(a, p, 'Ödeme, takip eden', 'Finans sorumlusu ödeme gününü yazılı bildirir.')],
         soru: 'Komisyon ödemesi ne durumda?',
         secenekler: [
           son('tamamla', 'odendi', 'Komisyon geldi, faturamı kestim', 'Bu işin rehberi tamamlandı', 'Ödemeyi kendi kaydınızla karşılaştırın.'),

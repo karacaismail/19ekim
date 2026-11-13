@@ -8,7 +8,7 @@ export const politika: ProjePolitika = {
   "iliski": "Bağımsız tanıtım ortağısınız. iStoc’u sosyal medyada, eğitimde veya etkinlikte tanıtırsınız. Satışı, kurulumu ve satıcı desteğini şirket yürütür. Bu ilişki maaşlı iş veya kazanç garantisi değildir.",
   "gorev": [
     "Satıcıların katalog ve ürün bilgisi ihtiyacına uygun içerik hazırlayın.",
-    "Her ticari paylaşımda “reklam” ibaresini en başta gösterin.",
+    "Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.",
     "Yalnız şirketin onayladığı iStoc bilgisini kullanın.",
     "Size verilen bağlantıyı veya kodu paylaşın.",
     "Başvuruların sizin kaydınıza ulaştığını kontrol edin."
@@ -108,7 +108,7 @@ export const politika: ProjePolitika = {
       "urun": "iStoc",
       "ad": "Toptan giyim ve tekstil satıcıları",
       "ihtiyac": "Örneğin bu satıcılar büyük şehirdeki toptan çarşılarda 2 ile 15 çalışanla sezonluk koleksiyon satabilir. Ürünlerini alıcılara düzenli bir katalogla göstermek isteyebilir.",
-      "ulasim": "Ticaret eğitimi kanalında reklam olduğu açık bir katalog örneği yayımlayın.",
+      "ulasim": "Ticaret eğitimi kanalında bir katalog örneği yayımlayın. Paylaşımın reklam olduğunu açıkça yazın.",
       "mesaj": "Ürünlerinizi alıcılara daha düzenli göstermek ister misiniz?",
       "uygunluk": "Satıcının toptan satış yapmadığını öğrenirseniz satış baskısı kurmayın.",
       "sonrasi": "İlgilenen satıcı onaylı bağlantıdan şirketle görüşsün."
@@ -135,7 +135,7 @@ export const politika: ProjePolitika = {
       "urun": "iStoc",
       "ad": "Ev ve mutfak ürünleri tedarikçileri",
       "ihtiyac": "Örneğin bu tedarikçiler depodan çok sayıda ürün kalemini mağazalara satabilir. Ürün listesini güncel tutmak isteyebilir.",
-      "ulasim": "Sektör bülteninde reklam olduğu açık bir kullanım anlatımı yayımlayın.",
+      "ulasim": "Sektör bülteninde bir kullanım anlatımı yayımlayın. Yazının reklam olduğunu açıkça belirtin.",
       "mesaj": "Ürün listenizi güncel tutmak ne kadar vaktinizi alıyor?",
       "uygunluk": "Sipariş veya müşteri sayısı garantisi vermeyin.",
       "sonrasi": "Okuyucu isterse şirketin başvuru yoluna geçsin."
@@ -226,7 +226,7 @@ export const politika: ProjePolitika = {
       "baslik": "Bağlantı, kod ve komisyon",
       "metin": [
         "Sözleşme başvurunun elçiye bağlanma yöntemini açıklar.",
-        "Şirket saha ortağı aynı satıcıya ulaşırsa hangi kaydın geçerli olacağını yazar.",
+        "Saha ortağı da aynı satıcıya ulaşabilir. Bu durumda hangi kaydın geçerli olacağını şirket yazar.",
         "Görüntülenme veya tıklama tek başına satış komisyonu sayılmaz.",
         "Komisyon yalnız ödemesi alınan satıştan doğar. Finans sorumlusu iade olursa ne olacağını yazar."
       ]
@@ -244,7 +244,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Elçi başvuran satıcıların bilgilerini kendi listesine kaydetmez.",
         "Hukuk danışmanı her kanal için ticari mesaj gönderme iznini ayrıca belirler.",
-        "Tacir ve esnafa tanınan ileti istisnası bütün kişilere uygulanmaz.",
+        "Yasa, tüccara ve esnafa giden bazı iletiler için önceden izin istemez. Bu istisna herkes için geçerli değildir.",
         "Hukuk danışmanı bilgilendirme metnini ve açık rıza metnini ayrı hazırlar."
       ]
     },
@@ -265,7 +265,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket aynı satıcıya saha ortağı da ulaşırsa hangi kaydın geçerli olacağını henüz yazmadı.",
       "islem": "Pazarlama sorumlusu finans sorumlusuyla kayıt kuralı hazırlasın.",
       "kanit": "Pazarlama sorumlusu örnek bir çakışmayı kurala göre çözsün. Sonucu taraflara göstersin.",
-      "firsat": "Açık kural elçi ile saha ortağını aynı satıcıda birlikte çalıştırır. Elçinin içeriği saha ziyaretini kolaylaştırır.",
+      "firsat": "Net bir kural elçi ile saha ortağını aynı satıcıda birlikte çalıştırır. Elçinin içeriği saha ziyaretini kolaylaştırır.",
       "durdur": "Kural açıklanmadan kesin komisyon vaat etmeyin."
     },
     {
@@ -282,8 +282,8 @@ export const politika: ProjePolitika = {
       "mevcut": "Elçi kendi kitlesine tanıtım yapar.",
       "eksik": "Şirketin yeniden kullanım hakkı ve süresi açık değildir.",
       "islem": "Pazarlama sorumlusu içerik ekinde kullanım sınırlarını yazsın.",
-      "kanit": "Taraflar aynı içerik örneğinin izinli kanallarını işaretlesin.",
-      "firsat": "Şirket onaylı içeriği fuar ve eğitim gibi başka yerlerde de kullanabilir.",
+      "kanit": "Pazarlama sorumlusu örnek bir içeriği iki tarafa göstersin. İki taraf aynı kanalları işaretlerse kural yeterince açıktır.",
+      "firsat": "Şirketin onayladığı içerik fuar ve eğitim gibi başka yerlerde de kullanılabilir.",
       "durdur": "İzin verilmeyen kanalda içeriği kullanmayın."
     },
     {
@@ -292,7 +292,7 @@ export const politika: ProjePolitika = {
       "eksik": "Finans sorumlusu fatura, belge türü ve stopaj kararını henüz vermedi. Stopaj, ödemeden yapılan vergi kesintisidir.",
       "islem": "Finans sorumlusu mali müşavirle elçi türlerine göre kural yazsın.",
       "kanit": "Finans sorumlusu bir örnek ödeme için gereken belge listesini hazırlasın.",
-      "firsat": "Açık belge kuralı ödeme gecikmesini azaltır. Ödemesini zamanında alan elçi yeni içerik üretmeye devam eder.",
+      "firsat": "Net bir belge kuralı ödeme gecikmesini azaltır. Ödemesini zamanında alan elçi yeni içerik üretmeye devam eder.",
       "durdur": "Belge kuralı netleşmeden ilk ödemeyi planlamayın."
     }
   ],
@@ -301,29 +301,29 @@ export const politika: ProjePolitika = {
       "baslik": "Satıcılar alıcı garantisi mi bekliyor?",
       "sinyal": "Başvuran satıcılar iStoc’un alıcı getireceğini sanabilir.",
       "kontrol": "Pazarlama sorumlusu satış görüşmelerindeki ilk soruları incelesin.",
-      "tepki": "Yanlış beklenti tekrarlanırsa pazarlama sorumlusu başlığı ve çağrıyı değiştirsin.",
-      "kayit": "Önceki metni, yeni metni ve başvuru nedenini saklayın."
+      "tepki": "Yanlış beklenti tekrarlanırsa pazarlama sorumlusu başlığı ve başvuru davetini değiştirsin.",
+      "kayit": "Pazarlama sorumlusu önceki metni, yeni metni ve başvuru nedenini saklasın."
     },
     {
       "baslik": "Başvurular gerçekten toptancı mı?",
       "sinyal": "Tıklama artarken toptan satış yapmayan kişiler başvurabilir.",
       "kontrol": "Pazarlama sorumlusu kabul edilen başvuruları içeriğin yayımlandığı kanala göre ayırsın.",
       "tepki": "Pazarlama sorumlusu uygun olmayan kitleye harcamayı durdursun. İçeriği hedef satıcıya göre değiştirsin.",
-      "kayit": "Kişisel veriyi çoğaltmadan inceleme sonucunu kaydedin."
+      "kayit": "Pazarlama sorumlusu inceleme sonucunu kaydetsin. Kayda kişisel veri kopyalamasın."
     },
     {
       "baslik": "Reklam ibaresi görünmüyor mu?",
       "sinyal": "Platform ibareyi kısaltabilir veya “daha fazla” altına gizleyebilir.",
       "kontrol": "Pazarlama sorumlusu paylaşımı telefonda ve bilgisayarda açıp baksın.",
       "tepki": "İbare ilk bakışta görünmüyorsa pazarlama sorumlusu paylaşımı düzelttirsin.",
-      "kayit": "Düzeltme öncesi ve sonrası ekran görüntüsünü saklayın."
+      "kayit": "Pazarlama sorumlusu düzeltme öncesi ve sonrası ekran görüntüsünü saklasın."
     },
     {
       "baslik": "Kod satıcı gruplarında mı dolaşıyor?",
       "sinyal": "Elçinin kitlesiyle ilgisi olmayan gruplardan başvuru gelebilir.",
       "kontrol": "Pazarlama sorumlusu başvuruların geldiği sayfaları incelesin.",
       "tepki": "Pazarlama sorumlusu izinsiz yayılan kodu kapatsın. Elçiye yeni kod versin.",
-      "kayit": "Başvuruların geldiği sayfayı ve tarihini kaydedin."
+      "kayit": "Pazarlama sorumlusu başvuruların geldiği sayfayı ve tarihini kaydetsin."
     }
   ],
   "firsatlar": [
@@ -342,7 +342,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Elçi ile saha ortağını aynı bölgede birlikte çalıştırın",
       "neden": "Aynı satıcıya elçi ve saha ortağı birlikte ulaşabilir. Kayıt kuralı yazılı olmadığı için bu durum bugün çakışma sayılır.",
-      "ilkAdim": "Pazarlama sorumlusu ve finans sorumlusu ortak kayıt kuralını yazar. Sonra elçinin kitlesinin yoğun olduğu bir şehirde saha ziyareti planlar.",
+      "ilkAdim": "Pazarlama sorumlusu ve finans sorumlusu, elçi ile saha ortağının uyacağı kayıt kuralını yazar. Sonra elçinin kitlesinin yoğun olduğu bir şehirde saha ziyareti planlar.",
       "olcu": "Pazarlama sorumlusu elçi bağlantısıyla gelip saha ortağıyla görüşen satıcıları sayar."
     },
     {
@@ -353,9 +353,9 @@ export const politika: ProjePolitika = {
     }
   ],
   "haftalik": [
-    "Pazarlama sorumlusu her hafta uygun satıcı başvurularını toplam başvurulara bölsün.",
-    "Finans sorumlusu ödemesi alınan satışları uygun başvurulara bölsün.",
-    "Pazarlama sorumlusu reklam ibaresi eksik paylaşımları yayındaki paylaşımlara bölsün.",
+    "Pazarlama sorumlusu her hafta uygun satıcı başvurularının yüzdesini hesaplasın.",
+    "Finans sorumlusu uygun başvuruların yüzde kaçının ödenmiş satışa dönüştüğünü hesaplasın.",
+    "Pazarlama sorumlusu “reklam” sözcüğü eksik paylaşımların yüzdesini hesaplasın.",
     "Görüntülenme sayısını tek başına başarı ölçüsü saymayın.",
     "Alıcı garantisi beklentisi artarsa ilgili yayını gözden geçirin.",
     "Anlaşmadan önce elçi görevini kendi sözleriyle anlatsın.",

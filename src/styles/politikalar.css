@@ -28,12 +28,13 @@
 .pol-kontrol { padding-inline-start: var(--space-5); }
 .pol-kontrol li, .pol-panel li { margin-block: var(--space-3); }
 .pol-ayrinti { border: 0; margin-block: var(--space-2); background: transparent; }
-.pol-ac { padding: var(--space-2) 0; min-block-size: var(--hit-min); color: var(--text-primary); border-radius: var(--radius-control); }
+/* Açılır düğme üzerine gelince zemin alır. Yazı ve ok zemin kenarına yapışmaz (iç boşluk, tests/bosluk.spec.ts). */
+.pol-ac { padding: var(--clear-block) var(--clear-inline); min-block-size: var(--hit-min); color: var(--text-primary); border-radius: var(--radius-control); }
 .pol-ac { transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
 .pol-ok { transition-property: transform; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
 .pol-ac:hover { background: var(--surface-hover); }
 .pol-ac-etiket { font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-body); padding: 0; }
-.pol-panel { padding: var(--space-1) 0 var(--space-4); }
+.pol-panel { padding: var(--space-1) var(--clear-inline) var(--space-4); }
 .pol-panel blockquote { margin-inline: 0; padding-inline-start: var(--space-4); font-weight: var(--weight-medium); }
 .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-8); }
 @media (min-width: 48em) {
@@ -68,7 +69,7 @@
 .pol-zaman > li { display: grid; grid-template-columns: var(--policy-rail) minmax(0, 1fr); gap: var(--space-2); position: relative; }
 .pol-zaman > li + li { padding-block-start: var(--policy-step-gap); }
 .pol-zaman > li::before { content: ''; position: absolute; inset-inline-start: calc(var(--policy-rail) / 2); inset-block: 0; inline-size: var(--hairline); background: var(--policy-timeline-line); }
-.pol-zaman-sayi { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; block-size: var(--policy-rail); background: var(--surface-page); color: var(--text-secondary); font-size: var(--text-md); font-weight: var(--weight-semibold); }
+.pol-zaman-sayi { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; block-size: max(var(--policy-rail), 1.75rem); background: var(--surface-page); color: var(--text-secondary); font-size: var(--text-md); font-weight: var(--weight-semibold); }
 .pol-zaman-etkin > .pol-zaman-sayi { background: var(--policy-active-ink); color: var(--surface-raised); }
 .pol-zaman-gecmis h3 { font-size: var(--text-lg); margin: 0; line-height: var(--leading-snug); }
 .pol-zaman-gecmis p { margin-block: var(--space-1) 0; color: var(--text-secondary); }

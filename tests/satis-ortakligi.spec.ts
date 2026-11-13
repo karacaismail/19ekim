@@ -164,16 +164,16 @@ test('sürüm seçici: v1 ve v2 ayrı ayarlarla çalışır, v2 adresten açıl�
   await page.setViewportSize({ width: 1512, height: 945 });
   await page.goto('satis-ortakligi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
-  await expect(page.getByRole('button', { name: 'v1' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '1. sürüm', exact: true })).toHaveAttribute('aria-pressed', 'true');
   // Sürüm seçici ürün ve ödeme satırının üstünde, ayrı bir satırdadır.
   const surumAlt = await page.locator('.so-surum').evaluate((e) => e.getBoundingClientRect().bottom);
   const aracUst = await page.locator('.so2-arac').evaluate((e) => e.getBoundingClientRect().top);
   expect(surumAlt).toBeLessThanOrEqual(aracUst);
-  await expect(page.locator('.so2-arac').getByRole('button', { name: 'v1' })).toHaveCount(0);
+  await expect(page.locator('.so2-arac').getByRole('button', { name: '1. sürüm', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Segika' }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');
 
-  await page.getByRole('button', { name: 'v2' }).click();
+  await page.getByRole('button', { name: '2. sürüm', exact: true }).click();
   await expect(page).toHaveURL(/[?&]surum=v2/);
   await expect(page.getByRole('tab')).toHaveCount(5);
   // v2 kendi ayarıyla başlar: v1'deki Segika seçimi v2'ye geçmez.
@@ -183,10 +183,10 @@ test('sürüm seçici: v1 ve v2 ayrı ayarlarla çalışır, v2 adresten açıl�
   await page.getByText('Karar verisi (JSON)').click();
   await expect(page.locator('.v2-so2-json-ac pre')).toContainText('"program": "v2"');
 
-  await page.getByRole('button', { name: 'v1' }).click();
+  await page.getByRole('button', { name: '1. sürüm', exact: true }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');
 
   await page.goto('satis-ortakligi/?surum=v2');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
-  await expect(page.getByRole('button', { name: 'v2' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '2. sürüm', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });

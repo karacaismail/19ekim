@@ -55,7 +55,7 @@ const BOLUMLER = [
 function KaynakBaglantisi({ k }: { k: Kaynak }) {
   return (
     <span className="pz-kaynak">
-      <a href={k.url} target="_blank" rel="noopener noreferrer">
+      <a href={k.url} target="_blank" rel="noopener noreferrer" data-yalin="kunye">
         Kaynak: {k.ad}
       </a>
     </span>
@@ -68,7 +68,7 @@ function FaydaListesi({ faydalar }: { faydalar: Fayda[] }) {
       {faydalar.map((f) => (
         <li key={f.id} className="pz-fayda">
           <span className="pz-fayda-simge" aria-hidden="true">
-            <IconCheck size={18} stroke={2} />
+            <IconCheck size={16} stroke={2} />
           </span>
           <div className="pz-fayda-metin">
             <p>{f.metin}</p>
@@ -158,8 +158,8 @@ function Icerik() {
         title="Hizmetler"
         purpose="istoc.com’da alıcının ve satıcının neyi ücretsiz, neyi ücretli kullandığını gösterir."
         meta={[
-          { label: 'Paketler', value: `istoc.com satıcı paketleri, ${OKUNDU}` },
-          { label: 'İlke', value: 'Küresel B2B pazaryerleri araştırması' },
+          { label: 'Paket bilgisinin kaynağı', value: `istoc.com satıcı paketleri, ${OKUNDU}` },
+          { label: 'Ücretsiz ve ücretli ayrımının kaynağı', value: 'İşletmeden işletmeye satış (B2B) yapan küresel pazar yerleri araştırması' },
         ]}
       />
       <div className="pz-sayfa">
@@ -249,7 +249,7 @@ function Icerik() {
                   <span className="pz-paket-tutar">{p.fiyat}</span>
                   {p.birim ? <span className="pz-paket-birim">{p.birim}</span> : null}
                 </p>
-                <p className="pz-paket-yillik">{p.yillik ?? 'Fiyat ihtiyaca göre teklifle belirlenir.'}</p>
+                <p className="pz-paket-yillik">{p.yillik ?? 'Fiyat, satıcının ihtiyacına göre belirlenir. Satıcı fiyatı öğrenmek için istoc.com’dan teklif ister.'}</p>
                 <ul aria-label={`${p.ad} paketinde öne çıkanlar`}>
                   {p.maddeler.map((m) => (
                     <li key={m}>
@@ -310,7 +310,7 @@ function Icerik() {
                   <span className="chip pz-cip">{h.icin}</span>
                   {h.katman ? (
                     <a className="text-link" href={href(`/kuresel-pazaryerleri/#katman-${h.katman}`)}>
-                      {katmanAdi(h.katman)} için küresel örnekler
+                      Diğer ülkelerde {katmanAdi(h.katman).toLocaleLowerCase('tr')} örneklerini görün
                     </a>
                   ) : null}
                 </div>
@@ -382,7 +382,7 @@ function Icerik() {
             <li>
               <a href={href('/deger-onerisi/')}>
                 <span className="pz-ilgili-ad">Değer önerisi</span>
-                <span className="pz-ilgili-metin">Saha ekibinin esnafa verdiği sözleri ve her sözün koşulunu gösterir.</span>
+                <span className="pz-ilgili-metin">Saha ekibinin esnafa verebileceği sözleri ve her sözün koşulunu gösterir.</span>
               </a>
             </li>
           </ul>

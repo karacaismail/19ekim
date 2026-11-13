@@ -143,7 +143,7 @@ function KatalogApplet() {
   const set = ortak.seviyeSeti === 'ozel' ? null : SEVIYE_SETLERI[ortak.seviyeSeti];
 
   return (
-    <Bolum id="katalog" dayanak="İş mimarisi (job architecture), meslek ailesini, seviyeyi ve uzmanlığı birlikte tanımlar (WTW, Mercer). Seviye ekseni meslekten bağımsızdır (SFIA 9 bilişim beceri çerçevesi, 37signals’ın beş seviyesi).">
+    <Bolum id="katalog" dayanak="İş mimarisi, meslek ailesini, seviyeyi ve uzmanlığı birlikte tanımlar (WTW, Mercer). Seviye ekseni meslekten bağımsızdır (SFIA 9 bilişim beceri çerçevesi, 37signals’ın beş seviyesi).">
       <Girdiler>
         <Secim
           label="Baz birim"
@@ -154,7 +154,7 @@ function KatalogApplet() {
             { value: 'ozel', label: 'Özel birim' },
           ]}
           onChange={(v) => guncelle({ bazKaynak: v as AppletDurum['ortak']['bazKaynak'] })}
-          aciklama={`Parametreler sayfasında net asgari ücret ${tlExact(params.minWage)}, brüt asgari ücret ${tlExact(params.minWageGross)}. Özel birim döviz veya iç katsayı olabilir.`}
+          aciklama={`Parametreler sayfasında net asgari ücret ${tlExact(params.minWage)}, brüt asgari ücret ${tlExact(params.minWageGross)}. “Özel birim” seçeneğinde döviz ya da iç katsayı kullanabilirsiniz.`}
         />
         {ortak.bazKaynak === 'ozel' ? (
           <>
@@ -171,12 +171,12 @@ function KatalogApplet() {
             />
           </>
         ) : null}
-        <Sayi label="Taban sınırı" birim="× baz" value={ortak.tabanCarpani} min={0} step={0.05} onChange={(v) => guncelle({ tabanCarpani: v })} aciklama="Hiçbir ücret baz birimin bu katının altına inmez. Asgari ücret çarpan birimi değil, alt sınırdır." />
+        <Sayi label="Taban sınırı" birim="× baz" value={ortak.tabanCarpani} min={0} step={0.05} onChange={(v) => guncelle({ tabanCarpani: v })} aciklama="Hiçbir ücret baz birimin bu katının altına inmez. Baz birim asgari ücretse ve değer 1 ise, alt sınır asgari ücrettir." />
       </Girdiler>
       <Ozet
         items={[
           { label: 'Baz birim', value: kesin(baz), note: 'Bütün tutarlar bu birimin katıdır.' },
-          { label: 'Meslek', value: int(ortak.meslekler.length), note: `${int(ortak.meslekler.reduce((n, m) => n + m.uzmanliklar.length, 0))} uzmanlık` },
+          { label: 'Meslek', value: int(ortak.meslekler.length), note: `Toplam ${int(ortak.meslekler.reduce((n, m) => n + m.uzmanliklar.length, 0))} uzmanlık` },
           { label: 'Seviye', value: int(ortak.seviyeler.length), note: `${icSayisi} uzman, ${mSayisi} yönetici` },
         ]}
       />
@@ -192,7 +192,7 @@ function KatalogApplet() {
       <DataTable<Seviye>
         id="katalog-seviye"
         title="Seviyeler"
-        note="Uzman (IC, bireysel katkı) ve yönetici (M) hatları paraleldir. Adım, aynı hattaki bir önceki seviyeye göre artıştır."
+        note="Uzman (P) ve yönetici (M) hatları yan yana ilerler. Adım, aynı hattaki bir önceki seviyeye göre artıştır. %25’i aşan adım işaretlenir."
         rowKey={(s) => s.kod}
         columns={[
           { key: 'kod', header: 'Kod', nowrap: true, rowHeader: true, render: (s) => s.kod },
@@ -206,7 +206,7 @@ function KatalogApplet() {
             render: (s) => {
               const hat = ortak.seviyeler.filter((x) => x.hat === s.hat);
               const i = hat.indexOf(s);
-              if (i <= 0 || !hat[i - 1].carpan) return 'Uygulanmıyor';
+              if (i <= 0 || !hat[i - 1].carpan) return i <= 0 ? 'İlk seviye' : 'Uygulanmıyor';
               const adim = s.carpan / hat[i - 1].carpan - 1;
               return adim > 0.25 ? <DurumHapi durum="uyari">{isaretli(adim)}</DurumHapi> : isaretli(adim);
             },
@@ -263,7 +263,7 @@ function KatalogApplet() {
       </Araclar>
 
       <Girdiler baslik="Uzmanlıklar">
-        <Secim label="Düzenlenen meslek" value={duzenlenen?.id ?? ''} data={meslekVerisi(ortak.meslekler)} onChange={setSecili} aciklama="Uzmanlık çarpanı, yeni seviye açmadan piyasadaki ücret farkını yansıtır (full stack, video, HRBP gibi)." />
+        <Secim label="Düzenlenen meslek" value={duzenlenen?.id ?? ''} data={meslekVerisi(ortak.meslekler)} onChange={setSecili} aciklama="Uzmanlık çarpanı piyasadaki ücret farkını yansıtır. Küçük farklar için yeni seviye açılmaz. Örnekler full stack, video ve insan kaynakları iş ortağıdır (HRBP)." />
       </Girdiler>
       {duzenlenen ? (
         <>
@@ -325,7 +325,7 @@ function RutbeMatrisi() {
   const enCok = Math.max(...hucreler);
   const goster = (v: number) => (m.gorunum === 'carpan' ? times(v) : para(v));
   return (
-    <Bolum id="rutbe-matrisi" dayanak="İlk model ücreti “meslek × unvan × seviye = rütbe = ücret” diye tanımlar. GitLab ve Codacy hesaplayıcıları da rol bazını seviye faktörüyle çarpar.">
+    <Bolum id="rutbe-matrisi" dayanak="İlk modelde meslek, unvan ve seviye birlikte rütbeyi belirler. Rütbe de ücreti belirler. GitLab ve Codacy hesaplayıcıları da rol bazını seviye faktörüyle çarpar.">
       <Dugmeler<'carpan' | 'tutar'>
         label="Görünüm"
         value={m.gorunum}
@@ -344,16 +344,16 @@ function RutbeMatrisi() {
         items={[
           { label: 'En düşük hücre', value: goster(enAz), note: m.gorunum === 'carpan' ? para(enAz) : times(enAz) },
           { label: 'En yüksek hücre', value: goster(enCok), note: m.gorunum === 'carpan' ? para(enCok) : times(enCok) },
-          { label: 'En yüksek ÷ en düşük', value: enAz > 0 ? `${num(Math.round((enCok / enAz) * 10) / 10)} : 1` : 'Veri yok', note: 'Seçili uzmanlıklarla hesaplanır. Yapı denetimi bütün uzmanlıkları sayar.' },
+          { label: 'En yüksek hücrenin en düşüğe oranı', value: enAz > 0 ? `${num(Math.round((enCok / enAz) * 10) / 10)} : 1` : 'Veri yok', note: 'Bu değerler seçtiğiniz uzmanlıklarla hesaplanır. “Yapı denetimi” ise bütün uzmanlıkları sayar.' },
         ]}
       />
       <DataTable<Seviye>
         id="rutbe"
-        title="Meslek × seviye"
-        note="Hücre = meslek katsayısı × seviye çarpanı × uzmanlık çarpanı. Hücrenin altındaki oran, aynı hattaki bir önceki seviyeye göre sıçramadır. %25’i aşan sıçrama işaretlenir."
+        title="Meslek ve seviye"
+        note="Hücredeki değer, meslek katsayısı, seviye çarpanı ve uzmanlık çarpanının çarpımıdır. Hücrenin altındaki oran adımdır. Adım, aynı hattaki bir önceki seviyeye göre artıştır. %25’i aşan adım işaretlenir."
         rowKey={(s) => s.kod}
         columns={[
-          { key: 'sev', header: 'Seviye', minWidth: '11rem', rowHeader: true, sticky: true, render: (s) => <>{s.kod}<span className="cell-sub">{s.ad}</span></> },
+          { key: 'sev', header: 'Seviye', minWidth: '11rem', rowHeader: true, sticky: true, render: (s) => <>{s.kod}{' '}<span className="cell-sub">{s.ad}</span></> },
           { key: 'carpan', header: 'Çarpan', summary: true, nowrap: true, render: (s) => times(s.carpan) },
           ...ortak.meslekler.map((ms) => ({
             key: ms.id,
@@ -373,7 +373,7 @@ function RutbeMatrisi() {
               return (
                 <>
                   {goster(v)}
-                  <span className="cell-sub">{adim === null ? 'İlk seviye' : adim > 0.25 ? <DurumHapi durum="uyari">Sıçrama {isaretli(adim)}</DurumHapi> : isaretli(adim)}</span>
+                  <span className="cell-sub">{adim === null ? 'İlk seviye' : adim > 0.25 ? <DurumHapi durum="uyari">Büyük adım {isaretli(adim)}</DurumHapi> : isaretli(adim)}</span>
                 </>
               );
             },
@@ -397,7 +397,7 @@ function KademeSerisi() {
   const son = satirlar[satirlar.length - 1];
   const gerek = ilerlemeIcin(k.yariGenislik, 0.5);
   return (
-    <Bolum id="kademe-serisi" dayanak="Asgari ücret çarpanları (1 ×, 1,25 ×, 1,5 × …) geometrik seriyle karşılaştırılır: Kg = K1 × (1 + p)^(g − 1). Mercer band yapısında ilerleme %10–20, genişlik %40–60’tır.">
+    <Bolum id="kademe-serisi" dayanak="Bu araç iki artış yolunu karşılaştırır. Aritmetik seride her derece aynı tutarda artar. Örneğin dereceler asgari ücretin 1, 1,25 ve 1,5 katıdır. Geometrik seride her derece aynı yüzdeyle artar. Formül şudur: Kg = K1 × (1 + p)^(g − 1). Mercer band yapısında ilerleme %10 ile %20 arasındadır. Genişlik %40 ile %60 arasındadır.">
       <Girdiler>
         <Sayi label="İlk derece (G1) orta noktası" birim="× baz" value={k.k1} min={0.1} step={0.05} onChange={(v) => setK({ ...k, k1: v })} />
         <Sayi label="Aritmetik adım" birim="× baz" value={k.artim} min={0} step={0.05} onChange={(v) => setK({ ...k, artim: v })} aciklama="İlk model +0,25 × adım kullanır." />
@@ -407,9 +407,9 @@ function KademeSerisi() {
       </Girdiler>
       <Ozet
         items={[
-          { label: 'Band genişliği', value: pct(yayilim(k.yariGenislik)), note: 'En çok değerin en aza göre farkı. Tipik aralık %40–60.' },
-          { label: 'Komşu bant örtüşmesi', value: pct(ortusme(k.yariGenislik, k.oran)), note: 'Tipik aralık %25–50.' },
-          { label: 'Örtüşme %50 için ilerleme', value: pct(Math.max(0, gerek)), note: `Bu band genişliğinde (±${pct(k.yariGenislik)})` },
+          { label: 'Band genişliği', value: pct(yayilim(k.yariGenislik)), note: 'Bandın en çok değeri, en az değerinden bu oranda yüksektir. Bu oran genelde %40 ile %60 arasındadır.' },
+          { label: 'Komşu bant örtüşmesi', value: pct(ortusme(k.yariGenislik, k.oran)), note: 'Bu oran genelde %25 ile %50 arasındadır.' },
+          { label: 'Örtüşmenin %50 olması için ilerleme', value: pct(Math.max(0, gerek)), note: `Bu hesap ±${pct(k.yariGenislik)} band yarı genişliği içindir.` },
           { label: `Son derece (G${son?.g})`, value: times(son?.geometrik ?? 0), note: `Aritmetik seride ${times(son?.aritmetik ?? 0)}` },
         ]}
       />
@@ -424,13 +424,13 @@ function KademeSerisi() {
         rowKey={(r) => `g${r.g}`}
         columns={[
           { key: 'g', header: 'Derece', nowrap: true, rowHeader: true, render: (r: (typeof satirlar)[number]) => `G${r.g}` },
-          { key: 'ar', header: 'Aritmetik', nowrap: true, render: (r) => <>{times(r.aritmetik)}<span className="cell-sub">{r.aritArtis === null ? 'Uygulanmıyor' : isaretli(r.aritArtis)}</span></> },
+          { key: 'ar', header: 'Aritmetik', nowrap: true, render: (r) => <>{times(r.aritmetik)}<span className="cell-sub">{r.aritArtis === null ? 'İlk derece' : isaretli(r.aritArtis)}</span></> },
           { key: 'geo', header: 'Geometrik orta', summary: true, nowrap: true, render: (r) => <>{times(r.geometrik)}<span className="cell-sub">{para(r.geometrik)}</span></> },
           // Aynı dereceyi iki modelle kıyaslayan görünür fark (gorsel_algi.md F08 / C054): ezber yok.
           { key: 'fark', header: 'Fark (geometrik − aritmetik)', nowrap: true, render: (r) => `${r.geometrik >= r.aritmetik ? '+' : '−'}${para(Math.abs(r.geometrik - r.aritmetik))}` },
           { key: 'min', header: 'En az', nowrap: true, render: (r) => para(r.min) },
           { key: 'max', header: 'En çok', nowrap: true, render: (r) => para(r.max) },
-          { key: 'ort', header: 'Üst bantla örtüşme', nowrap: true, render: (r) => (r.ortusme === null ? 'Uygulanmıyor' : r.ortusme > 0.5 ? <DurumHapi durum="uyari">{pct(r.ortusme)}</DurumHapi> : pct(r.ortusme)) },
+          { key: 'ort', header: 'Üst bantla örtüşme', nowrap: true, render: (r) => (r.ortusme === null ? 'Üst bant yok' : r.ortusme > 0.5 ? <DurumHapi durum="uyari">{pct(r.ortusme)}</DurumHapi> : pct(r.ortusme)) },
           { key: 'band', header: 'Band (ortak ölçek)', minWidth: '12rem', render: (r) => <BandCizgi alt={alt} ust={ust} min={r.min} orta={r.geometrik} max={r.max} /> },
         ]}
         rows={satirlar}
@@ -455,11 +455,11 @@ function IsDegerleme() {
   const pozGuncelle = (id: string, patch: Partial<AppletDurum['degerleme']['pozisyonlar'][number]>) => setD({ ...d, pozisyonlar: d.pozisyonlar.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
   type Poz = AppletDurum['degerleme']['pozisyonlar'][number];
   return (
-    <Bolum id="is-degerleme" dayanak="Bu hesap dört yönteme dayanır. Birincisi ILO’nun puan-faktör yöntemidir. ILO, Uluslararası Çalışma Örgütüdür. Diğerleri Korn Ferry Hay yöntemi, Mercer IPE ve WTW GGS’dir. Hay yöntemi bilgi, problem çözme ve hesap verebilirliği puanlar. Hay yöntemi %15 adım kuralını da kullanır. Bu yöntemlerde kişi değil, pozisyon puanlanır.">
+    <Bolum id="is-degerleme" dayanak="Bu hesap dört yönteme dayanır. Birincisi Uluslararası Çalışma Örgütünün (ILO) puan-faktör yöntemidir. Diğerleri Korn Ferry Hay yöntemi, Mercer IPE ve WTW GGS’dir. Hay yöntemi bilgi, problem çözme ve hesap verebilirliği puanlar. Hay yöntemi %15 adım kuralını da kullanır. Bu yöntemlerde kişi değil, pozisyon puanlanır.">
       <DataTable
         id="faktor"
         title="Faktörler ve ağırlıklar"
-        note={`Ağırlık toplamı ${int(agirlikToplam)}. Hesap bu toplamı 100’e ölçekler.`}
+        note={`Ağırlıkların toplamı ${int(agirlikToplam)}. Hesap her ağırlığı bu toplama böler ve payını kullanır.`}
         rowKey={(f) => f.id}
         columns={[
           { key: 'ad', editor: true, text: (f) => f.ad, header: 'Faktör', minWidth: '13rem', rowHeader: true, render: (f: AppletDurum['degerleme']['faktorler'][number]) => <Metin gizliEtiket label={`${d.faktorler.indexOf(f) + 1}. faktör adı`} value={f.ad} onChange={(v) => setD({ ...d, faktorler: d.faktorler.map((x) => (x.id === f.id ? { ...x, ad: v } : x)) })} /> },
@@ -471,8 +471,8 @@ function IsDegerleme() {
       />
       <DataTable<Poz>
         id="pozisyon"
-        title="Pozisyonlar (1–5 puan)"
-        note="Puan = Σ ağırlık × faktör puanı. Derece, aşağıdaki eşiklerle bulunur. Derecenin orta noktası Kademe serisi applet’inden gelir. Hay kuralına göre puanları %15’ten az farklı olan pozisyonlar aynı büyüklüktedir."
+        title="Pozisyonlar (1 ile 5 arası puan)"
+        note="Sistem puanı şöyle bulur. Her faktör puanını ağırlık payıyla çarpar. Sonra bu sayıları toplar. Derece, aşağıdaki eşiklerle bulunur. Derecenin orta noktası “Kademe serisi ve bantlar” aracından gelir. Hay kuralına göre puanları %15’ten az farklı pozisyonlar aynı büyüklüktedir. Tablo, puanca bir üstündeki ya da altındaki pozisyonla aynı büyüklükte olanları işaretler."
         rowKey={(p) => p.id}
         columns={[
           { key: 'ad', editor: true, text: (p) => p.ad, header: 'Pozisyon', minWidth: '16rem', rowHeader: true, sticky: true, render: (p) => <Metin gizliEtiket label={`${d.pozisyonlar.indexOf(p) + 1}. pozisyon adı`} value={p.ad} onChange={(v) => pozGuncelle(p.id, { ad: v })} /> },
@@ -494,7 +494,7 @@ function IsDegerleme() {
               return <>{para(dereceOrtasi(k, g))}<span className="cell-sub">{times(dereceOrtasi(k, g))}</span></>;
             },
           },
-          { key: 'hay', header: 'Hay %15', nowrap: true, render: (p) => (ayni.has(p.id) ? <DurumHapi durum="uyari">Aynı büyüklük</DurumHapi> : 'Ayrışıyor') },
+          { key: 'hay', header: 'Hay kuralına göre', nowrap: true, render: (p) => (ayni.has(p.id) ? <DurumHapi durum="uyari">Aynı büyüklük</DurumHapi> : 'Ayrışıyor') },
           { key: 'meslek', editor: true, header: 'Meslek', minWidth: '13rem', render: (p) => <Secim gizliEtiket label={`${p.ad} mesleği`} value={meslekBul(ortak.meslekler, p.meslekId)?.id ?? ''} data={meslekVerisi(ortak.meslekler)} onChange={(v) => pozGuncelle(p.id, { meslekId: v })} /> },
         ]}
         rows={d.pozisyonlar}
@@ -505,7 +505,7 @@ function IsDegerleme() {
           Son pozisyonu sil
         </Eylem>
       </Araclar>
-      <Girdiler baslik="Derece eşikleri (puan ≥)">
+      <Girdiler baslik="Derece eşikleri (en az puan)">
         {d.esikler.map((e, i) => (
           <Sayi key={`esik-${i + 2}`} label={`G${i + 2} en az`} value={e} min={1} max={5} step={0.1} onChange={(v) => setD({ ...d, esikler: d.esikler.map((x, j) => (j === i ? v : x)) })} />
         ))}
@@ -549,8 +549,8 @@ function TabanUcret() {
         <HucreSecimi meslekId={z.meslekId} uzmanlikId={z.uzmanlikId} seviyeKod={z.seviyeKod} onChange={(p) => setZ({ ...z, ...p })} />
         <Secim label="Lokasyon bandı" value={lok.id} data={ortak.lokasyonlar.map((l) => ({ value: l.id, label: l.ad }))} onChange={(v) => setZ({ ...z, lokasyonId: v })} aciklama={`Çarpan ${times(lok.carpan)}`} />
         <Secim label="Sözleşme türü" value={soz.id} data={ortak.sozlesmeler.map((l) => ({ value: l.id, label: l.ad }))} onChange={(v) => setZ({ ...z, sozlesmeId: v })} aciklama={`Çarpan ${times(soz.carpan)}`} />
-        <Sayi label="Band içi konum (compa-ratio)" value={z.bandKonumu} min={0.5} max={1.5} step={0.01} onChange={(v) => setZ({ ...z, bandKonumu: v })} aciklama="Compa-ratio, ücretin band orta noktasına oranıdır. 1,00, ücretin orta noktaya eşit olduğu anlamına gelir." />
-        <Sayi label="Aylık çalışma saati" birim="sa" value={z.saat} min={1} max={400} step={1} ondalik={0} onChange={(v) => setZ({ ...z, saat: v })} aciklama="Saatlik ücreti hesaplamak için kullanılır." />
+        <Sayi label="Band içi konum (compa-ratio)" value={z.bandKonumu} min={0.5} max={1.5} step={0.01} onChange={(v) => setZ({ ...z, bandKonumu: v })} aciklama="Compa-ratio, ücretin band orta noktasına oranıdır. Oran 1,00 ise ücret orta noktaya eşittir." />
+        <Sayi label="Aylık çalışma saati" birim="saat" value={z.saat} min={1} max={400} step={1} ondalik={0} onChange={(v) => setZ({ ...z, saat: v })} aciklama="Saatlik ücret bu sayıyla hesaplanır." />
       </Girdiler>
       <Araclar>
         <Dugmeler
@@ -559,7 +559,7 @@ function TabanUcret() {
           data={BAND_KADEMELERI.map((b) => ({ value: b.id, label: b.ad }))}
           onChange={(v) => setZ({ ...z, bandKonumu: BAND_KADEMELERI.find((b) => b.id === v)?.carpan ?? 1 })}
         />
-        <Anahtar ad="Adrese değil insana öde" acik={z.insanaOde} onChange={(v) => setZ({ ...z, insanaOde: v })} aciklama="Açıkken lokasyon faktörü 1,00 olur." />
+        <Anahtar ad="Adrese değil insana öde" acik={z.insanaOde} onChange={(v) => setZ({ ...z, insanaOde: v })} aciklama="Bu seçenek açıksa lokasyon faktörü 1,00 olur. Yani kişinin yaşadığı yer ücreti değiştirmez." />
       </Araclar>
       <Ozet
         items={[
@@ -588,7 +588,7 @@ function TabanUcret() {
           </p>
         </Note>
       ) : null}
-      {secenekTablosu('lokasyonlar', 'lokasyon', 'Lokasyon bantları', 'Referans pazarın çarpanı 1,00’dır. Yaşam maliyeti düşük bantlar daha düşük çarpan alır.')}
+      {secenekTablosu('lokasyonlar', 'lokasyon', 'Lokasyon bantları', 'Referans pazar, karşılaştırmada esas alınan pazardır. Bu pazarın çarpanı 1,00’dır. Yaşam maliyeti düşük bantlar daha düşük çarpan alır.')}
       <Girdiler>
         <Sayi label="Lokasyon alt sınırı" birim="×" value={ortak.lokasyonTaban} min={0} max={1} step={0.05} onChange={(v) => setOrtak((o) => ({ ...o, lokasyonTaban: v }))} aciklama="GitLab’de dünya genelindeki en düşük lokasyon faktörü 0,70’tir." />
       </Girdiler>
@@ -612,7 +612,7 @@ function BandKonumu() {
   const kisiGuncelle = (id: string, patch: Partial<Kisi>) => setB({ ...b, kisiler: b.kisiler.map((k) => (k.id === id ? { ...k, ...patch } : k)) });
   const hedef = (k: Kisi) => min + (max - min) * kbfOrani(b.kriterler, k.puan);
   return (
-    <Bolum id="band-konumu" dayanak="Compa-ratio = ücret ÷ band orta noktası (SHRM). Kişinin band içindeki yeri kritik başarı faktörü puanıyla bulunur. Formül şudur: en az + (en çok − en az) × puan.">
+    <Bolum id="band-konumu" dayanak="Compa-ratio, ücretin band orta noktasına bölümüdür (SHRM). Kişinin band içindeki yeri bir puanla bulunur. Bu puan, tablodaki ölçütlerin ağırlıklı ortalamasıdır. Formül şudur: en az + (en çok − en az) × puan.">
       <Girdiler>
         <HucreSecimi meslekId={b.meslekId} uzmanlikId={b.uzmanlikId} seviyeKod={b.seviyeKod} onChange={(p) => setB({ ...b, ...p })} />
         <Sayi label="Band yarı genişliği (±)" yuzde ondalik={1} value={b.yariGenislik} min={1} max={60} onChange={(v) => setB({ ...b, yariGenislik: v })} />
@@ -630,7 +630,7 @@ function BandKonumu() {
       <DataTable<Kisi>
         id="kbf"
         title="Kişiler"
-        note="Puanlar 0 ile 100 arasındadır. Hedef, puana göre band içindeki yerdir. Mevcut, bugünkü ücretin orta noktaya oranıdır. Band çizgisinde kalın çizgi mevcut ücreti, kesikli çizgi hedefi, ince çizgi orta noktayı gösterir."
+        note="Puanlar 0 ile 100 arasındadır. Hedef, puana göre band içindeki yerdir. Mevcut, bugünkü ücretin orta noktaya oranıdır. Band çizgisinde üç çizgi var. Kalın çizgi bugünkü ücreti gösterir. Kesikli çizgi hedef ücreti gösterir. İnce çizgi orta noktayı gösterir."
         rowKey={(k) => k.id}
         columns={[
           { key: 'ad', header: 'Kişi', nowrap: true, rowHeader: true, sticky: true, render: (k) => k.ad },
@@ -676,11 +676,11 @@ function LiyakatMatrisi() {
   const kisiGuncelle = (id: string, patch: Partial<Kisi>) => setMr({ ...mr, kisiler: mr.kisiler.map((k) => (k.id === id ? { ...k, ...patch } : k)) });
   const satirlar = [5, 4, 3, 2, 1];
   return (
-    <Bolum id="liyakat-matrisi" dayanak="Liyakat matrisi (merit matrix) zam yüzdesini verir. Yüzde, performans puanına ve compa-ratio’ya göre değişir. Workday ve Ravio örneğinde zam en çok %14’tür. Bütçe = bordro × liyakat zammı oranı (Mercer 2026 verisinde ABD için %3,2–3,3).">
+    <Bolum id="liyakat-matrisi" dayanak="Liyakat matrisi (merit matrix) zam yüzdesini verir. Yüzde, performans puanına ve compa-ratio’ya göre değişir. Workday ve Ravio örneğinde zam en çok %14’tür. Bütçe, bordronun liyakat zammı oranıyla çarpımıdır. Mercer 2026 verisinde bu oran ABD için %3,2 ile %3,3 arasındadır.">
       <DataTable<number>
         id="merit-matris"
         title="Matris (zam yüzdesi)"
-        note="Aynı performansta, ücreti bandın altında olan kişi daha çok, üstünde olan daha az zam alır. Hücreler düzenlenebilir."
+        note="Performansı aynı olan iki kişiyi düşünün. Ücreti bandın altında olan kişi daha çok zam alır. Ücreti bandın üstünde olan kişi daha az zam alır. Hücrelerdeki oranları değiştirebilirsiniz."
         kayit="matris"
         eksenEtiketi="Performans"
         rowKey={(p) => `p${p}`}
@@ -699,17 +699,17 @@ function LiyakatMatrisi() {
         rows={satirlar}
       />
       <Girdiler>
-        <Sayi label="Zam bütçesi (bordronun)" yuzde ondalik={1} value={mr.havuzOrani} max={100} onChange={(v) => setMr({ ...mr, havuzOrani: v })} />
-        <Sayi label="Band yarı genişliği (±)" yuzde ondalik={1} value={mr.yariGenislik} min={1} max={60} onChange={(v) => setMr({ ...mr, yariGenislik: v })} aciklama="Zammın bandın en çoğunu aşan kısmı tek seferlik ödenir." />
+        <Sayi label="Zam bütçesi (bordronun yüzdesi)" yuzde ondalik={1} value={mr.havuzOrani} max={100} onChange={(v) => setMr({ ...mr, havuzOrani: v })} />
+        <Sayi label="Band yarı genişliği (±)" yuzde ondalik={1} value={mr.yariGenislik} min={1} max={60} onChange={(v) => setMr({ ...mr, yariGenislik: v })} aciklama="Zammın band tavanını aşan kısmı bir kez ödenir. Bu kısım ücrete eklenmez." />
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Bütçeyi aşarsa orantılı küçült" acik={mr.olcekle} onChange={(v) => setMr({ ...mr, olcekle: v })} />
+        <Anahtar ad="Zamlar bütçeyi aşarsa aynı oranda küçültülsün" acik={mr.olcekle} onChange={(v) => setMr({ ...mr, olcekle: v })} />
       </Araclar>
       <Ozet
         items={[
           { label: 'Aylık bordro', value: para(s.bordro) },
           { label: 'Zam bütçesi', value: para(s.havuz), note: pct(mr.havuzOrani) },
-          { label: 'Matrise göre gereken', value: para(s.hamToplam), note: s.olcek < 1 ? `Ölçek ${pct(s.olcek)}` : 'Bütçe içinde' },
+          { label: 'Matrise göre gereken', value: para(s.hamToplam), note: s.olcek < 1 ? `Bütçeye sığması için her zammın ${pct(s.olcek)} kadarı ödenir` : 'Bütçe içinde' },
           { label: 'Dağıtılan', value: para(s.dagitilan), note: s.dagitilan > s.havuz + 1e-9 ? 'Bütçe aşıldı' : `Kalan ${para(Math.max(0, s.havuz - s.dagitilan))}` },
         ]}
       />
@@ -723,7 +723,7 @@ function LiyakatMatrisi() {
           { key: 'orta', editor: true, header: 'Band orta', minWidth: '7rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} band orta noktası`} birim="×" value={r.kisi.orta} min={0.1} step={0.05} onChange={(v) => kisiGuncelle(r.kisi.id, { orta: v })} /> },
           { key: 'puan', editor: true, header: 'Puan', minWidth: '6rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} performans puanı`} value={r.kisi.puan} min={1} max={5} step={1} ondalik={0} onChange={(v) => kisiGuncelle(r.kisi.id, { puan: v })} /> },
           { key: 'compa', header: 'Compa', nowrap: true, render: (r) => num(Math.round(r.compa * 100) / 100) },
-          { key: 'oran', header: 'Matris (tabanın yüzdesi)', nowrap: true, render: (r) => <>{pct(r.oran)}{s.olcek < 1 && r.oran > 0 ? <span className="cell-sub">ölçekli {pct(r.oran * s.olcek)}</span> : null}</> },
+          { key: 'oran', header: 'Matris (tabanın yüzdesi)', nowrap: true, render: (r) => <>{pct(r.oran)}{s.olcek < 1 && r.oran > 0 ? <span className="cell-sub">küçültülmüş {pct(r.oran * s.olcek)}</span> : null}</> },
           { key: 'artis', header: 'Aylık artış', summary: true, nowrap: true, render: (r) => para(r.artis) },
           { key: 'yeni', header: 'Yeni ücret', nowrap: true, render: (r) => <>{para(r.yeni)}<span className="cell-sub">tavan {para(r.tavan)}</span></> },
           { key: 'tek', header: 'Tek seferlik (yıllık)', nowrap: true, render: (r) => (r.tekSeferlik > 0 ? para(r.tekSeferlik) : '0 ₺') },
@@ -750,17 +750,17 @@ function YillikZam() {
         <Sayi label="Mevcut ücret" birim="× baz" value={z.ucret} min={0.1} step={0.05} onChange={(v) => g({ ucret: v })} />
         <Sayi label="Band orta noktası" birim="× baz" value={z.orta} min={0.1} step={0.05} onChange={(v) => g({ orta: v })} />
         <Sayi label="Band yarı genişliği (±)" yuzde ondalik={1} value={z.yariGenislik} min={1} max={60} onChange={(v) => g({ yariGenislik: v })} />
-        <Sayi label="Performans puanı" value={z.puan} min={1} max={5} step={1} ondalik={0} onChange={(v) => g({ puan: v })} aciklama="Liyakat oranı, Liyakat zam matrisi applet’indeki matristen alınır." />
+        <Sayi label="Performans puanı" value={z.puan} min={1} max={5} step={1} ondalik={0} onChange={(v) => g({ puan: v })} aciklama="Liyakat oranı, “Liyakat zam matrisi” hesap aracındaki matristen alınır." />
       </Girdiler>
       <Girdiler baslik="Bantlar ve piyasa">
-        <Sayi label="Yapı (band) düzeltmesi" yuzde ondalik={1} value={z.yapi} max={100} onChange={(v) => g({ yapi: v })} aciklama="Bantlar bu oranda yukarı kayar. Ücret yalnız yeni bandın en azının altında kalırsa yükselir." />
+        <Sayi label="Yapı düzeltmesi" yuzde ondalik={1} value={z.yapi} max={100} onChange={(v) => g({ yapi: v })} aciklama="Bantlar bu oranda yukarı kayar. Ücret yalnız yeni bandın en azının altında kalırsa yükselir." />
         <Sayi label="Genel zam (herkese)" yuzde ondalik={1} value={z.genel} max={100} onChange={(v) => g({ genel: v })} />
         <Sayi label="Piyasa eşiği (compa)" value={z.piyasaEsik} min={0.5} max={1.2} step={0.01} onChange={(v) => g({ piyasaEsik: v })} />
         <Sayi label="Piyasa düzeltmesi en çok" yuzde ondalik={1} value={z.piyasaTavan} max={100} onChange={(v) => g({ piyasaTavan: v })} />
       </Girdiler>
       <Girdiler baslik="Kıdem ve terfi">
         <Sayi label="Kıdem adımı" yuzde ondalik={1} value={z.kidemOrani} max={20} onChange={(v) => g({ kidemOrani: v })} />
-        <Sayi label="Terfi edilen seviyenin orta noktası" birim="× baz" value={z.terfiOrta} min={0.1} step={0.05} onChange={(v) => g({ terfiOrta: v })} />
+        <Sayi label="Terfi edilecek seviyenin orta noktası" birim="× baz" value={z.terfiOrta} min={0.1} step={0.05} onChange={(v) => g({ terfiOrta: v })} />
         <Sayi label="Terfi artışı en az" yuzde ondalik={1} value={z.terfiMin} max={100} onChange={(v) => g({ terfiMin: v })} />
         <Sayi label="Terfi artışı en çok" yuzde ondalik={1} value={z.terfiMax} max={100} onChange={(v) => g({ terfiMax: v })} />
         <Sayi label="Yeni bantta hedef compa" value={z.terfiCompa} min={0.6} max={1.2} step={0.01} onChange={(v) => g({ terfiCompa: v })} />
@@ -771,7 +771,7 @@ function YillikZam() {
       </Araclar>
       <Ozet
         items={[
-          { label: 'Yeni ücret', value: para(s.yeniUcret), note: `Önce ${para(z.ucret)}` },
+          { label: 'Yeni ücret', value: para(s.yeniUcret), note: `Önceki ücret ${para(z.ucret)}` },
           { label: 'Kalıcı artış', value: isaretli(s.artis), note: `Compa ${num(Math.round(s.compa * 100) / 100)}` },
           { label: 'Tek seferlik (yıllık)', value: s.tekSeferlik > 0 ? para(s.tekSeferlik) : '0 ₺', note: `Band tavanı ${para(s.tavan)}` },
         ]}
@@ -790,7 +790,7 @@ function YillikZam() {
             header: 'Toplam artıştaki payı',
             minWidth: '11rem',
             render: (r) => {
-              if (r.id === 'toplam') return 'Uygulanmıyor';
+              if (r.id === 'toplam') return artisToplam > 0 ? '%100' : 'Artış yok';
               const pay = artisToplam > 0 ? r.tutar / artisToplam : 0;
               return (
                 <span className="applet-pay">
@@ -825,11 +825,11 @@ function TerfiKapisi() {
   const g = (patch: Partial<AppletDurum['terfi']>) => setT({ ...t, ...patch });
   const KARAR = { gecti: 'Terfiye hazır', uyari: 'Koşullu: 1 koşul eksik', kaldi: `Hazır değil: ${kapi.eksik} koşul eksik` } as const;
   return (
-    <Bolum id="terfi-kapisi" dayanak="SFIA 9 (bilişim beceri çerçevesi) dört sorumluluk faktörü kullanır: otonomi, etki, karmaşıklık ve bilgi. 37signals her seviyenin beklentilerini yazılı tanımlar. Terfi eden kişinin ücreti üst bandın alt-orta bölgesine yerleşir.">
+    <Bolum id="terfi-kapisi" dayanak="SFIA 9 (bilişim beceri çerçevesi) dört sorumluluk ölçüsü kullanır. Bunlar kendi başına çalışabilme, etki, karmaşıklık ve bilgidir. 37signals her seviyenin beklentilerini yazılı tanımlar. Terfi eden kişinin ücreti üst bandın alt-orta bölgesine yerleşir.">
       <Girdiler>
         <HucreSecimi meslekId={t.meslekId} uzmanlikId={t.uzmanlikId} seviyeKod={t.seviyeKod} seviyeEtiketi="Mevcut seviye" onChange={(p) => g(p)} />
         <Sayi label="Mevcut compa-ratio" value={t.compa} min={0.5} max={1.5} step={0.01} onChange={(v) => g({ compa: v })} />
-        <Sayi label="Gereken kriter sayısı (5 kriterden)" value={t.gerekenKriter} min={1} max={5} step={1} ondalik={0} onChange={(v) => g({ gerekenKriter: v })} />
+        <Sayi label="Gereken ölçüt sayısı (5 ölçütten)" value={t.gerekenKriter} min={1} max={5} step={1} ondalik={0} onChange={(v) => g({ gerekenKriter: v })} />
         <Sayi label="Seviyedeki süre" birim="ay" value={t.seviyedeAy} max={240} step={1} ondalik={0} onChange={(v) => g({ seviyedeAy: v })} />
         <Sayi label="Gereken en az süre" birim="ay" value={t.gerekenAy} max={120} step={1} ondalik={0} onChange={(v) => g({ gerekenAy: v })} />
         <Sayi label="Önceki dönem skoru" value={t.perf1} max={200} step={1} ondalik={0} onChange={(v) => g({ perf1: v })} />
@@ -847,10 +847,10 @@ function TerfiKapisi() {
       <DataTable<string>
         id="terfi-kriter"
         ozetYok
-        title={`Değerlendirme: ${hedefSev ? `${hedefSev.kod} (${hedefSev.ad})` : 'üst seviye'} beklentileri karşılandı mı?`}
+        title={`Değerlendirme: ${hedefSev ? `${hedefSev.kod} ${hedefSev.ad} seviyesinin` : 'üst seviyenin'} beklentileri karşılandı mı?`}
         rowKey={(r) => r}
         columns={[
-          { key: 'kriter', header: 'Kriter', minWidth: '12rem', rowHeader: true, render: (r) => r },
+          { key: 'kriter', header: 'Ölçüt', minWidth: '12rem', rowHeader: true, render: (r) => r },
           { key: 'd1', editor: true, header: 'Önceki dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: önceki dönem`} checked={!!t.donem1[i]} onChange={(v) => g({ donem1: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem1[j])) })} />; } },
           { key: 'd2', editor: true, header: 'Son dönem', nowrap: true, render: (r) => { const i = TERFI_KRITERLERI.indexOf(r); return <Onay gizliEtiket label={`${r}: son dönem`} checked={!!t.donem2[i]} onChange={(v) => g({ donem2: TERFI_KRITERLERI.map((_, j) => (j === i ? v : !!t.donem2[j])) })} />; } },
         ]}
@@ -912,14 +912,14 @@ function KademeAdimlari() {
   const son = satirlar[satirlar.length - 1];
   const g = (patch: Partial<AppletDurum['adim']>) => setA({ ...a, ...patch });
   return (
-    <Bolum id="kademe-adimlari" dayanak="ABD kamu ücret cetveli General Schedule’da her derecede 10 kademe vardır. 1. kademeden 4. kademeye kadar her adımda bekleme 52 haftadır. 4. kademeden 7. kademeye kadar bekleme 104 haftadır. 7. kademeden 10. kademeye kadar bekleme 156 haftadır. Toplam bekleme 18 yıldır. Bir kademe yaklaşık %3’tür. Üstün performansta kişi beklemeden kademe atlar (Quality Step Increase).">
+    <Bolum id="kademe-adimlari" dayanak="ABD kamu ücret cetvelinin adı General Schedule’dır (GS). Bu cetvelde her derecede 10 kademe vardır. 1. kademeden 4. kademeye kadar her adımda bekleme 52 haftadır. 4. kademeden 7. kademeye kadar bekleme 104 haftadır. 7. kademeden 10. kademeye kadar bekleme 156 haftadır. Toplam bekleme 18 yıldır. Bir kademe yaklaşık %3’tür. Üstün performansta kişi beklemeden kademe atlar (Quality Step Increase).">
       <Girdiler>
         <Sayi label="1. kademe ücreti" birim="× baz" value={a.baslangic} min={0.1} step={0.05} onChange={(v) => g({ baslangic: v })} />
         <Sayi label="Kademe sayısı" value={a.adet} min={2} max={15} step={1} ondalik={0} onChange={(v) => g({ adet: v })} />
-        <Sayi label="Kademe oranı" yuzde ondalik={2} value={a.oran} max={20} onChange={(v) => g({ oran: v })} aciklama="Bileşik oran kapalıyken 1. kademe ücretinin yüzdesidir." />
+        <Sayi label="Kademe oranı" yuzde ondalik={2} value={a.oran} max={20} onChange={(v) => g({ oran: v })} aciklama="“Bileşik oran” kapalıysa bu oran 1. kademe ücretinin yüzdesidir. Açıksa bir önceki kademe ücretinin yüzdesidir." />
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Bileşik oran" acik={a.bilesik} onChange={(v) => g({ bilesik: v })} aciklama="Kapalıyken her kademe aynı tutarı ekler. Bu yüzden yüzde artış GS’deki gibi giderek düşer." />
+        <Anahtar ad="Bileşik oran" acik={a.bilesik} onChange={(v) => g({ bilesik: v })} aciklama="Bu seçenek kapalıysa her kademe aynı tutarı ekler. Bu yüzden yüzde artış GS’deki gibi giderek düşer." />
         <Eylem onClick={() => g({ bekleme: GS_BEKLEME, hizli: GS_BEKLEME.map(() => false) })}>GS bekleme sürelerine dön</Eylem>
       </Araclar>
       <Ozet
@@ -936,11 +936,11 @@ function KademeAdimlari() {
         rowKey={(r) => `k${r.kademe}`}
         columns={[
           { key: 'k', header: 'Kademe', nowrap: true, rowHeader: true, render: (r: (typeof satirlar)[number]) => int(r.kademe) },
-          { key: 'bekle', editor: true, header: 'Bekleme', minWidth: '7rem', render: (r) => (r.kademe === 1 ? 'Uygulanmıyor' : <Sayi gizliEtiket label={`${r.kademe}. kademe bekleme süresi (ay)`} birim="ay" value={bekleme[r.kademe - 2]} max={120} step={1} ondalik={0} onChange={(v) => g({ bekleme: bekleme.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
-          { key: 'hizli', editor: true, header: 'Üstün performans', nowrap: true, render: (r) => (r.kademe === 1 ? 'Uygulanmıyor' : <Onay gizliEtiket label={`${r.kademe}. kademe: bekleme yok`} checked={hizli[r.kademe - 2]} onChange={(v) => g({ hizli: hizli.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
+          { key: 'bekle', editor: true, header: 'Bekleme', minWidth: '7rem', render: (r) => (r.kademe === 1 ? 'İlk kademe' : <Sayi gizliEtiket label={`${r.kademe}. kademe bekleme süresi (ay)`} birim="ay" value={bekleme[r.kademe - 2]} max={120} step={1} ondalik={0} onChange={(v) => g({ bekleme: bekleme.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
+          { key: 'hizli', editor: true, header: 'Üstün performans', nowrap: true, render: (r) => (r.kademe === 1 ? 'İlk kademe' : <Onay gizliEtiket label={`${r.kademe}. kademe: bekleme yok`} checked={hizli[r.kademe - 2]} onChange={(v) => g({ hizli: hizli.map((x, j) => (j === r.kademe - 2 ? v : x)) })} />) },
           { key: 'ay', header: 'Başlangıçtan', nowrap: true, render: (r) => (r.ay ? `${num(Math.round((r.ay / 12) * 10) / 10)} yıl` : 'Giriş') },
           { key: 'carpan', header: 'Çarpan', nowrap: true, render: (r) => times(Math.round(r.carpan * 1000) / 1000) },
-          { key: 'adim', header: 'Adım', nowrap: true, render: (r) => (r.adimArtis === null ? 'Uygulanmıyor' : isaretli(r.adimArtis)) },
+          { key: 'adim', header: 'Adım', nowrap: true, render: (r) => (r.adimArtis === null ? 'İlk kademe' : isaretli(r.adimArtis)) },
           { key: 'tutar', header: 'Aylık', summary: true, nowrap: true, render: (r) => para(a.baslangic * r.carpan) },
         ]}
         rows={satirlar}
@@ -961,14 +961,14 @@ function PerformansKarnesi() {
   const PRIM = { uygun: { d: 'gecti', ad: 'Uygun' }, yok: { d: 'kaldi', ad: 'Prim yok (uyum kapısı)' }, inceleme: { d: 'uyari', ad: 'İnceleme sonucu bekleniyor' } } as const;
   type Boyut = (typeof boyutlar)[number];
   return (
-    <Bolum id="performans-karnesi" dayanak="Dengeli karne ve SPACE (geliştirici verimliliği çerçevesi), çıktının tek boyutla ölçülemeyeceğini söyler. DORA’nın (DevOps araştırma programı) kalite metrikleri ücrete değil, kalite kapısına bağlanır. 90–109 arasındaki skor beklenen performanstır.">
+    <Bolum id="performans-karnesi" dayanak="Dengeli karne ve SPACE (geliştirici verimliliği çerçevesi), çıktının tek boyutla ölçülemeyeceğini söyler. DORA’nın (DevOps araştırma programı) kalite ölçüleri ücreti doğrudan etkilemez. Bu ölçüler yalnız kalite kapısında kullanılır. 90 ile 109 arasındaki skor beklenen performanstır.">
       <Dugmeler label="Meslek şablonu" value={sablon.id} data={KARNE_SABLONLARI.map((x) => ({ value: x.id, label: x.ad }))} onChange={(v) => setKr({ ...kr, sablonId: v })} />
       <Araclar>
-        <Anahtar ad="Kritik olay var" acik={kr.kritikOlay} onChange={(v) => setKr({ ...kr, kritikOlay: v })} aciklama="Prim, inceleme bitene kadar ödenmez." />
+        <Anahtar ad="Kritik olay var" acik={kr.kritikOlay} onChange={(v) => setKr({ ...kr, kritikOlay: v })} aciklama="Kritik olay varsa bu seçeneği açın. Prim, inceleme bitene kadar ödenmez." />
       </Araclar>
       <Ozet
         items={[
-          { label: 'Ağırlıklı skor', value: num(Math.round(s.ham * 10) / 10), note: s.kaliteKaldi ? 'Kalite kapısı nedeniyle en çok 100' : '100 = hedef' },
+          { label: 'Ağırlıklı skor', value: num(Math.round(s.ham * 10) / 10), note: s.kaliteKaldi ? 'Kalite kapısı nedeniyle en çok 100' : '100 hedef puandır' },
           { label: 'Kapı sonrası skor', value: num(Math.round(s.skor * 10) / 10), note: <DurumHapi durum={s.bant.durum}>{s.bant.ad}</DurumHapi> },
           { label: 'Prim', value: <DurumHapi durum={PRIM[s.prim].d}>{PRIM[s.prim].ad}</DurumHapi>, note: `Çarpan ${times(s.faktor)}` },
         ]}
@@ -976,7 +976,7 @@ function PerformansKarnesi() {
       <DataTable<Boyut>
         id="karne"
         title={`${sablon.ad}: boyutlar`}
-        note="Puan 0 ile 150 arasındadır ve 100 beklenen düzeydir. Kapılı bir boyutun puanı 80’in altındaysa kalite kapısında toplam skor en çok 100 olur. Uyum kapısında ise prim ödenmez."
+        note="Puan 0 ile 150 arasındadır ve 100 beklenen düzeydir. Bazı boyutların “Kapı” sütununda “Kalite” ya da “Uyum” yazar. “Kalite” yazan bir boyutun puanı 80’in altındaysa toplam skor en çok 100 olur. “Uyum” yazan bir boyutun puanı 80’in altındaysa prim ödenmez."
         rowKey={(b) => b.id}
         columns={[
           { key: 'ad', header: 'Boyut', minWidth: '13rem', rowHeader: true, sticky: true, render: (b) => b.ad },
@@ -984,7 +984,7 @@ function PerformansKarnesi() {
           { key: 'kapi', header: 'Kapı', minWidth: '9rem', render: (b) => (b.kapi === 'kalite' ? 'Kalite' : b.kapi === 'uyum' ? 'Uyum' : 'Yok') },
           { key: 'puan', editor: true, header: 'Puan', minWidth: '7rem', render: (b) => { const i = boyutlar.indexOf(b); return <Sayi gizliEtiket label={`${b.ad} puanı`} value={puan[i] ?? 100} max={150} step={1} ondalik={0} onChange={(v) => setKr({ ...kr, puanlar: { ...kr.puanlar, [sablon.id]: boyutlar.map((_, j) => (j === i ? v : (puan[j] ?? 100))) } })} />; } },
           { key: 'katki', header: 'Katkı', summary: true, nowrap: true, render: (b) => num(Math.round((s.katki[boyutlar.indexOf(b)] ?? 0) * 10) / 10) },
-          { key: 'cubuk', header: 'Puan / 150', minWidth: '9rem', render: (b) => { const p = puan[boyutlar.indexOf(b)] ?? 0; return <Cubuk oran={p / 150} ton={b.kapi && p < 80 ? 'kotu' : p >= 110 ? 'iyi' : 'vurgu'} />; } },
+          { key: 'cubuk', header: '150 üzerinden puan', minWidth: '9rem', render: (b) => { const p = puan[boyutlar.indexOf(b)] ?? 0; return <Cubuk oran={p / 150} ton={b.kapi && p < 80 ? 'kotu' : p >= 110 ? 'iyi' : 'vurgu'} />; } },
         ]}
         rows={boyutlar}
       />
@@ -994,7 +994,7 @@ function PerformansKarnesi() {
         rowKey={(r) => r.ad}
         columns={[
           { key: 'ad', header: 'Bant', nowrap: true, rowHeader: true, render: (r: (typeof SKOR_BANTLARI)[number]) => r.ad },
-          { key: 'aralik', header: 'Skor', nowrap: true, render: (r) => { const i = SKOR_BANTLARI.indexOf(r); const ust = SKOR_BANTLARI[i + 1]?.alt; return r.alt === -Infinity ? `< ${ust}` : ust ? `${r.alt}–${ust - 1}` : `≥ ${r.alt}`; } },
+          { key: 'aralik', header: 'Skor', nowrap: true, render: (r) => { const i = SKOR_BANTLARI.indexOf(r); const ust = SKOR_BANTLARI[i + 1]?.alt; return r.alt === -Infinity ? `${ust} altı` : ust ? `${r.alt} ile ${ust - 1} arası` : `${r.alt} ve üstü`; } },
           { key: 'faktor', header: 'Prim ve liyakat çarpanı', summary: true, nowrap: true, render: (r) => times(r.faktor) },
         ]}
         rows={SKOR_BANTLARI}
@@ -1021,17 +1021,17 @@ function SprintSkoru() {
     render: (r: (typeof seri)[number]) => <Sayi gizliEtiket label={`${r.sprint.ad}: ${ad}`} value={r.sprint[alan]} max={999} step={1} ondalik={0} onChange={(v) => sg(r.sprint.id, { [alan]: v })} />,
   });
   return (
-    <Bolum id="sprint-skoru" dayanak="Story point (iş büyüklüğü puanı) paraya bağlanınca şişer. Kerievsky 2012, Scrum.org, Asana ve DORA bu konuda uyarır. Bu yüzden ürün sahibinin kabul ettiği taahhüt, kalite ve takım hedefi ölçülür.">
+    <Bolum id="sprint-skoru" dayanak="Story point (iş büyüklüğü puanı) paraya bağlanınca şişer. Kerievsky 2012, Scrum.org, Asana ve DORA bu konuda uyarır. Bu yüzden üç şey ölçülür. Birincisi, ekibin söz verdiği ve ürün sorumlusunun kabul ettiği işlerdir. Diğerleri kalite ve takım hedefidir.">
       <Girdiler baslik="Ağırlıklar ve kurallar">
         <Sayi label="Teslim ağırlığı" value={a.wTeslim} ondalik={0} step={5} onChange={(v) => ayar({ wTeslim: v })} />
         <Sayi label="Kalite ağırlığı" value={a.wKalite} ondalik={0} step={5} onChange={(v) => ayar({ wKalite: v })} />
         <Sayi label="Takım hedefi ağırlığı" value={a.wTakim} ondalik={0} step={5} onChange={(v) => ayar({ wTakim: v })} />
-        <Sayi label="Kaçan hata ağırlığı" birim="× geri dönen" value={a.hataAgirligi} max={10} step={0.5} ondalik={1} onChange={(v) => ayar({ hataAgirligi: v })} />
+        <Sayi label="Kaçan hata ağırlığı" birim="× geri dönen" value={a.hataAgirligi} max={10} step={0.5} ondalik={1} onChange={(v) => ayar({ hataAgirligi: v })} aciklama="Kalite puanında 1 kaçan hata, bu sayı kadar geri dönen iş gibi sayılır." />
         <Sayi label="Sprint hedefi tutmazsa takım puanı" value={a.hedefYoksa} max={100} step={5} ondalik={0} onChange={(v) => ayar({ hedefYoksa: v })} />
         <Sayi label="Teslim puanı tavanı" value={a.teslimTavan} min={100} max={200} step={5} ondalik={0} onChange={(v) => ayar({ teslimTavan: v })} />
-        <Sayi label="Şişme eşiği: SP artışı" yuzde ondalik={0} value={a.sismeEsik} max={200} onChange={(v) => ayar({ sismeEsik: v })} aciklama="İki koşul birlikte olursa sprint şişme olarak işaretlenir. SP bu oranın üstünde artar. Kabul artışı ikinci eşiğin altında kalır." />
+        <Sayi label="Şişme eşiği: SP artışı" yuzde ondalik={0} value={a.sismeEsik} max={200} onChange={(v) => ayar({ sismeEsik: v })} aciklama="İki koşul birlikte olursa sistem sprinti “Şişme” sütununda işaretler. Birinci koşul, SP artışının bu oranı aşmasıdır. İkinci koşul, kabul artışının “Şişme eşiği: kabul artışı” değerinden küçük kalmasıdır." />
         <Sayi label="Şişme eşiği: kabul artışı" yuzde ondalik={0} value={a.akisEsik} max={200} onChange={(v) => ayar({ akisEsik: v })} />
-        <Sayi label="Kayan ortalama penceresi" birim="sprint" value={a.pencere} min={1} max={6} step={1} ondalik={0} onChange={(v) => ayar({ pencere: v })} />
+        <Sayi label="Ortalamaya giren son sprint sayısı" birim="sprint" value={a.pencere} min={1} max={6} step={1} ondalik={0} onChange={(v) => ayar({ pencere: v })} />
       </Girdiler>
       <Ozet
         items={[
@@ -1043,7 +1043,7 @@ function SprintSkoru() {
       <DataTable
         id="sprint"
         title="Sprintler"
-        note="Teslim = kabul ÷ taahhüt. Kalite = 100 − 100 × (geri dönen + ağırlık × kaçan hata) ÷ kabul. Story point (SP) skora girmez. Yalnız şişmeyi yakalamak için izlenir."
+        note="Teslim puanı, kabul edilen işin söz verilen işe oranıdır. Kalite puanı 100’den başlar. Geri dönen işler ve kaçan hatalar bu puanı düşürür. Story point (SP) skora girmez. Yalnız şişmeyi yakalamak için izlenir."
         rowKey={(r) => r.sprint.id}
         columns={[
           { key: 'ad', header: 'Sprint', nowrap: true, rowHeader: true, sticky: true, render: (r: (typeof seri)[number]) => r.sprint.ad },
@@ -1095,7 +1095,7 @@ function Egri({ e, skor, kaliteGecti }: { e: AppletDurum['egri']; skor: number; 
           Ödeme eğrisi
         </span>
         <span className="chart-note">
-          Yatay eksen skoru ({int(xMin)}–{int(xMax)}), dikey eksen hedef primin ödenen oranını (0–{pct(yMax)}) gösterir. Kesikli çizgi %100 hedefi, dikey çizgi mevcut skoru gösterir.
+          Yatay eksen skoru gösterir ({int(xMin)} ile {int(xMax)} arası). Dikey eksen, hedef primin ödenen yüzdesini gösterir (%0 ile {pct(yMax)} arası). Kesikli çizgi %100 hedefi gösterir. Dikey çizgi mevcut skoru gösterir.
         </span>
       </figcaption>
       <div className="applet-egri-alan">
@@ -1127,7 +1127,7 @@ function PrimEgrisiApplet() {
   const g = (patch: Partial<AppletDurum['egri']>) => setE({ ...e, onayar: 'ozel', ...patch });
   const kademeler = [70, 80, 90, 95, 100, 110, 120, 130, 140, 150];
   return (
-    <Bolum id="prim-egrisi" dayanak="Prim, hedef primin ödeme eğrisiyle çarpılmasıyla bulunur. Eğrinin eşik, hedef ve tavan noktaları vardır. Microsoft %0–200 aralığını açıklar, Workday de benzer bir örnek verir. Netflix, GE ve Microsoft deneyimlerine göre düşük performansta ücretten kesinti yapılmaz, prim sıfır olur.">
+    <Bolum id="prim-egrisi" dayanak="Prim, hedef primin ödeme eğrisiyle çarpılmasıyla bulunur. Eğrinin eşik, hedef ve tavan noktaları vardır. Microsoft %0 ile %200 aralığını açıklar, Workday de benzer bir örnek verir. Netflix, GE ve Microsoft deneyimlerine göre düşük performansta ücretten kesinti yapılmaz, prim sıfır olur.">
       <Dugmeler
         label="Ön ayar"
         value={e.onayar}
@@ -1136,18 +1136,18 @@ function PrimEgrisiApplet() {
       />
       <p className="applet-not">{EGRI_ONAYARLARI[e.onayar]?.dayanak ?? 'Özel eğri: değerler elle değiştirildi.'}</p>
       <Girdiler>
-        <Sayi label="Hedef prim (aylık tabanın)" yuzde ondalik={1} value={e.hedefPrim} max={200} onChange={(v) => g({ hedefPrim: v })} />
+        <Sayi label="Hedef prim (aylık tabanın yüzdesi)" yuzde ondalik={1} value={e.hedefPrim} max={200} onChange={(v) => g({ hedefPrim: v })} />
         <Sayi label="Eşik skoru" value={e.esik} max={200} step={5} ondalik={0} onChange={(v) => g({ esik: v })} />
-        <Sayi label="Eşikte ödeme (hedefin)" yuzde ondalik={0} value={e.esikOdeme} max={100} onChange={(v) => g({ esikOdeme: v })} />
+        <Sayi label="Eşikte ödeme (hedefin yüzdesi)" yuzde ondalik={0} value={e.esikOdeme} max={100} onChange={(v) => g({ esikOdeme: v })} />
         <Sayi label="Hedef skor (%100 ödeme)" value={e.hedef} max={200} step={5} ondalik={0} onChange={(v) => g({ hedef: v })} />
         <Sayi label="Tavan skoru" value={e.tavan} max={250} step={5} ondalik={0} onChange={(v) => g({ tavan: v })} />
-        <Sayi label="Tavanda ödeme (hedefin)" yuzde ondalik={0} value={e.tavanOdeme} max={500} onChange={(v) => g({ tavanOdeme: v })} />
-        <Sayi label="Kademe adımı" value={e.kademe} max={50} step={5} ondalik={0} onChange={(v) => g({ kademe: v })} aciklama="0 seçilirse eğri doğrusal olur." />
+        <Sayi label="Tavanda ödeme (hedefin yüzdesi)" yuzde ondalik={0} value={e.tavanOdeme} max={500} onChange={(v) => g({ tavanOdeme: v })} />
+        <Sayi label="Kademe adımı" value={e.kademe} max={50} step={5} ondalik={0} onChange={(v) => g({ kademe: v })} aciklama="0 seçerseniz prim, skorla birlikte düzenli artar. Basamak oluşmaz." />
         <Sayi label="Bu dönemin skoru" value={e.skor} max={250} step={1} ondalik={0} onChange={(v) => setE({ ...e, skor: v })} />
         <Sayi label="Aylık taban" birim="× baz" value={e.ucret} min={0.1} step={0.05} onChange={(v) => setE({ ...e, ucret: v })} />
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Kalite kapısından geçti" acik={e.kaliteGecti} onChange={(v) => setE({ ...e, kaliteGecti: v })} aciklama="Kapıdan geçemezse prim en çok hedefin %50’si olur." />
+        <Anahtar ad="Kalite kapısından geçti" acik={e.kaliteGecti} onChange={(v) => setE({ ...e, kaliteGecti: v })} aciklama="Kişi kalite kapısından geçemezse prim en çok hedef primin %50’si olur." />
       </Araclar>
       <Ozet
         items={[
@@ -1185,10 +1185,10 @@ function PrimHavuzu() {
   const kg = (id: string, patch: Partial<Kisi>) => setEk({ ...ek, kisiler: ek.kisiler.map((k) => (k.id === id ? { ...k, ...patch } : k)) });
   const basamaklar = [...new Set([...SIRKET_BASAMAK, ...TAKIM_BASAMAK].map((b) => b.alt))].sort((a, b) => a - b);
   return (
-    <Bolum id="prim-havuzu" dayanak="Prim = yıllık taban × hedef prim × şirket × takım × birey çarpanı. Birey çarpanının bir tavanı vardır. İlk modeldeki %30 sınırı 1,30 × tavana karşılık gelir. Bu yapıda ekip içi yardımlaşma bireysel puanla cezalandırılmaz.">
+    <Bolum id="prim-havuzu" dayanak="Prim, yıllık taban ve hedef prim oranının üç çarpanla çarpımıdır. Bu çarpanlar şirket, takım ve birey çarpanıdır. Birey çarpanının bir tavanı vardır. İlk modeldeki %30 sınırı, birey çarpanında 1,30 tavanına karşılık gelir. Bu yapıda ekip içi yardımlaşma bireysel puanla cezalandırılmaz.">
       <Girdiler>
-        <Sayi label="Hedef prim (yıllık tabanın)" yuzde ondalik={1} value={ek.hedefPrim} max={100} onChange={(v) => setEk({ ...ek, hedefPrim: v })} />
-        <Sayi label="Şirket sonucu (hedefin)" yuzde ondalik={0} value={ek.sirketSonuc / 100} max={200} onChange={(v) => setEk({ ...ek, sirketSonuc: Math.round(v * 100) })} />
+        <Sayi label="Hedef prim (yıllık tabanın yüzdesi)" yuzde ondalik={1} value={ek.hedefPrim} max={100} onChange={(v) => setEk({ ...ek, hedefPrim: v })} />
+        <Sayi label="Şirket sonucu (hedefin yüzdesi)" yuzde ondalik={0} value={ek.sirketSonuc / 100} max={200} onChange={(v) => setEk({ ...ek, sirketSonuc: Math.round(v * 100) })} />
         {takimlar.map((t) => (
           <Sayi key={t} label={`${t} takım sonucu`} yuzde ondalik={0} value={(ek.takimSonuc[t] ?? 100) / 100} max={200} onChange={(v) => setEk({ ...ek, takimSonuc: { ...ek.takimSonuc, [t]: Math.round(v * 100) } })} />
         ))}
@@ -1196,13 +1196,13 @@ function PrimHavuzu() {
         {ek.sabitHavuz ? <Sayi label="Prim havuzu (yıllık)" birim="× baz" value={ek.havuz} step={1} onChange={(v) => setEk({ ...ek, havuz: v })} /> : null}
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Sabit havuz" acik={ek.sabitHavuz} onChange={(v) => setEk({ ...ek, sabitHavuz: v })} aciklama="Açıkken bütün ödemeler sabit havuza sığacak biçimde orantılı olarak ölçeklenir." />
+        <Anahtar ad="Sabit havuz" acik={ek.sabitHavuz} onChange={(v) => setEk({ ...ek, sabitHavuz: v })} aciklama="Bu seçenek açıksa sistem bütün ödemeleri aynı oranda büyütür ya da küçültür. Böylece toplam ödeme havuz tutarına eşit olur." />
       </Araclar>
       <Ozet
         items={[
           { label: 'Şirket çarpanı', value: times(s.sirket), note: `Sonuç %${int(ek.sirketSonuc)}` },
           { label: 'Hedef prim toplamı', value: para(s.hedefToplam), note: 'Yıllık' },
-          { label: 'Ödenecek', value: para(s.odenen), note: ek.sabitHavuz ? `Ölçek ${pct(s.olcek)}` : `Hedefin ${pct(s.hedefToplam ? s.odenen / s.hedefToplam : 0)}` },
+          { label: 'Ödenecek', value: para(s.odenen), note: ek.sabitHavuz ? `Havuza eşitlemek için ödemeler ${pct(s.olcek)} oranıyla çarpıldı` : `Hedefin ${pct(s.hedefToplam ? s.odenen / s.hedefToplam : 0)}` },
         ]}
       />
       <DataTable
@@ -1215,7 +1215,7 @@ function PrimHavuzu() {
           { key: 'takim', editor: true, header: 'Takım', minWidth: '9rem', render: (r) => <Metin gizliEtiket label={`${r.kisi.ad} takımı`} value={r.kisi.takim} onChange={(v) => kg(r.kisi.id, { takim: v })} /> },
           { key: 'skor', editor: true, header: 'Birey skoru', minWidth: '6.5rem', render: (r) => <Sayi gizliEtiket label={`${r.kisi.ad} skoru`} value={r.kisi.skor} max={200} step={1} ondalik={0} onChange={(v) => kg(r.kisi.id, { skor: v })} /> },
           { key: 'hedef', header: 'Hedef prim', nowrap: true, render: (r) => para(r.hedef) },
-          { key: 'carpan', header: 'Şirket × takım × birey', nowrap: true, render: (r) => `${num(r.sirket)} × ${num(r.takim)} × ${num(r.birey)}` },
+          { key: 'carpan', header: 'Şirket, takım ve birey çarpanı', nowrap: true, render: (r) => `${num(r.sirket)} × ${num(r.takim)} × ${num(r.birey)}` },
           { key: 'odeme', header: 'Ödeme', summary: true, nowrap: true, render: (r) => <>{para(r.odeme)}<span className="cell-sub">hedefin {pct(r.hedef ? r.odeme / r.hedef : 0)}</span></> },
         ]}
         rows={s.satirlar}
@@ -1229,10 +1229,10 @@ function PrimHavuzu() {
       <DataTable<number>
         id="basamak"
         title="Çarpan basamakları"
-        note="Birey çarpanı, Dengeli performans karnesi applet’indeki skor bantlarından gelir."
+        note="Birey çarpanı, “Dengeli performans karnesi” aracındaki skor bantlarından gelir."
         rowKey={(a) => `b${a}`}
         columns={[
-          { key: 'alt', header: 'Sonuç (hedefin)', nowrap: true, rowHeader: true, render: (a) => `≥ %${int(a)}` },
+          { key: 'alt', header: 'Sonuç (hedefin yüzdesi)', nowrap: true, rowHeader: true, render: (a) => `%${int(a)} ve üstü` },
           { key: 'sirket', header: 'Şirket çarpanı', summary: true, nowrap: true, render: (a) => times(basamakCarpani(SIRKET_BASAMAK, a)) },
           { key: 'takim', header: 'Takım çarpanı', nowrap: true, render: (a) => times(basamakCarpani(TAKIM_BASAMAK, a)) },
         ]}
@@ -1256,9 +1256,9 @@ function KarPaylasimi() {
     <Bolum id="kar-paylasimi" dayanak="37signals’ta iki yılını dolduran çalışanlar kâr paylaşımına katılır (2025’te pay, tabanın ortalama %41’i oldu). Google’ın akran priminde çalışanlar birbirini önerir ve sabit, küçük bir tutar ödenir.">
       <Girdiler>
         <Sayi label="Yıllık kâr" birim="× baz" value={kr.kar} step={5} onChange={(v) => setKr({ ...kr, kar: v })} />
-        <Sayi label="Paylaşım havuzu (kârın)" yuzde ondalik={1} value={kr.havuzOrani} max={100} onChange={(v) => setKr({ ...kr, havuzOrani: v })} />
+        <Sayi label="Paylaşım havuzu (kârın yüzdesi)" yuzde ondalik={1} value={kr.havuzOrani} max={100} onChange={(v) => setKr({ ...kr, havuzOrani: v })} />
         <Sayi label="Kıdem şartı" birim="yıl" value={kr.kidemSarti} max={10} step={0.5} ondalik={1} onChange={(v) => setKr({ ...kr, kidemSarti: v })} />
-        <Sayi label="Kişi başı tavan (yıllık tabanın)" yuzde ondalik={0} value={kr.tavan} max={200} onChange={(v) => setKr({ ...kr, tavan: v })} />
+        <Sayi label="Kişi başı tavan (yıllık tabanın yüzdesi)" yuzde ondalik={0} value={kr.tavan} max={200} onChange={(v) => setKr({ ...kr, tavan: v })} />
         <Sayi label="Akran ödülü tutarı" birim="× baz" value={kr.akranTutar} step={0.05} onChange={(v) => setKr({ ...kr, akranTutar: v })} />
         <Sayi label="Akran ödülü kotası" birim="kişi başı / çeyrek" value={kr.akranKota} max={20} step={1} ondalik={0} onChange={(v) => setKr({ ...kr, akranKota: v })} />
       </Girdiler>
@@ -1274,9 +1274,9 @@ function KarPaylasimi() {
       />
       <Ozet
         items={[
-          { label: 'Havuz', value: para(havuz), note: `Kârın ${pct(kr.havuzOrani)}` },
+          { label: 'Havuz', value: para(havuz), note: `Kârın ${pct(kr.havuzOrani)} kadarı` },
           { label: 'Dağıtılan', value: para(s.dagitilan), note: `${int(s.satirlar.filter((r) => r.uygun).length)} kişi uygun` },
-          { label: 'Devreden', value: para(s.kalan), note: 'Herkes tavana ulaşırsa artan tutar' },
+          { label: 'Devreden', value: para(s.kalan), note: 'Herkes tavana ulaşırsa dağıtılamayan tutar sonraki döneme devreder' },
           { label: 'Akran ödülü bütçesi', value: para(akranButce), note: 'Yıllık' },
         ]}
       />
@@ -1346,21 +1346,21 @@ function ToplamOdul() {
   const uzm = uzmanlikBul(meslek, o.uzmanlikId);
   const satirlar = toplamOdul({ meslek, uzmanlik: uzm, seviyeler: ortak.seviyeler, karisim: o.karisim, egitim: o.egitim, ekipman: o.ekipman, saglik: o.saglik });
   return (
-    <Bolum id="toplam-odul" dayanak="Toplam hedef nakit = taban + hedef prim. Örneğin 85 sabit ve 15 değişken toplam 100 eder. Üst seviyelerde değişken pay artar (Google ve Microsoft’un hedef bonus kademeleri). Eğitim, ekipman ve sağlık bütçeleri GitLab ve Codacy örneklerinden alınmıştır.">
+    <Bolum id="toplam-odul" dayanak="Toplam hedef nakit, taban ücret ile hedef primin toplamıdır. Örneğin 85 sabit ve 15 değişken toplam 100 eder. Üst seviyelerde değişken pay artar (Google ve Microsoft’un hedef bonus kademeleri). Eğitim, ekipman ve sağlık bütçeleri GitLab ve Codacy örneklerinden alınmıştır.">
       <Girdiler>
         <Secim label="Meslek" value={meslek.id} data={meslekVerisi(ortak.meslekler)} onChange={(v) => setO({ ...o, meslekId: v, uzmanlikId: meslekBul(ortak.meslekler, v)?.uzmanliklar[0]?.id ?? '' })} />
         <Secim label="Uzmanlık" value={uzm?.id ?? ''} data={uzmanlikVerisi(meslek)} onChange={(v) => setO({ ...o, uzmanlikId: v })} />
-        <Sayi label="Eğitim bütçesi (yıllık)" birim="× baz" value={o.egitim} step={0.1} onChange={(v) => setO({ ...o, egitim: v })} aciklama="Bu bütçe seviye çarpanıyla ölçeklenir." />
+        <Sayi label="Eğitim bütçesi (yıllık)" birim="× baz" value={o.egitim} step={0.1} onChange={(v) => setO({ ...o, egitim: v })} aciklama="Bu bütçe seviye çarpanıyla çarpılır. Bu yüzden üst seviyelerde bütçe artar." />
         <Sayi label="Ekipman bütçesi (yıllık)" birim="× baz" value={o.ekipman} step={0.1} onChange={(v) => setO({ ...o, ekipman: v })} />
         <Sayi label="Sağlık bütçesi (yıllık)" birim="× baz" value={o.saglik} step={0.1} onChange={(v) => setO({ ...o, saglik: v })} />
       </Girdiler>
       <DataTable
         id="odul"
         title={`${meslek.ad}${uzm ? ` (${uzm.ad})` : ''}: seviyeye göre toplam ödül (yıllık)`}
-        note="Değişken payı toplam hedef nakdin yüzdesidir: taban ÷ (1 − pay) = toplam hedef nakit."
+        note="Değişken pay, toplam hedef nakdin yüzdesidir. Örneğin pay %15 ise taban ücret toplamın %85’idir."
         rowKey={(r) => r.seviye.kod}
         columns={[
-          { key: 'sev', header: 'Seviye', minWidth: '10rem', rowHeader: true, sticky: true, render: (r: (typeof satirlar)[number]) => <>{r.seviye.kod}<span className="cell-sub">{r.seviye.ad}</span></> },
+          { key: 'sev', header: 'Seviye', minWidth: '10rem', rowHeader: true, sticky: true, render: (r: (typeof satirlar)[number]) => <>{r.seviye.kod}{' '}<span className="cell-sub">{r.seviye.ad}</span></> },
           { key: 'pay', editor: true, header: 'Değişken payı', minWidth: '7rem', render: (r) => <Sayi gizliEtiket yuzde ondalik={0} label={`${r.seviye.kod} değişken payı`} value={r.degisken} max={90} onChange={(v) => setO({ ...o, karisim: { ...o.karisim, [r.seviye.kod]: Math.round(v * 100) } })} /> },
           { key: 'aylik', header: 'Aylık taban', nowrap: true, render: (r) => para(r.aylik) },
           { key: 'yillik', header: 'Yıllık taban', nowrap: true, render: (r) => para(r.yillik) },
@@ -1416,7 +1416,7 @@ const sayfaIci = (e: MouseEvent<HTMLAnchorElement>, git: () => void) => {
 /** Geniş ekranda yapışık yan menü: motorlara göre gruplu, numara rozetli; seçili applet aria-current. */
 function Gezgin({ aktif, sec }: { aktif: string; sec: (id: string) => void }) {
   return (
-    <nav className="applet-gezgin" aria-label="Applet’ler">
+    <nav className="applet-gezgin" aria-label="Hesap araçları">
       {MOTOR_SIRASI.map((m) => (
         <div key={m} className="applet-gezgin-grup">
           <p className="applet-gezgin-baslik" id={`gezgin-${m}`}>
@@ -1450,7 +1450,7 @@ function Secici({ aktif, sec }: { aktif: string; sec: (id: string, odakla?: bool
   const veri = MOTOR_SIRASI.map((m) => ({ group: MOTORLAR[m], items: APPLETLER.flatMap((a, j) => (a.motor === m ? [{ value: a.id, label: `${j + 1}. ${a.ad}` }] : [])) }));
   return (
     <div className="applet-secici">
-      <Secim label="Applet" value={aktif} data={veri} onChange={(v) => sec(v, false)} />
+      <Secim label="Hesap aracı" value={aktif} data={veri} onChange={(v) => sec(v, false)} />
       <div className="applet-secici-oklar">
         <button type="button" className="applet-eylem applet-ok" disabled={!onceki} onClick={() => onceki && sec(onceki.id, false)}>
           <IconChevronLeft size={18} stroke={2} aria-hidden="true" />
@@ -1471,7 +1471,7 @@ function Sira({ aktif, sec }: { aktif: string; sec: (id: string) => void }) {
   const onceki = APPLETLER[i - 1];
   const sonraki = APPLETLER[i + 1];
   return (
-    <nav aria-label="Applet sırası" className="pager">
+    <nav aria-label="Hesap aracı sırası" className="pager">
       {onceki ? (
         <a className="pager-link" href={`#${onceki.id}`} rel="prev" onClick={(e) => sayfaIci(e, () => sec(onceki.id))}>
           <span className="pager-dir">← Önceki</span>
@@ -1504,21 +1504,21 @@ class AppletHata extends Component<{ children: ReactNode }, { hata: boolean; mes
     if (!this.state.hata) return this.props.children;
     /* Çizim hatası (gorsel_algi.md F14/F23, C073): gerçek neden yazılır, teşhis kesinleştirilmez; toplu sıfırlamanın kapsamı açık ve onaylı. */
     return (
-      <Note title="Bu applet çizilemedi">
+      <Note title="Bu hesap aracı çizilemedi">
         <p>
           Teknik neden: {this.state.mesaj || 'bilinmiyor'}. Bu hata, kayıtlı değerlerin bozulduğu anlamına gelmeyebilir. Önce sayfayı yenilemeyi deneyin. Hata
-          sürerse bütün applet’leri örnek değerlere döndürebilirsiniz. Bu işlem, bu tarayıcıdaki bütün applet kayıtlarını siler.
+          sürerse bütün hesap araçlarını örnek değerlere döndürebilirsiniz. Bu işlem, bu tarayıcıdaki bütün hesap aracı kayıtlarını siler.
         </p>
         <Araclar>
           <Eylem
             ikiAdim
-            onay="Bütün applet’leri örnek değerlere döndür (onayla)"
+            onay="Bütün hesap araçlarını örnek değerlere döndür (onayla)"
             onClick={() => {
               ornekDegerlereDon();
               this.setState({ hata: false, mesaj: '' });
             }}
           >
-            Bütün applet’leri örnek değerlere döndür
+            Bütün hesap araçlarını örnek değerlere döndür
           </Eylem>
         </Araclar>
       </Note>
@@ -1535,9 +1535,9 @@ function AppletAraclari() {
       <p className="param-status" role="status">
         {ozet.kayit === false
           ? 'Tarayıcı depolaması kapalı. Değişiklikler yalnız bu sayfa açıkken geçerlidir.'
-          : `${ozet.degisen ? `${ozet.degisen} applet örnek değerlerden farklı.` : 'Bütün applet’ler örnek değerlerde.'}${saat ? ` Son kayıt ${saat}.` : ''}`}
+          : `${ozet.degisen ? `${ozet.degisen} hesap aracının değerleri örnek değerlerden farklı.` : 'Bütün hesap araçları örnek değerlerde.'}${saat ? ` Son kayıt saati ${saat}.` : ''}`}
       </p>
-      <Eylem ikiAdim disabled={!ozet.degisen} onay={`${ozet.degisen} applet’i örnek değerlere döndür (onayla)`} onClick={ozet.sifirla}>
+      <Eylem ikiAdim disabled={!ozet.degisen} onay={`${ozet.degisen} hesap aracını örnek değerlere döndür (onayla)`} onClick={ozet.sifirla}>
         Örnek değerlere dön
       </Eylem>
     </div>
@@ -1596,10 +1596,10 @@ function AppletIcerik() {
   return (
     <div className="applet-sayfa">
       <PageHeader
-        title="Ücret ve performans applet’leri"
-        purpose="Sabit ücret (rütbe) ve performans (efor) için 17 küçük İK hesap aracı sunar."
+        title="Ücret ve performans hesap araçları"
+        purpose="Sabit ücret (rütbe) ve performans (efor) için 17 küçük insan kaynakları hesap aracı sunar."
         meta={[
-          { label: 'Kapsam', value: 'Modeller meslekten bağımsızdır. Tutarlar baz birimin katıdır ve kişiler kurgusaldır.' },
+          { label: 'Kapsam', value: 'Bu modelleri her meslekte kullanabilirsiniz. Bütün tutarlar baz birimin katıdır. Örneklerdeki kişiler gerçek değildir.' },
           { label: 'Kayıt', value: 'Yalnız bu tarayıcı' },
         ]}
       >
@@ -1607,8 +1607,8 @@ function AppletIcerik() {
       </PageHeader>
       <Note title="Tasarım ilkesi">
         <p>
-          Fatura kesen serbest çalışan ağı için iki motor ayrı tutulur. Rütbe motoru sabit ücret oranını belirler ve bu oran performansla düşmez. Efor
-          motoru zam ve primi belirler. Düşük performansın karşılığı tabandan kesinti değil, primin sıfırlanması ve gelişim planıdır.
+          Fatura kesen serbest çalışan ağı için sabit ücret ve performans ayrı hesaplanır. “Rütbe motoru” sabit ücret oranını belirler. Bu oran performansla düşmez.
+          “Zam motoru” yıllık zammı hesaplar. “Efor motoru” performansı ve primi hesaplar. Performans düşükse taban ücret kesilmez. Bunun yerine prim ödenmez. Kişi için bir gelişim planı hazırlanır. “İlk model”, şirketin ilk ücret ve prim taslağıdır.
         </p>
       </Note>
       <div className="applet-duzen">

@@ -22,6 +22,8 @@ export interface KaynakKalemi {
   id: string;
   konu: string;
   deger: number | string;
+  /** Okura gösterilen değer: yalın Türkçe, tarih “1 Mayıs 2027, Cumartesi” biçiminde, ondalık virgülle. */
+  metin: string;
   birim?: string;
   aralik?: string;
   kaynaklar: { ad: string; url: string; tarih: string }[];
@@ -190,24 +192,24 @@ export interface Katki {
 }
 /** Pozisyonların satışa katkısı. Listede olmayan pozisyonun doğrudan satış katkısı yoktur (destek ve yönetim). */
 export const KATKI: Record<string, Katki> = {
-  'istoc-saha-ekibi': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Değer Parametreler’den gelir. Saha personeli tam kapasitede ayda bu kadar yeni aktif satıcı getirir.', varsayim: false },
-  'ucuncu-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Saha personeliyle aynı.', varsayim: false },
-  'ek-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Saha personeliyle aynı.', varsayim: false },
-  'istoc-masa-basi': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: 'Değer Parametreler’den gelir. CRM masa başı tam kapasitede ayda bu kadar yeni aktif satıcı getirir.', varsayim: false },
-  'masa-basi-satis-uzmani-ek': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: 'Masa başıyla aynı.', varsayim: false },
-  'etkinlik-organizatoru': { tur: 'dogrudan', deger: P.organizatorActivesMonthly, dayanak: 'Değer Parametreler’den gelir. Organizatör ayda bu kadar yeni aktif satıcı getirir.', varsayim: false },
-  'kurumsal-satis-yoneticisi': { tur: 'dogrudan', deger: 2, dayanak: 'Büyük hesaplarda satış döngüsü uzundur. Ayda 2 yeni aktif satıcı beklenir.', varsayim: true },
-  'dijital-pazarlama-uzmani': { tur: 'dijital', deger: 1, dayanak: 'Gelir planındaki dijital kaynak (reklam ve organik içerik) bu kişinin kapasitesiyle çalışır.', varsayim: false },
-  'performans-pazarlama-uzmani': { tur: 'dijital', deger: 0.2, dayanak: 'Reklam verimini yüzde 20 artırır.', varsayim: true },
-  'seo-icerik-uzmani': { tur: 'dogrudan', deger: 2, dayanak: 'İşe başladıktan 3 ay sonra organik aramadan ayda 2 yeni aktif satıcı gelir.', varsayim: true },
-  'satis-ekip-lideri': { tur: 'lider', deger: 0.1, dayanak: 'Saha ve masa başı ekibinin çıktısını yüzde 10 artırır.', varsayim: true },
-  'satici-uyum-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'katalog-operatoru': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'satici-basari-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'musteri-hizmetleri-temsilcisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'alici-talep-sorumlusu': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Satıcıya alıcı getirir. Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'teklif-operasyon-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
-  'kurumsal-alici-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutmaya 1 puan ekler.', varsayim: true },
+  'istoc-saha-ekibi': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: `Her saha personeli tam kapasitede ayda ${P.sahaActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+  'ucuncu-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
+  'ek-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
+  'istoc-masa-basi': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: `Bu rol tam kapasitede ayda ${P.crmActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+  'masa-basi-satis-uzmani-ek': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: 'Hesap, masa başı rolüyle aynı kurala dayanır.', varsayim: false },
+  'etkinlik-organizatoru': { tur: 'dogrudan', deger: P.organizatorActivesMonthly, dayanak: `Organizatör ayda ${P.organizatorActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+  'kurumsal-satis-yoneticisi': { tur: 'dogrudan', deger: 2, dayanak: 'Büyük müşterilerde satışın tamamlanması uzun sürer. Bu rol tam kapasitede ayda 2 yeni aktif satıcı getirir. Yan sütundaki sayı 2027 toplamıdır. Toplam, işe başlama ayına ve kapasiteye göre hesaplanır.', varsayim: true },
+  'dijital-pazarlama-uzmani': { tur: 'dijital', deger: 1, dayanak: '“Gelir planı” sayfasındaki dijital satış kaynağı reklamdan ve ücretsiz içerikten oluşur. Bu kaynağın getirdiği satış bu kişinin çalışma saatine bağlıdır.', varsayim: false },
+  'performans-pazarlama-uzmani': { tur: 'dijital', deger: 0.2, dayanak: 'Reklam verimini %20 artırır.', varsayim: true },
+  'seo-icerik-uzmani': { tur: 'dogrudan', deger: 2, dayanak: 'İşe başladıktan 3 ay sonra ücretsiz arama sonuçlarından ayda 2 yeni aktif satıcı gelir.', varsayim: true },
+  'satis-ekip-lideri': { tur: 'lider', deger: 0.1, dayanak: 'Saha ve masa başı ekibinin çıktısını %10 artırır.', varsayim: true },
+  'satici-uyum-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'katalog-operatoru': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'satici-basari-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'musteri-hizmetleri-temsilcisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'alici-talep-sorumlusu': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Satıcıya alıcı getirir. Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'teklif-operasyon-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  'kurumsal-alici-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
 };
 /** Dolaylı katkının üst sınırı: aylık elde tutmaya en çok 8 puan. */
 export const ELDE_TUTMA_TAVAN = 0.08;
@@ -511,21 +513,21 @@ export interface Risk {
 }
 const HER_AY = AYLAR_2027.map((_, i) => i);
 export const RISKLER: Risk[] = [
-  { id: 'R1', ad: 'Mevsimsel grip', olasilik: 4, etki: 2, aylar: [0, 1, 2, 11], modelde: 'Sezonda yüzde 5 ile 15 atak, vaka başı 3,5 gün eşdeğeri.', onlem: 'Ekim ve kasımda grip aşısı, hasta çalışmama kuralı, evden çalışma.' },
-  { id: 'R2', ad: 'Hastalık izni', olasilik: 5, etki: 2, aylar: HER_AY, modelde: 'Kişi başı yılda 4 ile 8 gün.', onlem: 'Yedek kişi ve devir notu, rapor süreci.' },
-  { id: 'R3', ad: 'Regl dönemine bağlı verim düşüşü', olasilik: 4, etki: 1, aylar: HER_AY, modelde: 'Kayıp, seçilen politikaya göre kadın başı yılda 5,3 ile 9,7 gün eşdeğeridir. Bu kayıp toplam etkiye kadın oranıyla girer.', onlem: 'Esnek çalışma ve ücretli izin politikası, maaştan kesinti yok.' },
-  { id: 'R4', ad: 'İşten ayrılma', olasilik: 4, etki: 4, aylar: HER_AY, modelde: 'Satış ve destekte yılda yüzde 20 ile 45, diğer rollerde yüzde 10 ile 25. Boş ay ve yeni kişinin rampası.', onlem: 'Prim ve kariyer basamağı, ilk 90 gün koçluk, aday havuzu.' },
-  { id: 'R5', ad: 'İşe alım gecikmesi', olasilik: 3, etki: 3, aylar: [0, 1, 2, 3, 4, 5], modelde: 'Yeni kişide yüzde 30 olasılıkla 1 ay, yüzde 15 olasılıkla 2 ay gecikme.', onlem: 'İlanı işe alım ayından 6 hafta önce açmak.' },
-  { id: 'R6', ad: 'Satış dönüşümünün beklenenden düşük olması', olasilik: 3, etki: 5, aylar: HER_AY, modelde: 'Satış etkinliği çarpanı, log normal dağılım, standart sapma 0,2.', onlem: 'Haftalık dönüşüm ölçümü, 30, 60 ve 90. gün kararı.' },
-  { id: 'R7', ad: 'Elde tutmanın düşük kalması', olasilik: 3, etki: 5, aylar: HER_AY, modelde: 'Aylık elde tutmada eksi 8 ile artı 5 puan sapma.', onlem: 'Satıcı başarı ekibi, ilk 90 gün uyum programı, alıcı talebi.' },
-  { id: 'R8', ad: 'Bayram ve köprü günleri', olasilik: 5, etki: 2, aylar: [2, 4, 9], modelde: 'Takvimde 12 iş günü tatil. Köprü günleri bilinmiyor ve modelde yok.', onlem: 'Bayram öncesi kampanya, izin planı.' },
-  { id: 'R9', ad: 'Ramazan ayı', olasilik: 4, etki: 2, aylar: [1, 2], modelde: 'Şubat ve martta satış dönüşümü yüzde 5 ile 10 düşük.', onlem: 'Ziyaret saatlerini öğlene kaydırmak.' },
-  { id: 'R10', ad: 'Yaz durgunluğu', olasilik: 3, etki: 3, aylar: [6, 7], modelde: 'Temmuz yüzde 5, ağustos yüzde 15 düşük dönüşüm. Ölçülmüş veri yok, varsayım.', onlem: 'Yazın uyum ve katalog işlerine ağırlık vermek.' },
-  { id: 'R11', ad: 'İstanbul trafiği ve ulaşım', olasilik: 4, etki: 1, aylar: HER_AY, modelde: 'Verim aralığının içinde.', onlem: 'Saha rotası, toplu taşıma kartı.' },
-  { id: 'R12', ad: 'Deprem ya da büyük kesinti', olasilik: 1, etki: 5, aylar: HER_AY, modelde: 'Yılda yüzde 1,5 olasılık, olursa 2 ay kapasitenin yüzde 30’u.', onlem: 'Uzaktan çalışma ve yedekleme planı, acil durum tatbikatı.' },
-  { id: 'R13', ad: 'Kur ve fiyat', olasilik: 3, etki: 3, aylar: HER_AY, modelde: 'Modelde yok. ₺ fiyat gelir planındaki kur artışıyla büyür.', onlem: 'Fiyatı € olarak korumak, yıllık peşin ödemeyi özendirmek.' },
-  { id: 'R14', ad: 'Sipariş ve ödeme altyapısının gecikmesi', olasilik: 3, etki: 3, aylar: HER_AY, modelde: 'Modelde yok. Gelir yalnız aboneliktir.', onlem: 'Teslim tarihini ürün yol haritasına bağlamak.' },
-  { id: 'R15', ad: 'Kurucuya bağımlılık', olasilik: 3, etki: 4, aylar: HER_AY, modelde: 'Modelde yok.', onlem: 'Yetki devri, satış müdürü ve operasyon müdürü rolleri.' },
+  { id: 'R1', ad: 'Mevsimsel grip', olasilik: 4, etki: 2, aylar: [0, 1, 2, 11], modelde: 'Her grip sezonunda çalışanların %5 ile %15’i grip olur. Her grip 3,5 tam iş gününe denk kayıp sayılır.', onlem: 'Ekim ve Kasım’da grip aşısı yapılır. Hasta olan çalışan işe gelmez. Gerekirse evden çalışılır.' },
+  { id: 'R2', ad: 'Hastalık izni', olasilik: 5, etki: 2, aylar: HER_AY, modelde: 'Her çalışan yılda 4 ile 8 gün hastalık izni kullanır.', onlem: 'Yedek kişi belirlenir ve devir notu yazılır. Rapor süreci tanımlanır.' },
+  { id: 'R3', ad: 'Regl dönemine bağlı verim düşüşü', olasilik: 4, etki: 1, aylar: HER_AY, modelde: 'Kayıp, seçilen politikaya göre kadın başı yılda 5,3 ile 9,7 gün eşdeğeridir. Bu kayıp, kadın çalışanların oranıyla çarpılıp toplama eklenir.', onlem: 'Esnek çalışma ve ücretli izin politikası uygulanır. Maaştan kesinti yapılmaz.' },
+  { id: 'R4', ad: 'İşten ayrılma', olasilik: 4, etki: 4, aylar: HER_AY, modelde: 'Satış ve destek rollerinde her yıl çalışanların %20 ile %45’i ayrılır. Diğer rollerde bu oran %10 ile %25’tir. Ayrılan kişinin yeri bir süre boş kalır. Yeni gelen kişi tam verime zamanla ulaşır.', onlem: 'Prim ve kariyer basamağı sunulur. Yeni kişiye ilk 90 günde koçluk verilir. Aday havuzu hazır tutulur.' },
+  { id: 'R5', ad: 'İşe alım gecikmesi', olasilik: 3, etki: 3, aylar: [0, 1, 2, 3, 4, 5], modelde: 'Yeni kişinin işe başlaması %30 olasılıkla 1 ay, %15 olasılıkla 2 ay gecikir.', onlem: 'İlan, işe alım ayından 6 hafta önce açılır.' },
+  { id: 'R6', ad: 'Satış dönüşümünün beklenenden düşük olması', olasilik: 3, etki: 5, aylar: HER_AY, modelde: 'Satış verimi her olası yılda rastgele bir çarpanla artar ya da azalır. Bu çarpan log normal dağılır. Standart sapması 0,2’dir.', onlem: 'Satış dönüşümü her hafta ölçülür. 30., 60. ve 90. günde karar verilir.' },
+  { id: 'R7', ad: 'Elde tutmanın düşük kalması', olasilik: 3, etki: 5, aylar: HER_AY, modelde: 'Aylık elde tutma oranı en çok 8 yüzde puanı düşebilir. Oran en çok 5 yüzde puanı artabilir.', onlem: 'Satıcı başarı ekibi kurulur. Yeni satıcıya ilk 90 günde uyum programı uygulanır. Satıcıya alıcı talebi getirilir.' },
+  { id: 'R8', ad: 'Bayram ve köprü günleri', olasilik: 5, etki: 2, aylar: [2, 4, 9], modelde: 'Takvimde 12 iş günü tatil vardır. Köprü günleri bilinmiyor ve modelde yok.', onlem: 'Bayramdan önce kampanya yapılır. İzinler önceden planlanır.' },
+  { id: 'R9', ad: 'Ramazan ayı', olasilik: 4, etki: 2, aylar: [1, 2], modelde: 'Şubat ve Mart 2027’de satış dönüşümü %5 ile %10 düşer.', onlem: 'Ziyaret saatleri öğlene kaydırılır.' },
+  { id: 'R10', ad: 'Yaz durgunluğu', olasilik: 3, etki: 3, aylar: [6, 7], modelde: 'Satış dönüşümü Temmuz’da %5, Ağustos’ta %15 düşer. Ölçülmüş veri yoktur. Bu oranlar varsayımdır.', onlem: 'Yaz aylarında uyum ve katalog işlerine ağırlık verilir.' },
+  { id: 'R11', ad: 'İstanbul trafiği ve ulaşım', olasilik: 4, etki: 1, aylar: HER_AY, modelde: 'Trafik kaybı ayrı hesaplanmaz. Bu kayıp verim varsayımının içinde sayılır.', onlem: 'Saha için rota planlanır. Saha personeline toplu taşıma kartı verilir.' },
+  { id: 'R12', ad: 'Deprem ya da büyük kesinti', olasilik: 1, etki: 5, aylar: HER_AY, modelde: 'Deprem ya da büyük kesinti olasılığı yılda %1,5’tir. Böyle bir olay olursa 2 ay boyunca kapasitenin yalnız %30’u kalır.', onlem: 'Uzaktan çalışma ve yedekleme planı hazırlanır. Acil durum tatbikatı yapılır.' },
+  { id: 'R13', ad: 'Kur ve fiyat', olasilik: 3, etki: 3, aylar: HER_AY, modelde: 'Kurdaki beklenmedik değişim modelde yok. Modelde TL fiyatı yalnız “Gelir planı” sayfasındaki kur artışı kadar artar.', onlem: 'Fiyat avro olarak korunur. Yıllık peşin ödeme özendirilir.' },
+  { id: 'R14', ad: 'Sipariş ve ödeme altyapısının gecikmesi', olasilik: 3, etki: 3, aylar: HER_AY, modelde: 'Modelde yok. Gelir yalnız aboneliktir.', onlem: 'Teslim tarihi ürün yol haritasına bağlanır.' },
+  { id: 'R15', ad: 'Kurucuya bağımlılık', olasilik: 3, etki: 4, aylar: HER_AY, modelde: 'Modelde yok.', onlem: 'Kurucu yetkilerinin bir kısmını devreder. Satış müdürü ve operasyon müdürü rolleri açılır.' },
 ];
 export const riskPuani = (r: Risk) => r.olasilik * r.etki;
 export const riskDuzeyi = (puan: number) => (puan >= 15 ? 'Yüksek' : puan >= 8 ? 'Orta' : 'Düşük');

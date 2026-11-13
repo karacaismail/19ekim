@@ -38,7 +38,7 @@ function Kart({ s, ac }: { s: Strateji; ac: (s: Strateji, el: HTMLElement) => vo
         <span className="oy-kart-ozet" id={`oy-ozet-${s.id}`}>
           {s.ozet}
         </span>
-        <span className="oy-kart-ac">Eylem planını gör</span>
+        <span className="oy-kart-ac">Uygulama planını açın</span>
       </button>
     </li>
   );
@@ -127,10 +127,10 @@ function Icerik() {
 
   return (
     <>
-      <PageHeader title="Oyunlaştırma" purpose="istoc.com’da alıcıyı ve satıcıyı buluşturan, platformu sürdüren oyunlaştırma stratejilerini gösterir." />
+      <PageHeader title="Oyunlaştırma" purpose="Bu sayfa alıcıyı ve satıcıyı platforma çekecek ve orada tutacak oyunları gösterir." />
       <div className="oy">
         <p className="oy-uyari">
-          Bu sayfada üç ayrı analizin stratejileri var. Kartın üstündeki etiket öneriyi kimin yaptığını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir ve rakamlar pilotta ayarlanacak örnek değerlerdir. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
+          Oyunlaştırmada satıcı ya da alıcı belirli bir işi yapınca ödül kazanır. Bu sayfada üç ayrı analizin stratejileri var. Kartın üstündeki etiket, öneriyi yapan yapay zekâ programını gösterir: Claude, ChatGPT ya da Gemini. Stratejiler öneridir. Rakamlar örnektir. Rakamlar ilk küçük denemede yeniden ayarlanacak. Sipariş ve ödeme henüz platformda çalışmıyor. Bu yüzden bazı stratejiler ancak bu altyapı kurulunca uygulanabilir. Kartın “Ne zaman” satırı bunu gösterir. Bir kartı açınca stratejinin adım adım uygulama planı görünür.
         </p>
 
         <div className="oy-araclar">

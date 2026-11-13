@@ -1,4 +1,4 @@
-import { createTheme, type CSSVariablesResolver, type MantineColorsTuple } from '@mantine/core';
+import { CloseButton, createTheme, type CSSVariablesResolver, type MantineColorsTuple } from '@mantine/core';
 
 /** iStoc marka turuncusu (#FF8600) etrafında üretilmiş ton dizisi. */
 const istoc: MantineColorsTuple = [
@@ -51,6 +51,10 @@ export const theme = createTheme({
     md: 'var(--space-4)',
     lg: 'var(--space-6)',
     xl: 'var(--space-8)',
+  },
+  components: {
+    // Kapat düğmesi 44 px’tir. Simge 24 px olunca kenara en az 10 px kalır (iç boşluk kuralı, tests/bosluk.spec.ts).
+    CloseButton: CloseButton.extend({ defaultProps: { iconSize: 24 } }),
   },
 });
 

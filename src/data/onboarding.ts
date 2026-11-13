@@ -82,7 +82,7 @@ export const ASAMALAR: Asama[] = [
   {
     no: 1,
     ad: 'İlk temas',
-    gun: 'Kayıt gününden en geç 5. güne kadar',
+    gun: 'Kayıt gününden kayıttan sonraki 5. güne kadar',
     kartDurumu: 'Yeni',
     baslar: 'Yeni bir kayıt gelince',
     cikislar: [
@@ -351,7 +351,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 4,
       ad: '“Şimdi değil” dedi',
       adimlar: ['Nedenini sorun.', 'Ne zaman yeniden konuşmak istediğini sorun.', 'Teşekkür e-postasını gönderin.'],
-      kart: 'Durumu “Şimdi değil” yapın. Nedenini yazın. Satıcının istediği zamana bir hatırlatma tarihi koyun. Bu tarih 30, 60 ya da 90 gün sonrası olsun.',
+      kart: 'Durumu “Şimdi değil” yapın. Nedenini yazın. Satıcının istediği zamana bir hatırlatma tarihi koyun. Tarih, görüşmeden 30, 60 ya da 90 gün sonra olsun.',
       sablon: 'simdi-degil',
     },
     {
@@ -359,7 +359,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 4,
       ad: '“Hayır” dedi',
       adimlar: ['Teşekkür edin ve görüşmeyi kapatın.', 'Israr etmeyin.', 'Kararı değiştirmek için indirim ya da ücretsiz süre önermeyin.'],
-      kart: 'Durumu “Uygun değil” yapın. Satıcının neden hayır dediğini yazın. Neden fiyat, alıcı yokluğu ya da zaman olabilir.',
+      kart: 'Durumu “Uygun değil” yapın. Satıcının neden hayır dediğini yazın. Sebep fiyat, alıcı yokluğu ya da zaman olabilir.',
     },
     {
       id: 'hatirlatma',
@@ -582,7 +582,7 @@ export function sablonlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): 
     },
     {
       id: 'ilk-sonuc',
-      ad: 'Vitrin yayında mesajı',
+      ad: 'Vitrin yayında',
       metin: 'Merhaba [Ad] Bey ya da Hanım, vitrininiz yayında: [bağlantı]. Şu an [n] ürününüz görünüyor. Eksik kalan [ürün grubu] ürünlerinizi de ekleyelim mi?',
     },
     {
@@ -595,7 +595,7 @@ export function sablonlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): 
       id: 'teklif',
       ad: 'Teklif e-postası',
       konu: 'Konuştuğumuz paket',
-      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nKonuştuğumuz gibi ${std.ad} paketiyle devam ediyoruz.\n- Aylık ücret: ${eur(std.aylikEur!)}\n- Yıllık peşin: ${eur(std.yillikEur!)} (12 ay için ${p.annualMonths} ayın ücreti)\n- Türk lirası karşılığı ödeme günündeki kurla hesaplanır.\n\nÖdemeyi şöyle yapabilirsiniz: [ödeme adımı]\n\n${IMZA}\n\nBu tür e-postaları almak istemiyorsanız “istemiyorum” yazmanız yeterlidir.`,
+      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nKonuştuğumuz gibi ${std.ad} paketle devam ediyoruz.\n- Aylık ücret: ${eur(std.aylikEur!)}\n- Yıllık peşin: ${eur(std.yillikEur!)} (12 ay için ${p.annualMonths} ayın ücreti)\n- Türk lirası karşılığı ödeme günündeki kurla hesaplanır.\n\nÖdemeyi şöyle yapabilirsiniz: [ödeme adımı]\n\n${IMZA}\n\nBu tür e-postaları almak istemiyorsanız “istemiyorum” yazmanız yeterlidir.`,
     },
     {
       id: 'simdi-degil',

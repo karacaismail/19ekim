@@ -12,7 +12,7 @@
   "iseAlimAyi": "İşe alım ayının başında başlandığı varsayılır. 2027’den önce başlayanlar için 12 ay sayılır.",
   "asgariUcret2027": {
    "aciklandi": false,
-   "durum": "5 Kasım 2026 itibarıyla 2027 asgari ücreti açıklanmadı. Asgari Ücret Tespit Komisyonu Aralık 2026’da toplanır ve yeni ücret 1 Ocak 2027’de yürürlüğe girer.",
+   "durum": "5 Kasım 2026’ya kadar 2027 asgari ücreti açıklanmadı. Asgari Ücret Tespit Komisyonu Aralık 2026’da toplanır. Yeni ücret 1 Ocak 2027’de başlar.",
    "varsayilanArtis": "yüzde 29,73",
    "net": 36422.35,
    "brut": 42849.82,
@@ -46,7 +46,7 @@
     "hedef2027": "yüzde 21"
    },
    "piyasaBeklentisi": "Ağustos 2026 Piyasa Katılımcıları Anketi 2027 yıl sonu için yüzde 21,5 bekler.",
-   "sonVeri": "Eylül 2026 yıllık TÜFE yüzde 29,73. Ekim 2026 verisi 3 Kasım’da açıklandı ama bu çalışmada doğrulanamadı.",
+   "sonVeri": "Eylül 2026 yıllık TÜFE yüzde 29,73. Ekim 2026 verisi 3 Kasım 2026’da açıklandı ama bu çalışmada doğrulanamadı.",
    "not": "TCMB’nin 2026 yılı dördüncü Enflasyon Raporu bu tarih itibarıyla bulunamadı. Bulunursa 2027 tahmini güncellenmelidir.",
    "kaynak": [
     "alomaliye-tcmb-2026-iii",
@@ -55,7 +55,7 @@
   },
   "maasArtisi": {
    "oran": "yüzde 29,73",
-   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı ve 50 TL’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar varsayılan asgari ücretle hesaplandı. Dijital pazarlama maaşı asgari ücretin 1,25 katı, asistan maaşı 1,5 katıdır.",
+   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı. Maaşlar en yakın 50 ₺’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar varsayılan asgari ücretle hesaplandı. Dijital pazarlama maaşı asgari ücretin 1,25 katı, asistan maaşı 1,5 katıdır.",
    "sinir": "Ücret verisini eleman.net, iş ilanı ve özgeçmişteki ücret beyanından hesaplar. Veri, tutarın net mi brüt mü olduğunu yazmaz. Bu plan tutarları net kabul eder. Kariyer.net sayfaları erişime kapalı olduğu için arama sonucundaki özetler yalnız kontrol amacıyla kullanıldı. Michael Page, Hays ve Youthall’ın 2026 Türkiye ücret rehberleri bu çalışmada bulunamadı.",
    "kaynak": [
     "eleman-net-2026"
@@ -109,12 +109,12 @@
   {
    "id": "yonetim",
    "ad": "Yönetim kadrosu",
-   "aciklama": "Kurucu ve şirket düzeyindeki direktörler. Bölüm yöneticileri kendi kümelerinde durur."
+   "aciklama": "Bu kümede kurucu ve şirket düzeyindeki direktörler vardır. Bölüm yöneticileri kendi kümelerinde durur."
   },
   {
    "id": "satis",
    "ad": "Satış ve satıcı kazanımı",
-   "aciklama": "Saha, masa başı, kurumsal satış ve Segika satışı. Gelir planının yeni satıcı kaynaklarıdır."
+   "aciklama": "Bu küme saha, masa başı, kurumsal satış ve Segika satışını yürütür. Bu roller gelir planının yeni satıcı kaynaklarıdır."
   },
   {
    "id": "satici-basarisi",
@@ -129,37 +129,37 @@
   {
    "id": "pazarlama",
    "ad": "Pazarlama",
-   "aciklama": "Dijital, performans, içerik, etkinlik, eğitim ve marka işleri."
+   "aciklama": "Bu küme dijital pazarlama, reklam, içerik, etkinlik, eğitim ve marka işlerini yürütür."
   },
   {
    "id": "urun-teknoloji",
    "ad": "Ürün ve teknoloji",
-   "aciklama": "Ürün yönetimi, yazılım, tasarım, veri ve altyapı."
+   "aciklama": "Bu küme ürün yönetimi, yazılım, tasarım, veri ve altyapı işlerini yürütür."
   },
   {
    "id": "operasyon",
    "ad": "Operasyon",
-   "aciklama": "Müşteri hizmetleri, moderasyon, güven ve doğrulama."
+   "aciklama": "Bu küme müşteri hizmetleri, içerik denetimi, güven ve doğrulama işlerini yürütür."
   },
   {
    "id": "finans",
    "ad": "Finans ve muhasebe",
-   "aciklama": "Mali müşavirlik, bordro, fatura, tahsilat ve bütçe."
+   "aciklama": "Bu küme mali müşavirlik, bordro, fatura, tahsilat ve bütçe işlerini yürütür."
   },
   {
    "id": "insan-kaynaklari",
    "ad": "İnsan kaynakları",
-   "aciklama": "İşe alım, özlük işleri ve iş sağlığı ve güvenliği."
+   "aciklama": "Bu küme işe alım, özlük işleri ile iş sağlığı ve güvenliği işlerini yürütür."
   },
   {
    "id": "hukuk-uyum",
    "ad": "Hukuk ve uyum",
-   "aciklama": "Sözleşme, marka, KVKK, İYS ve SGK danışmanlığı."
+   "aciklama": "Bu küme sözleşme, marka, kişisel veri (KVKK), ileti izni (İYS) ve SGK danışmanlığı işlerini yürütür."
   },
   {
    "id": "idari-isler",
    "ad": "İdari işler ve geri hizmet",
-   "aciklama": "Yönetici asistanlığı, ofis, satın alma ve demirbaş."
+   "aciklama": "Bu küme yönetici asistanlığı, ofis, satın alma ve demirbaş işlerini yürütür."
   }
  ],
  "pozisyonlar": [
@@ -258,7 +258,7 @@
    "calismaBicimi": "Tam zamanlı",
    "eski": true,
    "planRolu": "pazarlamaci",
-   "gerekce": "Mevcut istihdam takvimindeki roldür ve değiştirilmeden korunur. Günde 60 arama ve 3 randevu hedefiyle satıcı adayı bulur ve dijital kanaldan gelen kayıtları ödemeye dönüştürür.",
+   "gerekce": "Mevcut istihdam takvimindeki roldür ve değiştirilmeden korunur. Günde 60 arama yapar ve 3 randevu alır. Böylece satıcı adayı bulur. Dijital kanaldan gelen kayıtları ödemeye geçirir.",
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
     "En az 1 yıl telefonla satış ya da çağrı merkezi deneyimi",
@@ -308,7 +308,7 @@
    "gerekce": "Mevcut istihdam takvimindeki 2 kişilik saha ekibidir ve değiştirilmeden korunur. Kişi başı günde 15 dükkân teması ve en az 4 karar verici görüşmesi yapar. Gelir planında satıcı kazanımının en büyük kaynağıdır.",
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
-    "En az 2 yıl saha satışı, tercihen toptan ya da KOBİ (küçük ve orta boy işletme) satışı",
+    "En az 2 yıl saha satışı deneyimi. Toptan ya da KOBİ (küçük ve orta boy işletme) satışı tercih edilir.",
     "İSTOÇ ya da benzer çarşı esnafını tanıma",
     "Günlük rota ve CRM kaydı disiplini"
    ],
@@ -355,13 +355,13 @@
    "calismaBicimi": "Tam zamanlı",
    "eski": true,
    "planRolu": "saha-uzmani",
-   "gerekce": "Mevcut istihdam takvimindeki koşullu roldür ve değiştirilmeden korunur. 10 iş günlük veri, ölçülmüş dönüşüm, uygun uyum kuyruğu, rota kapasitesi ve olumlu net katkı sağlanmadan işe alınmaz.",
+   "gerekce": "Mevcut istihdam takvimindeki koşullu roldür ve değiştirilmeden korunur. Bu role kimse hemen alınmaz. Önce beş koşul sağlanmalıdır. İlk ikisi 10 iş günlük veri ve ölçülmüş dönüşümdür. Diğerleri uygun uyum kuyruğu, rota kapasitesi ve olumlu net katkıdır.",
    "nitelikler": [
     "Saha ekibiyle aynı nitelikler",
     "Koşullar sağlanınca alınır"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 29,73 artışla 64.865 TL.",
+   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 TL’dir. Yüzde 29,73 artışla 64.865 TL olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -405,7 +405,7 @@
     "Tercihen İSTOÇ dışındaki toptan merkezlerini tanıma"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "Saha ekibiyle aynı: 2026 net 50.000 TL, yüzde 29,73 artışla 64.865 TL.",
+   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 TL’dir. Yüzde 29,73 artışla 64.865 TL olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -438,7 +438,7 @@
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Satıcı kazanım reklam bütçesi, kural sağlanırsa her 3 ayda 1,5 katına çıkar ve başlangıcın 4 katına kadar büyüyebilir. Bu durumda ayda yaklaşık 50 olan reklam kaydı 200’e yaklaşır. Tek masa başı personeli bu kayıtları 48 saat içinde arayamaz ve kayıt soğur.",
+   "gerekce": "Kural sağlanırsa satıcı bulma reklam bütçesi her 3 ayda 1,5 katına çıkar. Bütçe en çok başlangıcın 4 katına ulaşır. Bu durumda ayda yaklaşık 50 olan reklam kaydı 200’e yaklaşır. Tek masa başı personeli bu kayıtları 48 saat içinde arayamaz ve kayıt soğur.",
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
     "En az 1 yıl telefonla satış deneyimi",
@@ -446,7 +446,7 @@
     "Günde 60 aramayı sürdürebilme"
    ],
    "netMaas2027": 45405.5,
-   "maasDayanagi": "İstoç masa başıyla aynı: 2026 net 35.000 TL, yüzde 29,73 artışla yaklaşık 45.406 TL.",
+   "maasDayanagi": "Maaş İstoç masa başı uzmanıyla aynıdır. 2026’da net 35.000 TL’dir. Yüzde 29,73 artışla yaklaşık 45.406 TL olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -490,7 +490,7 @@
     "Tercihen mevcut ekipten terfi"
    ],
    "netMaas2027": 77838,
-   "maasDayanagi": "Saha maaşı 64.865 TL ile projedeki 10.000 TL liderlik farkının yüzde 29,73 artırılmış hâli olan 12.973 TL toplanır.",
+   "maasDayanagi": "Saha maaşı 64.865 TL’dir. Projedeki liderlik farkı 10.000 TL’dir. Bu fark yüzde 29,73 artınca 12.973 TL olur. Maaş bu iki tutarın toplamıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -525,7 +525,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Pro paket aylık 599 €’dur ve Kurumsal paketin fiyatı teklifle belirlenir. Çok mağazalı toptancı, üretici ve İSTOÇ dışındaki toptan merkezleri dükkân ziyaretiyle değil, teklif ve sözleşme süreciyle satılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
+   "gerekce": "Pro paket aylık 599 €’dur ve Kurumsal paketin fiyatı teklifle belirlenir. Çok mağazalı toptancıya, üreticiye ve İSTOÇ dışındaki toptan merkezlerine dükkân ziyaretiyle satış yapılmaz. Bu müşterilere teklif verilir ve sözleşme yapılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
    "nitelikler": [
     "Üniversite mezunu",
     "En az 4 yıl B2B (işletmeler arası) satış ya da hesap yönetimi deneyimi",
@@ -692,11 +692,11 @@
    "id": "satici-uyum-uzmani",
    "kume": "satici-basarisi",
    "departman": "Satıcı başarısı",
-   "unvan": "Satıcı uyum (onboarding) uzmanı",
+   "unvan": "Satıcı uyum uzmanı",
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Ek roller listesi bu rolü kritik sayar ve uyum işi ayda 30 saati geçince açar. Medyan senaryoda 2027’de ayda ortalama 53 yeni aktif satıcı gelir. Satıcı başına 4 saatlik kurulum varsayımıyla bu ayda yaklaşık 210 saat eder ve net 125 saatlik aylık kapasiteyle 2 kişi gerekir.",
+   "gerekce": "Ek roller listesi bu rolü kritik sayar ve uyum işi ayda 30 saati geçince açar. Medyan senaryoda 2027’de ayda ortalama 53 yeni aktif satıcı gelir. Hesapta her satıcının kurulumunun 4 saat sürdüğü varsayılır. Buna göre bu ay toplam iş yaklaşık 210 saat eder. Bir kişi ayda net 125 saat çalışır. Bu yüzden 2 kişi gerekir.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "En az 1 yıl e-ticaret, pazar yeri ya da müşteri destek deneyimi",
@@ -789,7 +789,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Gelir planı medyan senaryoda aylık yüzde 70, kötümser senaryoda yüzde 50 yenileme varsayar ve yenileme oranındaki her puan geliri doğrudan değiştirir. Satıcı başarı yöneticisi ödeyen satıcının alıcı talebi alıp almadığını izler, yenilemeyi ve Pro pakete geçişi yönetir. Bir yönetici için yaklaşık 150 ödeyen satıcı varsayılmıştır, bu oran tahmindir.",
+   "gerekce": "Gelir planı medyan senaryoda her ay yüzde 70 yenileme varsayar. Kötümser senaryoda bu oran yüzde 50’dir. Yenileme oranındaki her puan geliri doğrudan değiştirir. Satıcı başarı yöneticisi, ödeyen satıcının alıcı talebi alıp almadığını izler. Yenilemeyi ve Pro pakete geçişi de yönetir. Bir yönetici için yaklaşık 150 ödeyen satıcı varsayılmıştır, bu oran tahmindir.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 2 yıl müşteri başarısı, hesap yönetimi ya da B2B satış deneyimi",
@@ -878,11 +878,11 @@
    "id": "teklif-operasyon-uzmani",
    "kume": "alici-talep",
    "departman": "Alıcı geliştirme",
-   "unvan": "Teklif talebi (RFQ) operasyon uzmanı",
+   "unvan": "Teklif talebi operasyon uzmanı",
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Teklif talebi (RFQ, alıcının ürün, adet ve teslim yerini yazıp satıcılardan fiyat istediği form) eksik bilgiyle gelirse satıcı cevap vermez. Bu uzman talebi tamamlar, doğru satıcılara yönlendirir ve 24 saat içinde cevap gelip gelmediğini izler. Platformda sipariş ve ödeme çalışmadığı sürece alıcının satıcıya değeri bu teklif akışından gelir.",
+   "gerekce": "Teklif talebi (RFQ), alıcının satıcılardan fiyat istediği formdur. Alıcı formda ürünü, adedi ve teslim yerini yazar. Talep eksik bilgiyle gelirse satıcı cevap vermez. Bu uzman talebi tamamlar, doğru satıcılara yönlendirir ve 24 saat içinde cevap gelip gelmediğini izler. Platformda sipariş ve ödeme çalışmadığı sürece alıcının satıcıya değeri bu teklif akışından gelir.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "En az 1 yıl müşteri hizmetleri ya da satın alma deneyimi",
@@ -1057,11 +1057,11 @@
    "id": "egitmen",
    "kume": "pazarlama",
    "departman": "Pazarlama",
-   "unvan": "Sözleşmeli eğitmen ve içerik sahibi",
+   "unvan": "Sözleşmeli eğitmen",
    "seviye": "Uzman",
    "calismaBicimi": "Serbest çalışan",
    "eski": false,
-   "gerekce": "Organizatör etkinliği yönetir ama uzman eğitimini tek başına hazırlayamaz. Ek roller listesi bu rolü kritik sayar ve pilot etkinlikten önce 3 ile 5 sözleşmeli eğitmen öngörür. Trendyol da satıcılarına satıcı paneli üzerinden ücretsiz Trendyol Akademi eğitimleri verir, yani satıcı eğitimi pazar yerlerinde kalıcı bir iştir.",
+   "gerekce": "Organizatör etkinliği yönetir ama uzman eğitimini tek başına hazırlayamaz. Ek roller listesi bu rolü kritik sayar. Liste, ilk deneme etkinliğinden önce 3 ile 5 sözleşmeli eğitmen öngörür. Trendyol da satıcı panelinde ücretsiz Trendyol Akademi eğitimleri verir. Yani satıcı eğitimi pazar yerlerinde kalıcı bir iştir.",
    "nitelikler": [
     "E-ticaret, dijital pazarlama, dış ticaret ya da vergi konusunda uzmanlık",
     "Esnafa sade dille anlatabilme",
@@ -1159,7 +1159,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Projenin büyüme kuralı reklam bütçesini LTV ÷ CAC oranına bağlar. LTV bir satıcıdan beklenen toplam gelir, CAC ise bir satıcıyı kazanma maliyetidir. Bu oranı haftalık ölçen ve Meta ile Google bütçesini yöneten ayrı bir uzman, mevcut dijital pazarlama uzmanının günde 3 video hedefini korur.",
+   "gerekce": "Projenin büyüme kuralı reklam bütçesini bir orana bağlar. Bu oran, satıcıdan beklenen toplam gelirin (LTV) satıcıyı kazanma maliyetine (CAC) bölümüdür. Ayrı bir uzman bu oranı her hafta ölçer. Bu uzman Meta ve Google reklam bütçesini de yönetir. Böylece dijital pazarlama uzmanı günde 3 video hedefini koruyabilir.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 3 yıl Meta ve Google Ads yönetimi",
@@ -1198,7 +1198,7 @@
    "id": "seo-icerik-uzmani",
    "kume": "pazarlama",
    "departman": "Pazarlama",
-   "unvan": "SEO ve içerik uzmanı",
+   "unvan": "Arama motoru uyumu (SEO) ve içerik uzmanı",
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
@@ -1467,7 +1467,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Gelir modelleri sayfası işlem komisyonu ve güvenli ödemeyi hazır değil olarak işaretler, çünkü sepet, sipariş ve ödeme akışı platformda çalışmaz. Bu modelleri 2027’de açmak mevcut 4 kişiye ek geliştirici ister. Ekonomik seçenek abonelikle sınırlı kalır ve ek geliştirici almaz.",
+   "gerekce": "Gelir modelleri sayfası işlem komisyonunu ve güvenli ödemeyi “Hazır değil” diye gösterir. Bunun nedeni sepet, sipariş ve ödeme akışının platformda çalışmamasıdır. Bu modelleri 2027’de açmak mevcut 4 kişiye ek geliştirici ister. Ekonomik seçenek abonelikle sınırlı kalır ve ek geliştirici almaz.",
    "nitelikler": [
     "Bilgisayar mühendisliği ya da eşdeğer alanda lisans",
     "En az 3 yıl web uygulaması geliştirme",
@@ -1510,11 +1510,11 @@
    "id": "ui-ux-tasarimci",
    "kume": "urun-teknoloji",
    "departman": "Ürün ve teknoloji",
-   "unvan": "Arayüz ve kullanıcı deneyimi (UI/UX) tasarımcısı",
+   "unvan": "Arayüz ve kullanıcı deneyimi tasarımcısı",
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Satıcıların çoğu çarşı esnafıdır ve ürünü telefondan yükler. Ürün yükleme ve teklif ekranları sade değilse satıcı uyum ekibinin yükü artar ve satıcı aktif hâle gelmez.",
+   "gerekce": "Satıcıların çoğu çarşı esnafıdır ve ürünü telefondan yükler. Ürün yükleme ve teklif ekranları sade değilse satıcı uyum ekibinin yükü artar. O zaman satıcı aktif hâle gelmez.",
    "nitelikler": [
     "Tasarım ya da ilgili alanda lisans",
     "En az 3 yıl mobil öncelikli arayüz tasarımı",
@@ -1522,7 +1522,7 @@
     "Erişilebilirlik kurallarını bilme"
    ],
    "netMaas2027": 88200,
-   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. Grafik Tasarımcı (76.000 TL) ve Yazılım Mühendisi (78.400 TL) 2026 İstanbul ortalamalarının altında 68.000 TL alınıp yüzde 29,73 artırıldı. Tahmindir.",
+   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. 2026 İstanbul ortalaması Grafik Tasarımcı için 76.000 TL, Yazılım Mühendisi için 78.400 TL’dir. Hesapta bunların altında 68.000 TL alındı. Bu tutar yüzde 29,73 artırıldı. Tahmindir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1557,10 +1557,10 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Kanal başına satıcı edinme maliyeti, yenileme ve gelir hedefleri bugün asistan ve dijital pazarlama uzmanı tarafından izlenir. Ödeyen satıcı sayısı yüzleri geçince büyüme kuralının ve prim hesabının doğruluğu ayrı bir sahip ister. Ekonomik seçenekte bu iş asistanda kalır.",
+   "gerekce": "Bugün bu sayıları asistan ve dijital pazarlama uzmanı izler. Bunlar kanal başına satıcı edinme maliyeti, yenileme ve gelir hedefleridir. Ödeyen satıcı sayısı yüzleri geçince büyüme kuralının ve prim hesabının doğruluğu ayrı bir sahip ister. Ekonomik seçenekte bu iş asistanda kalır.",
    "nitelikler": [
     "İstatistik, endüstri mühendisliği ya da benzeri alanda lisans",
-    "SQL ve Google Sheets ya da Looker Studio",
+    "Veri sorgulama dili (SQL) ve Google Sheets ya da Looker Studio",
     "Kohort (aynı ay gelen müşteri grubu) ve yenileme analizi"
    ],
    "netMaas2027": 93400,
@@ -1635,7 +1635,7 @@
    "id": "devops-muhendisi",
    "kume": "urun-teknoloji",
    "departman": "Ürün ve teknoloji",
-   "unvan": "DevOps ve altyapı mühendisi",
+   "unvan": "Sunucu ve altyapı mühendisi (DevOps)",
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
@@ -1646,7 +1646,7 @@
     "Güvenlik güncellemelerini takip etme"
    ],
    "netMaas2027": 116750,
-   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması DevOps Mühendisi 89.900 TL, yüzde 29,73 artışla yaklaşık 116.750 TL. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
+   "maasDayanagi": "Tam zamanlı çalışan için eleman.net 2026 İstanbul ortalaması alındı. DevOps Mühendisi için bu tutar 89.900 TL’dir. Yüzde 29,73 artışla yaklaşık 116.750 TL olur. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1683,11 +1683,11 @@
    "id": "sizma-testi",
    "kume": "urun-teknoloji",
    "departman": "Ürün ve teknoloji",
-   "unvan": "Bağımsız güvenlik (sızma) testi",
+   "unvan": "Bağımsız güvenlik testi",
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "Ödeme kuruluşu entegrasyonu yapan ve kişisel veri işleyen bir pazar yeri için bağımsız güvenlik testi gerekir. Bu iş yılda bir ya da iki kez yapılır ve kadro gerektirmez.",
+   "gerekce": "Pazar yeri ödeme kuruluşuna bağlanır ve kişisel veri işler. Bu yüzden bağımsız bir güvenlik testi gerekir. Bu iş yılda bir ya da iki kez yapılır ve kadro gerektirmez.",
    "nitelikler": [
     "Sertifikalı sızma testi firması",
     "Rapor ve düzeltme sonrası yeniden test"
@@ -1729,7 +1729,7 @@
    "seviye": "Yönetici",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Satıcı uyumu, müşteri hizmetleri, moderasyon ve doğrulama işleri medyan seçenekte 8 ile 10 kişiye ulaşır. Bu ekip doğrudan kurucuya bağlı kalırsa yenileme oranının ve şikâyet sürelerinin sahibi olmaz. Operasyon müdürü bu göstergelerin sahibidir.",
+   "gerekce": "Medyan seçenekte satıcı uyumu, müşteri hizmetleri, içerik denetimi ve doğrulama işi büyür. Bu işlerde 8 ile 10 kişi çalışır. Bu ekip doğrudan kurucuya bağlı kalırsa yenileme oranının ve şikâyet sürelerinin sahibi olmaz. Operasyon müdürü bu göstergelerin sahibidir.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 6 yıl operasyon ya da müşteri deneyimi, en az 2 yıl yöneticilik",
@@ -1816,11 +1816,11 @@
    "id": "moderasyon-dogrulama-uzmani",
    "kume": "operasyon",
    "departman": "Operasyon",
-   "unvan": "Güven, doğrulama ve moderasyon uzmanı",
+   "unvan": "Güven, doğrulama ve içerik denetimi uzmanı",
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun’un 9. maddesine göre aracı hizmet sağlayıcı, belgeye dayanan fikri mülkiyet şikâyetinde ürünü yayından kaldırıp taraflara bildirmek zorundadır. Satıcının vergi levhası ve şirket bilgisini doğrulamak, taklit ürünü ve sahte ilanı ayıklamak alıcı güveninin temelidir. Ekonomik seçenekte bu iş satıcı uyum uzmanında kalır.",
+   "gerekce": "6563 sayılı Elektronik Ticaret Kanunu’nun 9. maddesi pazar yerini bağlar. Belgeli bir fikri mülkiyet şikâyeti gelirse pazar yeri ürünü yayından kaldırır. Sonra iki tarafa da bilgi verir. Alıcı güveni için satıcının vergi levhası ve şirket bilgisi doğrulanır. Taklit ürün ve sahte ilan da ayıklanır. Ekonomik seçenekte bu iş satıcı uyum uzmanında kalır.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "Belge kontrolü ve dikkatli inceleme",
@@ -1828,7 +1828,7 @@
     "Kurallara bağlı karar verme ve kayıt tutma"
    ],
    "netMaas2027": 62250,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalamaları Müşteri Temsilcisi 42.200 TL ve Kalite Kontrol Uzmanı 55.500 TL arasından 48.000 TL alınıp yüzde 29,73 artırıldı.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi için 42.200 TL, Kalite Kontrol Uzmanı için 55.500 TL’dir. Hesapta bu ikisinin arasından 48.000 TL alındı. Bu tutar yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1871,7 +1871,7 @@
     "SGK teşvikleri bilgisi"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "İSMMMO 2026 İstanbul tarifesine ulaşılamadı. Aylık bedel ekonomikte 30.000, medyanda 40.000, güçlüde 55.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "İstanbul Serbest Muhasebeci Mali Müşavirler Odası (İSMMMO) 2026 tarifesine ulaşılamadı. Aylık bedel ekonomikte 30.000, medyanda 40.000, güçlüde 55.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1997,7 +1997,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Medyan seçenekte 2027’de 25’ten fazla yeni kişi işe alınır. Kasım 2026 planında yöneticinin 96 saati yalnız işe alıma gitmiştir. İşe alım, deneme süresi değerlendirmesi ve özlük dosyası bir uzmana geçmezse kurucu satış ve ürün işine zaman ayıramaz.",
+   "gerekce": "Medyan seçenekte 2027’de 25’ten fazla yeni kişi işe alınır. Kasım 2026 planında yöneticinin 96 saati yalnız işe alıma gitmiştir. İşe alım, deneme süresi değerlendirmesi ve özlük dosyası bir uzmana geçmelidir. Yoksa kurucu satış ve ürün işine zaman ayıramaz.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 3 yıl işe alım ve özlük işleri deneyimi",
@@ -2041,7 +2041,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu her işverene iş güvenliği uzmanı ve işyeri hekimi hizmeti yükümlülüğü getirir. Ek roller listesi bu hizmeti işe girişlerden önce dış hizmet olarak öngörür. OSGB, bu hizmeti veren ortak sağlık ve güvenlik birimidir.",
+   "gerekce": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu her işvereni bağlar. İşveren iş güvenliği uzmanı ve işyeri hekimi hizmeti almalıdır. Ek roller listesi bu hizmeti işe girişlerden önce dış hizmet olarak öngörür. OSGB, bu hizmeti veren ortak sağlık ve güvenlik birimidir.",
    "nitelikler": [
     "Bakanlık yetkili OSGB",
     "Ofis ve saha çalışmasını kapsayan risk değerlendirmesi"
@@ -2087,7 +2087,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "İYS, marka ve ad benzerliği, satıcı sözleşmesi, bağımsız temsilci sözleşmesi ve satış vaatleri projede avukata bağlı kritik kararlardır. Ek roller listesi bu işi baştan dış hizmet olarak planlar.",
+   "gerekce": "Bu projede bazı kritik kararlar avukata bağlıdır. Bunlar İleti Yönetim Sistemi (İYS), marka ve ad benzerliği, sözleşmeler ve satış vaatleridir. Ek roller listesi bu işi baştan dış hizmet olarak planlar.",
    "nitelikler": [
     "Ticaret, rekabet ve e-ticaret hukuku deneyimi",
     "Marka ve KVKK konusunda çalışmış olma"
@@ -2133,7 +2133,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "KVKK, 6698 sayılı Kişisel Verilerin Korunması Kanunu’dur. Çağrı kaydı, satıcı ve alıcı verisi ve Segika’daki personel verisi için aydınlatma metni, saklama süresi ve yetki sınırı yazılı olmalıdır. Güçlü seçenekte bu iş şirket içindeki hukuk ve uyum uzmanına geçer.",
+   "gerekce": "KVKK, 6698 sayılı Kişisel Verilerin Korunması Kanunu’dur. Çağrı kaydı, satıcı ve alıcı verisi ve Segika’daki personel verisi kişisel veridir. Bu veriler için aydınlatma metni, saklama süresi ve yetki sınırı yazılı olmalıdır. Güçlü seçenekte bu iş şirket içindeki hukuk ve uyum uzmanına geçer.",
    "nitelikler": [
     "KVKK uyum projesi deneyimi",
     "Veri envanteri ve aydınlatma metni hazırlama"
@@ -2263,7 +2263,7 @@
    "calismaBicimi": "Tam zamanlı",
    "eski": true,
    "planRolu": "asistan",
-   "gerekce": "Mevcut istihdam takvimindeki roldür ve değiştirilmeden korunur. Görevlerin en az yüzde 90’ının zamanında bitmesini izler, işe alım dalgasından sonra 20 saatini veri ve rapor işine ayırır.",
+   "gerekce": "Mevcut istihdam takvimindeki roldür ve değiştirilmeden korunur. Görevlerin en az yüzde 90’ının zamanında bitmesini izler. İşe alımlar bitince 20 saatini veri ve rapor işine ayırır.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "Ofis yazılımları ve takvim yönetimi",
@@ -2308,7 +2308,7 @@
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Kadro 30 kişiyi geçince bilgisayar, telefon hattı, etkinlik malzemesi, salon ve ikram alımları asistanın günlük işini aşar. Satın almayı ve tedarikçi takibini tek kişiye vermek harcamayı kontrol altında tutar.",
+   "gerekce": "Kadro 30 kişiyi geçince alımlar asistanın günlük işini aşar. Bu alımlar bilgisayar, telefon hattı, etkinlik malzemesi, salon ve ikramdır. Satın almayı ve tedarikçi takibini tek kişiye vermek harcamayı kontrol altında tutar.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "En az 2 yıl idari işler ya da satın alma deneyimi",
@@ -2346,7 +2346,7 @@
  ],
  "secenekler": {
   "ekonomik": {
-   "aciklama": "Gelir planının kötümser senaryosuna göre kurulur. Mevcut kadro korunur, yalnız satıcının ilk 90 gününü ve tahsilatı koruyan roller eklenir. Ödeme ve sipariş altyapısı 2027’de açılmayacaksa ya da yatırım girişi belirsizse bu seçenek seçilir.",
+   "aciklama": "Gelir planının kötümser senaryosuna göre kurulur. Mevcut kadro korunur, yalnız satıcının ilk 90 gününü ve tahsilatı koruyan roller eklenir. Ödeme ve sipariş altyapısı 2027’de açılmayacaksa bu seçenek seçilir. Yatırım girişi belirsizse de bu seçenek seçilir.",
    "dayandigiSenaryo": "Kötümser",
    "toplamKisi": 19,
    "toplamKisiAciklama": "Aralık 2027 sonunda bordrodaki kişi sayısıdır. Kurucu ve mevcut 4 kişilik yazılım ekibi dahildir. Yarı zamanlı çalışanlar 1 kişi sayılır.",
@@ -2435,7 +2435,7 @@
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "medyan": {
-   "aciklama": "Gelir planının medyan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yönetici ya da uzman alır. Sipariş ve ödeme akışı için 2 ek geliştirici alınır. 2027 ilk çeyreğinde 50 aktif satıcıya ulaşılırsa ve yatırım bu gideri karşılıyorsa bu seçenek seçilir.",
+   "aciklama": "Gelir planının medyan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yönetici ya da uzman alır. Sipariş ve ödeme akışı için 2 ek geliştirici alınır. Bu seçenek iki koşul birlikte sağlanırsa seçilir. 31 Mart 2027’ye kadar 50 aktif satıcıya ulaşılmalıdır. Yatırım da bu gideri karşılamalıdır.",
    "dayandigiSenaryo": "Medyan",
    "toplamKisi": 40,
    "toplamKisiAciklama": "Aralık 2027 sonunda bordrodaki kişi sayısıdır. Kurucu ve mevcut 4 kişilik yazılım ekibi dahildir. Yarı zamanlı çalışanlar 1 kişi sayılır.",
@@ -2524,7 +2524,7 @@
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "guclu": {
-   "aciklama": "Gelir planının iyimser senaryosuna göre kurulur. Her kümenin bir yöneticisi olur, çalışan sayısı 50’yi aşar ve işlem komisyonu ile güvenli ödeme 2027 içinde açılacak biçimde teknoloji ekibi büyür. Yeterli yatırım alınmışsa ve ilk iki çeyrekte iyimser senaryonun satıcı sayıları tutuyorsa bu seçenek seçilir.",
+   "aciklama": "Gelir planının iyimser senaryosuna göre kurulur. Her kümenin bir yöneticisi olur, çalışan sayısı 50’yi aşar ve işlem komisyonu ile güvenli ödeme 2027 içinde açılacak biçimde teknoloji ekibi büyür. Bu seçenek iki koşul birlikte sağlanırsa seçilir. Yeterli yatırım alınmış olmalıdır. Ocak ile Haziran 2027 arasında iyimser senaryonun satıcı sayıları tutmalıdır.",
    "dayandigiSenaryo": "İyimser",
    "toplamKisi": 61,
    "toplamKisiAciklama": "Aralık 2027 sonunda bordrodaki kişi sayısıdır. Kurucu ve mevcut 4 kişilik yazılım ekibi dahildir. Yarı zamanlı çalışanlar 1 kişi sayılır.",

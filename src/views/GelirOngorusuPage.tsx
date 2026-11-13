@@ -40,7 +40,7 @@ import '../styles/gelirOngorusu.css';
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(new Date(`${iso}-01T00:00:00`));
 const milyon = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon ₺`;
-const yuzde = (v: number) => `yüzde ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
 const saat = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v)} saat`;
 const ondalik = (v: number, b = 1) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: b, minimumFractionDigits: b }).format(v);
 const POLITIKALAR: ReglPolitikasi[] = ['ikisi', 'evden', 'izin', 'yok'];
@@ -64,20 +64,20 @@ function Icerik({ pathname }: { pathname: string }) {
   const katkilar = POZISYONLAR.filter((p) => KATKI[p.id] && p.secenekler[secili].kisi > 0).map((p) => ({ p, k: KATKI[p.id], beklenen: o.medyan.dogrudan[p.id] }));
   const harita = [5, 4, 3, 2, 1].map((etki) => ({ etki, hucreler: [1, 2, 3, 4, 5].map((olasilik) => RISKLER.filter((r) => r.etki === etki && r.olasilik === olasilik)) }));
   const ongoruSatirlari = [
-    { ad: 'Kötümser (yüzde 10)', ciro: o.gelir.kotumser, gelir: o.kazanilan.kotumser, aktif: o.yeniAktif.kotumser },
+    { ad: 'Kötümser (%10)', ciro: o.gelir.kotumser, gelir: o.kazanilan.kotumser, aktif: o.yeniAktif.kotumser },
     { ad: 'Medyan (plan)', ciro: o.gelir.medyan, gelir: o.kazanilan.medyan, aktif: o.yeniAktif.medyan },
-    { ad: 'Ortanca (yüzde 50)', ciro: o.gelir.ortanca, gelir: o.kazanilan.ortanca, aktif: o.yeniAktif.ortanca },
-    { ad: 'İyimser (yüzde 90)', ciro: o.gelir.iyimser, gelir: o.kazanilan.iyimser, aktif: o.yeniAktif.iyimser },
+    { ad: 'Ortanca (%50)', ciro: o.gelir.ortanca, gelir: o.kazanilan.ortanca, aktif: o.yeniAktif.ortanca },
+    { ad: 'İyimser (%90)', ciro: o.gelir.iyimser, gelir: o.kazanilan.iyimser, aktif: o.yeniAktif.iyimser },
     { ad: 'Risksiz plan', ciro: o.gelir.risksiz, gelir: o.kazanilan.risksiz, aktif: o.yeniAktif.risksiz },
   ];
   const dokumSatirlari = [
     { ad: 'Yasal üst sınır (haftada 45 saat)', deger: dokum.yasal, not: `${dokum.isGunu} iş günü × 9 saat` },
-    { ad: 'Çavuş payı (45 yerine 40 saat)', deger: -dokum.cavusPayi, not: 'Haftada 5 saat verimsizlik payı' },
+    { ad: 'Haftalık 5 saatlik verimsizlik payı (45 yerine 40 saat)', deger: -dokum.cavusPayi, not: 'Yasal üst sınır ile plan arasındaki farktır.' },
     { ad: 'Plan (haftada 40 saat)', deger: dokum.plan, not: `${dokum.isGunu} iş günü × 8 saat. Resmî tatiller (${saat(dokum.tatil)}) zaten düşüldü.` },
-    { ad: 'Yıllık izin', deger: -dokum.izin, not: '14 iş günü (4857 sayılı Kanun, 1 ile 5 yıl kıdem)' },
-    { ad: 'Hastalık', deger: -dokum.hastalik, not: `${VARSAYIM.hastalik.medyan} gün (aralık ${VARSAYIM.hastalik.dusuk} ile ${VARSAYIM.hastalik.yuksek})` },
-    { ad: 'Grip', deger: -dokum.grip, not: `Atak oranı ${yuzde(VARSAYIM.grip.medyan)}, vaka başı ${ondalik(VARSAYIM.gripGun)} gün eşdeğeri` },
-    { ad: 'Regl dönemi (ortalama çalışan)', deger: -dokum.regl, not: `${REGL_POLITIKA_ADI[regl]}. Kadın oranı ${yuzde(VARSAYIM.kadinOrani)} varsayılır.` },
+    { ad: 'Yıllık izin', deger: -dokum.izin, not: '1 ile 5 yıl arası çalışmış kişiye 14 iş günü verilir (4857 sayılı İş Kanunu).' },
+    { ad: 'Hastalık', deger: -dokum.hastalik, not: `Hesapta ${VARSAYIM.hastalik.medyan} gün kullanılır. Gerçek sayı ${VARSAYIM.hastalik.dusuk} ile ${VARSAYIM.hastalik.yuksek} gün arasında değişir.` },
+    { ad: 'Grip', deger: -dokum.grip, not: `Her grip sezonunda çalışanların ${yuzde(VARSAYIM.grip.medyan)}’i grip olur. Her grip ${ondalik(VARSAYIM.gripGun)} tam iş gününe denk kayıp sayılır.` },
+    { ad: 'Regl dönemi (ortalama çalışan)', deger: -dokum.regl, not: `Seçili regl politikası “${REGL_POLITIKA_ADI[regl]}” seçeneğidir. Çalışanların ${yuzde(VARSAYIM.kadinOrani)}’sinin kadın olduğu varsayılır.` },
     { ad: 'Mazeret izinleri', deger: -dokum.mazeret, not: `${VARSAYIM.mazeret} gün (evlilik, ölüm, babalık ve benzeri)` },
     { ad: 'İşte geçen süre', deger: dokum.calisilan, not: 'Planlanan süreden kayıplar düşülünce' },
     { ad: 'Verimsiz süre', deger: -dokum.verimsiz, not: `İşte geçen sürenin ${yuzde(1 - VARSAYIM.verim.medyan)}’i: toplantı, mesaj, ara ve kesintiler` },
@@ -88,16 +88,16 @@ function Icerik({ pathname }: { pathname: string }) {
     <>
       <PageHeader
         title={kayit.baslik}
-        purpose="Kadronun 2027 çalışma saatini, verimini, satış katkısını, risklerini ve abonelik gelirini gösterir."
+        purpose="Bu sayfa 2027’de abonelikten ne kadar para gelebileceğini gösterir."
         meta={[
           { label: 'Dönem', value: 'Ocak ile Aralık 2027' },
-          { label: 'Simülasyon', value: `${int(KOSU_SAYISI)} olası yıl` },
+          { label: 'Hesap sayısı', value: `2027 yılı ${int(KOSU_SAYISI)} kez hesaplandı` },
         ]}
       />
       <div className="go27-uyari">
-        <p>Gelir, satıcı abonelik ödemesidir. Gelir, gelir planıyla aynı kurallarla hesaplanır. Bu kurallar aylık ya da yıllık peşin ödeme, aylık yenileme ve kurla büyüyen ₺ fiyattır. Kadro, İstihdam takvimi v2’deki seçenektir.</p>
+        <p>Gelir, satıcıların abonelik ödemesidir. Gelir, “Gelir planı” sayfasıyla aynı kurallarla hesaplanır. Satıcı aylık ya da yıllık peşin öder. Aylık ödeyen satıcı aboneliğini her ay yeniler. Aylık elde tutma, bir ay ödeyen satıcılardan sonraki ay da ödeyenlerin oranıdır. TL fiyatı döviz kuru arttıkça artar. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir.</p>
         <p>
-          Dört öngörü vardır. <strong>Medyan</strong>, risklerin beklenen değeriyle yapılan plan hesabıdır. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong>, {int(KOSU_SAYISI)} olası 2027 yılının simülasyonundan gelir. Olası yılların yüzde 10’u kötümserin altında kalır. Yarısı ortancanın, yüzde 90’ı iyimserin altında kalır.
+          Dört öngörü vardır. <strong>Medyan</strong> öngörüsü tek bir plan hesabıdır. Bu hesap risklerin ortalama etkisini kullanır. Bilgisayar 2027 yılını {int(KOSU_SAYISI)} kez hesapladı. Her hesapta riskler rastgele farklı çıktı. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong> öngörüler bu sonuçlardan gelir. Olası yılların %10’u kötümserin altında kalır. Olası yılların yarısı ortancanın altında kalır. Olası yılların %90’ı iyimserin altında kalır.
         </p>
       </div>
 
@@ -105,7 +105,7 @@ function Icerik({ pathname }: { pathname: string }) {
         id="ongoru"
         index={1}
         title="Gelir öngörüsü"
-        desc="Kadro seçeneği ve regl politikası değişince bütün hesap yeniden yapılır. İzin ve evden çalışma maaştan düşülmez, yalnız kapasiteye girer."
+        desc="Kadro seçeneği ve regl politikası değişince bütün hesap yeniden yapılır. İzin ve evden çalışma maaştan kesilmez. Bu günler yalnız kapasite hesabını etkiler. Kapasite, kişinin verimli çalışma saatine göre hesaplanır."
         tools={
           <div className="go27-araclar">
             <Choice<SecenekId> label="Kadro seçeneği" value={secili} options={SECENEKLER.map((s) => ({ id: s, name: SECENEK_ADI[s] }))} onChange={setSecili} />
@@ -115,10 +115,10 @@ function Icerik({ pathname }: { pathname: string }) {
       >
         <Stats
           items={[
-            { label: 'Kötümser ciro', value: milyon(o.gelir.kotumser), note: `Yüzde 10 noktası. Kazanılmış gelir ${milyon(o.kazanilan.kotumser)}.` },
-            { label: 'Medyan ciro (plan)', value: milyon(o.gelir.medyan), note: `Beklenen değer. Kazanılmış gelir ${milyon(o.kazanilan.medyan)}.` },
-            { label: 'Ortanca ciro', value: milyon(o.gelir.ortanca), note: `Yüzde 50 noktası. Kazanılmış gelir ${milyon(o.kazanilan.ortanca)}.` },
-            { label: 'İyimser ciro', value: milyon(o.gelir.iyimser), note: `Yüzde 90 noktası. Kazanılmış gelir ${milyon(o.kazanilan.iyimser)}.` },
+            { label: 'Kötümser ciro', value: milyon(o.gelir.kotumser), note: `Olası yılların %10’unda ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.kotumser)} olur.` },
+            { label: 'Medyan ciro (plan)', value: milyon(o.gelir.medyan), note: `Risklerin ortalama etkisiyle yapılan plan hesabıdır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.medyan)} olur.` },
+            { label: 'Ortanca ciro', value: milyon(o.gelir.ortanca), note: `Olası yılların yarısında ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.ortanca)} olur.` },
+            { label: 'İyimser ciro', value: milyon(o.gelir.iyimser), note: `Olası yılların %90’ında ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.iyimser)} olur.` },
           ]}
         />
         <DataTable<(typeof ongoruSatirlari)[number]>
@@ -137,32 +137,32 @@ function Icerik({ pathname }: { pathname: string }) {
         <dl className="go27-ozet">
           <div>
             <dt>Risksiz plan</dt>
-            <dd>{milyon(o.gelir.risksiz)}: herkes tam kapasitede, gecikme, ayrılma ve mevsim etkisi yok.</dd>
+            <dd>Risksiz planda herkes tam kapasiteyle çalışır. İşe alımda gecikme, işten ayrılma ve mevsim etkisi olmaz. Bu planda ciro {milyon(o.gelir.risksiz)} olur.</dd>
           </div>
           <div>
             <dt>Risk payı</dt>
-            <dd>{yuzde(o.riskPayi)}: medyan, risksiz planın bu kadar altındadır.</dd>
+            <dd>Medyan öngörüsü, risksiz plandan {yuzde(o.riskPayi)} düşüktür. Bu farka risk payı denir.</dd>
           </div>
           <div>
             <dt>Dağılım</dt>
             <dd>
-              Olası yılların ortalaması {milyon(o.gelir.ortalama)}, standart sapması {milyon(o.gelir.sapma)}. Ortanca medyandan düşüktür, çünkü kötü sonuçlar (ayrılma, düşük elde tutma) iyi sonuçlardan daha derindir.
+              {int(KOSU_SAYISI)} olası yılın ortalama cirosu {milyon(o.gelir.ortalama)} olur. Sonuçlar bu ortalamadan genelde {milyon(o.gelir.sapma)} kadar sapar. Bu sapmaya standart sapma denir. Ortanca öngörüsü, Medyan öngörüsünden düşüktür. Çünkü kötü sonuçlar ciroyu, iyi sonuçların artırdığından daha çok düşürür. İşten ayrılma ve düşük elde tutma kötü sonuçlara örnektir.
             </dd>
           </div>
           <div>
             <dt>Dolaylı katkı olmadan</dt>
             <dd>
-              Destek rollerinin elde tutmaya katkısı (en çok 8 puan) bir varsayımdır. Bu katkı sayılmazsa medyan {milyon(o.dolaylisizMedyan)} olur.
+              Destek rollerinin elde tutmaya katkısı bir varsayımdır. Bu katkı en çok 8 yüzde puanıdır. Bu katkı sayılmazsa Medyan öngörüsü {milyon(o.dolaylisizMedyan)} olur.
             </dd>
           </div>
           <div>
             <dt>Gelir planıyla karşılaştırma</dt>
-            <dd>Gelir planının medyan senaryosu 2027 için {milyon(GELIR_PLANI_2027)} verir. Fark, v2 kadrosunun ek satış ve destek rollerinden gelir.</dd>
+            <dd>“Gelir planı” sayfasında Medyan senaryosu 2027 için {milyon(GELIR_PLANI_2027)} gelir öngörür. Bu sayfadaki tutar farklıdır. Fark, yeni kadronun ek satış ve destek rollerinden gelir.</dd>
           </div>
         </dl>
       </Section>
 
-      <Section id="saat" index={2} title="Bir kişinin 2027 çalışma saati" desc="Ortalama bir çalışan için. Tatiller, izin ve kayıplar düşülür, kalan sürenin verimli payı bulunur. Kapasite çarpanı, verimli saatin projedeki tam kapasite tanımına (ayda 125 saat) oranıdır.">
+      <Section id="saat" index={2} title="Bir kişinin 2027 çalışma saati" desc="Tablo ortalama bir çalışanın 2027 çalışma saatini gösterir. Önce tatiller, izinler ve diğer kayıplar düşülür. Sonra kalan sürenin verimli kısmı bulunur. Projede tam kapasite ayda 125 saattir. “Kapasite” sütunu, verimli saatin 125 saate oranıdır. Kapasite %100’ü aşabilir. Çünkü bazı aylarda verimli saat 125 saati geçer.">
         <DataTable<(typeof dokumSatirlari)[number]>
           id="saat-dokumu"
           title="Yıllık saat dökümü"
@@ -190,7 +190,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="regl" index={3} title="Regl politikası karşılaştırması" desc="Bu bölüm bir çalışmaya dayanır (Schoep, BMJ Open 2019). Çalışmaya 32.748 kadın katıldı. Kadın başı yılda 1,3 gün devamsızlık bulundu. Toplam verim kaybı yılda 8,9 gündü. Kaybın çoğu işe gelip düşük verimle çalışmaktan gelir. Politikaların etkisi varsayımdır. Hiçbir politika maaşı etkilemez.">
+      <Section id="regl" index={3} title="Regl politikası karşılaştırması" desc="Bu bölüm bir çalışmaya dayanır (Schoep, BMJ Open 2019). Çalışmaya 32.748 kadın katıldı. Kadın başı yılda 1,3 gün devamsızlık bulundu. Toplam verim kaybı yılda 8,9 gündü. Kaybın çoğu işe gelip düşük verimle çalışmaktan gelir. Politikaların etkisi varsayımdır. Hiçbir politika maaşı etkilemez. “Gün eşdeğeri”, kaybın kaç tam iş gününe denk geldiğini gösterir.">
         <DataTable<ReglPolitikasi>
           id="regl-politika"
           title="Politikaya göre kayıp"
@@ -206,10 +206,10 @@ function Icerik({ pathname }: { pathname: string }) {
               minWidth: '16rem',
               render: (p) =>
                 ({
-                  yok: 'Belirtili günlerde kişi işe gelir ve verimi yaklaşık yüzde 33 düşer.',
-                  evden: 'Belirtili günlerde evden çalışılır. Verim kaybı yüzde 20’ye iner.',
-                  izin: 'Ayda en çok 1 gün ücretli izin. Kullanılan gün tam kayıptır, kalan günlerde kayıp sürer.',
-                  ikisi: 'Ücretli izin ya da evden çalışma. Kişi duruma göre seçer.',
+                  yok: 'Regl belirtisi olan günlerde kadın çalışan işe gelir. Bu günlerde verimi yaklaşık %33 düşer.',
+                  evden: 'Regl belirtisi olan günlerde kadın çalışan evden çalışır. Bu günlerde verim kaybı yaklaşık %33’ten %20’ye iner.',
+                  izin: 'Kadın çalışan ayda en çok 1 gün ücretli izin alabilir. İzin günü tam kayıp sayılır. Belirtisi olan diğer günlerde verim kaybı sürer.',
+                  ikisi: 'Kadın çalışan ücretli izin alabilir ya da evden çalışabilir. Çalışan duruma göre seçer.',
                 })[p],
             },
           ]}
@@ -217,7 +217,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="katki" index={4} title="Satışa katkı" desc="Doğrudan roller yeni aktif satıcı getirir. Dolaylı roller aylık elde tutmayı artırır. Varsayım işaretli katkıların kaynağı yoktur ve ilk 90 günün ölçümüyle güncellenmelidir. Segika masa başı ayrı şirkete sattığı için istoc.com gelirine sayılmaz.">
+      <Section id="katki" index={4} title="Satışa katkı" desc="Doğrudan roller yeni aktif satıcı getirir. Dolaylı roller aylık elde tutmayı artırır. “Varsayım” yazan katkıların kaynağı yoktur. Bu katkılar ilk 90 günün ölçümüne göre güncellenmeli. Segika masa başı, Segika’nın SGK teşvik yazılımını satar. Bu satışlar istoc.com gelirine sayılmaz.">
         <DataTable<(typeof katkilar)[number]>
           id="katki-tablosu"
           title={`${SECENEK_ADI[secili]} seçeneğindeki roller`}
@@ -225,17 +225,17 @@ function Icerik({ pathname }: { pathname: string }) {
           columns={[
             { key: 'ad', header: 'Pozisyon', rowHeader: true, minWidth: '12rem', render: (x) => `${x.p.unvan} (${x.p.secenekler[secili].kisi} kişi)` },
             { key: 'tur', header: 'Katkı türü', minWidth: '9rem', render: (x) => KATKI_TURU[x.k.tur] },
-            { key: 'beklenen', header: '2027 beklenen', nowrap: true, summary: true, render: (x) => (x.beklenen ? `${int(x.beklenen)} yeni aktif` : x.k.tur === 'elde-tutma' ? 'Elde tutmaya puan' : 'Kanal üzerinden') },
+            { key: 'beklenen', header: '2027 beklenen', nowrap: true, summary: true, render: (x) => (x.beklenen ? `${int(x.beklenen)} yeni aktif` : x.k.tur === 'elde-tutma' ? 'Elde tutmayı artırır' : 'Satışı kanal toplamında sayılır') },
             { key: 'dayanak', header: 'Dayanak', minWidth: '16rem', render: (x) => `${x.k.varsayim ? 'Varsayım. ' : ''}${x.k.dayanak}` },
           ]}
           rows={katkilar}
         />
         <p className="go27-not">
-          Kanal katkıları (medyan): dijital {int(o.medyan.dogrudan.dijital ?? 0)}, temsilci ağı {int(o.medyan.dogrudan.temsilci ?? 0)}, ekip lideri etkisi {int(o.medyan.dogrudan.lider ?? 0)} yeni aktif satıcı. Aylık elde tutma Ocak’ta {yuzde(o.medyan.eldeTutma[0])}, Aralık’ta {yuzde(o.medyan.eldeTutma[11])}.
+          Medyan öngörüsünde dijital kanal {int(o.medyan.dogrudan.dijital ?? 0)} yeni aktif satıcı getirir. Temsilci ağı, satıcı getiren bağımsız temsilcilerdir. Temsilci ağı {int(o.medyan.dogrudan.temsilci ?? 0)} yeni aktif satıcı getirir. Ekip liderinin etkisi {int(o.medyan.dogrudan.lider ?? 0)} yeni aktif satıcıdır. Aylık elde tutma Ocak’ta {yuzde(o.medyan.eldeTutma[0])}, Aralık’ta {yuzde(o.medyan.eldeTutma[11])} olur.
         </p>
       </Section>
 
-      <Section id="aylik" index={5} title="Ay ay gelir" desc="Her ay için simülasyonun yüzde 10, 50 ve 90 noktaları ve medyan plan.">
+      <Section id="aylik" index={5} title="Ay ay ciro" desc={`Tutarlar, o ay tahsil edilen abonelik ödemesidir. “Medyan” sütunu plan hesabıdır. Diğer sütunlar ${int(KOSU_SAYISI)} olası yıldan gelir.`}>
         <DataTable<(typeof aylikYuzdelik)[number]>
           id="aylik-gelir"
           title={`${SECENEK_ADI[secili]} seçeneği, 2027`}
@@ -251,23 +251,23 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="risk-payi" index={6} title="Risk payı" desc="Riskler sırayla eklenir. Her satır, o riskin önceki duruma göre götürdüğü geliri gösterir.">
+      <Section id="risk-payi" index={6} title="Risk payı" desc="Riskler tek tek eklenir. Her satır, o riskin bir önceki satıra göre kaybettirdiği ciroyu gösterir.">
         <DataTable<(typeof asamalar)[number] & { i: number }>
           id="risk-payi-tablosu"
           title="Risksiz plandan medyana"
           rowKey={(x) => x.a}
           columns={[
             { key: 'ad', header: 'Aşama', rowHeader: true, minWidth: '12rem', render: (x) => ASAMA_ADI[x.a] },
-            { key: 'gelir', header: '2027 geliri', nowrap: true, summary: true, render: (x) => milyon(x.gelir) },
-            { key: 'kayip', header: 'Götürdüğü', nowrap: true, render: (x) => (x.i ? milyon(asamalar[x.i - 1].gelir - x.gelir) : 'Başlangıç') },
-            { key: 'pay', header: 'Risksize göre', nowrap: true, render: (x) => yuzde(x.gelir / asamalar[0].gelir) },
+            { key: 'gelir', header: '2027 cirosu', nowrap: true, summary: true, render: (x) => milyon(x.gelir) },
+            { key: 'kayip', header: 'Kaybettirdiği ciro', nowrap: true, render: (x) => (x.i ? milyon(asamalar[x.i - 1].gelir - x.gelir) : 'Başlangıç') },
+            { key: 'pay', header: 'Risksiz plana oranı', nowrap: true, render: (x) => yuzde(x.gelir / asamalar[0].gelir) },
           ]}
           rows={asamalar.map((x, i) => ({ ...x, i }))}
         />
       </Section>
 
-      <Section id="harita" index={7} title="Risk haritası" desc="Satırlar etki, sütunlar olasılık düzeyidir (1 çok düşük, 5 çok yüksek). Puan, olasılık ile etkinin çarpımıdır: 15 ve üstü yüksek, 8 ile 14 orta, altı düşük.">
-        <p className="go27-not">Sütunlar soldan sağa olasılığı (1 ile 5), satırlar yukarıdan aşağı etkiyi (5 ile 1) gösterir. Hücredeki kodlar aşağıdaki risk listesindedir.</p>
+      <Section id="harita" index={7} title="Risk haritası" desc="Sütunlar soldan sağa olasılığı gösterir. Satırlar yukarıdan aşağı etkiyi gösterir. Düzeyler 1 ile 5 arasındadır. 1 çok düşük, 5 çok yüksek düzeydir. Puan, olasılık ile etkinin çarpımıdır. 15 ve üstü yüksek risktir. 8 ile 14 arası orta risktir. 8’in altı düşük risktir.">
+        <p className="go27-not">Hücredeki kodların adı aşağıdaki risk listesindedir. Liste puana göre, yüksekten düşüğe sıralıdır.</p>
         <div className="go27-harita-kap">
           <table className="go27-harita">
             <caption className="visually-hidden">Risk haritası: etki ve olasılık</caption>
@@ -306,14 +306,14 @@ function Icerik({ pathname }: { pathname: string }) {
           columns={[
             { key: 'ad', header: 'Risk', rowHeader: true, minWidth: '12rem', render: (r) => `${r.id}: ${r.ad}` },
             { key: 'puan', header: 'Puan', nowrap: true, summary: true, render: (r) => `${riskPuani(r)} (${riskDuzeyi(riskPuani(r))})` },
-            { key: 'modelde', header: 'Modelde', minWidth: '14rem', render: (r) => r.modelde },
+            { key: 'modelde', header: 'Modelde nasıl hesaplanır', minWidth: '14rem', render: (r) => r.modelde },
             { key: 'onlem', header: 'Önlem', minWidth: '14rem', render: (r) => r.onlem },
           ]}
           rows={[...RISKLER].sort((a, b) => riskPuani(b) - riskPuani(a))}
         />
       </Section>
 
-      <Section id="zaman" index={8} title="Risklerin zaman tüneli" desc="Bölüm her ay etkili olan riskleri gösterir. Ortalama bir çalışanın kayıp saatini de gösterir. Mevsimin satış dönüşümüne etkisi de görünür.">
+      <Section id="zaman" index={8} title="Risklerin zaman tüneli" desc="Bölüm her ay etkili olan riskleri gösterir. Ortalama bir çalışanın kayıp saatini de gösterir. Mevsimin satış dönüşümüne etkisi de görünür. Yıl boyu süren riskler bu tabloda yazılmaz.">
         <DataTable<{ ay: string; i: number }>
           id="zaman-tuneli"
           title="2027, ay ay"
@@ -328,7 +328,7 @@ function Icerik({ pathname }: { pathname: string }) {
               render: (x) =>
                 RISKLER.filter((r) => r.aylar.includes(x.i) && r.aylar.length < 12)
                   .map((r) => r.ad)
-                  .join(', ') || 'Yıl boyu süren riskler',
+                  .join(', ') || 'Mevsime bağlı risk yok',
             },
             { key: 'kayip', header: 'Kayıp saat', nowrap: true, render: (x) => saat(aylar[x.i].hastalik + aylar[x.i].grip + aylar[x.i].regl + aylar[x.i].mazeret) },
             { key: 'mevsim', header: 'Satış etkisi', nowrap: true, render: (x) => (MEVSIM[x.i] < 1 ? `eksi ${yuzde(1 - MEVSIM[x.i])}` : 'Yok') },
@@ -337,10 +337,10 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="secenekler" index={9} title="Kadro seçenekleri yan yana" desc="Seçili regl politikasıyla üç kadro seçeneğinin dört öngörüsü.">
+      <Section id="secenekler" index={9} title="Kadro seçenekleri yan yana" desc="Tablo, seçili regl politikasıyla üç kadro seçeneğinin dört öngörüsünü gösterir. Tutarlar 2027 cirosudur.">
         <DataTable<(typeof hepsi)[number]>
           id="secenek-karsilastirma"
-          title="2027 geliri"
+          title="2027 cirosu"
           rowKey={(x) => x.s}
           rowTone={(x) => (x.s === secili ? 'secili' : undefined)}
           columns={[
@@ -362,7 +362,7 @@ function Icerik({ pathname }: { pathname: string }) {
           rowKey={(x) => x.ad}
           columns={[
             { key: 'ad', header: 'Ölçü', rowHeader: true, minWidth: '12rem', render: (x) => x.ad },
-            { key: 'claude', header: 'Claude', nowrap: true, summary: true, render: (x) => x.claude },
+            { key: 'claude', header: 'Bu sayfanın hesabı (Claude)', nowrap: true, summary: true, render: (x) => x.claude },
             { key: 'chatgpt', header: 'ChatGPT', nowrap: true, render: (x) => x.chatgpt },
             { key: 'not', header: 'Fark ve neden', minWidth: '16rem', render: (x) => x.not },
           ]}
@@ -370,15 +370,27 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="kaynaklar" index={11} title="Kaynaklar" desc="Saat, sağlık, regl, işten ayrılma ve İstanbul risklerinin dayanakları. Tahmin işaretli değerler resmî ölçüm değildir.">
+      <Section id="kaynaklar" index={11} title="Kaynaklar" desc="Saat, sağlık, regl, işten ayrılma ve İstanbul risklerinin dayanakları. “Kaynak zayıf” yazan değerler resmî ölçüm değildir.">
         <DataTable<(typeof KAYNAKLAR)[number]>
           id="kaynak-listesi"
           title="Kullanılan veriler"
           rowKey={(k) => k.id}
           columns={[
             { key: 'konu', header: 'Konu', rowHeader: true, minWidth: '12rem', render: (k) => k.konu },
-            { key: 'deger', header: 'Değer', minWidth: '9rem', summary: true, // Birim yalnız sayıyla biten değere eklenir (“12 gün”). Sözel değerin sonuna “dönem”, “nitel” gibi birim adı yazılmaz.
-            render: (k) => `${k.deger}${k.birim && /\d$/.test(String(k.deger).trim()) ? ` ${k.birim}` : ''}${k.tahmin ? ' (tahmin)' : ''}` },
+            {
+              key: 'deger',
+              header: 'Değer',
+              minWidth: '12rem',
+              summary: true,
+              // Okura yazılı değer gösterilir (`metin`). Ham değer ve birim yalnız hesapta kullanılır.
+              text: (k) => `${k.metin}${k.tahmin ? ' Kaynak zayıf.' : ''}`,
+              render: (k) => (
+                <>
+                  {k.metin}
+                  {k.tahmin ? <>{' '}<span className="cell-sub">Kaynak zayıf.</span></> : null}
+                </>
+              ),
+            },
             {
               key: 'kaynak',
               header: 'Kaynak',

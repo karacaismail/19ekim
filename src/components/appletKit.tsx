@@ -51,7 +51,7 @@ export function Sayi({
   }, [goster]);
   const isle = (v: number) => onChange(yuzde ? v / 100 : v);
   const bicim = (v: number) => `${yuzde ? '%' : ''}${v.toLocaleString('tr-TR', { maximumFractionDigits: ondalik })}${birim ? ` ${birim}` : ''}`;
-  const sinirMetni = Number.isFinite(ust) ? `En az ${bicim(min)}, en çok ${bicim(ust)}.` : min > 0 ? `En az ${bicim(min)}.` : null;
+  const sinirMetni = Number.isFinite(ust) ? `Değer ${bicim(min)} ile ${bicim(ust)} arasında olmalı.` : min > 0 ? `Değer en az ${bicim(min)} olmalı.` : null;
   const aciklamaTam = sinirMetni ? (aciklama ? <>{aciklama} {sinirMetni}</> : sinirMetni) : aciklama;
   return (
     <>

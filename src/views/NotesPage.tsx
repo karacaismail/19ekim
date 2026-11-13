@@ -277,7 +277,7 @@ function NotesContent() {
           <div className="note-footer">
             <p className="note-status" role="status">
               {storage
-                ? `Notlar bu tarayıcıda saklanır. ${state.notes.filter((n) => !n.done).length} açık ve ${state.notes.filter((n) => n.done).length} tamamlanmış not var.`
+                ? `Notlar bu tarayıcıda saklanır. ${state.notes.filter((n) => !n.done).length} açık ve ${state.notes.filter((n) => n.done).length} tamamlanmış not var. “Varsayılan notlara dön” düğmesi eklediğiniz notları ve yaptığınız değişiklikleri siler.`
                 : 'Tarayıcı depolaması kapalı. Değişiklikler yalnız bu sayfa açık kaldığı sürece geçerlidir.'}
             </p>
             <ConfirmButton label="Varsayılan notlara dön" confirm="Varsayılan notlara dön (onayla)" onConfirm={reset} />

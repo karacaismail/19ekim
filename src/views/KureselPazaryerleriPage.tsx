@@ -92,7 +92,7 @@ function KatmanCipi({ k }: { k: Katman }) {
 function KaynakBaglantisi({ k }: { k: Kaynak }) {
   return (
     <span className="pz-kaynak">
-      <a href={k.url} target="_blank" rel="noopener noreferrer">
+      <a href={k.url} target="_blank" rel="noopener noreferrer" data-yalin="kunye">
         Kaynak: {k.ad}
       </a>
       {k.ikincil ? (
@@ -113,7 +113,7 @@ function SatirIciKaynak({ kaynaklar }: { kaynaklar: Kaynak[] }) {
       {kaynaklar.map((k, i) => (
         <Fragment key={k.url}>
           {i ? ' ve ' : null}
-          <a className="text-link" href={k.url} target="_blank" rel="noopener noreferrer">
+          <a className="text-link" href={k.url} target="_blank" rel="noopener noreferrer" data-yalin="kunye">
             {k.ad}
           </a>
           {k.ikincil ? ' (ikincil kaynak)' : null}
@@ -192,7 +192,7 @@ function Icerik() {
     <>
       <PageHeader
         title="Küresel B2B pazaryerleri"
-        purpose="Yedi küresel B2B pazaryerinin satıcıyı tutma, gelir ve ücretsiz kullanım yollarını gösterir."
+        purpose="Yedi küresel toptan pazar yerinin satıcı tutma, gelir ve ücretsiz hizmet yollarını gösterir."
         meta={[
           { label: 'Kaynak', value: `${RAPOR.yazar} araştırması` },
           { label: 'Tarih', value: RAPOR.tarih },
@@ -203,10 +203,10 @@ function Icerik() {
         <div className="pz-giris" data-edge="top">
           <div className="pz-giris-blok">
             <p className="pz-etiket">Araştırmanın ana fikri</p>
-            <p className="pz-iddia">Satıcıyı talep verisi, ödeme güvencesi ve nakit akışı tutar.</p>
+            <p className="pz-iddia">Satıcı bir platformda üç sebeple kalır. Alıcıların ne aradığını görür. Parasını güvenle alır. Parasını hızlı ya da önceden alabilir.</p>
             <p className="pz-acilis">
-              Yedi küresel B2B (işletmeden işletmeye) pazaryeri iki yoldan büyüyor. Bir kısmı alıcıyla satıcıyı tanıştırıp görünürlük satıyor. Öteki kısmı
-              ödemeyi taşıyıp gelir katmanlarını üst üste koyuyor. Bu sayfa iki yolu ve istoc.com’un yerini gösterir.
+              Yedi küresel B2B (işletmeden işletmeye) pazaryeri iki yoldan büyüyor. Bazı platformlar alıcıyla satıcıyı yalnız tanıştırır. Satıcı bu platformlarda öne çıkmak için ücret öder. Diğer platformlarda
+              ödeme platformun üzerinden geçer. Bu platformlar aynı satıştan komisyon, reklam ve kargo gibi birkaç gelir alır. Bu sayfa iki yolu ve istoc.com’un yerini gösterir.
             </p>
           </div>
           <dl className="pz-rakamlar">
@@ -215,15 +215,15 @@ function Icerik() {
               <dd>{PLATFORMLAR.length}</dd>
             </div>
             <div className="pz-rakam">
-              <dt>Elde tutma katmanı</dt>
+              <dt>Satıcıyı tutan katman</dt>
               <dd>{TUTMA_KATMANLARI.length}</dd>
             </div>
             <div className="pz-rakam">
-              <dt>Gelir kalıbı</dt>
+              <dt>Gelir yolu</dt>
               <dd>{GELIR_KALIPLARI.length}</dd>
             </div>
             <div className="pz-rakam">
-              <dt>Modül sırasındaki faz</dt>
+              <dt>Kuruluş sırasındaki faz</dt>
               <dd>{FAZLAR.length}</dd>
             </div>
           </dl>
@@ -404,7 +404,7 @@ function Icerik() {
             columns={[
               { key: 'ad', header: 'Platform', rowHeader: true, minWidth: '9rem', render: (r) => r.ad, text: (r) => r.ad },
               { key: 'ucretsiz', header: 'Ücretsiz verilen', minWidth: '15rem', render: (r) => r.ucretsiz },
-              { key: 'duvar', header: 'Ödeme duvarının başladığı an', summary: true, minWidth: '15rem', render: (r) => r.duvar, text: (r) => r.duvar },
+              { key: 'duvar', header: 'Ücretin başladığı yer', summary: true, minWidth: '15rem', render: (r) => r.duvar, text: (r) => r.duvar },
               { key: 'kaynak', header: 'Kaynak', minWidth: '10rem', render: (r) => <KaynakBaglantisi k={r.ucretsizKaynagi} /> },
             ] satisfies Column<Platform>[]}
             rows={PLATFORMLAR}
@@ -497,7 +497,7 @@ function Icerik() {
             <li>
               <a href={href('/deger-onerisi/')}>
                 <span className="pz-ilgili-ad">Değer önerisi</span>
-                <span className="pz-ilgili-metin">Saha ekibinin esnafa verdiği sözleri ve her sözün koşulunu gösterir.</span>
+                <span className="pz-ilgili-metin">Saha ekibinin esnafa verebileceği sözleri ve her sözün koşulunu gösterir.</span>
               </a>
             </li>
           </ul>

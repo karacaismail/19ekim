@@ -25,11 +25,11 @@ export const QUADRANTS: Quadrant[] = [
     name: 'Yıldız',
     english: 'Star',
     rule: 'Hızlı pazar, yüksek pay',
-    short: 'Yatırım yap, liderliği koru',
+    short: 'Yatırım yapın, liderliği koruyun',
     growth: 'Hızlı',
     share: 'Yüksek (lideriz)',
     cash: 'Çok kazanır, büyümek için çok harcar',
-    action: 'Yatırıma devam et, liderliği koru',
+    action: 'Yatırıma devam edin, liderliği koruyun',
     next: 'Pazar yavaşlayınca Nakit ineği olur',
   },
   {
@@ -37,11 +37,11 @@ export const QUADRANTS: Quadrant[] = [
     name: 'Soru işareti',
     english: 'Question mark',
     rule: 'Hızlı pazar, düşük pay',
-    short: 'Yatırım yap ya da bırak',
+    short: 'Yatırım yapın ya da bırakın',
     growth: 'Hızlı',
     share: 'Düşük (henüz küçüğüz)',
     cash: 'Çok harcar, az kazanır',
-    action: 'Seç: pay kazanabiliyorsan yatırım yap, kazanamıyorsan bırak',
+    action: 'Ürün pay kazanabiliyorsa yatırım yapın. Kazanamıyorsa ürünü bırakın.',
     next: 'Ya Yıldız ya da Köpek olur',
   },
   {
@@ -49,11 +49,11 @@ export const QUADRANTS: Quadrant[] = [
     name: 'Nakit ineği',
     english: 'Cash cow',
     rule: 'Yavaş pazar, yüksek pay',
-    short: 'Nakit topla, diğerlerine aktar',
+    short: 'Nakit toplayın, diğer ürünlere aktarın',
     growth: 'Yavaş',
     share: 'Yüksek (lideriz)',
     cash: 'Çok kazanır, az harcar',
-    action: 'Verimli işlet, kazandığı nakdi Soru işaretlerine aktar',
+    action: 'Ürünü verimli işletin. Kazandığı nakdi Soru işaretlerine aktarın.',
     next: 'Uzun süre nakit üretir',
   },
   {
@@ -61,11 +61,11 @@ export const QUADRANTS: Quadrant[] = [
     name: 'Köpek',
     english: 'Dog',
     rule: 'Yavaş pazar, düşük pay',
-    short: 'Küçült veya çık',
+    short: 'Küçültün ya da satıştan çekin',
     growth: 'Yavaş',
     share: 'Düşük',
     cash: 'Az kazanır, az harcar',
-    action: 'Ürüne para bağlama, küçük tut veya çık',
+    action: 'Ürüne yeni para yatırmayın. Ürünü küçük tutun ya da satıştan çekin.',
     next: 'Kapatılır ya da elden çıkarılır',
   },
 ];
@@ -81,7 +81,7 @@ export const FLOWS: { from: QuadrantKey; to: QuadrantKey; text: string }[] = [
 export const PURPOSES = [
   '“Hangi ürüne para koyalım, hangisinden nakit toplayalım, hangisinden çıkalım?” sorusunu tek resimde yanıtlar.',
   'Bütün ürünleri aynı iki ölçüyle karşılaştırır. Böylece tartışmayı “hissiyat”tan sayılara taşır.',
-  'Portföyün, yani ürünlerin bütününün dengesini gösterir. Geleceği besleyen ürünler var mı? Bugünü finanse eden ürünler var mı?',
+  'Portföyün, yani ürünlerin bütününün dengesini gösterir. Yarın para kazandıracak ürünler var mı? Bugün para kazandıran ürünler var mı?',
 ];
 
 export const AXES = [
@@ -95,7 +95,7 @@ export const AXES = [
     axis: 'Yatay eksen',
     name: 'Göreli pazar payı',
     question: 'Bu pazarda en büyük rakibe göre ne kadar büyüğüz?',
-    rule: 'Bizim payımız ÷ en büyük rakibin payı. Eşik 1’dir. Üstü lider, altı takipçi sayılır.',
+    rule: 'Göreli pay, bizim payımızın en büyük rakibin payına bölümüdür. Eşik 1’dir. Üstü lider, altı takipçi sayılır.',
   },
 ];
 
@@ -103,25 +103,25 @@ export const AXES = [
 export const SHARE_EXAMPLES = [
   { case: 'Biz %12, en büyük rakip %8', calc: '12 ÷ 8 = 1,5', result: 'Lideriz (1’in üstü)' },
   { case: 'Biz %6, en büyük rakip %24', calc: '6 ÷ 24 = 0,25', result: 'Takipçiyiz: rakip bizim 4 katımız' },
-  { case: 'Biz %30 ile lideriz, ikinci oyuncu %15', calc: '30 ÷ 15 = 2,0', result: 'Lider, kendini ikinciyle karşılaştırır' },
+  { case: 'Biz %30 ile lideriz, ikinci büyük şirket %15', calc: '30 ÷ 15 = 2,0', result: 'Lider, kendini ikinciyle karşılaştırır' },
 ];
 
 export const STRATEGIES = [
-  { name: 'Büyüt', meaning: 'Payı artırmak için yatırım yap, kısa vadede kârdan vazgeç', where: 'Umut veren Soru işareti' },
-  { name: 'Koru', meaning: 'Bugünkü payı savun, yeterli yatırımla konumu koru', where: 'Yıldız, güçlü Nakit ineği' },
-  { name: 'Hasat et', meaning: 'Yatırımı kıs ve nakdi topla. Pay yavaş yavaş düşebilir.', where: 'Zayıflayan Nakit ineği, bazı Köpekler' },
-  { name: 'Çık', meaning: 'Ürünü sat veya kapat, kaynağı başka ürüne aktar', where: 'Köpek, umutsuz Soru işareti' },
+  { name: 'Büyütün', meaning: 'Payı artırmak için yatırım yapın. Kısa vadede kârdan vazgeçin.', where: 'Umut veren Soru işareti' },
+  { name: 'Koruyun', meaning: 'Bugünkü payı savunun. Yeterli yatırımla konumu koruyun.', where: 'Yıldız, güçlü Nakit ineği' },
+  { name: 'Hasat edin', meaning: 'Yatırımı kısın ve nakdi toplayın. Pay yavaş yavaş düşebilir.', where: 'Zayıflayan Nakit ineği, bazı Köpekler' },
+  { name: 'Pazardan çıkın', meaning: 'Ürünü elden çıkarın ya da kapatın. Kaynağı başka ürüne aktarın.', where: 'Köpek, umutsuz Soru işareti' },
 ];
 
 export const STEPS = [
-  { name: '1. Ürünleri listele', sub: 'Ürün veya iş birimi' },
-  { name: '2. Pazarı tanımla', sub: 'Kime, neyi satıyoruz?' },
-  { name: '3. Pazar büyümesini bul', sub: 'Yıllık %, son 1–3 yıl' },
-  { name: '4. Payları bul', sub: 'Biz ve en büyük rakip' },
-  { name: '5. Göreli payı hesapla', sub: 'Bizim pay ÷ en büyük rakibin payı' },
-  { name: '6. Matrise yerleştir', sub: 'Balon büyüklüğü ciroyu gösterir' },
-  { name: '7. Strateji ata', sub: 'Büyüt, koru, hasat et, çık' },
-  { name: '8. Dengeyi kontrol et', sub: 'Nakit ineği var mı?' },
+  { name: '1. Ürünleri listeleyin', sub: 'Ürün ya da iş birimi' },
+  { name: '2. Pazarı tanımlayın', sub: 'Kime ne sattığınızı yazın' },
+  { name: '3. Pazar büyümesini bulun', sub: 'Son 1 ile 3 yılın yıllık büyümesi' },
+  { name: '4. Payları bulun', sub: 'Bizim ve en büyük rakibin payı' },
+  { name: '5. Göreli payı hesaplayın', sub: 'Bizim payın en büyük rakibin payına bölümü' },
+  { name: '6. Matrise yerleştirin', sub: 'Balon büyüklüğü ciroyu gösterir' },
+  { name: '7. Strateji seçin', sub: 'Büyütün, koruyun, hasat edin ya da pazardan çıkın' },
+  { name: '8. Dengeyi kontrol edin', sub: 'Nakit ineği olup olmadığına bakın' },
 ];
 
 /** Çalışılmış örnek: kurgusal “Örnek Ev Aletleri A.Ş.” (sayılar uydurmadır, yöntemi göstermek içindir). */
@@ -138,11 +138,11 @@ export const GROWTH_SPLIT = 10;
 export const SHARE_SPLIT = 1;
 
 export const EXAMPLE: ExampleProduct[] = [
-  { name: 'Akıllı saat', growth: 18, ourShare: 12, rivalShare: 8, revenue: 40, strategy: 'Koru: liderliği savun, büyümeye yatırım sürsün' },
-  { name: 'Kahve makinesi', growth: 3, ourShare: 30, rivalShare: 15, revenue: 90, strategy: 'Koru ve nakit topla: kazancı Soru işaretlerine aktar' },
-  { name: 'Elektrikli scooter', growth: 25, ourShare: 2, rivalShare: 20, revenue: 8, strategy: 'Seç: lider 10 kat büyük, ya büyük yatırım yap ya da çık' },
-  { name: 'Akıllı termostat', growth: 14, ourShare: 6, rivalShare: 10, revenue: 12, strategy: 'Büyüt: lidere yakın (0,6), pay kazanabilir' },
-  { name: 'DVD oynatıcı', growth: -6, ourShare: 4, rivalShare: 25, revenue: 5, strategy: 'Hasat et veya çık: pazar küçülüyor' },
+  { name: 'Akıllı saat', growth: 18, ourShare: 12, rivalShare: 8, revenue: 40, strategy: 'Koruyun. Liderliği savunun ve büyümeye yatırımı sürdürün.' },
+  { name: 'Kahve makinesi', growth: 3, ourShare: 30, rivalShare: 15, revenue: 90, strategy: 'Koruyun ve nakit toplayın. Kazancı Soru işaretlerine aktarın.' },
+  { name: 'Elektrikli scooter', growth: 25, ourShare: 2, rivalShare: 20, revenue: 8, strategy: 'Seçim yapın. Lider 10 kat büyük. Ya büyük yatırım yapın ya da pazardan çıkın.' },
+  { name: 'Akıllı termostat', growth: 14, ourShare: 6, rivalShare: 10, revenue: 12, strategy: 'Büyütün. Ürün lidere yakın (0,6) ve pay kazanabilir.' },
+  { name: 'DVD oynatıcı', growth: -6, ourShare: 4, rivalShare: 25, revenue: 5, strategy: 'Hasat edin ya da pazardan çıkın. Pazar küçülüyor.' },
 ];
 
 export const relativeShare = (p: ExampleProduct) => p.ourShare / p.rivalShare;
@@ -155,21 +155,21 @@ export function quadrantOf(growth: number, share: number): QuadrantKey {
 export const MISTAKES = [
   { mistake: 'Pazarı yanlış tanımlamak', fix: 'Pazar, rakiplerin gerçekten yarıştığı alan olarak tanımlanır. Örneğin “içecek” değil, “Türkiye’de kapsül kahve makinesi” seçilir.' },
   { mistake: 'Mutlak payı göreli pay sanmak', fix: '%20 pay tek başına bir şey söylemez. En büyük rakibin payı %60 ise göreli pay 0,33’tür.' },
-  { mistake: 'Enflasyonlu büyümeyi gerçek büyüme sanmak', fix: 'TL cinsinden ciro enflasyonla şişer. Bu yüzden adet büyümesi veya enflasyondan arındırılmış büyüme kullanılır.' },
-  { mistake: 'Köpek’i düşünmeden kapatmak', fix: 'Köpek başka bir ürünün satışına yardım ediyor, müşteriyi tutuyor veya sabit gideri paylaşıyor olabilir. Bu yüzden kapatmadan önce tartılır.' },
+  { mistake: 'Enflasyonlu büyümeyi gerçek büyüme sanmak', fix: 'TL cinsinden ciro enflasyonla şişer. Bu yüzden satılan adedin büyümesine bakın. Ya da fiyat artışının etkisini çıkarıp büyümeyi hesaplayın.' },
+  { mistake: 'Köpek’i düşünmeden kapatmak', fix: 'Köpek başka bir ürünün satışına yardım ediyor, müşteriyi tutuyor veya sabit gideri paylaşıyor olabilir. Bu yüzden ürünü kapatmadan önce bu etkileri inceleyin.' },
   { mistake: 'Matrisi bir kez yapıp bırakmak', fix: 'Pazarlar değişir. Bu yüzden matris en az yılda bir yeniden çizilir.' },
 ];
 
 export const LIMITS = [
   'Matris yalnız iki ölçüye bakar. Kârlılık, marka gücü ve rekabet yoğunluğu görünmez.',
-  'Yüksek pay her zaman yüksek kâr demek değildir, çünkü ölçek avantajı her sektörde aynı değildir.',
+  'Yüksek pay her zaman yüksek kâr demek değildir. Çünkü çok üretmenin maliyet avantajı her sektörde aynı değildir.',
   'Yeni ürünlerde pazar payını ölçmek zordur. Bu yüzden sonuç tahminlere dayanabilir.',
   'Başka yöntemler de var. GE–McKinsey matrisi pazarın çekiciliğini ve şirketin gücünü birçok ölçüyle değerlendirir. Ansoff matrisi büyüme yönünü mevcut veya yeni pazara ve ürüne göre seçer.',
 ];
 
 export const QUIZ = [
-  { situation: 'Pazar yılda %20 büyüyor. Payımız %5, en büyük rakibin payı %25.', answer: 'Soru işareti', why: 'Hızlı pazar (≥ %10), göreli pay 5 ÷ 25 = 0,2 (< 1).' },
-  { situation: 'Pazar yılda %2 büyüyor. Payımız %40, ikinci oyuncunun payı %10.', answer: 'Nakit ineği', why: 'Yavaş pazar, göreli pay 40 ÷ 10 = 4 (lider).' },
-  { situation: 'Pazar yılda %15 büyüyor. Payımız %18, en büyük rakibin payı %12.', answer: 'Yıldız', why: 'Hızlı pazar, göreli pay 18 ÷ 12 = 1,5 (lider).' },
-  { situation: 'Pazar yılda %4 küçülüyor. Payımız %3, en büyük rakibin payı %30.', answer: 'Köpek', why: 'Yavaş (küçülen) pazar, göreli pay 0,1.' },
+  { situation: 'Pazar yılda %20 büyüyor. Payımız %5, en büyük rakibin payı %25.', answer: 'Soru işareti', why: 'Pazar hızlı büyüyor, çünkü büyüme %10 ya da üstünde. Göreli pay 5’in 25’e bölümüdür, yani 0,2. Bu sayı 1’den küçüktür.' },
+  { situation: 'Pazar yılda %2 büyüyor. Payımız %40, ikinci büyük şirketin payı %10.', answer: 'Nakit ineği', why: 'Pazar yavaş büyüyor. Göreli pay 40’ın 10’a bölümüdür, yani 4. Ürün lider.' },
+  { situation: 'Pazar yılda %15 büyüyor. Payımız %18, en büyük rakibin payı %12.', answer: 'Yıldız', why: 'Pazar hızlı büyüyor. Göreli pay 18’in 12’ye bölümüdür, yani 1,5. Ürün lider.' },
+  { situation: 'Pazar yılda %4 küçülüyor. Payımız %3, en büyük rakibin payı %30.', answer: 'Köpek', why: 'Pazar küçülüyor, bu yüzden yavaş pazar sayılır. Göreli pay 3’ün 30’a bölümüdür, yani 0,1.' },
 ];

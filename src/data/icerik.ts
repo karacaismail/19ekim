@@ -78,7 +78,7 @@ export const GRUP_ADI: Record<IcerikGrubu, string> = { pazarlama: 'Pazarlama', i
 
 const T = '2026-10-28';
 const BELIRLENMEDI = 'belirlenmedi';
-const PARAM_NOTU = 'Parametreler sayfasında değiştirilen değerler yalnız değiştirildikleri tarayıcıda saklanır.';
+const PARAM_NOTU = '“Parametreler” sayfasında bir değeri değiştirirseniz değişiklik yalnız o tarayıcıda kalır. Başka tarayıcıda bu değişiklik görünmez.';
 
 const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: Marka[] = ['istoc']): IcerikKaydi => ({
   id: `rol-${slug}`,
@@ -97,7 +97,7 @@ const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: 
   asOf: T,
   gozdenGecirme: 'Kadro, görev ya da başlangıç koşulu değişince',
   duzenleme: 'yok',
-  kapsam: `${kapsam} Ücret özeti örnek bir politikadır. Gerçekleşmiş performansı veya bordro kaydını göstermez. ${PARAM_NOTU}`,
+  kapsam: `${kapsam} Bu sayfadaki ücret bilgisi örnek bir ücret planıdır. Gerçekleşen performansı ve bordro kaydını göstermez. ${PARAM_NOTU}`,
   iliskili: ['organizasyon', 'istihdam', 'eylem-plani', 'applet'],
 });
 
@@ -108,7 +108,7 @@ const politikaKayitlari: IcerikKaydi[] = [{
   sahip: BELIRLENMEDI, durum: 'taslak', kanit: 'ornek',
   kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
   asOf: '2026-11-11', gozdenGecirme: 'Projenin çalışma kapsamı, hesabı veya koşulu değişince', duzenleme: 'yok',
-  kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar seçili satış parametrelerini kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
+  kapsam: 'Her proje için beş rolün ayrı rehberi var. Her rehber bir çalışma taslağıdır. Hesaplar seçili satış değerleriyle yapılır. Bu rehberler imzalı sözleşme değildir. Kesin kazanç da göstermez.',
   iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri', yeni: true,
 }];
 
@@ -130,17 +130,17 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Kadro kararı ya da başlangıç tarihi değişince',
     duzenleme: 'yok',
-    kapsam: `Şema planlanan kadroyu gösterir. Kişi sayıları ve başlangıç tarihleri plandır, kimsenin işe başladığını kanıtlamaz. ${PARAM_NOTU}`,
+    kapsam: `Şema planlanan kadroyu gösterir. Kişi sayıları ve başlangıç tarihleri plandır. Bu bilgiler kimsenin işe başladığını göstermez. ${PARAM_NOTU}`,
     iliskili: ['istihdam', 'eylem-plani'],
     menu: 'Organizasyon şeması',
   },
-  rol('dijital-pazarlama', 'Dijital pazarlama uzmanı', 'Dijital pazarlama uzmanı hangi çıktılardan sorumludur ve günü nasıl düzenlenir?', 'Rol profili planlanan sorumlulukları anlatır. Kanal ve içerik planının asıl yeri Pazarlama operasyonu sayfasıdır.'),
-  rol('pazarlamaci', 'Masa başı pazarlama (CRM)', 'iStoc CRM rolü hangi aşamaları yürütür ve aday ne zaman müşteri sayılır?', 'Rol profili planlanan sorumlulukları anlatır. Müşteri aşamaları Müşteri yolculuğu kaydında tanımlanır.'),
-  rol('saha-uzmani', 'Saha pazarlama ekibi', 'Saha ekibi ne teslim eder ve kaydı CRM’e nasıl aktarır?', 'Rol profili planlanan sorumlulukları anlatır. Temsilci ağı modeli ayrı bir sayfada anlatılır.'),
-  rol('ekip-lideri', 'Satış-pazarlama ekip lideri', 'Ekip lideri hangi kararları kendisi verir, hangilerini bir üst role iletir?', 'Rol profili planlanan sorumlulukları anlatır. Ağ modeli ayrı bir sayfada anlatılır.'),
-  rol('organizator', 'Organizatör', 'Organizatör hangi etkinlik sonuçlarından sorumludur ve katılım ile aktivasyon nasıl ayrılır?', 'Rol profili planlanan sorumlulukları anlatır. Toplantı programı Eylem planında ortak bir etkinlik olarak yer alır.'),
-  rol('segika', 'Segika masa başı pazarlama (CRM)', 'Segika satış ve CRM rolü neyi üstlenir? Demo, ilk değer ve destek devri nasıl işler?', 'Rol profili planlanan sorumlulukları anlatır. Segika’ya özgü müşteri, demo ve destek devri kuralları henüz netleşmedi. Bu yüzden iStoc için tanımlanan olaylar Segika’ya kopyalanmaz.', ['segika']),
-  rol('asistan', 'Yönetici asistanı', 'Asistan hangi işlerde destek verir, talebi kim iletir ve işin yapıldığı nasıl kanıtlanır?', 'Rol profili planlanan sorumlulukları anlatır ve henüz onay bekler. Şirketin karar listesi Kararlar sayfasındadır.', ['istoc', 'segika']),
+  rol('dijital-pazarlama', 'Dijital pazarlama uzmanı', 'Dijital pazarlama uzmanı hangi çıktılardan sorumludur ve günü nasıl düzenlenir?', 'Bu sayfa rolün planlanan görevlerini anlatır. Kanal ve içerik planının asıl yeri “Pazarlama operasyonu” sayfası olacak. Bu yeni sayfa henüz açılmadı.'),
+  rol('pazarlamaci', 'Masa başı pazarlama (CRM)', 'iStoc CRM rolü hangi aşamaları yürütür ve aday ne zaman müşteri sayılır?', 'Bu sayfa rolün planlanan görevlerini anlatır. Müşteri aşamaları “Müşteri yolculuğu” sayfasında tanımlanacak. Bu yeni sayfa henüz açılmadı.'),
+  rol('saha-uzmani', 'Saha pazarlama ekibi', 'Saha ekibi ne teslim eder ve kaydı CRM’e nasıl aktarır?', 'Bu sayfa rolün planlanan görevlerini anlatır. Temsilci ağının nasıl çalıştığı “Temsilci ağı” sayfasında anlatılır.'),
+  rol('ekip-lideri', 'Satış-pazarlama ekip lideri', 'Ekip lideri hangi kararları kendisi verir, hangilerini bir üst role iletir?', 'Bu sayfa rolün planlanan görevlerini anlatır. Temsilci ağının nasıl çalıştığı “Temsilci ağı” sayfasında anlatılır.'),
+  rol('organizator', 'Organizatör', 'Organizatör hangi etkinlik sonuçlarından sorumludur ve katılım ile aktivasyon nasıl ayrılır?', 'Bu sayfa rolün planlanan görevlerini anlatır. Toplantı programı “Eylem planı” sayfasında ortak bir etkinlik olarak gösterilir.'),
+  rol('segika', 'Segika masa başı pazarlama (CRM)', 'Segika satış ve CRM rolü neyi üstlenir? Demo, ilk değer ve destek devri nasıl işler?', 'Bu sayfa rolün planlanan görevlerini anlatır. Segika için müşteri, ürün tanıtımı (demo) ve desteğe devir kuralları henüz belli değil. Bu yüzden iStoc için tanımlanan olaylar Segika’da kullanılmaz.', ['segika']),
+  rol('asistan', 'Yönetici asistanı', 'Asistan hangi işlerde destek verir, talebi kim iletir ve işin yapıldığı nasıl kanıtlanır?', 'Bu sayfa rolün planlanan görevlerini anlatır. Rol henüz onaylanmadı. Şirketin bütün kararları “Kararlar” sayfasındadır.', ['istoc', 'segika']),
   {
     id: 'istihdam',
     path: '/istihdam/',
@@ -185,7 +185,7 @@ export const ICERIK: IcerikKaydi[] = [
     id: 'applet',
     path: '/applet/',
     sinif: ['yontem'],
-    baslik: 'Ücret ve performans applet’leri',
+    baslik: 'Ücret ve performans hesap araçları',
     kullaniciSorusu: 'Bir ücret, prim veya performans modelini nasıl kurarım ve örnek değerlerle hangi sonuç çıkar?',
     grup: 'istihdam',
     marka: ['istoc', 'segika'],
@@ -197,9 +197,9 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Ücret politikası taslağı değişince',
     duzenleme: 'bu-tarayici',
-    kapsam: 'Applet tutarları örnek verilerdir ve şirket kararı değildir. Yapılan değişiklikler yalnız bu tarayıcıda saklanır. Bir örnek, ancak Kararlar sayfası üzerinden politika önerisine dönüşür.',
+    kapsam: 'Hesap araçlarındaki tutarlar örnek verilerdir ve şirket kararı değildir. Yapılan değişiklikler yalnız bu tarayıcıda saklanır. Bir örneği politika önerisi yapmak için “Kararlar” sayfasını kullanın.',
     iliskili: ['ucret-politikasi', 'karar'],
-    menu: 'Applet',
+    menu: 'Hesap araçları',
   },
   {
     id: 'hedefler',
@@ -217,7 +217,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: '2. haftanın sonunda gerçek veriyle kalibrasyon',
     duzenleme: 'bu-senaryo',
-    kapsam: `Hedefler 19 Ekim tahtasındaki başlangıç değerleridir. Tahminler seçili senaryoya bağlıdır. Henüz gerçekleşen ölçüm yoktur, bu yüzden boş bir değer sıfır değil, ölçülmemiş demektir. ${PARAM_NOTU}`,
+    kapsam: `Tahminler seçili senaryoya bağlıdır. Henüz gerçek ölçüm yok. Bu yüzden boş bir alan sıfır demek değildir. Boş alan, değerin henüz ölçülmediğini gösterir. ${PARAM_NOTU}`,
     iliskili: ['gelir-plani', 'eylem-plani', 'karar', 'olcum'],
     menu: 'Hedefler',
   },
@@ -237,7 +237,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Fiyat, kadro, kanal bütçesi ya da dönüşüm varsayımı değişince',
     duzenleme: 'bu-senaryo',
-    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir, kesinleşmiş karar değildir. Hesap, koşullu abonelik modeliyle yapılır. İş modelinin abonelik mi, işlem gelirine dayalı likidite pilotu mu olacağına henüz karar verilmedi. Likidite pilotu için ayrıca bir hesap modeli yoktur. ${PARAM_NOTU}`,
+    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir, kesinleşmiş karar değildir. Hesap, koşullu abonelik modeliyle yapılır. İş modeline henüz karar verilmedi. Seçenekler abonelik ve işlem gelirine dayalı likidite pilotudur. Bu sayfa yalnız abonelik modelini hesaplar. Likidite pilotu için ayrı bir hesap yoktur. ${PARAM_NOTU}`,
     iliskili: ['hedefler', 'nakit-akisi', 'giderler', 'parametreler', 'karar'],
     menu: 'Gelir planı',
   },
@@ -257,7 +257,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Teslim tarihi, sorumlu ya da bağımlılık değişince',
     duzenleme: 'yok',
-    kapsam: `Eylemler, 19 Ekim kararlarına dayanan planlanmış teslimlerdir. Tarihler ve sorumlular plandır, işlerin tamamlandığına dair kanıt henüz yoktur. Rol ve ortaklık görünümleri aynı kayıtları süzerek gösterir. ${PARAM_NOTU}`,
+    kapsam: `Eylemler, 19 Ekim kararlarına dayanan planlanmış teslimlerdir. Tarihler ve sorumlular plandır, işlerin tamamlandığına dair kanıt henüz yoktur. Rol ve ortaklık sayfaları bu kayıtların yalnız kendi bölümünü gösterir. ${PARAM_NOTU}`,
     iliskili: ['hedefler', 'istihdam', 'satis-ortakligi', 'karar'],
     menu: 'Eylem planı',
   },
@@ -277,7 +277,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Temsilci kazanım varsayımı ya da katman kuralı değişince',
     duzenleme: 'bu-senaryo',
-    kapsam: `Temsilci ağı modeli seçili senaryoya göre koşullu tahmindir. Temsilci kazanma hunisi, müşteri kazanma hunisiyle toplanmaz. Segika ortaklık kuralları bu sayfada yer almaz. ${PARAM_NOTU}`,
+    kapsam: `Temsilci ağı modeli, ayarlardaki değerlere dayanan koşullu tahmindir. Temsilci bulma sayıları ile müşteri kazanma sayıları ayrıdır. Bu iki sayıyı toplamayın. Segika ortaklık kuralları “Satış ortaklığı” sayfasındadır. ${PARAM_NOTU}`,
     iliskili: ['rol-saha-uzmani', 'rol-ekip-lideri', 'gelir-plani', 'satis-ortakligi'],
     menu: 'Temsilci ağı',
   },
@@ -299,7 +299,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-03',
     gozdenGecirme: 'Fiyat, kur ya da komisyon oranı değişince',
     duzenleme: 'yok',
-    kapsam: 'Bu program bir öneridir. Oranlar, kotalar ve hedefler başlangıç değeridir, imzalı sözleşme değildir. Döviz kuru 3 Kasım 2026 tarihli değerdir.',
+    kapsam: 'Bu program bir öneridir. Oranlar, kotalar ve hedefler başlangıç değeridir. Bunlar imzalı sözleşme değildir. Döviz kuru 3 Kasım 2026 tarihli değerdir.',
     iliskili: ['deger-onerisi', 'buyume-modeli'],
     menu: 'Satış ortaklığı',
   },
@@ -319,7 +319,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-03',
     gozdenGecirme: 'Bir hizmet hazır olunca ya da kaldırılınca',
     duzenleme: 'yok',
-    kapsam: 'Sözlerin çoğu henüz çalışan bir hizmet değil, öneridir. Esnafa söz vermeden önce hizmetin hazır olduğu doğrulanmalıdır.',
+    kapsam: 'Sözlerin çoğu henüz çalışan bir hizmet değil, öneridir. Saha ekibi esnafa söz vermeden önce hizmetin hazır olduğunu doğrulamalıdır.',
     iliskili: ['satis-ortakligi'],
     menu: 'Değer önerisi',
   },
@@ -380,7 +380,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-12',
     gozdenGecirme: 'Bir platformun fiyatı, oranı ya da koşulu değişince',
     duzenleme: 'yok',
-    kapsam: 'Platform bilgileri araştırma belgesinden alındı ve kaynağın yayın tarihine aittir. İkincil kaynak etiketli bilgiler platformun kendi yayını değildir. istoc.com satırları 12 Kasım 2026 günü canlı siteden okundu.',
+    kapsam: 'Platform bilgileri araştırma belgesinden alındı ve kaynağın yayın tarihine aittir. İkincil kaynak etiketli bilgiler platformun kendi yayını değildir. Tablodaki istoc.com satırları 12 Kasım 2026 günü canlı siteden okundu.',
     iliskili: ['services', 'gelir-modelleri', 'deger-onerisi'],
     menu: 'Küresel pazaryerleri',
     yeni: true,
@@ -401,7 +401,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-04',
     gozdenGecirme: 'Sipariş ve ödeme platforma gelince ya da gelir modeli kararı verilince',
     duzenleme: 'yok',
-    kapsam: 'Stratejiler öneridir. Rakamlar pilotta ayarlanacak örnek değerlerdir. Ödüller bugün kaydedilebilen olaylara bağlıdır, çünkü sipariş ve ödeme henüz platformda değildir.',
+    kapsam: 'Stratejiler öneridir. Rakamlar örnektir ve ilk küçük denemede yeniden ayarlanacak. Claude önerilerinde ödüller bugün kaydedilebilen işlere bağlıdır. Gemini önerilerinin çoğu ise sipariş ve ödeme platformda çalışınca uygulanabilir.',
     iliskili: ['deger-onerisi', 'gelir-modelleri', 'satis-ortakligi'],
     menu: 'Oyunlaştırma',
   },
@@ -421,7 +421,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-10',
     gozdenGecirme: 'İlk kayıtlarla pilot bitince ya da sipariş ve ödeme platforma gelince',
     duzenleme: 'yok',
-    kapsam: `Akış öneridir. Gün sayıları ve 10 ürün hedefi pilotta ayarlanacak başlangıç değerleridir. ${PARAM_NOTU}`,
+    kapsam: `Akış öneridir. Gün sayıları ve 10 ürün hedefi başlangıç değerleridir. Bu değerleri deneme döneminde ayarlarız. ${PARAM_NOTU}`,
     iliskili: ['deger-onerisi', 'gelir-modelleri', 'hedefler'],
     menu: 'Yeni kayıtlar',
   },
@@ -483,7 +483,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Sheets dosyası değişince (her açılışta)',
     duzenleme: 'dis-kaynak',
-    kapsam: 'Gider tutarları, sayfa açılırken Giderler Sheets dosyasından okunur. Dosya değişince bu sayfa da değişir. Kaynak bir plandır, ödeme takibi değildir. Kaynak kurum Türksab’dır. Giderlerin markalara nasıl dağıtılacağı henüz belirlenmedi ve karar bekliyor. Varsayım kaynakları yalnız arama bağlantısıdır, doğrulanmış belge değildir.',
+    kapsam: 'Gider tutarları, sayfa açılırken Giderler Sheets dosyasından okunur. Dosya değişince bu sayfa da değişir. Bu sayfa bir gider planıdır. “Ödendi” ve “Bekliyor” yalnız Sheets’e yazılan durumu gösterir. Sayfa ödemeleri takip etmez. Kaynak kurum Türksab’dır. Giderlerin markalara nasıl dağıtılacağı henüz belirlenmedi ve karar bekliyor. Varsayım kaynakları yalnız arama bağlantısıdır, doğrulanmış belge değildir.',
     iliskili: ['nakit-akisi', 'gelir-plani', 'parametreler', 'karar'],
     menu: 'Giderler',
   },
@@ -503,7 +503,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Senaryo, gider planı ya da tahsilat varsayımı değişince',
     duzenleme: 'bu-senaryo',
-    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir, kesinleşmiş karar değildir. Nakit, kâr veya ciro ile aynı şey değildir. Sayfa, gelir planındaki seçili senaryoyu ve hesap seçeneklerini kullanır. Gider kaynağı seçeneği bunun dışındadır. Hangi seçeneklerin uygulandığı sayfada yazılır. Nakit çıkışları, Sheets gider planından ve plan kalemlerinden alınır. ${PARAM_NOTU}`,
+    kapsam: `Bu sayfadaki tutarlar seçili senaryoya göre koşullu tahmindir, kesinleşmiş karar değildir. Nakit, kasadaki paradır. Kâr ya da ciro ile aynı şey değildir. Sayfa, gelir planındaki seçili senaryoyu ve hesap seçeneklerini kullanır. Gider kaynağı seçeneği bunun dışındadır. Hangi seçeneklerin uygulandığı sayfada yazılır. Nakit çıkışları, Sheets gider planından ve plan kalemlerinden alınır. ${PARAM_NOTU}`,
     iliskili: ['gelir-plani', 'giderler', 'karar'],
     menu: 'Nakit akışı',
   },
@@ -543,7 +543,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-05',
     gozdenGecirme: 'Kadro seçeneği, gelir parametreleri ya da ilk 90 günün ölçümleri değişince',
     duzenleme: 'yok',
-    kapsam: 'Bu sayfadaki tutarlar 2027 için olasılıklı öngörüdür, kesinleşmiş gelir değildir. Saat ve risk değerleri kaynaklıdır ya da varsayım olarak işaretlidir. Satış katkısının bir kısmı varsayımdır ve ilk 90 günün ölçümüyle güncellenmelidir.',
+    kapsam: 'Bu sayfadaki tutarlar 2027 için olasılıklı öngörüdür, kesinleşmiş gelir değildir. Saat ve risk değerleri kaynaklıdır ya da varsayım olarak işaretlidir. Satış katkısının bir kısmı varsayımdır. Bu kısım ilk 90 günün ölçümüne göre güncellenmeli.',
     iliskili: ['gelir-plani', 'istihdam', 'butce-2027'],
     menu: '2027 gelir öngörüsü',
   },
@@ -563,7 +563,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Kullanıcı düzenleyince',
     duzenleme: 'bu-tarayici',
-    kapsam: 'Bu sayfa kişisel çalışma notlarını içerir ve notlar yalnız bu tarayıcıda saklanır. Bir notu tamamlandı diye işaretlemek, şirketteki resmî eylem veya karar durumunu değiştirmez.',
+    kapsam: 'Bu sayfada kişisel çalışma notları var. Notlar yalnız bu tarayıcıda saklanır. Bir notu tamamlandı diye işaretlemek, şirketteki resmî eylem veya karar durumunu değiştirmez.',
     iliskili: ['eylem-plani', 'karar'],
     menu: 'Notlar',
   },
@@ -583,7 +583,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Gerçek pazar verisiyle uygulama kararı alınırsa',
     duzenleme: 'yok',
-    kapsam: 'Bu sayfa genel bir eğitim sayfasıdır. Örnek veriler kurgusaldır, iStoc’a uygulanmış bir analiz veya şirket değerlendirmesi değildir. Kullanıcı kararıyla ana menüde ve sunum sırasında yer almaz.',
+    kapsam: 'Bu sayfa genel bir eğitim sayfasıdır. Örnek veriler kurgusaldır, iStoc’a uygulanmış bir analiz veya şirket değerlendirmesi değildir. Bu sayfa ana menüde yoktur. Sunumda da gösterilmez.',
     iliskili: ['strateji'],
   },
   {
@@ -641,7 +641,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Adres taşınınca',
     duzenleme: 'yok',
-    kapsam: 'Bu bir sistem sayfasıdır. Eski adresler gerekçesiz olarak ana sayfaya yönlendirilmez, bunun yerine geçerli bağlantılar listelenir.',
+    kapsam: 'Aradığınız adres bulunamadı. Gitmek istediğiniz sayfayı menüden seçin.',
     iliskili: [],
   },
   // Planlanan ana adresler (§5.2, §8): içerik taşınana kadar dosya açılmaz; durum taslak.
@@ -744,7 +744,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: T,
     gozdenGecirme: 'Ücret, prim ya da çalışma düzeni kararı değişince',
     duzenleme: 'yok',
-    kapsam: 'Sayfada politikanın sürümü, durumu ve uygulandığı kapsam görünür. Applet örnekleri kendiliğinden politika olmaz. Hukuki ifadeler henüz doğrulanmadı.',
+    kapsam: 'Sayfada politikanın sürümü, durumu ve uygulandığı kapsam görünür. Hesap araçlarındaki örnekler kendiliğinden politika olmaz. Hukuki ifadeler henüz doğrulanmadı.',
     iliskili: ['karar', 'applet', 'giderler'],
     menu: 'Ücret ve çalışma modeli',
     planlandi: true,
@@ -827,7 +827,7 @@ export function altBilgiKapsami(path: string): string {
  */
 export function altBilgiOnCumle(path: string): string {
   return icerikOf(path)?.turetim === 'tahta'
-    ? 'Bu içerik 19 Ekim 2026 tarihli tahta kararlarından ve planlama panosundan türetildi. Hedefler başlangıç değeridir ve 2. haftanın sonunda gerçek veriyle kalibre edilir. '
+    ? 'Bu içerik 19 Ekim 2026’da tahtaya yazılan kararlardan ve planlama panosundan hazırlandı. Hedefler ilk tahmindir. Hedefler 2. haftanın sonunda gerçek sonuçlara göre düzeltilir. '
     : '';
 }
 

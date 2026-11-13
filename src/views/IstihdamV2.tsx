@@ -33,7 +33,7 @@ import '../styles/istihdamV2.css';
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}-01T00:00:00`));
 const tarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
-const yuzde = (v: number) => `yüzde ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v)}`;
+const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v)}`;
 const hizmetMi = (p: Pozisyon, s: SecenekId) => ['Dış hizmet', 'Serbest çalışan'].includes(p.secenekler[s].bicim);
 
 /** İşe alım ayları: “Mart 2027 (2 kişi)” biçiminde. Mevcut takvim rolünde plan tarihi gün olarak yazılır. */
@@ -56,14 +56,14 @@ function maasMetni(p: Pozisyon, s: SecenekId) {
     if (o.yillikMaliyet2027) return `${tl(o.yillikMaliyet2027)} bir kerelik`;
     return 'Bedel bilinmiyor';
   }
-  if (!p.netMaas2027) return 'Plan dışı';
-  return `${tl(p.netMaas2027)} net`;
+  if (!p.netMaas2027) return 'Bu plana dahil değil';
+  return tl(p.netMaas2027);
 }
 
 function aylikMaliyetMetni(p: Pozisyon, s: SecenekId) {
   const o = p.secenekler[s];
-  if (hizmetMi(p, s)) return o.aylikHizmetBedeli ? tl(o.aylikHizmetBedeli) : 'Aylık bedel yok';
-  if (!p.aylikMaliyet) return 'Plan dışı';
+  if (hizmetMi(p, s)) return o.aylikHizmetBedeli ? tl(o.aylikHizmetBedeli) : o.yillikMaliyet2027 ? 'Bir kerelik ödeme' : 'Bedel bilinmiyor';
+  if (!p.aylikMaliyet) return 'Bu plana dahil değil';
   const kisiBasi = p.aylikMaliyet * (o.bicim === 'Yarı zamanlı' ? 0.5 : 1);
   return o.kisi > 1 ? `${tl(kisiBasi)} kişi başı` : tl(kisiBasi);
 }
@@ -92,7 +92,7 @@ function PozisyonAyrintisi({ p, secili }: { p: Pozisyon; secili: SecenekId }) {
           <dd>{p.seviye}</dd>
         </div>
         <div>
-          <dt>Maaş, 2027</dt>
+          <dt>Net maaş, 2027</dt>
           <dd>{maasMetni(p, secili)}</dd>
         </div>
       </dl>
@@ -110,7 +110,7 @@ function PozisyonAyrintisi({ p, secili }: { p: Pozisyon; secili: SecenekId }) {
         </ul>
       </section>
       <section className="iv2-bolum" aria-labelledby="iv2-maas">
-        <h3 id="iv2-maas">Maaşın dayanağı</h3>
+        <h3 id="iv2-maas">Maaş nasıl hesaplandı?</h3>
         <p>{p.maasDayanagi}</p>
       </section>
       <section className="iv2-bolum" aria-labelledby="iv2-secenekte">
@@ -242,7 +242,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
     <>
       <PageHeader
         title="İstihdam takvimi"
-        purpose="istoc.com 2027 kadro planının kümelerini, pozisyonlarını, kişi sayısını, tarihini ve maliyetini üç seçenekle gösterir."
+        purpose="Bu sayfa istoc.com’un 2027 kadro planını, işe alım aylarını ve maliyetini gösterir."
         meta={[
           { label: 'Hesap tarihi', value: tarih(HESAP_TARIHI) },
           { label: 'Maliyet', value: 'Net maaş × 2' },
@@ -251,7 +251,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
       {surum}
 
       <p className="iv2-uyari">
-        Bu sürüm, mevcut istihdam takvimindeki {eskiSayisi} rolü değiştirmeden korur ve “Eski” etiketiyle gösterir. Üstüne 11 kümede {yeniSayisi} yeni pozisyon ekler. Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
+        Bu sürüm, 1. sürümdeki {eskiSayisi} rolü aynen korur. Bu roller “Eski” etiketiyle görünür. Bu sürüm 11 kümede {yeniSayisi} yeni pozisyon ekler. Her seçenek bu pozisyonların bir kısmını kullanır. Dış hizmetler ve serbest çalışanlar kişi sayısına girmez.</p><p className="iv2-uyari">Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
       </p>
 
       <Section
@@ -268,15 +268,15 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         <p className="iv2-aciklama">{oz.aciklama}</p>
         <Stats
           items={[
-            { label: 'Aralık 2027 kadro', value: `${int(oz.toplamKisi)} kişi`, note: `Kurucu ve yazılım ekibi dahil. ${int(oz.yeniKadroKisi)} kişi yeni kadro.` },
+            { label: 'Aralık 2027 kadro', value: `${int(oz.toplamKisi)} kişi`, note: `Bu sayıya kurucu ve yazılım ekibi de dahildir. Bunların ${int(oz.yeniKadroKisi)} kişisi yeni alınır.` },
             { label: 'Dış hizmet ve serbest', value: `${int(oz.disHizmetSayisi + oz.serbestCalisanSayisi)} hizmet`, note: `${int(oz.disHizmetSayisi)} dış hizmet, ${int(oz.serbestCalisanSayisi)} serbest çalışan` },
             { label: '2027 kadro ve hizmet gideri', value: tl(oz.toplamMaliyet2027), note: `Aralık 2027’de aylık ${tl(oz.aylikMaliyetAralik2027)}` },
-            { label: 'Giderin gelire oranı', value: yuzde(oz.gelirPayi), note: `${oz.dayandigiSenaryo} senaryosunun 2027 abonelik geliri ${tl(oz.gelirHedefi2027)}` },
+            { label: 'Giderin gelire oranı', value: yuzde(oz.gelirPayi), note: `Oran, ${oz.dayandigiSenaryo} senaryosunun 2027 abonelik gelirine göre hesaplanır. Bu gelir ${tl(oz.gelirHedefi2027)} olur. Her 100 ₺ gelirin ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(oz.gelirPayi)} ₺ kadarı kadro ve hizmet giderine gider.` },
           ]}
         />
       </Section>
 
-      <Section id="karsilastirma" index={2} title="Üç seçeneğin karşılaştırması" desc="Gider oranı, 2027 kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır. Reklam, satış primi, ofis ve yazılım araçları bu gidere dahil değildir.">
+      <Section id="karsilastirma" index={2} title="Üç seçeneğin karşılaştırması" desc="2027 kadro ve hizmet giderini, aynı senaryonun 2027 abonelik gelirine böleriz. Böylece gider oranını buluruz. Reklam, satış primi, ofis ve yazılım araçları bu gidere dahil değildir.">
         <DataTable<SecenekId>
           id="secenekler"
           title="Seçenekler yan yana"
@@ -290,13 +290,13 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
             { key: 'gider', header: '2027 gideri', nowrap: true, summary: true, render: (s) => tl(SECENEK_OZETI[s].toplamMaliyet2027) },
             { key: 'gelir', header: '2027 geliri', nowrap: true, render: (s) => tl(SECENEK_OZETI[s].gelirHedefi2027) },
             { key: 'oran', header: 'Gider oranı', nowrap: true, render: (s) => yuzde(SECENEK_OZETI[s].gelirPayi) },
-            { key: 'aralik', header: 'Aralık 2027 aylık oran', minWidth: '8rem', render: (s) => yuzde(SECENEK_OZETI[s].aralikGelirPayi) },
+            { key: 'aralik', header: 'Aralık 2027’de aylık gider oranı', minWidth: '8rem', render: (s) => yuzde(SECENEK_OZETI[s].aralikGelirPayi) },
           ]}
           rows={SECENEKLER}
         />
       </Section>
 
-      <Section id="takvim" index={3} title="2027 işe alım takvimi" desc={`Tablo, ${SECENEK_ADI[secili]} seçeneğinde her ay kimin başladığını gösterir. Tablo ay sonundaki kadroyu ve o ayın kadro ve hizmet giderini de gösterir. 2027’den önce başlayanlar Ocak ayının kadrosunda sayılır.`}>
+      <Section id="takvim" index={3} title="2027 işe alım takvimi" desc={`Tablo, ${SECENEK_ADI[secili]} seçeneğinde her ay kimin başladığını gösterir. Tablo ay sonundaki kadroyu ve o ayın kadro ve hizmet giderini de gösterir. 2027’den önce başlayanlar Ocak ayının kadrosunda sayılır. Serbest çalışanlar ve dış hizmetler kişi sayısına girmez.`}>
         <DataTable<(typeof takvim)[number]>
           id="takvim-2027"
           title={`${SECENEK_ADI[secili]} seçeneği, ay ay`}
@@ -305,7 +305,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
             { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (a) => ayAdi(a.ay) },
             {
               key: 'baslayan',
-              header: 'Başlayanlar',
+              header: 'Başlayan kişi ve hizmetler',
               minWidth: '16rem',
               text: (a) => (a.baslayanlar.length ? a.baslayanlar.map((b) => (b.adet > 1 ? `${b.pozisyon.unvan} (${b.adet})` : b.pozisyon.unvan)).join(', ') : 'Yeni başlayan yok'),
               render: (a) =>
@@ -331,10 +331,10 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         id="pozisyonlar"
         index={4}
         title="Kümeler ve pozisyonlar"
-        desc="Her küme kendi tablosundadır. Tabloda yalnız seçili seçenekte yer alan pozisyonlar vardır. “Ayrıntı” düğmesi pozisyonun neden gerekli olduğunu, aranan nitelikleri ve maaşın dayanağını açar."
+        desc="Her küme kendi tablosundadır. Tabloda yalnız seçili seçenekte yer alan pozisyonlar vardır. “Ayrıntı” düğmesine basınca pozisyonun neden gerektiğini görürsünüz. Aranan nitelikleri ve maaşın nasıl hesaplandığını da görürsünüz."
         tools={
           <div className="iv2-araclar">
-            <Choice<string> label="Küme" value={kumeSuzgec} options={[{ id: 'hepsi', name: 'Hepsi' }, ...KUMELER.map((k) => ({ id: k.id, name: k.ad }))]} onChange={setKumeSuzgec} />
+            <Choice<string> label="Gösterilecek kümeyi seçin" value={kumeSuzgec} options={[{ id: 'hepsi', name: 'Hepsi' }, ...KUMELER.map((k) => ({ id: k.id, name: k.ad }))]} onChange={setKumeSuzgec} />
           </div>
         }
       >
@@ -348,7 +348,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
           <div>
             <dt>2027 asgari ücreti</dt>
             <dd>
-              {asgari.durum} Plan net {tl(asgari.net)}, brüt {tl(asgari.brut)} alır. Olası aralık net {tl(asgari.aralik.dusuk.net)} ile {tl(asgari.aralik.yuksek.net)} arasıdır.
+              {asgari.durum} Plan net asgari ücreti {tl(asgari.net)}, brüt asgari ücreti {tl(asgari.brut)} kabul eder. Olası aralık net {tl(asgari.aralik.dusuk.net)} ile {tl(asgari.aralik.yuksek.net)} arasıdır.
             </dd>
           </div>
           <div>
@@ -365,7 +365,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
           </div>
           <div>
             <dt>Maliyet kuralı</dt>
-            <dd>İşveren maliyeti net maaşın 2 katıdır. Yarı zamanlı çalışan yarım maliyettir. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır. Kişi, işe alım ayının başında başlar. Takvimdeki aylar {ayAdi(AYLAR_2027[0])} ile {ayAdi(AYLAR_2027[11])} arasıdır.</dd>
+            <dd>İşveren maliyeti net maaşın 2 katıdır. Yarı zamanlı çalışanın maliyeti, tam zamanlı çalışanın yarısıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır. Kişi, işe alım ayının başında başlar. Takvim {ayAdi(AYLAR_2027[0])} ayından {ayAdi(AYLAR_2027[11])} ayına kadardır.</dd>
           </div>
         </dl>
         <h3 className="block-title">Kaynaklar</h3>
@@ -384,7 +384,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
         </ul>
       </Section>
 
-      <Section id="dikkat" index={6} title="Dikkat edilmesi gerekenler" desc="Bu plan projenin bugünkü kararlarıyla bazı noktalarda çelişir. Seçenek kararından önce aşağıdaki noktalar ve sorular yanıtlanmalıdır.">
+      <Section id="dikkat" index={6} title="Dikkat edilmesi gerekenler" desc="Bu plan projenin bugünkü kararlarıyla bazı noktalarda çelişir. Bir seçenek seçmeden önce aşağıdaki noktalar incelenmeli ve sorular cevaplanmalıdır.">
         <dl className="iv2-dikkat">
           {DIKKAT.map((d) => (
             <div key={d.baslik}>

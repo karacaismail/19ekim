@@ -91,9 +91,9 @@ export function KararSecimleri() {
         <div className="ks-ilerleme">
           <p className="ks-ilerleme-metin" aria-live="polite">
             <strong>
-              {cevaplanan} / {SORULAR.length}
+              {SORULAR.length} açık sorudan {cevaplanan} tanesi
             </strong>{' '}
-            soru cevaplandı{degisen ? `, ${degisen} ajan kararı değişti` : ''}.
+            cevaplandı.{degisen ? ` ${degisen} ajan kararı değişti.` : ''}
           </p>
           <svg className="ks-cubuk" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
             <rect className="ks-cubuk-iz" x="0" y="0" width="100" height="6" />
@@ -102,10 +102,10 @@ export function KararSecimleri() {
         </div>
         <div className="ks-araclar">
           <button type="button" className="ks-dugme" onClick={onerileriSec}>
-            Boşlara önerileri koy
+            Cevapsız sorulara öneriyi seç
           </button>
           <button type="button" className="ks-dugme" data-ikincil="" onClick={() => yaz({})}>
-            Temizle
+            Bütün seçimleri ve notları sil
           </button>
         </div>
       </div>
@@ -125,7 +125,7 @@ export function KararSecimleri() {
                       <button type="button" className="ks-liste-oge" aria-current={j === i ? 'step' : undefined} data-cevap={secimi(x, c) ? '' : undefined} onClick={() => git(j)}>
                         <span className="ks-liste-isaret" aria-hidden="true" />
                         <span className="ks-liste-metin">{x.q.baslik}</span>
-                        <span className="ks-gizli">{secimi(x, c) ? ', cevaplandı' : ', boş'}</span>
+                        <span className="ks-gizli">{secimi(x, c) ? ', cevaplandı' : ', cevaplanmadı'}</span>
                       </button>
                     </li>
                   ) : null,
@@ -140,7 +140,7 @@ export function KararSecimleri() {
             <p className="ks-ust-etiket">
               {k.ajan ? 'Ajan kararı, onayınızı bekliyor' : 'Açık soru'}
               <span>
-                {i + 1} / {KALEMLER.length}
+                {i + 1}. soru, toplam {KALEMLER.length} soru
               </span>
             </p>
             <h3 className="ks-soru" id={`ks-soru-${k.q.id}`}>

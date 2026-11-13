@@ -156,7 +156,7 @@ test('akışı değiştirmeyen ortak değer ilerlemeyi sıfırlamaz, akışı de
 test('rehberdeki ayar seçimi herkesi etkilediğini söyler', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   await page.getByRole('button', { name: 'Görevi ve çalışma koşullarını görün', exact: true }).click();
-  await expect(page.getByText('Bu seçim ortak ayarı değiştirir. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.')).toBeVisible();
+  await expect(page.getByText('Aşağıdaki seçimler bu cihazda kalmaz. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.')).toBeVisible();
   await expect(page.getByText('Değişiklikler hesaplayıcıya ve bu projenin rehberlerine yansır.')).toHaveCount(0);
 });
 

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { EXAMPLE, QUIZ, quadrantOf, relativeShare } from '../src/data/bcg';
 import { contentPlan, pipeline, productionRamp } from '../src/data/digital';
 import { DEFAULT_NOTES } from '../src/data/notes';
-import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
+import { computeBreakeven, crossing, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, SENS_RETENTIONS } from '../src/data/breakeven';
 import { addedSahaCosts, makeStaffing, staffingSheet } from '../src/data/staffing';
 import { adCapacity, adSchedule, growthHires, HORIZON, priceSeries } from '../src/data/revenue';
 import { buildCashflow, cashSeriesOf, toparlanmaOf } from '../src/data/cashflow';
@@ -14,6 +14,7 @@ import { DEFAULT_PARAMS, loadParams, loadParamsDetay, PARAM_GROUPS, PARAMS_KEY, 
 import type { OrgNode } from '../src/data/tree';
 import { addDays, monthStart, shiftText } from '../src/lib/dates';
 import { presetOptions, presetsOf } from '../src/lib/scenarioOptions';
+import { acikAd, acikTerimler } from '../src/data/politikalar/terimler';
 import { buildModel as buildOpex } from './opex-fixture';
 
 const m = buildModel(DEFAULT_PARAMS);
@@ -102,7 +103,7 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
     for (const d of m.openDecisions) expect(['yonetici', 'yatirimci'], d.topic).toContain(d.owner);
     const open = m.openDecisions.map((d) => d.topic);
     for (const d of m.decisions) expect(open, d.topic).not.toContain(d.topic);
-    for (const topic of ['Ücret, prim ve kota', 'Diğer rollerin maaşları', 'CRM aracı ve aşamaları', 'Kazanç planı (MLM)', 'Ekip lideri primi', '4. aydan itibaren mesai modeli']) {
+    for (const topic of ['Ücret, prim ve kota', 'Diğer rollerin maaşları', 'CRM aracı ve aşamaları', 'Kazanç planı (MLM)', 'Ekip lideri primi', 'Programın ilk 3 ayında ve sonrasında mesai düzeni']) {
       expect(m.decisions.some((d) => d.topic === topic), topic).toBe(true);
     }
     expect(open.some((t) => t.includes('RFQ')), 'RFQ yatırımcı kararı').toBe(true);
@@ -117,7 +118,7 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
     expect(m.salaries.organizator).toBe(50_000);
     expect(m.salaries.asistan).toBeCloseTo(28_075.5 * 1.5);
     expect(m.salaries.dijital).toBeCloseTo(28_075.5 * 1.25);
-    expect(m.payRules[7].fixed).toContain('50.000 ₺ maaş / ay (net)');
+    expect(m.payRules[7].fixed).toContain('Ayda 50.000 ₺ net maaş');
     expect(m.payRules.map((r) => r.role)).toEqual(['saha-uzmani', 'ekip-lideri', 'ekip-lideri', 'pazarlamaci', 'segika', 'dijital-pazarlama', 'asistan', 'organizator']);
     expect(m.maxPayout).toBe(3_250);
   });
@@ -139,8 +140,8 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
   test('organizatör: eğitimden 60 kayıt ve 12 aktif satıcı; haftalık kayıt 5 → 10', () => {
     const org = m.targetPlan.find((t) => t.role === 'organizator')!;
     expect([sum(org.kayit), sum(org.aktif)]).toEqual([60, 12]);
-    expect(m.role('organizator').tasks.some((t) => t.measure.includes('~60 kayıt, ~12 aktif'))).toBe(true);
-    expect(m.role('organizator').kpis.find((k) => k.metric === 'Eğitimden kayıt')?.value).toBe('5 → 10');
+    expect(m.role('organizator').tasks.some((t) => t.measure.includes('yaklaşık 60 kayıt') && t.measure.includes('yaklaşık 12 aktif satıcı'))).toBe(true);
+    expect(m.role('organizator').kpis.find((k) => k.metric === 'Eğitimden kayıt')?.value).toBe('Aralık’ta 5, Ocak’ta 10');
   });
 
   test('temsilci ve saha sayıları her yerde aynı', () => {
@@ -148,10 +149,10 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
     expect(recruitmentFunnel[0].value).toBe(50);
     expect(recruitmentFunnel.at(-1)?.value).toBe(0.5);
     expect(levels.at(-1)?.count).toBe(5);
-    expect(m.role('ekip-lideri').kpis.find((k) => k.metric === 'Aktif temsilci')?.value).toBe('~5');
-    expect(growthKpis.find((k) => k.metric === 'Aktif temsilci')?.target).toContain('~5');
-    expect(flat(m.org).find((n) => n.name === 'Bağımsız temsilciler')?.sub).toContain('~5');
-    expect(m.role('saha-uzmani').tasks[0].measure).toBe('Günde 1–2 randevu + 10 çat kapı');
+    expect(m.role('ekip-lideri').kpis.find((k) => k.metric === 'Aktif temsilci')?.value).toBe('Yaklaşık 5');
+    expect(growthKpis.find((k) => k.metric === 'Aktif temsilci')?.target).toContain('yaklaşık 5');
+    expect(flat(m.org).find((n) => n.name === 'Bağımsız temsilciler')?.sub).toContain('yaklaşık 5');
+    expect(m.role('saha-uzmani').tasks[0].measure).toBe('Günde 1 ya da 2 randevulu ziyaret yapın. Ayrıca günde 10 randevusuz ziyaret yapın.');
     expect(m.role('pazarlamaci').tasks[1].measure).toContain('Günde 3 randevu');
   });
 
@@ -169,10 +170,10 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
 test.describe('dijital pazarlama: ölçüm → otomasyon → üretim → içerik planı', () => {
   test('ölçüm entegrasyonları tarihli; KPI sayısıyla aynı; üretim başlamadan GTM ve çerez onayı hazır', () => {
     const { integrations, digitalPlan } = m.digital;
-    expect(m.role('dijital-pazarlama').kpis.find((k) => k.metric === 'Ölçüm altyapısı')?.value).toBe(`${integrations.length} / ${integrations.length}`);
+    expect(m.role('dijital-pazarlama').kpis.find((k) => k.metric === 'Ölçüm altyapısı')?.value).toBe(String(integrations.length));
     for (const i of integrations) expect(i.date, i.name).toMatch(ISO);
     const firstPublish = digitalPlan.filter((p) => p.stream === 'uretim').map((p) => p.from).sort()[0];
-    for (const name of ['Google Tag Manager', 'Çerez onayı (KVKK) + Consent Mode']) {
+    for (const name of ['Google Tag Manager (GTM)', 'Çerez onayı ve Google izin modu (Consent Mode)']) {
       expect(integrations.find((i) => i.name === name)!.date <= firstPublish, name).toBe(true);
     }
   });
@@ -213,7 +214,7 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
     expect(x.salaries.dijital).toBe(37_500);
     expect(x.role('dijital-pazarlama').pay).toContain('37.500 ₺');
     expect(x.salaries.organizator).toBe(50_000);
-    expect(x.role('organizator').pay).toContain('50.000 ₺ maaş (net)');
+    expect(x.role('organizator').pay).toContain('50.000 ₺ net maaş');
     expect(x.staffCost90).toBeGreaterThan(m.staffCost90);
   });
 
@@ -264,6 +265,30 @@ test.describe('BCG eğitimi', () => {
       for (const [, a, b] of nums) expect(Number(a.replace(',', '.')) / Number(b) > 0).toBe(true);
     }
   });
+});
+
+test('başabaş kesişimi: tarih, değerin ilk kez sıfırın altına indiği ayın içindedir', () => {
+  // Ekim zarar, kasım zarar, aralık kâr: kesişim aralık ayındadır. Kasıma yazılırsa tablo ile tarih bir ay ayrışır.
+  const aylar = ['2026-10-01', '2026-11-01', '2026-12-01'].map((iso) => ({ iso })) as unknown as Parameters<typeof crossing>[0];
+  const k = crossing(aylar, [100, 50, -50])!;
+  expect(k.date.slice(0, 7)).toBe('2026-12');
+  // Kesirli ay sözleşmesi korunur: tavan kesişim ayının sırasını, taban önceki ayın sırasını verir.
+  expect(Math.ceil(k.t)).toBe(2);
+  expect(k.t).toBeCloseTo(1.5, 5);
+});
+
+test('politika terimleri: kısaltma açılır, yasaklı ifade korunur, ekli biçim ve uzun kelime bozulmaz', () => {
+  // Kural tam olarak “MLM fırsatı” ifadesini yasaklar. İfade silinmez, anlamı yanına eklenir.
+  expect(acikTerimler('Reklamda kazanç vaadi ve “MLM fırsatı” ifadesi kullanılmaz.')).toBe(
+    'Reklamda kazanç vaadi ve “MLM fırsatı” (MLM, yani çok katmanlı pazarlama) ifadesi kullanılmaz.',
+  );
+  expect(acikAd('OSGB')).toBe('Ortak sağlık ve güvenlik birimi');
+  expect(acikAd('Bordro ve İK yazılımı')).toBe('Bordro ve insan kaynakları yazılımı');
+  expect(acikAd('Dernek, OSB ve oda')).toBe('Dernek, organize sanayi bölgesi ve oda');
+  expect(acikTerimler('Bu ortaklıkta karşı taraf bir OSGB, yani ortak sağlık ve güvenlik birimidir.')).toBe('Bu ortaklıkta karşı taraf bir ortak sağlık ve güvenlik birimidir.');
+  // Ekli biçimde Türkçe ek uymaz. Bu biçim kaynakta düz yazılır, işlev onu değiştirmez.
+  expect(acikTerimler('Aynı OSB’deki firma')).toBe('Aynı OSB’deki firma');
+  expect(acikTerimler('İKİNCİ ADIM')).toBe('İKİNCİ ADIM');
 });
 
 test.describe('notlar', () => {

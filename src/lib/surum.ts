@@ -35,6 +35,6 @@ export function useSurum(anahtar: string) {
 }
 
 export const SURUM_SECENEKLERI: { id: Surum; name: string }[] = [
-  { id: 'v1', name: 'v1' },
-  { id: 'v2', name: 'v2' },
+  { id: 'v1', name: '1. sürüm' },
+  { id: 'v2', name: '2. sürüm' },
 ];

@@ -90,19 +90,19 @@ export const KUMELER: Kume[] = [
     ad: 'Tanıştıran platformlar',
     model: 'Dizin modeli',
     soru: 'Ödeme platformdan geçmez',
-    ozet: 'Bu platformlar alıcıyla satıcıyı tanıştırır ve aradan çekilir. Gelirlerini görünürlük satarak kazanırlar.',
+    ozet: 'Bu platformlar alıcıyla satıcıyı tanıştırır ve aradan çekilir. Satıcı bu platformlarda öne çıkmak için ücret öder.',
   },
   {
     id: 'odeme',
     ad: 'Ödemeyi taşıyan platformlar',
     model: 'İşlem modeli',
     soru: 'Ödeme platformdan geçer',
-    ozet: 'Bu platformlar ödemeyi kendi üzerinden geçirir. Bu sayede komisyon, reklam ve lojistik gelirini üst üste koyarlar.',
+    ozet: 'Bu platformlar ödemeyi kendi üzerinden geçirir. Bu yüzden aynı satıştan komisyon, reklam ve kargo geliri birlikte alınır.',
   },
 ];
 
 export const HARITA_NOTU =
-  'Belge bu bölümde “3 model, 7 platform” adlı bir şema gösterir. Şemanın kendisi belgenin metninde yok. Metin yalnız iki kümeyi anlatır. Bu harita o iki kümeyi gösterir.';
+  'Belgede “3 model, 7 platform” adlı bir şema var. Ama belgenin metni yalnız 2 modeli anlatır. Bu harita o 2 modeli gösterir.';
 export const MODEL_NOTU =
   'Belge tanıştıranların yoluna “dizin modeli” der. Belgenin bir cümlesinde aynı yolun adı “lead modeli”dir. Lead, satıcıya gelen alım isteği demektir. Ödemeyi taşıyanların yoluna belge “işlem modeli” der.';
 export const SITE_NOTU = 'istoc.com kutusu sitenin karşılaştırmasıdır. Bu bilgi belgede yok.';
@@ -169,7 +169,7 @@ export const PLATFORMLAR: Platform[] = [
     katmanlar: ['abonelik', 'reklam', 'guven', 'veri'],
     komisyon: 'Yok',
     abonelik: 'Booster Premium ve International. ABD’de International yılda 1.100 USD (2023 sonu).',
-    reklam: 'Görsel reklam ve yönetilen tıklama başı reklam. Bu reklamları yalnız Booster abonesi alır.',
+    reklam: 'Görsel reklam ve yönetilen tıklama başına reklam. Bu reklamları yalnız Booster abonesi alır.',
     ucretsiz: 'Dizinde şirket profili.',
     duvar: 'İkinci dil, ürün sınırı, rakip reklamı göstermeyen profil, yurt dışı talepleri ve veri tabanı erişimi.',
     gelirKaynagi: K.kompassFiyat,
@@ -182,7 +182,7 @@ export const PLATFORMLAR: Platform[] = [
     katmanlar: ['komisyon', 'reklam', 'odeme', 'lojistik'],
     komisyon: '%5 ile %8 arası, kategoriye göre',
     abonelik: 'Yok. Mağaza açılışı ücretsiz.',
-    reklam: 'Tıklama başı arama reklamı ve satış başına ücretli ortaklık programı (affiliate).',
+    reklam: 'Tıklama başına ücretli arama reklamı ve satış başına ücretli ortaklık programı (affiliate).',
     ucretsiz: 'Mağaza açılışı ve listeleme. ABD yerel satıcısına tanıtım döneminde %0 komisyon.',
     duvar: 'İlk satış (komisyon). Görünürlük için reklam.',
     gelirKaynagi: K.channable,
@@ -195,9 +195,9 @@ export const PLATFORMLAR: Platform[] = [
     katmanlar: ['komisyon', 'reklam', 'odeme', 'lojistik', 'guven'],
     komisyon: '%6 ile %15 arası, kategoriye ve fiyata göre',
     abonelik: 'Yok',
-    reklam: 'Walmart Connect Sponsored Search, tıklama başı.',
+    reklam: 'Walmart Connect Sponsored Search, tıklama başına ücretli.',
     ucretsiz: 'Kurulum ve listeleme ücretsiz. Aylık ücret yok. Yeni satıcıya komisyon indirimi ve reklam kredisi.',
-    duvar: 'İlk satış (komisyon). Hızlı teslimat etiketi için WFS depo hizmeti.',
+    duvar: 'İlk satış (komisyon). Hızlı teslimat etiketi için Walmart’ın depo ve kargo hizmeti (WFS).',
     gelirKaynagi: K.walmartYeni,
     ucretsizKaynagi: K.walmartYeni,
   },
@@ -208,7 +208,7 @@ export const PLATFORMLAR: Platform[] = [
     katmanlar: ['komisyon', 'abonelik', 'reklam', 'odeme', 'lojistik'],
     komisyon: '%15 ve yeni müşteride tek seferlik 10 USD',
     abonelik: 'Alıcı tarafında Insider, ayda 19,99 USD.',
-    reklam: 'Promoted Listings, tıklama başı.',
+    reklam: 'Promoted Listings, tıklama başına ücretli.',
     ucretsiz: 'Kayıt, vitrin, sipariş ve müşteri kayıt araçları (CRM). Kendi getirdiği müşteride %0 komisyon.',
     duvar: 'Pazaryerinden gelen sipariş (%15). Her siparişte ödeme ücreti.',
     gelirKaynagi: K.faireFiyat,
@@ -220,7 +220,7 @@ export const PLATFORMLAR: Platform[] = [
     kume: 'odeme',
     katmanlar: ['komisyon', 'abonelik', 'reklam', 'odeme', 'lojistik'],
     komisyon: '300 USD altı siparişte %12,5 ile %21,5 arası. 300 ile 1.000 USD arasında %4 ile %8 arası. 1.000 USD üstünde %0,15 ile %3,5 arası.',
-    abonelik: 'Platform kullanım ücreti, yılda yaklaşık 1.100 ile 1.400 CNY arası.',
+    abonelik: 'Platform kullanım ücreti, yılda yaklaşık 1.100 ile 1.400 Çin yuanı (CNY) arası.',
     reklam: 'Site içi reklam sistemi. Üst paketlerde ön ödemeli kredi.',
     ucretsiz: 'Ücretsiz kademe yok.',
     duvar: 'Kayıt anı. Şubat 2019’dan beri her yeni hesap platform kullanım ücreti öder.',
@@ -283,7 +283,7 @@ const hazirlik = (id: string) => {
   return HAZIRLIK_ADI[m.hazirlik];
 };
 
-export const TUTMA_GIRIS = 'Satıcıyı içeride tutan şey yönetim paneli değildir. Başka yerde bulamayacağı talep verisi, ödeme güvencesi ve nakit akışıdır. Platformlar bunu altı katmanda kuruyor.';
+export const TUTMA_GIRIS = 'Satıcıyı platformda tutan şey yönetim paneli değildir. Satıcıyı, başka yerde bulamadığı üç şey tutar. Alıcıların ne aradığını görür. Parasını güvenle alır. Parasını hızlı ya da önceden alabilir. Platformlar bunu altı katmanda kuruyor.';
 export const ISTOC_KUTU_NOTU = `Her katmandaki istoc.com kutusu sitenin karşılaştırmasıdır. Bu bilgi belgede yok. Kutulardaki paket bilgisi istoc.com’dan ${OKUNDU} günü okundu.`;
 
 export const TUTMA_KATMANLARI: TutmaKatmani[] = [
@@ -298,7 +298,7 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ],
     istoc: {
       durum: 'kismen',
-      metin: `Temel analitik ${bas('feature.analytics.basic')}. Gelişmiş raporlar ${bas('feature.analytics.advanced')}. Fiyat planlarında ziyaretçi kimliği diye bir özellik yok.`,
+      metin: `Temel analitik ${bas('feature.analytics.basic')}. Gelişmiş raporlar ${bas('feature.analytics.advanced')}. istoc.com satıcı paketlerinde ziyaretçi kimliği diye bir özellik yok.`,
     },
   },
   {
@@ -307,7 +307,7 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     neden: 'Satıcı beklemez. Açık bir talebe kendisi teklif verir.',
     ornekler: [
       o('Europages Request Hub', 'Doğrulanmış talepler yapay zekâ ile satıcı profiline eşleştirilir. Almanya’daki B2B dizini wlw’nin ve Alibaba.com’un talepleri de aynı havuza akar.', [K.requestHub]),
-      o('Global Sources', 'Teklif hakkı günlük kotalıdır ve üyelik düzeyiyle büyür. Fuar katılımcısı 5, 1 ile 5 yıldızlı üye 10, 6 yıldızlı üye 20 teklif verir.', [K.gsTeklif]),
+      o('Global Sources', 'Satıcının günde verebileceği teklif sayısı üyeliğine göre değişir. Fuara katılan satıcı günde 5 teklif verir. 1 ile 5 yıldızlı üye günde 10 teklif verir. 6 yıldızlı üye günde 20 teklif verir.', [K.gsTeklif]),
       o('AliExpress Business', 'Küçük işletmelere ve stok tutmadan satan alıcılara (dropshipping) teklif isteği araçları sunar. Adede göre değişen toptan fiyat da sunar.', [K.worldfirst]),
       o('Kompass', 'Booster aboneleri özel ihalelere erişir. International pakette yurt dışı ihaleler sınırsızdır.', [K.kompassBooster]),
     ],
@@ -327,27 +327,27 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ],
     istoc: {
       durum: 'kismen',
-      metin: `Ticaret Güvencesi ${bas('feature.commerce.trade_assurance')}. Güvence sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı talep açar. iStoc ödemeyi tutmaz. Gelir modellerinde emanet ödemenin durumu “${hazirlik('guvenli-odeme')}”.`,
+      metin: `Ticaret Güvencesi ${bas('feature.commerce.trade_assurance')}. Güvence sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı şikâyet kaydı açar. iStoc ödemeyi tutmaz. “Gelir modelleri” sayfasında emanet ödemenin durumu “${hazirlik('guvenli-odeme')}”.`,
     },
   },
   {
     id: 'finansman',
     ad: 'Finansman ve nakit hızı',
-    neden: 'Satıcının işletme sermayesi platforma bağlanır.',
+    neden: 'Satıcı ihtiyaç duyduğu parayı platformdan alır. Bu yüzden platformdan ayrılmak istemez.',
     ornekler: [
       o('Faire', 'Satıcı ödeme hızını kendisi seçer. Seçenekler ertesi gün, 30 gün ve 60 gündür.', [K.faireFiyat]),
       o('Walmart Marketplace Capital', 'Satış geçmişine göre nakit avans verir. Üç program vardır. En az altı aylık satış geçmişi gerekir.', [K.walmartCapital]),
-      o('DHgate', 'Kendini lojistiği, sınır ötesi ödemeyi ve internet finansmanını tek çatıda sunan platform olarak tanımlar. Belgenin yazarı güncel kredi ürününün koşullarını doğrulayamadı.', [K.dhgateBulten]),
+      o('DHgate', 'DHgate kendini şöyle tanımlar: kargo, yurt dışı ödeme ve internetten finansman hizmetini birlikte sunan platform. Belgenin yazarı güncel kredi ürününün koşullarını doğrulayamadı.', [K.dhgateBulten]),
     ],
     istoc: {
       durum: 'yok',
-      metin: `Gelir modellerinde vadeli satışın durumu “${hazirlik('vadeli-satis')}”. Bu hizmet için sipariş ve ödemenin platformdan geçmesi gerekir.`,
+      metin: `“Gelir modelleri” sayfasında vadeli satışın durumu “${hazirlik('vadeli-satis')}”. Bu hizmet için sipariş ve ödemenin platformdan geçmesi gerekir.`,
     },
   },
   {
     id: 'lojistik',
     ad: 'Lojistik ve depolama',
-    neden: 'Stok platformun deposuna girince satıcının ayrılma maliyeti yükselir.',
+    neden: 'Satıcının malı platformun deposundaysa satıcının platformdan ayrılması zorlaşır.',
     ornekler: [
       o('Walmart WFS', 'Kayıt ve aylık ücret yoktur. Ücret birim başınadır. Karşılığında hızlı teslimat etiketi gelir.', [K.ecomclips]),
       o(
@@ -360,24 +360,24 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ],
     istoc: {
       durum: 'kismen',
-      metin: `Kargo entegrasyonu ${bas('feature.functional.cargo_integration')}. Sevkiyat takibi ${bas('feature.logistics.insured_shipping')}. Gelir modellerinde toplu kargo anlaşmasının durumu “${hazirlik('lojistik')}”.`,
+      metin: `Kargo entegrasyonu ${bas('feature.functional.cargo_integration')}. Sevkiyat takibi ${bas('feature.logistics.insured_shipping')}. “Gelir modelleri” sayfasında toplu kargo anlaşmasının durumu “${hazirlik('lojistik')}”.`,
     },
   },
   {
     id: 'cevrim-disi',
-    ad: 'Çevrim dışı talep',
+    ad: 'Fuar ve yüz yüze buluşma',
     neden: 'Bu katman yalnız Global Sources’ta var.',
     ornekler: [o('Global Sources', 'Hong Kong fuarları, sanal fuarlar ve MATCH birebir eşleştirme hizmeti çevrim içi üyelikle birlikte satılır.', [K.gsBrosur])],
     istoc: {
       durum: 'kismen',
-      metin: `Fuar ve etkinlik daveti ${bas('feature.support.event_invitations')}. Gelir modellerinde İstoç çarşısındaki eşleştirme günlerinin durumu “${hazirlik('eslestirme-etkinlikleri')}”.`,
+      metin: `Fuar ve etkinlik daveti ${bas('feature.support.event_invitations')}. “Gelir modelleri” sayfasında İstoç çarşısındaki eşleştirme günlerinin durumu “${hazirlik('eslestirme-etkinlikleri')}”.`,
     },
   },
 ];
 
 export const KAYNAKSIZ_NOTU = 'Belgede bu cümlenin kaynağı gösterilmedi.';
 export const TUTMA_CIKARIMI =
-  'Emanet ödeme, vade ve avans ancak ödeme platformdan geçerse kurulabilir. Dizin modelinde satıcıyı tutmak için talep verisine dayanmak gerekir. Bu veri teklif istekleri ve ziyaretçi kimliğidir.';
+  'Emanet ödeme, vade ve avans ancak ödeme platformdan geçerse kurulabilir. Dizin modelinde satıcıyı tutmak için talep verisine dayanmak gerekir. Bu veri iki şeydir: alıcıların teklif istekleri ve profili ziyaret eden şirketlerin adları.';
 
 /** Gelir kalıpları. */
 export interface GelirKalibi {
@@ -394,7 +394,7 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
   {
     id: 'katmanli-abonelik',
     ad: 'Katmanlı abonelik',
-    ozet: 'Dizin modelinin ana geliridir. Kademeleri dil sayısı, ürün sınırı ve talep kapsamı ayırır.',
+    ozet: 'Dizin modelinin ana geliridir. Paketler birbirinden üç şeyle ayrılır: dil sayısı, ürün sınırı ve talebin kapsamı.',
     ornekler: [
       o('Kompass', 'Booster Premium 2 dil ve yurt içinde öncelikli sıra verir. Booster International 26 dil, dil başına 200 ürün ve 25 katalog verir. International yurt dışı taleplerini de ekler.', [K.kompassBooster]),
       o('Global Sources', 'İki yıllık “Advanced” paket 1.200 ürün vitrini ve 150 video içerir. Paket 5 alt hesap ve günde 15 teklif hakkı da verir.', [K.gsPaket]),
@@ -403,12 +403,12 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
   },
   {
     id: 'tiklama-basi',
-    ad: 'Tıklama başı reklam',
+    ad: 'Tıklama başına ücretli reklam',
     ozet: 'İşlem modelinde komisyondan sonraki ikinci gelir katmanıdır.',
     ornekler: [
       o(
         'Faire Promoted Listings',
-        'Reklamın tıklama fiyatını satıcı değil Faire belirler. Faire bunu tıklamanın siparişe dönme olasılığına göre yapar. En düşük aylık bütçe 200 USD, 150 EUR ya da 125 GBP’dir.',
+        'Reklamın tıklama fiyatını satıcı değil Faire belirler. Faire bunu tıklamanın siparişe dönme olasılığına göre yapar. En düşük aylık bütçe 200 USD, 150 EUR ya da 125 İngiliz sterlinidir (GBP).',
         [K.faireTiklama, K.faireButce],
       ),
       o('Walmart Connect', 'Sponsored Search yalnız tıklamada ücretlenir.', [K.walmartReklam]),
@@ -422,7 +422,7 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
   {
     id: 'sabit-gorunurluk',
     ad: 'Sabit fiyatlı görünürlük',
-    ozet: 'Tıklama ölçmek istemeyen dizinler sırayı satar.',
+    ozet: 'Bazı dizin modeli platformları tıklama başına ücret almaz. Bunun yerine üst sıraları sabit fiyatla satar.',
     ornekler: [
       o('Europages Top Ranking', 'Reklam kategorisindeki ilk üç sıra sabit fiyatla satılır. Sırayı ilk başvuran alır.', [K.topRanking]),
       o('Global Sources', 'Paketle 324.000’e kadar sıralama puanı (SAB puanı) gelir. Bu puan ana sayfadaki sıralama alanına çevrilir. Tıklama ücreti yoktur.', [K.gsPaket]),
@@ -433,7 +433,7 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Ödeme ve nakit hızı ücreti',
     ozet: 'Komisyondan bağımsızdır ve her işlemde alınır.',
     ornekler: [
-      o('Faire', 'Ertesi gün ödeme %3,5, 30 gün %2,4, 60 gün %1,9’dur. Hepsine 0,30 USD eklenir. Faire Direct siparişinde komisyon sıfırdır. Ama bu ücret kalır.', [K.faireFiyat]),
+      o('Faire', 'Satıcı parasını ertesi gün isterse %3,5 öder. 30 gün sonra isterse %2,4 öder. 60 gün sonra isterse %1,9 öder. Her ödemeye 0,30 USD eklenir. Faire Direct siparişinde komisyon sıfırdır. Ama bu ücret kalır.', [K.faireFiyat]),
       o('Walmart Marketplace Capital', 'Parafin programında tek bir sabit sermaye ücreti alınır. Geri ödeme satışın yüzdesiyle yapılır.', [K.pymnts]),
     ],
   },
@@ -458,26 +458,26 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Veri ve yazılım bağlantısı (API)',
     ozet: 'Veri satan platform var. Yazılım bağlantısı (API) satan platform yok.',
     ornekler: [
-      o('Kompass', 'Veriyi doğrudan ürün yapar. EasyBusiness aboneliği 70 ülkede 60 milyondan fazla şirketi kapsar.', [K.kompassFiyat]),
+      o('Kompass', 'Şirket bilgilerini ayrı bir ürün olarak satar. EasyBusiness aboneliği 70 ülkede 60 milyondan fazla şirketi kapsar.', [K.kompassFiyat]),
       o('AliExpress', 'API’yi gelir kalemi olarak sunmaz. API, satıcının kendi sistemini platforma bağladığı bir araçtır.', [K.aeBulten]),
     ],
     not: 'Belgenin yazarı taradığı kaynaklarda yedi platformun hiçbirinde ayrı bir API erişim ücreti görmedi.',
   },
   {
     id: 'fiyata-gomme',
-    ad: 'Komisyonu fiyata gömme',
+    ad: 'Komisyonu alıcı fiyatına ekleme',
     ozet: 'Satıcı eline geçecek tutarı girer. Komisyonu alıcının ödediği fiyat taşır.',
     ornekler: [o('DHgate', 'Satıcı eline geçecek fiyatı girer. Platform komisyonu alıcı fiyatına ekler. Oran sipariş büyüdükçe düşer. Bu düzen toptan sepeti teşvik eder.', [K.cls])],
   },
 ];
 
-export const GELIR_CIKARIMI = 'Komisyonun tek başına bir tavanı vardır. Reklam ve ödeme hızı ücreti aynı işlem hacminden ikinci ve üçüncü kez gelir üretir.';
+export const GELIR_CIKARIMI = 'Komisyon tek başına belli bir sınırın üstüne çıkamaz. Bu yüzden platformlar aynı satıştan reklam ücreti de alır. Ödeme hızı için de ücret alırlar. Böylece aynı satıştan ikinci ve üçüncü gelir elde edilir.';
 export const GELIR_TABLO_NOTU = `${DHGATE_NOTU} istoc.com satırı sitenin karşılaştırmasıdır ve belgede yoktur.`;
 
 /** Ücretsiz başlangıç (freemium) ve ödeme duvarı (paywall). */
 export const DUVAR_TANIMI = 'Ödeme duvarı, ücretsiz kullanımın bitip ödemenin başladığı noktadır.';
 export const DUVAR_GIRIS =
-  'Beş platform satıcı kaydını ve temel vitrini kalıcı olarak ücretsiz veriyor. Global Sources deneme sunuyor. DHgate girişte ücret alıyor. Ödeme duvarı işlem modelinde ilk satışta başlıyor. Dizin modelinde ise alıcıya erişim genişlediği anda başlıyor.';
+  'Beş platform satıcı kaydını ve temel vitrini kalıcı olarak ücretsiz veriyor. Global Sources deneme sunuyor. DHgate girişte ücret alıyor. Ödeme duvarı işlem modelinde ilk satışta başlıyor. Dizin modelinde ise satıcı daha çok alıcıya ulaşmak isteyince başlıyor.';
 
 /** Ödeme duvarı şeması: belgede yok. Öğeler belgenin tablosundan seçildi. Bugünkü an ile belgenin önerdiği an ayrı yazılır. */
 export interface DuvarSemasi {
@@ -502,7 +502,7 @@ export const DUVAR_SEMASI: DuvarSemasi[] = [
     id: 'dizin',
     ad: 'Dizin modeli',
     ucretsiz: ['Şirket profili', 'Alıcı araması', 'Teklif isteği'],
-    bugun: 'Ödeme duvarı bugün alıcıya erişim genişleyince başlıyor.',
+    bugun: 'Ödeme duvarı bugün satıcı daha çok alıcıya ulaşmak isteyince başlıyor.',
     oneri: 'Belge duvarı ilk nitelikli talebe taşımayı önerir.',
     ucretli: ['Teklif kotası', 'Ziyaretçi kimliği', 'Üst sıra'],
   },
@@ -525,7 +525,7 @@ export const DUVAR_ILKELERI: Ilke[] = [
   },
   {
     id: 'kendi-musterisi',
-    ad: '“Kendi müşterini getir” teşviki',
+    ad: '“Kendi müşterinizi getirin” teşviki',
     metin:
       'Satıcı müşterisini kendi bağlantısıyla getirirse Faire Direct’te %0 komisyon öder. Platform böylece ücretsiz alıcı kazanır. Faire yeni gelen perakendeciye bir yıl ücretsiz kargo verir.',
     kaynaklar: [K.faireFiyat],
@@ -533,7 +533,7 @@ export const DUVAR_ILKELERI: Ilke[] = [
   {
     id: 'kota',
     ad: 'Kotayla sınırlama',
-    metin: 'Ücretsiz kullanıcı değeri görür. İşi büyüyünce sınıra takılır.',
+    metin: 'Ücretsiz kullanan satıcı platformun işine yaradığını görür. İşi büyüyünce ücretsiz sınır yetmez.',
     maddeler: [
       o('Global Sources', 'Teklif kotası üyelik düzeyiyle günde 5’ten 20’ye çıkar.', [K.gsTeklif]),
       o('Kompass', 'Giriş kademesi 5 ürün gösterir. International pakette sınır dil başına 200 üründür.', [K.kompassBooster]),
@@ -542,7 +542,7 @@ export const DUVAR_ILKELERI: Ilke[] = [
   },
   {
     id: 'kimlik',
-    ad: 'Kimlik karşılığında açılır',
+    ad: 'Alıcının kimliği sonradan açılır',
     metin: 'Europages Request Hub alıcının bilgisini satıcı yanıt verene kadar gizler. Profili kimin ziyaret ettiği ise yalnız Premium pakette görünür.',
     kaynaklar: [K.requestHub, K.epZiyaretci],
   },
@@ -563,12 +563,12 @@ export const DUVAR_ILKELERI: Ilke[] = [
   {
     id: 'giriste-duvar',
     ad: 'Girişte duvar (ters örnek)',
-    metin: 'DHgate kayıt anında ücret alır. Süresi dolan hesabın ürünleri yayından kalkar. Ücret düşük kaliteli satıcıyı eler. Ama çekim gücünü alıcı trafiğine ve kademeli komisyona bırakır.',
+    metin: 'DHgate kayıt anında ücret alır. Süresi dolan hesabın ürünleri yayından kalkar. Ücret düşük kaliteli satıcıyı eler. Ama DHgate satıcıyı iki şeyle çeker. Bunlar çok sayıda alıcı ve sipariş büyüdükçe düşen komisyondur.',
     kaynaklar: [K.amz123],
   },
 ];
 
-export const DUVAR_CIKARIMI = 'Ödeme duvarını değerin kanıtlandığı ana koyun. İşlem modelinde bu an ilk satıştır. Dizin modelinde ise ilk nitelikli taleptir.';
+export const DUVAR_CIKARIMI = 'Satıcıdan ücret almaya, satıcı platformun işine yaradığını görünce başlayın. İşlem modelinde bu an ilk satıştır. Dizin modelinde ise ilk nitelikli taleptir.';
 export const NITELIKLI_TALEP_NOTU = 'Belge “nitelikli talep” terimini tanımlamaz. Bu sayfa onu ürünü, adedi ve iletişim bilgisi doğrulanmış bir alım isteği olarak okur.';
 
 /** Yeni platform için modül sırası: üç faz ve iki kapı. Şema belgede yok. Fazlar belgenin metninden kuruldu. */
@@ -586,13 +586,13 @@ export interface Kapi {
 export const FAZLAR: Faz[] = [
   { no: 1, ad: 'Talebi topla', metin: 'Alıcı aramayı ve teklif isteğini ücretsiz kullanır. Müşterisini getiren satıcı komisyon ödemez.', modul: ['Ücretsiz arama', 'Ücretsiz teklif isteği', 'Kendi müşterisinde %0 komisyon'] },
   { no: 2, ad: 'İşlemi ölç', metin: 'Komisyon sipariş büyüklüğüne bağlanır. Satıcı teklif hakkını kotayla alır.', modul: ['Azalan oranlı komisyon', 'Kotalı teklif hakkı', 'Ödeme ücreti'] },
-  { no: 3, ad: 'Trafiği ve veriyi sat', metin: 'Önceki fazların ürettiği alıcı trafiği ve işlem verisi satılır.', modul: ['Reklam', 'Abonelik'] },
+  { no: 3, ad: 'Ziyaretleri ve veriyi sat', metin: 'Önceki fazlarda gelen alıcı ziyaretleri ve işlem verisi satılır.', modul: ['Reklam', 'Abonelik'] },
 ];
 export const KAPILAR: Kapi[] = [
-  { no: 1, ad: 'İlk nitelikli talep ya da ilk satış', metin: 'Değer burada kanıtlanır. Ödeme duvarı buraya konur.' },
-  { no: 2, ad: 'Yeterli alıcı trafiği ve işlem verisi', metin: 'Reklam ve abonelik ancak satılacak trafik ve veri olunca değer taşır.' },
+  { no: 1, ad: 'İlk nitelikli talep ya da ilk satış', metin: 'Satıcı platformun işine yaradığını burada görür. Ücretli kullanım burada başlar.' },
+  { no: 2, ad: 'Yeterli alıcı ziyareti ve işlem verisi', metin: 'Reklam ve abonelik ancak satılacak ziyaret ve veri olunca değer taşır.' },
 ];
-export const SIRA_GIRIS = 'Reklam ve abonelik en sona kalır. İkisi de önceki fazların ürettiği alıcı trafiğini ve işlem verisini satar.';
+export const SIRA_GIRIS = 'Reklam ve abonelik en sona kalır. İkisi de önceki fazlarda gelen alıcı ziyaretlerini ve işlem verisini satar.';
 export const SIRA_NOTU =
   'Belgedeki “3 faz, 2 kapı” şeması metinde yok. Fazları ve kapıları bu sayfa belgenin metninden kurdu. Fazlar belgenin üç kuralından gelir. Birinci fazdaki ücretsiz arama “alıcı her yerde ücretsiz” ilkesinden gelir. Kapılar belgenin ödeme duvarı çıkarımından ve bu bölümün ilk cümlesinden gelir.';
 export const SIRA_ISTOC = 'istoc.com bugün bu fazdan başlıyor. Bu bilgi sitenin karşılaştırmasıdır.';
@@ -609,15 +609,15 @@ export const ISTOC_SONUC = {
   etiket: 'Sitenin karşılaştırması. Belgede yok.',
   maddeler: [
     'istoc.com tanıştıran kümededir. Ödeme satıcıya ya da Thoptan.com’a gider. iStoc ödemeyi tutmaz.',
-    'Bu yüzden satıcıyı tutacak katman talep verisidir. Bu veri teklif istekleri ve ziyaretçi kimliğidir.',
-    `istoc.com bugün sıranın son fazından başlıyor. Bu faz satıcı aboneliğidir. ${KOMISYON_YOK ? 'Komisyon şu an alınmıyor.' : `Komisyon ${KOMISYON_METNI}.`}`,
+    'Bu yüzden satıcıyı tutacak katman talep verisidir. Bu veri iki şeydir: alıcıların teklif istekleri ve profili ziyaret eden şirketlerin adları.',
+    `Belgeye göre abonelik en son kurulmalıdır. istoc.com ise bugün işe abonelikle başlıyor. ${KOMISYON_YOK ? 'Komisyon şu an alınmıyor.' : `Komisyon ${KOMISYON_METNI}.`}`,
     `Belge teklif isteğini satıcıya kotayla açmayı önerir. Bugün teklif isteğine yanıt hakkı istoc.com’da ${bas('quota.rfq_quotes_monthly')}.`,
-    'Belgenin kuralına göre ödeme duvarı değerin kanıtlandığı ana yaklaşmalıdır. Dizin modelinde bu an ilk nitelikli taleptir.',
+    'Belgenin kuralına göre ödemenin başladığı an, satıcının platformdan fayda gördüğü ana yaklaşmalıdır. Dizin modelinde bu an ilk nitelikli taleptir.',
   ],
 };
 
 export const KAYNAK_NOTU =
-  'Belgenin yazarı aşağıdaki sayfaları doğrudan açıp okudu. Kompass paket sayfası, Global Sources teklif yardım sayfası, DHgate komisyon duyuruları ve Walmart sayfaları açılamadı. Bu veriler arama sonucu özetlerinden alındı. “İkincil kaynak” etiketli veriler platformun kendi yayını değildir.';
+  'Belgenin yazarı aşağıdaki sayfaları açıp okudu. Yazar bazı sayfaları açamadı. Bunlar Kompass paket sayfası, Global Sources teklif yardım sayfası, DHgate komisyon duyuruları ve Walmart sayfalarıdır. Bu sayfaların verileri arama sonucu özetlerinden alındı. “İkincil kaynak” etiketli veriler platformun kendi yayını değildir.';
 const SAYFA_ETIKETLI = Object.values(K as Record<string, Kaynak>).filter((k) => k.ikincil === 'sayfa');
 const BELGE_ETIKETLI = Object.values(K as Record<string, Kaynak>).filter((k) => k.ikincil === 'belge');
 export const IKINCIL_NOTU = `Belge ${BELGE_ETIKETLI.length} kaynağı “ikincil kaynak” diye etiketledi. Bu sayfa platformun kendi yayını olmayan ${SAYFA_ETIKETLI.length} kaynağı daha etiketledi. Bunlar ${liste(SAYFA_ETIKETLI.map((k) => site(k.url)))} sayfalarıdır.`;

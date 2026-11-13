@@ -244,7 +244,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   const program = seciliKosul(a, 'oncu').id;
   if (program === 'ag') return {
     baslik: 'Öncü satış ortağının kademeli temsilci ağı',
-    ozet: 'Kendi şirketinizle satıcı işletme bulursunuz. Kazanç gerçek satıştan doğar.',
+    ozet: 'Kendi şirketinizle satıcı işletme bulursunuz. Kazanç gerçek satıştan doğar. Satışı yapan ortak komisyon alır. Belirli sayıda üst kademedeki ortak da bu satıştan pay alır.',
     hedef: 'Satıcının ilk ödemesi ve aktifliği kayda geçsin.',
     ilk: 'sirket',
     adimlar: agAkisi(a),
@@ -252,7 +252,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   return {
     baslik: 'Öncü satış ortağının ana programı',
     ozet: SEVIYE_METNI[a.oncuSeviye],
-    hedef: 'Uygun işletme onaylı teklifle satışa ve katalog kurulumuna ulaşsın.',
+    hedef: 'Bu programın amacı, uygun işletmenin onaylı teklifle satın almasıdır. Satıştan sonra işletmenin kataloğu kurulur.',
     ilk: 'anlasma',
     adimlar: anaAkis(a),
   };

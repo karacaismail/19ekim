@@ -18,14 +18,14 @@ const tl = (v: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(v)
 test('varsayılan v1; sürüm seçici v2’ye geçer, adres ?surum=v2 olur, geri dönünce v1 korunur', async ({ page }) => {
   await ac(page, 1280, 'istihdam/');
   const surum = page.getByRole('group', { name: 'Sürüm' });
-  await expect(surum.getByRole('button', { name: 'v1' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(surum.getByRole('button', { name: '1. sürüm', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#katki')).toHaveCount(1);
-  await surum.getByRole('button', { name: 'v2' }).click();
+  await surum.getByRole('button', { name: '2. sürüm', exact: true }).click();
   await expect(page).toHaveURL(/surum=v2/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('İstihdam takvimi');
   await expect(page.locator('#secenek')).toHaveCount(1);
   await expect(page.locator('#katki')).toHaveCount(0);
-  await surum.getByRole('button', { name: 'v1' }).click();
+  await surum.getByRole('button', { name: '1. sürüm', exact: true }).click();
   await expect(page.locator('#katki')).toHaveCount(1);
 });
 
@@ -47,7 +47,7 @@ test('mevcut takvimdeki her rol “Eski” hapıyla görünür; ayrıntı pencer
   const pozisyonlar = page.locator('#pozisyonlar');
   await expect(pozisyonlar.locator('.chip.iv2-eski')).toHaveCount(PLAN_ROLLERI.length);
   for (const r of PLAN_ROLLERI) await expect(pozisyonlar.getByRole('rowheader', { name: new RegExp(r.ad.replace('.', '\\.')) })).toContainText('Eski');
-  const dugme = pozisyonlar.getByRole('button', { name: 'Satıcı uyum (onboarding) uzmanı: gerekçe ve nitelikler' });
+  const dugme = pozisyonlar.getByRole('button', { name: 'Satıcı uyum uzmanı: gerekçe ve nitelikler' });
   await dugme.focus();
   await page.keyboard.press('Enter');
   const pencere = page.getByRole('dialog');
@@ -64,7 +64,7 @@ test('küme süzgeci tek kümeyi gösterir', async ({ page }) => {
   await ac(page, 1280);
   const tablolar = page.locator('#pozisyonlar .table-block, #pozisyonlar .iv2-kume-bos');
   await expect(tablolar).toHaveCount(11);
-  await page.getByRole('group', { name: 'Küme' }).getByRole('combobox').click();
+  await page.getByRole('group', { name: 'Gösterilecek kümeyi seçin' }).getByRole('combobox').click();
   await page.getByRole('option', { name: 'Finans ve muhasebe' }).click();
   await expect(tablolar).toHaveCount(1);
   await expect(tablolar.first()).toContainText('Finans ve muhasebe');

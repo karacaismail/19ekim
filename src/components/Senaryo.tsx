@@ -23,7 +23,7 @@ export function ModSecimi({ value, onChange, label = 'Görünüm' }: { value: Mo
       value={value}
       options={[
         { id: 'secili', name: 'Seçili senaryo' },
-        { id: 'ucu', name: 'Üçü üst üste' },
+        { id: 'ucu', name: 'Üç senaryo' },
       ]}
       onChange={onChange}
     />

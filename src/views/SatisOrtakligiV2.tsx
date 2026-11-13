@@ -102,18 +102,18 @@ function Robot({ a, g }: { a: Ayar; g: G }) {
     <Grup baslik="Satış: ayda kaç yeni müşteri?">
       {a.marka === 'istoc'
         ? (Object.keys(ISTOC_PAKET_ADI) as IstocPaket[]).map((id) => (
-            <Girdi key={id} label={`${ISTOC_PAKET_ADI[id]} paket`} birim={id === 'kurumsal' ? 'teklif' : `${a.istocPaketEur[id]} € / ay`} value={a.istocSatis[id]} onChange={(v) => g({ istocSatis: { ...a.istocSatis, [id]: v } })} />
+            <Girdi key={id} label={`${ISTOC_PAKET_ADI[id]} paket`} birim={id === 'kurumsal' ? 'teklifle fiyatlanır' : `${a.istocPaketEur[id]} € / ay`} value={a.istocSatis[id]} onChange={(v) => g({ istocSatis: { ...a.istocSatis, [id]: v } })} />
           ))
         : (Object.keys(PAKET_ADI) as SegikaPaket[]).map((id) => (
             <Girdi key={id} label={PAKET_ADI[id]} birim={`${tl(segikaAylik(a, id).toplam)} / ay`} value={a.segikaSatis[id]} onChange={(v) => g({ segikaSatis: { ...a.segikaSatis, [id]: v } })} />
           ))}
       <p className="v2-so2-robot">
-        <span>Aylık satış cirosu</span>
+        <span>Bu ayki satışların tutarı</span>
         <strong>
           <Canli deger={s.ciro}>{tl(s.ciro)}</Canli>
         </strong>
         <small>
-          {sayi(s.adet)} yeni müşterinin ilk yıl bedeli. {a.faturalama === 'yillik' ? 'Müşteri yıllık paket öder.' : 'Müşteri aylık abonelikle öder.'}
+          Bu tutar, bu ay gelen {sayi(s.adet)} yeni müşterinin ilk yıl bedelidir. {a.faturalama === 'yillik' ? 'Müşteri yıllık paketi peşin öder.' : 'Müşteri aylık abonelikle öder.'}
         </small>
       </p>
     </Grup>
@@ -128,13 +128,13 @@ function StandartAyarlar({ a, g }: { a: Ayar; g: G }) {
         <Sec<Seviye>
           label="Ortak satışta ne yapar?"
           value={a.katki}
-          options={(['A', 'B', 'C'] as Seviye[]).map((s) => ({ id: s, name: SEVIYE_ADI[s], not: `oranın ${yuzde(a.katkiCarpan[s])} kadarı` }))}
+          options={(['A', 'B', 'C'] as Seviye[]).map((s) => ({ id: s, name: SEVIYE_ADI[s], not: `Satışı kapatanın oranının ${yuzde(a.katkiCarpan[s])} kadarını alır` }))}
           onChange={(v) => g({ katki: v })}
         />
       </Grup>
       <Grup baslik="Segment koşulları">
-        <Girdi label="Yenileme oranı" yuzdeMi value={a.yenileme} onChange={(v) => g({ yenileme: Math.min(1, v) })} />
-        <Girdi label="Net tavsiye puanı (NPS)" birim="0–100" value={a.memnuniyet} onChange={(v) => g({ memnuniyet: Math.min(100, v) })} />
+        <Girdi label="Yenileme oranı (aboneliğini yenileyen müşteriler)" yuzdeMi value={a.yenileme} onChange={(v) => g({ yenileme: Math.min(1, v) })} />
+        <Girdi label="Müşterilerin bizi tavsiye etme puanı (NPS)" birim="0 ile 100 arası" value={a.memnuniyet} onChange={(v) => g({ memnuniyet: Math.min(100, v) })} />
         <Sec<Egitim>
           label="Eğitim"
           value={a.egitim}
@@ -154,15 +154,15 @@ function StandartAyarlar({ a, g }: { a: Ayar; g: G }) {
           onChange={(v) => g({ destek: v === 'ortak' })}
         />
       </Grup>
-      <Grup baslik="Ağ: en çok 2 kademe">
-        <Girdi label="Getirdiği ortak" birim="kişi" value={a.agAltTemsilci} onChange={(v) => g({ agAltTemsilci: Math.min(6, v) })} />
-        <Girdi label="Ağdaki ortak başına satış" birim="paket / ay" value={a.agAltSatis} onChange={(v) => g({ agAltSatis: v })} />
+      <Grup baslik="Ağ: en çok 2 kademe"><p className="v2-so2-kutu-not">Ortak, getirdiği ortakların satışından da pay alır. Bu paya ağ payı deriz. Ortağın getirdikleri 1. kademedir. Onların getirdikleri 2. kademedir.</p>
+        <Girdi label="Her ortağın getirdiği ortak sayısı" value={a.agAltTemsilci} onChange={(v) => g({ agAltTemsilci: Math.min(6, v) })} />
+        <Girdi label="Ağdaki her ortağın aylık satışı" birim="paket" value={a.agAltSatis} onChange={(v) => g({ agAltSatis: v })} />
       </Grup>
       <Grup baslik="Kampanyalar">
         <Girdi label="İlk 90 gün ek oran" yuzdeMi value={a.hizliBaslangic} onChange={(v) => g({ hizliBaslangic: Math.min(1, v) })} />
         {a.marka === 'istoc' ? <Girdi label="Kurumsal paket ek oranı" yuzdeMi value={a.kurumsalEk} onChange={(v) => g({ kurumsalEk: Math.min(1, v) })} /> : null}
         <ArkadasiniGetir a={a} g={g} />
-        <Girdi label="Yılda en çok tavsiye" birim="tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
+        <Girdi label="Yılda en çok tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
       </Grup>
       <FiyatAyarlari a={a} g={g} />
     </>
@@ -177,8 +177,8 @@ function ArkadasiniGetir({ a, g }: { a: Ayar; g: G }) {
   return (
     <fieldset className="v2-so2-kutu">
       <legend className="v2-so2-kutu-baslik">Arkadaşını getir</legend>
-      <p className="v2-so2-kutu-not">Yeni müşterinin ödemesi bu süre içinde tahsil edilirse hakediş oluşur. Her ay 30 gün sayılır.</p>
-      <Girdi label="Tahsilat süresi" birim={`ay = ${ayGun(a.tavsiyeSure)} gün`} min={1} value={a.tavsiyeSure} onChange={(v) => g({ tavsiyeSure: Math.min(12, Math.max(1, v)) })} />
+      <p className="v2-so2-kutu-not">Yeni müşterinin ödemesi aşağıdaki süre içinde bize ulaşmalıdır. Ödeme bu sürede gelirse iki müşteri de ücretsiz kullanım kazanır. Bir ay 30 gün sayılır.</p>
+      <Girdi label="Tahsilat süresi" birim={`ay, yani ${ayGun(a.tavsiyeSure)} gün`} min={1} value={a.tavsiyeSure} onChange={(v) => g({ tavsiyeSure: Math.min(12, Math.max(1, v)) })} />
       <Girdi label="Tavsiye eden müşteriye" birim="ay bedava" value={a.krediAy} onChange={(v) => g({ krediAy: v })} />
       <Girdi label="Tavsiyeyle gelen müşteriye" birim="ay bedava" value={a.yeniKrediAy} onChange={(v) => g({ yeniKrediAy: v })} />
     </fieldset>
@@ -192,8 +192,8 @@ function FiyatAyarlari({ a, g }: { a: Ayar; g: G }) {
         {(Object.keys(ISTOC_PAKET_ADI) as IstocPaket[]).map((id) => (
           <Girdi key={id} label={id === 'kurumsal' ? 'Kurumsal, örnek teklif' : `${ISTOC_PAKET_ADI[id]} paket`} birim="€ / ay" value={a.istocPaketEur[id]} onChange={(v) => g({ istocPaketEur: { ...a.istocPaketEur, [id]: v } })} />
         ))}
-        <Girdi label="Euro kuru" birim="₺" step={0.1} value={a.kur} onChange={(v) => g({ kur: v })} />
-        <Girdi label="Yıllık paket" birim="ay bedeli" value={a.istocYilAy} onChange={(v) => g({ istocYilAy: v })} />
+        <Girdi label="1 euro kaç ₺?" step={0.1} value={a.kur} onChange={(v) => g({ kur: v })} />
+        <Girdi label="Yıllık pakette kaç ayın ücreti ödenir?" value={a.istocYilAy} onChange={(v) => g({ istocYilAy: v })} />
       </Grup>
     );
   const sayiTr = (n: number) => new Intl.NumberFormat('tr-TR').format(n);
@@ -249,30 +249,30 @@ function ProgramKurallari({ a, g }: { a: Ayar; g: G }) {
         </Grup>
         <Grup baslik="Katkıya göre ödenen kısım">
           {(['A', 'B', 'C'] as Seviye[]).map((s) => (
-            <Girdi key={s} label={SEVIYE_ADI[s]} yuzdeMi value={a.katkiCarpan[s]} onChange={(v) => g({ katkiCarpan: { ...a.katkiCarpan, [s]: Math.min(1, v) } })} />
+            <Girdi key={s} label={({ A: 'Yalnız tanıştırırsa', B: 'Ürünü de gösterirse', C: 'Satışı kendisi kapatırsa' } as Record<Seviye, string>)[s]} yuzdeMi value={a.katkiCarpan[s]} onChange={(v) => g({ katkiCarpan: { ...a.katkiCarpan, [s]: Math.min(1, v) } })} />
           ))}
         </Grup>
         <Grup baslik="Segment eşikleri (yıllık)">
           {esik.map((e, i) => (
             <div key={i} className="v2-so2-kademe">
               <p className="v2-so2-kademe-ad">{SEGMENT_ADI[i + 1]}</p>
-              <Girdi label="Yeni müşteri" birim="müşteri" value={e.musteri} onChange={(v) => esikYaz(i, { musteri: v })} />
-              <Girdi label="Ciro" birim="₺" step={50_000} value={e.ciro} onChange={(v) => esikYaz(i, { ciro: v })} />
+              <Girdi label="Yılda en az yeni müşteri" value={e.musteri} onChange={(v) => esikYaz(i, { musteri: v })} />
+              <Girdi label="Yılda en az ciro" birim="₺" step={50_000} value={e.ciro} onChange={(v) => esikYaz(i, { ciro: v })} />
             </div>
           ))}
           <Girdi label="Altın için yenileme" yuzdeMi value={a.segmentYenileme[0]} onChange={(v) => g({ segmentYenileme: [Math.min(1, v), a.segmentYenileme[1]] })} />
           <Girdi label="Profesyonel için yenileme" yuzdeMi value={a.segmentYenileme[1]} onChange={(v) => g({ segmentYenileme: [a.segmentYenileme[0], Math.min(1, v)] })} />
-          <Girdi label="Profesyonel için tavsiye puanı" birim="NPS" value={a.proMemnuniyet} onChange={(v) => g({ proMemnuniyet: Math.min(100, v) })} />
+          <Girdi label="Profesyonel için tavsiye puanı" birim="puan" value={a.proMemnuniyet} onChange={(v) => g({ proMemnuniyet: Math.min(100, v) })} />
           <Girdi label="Profesyonel yenileme payı" yuzdeMi value={a.proYenilemePay} onChange={(v) => g({ proYenilemePay: Math.min(1, v) })} />
         </Grup>
         <Grup baslik="Ağ payı (cironun oranı)">
           <Girdi label="1. kademe" yuzdeMi value={a.agPay[0]} onChange={(v) => g({ agPay: [Math.min(1, v), a.agPay[1]] })} />
           <Girdi label="2. kademe" yuzdeMi value={a.agPay[1]} onChange={(v) => g({ agPay: [a.agPay[0], Math.min(1, v)] })} />
         </Grup>
-        <Grup baslik="Hakediş ödemesi">
+        <Grup baslik="Ortağın kazancının ödenmesi">
           <Girdi label="İlk ödeme" yuzdeMi value={a.ilkOdeme} onChange={(v) => g({ ilkOdeme: Math.min(1, v) })} />
-          <Girdi label="İlk ödeme günü" birim="gün" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
-          <Girdi label="Kalan ödeme günü" birim="gün" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
+          <Girdi label="İlk ödeme kaçıncı günde?" value={a.ilkGun} onChange={(v) => g({ ilkGun: v })} />
+          <Girdi label="Kalan ödeme kaçıncı günde?" value={a.kalanGun} onChange={(v) => g({ kalanGun: v })} />
         </Grup>
       </div>
     </section>
@@ -333,7 +333,7 @@ function ProgramAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: A
     return (
       <>
         <Grup baslik="Satış hedefleri ve oranlar">
-          {['İlk 14 gün', '15–45. gün', '46–90. gün', '91. günden sonra'].map((ad, i) => (
+          {['İlk 14 gün', '15. günden 45. güne kadar', '46. günden 90. güne kadar', '90. günden sonra'].map((ad, i) => (
             <Girdi key={ad} label={`${ad}: ayda kaç satış?`} value={a.oncuAsama[i]} onChange={(v) => g({ oncuAsama: a.oncuAsama.map((x, j) => (j === i ? v : x)) as Ayar['oncuAsama'] })} />
           ))}
           <YilOranlari oranlar={a.yillaraOncu} onChange={(o) => g({ yillaraOncu: o })} />
@@ -404,8 +404,8 @@ function OzelKosullar({ rol, persona, a, g }: { rol: RolId; persona: RolMetni; a
               <Girdi label="Kota üstü prim" yuzdeMi value={a.kadroluPrimOran[i]} onChange={(v) => g({ kadroluPrimOran: a.kadroluPrimOran.map((x, j) => (j === i ? Math.min(1, v) : x)) as Ayar['kadroluPrimOran'] })} />
             </div>
           ))}
-          <Girdi label="Kota: maaşın katı" birim="×" step={0.5} value={a.kotaCarpan} onChange={(v) => g({ kotaCarpan: v })} />
-          <Girdi label="Kotaya ek" yuzdeMi value={a.kotaEk} onChange={(v) => g({ kotaEk: v })} />
+          <Girdi label="Kota, maaşın kaç katı?" step={0.5} value={a.kotaCarpan} onChange={(v) => g({ kotaCarpan: v })} />
+          <Girdi label="Kotaya eklenen pay" yuzdeMi value={a.kotaEk} onChange={(v) => g({ kotaEk: v })} />
         </Grup>
       </>
     );
@@ -458,7 +458,7 @@ function OzelKosullar({ rol, persona, a, g }: { rol: RolId; persona: RolMetni; a
 const SOZLESME_NOTU = {
   bagimsiz: 'Maaş almaz. Kazancını sözleşmeye göre fatura ya da makbuzla alır.',
   kadrolu: 'SGK’lı çalışanımızdır. Maaş ve prim alır.',
-  musteri: 'Ortak değildir. Para değil hizmet kredisi kazanır.',
+  musteri: 'Ortak değildir. Para değil, ücretsiz kullanım kazanır.',
 };
 
 /** Kırılım: büyük sonucu oluşturan kalemler; kapalı kalemlerde hangi koşulla açılacağı yazar. */
@@ -522,8 +522,8 @@ function BagimsizSonuc({ a, persona }: { a: Ayar; persona: RolMetni }) {
         aciklama={
           b.aktif ? (
             <>
-              {persona.ad} ayda {sayi(b.s.adet)} yeni müşteri getirir ve {tl(b.s.ciro)} ciro yapar. {seg} olarak, satışta “{katki}” katkısıyla cironun {yuzde(b.oran)} kadarını alır.
-              <span className="v2-so2-bize">Bu satıştan üç kalem düşülür: komisyon, kampanya ve üstteki 2 kademenin ağ payı. Geriye bize en az {tl(b.bize)} kalır.</span>
+              {persona.ad} ayda {sayi(b.s.adet)} yeni müşteri getirir ve {tl(b.s.ciro)} ciro yapar. Ortak şu anda {seg} basamağındadır. Satışta “{katki}” katkısı verdiği için cironun {yuzde(b.oran)} kadarını alır.
+              <span className="v2-so2-bize">Bu satıştan üç ödeme yaparız. Ortağa komisyon öderiz. Kampanya ekini öderiz. Ortağın üstündeki 2 kademeye ağ payı öderiz. Bize en az {tl(b.bize)} kalır.</span>
             </>
           ) : (
             'Bu ay satış yok. Satış olmadan komisyon da ağ payı da doğmaz.'
@@ -533,12 +533,12 @@ function BagimsizSonuc({ a, persona }: { a: Ayar; persona: RolMetni }) {
       <Kirilim
         satirlar={[
           { ad: 'Satış komisyonu', deger: tl(b.komisyon), not: `${tl(b.s.ciro)} × ${yuzde(b.oran)}` },
-          ...(a.marka === 'istoc' ? [{ ad: 'Kurumsal paket kampanyası', deger: tl(b.kurumsal), not: b.kurumsal > 0 ? `Kurumsal ciro × ${yuzde(a.kurumsalEk)}` : 'Kurumsal paket satılınca işler', kapali: b.kurumsal === 0 }] : []),
-          { ad: 'Ağ, 1. kademe', deger: tl(b.k1), not: b.k1Acik ? `${sayi(b.dal)} ortağın satışından` : 'Gümüş ve üstü segmentlerde, en az bir satış yapılan ayda açılır', kapali: !b.k1Acik },
-          { ad: 'Ağ, 2. kademe', deger: tl(b.k2), not: b.k2Acik ? `${sayi(b.dal * b.dal)} ortağın satışından` : 'Altın ve üstü segmentlerde, en az bir satış yapılan ayda açılır', kapali: !b.k2Acik },
+          ...(a.marka === 'istoc' ? [{ ad: 'Kurumsal paket kampanyası', deger: tl(b.kurumsal), not: b.kurumsal > 0 ? `Kurumsal ciro × ${yuzde(a.kurumsalEk)}` : 'Yalnız kurumsal paket satılınca ödenir', kapali: b.kurumsal === 0 }] : []),
+          { ad: 'Ağ, 1. kademe', deger: tl(b.k1), not: b.k1Acik ? `${sayi(b.dal)} ortağın satışından` : 'Ortak Gümüş ortak ya da üstü olunca ödenir. Ortağın o ay en az 1 satış yapması gerekir.', kapali: !b.k1Acik },
+          { ad: 'Ağ, 2. kademe', deger: tl(b.k2), not: b.k2Acik ? `${sayi(b.dal * b.dal)} ortağın satışından` : 'Ortak Altın ortak ya da üstü olunca ödenir. Ortağın o ay en az 1 satış yapması gerekir.', kapali: !b.k2Acik },
           { ad: 'Aylık toplam', deger: tl(b.aylik), toplam: true },
-          { ad: 'İlk 90 gün hızlı başlangıç', deger: tl(b.hizli), not: b.hizli > 0 ? `Yalnız ilk 3 ay, her ay ${tl(b.s.ciro)} × ${yuzde(a.hizliBaslangic)}` : 'Yeni ortağın ilk 3 ayındaki satışlarda açılır', kapali: b.hizli === 0 },
-          { ad: '2. yıldan sonra yenileme payı', deger: tl(b.yenilemePay), not: b.yenilemePay > 0 ? `Yenilenen ciro × ${yuzde(a.proYenilemePay)}, her ay` : 'Profesyonel çözüm ortağı rozetiyle açılır', kapali: b.yenilemePay === 0 },
+          { ad: 'İlk 90 gün hızlı başlangıç', deger: tl(b.hizli), not: b.hizli > 0 ? `Ortak başladıktan sonraki ilk 90 gün, her ay ${tl(b.s.ciro)} × ${yuzde(a.hizliBaslangic)}` : 'Yalnız ortak başladıktan sonraki ilk 90 gündeki satışlarda ödenir', kapali: b.hizli === 0 },
+          { ad: '2. yıldan sonra yenileme payı', deger: tl(b.yenilemePay), not: b.yenilemePay > 0 ? `Yenilenen ciro × ${yuzde(a.proYenilemePay)}, her ay` : 'Ortak Profesyonel çözüm ortağı olunca ödenir', kapali: b.yenilemePay === 0 },
         ]}
       />
     </>
@@ -594,11 +594,11 @@ function MusteriSonuc({ a }: { a: Ayar }) {
   return (
     <>
       <Sonuc
-        etiket="Yıllık hizmet kredisi"
+        etiket="Yıllık ücretsiz kullanımın değeri"
         deger={tl(m.yillikKredi)}
         aciklama={
           <>
-            Müşteri yılda {sayi(m.yillikTavsiye)} yeni müşteri getirir. Bunların {sayi(m.sayilan)} tanesi krediye çevrilir. Her tavsiye {a.krediAy} ay, yani {tl(m.tavsiyeBasi)} değerinde ücretsiz kullanımdır.
+            Müşteri yılda {sayi(m.yillikTavsiye)} yeni müşteri getirir. Bunların {sayi(m.sayilan)} tanesi ödül kazandırır. Her tavsiye {a.krediAy} ay, yani {tl(m.tavsiyeBasi)} değerinde ücretsiz kullanımdır.
             <span className="v2-so2-bize">
               Hakediş, yeni müşterinin ödemesi {m.sureGun} gün içinde tahsil edilirse oluşur. Hesap, ödemenin bu sürede alındığını varsayar. Yeni müşteri de {a.yeniKrediAy} ay bedava kullanır.
             </span>
@@ -608,7 +608,7 @@ function MusteriSonuc({ a }: { a: Ayar }) {
       <Adalet baslik="Ortak olursa ne kazanır?">
         {m.fazla > 0
           ? `Sınırı aşan ${sayi(m.fazla)} tavsiye artık bir ortaklık hacmidir. Bağımsız ortak olursa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır. Bu kişi ${SEGMENT_ADI[m.ortakOlursa.sg.seviye]} olarak başlar.`
-          : `Müşteri ortaklık sözleşmesi imzalarsa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır. Kampanya kredisi ise yalnız müşteriler içindir.`}
+          : `Müşteri ortaklık sözleşmesi imzalarsa aynı satışla ayda ${tl(m.ortakOlursa.satisKazanci)} satış komisyonu alır. Kampanyanın ücretsiz kullanım ödülü ise yalnız müşteriler içindir.`}
       </Adalet>
     </>
   );
@@ -645,7 +645,7 @@ function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
       formul: a.marka === 'istoc' ? `${sayi(a.istocPaketEur[p.id as IstocPaket])} € × ${sayi(a.kur)} ₺ × ${ay} ay` : `${tl(p.aylik)} × ${ay} ay`,
       sonuc: tl(p.ilkYil),
     }));
-  const ciro = { ad: 'Aylık satış cirosu', formul: s.paketler.filter((p) => p.adet > 0).map((p) => `${sayi(p.adet)} × ${tl(p.ilkYil)}`).join(' + ') || 'Satış yok', sonuc: tl(s.ciro) };
+  const ciro = { ad: 'Bu ayki satışların tutarı', formul: s.paketler.filter((p) => p.adet > 0).map((p) => `${sayi(p.adet)} × ${tl(p.ilkYil)}`).join(' + ') || 'Satış yok', sonuc: tl(s.ciro) };
   if (sozlesme === 'kadrolu') {
     const k = kadroluKazanc(a);
     return [
@@ -660,8 +660,8 @@ function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
     const m = musteriKazanc(a);
     return [
       { ad: 'Hakediş için tahsilat süresi', formul: `${sayi(a.tavsiyeSure)} ay × 30 gün`, sonuc: `${m.sureGun} gün` },
-      { ad: 'Tavsiye başı kredi', formul: `${tl(m.kendiAylik)} × ${a.krediAy} ay`, sonuc: tl(m.tavsiyeBasi) },
-      { ad: 'Krediye çevrilen tavsiye', formul: `En çok ${a.tavsiyeSinir}`, sonuc: sayi(m.sayilan) },
+      { ad: 'Bir tavsiyenin ödülü', formul: `${tl(m.kendiAylik)} × ${a.krediAy} ay`, sonuc: tl(m.tavsiyeBasi) },
+      { ad: 'Ödül kazandıran tavsiye', formul: `En çok ${a.tavsiyeSinir}`, sonuc: sayi(m.sayilan) },
     ];
   }
   const b = bagimsizKazanc(a);
@@ -670,8 +670,8 @@ function hesapSatirlari(a: Ayar, sozlesme: RolMetni['sozlesme']) {
     ciro,
     { ad: 'Komisyon oranı', formul: `${SEGMENT_ADI[b.sg.seviye]} ${yuzde(a.segmentOran[b.sg.seviye])} × katkı ${yuzde(a.katkiCarpan[a.katki])}`, sonuc: yuzde(b.oran) },
     { ad: 'Satış komisyonu', formul: `${tl(s.ciro)} × ${yuzde(b.oran)}`, sonuc: tl(b.komisyon) },
-    { ad: 'Ağ, 1. kademe', formul: b.k1Acik ? `${sayi(b.dal)} ortak × ${sayi(a.agAltSatis)} satış × ${tl(b.birim.k1)}` : 'Gümüş segmentte ve satış yapılan ayda açılır', sonuc: tl(b.k1) },
-    { ad: 'Ağ, 2. kademe', formul: b.k2Acik ? `${sayi(b.dal * b.dal)} ortak × ${sayi(a.agAltSatis)} satış × ${tl(b.birim.k2)}` : 'Altın segmentte ve satış yapılan ayda açılır', sonuc: tl(b.k2) },
+    { ad: 'Ağ, 1. kademe', formul: b.k1Acik ? `${sayi(b.dal)} ortak × ${sayi(a.agAltSatis)} satış × ${tl(b.birim.k1)}` : 'Gümüş ortak ya da üstü olunca ve o ay satış yapınca ödenir', sonuc: tl(b.k1) },
+    { ad: 'Ağ, 2. kademe', formul: b.k2Acik ? `${sayi(b.dal * b.dal)} ortak × ${sayi(a.agAltSatis)} satış × ${tl(b.birim.k2)}` : 'Altın ortak ya da üstü olunca ve o ay satış yapınca ödenir', sonuc: tl(b.k2) },
     ...(b.komisyon <= 0
       ? []
       : a.faturalama === 'aylik'
@@ -897,8 +897,8 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   const model = affilateModeli(a, rol);
   return (
     <div className="v2-so2" ref={kok}>
-      <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla kazancını, segmentini ve üst segmente geçme yolunu gösterir." />
-      <p className="v2-so2-yerel-not" data-v2-yerel-not>Bu sürümün ayarları yalnız bu tarayıcıda kalır. Ortak tabloya birinci sürümün ayarları yazılır.</p>
+      <PageHeader title="Satış ortaklığı programı" purpose="Bu sayfa beş satış rolünün aynı satıştan kazancını ve kariyer basamağını gösterir." />
+      <p className="v2-so2-yerel-not" data-v2-yerel-not>Bu sürümde yaptığınız ayarlar yalnız bu tarayıcıda saklanır. Ortak kayda yalnız 1. sürümün ayarları kaydedilir.</p>
       <div className="v2-so2-iskelet" ref={iskelet}>
       <div className="v2-so2-ana">
       <div className="v2-so2-arac">
@@ -926,7 +926,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
           Koşullar
         </button>
         <p className="v2-so2-fiyat">
-          Aylık satış cirosu <strong>{tl(s.ciro)}</strong>
+          Bu ayki satışların tutarı <strong>{tl(s.ciro)}</strong>
           <span>
             {sayi(s.adet)} yeni müşteri, müşteri başı ilk yıl {tl(s.ortalamaIlkYil)}
           </span>

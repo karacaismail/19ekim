@@ -40,7 +40,7 @@ function OneriKarti({ o }: { o: Oneri }) {
         </div>
         <div>
           <dt>Dayanak</dt>
-          <dd>{o.dayanak}</dd>
+          <dd>{o.dayanak === 'Öneri' ? 'Dış kaynak yok. Bu bir öneridir.' : o.dayanak}</dd>
         </div>
         <div className="dg-bilgi-genis">
           <dt>Kime söylenir?</dt>
@@ -60,7 +60,7 @@ function OneriKarti({ o }: { o: Oneri }) {
 function Icerik() {
   return (
     <div className="dg">
-      <PageHeader title="Değer önerisi" purpose="Saha ekibinin esnafa söyleyeceği sözleri ve her sözü tutmak için platformun yapması gereken işi gösterir." />
+      <PageHeader title="Değer önerisi" purpose="Saha ekibinin esnafa vereceği sözleri ve her söz için platformun yapacağı işi gösterir." />
 
       <p className="dg-uyari">
         Bu sözlerin çoğu henüz istoc.com’da çalışan bir hizmet değildir. Bunlar geliştirilmesi gereken önerilerdir. Esnafa söz vermeden önce hizmetin hazır olduğunu doğrulayın.
@@ -81,7 +81,7 @@ function Icerik() {
           <h2 id="en-guclu-baslik" className="dg-bolum-baslik">
             En güçlü {GUCLU_SOZLER.length} söz
           </h2>
-          <p className="dg-bolum-giris">Saha ekibi ilk görüşmede bu sözlerle başlar.</p>
+          <p className="dg-bolum-giris">Bu sözlerin çoğu bugün tutulamaz. Saha ekibi bir sözü yalnız hizmet hazırsa kullanır.</p>
         </header>
         <ol className="dg-guclu-liste">
           {GUCLU_SOZLER.map((s, i) => (

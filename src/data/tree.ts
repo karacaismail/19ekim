@@ -1,4 +1,4 @@
-import { shortDate } from '../lib/dates';
+import { addDays, longDate } from '../lib/dates';
 import { GRUP_ADI, icerikKaydi, type IcerikGrubu } from './icerik';
 import type { Params } from './params';
 import type { Role, RoleKey } from './types';
@@ -20,7 +20,7 @@ export interface OrgNode {
 export function makeOrg(p: Params, _roles: Role[]): OrgNode {
   const node = (slug: RoleKey, name: string, count: number, date: string, extra: Partial<OrgNode> = {}): OrgNode => ({
     name,
-    sub: `${count} kişi, ${shortDate(date)}`,
+    sub: `${count} kişi, başlangıç ${longDate(date)}`,
     role: slug,
     href: `/roller/${slug}/`,
     ...extra,
@@ -30,8 +30,8 @@ export function makeOrg(p: Params, _roles: Role[]): OrgNode {
     sub: 'Strateji ve operasyon',
     role: 'yonetici',
     children: [
-      node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi, ${shortDate(p.startDate)} (onay bekliyor)` }),
-      { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi, Scrum`, role: 'yazilim' },
+      node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi, başlangıç ${longDate(p.startDate)} (onay bekliyor)` }),
+      { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi, Scrum yöntemiyle çalışır`, role: 'yazilim' },
       node('dijital-pazarlama', 'Ağaç 1: Dijital pazarlama', p.dijitalCount, p.startDate),
       node('pazarlamaci', 'Ağaç 2: Masa başı (CRM)', p.masaCount, p.startDate),
       {
@@ -41,10 +41,10 @@ export function makeOrg(p: Params, _roles: Role[]): OrgNode {
         href: '/roller/saha-uzmani/',
         children: [
           node('saha-uzmani', 'Saha ekibi', p.sahaCount + p.sahaDecCount, p.startDate, {
-            sub: `${p.sahaCount + p.sahaDecCount} kişi: ${p.sahaCount} + ${p.sahaDecCount} (${shortDate(p.decStartDate)})`,
+            sub: p.sahaDecCount ? `${p.sahaCount + p.sahaDecCount} kişi (${p.sahaDecCount} kişi ${longDate(p.decStartDate)} tarihinde katılır)` : `${p.sahaCount} kişi`,
           }),
           node('ekip-lideri', 'Ekip lideri', 1, p.decStartDate, {
-            children: [{ name: 'Bağımsız temsilciler', sub: 'Ayda ~2, 90. günde ~5', role: 'ekip-lideri', href: '/buyume-modeli/' }],
+            children: [{ name: 'Bağımsız temsilciler', sub: `Ayda yaklaşık 2 kişi, ${longDate(addDays(p.startDate, 90))} tarihinde yaklaşık 5 kişi`, role: 'ekip-lideri', href: '/buyume-modeli/' }],
           }),
         ],
       },
@@ -107,7 +107,7 @@ export const TREE_NAV: NavLink[] = [
 /** “İstihdam” menüsünün alt bölümü: takvim ve ücret/performans modelleri. */
 export const HIRING_NAV = { label: 'İstihdam takvimi', path: '/istihdam/' };
 export const KADRO_NAV = { label: 'Kadro kapasitesi', path: '/kadro-kapasitesi/' };
-export const APPLET_NAV = { label: 'Applet', path: '/applet/', tam: 'Ücret ve performans applet’leri' };
+export const APPLET_NAV = { label: 'Hesap araçları', path: '/applet/', tam: 'Ücret ve performans hesap araçları' };
 
 /** Menü öğesi; etiket ve yol içerik envanterinden (docs/contents.md F15: menü, kırıntı ve sunum sırası ayrı). */
 export interface NavLink {

@@ -45,8 +45,12 @@ const pct2 = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFraction
 const signed = (r: number) => `${r > 0 ? '+' : r < 0 ? '−' : ''}${pct2(Math.abs(r))}`;
 /** Değişim oranı; önceki değer 0 ise (ör. tüm kalemleri işaretsiz ay) “—”. */
 const change = (now: number, before: number) => (before ? signed(now / before - 1) : 'Uygulanmıyor');
+/** Tutar sayfanın geri kalanı gibi yazılır: simge sayıdan sonra gelir (“4.899,00 ₺”, “50,00 €”). */
+const PARA_SIMGESI: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€' };
 const money = (value: number, currency: string) =>
-  new Intl.NumberFormat('tr-TR', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} ${PARA_SIMGESI[currency] ?? currency}`;
+/** Görünen para birimi adı: veri kodu “TRY” kalır, okur “TL” görür. */
+export const paraAdi = (kod: string) => (kod === 'TRY' ? 'TL' : kod);
 const rate = (value: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value)} ₺`;
 const clock = (iso: string | null | undefined) =>
   iso ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso)) : 'Veri yok';
@@ -182,7 +186,7 @@ function useOpexLive() {
           setLive({ status: 'ready', data: reply.data, checked: reply.data.denetlendi, push: pushing });
           if (changed) {
             const m = reply.data.model;
-            setAnnounce(`Veriler güncellendi: ${m.donem.etiket} toplam OPEX ${tl(m.ozet.buAy.toplam)}.`);
+            setAnnounce(`Veriler güncellendi: ${m.donem.etiket} toplam işletme gideri ${tl(m.ozet.buAy.toplam)}.`);
           }
         } else if (reply.kind === 'unchanged') {
           const data = last.current;
@@ -442,9 +446,10 @@ function Kurlar({ m }: { m: OpexModel }) {
     <dl className="opex-kur" aria-label="Döviz kurları">
       {(['USD', 'EUR'] as const).map((k) => (
         <div key={k}>
-          <dt>{k}/TRY</dt>
+          <dt>1 {k}</dt>
           <dd>
-            {rate(m.kur[k].deger)} <span className="opex-kur-kaynak">({m.kur[k].kaynak})</span>
+            {rate(m.kur[k].deger)} {/* “Yedek kur”: canlı kur okunamadığında önceden girilen kur. Kırıntı satırı dar olduğu için kısa yazılır. */}
+            <span className="opex-kur-kaynak" title={m.kur[k].kaynak === 'yedek' ? 'Canlı kur okunamadı. Önceden girilen kur kullanılıyor.' : undefined}>({m.kur[k].kaynak === 'yedek' ? 'yedek kur' : m.kur[k].kaynak})</span>
           </dd>
         </div>
       ))}
@@ -550,12 +555,12 @@ function Overview({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <div className="opex-kpis">
         <div className="opex-hero" data-edge="top">
-          <p className="opex-hero-label">{d.etiket} için toplam OPEX</p>
+          <p className="opex-hero-label">{d.etiket} için toplam işletme gideri (OPEX)</p>
           <Value className="opex-hero-value">{tl(total)}</Value>
           <p className="opex-hero-note">
-            Aylık ortalama {tl(d.ortalama.toplam)} ({d.aySayisi} ay).
+            Aylık ortalama gider {d.aySayisi} ayda {tl(d.ortalama.toplam)} olur.
             {d.yil === 2026 && m.donem.yil === 2026 ? ` ${m.donem.etiket} (bu ay): ${tl(m.ozet.buAy.toplam)}.` : ''}
-            {onceki ? ` 2026 (${onceki.etiket.replace(' 2026', '')}) aylık ortalamasına göre değişim ${change(d.ortalama.toplam, onceki.ortalama.toplam)}.` : ''}
+            {onceki ? ` 2026’nın ${onceki.etiket.replace(' 2026', '')} aylık ortalamasına göre değişim ${change(d.ortalama.toplam, onceki.ortalama.toplam)} olur.` : ''}
           </p>
         </div>
         <ul className="opex-tiles">
@@ -613,7 +618,7 @@ function Plan({ p }: { p: Plan }) {
           { label: `Toplam (${p.aySayisi} ay)`, value: tl(p.toplam.toplam) },
           { label: 'Aylık ortalama', value: tl(p.ortalama.toplam) },
           { label: 'En yüksek ay', value: `${enYuksek.ad}: ${tl(enYuksek.toplam)}` },
-          ...(sinir > 0 ? [{ label: `${p.aylar[sinir - 1].ad} → ${p.aylar[sinir].ad}`, value: change(p.aylar[sinir].toplam, p.aylar[sinir - 1].toplam) }] : []),
+          ...(sinir > 0 ? [{ label: `${p.aylar[sinir].ad} ayındaki değişim (önceki aya göre)`, value: change(p.aylar[sinir].toplam, p.aylar[sinir - 1].toplam) }] : []),
         ]}
       />
       <Chart
@@ -821,7 +826,7 @@ function KolonFiltresi({ ad, tur, secenekler, deger, onChange }: { ad: string; t
           <>
             {sayi('En az (₺)', hamMin, setHamMin, (v) => aralikDegis({ ...aralik, min: v }))}
             {sayi('En çok (₺)', hamMax, setHamMax, (v) => aralikDegis({ ...aralik, max: v }))}
-            <Checkbox label="Boş (—) olanlar da" checked={aralik.bos} onChange={(e) => aralikDegis({ ...aralik, bos: e.currentTarget.checked })} classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }} />
+            <Checkbox label="Boş (“—”) olanlar da" checked={aralik.bos} onChange={(e) => aralikDegis({ ...aralik, bos: e.currentTarget.checked })} classNames={{ root: 'opex-check', body: 'opex-check-body', input: 'opex-check-input', label: 'opex-check-label' }} />
             <button
               type="button"
               className="opex-btn"
@@ -888,7 +893,7 @@ function SecimKutusu({ label, data, value, onChange }: { label: string; data: st
 type AltSatir = { tur: 'grup'; kume: KumeKod; ad: string; aylar: number[]; yillar: number[]; donem: number } | { tur: 'toplam'; ad: string; aylar: number[]; yillar: number[]; donem: number } | { tur: 'degisim'; ad: string; oranlar: string[] };
 
 const ESAS_NOTU: Record<string, string> = { Net: 'net ücret', Brüt: 'brüt ücret', 'Asgari ücret': 'asgari ücret (net)', 'Fatura (KDV dahil)': 'fatura, KDV dahil' };
-const ARTIS: Record<Gider['artis'], string> = { Kur: 'kur', Kira: 'kira', Genel: 'genel', Yok: 'artışsız' };
+const ARTIS: Record<Gider['artis'], string> = { Kur: 'Kur artışı', Kira: 'Kira artışı', Genel: 'Enflasyon kadar artış', Yok: 'Artış yok' };
 const r2 = (v: number) => Math.round(v * 100) / 100;
 const SUTUN_GRUPLARI: { id: SutunGrubu; ad: string }[] = [
   { id: 'ay', ad: 'Ay sütunları (15)' },
@@ -1006,7 +1011,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
         ozel: p.aylar.map((a) => k.ozel[a.key][a.index]),
         yillar,
         donem: r2(yillar.reduce((t, v) => t + v, 0)),
-        artis: k.zamOrani ? `zam ${signed(k.zamOrani)}` : 'zam yok',
+        artis: k.zamOrani ? `Maaş zammı ${signed(k.zamOrani)}` : 'Maaş zammı yok',
         artar: k.zamOrani > 0,
         brut: bordrolu ? top((s) => s.brut) : null,
         kesinti: bordrolu ? top((s) => s.gv + s.dv + s.sgkIsci + s.issizlikIsci) : null,
@@ -1338,11 +1343,11 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
     ...(kategoriSec.length ? [{ ad: `Kategori: ${kategoriSec.join(', ')}`, kaldir: () => setKategoriSec([]) }] : []),
     ...(durumSec.length ? [{ ad: `Bu ay: ${durumSec.join(', ')}`, kaldir: () => setDurumSec([]) }] : []),
     ...(turSec.length ? [{ ad: `Tür: ${turSec.join(', ')}`, kaldir: () => setTurSec([]) }] : []),
-    ...(paraSec.length ? [{ ad: `Para birimi: ${paraSec.join(', ')}`, kaldir: () => setParaSec([]) }] : []),
+    ...(paraSec.length ? [{ ad: `Para birimi: ${paraSec.map(paraAdi).join(', ')}`, kaldir: () => setParaSec([]) }] : []),
     ...(artisSec.length ? [{ ad: `2027 artışı: ${artisSec.join(', ')}`, kaldir: () => setArtisSec([]) }] : []),
     ...(enAzHam !== '' ? [{ ad: `Toplam ₺ en az: ${enAzHam}`, kaldir: () => setEnAz('') }] : []),
     ...(enCokHam !== '' ? [{ ad: `Toplam ₺ en çok: ${enCokHam}`, kaldir: () => setEnCok('') }] : []),
-    ...hizli.map((kod) => ({ ad: `Hızlı: ${HIZLI.find((h) => h.kod === kod)?.ad ?? kod}`, kaldir: () => setHizli((h) => h.filter((x) => x !== kod)) })),
+    ...hizli.map((kod) => ({ ad: `Süzgeç: ${HIZLI.find((h) => h.kod === kod)?.ad ?? kod}`, kaldir: () => setHizli((h) => h.filter((x) => x !== kod)) })),
   ];
   const coklu = (label: string, data: string[], value: string[], onChange: (v: string[]) => void) => <SecimKutusu label={label} data={data} value={value} onChange={onChange} />;
   const tabloAdi = `Kalemler (${p.etiket})`;
@@ -1352,8 +1357,8 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
       {buAyVar && odemeTakibi ? (
         <FactsRow
           items={[
-            { label: 'Bu ay ödenen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.odenen)} (${m.ozet.odeme.adetOdenen} kalem)` },
-            { label: 'Bu ay bekleyen (teknoloji, ofis)', value: `${tl(m.ozet.odeme.bekleyen)} (${m.ozet.odeme.adetBekleyen} kalem)` },
+            { label: `${m.donem.etiket} ayında ödenen (teknoloji, ofis)`, value: `${tl(m.ozet.odeme.odenen)} (${m.ozet.odeme.adetOdenen} kalem)` },
+            { label: `${m.donem.etiket} ayında bekleyen (teknoloji, ofis)`, value: `${tl(m.ozet.odeme.bekleyen)} (${m.ozet.odeme.adetBekleyen} kalem)` },
           ]}
         />
       ) : null}
@@ -1373,7 +1378,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
               onChange={setGrupSec}
               options={[
                 { value: 'tumu', label: `Hepsi (${all.length})` },
-                { value: 'ofis', label: `Ofis (${kumeSay('ofis')})` },
+                { value: 'ofis', label: `Ofis ve işletme (${kumeSay('ofis')})` },
                 { value: 'teknoloji', label: `Teknoloji (${kumeSay('teknoloji')})` },
                 { value: 'insan', label: `Personel (${kumeSay('insan')})` },
               ]}
@@ -1435,7 +1440,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             {coklu('Kategori', [...katRenk.keys()], kategoriSec, setKategoriSec)}
             {buAyVar ? coklu('Bu ay', secenek(all.map((r) => r.durum?.ad ?? '').filter(Boolean)), durumSec, setDurumSec) : null}
             {coklu('Tür', ['Gider', 'Bordrolu', 'Freelancer'], turSec, setTurSec)}
-            {coklu('Para birimi', secenek(all.map((r) => r.para)), paraSec, setParaSec)}
+            {coklu('Para birimi', secenek(all.map((r) => r.para)).map(paraAdi), paraSec.map(paraAdi), (v) => setParaSec(v.map((x) => (x === 'TL' ? 'TRY' : x))))}
             {coklu('2027 artışı', ARTIS_SECENEK, artisSec, setArtisSec)}
             <NumberInput
               label="Toplam ₺ en az"
@@ -1454,7 +1459,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
           </div>
           <div className="opex-veri-durum">
             <p className="opex-veri-sayi" role="status" aria-live="polite">
-              {suzulmus.length} / {all.length} kalem
+              {all.length} kalemin {suzulmus.length} tanesi gösteriliyor
             </p>
             {filtreVar ? (
               <button type="button" className="opex-btn" onClick={temizle}>
@@ -1464,7 +1469,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             {/* Kapsam (UX-12): süzgeç kalemleri azaltınca süzülmüş ve genel dönem toplamı birlikte, iki kabukta da. */}
             {suzulmus.length !== all.length ? (
               <p className="opex-veri-kapsam">
-                Süzülmüş toplam {tl(toplam.donem)} ({suzulmus.length} kalem). Genel toplam {tl(genel.donem)} ({all.length} kalem).
+                Seçtiğiniz {suzulmus.length} kalemin toplamı {tl(toplam.donem)}. Bütün {all.length} kalemin toplamı {tl(genel.donem)}.
               </p>
             ) : null}
             {/* Kısa sembol efsanesi (gorsel_algi.md F17): yoğun tabloda “—” korunur, anlamı görünür ve yereldir. */}
@@ -1688,7 +1693,7 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
         items={[
           { label: `Bordrolu işveren maliyeti (${d.aySayisi} ay)`, value: `${tl(b.maliyet)} (${staff.length} kişi)` },
           { label: 'Freelancer faturaları (KDV dahil)', value: `${tl(sum('fatura', free))} (${free.length} kişi)` },
-          { label: 'Freelancer KDV hariç / KDV', value: `${tl(sum('kdvHaric', free))} / ${tl(sum('kdv', free))}` },
+          { label: 'Freelancer, KDV hariç', value: tl(sum('kdvHaric', free)) }, { label: 'Freelancer faturalarının KDV tutarı', value: tl(sum('kdv', free)) },
           { label: 'Teşvik ve destekler', value: tl(b.tesvik) },
         ]}
       />
@@ -1697,7 +1702,7 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
       <Chart
         id={`bordro-bilesen-${d.yil}`}
         title="Bordro bileşenleri"
-        note={`${d.etiket} toplamı, kişi başına`}
+        note={`${d.etiket} toplamı, her kişi ayrı satırda`}
         size="lg"
         rows={staff.length}
         summary={`Bordrolu ${staff.length} kişi, ${d.etiket}: net ${tl(b.net)}, gelir ve damga vergisi ${tl(b.gv + b.dv)}, SGK ve işsizlik işçi payı ${tl(b.sgkIsci + b.issizlikIsci)}, işveren payı (teşvik sonrası) ${tl(b.sgkIsveren + b.issizlikIsveren - b.tesvik)}.`}
@@ -1719,7 +1724,7 @@ function People({ m, d }: { m: OpexModel; d: Donem }) {
         size="sm"
         rows={1}
         shortLabels
-        summary={`İşveren maliyeti ${tl(b.maliyet)}: net ücret ${tl(b.net)}, gelir vergisi ${tl(b.gv)}, damga vergisi ${tl(b.dv)}, işçi SGK ve işsizlik ${tl(b.sgkIsci + b.issizlikIsci)} (brüt ${tl(b.brut)}), işveren payı ${tl(b.sgkIsveren + b.issizlikIsveren - b.tesvik)} (teşvik ${tl(b.tesvik)} düşüldü).`}
+        summary={`İşveren maliyeti ${tl(b.maliyet)} olur. Bunun ${tl(b.net)} tutarı net ücrettir. Gelir vergisi ${tl(b.gv)}, damga vergisi ${tl(b.dv)} olur. Diğer kalemler şunlardır: işçi SGK ve işsizlik ${tl(b.sgkIsci + b.issizlikIsci)} (brüt ${tl(b.brut)}), işveren payı ${tl(b.sgkIsveren + b.issizlikIsveren - b.tesvik)} (teşvik ${tl(b.tesvik)} düşüldü).`}
         spec={{ kind: 'opex-bilesim', total: { name: 'İşveren maliyeti', value: b.maliyet }, parts: bilesim }}
       />
     </>
@@ -1739,14 +1744,14 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
   const columns: Column<AyRow>[] = [
     { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (r) => (r.kind === 'ay' ? r.ad : 'Dönem toplamı') },
     c('Brüt', (s) => s.brut),
-    c('SGK + işsizlik (işçi)', (s) => s.sgkIsci + s.issizlikIsci),
-    c('Gelir vergisi matrahı', (s) => s.gvMatrahi),
-    c('Kümülatif matrah', (s) => s.kumulatifMatrah),
+    c('SGK ve işsizlik primi (çalışan payı)', (s) => s.sgkIsci + s.issizlikIsci),
+    c('Vergilenen tutar', (s) => s.gvMatrahi),
+    c('Yıl başından beri vergilenen toplam', (s) => s.kumulatifMatrah),
     c('Gelir vergisi', (s) => s.gv),
-    c('Asgari ücret gelir vergisi istisnası', (s) => s.gvIstisna),
+    c('Asgari ücret için vergiden düşülen tutar', (s) => s.gvIstisna),
     c('Damga vergisi', (s) => s.dv),
     c('Net', (s) => s.net),
-    c('İşveren SGK + işsizlik', (s) => s.sgkIsveren + s.issizlikIsveren),
+    c('İşveren SGK ve işsizlik primi', (s) => s.sgkIsveren + s.issizlikIsveren),
     c('Teşvik', (s) => s.tesvik),
     { ...c('İşveren maliyeti', (s) => s.maliyet), summary: true },
   ];
@@ -1758,8 +1763,8 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <Toggles label="Kişi" value={String(person.satir)} onChange={setWho} options={staff.map((k) => ({ value: String(k.satir), label: k.ad }))} />
       <FactsRow
         items={[
-          { label: 'Ücret esası', value: `${person.esas}: ${tlExact(d.yil === 2027 ? person.tutar2027 : person.tutar)}` },
-          { label: `${d.seri[0].ad} → ${d.seri[d.seri.length - 1].ad} brüt`, value: `${tl(first.brut)} → ${tl(last.brut)}` },
+          { label: 'Ücret türü', value: `${person.esas}: ${tlExact(d.yil === 2027 ? person.tutar2027 : person.tutar)}` },
+          { label: `Brüt maaş, ${d.seri[0].ad} ve ${d.seri[d.seri.length - 1].ad}`, value: `${tl(first.brut)} ve ${tl(last.brut)}` },
           { label: `${d.etiket} işveren maliyeti`, value: tl(pd.toplam.maliyet) },
           { label: 'Aylık ortalama maliyet', value: tl(pd.toplam.maliyet / d.aySayisi) },
         ]}
@@ -1767,7 +1772,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <Chart
         id={`bordro-aylik-${d.yil}`}
         title={`${person.ad}: aylık bordro`}
-        note={`${d.etiket}. Kümülatif matrah yeni bir gelir vergisi dilimine geçtikçe aynı net ücret için brüt ücret artar.`}
+        note={`${d.etiket}. Yıl içinde toplam kazanç arttıkça vergi oranı yükselir. Çalışanın eline aynı para geçsin diye brüt maaş artar.`}
         size="lg"
         rows={d.aySayisi}
         shortLabels
@@ -1786,7 +1791,7 @@ function Payroll({ m, d }: { m: OpexModel; d: Donem }) {
       <DataTable
         id={`bordro-ay-${d.yil}`}
         title={`${person.ad}, ${d.etiket} bordrosu`}
-        note={`SGK tavanı ${tl(asg.tavan)}. Asgari ücret ${tlExact(asg.brut)} brüt, ${tlExact(asg.net)} net. Asgari ücrete denk gelen tutar gelir vergisi ve damga vergisinden istisnadır.${d.yil === 2026 && d.aySayisi < 12 ? ' Kümülatif matrah Ocak 2026’dan hesaplanır.' : ''}`}
+        note={`SGK tavanı ${tl(asg.tavan)} olarak alındı. Asgari ücret brüt ${tlExact(asg.brut)}, net ${tlExact(asg.net)} olarak alındı. Asgari ücrete denk gelen tutardan gelir vergisi ve damga vergisi alınmaz.${d.yil === 2026 && d.aySayisi < 12 ? ' Yıl başından beri vergilenen toplam Ocak 2026’dan sayılır.' : ''}`}
         columns={columns /* summary: 'İşveren maliyeti' (sütun tanımında, F07) */}
         rows={rows}
         rowTone={(r) => (r.kind === 'total' ? 'total' : undefined)}
@@ -1802,7 +1807,7 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
   const once = donemOf(m, 2026);
   const exempt = m.kisiler.filter((k) => !k.zam && k.esas !== 'Asgari ücret').map((k) => k.ad);
   const e = m.enflasyon;
-  const kumeRows: KumeRow[] = [...GRUPLAR.map((g) => ({ k: g.kume, label: KUME_AD[g.kume] })), { k: 'toplam', label: 'Toplam OPEX' }];
+  const kumeRows: KumeRow[] = [...GRUPLAR.map((g) => ({ k: g.kume, label: KUME_AD[g.kume] })), { k: 'toplam', label: 'Toplam gider' }];
   const columns: Column<KumeRow>[] = [
     {
       key: 'kume',
@@ -1819,8 +1824,8 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
           </span>
         ),
     },
-    { key: 'o26', header: <Num>{`2026 aylık ort. (${once.etiket.replace(' 2026', '')})`}</Num>, nowrap: true, render: (r) => <Num>{tl(once.ortalama[r.k])}</Num> },
-    { key: 'o27', header: <Num>2027 aylık ort.</Num>, nowrap: true, render: (r) => <Num>{tl(d.ortalama[r.k])}</Num> },
+    { key: 'o26', header: <Num>{`2026 aylık ortalama (${once.etiket.replace(' 2026', '')})`}</Num>, nowrap: true, render: (r) => <Num>{tl(once.ortalama[r.k])}</Num> },
+    { key: 'o27', header: <Num>2027 aylık ortalama</Num>, nowrap: true, render: (r) => <Num>{tl(d.ortalama[r.k])}</Num> },
     { key: 'dg', header: <Num>Değişim</Num>, nowrap: true, summary: true, render: (r) => <Num>{once.ortalama[r.k] ? signed(d.ortalama[r.k] / once.ortalama[r.k] - 1) : 'Uygulanmıyor'}</Num> },
     { key: 'y27', header: <Num>2027 yıllık</Num>, nowrap: true, render: (r) => <Num>{tl(d.toplam[r.k])}</Num> },
   ];
@@ -1828,20 +1833,20 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
     <>
       <FactsRow
         items={[
-          { label: 'Ücret zammı', value: `${m.zam.esas} ${pct2(m.zam.oran)}${exempt.length ? ` (hariç: ${exempt.join(', ')})` : ''}` },
+          { label: 'Ücret zammı', value: `${m.zam.esas} ${pct2(m.zam.oran)}${exempt.length ? `. Zam almayanlar: ${exempt.join(', ')}` : ''}` },
           { label: 'Kira artışı', value: pct2(m.artis2027.kira) },
           { label: 'Faturalar ve ofis', value: pct2(m.artis2027.genel) },
-          { label: 'Döviz kalemleri (₺)', value: `${pct2(m.artis2027.kur)} (kur varsayımı)` },
+          { label: 'Döviz kalemleri (₺)', value: `${pct2(m.artis2027.kur)} (tahmini kur artışı)` },
           { label: 'Asgari ücret 2027', value: `${tl(m.asgari.y2027.brut)} brüt, ${tl(m.asgari.y2027.net)} net` },
         ]}
       />
       <p className="opex-source">
         2026 enflasyonu {e.donem} verisidir. Yıllık TÜFE {pct2(e.yillik)}, aylık TÜFE {pct2(e.aylik)} olur. 12 aylık ortalama TÜFE {pct2(e.ortalama12)},
-        Yİ-ÜFE aylık {pct2(e.yiufeAylik)} olur.{' '}
+        Yurt içi üretici fiyat endeksi (Yİ-ÜFE) aylık {pct2(e.yiufeAylik)} olur.{' '}
         <a className="text-link" href={e.kaynak} target="_blank" rel="noopener noreferrer">
           Kaynak arama bağlantısı
         </a>{' '}
-        (Bu bağlantı bir arama sonucudur, doğrulanmış kaynak değildir. Tarihi ve sürümü kullanıcının kontrol etmesi gerekir.)
+        Bu bağlantı bir arama sonucudur ve doğrulanmış kaynak değildir. Verinin tarihini ve sürümünü kontrol edin.
       </p>
       <Chart
         id="kisi-2027"
@@ -1854,8 +1859,8 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
           kind: 'opex-group',
           categories: m.kisiler.map((k) => k.ad),
           series: [
-            { name: `2026 aylık ort.`, tone: 'y2026', values: m.kisiler.map((k) => kisiDonem(k, once).toplam.maliyet / once.aySayisi) },
-            { name: '2027 aylık ort.', tone: 'y2027', values: m.kisiler.map((k) => kisiDonem(k, d).toplam.maliyet / d.aySayisi) },
+            { name: `2026 aylık ortalama`, tone: 'y2026', values: m.kisiler.map((k) => kisiDonem(k, once).toplam.maliyet / once.aySayisi) },
+            { name: '2027 aylık ortalama', tone: 'y2027', values: m.kisiler.map((k) => kisiDonem(k, d).toplam.maliyet / d.aySayisi) },
           ],
         }}
       />
@@ -1895,7 +1900,7 @@ function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
     <DataTable
       id={`tesvikler-${d.yil}`}
       title={`SGK teşvik ve destekleri (${d.yil})`}
-      note="Standart teşvikler, koşulu sağlayan herkese parametreyle uygulanır. Koşullu teşvikler yalnız Sheets’te kişinin satırına teşvik kodu yazılınca uygulanır. Tutarları mali müşavirle doğrulayın."
+      note="Standart teşvikler, koşulu sağlayan herkese kendiliğinden uygulanır. Koşullu teşvik yalnız Sheets’te kişinin satırına teşvik kodu yazılınca uygulanır. Tutarları mali müşavirle doğrulayın."
       columns={columns /* summary: 'Tür ve değer' (sütun tanımında, F07) */}
       rows={m.tesvikler}
     />
@@ -1911,14 +1916,14 @@ function YearPanel({ m, d, start }: { m: OpexModel; d: Donem; start: number }) {
       <Section id={`ozet-${d.yil}`} index={no()} title={`${d.yil} özeti`}>
         <Overview m={m} d={d} />
       </Section>
-      <Section id={`ucretler-${d.yil}-bolum`} index={no()} title="Personel giderleri" desc="Bordrolu personelin maliyeti netten brüte, oradan da işveren maliyetine hesaplanır. Freelancer maliyeti KDV dahil fatura tutarıdır.">
+      <Section id={`ucretler-${d.yil}-bolum`} index={no()} title="Personel giderleri" desc="Bordrolu personel için hesap net maaştan başlar. Net maaş, çalışanın eline geçen paradır. Hesap vergileri ve kesintileri ekleyerek brüt maaşı bulur. Sonra işverenin ödediği primleri ekler. Freelancer maliyeti KDV dahil fatura tutarıdır.">
         <People m={m} d={d} />
       </Section>
-      <Section id={`bordro-${d.yil}-bolum`} index={no()} title="Netten brüte: aylık bordro" desc="Gelir vergisi yıl içinde kümülatif matrahla hesaplanır. Asgari ücret istisnası ve SGK tavanı da uygulanır.">
+      <Section id={`bordro-${d.yil}-bolum`} index={no()} title="Netten brüte: aylık bordro" desc="Gelir vergisi, yıl başından beri vergilenen toplam ücrete göre hesaplanır. Bu toplam büyüdükçe vergi oranı artar. Asgari ücrete denk gelen kısımdan vergi alınmaz. SGK primi bir üst sınıra kadar hesaplanır. Bu sınıra SGK tavanı denir.">
         <Payroll m={m} d={d} />
       </Section>
       {d.yil === 2027 ? (
-        <Section id="varsayimlar-2027" index={no()} title="2027 varsayımları" desc="Ücret zammı enflasyon parametresine bağlıdır. Kira, fatura ve döviz kalemleri kendi artış esaslarına göre artar.">
+        <Section id="varsayimlar-2027" index={no()} title="2027 varsayımları" desc="Maaş zammı, Sheets’teki enflasyon değerine bağlıdır. Kira, fatura ve döviz kalemlerinin her birinin kendi artış oranı vardır.">
           <Assumptions m={m} d={d} />
         </Section>
       ) : null}
@@ -1950,10 +1955,10 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
           </ul>
         </Note>
       ) : null}
-      <Section id="plan-bolum" index={1} title={`Aylık plan (${p.etiket})`} desc="Her ay için teknoloji, ofis ve işletme ile personel giderleri ayrı hesaplanır.">
+      <Section id="plan-bolum" index={1} title={`Aylık plan (${p.etiket})`} desc="Sistem her ay üç grubu ayrı hesaplar. Bunlar teknoloji, “Ofis ve işletme” ve personel gruplarıdır.">
         <Plan p={p} />
       </Section>
-      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Kalemler üç gruba ayrılır. Ofis grubu kira ve aidat, internet, telefon, elektrik ve ofis ihtiyaçlarıdır. Teknoloji grubu yazılım, yapay zekâ, sunucu, API ve AWS gibi kalemlerdir. Personel grubu bordro ve freelancer giderleridir.">
+      <Section id="kalemler-bolum" index={2} title="Kalemler" desc="Kalemler üç gruptadır. “Ofis ve işletme” grubunda kira, aidat, internet, telefon, elektrik ve ofis ihtiyaçları vardır. Teknoloji grubu yazılım, yapay zekâ ve sunucu kalemleridir. Yazılım bağlantısı (API) ve Amazon bulut sunucusu (AWS) da bu gruptadır. Personel grubu bordro ve freelancer giderleridir.">
         <KalemTablosu m={m} p={p} />
         {/* Tablo ile grafik arasında ayırıcı (kullanıcı kararı 2026-10-21). */}
         <hr className="opex-ayrac opex-ayrac-arada" />
@@ -1966,14 +1971,14 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
       <div className="opex-yil-kume">
         <div className="opex-year-bar">
           <YearTabs value={d.yil} onChange={onYil} donemler={donemler} />
-          <p className="opex-year-bar-text">Aşağıdaki bölümler seçili yılı gösterir.</p>
+          <p className="opex-year-bar-text">Üstteki sekmeden bir yıl seçin. Aşağıdaki bölümler seçtiğiniz yılı gösterir.</p>
         </div>
         <div id="yil-paneli" role="tabpanel" aria-labelledby={`yil-${d.yil}`} className="opex-year-panel">
           <YearPanel key={d.yil} m={m} d={d} start={3} />
         </div>
       </div>
       <p className="opex-source">
-        Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. Motor sürümü {m.surum}, özet kodu {data.ozet}.
+        Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. Hesap aracının sürümü <code>{m.surum}</code>, özet kodu <code>{data.ozet}</code> olur.
       </p>
     </OzetContext.Provider>
   );

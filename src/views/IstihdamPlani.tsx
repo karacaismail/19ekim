@@ -41,7 +41,7 @@ function useBugun() {
 }
 
 type Durum = 'gecti' | 'bugun' | 'yakin' | 'plan';
-const DURUM_ADI: Record<Durum, string> = { gecti: 'Geçti', bugun: 'Bugün', yakin: 'Bu hafta', plan: 'Planlandı' };
+const DURUM_ADI: Record<Durum, string> = { gecti: 'Tarihi geçti', bugun: 'Bugün', yakin: '7 gün içinde', plan: 'Planlandı' };
 function durumu(tarih: string, bugun: string | null): Durum | null {
   if (!bugun) return null;
   const f = gunFarki(bugun, tarih);
@@ -249,10 +249,10 @@ export function IstihdamPlanGorunumu() {
     <>
       <Stats
         items={[
-          { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => a.ad.split(': ')[1]).join(', ') : 'Plan 3 Kasım 2026’da başlar.' },
+          { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => `“${a.ad.split(': ')[1]}”`).join(' ve ') : 'Plan 3 Kasım 2026’da başlar.' },
           { label: 'Sıradaki adım', value: siradaki ? uzunTarih(siradaki.tarih) : 'Yok', note: siradaki?.baslik },
-          { label: 'Birinci dalga', value: '23 Kasım 2026', note: '6 kişi başlar.' },
-          { label: 'İkinci dalga', value: '1 Aralık 2026', note: 'Organizatör ve koşullu 3. saha personeli başlar.' },
+          { label: 'Birinci dalga', value: '23 Kasım 2026', note: 'Bu tarihte 6 kişi birlikte işe başlar.' },
+          { label: 'İkinci dalga', value: '1 Aralık 2026', note: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar.' },
         ]}
       />
       <Section
@@ -309,21 +309,21 @@ function KadroIcerik() {
     <div className="tk">
       <PageHeader title="Kadro kapasitesi" purpose="Her rolün başlangıcını, iş yükünü, hedefini ve verilecek kararları gösterir." />
 
-      <Section id="roller" index={1} title="Roller ve kapasite" desc={`Bir kişinin ayda net ${NET_SAAT} saati vardır. Çubuk gereken saati, dik çizgi ${NET_SAAT} saatlik sınırı gösterir.`}>
+      <Section id="roller" index={1} title="Roller ve kapasite" desc={`Bir kişinin ayda işe ayırabileceği süre ${NET_SAAT} saattir. Çubuk gereken saati, dik çizgi ${NET_SAAT} saatlik sınırı gösterir.`}>
         <ul className="tk-roller">
           {PLAN_ROLLERI.map((r) => (
             <li key={r.ad} className="tk-rol" data-edge={r.saat > NET_SAAT ? 'top' : undefined}>
               <p className="tk-rol-ust">
                 <RoleChip role={r.role} label={r.ad} />
                 <span className="tk-rol-dalga">
-                  Dalga {r.dalga}, {uzunTarih(r.tarih)}, {r.kisi} kişi
+                  {r.dalga === 1 ? 'Birinci' : 'İkinci'} dalga, {uzunTarih(r.tarih)}, {r.kisi} kişi
                 </span>
               </p>
               <div className="tk-rol-kapasite">
                 <KapasiteCubugu saat={r.saat} oneri={r.oneriSaat} />
                 <p>
                   <strong>{r.saat} saat</strong> gerekir.{' '}
-                  {r.saat > NET_SAAT ? `Kapasiteyi yüzde ${Math.round(((r.saat - NET_SAAT) / NET_SAAT) * 100)} aşar.` : 'Kapasiteye sığar.'}
+                  {r.saat > NET_SAAT ? `Kapasiteyi %${Math.round(((r.saat - NET_SAAT) / NET_SAAT) * 100)} aşar.` : 'Kapasiteye sığar.'}
                   {r.oneriSaat ? ` Önerilen düzenlemeyle ${r.oneriSaat} saate iner.` : ''}
                 </p>
               </div>
@@ -353,7 +353,7 @@ function KadroIcerik() {
             <div className="tk-rol-kapasite">
               <KapasiteCubugu saat={YONETICI_YUKU.saat} />
               <p>
-                <strong>{YONETICI_YUKU.saat} saat</strong> gerekir: {YONETICI_YUKU.iseAlim} saat işe alım ve {YONETICI_YUKU.yonetim} saat tekrarlayan yönetim işi. Asistan alınmazsa bu yük zor azalır.
+                <strong>{YONETICI_YUKU.saat} saat</strong> gerekir. Bunun {YONETICI_YUKU.iseAlim} saati işe alım, {YONETICI_YUKU.yonetim} saati her ay tekrarlanan yönetim işidir. Asistan alınmazsa bu iş yükünü azaltmak zorlaşır.
               </p>
             </div>
           </li>
@@ -375,7 +375,7 @@ function KadroIcerik() {
         </ol>
       </Section>
 
-      <Section id="kararlar" index={3} title="Kararlar ve son tarihler" desc="Kritik kararlar verilmeden ilgili iş başlamamalıdır. Durum bugünün tarihine göre hesaplanır.">
+      <Section id="kararlar" index={3} title="Kararlar ve son tarihler" desc="Kritik kararlar verilmeden ilgili işe başlamayın. Durum etiketleri bugünün tarihine göre kendiliğinden değişir.">
         <ol className="tk-kararlar">
           {kararlar.map((k) => (
             <li key={k.konu} className="tk-karar">
@@ -409,12 +409,12 @@ function KadroIcerik() {
         </ul>
       </Section>
 
-      <Section id="ek-roller" index={4} title="Listede olmayan ama gereken roller" desc="Bu roller için hemen yeni kadro gerekmez. Her rol, yanında yazan koşul gerçekleşince açılır.">
+      <Section id="ek-roller" index={4} title="Listede olmayan ama gereken roller" desc="Bu roller için hemen yeni kadro gerekmez. Her rol için “Ne zaman” satırındaki koşul gerçekleşince işe alım başlar.">
         <div className="tk-ek">
           {SEVIYE_SIRA.map((s) => (
             <section key={s} className="tk-ek-grup" aria-labelledby={`ek-${s}`}>
               <h3 className="tk-alt-baslik" id={`ek-${s}`}>
-                <span className="tk-seviye" data-seviye={s}>
+                <span className="tk-seviye" data-seviye={s}>Öncelik:{' '}
                   {s}
                 </span>
               </h3>
@@ -465,7 +465,8 @@ export function GuncelPlan() {
   const satirlar = [
     ...ASAMALAR.filter((a) => a.id.startsWith('f')).map((a) => ({ bas: a.bas, son: a.son, ad: a.ad, aciklama: a.aciklama, tur: 'Aşama' })),
     ...OLAYLAR.map((o) => ({ bas: o.tarih, son: o.tarih, ad: o.baslik, aciklama: o.aciklama, tur: OLAY_TURU_ADI[o.tur] })),
-  ].sort((x, y) => x.bas.localeCompare(y.bas) || y.son.localeCompare(x.son));
+    // Aynı gün başlayan aşama, olaydan önce gelir. Aşamalar kendi aralarında ad sırasıyla dizilir (Faz 3, Faz 4’ten önce).
+  ].sort((x, y) => x.bas.localeCompare(y.bas) || Number(y.tur === 'Aşama') - Number(x.tur === 'Aşama') || x.ad.localeCompare(y.ad, 'tr'));
   const tarih = (b: string, s: string) => (b === s ? uzunTarih(b) : `${uzunTarih(b)} ile ${uzunTarih(s)} arası`);
   const durum = (b: string, s: string): Durum | null => {
     if (!bugun) return null;
@@ -477,7 +478,7 @@ export function GuncelPlan() {
     <Section
       id="guncel"
       title="Güncel plan (3 Kasım 2026)"
-      desc="Bu adımlar 3 Kasım Kadro Kapasite Planı ve GAP eylem planından gelir. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır ve başlangıç tarihi kararı verilince güncellenir."
+      desc="Bu adımlar 3 Kasım 2026’da hazırlanan iki plandan gelir. Biri “Kadro kapasitesi” sayfasındaki plandır. Diğeri, bugünkü durum ile hedef arasındaki farkı kapatan eylem planıdır. Dalga, aynı gün işe başlayan kişi grubudur. Birinci dalga 23 Kasım 2026’da, ikinci dalga 1 Aralık 2026’da başlar. Dalgaların gün sırası, dalganın işe başladığı günden sayılır. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır. Başlangıç tarihi kararı verilince bu satırlar güncellenir."
     >
       <ol className="tk-kararlar">
         {satirlar.map((r) => (
@@ -498,7 +499,7 @@ export function GuncelPlan() {
       </ol>
       <p>
         <TextLink to="/karar/#secimler" standalone>
-          Karar seçimlerinde başlangıç tarihini ve diğer açık soruları görün
+          Başlangıç tarihini ve diğer açık soruları “Kararlar” sayfasında görün
         </TextLink>
       </p>
     </Section>

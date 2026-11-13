@@ -50,29 +50,36 @@ function timeShare(rows: ScheduleRow[]) {
   return [...totals].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 }
 
-const hours = (min: number) => `${Math.floor(min / 60)} sa${min % 60 ? ` ${min % 60} dk` : ''}`;
+const hours = (min: number) => [Math.floor(min / 60) ? `${Math.floor(min / 60)} saat` : '', min % 60 ? `${min % 60} dakika` : ''].filter(Boolean).join(' ');
 const range = (row: { from: string; to: string }) => `${formatDate(row.from)} – ${formatDate(row.to)}`;
 const shortDate = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
-const shortRange = (row: { from: string; to: string }) => `${shortDate(row.from)} – ${shortDate(row.to)}`;
+const shortRange = (row: { from: string; to: string }) => `${formatDate(row.from)} – ${formatDate(row.to)}`;
 
 /**
  * Rol başlığı: tek PageHeader (ux.md M03; kullanıcı kararı 2026-10-20 — yükseklik ≥ %75 az — korunur). Kırıntı
  * öğesinde simge, ad ve durum; amaç satırında görev (veri: `role.mission`); dönem satırında kişi, başlangıç, bağlı,
  * ücret ve aranan nitelikler. Ağacın adı sunum sırası etiketlerinde ve organizasyon şemasında kalır.
  */
+/** Görev tanımını ilk cümle ve kalanı diye ayırır. Başlıktaki amaç satırı tek cümledir (ux.md P6.1). */
+function gorevParcalari(mission: string): [string, string] {
+  const m = mission.match(/^.*?[.!?](?=\s+[A-ZÇĞİÖŞÜ“]|\s*$)/u);
+  const ilk = m ? m[0] : mission;
+  return [ilk, mission.slice(ilk.length).trim()];
+}
+
 function RoleHero({ role }: { role: Role }) {
   return (
     <PageHeader
       title={role.title}
       icon={<Avatar role={role.slug} />}
       badge={<StatusChip status={role.startStatus} />}
-      purpose={role.mission}
+      purpose={gorevParcalari(role.mission)[0]}
       meta={[
         { label: 'Kişi', value: role.count },
         { label: 'Başlangıç', value: role.start },
-        { label: 'Bağlı', value: role.reportsTo },
-        { label: 'Ücret', value: role.pay },
-        { label: 'Aranan', value: role.seeks.join(', ') },
+        { label: 'Yönetici', value: role.reportsTo },
+        { label: 'Ücret', value: gorevParcalari(role.pay)[0] },
+        { label: 'Aranan özellikler', value: role.seeks.join(', ') },
       ]}
     />
   );
@@ -87,13 +94,13 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       id="gun"
       index={index}
       title="Günlük düzen"
-      desc={`Dönem 1, ${formatDate(p1.from)} ile ${formatDate(p1.to)} arasıdır. Bu dönemde hafta içi düzen ${role.hours.weekday} olur. Cumartesi düzeni ${role.hours.saturday} olur. Haftalık süre ${role.hours.weeklyNet}. Dönem 2, ${formatDate(p2.from)} tarihinde başlar. Dönem 2 düzeni şudur: ${role.hours.fromFeb}. Dönem 2 düzeni, yıllık fazla çalışma tavanı nedeniyle uygulanır.`}
+      desc={`Dönem 1, ${formatDate(p1.from)} tarihinden ${formatDate(p1.to)} tarihine kadar sürer. ${role.hours.weekday} ${role.hours.saturday} ${role.hours.weeklyNet} Dönem 2, ${formatDate(p2.from)} tarihinde başlar. ${role.hours.fromFeb} Fazla çalışmanın yıllık bir üst sınırı vardır. Dönem 2 düzeni bu sınır yüzünden uygulanır.`}
     >
       <Chart
         id="zaman-payi"
         title="Hafta içi zaman payı"
-        note={top.map((t, i) => `${['En büyük', 'İkinci', 'Üçüncü'][i]} blok ${t.name} (${hours(t.value)}).`).join(' ')}
-        summary={`Hafta içi çalışma süresinin dağılımı: ${share.map((s) => `${s.name} ${hours(s.value)}`).join(', ')}.`}
+        note={`Hafta içi günde ${hours(share.reduce((s, x) => s + x.value, 0))} çalışırsınız. ${top.map((t, i) => `“${t.name}” ${['en çok zaman alan iştir', 'ikinci sıradadır', 'üçüncü sıradadır'][i]}. Günde ${hours(t.value)} sürer.`).join(' ')}`}
+        summary={`Hafta içi bir iş gününün işlere göre dağılımı: ${share.map((s) => `${s.name} ${hours(s.value)}`).join(', ')}.`}
         spec={{ kind: 'pay', role: role.slug, items: share }}
         size={share.length > 9 ? 'xxl' : share.length > 7 ? 'xl' : 'lg'}
       />
@@ -102,8 +109,10 @@ function DaySection({ role, index }: { role: Role; index: number }) {
           id="hafta-ici"
           title="Hafta içi"
           columns={[
-            { key: 'time', header: 'Saat', nowrap: true, rowHeader: true, render: (r) => r.time },
-            { key: 'block', header: 'Blok', summary: true, minWidth: '12rem', render: (r) => r.block },
+            // Saat aralığı iki sütundur: “08:00–08:15” yerine “Başlar 08:00”, “Biter 08:15” okunur.
+            { key: 'time', header: 'Başlar', nowrap: true, rowHeader: true, render: (r) => r.time.split('–')[0] },
+            { key: 'bitis', header: 'Biter', nowrap: true, render: (r) => r.time.split('–')[1] ?? '' },
+            { key: 'block', header: 'İş', summary: true, minWidth: '12rem', render: (r) => r.block },
           ]}
           rows={role.daily}
           rowTone={(r) => r.tone}
@@ -112,8 +121,10 @@ function DaySection({ role, index }: { role: Role; index: number }) {
           id="cumartesi"
           title="Cumartesi"
           columns={[
-            { key: 'time', header: 'Saat', nowrap: true, rowHeader: true, render: (r) => r.time },
-            { key: 'block', header: 'Blok', summary: true, minWidth: '12rem', render: (r) => r.block },
+            // Saat aralığı iki sütundur: “08:00–08:15” yerine “Başlar 08:00”, “Biter 08:15” okunur.
+            { key: 'time', header: 'Başlar', nowrap: true, rowHeader: true, render: (r) => r.time.split('–')[0] },
+            { key: 'bitis', header: 'Biter', nowrap: true, render: (r) => r.time.split('–')[1] ?? '' },
+            { key: 'block', header: 'İş', summary: true, minWidth: '12rem', render: (r) => r.block },
           ]}
           rows={role.saturday}
           rowTone={(r) => r.tone}
@@ -122,7 +133,7 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       {role.slug === 'ekip-lideri' ? (
         <p className="after-block">
           <TextLink to="/buyume-modeli/" standalone>
-            Çok katmanlı pazarlama ağı: kademe ve huni
+            Çok katmanlı pazarlama ağının işleyişini görün
           </TextLink>
         </p>
       ) : null}
@@ -146,11 +157,11 @@ function DigitalSections({ role }: { role: Role }) {
         id="olcum"
         index={1}
         title="Ölçüm ve entegrasyonlar"
-        desc={`İlk iş ölçümü kurmaktır. Böylece her içeriğin ve reklamın kayda ve aktif satıcıya etkisi görünür. ${integrations.length} entegrasyon ${shortDate(last.date)} tarihine kadar tamamlanır.`}
+        desc={`İlk işiniz ölçüm araçlarını kurmaktır. Böylece her içeriğin ve reklamın kaç kayıt getirdiği görünür. Kaç aktif satıcı getirdiği de görünür. ${integrations.length} ölçüm bağlantısını ${shortDate(last.date)} tarihine kadar kurun.`}
       >
         <Chart
           id="entegrasyon"
-          title="Entegrasyon × tamamlanma tarihi"
+          title="Ölçüm bağlantılarının bitiş tarihleri"
           summary={integrations.map((i) => `${i.name}: ${shortDate(i.date)}`).join('. ')}
           spec={{ kind: 'deadlines', start: integrationDates[0], end: addDays(integrationDates[integrationDates.length - 1], 4), items: integrations.map((i) => ({ name: i.name, date: i.date, role: role.slug })) }}
           size="lg"
@@ -158,10 +169,10 @@ function DigitalSections({ role }: { role: Role }) {
         />
         <DataTable<Integration>
           id="entegrasyon"
-          title="Ne ölçer, ne zaman tamam sayılır"
+          title="Ne işe yarar, ne zaman tamam sayılır"
           columns={[
-            { key: 'name', header: 'Entegrasyon', minWidth: '13rem', rowHeader: true, render: (r) => r.name },
-            { key: 'measures', header: 'Ne ölçer', minWidth: '16rem', render: (r) => r.measures },
+            { key: 'name', header: 'Ölçüm bağlantısı', minWidth: '13rem', rowHeader: true, render: (r) => r.name },
+            { key: 'measures', header: 'Ne işe yarar', minWidth: '16rem', render: (r) => r.measures },
             { key: 'done', header: 'Kabul ölçütü', minWidth: '16rem', render: (r) => r.done },
             { key: 'date', header: 'Tarih', summary: true, nowrap: true, render: (r) => shortDate(r.date) },
           ]}
@@ -173,11 +184,11 @@ function DigitalSections({ role }: { role: Role }) {
         id="otomasyon"
         index={2}
         title="AI-first paylaşım otomasyonu"
-        desc="Uzman içeriği tek tek üretmez. İçeriği üreten hattı kurar ve denetler. İnsan yalnız iki noktada devreye girer: senaryo seçimi ve yayın onayı."
+        desc="Siz içeriği tek tek üretmezsiniz. İçeriği adım adım üreten otomatik sistemi kurar ve denetlersiniz. Yalnız iki adımda işe katılırsınız. Senaryoyu seçer ve yayını onaylarsınız."
       >
         <Chart
           id="hat"
-          title="Kaynaktan ölçüme hat"
+          title="Fikirden ölçüme otomatik sistemin adımları"
           summary={pipeline.map((p, i) => `${i + 1}. ${p.step} (${STEP_MODE_LABELS[p.mode]}): ${p.measure}`).join('. ')}
           spec={{
             kind: 'chain',
@@ -198,8 +209,8 @@ function DigitalSections({ role }: { role: Role }) {
         />
         <DataTable<AiTool>
           id="arac"
-          title={`Araçlar: bütçe en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ / ay`}
-          note="Karar 19 Ekim’de verildi. Bütçe tavanı yalnız İsmail Karaca’nın onayıyla aşılabilir. Bütçe 30 Aralık’ta ölçüm panosuna göre yeniden değerlendirilir."
+          title="Araçlar ve aylık bütçe"
+          note={`Araçlara ayda en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim’de verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık’ta ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
             { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },
@@ -209,7 +220,7 @@ function DigitalSections({ role }: { role: Role }) {
         />
       </Section>
 
-      <Section id="uretim" index={3} title="Üretim ve paylaşım otomasyonu" desc="Aylık artış hedefleri ve içeriğin paylaşıldığı kanallar.">
+      <Section id="uretim" index={3} title="Üretim ve paylaşım otomasyonu" desc="Bu bölümde aylık hedefler ve paylaşım kanalları var.">
         <KpiGrid kpis={role.kpis} role={role.slug} />
         <Chart
           id="uretim-artis"
@@ -230,7 +241,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<Channel>
           id="kanal"
           title="Kanallar"
-          note="Tüm kanallar tek paylaşım kuyruğundan otomatik beslenir. Kanal listesi, içerik planı v1 ile birlikte 6 Kasım’da onaylanır."
+          note="Bütün kanallardaki paylaşımlar tek bir paylaşım listesinden otomatik yapılır. İsmail Karaca kanal listesini 6 Kasım’da onaylar. Onay, içerik planının 1. sürümüyle birlikte verilir."
           columns={[
             { key: 'channel', header: 'Kanal', minWidth: '12rem', rowHeader: true, render: (r) => r.channel },
             { key: 'content', header: 'Ne paylaşılır', minWidth: '16rem', render: (r) => r.content },
@@ -243,28 +254,28 @@ function DigitalSections({ role }: { role: Role }) {
       <Section
         id="icerik-plani"
         index={4}
-        title="İçerik planı: ne üreteceğiz"
-        desc={`Ocak’ta haftada ${weekly} video (günde 3 × 6 gün) üretilir ve altı içerik sütununa dağılır. Ham malzeme ekiplerden gelir. Uzman malzemeyi derler, otomasyon hattı videoyu üretir ve paylaşır.`}
+        title="İçerik planı: ne üretilecek"
+        desc={`Ocak’ta haftada ${weekly} video üretilir. Bu, 6 gün boyunca günde 3 video demektir. Videolar altı içerik türüne dağılır. Ham malzemeyi ekipler verir. Siz malzemeyi toplarsınız. Otomatik sistem videoyu üretir ve paylaşır.`}
       >
         <Chart
           id="icerik-karmasi"
-          title="Haftalık içerik karması (Ocak)"
+          title="Ocak’ta haftalık video dağılımı"
           summary={contentPlan.map((p) => `${p.pillar}: haftada ${p.perWeek}`).join('. ')}
           spec={{ kind: 'mix', unit: '/ hafta', items: contentPlan.map((p) => ({ name: p.pillar, value: p.perWeek, role: p.source })) }}
           size="lg"
         />
         <DataTable<ContentPillar>
           id="icerik"
-          title="Sütun, kaynak, format, ölçüt"
+          title="İçerik türü, kaynak, biçim ve ölçüt"
           columns={[
-            { key: 'pillar', header: 'Sütun', nowrap: true, rowHeader: true, render: (r) => r.pillar },
+            { key: 'pillar', header: 'İçerik türü', nowrap: true, rowHeader: true, render: (r) => r.pillar },
             {
               key: 'what',
               header: 'Ne',
               minWidth: '16rem',
               render: (r) => (
                 <>
-                  {r.what}
+                  {r.what}{' '}
                   <span className="cell-sub">Örneğin {r.example}</span>
                 </>
               ),
@@ -275,12 +286,12 @@ function DigitalSections({ role }: { role: Role }) {
               minWidth: '14rem',
               render: (r) => (
                 <>
-                  <RoleChip role={r.source} />
+                  <RoleChip role={r.source} />{' '}
                   <span className="cell-sub">{r.sourceNote}</span>
                 </>
               ),
             },
-            { key: 'format', header: 'Format', minWidth: '12rem', render: (r) => r.format },
+            { key: 'format', header: 'Biçim', minWidth: '12rem', render: (r) => r.format },
             { key: 'perWeek', header: 'Haftada', summary: true, nowrap: true, render: (r) => r.perWeek },
             { key: 'measure', header: 'Ölçüt', minWidth: '11rem', render: (r) => r.measure },
           ]}
@@ -288,21 +299,21 @@ function DigitalSections({ role }: { role: Role }) {
         />
       </Section>
 
-      <Section id="eylem-plani" index={5} title="90 günlük plan" desc="Dört iş akışı, tarih ve ölçülebilir hedefle.">
+      <Section id="eylem-plani" index={5} title="90 günlük plan" desc="Planda dört iş akışı var. Her işin tarihi ve hedefi aşağıdadır.">
         <Chart
           id="dijital-gantt"
           title="İş akışı × zaman"
-          summary={digitalPlan.map((p) => `${STREAM_LABELS[p.stream]}, ${shortRange(p)}: ${p.action}, hedef ${p.target}`).join('. ')}
+          summary={digitalPlan.map((p) => `${STREAM_LABELS[p.stream]}, ${shortRange(p)}: ${p.action.replace(/\.$/, '')}. Hedef: ${p.target}.`).join(' ')}
           spec={{
             kind: 'gantt',
             start: planStart,
             end: planEnd,
             rows: digitalPlan.map((p, i) => ({
-              name: `${STREAM_LABELS[p.stream]} ${digitalPlan.slice(0, i + 1).filter((r) => r.stream === p.stream).length}`,
+              name: `${STREAM_LABELS[p.stream]}, ${digitalPlan.slice(0, i + 1).filter((r) => r.stream === p.stream).length}. adım`,
               from: p.from,
               to: p.to,
               role: role.slug,
-              text: `${p.action}. Hedef: ${p.target}`,
+              text: `${p.action.replace(/\.$/, '')}. Hedef: ${p.target}`,
               milestone: p.milestone,
             })),
             marks,
@@ -322,7 +333,7 @@ function DigitalSections({ role }: { role: Role }) {
           rows={digitalPlan}
         />
         <Note title="Asistan alınmazsa">
-          <p>Uzman {formatDate(m.params.dijitalAltDate)} itibarıyla başlar ve bu sayfadaki tarihler buna göre kayar. Meta reklamları o güne kadar İsmail Karaca’da kalır.</p>
+          <p>Asistan işe alınmazsa {formatDate(m.params.dijitalAltDate)} tarihinde başlarsınız. Bu durumda sayfadaki tarihler de ileri kayar. Meta reklamlarını {formatDate(m.params.dijitalAltDate)} tarihine kadar İsmail Karaca yönetir.</p>
         </Note>
       </Section>
 
@@ -349,21 +360,21 @@ function GenericSections({ role }: { role: Role }) {
         />
       </Section>
 
-      <Section id="kpi" index={2} title="KPI hedefleri" desc="Değer, birim ve ölçüm zamanı.">
+      <Section id="kpi" index={2} title="Performans hedefleri" desc="Her kartta hedef değer ve ölçüm zamanı yazılıdır.">
         <KpiGrid kpis={role.kpis} role={role.slug} />
         <Chart
           id="kpi-artis"
-          title={`${series.map((s) => s.name).join(' ve ')}: aylara göre`}
-          summary={series.map((s) => `${s.name}: ${s.values.map((v, i) => `${months[i]} ${v}`).join(', ')}`).join('. ')}
+          title={`${series.map((s, i) => (i ? s.name.toLocaleLowerCase('tr-TR') : s.name)).join(' ve ')} hedefi`}
+          summary={series.map((s) => `${s.name} hedefi ${s.values.map((v, i) => `${months[i]} ayında ${v}`).join(', ')} olur.`).join(' ')}
           spec={{ kind: 'ramp', months, role: role.slug, series }}
         />
       </Section>
 
-      <Section id="eylem-plani" index={3} title="Eylem planı" desc="Tarih aralığı, eylem ve ölçülebilir hedef.">
+      <Section id="eylem-plani" index={3} title="Eylem planı" desc="Bu tabloda her adımın tarihi, yapılacak iş ve hedefi vardır.">
         <Chart
           id="rol-gantt"
           title="Zaman çizelgesi"
-          summary={role.plan.map((p) => `${range(p)}: ${p.action}, hedef ${p.target}`).join('. ')}
+          summary={role.plan.map((p, i) => `${i + 1}. adım ${formatDate(p.from)} tarihinde başlar ve ${formatDate(p.to)} tarihinde biter. ${p.action.replace(/\.?$/, '.')} Hedef: ${p.target.replace(/\.?$/, '.')}`).join(' ')}
           spec={{
             kind: 'gantt',
             start: role.plan[0].from,
@@ -396,6 +407,9 @@ function RoleContent({ slug }: { slug: string }) {
   return (
     <>
       <RoleHero role={role} />
+      {/* Görev tanımının ve ücretin kalanı başlığın altında tam cümlelerle okunur. Başlık kısa kalır. */}
+      {gorevParcalari(role.mission)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.mission)[1]}</p> : null}
+      {gorevParcalari(role.pay)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.pay)[1]}</p> : null}
       {role.slug === 'dijital-pazarlama' ? <DigitalSections role={role} /> : <GenericSections role={role} />}
     </>
   );

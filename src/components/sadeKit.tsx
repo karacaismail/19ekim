@@ -225,7 +225,7 @@ export function Donemler({ satirlar }: { satirlar: { ad: string; yillik: number;
           </tbody>
         </table>
       </div>
-      <p className="so2-donem-not">Yaklaşık değerdir. Günlük = yıllık ÷ 365, haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12.</p>
+      <p className="so2-donem-not">Tutarlar yaklaşıktır. Günlük tutarı bulmak için yıllık tutarı 365’e böleriz. Haftalık tutar için 52’ye, aylık tutar için 12’ye böleriz.</p>
     </div>
   );
 }

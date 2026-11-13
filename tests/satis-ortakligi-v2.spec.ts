@@ -395,6 +395,6 @@ for (const genislik of [320, 360, 375, 390]) {
 
 test('ikinci sürüm, ayarlarının ortak tabloya gitmediğini söyler', async ({ page, personaServer }) => {
   await page.goto('satis-ortakligi/?surum=v2');
-  await expect(page.locator('[data-v2-yerel-not]')).toHaveText('Bu sürümün ayarları yalnız bu tarayıcıda kalır. Ortak tabloya birinci sürümün ayarları yazılır.');
+  await expect(page.locator('[data-v2-yerel-not]')).toHaveText('Bu sürümde yaptığınız ayarlar yalnız bu tarayıcıda saklanır. Ortak kayda yalnız 1. sürümün ayarları kaydedilir.');
   expect(personaServer.writes).toHaveLength(0);
 });

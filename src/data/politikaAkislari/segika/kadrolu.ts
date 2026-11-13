@@ -35,7 +35,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       ad: 'Görevinizi ve prim ekinizi alın',
       sorumlu: 'Siz ve insan kaynakları sorumlusu',
       yap: [
-        'İnsan kaynakları size yazılı görev tanımı verir.',
+        'İnsan kaynakları size yazılı görev tanımı verir.', 'Prim eki, iş sözleşmenize eklenen prim belgesidir. Primin nasıl hesaplanacağını ve ne zaman ödeneceğini yazar.',
         'Prim ekindeki başlangıç dönemi kuralını okuyun.',
         'Maaşın net mi brüt mü olduğunu sorun.',
       ],
@@ -102,10 +102,10 @@ export const akisOlustur: AkisOlustur = (a) => {
     },
     {
       id: 'gosterim',
-      ad: 'Kimliksiz örnekle gösterim yapın',
+      ad: 'Gerçek kişi bilgisi olmayan örnekle gösterim yapın',
       sorumlu: 'Siz',
       yap: [
-        'Yalnız kimliksiz örnek veri kullanın.',
+        'Yalnız gerçek kişi bilgisi olmayan örnek veri kullanın.',
         'Gerçek çalışan dosyası istemeyin.',
         'Teşvik tutarı veya sonuç sözü vermeyin.',
       ],
@@ -115,7 +115,7 @@ export const akisOlustur: AkisOlustur = (a) => {
         devam('teklif-istedi', 'İşveren teklif istedi', 'teklif'),
         son('bitir', 'tesvik-tutari', 'İşveren kesin teşvik tutarı istiyor', 'Tutar sözü veremezsiniz', [
           'Tutar sözü veremeyeceğinizi açıkça söyleyin.',
-          'İşveren tutarsız devam etmezse görüşmeyi kapatın.',
+          'İşveren tutar olmadan devam etmezse görüşmeyi bitirin.',
         ]),
         son('bekle', 'gercek-dosya', 'İşveren gerçek çalışan dosyası gönderdi', 'Kişisel veri kararını bekleyin', [
           'Dosyayı açmayın ve saklamayın.',
@@ -134,7 +134,7 @@ export const akisOlustur: AkisOlustur = (a) => {
         'Teklife paketi ve çalışan sayısını yazın.',
         'Fiyat tablodaki fiyattır. İndirim yoktur.',
       ],
-      dikkat: `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar. Bu örnek ${sayi(fiyat.kisi)} çalışana göredir. Sayı aynı blokta kalırsa fiyat değişmez.`,
+      dikkat: `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar. Bu örnek ${sayi(fiyat.kisi)} çalışana göredir. Sayı aynı grupta kalırsa fiyat değişmez.`,
       soru: 'Teklifin durumu nedir?',
       ek: 'kazanc',
       secenekler: [

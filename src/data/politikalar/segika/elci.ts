@@ -9,7 +9,7 @@ export const politika: ProjePolitika = {
   "gorev": [
     "Teşvik takibi ihtiyacına uygun içerik hazırlayın. Teşvik, devletin işverene sağladığı destektir. Sigorta prim desteği buna bir örnektir.",
     "Bordro takibi ihtiyacına uygun içerik de hazırlayabilirsiniz.",
-    "Her ticari paylaşımda “reklam” ibaresini en başta gösterin.",
+    "Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.",
     "Yalnız şirketin onayladığı Segika bilgisini kullanın.",
     "Pazarlama sorumlusunun size verdiği bağlantıyı veya kodu paylaşın.",
     "Başvuruların sizin kaydınıza ulaştığını kontrol edin."
@@ -118,7 +118,7 @@ export const politika: ProjePolitika = {
       "urun": "Segika",
       "ad": "100 ile 1.000 çalışanlı üretim işletmeleri",
       "ihtiyac": "İşletmeler teşvik takibini düzenli yapmak isteyebilir.",
-      "ulasim": "İnsan kaynakları topluluğunda reklam olduğu açık bir süreç örneği paylaşın.",
+      "ulasim": "İnsan kaynakları topluluğunda bir iş örneği paylaşın. Paylaşımın reklam olduğunu açıkça yazın.",
       "mesaj": "Teşvik takibini şu an hangi yöntemle yapıyorsunuz?",
       "uygunluk": "Teşvik sonucunu kesin tasarruf vaadine çevirmeyin.",
       "sonrasi": "İlgilenen işveren onaylı bağlantıdan şirketle görüşsün."
@@ -136,7 +136,7 @@ export const politika: ProjePolitika = {
       "urun": "Segika",
       "ad": "Büyükşehirde hızlı işe alım yapan 20 ile 200 çalışanlı hizmet işletmeleri",
       "ihtiyac": "İşletmeler yeni çalışan girişlerinde teşvik şartlarını kaçırmak istemeyebilir.",
-      "ulasim": "Yasa değişikliklerini anlatan bültende reklam olduğu açık bir yazı yayımlayın.",
+      "ulasim": "Yasa değişikliklerini anlatan bültende bir yazı yayımlayın. Yazının reklam olduğunu açıkça belirtin.",
       "mesaj": "Yeni çalışan girişlerinde teşvik şartını nasıl kontrol ediyorsunuz?",
       "uygunluk": "Okuyucunun kendi teşvik hakkı hakkında kesin görüş vermeyin.",
       "sonrasi": "Okuyucu isterse şirketin başvuru yoluna geçsin."
@@ -278,10 +278,10 @@ export const politika: ProjePolitika = {
     {
       "baslik": "İşveren elçiye mi, danışmanına mı yazılacak?",
       "mevcut": "Bağlantıdan gelen işveren ödeme yaparsa şirket komisyon hesaplar.",
-      "eksik": "Şirket, işverenin danışmanı da Segika’yı önerirse hangi kaydın geçerli olacağını henüz yazmadı.",
+      "eksik": "İşverenin danışmanı da Segika’yı önerebilir. Bu durumda hangi kaydın geçerli olacağını şirket henüz yazmadı.",
       "islem": "Pazarlama sorumlusu finans sorumlusuyla kayıt kuralı hazırlasın.",
       "kanit": "Pazarlama sorumlusu bir örnek çakışmayı kurala göre çözüp taraflara göstersin.",
-      "firsat": "Açık kayıt kuralı danışmanlarla birlikte çalışmayı kolaylaştırır. Danışman ve elçi aynı işverene birlikte ulaşabilir.",
+      "firsat": "Net bir kayıt kuralı danışmanlarla birlikte çalışmayı kolaylaştırır. Danışman ve elçi aynı işverene birlikte ulaşabilir.",
       "durdur": "Kural açıklanmadan kesin komisyon vaat etmeyin."
     },
     {
@@ -308,7 +308,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket fatura, belge türü ve stopaj kararını henüz vermedi. Stopaj, ödemeden yapılan vergi kesintisidir.",
       "islem": "Finans sorumlusu mali müşavirle elçi türlerine göre kural yazsın.",
       "kanit": "Finans sorumlusu bir örnek ödeme için gereken belge listesini hazırlasın.",
-      "firsat": "Açık belge kuralı yeni elçi bulmayı kolaylaştırabilir. Zamanında ödeme alan elçi içerik üretmeye devam eder.",
+      "firsat": "Net bir belge kuralı yeni elçi bulmayı kolaylaştırabilir. Zamanında ödeme alan elçi içerik üretmeye devam eder.",
       "durdur": "Belge kuralı netleşmeden ilk ödemeyi planlamayın."
     }
   ],
@@ -321,7 +321,7 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Teşvik kuralı değişince güncel içerik yayımlayın",
-      "neden": "“Yasa ve yönetmelik içeriğini kim güncel tutacak?” konusu değişiklik dönemlerini gösteriyor. Bu dönemlerde işverenler bilgi arar.",
+      "neden": "Yasa ve yönetmelik zaman zaman değişir. Değişiklik dönemlerinde işverenler bilgi arar.",
       "ilkAdim": "Ürün sorumlusu yeni teşvik kuralını elçiye bildirir. Elçi onaylı bilgiyle güncel içerik hazırlar.",
       "olcu": "Güncel içerikten gelen işveren başvurularını sayın."
     },
@@ -333,7 +333,7 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Pazar yeri satıcılarına teşvik içeriği hazırlayın",
-      "neden": "Şirketin toptan pazar yeri ürünündeki satıcıların bir kısmının çalışanı var. Bu satıcılar teşvik içeriğiyle ilgilenebilir.",
+      "neden": "Şirketin toptan pazar yerindeki satıcıların bir kısmının çalışanı var. Bu satıcılar teşvik içeriğiyle ilgilenebilir.",
       "ilkAdim": "Pazarlama sorumlusu pazar yeri ekibiyle izinli bir duyuru kanalı belirler.",
       "olcu": "Bu kanaldan gelen işveren başvurularını ayrı sayın."
     }
@@ -343,8 +343,8 @@ export const politika: ProjePolitika = {
       "baslik": "İzleyiciler kesin teşvik mi bekliyor?",
       "sinyal": "Başvuranlar Segika’nın teşvik hakkı sağlayacağını sanabilir.",
       "kontrol": "Pazarlama sorumlusu satış görüşmelerindeki ilk soruları incelesin.",
-      "tepki": "Yanlış beklenti tekrarlanırsa pazarlama sorumlusu başlığı ve çağrıyı değiştirsin.",
-      "kayit": "Önceki metni, yeni metni ve başvuru nedenini saklayın."
+      "tepki": "Yanlış beklenti tekrarlanırsa pazarlama sorumlusu başlığı ve başvuru davetini değiştirsin.",
+      "kayit": "Pazarlama sorumlusu önceki metni, yeni metni ve başvuru nedenini saklasın."
     },
     {
       "baslik": "Yorumlarda kişisel bilgi paylaşılıyor mu?",
@@ -358,20 +358,20 @@ export const politika: ProjePolitika = {
       "sinyal": "Platform ibareyi kısaltabilir veya “daha fazla” altına gizleyebilir.",
       "kontrol": "Pazarlama sorumlusu paylaşımı telefonda ve bilgisayarda açıp baksın.",
       "tepki": "İbare ilk bakışta görünmüyorsa pazarlama sorumlusu paylaşımı düzelttirsin.",
-      "kayit": "Düzeltme öncesi ve sonrası ekran görüntüsünü saklayın."
+      "kayit": "Pazarlama sorumlusu düzeltme öncesi ve sonrası ekran görüntüsünü saklasın."
     },
     {
       "baslik": "Başvurular gerçekten işveren mi?",
       "sinyal": "Öğrenciler veya çalışanlar işveren gibi başvurabilir.",
       "kontrol": "Pazarlama sorumlusu kabul edilen başvuruları içeriğin yayımlandığı kanala göre ayırsın.",
       "tepki": "Pazarlama sorumlusu uygun olmayan kitleye harcamayı durdursun. Çağrıyı işverene göre değiştirsin.",
-      "kayit": "Kişisel veriyi çoğaltmadan inceleme sonucunu kaydedin."
+      "kayit": "Pazarlama sorumlusu inceleme sonucunu kaydetsin. Kayda kişisel veri kopyalamasın."
     }
   ],
   "haftalik": [
-    "Pazarlama sorumlusu her hafta uygun işveren başvurularını toplam başvurulara bölsün.",
-    "Finans sorumlusu ödemesi alınan satışları uygun başvurulara bölsün.",
-    "Ürün sorumlusu eskiyen kural içeriklerini yayındaki içeriklere bölsün.",
+    "Pazarlama sorumlusu her hafta uygun işveren başvurularının yüzdesini hesaplasın.",
+    "Finans sorumlusu uygun başvuruların yüzde kaçının ödenmiş satışa dönüştüğünü hesaplasın.",
+    "Ürün sorumlusu yayındaki içeriklerin yüzde kaçında kuralın eskidiğini hesaplasın.",
     "Görüntülenme sayısını tek başına başarı ölçüsü saymayın.",
     "Kesin teşvik beklentisi artarsa ilgili yayını gözden geçirin.",
     "Anlaşmadan önce elçi görevini kendi sözleriyle anlatsın.",

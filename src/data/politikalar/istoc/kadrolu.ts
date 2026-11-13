@@ -4,12 +4,12 @@ export const politika: ProjePolitika = {
   "id": "kadrolu",
   "proje": "istoc",
   "ad": "Kadrolu satış uzmanı",
-  "amac": "Satıcı işletmeleri bulun, iStoc'u gösterin ve satışı katalog kurulumuna devredin.",
+  "amac": "Satıcı işletmeleri bulun, iStoc’u gösterin ve satışı katalog kurulumuna devredin.",
   "iliski": "Bu modelde şirket sizi maaşlı çalıştırır. Maaşınızı insan kaynakları bordroyla öder. İnsan kaynakları görevinizi ve prim koşullarınızı iş sözleşmesinin ekine yazar.",
   "gorev": [
     "Bölgenizdeki satıcıları ziyaret listenize göre takip edin.",
     "Satıcının ürünlerini alıcılara nasıl tanıttığını öğrenin.",
-    "iStoc'u satıcının kendi ürün grubuyla gösterin.",
+    "iStoc’u satıcının kendi ürün grubuyla gösterin.",
     "Onaylı teklif ve sözleşmeyle satışı tamamlayın.",
     "Satıştan sonra katalog kurulumunu ilgili ekibe devredin. Devrin kabul edildiğini kontrol edin."
   ],
@@ -45,7 +45,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Ziyaretleri önceliklendirin",
       "metin": [
-        "Önce satıcıya verilmiş sözleri ve açık işleri kontrol edin.",
+        "Önce satıcıya verilmiş sözleri ve bekleyen işleri kontrol edin.",
         "Sonra düzenli ürün listesi olan satıcılara öncelik verin.",
         "Kişi ileti istemezse tercihini kayda yazın. Pazarlama iletisini durdurun."
       ]
@@ -179,7 +179,7 @@ export const politika: ProjePolitika = {
       {
         "urun": "iStoc",
         "ad": "Toptancı sitesindeki dükkânlar",
-        "ihtiyac": "Örneğin bir toptancı sitesinde 2 ile 10 çalışanlı çok sayıda dükkân yan yana çalışabilir. Bu dükkânlar yeni ürünlerini alıcılara hızlı duyurmak isteyebilir.",
+        "ihtiyac": "Örneğin bir toptancı sitesinde çok sayıda dükkân yan yana çalışabilir. Bu dükkânlarda 2 ile 10 çalışan olabilir. Bu dükkânlar yeni ürünlerini alıcılara hızlı duyurmak isteyebilir.",
         "ulasim": "Satış yöneticisinin verdiği site listesine göre günlük ziyaret planı yapın.",
         "mesaj": "Alıcılarınız yeni ürünlerinizi nereden öğreniyor?",
         "uygunluk": "Dükkân başka çalışana veya ortağa kayıtlıysa görüşmeye başlamayın.",
@@ -199,7 +199,7 @@ export const politika: ProjePolitika = {
       {
         "urun": "iStoc",
         "ad": "Büyük toptan ticaret merkezindeki dükkânlar",
-        "ihtiyac": "Örneğin İstoç gibi bir ticaret merkezinde birçok blok ve çok sayıda dükkân bulunabilir. Dükkânlar merkeze gelemeyen alıcılara da ulaşmak isteyebilir.",
+        "ihtiyac": "Örneğin İstoç çarşısı gibi bir ticaret merkezinde birçok blok ve dükkân olabilir. Dükkânlar merkeze gelemeyen alıcılara da ulaşmak isteyebilir.",
         "ulasim": "Ticaret merkezini bloklara bölün. Her saha çalışanı kendi bloğundaki dükkânları ziyaret etsin.",
         "mesaj": "Şehir dışındaki alıcılarınız ürünlerinizi nasıl görüyor?",
         "uygunluk": "Aynı dükkânı iki ekip üyesine yazmayın.",
@@ -225,7 +225,7 @@ export const politika: ProjePolitika = {
     {
       "kosul": "Satıcı alıcı veya sipariş garantisi isterse",
       "islem": "Garanti veremeyeceğinizi açıkça söyleyin. Talebi görüşme kaydına yazın.",
-      "sonuc": "Satıcı garanti olmadan devam etmezse görüşmeyi kapatın."
+      "sonuc": "Satıcı garanti olmadan devam etmezse görüşmeyi bitirin."
     },
     {
       "kosul": "Satıcı indirim, özel fiyat veya farklı ödeme koşulu isterse",
@@ -269,7 +269,7 @@ export const politika: ProjePolitika = {
     },
     {
       "kosul": "Göreviniz değişirse veya işten ayrılırsanız",
-      "islem": "Açık satıcı işleri için yöneticinizle devir listesi hazırlayın.",
+      "islem": "Bekleyen satıcı işleri için yöneticinizle devir listesi hazırlayın.",
       "sonuc": "İnsan kaynakları ve finans ekibi kalan hakları ayrıca hesaplar."
     }
   ],
@@ -353,10 +353,10 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Kur hangi tarihte belirlenecek?",
       "mevcut": "Teklif fiyatı avroyla belirlenir.",
-      "eksik": "Şirket teklif, sözleşme ve tahsilat tarihlerinden hangisinin kurunun kullanılacağını henüz yazmadı.",
+      "eksik": "Avronun TL karşılığı hangi günün kuruyla hesaplanacak? Teklif günü mü, sözleşme günü mü, tahsilat günü mü? Şirket bunu henüz yazmadı.",
       "islem": "Finans sorumlusu kur tarihini teklif ve prim ekine yazsın.",
       "kanit": "Aynı satışın teklifi ve prim listesi aynı kuru göstersin.",
-      "firsat": "Açık kur kuralıyla satış uzmanı TL tutarını teklif gününde yazar. Satıcı kararını beklemeden verebilir.",
+      "firsat": "Net bir kur kuralıyla satış uzmanı TL tutarını teklif gününde yazar. Satıcı kararını beklemeden verebilir.",
       "durdur": "Kur kuralı yoksa satıcıya kesin lira tutarı yazmayın."
     },
     {
@@ -365,7 +365,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket bu tutarın net mi brüt mü olduğunu henüz yazmadı.",
       "islem": "İnsan kaynakları maaşın niteliğini iş sözleşmesine yazsın.",
       "kanit": "Çalışan örnek bordroyu iş sözleşmesiyle karşılaştırabilsin.",
-      "firsat": "Açık bordro örneği ilk maaş günündeki soruları azaltır. Satış uzmanı bu zamanı satış görüşmesine ayırır.",
+      "firsat": "Net bir bordro örneği ilk maaş günündeki soruları azaltır. Satış uzmanı bu zamanı satış görüşmesine ayırır.",
       "durdur": "Net veya brüt bilgisi yazılmadan örnek maaşı sözleşmeye yazmayın."
     },
     {
@@ -374,7 +374,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket kadrolu satışta destek sorumlusunu henüz yazmadı.",
       "islem": "Satış yöneticisi destek ekibini ve iletişim kanalını yazsın.",
       "kanit": "Her satıcının destek sorumlusu müşteri kaydında görünsün.",
-      "firsat": "Açık destek yolu ilk kullanım sorunlarını erken çözer. Sorunu çözülen satıcı yenileme görüşmesine hazır gelir.",
+      "firsat": "Net bir destek yolu ilk kullanım sorunlarını erken çözer. Sorunu çözülen satıcı yenileme görüşmesine hazır gelir.",
       "durdur": "Destek sorumlusu yoksa satıcıya destek sözü vermeyin."
     },
     {
@@ -393,28 +393,28 @@ export const politika: ProjePolitika = {
       "sinyal": "Satıcı ilk aylarda sipariş gelmediği için iptal isteyebilir.",
       "kontrol": "Satış yöneticisi iptal nedenlerini görüşme notlarıyla karşılaştırsın.",
       "tepki": "Notlarda alıcı sözü varsa satış yöneticisi ilgili satış anlatımını düzeltsin.",
-      "kayit": "İptal nedenini ve görüşmede söylenenleri birlikte saklayın."
+      "kayit": "Satış yöneticisi iptal nedenini ve görüşmede söylenenleri birlikte saklasın."
     },
     {
       "baslik": "Katalog kurulumu satıştan sonra bekliyor mu?",
       "sinyal": "Ödeme alınmış ama satıcının ürünleri görünmüyor olabilir.",
       "kontrol": "Kurulum ekibi ödenmiş satışları yayımlanan kataloglarla karşılaştırsın.",
       "tepki": "Bekleyen katalog varsa satış yöneticisi yeni teklifleri yavaşlatsın.",
-      "kayit": "Devir tarihini ve kataloğun yayımlandığı tarihi saklayın."
+      "kayit": "Kurulum ekibi devir tarihini ve kataloğun yayımlandığı tarihi saklasın."
     },
     {
-      "baslik": "Kota davranışı bozuyor mu?",
-      "sinyal": "Ay sonunda erken satış kaydı veya fiyat tablosu dışında teklif görülebilir.",
+      "baslik": "Kota yüzünden kurala aykırı satış oluyor mu?",
+      "sinyal": "Ay sonunda bazı satışlar kesinleşmeden kayda girebilir. Fiyat tablosu dışında teklif de verilebilir.",
       "kontrol": "Finans ekibi satış tarihini tahsilat ve sözleşmeyle karşılaştırsın.",
       "tepki": "Uyumsuzluk varsa finans ekibi ilgili primi incelemeye alsın.",
-      "kayit": "Düzeltmenin nedenini ve onaylayan görevi kaydedin."
+      "kayit": "Finans ekibi düzeltmenin nedenini ve onaylayan görevi kaydetsin."
     },
     {
       "baslik": "Ekip satışı ile kendi satış karışıyor mu?",
       "sinyal": "Ekip lideri seçeneğinde aynı satış iki kişide görünebilir.",
       "kontrol": "Finans ekibi ekip payı listesini kişisel satış listesiyle karşılaştırsın.",
       "tepki": "Aynı satış iki listede varsa satış yöneticisi kaydı düzeltsin.",
-      "kayit": "Satışın kime yazıldığını ve kararı veren görevi saklayın."
+      "kayit": "Finans ekibi satışın kime yazıldığını ve kararı veren görevi saklasın."
     }
   ],
   "firsatlar": [
@@ -427,7 +427,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Üreticinin bayilerini yeni satıcı adayı yapın",
       "neden": "Bayilere satış yapan üreticiler rehberde hedef kitledir. Bu bayilerin bir kısmı da toptan satış yapar. Bu bayiler bugün ayrı bir hedef olarak izlenmez.",
-      "ilkAdim": "Satış uzmanı üreticiye bayilerine iStoc'u kendisinin duyurmak isteyip istemediğini sorar. Satış yöneticisi ilgilenen bayiler için ziyaret listesi hazırlar.",
+      "ilkAdim": "Satış uzmanı üreticiye bayilerine iStoc’u kendisinin duyurmak isteyip istemediğini sorar. Satış yöneticisi ilgilenen bayiler için ziyaret listesi hazırlar.",
       "olcu": "Satış yöneticisi üretici aracılığıyla tanışılan bayileri ve satıcı olan bayileri sayar."
     },
     {
@@ -444,11 +444,11 @@ export const politika: ProjePolitika = {
     }
   ],
   "haftalik": [
-    "Haftada bir açık teklifleri ve geciken sözleri gözden geçirin.",
+    "Haftada bir bekleyen teklifleri ve geciken sözleri gözden geçirin.",
     "Satış yöneticisi geçen hafta yapılan ziyaretleri saysın. Bunlardan gösterime geçenleri ayrıca saysın.",
     "Satış yöneticisi kabul edilen teklifleri saysın. Bunlardan tahsil edilenleri ayrıca saysın.",
     "Kurulum ekibi o hafta yayımlanan katalogları ödenmiş satışlarla karşılaştırsın.",
-    "Oran önceki haftadan düşükse yönetici nedeni ve çözümü kaydetsin.",
+    "İki orandan biri önceki haftadan düşük olabilir. Bu durumda satış yöneticisi nedeni ve çözümü kaydetsin.",
     "Başlamadan kotayı, prim ödemesini ve durma nedenini kendi sözlerinizle anlatın. Satış yöneticisi farklı anlaşılan yeri metinde düzeltsin."
   ],
   "programlar": {
@@ -457,11 +457,11 @@ export const politika: ProjePolitika = {
       "İlk iki ay kota uygulanmaz. İnsan kaynakları bu dönemin prim kuralını ayrıca yazar."
     ],
     "saha": [
-      "Bu ayrı seçenek kota sonrası satış başı prim kullanır.",
+      "Bu programda kota dolunca her satıştan prim alırsınız.",
       "Ana programın yüzdelik primiyle birlikte uygulanmaz. İnsan kaynakları prim ekine hangi modelin geçerli olduğunu yazar."
     ],
     "lider": [
-      "Bu seçenekte yönetici görevi ve ekip payı bulunur.",
+      "Bu programda yönetici görevi ve ekip payı bulunur.",
       "Kendi satışlarınızın primi saha personeli kuralıyla hesaplanır.",
       "Satış yöneticisi ekip satışının kabulünü ve görev değişikliğinin tarihini yazılı belirler.",
       "Kendi satışınızı ve ekip satışını ayrı kaydedin."

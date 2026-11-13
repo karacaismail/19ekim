@@ -5,6 +5,7 @@
    "id": "takvim.2027.yilbasi",
    "konu": "1 Ocak 2027 Yılbaşı",
    "deger": "2027-01-01 Cuma",
+   "metin": "1 Ocak 2027, Cuma",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -20,6 +21,7 @@
    "id": "takvim.2027.ramazan_bayrami",
    "konu": "Ramazan Bayramı 2027 (arife yarım gün ve 3 gün)",
    "deger": "Arife 2027-03-08 Pazartesi (yarım gün), bayram 2027-03-09 Salı, 2027-03-10 Çarşamba, 2027-03-11 Perşembe",
+   "metin": "Arife 8 Mart 2027, Pazartesi (yarım gün). Bayram 9 Mart 2027 Salı günü başlar ve 11 Mart 2027 Perşembe günü biter.",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -40,6 +42,7 @@
    "id": "takvim.2027.23_nisan",
    "konu": "23 Nisan Ulusal Egemenlik ve Çocuk Bayramı",
    "deger": "2027-04-23 Cuma",
+   "metin": "23 Nisan 2027, Cuma",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -55,6 +58,7 @@
    "id": "takvim.2027.1_mayis",
    "konu": "1 Mayıs Emek ve Dayanışma Günü",
    "deger": "2027-05-01 Cumartesi",
+   "metin": "1 Mayıs 2027, Cumartesi",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -70,6 +74,7 @@
    "id": "takvim.2027.kurban_bayrami",
    "konu": "Kurban Bayramı 2027 (arife yarım gün ve 4 gün) ile 19 Mayıs",
    "deger": "Arife 2027-05-15 Cumartesi, bayram 2027-05-16 Pazar, 2027-05-17 Pazartesi, 2027-05-18 Salı, 2027-05-19 Çarşamba",
+   "metin": "Arife 15 Mayıs 2027, Cumartesi. Bayram 16 Mayıs 2027 Pazar günü başlar ve 19 Mayıs 2027 Çarşamba günü biter. 19 Mayıs bayramın son gününe denk gelir.",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -90,6 +95,7 @@
    "id": "takvim.2027.15_temmuz",
    "konu": "15 Temmuz Demokrasi ve Millî Birlik Günü",
    "deger": "2027-07-15 Perşembe",
+   "metin": "15 Temmuz 2027, Perşembe",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -105,6 +111,7 @@
    "id": "takvim.2027.30_agustos",
    "konu": "30 Ağustos Zafer Bayramı",
    "deger": "2027-08-30 Pazartesi",
+   "metin": "30 Ağustos 2027, Pazartesi",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -120,6 +127,7 @@
    "id": "takvim.2027.cumhuriyet_bayrami",
    "konu": "28 Ekim (yarım gün) ve 29 Ekim Cumhuriyet Bayramı",
    "deger": "2027-10-28 Perşembe yarım gün, 2027-10-29 Cuma tam gün",
+   "metin": "28 Ekim 2027, Perşembe (yarım gün). 29 Ekim 2027, Cuma (tam gün).",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -135,6 +143,7 @@
    "id": "takvim.2027.hafta_ici_gun",
    "konu": "2027 toplam hafta içi gün sayısı",
    "deger": 261,
+   "metin": "261 gün",
    "birim": "gün",
    "kaynaklar": [
     {
@@ -150,6 +159,7 @@
    "id": "takvim.2027.tatil_hafta_ici",
    "konu": "2027 hafta içine denk gelen resmi tatil günleri",
    "deger": 12,
+   "metin": "12 iş günü kadar. Yarım günler de bu sayıya eklendi.",
    "birim": "iş günü eşdeğeri",
    "aralik": "11 tam gün ve 2 yarım gün",
    "kaynaklar": [
@@ -166,6 +176,7 @@
    "id": "takvim.2027.is_gunu",
    "konu": "2027 resmi tatiller sonrası iş günü",
    "deger": 249,
+   "metin": "249 iş günü",
    "birim": "iş günü",
    "kaynaklar": [
     {
@@ -181,6 +192,7 @@
    "id": "takvim.2027.brut_saat",
    "konu": "2027 brüt çalışma saati (haftada 45 saat, 5 gün, günde 9 saat)",
    "deger": 2241,
+   "metin": "Kişi başına 2.241 saat",
    "birim": "saat/kişi",
    "kaynaklar": [
     {
@@ -196,6 +208,7 @@
    "id": "takvim.2027.kopru_gunleri",
    "konu": "2027 olası köprü günleri ve idari izin",
    "deger": "Bilinmiyor",
+   "metin": "Henüz bilinmiyor.",
    "birim": "gün",
    "aralik": "0 ile 3 gün (12 Mart Cuma, 20 ve 21 Mayıs Perşembe ile Cuma, 16 Temmuz Cuma adaydır)",
    "kaynaklar": [
@@ -217,6 +230,7 @@
    "id": "takvim.2027.ramazan_ayi",
    "konu": "2027 Ramazan ayı dönemi",
    "deger": "2027-02-08 ile 2027-03-08 arası",
+   "metin": "8 Şubat 2027 ile 8 Mart 2027 arası",
    "birim": "tarih aralığı",
    "kaynaklar": [
     {
@@ -232,6 +246,7 @@
    "id": "is_hukuku.haftalik_sure",
    "konu": "Haftalık azami çalışma süresi",
    "deger": 45,
+   "metin": "Haftada en çok 45 saat",
    "birim": "saat/hafta",
    "aralik": "Günlük en fazla 11 saat, yıllık fazla çalışma en fazla 270 saat",
    "kaynaklar": [
@@ -248,6 +263,7 @@
    "id": "is_hukuku.yillik_izin",
    "konu": "Yıllık ücretli izin süresi (kıdeme göre)",
    "deger": 14,
+   "metin": "Yılda 14 iş günü. Kıdem arttıkça süre uzar.",
    "birim": "iş günü/yıl",
    "aralik": "1 ile 5 yıl (5 dahil) 14 gün, 5 ile 15 yıl arası 20 gün, 15 yıl ve üstü 26 gün, 18 yaş altı ve 50 yaş üstü en az 20 gün",
    "kaynaklar": [
@@ -264,6 +280,7 @@
    "id": "is_hukuku.mazeret_izinleri",
    "konu": "Ücretli mazeret izinleri (İş Kanunu ek madde 2)",
    "deger": "Evlilik, evlat edinme ve ölüm için 3 gün. Babalık için 10 gün. Engelli veya süreğen hastalığı olan çocuk için yılda 10 güne kadar.",
+   "metin": "Evlilik, evlat edinme ve ölüm için 3 gün. Babalık için 10 gün. Engelli veya süreğen hastalığı olan çocuk için yılda 10 güne kadar.",
    "birim": "gün",
    "kaynaklar": [
     {
@@ -284,6 +301,7 @@
    "id": "is_hukuku.analik_izni",
    "konu": "Analık (doğum) izni",
    "deger": 24,
+   "metin": "24 hafta",
    "birim": "hafta",
    "aralik": "Tekil gebelikte doğumdan önce 8, sonra 16 hafta. Çoğul gebelikte toplam 26 hafta",
    "kaynaklar": [
@@ -300,6 +318,7 @@
    "id": "is_hukuku.rapor_odemesi",
    "konu": "Hastalık raporunda SGK geçici iş göremezlik ödeneği",
    "deger": "Raporun 3. gününden itibaren",
+   "metin": "SGK, raporun 3. gününden itibaren ödenek öder.",
    "birim": "kural",
    "aralik": "Ayakta tedavide günlük kazancın 2/3'ü, yatarak tedavide 1/2'si. Son 1 yılda en az 90 gün kısa vadeli sigorta primi şartı vardır",
    "kaynaklar": [
@@ -321,6 +340,7 @@
    "id": "hastalik.turkiye_gun",
    "konu": "Türkiye'de çalışan başına yıllık hastalık izni",
    "deger": 4.6,
+   "metin": "Çalışan başına yılda 4,6 gün",
    "birim": "gün/çalışan/yıl",
    "aralik": "Modelde 4 ile 8 gün arası önerilir",
    "kaynaklar": [
@@ -342,6 +362,7 @@
    "id": "hastalik.almanya_gun",
    "konu": "Almanya'da çalışan başına yıllık hastalık izni (AB karşılaştırması)",
    "deger": 15.1,
+   "metin": "Çalışan başına yılda 15,1 iş günü",
    "birim": "iş günü/çalışan/yıl",
    "aralik": "2021'de yaklaşık 11,1 gün",
    "kaynaklar": [
@@ -358,6 +379,7 @@
    "id": "hastalik.avrupa_presenteizm",
    "konu": "Avrupa'da hastayken çalışma (presenteizm) oranı",
    "deger": 39,
+   "metin": "Hasta olunan günlerin %39’u işte geçer.",
    "birim": "% (hasta olunan günlerin işte geçirilen payı)",
    "aralik": "2010 anketinde çalışanların yaklaşık %40'ı son 12 ayda hastayken çalıştığını söyledi",
    "kaynaklar": [
@@ -372,8 +394,9 @@
   },
   {
    "id": "grip.yetiskin_atak_orani",
-   "konu": "Mevsimsel gribin yetişkinlerde semptomlu görülme oranı",
+   "konu": "Mevsimsel gribin yetişkinlerde belirtili görülme oranı",
    "deger": 5.1,
+   "metin": "Her sezon yetişkinlerin %5,1’i belirtili grip geçirir.",
    "birim": "% / sezon",
    "aralik": "Yetişkinlerde %3,6 ile 6,6. Tüm yaşlarda ortalama %8, sezona göre %3 ile 11",
    "kaynaklar": [
@@ -390,6 +413,7 @@
    "id": "grip.turkiye_sezon",
    "konu": "Türkiye grip sezonu",
    "deger": "Ekim başı ile Mayıs ortası arası (40. hafta ile 20. hafta)",
+   "metin": "Ekim başından Mayıs ortasına kadar sürer. Bu dönem yılın 40. haftasından ertesi yılın 20. haftasına kadar sürer.",
    "birim": "dönem",
    "aralik": "Yoğunluk genellikle Aralık ile Şubat arasında yükselir",
    "kaynaklar": [
@@ -406,6 +430,7 @@
    "id": "grip.is_gunu_kaybi",
    "konu": "Grip veya grip benzeri hastalık başına kaybedilen iş günü",
    "deger": "2-3",
+   "metin": "Hastalık başına 2 ile 3 iş günü",
    "birim": "gün/vaka",
    "aralik": "Çalışmalar arasında ortalama 0,5 ile 5,3 gün. Hastaların %42 ile 89'u hastayken çalıştı, verim kaybı 0,3 ile 4,4 gün",
    "kaynaklar": [
@@ -422,6 +447,7 @@
    "id": "regl.devamsizlik",
    "konu": "Regl belirtileri nedeniyle devamsızlık",
    "deger": 1.3,
+   "metin": "Kadın başına yılda 1,3 gün",
    "birim": "gün/kadın/yıl",
    "aralik": "Kadınların %13,8'i regl döneminde en az bir kez işe veya okula gitmedi, %3,4'ü bunu her döngüde veya çoğu döngüde yaşadı",
    "kaynaklar": [
@@ -438,6 +464,7 @@
    "id": "regl.verim_kaybi",
    "konu": "Regl belirtileri nedeniyle toplam verim kaybı",
    "deger": 8.9,
+   "metin": "Kadın başına yılda 8,9 gün",
    "birim": "gün/kadın/yıl",
    "aralik": "Kadınların %80,7'si işte verim düşüşü bildirdi. Bu düşüş yılda ortalama 23,2 gün sürdü ve o günlerde verim yaklaşık %33 azaldı",
    "kaynaklar": [
@@ -459,6 +486,7 @@
    "id": "regl.dismenore",
    "konu": "Dismenore (ağrılı regl) yaygınlığı",
    "deger": "16-91",
+   "metin": "Üreme çağındaki kadınların %16’sı ile %91’i arasında. Oran araştırmaya göre değişir.",
    "birim": "% (üreme çağındaki kadınlar)",
    "aralik": "Şiddetli ağrı %2 ile 29",
    "kaynaklar": [
@@ -475,6 +503,7 @@
    "id": "regl.yasal_izin_turkiye",
    "konu": "Türkiye'de yasal regl izni",
    "deger": "Yok",
+   "metin": "Türkiye’de yasal regl izni yoktur.",
    "birim": "kural",
    "kaynaklar": [
     {
@@ -490,6 +519,7 @@
    "id": "regl.diger_ulkeler",
    "konu": "Başka ülkelerde regl izni ve kullanım oranı",
    "deger": "İspanya 2023'ten beri yasal, Japonya 1947'den beri yasal",
+   "metin": "İspanya’da 2023’ten beri yasaldır. Japonya’da 1947’den beri yasaldır.",
    "birim": "kural",
    "aralik": "Japonya'da kadın çalışanların yaklaşık %0,9'u kullandı (2017 hükümet anketi, ikincil kaynak)",
    "kaynaklar": [
@@ -511,6 +541,7 @@
    "id": "regl.esneklik_calismasi",
    "konu": "Esnek çalışma saatleri ve regl döneminde verim",
    "deger": "Anlamlı olumlu ilişki",
+   "metin": "Esnek çalışma saati ile verim arasında olumlu bir ilişki bulundu.",
    "birim": "nitel bulgu",
    "kaynaklar": [
     {
@@ -526,6 +557,7 @@
    "id": "isgucu.kadin_katilim",
    "konu": "Türkiye'de kadınların işgücüne katılma oranı",
    "deger": 36.2,
+   "metin": "%36,2",
    "birim": "%",
    "aralik": "Erkeklerde %71,3. Kadın istihdam oranı %32,1. 2024'te kadın katılımı %36,8 idi",
    "kaynaklar": [
@@ -547,6 +579,7 @@
    "id": "verim.satis_zamani",
    "konu": "Satış temsilcilerinin satışa ayırdığı zaman payı",
    "deger": 30,
+   "metin": "Çalışma süresinin %30’u",
    "birim": "% çalışma süresi",
    "aralik": "Satış dışı işler %70. Önceki baskıda satış payı %28",
    "kaynaklar": [
@@ -563,6 +596,7 @@
    "id": "verim.bilgi_calisani_iletisim",
    "konu": "Bilgi çalışanlarının iletişime ayırdığı zaman",
    "deger": 57,
+   "metin": "Microsoft 365 içinde geçen sürenin %57’si. Bilgi çalışanı, işini bilgisayar başında bilgi işleyerek yapan kişidir.",
    "birim": "% (Microsoft 365 içindeki süre)",
    "aralik": "Toplantı %23, sohbet %19, e-posta %15. Doküman ve tablo üretimi %43",
    "kaynaklar": [
@@ -584,6 +618,7 @@
    "id": "verim.mckinsey_eposta_arama",
    "konu": "Bilgi çalışanlarının e-posta ve bilgi aramaya ayırdığı süre",
    "deger": "28 ve 19",
+   "metin": "Çalışma haftasının %28’i e-postaya gider. %19’u bilgi aramaya gider.",
    "birim": "% çalışma haftası",
    "aralik": "E-posta %28, bilgi arama yaklaşık %19 ile 20, iç iletişim %14",
    "kaynaklar": [
@@ -600,6 +635,7 @@
    "id": "verim.kesinti",
    "konu": "Kesintiye uğrayan işe geri dönme süresi",
    "deger": "23 dakika 15 saniye",
+   "metin": "23 dakika 15 saniye",
    "birim": "dakika",
    "aralik": "2005 CHI çalışmasında 25 dakika 26 saniye",
    "kaynaklar": [
@@ -614,8 +650,9 @@
   },
   {
    "id": "verim.model_araligi",
-   "konu": "Modelde önerilen verimli çekirdek iş payı",
+   "konu": "Asıl işe ayrılan süre payı",
    "deger": "30-45 satış, 40-60 diğer roller",
+   "metin": "Satış rollerinde net sürenin %30’u ile %45’i arası. Diğer rollerde %40’ı ile %60’ı arası.",
    "birim": "% net çalışma süresi",
    "kaynaklar": [
     {
@@ -629,8 +666,9 @@
   },
   {
    "id": "devir.turkiye_genel",
-   "konu": "Türkiye'de yıllık çalışan devir oranı (genel)",
+   "konu": "Türkiye’de yıllık işten ayrılma oranı (genel)",
    "deger": "25-30",
+   "metin": "Yılda %25 ile %30 arası",
    "birim": "%/yıl",
    "kaynaklar": [
     {
@@ -644,8 +682,9 @@
   },
   {
    "id": "devir.cagri_merkezi",
-   "konu": "Çağrı merkezlerinde yıllık devir oranı",
+   "konu": "Çağrı merkezlerinde yıllık işten ayrılma oranı",
    "deger": 45,
+   "metin": "Yılda %45",
    "birim": "%/yıl",
    "aralik": "2025 için yaklaşık %35 beklentisi",
    "kaynaklar": [
@@ -660,8 +699,9 @@
   },
   {
    "id": "devir.perakende",
-   "konu": "Perakendede yıllık devir oranı",
+   "konu": "Perakendede yıllık işten ayrılma oranı",
    "deger": 55,
+   "metin": "Yılda %55",
    "birim": "%/yıl",
    "aralik": "Genellikle %50'nin üzerinde. Kabul edilebilir eşik %10 ile 15",
    "kaynaklar": [
@@ -678,6 +718,7 @@
    "id": "ise_alim.doldurma_suresi",
    "konu": "Açık pozisyonu doldurma süresi",
    "deger": 44,
+   "metin": "44 takvim günü",
    "birim": "takvim günü",
    "aralik": "Yönetici dışı rollerde medyan 44 gün, yönetici rollerinde 45 gün",
    "kaynaklar": [
@@ -694,6 +735,7 @@
    "id": "ise_alim.ramp_suresi",
    "konu": "Yeni satış temsilcisinin tam verime ulaşma süresi",
    "deger": 5.7,
+   "metin": "5,7 ay",
    "birim": "ay",
    "aralik": "2022'de 5,3 ay, 2020'de 4,3 ay. Daha basit telefon ve randevu rolleri için yaklaşık 3 ay",
    "kaynaklar": [
@@ -710,6 +752,7 @@
    "id": "risk.istanbul_trafik",
    "konu": "İstanbul'da yoğun saat trafiğinde kaybedilen zaman",
    "deger": 112,
+   "metin": "Sürücü başına yılda 112 saat",
    "birim": "saat/sürücü/yıl",
    "aralik": "INRIX 2025 ölçümünde 118 saat. Ortalama sıkışıklık %123,3, 10 km yol yaklaşık 32,6 dakika",
    "kaynaklar": [
@@ -731,6 +774,7 @@
    "id": "risk.istanbul_toplu_tasima",
    "konu": "İstanbul'da toplu taşımayla ortalama işe gidiş süresi",
    "deger": 77,
+   "metin": "Ortalama 77 dakika",
    "birim": "dakika",
    "kaynaklar": [
     {
@@ -744,8 +788,9 @@
   },
   {
    "id": "risk.deprem_olasiligi",
-   "konu": "İstanbul'u etkileyecek M7,3 üstü deprem olasılığı (30 yıl)",
+   "konu": "İstanbul’u etkileyecek 7,3 büyüklüğün üstündeki depremin 30 yıl içindeki olasılığı",
    "deger": "35-47",
+   "metin": "30 yıl içinde %35 ile %47 arası",
    "birim": "% / 30 yıl",
    "aralik": "Parsons 2004 tahmini %41 artı eksi 14",
    "kaynaklar": [
@@ -767,6 +812,7 @@
    "id": "risk.silivri_depremi",
    "konu": "23 Nisan 2025 Silivri açıkları depremi",
    "deger": 6.2,
+   "metin": "6,2 büyüklüğünde (Mw)",
    "birim": "büyüklük (Mw)",
    "kaynaklar": [
     {
@@ -787,6 +833,7 @@
    "id": "risk.ramazan_verim",
    "konu": "Ramazan orucunun ekonomik çıktıya etkisi",
    "deger": "Olumsuz",
+   "metin": "Ekonomik çıktıya etkisi olumsuzdur.",
    "birim": "nitel bulgu",
    "aralik": "Oruç süresi uzadıkça Müslüman çoğunluklu ülkelerde GSYH büyümesi düşer",
    "kaynaklar": [
@@ -803,6 +850,7 @@
    "id": "risk.ramazan_mesai",
    "konu": "Ramazan'da özel sektör için yasal mesai kısaltması",
    "deger": "Yok",
+   "metin": "Özel sektörde yasal mesai kısaltması yoktur.",
    "birim": "kural",
    "kaynaklar": [
     {
@@ -818,6 +866,7 @@
    "id": "risk.okul_tatilleri",
    "konu": "2026-2027 okul tatilleri (MEB)",
    "deger": "Yarıyıl 2027-01-25 ile 2027-02-05, ara tatil 2027-03-08 ile 2027-03-12, yaz tatili 2027-06-26'dan itibaren",
+   "metin": "Yarıyıl tatili 25 Ocak 2027 ile 5 Şubat 2027 arası. Ara tatil 8 Mart 2027 ile 12 Mart 2027 arası. Yaz tatili 26 Haziran 2027’de başlar.",
    "birim": "tarih aralığı",
    "aralik": "Kasım ara tatili 2026-11-16 ile 2026-11-20. 2027-2028 takvimi henüz yayımlanmadı",
    "kaynaklar": [
@@ -834,6 +883,7 @@
    "id": "risk.toptan_yaz_durgunlugu",
    "konu": "İstanbul toptan ticaretinde yaz durgunluğu",
    "deger": "Ölçülmedi",
+   "metin": "Ölçülmedi.",
    "birim": "nitel",
    "aralik": "Temmuz ve Ağustos aylarında talep düşüşü varsayımı",
    "kaynaklar": [

@@ -53,36 +53,36 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   const win = (xs: number[]) => sum(xs.slice(adT, adT + WINDOW));
 
   const kanallar: Channel[] = [
-    { kanal: 'Meta lead formu (Instagram + Facebook)', amac: 'İstoç ve çevresindeki toptancı ve üreticilerden kayıt toplar. Reklam konuma ve ilgi alanına göre hedeflenir, siteyi ziyaret edenlere yeniden gösterilir.', role: 'dijital-pazarlama', olcum: 'Kayıt başına maliyet (CPL) ve kayıttan ilk ödemeye dönüşüm. Kaynak UTM etiketi ve CRM kaynak alanıyla izlenir.', baslangic: longDate(monthStart(p.dijitalAdStartDate)) },
-    { kanal: 'Google Arama (niyetli trafik)', amac: '“toptan …”, “istoç toptancı” ve “b2b pazar yeri” gibi aramalardan gelenleri kayıt sayfasına yönlendirir.', role: 'dijital-pazarlama', olcum: 'Tıklama maliyeti, kayıt sayfası dönüşümü ve Search Console sorguları', baslangic: longDate(monthStart(p.dijitalAdStartDate)) },
-    { kanal: 'Organik içerik (YouTube, TikTok, Instagram)', amac: 'Altı içerik sütununda günde 3 kısa video yayınlanır. Satıcı hikâyeleri ve ürün vitrinleri CRM’e haftada 10 talep getirir.', role: 'dijital-pazarlama', olcum: 'İzlenmeden profile ve kayda geçiş, haftalık talep sayısı', baslangic: longDate(monthStart(p.dijitalOrganicStartDate)) },
-    { kanal: 'CRM yaşam döngüsü (WhatsApp + e-posta)', amac: 'Kayıttan ilk ödemeye kadar 7 günlük mesaj dizisi gönderilir. Aylık değer raporu ve yenileme çağrısı satıcıyı elde tutar.', role: 'pazarlamaci', olcum: 'Kayıttan ödemeye geçiş oranı, 30 günlük elde tutma ve yenileme oranı', baslangic: longDate(prog.dates.start) },
-    { kanal: 'Alıcı tarafı: pazar yeri SEO ve listeler', amac: 'Perakendeci ziyaretçiler satıcıya sipariş getirir. Satıcı değeri görünce aboneliğini sürdürür.', role: 'yazilim', olcum: 'Organik oturum, ürün sayfası görüntüleme ve satıcı başına sipariş', baslangic: longDate(monthStart(p.dijitalOrganicStartDate)) },
-    { kanal: 'Meta işe alım reklamı (temsilci)', amac: 'Bağımsız temsilci başvurusu toplar. Bütçesi ayrıdır ve Bütçe grubunda yer alır. Satıcı kazanımına dolaylı katkı verir.', role: 'yonetici', olcum: 'Haftalık başvuru ve aktif kalan temsilci sayısı', baslangic: longDate(p.metaStartDate) },
+    { kanal: 'Meta kayıt formu reklamı (Instagram ve Facebook)', amac: 'İstoç ve çevresindeki toptancı ve üreticilerden kayıt toplar. Reklam konuma ve ilgi alanına göre hedeflenir, siteyi ziyaret edenlere yeniden gösterilir.', role: 'dijital-pazarlama', olcum: 'Bir kaydın maliyeti (CPL) ve ödemeye geçiş oranı ölçülür. Dijital pazarlama uzmanı kaynağı bağlantı etiketiyle (UTM) izler. CRM’deki kaynak alanını da kullanır.', baslangic: longDate(monthStart(p.dijitalAdStartDate)) },
+    { kanal: 'Google arama reklamı (toptancı arayanlara)', amac: '“toptan …”, “istoç toptancı” ve “b2b pazar yeri” gibi aramalardan gelenleri kayıt sayfasına yönlendirir.', role: 'dijital-pazarlama', olcum: 'Tıklama maliyeti, kayıt sayfasından kayıt olanların oranı ve Search Console aramaları', baslangic: longDate(monthStart(p.dijitalAdStartDate)) },
+    { kanal: 'Organik içerik (YouTube, TikTok, Instagram)', amac: 'Videolar altı ana konuda hazırlanır. Günde 3 kısa video yayınlanır. Satıcı hikâyeleri ve ürün vitrinleri CRM’e haftada 10 talep getirir.', role: 'dijital-pazarlama', olcum: 'İzlenmeden profile ve kayda geçiş, haftalık talep sayısı', baslangic: longDate(monthStart(p.dijitalOrganicStartDate)) },
+    { kanal: 'Kayıttan yenilemeye mesajlar (WhatsApp ve e-posta)', amac: 'Kayıttan ilk ödemeye kadar 7 günlük mesaj dizisi gönderilir. Aylık değer raporu ve yenileme çağrısı satıcıyı elde tutar.', role: 'pazarlamaci', olcum: 'Kayıttan ödemeye geçiş oranı, 30 günlük elde tutma ve yenileme oranı', baslangic: longDate(prog.dates.start) },
+    { kanal: 'Alıcı tarafı: arama motorunda görünme (SEO) ve listeler', amac: 'Perakendeci ziyaretçiler satıcıya sipariş getirir. Satıcı değeri görünce aboneliğini sürdürür.', role: 'yazilim', olcum: 'Organik oturum, ürün sayfası görüntüleme ve satıcı başına sipariş', baslangic: longDate(monthStart(p.dijitalOrganicStartDate)) },
+    { kanal: 'Meta işe alım reklamı (temsilci)', amac: 'Bağımsız temsilci başvurusu toplar. Bütçesi ayrıdır. Bu bütçe Parametreler sayfasındaki “Bütçe ve temsilci başvuruları” grubundadır. Satıcı kazanımına dolaylı katkı verir.', role: 'yonetici', olcum: 'Haftalık başvuru ve aktif kalan temsilci sayısı', baslangic: longDate(p.metaStartDate) },
   ];
 
   const kpis = [
-    { metrik: 'Kayıt maliyeti (CPL)', hedef: `≤ ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺`, sik: 'Haftalık', kaynak: 'Reklam hesabı + CRM kaynak alanı' },
-    { metrik: 'Kayıt → ilk ödeme', hedef: `≥ %${p.dijitalLeadToActive}`, sik: 'Haftalık', kaynak: 'CRM aşamaları' },
-    { metrik: 'Kazanım maliyeti (CAC)', hedef: 'LTV ÷ CAC ≥ 3 (LTV: satıcı başına beklenen toplam gelir)', sik: 'Aylık', kaynak: 'Bütçe ÷ yeni aktif satıcı' },
+    { metrik: 'Kayıt maliyeti (CPL)', hedef: `En çok ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺`, sik: 'Haftalık', kaynak: 'Reklam hesabı + CRM kaynak alanı' },
+    { metrik: 'Kayıttan ilk ödemeye geçiş', hedef: `En az %${p.dijitalLeadToActive}`, sik: 'Haftalık', kaynak: 'CRM aşamaları' },
+    { metrik: 'Kazanım maliyeti (CAC)', hedef: 'Satıcı değeri (LTV) maliyetin en az 3 katı', sik: 'Aylık', kaynak: 'Bütçe ve yeni aktif satıcı sayısı' },
     { metrik: '30 gün elde tutma', hedef: `≥ %${Math.round(prog.planRetention * 100)}`, sik: 'Aylık', kaynak: 'Abonelik olayları (GA4) + CRM' },
     { metrik: 'Organik talep', hedef: '10 / hafta (Ocak)', sik: 'Haftalık', kaynak: 'CRM (kaynak: içerik)' },
     { metrik: 'Video üretimi', hedef: '3 / gün (Ocak)', sik: 'Günlük', kaynak: 'Paylaşım hattı' },
   ];
 
   const takvim = [
-    { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'GTM, GA4, Metrica, Meta Pixel ve Conversions API, UTM standardı ve CRM kaynak alanı kurulur. Kayıt sayfası, lead formu ve WhatsApp mesaj dizisi hazırlanır.', olcut: '8 ölçüm aracının 8’i yayında. Kaynağı boş kayıt yok.' },
-    { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `CPL ≤ ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺, dönüşüm ≥ %${p.dijitalLeadToActive}` },
-    { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'İçerik makinesi', is: 'Altı içerik sütununda günde 3 video yayınlanır, paylaşımların yüzde 80’i otomatiktir. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
-    { ay: longDate(prog.dates.day90), adim: 'Ölçek kararı', is: `Bütçe LTV ÷ CAC oranına göre belirlenir. Oran ${SCALE_RULE.threshold} veya üstündeyse bütçe ${SCALE_RULE.step.toLocaleString('tr-TR')} ile çarpılır (en çok ${p.dijitalScaleMax} katına kadar). Oran 1,5–3 arasındaysa bütçe korunur. 1,5’in altındaysa reklam durdurulur ve dönüşüm düzeltilir.`, olcut: '90. gün değerlendirmesi' },
+    { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'Dijital pazarlama uzmanı ölçüm araçlarını kurar. Bunlar Google Tag Manager (GTM), Google Analytics 4 (GA4), Yandex Metrica ve Meta Pixel araçlarıdır. Meta’ya satış verisi gönderen dönüşüm bağlantısı (Conversions API) da kurulur. Bağlantı etiketi (UTM) standardı ve CRM kaynak alanı eklenir. Kayıt sayfası, kayıt formu ve WhatsApp mesaj dizisi hazırlanır.', olcut: '8 ölçüm aracının hepsi çalışıyor. Kaynağı boş kayıt yok.' },
+    { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `Kayıt maliyeti en çok ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺. Ödemeye geçiş oranı en az %${p.dijitalLeadToActive}.` },
+    { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'Düzenli video üretimi', is: 'Videolar altı ana konuda hazırlanır. Günde 3 video yayınlanır. Paylaşımların yüzde 80’i otomatik yapılır. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
+    { ay: longDate(prog.dates.day90), adim: 'Bütçe artırma kararı', is: `Bütçe, satıcı değerinin (LTV) maliyete oranına göre belirlenir. Oran ${SCALE_RULE.threshold} veya üstündeyse bütçe ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok başlangıcın ${p.dijitalScaleMax} katına ulaşır. Oran 1,5 ile 3 arasındaysa bütçe aynı kalır. Oran 1,5’in altındaysa reklam durur. Kayıt sayfası ve mesajlar düzeltilir.`, olcut: '90. gün değerlendirmesi' },
   ];
 
   const kurallar = [
-    'Her reklam ve paylaşım UTM kaynak etiketi taşır. CRM’de kaynağı boş kayıt kabul edilmez, çünkü ölçülmeyen kanal bütçe almaz.',
-    'Bütçe aylık ve kademeli artar: önce test edilir, sonra büyütülür. Yeni kademe ancak önceki ay CPL ve dönüşüm hedefi tuttuysa açılır.',
+    'Her reklama ve paylaşıma kaynak etiketi (UTM) eklenir. CRM’e kaynağı boş kayıt girmeyin. Ölçülmeyen kanala bütçe verilmez.',
+    'Bütçe her ay adım adım artar. Önce küçük bütçe denenir, sonra bütçe büyütülür. Önceki ay kayıt maliyeti ve ödemeye geçiş hedefi tuttuysa bütçe bir adım artar.',
     `LTV ÷ CAC oranı ${SCALE_RULE.threshold} veya üstündeyse bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} ile çarpılır. Bütçe başlangıcın en çok ${p.dijitalScaleMax} katına çıkar ve simülasyon bu kuralı uygular. Oran 1,5–3 arasındaysa bütçe korunur ve dönüşüm iyileştirilir. 1,5’in altındaysa reklam durdurulur, kayıt sayfası ve CRM mesaj dizisi düzeltilir.`,
     'Organik içerik reklamın yerine geçmez, onu tamamlar. Reklam hızlı ama pahalıdır, içerik yavaş ama ucuzdur. İkisinden gelen kayıtlar da CRM’de aynı aşamalardan geçer.',
-    'Elde tutma dijital işin yarısıdır. Aylık değer raporu ve yenileme çağrısı yapılmazsa kazanılan satıcı zamanla ayrılır.',
+    'Satıcıyı tutmak, yeni satıcı bulmak kadar önemlidir. CRM masa başı personeli her ay değer raporu gönderir ve yenileme çağrısı yapar. Bu yapılmazsa kazanılan satıcı zamanla ayrılır.',
   ];
 
   const tierBudgets = [...new Set([0, 15_000, 30_000, 60_000, 120_000, p.dijitalAdBudgetMonthly])].sort((a, b) => a - b);

@@ -158,22 +158,22 @@ const yuzdeTam = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFraction
 /** Seçeneklerin gider ÷ gelir aralığı: “yüzde 87 ile 94’ü” biçiminde (veriden). */
 function payAraligi() {
   const paylar = SECENEKLER.map((s) => SECENEK_OZETI[s].gelirPayi);
-  return `yüzde ${yuzdeTam(Math.min(...paylar))} ile ${yuzdeTam(Math.max(...paylar))}’ü`;
+  return `%${yuzdeTam(Math.min(...paylar))} ile %${yuzdeTam(Math.max(...paylar))}’ü`;
 }
 
 /** Projenin bugünkü kararlarıyla çelişen ya da karar bekleyen noktalar (araştırma notlarından, 2026-11-05). */
 export const DIKKAT: { baslik: string; metin: string }[] = [
   {
     baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
-    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları eklenince 2027 zarar yılıdır. Parametrelerde yatırım girişi 0 TL’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
+    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları da eklenince şirket 2027’de zarar eder. “Varsayımlar ve ayarlar” sayfasında dışarıdan gelecek yatırım 0 ₺’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
   },
   {
     baslik: 'Saha personeli sayısı iki planda farklı',
-    metin: 'Gelir planı 2027’de ikinci ve üçüncü saha personelini daha geç varsayar. İstihdam takvimi ise Aralık 2026’da 3 saha personeli öngörür. Bu yüzden takvimdeki saha kapasitesi 2027’nin ilk yarısında gelir planına tam yansımaz.',
+    metin: 'Gelir planında 2. ve 3. saha personeli daha geç başlar. İstihdam takviminde ise Aralık 2026’da 3 saha personeli çalışır. Bu yüzden gelir planı Ocak ile Haziran 2027 arasında saha ekibinin bütün satışlarını saymaz.',
   },
   {
     baslik: 'Güçlü seçenek 50 çalışan eşiğini aşar',
-    metin: 'Bu eşikte üç yükümlülük gündeme gelir. Birincisi VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydıdır. İkincisi yüzde 3 engelli çalışan yükümlülüğüdür. Üçüncüsü iş sağlığı ve güvenliği kuruludur. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
+    metin: 'Şirkette 50 ya da daha çok çalışan olunca üç yeni yükümlülük başlar. Birincisi VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydıdır. İkincisi %3 engelli çalışan yükümlülüğüdür. Üçüncüsü iş sağlığı ve güvenliği kuruludur. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
   },
   {
     baslik: 'İhracat ve bağımsız temsilciler kadroda yok',
@@ -181,7 +181,7 @@ export const DIKKAT: { baslik: string; metin: string }[] = [
   },
   {
     baslik: 'Segika gideri ayrılmalı',
-    metin: 'Segika masa başı ve SGK danışmanı Segika’ya aittir. İki şirket ayrı tüzel kişilerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyet paylaşımı işveren kararına bağlıdır.',
+    metin: 'Segika masa başı ve SGK danışmanı Segika’ya aittir. iStoc ve Segika ayrı şirketlerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyetin nasıl paylaşılacağı işveren kararına bağlıdır.',
   },
 ];
 
@@ -191,7 +191,7 @@ export const ACIK_SORULAR: string[] = [
   'Yatırım girişinin tutarı ve tarihi nedir?',
   'Sepet, sipariş ve ödeme akışı 2027’de açılacak mı? Ek geliştirici, test uzmanı ve güvenlik testi bu karara bağlıdır.',
   'Mevcut yazılım ekibinin gerçek ücretleri nedir? Plan bu ekip için tahmini piyasa ücreti kullanır.',
-  'Bugünkü DevOps ve altyapı hizmetinin bedeli nedir? Ekonomik ve medyan seçenekte bu bedel bilinmediği için toplama eklenmedi.',
+  'Bugünkü sunucu ve altyapı hizmetinin (DevOps) bedeli nedir? Ekonomik ve medyan seçenekte bu bedel bilinmediği için toplama eklenmedi.',
   'Satış ekip lideri mevcut saha personelinden mi seçilecek? Seçilirse yeni kişi yerine liderlik farkı ödenir.',
   '2027 asgari ücreti Aralık 2026’da açıklanınca bütün maaşlar yeniden hesaplanmalıdır.',
 ];

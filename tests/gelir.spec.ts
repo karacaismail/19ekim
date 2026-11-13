@@ -99,7 +99,7 @@ test.describe('gelir planı', () => {
     const acici = kurucu.getByRole('button', { name: /Ayrıntılı seçenekler/ });
     if ((await acici.getAttribute('aria-expanded')) === 'false') await acici.click();
     const secenekler = kurucu.getByRole('group', { name: 'Ayrıntılı seçenekler' });
-    await expect(secenekler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '+2 kişi' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(secenekler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '2 kişi daha' })).toHaveAttribute('aria-pressed', 'true');
     await expect(secenekler.getByRole('group', { name: 'Aylık reklam bütçesi' }).getByRole('button', { name: 'Yok' })).toHaveAttribute('aria-pressed', 'true');
     await expect(page).toHaveURL(/eksaha=2/);
     // Bir seçenek değişince senaryo “özel” olur; sıfırla hazır senaryoya döner.
@@ -232,7 +232,7 @@ test.describe('gelir planı', () => {
     // Riskli seçenekler (ek sabit gider, düşük elde tutma, reklamsız): sonuç ve durum anında değişir, durum yine görünür
     // ve tonuyla tutarlı; özel senaryo kıyasa dördüncü satır olarak girer; şerit ile blok aynı değeri taşır.
     const onceki = (await deger.textContent())?.trim();
-    await secenekler.getByRole('group', { name: 'Aylık ek sabit gider' }).getByRole('button', { name: '+500 bin ₺' }).click();
+    await secenekler.getByRole('group', { name: 'Aylık ek sabit gider' }).getByRole('button', { name: '500.000 ₺' }).click();
     await secenekler.getByRole('group', { name: 'Aylık elde tutma' }).getByRole('button', { name: '%60', exact: true }).click();
     await secenekler.getByRole('group', { name: 'Aylık reklam bütçesi' }).getByRole('button', { name: 'Yok' }).click();
     await expect(deger).not.toHaveText(onceki ?? '');
@@ -260,25 +260,25 @@ test.describe('gelir planı', () => {
     await page.locator('.kurucu').scrollIntoViewIfNeeded();
     await page.locator('.kurucu').getByRole('button', { name: 'Senaryo bağlantısını kopyala' }).click();
     await expect(page.locator('.kurucu .kurucu-durum')).toContainText(/kopyalandı|kopyalanamadı/);
-    const [indirme] = await Promise.all([page.waitForEvent('download'), page.locator('.table-block:has(#aylik-tablo)').getByRole('button', { name: 'CSV indir' }).click()]);
+    const [indirme] = await Promise.all([page.waitForEvent('download'), page.locator('.table-block:has(#aylik-tablo)').getByRole('button', { name: 'Tabloyu indir (CSV dosyası)' }).click()]);
     expect(indirme.suggestedFilename()).toMatch(/^gelir-plani-aylik-.*\.csv$/);
   });
 
-  test('“Üçü üst üste” görünümü grafiği değiştirir; eksen anahtarı sağda; başabaş grafikleri çizilir', async ({ page }) => {
+  test('“Üç senaryo” görünümü grafiği değiştirir; eksen anahtarı sağda; başabaş grafikleri çizilir', async ({ page }) => {
     await page.goto('gelir-plani/');
     await icerik(page);
     await hydrated(page);
     const canvas = (id: string) => page.locator(`#${id} .chart-canvas`).first();
     await expect(canvas('kadro')).toHaveAttribute('data-kind', 'kaynak-ay');
-    await page.locator('#kadro').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
+    await page.locator('#kadro').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(canvas('kadro')).toHaveAttribute('data-kind', 'seri-cizgi');
     await expect(canvas('kadro').locator('svg')).toBeVisible({ timeout: 10_000 });
     await expect(canvas('gelir')).toHaveAttribute('data-kind', 'gelir-ay');
-    await page.locator('#gelir').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
+    await page.locator('#gelir').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(canvas('gelir')).toHaveAttribute('data-kind', 'grup-ay');
     // gorsel_algi.md F05/F15 (2026-10-28): tablo başlığı varyantla değişmez; senaryo adı araç çubuğu etiketinde, başlıkta tekrar etmez.
     await expect(page.locator('#aylik-tablo')).toHaveText(/^Ay ay: bütün aylar, 2027 sonuna kadar$/);
-    await page.locator('#huni').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
+    await page.locator('#huni').getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(canvas('huni')).toHaveAttribute('data-kind', 'hedef-adim');
     const bolum = page.locator('#basabas');
     await expect(bolum.locator('.chart-canvas')).toHaveCount(3);
@@ -315,10 +315,10 @@ test.describe('gelir planı', () => {
     const kadro = page.locator('#kadro');
     const katki = kadro.locator('.table-block:has(#katki-tablo) tbody tr');
     await expect(katki).toHaveCount(11);
-    await expect(katki.filter({ hasText: 'Büyüme: saha personeli' })).toHaveCount(1);
+    await expect(katki.filter({ hasText: 'Büyümeyle eklenen saha personeli' })).toHaveCount(1);
     await expect(katki.filter({ hasText: 'Yönetici asistanı' })).toHaveAttribute('data-tone', 'total');
     await expect(katki.filter({ hasText: 'Yönetici asistanı' }).locator('td', { hasText: /^Dolaylı$/ })).toHaveCount(1);
-    await kadro.locator('.table-block:has(#katki-tablo)').getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üçü üst üste' }).click();
+    await kadro.locator('.table-block:has(#katki-tablo)').getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(kadro.locator('.table-block:has(#katki-tablo) thead th')).toHaveCount(8);
     await page.goto('istihdam/');
     await icerik(page);
@@ -371,7 +371,7 @@ test.describe('gelir planı', () => {
 
   // gorsel_algi.md (kullanıcı kararı 2026-10-28) F15 / süreklilik ilkesi ve kullanıcının ekran görüntüsü: görünüm varyantı
   // değişince araç çubuğundaki bileşenler yer değiştirmez — iki varyantta aynı araçlar (Dışa aktar + Görünüm), başlık sabit;
-  // “Üçü üst üste” görünümünde de CSV indirilir (hazır senaryo sütunlarıyla).
+  // “Üç senaryo” görünümünde de CSV indirilir (hazır senaryo sütunlarıyla).
   for (const genislik of [1280, 320]) {
     test(`${genislik} px: görünüm değişince araç çubuğu bileşenleri yerinde kalır; üst üste görünümde CSV indirilir`, async ({ page }) => {
       await page.setViewportSize({ width: genislik, height: genislik === 320 ? 480 : 800 });
@@ -380,7 +380,7 @@ test.describe('gelir planı', () => {
       await hydrated(page);
       await page.evaluate(() => document.fonts.ready);
       // Grafik blokları da: başlık sabit, görünüm anahtarı figür içinde yerinde (varyanta bağlı açıklama grafiğin altında).
-      for (const [bolum, secenek] of [['#kadro', 'Üçü üst üste'], ['#gelir', 'Üçü üst üste'], ['#huni', 'Üçü üst üste'], ['#basabas', 'Kümülatif']] as const) {
+      for (const [bolum, secenek] of [['#kadro', 'Üç senaryo'], ['#gelir', 'Üç senaryo'], ['#huni', 'Üç senaryo'], ['#basabas', 'Kümülatif']] as const) {
         const figur = page.locator(`${bolum} figure.chart`).filter({ has: page.getByRole('button', { name: secenek }) }).first();
         const grup = figur.locator('.araclar .secim').last();
         await figur.scrollIntoViewIfNeeded();
@@ -404,7 +404,7 @@ test.describe('gelir planı', () => {
       for (const [baslik, dosya, sutun] of tablolar) {
         const blok = page.locator(`.table-block:has(${baslik})`);
         const gorunum = blok.getByRole('group', { name: /görünüm/i });
-        const csv = blok.getByRole('button', { name: 'CSV indir' });
+        const csv = blok.getByRole('button', { name: 'Tabloyu indir (CSV dosyası)' });
         await blok.scrollIntoViewIfNeeded();
         const konum = async () => {
           const b = (await blok.boundingBox())!;
@@ -414,8 +414,8 @@ test.describe('gelir planı', () => {
         };
         const ilkBaslik = await blok.locator(baslik).innerText();
         const once = await konum();
-        await gorunum.getByRole('button', { name: 'Üçü üst üste' }).click();
-        await expect(gorunum.getByRole('button', { name: 'Üçü üst üste' })).toHaveAttribute('aria-pressed', 'true');
+        await gorunum.getByRole('button', { name: 'Üç senaryo' }).click();
+        await expect(gorunum.getByRole('button', { name: 'Üç senaryo' })).toHaveAttribute('aria-pressed', 'true');
         expect(await blok.locator(baslik).innerText(), `${baslik} başlık sabit`).toBe(ilkBaslik);
         const sonra = await konum();
         for (const k of ['gx', 'gy', 'cx', 'cy'] as const) expect(Math.abs(sonra[k] - once[k]), `${baslik} ${k}`).toBeLessThanOrEqual(1);

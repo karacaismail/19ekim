@@ -176,7 +176,7 @@ export const VARSAYILAN_AYAR: Ayar = {
   affSonraki: { satis: 0, cozum: 0 },
 };
 
-export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Demo da yapar', C: 'Satışı kendisi kapatır' };
+export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Ürünü de gösterir', C: 'Satışı kendisi kapatır' };
 export const PAKET_ADI: Record<SegikaPaket, string> = { ikisi: 'Teşvik ve Otomasyon', tesvik: 'SGK Teşvik', otomasyon: 'SGK Otomasyon' };
 
 /**
@@ -273,7 +273,7 @@ export function donemKazanci(a: Ayar, rol: RolId): DonemSatiri[] {
   }
   if (rol === 'tavsiye') {
     const kredi = aylikFiyat(a) * a.krediAy;
-    return [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye (kredi)`, yillik: kredi * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(kredi)}` }];
+    return [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye (ücretsiz kullanım)`, yillik: kredi * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(kredi)}` }];
   }
   const birim = satisKazanci(a, a.elciSeviye);
   return [{ ad: 'Elçi', yillik: birim * a.elciSatis * 12, formul: `${a.elciSatis} satış × 12 ay × ${t(birim)}` }];
@@ -307,8 +307,8 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kim:
         marka === 'istoc'
           ? 'Deniz 22 yaşında, son sınıf öğrencisi. Gerçek işletmelerle görüşerek satış öğrenmek istiyor. Kazancı, ödeme yapan müşteri sayısıyla artar.'
-          : 'Ece 23 yaşında, İK ya da muhasebe öğrencisi. Doğru işletmeyi bulur ve demo ayarlar. Teşvik sonucu hakkında söz vermez.',
-      kurallar: ['Kazanç garantisi verilmez.', 'Başarılı olanı kadro görüşmesine çağırırız.', 'Tahsilat yapmaz, indirim veremez.'],
+          : 'Ece 23 yaşında, İK ya da muhasebe öğrencisi. Doğru işletmeyi bulur ve ürün gösterimi ayarlar. Teşvik sonucu hakkında söz vermez.',
+      kurallar: ['Ortağa kazanç garantisi vermeyiz.', 'Başarılı olanı kadro görüşmesine çağırırız.', 'Ortak müşteriden ödeme almaz. Ortak indirim de veremez.'],
       kimler:
         marka === 'istoc'
           ? ['Üniversite öğrencisi', 'Yeni mezun', 'İşletme ve pazarlama öğrencisi', 'Yarı zamanlı çalışmak isteyen', 'Ticarete ilgi duyan genç']
@@ -325,10 +325,10 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kurallar:
         marka === 'segika'
           ? ['Müşteri desteğini biz veririz. Müşteri, destek uzmanımıza WhatsApp, e-posta ya da telefonla ulaşır.', 'Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.']
-          : ['İlk iki ay kota yoktur. Bu sürede işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
+          : ['İlk iki ay kota yoktur. Uzman bu sürede işi öğrenir.', 'Prim, müşteri ödeyince ve iade süresi geçince ödenir.'],
       kimler:
         marka === 'istoc'
-          ? ['Deneyimli saha satışçısı', 'B2B satış temsilcisi', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']
+          ? ['Deneyimli saha satışçısı', 'İşletmelere satış yapan temsilci', 'Toptan sektöründen satışçı', 'Bayi satış sorumlusu', 'Öncü ortaklardan yükselen']
           : ['Yazılım satış temsilcisi', 'Bordro yazılımı satışçısı', 'Muhasebe yazılımı satışçısı', 'SGK bilgili satış uzmanı', 'Öncü ortaklardan yükselen'],
     },
     {
@@ -341,12 +341,12 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
           : 'İşverene bordro, İK ya da iş güvenliği hizmeti veren profesyoneldir. Segika’yı müşterisine önerir ve müşterinin desteğini kendisi verir.',
       kurallar:
         marka === 'segika'
-          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Her firma tek ortağa yazılır.']
-          : ['Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Ortak getirmeye para ödemeyiz.', 'Her firma tek ortağa yazılır.'],
+          ? ['Müşteri ilişkileri için CRM yazılımını biz sağlarız.', 'Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Her müşteri firma yalnız bir ortağın hesabına yazılır.']
+          : ['Ortak sözleşmeyle çalışır. Kazancını bize fatura keserek alır.', 'Başka bir ortağı programa getirene para ödemeyiz.', 'Her müşteri firma yalnız bir ortağın hesabına yazılır.'],
       kimler:
         marka === 'istoc'
-          ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'ERP ve POS bayisi', 'Lojistik firması', 'Gümrük müşaviri', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']
-          : ['Mali müşavir', 'Bordro bürosu', 'OSGB', 'Bağımsız İK danışmanı', 'İK dernekleri', 'OSB yönetimi', 'Sanayi ve ticaret odası', 'ERP bayisi (Luca, Mikro, ETA)', 'Özel istihdam bürosu', 'İş hukuku avukatı'],
+          ? ['E-ihracat danışmanı', 'Katalog ve fotoğraf stüdyosu', 'E-ticaret ajansı', 'Muhasebe yazılımı (ERP) ve kartlı ödeme cihazı (POS) bayisi', 'Lojistik firması', 'Gümrük müşaviri', 'Çarşı derneği', 'Fuar organizatörü', 'Üretici birlikleri']
+          : ['Mali müşavir', 'Bordro bürosu', 'OSGB', 'Bağımsız İK danışmanı', 'İK dernekleri', 'OSB yönetimi', 'Sanayi ve ticaret odası', 'Muhasebe yazılımı bayisi (Luca, Mikro, ETA)', 'Özel istihdam bürosu', 'İş hukuku avukatı'],
     },
     {
       id: 'tavsiye',
@@ -354,20 +354,20 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
       kisa: 'Mevcut müşterinin tavsiyesi',
       kim:
         marka === 'istoc'
-          ? 'İstoç’taki müşterimiz, komşu dükkâna iStoc’u önerir. Komşu yıllık paket alırsa iki taraf da ücretsiz kullanım kazanır.'
+          ? 'İstoç çarşısındaki müşterimiz, komşu dükkâna iStoc’u önerir. Komşu yıllık paket alırsa iki taraf da ücretsiz kullanım kazanır.'
           : 'Segika müşterisi, başka firmadaki İK ya da muhasebe yöneticisine Segika’yı önerir. Firma yıllık paket alırsa iki taraf da kazanır.',
-      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün boyunca kullanmaya devam edince kredi hesaba yazılır.', 'Tavsiye, müşteri hizmetten doğrulanmış bir sonuç aldıktan sonra istenir.'],
+      kurallar: ['Ödül nakit değil, ücretsiz kullanımdır.', 'Yeni müşteri 60 gün kullanmaya devam ederse şirket ücretsiz kullanımı tavsiye edenin hesabına yazar.', 'Müşteriden tavsiyeyi, hizmetten doğrulanmış bir sonuç aldıktan sonra isteriz.'],
       kimler:
         marka === 'istoc'
           ? ['Mevcut iStoc satıcısı', 'Çarşıdaki komşu dükkân', 'Aynı bloktaki toptancı', 'Tedarikçi esnaf', 'Müşteri esnaf']
-          : ['Mevcut Segika müşterisi', 'İK yöneticisi', 'Muhasebe yöneticisi', 'Aynı OSB’deki firma', 'Grup şirketleri'],
+          : ['Mevcut Segika müşterisi', 'İK yöneticisi', 'Muhasebe yöneticisi', 'Aynı organize sanayi bölgesindeki firma', 'Grup şirketleri'],
     },
     {
       id: 'elci',
       ad: 'Marka elçisi',
       kisa: 'İçerik üreticileri ve eğitmenler',
       kim: `Sosyal medyada ${urun}’u kendi bağlantısıyla tanıtır. Bağlantıdan gelen müşteri ödeme yaparsa komisyon alır.`,
-      kurallar: ['Elçi, paylaşımlarına “reklam” ibaresini ekler.', 'Sahte yorum ve toplu mesaj yasaktır.'],
+      kurallar: ['Elçi, paylaşımlarına “reklam” sözünü yazar.', 'Sahte yorum ve toplu mesaj yasaktır.'],
       kimler:
         marka === 'istoc'
           ? ['Toptan ticaret eğitmeni', 'E-ihracat içerik üreticisi', 'LinkedIn yazarı', 'Sektör YouTube kanalı', 'Girişimcilik topluluğu']
@@ -377,4 +377,4 @@ export function rolMetinleri(marka: Marka): RolMetni[] {
 }
 
 export const ASAMA_ADI = ['Eğitim dönemi', 'İlk müşteri', 'Düzenli satış', 'Deneyimli'];
-export const ASAMA_SURE = ['İlk 14 gün', '15–45. gün', '46–90. gün', '90. günden sonra'];
+export const ASAMA_SURE = ['İlk 14 gün', '15. günden 45. güne kadar', '46. günden 90. güne kadar', '90. günden sonra'];

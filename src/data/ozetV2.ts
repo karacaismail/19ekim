@@ -12,7 +12,7 @@ export function personaOzeti(a: Ayar, r: RolMetni) {
   const k = kosulSonucu(a, r.id);
   if (k) return { deger: k.ozet, birim: k.ozetBirim };
   if (r.sozlesme === 'kadrolu') return { deger: tl(kadroluKazanc(a).toplam), birim: '/ ay' };
-  if (r.sozlesme === 'musteri') return { deger: tl(musteriKazanc(a).yillikKredi), birim: 'kredi / yıl' };
+  if (r.sozlesme === 'musteri') return { deger: tl(musteriKazanc(a).yillikKredi), birim: 'ücretsiz kullanım / yıl' };
   return { deger: tl(bagimsizKazanc(a).aylik), birim: '/ ay' };
 }
 

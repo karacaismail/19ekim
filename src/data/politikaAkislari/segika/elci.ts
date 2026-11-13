@@ -190,7 +190,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       sorumlu: 'Siz',
       yap: [
         'Yalnız şirketin onayladığı teklifi kullanın.',
-        `Şirket fiyatı ${sayi(a.blok)} çalışanlık bloklarla hesaplar.`,
+        `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar.`,
         'Fiyat herkes için aynıdır.',
         'Çalışan sayısı değişirse güncel teklif isteyin.',
       ],
@@ -294,7 +294,7 @@ export const akisOlustur: AkisOlustur = (a) => {
   );
 
   return {
-    baslik: 'Segika marka elçisi akışı',
+    baslik: 'Segika marka elçisinin iş adımları',
     ozet: SEVIYE_OZET[seviye],
     hedef: 'İşverenleri doğru bilgiyle Segika’ya yönlendirin.',
     ilk: 'anlasma',

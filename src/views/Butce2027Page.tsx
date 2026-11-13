@@ -33,9 +33,9 @@ import '../styles/butce2027.css';
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}-01T00:00:00`));
 const milyon = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon ₺`;
-const yuzde = (v: number) => `yüzde ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const yuzde = (v: number) => (v > 0 && v < 0.0005 ? '%0,1’den az' : `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`);
 const GRUPLAR: Grup[] = ['mevcut', 'kadro', 'kisi', 'pazarlama', 'ofis', 'diger'];
-const TUR_ADI = { opex: 'OPEX', capex: 'CAPEX' } as const;
+const TUR_ADI = { opex: 'İşletme gideri', capex: 'Yatırım harcaması' } as const;
 
 function Icerik({ pathname }: { pathname: string }) {
   const kayit = icerikOf(pathname)!;
@@ -47,7 +47,7 @@ function Icerik({ pathname }: { pathname: string }) {
   const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, b: butce(taban, s, ayar) })), [taban, ayar]);
   const opexT = toplam(b.opex);
   const capexT = toplam(b.capex);
-  const fark = b.gelir2027 - opexT - capexT;
+  const fark = b.gelir2027 - opexT - capexT; const farkYazisi = (v: number) => `${milyon(Math.abs(v))} ${v < 0 ? 'açık' : 'fazla'}`;
   const yemekEtkisi = useMemo(() => {
     const acik = butce(taban, secili, { ...ayar, yemek: true });
     const kapali = butce(taban, secili, { ...ayar, yemek: false });
@@ -72,7 +72,7 @@ function Icerik({ pathname }: { pathname: string }) {
     <>
       <PageHeader
         title={kayit.baslik}
-        purpose="2027’de işletme giderlerini (OPEX) ve yatırım harcamalarını (CAPEX) ay ay gösterir. Taban Sheets’teki gider planıdır, üstüne seçilen kadro seçeneğinin eklemeleri gelir."
+        purpose="2027’de işletme giderlerini (OPEX) ve yatırım harcamalarını (CAPEX) ay ay gösterir."
         meta={[
           { label: 'Dönem', value: 'Ocak ile Aralık 2027' },
           { label: 'Fiyat tarihi', value: '5 Kasım 2026' },
@@ -81,13 +81,13 @@ function Icerik({ pathname }: { pathname: string }) {
 
       <div className="b27-uyari">
         <p>
-          OPEX, her ay tekrarlanan işletme gideridir: maaş, kira, lisans, reklam. CAPEX, bir kez alınıp yıllarca kullanılan yatırım harcamasıdır: bilgisayar, mobilya, tadilat. Taban, Google Sheets gider tablosundaki 2027 planıdır ve sayfa açılırken okunur. Eklemeler, İstihdam takvimi v2’deki kadro seçeneği ve kaynaklı birim fiyatlarla hesaplanır. Fiyatlar 2026 fiyatının yüzde 29,73 artırılmış hâlidir. Yatırım kalemleri KDV hariç yazılır, çünkü KDV’nin indirilebildiği varsayılır.
+          İşletme gideri her ay tekrarlanır. Maaş, kira, lisans ve reklam işletme gideridir. Yatırım harcaması bir kez yapılır. Alınan şey yıllarca kullanılır. Bilgisayar, mobilya ve tadilat yatırım harcamasıdır. Bütçe iki parçadan oluşur. İlk parça, Google Sheets gider tablosundaki 2027 planıdır. Bu sayfada bu parçaya “Mevcut plan” denir. Mevcut plan sayfa açılırken okunur. İkinci parça, seçilen kadro seçeneğinin eklediği giderlerdir. Eklemeler iki bilgiyle hesaplanır. Biri seçilen kadro seçeneğidir. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir. Diğeri kaynağı gösterilen birim fiyatlardır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Bu oran Sheets gider tablosundaki 2027 artışıdır. Yatırım kalemleri bütçeye KDV’siz tutarla girer. Çünkü şirketin bu KDV’yi vergi borcundan düşebileceği varsayılır. Fiyatı KDV dahil olan kalemde tutar 1,2’ye bölünür.
         </p>
         {opex.status === 'loading' ? <p className="b27-durum">Sheets’teki 2027 planı okunuyor. Bu sırada yalnız eklemeler gösterilir.</p> : null}
-        {opex.status === 'failed' || opex.status === 'setup' ? <p className="b27-durum" role="alert">Sheets’teki 2027 planı okunamadı: {opex.message} Bu yüzden toplamlarda taban yoktur, yalnız eklemeler vardır.</p> : null}
+        {opex.status === 'failed' || opex.status === 'setup' ? <p className="b27-durum" role="alert">Sheets’teki 2027 planı okunamadı: {opex.message} Bu yüzden toplamlarda “Mevcut plan” yoktur. Toplamlarda yalnız eklemeler vardır.</p> : null}
         {ciftSayim ? (
           <p className="b27-durum" role="alert">
-            Sheets’te {taban!.bordrolu} bordrolu ve {taban!.faturali} faturalı kişi var. Plan {BEKLENEN_SHEETS.bordrolu} bordrolu ve {BEKLENEN_SHEETS.faturali} faturalı kişi bekler. Sheets’e İstihdam takvimindeki bir rol eklendiyse o rol burada iki kez sayılıyor olabilir.
+            Sheets’te {taban!.bordrolu} bordrolu ve {taban!.faturali} faturalı kişi var. Plan {BEKLENEN_SHEETS.bordrolu} bordrolu ve {BEKLENEN_SHEETS.faturali} faturalı kişi bekler. Bir rol hem Sheets’te hem “İstihdam takvimi” sayfasında olabilir. Bu durumda rol bütçede iki kez sayılıyor olabilir.
           </p>
         ) : null}
       </div>
@@ -96,26 +96,26 @@ function Icerik({ pathname }: { pathname: string }) {
         id="secenek"
         index={1}
         title="Bütçe seçeneği"
-        desc="Kadro seçeneği İstihdam takvimi v2 ile aynıdır. Yemek kartı ve sağlık sigortası şirket politikasıdır ve henüz karar verilmedi. Anahtarlarla bütçeye eklenip çıkarılabilir."
+        desc="Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümüyle aynıdır. Yemek kartı ve sağlık sigortası için şirket henüz karar vermedi. Bu iki kalemi anahtarlarla bütçeye ekleyebilir ya da çıkarabilirsiniz."
         tools={
           <div className="b27-araclar">
             <Choice<SecenekId> label="Kadro seçeneği" value={secili} options={SECENEKLER.map((s) => ({ id: s, name: SECENEK_ADI[s] }))} onChange={setSecili} />
             <div className="b27-anahtarlar">
-              <Anahtar ad="Yemek kartı" acik={ayar.yemek} onChange={(v) => setAyar((a) => ({ ...a, yemek: v }))} aciklama={`Bütün bordrolu kadroya. 2027 etkisi ${tl(yemekEtkisi)}.`} />
-              <Anahtar ad="Sağlık sigortası" acik={ayar.saglik} onChange={(v) => setAyar((a) => ({ ...a, saglik: v }))} aciklama={`Tamamlayıcı sağlık sigortası, bütün bordrolu kadroya. 2027 etkisi ${tl(saglikEtkisi)}.`} />
+              <Anahtar ad="Yemek kartı" acik={ayar.yemek} onChange={(v) => setAyar((a) => ({ ...a, yemek: v }))} aciklama={`Bütün bordrolu çalışanlara verilir. 2027 bütçesine ${tl(yemekEtkisi)} ekler. Bu tutara %5 öngörülemeyen gider payı dahildir.`} />
+              <Anahtar ad="Sağlık sigortası" acik={ayar.saglik} onChange={(v) => setAyar((a) => ({ ...a, saglik: v }))} aciklama={`Tamamlayıcı sağlık sigortası bütün bordrolu çalışanlara yapılır. 2027 bütçesine ${tl(saglikEtkisi)} ekler. Bu tutara %5 öngörülemeyen gider payı dahildir.`} />
             </div>
           </div>
         }
       >
         <Stats
           items={[
-            { label: '2027 OPEX', value: milyon(opexT), note: b.tabanVar ? `Aylık ortalama ${tl(opexT / 12)}` : 'Sheets tabanı yok, yalnız eklemeler' },
-            { label: '2027 CAPEX', value: milyon(capexT), note: 'KDV hariç' },
+            { label: '2027 işletme gideri', value: milyon(opexT), note: b.tabanVar ? `Aylık ortalama ${tl(opexT / 12)}` : '“Mevcut plan” yok. Yalnız eklemeler sayıldı.' },
+            { label: '2027 yatırım harcaması', value: milyon(capexT), note: 'KDV hariç' },
             { label: 'Toplam harcama', value: milyon(opexT + capexT), note: `Aralık 2027’de ${b.kadroAylik[11]} kişi` },
-            { label: 'Gelirle fark', value: milyon(fark), note: `${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosunun 2027 abonelik geliri ${milyon(b.gelir2027)}` },
+            { label: 'Gelirden harcama düşülünce kalan', value: farkYazisi(fark), note: `“Gelir planı” sayfasındaki ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosuna göre 2027 abonelik geliri ${milyon(b.gelir2027)} olur.` },
           ]}
         />
-        {fark < 0 ? <p className="b27-not">Gelir 2027 harcamasını karşılamaz. Açık {milyon(-fark)} tutarındadır ve yatırım ya da başlangıç nakdiyle kapatılmalıdır. Nakit akış tablosu bu eklemeleri henüz içermez.</p> : null}
+        {fark < 0 ? <p className="b27-not">Gelir 2027 harcamasını karşılamaz. Açık {milyon(-fark)} olur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılmalı. “Nakit akışı” sayfası bu sayfadaki eklemeleri henüz içermez.</p> : null}
       </Section>
 
       <Section id="ozet" index={2} title="Gruplara göre özet" desc="Her satır bir harcama grubudur. Mevcut plan Sheets’ten gelir, diğer gruplar bu sayfada hesaplanır.">
@@ -134,15 +134,15 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="aylik" index={3} title="Aylık plan" desc="Her ayın işletme gideri, yatırım harcaması ve yıl başından bu yana toplam harcama. Kişi sayısı Sheets’teki kişiler ile yeni kadronun toplamıdır.">
+      <Section id="aylik" index={3} title="Aylık plan" desc="Tablo her ayın işletme giderini ve yatırım harcamasını gösterir. Yıl başından o aya kadarki toplam harcamayı da gösterir. Kişi sayısı Sheets’teki kişiler ile yeni kadronun toplamıdır.">
         <DataTable<(typeof aylar)[number]>
           id="aylar"
           title="Ocak ile Aralık 2027"
           rowKey={(a) => a.ay}
           columns={[
             { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (a) => ayAdi(a.ay) },
-            { key: 'opex', header: 'OPEX', nowrap: true, render: (a) => tl(a.opex) },
-            { key: 'capex', header: 'CAPEX', nowrap: true, render: (a) => tl(a.capex) },
+            { key: 'opex', header: 'İşletme gideri', nowrap: true, render: (a) => tl(a.opex) },
+            { key: 'capex', header: 'Yatırım harcaması', nowrap: true, render: (a) => tl(a.capex) },
             { key: 'toplam', header: 'Toplam', nowrap: true, summary: true, render: (a) => tl(a.opex + a.capex) },
             { key: 'birikim', header: 'Yıl başından beri', nowrap: true, render: (a) => tl(birikimli[a.i]) },
             { key: 'kisi', header: 'Kişi', nowrap: true, render: (a) => `${a.kisi} kişi` },
@@ -152,14 +152,14 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="kalemler" index={4} title="Kalemler ve hesap kuralları" desc="Her kalemin nasıl hesaplandığı düz cümleyle yazılıdır. Birim fiyatın dayanağı son bölümdedir.">
+      <Section id="kalemler" index={4} title="Kalemler ve hesap kuralları" desc="Her kalemin nasıl hesaplandığı düz cümleyle yazılıdır. Birim fiyatların dayanağı “Birim fiyatlar ve kaynaklar” bölümündedir.">
         <DataTable<Kalem>
           id="kalem-listesi"
           title="Bütün kalemler"
           rowKey={(k) => k.id}
           columns={[
             { key: 'ad', header: 'Kalem', rowHeader: true, minWidth: '12rem', render: (k) => k.ad },
-            { key: 'grup', header: 'Grup ve tür', minWidth: '9rem', render: (k) => `${GRUP_ADI[k.grup]}, ${TUR_ADI[k.tur]}` },
+            { key: 'grup', header: 'Grup ve tür', minWidth: '9rem', render: (k) => `${GRUP_ADI[k.grup]}, ${TUR_ADI[k.tur].toLocaleLowerCase('tr-TR')}` },
             { key: 'kural', header: 'Hesap kuralı', minWidth: '20rem', render: (k) => k.kural },
             { key: 'birim', header: 'Birim fiyat', nowrap: true, render: (k) => (k.fiyatId ? tl(fiyat(k.fiyatId)) : 'Hesaplanır') },
             { key: 'toplam', header: '2027 toplamı', nowrap: true, summary: true, render: (k) => tl(toplam(k.aylik)) },
@@ -168,7 +168,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="karsilastirma" index={5} title="Üç seçeneğin karşılaştırması" desc="Anahtarların seçimi üç seçeneğe de uygulanır. Gelir, her seçeneğin dayandığı gelir senaryosunun 2027 abonelik geliridir.">
+      <Section id="karsilastirma" index={5} title="Üç seçeneğin karşılaştırması" desc="Anahtarların seçimi üç seçeneğe de uygulanır. “Gelir” sütunu, “Gelir planı” sayfasındaki senaryonun 2027 abonelik geliridir. “2027 gelir öngörüsü” sayfası başka bir tutar gösterebilir. Çünkü o sayfa yeni kadronun ek satış ve destek rollerini de sayar.">
         <DataTable<(typeof hepsi)[number]>
           id="secenekler"
           title="Seçenekler yan yana"
@@ -176,11 +176,11 @@ function Icerik({ pathname }: { pathname: string }) {
           rowTone={(x) => (x.s === secili ? 'secili' : undefined)}
           columns={[
             { key: 'ad', header: 'Seçenek', rowHeader: true, render: (x) => SECENEK_ADI[x.s] },
-            { key: 'kisi', header: 'Aralık kişi', nowrap: true, render: (x) => `${x.b.kadroAylik[11]} kişi` },
-            { key: 'opex', header: 'OPEX', nowrap: true, render: (x) => milyon(toplam(x.b.opex)) },
-            { key: 'capex', header: 'CAPEX', nowrap: true, render: (x) => milyon(toplam(x.b.capex)) },
+            { key: 'kisi', header: 'Aralık 2027’de kişi sayısı', nowrap: true, render: (x) => `${x.b.kadroAylik[11]} kişi` },
+            { key: 'opex', header: 'İşletme gideri', nowrap: true, render: (x) => milyon(toplam(x.b.opex)) },
+            { key: 'capex', header: 'Yatırım harcaması', nowrap: true, render: (x) => milyon(toplam(x.b.capex)) },
             { key: 'gelir', header: 'Gelir', nowrap: true, render: (x) => milyon(x.b.gelir2027) },
-            { key: 'fark', header: 'Gelirle fark', nowrap: true, summary: true, render: (x) => milyon(x.b.gelir2027 - toplam(x.b.opex) - toplam(x.b.capex)) },
+            { key: 'fark', header: 'Gelirden harcama düşülünce kalan', nowrap: true, summary: true, render: (x) => farkYazisi(x.b.gelir2027 - toplam(x.b.opex) - toplam(x.b.capex)) },
           ]}
           rows={hepsi}
         />
@@ -191,13 +191,13 @@ function Icerik({ pathname }: { pathname: string }) {
           <div>
             <dt>Ofis kapasitesi</dt>
             <dd>
-              Bugünkü kira ve bölgedeki ortanca m² kirasıyla ofis yaklaşık {b.kapasite.m2} m² sayılır. Kişi başı {KISI_BASI_M2} m² ile bu, {b.kapasite.masa} masa eder. Gerçek alan ve masa sayısı doğrulanmalıdır. Kapasite aşılırsa ek alan kiralanır ve hazırlanır.
+              Ofisin gerçek alanı bilinmiyor. Alan, bugünkü kiranın bölgedeki ortanca m² kirasına bölünmesiyle tahmin edildi. Tahmine göre ofis yaklaşık {b.kapasite.m2} m²’dir. Kişi başı {KISI_BASI_M2} m² ile ofise {b.kapasite.masa} masa sığar. Gerçek alan ve masa sayısı doğrulanmalıdır. Kapasite aşılırsa ek alan kiralanır ve hazırlanır.
             </dd>
           </div>
           <div>
             <dt>Etkinlik sayısı ve ikram</dt>
             <dd>
-              Ekonomik seçenekte ayda {ETKINLIK.ekonomik.ic + ETKINLIK.ekonomik.dis}, medyanda {ETKINLIK.medyan.ic + ETKINLIK.medyan.dis}, güçlüde {ETKINLIK.guclu.ic + ETKINLIK.guclu.dis} satıcı eğitimi sayılır. Her birinde 50 kişilik coffee break paketi vardır ({tl(fiyat('etkinlik-coffee-break-50'))}). Bu kalem bütçenin büyük kalemlerindendir. İkram ofiste hazırlanırsa tutar belirgin düşer.
+              Ekonomik seçenekte ayda {ETKINLIK.ekonomik.ic + ETKINLIK.ekonomik.dis}, medyanda {ETKINLIK.medyan.ic + ETKINLIK.medyan.dis}, güçlüde {ETKINLIK.guclu.ic + ETKINLIK.guclu.dis} satıcı eğitimi sayılır. Her eğitimde 50 kişilik kahve arası ikramı verilir. Bir ikram {tl(fiyat('etkinlik-coffee-break-50'))} tutar. Bu kalem bütçenin büyük kalemlerindendir. İkram ofiste hazırlanırsa tutar belirgin düşer.
             </dd>
           </div>
           <div>
@@ -209,8 +209,8 @@ function Icerik({ pathname }: { pathname: string }) {
             <dd>Satış ekibinin Segika’yı kullandığı varsayılır. Bu yüzden ayrı bir CRM lisansı yazılmadı.</dd>
           </div>
           <div>
-            <dt>DevOps hizmeti</dt>
-            <dd>Bugünkü altyapı hizmetinin bedeli bilinmiyor. Ekonomik ve medyan seçenekte bu bedel toplamda yoktur.</dd>
+            <dt>Sunucu ve altyapı hizmeti (DevOps)</dt>
+            <dd>Bugünkü altyapı hizmetinin bedeli bilinmiyor. Bu bedel Ekonomik ve Medyan seçeneklerin toplamında yoktur. Güçlü seçenekte bu iş kadroya alınır ve maaşı toplama girer.</dd>
           </div>
           <div>
             <dt>Marka tescili ve işyeri sigortası</dt>
@@ -218,12 +218,12 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Nakit ve finansman</dt>
-            <dd>Gelir harcamayı karşılamıyorsa açığın yatırımla mı, başlangıç nakdiyle mi kapatılacağı karar bekler. Parametrelerde yatırım girişi şu an 0 ₺’dir.</dd>
+            <dd>Gelir harcamayı karşılamazsa açık oluşur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılabilir. Hangisinin seçileceğine henüz karar verilmedi. “Parametreler” sayfasında yatırım girişi şu an 0 ₺’dir.</dd>
           </div>
         </dl>
       </Section>
 
-      <Section id="fiyatlar" index={7} title="Birim fiyatlar ve kaynaklar" desc="2026 fiyatı kaynakta bulunan fiyattır. 2027 fiyatı bunun yüzde 29,73 artırılmış hâlidir. Tahmin işaretli fiyatların kaynağı zayıftır ve teklifle doğrulanmalıdır.">
+      <Section id="fiyatlar" index={7} title="Birim fiyatlar ve kaynaklar" desc="2026 fiyatı kaynakta bulunan fiyattır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. “Tahmin” yazan fiyatların kaynağı zayıftır. Bu fiyatlar teklif alınarak doğrulanmalı.">
         <DataTable<Fiyat>
           id="fiyat-listesi"
           title="Kullanılan fiyatlar"
@@ -233,7 +233,7 @@ function Icerik({ pathname }: { pathname: string }) {
             { key: 'birim', header: 'Birim', nowrap: true, render: (f) => f.birim },
             { key: 'f26', header: '2026 fiyatı', nowrap: true, render: (f) => tl(f.fiyat2026) },
             { key: 'f27', header: '2027 fiyatı', nowrap: true, summary: true, render: (f) => tl(f.fiyat2027) },
-            { key: 'kdv', header: 'KDV', nowrap: true, render: (f) => (f.kdv === 'bilinmiyor' ? 'Bilinmiyor' : `KDV ${f.kdv}`) },
+            { key: 'kdv', header: 'Kaynak fiyatında KDV', nowrap: true, render: (f) => (f.kdv === 'bilinmiyor' ? 'Bilinmiyor' : f.kdv === 'uygulanmaz' ? 'KDV yok' : `KDV ${f.kdv}`) },
             { key: 'dayanak', header: 'Dayanak', minWidth: '18rem', render: (f) => `${f.tahmin ? 'Tahmin. ' : ''}${f.dayanak}` },
             {
               key: 'kaynak',

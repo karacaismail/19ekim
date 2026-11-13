@@ -77,7 +77,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Eğitimi planlayın",
       "metin": [
-        "Şirket size ve destek personelinize her yıl belirli saat program eğitimi verir.",
+        "Şirket size ve destek personelinize her yıl ücretsiz program eğitimi verir. Kaç saat olduğu “Kazanç nasıl hesaplanır?” bölümünde yazar.",
         "Bu saatin üstündeki eğitim ücretlidir.",
         "Finans sorumlusu ek eğitim giderini kazancınızdan düşer.",
         "Ek eğitim giderini kabul etmeden eğitim siparişi vermeyin."
@@ -86,7 +86,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Müşteri desteğini yürütün",
       "metin": [
-        "Şirket müşteri ilişkileri için müşteri takip yazılımını sağlar.",
+        "Şirket müşteri ilişkileri için müşteri takip sistemini sağlar.",
         "Destek kaydında konuyu, sorumluyu ve çözüm durumunu tutun.",
         "Çözemediğiniz teknik sorunu şirketin teknik ekibine iletin."
       ]
@@ -135,7 +135,7 @@ export const politika: ProjePolitika = {
       "ihtiyac": "İşletme bordro takibini mevcut yazılımıyla uyumlu yürütmek isteyebilir.",
       "ulasim": "Yazılım desteği görüşmesinde muhasebe sorumlusuna sorun.",
       "mesaj": "Bordro bilgisini mevcut yazılımınıza nasıl aktarıyorsunuz?",
-      "uygunluk": "Teknik ekip bağlantıyı doğrulamadan entegrasyon sözü vermeyin.",
+      "uygunluk": "Teknik ekip doğrulamadan yazılım bağlantısı sözü vermeyin.",
       "sonrasi": "Teknik ekip uygun bulursa kapsamı destek planına yazın."
     },
     {
@@ -193,7 +193,7 @@ export const politika: ProjePolitika = {
       {
         "urun": "Segika",
         "ad": "Ofisinize bordro yaptıran 10 ile 50 çalışanlı mükellef",
-        "ihtiyac": "Mükellef yeni işe girişlerde teşvik fırsatını kaçırmak istemez.",
+        "ihtiyac": "Mükellef, mali müşavirin hizmet verdiği firmadır. Mükellef yeni işe girişlerde teşvik fırsatını kaçırmak istemez.",
         "ulasim": "Aylık bordro kapanışında mükellefin yetkilisine sorun.",
         "mesaj": "Teşvik kontrolünü her ay bordroyla birlikte yapmamızı ister misiniz?",
         "uygunluk": "Mükellefe teşvik tutarı sözü vermeyin.",
@@ -217,7 +217,7 @@ export const politika: ProjePolitika = {
         "ulasim": "Yıllık danışmanlık sözleşmesini yenilerken genel müdürle konuşun.",
         "mesaj": "Teşvik durumunuzu her ay kendi panelinizden görmek ister misiniz?",
         "uygunluk": "Hizmet seviyesi sözleşmesi imzalanmadan kurulum tarihi vermeyin.",
-        "sonrasi": "Müşteriyi yıllık taahhüt sayınıza ekleyin."
+        "sonrasi": "Müşteriyi bu yıl getirmeye söz verdiğiniz firma sayısına ekleyin."
       },
       {
         "urun": "Segika",
@@ -236,8 +236,8 @@ export const politika: ProjePolitika = {
         "ihtiyac": "İşletme teşvik kontrolünü bordro ekranından ayrılmadan yapmak ister.",
         "ulasim": "Yazılımınızın duyuru alanında reklam olduğunu belirterek tanıtın.",
         "mesaj": "Teşvik kontrolünü bordro ekranınızdan yapmak ister misiniz?",
-        "uygunluk": "Kullanıcının izni olmadan çalışan verisini Segika'ya aktarmayın.",
-        "sonrasi": "İlgilenen kullanıcıyı ortak tanıtımdaki başvuru yoluna yönlendirin."
+        "uygunluk": "Kullanıcının izni olmadan çalışan verisini Segika’ya aktarmayın.",
+        "sonrasi": "İlgilenen kullanıcıyı birlikte yapılan tanıtımdaki başvuru yoluna yönlendirin."
       },
       {
         "urun": "Segika",
@@ -339,7 +339,7 @@ export const politika: ProjePolitika = {
     },
     {
       "kosul": "Destek yükünü karşılayamıyorsanız",
-      "islem": "Ortaklık sorumlusuna açık işleri ve kapasite sorununu bildirin.",
+      "islem": "Ortaklık sorumlusuna bekleyen işleri ve kapasite sorununu bildirin.",
       "sonuc": "Ortaklık sorumlusuyla devir planı yapın. Plan kabul edilmeden yeni destek sözü vermeyin."
     },
     {
@@ -386,7 +386,7 @@ export const politika: ProjePolitika = {
         "Destek saatlerini ve yanıt süresini ortaklık sorumlusuyla birlikte kararlaştırın.",
         "Sözleşme ücretsiz eğitim saatini ve ek eğitim giderini yazmalıdır.",
         "Ek eğitim gideri kazançtan düşülecekse sözleşme bunu ayrıca yazmalıdır.",
-        "Finans sorumlusu ödemeyi doğuran olayı ve ödeme gününü yazsın.",
+        "Finans sorumlusu, ödemenin hangi olaydan sonra yapılacağını yazsın. Ödeme gününü de yazsın.",
         "Örnek hesaptaki değişiklik anlaşmayı kendiliğinden değiştirmez."
       ]
     },
@@ -421,7 +421,7 @@ export const politika: ProjePolitika = {
   "acikKonular": [
     {
       "baslik": "Destek kimin üzerinde kalacak?",
-      "mevcut": "Ana programda desteği ortak üstlenir. İkinci sürümde destek, rozet adaylığı için isteğe bağlıdır.",
+      "mevcut": "Ana programda desteği ortak üstlenir. İkinci sürümde destek vermek zorunlu değildir. Destek veren ortak “Profesyonel çözüm ortağı” rozetine aday olabilir.",
       "eksik": "Şirket yanıt süresini ve yedek sorumluyu henüz kesinleştirmedi.",
       "islem": "Ortaklık sorumlusu destek kapsamını sizinle yazılı belirlesin.",
       "kanit": "Örnek destek talebi doğru kişiye ulaşsın ve kapatılsın.",
@@ -443,7 +443,7 @@ export const politika: ProjePolitika = {
       "eksik": "Ürün, ortak ve işverenin mali müşaviri arasındaki görev sınırı yazılı değildir.",
       "islem": "Hukuk danışmanı sorumluluk sınırı için ek madde önersin.",
       "kanit": "Her müşteri için teşvik kontrolünü yapan kişi kayıtlı olsun.",
-      "firsat": "Açık görev sınırı işverenin güvenini artırabilir. Güvenen işveren sözleşmeyi daha kolay imzalar.",
+      "firsat": "Net bir görev sınırı işverenin güvenini artırabilir. Güvenen işveren sözleşmeyi daha kolay imzalar.",
       "durdur": "Görev sınırı yazılmadan teşvik sonucu için söz vermeyin."
     },
     {
@@ -458,23 +458,23 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Özel programın fiyatı nedir?",
       "mevcut": "Bazı programlar yalnız ödeme modelinin adını verir.",
-      "eksik": "Şirket hacim fiyatı tablosunu, hizmet bedelini veya paylaşım oranını henüz yayımlamadı.",
+      "eksik": "Şirket üç bilgiyi henüz yayımlamadı. Bunlar iş miktarına göre fiyat tablosu, hizmet bedeli ve gelirden ortağa düşen paydır.",
       "islem": "Finans sorumlusu seçilen program için fiyat tablosu hazırlasın.",
-      "kanit": "Taraflar aynı örnek işin bedelini aynı şekilde hesaplasın.",
-      "firsat": "Fiyat tablosu hazır olunca kendi markasıyla sunan ortak programı satışa açılır.",
+      "kanit": "Finans sorumlusu örnek bir işi iki tarafa göstersin. İki taraf aynı bedeli bulursa tablo yeterince açıktır.",
+      "firsat": "Fiyat tablosu hazır olunca şirket “Altyapı ve kendi markası” programını başlatır.",
       "durdur": "Fiyat tablosu ve kabul ölçütü belirlenmeden ücretli işe başlamayın."
     }
   ],
   "firsatlar": [
     {
       "baslik": "Mali müşavir ofisleriyle mükelleflere ulaşın",
-      "neden": "“Mali müşavir seçeneği nasıl uygulanacak?” konusu çözülünce bir ofis birçok mükellefe ulaşabilir. Bugün bu kanal hukuk görüşünü bekliyor.",
+      "neden": "Şirket mali müşavir seçeneğinin nasıl uygulanacağına karar verince bir ofis birçok mükellefe ulaşabilir. Bugün bu yol hukuk görüşünü bekliyor.",
       "ilkAdim": "Ortaklık sorumlusu hukuk görüşü olumlu olan ofisleri listeler. Ofis ilgilenen mükelleflerini kayda yazar.",
       "olcu": "Ofis başına açılan işveren kayıtlarını sayın. Bunlardan sözleşmeye dönüşenleri ayrıca sayın."
     },
     {
-      "baslik": "Bordro yazılımlarıyla ortak tanıtım yapın",
-      "neden": "Hedef kitlede muhasebe yazılımı bayisinin müşterileri var. Bir bordro yazılımı ortağı aynı işverenlere izinli ve toplu ulaşım sağlar.",
+      "baslik": "Bordro yazılımlarıyla birlikte tanıtım yapın",
+      "neden": "Hedef kitlede muhasebe yazılımı bayisinin müşterileri var. Şirket bir bordro yazılımı firmasıyla ortak olursa bu işverenlere izinle ve tek seferde ulaşabilir.",
       "ilkAdim": "Ortaklık sorumlusu bir bordro yazılımı firmasıyla teknik görüşme planlar.",
       "olcu": "Ortak tanıtımdan gelen başvuruları sayın. Kurulumları ayrıca sayın."
     },
@@ -486,7 +486,7 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Pazar yeri satıcılarına danışman desteği verin",
-      "neden": "Şirketin toptan pazar yeri ürünündeki satıcıların bir kısmı çalışanı olan işverendir. Danışmanlar bu satıcılara bordro desteği verebilir.",
+      "neden": "Şirketin toptan pazar yerindeki satıcıların bir kısmı çalışanı olan işverendir. Danışmanlar bu satıcılara bordro desteği verebilir.",
       "ilkAdim": "Ortaklık sorumlusu pazar yeri ekibinden iletişim izni olan satıcıları ister. Danışman kendi bölgesindeki satıcılarla görüşür.",
       "olcu": "Pazar yeri satıcılarından açılan kayıtları ayrı sayın."
     }
@@ -497,25 +497,25 @@ export const politika: ProjePolitika = {
       "sinyal": "Destek talepleri ay sonunda birikebilir.",
       "kontrol": "Ortaklık sorumlusu talepleri ayın günlerine göre karşılaştırsın.",
       "tepki": "Yük birikiyorsa ortaklık sorumlusu yedek destek planını sizinle yazsın.",
-      "kayit": "Talep sayılarını kişisel veri olmadan kaydedin."
+      "kayit": "Ortaklık sorumlusu talep sayılarını kişisel veri olmadan kaydetsin."
     },
     {
       "baslik": "Veri sınırları karışıyor mu?",
       "sinyal": "Farklı işverenlerin çalışan kayıtları aynı dosyada birikebilir.",
-      "kontrol": "Teknik sorumlu örnek erişim yetkilerini işveren bazında kontrol etsin.",
+      "kontrol": "Teknik sorumlu her işverende birkaç erişim yetkisini kontrol etsin.",
       "tepki": "Yetkisiz erişim görülürse teknik sorumlu erişimi kapatıp inceleme başlatsın.",
-      "kayit": "Olayı ve düzeltmeyi gereksiz kişisel veri olmadan kaydedin."
+      "kayit": "Teknik sorumlu olayı ve düzeltmeyi gereksiz kişisel veri olmadan kaydetsin."
     },
     {
       "baslik": "Eğitim gideri kazancı aşıyor mu?",
       "sinyal": "Ek eğitim istekleri artarken yeni müşteri sayısı düşebilir.",
       "kontrol": "Finans sorumlusu eğitim giderini dönem kazancıyla karşılaştırsın.",
-      "tepki": "Gider sürdürülemiyorsa finans sorumlusu eğitim planını sizinle yeniden belirlesin.",
-      "kayit": "Kararı ve gerekçesini kayda ekleyin."
+      "tepki": "Gider kazancı aşıyorsa finans sorumlusu eğitim planını sizinle değiştirsin.",
+      "kayit": "Finans sorumlusu kararı ve gerekçesini kayda eklesin."
     }
   ],
   "haftalik": [
-    "Her hafta açık destek işlerinizi ve bekleyen kararları inceleyin.",
+    "Her hafta bekleyen destek işlerinizi ve kararları inceleyin.",
     "Ortaklık sorumlusu o hafta kabul edilen kayıtları açılan kayıtlarla karşılaştırsın.",
     "Destek sorumlusu o hafta kapanan talepleri açılan taleplerle karşılaştırsın.",
     "Finans ekibi uygun tahsilatı ve itirazlı tutarı ayrı göstersin.",
@@ -525,21 +525,21 @@ export const politika: ProjePolitika = {
   "programlar": {
     "ana": [
       "Ana programda müşteri desteğini siz verirsiniz. Katkı kapsamını sözleşmeye yazın.",
-      "Şirket her yıl belirli saat program eğitimini ücretsiz verir. Fazlası ücretlidir.",
+      "Şirket her yıl belli sayıda saat program eğitimini ücretsiz verir. Saat sayısı kazanç hesabında yazar. Fazlası ücretlidir.",
       "Mali müşavir komisyon veya programın müşteri indirimi seçeneğinden birini seçer. Bu seçenek pazarlık aracı değildir.",
       "Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez."
     ],
     "yillara": [
       "Bu program müşteri desteğini kendisi veren ortak içindir.",
       "Destek verdiğiniz sürece şirket dönemsel komisyon hesaplar.",
-      "Destek vermediğiniz ay için komisyon doğmaz.",
+      "Destek vermediğiniz ay için komisyon oluşmaz.",
       "Hangi kaydın destek sayılacağını ortaklık sorumlusu yazılı belirlesin.",
       "Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz."
     ],
     "yonlendirme": [
       "Bu program müşteriyi yalnız şirketin satış ekibine yönlendiren ortak içindir.",
       "Fiyatı değiştiremezsiniz. Garanti veremezsiniz. Tahsilat yapamazsınız.",
-      "Ortak puanı ve ortak sayısı sınırlıdır. Ortaklık sorumlusu uygunluğu önce doğrular.",
+      "Bu programda çalışılacak ortak sayısının üst sınırı var. Ortak puanının da alt sınırı var. Ortaklık sorumlusu uygunluğu önce doğrular.",
       "Finans ekibi uygun net tahsilatı ve ortaklar arasındaki paylaşımı doğrular.",
       "Aynı müşteride birden çok ortak varsa finans ekibi ortak bütçesini paylaştırır."
     ],
@@ -554,7 +554,7 @@ export const politika: ProjePolitika = {
     "altyapi": [
       "Bu program teşvik danışmanlığı veya dış kaynaklı bordro hizmeti veren firma içindir.",
       "Hizmeti kendi markanızla sunarsınız. Bunun için ayrı sözleşme gerekir.",
-      "Siz yıllık firma taahhüdü verirsiniz. Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.",
+      "Her yıl en az kaç firma getireceğinize yazılı söz verirsiniz. Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.",
       "Fiyat iş hacmine göre belirlenir. Şirket bu programın fiyat tablosunu henüz yayımlamadı.",
       "Taahhüt karşılanmazsa ne olacağını sözleşmeye yazın."
     ],

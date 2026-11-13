@@ -18,7 +18,7 @@ export function PersonaSyncStatus({ sync, store, inputError = '' }: { sync: Sync
     {inputError && <p role="alert">{inputError} Geçerli bir değer girin.</p>}
     {sync.access === 'development-public' && <p className="persona-sync-zaman">Geliştirme erişimi açık. Bağlantıyı bilenler ortak değerleri değiştirebilir.</p>}
     {sync.pending > 0 && <p>{sync.pending} alan için kayıt onayı bekleniyor.</p>}
-    {sync.state === 'synced' && sync.readAt && <p className="persona-sync-zaman">Son kontrol: {new Date(sync.readAt).toLocaleString('tr-TR')}</p>}
+    {sync.state === 'synced' && sync.readAt && <p className="persona-sync-zaman">Son kontrol zamanı şudur: {new Date(sync.readAt).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' })}.</p>}
     {sync.state === 'error' && <button className="persona-action" onClick={() => store.retry()}>Yeniden dene</button>}
     {sync.conflicts.map((field) => <div className="persona-cakisma" key={field}>
       <h3>{labels.find((d) => d.field === field)?.label ?? 'Değişen alan'}</h3>
@@ -29,7 +29,7 @@ export function PersonaSyncStatus({ sync, store, inputError = '' }: { sync: Sync
     {(sync.state === 'local' || sync.state === 'error') && <>
       <button className="persona-action" aria-expanded={open} aria-controls="persona-baglanti" onClick={() => setOpen(!open)}>Ortak kayda bağlan</button>
       <Collapse expanded={open} transitionDuration={motion} transitionTimingFunction="var(--motion-ease-standard)"><form id="persona-baglanti" onSubmit={(event) => { event.preventDefault(); personaBaglan(key); setKey(''); }}>
-        <p>Anahtarlı erişim açılırsa proje sorumlusunun verdiği anahtarı girin.</p>
+        <p>Ortak kayıt anahtar isterse anahtarı proje sorumlusundan alın. Anahtarı aşağıdaki alana yazın.</p>
         <TextInput type="password" label="Ortak kayıt erişim anahtarı" value={key} onChange={(e) => setKey(e.currentTarget.value)} autoComplete="off" />
         <button type="submit" className="persona-action" disabled={!key.trim() || !PERSONA_ENDPOINT}>Bağlan</button>
         {!PERSONA_ENDPOINT && <p>Ortak kayıt bağlantısı henüz kurulmadı.</p>}

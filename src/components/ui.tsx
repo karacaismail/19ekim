@@ -20,7 +20,7 @@ import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
 
 const STATUS_LABELS: Record<Status, string> = {
-  karar: 'Karar',
+  karar: 'Karar verildi',
   oneri: 'Öneri',
   bekliyor: 'Karar bekliyor',
 };
@@ -563,12 +563,17 @@ export function DataTable<T>({
   );
 }
 
-/** Hedef hücresi: kilometre taşı renkle değil görünür metinle belirtilir. */
+/** Hedef hücresi: önemli tarih renkle değil görünür metinle belirtilir. Metin ile işaret arasında boşluk kalır. */
 export function Target({ row }: { row: { target: string; milestone?: boolean } }) {
   return (
     <>
       {row.target}
-      {row.milestone ? <span className="cell-sub">Kilometre taşı</span> : null}
+      {row.milestone ? (
+        <>
+          {' '}
+          <span className="cell-sub">Önemli tarih</span>
+        </>
+      ) : null}
     </>
   );
 }
@@ -599,7 +604,13 @@ export function KpiGrid({ kpis, role }: { kpis: Kpi[]; role: RoleKey }) {
           <p className="kpi-label">{kpi.metric}</p>
           <p className="kpi-value">
             {kpi.value}
-            {kpi.unit ? <span className="kpi-unit">{kpi.unit}</span> : null}
+            {/* Değer ile birim arasında metin boşluğu kalır: ekran okuyucu “24 saat” okur, “24saat” okumaz. */}
+            {kpi.unit ? (
+              <>
+                {' '}
+                <span className="kpi-unit">{kpi.unit}</span>
+              </>
+            ) : null}
           </p>
           <p className="kpi-ramp">{kpi.when}</p>
         </li>
@@ -632,7 +643,7 @@ export function KayitDurumu({ kapsam, durum, zaman, etki, className }: { kapsam:
         ? `${kapsam} bu tarayıcıda kaydedildi${zaman ? ` ${zaman}` : ''} (yerel depolama).`
         : durum === 'kayitli'
           ? `${kapsam} bu tarayıcıda kayıtlı. Kayıt önceki oturumdan kaldı (yerel depolama).`
-          : `${kapsam} henüz kaydedilmedi. Bir değer değişince bu tarayıcıda saklanır.`;
+          : `${kapsam} henüz değişmedi. Bir değeri değiştirirseniz sistem bunu bu tarayıcıya kaydeder.`;
   return (
     <p className={`kayit-durumu${className ? ` ${className}` : ''}`} role="status" aria-live="polite" data-durum={durum}>
       {metin}
@@ -792,7 +803,8 @@ export function Chart({
  * Hiyerarşi: iç içe ul — alt düğümler üst düğümün li’si içinde; rol tonlu kutu, bağlantılı düğüm rol sayfasına gider.
  * Değerler: BCG ürünleri kutularına göre, sayılar grafiğin ipucuyla aynı biçimde.
  */
-const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(`${iso}T00:00:00`));
+// Ajanda tarihi ay adını tam yazar: “2 Kasım”. Kısa ay adı (“Kas”) okuru zorlar. Yıl ay başlığında yazılıdır.
+const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
 const ayBasligi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 const sayi = new Intl.NumberFormat('tr-TR');
 
@@ -849,13 +861,14 @@ function Ajanda({ titleId, rows, marks }: { titleId: string; rows: GanttRow[]; m
           <time dateTime={r.from}>{kisaTarih(r.from)}</time>
           {duz ? null : (
             <>
-              {' – '}
+              {' ile '}
               <time dateTime={r.to}>{kisaTarih(r.to)}</time>
+              {' arası'}
             </>
           )}
         </span>
         <RoleChip role={r.role} />
-        {r.milestone ? <span className="ajanda-kilometre">Kilometre taşı</span> : null}
+        {r.milestone ? <span className="ajanda-kilometre">Önemli tarih</span> : null}
       </span>
     );
     if (duz) {
@@ -879,7 +892,7 @@ function Ajanda({ titleId, rows, marks }: { titleId: string; rows: GanttRow[]; m
             <div>
               <dt>Tarih</dt>
               <dd>
-                {formatDate(r.from)} – {formatDate(r.to)}
+                {formatDate(r.from)} ile {formatDate(r.to)} arası
               </dd>
             </div>
             <div>
@@ -976,7 +989,7 @@ function Degerler({ titleId, spec }: { titleId: string; spec: Extract<ChartSpec,
                   <li key={i.name} className="degerler-madde">
                     <span className="kayit-ad">{i.name}</span>
                     <span className="degerler-sayilar">
-                      Pazar büyümesi %{sayi.format(i.growth)}, göreli pay {sayi.format(i.share)}×, ciro {sayi.format(i.revenue)} milyon ₺
+                      Pazar büyümesi {i.growth < 0 ? '−' : ''}%{sayi.format(Math.abs(i.growth))}, göreli pay {sayi.format(i.share)}×, ciro {sayi.format(i.revenue)} milyon ₺
                     </span>
                   </li>
                 ))}

@@ -152,7 +152,7 @@ test.describe('ifade: görev ve terim haritası (ikinci grup) ve biçim (üçün
   test('C26 / T24 ve C30: grafik ve tablo başlıkları ölçüt, dönem ve birimi söyler', async ({ page }) => {
     await gelir(page);
     const kadro = page.locator('#kadro');
-    await kadro.getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üçü üst üste' }).click();
+    await kadro.getByRole('group', { name: 'Görünüm' }).first().getByRole('button', { name: 'Üç senaryo' }).click();
     // gorsel_algi.md F15 (2026-10-28): başlık görünüm varyantıyla değişmez (“Aylık yeni satıcı tahmini”); C26’nın varyant açıklaması
     // grafiğin altındaki notta (aynı aylar yan yana, her hazır senaryo kendi varsayımlarıyla).
     await expect(kadro.locator('.chart').first().locator('.chart-title')).toContainText(/aylık yeni satıcı tahmini/i);

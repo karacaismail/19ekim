@@ -41,7 +41,7 @@ export type SeviyeSeti = 'kademeli' | 'gitlab' | 'codacy' | 'ilk';
 export const SEVIYE_SETLERI: Record<SeviyeSeti, { ad: string; dayanak: string; seviyeler: Seviye[] }> = {
   kademeli: {
     ad: 'Kademeli P1–P6 ve M1–M4',
-    dayanak: 'Radford ve WTW, uzman (P) ve yönetici (M) için iki paralel hat kullanır. Seviyeler arası adım yaklaşık %20–25’tir (GitLab ve 37signals aralığı).',
+    dayanak: 'Radford ve WTW, uzman (P) ve yönetici (M) için iki ayrı hat kullanır. Seviyeler arasındaki adım yaklaşık %20 ile %25 arasındadır (GitLab ve 37signals aralığı).',
     seviyeler: [
       { kod: 'P1', ad: 'Giriş (junior)', hat: 'IC', carpan: 0.8 },
       { kod: 'P2', ad: 'Gelişen (mid)', hat: 'IC', carpan: 1 },
@@ -95,10 +95,10 @@ export const VARSAYILAN_MESLEKLER: Meslek[] = [
     ad: 'Yazılım',
     katsayi: 1.8,
     uzmanliklar: [
-      { id: 'backend', ad: 'Backend', carpan: 1 },
-      { id: 'frontend', ad: 'Frontend', carpan: 1 },
-      { id: 'fullstack', ad: 'Full stack', carpan: 1.12 },
-      { id: 'devops', ad: 'DevOps', carpan: 1.1 },
+      { id: 'backend', ad: 'Sunucu yazılımı (backend)', carpan: 1 },
+      { id: 'frontend', ad: 'Arayüz yazılımı (frontend)', carpan: 1 },
+      { id: 'fullstack', ad: 'Uçtan uca yazılım (full stack)', carpan: 1.12 },
+      { id: 'devops', ad: 'Altyapı ve yayın (DevOps)', carpan: 1.1 },
     ],
   },
   {
@@ -107,7 +107,7 @@ export const VARSAYILAN_MESLEKLER: Meslek[] = [
     katsayi: 1.4,
     uzmanliklar: [
       { id: 'grafik', ad: 'Grafik tasarım', carpan: 1 },
-      { id: 'uiux', ad: 'UI/UX', carpan: 1.05 },
+      { id: 'uiux', ad: 'Arayüz ve kullanıcı deneyimi (UI/UX)', carpan: 1.05 },
       { id: 'video', ad: 'Video ve hareketli grafik', carpan: 1.08 },
       { id: 'art', ad: 'Sanat yönetimi', carpan: 1.1 },
     ],
@@ -117,11 +117,11 @@ export const VARSAYILAN_MESLEKLER: Meslek[] = [
     ad: 'İnsan kaynakları',
     katsayi: 1.3,
     uzmanliklar: [
-      { id: 'operasyon', ad: 'İK operasyonları', carpan: 1 },
+      { id: 'operasyon', ad: 'Personel işlemleri', carpan: 1 },
       { id: 'bordro', ad: 'Bordro', carpan: 1 },
       { id: 'isealim', ad: 'İşe alım', carpan: 1 },
       { id: 'odul', ad: 'Ücret ve yan haklar', carpan: 1.1 },
-      { id: 'hrbp', ad: 'İK iş ortağı (HRBP)', carpan: 1.1 },
+      { id: 'hrbp', ad: 'İnsan kaynakları iş ortağı (HRBP)', carpan: 1.1 },
     ],
   },
   {
@@ -403,11 +403,11 @@ export function kbfOrani(kriterler: KbfKriter[], puan: number[]) {
 export type Bolge = 'yesil' | 'ogrenme' | 'yetkin' | 'ileri' | 'kirmizi';
 
 export const BOLGELER: Record<Bolge, { ad: string; aralik: string; eylem: string; durum: Durum }> = {
-  yesil: { ad: 'Yeşil daire', aralik: '< 0,80', eylem: 'Ücret piyasanın altında. Zam döneminde öncelikle düzeltilir.', durum: 'uyari' },
-  ogrenme: { ad: 'Öğrenme bölgesi', aralik: '0,80–0,90', eylem: 'Kişi role yeni. Bandın içinde hızlı ilerleyebilir.', durum: 'gecti' },
-  yetkin: { ad: 'Tam yetkin', aralik: '0,90–1,10', eylem: 'Ücret piyasa orta noktasının çevresinde. Çalışanların çoğu bu bölgede olmalı.', durum: 'gecti' },
-  ileri: { ad: 'İleri düzey', aralik: '1,10–1,20', eylem: 'Kişi çok kıdemli. Kalıcı zam sınırlıdır, kişi terfiye hazırlanır.', durum: 'gecti' },
-  kirmizi: { ad: 'Kırmızı daire', aralik: '> 1,20', eylem: 'Ücret bandın üstüne çıktı. Zam tek seferlik prim olarak ödenir ya da kişi terfi eder.', durum: 'kaldi' },
+  yesil: { ad: 'Bandın altında', aralik: '0,80’den küçük', eylem: 'Ücret piyasanın altında. Zam döneminde öncelikle düzeltilir.', durum: 'uyari' },
+  ogrenme: { ad: 'Öğrenme bölgesi', aralik: '0,80 ile 0,90 arası (0,90 hariç)', eylem: 'Kişi role yeni. Bandın içinde hızlı ilerleyebilir.', durum: 'gecti' },
+  yetkin: { ad: 'Tam yetkin', aralik: '0,90 ile 1,10 arası (ikisi de dahil)', eylem: 'Ücret piyasa orta noktasının çevresinde. Çalışanların çoğu bu bölgede olmalı.', durum: 'gecti' },
+  ileri: { ad: 'İleri düzey', aralik: '1,10’dan büyük, en çok 1,20', eylem: 'Kişi çok kıdemli. Kalıcı zam sınırlıdır. Kişiyi terfiye hazırlayın.', durum: 'gecti' },
+  kirmizi: { ad: 'Bandın üstünde', aralik: '1,20’den büyük', eylem: 'Ücret bandın üstüne çıktı. Zam tek seferlik prim olarak ödenir ya da kişi terfi eder.', durum: 'kaldi' },
 };
 
 export function bolge(compa: number): Bolge {
@@ -422,7 +422,7 @@ export function bolge(compa: number): Bolge {
 
 /** Compa-ratio sütun sınırları: < 0,85 | 0,85–0,95 | 0,95–1,05 | 1,05–1,15 | ≥ 1,15 */
 export const COMPA_SINIRLARI = [0.85, 0.95, 1.05, 1.15];
-export const COMPA_ETIKETLERI = ['< 0,85', '0,85–0,95', '0,95–1,05', '1,05–1,15', '≥ 1,15'];
+export const COMPA_ETIKETLERI = ['0,85 altı', '0,85 ile 0,95', '0,95 ile 1,05', '1,05 ile 1,15', '1,15 ve üstü'];
 export const PERF_ADLARI = ['1: Karşılamıyor', '2: Kısmen karşılıyor', '3: Karşılıyor', '4: Beklentinin üstünde', '5: Olağanüstü'];
 
 /** Satır: performans puanı 1…5, sütun: compa-ratio bandı; değer: zam yüzdesi. Ravio örneği gibi en yüksek %14. */
@@ -532,7 +532,7 @@ export function yillikZam(g: ZamGirdi, matris: number[][]) {
 
   const min = orta * (1 - g.yariGenislik);
   const yapiTutar = Math.max(0, min - ucret);
-  adimlar.push({ id: 'yapi', ad: 'Yapı düzeltmesi', tutar: yapiTutar, aciklama: yapiTutar > 0 ? `Band ${yuz(g.yapi)} kaydı. Ücret yeni bandın en azına çıkarıldı.` : `Band ${yuz(g.yapi)} kaydı. Ücret yeni bandın içinde kaldığı için artış yok.` });
+  adimlar.push({ id: 'yapi', ad: 'Yapı düzeltmesi', tutar: yapiTutar, aciklama: yapiTutar > 0 ? `Band ${yuz(g.yapi)} yukarı kaydı. Ücret yeni bandın en azına çıkarıldı.` : `Band ${yuz(g.yapi)} yukarı kaydı. Ücret yeni bandın içinde kaldığı için artmadı.` });
   ucret += yapiTutar;
 
   const genelTutar = ucret * g.genel;
@@ -556,7 +556,7 @@ export function yillikZam(g: ZamGirdi, matris: number[][]) {
   ucret += meritTutar;
 
   const kidemTutar = g.kidemVar ? ucret * g.kidemOrani : 0;
-  adimlar.push({ id: 'kidem', ad: 'Kıdem adımı', tutar: kidemTutar, aciklama: g.kidemVar ? `Seviye değişmeden bir kademe ilerleme: ${yuz(g.kidemOrani)}.` : 'Bu yıl kademe ilerlemesi yok.' });
+  adimlar.push({ id: 'kidem', ad: 'Kıdem adımı', tutar: kidemTutar, aciklama: g.kidemVar ? `Seviye değişmeden bir kademe ilerledi. Artış ${yuz(g.kidemOrani)}.` : 'Bu yıl kademe ilerlemesi yok.' });
   ucret += kidemTutar;
 
   let terfiTutar = 0;
@@ -602,7 +602,7 @@ export const KARNE_SABLONLARI: KarneSablon[] = [
       { id: 'sonuc', ad: 'İş sonucu', agirlik: 30 },
       { id: 'kalite', ad: 'Kalite ve yeniden iş', agirlik: 25, kapi: 'kalite' },
       { id: 'teslim', ad: 'Teslim güvenilirliği', agirlik: 20 },
-      { id: 'isbirligi', ad: 'İşbirliği', agirlik: 15 },
+      { id: 'isbirligi', ad: 'İş birliği', agirlik: 15 },
       { id: 'gelisim', ad: 'Yetkinlik gelişimi', agirlik: 10 },
     ],
   },
@@ -611,9 +611,9 @@ export const KARNE_SABLONLARI: KarneSablon[] = [
     ad: 'Yazılım',
     boyutlar: [
       { id: 'sonuc', ad: 'Takım ve iş sonucu', agirlik: 25 },
-      { id: 'teslim', ad: 'Teslim ve öngörülebilirlik', agirlik: 20 },
+      { id: 'teslim', ad: 'Teslim ve planı tutturma', agirlik: 20 },
       { id: 'kalite', ad: 'Kalite ve güvenilirlik', agirlik: 25, kapi: 'kalite' },
-      { id: 'isbirligi', ad: 'İşbirliği ve sahiplenme', agirlik: 15 },
+      { id: 'isbirligi', ad: 'İş birliği ve sorumluluk alma', agirlik: 15 },
       { id: 'gelisim', ad: 'Yetkinlik gelişimi', agirlik: 15 },
     ],
   },
@@ -625,7 +625,7 @@ export const KARNE_SABLONLARI: KarneSablon[] = [
       { id: 'kalite', ad: 'Kalite ve revizyon', agirlik: 25, kapi: 'kalite' },
       { id: 'teslim', ad: 'Teslim güvenilirliği', agirlik: 20 },
       { id: 'yaratici', ad: 'Yaratıcı problem çözme', agirlik: 15 },
-      { id: 'isbirligi', ad: 'İşbirliği', agirlik: 15 },
+      { id: 'isbirligi', ad: 'İş birliği', agirlik: 15 },
     ],
   },
   {
@@ -636,7 +636,7 @@ export const KARNE_SABLONLARI: KarneSablon[] = [
       { id: 'uyum', ad: 'Doğruluk ve uyum', agirlik: 25, kapi: 'uyum' },
       { id: 'paydas', ad: 'Paydaş sonucu', agirlik: 20 },
       { id: 'surec', ad: 'Süreç iyileştirme', agirlik: 15 },
-      { id: 'isbirligi', ad: 'İşbirliği ve yetkinlik', agirlik: 15 },
+      { id: 'isbirligi', ad: 'İş birliği ve yetkinlik', agirlik: 15 },
     ],
   },
   {
@@ -647,7 +647,7 @@ export const KARNE_SABLONLARI: KarneSablon[] = [
       { id: 'tahsilat', ad: 'Kârlılık ve tahsilat', agirlik: 20 },
       { id: 'kalite', ad: 'Müşteri kalitesi (iptal, şikâyet)', agirlik: 20, kapi: 'kalite' },
       { id: 'surec', ad: 'Satış fırsatlarının düzenli takibi', agirlik: 15 },
-      { id: 'isbirligi', ad: 'İşbirliği', agirlik: 10 },
+      { id: 'isbirligi', ad: 'İş birliği', agirlik: 10 },
     ],
   },
 ];
@@ -775,17 +775,17 @@ export interface PrimEgrisi {
 export const EGRI_ONAYARLARI: Record<string, { ad: string; dayanak: string; egri: PrimEgrisi }> = {
   onerilen: {
     ad: 'Önerilen (hedef %15, tavan 2 ×)',
-    dayanak: 'Skor %90’ın altındaysa prim ödenmez. Skor %100 olunca hedef prim, %130 olunca hedefin 2 katı ödenir. Böylece prim en çok tabanın %30’u olur, bu da ilk modeldeki üst sınırdır.',
+    dayanak: 'Skor 90’ın altındaysa prim ödenmez. Skor 100 olunca hedef primin tamamı ödenir. Skor 130 olunca hedef primin 2 katı ödenir. Böylece prim en çok tabanın %30’u olur. Bu, ilk modeldeki üst sınırdır.',
     egri: { hedefPrim: 0.15, esik: 90, esikOdeme: 0.5, hedef: 100, tavan: 130, tavanOdeme: 2, kademe: 0 },
   },
   ilk: {
     ad: 'İlk model (%110 üstü, en çok %30)',
-    dayanak: 'Şirketin ilk taslağında %90–110 normal performans sayılır. Prim %110’dan sonra başlar ve tavanı %30’dur. Düşük performansta ücretten kesinti yapılmaz, prim sıfır olur.',
+    dayanak: 'Şirketin ilk taslağında %90 ile %110 arası normal performans sayılır. Prim %110’dan sonra başlar ve tavanı %30’dur. Düşük performansta ücretten kesinti yapılmaz, prim sıfır olur.',
     egri: { hedefPrim: 0.3, esik: 110, esikOdeme: 0, hedef: 140, tavan: 140, tavanOdeme: 1, kademe: 0 },
   },
   genis: {
-    ad: 'Geniş aralık (%0–200)',
-    dayanak: 'Microsoft’un açıkladığı %0–200 ödeme aralığına benzeyen örnek bir eğri.',
+    ad: 'Geniş aralık (%0 ile %200)',
+    dayanak: 'Microsoft’un açıkladığı %0 ile %200 arasındaki ödeme aralığına benzeyen örnek bir eğri.',
     egri: { hedefPrim: 0.15, esik: 80, esikOdeme: 0.25, hedef: 100, tavan: 150, tavanOdeme: 2, kademe: 0 },
   },
   kademeli: {
@@ -871,7 +871,7 @@ export function primHavuzu(g: { kisiler: PrimKisi[]; hedefPrim: number; sirketSo
 /* ---------- Terfi kapısı ---------- */
 
 /** SFIA sorumluluk faktörleri: seviyeyi otonomi, etki, karmaşıklık, bilgi ve iletişim belirler. */
-export const TERFI_KRITERLERI = ['Otonomi', 'Etki', 'Karmaşıklık', 'Bilgi', 'İletişim ve liderlik'];
+export const TERFI_KRITERLERI = ['Kendi başına çalışabilme', 'Etki', 'Karmaşıklık', 'Bilgi', 'İletişim ve liderlik'];
 
 export interface TerfiGirdi {
   donem1: boolean[];
@@ -893,7 +893,7 @@ export function terfiKapisi(g: TerfiGirdi, hat: Hat) {
   const d1 = g.donem1.filter(Boolean).length;
   const d2 = g.donem2.filter(Boolean).length;
   const kosullar: { ad: string; deger: string; gecti: boolean }[] = [
-    { ad: 'Yazılı ölçütler iki ardışık dönemde karşılandı', deger: `Önceki dönem ${d1}, son dönem ${d2} kriter (gereken ${g.gerekenKriter})`, gecti: d1 >= g.gerekenKriter && d2 >= g.gerekenKriter },
+    { ad: 'Yazılı ölçütler üst üste iki dönem karşılandı', deger: `Önceki dönem ${d1}, son dönem ${d2} ölçüt (gereken ${g.gerekenKriter})`, gecti: d1 >= g.gerekenKriter && d2 >= g.gerekenKriter },
     { ad: 'Seviyede en az süre', deger: `${g.seviyedeAy} ay (gereken ${g.gerekenAy})`, gecti: g.seviyedeAy >= g.gerekenAy },
     { ad: 'Son iki dönem performansı', deger: `${g.perf1} ve ${g.perf2} (ikisi de en az ${g.perfAlt}, biri en az ${g.perfUst} olmalı)`, gecti: Math.min(g.perf1, g.perf2) >= g.perfAlt && Math.max(g.perf1, g.perf2) >= g.perfUst },
     { ad: 'Kalite kapısı', deger: g.kaliteGecti ? 'Geçti' : 'Kaldı', gecti: g.kaliteGecti },
@@ -1046,14 +1046,14 @@ export function yapiDenetimi(g: { meslekler: Meslek[]; seviyeler: Seviye[]; kade
       deger: enAz > 0 ? `${yuvarla(enCok / enAz, 1).toLocaleString('tr-TR')} : 1` : 'Veri yok',
       durum: enAz > 0 ? derecele(enCok / enAz, [0, 6], [0, 9]) : 'kaldi',
       aciklama: 'Katalogdaki bütün hücreler (meslek × uzmanlık × seviye) karşılaştırılır.',
-      dayanak: 'Mondragon kooperatiflerinde oran 1:6, bazı üst yöneticilerde 9:1.',
+      dayanak: 'Mondragon kooperatiflerinde en yüksek ücret, en düşük ücretin 6 katıdır. Bazı üst yönetici ücretlerinde bu oran 9 kattır.',
     },
     {
-      ad: 'Uzman hattında en büyük seviye sıçraması',
+      ad: 'Uzman hattında en büyük seviye adımı',
       deger: adimlar.length ? yuzde(enBuyukAdim) : 'Veri yok',
       durum: adimlar.length ? derecele(enBuyukAdim, [0, 0.25], [0, 0.35]) : 'uyari',
-      aciklama: 'Bir seviyeden sonrakine geçerken çarpanın ne kadar arttığını gösterir. Büyük sıçrama terfiyi pahalı ve tartışmalı yapar.',
-      dayanak: 'GitLab, Buffer ve 37signals’ta seviye başına %13–25.',
+      aciklama: 'Bir seviyeden sonrakine geçerken çarpanın ne kadar arttığını gösterir. Büyük adım terfiyi pahalı ve tartışmalı yapar.',
+      dayanak: 'GitLab, Buffer ve 37signals’ta seviye başına adım %13 ile %25 arasındadır.',
     },
     {
       ad: 'Girişten kıdemliye (1. seviyeden 3. seviyeye)',
@@ -1073,36 +1073,36 @@ export function yapiDenetimi(g: { meslekler: Meslek[]; seviyeler: Seviye[]; kade
       ad: 'En büyük uzmanlık çarpanı',
       deger: kat(enBuyukUzmanlik),
       durum: derecele(enBuyukUzmanlik, [0, 1.2], [0, 1.3]),
-      aciklama: 'Uzmanlık primi gizli bir seviyeye dönüşmemeli. Fark büyükse ayrı bir seviye açılmalı.',
-      dayanak: 'Buffer’ın rol çarpanı +%10. Full stack örneğinde +%12–15.',
+      aciklama: 'Uzmanlık çarpanı küçük kalmalı. Uzmanlık farkı çok büyükse ayrı bir seviye açılmalı.',
+      dayanak: 'Buffer’ın rol çarpanı +%10. Full stack örneğinde artış %12 ile %15 arasındadır.',
     },
     {
       ad: 'Taban sınırı',
       deger: `${kat(enAz)} ≥ ${kat(g.tabanCarpani)}`,
       durum: enAz >= g.tabanCarpani - 1e-9 ? 'gecti' : 'kaldi',
-      aciklama: 'En düşük hücre, baz birimin taban katının altına düşmemeli. Asgari ücret yalnız alt sınırdır.',
-      dayanak: 'Asgari ücret çarpan birimi olarak değil, alt sınır olarak kullanılır.',
+      aciklama: 'En düşük hücre, baz birimin taban katının altına düşmemeli. Varsayılan taban net asgari ücrettir.',
+      dayanak: 'Varsayılan ayarda asgari ücret hem baz birim hem de alt sınırdır.',
     },
     {
       ad: 'Dereceler arası orta nokta ilerlemesi',
       deger: yuzde(g.kademe.oran),
       durum: derecele(g.kademe.oran, [0.1, 0.2], [0.05, 0.25]),
-      aciklama: 'Kademe serisi applet’indeki geometrik ilerleme oranıdır.',
-      dayanak: 'Mercer’e göre %10–20. WorldatWork’e göre en yaygın aralık %10–14.',
+      aciklama: '“Kademe serisi ve bantlar” aracındaki geometrik ilerleme oranıdır.',
+      dayanak: 'Mercer’e göre aralık %10 ile %20 arasıdır. WorldatWork’e göre en yaygın aralık %10 ile %14 arasıdır.',
     },
     {
       ad: 'Band genişliği (yayılım)',
       deger: yuzde(yayilim(h)),
       durum: derecele(yayilim(h), [0.4, 0.6], [0.3, 0.7]),
       aciklama: 'Bandın en çok değerinin en az değerinden yüzde kaç yüksek olduğunu gösterir.',
-      dayanak: 'Mercer’e göre %40–60. Profesyonel işlerde %40–50.',
+      dayanak: 'Mercer’e göre aralık %40 ile %60 arasıdır. Profesyonel işlerde %40 ile %50 arasıdır.',
     },
     {
       ad: 'Komşu bant örtüşmesi',
       deger: yuzde(ortusme(h, g.kademe.oran)),
       durum: derecele(ortusme(h, g.kademe.oran), [0.25, 0.5], [0.15, 0.65]),
       aciklama: `Örtüşmenin %50 olması için ilerleme ${yuzde(Math.max(0, ilerlemeIcin(h, 0.5)))} olmalı.`,
-      dayanak: 'Yaygın aralık %25–50.',
+      dayanak: 'Yaygın aralık %25 ile %50 arasıdır.',
     },
   ];
   return kontroller;
@@ -1245,10 +1245,10 @@ export const APPLETLER: { id: string; ad: string; soru: string; motor: Motor }[]
   { id: 'terfi-kapisi', ad: 'Terfi kapısı', soru: 'Kişi terfiye hazır mı ve yeni bandın neresinden başlar?', motor: 'zam' },
   { id: 'kademe-adimlari', ad: 'Kademe adımları', soru: 'Seviye değişmeden ücret zamanla nasıl artar?', motor: 'zam' },
   { id: 'performans-karnesi', ad: 'Dengeli performans karnesi', soru: 'Mesleğe göre performans nasıl puanlanır?', motor: 'efor' },
-  { id: 'sprint-skoru', ad: 'Sprint teslim skoru', soru: 'Story point (iş büyüklüğü puanı) yerine ne ölçülür ve puan şişmesi nasıl yakalanır?', motor: 'efor' },
+  { id: 'sprint-skoru', ad: 'Sprint teslim skoru', soru: 'İş büyüklüğü puanı (SP) yerine ne ölçülür ve puan şişmesi nasıl yakalanır?', motor: 'efor' },
   { id: 'prim-egrisi', ad: 'Prim ödeme eğrisi', soru: 'Skora göre hedef primin yüzde kaçı ödenir?', motor: 'efor' },
   { id: 'prim-havuzu', ad: 'Şirket × takım × birey', soru: 'Ekip primi hangi çarpanlarla hesaplanır ve havuza nasıl sığdırılır?', motor: 'efor' },
   { id: 'kar-paylasimi', ad: 'Kâr paylaşımı ve akran ödülü', soru: 'Kâr havuzu kıdeme göre kime ve nasıl dağıtılır?', motor: 'efor' },
   { id: 'yapi-denetimi', ad: 'Yapı denetimi', soru: 'Model, dünyadaki örneklerin aralığında mı?', motor: 'denetim' },
-  { id: 'toplam-odul', ad: 'Toplam hedef nakit', soru: 'Sabit, değişken ve yan haklar seviyeye göre nasıl karışır?', motor: 'denetim' },
+  { id: 'toplam-odul', ad: 'Toplam hedef nakit', soru: 'Sabit ücret, değişken ücret ve yan haklar seviyeye göre nasıl değişir?', motor: 'denetim' },
 ];

@@ -61,9 +61,9 @@ for (const genislik of [320, 390, 1280]) {
 
 test('karta basınca adım adım yol haritası pencerede açılır, Escape kapatır, odak karta döner', async ({ page }) => {
   await ac(page, 1280);
-  const k = kart(page, 'Kendi müşterini getir');
+  const k = kart(page, 'Kendi müşterinizi getirin');
   await k.click();
-  const pencere = page.getByRole('dialog', { name: /Kendi müşterini getir/ });
+  const pencere = page.getByRole('dialog', { name: /Kendi müşterinizi getirin/ });
   await expect(pencere).toBeVisible();
   await expect(pencere.locator('.oy-amac')).not.toBeEmpty();
   await expect(pencere.locator('.oy-odul')).not.toBeEmpty();
@@ -213,8 +213,8 @@ test('yatay telefon (844 × 390): pencere tam ekran, taşma yok', async ({ page 
 
 test('Gemini kartı yol haritasını açar, kaynağı ve projeyle çelişen noktaları pencerede yazar', async ({ page }) => {
   await ac(page, 1280);
-  await kart(page, 'Kendi bayini getir').click();
-  const pencere = page.getByRole('dialog', { name: /Kendi bayini getir/ });
+  await kart(page, 'Kendi bayinizi getirin').click();
+  const pencere = page.getByRole('dialog', { name: /Kendi bayinizi getirin/ });
   await expect(pencere).toBeVisible();
   await expect(pencere.locator('.oy-pencere-kaynak')).toContainText('Gemini');
   expect(await pencere.locator('.oy-adim').count()).toBeGreaterThanOrEqual(4);

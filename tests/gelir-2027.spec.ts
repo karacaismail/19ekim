@@ -28,7 +28,7 @@ test('dört öngörü modelle aynı; seçenek ve politika değişince değişir'
 test('saat dökümü 249 iş günü ve çavuş payını yazar; risk haritası ve listesi var', async ({ page }) => {
   await ac(page);
   await expect(page.locator('#saat')).toContainText('249 iş günü × 9 saat');
-  await expect(page.locator('#saat')).toContainText('Çavuş payı');
+  await expect(page.locator('#saat')).toContainText('verimsizlik payı');
   await expect(page.locator('.go27-harita tbody tr')).toHaveCount(5);
   await expect(page.locator('#harita')).toContainText('İşten ayrılma');
 });

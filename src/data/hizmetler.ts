@@ -53,7 +53,7 @@ export function bas(anahtar: string): string {
 /** Düzey değeri (Standart, Yüksek, Özel) cümle içinde küçük harfle yazılır. */
 export const kucuk = (v: OzellikDegeri) => String(v).toLocaleLowerCase('tr');
 /** Kota cümlesinin yüklemi: “sınırsızdır”, “sıfırdır”, “yoktur” ya da “ayda 20 kadardır”. */
-export const kota = (v: OzellikDegeri) => (v === 'Sınırsız' ? 'sınırsızdır' : v === '0' ? 'sıfırdır' : v === false ? 'yoktur' : `ayda ${v} kadardır`);
+export const kota = (v: OzellikDegeri) => (v === 'Sınırsız' ? 'sınırsızdır' : v === '0' || v === false ? 'yoktur' : `ayda en çok ${v} tanedir`);
 
 /** Canlı destek düzeyinin yalın açıklaması. Listede olmayan düzey olduğu gibi yazılır. */
 const DESTEK: Record<string, string> = {
@@ -94,9 +94,9 @@ export const K = {
 /** Araştırmanın ilkesi: kim ne zaman öder? Bu bugünkü uygulama değildir. Kaynak küresel pazaryeri araştırması. */
 export const ILKE = {
   etiket: 'Araştırmanın ilkesi',
-  baslik: 'Alıcı ücretsiz kullanır. Satıcı ücretsiz başlar ve değeri görünce öder.',
-  metin: 'Talebi alıcı getirir. Bu yüzden alıcı arama, mesaj ve teklif isteği için ödeme yapmaz. Satıcı için ödeme duvarı, değerin kanıtlandığı anda başlar.',
-  kaynak: 'Küresel B2B pazaryerleri araştırması, 12 Kasım 2026',
+  baslik: 'Alıcı ücretsiz kullanır. Satıcı ücretsiz başlar ve platformdan fayda görünce öder.',
+  metin: 'Talebi alıcı getirir. Bu yüzden alıcı arama, mesaj ve teklif isteği için ödeme yapmaz. Satıcının ödemeye başladığı ana ödeme duvarı denir. Bu an, satıcının platformdan fayda gördüğü andır.',
+  kaynak: 'İşletmeden işletmeye satış (B2B) yapan küresel pazar yerleri araştırması, 12 Kasım 2026',
 };
 
 /** Bugün istoc.com’da: sayfa başındaki rakamlar. Hepsi canlı veriden türetilir. */
@@ -117,8 +117,8 @@ export const ALICI_UCRETSIZ: Fayda[] = [
   { id: 'hesap', metin: 'Hesap açmak ücretsizdir.', kaynak: K.ureticiler },
   { id: 'arama', metin: 'Ürün ve üretici araması herkese açıktır. Arama için giriş gerekmez.', kaynak: K.urunler },
   { id: 'teklif', metin: 'Alıcı bir teklif isteğiyle birden fazla satıcıdan teklif alır.', kaynak: K.ureticiler },
-  { id: 'guvence', metin: 'Ticaret Güvencesi sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı talep açar.', kaynak: K.guvence },
-  { id: 'paket-yok', metin: 'Fiyat planlarında yalnız satıcı paketi var.', kaynak: K.plan },
+  { id: 'guvence', metin: 'Ticaret Güvencesi sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı şikâyet kaydı açar.', kaynak: K.guvence },
+  { id: 'paket-yok', metin: 'istoc.com satıcı paketleri sayfasında yalnız satıcılar için paket var.', kaynak: K.plan },
 ];
 
 export const SATICI_UCRETSIZ: Fayda[] = [
@@ -178,7 +178,7 @@ export function paketKartlari(): PaketKarti[] {
     kart('platinium', 'Büyüyen KOBİ için', [
       urun('platinium'),
       pakette(deger('quota.featured_listings_monthly', 'platinium')) ? `Ayda ${deger('quota.featured_listings_monthly', 'platinium')} öne çıkan ürün` : null,
-      varsa('platinium', ['feature.crm.module', 'feature.api.erp_integration'], 'Müşteri kayıtları (CRM) ve muhasebe yazılımı bağlantısı (ERP)'),
+      varsa('platinium', ['feature.crm.module', 'feature.api.erp_integration'], 'Müşteri kayıt modülü (CRM) ve kurumsal kaynak planlama (ERP) ya da muhasebe yazılımı bağlantısı'),
       buyukHarf(destekMetni('platinium')),
       yanitMaddesi('platinium'),
     ]),
@@ -259,7 +259,7 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       soru: 'Satıcı kimin ne aradığını nasıl görür?',
       icin: 'Satıcı',
       ucretsiz: null,
-      pakette: `Temel analitik ${bas('feature.analytics.basic')}. Veri dışa aktarımı ${bas('feature.analytics.export')}. Gelişmiş raporlar ${bas('feature.analytics.advanced')}.`,
+      pakette: `Temel analitik ${bas('feature.analytics.basic')}. Verileri dosya olarak indirme hakkı ${bas('feature.analytics.export')}. Gelişmiş raporlar ${bas('feature.analytics.advanced')}.`,
       planlanan: [model('veri-raporlari', 'Platformdaki arama ve talep verisinden raporlar hazırlanır. Raporlarda kişisel veri bulunmaz.')],
       katman: 'talep-verisi',
     },
@@ -268,7 +268,7 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       ad: 'Güven ve doğrulama',
       soru: 'Alıcı satıcıya neden güvenir?',
       icin: 'Alıcı ve satıcı',
-      ucretsiz: 'Ticaret Güvencesi sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı talep açar.',
+      ucretsiz: 'Ticaret Güvencesi sipariş koşullarını kayıt altına alır. Sorun çıkarsa alıcı şikâyet kaydı açar.',
       pakette: `Şirket doğrulaması ${bas('feature.storefront.manufacturer_badge_tier')}. Doğrulanan mağaza rozet taşır.`,
       planlanan: [model('dogrulanmis-tedarikci', 'Dükkân ya da depo yerinde denetlenir. Denetimi geçen satıcı ücretli bir rozet alır.')],
       fark: 'Paketteki doğrulama şirketin kaydını denetler. Planlanan rozet buna dükkânın ya da deponun yerinde denetimini ekler.',
@@ -283,7 +283,7 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       planlanan: [
         model('guvenli-odeme', 'Alıcının ödemesi teslimata kadar lisanslı bir ödeme kuruluşunda bekler.'),
         model('vadeli-satis', 'Alıcı malı vadeli alır. Satıcı parasını bir finans ortağı aracılığıyla peşin alır.'),
-        model('alacak-sigortasi', 'Vadeli satışta satıcının alacağı bir sigorta şirketiyle güvenceye alınır.'),
+        model('alacak-sigortasi', 'Vadeli satışta satıcının alıcıdan alacağı para bir sigorta şirketiyle güvenceye alınır.'),
       ],
       katman: 'finansman',
     },
@@ -295,7 +295,7 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       ucretsiz: null,
       pakette: `Kargo entegrasyonu ${bas('feature.functional.cargo_integration')}. Sevkiyat takibi ${bas('feature.logistics.insured_shipping')}.`,
       planlanan: [model('lojistik', 'Platform kargo firmalarıyla toplu fiyat anlaşması yapar. Satıcı bu anlaşmalı fiyatla gönderir.')],
-      fark: 'Paketteki entegrasyon satıcıyı kargo firmasına bağlar. Planlanan hizmet toplu anlaşmayla daha ucuz gönderi sağlar.',
+      fark: 'Paketteki kargo bağlantısı satıcıyı kargo firmasına bağlar. Planlanan hizmet toplu anlaşmayla daha ucuz gönderi sağlar.',
       katman: 'lojistik',
     },
     {
@@ -310,11 +310,11 @@ export function hizmetHaritasi(): HizmetSatiri[] {
     },
     {
       id: 'ekip',
-      ad: 'Ekip ve entegrasyon',
+      ad: 'Ekip ve yazılım bağlantısı',
       soru: 'Satıcının ekibi ve yazılımı nasıl bağlanır?',
       icin: 'Satıcı',
       ucretsiz: null,
-      pakette: `Alt kullanıcı sayısı ${ad(ilk)} paketinde ${deger('quota.max_sub_users', ilk)}, ${ad(orta)} paketinde ${deger('quota.max_sub_users', orta)}, ${ad(son)} paketinde ${deger('quota.max_sub_users', son)} kişidir. Muhasebe yazılımı bağlantısı (ERP) ${bas('feature.api.erp_integration')}.`,
+      pakette: `Ek kullanıcı hesabı sayısı ${ad(ilk)} paketinde ${deger('quota.max_sub_users', ilk)}, ${ad(orta)} paketinde ${deger('quota.max_sub_users', orta)}, ${ad(son)} paketinde ${deger('quota.max_sub_users', son)} kişidir. ERP ya da muhasebe yazılımı bağlantısı ${bas('feature.api.erp_integration')}.`,
       planlanan: [
         model('eklentiler', 'Paketin üstüne ek kullanıcı, ek ürün sınırı ve muhasebe yazılımı bağlantısı satılır.'),
         model('beyaz-etiket', 'Büyük bir toptancıya kendi adıyla çalışan bir sipariş mağazası kurulur.'),
@@ -351,15 +351,15 @@ export const BUGUNKU_YOL: Adim[] = [
 ];
 export const KURALIN_YOLU: Adim[] = [
   { ad: 'Talebi görür', metin: 'Satıcı vitrinini ücretsiz açar ve gelen talebi görür.', ucret: 'ucretsiz' },
-  { ad: 'İlk nitelikli talep gelir', metin: 'Değer burada kanıtlanır. Ödeme duvarı buraya konur.', ucret: 'ucretli' },
-  { ad: 'Kota ve görünürlük alır', metin: 'Satıcı teklif hakkını, öne çıkarmayı ve ziyaretçi kimliğini paketle alır.', ucret: 'ucretli' },
+  { ad: 'İlk nitelikli talep gelir', metin: 'Satıcı platformun işine yaradığını burada görür. Ücretli kullanım burada başlar.', ucret: 'ucretli' },
+  { ad: 'Kota ve görünürlük alır', metin: 'Satıcı teklif hakkını, öne çıkarmayı ve profilini ziyaret edenlerin adlarını paketle alır.', ucret: 'ucretli' },
 ];
 export const NITELIKLI_TALEP = 'Araştırma “nitelikli talep” terimini tanımlamaz. Bu sayfa onu ürünü, adedi ve iletişim bilgisi doğrulanmış bir alım isteği olarak okur.';
-export const YOL_NOTU = 'Bugün ödeme deneme süresinin sonunda başlıyor. Araştırmanın kuralına göre ödeme duvarı ilk nitelikli talebe yaklaşmalıdır. Bu geçiş için talep verisinin ölçülmesi gerekir.';
+export const YOL_NOTU = 'Bugün ödeme deneme süresinin sonunda başlıyor. Araştırmanın kuralına göre ödeme duvarı ilk nitelikli talebe yaklaşmalıdır. Bu geçiş için önce gelen talepler sayılmalı.';
 
 export const SAYFA_KAYNAGI = `Paket fiyatları ve özellikleri istoc.com satıcı paketlerinden ${OKUNDU} günü okundu.`;
 export const PAKET_ADI_NOTU = 'Gelir modelleri sayfası aynı paketlere Standart, Pro ve Kurumsal der. Bu sayfa istoc.com’daki adları kullanır.';
-export const OZELLIK_NOTU = 'Fiyat planları bir paketin içeriğini listeler. Bir özelliğin bugün çalıştığını tek başına göstermez.';
+export const OZELLIK_NOTU = 'Satıcı paketleri sayfası bir paketin içeriğini listeler. Bu liste, bir özelliğin bugün çalıştığını tek başına göstermez.';
 
 /** Yıllık peşin ödemenin kaç aylık ücrete eşit olduğu. Tam sayı değilse null döner. */
 export function yillikAy(id: PaketId): number | null {

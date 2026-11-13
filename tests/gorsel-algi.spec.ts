@@ -43,7 +43,7 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
     await expect(secenekler.getByRole('group', { name: 'İkinci saha personeli' }).getByRole('button')).toHaveText(['Aralık 2026', 'Ocak 2027', 'Mart 2027', 'Gelmez']);
     // Kaynak bilgisi yardım alanında, Parametreler bağlantısıyla (F01: “değerin geldiği parametreye ayrı bağlantı”).
     const fiyatKaynak = secenekler.getByRole('group', { name: 'Aylık abonelik fiyatı' }).locator('.secim-kaynak');
-    await expect(fiyatKaynak).toContainText(/Başlangıç değeri genel parametre: 399 €/);
+    await expect(fiyatKaynak).toContainText(/Başlangıç değeri 399 € olur/);
     await expect(fiyatKaynak.getByRole('link', { name: /Parametreler/ })).toHaveAttribute('href', /parametreler\/$/);
   });
 
@@ -53,7 +53,7 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
     const anahtar = kapasite.getByRole('switch', { name: /Senaryoyla birlikte güncellenir/ });
     await expect(kapasite.getByRole('button', { name: '%100', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await expect(anahtar).toHaveAttribute('aria-checked', 'true');
-    await expect(kapasite.locator('.anahtar-aciklama')).toContainText(/seçili senaryodan \(Medyan\): %100/);
+    await expect(kapasite.locator('.anahtar-aciklama')).toContainText(/seçili senaryodan gelir\. Medyan senaryosunda değer %100 olur/);
     expect(await anahtar.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
     // Temel senaryo değişince otomatik değer senaryoyu izler.
     await kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Kötümser' }).click();
@@ -94,7 +94,7 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
     await kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Saha ağırlıklı' }).click();
     await expect(kapasite.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
     await expect(kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Özel', exact: true })).toHaveCount(0);
-    await expect(secenekler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '+2 kişi' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(secenekler.getByRole('group', { name: 'Ek saha personeli' }).getByRole('button', { name: '2 kişi daha' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('V05: liste dışı parametre değeri (449 €) tek ve gerçek seçenek olarak görünür; tekrar eden etiket yok', async ({ page }) => {
@@ -207,7 +207,7 @@ test.describe('gorsel_algi GA-2: işaret ve birim sözlüğü, “—” sözlü
     const kadro = page.locator('.table-block:has(#katki-tablo)');
     await expect(kadro.locator('tbody tr[data-tone="total"]').first()).toContainText('Uygulanmıyor');
     expect(await kadro.locator('td', { hasText: /^—$/ }).count()).toBe(0);
-    await kadro.getByRole('group', { name: /görünüm/i }).getByRole('button', { name: 'Üçü üst üste' }).click();
+    await kadro.getByRole('group', { name: /görünüm/i }).getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(kadro.locator('.table-note-alt')).toContainText('Senaryoda yok');
     expect(await kadro.locator('td', { hasText: /^—$/ }).count()).toBe(0);
     expect(await page.locator('main td', { hasText: /^—$/ }).count()).toBe(0);
@@ -261,10 +261,10 @@ test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay,
     await page.goto('applet/');
     await icerik(page);
     await hydrated(page);
-    await page.getByRole('navigation', { name: 'Applet’ler' }).getByRole('link', { name: /Kademe serisi/ }).click();
+    await page.getByRole('navigation', { name: 'Hesap araçları' }).getByRole('link', { name: /Kademe serisi/ }).click();
     const alan = page.getByRole('textbox', { name: 'Derece sayısı' });
     await expect(alan).toBeVisible();
-    await expect(page.locator('.param-field', { has: alan }).locator('.param-help')).toContainText(/en az 2, en çok 15/i);
+    await expect(page.locator('.param-field', { has: alan }).locator('.param-help')).toContainText(/2 ile 15 arasında/);
     await alan.click();
     await alan.press('ControlOrMeta+a');
     await alan.pressSequentially('40');
@@ -326,7 +326,7 @@ test.describe('gorsel_algi GA-3: sessiz düzeltme geri bildirimi, süresiz onay,
     const don = page.locator('.param-toolbar .applet-eylem').first();
     await expect(don).toHaveText('Örnek değerlere dön');
     await don.click();
-    await expect(don).toHaveText(/1 applet’i örnek değerlere döndür \(onayla\)/);
+    await expect(don).toHaveText(/1 hesap aracını örnek değerlere döndür \(onayla\)/);
     await page.waitForTimeout(6000);
     await expect(don).toHaveText(/örnek değerlere döndür \(onayla\)/);
     await page.getByRole('button', { name: 'Vazgeç' }).click();

@@ -355,7 +355,7 @@ html[data-focus-mode='keyboard'] .v2-so2-girdi:has(:focus-visible) .v2-so2-girdi
   display: flex;
   align-items: center;
   min-height: var(--hit-min);
-  padding: 0 var(--space-3);
+  padding: var(--clear-block) var(--clear-inline);
   border: var(--hairline) solid var(--rule);
   background-color: var(--surface-page);
   color: var(--text-primary);
@@ -879,12 +879,15 @@ html[data-bant-gizli] .v2-so2-duzen {
   border-top: 0;
 }
 .v2-so2-sec-dugme:has(.v2-so2-sec-not) {
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
 }
 
+/* Açıklama sığmazsa alt satıra iner. Düğmenin dışına taşmaz. */
 .v2-so2-sec-not {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   color: var(--text-secondary);
   font-size: var(--text-sm);
 }
@@ -1302,7 +1305,7 @@ html[data-focus-mode='keyboard'] .v2-ag-dugum:focus-visible .v2-ag-odak {
 }
 
 .v2-sg-rozet {
-  padding: 0 var(--space-2);
+  padding: var(--clear-block-sm) var(--clear-inline-sm);
   background-color: var(--accent);
   color: var(--text-on-accent);
   font-size: var(--text-sm);

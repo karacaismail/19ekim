@@ -50,11 +50,11 @@ test('yemek kartı anahtarı kalemi ekler ve OPEX’i artırır; klavyeyle çal�
   await ac(page);
   const anahtar = page.getByRole('switch', { name: 'Yemek kartı' });
   await expect(anahtar).toHaveAttribute('aria-checked', 'false');
-  await expect(page.locator('#kalemler')).not.toContainText('Bütün bordrolu kadroya, günlük istisna');
+  await expect(page.locator('#kalemler')).not.toContainText('vergiden muaf günlük tutarın');
   await anahtar.focus();
   await page.keyboard.press('Space');
   await expect(anahtar).toHaveAttribute('aria-checked', 'true');
-  await expect(page.locator('#kalemler')).toContainText('Bütün bordrolu kadroya, günlük istisna');
+  await expect(page.locator('#kalemler')).toContainText('vergiden muaf günlük tutarın');
   await expect(page.locator('#secenek .stats')).toContainText(milyon(toplam(butce(TABAN, 'medyan', { yemek: true, saglik: false }).opex)));
 });
 

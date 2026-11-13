@@ -42,7 +42,7 @@ export default function PolitikaAkisAyrinti({ proje, rol, ayar, bolum }: { proje
   }
   if (bolum === 'bosluk') return <div className="pol-bosluk" data-akis-bosluk>
     <h4>Yeni satış fırsatları</h4>
-    <p>Bu fırsatlar boşluk analizinden çıktı. Hedef veya kazanç sözü değildir.</p>
+    <p>Bu fırsatları, bugünkü çalışmadaki eksikleri inceleyerek bulduk. Bu fırsatlar hedef ya da kazanç sözü değildir.</p>
     {(policy.firsatlar ?? []).map((f) => <section key={f.baslik} className="pol-alt-bolum" data-firsat>
       <h5>{f.baslik}</h5><p>{f.neden}</p><p>{f.ilkAdim}</p><p>{f.olcu}</p>
     </section>)}

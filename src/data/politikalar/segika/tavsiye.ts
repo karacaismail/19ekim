@@ -58,7 +58,7 @@ export const politika: ProjePolitika = {
       ]
     },
     {
-      "baslik": "Tanıştırmayı kaydettirin",
+      "baslik": "Başvuruyu kaydettirin",
       "metin": [
         "Firma kabul ederse şirketin onaylı başvuru yolunu paylaşın.",
         "Başvuruyu karşı firmanın yetkili yöneticisi yapsın.",
@@ -84,7 +84,7 @@ export const politika: ProjePolitika = {
         "Birinci sürümde yeni müşteri 60 gün kullanmaya devam etmelidir.",
         "Müşteri sorumlusu bu 60 günün hangi olaydan sayılacağını yazılı bildirir.",
         "Bu iki koşul sağlanırsa şirket ücretsiz kullanımı firmanızın hesabına yazar.",
-        "İkinci sürüm seçildiyse ödeme belirlenen süre içinde alınmalıdır.",
+        "İkinci sürüm seçildiyse şirket ödemeyi tavsiyeden sonraki belirli bir süre içinde almalıdır. Süre, “İkinci hesap sürümü seçilirse” bölümünde yazar.",
         "Ödeme bu sürede alınmazsa ikinci sürümde ödül hakkı oluşmaz.",
         "Şirket yeni müşterinin kendi ödülünü ona ayrıca bildirir."
       ]
@@ -134,7 +134,7 @@ export const politika: ProjePolitika = {
       "ulasim": "Mevcut iş görüşmenizin uygun bir anında izin isteyin.",
       "mesaj": "Teşvik takibinde kullandığımız yöntemi merak eder misiniz?",
       "uygunluk": "İş ilişkinizi tavsiye kabulüne bağlamayın.",
-      "sonrasi": "İhtiyaç uygunsa şirketin başvuru yolunu paylaşın."
+      "sonrasi": "Firmanın ihtiyacı ürüne uyuyorsa şirketin başvuru yolunu paylaşın."
     }
   ],
   "programKitleleri": {
@@ -306,10 +306,10 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Grup şirketleri sayılıyor mu?",
       "mevcut": "Program yeni müşterinin tavsiyesini ödüllendirir.",
-      "eksik": "Şirket bağlı şirket ve yinelenen başvuru ölçütünü henüz netleştirmedi.",
+      "eksik": "Şirket iki konuyu henüz netleştirmedi. Aynı gruptaki şirketler yeni müşteri sayılır mı? Aynı firma iki kez başvurursa ne olur?",
       "islem": "Müşteri sorumlusu yeni müşteri kontrolünü yazılı tanımlasın.",
       "kanit": "Müşteri sorumlusu aynı başvurunun tekrar sayılmadığını bir örnekle göstersin.",
-      "firsat": "Açık grup kuralı grup şirketlerini yeni müşteri olarak kazanmayı kolaylaştırabilir.",
+      "firsat": "Net bir grup kuralı grup şirketlerini yeni müşteri olarak kazanmayı kolaylaştırabilir.",
       "durdur": "Çakışan kayıtta ödül uygulamasını inceleme bitene kadar bekletin."
     },
     {
@@ -318,7 +318,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket sürenin kurulumla mı, ilk bordroyla mı başladığını henüz yazmadı.",
       "islem": "Müşteri sorumlusu başlangıç olayını yazılı tanımlasın.",
       "kanit": "Tavsiye kaydında başlangıç ve bitiş tarihi görülsün.",
-      "firsat": "Açık tarih ödülün zamanında verilmesini sağlar. Ödülünü zamanında alan müşteri yeni tavsiye yapabilir.",
+      "firsat": "Net bir tarih ödülün zamanında verilmesini sağlar. Ödülünü zamanında alan müşteri yeni tavsiye yapabilir.",
       "durdur": "Başlangıç belirsizse ödül tarihi söylemeyin."
     },
     {
@@ -336,14 +336,14 @@ export const politika: ProjePolitika = {
       "eksik": "Kullanılmış ücretsiz sürenin geri alınıp alınmayacağı belli değildir.",
       "islem": "Finans sorumlusu bu kuralı tavsiye başlamadan yazsın.",
       "kanit": "Kural, firmaya verilen koşul yazısında bulunsun.",
-      "firsat": "Açık iptal kuralı müşterilerin tavsiye yapmaya güvenmesini sağlayabilir.",
+      "firsat": "Net bir iptal kuralı müşterilerin tavsiye yapmaya güvenmesini sağlayabilir.",
       "durdur": "Kural yazılmadan kullanılmış süreyi geri almayın."
     }
   ],
   "firsatlar": [
     {
       "baslik": "Grup şirketlerine ulaşın",
-      "neden": "“Grup şirketleri sayılıyor mu?” konusu çözülünce aynı gruptaki şirketler yeni müşteri olabilir. Bugün bu kural yazılı değil.",
+      "neden": "Şirket grup şirketlerinin sayılıp sayılmayacağına karar verince aynı gruptaki şirketler yeni müşteri olabilir. Bugün bu kural yazılı değil.",
       "ilkAdim": "Müşteri sorumlusu grup şirketi kuralını yazar. Sonra grubu olan müşterilere bu kuralı bildirir.",
       "olcu": "Grup şirketlerinden gelen tavsiyeleri sayın. Bunlardan imzalanan sözleşmeleri ayrıca sayın."
     },
@@ -355,7 +355,7 @@ export const politika: ProjePolitika = {
     },
     {
       "baslik": "Toptan satış yapan müşterileri pazar yerine tanıştırın",
-      "neden": "Segika müşterilerinin bir kısmı toptan satış yapar. Bu müşteriler şirketin toptan pazar yeri ürünü için satıcı adayı olabilir.",
+      "neden": "Segika müşterilerinin bir kısmı toptan satış yapar. Bu müşteriler şirketin toptan pazar yeri için satıcı adayı olabilir.",
       "ilkAdim": "Müşteri sorumlusu toptan satış yapan müşterileri kayıtta işaretler. İzin veren müşteriyi pazar yeri ekibiyle tanıştırır.",
       "olcu": "Pazar yeri ekibiyle tanışan müşterileri sayın. Satıcı olanları ayrıca sayın."
     },
@@ -372,28 +372,28 @@ export const politika: ProjePolitika = {
       "sinyal": "Başvuruda bordro dosyası veya çalışan listesi görülebilir.",
       "kontrol": "Müşteri sorumlusu başvuru eklerini başvurunun geldiği gün kontrol etsin.",
       "tepki": "Çalışan verisi varsa müşteri sorumlusu eki kullanmasın. Veri sorumlusuna bildirsin.",
-      "kayit": "Bildirim tarihini kişisel veri çoğaltmadan kaydedin."
+      "kayit": "Müşteri sorumlusu bildirim tarihini kaydetsin. Kayda kişisel veri kopyalamasın."
     },
     {
       "baslik": "Teşvik beklentisi abartılıyor mu?",
       "sinyal": "Yeni firma, belirli bir teşvik tutarı sözü verildiğini söyleyebilir.",
       "kontrol": "Satış uzmanı ilk görüşmede firmanın beklentisini sorsun.",
       "tepki": "Söz verilmişse satış uzmanı firmaya bunun geçerli olmadığını açıklasın.",
-      "kayit": "Düzeltme tarihini tavsiye kaydına yazın."
+      "kayit": "Satış uzmanı düzeltme tarihini tavsiye kaydına yazsın."
     },
     {
       "baslik": "Ödül yanlış hesaba mı gidiyor?",
       "sinyal": "Tavsiye yapan kişi ile firma hesabının yetkilisi farklı olabilir.",
       "kontrol": "Müşteri sorumlusu firma hesabının yetkilisini doğrulasın.",
       "tepki": "Yetki belirsizse müşteri sorumlusu ödülü başka hesaba taşımayı durdursun.",
-      "kayit": "Kararı kişisel veri çoğaltmadan hesap kaydında saklayın."
+      "kayit": "Müşteri sorumlusu kararı hesap kaydında saklasın. Kayda kişisel veri kopyalamasın."
     },
     {
       "baslik": "Tavsiye ilişkisi gizleniyor mu?",
-      "sinyal": "Mesleki toplulukta paylaşım, ödül ilişkisini belirtmeden bağımsız görüş gibi görünebilir.",
-      "kontrol": "Müşteri sorumlusu açık paylaşımlardan küçük bir örneğe baksın.",
+      "sinyal": "Bir firma meslek grubunda Segika’yı övebilir. Ödül aldığını yazmazsa okurlar bunu bağımsız görüş sanabilir.",
+      "kontrol": "Müşteri sorumlusu herkese açık paylaşımlardan küçük bir örneğe baksın.",
       "tepki": "İlişki belirtilmemişse müşteri sorumlusu firmadan paylaşımı düzeltmesini istesin.",
-      "kayit": "İstek tarihini ve düzeltme sonucunu kaydedin."
+      "kayit": "Müşteri sorumlusu istek tarihini ve düzeltme sonucunu kaydetsin."
     }
   ],
   "haftalik": [

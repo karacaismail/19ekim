@@ -102,7 +102,7 @@ test.describe('içerik envanteri', () => {
 
   test('IA-10: Applet İstihdam grubunda; BCG ve e-posta yalnız doğrudan erişimde (menüsüz); arşiv Yardımcı erişimde; kişisel sayfalar kişisel sınıfta', () => {
     expect(icerikOf('/applet/')?.grup).toBe('istihdam');
-    expect(icerikOf('/applet/')?.menu).toBe('Applet');
+    expect(icerikOf('/applet/')?.menu).toBe('Hesap araçları');
     for (const p of ['/bcg/', '/email/']) {
       expect(icerikOf(p)?.grup, p).toBe('dogrudan');
       expect(icerikOf(p)?.menu, p).toBeUndefined();
@@ -132,7 +132,7 @@ test.describe('içerik envanteri', () => {
     expect(kirinti('/satis-ortakligi/')).toEqual(['Pazarlama', 'Satış ortaklığı programı']);
     expect(kirinti('/bcg/')).toEqual(['BCG matrisi eğitimi']);
     expect(kirinti('/giderler/')).toEqual(['Finans', 'OpEx', 'Operasyonel Giderler']); // kullanıcı kararı 2026-10-21 korunur
-    expect(kirinti('/applet/')).toEqual(['İstihdam', 'Ücret ve performans applet’leri']);
+    expect(kirinti('/applet/')).toEqual(['İstihdam', 'Ücret ve performans hesap araçları']);
     expect(kirinti('/notlar/')).toEqual(['Yardımcı', 'Notlar']);
     expect(kirinti('/arsiv/')).toEqual(['Yardımcı', 'Arşiv: tahtadan karara']);
     expect(kirinti('/email/')).toEqual(['E-posta']); // doğrudan erişim: tek parça, kırıntı satırı çizilmez
@@ -155,7 +155,7 @@ test('B2c (MS-11): her kaydın türetim kaynağı var; ön cümle yalnız tahtad
   const turler = ['tahta', 'sheets', 'oneri', 'ornek', 'egitim', 'kisisel', 'sistem'];
   for (const k of ICERIK) expect(turler, k.id).toContain(k.turetim);
   expect(altBilgiOnCumle('/19ekim/roller/asistan/')).toMatch(/19 Ekim 2026/);
-  expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/kalibre edilir/);
+  expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/gerçek sonuçlara göre düzeltilir/);
   for (const p of ['/19ekim/bcg/', '/19ekim/notlar/', '/19ekim/email/', '/19ekim/applet/', '/19ekim/giderler/', '/19ekim/404/', '/bilinmeyen/']) expect(altBilgiOnCumle(p), p).toBe('');
   // Nakit akışı kapsam cümlesi mevcut davranışı anlatır: hesap seçenekleri uygulanır, gider kaynağı seçeneği uygulanmaz; gelecek vaadi yok.
   const nakit = altBilgiKapsami('/19ekim/nakit-akisi/');
@@ -174,8 +174,8 @@ test.describe('içerik envanteri — sayfada', () => {
       expect(alt, id).toContain(k.kapsam.slice(0, 40));
       if (['bcg', 'applet', 'notlar'].includes(id)) expect(alt, id).not.toMatch(/kesinleşen/i);
       // B2c (MS-11): tahtadan türetilmeyen sayfada “19 Ekim … kalibre edilir” ön cümlesi yok.
-      if (k.turetim === 'tahta') expect(alt, id).toMatch(/kalibre edilir/);
-      else expect(alt, id).not.toMatch(/kalibre edilir|tahta kararlarından/);
+      if (k.turetim === 'tahta') expect(alt, id).toMatch(/gerçek sonuçlara göre düzeltilir/);
+      else expect(alt, id).not.toMatch(/gerçek sonuçlara göre düzeltilir|tahtaya yazılan kararlardan/);
     }
   });
 });

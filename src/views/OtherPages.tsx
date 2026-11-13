@@ -42,7 +42,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
   const st = m.staffing.byId[sid];
   const sc = st.scenario;
   const H = m.staffing.horizon;
-  const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
+  const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
   return (
     <>
       <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
@@ -54,7 +54,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
         id="katki"
         index={2}
         title="Görev, gider ve gelir katkısı (senaryo)"
-        desc={`İstihdam planı, kullanıcı kararıyla (2026-10-27) gelir planına bağlandı. Tablo her rolün görevini, işveren maliyetini ve seçili senaryoda ${H} ayda gelire katkısını gösterir. Katkı, gelir planı simülasyonunda o kaynak olmasaydı kaybedilecek gelirdir. Dolaylı rollerin katkısı hesaplanmaz. Burada seçilen senaryo, gelir planında ve nakit akış tablosunda da geçerli olur.`}
+        desc={`İstihdam planı 27 Ekim 2026’da alınan kararla gelir planına bağlandı. Tablo her rolün görevini ve işveren maliyetini gösterir. Tablo, seçili senaryoda ${m.revenue.months[0].ad} ile ${m.revenue.months[H - 1].ad} arasındaki ${H} ayda gelire katkıyı da gösterir. Katkıyı şöyle hesaplarız: Gelir planından bu rolü çıkarırız. Kaybolan gelir, rolün katkısıdır. Doğrudan satış yapmayan rollerin katkısı hesaplanmaz. Burada seçilen senaryo, gelir planında ve nakit akış tablosunda da geçerli olur.`}
         tools={
           <Araclar role={sc.role}>
             <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
@@ -65,7 +65,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
           items={[
             { label: `Kadro gideri, ${H} ay`, value: lira(st.toplam.gider), note: `Maaşlı roller, reklam bütçesi ve temsilci primi (${sc.name})` },
             { label: `Gelire katkı, ${H} ay`, value: lira(st.toplam.katki), note: `Kaynakların toplamı (${sc.name})` },
-            { label: 'Net (katkı − gider)', value: lira(st.toplam.net), note: 'Ofis, yazılım ekibi ve yapay zekâ araçları hariç' },
+            { label: 'Net katkı (katkıdan gider çıkınca kalan)', value: lira(st.toplam.net), note: 'Ofis, yazılım ekibi ve yapay zekâ araçları hariç' },
           ]}
         />
         <DataTable
@@ -79,12 +79,12 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
           columns={[
             { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: StaffResult) => <RoleChip role={x.role.role} label={x.role.name} /> },
             { key: 'g', header: 'Görev', minWidth: '20rem', render: (x) => x.role.gorev },
-            { key: 'y', header: 'Gelire katkı yolu', minWidth: '16rem', render: (x) => x.role.katkiYolu },
+            { key: 'y', header: 'Gelire nasıl katkı verir?', minWidth: '16rem', render: (x) => x.role.katkiYolu },
             { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => kisaTarih(x.role.startIso) },
             { key: 'm', header: 'Aylık maliyet', nowrap: true, render: (x) => (x.role.katki.kind === 'rep' ? `${lira(m.params.commission)} / satış` : lira(x.role.maliyet)) },
             { key: 'c', header: `${H} ay gider`, nowrap: true, render: (x) => lira(x.gider) },
             { key: 'k', header: 'Gelire katkı', summary: true, nowrap: true, render: (x) => (x.dogrudan ? lira(x.katki) : 'Dolaylı') },
-            { key: 'n', header: 'Net', nowrap: true, render: (x) => lira(x.net) },
+            { key: 'n', header: 'Net', nowrap: true, render: (x) => (x.dogrudan ? lira(x.net) : `${lira(x.net)} (yalnız gider)`) },
           ]}
           rows={st.rows}
           rowKey={(x) => x.role.id}
@@ -92,7 +92,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
         />
         <p>
           <TextLink to="/gelir-plani/#kadro" standalone>
-            Gelir planında kadro, dijital strateji ve başabaş
+            Gelir planında kadroyu, dijital pazarlamayı ve başabaş ayını görün
           </TextLink>
         </p>
       </Section>
@@ -119,7 +119,7 @@ function GoalsContent() {
   const plan = payments(m.planRetention);
   const options = [
     { option: 'Yıllık peşin (10 ay ücreti, 2 ay bedava)', unit: lira(ANNUAL_TRY), count: Math.ceil(gap / (ANNUAL_TRY - SUBSCRIPTION_TRY)), note: 'Aylık yerine peşin ödeyen aktif satıcı' },
-    { option: 'Üye satıcıyı aktife çevirmek', unit: `${SUBSCRIPTION_EUR} € / ay`, count: gapMonths, note: `500 üyenin ${pct(gapMonths / 500)} kadarı` },
+    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: `500 üyenin ${pct(gapMonths / 500)} kadarı` },
   ];
 
   return (
@@ -127,7 +127,7 @@ function GoalsContent() {
       <PageHeader
         title="90 gün hedefleri"
         purpose={`Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder, ancak bazıları ilk aydan sonra bırakabilir.`}
-        meta={[{ label: 'Dönem', value: `${longDate(dates.start)} – ${longDate(dates.day90)}` }]}
+        meta={[{ label: 'Dönem', value: `${longDate(dates.start)} ile ${longDate(dates.day90)} arası` }]}
       >
         <Stats items={targets} />
       </PageHeader>
@@ -135,8 +135,8 @@ function GoalsContent() {
       <Section
         id="kopru"
         index={1}
-        title="Ciro köprüsü"
-        desc={`${firstTotal} aktif satıcının ilk ödemeleri toplam ${lira(firstTotal * SUBSCRIPTION_TRY)} eder. Hedefe ulaşmak için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir. Bir satıcı-ay, bir satıcının bir aylık ödemesidir. ${m.retentionThreshold === null ? 'Abonelik tek başına bu hedefe yetmez' : `Bunun için aylık elde tutma en az ${pct(m.retentionThreshold)} olmalıdır`}.`}
+        title="Ciro hedefinin hesabı"
+        desc={`Hesapta 1 € için ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(m.params.eurTry)} ₺ kullanıldı. ${firstTotal} aktif satıcının ilk ödemeleri toplam ${lira(firstTotal * SUBSCRIPTION_TRY)} eder. Bir satıcının bir aylık ödemesine “satıcı-ay” denir. Hedefe ulaşmak için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir. Aylık elde tutma, bir ay ödeyen satıcılardan ertesi ay yine ödeyenlerin oranıdır. ${m.retentionThreshold === null ? 'Abonelik tek başına bu hedefe yetmez' : `Bunun için aylık elde tutma en az ${pct(m.retentionThreshold)} olmalıdır`}.`}
       >
         <Chart
           id="kopru"
@@ -174,7 +174,7 @@ function GoalsContent() {
           title="Açığı tek başına kapatan adet"
           columns={[
             { key: 'o', header: 'Seçenek', minWidth: '16rem', rowHeader: true, render: (o: (typeof options)[number]) => o.option },
-            { key: 'u', header: 'Birim', nowrap: true, render: (o) => o.unit },
+            { key: 'u', header: 'Tutar', nowrap: true, render: (o) => o.unit },
             { key: 'c', header: 'Gereken adet', summary: true, nowrap: true, render: (o) => o.count },
             { key: 'n', header: 'Not', minWidth: '14rem', render: (o) => o.note },
           ]}
@@ -182,10 +182,10 @@ function GoalsContent() {
         />
       </Section>
 
-      <Section id="aylik" index={3} title="Aylık ciro" desc={`Plan senaryosunda aylık elde tutma ${pct(m.planRetention)} olur.`}>
+      <Section id="aylik" index={3} title="Aylık ciro" desc={`Plan senaryosu aylık elde tutmayı ${pct(m.planRetention)} varsayar.`}>
         <Chart
           id="gelir-ay"
-          title="İlk ödemeler, yenilemeler ve kümülatif ciro"
+          title="İlk ödemeler, yenilemeler ve ay ay biriken ciro"
           summary={`${MONTHS.map((m, i) => `${m}: ${lira(plan.monthly[i] * SUBSCRIPTION_TRY)}`).join('. ')}. Toplam ${lira(plan.total * SUBSCRIPTION_TRY)}.`}
           spec={{
             kind: 'gelir-ay',
@@ -197,22 +197,22 @@ function GoalsContent() {
         />
       </Section>
 
-      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, kaynaklara göre yeni aktif satıcı ve kayıt sayısını gösterir. Kapasite açığı 45 kayıt ve 8 aktif satıcıdır. Bu açık ${shortDate(dates.dec)} tarihinden itibaren Aralık takviyesiyle kapanır (${labels.sahaDecLabel || "yok"}).`}>
+      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, satış kanallarına göre yeni aktif satıcı ve kayıt sayısını gösterir. Aralık takviyesi olmadan hedefe 45 kayıt ve 8 aktif satıcı eksik kalır. Takviye ${longDate(dates.dec)} tarihinde başlar ve bu eksiği kapatır (${labels.sahaDecLabel || 'takviye yok'}).`}>
         <Chart
           id="kaynak-ay"
-          title="Yeni aktif satıcı: kaynak × ay"
-          summary={targetPlan.map((t) => `${t.source}: ${t.aktif.join(', ')}`).join('. ')}
+          title="Satış kanalına ve aya göre yeni aktif satıcı"
+          summary={targetPlan.map((t) => `${t.source}: ${t.aktif.map((v, i) => `${MONTHS[i]} ayında ${v}`).join(', ')}`).join('. ')}
           spec={{ kind: 'kaynak-ay', months: MONTHS, unit: 'Aktif satıcı', series: targetPlan.map((t) => ({ name: t.short, role: t.role, values: t.aktif })) }}
         />
         <DataTable
           id="kaynak"
-          title="Kaynak × ay (kayıt / yeni aktif)"
+          title="Satış kanalına ve aya göre kayıt ve yeni aktif satıcı"
           kayit="sutun"
           ozetSatir={(t) => t.source === 'Toplam'}
           columns={[
-            { key: 's', header: 'Kaynak', minWidth: '15rem', rowHeader: true, render: (t: (typeof targetPlan)[number]) => t.source },
-            ...MONTHS.map((m, i) => ({ key: m, header: m, nowrap: true, render: (t: (typeof targetPlan)[number]) => `${t.kayit[i]} / ${t.aktif[i]}` })),
-            { key: 't', header: 'Toplam', nowrap: true, render: (t) => `${sum(t.kayit)} / ${sum(t.aktif)}` },
+            { key: 's', header: 'Satış kanalı', minWidth: '15rem', rowHeader: true, render: (t: (typeof targetPlan)[number]) => t.source },
+            ...MONTHS.map((m, i) => ({ key: m, header: m, nowrap: true, render: (t: (typeof targetPlan)[number]) => `${t.kayit[i]} kayıt, ${t.aktif[i]} yeni aktif` })),
+            { key: 't', header: 'Toplam', nowrap: true, render: (t) => `${sum(t.kayit)} kayıt, ${sum(t.aktif)} yeni aktif` },
           ]}
           rows={[...targetPlan, { source: 'Toplam', short: 'Toplam', role: 'yonetici' as RoleKey, kayit: [0, 1, 2].map((i) => sum(targetPlan.map((t) => t.kayit[i]))), aktif: NEW_ACTIVE }]}
           rowTone={(t) => (t.source === 'Toplam' ? 'total' : undefined)}
@@ -239,8 +239,8 @@ function PlanContent() {
   const m = useModel();
   const { managerPlan, roles, dates } = m;
   const actionRows: ActionRow[] = [
-    ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca ${i + 1}`, ...p })),
-    ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle} ${i + 1}`, ...p }))),
+    ...managerPlan.map((p, i) => ({ who: 'yonetici' as RoleKey, label: `İsmail Karaca, ${i + 1}. eylem`, ...p })),
+    ...roles.flatMap((role) => role.plan.map((p, i) => ({ who: role.slug, label: `${role.shortTitle}, ${i + 1}. eylem`, ...p }))),
   ];
 
   const start = actionRows.reduce((min, r) => (r.from < min ? r.from : min), actionRows[0].from);
@@ -248,15 +248,15 @@ function PlanContent() {
   const rows: GanttRow[] = actionRows.map((r) => ({ name: r.label, from: r.from, to: r.to, role: r.who, text: `${r.action}. Hedef: ${r.target}`, milestone: r.milestone }));
   return (
     <>
-      <PageHeader title="Eylem planı" purpose="istoc.com genel planını, her satırda tarihli bir eylem ve ölçülebilir bir hedefle gösterir." meta={[{ label: 'Dönem', value: `${formatDate(start)} – ${formatDate(end)}` }]} />
+      <PageHeader title="Eylem planı" purpose="istoc.com genel planını, her satırda tarihli bir eylem ve ölçülebilir bir hedefle gösterir." meta={[{ label: 'Dönem', value: `${formatDate(start)} ile ${formatDate(end)} arası` }]} />
 
       <GuncelPlan />
 
-      <Section id="gantt" index={1} title="Gantt şeması" desc={`Kesikli çizgiler, 60. gün (${shortDate(dates.day60)}) ve 90. gün (${shortDate(dates.day90)}) kontrollerini gösterir.`}>
+      <Section id="gantt" index={1} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} tarihi 60. gündür. ${longDate(dates.day90)} tarihi 90. gündür.`}>
         <Chart
           id="gantt"
-          title="Kişi × zaman"
-          summary={`${actionRows.length} eylem, ${formatDate(start)} ile ${formatDate(end)} arasında. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)}.`}
+          title="Kişilere göre zaman çizelgesi"
+          summary={`Satırlar kişileri, sütunlar zamanı gösterir. Çizelgede ${formatDate(start)} ile ${formatDate(end)} arasında ${actionRows.length} eylem var. Kontrol günleri ${longDate(dates.day60)} ve ${longDate(dates.day90)} tarihleridir.`}
           spec={{
             kind: 'gantt',
             start,
@@ -279,7 +279,7 @@ function PlanContent() {
           title="Eylem, tarih ve hedef"
           columns={[
             { key: 'who', header: 'Kim', nowrap: true, rowHeader: true, render: (r) => <RoleChip role={r.who} /> },
-            { key: 'when', header: 'Tarih', summary: true, nowrap: true, render: (r) => `${shortDate(r.from)} – ${shortDate(r.to)}` },
+            { key: 'when', header: 'Tarih', summary: true, nowrap: true, render: (r) => `${longDate(r.from)} ile ${longDate(r.to)} arası` },
             { key: 'action', header: 'Eylem', minWidth: '20rem', render: (r) => r.action },
             { key: 'target', header: 'Hedef', minWidth: '14rem', render: (r) => <Target row={r} /> },
           ]}
@@ -304,28 +304,28 @@ function AuthorityContent({ ilkNo }: { ilkNo: number }) {
         <Chart
           id="yetki"
           title="Yatırımcıdan İsmail Karaca’ya karar yetkisi"
-          summary={`Yatırımcı ürün, bütçe ve kayıp tavanına karar verir. İsmail Karaca maliyet, kanıt ve kapasiteyi yönetir. Harcama yetki sınırı içinde İsmail Karaca, sınırı aşarsa yatırımcı karar verir. Kanal olarak yalnız A (iç satış ve saha, seçilen kanal) veya B (dijital müşteri edinme) kullanılır. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} tarihlerinde yapılır. Her kontrolde planı sürdürme, iyileştirme veya durdurma kararı verilir.`}
+          summary={`Yatırımcı ürüne ve bütçeye karar verir. En çok ne kadar zarar edilebileceğine de yatırımcı karar verir. İsmail Karaca maliyeti, kanıtı ve ekibin kapasitesini yönetir. Harcama yetki sınırını aşmıyorsa İsmail Karaca karar verir. Harcama bu sınırı aşıyorsa yatırımcı karar verir. Müşteri bulmak için iki kanal var. A kanalı iç satış ve sahadır. B kanalı dijital yoldan müşteri bulmaktır. Yalnız biri kullanılır. Bugün A kanalı seçili. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} tarihlerinde yapılır. Her kontrolde planı sürdürme, iyileştirme veya durdurma kararı verilir.`}
           spec={{ kind: 'gov', root: govChart(governanceTree) }}
           size="xxl"
           wide
         />
       </Section>
 
-      <Section id="kontrol" index={ilkNo + 1} title="Kontrol noktaları" desc={`Ciro değerleri, aylık ${pct(m.planRetention)} elde tutma senaryosuyla hesaplandı.`}>
+      <Section id="kontrol" index={ilkNo + 1} title="Kontrol noktaları" desc={`Ciro hesaplanırken şu varsayıldı: Satıcıların ${pct(m.planRetention)} kadarı her ay aboneliğini sürdürür.`}>
         <Chart
           id="kontrol"
-          title="Kümülatif aktif satıcı ve ciro"
+          title="Başlangıçtan bu yana aktif satıcı ve ciro"
           summary={checkpoints.map((c) => `${c.day} (${formatDate(c.date)}): ${c.aktif} aktif satıcı, ${lira(c.ciro)}`).join('. ')}
           spec={{ kind: 'checkpoint', days: checkpoints.map((c) => c.day), aktif: checkpoints.map((c) => c.aktif), ciro: checkpoints.map((c) => c.ciro), target: CIRO_TARGET }}
         />
         <DataTable
           id="kontrol"
-          title="Eşik ve karar"
+          title="Kontrol günlerindeki eşikler ve kararlar"
           columns={[
             { key: 'd', header: 'Kontrol', nowrap: true, rowHeader: true, render: (c: (typeof checkpoints)[number]) => `${c.day} (${shortDate(c.date)})` },
-            { key: 'a', header: 'Aktif satıcı', nowrap: true, render: (c) => `≥ ${c.aktif}` },
-            { key: 'k', header: 'Kayıt', nowrap: true, render: (c) => `≥ ${c.kayit}` },
-            { key: 'c', header: 'Kümülatif ciro', nowrap: true, render: (c) => `≥ ${lira(c.ciro)}` },
+            { key: 'a', header: 'Aktif satıcı', nowrap: true, render: (c) => `en az ${c.aktif}` },
+            { key: 'k', header: 'Kayıt', nowrap: true, render: (c) => `en az ${c.kayit}` },
+            { key: 'c', header: 'Başlangıçtan bu yana ciro', nowrap: true, render: (c) => `en az ${lira(c.ciro)}` },
             { key: 'r', header: 'Karar', summary: true, minWidth: '16rem', render: (c) => c.rule },
           ]}
           rows={checkpoints}
@@ -377,23 +377,23 @@ function PendingContent() {
       <PageHeader
         title="Kararlar"
         purpose="Bekleyen ve verilen kararları, karar yetkisini ve kontrol noktalarını tek yerde gösterir."
-        meta={[{ label: 'Durum', value: `${ozet.bekleyen} bekliyor (${ozet.gecikmis} gecikmiş), ${ozet.verilen} verildi, ${ozet.yururlukte} yürürlükte` }]}
+        meta={[{ label: 'Durum', value: `${ozet.bekleyen} karar bekliyor. Bunlardan ${ozet.gecikmis} tanesi gecikmiş. ${ozet.verilen} karar verildi. Bunlardan ${ozet.yururlukte} tanesi yürürlükte.` }]}
       />
 
       <KararSecimleri />
 
-      <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Son tarihi geçen karar “gecikti” olarak işaretlenir. Karar girilmeden hiçbir kayıt “verildi” olarak gösterilmez.">
+      <Section id="bekleyen" index={1} title="Bekleyen kararlar" desc="Site, son tarihi geçen kararı “Gecikti” diye işaretler. Bir kayıt ancak karar yazılınca “Verildi” olur.">
         <Chart
           id="son-tarih"
-          title="Karar × son tarih"
-          summary={sorted.map((d) => `${d.soru}: ${shortDate(d.sonTarih!)}, ${ROLE_LABELS[d.sahip]}`).join('. ')}
+          title="Bekleyen kararların son tarihleri"
+          summary={sorted.map((d) => `“${d.soru}” kararının son tarihi ${shortDate(d.sonTarih!)}. Kararı veren: ${ROLE_LABELS[d.sahip]}`).join('. ')}
           spec={{ kind: 'deadlines', start: addDays(deadlines[0], -7), end: addDays(deadlines[deadlines.length - 1], 14), items: sorted.map((d) => ({ name: d.soru, date: d.sonTarih!, role: d.sahip })) }}
           size="md"
           wide
         />
         <DataTable<KararKaydi>
           id="karar"
-          title="Soru, seçenekler, etki, karar veren"
+          title="Bekleyen kararlar ve etkileri"
           columns={[
             {
               key: 'sonTarih',
@@ -404,7 +404,7 @@ function PendingContent() {
                 <>
                   {d.sonTarih ? shortDate(d.sonTarih) : 'Son tarih yok'}
                   <span className="cell-sub" data-durum={gorunum(d)}>
-                    {gorunum(d) === 'gecikti' ? `${KARAR_DURUM_ADI.gecikti} (${gecikmeGun(d)} gün)` : KARAR_DURUM_ADI[gorunum(d)]}
+                    {gorunum(d) === 'gecikti' ? `${KARAR_DURUM_ADI.gecikti}. Son tarihten bu yana ${gecikmeGun(d)} gün geçti.` : KARAR_DURUM_ADI[gorunum(d)]}
                   </span>
                 </>
               ),
@@ -444,10 +444,10 @@ function PendingContent() {
         />
       </Section>
 
-      <Section id="kesin" index={2} title="Verilen kararlar" desc="Tablo, 19 Ekim 2026 tahta kararlarını ve sahibin 28 Ekim’de verdiği cevapları listeler. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
+      <Section id="kesin" index={2} title="Verilen kararlar" desc="Tablo üç tarihteki kararları listeler: 19 Ekim 2026, 28 Ekim 2026 ve 3 Kasım 2026. 19 Ekim kararları “Arşiv” sayfasındaki tahta notlarına dayanır. 28 Ekim ve 3 Kasım kararlarını sahip verdi. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
         <DataTable<KararKaydi>
           id="verilen"
-          title="Tarih, konu, karar, durum"
+          title="Verilen kararların listesi"
           columns={[
             { key: 'kararTarihi', header: 'Karar tarihi', nowrap: true, rowHeader: true, render: (d) => longDate(d.kararTarihi!) },
             { key: 'soru', header: 'Konu', minWidth: '12rem', render: (d) => d.soru },
@@ -459,8 +459,18 @@ function PendingContent() {
               render: (d) => (
                 <>
                   {d.sonuc}
-                  {d.politika ? <span className="cell-sub">Politika: {d.politika}</span> : null}
-                  {d.acik?.length ? <span className="cell-sub">Açık: {d.acik.join(' ')}</span> : null}
+                  {d.politika ? <span className="cell-sub">{d.politika}</span> : null}
+                  {/* Her soru ayrı satırdadır. Sorular tek cümlede birleşmez. */}
+                  {d.acik?.length ? (
+                    <>
+                      <span className="cell-sub">Cevap bekleyen sorular şunlardır:</span>
+                      {d.acik.map((q) => (
+                        <span key={q} className="cell-sub">
+                          {q}
+                        </span>
+                      ))}
+                    </>
+                  ) : null}
                 </>
               ),
             },
@@ -468,7 +478,7 @@ function PendingContent() {
               key: 'durum',
               header: 'Durum',
               nowrap: true,
-              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} (${shortDate(d.yururlukTarihi!)})` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi}, yürürlük ${shortDate(d.yururlukTarihi)}` : `${KARAR_DURUM_ADI.verildi}, uygulama bekliyor`),
+              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} (${shortDate(d.yururlukTarihi!)})` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi}. ${shortDate(d.yururlukTarihi)} tarihinde yürürlüğe girer.` : `${KARAR_DURUM_ADI.verildi}. Uygulama bekliyor.`),
             },
             {
               key: 'ilgili',
@@ -484,7 +494,7 @@ function PendingContent() {
                     ))}
                   </ul>
                 ) : (
-                  '—'
+                  'Yok'
                 ),
             },
           ]}
@@ -497,11 +507,11 @@ function PendingContent() {
         id="ucret"
         index={3}
         title="Ücret ve prim"
-        desc={`İşveren maliyeti = maaş × ${params.costFactor.toLocaleString('tr-TR')} (SGK, yemek, bilgisayar, vergi ve diğerleri). Prim yalnız kriterleri tamamlanan satış için ödenir. Saha kotası, ay içinde ${lira(m.quota)} tutarında satıştır.`}
+        desc={`İşveren maliyeti maaşın ${params.costFactor.toLocaleString('tr-TR')} katıdır. Bu tutara SGK, yemek, bilgisayar, vergi ve diğer giderler dahildir. Prim yalnız CRM’deki ${crmStages.filter((c) => c.commission).length} prim koşulu tamamlanan satış için ödenir. Bu koşullar bir sonraki bölümde yazılı. Saha kotası, ay içinde ${lira(m.quota)} tutarında satıştır.`}
       >
         <DataTable<PayRule>
           id="ucret"
-          title="Kişi başı, aylık"
+          title="Kişi başı aylık ücret ve prim"
           columns={[
             { key: 'who', header: 'Kim', minWidth: '13rem', rowHeader: true, render: (r) => r.who },
             { key: 'status', header: 'Statü', minWidth: '12rem', render: (r) => r.status },
@@ -513,24 +523,24 @@ function PendingContent() {
         />
         <Note title="Hesap">
           <p>
-            90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} kadarı saha ekibine aittir ({params.sahaCount} kişi 3 ay, {params.sahaDecCount} kişi {m.decMonths} ay).
+            90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} tutarı saha ekibinin maliyetidir. Saha ekibinde {params.sahaCount} kişi 3 ay, {params.sahaDecCount} kişi {m.decMonths} ay çalışır.
           </p>
           <p>
-            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Formül şudur: temsilci {lira(params.commission)} + sponsor {lira(params.sponsorShare)} + ekip lideri {lira(params.leadTeamShare)}.
+            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Temsilci {lira(params.commission)}, sponsor {lira(params.sponsorShare)} ve ekip lideri {lira(params.leadTeamShare)} alır.
           </p>
         </Note>
       </Section>
 
-      <Section id="crm" index={4} title="CRM aşamaları ve prim kriterleri" desc="CRM aracı olarak Frappe CRM kullanılır. Prim kriterleri CRM aşamalarıyla aynıdır. Onboarding, Mağaza açıldı, İlk ürünler ve Ödeme aşamaları tamamlanınca prim hak edilir.">
+      <Section id="crm" index={4} title="CRM aşamaları ve prim koşulları" desc="CRM aracı olarak Frappe CRM kullanılır. Prim koşulları CRM aşamalarıyla aynıdır. Şu dört aşama tamamlanınca prim hak edilir: “Onboarding”, “Mağaza açıldı”, “İlk ürünler” ve “Ödeme”. Bu aşamaların sorumlusu saha ekibi ya da temsilcidir.">
         <Chart
           id="crm-asamalari"
           title="Adaydan yenilemeye"
-          summary={crmStages.map((c, i) => `${i + 1}. ${c.stage}${c.commission ? ' (prim kriteri)' : ''}`).join('. ')}
+          summary={crmStages.map((c, i) => `${i + 1}. ${c.stage}${c.commission ? ' (prim koşulu)' : ''}`).join('. ')}
           spec={{
             kind: 'chain',
             steps: crmStages.map((c, i) => ({
               name: `${i + 1}. ${c.stage}`,
-              sub: c.stage === 'Ödeme' ? `Prim hak edilir: ${lira(COMMISSION_PER_SALE)}` : c.commission ? 'Prim kriteri' : c.owner,
+              sub: c.stage === 'Ödeme' ? `Prim hak edilir: ${lira(COMMISSION_PER_SALE)}` : c.commission ? 'Prim koşulu' : c.owner,
               role: c.commission ? 'saha-uzmani' : 'yonetici',
             })),
           }}
@@ -538,12 +548,12 @@ function PendingContent() {
         />
         <DataTable<CrmStage>
           id="crm"
-          title="Aşama, geçiş kuralı, sorumlu"
+          title="CRM aşamaları ve geçiş kuralları"
           columns={[
             { key: 'stage', header: 'Aşama', nowrap: true, rowHeader: true, render: (r) => r.stage },
             { key: 'rule', header: 'Geçiş kuralı', summary: true, minWidth: '18rem', render: (r) => r.rule },
             { key: 'owner', header: 'Sorumlu', minWidth: '11rem', render: (r) => r.owner },
-            { key: 'commission', header: 'Prim kriteri', nowrap: true, render: (r) => (r.commission ? 'Evet' : 'Hayır') },
+            { key: 'commission', header: 'Prim koşulu mu?', nowrap: true, render: (r) => (r.commission ? 'Evet' : 'Hayır') },
           ]}
           rows={crmStages}
         />
@@ -553,7 +563,7 @@ function PendingContent() {
         id="mesai"
         index={5}
         title="Mesai modeli: yasal tavan"
-        desc={`Dayanak 4857 sayılı İş Kanunu’dur. Yıllık fazla çalışma tavanı ${OVERTIME_CAP} saattir. En temkinli yoruma göre bu süre, işe girişten itibaren 12 ay içinde sayılır.`}
+        desc={`Bu kurallar 4857 sayılı İş Kanunu’na dayanır. Yıllık fazla çalışma en çok ${OVERTIME_CAP} saat olabilir. ${OVERTIME_CAP} saat, işçinin işe girdiği günden sonraki 12 ay içinde sayılır. Kanunun en güvenli okuması budur.`}
       >
         <DataTable
           id="yasal"
@@ -578,7 +588,7 @@ function PendingContent() {
         />
         <Chart
           id="fazla-calisma"
-          title="Kişi başı kümülatif fazla çalışma"
+          title="Kişi başı birikmiş fazla çalışma"
           note={`Kesikli çizgi, Dönem 1 düzeni sürseydi tavanın ${crossWeek}. haftada (${shortDate(addDays(dates.firstDay, (crossWeek - 1) * 7))}) dolacağını gösterir.`}
           summary={`Program başında başlayanlar ${overtimeUsed.kasim} saat, organizatör ${overtimeUsed.organizator} saat fazla çalışmayla Dönem 1’i bitirir. Yasal tavan ${OVERTIME_CAP} saattir. Dönem 1 düzeni sürseydi tavan ${crossWeek}. haftada dolardı.`}
           spec={{
@@ -597,7 +607,7 @@ function PendingContent() {
         />
         <Note title="Fazla çalışma ücreti">
           <p>
-            Saha için saat ücreti {lira(params.sahaSalary / 225)}, fazla çalışmanın saat ücreti {lira(overtimeHourly)} olur. Hesapta maaş 225 saate bölünür ve %50 zam eklenir. Bordroda brüt tutar esas alınır.
+            Saha için saat ücreti {lira(params.sahaSalary / 225)}, fazla çalışmanın saat ücreti {lira(overtimeHourly)} olur. Hesapta {lira(params.sahaSalary)} maaş 225 saate bölünür. Bu saat ücretine %50 eklenir. Bordroda ise brüt maaş kullanılır.
             Dönem 1’de ayda yaklaşık {monthlyOvertime} saat fazla çalışma olur. Bu, kişi başı ayda yaklaşık {lira(monthlyOvertime * overtimeHourly)} eder. {p2.name} ile bu gider ortadan kalkar.
           </p>
         </Note>
@@ -617,12 +627,12 @@ function GrowthContent() {
 
   return (
     <>
-      <PageHeader title="Çok katmanlı pazarlama ağı (MLM)" purpose="Bağımsız satış temsilcilerinin Meta reklamlarıyla bulunduğu ve yalnız gerçek satıştan kazandığı doğrudan satış modelini gösterir." />
+      <PageHeader title="Çok katmanlı pazarlama ağı (MLM)" purpose="Bu sayfa, yalnız gerçek satıştan kazanan bağımsız temsilcilerle doğrudan satış modelini gösterir." />
 
-      <Section id="kademe" index={1} title="Kademeler" desc={`${longDate(dates.day90)} hedefi.`}>
+      <Section id="kademe" index={1} title="Kademeler" desc={`Bu kademeler ${longDate(dates.day90)} için hedeftir. Çekirdek ekipte saha, masa başı, dijital pazarlama ve organizatör çalışanları var. Ekip lideri bu sayıya girmez.`}>
         <Chart
           id="piramit"
-          title="Kademe piramidi"
+          title="Kademe şeması"
           summary={levels.map((l) => `${l.level} ${l.name}: ${l.count} kişi`).join('. ')}
           spec={{ kind: 'piramit', items: levels.map((l, i) => ({ name: l.name, count: l.count, role: LEVEL_ROLES[i] })) }}
         />
@@ -631,18 +641,18 @@ function GrowthContent() {
           title="Kademe ve kişi sayısı"
           columns={[
             { key: 'l', header: 'Seviye', nowrap: true, rowHeader: true, render: (l: (typeof levels)[number]) => l.level },
-            { key: 'n', header: 'Kademe', minWidth: '14rem', render: (l) => l.name },
-            { key: 'c', header: 'Kişi', summary: true, nowrap: true, render: (l) => l.count },
+            { key: 'n', header: 'Kim', minWidth: '14rem', render: (l) => l.name },
+            { key: 'c', header: 'Kişi sayısı', summary: true, nowrap: true, render: (l) => l.count },
           ]}
           rows={levels}
         />
       </Section>
 
-      <Section id="huni" index={2} title="Haftalık işe alım hunisi" desc={`Meta reklamına haftada ${lira(params.metaWeekly)}, yani ayda yaklaşık ${lira((params.metaWeekly * 52) / 12)} harcanır. Bu bütçeyle ayda en fazla yaklaşık ${m.growth.monthlyRepsText} aktif temsilci kazanılır.`}>
+      <Section id="huni" index={2} title="Haftalık temsilci bulma adımları" desc={`Meta reklamına haftada ${lira(params.metaWeekly)}, yani ayda yaklaşık ${lira((params.metaWeekly * 52) / 12)} harcanır. Bu bütçeyle ayda en çok ${m.growth.monthlyRepsText} aktif temsilci kazanılabilir.`}>
         <Chart
           id="huni"
           title="Başvurudan aktif temsilciye (haftalık)"
-          summary={recruitmentFunnel.map((f) => `${f.stage}: ${new Intl.NumberFormat('tr-TR').format(f.value)}`).join('. ')}
+          summary={`Haftalık ortalama kişi sayısı. ${recruitmentFunnel.map((f) => `${f.stage}: ${new Intl.NumberFormat('tr-TR').format(f.value)} kişi`).join('. ')}`}
           spec={{ kind: 'huni', role: 'ekip-lideri', items: recruitmentFunnel.map((f) => ({ name: f.stage, value: f.value })) }}
           size="lg"
         />

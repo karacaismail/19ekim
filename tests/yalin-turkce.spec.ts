@@ -1,14 +1,16 @@
-import { expect, test, type Page } from '@playwright/test';
-import { YAYIMLANAN } from '../src/data/icerik';
+import { expect, test } from './fixtures/persona';
 import { buildModel, reply } from './opex-fixture';
+import { sayfayiGez, TUM_SAYFALAR } from './sayfa-gezgini';
 
 /**
  * Yalın Türkçe kuralları (Claude ve Codex ortak kural seti, 10 Kasım 2026). Kullanıcı kararı 11 Kasım 2026: sitenin
  * bütün sayfaları bu kurallara uyar. Onboarding'in kendi dil testleri vardır (onboarding.spec.ts).
  *
- * Test her sayfayı açar. Kapalı panelleri, anahtarları ve sekmeleri tek tek açar. Görünen metni bloklara ayırır.
- * Grafiklerin ekran okuyucu özetinde yalnız işaretler denetlenir. Özet bir veri listesidir. Kod blokları (JSON çıktısı)
- * denetlenmez.
+ * Test her sayfayı açar. Kapalı panelleri, anahtarları, sekmeleri, açılır pencereleri ve seçim listelerini tek tek açar.
+ * Ana sayfada üst menüler ve menü çekmecesi de açılır. Görünen metni bloklara ayırır. Sekme adı, sayfa açıklaması,
+ * ipuçları (`title`) ve grafik yazıları (eksen, gösterge) da denetlenir. Grafiklerin ekran okuyucu özetinde yalnız
+ * işaretler denetlenir. Özet bir veri listesidir. Kod blokları (JSON çıktısı) denetlenmez. Giriş ekranı ve bulunamayan
+ * sayfa ayrı testte denetlenir.
  *
  * Kurallar:
  * - Noktalı virgül, uzun çizgi ve orta nokta kullanılmaz. Boş hücredeki tek `—` bir veri işaretidir, serbesttir.
@@ -16,6 +18,9 @@ import { buildModel, reply } from './opex-fixture';
  * - Tam cümlede okla fikir bağlanmaz.
  * - Açıklama cümlesi en çok 15, talimat cümlesi en çok 10 kelimedir.
  * - Açıklama “Etiket: açıklama.” biçiminde kurulmaz. Kısa değer alanı (“Kayıt: Yalnız bu tarayıcı”) serbesttir.
+ * - Okunur yazım (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027, Cumartesi” biçimindedir, ISO tarih yazılmaz.
+ *   Ondalık sayı virgülle yazılır (“8,9”). Yüzde işareti sayıdan önce gelir (“%36”). Birim zinciri (“gün/kadın/yıl”)
+ *   yerine söz kullanılır (“kadın başına yılda”).
  *
  * İstisnalar (kullanıcı kararı 11 Kasım 2026): Arşiv sayfası tahtadaki notların aynen kopyasıdır. Aynen korunan
  * alıntı değiştirilmez. Kaynak künyesi (`data-yalin="kunye"`) yayın adı ve başlıktır, etiket dizisi sayılmaz. Google
@@ -23,23 +28,25 @@ import { buildModel, reply } from './opex-fixture';
  */
 
 const ATLA = new Set(['/onboarding/', '/arsiv/']);
-const SAYFALAR = [
-  ...YAYIMLANAN.map((k) => k.path).filter((p) => !ATLA.has(p)),
-  '/istihdam/?surum=v2',
-  '/satis-ortakligi/?surum=v2',
-];
+const SAYFALAR = TUM_SAYFALAR.filter((p) => !ATLA.has(p));
 
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbTestDeploymentId_1234567890abcdef/exec';
 const KEY = 'opex_test_anahtari_123';
 const MODEL = buildModel();
 
-/** Sayfanın görünen metnini bloklara ayırır. Satır içi öğeler birleşir, blok öğeler ayrı blok olur. */
-function bloklar() {
-  const INLINE = new Set(['A', 'SPAN', 'STRONG', 'EM', 'B', 'I', 'CODE', 'SMALL', 'ABBR', 'TIME', 'SUB', 'SUP', 'MARK', 'Q', 'KBD', 'S', 'U', 'DATA', 'VAR', 'BDI', 'DFN', 'CITE']);
-  const ATLANAN = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'SVG', 'svg', 'CANVAS', 'PRE', 'IFRAME', 'INPUT', 'TEXTAREA', 'SELECT']);
-  const out: { metin: string; tur: 'blok' | 'hucre' | 'baslik' | 'kunye' | 'ozet' }[] = [];
+type Tur = 'blok' | 'hucre' | 'baslik' | 'kunye' | 'ozet' | 'terim';
+
+/**
+ * Sayfanın görünen metnini bloklara ayırır. Satır içi öğeler birleşir, blok öğeler ayrı blok olur. Kökler ana içerik,
+ * alt bilgi ve ana içeriğin dışında açılan pencerelerdir (menü, seçim listesi, iletişim kutusu, ipucu).
+ */
+function bloklar(kokSecici = 'main, .app-footer') {
+  const INLINE = new Set(['A', 'SPAN', 'STRONG', 'EM', 'B', 'I', 'SMALL', 'ABBR', 'TIME', 'SUB', 'SUP', 'MARK', 'Q', 'KBD', 'S', 'U', 'DATA', 'VAR', 'BDI', 'DFN', 'CITE']);
+  // Kod (`code`, `pre`) doğal dil değildir: sürüm numarası ve kimlik kodu denetlenmez.
+  const ATLANAN = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'SVG', 'svg', 'CANVAS', 'PRE', 'CODE', 'IFRAME', 'INPUT', 'TEXTAREA', 'SELECT']);
+  const out: { metin: string; tur: Tur }[] = [];
   let tampon = '';
-  let tur: 'blok' | 'hucre' | 'baslik' | 'kunye' = 'blok';
+  let tur: Tur = 'blok';
   const bosalt = () => {
     const t = tampon.replace(/\s+/g, ' ').trim();
     if (t) out.push({ metin: t, tur });
@@ -55,6 +62,12 @@ function bloklar() {
     if (ATLANAN.has(el.tagName) || el.dataset.kaynak === 'sheets' || el.classList.contains('chart-fallback') || el.classList.contains('visually-hidden') || el.getAttribute('aria-hidden') === 'true') return;
     const cs = getComputedStyle(el);
     const satirIci = cs.display === 'none' ? INLINE.has(el.tagName) : cs.display === 'inline' || cs.display === 'contents';
+    // Satır içi kaynak bağlantısı yayın adıdır. Cümlede yer tutucu olarak kalır, adı ayrıca künye olarak kaydedilir.
+    if (satirIci && el.dataset.yalin === 'kunye') {
+      tampon += ' «kaynak» ';
+      out.push({ metin: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), tur: 'kunye' });
+      return;
+    }
     if (satirIci && el.tagName !== 'BR') {
       for (const c of el.childNodes) gez(c);
       return;
@@ -65,50 +78,37 @@ function bloklar() {
     // Dar ekrandaki kayıt başlığı, geniş ekrandaki satır başlığı hücresinin karşılığıdır.
     else if (el.tagName === 'TD' || el.tagName === 'TH' || el.classList.contains('kayit-ad')) tur = 'hucre';
     else if (el.dataset.yalin === 'kunye') tur = 'kunye';
+    // Sözlük satırı: terim (`dt`) ve hemen ardından tanımı (`dd`). Terim kısaltmanın açılışı sayılır.
+    else if (el.tagName === 'DT' && el.nextElementSibling?.tagName === 'DD') tur = 'terim';
     for (const c of el.childNodes) gez(c);
     bosalt();
     tur = eski;
   };
-  // Sayfa içeriği ve alt bilgi denetlenir. Alt bilgi her sayfada kapsam cümlesini taşır.
-  for (const kok of [document.querySelector('main'), document.querySelector('.app-footer')]) if (kok) gez(kok);
+  // Sayfa içeriği ve alt bilgi denetlenir. Alt bilgi her sayfada kapsam cümlesini taşır. Ana içeriğin dışında açılan
+  // pencereler (menü, seçim listesi, iletişim kutusu, ipucu) ayrıca gezilir.
+  const ACILIR = '[role="dialog"], [role="menu"], [role="listbox"], .mantine-Popover-dropdown, .mantine-Tooltip-tooltip';
+  const kokler = [...document.querySelectorAll(`${kokSecici}, ${ACILIR}`)].filter((k, i, hepsi) => !hepsi.some((d, j) => j !== i && d !== k && d.contains(k)));
+  for (const kok of kokler) gez(kok);
   bosalt();
-  for (const c of document.querySelectorAll('main .chart-canvas[aria-label]')) out.push({ metin: c.getAttribute('aria-label') ?? '', tur: 'ozet' });
-  return out;
-}
-
-/** Kapalı panelleri ve anahtarları tek tek açar. Her açılıştan sonra blokları toplar. */
-async function hepsiniTopla(page: Page) {
-  const toplanan = new Map<string, string>();
-  const ekle = async () => {
-    for (const b of await page.evaluate(bloklar)) toplanan.set(`${b.tur}\u0000${b.metin}`, b.tur);
-  };
-  const SEC = 'main button[aria-expanded="false"]:not([aria-haspopup]), main [role="switch"][aria-checked="false"]';
-  const ac = async () => {
-    for (let tur = 0; tur < 3; tur++) {
-      const n = await page.locator(SEC).count();
-      if (!n) break;
-      for (let i = 0; i < Math.min(n, 80); i++) {
-        const b = page.locator(SEC).first();
-        if (!(await b.count())) break;
-        const tiklandi = await b.evaluate((x) => (x.closest('nav') ? false : ((x as HTMLElement).click(), true))).catch(() => false);
-        if (!tiklandi) break;
-        await page.waitForTimeout(80);
-        await ekle();
-      }
+  for (const kok of kokler) {
+    for (const c of kok.querySelectorAll('.chart-canvas[aria-label]')) out.push({ metin: c.getAttribute('aria-label') ?? '', tur: 'ozet' });
+    // Grafik yazıları: eksen adı, eksen değeri, gösterge. Kısa değerdir, hücre gibi denetlenir.
+    for (const t of kok.querySelectorAll('svg text')) {
+      const y = (t.textContent ?? '').replace(/\s+/g, ' ').trim();
+      if (y) out.push({ metin: y, tur: 'hucre' });
     }
-  };
-  await ekle();
-  await ac();
-  const sekmeler = page.locator('main [role="tab"]');
-  const sekmeSayisi = await sekmeler.count();
-  for (let i = 0; i < sekmeSayisi; i++) {
-    if (!(await sekmeler.nth(i).isVisible().catch(() => false))) continue;
-    await sekmeler.nth(i).click().catch(() => undefined);
-    await page.waitForTimeout(150);
-    await ac();
-    await ekle();
+    // İpucu metni fareyle görünür. Okur onu da okur.
+    for (const e of kok.querySelectorAll('[title]')) {
+      const y = (e.getAttribute('title') ?? '').trim();
+      if (y && y !== (e.textContent ?? '').trim()) out.push({ metin: y, tur: 'blok' });
+    }
   }
-  return [...toplanan].map(([k, tur]) => ({ metin: k.split('\u0000')[1], tur }));
+  if (kokSecici.includes('main')) {
+    out.push({ metin: document.title, tur: 'baslik' });
+    const aciklama = document.querySelector('meta[name="description"]')?.getAttribute('content');
+    if (aciklama) out.push({ metin: aciklama, tur: 'blok' });
+  }
+  return out;
 }
 
 /** Kelime sayımı: boşlukla ayrılan kelime, sayı ve ayrı yazılan birim (€, ₺) birer kelimedir. */
@@ -142,13 +142,22 @@ function ihlaller(metin: string, tur: string) {
   if (metin.includes('·')) sonuc.push('orta nokta');
   if (/(?:^|[\s(“"'])(?:gün|Gün|GÜN)\s+\d+/u.test(metin)) sonuc.push('“Gün 30” biçimi');
   if (/\d+\. ile \d+\. gün/u.test(metin)) sonuc.push('“1. ile 3. gün” biçimi');
+  // Okunur yazım (kullanıcı kararı 13 Kasım 2026): tarih, ondalık sayı, yüzde ve birim okurun diliyle yazılır.
+  // Kaynak künyesi yayının kendi adıdır. Künyede bu kurallar uygulanmaz.
+  if (tur !== 'kunye') {
+    if (/\b\d{4}-\d{2}-\d{2}\b/.test(metin)) sonuc.push('ISO tarih: “1 Mayıs 2027, Cumartesi” biçiminde yazın');
+    if (/\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/.test(metin)) sonuc.push('sayılı tarih: “1 Mayıs 2027” biçiminde yazın');
+    if (/(?<![\p{L}\d.,])\d{1,3}\.\d{1,2}(?![\d.])/u.test(metin)) sonuc.push('ondalık nokta: “8,9” biçiminde virgülle yazın');
+    if (/\d\s?%(?!\d)/.test(metin)) sonuc.push('yüzde: işaret sayıdan önce gelir, “%36” yazın');
+    if (/\p{L}+\s*\/\s*\p{L}+\s*\/\s*\p{L}+/u.test(metin)) sonuc.push('birim: “kadın başına yılda” gibi sözle yazın');
+  }
   // Başlık, künye ve grafik özeti cümle değil, ad ya da veri listesidir. Bunlarda yalnız işaretler denetlenir.
   if (tur === 'baslik' || tur === 'kunye' || tur === 'ozet') return sonuc;
   const tamCumle = /[.!?…]["”]?$/.test(metin) || /[.!?…]["”]?\s/.test(metin);
   if (tamCumle && /[→⇒]/.test(metin) && kelimeler(metin).length >= 7) sonuc.push('okla fikir bağlama');
   // Kısa değer alanı (en çok 3 kelime, noktasız) cümle sayılmaz.
   if (kelimeler(metin).length <= 3 && !/[.!?…]$/.test(metin)) return sonuc;
-  if (tur !== 'hucre' && tur !== 'ozet') {
+  if (tur !== 'hucre' && tur !== 'ozet' && tur !== 'terim') {
     const etiket = metin.match(/^([\p{Lu}][\p{L} ]{0,24}):\s+(.+)$/u);
     if (etiket) {
       const deger = etiket[2].trim();
@@ -168,41 +177,106 @@ function ihlaller(metin: string, tur: string) {
   return sonuc;
 }
 
+/**
+ * Kısaltma kuralı (kullanıcı kararı 13 Kasım 2026): sayfadaki her kısaltma o sayfada en az bir kez açılır.
+ *
+ * Kısaltma en az iki büyük harf taşıyan, 2 ile 6 karakterlik kelimedir. Örneğin KVKK, B2B, GA4 ve OpEx kısaltmadır.
+ * Açılış biçimleri şunlardır:
+ * - Türkçe ad önce, kısaltma parantezde: “ortak sağlık ve güvenlik birimi (OSGB)”. Tercih edilen biçim budur.
+ * - Kısaltma önce, açılış hemen ardından parantezde ve bir kelimeyle başlar: “LTV (satıcıdan beklenen gelir)”.
+ * - “API, yani yazılım bağlantısı” biçimi.
+ * - Sözlükte terim satırı (`dt`) ve hemen ardından tanımı (`dd`).
+ *
+ * Virgülle sıralanan liste açılış sayılmaz: “(GA4, Yandex Metrica, GTM)”. Okurun her gün bildiği kısaltmalar ve ürün ya
+ * da kurum adları serbesttir. Örnek: TL, KDV, SGK, CRM. Kod biçimindeki kimlikler (P1, R12, S01) kısaltma sayılmaz.
+ * Kaynak künyesi denetlenmez.
+ */
+// Okurun her gün gördüğü kısaltmalar.
+const BILINEN = new Set(['TL', 'KDV', 'SGK', 'CRM', 'ABD', 'AB', 'USD', 'EUR', 'KOBİ', 'TÜFE', 'GPS', 'GB', 'TB', 'USB', 'LED', 'QR', 'PDF', 'TV', 'DVD', 'HD', 'JSON', 'CSV', 'URL', 'II', 'III', 'IV', 'VI', 'VII', 'VIII', 'IX', 'XI', 'XII']);
+// Marka, ürün ve kurum adları ile satıştaki ürün özelliği adları. Bunlar açılmaz, çünkü adın kendisidir. Örnek: Garanti
+// BBVA, TÜV SÜD, Mercer IPE, IPS monitör.
+const ADLAR = new Set(['İSTOÇ', 'İBB', 'MEB', 'TÜİK', 'AVM', 'DJI', 'JBL', 'HP', 'ASUS', 'IKEA', 'BMJ', 'DHL', 'UPS', 'PTT', 'MNG', 'BOE', 'NHS', 'PwC', 'EY', 'KPMG', 'OECD', 'IMF', 'TBMM', 'GE', 'BBVA', 'GDX', 'GO', 'RB', 'SGS', 'TÜV', 'SÜD', 'PYMNTS', 'CLS', 'PR', 'MATCH', 'IPE', 'GGS', 'ETA', 'IPS', 'UHF', 'DHgate', 'TikTok', 'CapCut', 'GitLab', 'WTW', 'YouTube']);
+// Kullanıcı kararıyla kırıntıda duran ad: “Finans › OpEx › Operasyonel Giderler”. Kırıntıdaki sonraki ad açılımdır.
+const KARARLI = new Set(['OpEx']);
+// Anlamı kaynakta yazmayan kısaltmalar. Bunlar uydurularak açılmaz, kullanıcıya sorulur. ECA, notlardaki kullanıcı notudur.
+const SORULACAK = new Set(['ECA']);
+function aciklanmayanKisaltmalar(bloklar: { metin: string; tur: string }[]) {
+  const metinler = bloklar.filter((b) => b.tur !== 'kunye').map((b) => b.metin);
+  const tum = metinler.join('\n');
+  const bulunan = new Set<string>();
+  for (const m of tum.matchAll(/(?<![\p{L}\d-])((?=[\p{L}\d]*\p{Lu}[\p{L}\d]*\p{Lu})\p{Lu}[\p{L}\d]{1,5})(?![\p{L}\d-])/gu)) bulunan.add(m[1]);
+  const terimler = new Set(bloklar.filter((b) => b.tur === 'terim').map((b) => b.metin.trim()));
+  const sonuc: string[] = [];
+  for (const k of bulunan) {
+    // Ürün model kodu (EAP673, MK295) ve tek harfli kod (P1, R12) kısaltma değildir.
+    if (BILINEN.has(k) || ADLAR.has(k) || KARARLI.has(k) || SORULACAK.has(k) || /^\p{Lu}\d+$/u.test(k) || /^\p{Lu}{1,4}\d{2,}$/u.test(k)) continue;
+    const kac = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const acik =
+      // Kısaltma önce: açılış parantezde bir kelimeyle başlar (yıl ya da birim açılış sayılmaz).
+      new RegExp(`(?<![\\p{L}])${kac}(’[\\p{L}]+)?(\\s\\d+)?\\s*\\(\\p{L}\\p{Ll}`, 'u').test(tum) ||
+      // Parantez içinde kısaltma ve virgülden sonra açılımı: “(CEO, şirketin en üst yöneticisi)”.
+      new RegExp(`\\(${kac},\\s*\\p{Ll}`, 'u').test(tum) ||
+      // Türkçe ad önce: kelimeden sonra parantezde yalnız kısaltma. Ürün adının sonu da olabilir: “(Conversions API)”, “(UI/UX)”.
+      new RegExp(`[\\p{L}\\d]’?\\p{L}*\\s\\((\\p{L}+[ /])?${kac}(\\s\\p{Ll}+)?[)/]`, 'u').test(tum) ||
+      new RegExp(`(?<![\\p{L}])${kac}(’[\\p{L}]+)?,\\s*yani`, 'u').test(tum) ||
+      terimler.has(k);
+    if (!acik) {
+      const i = tum.search(new RegExp(`(?<![\\p{L}\\d-])${kac}(?![\\p{L}\\d-])`, 'u'));
+      sonuc.push(`${k} «${tum.slice(Math.max(0, i - 60), i + 40).replace(/\s+/g, ' ')}»`);
+    }
+  }
+  return sonuc.sort();
+}
+
 test.describe('yalın Türkçe: sitenin bütün sayfaları', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'metin tarayıcıdan bağımsızdır, yalnız Chromium’da denetlenir');
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(([endpoint, key]) => localStorage.setItem('istoc-opex-baglanti', JSON.stringify({ endpoint, key })), [ENDPOINT, KEY]);
+    // Giderler isteği örnek modelle karşılanır. Ortak kayıt (persona) isteği test kaydına bırakılır (fixtures/persona).
     await page.route('https://script.google.com/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(MODEL, 'ozet-1')) }).catch(() => undefined),
+      (route.request().postData() ?? '').includes('"service":"persona"')
+        ? route.fallback()
+        : route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(MODEL, 'ozet-1')) }).catch(() => undefined),
     );
   });
 
   for (const yol of SAYFALAR) {
     test(`${yol}: noktalama, gün yazımı, etiket dizisi ve cümle uzunluğu`, async ({ page }) => {
       test.setTimeout(300_000);
-      await page.goto(yol.slice(1));
-      await page.waitForSelector('.app-footer', { state: 'attached' });
-      await page.waitForLoadState('networkidle');
-      let toplanan = await hepsiniTopla(page);
-      // Applet sayfasında bir anda tek applet çizilir. Her applet kendi adresinde ayrı denetlenir.
-      const adresler =
-        yol === '/applet/' ? await page.evaluate(() => [...new Set([...document.querySelectorAll('main a[href^="#"], nav a[href^="#"]')].map((a) => a.getAttribute('href') ?? '').filter((h) => h.length > 1))]) : [''];
-      if (yol === '/applet/') expect(adresler.length, 'applet adresleri').toBeGreaterThan(10);
-      // Geniş ekranda (1280 px) ve dar ekranda (375 px) denetlenir. Dar ekranda tablo kayıt listesine, grafik eşdeğer
-      // listeye ve Gantt ajandaya dönüşür. Bu kabukların metni de kurala uyar.
-      for (const genislik of [1280, 375]) {
-        await page.setViewportSize({ width: genislik, height: genislik === 1280 ? 900 : 812 });
-        for (const h of adresler) {
-          if (genislik === 1280 && h === '') continue;
-          await page.goto(`${yol.slice(1)}${h}`);
-          await page.waitForSelector('.app-footer', { state: 'attached' });
-          toplanan = toplanan.concat(await hepsiniTopla(page));
-        }
-      }
+      const toplanan = new Map<string, string>();
+      await sayfayiGez(page, yol, async () => {
+        for (const b of await page.evaluate(bloklar, "main, .app-footer")) toplanan.set(`${b.tur}\u0000${b.metin}`, b.tur);
+      });
       const bulgular = new Set<string>();
-      for (const { metin, tur } of toplanan) for (const i of ihlaller(metin, tur)) bulgular.add(`[${i}] ${metin.slice(0, 220)}`);
+      for (const k of aciklanmayanKisaltmalar([...toplanan].map(([k, tur]) => ({ metin: k.split('\u0000')[1], tur })))) bulgular.add(`[kısaltma açıklanmadı] ${k}`);
+      for (const [k, tur] of toplanan) {
+        const metin = k.split('\u0000')[1];
+        for (const i of ihlaller(metin, tur)) bulgular.add(`[${i}] ${metin.slice(0, 220)}`);
+      }
       expect([...bulgular], [...bulgular].join('\n')).toEqual([]);
+    });
+  }
+});
+
+test.describe('yalın Türkçe: giriş ekranı ve bulunamayan sayfa', () => {
+  test.skip(({ browserName }) => browserName !== 'chromium', 'metin tarayıcıdan bağımsızdır, yalnız Chromium’da denetlenir');
+  // Giriş ekranı yalnız girişsiz tarayıcıda görünür.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  for (const [ad, yol] of [['giriş ekranı', ''], ['bulunamayan sayfa', 'yok-boyle-bir-sayfa/']] as const) {
+    test(`${ad}: noktalama, kısaltma ve cümle uzunluğu`, async ({ page }) => {
+      for (const genislik of [1280, 375]) {
+        await page.setViewportSize({ width: genislik, height: 812 });
+        await page.goto(yol);
+        await page.waitForLoadState('networkidle');
+        const toplanan = await page.evaluate(bloklar, 'body');
+        expect(toplanan.length, 'metin bulundu').toBeGreaterThan(0);
+        const bulgular = new Set<string>();
+        for (const k of aciklanmayanKisaltmalar(toplanan)) bulgular.add(`[kısaltma açıklanmadı] ${k}`);
+        for (const b of toplanan) for (const i of ihlaller(b.metin, b.tur)) bulgular.add(`[${i}] ${b.metin.slice(0, 220)}`);
+        expect([...bulgular], [...bulgular].join('\n')).toEqual([]);
+      }
     });
   }
 });

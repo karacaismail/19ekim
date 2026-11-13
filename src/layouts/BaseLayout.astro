@@ -35,12 +35,12 @@ interface Props {
 
 const { title, page } = Astro.props;
 // Giriş kapısı (kullanıcı kararı 2026-10-21): statik HTML'de veri yok; açıklama tüm sayfalarda genel.
-const description = 'Türksab pazarlama ve finansal planlama. Görmek için giriş gerekir.';
+const description = 'Bu site Türksab’ın pazarlama ve finansal planlamasını gösterir. Görmek için giriş yapın.';
 // Sekme başlığı verilmezse içerik kaydındaki addan türer (kullanıcı kararı 2026-11-05). Yeni sayfada ad yalnız kayıtta
 // yazılır. Ana sayfa site adını taşır. Testte sekme başlığı kayıttaki ad, menü adı ya da h1 olmalıdır (ui.spec.ts).
 const kayit = icerikOf(Astro.url.pathname);
 const ad = title ?? (kayit && kayit.path !== '/' ? kayit.baslik : undefined);
-const pageTitle = ad ? `${ad} · ${meta.siteTitle}` : meta.siteTitle;
+const pageTitle = ad ? `${ad} - ${meta.siteTitle}` : meta.siteTitle;
 ---
 
 <!doctype html>

@@ -1,6 +1,7 @@
 /**
- * Gelir modelleri (kullanıcı kararı 2026-11-03): istoc.com’un bugünkü tek gelir modeli (abonelik, üç paket) ve bir B2B
- * toptan pazar yerine eklenebilecek aday gelir modelleri. Örnek hesaplar yöntemi gösteren varsayımlardır, söz ya da hedef
+ * Gelir modelleri (kullanıcı kararı 3 Kasım 2026, yeniden düzen 13 Kasım 2026): istoc.com’un bugünkü tek gelir modeli
+ * (abonelik, üç paket) ve bir B2B toptan pazar yerine eklenebilecek aday gelir modelleri. Sayfa modelleri hazırlık
+ * durumuna göre üç grupta gösterir. Her grup okura ne yapacağını söyler (`HAZIRLIK_EYLEMI`). Örnek hesaplar yöntemi gösteren varsayımlardır, söz ya da hedef
  * değildir. İhracat altyapısı (yazılım, gümrük, mikro ihracat operasyonu) hazır değildir: ihracatla ilgili hiçbir model
  * hazır gibi sunulmaz. Açıklamalar tam cümledir, noktalı virgül ve uzun çizgi kullanılmaz (`tests/gelir-modelleri.spec.ts`).
  */
@@ -20,7 +21,21 @@ export const HAZIRLIK_ADI: Record<Hazirlik, string> = {
 export const HAZIRLIK_TANIMI: Record<Hazirlik, string> = {
   hazir: 'Bugünkü ekiple ve yazılım geliştirmeden başlatılabilir.',
   yakinda: 'Küçük bir yazılım geliştirmesi ya da bir ortakla anlaşma gerekir.',
-  'hazir-degil': 'Yazılım, lisans, ortak ya da operasyon eksiktir. Bugün satılamaz ve esnafa söz verilmemelidir.',
+  'hazir-degil': 'Yazılım, lisans, ortak ya da operasyon eksiktir.',
+};
+
+/** Her hazırlık grubunda okurun yapacağı iş. Okur satış ekibidir, “siz” diye hitap edilir. */
+export const HAZIRLIK_EYLEMI: Record<Hazirlik, string> = {
+  hazir: 'Bu hizmeti esnafa bugün sunabilirsiniz.',
+  yakinda: 'Bu modeller henüz satılamaz. Esnafa tarih ya da söz vermeyin.',
+  'hazir-degil': 'Bu modeller bugün satılamaz. İhracat hizmetleri de bu gruptadır. Esnafa söz vermeyin.',
+};
+
+/** Öncelik etiketi: modelin ne zaman denenmesi önerilir? */
+export const ONCELIK_ADI: Record<Oncelik, string> = {
+  1: 'İlk denenecek',
+  2: 'Sonra denenecek',
+  3: 'Altyapı hazır olunca',
 };
 
 export interface Paket {
@@ -90,7 +105,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'İşlem komisyonu',
     nasil:
       'Platform üzerinden tamamlanan her siparişin tutarından küçük bir yüzde alınır. Oran, GMV (brüt sipariş hacmi, yani platformdan geçen siparişlerin toplam tutarı) üzerinden hesaplanır.',
-    ornek: 'Bir satıcı platformdan ayda 200.000 ₺ sipariş alıyor. Komisyon oranı %1,5. Bu satıcıdan ayda 3.000 ₺ komisyon gelir.',
+    ornek: 'Bir satıcı platformdan ayda 200.000 ₺ sipariş alabilir. Komisyon oranı %1,5 olursa bu satıcıdan ayda 3.000 ₺ komisyon gelir.',
     kimOder: 'Satıcı öder. Komisyon her siparişin tutarından düşülür.',
     uygunluk: 'Sipariş ve ödeme platformdan geçmediği sürece uygulanamaz. Bugün esnaf alıcıyla çoğunlukla platform dışında anlaşır.',
     risk: 'Büyük ve seyrek verilen toptan siparişlerde yüzde ile alınan pay satıcıya adil gelmeyebilir. Satıcı bu yüzden anlaşmayı platform dışına taşıyabilir.',
@@ -103,7 +118,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Güvenli ödeme ve emanet hesabı',
     nasil:
       'Alıcının ödemesi lisanslı bir ödeme kuruluşunda bekletilir. Mal teslim edilip alıcı onaylayınca para satıcıya geçer ve platform her işlemden hizmet bedeli alır.',
-    ornek: 'Ayda 100 işlem yapılıyor. İşlem başına ortalama tutar 20.000 ₺, hizmet bedeli %0,5. Bu, ayda 10.000 ₺ gelir eder. Ödeme kuruluşunun kesintisi bu hesaba dahil değildir.',
+    ornek: 'Ayda 100 işlem yapılabilir. İşlem başına ortalama tutar 20.000 ₺ olabilir. Hizmet bedeli %0,5 olursa ayda 10.000 ₺ gelir olur. Ödeme kuruluşunun kesintisi bu hesaba dahil değildir.',
     kimOder: 'Alıcı ya da satıcı öder. Bedeli kimin ödeyeceği sözleşmede belirlenir.',
     uygunluk: 'Yeni müşteriden parayı alamama riski esnafın en büyük sıkıntılarından biridir. Bu yüzden güçlü bir değer önerisidir.',
     risk: 'Platform parayı kendisi tutamaz. Lisanslı bir ödeme kuruluşuyla sözleşme, iade ve itiraz süreçleri gerekir.',
@@ -116,7 +131,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Vadeli satış ve tedarik zinciri finansmanı',
     nasil:
       'Alıcı malı vadeli alır, satıcı ise parasını peşin alır. Aradaki finansmanı bir banka ya da finans şirketi sağlar. Platform, yönlendirdiği her işlem için ortaktan komisyon alır.',
-    ornek: 'Ayda 500.000 ₺ tutarında vadeli işlem yönlendiriliyor. Ortak platforma %0,3 komisyon ödüyor. Bu, ayda 1.500 ₺ gelir eder.',
+    ornek: 'Ayda 500.000 ₺ tutarında vadeli işlem yönlendirilebilir. Ortak platforma %0,3 komisyon öderse ayda 1.500 ₺ gelir olur.',
     kimOder: 'Komisyonu finans ortağı öder. Finansman maliyetini alıcı ya da satıcı üstlenir.',
     uygunluk: 'Toptan ticarette vadeli satış yaygındır. Bu yüzden esnaf için değeri yüksektir.',
     risk: 'Kredi riski ortakta kalmalıdır. Yanlış sunulursa platform borç tahsilatına karışmış gibi görünür.',
@@ -129,10 +144,10 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Sponsorlu ürün ve öne çıkarma',
     nasil:
       'Satıcı, ürününün arama sonuçlarında ya da kategori sayfasında üstte görünmesi için ücret öder. Ücret belirli bir süre için sabit olabilir ya da tıklama başına alınabilir.',
-    ornek: '40 satıcı ayda 50 € tutarında öne çıkarma paketi alıyor. Bu, ayda 2.000 € ek gelir eder.',
+    ornek: '40 satıcı ayda 50 € tutarında öne çıkarma paketi alabilir. Bu durumda ayda 2.000 € ek gelir olur.',
     kimOder: 'Satıcı öder.',
     uygunluk: 'Abonelik ödeyen satıcı tabanına eklenir. Satıcı karşılığını gösterim, tıklama ve mesaj sayısıyla görebilir.',
-    risk: 'Alıcı trafiği az olursa satıcı karşılık göremez ve paketi yenilemez. Sponsorlu sonuçlar alıcıya açıkça etiketlenmelidir.',
+    risk: 'Platforma az alıcı gelirse satıcı karşılık göremez ve paketi yenilemez. Sponsorlu sonuçlar alıcıya açıkça etiketlenmelidir.',
     gereken: 'Öne çıkarma alanı, “sponsorlu” etiketi ve satıcıya gösterim ile tıklama raporu gerekir.',
     hazirlik: 'yakinda',
     oncelik: 1,
@@ -141,7 +156,7 @@ export const MODELLER: GelirModeli[] = [
     id: 'kategori-vitrini',
     ad: 'Kategori vitrini sponsorluğu',
     nasil: 'Bir kategorinin vitrin alanı belirli bir süre için tek bir satıcıya ya da markaya kiralanır. Örneğin tekstil kategorisinin üst bölümü kiralanabilir.',
-    ornek: '8 kategori vitrini var ve her biri ayda 150 €. Hepsi dolarsa ayda 1.200 € gelir eder.',
+    ornek: '8 kategori vitrini olabilir. Her vitrinin aylık ücreti 150 € olabilir. Hepsi dolarsa ayda 1.200 € gelir olur.',
     kimOder: 'Satıcı, üretici ya da marka öder.',
     uygunluk: 'İstoç çarşısında kategorisinde güçlü toptancılar vardır. Vitrin onlara görünürlük sağlar.',
     risk: 'Vitrin sayısı sınırlı olduğu için gelirin tavanı düşüktür. Az satıcı alırsa vitrin boş kalır.',
@@ -154,7 +169,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Doğrulanmış tedarikçi rozeti',
     nasil:
       'Satıcının vergi kaydı, adresi ve dükkânı ya da deposu ücretli bir denetimle kontrol edilir. Denetimi geçen satıcının profilinde rozet görünür.',
-    ornek: '30 satıcı yılda bir kez 150 € denetim ücreti ödüyor. Bu, yılda 4.500 € gelir eder.',
+    ornek: '30 satıcı yılda bir kez 150 € denetim ücreti öderse yılda 4.500 € gelir olur.',
     kimOder: 'Satıcı öder.',
     uygunluk: 'Yeni alıcı güven arar. Saha ekibi denetimi dükkân ziyaretinde yapabilir.',
     risk: 'Rozet verilen satıcı sorun çıkarırsa platformun güvenilirliği zarar görür. Denetim ölçütü yazılı ve herkes için aynı olmalıdır.',
@@ -167,24 +182,24 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Talep toplama ve teklif talebi ücreti',
     nasil:
       'Alıcıların satın alma talepleri toplanır. Bunlara RFQ (teklif talebi) denir. Talebe teklif vermek isteyen satıcı talep başına ücret öder. Bunun yerine satıcının aboneliğine belirli sayıda talep hakkı da eklenebilir.',
-    ornek: 'Ayda 200 talep geliyor. Her talebi ortalama 3 satıcı açıyor. Talep açma ücreti 5 €. Bu, ayda 3.000 € gelir eder.',
+    ornek: 'Ayda 200 talep gelebilir. Her talebe ortalama 3 satıcı 5 € ödeyerek teklif verebilir. Bu durumda ayda 3.000 € gelir olur.',
     kimOder: 'Satıcı öder. Alıcı talebini ücretsiz bırakır.',
-    uygunluk: 'Değer önerisindeki “gerçek alıcılardan sipariş fırsatı” sözüyle aynı yöndedir.',
+    uygunluk: '“Değer önerisi” sayfasındaki “Gerçek alıcılardan hazır sipariş fırsatları” sözüyle aynı yöndedir.',
     risk: 'Talepler zayıfsa satıcı para öder ama satış yapamaz. Bu durum aboneliği de kaybettirebilir.',
-    gereken: 'Alıcı tarafında trafik, talep formu ve talepleri doğrulayan bir CRM (müşteri ilişkileri yönetimi) süreci gerekir.',
+    gereken: 'Platforma yeterli alıcı gelmesi gerekir. Talep formu ve talepleri doğrulayan bir CRM (müşteri ilişkileri yönetimi) süreci de gerekir.',
     hazirlik: 'yakinda',
     oncelik: 2,
   },
   {
     id: 'eklentiler',
-    ad: 'Eklentiler (ek kullanıcı, ek ürün limiti ve entegrasyon)',
+    ad: 'Eklentiler (ek kullanıcı, ek ürün sınırı ve yazılım bağlantısı)',
     nasil:
-      'Paketin üzerine küçük ücretli ekler satılır. Ek kullanıcı hesabı ve daha yüksek ürün limiti bunlara örnektir. Stok ve fiyat eşitlemesi de bir ektir. Eşitleme ERP (kurumsal kaynak planlama) ya da muhasebe yazılımıyla yapılır.',
-    ornek: '100 abone satıcının 25’i ayda 30 € tutarında ek alıyor. Bu, ayda 750 € ek gelir eder.',
+      'Paketin üzerine küçük ücretli ekler satılır. Ek kullanıcı hesabı ve daha yüksek ürün sınırı bunlara örnektir. Stok ve fiyatların ERP ya da muhasebe programıyla kendiliğinden aynı tutulması da bir ektir. ERP, kurumsal kaynak planlama yazılımıdır.',
+    ornek: '100 abone satıcının 25’i ayda 30 € tutarında ek alabilir. Bu durumda ayda 750 € ek gelir olur.',
     kimOder: 'Satıcı öder.',
     uygunluk: 'Abonelik modelinin doğal uzantısıdır. Büyüyen satıcı daha çok öder.',
-    risk: 'Ekler temel pakette olması beklenen bir şeyi kısarsa satıcı kendini cezalandırılmış hisseder. Entegrasyonun bakımı sürekli emek ister.',
-    gereken: 'Paket limitleri yazılı olmalıdır. Ek satın alma ekranı gerekir. En az bir muhasebe yazılımıyla entegrasyon da gerekir.',
+    risk: 'Satıcı, temel pakette olmasını beklediği bir şey için ek ücret öderse kendini cezalandırılmış hisseder. Yazılım bağlantısının bakımı sürekli emek ister.',
+    gereken: 'Paket sınırları yazılı olmalıdır. Ek satın alma ekranı gerekir. En az bir muhasebe yazılımıyla bağlantı da gerekir.',
     hazirlik: 'yakinda',
     oncelik: 1,
   },
@@ -192,10 +207,10 @@ export const MODELLER: GelirModeli[] = [
     id: 'kurulum-egitim',
     ad: 'Kurulum ve eğitim hizmeti',
     nasil:
-      'Satıcının ürünleri, fotoğrafları, açıklamaları ve toptan fiyatları ekip tarafından platforma girilir. Satıcıya ve çalışanına kısa bir kullanım eğitimi verilir ve bu iş tek seferlik ücretle satılır.',
-    ornek: 'Ayda 20 yeni satıcının yarısı 150 € tutarında kurulum paketi alıyor. Bu, ayda 1.500 € gelir eder.',
+      'Ekip satıcının ürünlerini, fotoğraflarını, açıklamalarını ve toptan fiyatlarını platforma girer. Ekip satıcıya ve çalışanına kısa bir kullanım eğitimi verir. Bu iş tek seferlik ücretle satılır.',
+    ornek: 'Ayda 20 yeni satıcı gelebilir. Yarısı 150 € tutarında kurulum paketi alırsa ayda 1.500 € gelir olur.',
     kimOder: 'Satıcı öder.',
-    uygunluk: 'Değer önerisindeki “ürünlerinizi biz dijital satışa hazırlayalım” sözüyle aynıdır. Kurulumu yapılmış satıcının aboneliği bırakma olasılığı düşebilir.',
+    uygunluk: '“Değer önerisi” sayfasındaki “Ürünlerinizi biz dijital satışa hazırlayalım” sözüyle aynıdır. Kurulumu yapılmış satıcının aboneliği bırakma olasılığı düşebilir.',
     risk: 'Emek isteyen bir iştir. Fiyat düşük kalırsa ekibin zamanı zararına harcanır.',
     gereken: 'Yazılım gerekmez. Ekip saati, fiyat listesi ve kurulum kontrol listesi yeterlidir.',
     hazirlik: 'hazir',
@@ -203,10 +218,10 @@ export const MODELLER: GelirModeli[] = [
   },
   {
     id: 'lojistik',
-    ad: 'Lojistik ve kargo anlaşma marjı',
+    ad: 'Anlaşmalı ucuz kargo',
     nasil:
-      'Platform kargo firmalarıyla toplu fiyat anlaşması yapar ve satıcı bu indirimli fiyatla gönderir. Platform, anlaşma fiyatı ile satıcıya yansıyan fiyat arasındaki farkı ya da firmadan aracılık payı alır.',
-    ornek: 'Ayda 1.000 gönderi yapılıyor ve gönderi başına marj 10 ₺. Bu, ayda 10.000 ₺ gelir eder.',
+      'Platform kargo firmalarıyla toplu fiyat anlaşması yapar. Satıcı bu indirimli fiyatla gönderir. Platform, kargo firmasıyla anlaştığı fiyat ile satıcıdan alınan fiyat arasındaki farkı alabilir. Ya da kargo firmasından aracılık payı alabilir.',
+    ornek: 'Ayda 1.000 gönderi yapılabilir. Platform gönderi başına 10 ₺ kazanırsa ayda 10.000 ₺ gelir olur.',
     kimOder: 'Satıcı öder. Pay, kargo ücretinin içindedir.',
     uygunluk: 'Toptan gönderim esnafın günlük işidir. Daha ucuz kargo kolay anlaşılan bir faydadır.',
     risk: 'Marj küçüktür ve kargo firması koşulları değiştirebilir. Gecikme ve hasar şikâyetleri platforma döner.',
@@ -219,11 +234,11 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Veri ve pazar raporları',
     nasil:
       'Platformdaki arama, talep ve fiyat verisinden kişisel veri içermeyen raporlar hazırlanır. Örneğin hangi ürünün hangi ilde arandığı raporlanır. Rapor abonelikle ya da tek tek satılır.',
-    ornek: '20 satıcı ayda 25 € tutarında rapor aboneliği alıyor. Bu, ayda 500 € gelir eder.',
+    ornek: '20 satıcı ayda 25 € tutarında rapor aboneliği alırsa ayda 500 € gelir olur.',
     kimOder: 'Satıcı, üretici ya da marka öder.',
     uygunluk: 'Esnaf neyin satacağını bilmek ister. Ancak raporun değeri platformdaki veri miktarıyla artar.',
     risk: 'Veri azken rapor yanıltıcı olur. KVKK (Kişisel Verilerin Korunması Kanunu) kurallarına uyulmalı ve kişisel veri satılmamalıdır.',
-    gereken: 'Yeterli arama ve talep verisi, anonimleştirme ve rapor şablonu gerekir.',
+    gereken: 'Yeterli arama ve talep verisi gerekir. Verilerden kişileri tanıtan bilgiler çıkarılmalı. Bir rapor şablonu da gerekir.',
     hazirlik: 'hazir-degil',
     oncelik: 3,
   },
@@ -232,7 +247,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'B2B eşleştirme etkinlikleri ve sponsorluk',
     nasil:
       'Alıcılar ve satıcılar belirli bir sektör için aynı gün, çarşıda ya da çevrim içi buluşturulur. Satıcı katılım ücreti öder ve etkinliğe sponsor da alınabilir.',
-    ornek: 'Üç ayda bir etkinlik yapılıyor. 30 satıcı kişi başı 100 € katılım ücreti ödüyor. Etkinliğe 1.000 € sponsorluk geliyor. Etkinlik başına 4.000 € gelir eder. Salon ve ikram gibi giderler düşülmemiştir.',
+    ornek: 'Üç ayda bir etkinlik yapılabilir. 30 satıcının her biri 100 € katılım ücreti ödeyebilir. Etkinliğe 1.000 € sponsorluk gelebilir. Bu durumda etkinlik başına 4.000 € gelir olur. Salon ve ikram gibi giderler düşülmemiştir.',
     kimOder: 'Satıcı ve sponsor öder.',
     uygunluk: 'İstoç çarşısı fiziksel bir buluşma yeridir. Organizatör rolü bu işi üstlenebilir.',
     risk: 'Alıcı gelmezse satıcı memnun kalmaz ve sonraki etkinliğe katılmaz. Giderler önden ödenir.',
@@ -242,10 +257,10 @@ export const MODELLER: GelirModeli[] = [
   },
   {
     id: 'beyaz-etiket',
-    ad: 'Beyaz etiketli kurumsal mağaza',
+    ad: 'Toptancının kendi adıyla çalışan mağaza',
     nasil:
       'Büyük bir toptancıya ya da üreticiye bir B2B sipariş mağazası kurulur. Mağaza müşterinin kendi adı ve alan adıyla çalışır. Altyapı istoc.com’dur. Kurulum ücreti ve aylık lisans alınır.',
-    ornek: '3 kurumsal müşteri var. Her biri 2.000 € kurulum ücreti ve ayda 300 € lisans ödüyor. Bu, ilk yıl 16.800 € gelir eder.',
+    ornek: '3 kurumsal müşteri olabilir. Her biri 2.000 € kurulum ücreti ödeyebilir. Her biri ayda 300 € lisans da ödeyebilir. Bu durumda ilk yıl 16.800 € gelir olur.',
     kimOder: 'Kurumsal müşteri öder.',
     uygunluk: 'Kurumsal paketin doğal devamıdır. Fiyatı teklifle belirlenir.',
     risk: 'Her müşteri özel istek getirir. Ürün ekibinin yükü artar ve ana platformdaki işler gecikebilir.',
@@ -258,7 +273,7 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Ticari alacak sigortası komisyonu',
     nasil:
       'Satıcının vadeli satışta alıcıdan alacağı para bir sigorta şirketi tarafından güvenceye alınır. Platform, lisanslı bir acente ortağı üzerinden yönlendirdiği poliçelerden komisyon alır.',
-    ornek: '15 satıcı yılda 1.000 € prim ödüyor ve platformun payı %10. Bu, yılda 1.500 € gelir eder.',
+    ornek: '15 satıcı yılda 1.000 € prim ödeyebilir. Platformun payı %10 olursa yılda 1.500 € gelir olur.',
     kimOder: 'Primi satıcı öder. Komisyonu sigorta şirketi ya da acente öder.',
     uygunluk: 'Vadeli satış yapan toptancı için alacak riski gerçektir.',
     risk: 'Sigorta aracılığı lisans ister ve lisanssız aracılık yapılamaz. Bu yüzden lisanslı bir acente ortağı şarttır.',
@@ -269,7 +284,7 @@ export const MODELLER: GelirModeli[] = [
   {
     id: 'ihracat',
     ad: 'İhracat hizmetleri',
-    nasil: 'Yurt dışındaki alıcılara satış için gümrük işlemleri, mikro ihracat ve uluslararası kargo ücret karşılığı sunulur.',
+    nasil: 'İleride yurt dışı satış için gümrük işlemleri, mikro ihracat ve uluslararası kargo ücretli olarak sunulabilir.',
     ornek: 'Varsayım kurulmadı. Hizmet hazır olmadığı için gelir hesabı yapılmadı.',
     kimOder: 'Henüz belirlenmedi.',
     uygunluk: 'Esnafın ilgisi olabilir. Ancak bugün bu hizmet sunulamaz ve esnafa söz verilmemelidir.',
@@ -292,7 +307,7 @@ export const ONCELIK_ONERISI: { id: string; neden: string }[] = [
   },
   {
     id: 'sponsorlu-urun',
-    neden: 'Zaten ödeme yapan satıcılardan ek gelir sağlar. Sonuç gösterim ve tıklamayla ölçülür ve alıcı trafiği arttıkça değeri büyür.',
+    neden: 'Zaten ödeme yapan satıcılardan ek gelir sağlar. Sonuç gösterim ve tıklamayla ölçülür. Platforma gelen alıcı sayısı arttıkça değeri büyür.',
   },
 ];
 
@@ -301,7 +316,7 @@ export const ONCELIK_NOTU =
 
 /** Araştırma notu: temkinli dil, “kaynaklara göre”. Doğrulanmış pazar verisi değildir. */
 export const ARASTIRMA_NOTU: string[] = [
-  'Kaynaklara göre B2B pazar yerleri gelirini çoğunlukla birkaç modelin birleşiminden elde eder. Tek bir modele dayanmaz. Bunlar abonelik, işlem komisyonu, reklam ve gömülü finanstır. Gömülü finans, ödeme, vade ve sigorta gibi finans hizmetlerinin platformun içinde sunulması demektir.',
+  'Kaynaklara göre B2B pazar yerleri gelirini çoğunlukla birkaç modelin birleşiminden elde eder. Tek bir modele dayanmaz. Başlıca gelir modelleri şunlardır: abonelik, işlem komisyonu, reklam ve gömülü finans. Gömülü finans, ödeme, vade ve sigorta gibi finans hizmetlerinin platformun içinde sunulması demektir.',
   'Bain Capital Ventures bir değerlendirme yaptı. Buna göre büyük ve seyrek B2B siparişlerinde yüzdeyle alınan komisyon satıcıya adil gelmeyebilir. Bu durumda satıcı anlaşmayı platform dışına taşımaya yönelebilir.',
   'Kaynaklara göre Hindistan’ın büyük B2B pazar yeri IndiaMART, gelirinin büyük kısmını satıcı aboneliklerinden elde eder. Bu, istoc.com’un bugünkü abonelik modelinin sektörde karşılığı olduğunu düşündürür.',
   'Bu bilgiler genel kaynaklara dayanır. Doğrulanmış pazar verisi değildir.',
