@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /**
  * Gelir planı (/gelir-plani/), UX-first yeniden kurulum (kullanıcı kararı 2026-10-27): sayfanın başında senaryo kurucu

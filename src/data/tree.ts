@@ -116,10 +116,12 @@ export interface NavLink {
   role?: RoleKey;
   no?: number;
   also?: string[];
+  /** Yeni öğe işareti; içerik kaydının `yeni` alanından gelir. */
+  yeni?: true;
 }
 const menu = (id: string): NavLink => {
   const k = icerikKaydi(id);
-  return { label: k.menu ?? k.baslik, path: k.path };
+  return { label: k.menu ?? k.baslik, path: k.path, ...(k.yeni ? { yeni: k.yeni } : {}) };
 };
 
 /**
@@ -130,7 +132,18 @@ const menu = (id: string): NavLink => {
  * değişti; adresler aynı. Yeni ana adresler (Strateji, Müşteri yolculuğu, Pazarlama operasyonu, Ücret ve çalışma modeli,
  * Ölçüm, Genel bakış, Kaynaklar) içerik taşınınca ilgili gruba girer.
  */
-export const MARKETING_NAV: NavLink[] = [menu('buyume-modeli'), menu('satis-ortakligi'), menu('deger-onerisi'), menu('gelir-modelleri'), menu('oyunlastirma'), menu('onboarding')];
+export const MARKETING_NAV: NavLink[] = [
+  menu('buyume-modeli'),
+  menu('satis-ortakligi'),
+  menu('deger-onerisi'),
+  // Hizmetler ve küresel pazaryerleri (kullanıcı kararı 2026-11-12): değer önerisi → hizmetler → gelir modelleri → küresel örnekler.
+  menu('services'),
+  menu('gelir-modelleri'),
+  menu('kuresel-pazaryerleri'),
+  menu('oyunlastirma'),
+  menu('onboarding'),
+  menu('politikalar'),
+];
 export const FINANCE_NAV: NavLink[] = [menu('gelir-plani'), menu('giderler'), menu('nakit-akisi'), menu('butce-2027'), menu('gelir-ongorusu-2027')];
 export const MANAGEMENT_NAV: NavLink[] = [menu('hedefler'), menu('eylem-plani'), menu('karar')];
 export const HELPER_NAV: NavLink[] = [menu('parametreler'), menu('notlar'), menu('arsiv')];

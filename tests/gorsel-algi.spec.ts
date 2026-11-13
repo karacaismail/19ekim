@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { buildModel, reply } from './opex-fixture';
 import { YAYIMLANAN, icerikOf } from '../src/data/icerik';
 import { NAV_GROUPS, SEQUENCE } from '../src/data/tree';

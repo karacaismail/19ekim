@@ -34,11 +34,35 @@ const kokuTabanaYonlendir = {
   },
 };
 
+/**
+ * Yalnız üretim derlemesi: rehber parçaları önyükleme bağlantısı olmadan, doğrudan yüklenir.
+ * Bağımlılıklarını sayfa zaten yükler. WebKit başarısız önyüklemeyi önbellekte tutar.
+ * Bağlantı olursa yükleme hatasından sonra "yeniden yükle" düğmesi de başarısız olur.
+ * Astro istemci derlemesinin `modulePreload` ayarını kendisi yazar. Bu yüzden ayar eklenti kancasıyla eklenir.
+ * @type {import('vite').Plugin}
+ */
+const rehberOnyuklemesi = {
+  name: 'rehber-onyuklemesi',
+  apply: 'build',
+  configEnvironment(ad) {
+    if (ad !== 'client') return;
+    return {
+      build: {
+        modulePreload: {
+          polyfill: false,
+          resolveDependencies: (dosya, bagimliliklar) =>
+            /(^|\/)(oncu|kadrolu|cozum|tavsiye|elci|PolitikaAkisAyrinti)\.[\w-]+\.js$/.test(dosya) ? [] : bagimliliklar,
+        },
+      },
+    };
+  },
+};
+
 // GitHub Pages: https://karacaismail.github.io/19ekim/
 export default defineConfig({
   site: 'https://karacaismail.github.io',
   base: BASE,
   trailingSlash: 'always',
   integrations: [react()],
-  vite: { plugins: [kokuTabanaYonlendir] },
+  vite: { plugins: [kokuTabanaYonlendir, rehberOnyuklemesi] },
 });

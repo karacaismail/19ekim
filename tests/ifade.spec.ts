@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /**
  * İfade sözleşmesi (docs/ifade.md, kullanıcı kararı 2026-10-28): arayüz metinleri bilgiyle birlikte okurun o bilgiyle ne

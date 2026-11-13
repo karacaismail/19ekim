@@ -1077,6 +1077,36 @@ html:not([data-js]) .giris-form {
   background-color: var(--rule-strong);
 }
 
+/* Yeni öğe (kullanıcı isteği 2026-11-12): nokta yeşil ve biraz büyüktür, yavaşça yanıp söner. Kutu 1.5rem kaldığı için
+ * yazılar kaymaz. Belgeli döngü istisnası: sonsuz, gidip gelen, döngü süresi ve simetrik eğri. Hareket azaltma
+ * tercihinde yanıp sönmez, yeşil kalır. Menü kapanınca nokta da kalkar, yanıp sönme yalnız menü açıkken sürer. */
+.navmenu-bullet[data-yeni='true']::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--new-mark);
+  animation-name: navmenu-yeni;
+  animation-duration: var(--motion-duration-loop);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes navmenu-yeni {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navmenu-bullet[data-yeni='true']::before {
+    animation-name: none;
+  }
+}
+
 .mainnav-link[data-role]::before {
   display: none;
 }

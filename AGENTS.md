@@ -334,8 +334,8 @@ yalnız projeye özgü kararları ve gerçek komutları kaydeder.
 - Odak: çevreleyen halka yok; yalnız Tab/Shift+Tab görünür odak modunu açar; gösterge tek kenardır (metin alt çizgisi
   veya düz sol çubuk). Tablo bölgelerinde çubuk `.table-frame` üzerinde çizilir.
 - Hareket: `--motion-ease-standard: cubic-bezier(.65, 0, .35, 1)`, süre 120–320 ms; tek belgeli istisna
-  `--motion-duration-loop` (800–2000 ms, Giderler yükleyicisi: sonsuz + alternate + aynı eğri; hareket azaltmada 0; kapı
-  geçişte kullanımını reddeder); ECharts’ta `cubicInOut`
+  `--motion-duration-loop` (800–2000 ms, Giderler yükleyicisi ve menüdeki yeni öğe noktası: sonsuz + alternate + aynı
+  eğri; hareket azaltmada 0; kapı geçişte kullanımını reddeder); ECharts’ta `cubicInOut`
   ve token süresi seri, işaret çizgisi, durum (`stateAnimation`), ipucu işaretçisi ve açıklamaya ayrı ayrı yazılır
   (ECharts varsayılanları doğrusal/1000 ms’dir); hareket azaltma tercihinde animasyon kapanır. Test, çizilen
   grafiklerin modelini okuyarak bunu doğrular.
@@ -734,7 +734,7 @@ Kanonik görev tanımı `docs/affilate.md` (Codex raporu; depoda). Sayfa **Pazar
   1 Şubat; hareket Şubat raporunda) — bu yüzden 12 hizmet ayının tamamı 13 takvim aylık ufukta görünür; tek yıllık
   hazır senaryolar yenilemeyi `iptalHizmetAyi: 12` ile kapatır. Aynı tarihte işleme sırası: fatura → tahsilat/iade →
   ay sonu (destek, hakediş) → ortak ödemesi; ödeme kazanılmamış tutarı avans olarak ödemez, eksik kalan plan geri
-  alınacak bakiyeden mahsup edilir. Üç ortak modeli örnek başlangıçtır (Ayşe ilk fatura %10; satış ortağı 12 ay %15 / 12
+  alınacak bakiyeden mahsup edilir. Üç ortak modeli örnek başlangıçtır (ilk fatura tavsiyesi %10; satış ortağı 12 ay %15 / 12
   ay %10 / 12 ay %0; çözüm ortağı 12 ay %25 / 12 ay %15 / 12 ay %0; sonrası %0) — hiçbir yüzde iş kuralı olarak gömülü
   değildir, hepsi girdidir, %0 geçerlidir. Kapsam: ilk fatura (ilk pozitif fatura, ödeme sırasından bağımsız; iade yeni ilk
   fatura doğurmaz) / süreli (oran-dönem matrisi, ardışık, sonrası açık girdi). Politikalar: tahsilatta kazan aynı ay öde ·
@@ -969,6 +969,44 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Koşullar penceresi (`components/KosullarV2.tsx`: segment ve kariyer merdiveni, ağ kuralları ve diyagram, kampanyalar) `React.lazy` ile ilk açılışta yüklenir, düğmeye gelince önceden yüklenir. Odak açan düğmeye sayfa tarafından döndürülür (Safari tıklamada odak vermez).
 - Test: `npm run build` sonra `npx playwright test tests/satis-ortakligi-v2.spec.ts tests/satis-ortakligi.spec.ts tests/surum.spec.ts --project=chromium --project=webkit`. Firefox kullanıcı kararıyla çalıştırılmaz.
 
+### Hizmetler ve küresel pazaryerleri sayfaları (kullanıcı kararları 2026-11-12)
+
+- `/kuresel-pazaryerleri/` (menüde “Küresel pazaryerleri”) titanlar.com araştırmasını gösterir: “Küresel B2B Pazaryerleri: Ekosistem,
+  Gelir ve Freemium Mimarisi”, 12 Kasım 2026. Kullanıcı bu belgeyi kesin karar olarak verdi (içerik kaydında durum `onaylandi`).
+  Sayfada üç bilgi türü ayrı etiketle görünür:
+  - Belgeden: rakam, oran ve kaynak bağlantısı belgeden aynen alınır. Cümleler yalın Türkçeyle yeniden yazılır. Sayı aralığı
+    “%5 ile %8 arası” biçimindedir. Belgedeki 33 bağlantının hepsi sayfadadır (`BELGE_BAGLANTILARI`, testle denetlenir).
+  - Belgenin şeması: “3 model, 7 platform” ve “3 faz, 2 kapı” şemaları belgenin metninde yok. Harita, ödeme duvarı şeması ve
+    modül sırası belgenin metninden kurulur. Her birinin önünde bunu söyleyen görünür bir not (`.pz-notlar`) durur.
+  - Sitenin karşılaştırması: istoc.com kutuları, “Bugün burada” işareti ve istoc.com sonucu belgede yoktur. Bu bilgiler
+    “sitenin karşılaştırması” notunu taşır. Değerleri canlı paket verisinden türetilir (`hizmetler.ts → deger()`, `bas()`).
+  - Belgede kaynağı gösterilmeyen cümle (`kaynaksiz`) ayrı notla yazılır. Her bölümde belgenin çıkarımı örneklerden önce gelir.
+  - “İkincil kaynak” etiketi platformun kendi yayını olmayan kaynağı gösterir. Belge beş kaynağı etiketledi. Sayfa dört
+    kaynağı daha etiketledi (`ikincil: 'sayfa'`) ve bunu kaynaklar bölümünde yazar.
+  - Belgenin adlandırması korunur: tanıştıran platformlar “dizin modeli”, ödemeyi taşıyanlar “işlem modeli”dir.
+  Veri `src/data/kuresel.ts`, görünüm `src/views/KureselPazaryerleriPage.tsx`.
+- `/services/` (menüde ve başlıkta “Hizmetler”; adres kullanıcının istediği gibi İngilizce) üç bilgi türünü ayrı gösterir:
+  bugün var (canlı olgu), araştırmanın ilkesi (ücretsiz ve ücretli ayrımı) ve planlanan (`gelirModelleri.ts` hazırlık durumu).
+  Yeşil yalnız bugün ücretsiz olanı gösterir. Planlanan hizmetin hazırlık hapı nötrdür. “Yakında” işaretli özellik tabloda
+  “Var” değil “Yakında” yazar. Paketteki özellik ile planlanan ek hizmet aynı işi anlatıyor gibi görünürse satırda farkları yazılır.
+- Paket fiyatı ve özellikleri istoc.com fiyat planları ucundan okunur. `node scripts/canli-paketler.mjs` komutu ucu canlı okur ve
+  `src/data/canliPaketler.ts` dosyasını üretir. Kaydedilmiş yanıtla çalışırken okunma günü verilir:
+  `node scripts/canli-paketler.mjs yanit.json --okundu=YYYY-AA-GG`. Bu dosya elle değiştirilmez. Metindeki paket adı, sayı,
+  komisyon ve okunma tarihi bu dosyadan türetilir. Elle sayı yazılmaz. Canlı uçta kodu `free` olan paketin adı Basic’tir ve
+  ücretlidir. Gelir modelleri sayfası aynı paketlere Standart, Pro ve Kurumsal der. Hizmetler sayfası bunu not olarak yazar.
+- Menü sırası: Değer önerisi → Hizmetler → Gelir modelleri → Küresel pazaryerleri. İki öğe `yeni` işaretlidir. Öğe artık yeni
+  sayılmayınca `yeni` alanı içerik kaydından silinir ve menü testlerindeki “Yeni” sayısı düşürülür.
+- Ortak stil `src/styles/pazar.css` (`.pz-*`): düz köşeli yüzeyler, kenar sistemi (`data-edge`), tanıştıran küme `--viz-1`,
+  ödemeyi taşıyan küme `--viz-credit`, ücretsiz durum yeşili, ücretli vurgu yüzeyi. Kapı ve duvar anı iki temada da
+  `--surface-changed` yüzeyini kullanır. Renkli ya da gömük kutudaki hap kart yüzeyine çıkar. Hap biçimi yalnız
+  `.chip.pz-cip` etiketlerindedir. Hizmet satırında ad 64em’den itibaren solda, daha dar ekranda üsttedir.
+- Kaynak bağlantıları sitenin geri kalanı gibi yeni sekmede açılır (`target="_blank"`, `rel="noopener noreferrer"`).
+  Düzyazıdaki kaynak cümlenin sonunda satır içi bağlantıdır. Tablodaki ve listedeki kaynak en az 44 px yüksekliktedir.
+- Testler: `tests/kuresel-pazaryerleri.spec.ts` ve `tests/hizmetler.spec.ts`. Genişlikler 320, 360, 375, 390, 768, 1024 ve
+  1280 px ile yatay telefon (844 × 390) olur. Testler taşmayı, en küçük metni ve noktalı virgül ile uzun çizgi yasağını
+  denetler. Canlı paket değerlerini, görünür notları, belgedeki bütün bağlantıları, planlanan hizmetin gelir modeli
+  kartına bağlantısını ve menü yerini de denetler.
+
 ### Oyunlaştırma sayfası (kullanıcı kararları 2026-11-04)
 
 - `/oyunlastirma/` Pazarlama menüsündedir, Gelir modellerinden sonra gelir. Veri `src/data/oyunlastirma.ts`, görünüm `src/views/OyunlastirmaPage.tsx`, stil `global.css` içindeki `.oy-*` bloğudur. Test: `tests/oyunlastirma.spec.ts`.
@@ -1187,7 +1225,7 @@ için şu kurallar ve testler geçerlidir:
 | Tip, Astro ve UI kapısı | `npm run check` (`astro check` + `scripts/check-ui-gates.mjs`) |
 | Yalnız UI kapısı | `npm run gates` |
 | Üretim derlemesi | `npm run build` |
-| Tarayıcı testleri | `npm test` (önce derleme; Chromium, Firefox, WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
+| Tarayıcı testleri | `npm test` (önce derleme; Chromium ve WebKit; `scripts/serve-dist.mjs` ile). Testler girişli başlar (`playwright.config.ts → storageState`); doğru parolayla giriş testi `GIRIS_PAROLA` ortam değişkeniyle çalışır, yoksa (CI) atlanır |
 | Hepsi | `npm run verify` |
 | Paralel çalışma ağacında test | `PW_PORT=4333 npm test` — aynı makinede ikinci bir worktree test koşuyorsa port çakışmasın: `reuseExistingServer` komşu ağacın 4322 sunucusunu (başka bir `dist`) kullanır ve yanlış paketi test eder (`playwright.config.ts`) |
 | Apps Script paketi (OPEX) | `node apps-script/build.mjs --cikti ../opex-google/OPEX.gs --tohum ../opex-google/Tohum.js` (kurulum: `apps-script/README.md`) |
@@ -1224,3 +1262,106 @@ Pages yayınından önce çalıştırır.
 - Forced-colors yalnız Chromium’da emüle edilir; Firefox mobil emülasyonu yoktur.
 - Görsel referans (snapshot) testleri kurulmadı; gerçek Safari/iOS/Android cihaz kontrolleri yapılmadı.
 - `astro preview` Astro 7’de etkileşimsiz ortamda arka plana geçer; testler bu yüzden `scripts/serve-dist.mjs` kullanır.
+
+## Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12)
+
+- Yeni bir menü öğesinin noktası yeşil olur ve yavaşça yanıp söner. Böylece kullanıcı öğenin yeni olduğunu anlar.
+- Öğeyi yeni yapmak için `src/data/icerik.ts` kaydına `yeni: true` yazın. Öğe artık yeni sayılmayınca alanı silin.
+- İşaret geniş ekran menüsünde ve dar ekran çekmecesinde aynıdır. Öğenin metni değişmez.
+- Ekran okuyucu noktayı “Yeni” diye okur. Renk `--new-mark` tokenından gelir.
+- Nokta hareket azaltma tercihinde yanıp sönmez, yeşil kalır.
+- Nokta yalnız menü açıkken görünür. Menü kapanınca yanıp sönme de durur.
+- `tests/yeni-isaret.spec.ts` bu davranışı iki temada ve 3:1 karşıtlıkla denetler.
+
+## Projeye göre çalışma rehberleri
+
+- Menüde tek “Çalışma rehberleri” bağlantısı bulunur. Ana adres `/politikalar/` olur.
+- iStoc ve Segika ayrı proje sekmeleridir. Her projede mevcut beş rol bulunur.
+  Toplam on içerik ayrı yazılır. Yeni kişi hikâyesi eklenmez.
+- `?proje=segika&rol=cozum` gibi sorgular seçimi paylaşır.
+  Proje değişince rol korunur. Geri dönüş ve yenileme aynı seçimi açar.
+  Eski beş rol adresi aynı rolün iStoc sekmesine yönelir.
+- Her rehber görev, koşullu iş sırası, hedef kitle, kazanç, sorun ve anlaşma bölümlerini taşır.
+  Açık kararlar ve çalışma önerileri kabul edilmiş sözleşme sayılmaz.
+- Hesap kaynağı `src/data/politikalar/hesap.ts` dosyasıdır.
+  Hesaplar seçilen projenin ortak persona parametrelerinden türetilir.
+  Birinci sürüm ana örnektir. İkinci sürüm ayrı bölümde karşılaştırılır.
+  Birinci sürümdeki alan değişiklikleri rehbere yansır. İmzalanmış anlaşma kendiliğinden değişmez.
+  Eski kişisel tarayıcı kaydı ortak tabloya aktarılmaz.
+  Genel planın personel ve bütçe değerleri satış hesaplarıyla karıştırılmaz.
+- Zaman çizelgesi geçmiş adımları, etkin adımı ve "Sonraki olası adımlar" listesini gösterir.
+  Etkin adımda önce "Bu adımda yapılacaklar", sonra soru gelir. Okur önce işi okur, sonra sonucu yanıtlar.
+  Sorumlu bilgisi tam cümledir: "Bu adımı finans sorumlusu yürütür." Atanmamış görev ayrıca söylenir.
+  Adımı okur yapıyorsa veride `sorumlu: 'Siz'` yazılır. Birlikte yapılan işte `'Siz ve <görev>'` yazılır.
+- "Açık konuları, riskleri ve fırsatları görün" bölümü tek tıkla açılır.
+  Bu bölüm fırsatları, açık konuları, gözden kaçabilecek sorunları ve sorun çözme adımlarını gösterir.
+  Her rehberde 3 ile 5 arası ticari fırsat (`firsatlar`) bulunur. Fırsat fiyat, indirim veya ücretsiz süre sözü içermez.
+  Ana program dışındaki her programın kendi hedef kitlesi (`programKitleleri`) vardır.
+  `tests/politika-icerik.spec.ts` bu kuralları ve fiyat kuralını denetler.
+- `PolitikaSekmeleriPage.tsx` sekmeleri ve adresi yönetir.
+  `PolitikaAkisi.tsx` mevcut işi ve önceki yanıtları gösterir.
+  `politikaAkislari` içindeki on dosya koşullu adımları üretir.
+  `PolitikaPage.tsx` istenince açılan kapsamlı belgeyi gösterir.
+  Yalnız seçilen içerik yüklenir. Diğer içerikler seçim yapılınca yüklenir.
+  Yükleme hatası ve bekleme durumu görünürdür. Eski proje içeriği yeni seçimde gösterilmez.
+- `politikalar.css`, `pol-` önekini ve ortak semantik tokenları kullanır.
+  Rol sekmeleri kendi alanında yatay kayar. Metin küçültülmez.
+  Mantine sekmeleri ve açılan bölümler merkezi klavye odağını korur.
+  Hareket iki yönde ortak süre ve eğri kullanır. Hareket azaltma tercihi korunur.
+- İçerik ve hesap verisi Astro ada özelliklerine yazılmaz.
+  Giriş öncesi HTML yalnız mevcut giriş formunu taşır.
+- Kontrol: `npm run check`, `npm run build` ve `npm test`.
+  Hedefli kontrol: `npx playwright test tests/politikalar.spec.ts tests/politika-sekmeler.spec.ts`.
+  Bu testler hesapları, koşulları, sekmeleri, adresleri ve tek menü bağlantısını denetler.
+  Ağ yüklemesi, hata durumu, klavye, yön değişimi ve dar ekranlar da kapsamdadır.
+- Bu makinede Firefox açık kullanıcı isteği olmadan çalıştırılmaz.
+  Varsayılan testler Chromium ve WebKit kullanır.
+  WebKit sonucu gerçek Safari veya fiziksel cihaz sonucu sayılmaz.
+
+## Ortak persona parametreleri
+
+- Google Sheets, iki projenin parametrelerini ayrı tutar.
+  `personaFields.ts` alanların ve seçeneklerin tek kaynağıdır.
+  Apps Script şeması bu dosyadan üretilir.
+- `personaSync.ts` değişen alanı hemen sıraya alır.
+  Aynı anda yalnız bir istek gönderilir. Yeni girişler bekleyen sırada korunur.
+  Açık sayfa son yanıttan 2,5 saniye sonra tekrar okur.
+  Bu süreye ağ ve Apps Script işlem süresi eklenir.
+  Gizli sekme okuma yapmaz. Sekme açılınca tekrar okur.
+- Başarılı sunucu yanıtı gelmeden kayıt tamamlandı denmez.
+  Okuma başarısı, başarısız yazma uyarısını kaldırmaz.
+  Yeniden deneme aynı işlem kimliğini kullanır.
+  Aynı alan değişmişse kullanıcı kullanılacak değeri seçer.
+  Bekleyen yazılar sekmeye özel depoda tutulur. Başka sekmenin okuması bu kuyruğu silemez.
+  Sayfa yenilenince bekleyen işlem aynı kimlikle geri gelir.
+- `Persona Ayarları` sekmesi ortak değerleri tutar.
+  `Persona İşlemleri` sekmesi tamamlanmış işlem kimliklerini tutar.
+  Kimlikler silinmez. Defter dolarsa yeni yazma reddedilir.
+  OPEX sekmeleri ve dağıtımı bu servisten ayrıdır.
+- Kullanıcı, geliştirme sırasında bağlantıyla düzenlemeyi kabul etti.
+  Bu aşamada servis `development-public` erişimini kullanır.
+  Anahtar ve kişisel kurulum dosyaları Git'e girmez.
+- Servis, kullanıcının hesabındaki ayrı "Persona eşitleme" Apps Script projesinde çalışır.
+  Web uygulaması adresi `src/lib/personaStore.ts` içindeki `PERSONA_ENDPOINT` alanındadır.
+  Adres gizli değildir. Sahip, projenin Google iznini 12 Kasım 2026'da verdi.
+  Canlı ölçüm, 12 Kasım 2026: yazma onayı yaklaşık 4 ile 9 saniye sürdü.
+  Başka tarayıcı aynı değeri yaklaşık 4,5 saniyede gördü.
+  Tablodaki elle değişiklik açık sayfada yaklaşık 3 saniyede göründü.
+  Bu süreler ağa ve Google'a bağlıdır. Sıfır gecikme sözü verilmez.
+- `Persona Ayarları` sekmesinin G sütunu "Nasıl yazılır?" notlarını taşır.
+  Notlar `personaFields.ts` tanımlarından üretildi. Sunucu yalnız A ile F sütunlarını kullanır.
+  Yeni alan eklenirse o satırın notunu da yazın.
+- Sayfa açan her test `tests/fixtures/persona.ts` dosyasından içe aktarır.
+  Bu fixture isteği ağa çıkmadan karşılar. Testler gerçek tabloya yazmaz.
+  `tests/persona-isolation.spec.ts` bu kuralı bütün test dosyalarında denetler.
+- Hesaplayıcının ikinci sürümü (`?surum=v2`) ayrı bir modeldir.
+  Bu sürümün ayarları ortak kayda bağlı değildir. Ayarlar yalnız o tarayıcıda kalır.
+- Yalnız akışın yapısını değiştiren parametre adım yanıtlarını sıfırlar.
+  Örneğin katkı seviyesi gösterim adımını ekler veya kaldırır. Kur ise yalnız metindeki tutarı değiştirir ve ilerlemeyi silmez.
+  Bu yanıtlar müşteri kaydı, imza veya ortak operasyon kaydı değildir.
+  Yanıtlar okurun kendi cihazında (`localStorage`) saklanır. Sekme kapanınca ilerleme kaybolmaz.
+- Sunucu kontrolü: `node --test apps-script/test-persona-sync.mjs`.
+  Bu kontrol Pages iş akışında da çalışır.
+  İstemci kontrolü: `npx playwright test tests/persona-sync.spec.ts`.
+  Rehber kontrolü: `npx playwright test tests/politika-akis.spec.ts tests/politika-hesap.spec.ts`.
+  Gerçek Sheets yazımı ayrıca canlı serviste doğrulanır.

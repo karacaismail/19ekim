@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { eur, paketler } from '../src/data/gelirModelleri';
 import { ASAMALAR, BEKLEME_NOTU, HER_DURUMDA, KAPANIS_DURUMLARI, durumlar, sablonlar } from '../src/data/onboarding';
 import { DEFAULT_PARAMS } from '../src/data/params';
@@ -216,7 +216,7 @@ test('Pazarlama menüsünde Oyunlaştırma’dan sonra “Onboarding” var ve e
   await expect(page).toHaveTitle(/^Yeni kayıt gelince ne yapılır\?/);
   await page.getByRole('button', { name: 'Pazarlama' }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar']);
+  await expect(menu.getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
   await expect(menu.getByRole('menuitem', { name: 'Yeni kayıtlar' })).toHaveAttribute('aria-current', 'page');
 });
 

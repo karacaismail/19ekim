@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 
 /**
  * Satış ortaklığı v2 (kullanıcı kararı 2026-11-03): persona ayrı, segment ayrı. Aynı satışı yapan bağımsız ortaklar aynı
@@ -392,3 +392,9 @@ for (const genislik of [320, 360, 375, 390]) {
     }
   });
 }
+
+test('ikinci sürüm, ayarlarının ortak tabloya gitmediğini söyler', async ({ page, personaServer }) => {
+  await page.goto('satis-ortakligi/?surum=v2');
+  await expect(page.locator('[data-v2-yerel-not]')).toHaveText('Bu sürümün ayarları yalnız bu tarayıcıda kalır. Ortak tabloya birinci sürümün ayarları yazılır.');
+  expect(personaServer.writes).toHaveLength(0);
+});

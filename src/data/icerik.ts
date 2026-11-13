@@ -49,6 +49,11 @@ export interface IcerikKaydi {
   iliskili: string[];
   /** Menü etiketi (grup menüsünde); yoksa doğrudan erişim. */
   menu?: string;
+  /**
+   * Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12): noktası yeşil olur ve yanıp söner, ekran okuyucu “Yeni”
+   * der. Öğe artık yeni sayılmayınca bu alan kayıttan silinir.
+   */
+  yeni?: true;
   /** Henüz içerik taşınmamış, planlanan sayfa (dosyası yok). */
   planlandi?: boolean;
   /** Ara kırıntılar (grup/ebeveyn yerine; son kırıntı başlıktır) — belgeli kullanıcı kararı (Giderler: Finans › OpEx). */
@@ -96,7 +101,19 @@ const rol = (slug: string, baslik: string, soru: string, kapsam: string, marka: 
   iliskili: ['organizasyon', 'istihdam', 'eylem-plani', 'applet'],
 });
 
+const politikaKayitlari: IcerikKaydi[] = [{
+  id: 'politikalar', path: '/politikalar/', sinif: ['politika', 'operasyon'],
+  baslik: 'Çalışma rehberleri', kullaniciSorusu: 'Seçtiğim projede bu rolün işi ve çalışma koşulları nedir?',
+  grup: 'pazarlama', ebeveyn: 'satis-ortakligi', turetim: 'oneri', marka: ['istoc', 'segika'],
+  sahip: BELIRLENMEDI, durum: 'taslak', kanit: 'ornek',
+  kaynak: 'src/data/politikalar, satisOrtakligi.ts, satisOrtakligiV2.ts, kosullar.ts ve params.ts',
+  asOf: '2026-11-11', gozdenGecirme: 'Projenin çalışma kapsamı, hesabı veya koşulu değişince', duzenleme: 'yok',
+  kapsam: 'Her projenin beş rolü ayrı çalışma taslağıdır. Hesaplar seçili satış parametrelerini kullanır. İmzalanmış sözleşme veya kesin kazanç değildir.',
+  iliskili: ['satis-ortakligi', 'parametreler'], menu: 'Çalışma rehberleri', yeni: true,
+}];
+
 export const ICERIK: IcerikKaydi[] = [
+  ...politikaKayitlari,
   {
     id: 'organizasyon',
     path: '/',
@@ -325,6 +342,48 @@ export const ICERIK: IcerikKaydi[] = [
     kapsam: `Bugünkü gelir modeli yalnız aboneliktir. Aday modellerin çoğu hazır değildir ve örnek hesaplar varsayımdır, gelir sözü değildir. İhracat hizmetleri hazır değildir. ${PARAM_NOTU}`,
     iliskili: ['satis-ortakligi', 'deger-onerisi'],
     menu: 'Gelir modelleri',
+  },
+  {
+    id: 'services',
+    path: '/services/',
+    turetim: 'oneri',
+    sinif: ['strateji', 'kaynak-veri'],
+    baslik: 'Hizmetler',
+    kullaniciSorusu: 'istoc.com’da alıcı ve satıcı neyi ücretsiz, neyi ücretli kullanır ve ödeme ne zaman başlar?',
+    grup: 'pazarlama',
+    marka: ['istoc'],
+    sahip: BELIRLENMEDI,
+    durum: 'taslak',
+    kanit: 'kaynakli',
+    kaynak: 'istoc.com fiyat planları ucu (12 Kasım 2026, src/data/canliPaketler.ts); src/data/hizmetler.ts; ilke: src/data/kuresel.ts',
+    asOf: '2026-11-12',
+    gozdenGecirme: 'Paket, fiyat ya da deneme süresi değişince (scripts/canli-paketler.mjs yeniden çalıştırılır)',
+    duzenleme: 'yok',
+    kapsam: 'Paket fiyatları ve özellikleri istoc.com fiyat planlarından 12 Kasım 2026 günü okundu. Planlanan ek hizmetler bugün satılmaz ve esnafa söz verilmemelidir.',
+    iliskili: ['kuresel-pazaryerleri', 'gelir-modelleri', 'deger-onerisi'],
+    menu: 'Hizmetler',
+    yeni: true,
+  },
+  {
+    id: 'kuresel-pazaryerleri',
+    path: '/kuresel-pazaryerleri/',
+    turetim: 'oneri',
+    sinif: ['strateji', 'kaynak-veri'],
+    baslik: 'Küresel B2B pazaryerleri',
+    kullaniciSorusu: 'Küresel B2B pazaryerleri satıcıyı nasıl tutuyor, nasıl gelir elde ediyor, neyi ücretsiz veriyor ve istoc.com bu haritada nerede?',
+    grup: 'pazarlama',
+    marka: ['istoc'],
+    sahip: BELIRLENMEDI,
+    durum: 'onaylandi',
+    kanit: 'kaynakli',
+    kaynak: 'src/data/kuresel.ts (titanlar.com araştırması, 12 Kasım 2026; kaynak bağlantıları sayfada)',
+    asOf: '2026-11-12',
+    gozdenGecirme: 'Bir platformun fiyatı, oranı ya da koşulu değişince',
+    duzenleme: 'yok',
+    kapsam: 'Platform bilgileri araştırma belgesinden alındı ve kaynağın yayın tarihine aittir. İkincil kaynak etiketli bilgiler platformun kendi yayını değildir. istoc.com satırları 12 Kasım 2026 günü canlı siteden okundu.',
+    iliskili: ['services', 'gelir-modelleri', 'deger-onerisi'],
+    menu: 'Küresel pazaryerleri',
+    yeni: true,
   },
   {
     id: 'oyunlastirma',
@@ -745,10 +804,16 @@ const temizle = (path: string) => {
 /** Yayımlanan (dosyası olan) kayıtlar. */
 export const YAYIMLANAN = ICERIK.filter((k) => !k.planlandi);
 
-/** Yola göre kayıt (taban yolu `/19ekim` düşülmüş, sondaki eğik çizgi normalleştirilmiş). */
+/** Eski bağlantılar içerik kopyası oluşturmaz. Tek rehber merkezine açılır. */
+export const ICERIK_YONLENDIRMELERI = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'].map((rol) => ({
+  path: `/politikalar/${rol}/`, hedef: '/politikalar/', rol,
+}));
+
+/** Yola göre kayıt. Eski rehber adresleri ana merkeze çözülür. */
 export function icerikOf(path: string): IcerikKaydi | undefined {
   const p = temizle(path);
-  return ICERIK.find((k) => k.path === p);
+  const hedef = ICERIK_YONLENDIRMELERI.find((k) => k.path === p)?.hedef ?? p;
+  return ICERIK.find((k) => k.path === hedef);
 }
 
 /** Alt bilgi kapsam cümlesi (F10): kaydı olmayan sayfa için genel, kapsamı doğru özetleyen cümle. */

@@ -1,0 +1,128 @@
+/* Rehberler ortak marka, odak ve hareket tokenlarını kullanır. */
+.pol-belge { max-inline-size: var(--prose-max); margin-inline: auto; font-size: var(--text-md); line-height: var(--leading-body); overflow-wrap: break-word; }
+.pol-belge p { margin-block: var(--space-3); }
+.pol-giris { padding-block: var(--space-4); }
+.pol-durum { font-weight: var(--weight-semibold); color: var(--accent-strong); }
+.pol-roller { margin-block: var(--space-6); }
+.pol-roller p { font-weight: var(--weight-semibold); }
+.pol-roller ul, .pol-bolumler ul { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding: 0; margin: 0; }
+.pol-roller a, .pol-bolumler a { display: inline-flex; align-items: center; min-block-size: var(--hit-min); color: var(--text-link); }
+.pol-roller a[aria-current='page'] { font-weight: var(--weight-bold); }
+.pol-belge-baglanti { display: inline-flex; align-items: center; min-block-size: var(--hit-min); }
+.pol-bolumler { padding-block: var(--space-4); }
+.pol-bolum { margin-block-start: var(--section-gap); scroll-margin-block-start: var(--space-20); }
+.pol-bolum h2 { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin-block: 0 var(--space-5); }
+.pol-bolum h3 { font-size: var(--text-xl); line-height: var(--leading-snug); margin-block: var(--space-6) var(--space-3); }
+.pol-bolum h4 { font-size: var(--text-lg); line-height: var(--leading-snug); margin-block: var(--space-5) var(--space-2); }
+.pol-adimlar { padding-inline-start: var(--space-6); }
+.pol-adimlar li { padding-inline-start: var(--space-2); margin-block: var(--space-6); }
+.pol-adimlar li::marker { color: var(--accent-strong); font-weight: var(--weight-bold); }
+.pol-hesap { padding-block: var(--space-4); }
+.pol-hesap dl, .pol-formuller { margin: 0; }
+.pol-hesap dl > div, .pol-formuller > div { padding-block: var(--space-3); }
+.pol-hesap dt, .pol-formuller dt { color: var(--text-secondary); }
+.pol-hesap dd, .pol-formuller dd { margin: 0; font-weight: var(--weight-semibold); }
+.pol-sorunlar > div { margin-block: var(--space-6); }
+.pol-sorunlar dt { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+.pol-sorunlar dd { margin: 0; }
+.pol-kontrol { padding-inline-start: var(--space-5); }
+.pol-kontrol li, .pol-panel li { margin-block: var(--space-3); }
+.pol-ayrinti { border: 0; margin-block: var(--space-2); background: transparent; }
+.pol-ac { padding: var(--space-2) 0; min-block-size: var(--hit-min); color: var(--text-primary); border-radius: var(--radius-control); }
+.pol-ac { transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-ok { transition-property: transform; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-ac:hover { background: var(--surface-hover); }
+.pol-ac-etiket { font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-body); padding: 0; }
+.pol-panel { padding: var(--space-1) 0 var(--space-4); }
+.pol-panel blockquote { margin-inline: 0; padding-inline-start: var(--space-4); font-weight: var(--weight-medium); }
+.pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-8); }
+@media (min-width: 48em) {
+  .pol-hesap dl > div, .pol-formuller > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); }
+}
+
+/* İki proje ve beş rol aynı sayfada seçilir. Rol sekmeleri kendi alanında yatay kayar. */
+.pol-merkez { max-inline-size: var(--policy-max); margin-inline: auto; }
+.pol-sekme-listesi { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block-end: var(--space-2); }
+.pol-sekme { display: inline-flex; align-items: center; justify-content: center; min-block-size: var(--hit-min); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-control); background: var(--surface-sunken); color: var(--text-primary); font: inherit; font-size: var(--text-md); line-height: var(--leading-body); cursor: pointer; }
+.pol-sekme { transition-property: background-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-sekme:hover { background: var(--surface-hover); }
+.pol-sekme[aria-selected='true'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
+.pol-sekme-paneli { min-inline-size: 0; }
+.pol-yukleme { padding-block: var(--space-6); }
+.pol-belge > h2 { margin-block: var(--space-8) var(--space-3); font-size: var(--text-2xl); line-height: var(--leading-snug); }
+.pol-amac { font-size: var(--text-lg); }
+
+/* Seçili rolün çizgisi, klavye odağının metin alt çizgisinden ayrıdır. */
+.pol-sekme-listesi[aria-label='Çalışma rolü'] { flex-wrap: nowrap; overflow-x: auto; max-inline-size: 100%; gap: var(--space-1); padding-inline-end: var(--space-1); }
+.pol-sekme-listesi[aria-label='Çalışma rolü'] .pol-sekme { flex: 0 0 auto; position: relative; background: transparent; }
+.pol-sekme-listesi[aria-label='Çalışma rolü'] .pol-sekme:hover { background: var(--surface-hover); }
+.pol-sekme-listesi[aria-label='Çalışma rolü'] .pol-sekme::after { content: ''; position: absolute; inset-inline: var(--space-3); inset-block-end: 0; block-size: var(--edge-width); background: var(--policy-active-ink); opacity: 0; transition-property: opacity; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-sekme-listesi[aria-label='Çalışma rolü'] .pol-sekme[aria-selected='true']::after { opacity: 1; }
+
+/* Yalnız yanıtlanan kararlar ve mevcut iş çizilir. Gelecek yol yanıta bağlıdır. */
+.pol-yol { overflow-wrap: break-word; margin-block: var(--space-4); }
+.pol-yol-giris { margin-block-end: var(--space-4); max-inline-size: var(--prose-max); }
+.pol-yol-giris h2 { font-size: var(--text-2xl); line-height: var(--leading-tight); margin: 0; }
+.pol-yol-ust { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--policy-active-ink); }
+.pol-zaman { list-style: none; padding: 0; margin-block: 0 var(--space-5); }
+.pol-zaman > li { display: grid; grid-template-columns: var(--policy-rail) minmax(0, 1fr); gap: var(--space-2); position: relative; }
+.pol-zaman > li + li { padding-block-start: var(--policy-step-gap); }
+.pol-zaman > li::before { content: ''; position: absolute; inset-inline-start: calc(var(--policy-rail) / 2); inset-block: 0; inline-size: var(--hairline); background: var(--policy-timeline-line); }
+.pol-zaman-sayi { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; block-size: var(--policy-rail); background: var(--surface-page); color: var(--text-secondary); font-size: var(--text-md); font-weight: var(--weight-semibold); }
+.pol-zaman-etkin > .pol-zaman-sayi { background: var(--policy-active-ink); color: var(--surface-raised); }
+.pol-zaman-gecmis h3 { font-size: var(--text-lg); margin: 0; line-height: var(--leading-snug); }
+.pol-zaman-gecmis p { margin-block: var(--space-1) 0; color: var(--text-secondary); }
+/* Sonraki olası adımlar: okur önündeki yolu görür. Etkin adımdan sönük durur. */
+.pol-zaman-sonraki > .pol-zaman-sayi { background: transparent; }
+.pol-zaman-sonraki .pol-yol-aciklama { margin-inline: 0; margin-block: var(--space-3) 0; }
+.pol-zaman-sonraki .pol-yol-ust { margin-block: 0 var(--space-2); }
+.pol-sonraki-liste { margin: 0; padding-inline-start: var(--space-5); color: var(--text-secondary); font-size: var(--text-md); line-height: var(--leading-body); }
+.pol-sonraki-liste li + li { margin-block-start: var(--space-1); }
+.pol-gecmis-icerik { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; column-gap: var(--space-4); padding-block-end: var(--space-2); }
+.pol-yapilacak { min-inline-size: 0; }
+.pol-adim-basligi { margin-block-end: var(--space-3); }
+.pol-adim-basligi > .pol-yol-ust { margin-block: 0 var(--space-1); }
+.pol-etkin-baslik { font-size: var(--text-2xl); line-height: var(--leading-snug); margin: 0; scroll-margin-block: var(--space-20); }
+html[data-focus-mode='keyboard'] .pol-etkin-baslik:focus-visible,
+html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decoration-line: underline; text-decoration-color: var(--focus-indicator); text-decoration-thickness: var(--focus-indicator-width); text-underline-offset: var(--focus-indicator-offset); }
+.pol-adim-duzeni { display: grid; gap: var(--space-5); align-items: start; }
+.pol-karar-alani, .pol-is-aciklamasi { min-inline-size: 0; }
+.pol-karar { padding: 0; border: 0; margin: 0; min-inline-size: 0; }
+.pol-karar legend { max-inline-size: 100%; padding: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin-block-end: var(--space-3); }
+.pol-yanit { display: block; inline-size: 100%; min-block-size: var(--hit-min); text-align: start; padding: var(--policy-control-padding); margin: 0; border: var(--hairline) solid var(--rule-strong); border-radius: var(--radius-control); background: var(--surface-raised); color: var(--text-primary); font: inherit; cursor: pointer; }
+.pol-yanit + .pol-yanit { margin-block-start: var(--space-2); }
+.pol-yanit { transition-property: background-color, border-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-yanit:hover { background: var(--surface-hover); border-color: var(--text-primary); }
+.pol-yanit[aria-pressed='true'] { background: var(--policy-active-surface); border-color: var(--text-primary); }
+.pol-is-aciklamasi h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin: 0; }
+.pol-sorumlu { margin-block: var(--space-2) var(--space-3); color: var(--text-secondary); }
+.pol-yap { padding-inline-start: var(--space-5); margin-block: var(--space-3); }
+.pol-yap > li { padding-inline-start: var(--space-1); margin-block: var(--space-2); }
+.pol-yap > li::marker { color: var(--text-secondary); }
+.pol-yol-link { display: inline-flex; align-items: center; min-block-size: var(--hit-min); padding: 0; border: 0; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; }
+.pol-yol-link { transition-property: color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
+.pol-yol-link:hover { color: var(--accent-strong); }
+.pol-sonuc { margin-block-start: var(--space-4); padding: var(--space-3); background: var(--surface-accent); }
+.pol-sonuc h4 { font-size: var(--text-lg); line-height: var(--leading-snug); margin-block: 0 var(--space-3); }
+.pol-sonuc-baslik { scroll-margin-block: var(--space-20); }
+.pol-sonuc p { margin-block: var(--space-2); }
+.pol-yol-not { padding-inline-start: var(--space-3); border-inline-start: var(--hairline) solid var(--rule-strong); }
+.pol-yol-aciklama { color: var(--text-secondary); font-size: var(--text-sm); max-inline-size: var(--prose-max); }
+.pol-rehber-ekleri { margin-block-start: var(--space-5); max-inline-size: var(--prose-max); }
+@media (forced-colors: active) {
+  html[data-focus-mode='keyboard'] .pol-etkin-baslik:focus-visible,
+  html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decoration: none; }
+}
+@media (min-width: 48em) {
+  .pol-yol { --policy-rail: var(--policy-rail-wide); margin-block-start: var(--space-5); }
+  .pol-yol-giris { margin-block-end: var(--space-5); }
+  .pol-zaman > li { gap: var(--space-4); }
+  .pol-adim-duzeni { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--policy-column-gap); }
+  .pol-yol-aciklama, .pol-rehber-ekleri { margin-inline-start: calc(var(--policy-rail) + var(--space-4)); }
+}
+
+/* Boşluk, risk ve fırsat bölümü: başlıklar bölüm düzeyini korur, metin küçülmez. */
+.pol-bosluk > h4 { margin-block: var(--space-6) var(--space-2); font-size: var(--text-lg); line-height: var(--leading-snug); }
+.pol-bosluk > h4:first-child { margin-block-start: 0; }
+.pol-bosluk h5 { margin-block: 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-bosluk .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-5); }

@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page, type Request, type Route } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Request, type Route } from './fixtures/persona';
 import { OPEX_ENDPOINT, OPEX_MIN_GAP_MS, OPEX_MIN_WAIT_MS, OPEX_POLL_MS, OPEX_STORE_KEY, donemOf, giderDonem, kisiDonem, planOfModel } from '../src/data/opex';
 import { buildModel, exampleTohum, reply } from './opex-fixture';
 

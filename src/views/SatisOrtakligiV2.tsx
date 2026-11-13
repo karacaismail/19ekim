@@ -898,6 +898,7 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
   return (
     <div className="v2-so2" ref={kok}>
       <PageHeader title="Satış ortaklığı programı" purpose="Her personanın aynı satışla kazancını, segmentini ve üst segmente geçme yolunu gösterir." />
+      <p className="v2-so2-yerel-not" data-v2-yerel-not>Bu sürümün ayarları yalnız bu tarayıcıda kalır. Ortak tabloya birinci sürümün ayarları yazılır.</p>
       <div className="v2-so2-iskelet" ref={iskelet}>
       <div className="v2-so2-ana">
       <div className="v2-so2-arac">

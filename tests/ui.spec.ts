@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures/persona';
 import { YAYIMLANAN } from '../src/data/icerik';
 import { PARAM_GROUPS } from '../src/data/params';
 import { meta } from '../src/data/program';
@@ -19,7 +19,7 @@ const MENU_BAGLANTI = NAV_GROUPS.flatMap((g) => g.items).length;
  * sessizce denetim dışında kalmaz.
  * Giderler grafikleri yalnız Sheets bağlantısıyla çizilir. Ayrı testte (giderler.spec.ts) sahte yanıtla denetlenir.
  */
-const GRAFIKSIZ = ['istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', 'onboarding/', '404/'];
+const GRAFIKSIZ = [...YAYIMLANAN.filter((k) => k.path.startsWith('/politikalar/')).map((k) => k.path.slice(1)), 'istihdam/', 'kadro-kapasitesi/', 'arsiv/', 'parametreler/', 'notlar/', 'giderler/', 'email/', 'applet/', 'satis-ortakligi/', 'deger-onerisi/', 'gelir-modelleri/', 'oyunlastirma/', 'butce-2027/', 'gelir-ongorusu-2027/', 'onboarding/', 'services/', 'kuresel-pazaryerleri/', '404/'];
 const CHART_PAGES = PAGES.filter((p) => !GRAFIKSIZ.includes(p));
 
 /** Giderler sayfası varsayılan Apps Script ucunu sorar; testler gerçek Google’a gitmez (anahtar istenir → form). */
@@ -921,7 +921,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu.getByRole('menuitem', { name: 'Kararlar' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Pazarlama' }).click();
-    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Gelir modelleri', 'Oyunlaştırma', 'Yeni kayıtlar']);
+    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Finans' }).click();
     await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);

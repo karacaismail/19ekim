@@ -1,4 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { usePersonaAyar } from '../lib/personaStore';
+import { PersonaSyncStatus } from '../components/PersonaSyncStatus';
 import { AffilateMotoru } from '../components/AffilateMotoru';
 import { AgDiyagrami } from '../components/AgDiyagrami';
 import { PageHeader } from '../components/PageHeader';
@@ -9,7 +11,6 @@ import {
   ASAMA_SURE,
   PAKET_ADI,
   SEVIYE_ADI,
-  VARSAYILAN_AYAR,
   aylikFiyat,
   donemKazanci,
   kadrolu,
@@ -30,40 +31,9 @@ import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, 
 import { POLITIKA_ADI } from '../data/affilateKurgu';
 import type { Politika } from '../data/affilate';
 
-const ANAHTAR = 'turksab-satis-ortakligi-v1';
 const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
 const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
 
-function useAyar() {
-  const [ayar, setAyar] = useState<Ayar>(VARSAYILAN_AYAR);
-  useEffect(() => {
-    try {
-      const kayit = localStorage.getItem(ANAHTAR);
-      if (kayit) setAyar({ ...VARSAYILAN_AYAR, ...(JSON.parse(kayit) as Partial<Ayar>) });
-    } catch {
-      /* kayıt okunamazsa başlangıç değerleri */
-    }
-  }, []);
-  const guncelle = (p: Partial<Ayar>) =>
-    setAyar((o) => {
-      const yeni = { ...o, ...p };
-      try {
-        localStorage.setItem(ANAHTAR, JSON.stringify(yeni));
-      } catch {
-        /* depolama kapalı */
-      }
-      return yeni;
-    });
-  const sifirla = () => {
-    try {
-      localStorage.removeItem(ANAHTAR);
-    } catch {
-      /* yok */
-    }
-    setAyar(VARSAYILAN_AYAR);
-  };
-  return { ayar, guncelle, sifirla };
-}
 
 function SeviyeSec({ value, onChange }: { value: Seviye; onChange: (s: Seviye) => void }) {
   return <Sec<Seviye> label="Ortak satışta ne yapar?" value={value} options={(['A', 'B', 'C'] as Seviye[]).map((s) => ({ id: s, name: SEVIYE_ADI[s] }))} onChange={onChange} />;
@@ -664,8 +634,13 @@ function KosulPaneli({ a, ks, kaynak, ek }: { a: Ayar; ks: KosulSonuc; kaynak: s
 /** Sürüm seçicisi dışarıdan gelir (src/views/SatisOrtakligiSurumleri.tsx). */
 export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
   const duzen = useYapisikSutunlar();
-  const { ayar: a, guncelle: g, sifirla } = useAyar();
-  const [rol, setRol] = useState<RolId>('oncu');
+  const [proje, setProje] = useState<Marka>(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('proje') === 'segika' ? 'segika' : 'istoc');
+  const { ayar: a, guncelle, sifirla, sync, store, inputError } = usePersonaAyar(proje);
+  const g = (patch: Partial<Ayar>) => { if (patch.marka) { setProje(patch.marka); const url = new URL(window.location.href); url.searchParams.set('proje', patch.marka); history.replaceState(null, '', url); } else guncelle(patch); };
+  const [rol, setRol] = useState<RolId>(() => {
+    const value = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('rol') : null;
+    return (['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as RolId[]).find((r) => r === value) ?? 'oncu';
+  });
   const serit = useSeciliSekmeGorunur(rol);
   const roller = rolMetinleri(a.marka);
   const secili = roller.find((r) => r.id === rol)!;
@@ -693,6 +668,7 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
       <PageHeader title="Satış ortaklığı programı" purpose="Beş ortak rolünün kim olduğunu ve ne kazandığını gösterir ve ayarlar değişince sonuçlar hemen güncellenir." />
 
       {surum}
+      <PersonaSyncStatus sync={sync} store={store} inputError={inputError} />
       <div className="so2-arac">
         <Choice<Marka>
           label="Ürün"
@@ -723,7 +699,7 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
         <aside className="so2-ayarlar" aria-label="Ayarlar">
           <div className="so2-ayarlar-ust">
             <p className="so2-ayarlar-baslik">Ayarlar</p>
-            <button type="button" className="so2-sifirla" onClick={sifirla}>
+            <button type="button" className="so2-sifirla" onClick={() => { if (window.confirm('Bu projenin ortak ayarları varsayılana dönecek. Devam edilsin mi?')) sifirla(); }}>
               Başa dön
             </button>
             <p className="so2-ayarlar-ozet">

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 
 /** İstihdam takvimi ve Kadro kapasitesi (kullanıcı kararı 2026-11-03): dar ve geniş ekranda taşma yok, metin ≥ 14 px. */
 for (const [yol, ad] of [

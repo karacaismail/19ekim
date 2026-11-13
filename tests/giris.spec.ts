@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures/persona';
 import { GIRIS_ANAHTARI, kullaniciAdiNormal } from '../src/lib/giris';
 
 /*

@@ -97,7 +97,7 @@ function ThemeToggle() {
 }
 
 /** Parametreler varsayılandan farklıysa her sayfada görünür not. */
-function ParamsNotice() {
+function ParamsNotice({ rehber = false }: { rehber?: boolean }) {
   const { changed } = useParams();
   if (!changed) return null;
   return (
@@ -105,7 +105,7 @@ function ParamsNotice() {
       <div className="wrap">
         {/* Kısa durum + kapsam bağlantısı (gorsel_algi.md F05 / C002): uzun açıklama her sayfada yinelenmez. */}
         <p>
-          {changed} parametre bu tarayıcıda değiştirildi. Sayfalar bu değerlerle hesaplanır.{' '}
+          {changed} parametre bu tarayıcıda değiştirildi. {rehber ? 'Çalışma rehberleri satış ortaklığı ayarlarını kullanır.' : 'Sayfalar bu değerlerle hesaplanır.'}{' '}
           <a className="text-link" href={href('/parametreler/')}>
             Parametreler
           </a>
@@ -128,6 +128,16 @@ function durumOf(item: NavLink, current: string) {
   const exact = target === current;
   const inSection = !exact && (item.also ?? []).some((p) => normalizePath(href(p)) === current);
   return { ...item, exact, inSection };
+}
+
+/**
+ * Menü öğesinin solundaki işaret: numaralı öğede numara rozeti, diğerlerinde sade nokta. Yeni öğenin noktası yeşil olur
+ * ve yanıp söner (kullanıcı isteği 2026-11-12). Ekran okuyucu bu noktayı “Yeni” diye okur. Öğenin metni değişmez.
+ */
+function MenuIsareti({ item }: { item: NavLink }) {
+  if (item.no) return <span className="tree-no">{item.no}</span>;
+  if (item.yeni) return <span className="navmenu-bullet" data-yeni="true" role="img" aria-label="Yeni" />;
+  return <span className="navmenu-bullet" aria-hidden="true" />;
 }
 
 /** Grup simgeleri (kullanıcı kararı 2026-10-21: öğeler ayırt edilsin, menü olduğu anlaşılsın). */
@@ -173,7 +183,7 @@ function NavMenu({ label, items: links, dividerBefore, icon: Simge, current }: {
             data-section={item.inSection ? 'true' : undefined}
           >
             {/* Numarasız öğede aynı sade nokta (numara rozetiyle aynı genişlikte; yazılar hizalı). */}
-            {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
+            <MenuIsareti item={item} />
             {item.label}
           </Menu.Item>,
         ])}
@@ -229,7 +239,7 @@ function CekmeceGezinme({ current }: { current: string }) {
                     return (
                       <li key={item.path}>
                         <a className="cekmece-link" href={href(item.path)} data-role={item.role} aria-current={item.exact ? 'page' : undefined} data-section={item.inSection ? 'true' : undefined}>
-                          {item.no ? <span className="tree-no">{item.no}</span> : <span className="navmenu-bullet" aria-hidden="true" />}
+                          <MenuIsareti item={item} />
                           {item.label}
                         </a>
                       </li>
@@ -368,7 +378,7 @@ export function AppFrame({
             </div>
           </div>
         </header>
-        {girisli ? <ParamsNotice /> : null}
+        {girisli ? <ParamsNotice rehber={current === normalizePath(href('/politikalar/'))} /> : null}
         <main className="app-main" id="icerik" tabIndex={-1}>
           <div className="wrap" data-wide={wide && girisli ? '' : undefined}>
             {!girisli ? (
