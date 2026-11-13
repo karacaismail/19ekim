@@ -153,7 +153,7 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
           { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
             <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
             {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
-            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&proje=${p.proje}`}>İkinci sürümdeki hesabı açın</a></p>
+            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&urun=${p.proje}`}>İkinci sürümdeki hesabı açın</a></p>
           </> },
           ...hesap.programlar.map((k) => ({ id: `program-${k.id}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
             <p>Bu ayrı bir programdır. Ana programla kendiliğinden birleşmez.</p>

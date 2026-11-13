@@ -69,6 +69,15 @@ function useAyar() {
     } catch {
       /* kayıt okunamazsa başlangıç değerleri */
     }
+    // Çalışma rehberinin bağlantısı (`?surum=v2&urun=segika`) ürünü bir kez seçer ve bu sürümün kaydına yazar.
+    // `proje` okunmaz: 1. sürüm onu adrese yazar ve iki sürümün ayarları ayrı kalmalıdır.
+    const url = new URL(window.location.href);
+    const urun = url.searchParams.get('urun');
+    if (urun === 'istoc' || urun === 'segika') {
+      guncelle({ marka: urun });
+      url.searchParams.delete('urun');
+      window.history.replaceState(null, '', url);
+    }
   }, []);
   const guncelle = (p: Partial<Ayar>) =>
     setAyar((o) => {

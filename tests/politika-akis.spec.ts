@@ -176,5 +176,5 @@ test('Segika rehberindeki hesap bağlantısı Segika hesabını açar', async ({
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Birinci sürümdeki hesabı açın' })).toHaveAttribute('href', /proje=segika/);
   // İkinci sürüm bağlantısı kapalı bir alt bölümdedir. Bağlantının adresi yine denetlenir.
-  await expect(page.locator('.pol-belge a[href*="surum=v2"]')).toHaveAttribute('href', /proje=segika/);
+  await expect(page.locator('.pol-belge a[href*="surum=v2"]')).toHaveAttribute('href', /urun=segika/);
 });
