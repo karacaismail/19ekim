@@ -9,16 +9,21 @@ import {
   HAZIRLIK_ADI,
   HAZIRLIK_EYLEMI,
   HAZIRLIK_TANIMI,
+  KARAR_ISI_ADI,
+  KARAR_TARIHI,
   KISALTMALAR,
   MODELLER,
   ONCELIK_ADI,
   ONCELIK_NOTU,
   ONCELIK_ONERISI,
   eur,
+  paketKararlari,
   paketler,
   type GelirModeli,
   type Hazirlik,
+  type PaketKarari,
 } from '../data/gelirModelleri';
+import { href } from '../lib/paths';
 
 /**
  * Gelir modelleri (kullanıcı kararı 3 Kasım 2026, yeniden düzen 13 Kasım 2026). Sayfa okurun sorularını sırayla cevaplar:
@@ -93,6 +98,12 @@ function ModelKarti({ m }: { m: GelirModeli }) {
         </span>
       </div>
       <p className="gm-nasil">{m.nasil}</p>
+      {m.fiyat ? (
+        <dl className="gm-fiyat">
+          <dt>İlk fiyat</dt>
+          <dd>{m.fiyat}</dd>
+        </dl>
+      ) : null}
       <div className="gm-ornek">
         <p className="gm-ornek-ad">Örnek hesap</p>
         {/* Uyarı sayıdan önce okunur. */}
@@ -100,6 +111,40 @@ function ModelKarti({ m }: { m: GelirModeli }) {
         <p className="gm-ornek-metin">{m.ornek}</p>
       </div>
       <Ayrintilar m={m} />
+    </li>
+  );
+}
+
+/** Paket kararı: ad, kimin uygulayacağı, açıklama ve gerekiyorsa sınırlar. Karar bugünkü paket kartlarından ayrı durur. */
+function Karar({ k }: { k: PaketKarari }) {
+  return (
+    <li className="gm-karar" id={`karar-${k.id}`}>
+      <div className="gm-karar-ust">
+        <h4 className="gm-karar-ad">{k.ad}</h4>
+        <span className="gm-karar-durum" data-is={k.is}>
+          {KARAR_ISI_ADI[k.is]}
+        </span>
+      </div>
+      {k.metin.map((t) => (
+        <p key={t} className="gm-karar-metin">
+          {t}
+        </p>
+      ))}
+      {k.sinirlar ? (
+        <dl className="gm-sinirlar" aria-label={`${k.ad}: sınırlar`}>
+          {k.sinirlar.map((s) => (
+            <div key={s.ad}>
+              <dt>{s.ad}</dt>
+              <dd>{s.deger}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      {k.bag ? (
+        <a className="gm-ozet-bag" href={k.bag.yol.startsWith('#') ? k.bag.yol : href(k.bag.yol)}>
+          {k.bag.metin}
+        </a>
+      ) : null}
     </li>
   );
 }
@@ -168,6 +213,17 @@ function Icerik() {
               </li>
             ))}
           </ul>
+          <div className="gm-kararlar">
+            <h3 className="gm-kararlar-baslik">Paketler için alınan kararlar</h3>
+            <p className="gm-kararlar-giris">
+              Bu kararlar {KARAR_TARIHI} günü alındı. istoc.com’daki paketler henüz değişmedi.
+            </p>
+            <ul className="gm-karar-liste">
+              {paketKararlari(params).map((k) => (
+                <Karar key={k.id} k={k} />
+              ))}
+            </ul>
+          </div>
         </Section>
 
         <Section id="oncelik-onerisi" title="Önce denenecek üç model" desc="Bu üç model en az hazırlığı ister. Sıra en kolay olandan başlar.">
@@ -202,6 +258,7 @@ function Icerik() {
           tools={
             <div className="gm-araclar">
               <p className="gm-not">Örnek hesaplar yöntemi gösterir. Bunlar gelir sözü ya da hedef değildir.</p>
+              <p className="gm-not">İlk fiyatlar {KARAR_TARIHI} günü onaylandı. Bu fiyatlar esnafla denenmedi.</p>
               <nav className="gm-gruplar" aria-label="Hazırlık grupları">
                 <ul>
                   {DURUMLAR.map((h) => (

@@ -1,4 +1,4 @@
-import { IconCheck, IconClock, IconDoor, IconMinus, IconSparkles } from '@tabler/icons-react';
+import { IconBan, IconCheck, IconClock, IconDoor, IconMinus, IconSparkles } from '@tabler/icons-react';
 import { useState, type ReactNode } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
@@ -17,12 +17,18 @@ import {
   OKUNDU,
   OZELLIK_NOTU,
   PAKET_ADI_NOTU,
+  PAKET_KARARI,
   PAKET_SIRASI,
   SATICI_UCRETSIZ,
   SAYFA_KAYNAGI,
+  YAZILIM_DURUMU,
+  YAZILIM_KAYNAGI,
+  YAZILIM_NOTU,
+  YOL_KARARI,
   YOL_NOTU,
   degerMetni,
   hizmetHaritasi,
+  isaret,
   paket,
   paketKartlari,
   pakette,
@@ -80,17 +86,25 @@ function FaydaListesi({ faydalar }: { faydalar: Fayda[] }) {
   );
 }
 
-/** Tabloda gösterilen değer. “Yakında” işaretli özellik pakette olsa da bugün çalışmaz. */
-const gosterilen = (o: CanliOzellik, p: PaketId) => (o.yakinda && pakette(o.deger[p]) ? 'Yakında' : String(degerMetni(o.deger[p])));
+/**
+ * Tabloda gösterilen değer. “Yakında” ya da “Hazır değil” işaretli özellik pakette olsa da bugün çalışmaz. İşaret canlı
+ * tablodan ya da kod incelemesinden gelir (`isaret`, kullanıcı kararı 13 Kasım 2026).
+ */
+const gosterilen = (o: CanliOzellik, p: PaketId) => {
+  const i = isaret(o);
+  return i && pakette(o.deger[p]) ? HAZIRLIK_ADI[i] : String(degerMetni(o.deger[p]));
+};
 
-/** Özellik değeri: “Var”, “Yok” ve “Yakında” simgeyle ve yazıyla, metin değer olduğu gibi. */
+/** Özellik değeri: “Var”, “Yok”, “Yakında” ve “Hazır değil” simgeyle ve yazıyla, metin değer olduğu gibi. */
 function Deger({ o, p }: { o: CanliOzellik; p: PaketId }) {
   const v = o.deger[p];
-  if (o.yakinda && pakette(v)) {
+  const i = isaret(o);
+  if (i && pakette(v)) {
+    const Simge = i === 'yakinda' ? IconClock : IconBan;
     return (
-      <span className="pz-deger" data-deger="yakinda">
-        <IconClock size={16} stroke={2} aria-hidden="true" />
-        Yakında
+      <span className="pz-deger" data-deger={i}>
+        <Simge size={16} stroke={2} aria-hidden="true" />
+        {HAZIRLIK_ADI[i]}
       </span>
     );
   }
@@ -140,6 +154,30 @@ function Alan({ ad, ton, bos, children }: { ad: string; ton?: string; bos?: bool
 
 const katmanAdi = (id: string) => TUTMA_KATMANLARI.find((k) => k.id === id)?.ad ?? id;
 
+/** Özellik adı ve yazılımdaki durumu söyleyen not. Not yalnız kod incelemesinin bulduğu satırda vardır. */
+function OzellikAdi({ o }: { o: CanliOzellik }) {
+  const d = YAZILIM_DURUMU[o.anahtar];
+  if (!d) return <>{o.ad}</>;
+  return (
+    <span className="pz-ozellik">
+      <span>{o.ad}</span>
+      <span className="pz-ozellik-not">{d.not}</span>
+    </span>
+  );
+}
+
+/** Karar notu (kullanıcı kararı 13 Kasım 2026). Karar istoc.com’da henüz uygulanmadı. */
+function KararNotu({ children }: { children: ReactNode }) {
+  return (
+    <p className="pz-karar">
+      <span className="chip pz-cip" data-ton="karar">
+        Karar
+      </span>
+      <span className="pz-karar-metin">{children}</span>
+    </p>
+  );
+}
+
 function Icerik() {
   const [grup, setGrup] = useState<string>(KARSILASTIRMA[0].id);
   const secenekler = [
@@ -160,6 +198,7 @@ function Icerik() {
         meta={[
           { label: 'Paket bilgisinin kaynağı', value: `istoc.com satıcı paketleri, ${OKUNDU}` },
           { label: 'Ücretsiz ve ücretli ayrımının kaynağı', value: 'İşletmeden işletmeye satış (B2B) yapan küresel pazar yerleri araştırması' },
+          { label: 'Yazılımdaki durumun kaynağı', value: YAZILIM_KAYNAGI },
         ]}
       />
       <div className="pz-sayfa">
@@ -262,13 +301,19 @@ function Icerik() {
             ))}
           </ul>
           <p className="pz-not">{PAKET_ADI_NOTU}</p>
+          <KararNotu>
+            {PAKET_KARARI}{' '}
+            <a className="text-link" href={href('/gelir-modelleri/#karar-ucretsiz')}>
+              Ücretsiz paketin sınırlarını görün
+            </a>
+          </KararNotu>
         </Section>
 
         <Section
           id="karsilastirma"
           index={3}
           title={BOLUMLER[2].baslik}
-          desc="Bütün özellikler istoc.com satıcı paketlerindeki sırayla yazıldı. “Yok” o özelliğin pakette olmadığını söyler. “Yakında” o özelliğin bugün çalışmadığını söyler."
+          desc="Bütün özellikler istoc.com satıcı paketlerindeki sırayla yazıldı. “Yok” o özelliğin pakette olmadığını söyler. “Yakında” ve “Hazır değil” o özelliğin bugün çalışmadığını söyler."
           tools={<Choice label="Özellik grubu" value={grup} options={secenekler} onChange={setGrup} />}
           dizin
         >
@@ -276,7 +321,7 @@ function Icerik() {
             id="paket-karsilastirma"
             title={grup === 'hepsi' ? 'Bütün özellikler' : KARSILASTIRMA.find((g) => g.id === grup)!.ad}
             columns={[
-              { key: 'ad', header: 'Özellik', rowHeader: true, minWidth: '14rem', render: (o) => o.ad, text: (o) => o.ad },
+              { key: 'ad', header: 'Özellik', rowHeader: true, minWidth: '14rem', render: (o) => <OzellikAdi o={o} />, text: (o) => o.ad },
               ...PAKET_SIRASI.map(
                 (p, i): Column<CanliOzellik> => ({
                   key: p,
@@ -292,6 +337,7 @@ function Icerik() {
             rowKey={(o) => o.anahtar}
           />
           <p className="pz-not">{OZELLIK_NOTU}</p>
+          <p className="pz-not">{YAZILIM_NOTU}</p>
         </Section>
 
         <Section
@@ -313,6 +359,7 @@ function Icerik() {
                       Diğer ülkelerde {katmanAdi(h.katman).toLocaleLowerCase('tr')} örneklerini görün
                     </a>
                   ) : null}
+                  {h.karar ? <KararNotu>{h.karar}</KararNotu> : null}
                 </div>
                 <dl className="pz-hizmet-alanlar">
                   <Alan ad="Ücretsiz" ton={h.ucretsiz ? 'ucretsiz' : undefined} bos={!h.ucretsiz}>
@@ -363,6 +410,7 @@ function Icerik() {
             </p>
             <p className="pz-cikarim-metin">{YOL_NOTU}</p>
           </aside>
+          <KararNotu>{YOL_KARARI}</KararNotu>
         </Section>
 
         <Section id="ilgili" title={BOLUMLER[5].baslik} dizin>

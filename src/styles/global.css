@@ -7785,6 +7785,139 @@ html[data-bant-gizli] .so2-duzen {
   font-size: var(--text-sm);
 }
 
+/* Paketler için alınan kararlar (13 Kasım 2026): bugünkü paket kartlarından sonra, ayrı başlıkla. */
+.gm-kararlar {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-10);
+}
+
+.gm-kararlar-baslik {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.gm-kararlar-giris {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--text-secondary);
+}
+
+.gm-karar-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gm-karar {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background-color: var(--surface-raised);
+  scroll-margin-top: calc(var(--bant-h, 0px) + var(--hit-min) + var(--space-4));
+}
+
+.gm-karar-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+
+.gm-karar-ad {
+  flex: 1 1 14rem;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* Kararı kimin uygulayacağı. Durum metinle de yazılır. */
+.gm-karar-durum {
+  padding: var(--clear-block-sm) var(--clear-inline-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.gm-karar-durum[data-is='ayar'] {
+  background-color: var(--hazirlik-hazir-bg);
+  color: var(--hazirlik-hazir-fg);
+}
+
+.gm-karar-durum[data-is='yazilim'] {
+  background-color: var(--hazirlik-yakinda-bg);
+  color: var(--hazirlik-yakinda-fg);
+}
+
+.gm-karar-durum[data-is='degisiklik-yok'] {
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+}
+
+.gm-karar-metin {
+  margin: 0;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.gm-sinirlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-1) var(--space-6);
+  margin: var(--space-2) 0 0;
+  padding: var(--space-4);
+  background-color: var(--surface-sunken);
+}
+
+.gm-sinirlar div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.gm-sinirlar dt {
+  color: var(--text-secondary);
+}
+
+/* Değer alt satıra inse de sağda kalır. */
+.gm-sinirlar dd {
+  margin: 0 0 0 auto;
+  text-align: end;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Onaylanan ilk fiyat: açıklamadan sonra, örnek hesaptan önce. */
+.gm-fiyat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gm-fiyat dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.gm-fiyat dd {
+  margin: 0;
+  color: var(--accent-strong);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Bölüm başlığı ile içerik arasında boşluk (Section başlık bloğunun hemen altı). */
 .gm .section-head + .gm-ozet,
 .gm .section-head + .gm-paketler,

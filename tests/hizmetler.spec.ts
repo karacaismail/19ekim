@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures/persona';
 import { CANLI_GRUPLAR, CANLI_PAKETLER } from '../src/data/canliPaketler';
-import { ALICI_UCRETSIZ, OKUNDU, PAKET_ADI_NOTU, SATICI_UCRETSIZ, hizmetHaritasi } from '../src/data/hizmetler';
+import { ALICI_UCRETSIZ, OKUNDU, PAKET_ADI_NOTU, SATICI_UCRETSIZ, YAZILIM_DURUMU, YAZILIM_KAYNAGI, hizmetHaritasi, paketKartlari } from '../src/data/hizmetler';
 import { HAZIRLIK_ADI, MODELLER } from '../src/data/gelirModelleri';
 
 /**
@@ -172,4 +172,69 @@ test('hizmetler: menüde Pazarlama grubunda, değer önerisinden sonra ve yeni i
   await expect(oge).toHaveAttribute('aria-current', 'page');
   await expect(oge).toHaveAttribute('href', '/19ekim/services/');
   await expect(oge.getByRole('img', { name: 'Yeni', exact: true })).toHaveCount(1);
+});
+
+/**
+ * Kullanıcı kararı 13 Kasım 2026: canlı paket tablosunda yazılımda karşılığı olmayan satırlar silinmez. Satır işaretle
+ * gösterilir. Kod incelemesi 22 maddeyi buldu. Bu maddeler canlı tabloda 25 satırdır. Çalışmayan satırın paketteki
+ * hücresinde “Yakında” ya da “Hazır değil” yazar. Pakete bağlı olmayan ve alıcıya ait satırda yalnız not durur.
+ */
+test('hizmetler: yazılım durumu listesindeki her anahtar canlı tabloda vardır', () => {
+  const anahtarlar = new Set(CANLI_GRUPLAR.flatMap((g) => g.ozellikler.map((o) => o.anahtar)));
+  expect(Object.keys(YAZILIM_DURUMU)).toHaveLength(25);
+  for (const a of Object.keys(YAZILIM_DURUMU)) expect(anahtarlar.has(a), a).toBe(true);
+});
+
+test('hizmetler: yazılımda çalışmayan satır işaret ve not taşır, işaretin kaynağı yazılıdır', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('services/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const toplam = CANLI_GRUPLAR.reduce((n, g) => n + g.ozellikler.length, 0);
+  await page.getByRole('combobox', { name: 'Özellik grubu' }).click();
+  await page.getByRole('option', { name: `Hepsi (${toplam})` }).click();
+  const tablo = page.locator('#karsilastirma table');
+  for (const o of CANLI_GRUPLAR.flatMap((g) => g.ozellikler)) {
+    const d = YAZILIM_DURUMU[o.anahtar];
+    if (!d) continue;
+    const satir = tablo.locator('tbody tr').filter({ has: page.locator('th', { hasText: o.ad }) });
+    await expect(satir.locator('.pz-ozellik-not'), o.anahtar).toHaveText(d.not);
+    if (d.durum === 'yakinda' || d.durum === 'hazir-degil') {
+      const isaret = HAZIRLIK_ADI[d.durum];
+      await expect(satir.locator(`.pz-deger[data-deger="${d.durum}"]`).first(), o.anahtar).toHaveText(isaret);
+      const hucreler = (await satir.locator('td').allInnerTexts()).map((t) => t.trim());
+      expect(hucreler, o.anahtar).not.toContain('Var');
+    } else {
+      await expect(satir.locator('.pz-deger[data-deger="yakinda"], .pz-deger[data-deger="hazir-degil"]'), o.anahtar).toHaveCount(0);
+    }
+  }
+  await expect(page.locator('#karsilastirma')).toContainText(YAZILIM_KAYNAGI);
+  await expect(page.locator('.page-meta')).toContainText(YAZILIM_KAYNAGI);
+});
+
+test('hizmetler: paket kartları yalnız yazılımda çalışan özelliği sayar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('services/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const kartlar = paketKartlari();
+  for (const k of kartlar) {
+    const metin = await page.locator(`#paket-${k.id} ul`).innerText();
+    expect(metin).toContain('kayıtlı ürün');
+    expect(metin).not.toMatch(/aynı anda yayında|öne çıkan ürün|ERP|ödeme koşulları|fuar|dilde açılır/i);
+  }
+});
+
+test('hizmetler: 13 Kasım 2026 kararları ve yeni ek hizmetler görünür', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('services/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const harita = hizmetHaritasi();
+  await expect(page.locator('.pz-hizmet .pz-karar')).toHaveCount(harita.filter((h) => h.karar).length);
+  await expect(page.locator('#hizmet-talep .pz-karar')).toContainText('teklif isteğine yanıt verecek');
+  await expect(page.locator('#hizmet-gorunurluk .pz-karar')).toContainText('yalnız İstoç çalışanı');
+  await expect(page.locator('#hizmet-vitrin .pz-karar')).toContainText('Ücretsiz paket');
+  await expect(page.locator('#odeme-ne-zaman .pz-karar')).toContainText('Ücretsiz paket');
+  await expect(page.locator('#paketler .pz-karar')).toContainText('Ücretsiz paket');
+  await expect(page.locator('.pz-karar .chip').first()).toHaveText('Karar');
+  await expect(page.locator('#hizmet-ekip .pz-planlanan a[href$="#model-crm-eki"]')).toHaveCount(1);
+  await expect(page.locator('#hizmet-gorunurluk .pz-planlanan a[href$="#model-yetkili-satici"]')).toHaveCount(1);
 });

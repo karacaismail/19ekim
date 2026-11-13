@@ -4,6 +4,11 @@
  * durumuna göre üç grupta gösterir. Her grup okura ne yapacağını söyler (`HAZIRLIK_EYLEMI`). Örnek hesaplar yöntemi gösteren varsayımlardır, söz ya da hedef
  * değildir. İhracat altyapısı (yazılım, gümrük, mikro ihracat operasyonu) hazır değildir: ihracatla ilgili hiçbir model
  * hazır gibi sunulmaz. Açıklamalar tam cümledir, noktalı virgül ve uzun çizgi kullanılmaz (`tests/gelir-modelleri.spec.ts`).
+ *
+ * Kullanıcı kararları 13 Kasım 2026 (fiyat tablosu ve gelir önerisi): ücretsiz paket gelecek, Standart pakete CRM eki
+ * satılır, Pro paket teklif isteğine yanıt verir, Standart pakette beden ve renk seçeneği yoktur. Ek hizmetlerin ilk
+ * fiyatları onaylandı (`ILK_FIYAT_EUR`). Buybox önceliği yalnız onaylı markalara “Yetkili satıcı önceliği” adıyla satılır.
+ * “Öne çıkan” kutusunu yalnız İstoç çalışanı işaretler. Kararlar istoc.com’da henüz uygulanmadı.
  */
 import type { Params } from './params';
 
@@ -53,6 +58,102 @@ export const PRO_AYLIK_EUR = 599;
 
 export const eur = (n: number) => `${n.toLocaleString('tr-TR')} €`;
 
+/** Kararların alındığı gün. */
+export const KARAR_TARIHI = '13 Kasım 2026';
+
+/** Standart pakete CRM ekinin aylık ücreti (€). Kullanıcı kararı 13 Kasım 2026. Yıllık ücret Parametreler’deki ay sayısıyla hesaplanır. */
+export const CRM_EKI_AYLIK_EUR = 99;
+
+/** Ek hizmetlerin onaylanan ilk fiyatları (€). Kullanıcı kararı 13 Kasım 2026. Esnafla denenmedi. */
+export const ILK_FIYAT_EUR = { kurulum: 150, denetim: 150, ek: 30, vitrin: 150, oneCikarma: 50, teklif: 5 } as const;
+
+/** Ücretsiz paketteki kayıtlı ürün sınırı. */
+export const UCRETSIZ_URUN = 50;
+
+/** Ücretsiz paketin sınırları (kullanıcı kararı 13 Kasım 2026). Paket bugün istoc.com’da yok. */
+export const UCRETSIZ_SINIRLAR: { ad: string; deger: string }[] = [
+  { ad: 'Aylık ücret', deger: eur(0) },
+  { ad: 'Süre', deger: 'Süresiz' },
+  { ad: 'Kayıtlı ürün', deger: String(UCRETSIZ_URUN) },
+  { ad: 'Alt kullanıcı', deger: '1' },
+  { ad: 'Satış bölgesi', deger: 'Türkiye' },
+  { ad: 'Dosya depolama', deger: '500 MB (megabayt)' },
+  { ad: 'Dosyayla toplu ürün yükleme', deger: 'Yok' },
+  { ad: 'Şirket doğrulama rozeti', deger: 'Var' },
+  { ad: 'Teklif isteklerini görme', deger: 'Var' },
+  { ad: 'Teklif isteğine yanıt', deger: 'Yok' },
+  { ad: 'CRM', deger: 'Yok' },
+];
+
+/** Paket kararını kimin uygulayacağı. */
+export type KararIsi = 'ayar' | 'yazilim' | 'degisiklik-yok';
+export const KARAR_ISI_ADI: Record<KararIsi, string> = {
+  ayar: 'Yönetici ayarı yeter',
+  yazilim: 'Yazılım işi gerekir',
+  'degisiklik-yok': 'Değişiklik yok',
+};
+
+export interface PaketKarari {
+  id: string;
+  ad: string;
+  is: KararIsi;
+  metin: string[];
+  /** Kararın ayrıntısını gösteren sayfa. */
+  bag?: { metin: string; yol: string };
+  sinirlar?: { ad: string; deger: string }[];
+}
+
+/** Paketler için alınan kararlar (kullanıcı kararı 13 Kasım 2026). istoc.com’daki paketler henüz değişmedi. */
+export function paketKararlari(p: Pick<Params, 'annualMonths'>): PaketKarari[] {
+  return [
+    {
+      id: 'ucretsiz',
+      ad: 'Ücretsiz paket gelecek',
+      is: 'yazilim',
+      metin: [
+        'Satıcı istoc.com’u ücretsiz kullanmaya başlar. Satıcı teklif isteklerini görür.',
+        'Satıcı teklif vermek için ücretli paket alır.',
+        'Bugün yazılım bu paketi açamaz. Yazılımcı dört işi bitirince paket açılır. Esnafa tarih vermeyin.',
+      ],
+      sinirlar: UCRETSIZ_SINIRLAR,
+    },
+    {
+      id: 'pro-teklif',
+      ad: 'Pro paket teklif isteğine yanıt verecek',
+      is: 'ayar',
+      metin: ['Bugün yalnız Kurumsal paket teklif isteğine yanıt verir.', 'istoc.com yöneticisi bu ayarı paket ekranından yapar. Yazılım işi gerekmez.'],
+    },
+    {
+      id: 'crm-eki',
+      ad: 'Standart pakete CRM eki',
+      is: 'ayar',
+      metin: [
+        `Standart paketi kullanan satıcı CRM’i ayda ${eur(CRM_EKI_AYLIK_EUR)} ek ücretle alır.`,
+        `Satıcı yıllık peşin ödemede ${eur(CRM_EKI_AYLIK_EUR * p.annualMonths)} öder.`,
+        'Satıcı Pro pakete geçerse ekip ek ücreti durdurur. Çünkü Pro pakette CRM zaten vardır.',
+      ],
+      bag: { metin: 'CRM ekini görün', yol: '#model-crm-eki' },
+    },
+    {
+      id: 'varyant',
+      ad: 'Standart pakette beden ve renk seçeneği yok',
+      is: 'degisiklik-yok',
+      metin: ['Beden ve renk seçeneği Pro paketten başlar. Bu durum değişmeyecek.'],
+    },
+    {
+      id: 'tablo',
+      ad: 'Paket tablosundaki karşılıksız satırlar işaretlenecek',
+      is: 'ayar',
+      metin: [
+        'Bazı satırların yazılımda karşılığı yok. Bazı satırlar da pakete bağlı değil.',
+        'istoc.com yöneticisi bu satırların yanına “Yakında” ya da “Hazır değil” yazar.',
+        'Hizmetler sayfasındaki tablo bu satırları bugünden işaretler.',
+      ],
+      bag: { metin: 'İşaretli satırları görün', yol: '/services/#karsilastirma' },
+    },
+  ];
+}
+
 /** Bugünkü abonelik paketleri; Standart ücret ve yıllık pakette ücreti alınan ay Parametreler’den gelir. */
 export function paketler(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): Paket[] {
   const yillik = (aylik: number) => aylik * p.annualMonths;
@@ -86,6 +187,8 @@ export interface GelirModeli {
   ad: string;
   /** Nasıl çalışır (1–2 cümle). */
   nasil: string;
+  /** Onaylanan ilk fiyat (kullanıcı kararı 13 Kasım 2026). Kartta “İlk fiyat” adıyla görünür. */
+  fiyat?: string;
   /** Örnek hesap: birimlidir, söz değildir. Kartta “Örnek hesap (varsayımdır, söz değildir)” başlığı altında görünür. */
   ornek: string;
   /** Kim öder? */
@@ -144,11 +247,13 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Sponsorlu ürün ve öne çıkarma',
     nasil:
       'Satıcı, ürününün arama sonuçlarında ya da kategori sayfasında üstte görünmesi için ücret öder. Ücret belirli bir süre için sabit olabilir ya da tıklama başına alınabilir.',
-    ornek: '40 satıcı ayda 50 € tutarında öne çıkarma paketi alabilir. Bu durumda ayda 2.000 € ek gelir olur.',
+    fiyat: `Ayda ${eur(ILK_FIYAT_EUR.oneCikarma)}`,
+    ornek: `40 satıcı ayda ${eur(ILK_FIYAT_EUR.oneCikarma)} tutarında öne çıkarma paketi alabilir. Bu durumda ayda ${eur(40 * ILK_FIYAT_EUR.oneCikarma)} ek gelir olur.`,
     kimOder: 'Satıcı öder.',
     uygunluk: 'Abonelik ödeyen satıcı tabanına eklenir. Satıcı karşılığını gösterim, tıklama ve mesaj sayısıyla görebilir.',
     risk: 'Platforma az alıcı gelirse satıcı karşılık göremez ve paketi yenilemez. Sponsorlu sonuçlar alıcıya açıkça etiketlenmelidir.',
-    gereken: 'Öne çıkarma alanı, “sponsorlu” etiketi ve satıcıya gösterim ile tıklama raporu gerekir.',
+    gereken:
+      'Bugün her satıcı ürün formundaki “Öne çıkan” kutusunu kendisi işaretleyebiliyor. Karara göre bu kutuyu yalnız İstoç çalışanı işaretleyecek. Satıcı önce ücreti öder. Bu değişikliği yazılımcı yapar. “Sponsorlu” etiketi ve satıcıya gösterim ile tıklama raporu da gerekir.',
     hazirlik: 'yakinda',
     oncelik: 1,
   },
@@ -156,7 +261,8 @@ export const MODELLER: GelirModeli[] = [
     id: 'kategori-vitrini',
     ad: 'Kategori vitrini sponsorluğu',
     nasil: 'Bir kategorinin vitrin alanı belirli bir süre için tek bir satıcıya ya da markaya kiralanır. Örneğin tekstil kategorisinin üst bölümü kiralanabilir.',
-    ornek: '8 kategori vitrini olabilir. Her vitrinin aylık ücreti 150 € olabilir. Hepsi dolarsa ayda 1.200 € gelir olur.',
+    fiyat: `Vitrin başına ayda ${eur(ILK_FIYAT_EUR.vitrin)}`,
+    ornek: `8 kategori vitrini olabilir. Her vitrinin aylık ücreti ${eur(ILK_FIYAT_EUR.vitrin)} olabilir. Hepsi dolarsa ayda ${eur(8 * ILK_FIYAT_EUR.vitrin)} gelir olur.`,
     kimOder: 'Satıcı, üretici ya da marka öder.',
     uygunluk: 'İstoç çarşısında kategorisinde güçlü toptancılar vardır. Vitrin onlara görünürlük sağlar.',
     risk: 'Vitrin sayısı sınırlı olduğu için gelirin tavanı düşüktür. Az satıcı alırsa vitrin boş kalır.',
@@ -165,11 +271,26 @@ export const MODELLER: GelirModeli[] = [
     oncelik: 2,
   },
   {
+    id: 'yetkili-satici',
+    ad: 'Yetkili satıcı önceliği',
+    nasil:
+      'Bir markanın ürününü birkaç satıcı satabilir. Marka bu satıcılardan birine yetki verir. Yetkili satıcı ürün sayfasında ilk sırada görünür. Alıcı bu satıcının yanında “Yetkili satıcı” yazısını görür.',
+    ornek: 'Fiyat henüz belirlenmedi. Bu yüzden gelir hesabı yapılmadı.',
+    kimOder: 'Marka öder. Bu hizmet yalnız onaylı markalara satılır.',
+    uygunluk: 'Marka, ürününün yetkili satıcıdan alınmasını ister. Alıcı da ürünün gerçek olduğunu bilmek ister.',
+    risk: 'Alıcı ilk sıradaki satıcının neden orada olduğunu bilmelidir. Bu yüzden “Yetkili satıcı” yazısı her zaman görünmelidir. Diğer satıcılar da sayfada görünmeye devam etmelidir.',
+    gereken:
+      'Bugün sıralama fiyata, teslim süresine ve satıcı puanına bakıyor. Yazılımcı marka yetkisini de sıralamaya eklemelidir. Markanın yetki verdiğini gösteren bir belge de gerekir.',
+    hazirlik: 'yakinda',
+    oncelik: 2,
+  },
+  {
     id: 'dogrulanmis-tedarikci',
     ad: 'Doğrulanmış tedarikçi rozeti',
     nasil:
       'Satıcının vergi kaydı, adresi ve dükkânı ya da deposu ücretli bir denetimle kontrol edilir. Denetimi geçen satıcının profilinde rozet görünür.',
-    ornek: '30 satıcı yılda bir kez 150 € denetim ücreti öderse yılda 4.500 € gelir olur.',
+    fiyat: `Yılda ${eur(ILK_FIYAT_EUR.denetim)}`,
+    ornek: `30 satıcı yılda bir kez ${eur(ILK_FIYAT_EUR.denetim)} denetim ücreti öderse yılda ${eur(30 * ILK_FIYAT_EUR.denetim)} gelir olur.`,
     kimOder: 'Satıcı öder.',
     uygunluk: 'Yeni alıcı güven arar. Saha ekibi denetimi dükkân ziyaretinde yapabilir.',
     risk: 'Rozet verilen satıcı sorun çıkarırsa platformun güvenilirliği zarar görür. Denetim ölçütü yazılı ve herkes için aynı olmalıdır.',
@@ -182,8 +303,10 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Talep toplama ve teklif talebi ücreti',
     nasil:
       'Alıcıların satın alma talepleri toplanır. Bunlara RFQ (teklif talebi) denir. Talebe teklif vermek isteyen satıcı talep başına ücret öder. Bunun yerine satıcının aboneliğine belirli sayıda talep hakkı da eklenebilir.',
-    ornek: 'Ayda 200 talep gelebilir. Her talebe ortalama 3 satıcı 5 € ödeyerek teklif verebilir. Bu durumda ayda 3.000 € gelir olur.',
-    kimOder: 'Satıcı öder. Alıcı talebini ücretsiz bırakır.',
+    fiyat: `Her istek için ${eur(ILK_FIYAT_EUR.teklif)}`,
+    ornek: `Ayda 200 talep gelebilir. Her talebe ortalama 3 satıcı ${eur(ILK_FIYAT_EUR.teklif)} ödeyerek teklif verebilir. Bu durumda ayda ${eur(200 * 3 * ILK_FIYAT_EUR.teklif)} gelir olur.`,
+    kimOder:
+      'Yanıt hakkı paketinde olmayan satıcı öder. Karara göre Pro ve Kurumsal paketlerde bu hak paketin içinde olacak. Alıcı talebini ücretsiz bırakır.',
     uygunluk: '“Değer önerisi” sayfasındaki “Gerçek alıcılardan hazır sipariş fırsatları” sözüyle aynı yöndedir.',
     risk: 'Talepler zayıfsa satıcı para öder ama satış yapamaz. Bu durum aboneliği de kaybettirebilir.',
     gereken: 'Platforma yeterli alıcı gelmesi gerekir. Talep formu ve talepleri doğrulayan bir CRM (müşteri ilişkileri yönetimi) süreci de gerekir.',
@@ -195,7 +318,8 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Eklentiler (ek kullanıcı, ek ürün sınırı ve yazılım bağlantısı)',
     nasil:
       'Paketin üzerine küçük ücretli ekler satılır. Ek kullanıcı hesabı ve daha yüksek ürün sınırı bunlara örnektir. Stok ve fiyatların ERP ya da muhasebe programıyla kendiliğinden aynı tutulması da bir ektir. ERP, kurumsal kaynak planlama yazılımıdır.',
-    ornek: '100 abone satıcının 25’i ayda 30 € tutarında ek alabilir. Bu durumda ayda 750 € ek gelir olur.',
+    fiyat: `Her ek için ayda ${eur(ILK_FIYAT_EUR.ek)}`,
+    ornek: `100 abone satıcının 25’i ayda ${eur(ILK_FIYAT_EUR.ek)} tutarında ek alabilir. Bu durumda ayda ${eur(25 * ILK_FIYAT_EUR.ek)} ek gelir olur.`,
     kimOder: 'Satıcı öder.',
     uygunluk: 'Abonelik modelinin doğal uzantısıdır. Büyüyen satıcı daha çok öder.',
     risk: 'Satıcı, temel pakette olmasını beklediği bir şey için ek ücret öderse kendini cezalandırılmış hisseder. Yazılım bağlantısının bakımı sürekli emek ister.',
@@ -208,13 +332,29 @@ export const MODELLER: GelirModeli[] = [
     ad: 'Kurulum ve eğitim hizmeti',
     nasil:
       'Ekip satıcının ürünlerini, fotoğraflarını, açıklamalarını ve toptan fiyatlarını platforma girer. Ekip satıcıya ve çalışanına kısa bir kullanım eğitimi verir. Bu iş tek seferlik ücretle satılır.',
-    ornek: 'Ayda 20 yeni satıcı gelebilir. Yarısı 150 € tutarında kurulum paketi alırsa ayda 1.500 € gelir olur.',
+    fiyat: `Bir kez ${eur(ILK_FIYAT_EUR.kurulum)}`,
+    ornek: `Ayda 20 yeni satıcı gelebilir. Yarısı ${eur(ILK_FIYAT_EUR.kurulum)} tutarında kurulum paketi alırsa ayda ${eur(10 * ILK_FIYAT_EUR.kurulum)} gelir olur.`,
     kimOder: 'Satıcı öder.',
     uygunluk: '“Değer önerisi” sayfasındaki “Ürünlerinizi biz dijital satışa hazırlayalım” sözüyle aynıdır. Kurulumu yapılmış satıcının aboneliği bırakma olasılığı düşebilir.',
     risk: 'Emek isteyen bir iştir. Fiyat düşük kalırsa ekibin zamanı zararına harcanır.',
     gereken: 'Yazılım gerekmez. Ekip saati, fiyat listesi ve kurulum kontrol listesi yeterlidir.',
     hazirlik: 'hazir',
     oncelik: 1,
+  },
+  {
+    id: 'crm-eki',
+    ad: 'Standart pakete CRM eki',
+    nasil:
+      'Standart paketi kullanan satıcı CRM bölümünü ayrı ücretle alır. CRM, gelen mesajları ve teklif isteklerini müşteri kaydına çevirir.',
+    fiyat: `Ayda ${eur(CRM_EKI_AYLIK_EUR)}`,
+    ornek: `Standart paketi kullanan 100 satıcının 20’si CRM eki alabilir. Bu durumda ayda ${eur(20 * CRM_EKI_AYLIK_EUR)} ek gelir olur.`,
+    kimOder: 'Standart paketi kullanan satıcı öder. Pro ve Kurumsal paketlerde CRM zaten vardır.',
+    uygunluk: 'Yalnız CRM isteyen satıcı Pro pakete geçmeden CRM kullanır. Standart paket ve CRM eki birlikte Pro paketten ucuzdur.',
+    risk: 'Bu ayar canlıda henüz denenmedi. Satıcı Pro pakete geçerse ekip ek ücreti durdurmalıdır.',
+    gereken:
+      'Yönetici CRM’i mağazanın abonelik kaydında açar. Standart paketin ayarında CRM satırı “kapalı” değeriyle bulunmalıdır. Ek ücret ayrı faturayla alınır.',
+    hazirlik: 'hazir',
+    oncelik: 2,
   },
   {
     id: 'lojistik',

@@ -1160,6 +1160,27 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Test `tests/gelir-modelleri.spec.ts` dosyasıdır. Test bölüm sırasını, özet sayılarını, grupları, paneli ve 320, 390,
   1280 px genişlikte taşmayı denetler.
 
+### Paket kararları, ilk fiyatlar ve yazılım durumu (kullanıcı kararları 13 Kasım 2026)
+
+- Kararlar istoc.com’da henüz uygulanmadı. Sayfalar bunu açıkça yazar.
+- Gelir modelleri sayfasında bugünkü üç paketin altında “Paketler için alınan kararlar” listesi durur (`paketKararlari`).
+  Her karar işi kimin yapacağını söyler: “Yönetici ayarı yeter”, “Yazılım işi gerekir” ya da “Değişiklik yok”.
+- Kararlar şunlardır:
+  - Ücretsiz paket gelecek. Sınırları `UCRETSIZ_SINIRLAR` içindedir. Paket bugün yazılımda açılamaz.
+  - Pro paket teklif isteğine yanıt verecek.
+  - Standart pakete CRM eki ayda 99 € ile satılır (`CRM_EKI_AYLIK_EUR`). Bu tutarı kullanıcı ajana bıraktı.
+  - Standart pakette beden ve renk seçeneği yoktur.
+  - Buybox önceliği yalnız onaylı markalara “Yetkili satıcı önceliği” adıyla satılır. “Buybox” adı sitede kullanılmaz.
+  - “Öne çıkan” kutusunu yalnız İstoç çalışanı işaretler. Satıcı önce ücreti öder.
+- Ek hizmetlerin ilk fiyatları onaylandı (`ILK_FIYAT_EUR`). Fiyat kartta “İlk fiyat” olarak örnek hesaptan önce görünür.
+- Hizmetler sayfasındaki karşılaştırma tablosu kod incelemesinin bulduğu satırları işaretler (`YAZILIM_DURUMU`). Kod
+  incelemesi 22 madde buldu, bunlar canlı tabloda 25 satırdır. Kullanıcı bu satırların silinmesini değil işaretlenmesini istedi.
+  - Çalışmayan özellik “Yakında” işareti taşır.
+  - İhracat, ödeme, sipariş akışı, reklam sistemi ve alan adı satırları “Hazır değil” işareti taşır. Bunlar için esnafa söz verilmez.
+  - Pakete bağlı olmayan ya da alıcıya ait satırda işaret yoktur, yalnız not vardır.
+- `canliPaketler.ts` elle değiştirilmez. İşaretler ayrı listede tutulur. Paket kartları yalnız çalışan özelliği sayar.
+- Küresel pazaryerleri sayfası aynı paket verisini `bas()` ile kullanır ve bu işaretleri henüz göstermez.
+
 ## Gizlilik ve yayın
 
 - Repo herkese açıktır. Kaynak PDF’ler ve fotoğraflar repoya girmez (`.gitignore`). Üçüncü kişi adları, maaş ve bütçe
