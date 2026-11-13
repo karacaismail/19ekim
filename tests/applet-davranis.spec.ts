@@ -841,7 +841,7 @@ test.describe('Kayıtlı değerler', () => {
     }, APPLET_KEY);
     await ac(page, 'katalog');
     await yaz(page.getByRole('textbox', { name: 'Yazılım katsayısı' }), '2');
-    await expect(page.locator('.param-toolbar').getByRole('status')).toContainText('depolaması kapalı');
+    await expect(page.locator('.param-toolbar [role="status"]:not(.visually-hidden)')).toContainText('depolaması kapalı');
     await git(page, 'rutbe-matrisi');
     const ortak = ortakIle({ meslekler: katsayiIle('yazilim', 2) });
     await expect.poll(async () => tabloOku(page, 'rutbe')).toEqual(rutbeBekle(ortak, 'carpan').satir);

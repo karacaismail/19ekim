@@ -1882,9 +1882,10 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
  * İki adımlı onay (OnayDugmesi): onay bekleyen düğme her sayfada aynı uyarı tonundadır. Üzerine gelince de değişmez.
  * Onay cümlesi uzunsa satır sarar. Dikey iç boşluk her durumda vardır, bu yüzden onaylanınca düğmenin yeri oynamaz.
  */
+/* Onay cümlesi sarabilsin diye düğme daralabilir, ama dokunma alanı en az --hit-min kalır. */
 button.onay-dugmesi {
   flex: 0 1 auto;
-  min-width: 0;
+  min-width: var(--hit-min);
   padding-block: var(--clear-block-sm);
 }
 

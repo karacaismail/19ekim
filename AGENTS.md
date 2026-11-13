@@ -1311,10 +1311,11 @@ genişlikte açar. Chromium ve WebKit’te çalışır. Token değerleri sayfada
   `--section-index-w` genişliğindedir.
 - **Sıra.** `main > .wrap` içindeki parçalar şu sırayla gelir. Sayfaya özel sarmalayıcı açılır, içindekiler de aynı
   sırayla denetlenir.
-  1. Önce sayfa başı gelir. Sayfa başında kırıntı satırı ve amaç satırı durur. Bütün bölümlere uygulanan süzgeç ve özet
-     sayıları da `PageHeader` içindedir. Örnekler Oyunlaştırma süzgeci ve İstihdam takviminin sayılarıdır.
-  2. Sonra sayfa önü gelir. Sayfa önünde üst kutu (`data-ust-kutu`), yapışık özet ve sürüm seçici durabilir. Bölüm
-     dizini, sayfa notu ve sayfa girişi de burada durur.
+  1. Önce sayfa başı gelir. Sayfa başında kırıntı satırı ve amaç satırı durur. Bütün bölümlere uygulanan süzgeç de
+     `PageHeader` içindedir. Örneği Oyunlaştırma süzgecidir.
+  2. Sonra sayfa önü gelir. Sayfa önünde üst kutu (`data-ust-kutu`), yapışık özet ve sürüm seçici durabilir. Özet
+     sayıları (`Stats`), bölüm dizini, sayfa notu ve sayfa girişi de burada durur. Sayfa başı sıkışık kalsın diye
+     İstihdam takviminin sayıları sayfa önündedir.
   3. Sonra gövde gelir. Gövdede yalnız bölümler durur. Sekmeli bölüm kümesi de gövdenin parçasıdır. Örneği Giderler’in
      yıl kümesidir.
   4. En sonda sayfa sonu gelir. Sayfa sonunda sayfa kaynağı (`SayfaKaynagi`) ve sayfa sonu gezinmesi durur.

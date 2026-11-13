@@ -44,7 +44,7 @@ test.describe('notlar: yeni liste', () => {
     // Ad kırpılır. Yeni liste hemen seçilir ve boştur.
     await expect(listeDugmesi(page, 'Toplantı')).toHaveAttribute('aria-pressed', 'true');
     await expect(listeDugmesi(page, 'Tümü')).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.locator('#not-listesi')).toHaveText('Toplantı');
+    await expect(page.locator('#not-listesi').getByRole('heading', { level: 2 })).toHaveText('Toplantı');
     await expect(sayac(page, 'Toplantı')).toHaveText('0');
     await expect(page.locator('.note-row')).toHaveCount(0);
     await expect(alan).toHaveValue('');
@@ -238,7 +238,8 @@ test.describe('notlar: sayaçlar, bozuk kayıt ve kapalı depolama', () => {
       };
     }, NOTES_KEY);
     await ac(page);
-    const durum = page.locator('.note-footer [role="status"]');
+    // Görünen durum satırı. Onay düğmesinin ekran okuyucu satırı ayrıdır ve gizlidir.
+    const durum = page.locator('.note-footer [role="status"]:not(.visually-hidden)');
     // Henüz değişiklik yok: kapalı depolama uyarısı görünmez.
     await expect(durum).not.toContainText('kapalı');
     const not = page.getByRole('textbox', { name: /^Yeni not/ });

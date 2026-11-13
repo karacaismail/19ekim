@@ -79,8 +79,10 @@ test.describe('karar seçimleri: kayıt', () => {
     await expect(ilerleme(page)).toContainText('1 ajan kararı değişti');
     await expect(page.getByRole('textbox', { name: 'Notunuz' })).toHaveValue('İlk not');
 
-    // Düğme onay sormadan siler (bugünkü davranış).
+    // Silme iki adımlıdır. İlk basış yalnız onay adımını açar, hiçbir şey silinmez.
     await page.getByRole('button', { name: 'Bütün seçimleri ve notları sil' }).click();
+    await expect(ilerleme(page)).toContainText(`${SORULAR.length} açık sorudan 2 tanesi`);
+    await page.getByRole('button', { name: /bütün seçimleri ve notları sil \(onayla\)$/ }).click();
     await expect(ilerleme(page)).toContainText(`${SORULAR.length} açık sorudan 0 tanesi`);
     await expect(ilerleme(page)).not.toContainText('ajan kararı değişti');
     await expect(page.locator('#secimler [role="radio"][aria-checked="true"]')).toHaveCount(0);

@@ -65,11 +65,15 @@ test('birinci sürüm “Başa dön”: vazgeçince hiçbir şey değişmez, ona
   await expect(sonuc(page)).toHaveText(tl(6 * satisKazanci(degismis, 'B')));
   const yaziSayisi = personaServer.writes.length;
 
+  // Onay sayfanın kendi iki adımlı düğmesiyle sorulur. Tarayıcı penceresi açılmaz.
+  const pencereler: string[] = [];
+  page.on('dialog', (d) => { pencereler.push(d.type()); void d.dismiss(); });
   // Vazgeç: alanlar ve ortak kayıt aynı kalır.
-  let tur = '';
-  page.once('dialog', (d) => { tur = d.type(); void d.dismiss(); });
   await page.getByRole('button', { name: 'Başa dön', exact: true }).click();
-  await expect.poll(() => tur).toBe('confirm');
+  const onayla = page.getByRole('button', { name: /varsayılana döndür \(onayla\)$/ });
+  await expect(onayla).toBeVisible();
+  await page.getByRole('button', { name: 'Vazgeç', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Başa dön', exact: true })).toBeFocused();
   await page.waitForTimeout(300);
   await expect(kutu(page, '1 euro kaç ₺?')).toHaveValue('60');
   await expect(kutu(page, '90. günden sonra: ayda kaç satış?')).toHaveValue('6');
@@ -77,8 +81,8 @@ test('birinci sürüm “Başa dön”: vazgeçince hiçbir şey değişmez, ona
   expect(personaServer.writes).toHaveLength(yaziSayisi);
 
   // Onayla: alanlar varsayılana döner. Bu projenin ortak kaydına tek yazı gider.
-  page.once('dialog', (d) => void d.accept());
   await page.getByRole('button', { name: 'Başa dön', exact: true }).click();
+  await onayla.click();
   await expect(kutu(page, '1 euro kaç ₺?')).toHaveValue('56');
   await expect(kutu(page, '90. günden sonra: ayda kaç satış?')).toHaveValue('4');
   await expect(yillikPaket(page)).toHaveText(tl(yillikFiyat(ayar())));
@@ -92,6 +96,7 @@ test('birinci sürüm “Başa dön”: vazgeçince hiçbir şey değişmez, ona
   const varsayilan = Object.fromEntries(alanTanimlari('istoc').map((d) => [d.field, d.value]));
   expect(personaServer.snapshot('istoc').fields).toEqual(varsayilan);
   expect(personaServer.writes.every((w) => w.project === 'istoc')).toBe(true);
+  expect(pencereler).toEqual([]);
 });
 
 /* ---------- Birinci sürüm: girdi denetimi ---------- */
@@ -396,7 +401,10 @@ test('ikinci sürüm ayarları bu tarayıcıda kalır, yenilemede korunur ve “
   await expect(aylik).toHaveAttribute('aria-pressed', 'true');
   await expect(sekme2(page, 'oncu').locator('.v2-so2-rol-tutar')).toContainText(tl(v2.bagimsizKazanc(a).aylik));
 
+  // İlk basış yalnız onay adımını açar. Ayarlar ancak onaylanınca silinir.
   await page.getByRole('button', { name: 'Başa dön', exact: true }).click();
+  await expect(basic).toHaveValue('2');
+  await page.getByRole('button', { name: /varsayılana döndür \(onayla\)$/ }).click();
   await expect(fiyat2(page)).toHaveText(tl(v2.satisOzeti(ayar2()).ciro));
   await expect(basic).toHaveValue('1');
   await expect(aylik).toHaveAttribute('aria-pressed', 'false');

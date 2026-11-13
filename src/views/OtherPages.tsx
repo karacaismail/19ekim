@@ -49,10 +49,10 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
   const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
   return (
     <>
-      <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir.">
-        <IstihdamOzeti />
-      </PageHeader>
+      <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
       {surum}
+      {/* Özet sayıları sayfa önündedir. Sayfa başı sıkışık kalır (ux.md P6.1, ui.spec başlık yüksekliği). */}
+      <IstihdamOzeti />
 
       <IstihdamPlanGorunumu />
 

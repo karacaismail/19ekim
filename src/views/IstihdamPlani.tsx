@@ -242,7 +242,7 @@ function Takvim({ bugun }: { bugun: string | null }) {
 
 type Gorunum = 'zaman' | 'takvim';
 
-/** İstihdam takviminin özet sayıları: sayfa başının parçasıdır (iskelet sözleşmesi K8; Hedefler sayfasındaki gibi). */
+/** İstihdam takviminin özet sayıları: sayfa önünde, sürüm seçicinin altında durur (iskelet sözleşmesi K8). */
 export function IstihdamOzeti() {
   const bugun = useBugun();
   const etkin = bugun ? ASAMALAR.filter((a) => a.bas <= bugun && bugun <= a.son && a.id.startsWith('f')) : [];
