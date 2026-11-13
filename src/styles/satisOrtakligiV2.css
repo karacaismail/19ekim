@@ -3,6 +3,11 @@
  * kopyasıdır. v2 değişiklikleri yalnız bu dosyada yapılır; global.css'teki v1 stillerine dokunulmaz.
  */
 
+/* Özet sütunu klavyeyle odaklanınca solda tek bir odak çubuğu görünür (çevreleyen halka yok). */
+html[data-focus-mode='keyboard'] .v2-so2-ozet-kap:focus-visible {
+  box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
+}
+
 html[data-focus-mode='keyboard'] .v2-so2-json-icerik:focus-visible {
   box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator);
 }
@@ -1792,9 +1797,16 @@ html[data-focus-mode='keyboard'] .v2-pencere-kapat:focus-visible {
     grid-template-columns: minmax(18.125rem, 21.25rem) minmax(0, 37.5rem);
   }
 
+  /*
+   * Özet sütunu yapışıktır ve üstü her zaman görünür. Ekrandan uzunsa kendi içinde kayar (karar listesi 8.2, 13 Kasım
+   * 2026). Özetin içi kayınca sayfa kaymaz.
+   */
   .v2-so2-ozet-kap {
     position: sticky;
-    top: min(calc(var(--v2-yapis-ust, 0px) + var(--space-4)), calc(100dvh - var(--v2-so2-boy, 0px) - var(--space-4)));
+    top: calc(var(--v2-yapis-ust, 0px) + var(--space-4));
+    max-height: calc(100dvh - var(--v2-yapis-ust, 0px) - var(--space-8));
+    overflow-y: auto;
+    scrollbar-width: thin;
     order: 0;
     align-self: start;
     transition-property: top;
@@ -2003,3 +2015,38 @@ html:has(.v2-so2-alt-cubuk) {
 
 /* İkinci sürüm ortak kayda bağlı değildir. Okur bunu ayarları değiştirmeden önce görür. */
 .v2-so2-yerel-not { margin-block: 0 var(--space-4); color: var(--text-secondary); font-size: var(--text-sm); max-inline-size: var(--prose-max); }
+
+/*
+ * Yapışık şeritler incedir (karar listesi 8.1, kullanıcı kararı 13 Kasım 2026). Sayfa kayınca “Ürün” ve “Müşteri öder”
+ * başlıkları görünmez olur. Başlıklar ekran okuyucuda grup adı olarak kalır. Bütün düğmeler görünür kalır.
+ * Böylece “Koşullar” düğmesi ürün satırının sonuna sığar. Persona sekmeleri tek satırdadır ve sığmazsa yana kayar.
+ * Her sekmenin adı tek satırda okunur.
+ */
+@media (min-width: 64em) and (min-height: 40em) {
+  /* Sürüm seçicinin başlığı kalır: başlık gizlenince seçici daralıp alt alta dizilir. */
+  html[data-kaydirildi] .v2-so2-arac > .secim > .secim-etiket {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  html[data-kaydirildi] .v2-so2-arac .v2-so2-kosullar-dugme {
+    margin-inline: auto 0;
+  }
+
+  .v2-so2-sag > .v2-so2-roller {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  .v2-so2-sag .v2-so2-rol-ad {
+    white-space: nowrap;
+  }
+}

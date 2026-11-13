@@ -263,7 +263,7 @@ export const politika: ProjePolitika = {
       "baslik": "Kazanç, vergi ve masraf",
       "metin": [
         "Finans sorumlusu komisyonun hangi tahsilattan doğacağını yazmalıdır.",
-        "Finans sorumlusu ödeme günlerini ve gün sayımının hangi olayla başladığını yazmalıdır.",
+        "Gün sayımı müşterinin ödeme gününden başlar. Finans sorumlusu ödeme günlerini yazmalıdır.",
         "Anlaşma geçerli hesap sürümünü ve program adını yazmalıdır.",
         "Anlaşma çalışan sayısı değişirse komisyonun ne olacağını yazmalıdır.",
         "Mali müşavir komisyonu hangi belgeyle alacağınızı doğrulamalıdır.",

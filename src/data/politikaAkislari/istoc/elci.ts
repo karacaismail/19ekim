@@ -3,13 +3,13 @@ import { satisKazanci, yillikFiyat, type Ayar, type Seviye } from '../../satisOr
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const para = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const para = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const avro = (n: number) => `${sayi(n)} €`;
 const oranMetni = (n: number) => `%${sayi(n * 100)}`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
-  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${para(yillikFiyat(a))} eder.`;
+  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${para(yillikFiyat(a))} eder.`;
 
 const SEVIYE_OZET: Record<Seviye, string> = {
   A: 'Siz yalnız tanıştırırsınız. Ürün gösterimini ve satışı şirket yapar.',
@@ -258,7 +258,7 @@ export const akisOlustur: AkisOlustur = (a) => {
           'Ödeme gelince bu adıma dönün.',
         ] } },
         { id: 'kural-yok', metin: 'Ödeme günü kuralı yazılı değil', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralını netleştirin', metin: [
-          'Şirket gün sayımının hangi olayla başladığını henüz yazmadı.',
+          'Gün sayımı müşterinin ödeme gününden başlar.',
           'Finans sorumlusu kuralı anlaşmaya yazar.',
           'Kural yazılınca bu adıma dönün.',
         ] } },

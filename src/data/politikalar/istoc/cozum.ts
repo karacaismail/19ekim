@@ -345,7 +345,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Anlaşmanın hangi hesap sürümüne bağlı olduğunu yazın.",
         "Satış ortaklığı hesabındaki bir değişiklik imzalı anlaşmayı kendiliğinden değiştirmez.",
-        "Finans sorumlusu, ödemenin hangi olaydan sonra yapılacağını yazsın. Ödeme gününü de yazsın.",
+        "Ödeme günleri müşterinin ödeme gününden sayılır. Finans sorumlusu ödeme gününü sözleşmeye yazar.",
         "Finans ekibi fatura, vergi ve döviz uygulamasını açıklasın."
       ]
     },

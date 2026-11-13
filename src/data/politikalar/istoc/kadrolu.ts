@@ -73,7 +73,7 @@ export const politika: ProjePolitika = {
       "baslik": "Katalog kapsamıyla teklif hazırlayın",
       "metin": [
         "Satıcı isterse teklifi fiyat tablosundaki fiyatla hazırlayın.",
-        "Fiyat avroyla belirlenir. Finans sorumlusu TL karşılığı için hangi kurun kullanılacağını belirler.",
+        "Fiyat avroyla belirlenir. Finans sorumlusu ₺ karşılığı için hangi kurun kullanılacağını belirler.",
         "Teklife katalogda yer alacak ürün gruplarını yazın.",
         "Teklife fiyat tablosu dışında fiyat veya ödeme koşulu yazmayın.",
         "Satıcı indirim isterse fiyatın herkes için aynı olduğunu söyleyin. Talebi kimseye iletmeyin."
@@ -353,10 +353,10 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Kur hangi tarihte belirlenecek?",
       "mevcut": "Teklif fiyatı avroyla belirlenir.",
-      "eksik": "Avronun TL karşılığı hangi günün kuruyla hesaplanacak? Teklif günü mü, sözleşme günü mü, tahsilat günü mü? Şirket bunu henüz yazmadı.",
+      "eksik": "Avronun ₺ karşılığı hangi günün kuruyla hesaplanacak? Teklif günü mü, sözleşme günü mü, tahsilat günü mü? Şirket bunu henüz yazmadı.",
       "islem": "Finans sorumlusu kur tarihini teklif ve prim ekine yazsın.",
       "kanit": "Aynı satışın teklifi ve prim listesi aynı kuru göstersin.",
-      "firsat": "Net bir kur kuralıyla satış uzmanı TL tutarını teklif gününde yazar. Satıcı kararını beklemeden verebilir.",
+      "firsat": "Net bir kur kuralıyla satış uzmanı ₺ tutarını teklif gününde yazar. Satıcı kararını beklemeden verebilir.",
       "durdur": "Kur kuralı yoksa satıcıya kesin lira tutarı yazmayın."
     },
     {

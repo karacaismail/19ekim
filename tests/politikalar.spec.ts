@@ -70,7 +70,7 @@ test('kişisel hesap ayarı rehberi veya anlaşmayı değiştirmez', async ({ pa
   await page.goto('politikalar/kadrolu/');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.locator('.pol-belge')).toBeVisible();
-  await expect(page.locator('#kazanc')).toContainText('50.000 TL');
+  await expect(page.locator('#kazanc')).toContainText('50.000 ₺');
   await expect(page.locator('#kazanc')).not.toContainText('999.999');
   expect(await page.evaluate(() => localStorage.getItem('turksab-satis-ortakligi-v1'))).toBe('{bozuk');
 });

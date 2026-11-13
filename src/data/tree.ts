@@ -32,24 +32,24 @@ export function makeOrg(p: Params, _roles: Role[]): OrgNode {
     children: [
       node('asistan', 'Asistan', p.asistanCount, p.startDate, { sub: `${p.asistanCount} kişi, başlangıç ${longDate(p.startDate)} (onay bekliyor)` }),
       { name: 'Yazılım ekibi', sub: `${p.softwareCount} kişi, Scrum yöntemiyle çalışır`, role: 'yazilim' },
-      node('dijital-pazarlama', 'Ağaç 1: Dijital pazarlama', p.dijitalCount, p.startDate),
-      node('pazarlamaci', 'Ağaç 2: Masa başı (CRM)', p.masaCount, p.startDate),
+      node('dijital-pazarlama', 'Dijital pazarlama uzmanı', p.dijitalCount, p.startDate),
+      node('pazarlamaci', 'İstoç Pazarlama CRM uzmanı', p.masaCount, p.startDate),
       {
-        name: 'Ağaç 3: Saha satış',
+        name: 'Saha satış uzmanı',
         sub: 'Kayıt, abonelik ve ağ',
         role: 'saha-uzmani',
         href: '/roller/saha-uzmani/',
         children: [
           node('saha-uzmani', 'Saha ekibi', p.sahaCount + p.sahaDecCount, p.startDate, {
-            sub: p.sahaDecCount ? `${p.sahaCount + p.sahaDecCount} kişi (${p.sahaDecCount} kişi ${longDate(p.decStartDate)} tarihinde katılır)` : `${p.sahaCount} kişi`,
+            sub: p.sahaDecCount ? `${p.sahaCount + p.sahaDecCount} kişi (${p.sahaDecCount} kişi ${longDate(p.decStartDate)} günü katılır)` : `${p.sahaCount} kişi`,
           }),
           node('ekip-lideri', 'Ekip lideri', 1, p.decStartDate, {
-            children: [{ name: 'Bağımsız temsilciler', sub: `Ayda yaklaşık 2 kişi, ${longDate(addDays(p.startDate, 90))} tarihinde yaklaşık 5 kişi`, role: 'ekip-lideri', href: '/buyume-modeli/' }],
+            children: [{ name: 'Bağımsız temsilciler', sub: `Ayda yaklaşık 2 kişi, ${longDate(addDays(p.startDate, 90))} günü yaklaşık 5 kişi`, role: 'ekip-lideri', href: '/buyume-modeli/' }],
           }),
         ],
       },
-      node('organizator', 'Ağaç 4: Organizatör', p.organizatorCount, p.decStartDate),
-      node('segika', 'Segika: Masa başı (CRM)', p.segikaCount, p.startDate),
+      node('organizator', 'Organizatör', p.organizatorCount, p.decStartDate),
+      node('segika', 'Segika CRM', p.segikaCount, p.startDate),
     ],
   };
 }
@@ -70,14 +70,14 @@ export interface Stop {
 /** Doğrusal sunum sırası (önceki / sonraki). Menü `NAV_GROUPS`, kırıntı içerik kaydı: üçü ayrı tanımlanır (F15). */
 export const SEQUENCE: Stop[] = [
   { path: '/', label: 'Organizasyon şeması' },
-  { path: '/roller/dijital-pazarlama/', label: 'Ağaç 1: Dijital pazarlama', tam: 'Dijital pazarlama uzmanı' },
-  { path: '/roller/pazarlamaci/', label: 'Ağaç 2: Masa başı pazarlama', tam: 'Masa başı pazarlama (CRM)' },
-  { path: '/roller/saha-uzmani/', label: 'Ağaç 3: Saha ekibi', tam: 'Saha pazarlama ekibi' },
-  { path: '/roller/ekip-lideri/', label: 'Ağaç 3: Ekip lideri', tam: 'Satış-pazarlama ekip lideri' },
-  { path: '/buyume-modeli/', label: 'Ağaç 3: Çok katmanlı pazarlama ağı', tam: 'Çok katmanlı pazarlama ağı (MLM)' },
-  { path: '/roller/organizator/', label: 'Ağaç 4: Organizatör', tam: 'Organizatör' },
-  { path: '/roller/segika/', label: 'Segika: Masa başı (CRM)', tam: 'Segika masa başı pazarlama (CRM)' },
-  { path: '/roller/asistan/', label: 'Kurmay: Asistan', tam: 'Yönetici asistanı' },
+  { path: '/roller/dijital-pazarlama/', label: 'Dijital pazarlama uzmanı' },
+  { path: '/roller/pazarlamaci/', label: 'İstoç Pazarlama CRM uzmanı' },
+  { path: '/roller/saha-uzmani/', label: 'Saha satış uzmanı' },
+  { path: '/roller/ekip-lideri/', label: 'Satış-pazarlama ekip lideri' },
+  { path: '/buyume-modeli/', label: 'MLM (çok katmanlı pazarlama)' },
+  { path: '/roller/organizator/', label: 'Organizatör' },
+  { path: '/roller/segika/', label: 'Segika CRM' },
+  { path: '/roller/asistan/', label: 'Asistan' },
   { path: '/istihdam/', label: 'İstihdam takvimi' },
   { path: '/hedefler/', label: '90 gün hedefleri' },
   // Gelir planı (kullanıcı kararı 2026-10-27): kadro kapasitesinden hedef zinciri, senaryolar ve kümülatif gelir.
@@ -85,9 +85,9 @@ export const SEQUENCE: Stop[] = [
   { path: '/eylem-plani/', label: 'Eylem planı' },
   { path: '/karar/', label: 'Kararlar' },
   { path: '/parametreler/', label: 'Parametreler' },
-  // Giderler kırıntısı “Finans › OpEx › Operasyonel Giderler” (kullanıcı kararı 2026-10-21) içerik kaydındadır (`kirintiYolu`).
-  { path: '/giderler/', label: 'Giderler (OPEX)', tam: 'Operasyonel Giderler' },
-  { path: '/nakit-akisi/', label: 'Nakit akış tablosu' },
+  // OPEX kırıntısı “Finans › OPEX (işletme giderleri)” (kullanıcı kararı 13 Kasım 2026) içerik kaydındadır (`kirintiYolu`).
+  { path: '/giderler/', label: 'OPEX (işletme giderleri)' },
+  { path: '/nakit-akisi/', label: 'Nakit akışı' },
   { path: '/notlar/', label: 'Notlar' },
 ];
 

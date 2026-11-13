@@ -5,14 +5,15 @@ import type { ScenarioId } from '../lib/scenario';
 import { Choice } from './ui';
 
 /**
- * Senaryo seçici (kullanıcı kararı 2026-10-27: kötümser · medyan · iyimser her bölümün, tablonun ve grafiğin başında) ve
+ * Senaryo seçici (kullanıcı kararı 2026-10-27: kötümser · plan · iyimser her bölümün, tablonun ve grafiğin başında) ve
  * grafik görünümü (seçili senaryo ya da üçü üst üste). Seçim `useScenario` ile sayfalar arasında ortaktır.
  */
 export type Mod = 'secili' | 'ucu';
 
-export function SenaryoSecimi({ scenarios, value, onChange, label = 'Senaryo' }: { scenarios: Scenario[]; value: ScenarioId; onChange: (id: ScenarioId) => void; label?: string }) {
+/** `aciklamasiz`: senaryonun açıklaması yazılmaz. Açıklama sayfada başka bir yerde bir kez yazıyorsa kullanılır (karar listesi 8.5). */
+export function SenaryoSecimi({ scenarios, value, onChange, label = 'Senaryo', aciklamasiz = false }: { scenarios: Scenario[]; value: ScenarioId; onChange: (id: ScenarioId) => void; label?: string; aciklamasiz?: boolean }) {
   const secili = scenarios.find((s) => s.id === value);
-  return <Choice label={label} value={value} options={scenarios.map((s) => ({ id: s.id, name: s.name, role: s.role }))} note={secili?.desc} onChange={onChange} />;
+  return <Choice label={label} value={value} options={scenarios.map((s) => ({ id: s.id, name: s.name, role: s.role }))} note={aciklamasiz ? undefined : secili?.desc} onChange={onChange} />;
 }
 
 /** Görünüm anahtarı: sunum tercihi, değer filtresi değil; grup adı neyi etkilediğini söyler (gorsel_algi.md F03 / C014). */

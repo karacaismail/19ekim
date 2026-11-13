@@ -86,13 +86,16 @@ function Icerik() {
   const son = cf.aylar[cf.aylar.length - 1];
   const kaynakNotu =
     durum.status === 'ready'
-      ? `Giderler Google Sheets’ten okundu (hesaplanma zamanı: ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'medium', timeStyle: 'short' })}).`
+      ? `Giderler Google Sheets’ten okundu (hesaplanma zamanı: ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}).`
       : durum.status === 'loading'
         ? 'Giderler Sheets’ten okunuyor…'
         : durum.status === 'setup'
-          ? 'Sheets verisi okunamadı, çünkü veri ucu erişim anahtarı istiyor. Anahtarı Giderler sayfasında girin. Tablo şimdilik yalnız plan kalemlerini gösterir.'
+          ? 'Sheets verisi okunamadı, çünkü veri ucu erişim anahtarı istiyor. Anahtarı “OPEX (işletme giderleri)” sayfasında girin. Tablo şimdilik yalnız plan kalemlerini gösterir.'
           : `Sheets verisi okunamadı. ${durum.message} Tablo yalnız plan kalemlerini gösterir.`;
-  const secici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} />;
+  // Senaryonun açıklaması yalnız sayfa başındaki sonuç kutusunda bir kez yazar (karar listesi 8.5). Bölümlerdeki seçicilerde
+  // yalnız senaryo adları kalır.
+  const secici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} aciklamasiz />;
+  const aciklamaliSecici = <SenaryoSecimi scenarios={m.cashflow.senaryolar} value={sid} onChange={setSid} />;
   const cubuk = (extra?: React.ReactNode) => (
     <Araclar role={sc.role}>
       {secici}
@@ -126,7 +129,7 @@ function Icerik() {
   return (
     <>
       <PageHeader
-        title="Nakit akış tablosu"
+        title="Nakit akışı"
         purpose={`Bu sayfa ${cf.aylar.length} ay boyunca giren ve çıkan parayı ve kasada kalan nakdi gösterir.`}
         meta={[
           { label: 'Dönem', value: `${ilk.ad} – ${son.ad} (${cf.aylar.length} ay)` },
@@ -146,7 +149,7 @@ function Icerik() {
             : 'Sheets gider verisi okunamadı. Bu tutar yalnız plan kalemleriyle hesaplandı, bu yüzden tam finansman ihtiyacı değildir.',
         }}
         durum={sonucDurum}
-        tools={secici}
+        tools={aciklamaliSecici}
         kiyas={{ temel: 'Aynı Sheets giderleri ve aynı seçeneklerle üç temel senaryoda nakit açığı tavanı', satirlar: karsilastirma.map((x) => ({ ad: x.s.name, role: x.s.role, deger: acikYaz(x.cf), secili: x.s.id === sid })) }}
         ikincil={[
           { etiket: 'En düşük nakit', deger: `${tl(cf.enDusuk.deger)} (${cf.enDusuk.ay.kisa})` },
@@ -157,14 +160,14 @@ function Icerik() {
         // Kapsam ana sonucun bağlamında (B2c, MS-10): yalnız iStoc girişleri, ortak gider planının tamamı; markaya dağıtım belirlenmedi — “Türksab toplam” denmez.
         kaynak={`Tablodaki girişler iStoc girişleridir, yani abonelik gelirleridir. Giderler ise Türksab’ın Sheets’teki ortak gider planının tamamıdır. Giderlerin markaya dağıtımı henüz belirlenmedi. Yani bu giderlerin ne kadarının iStoc’a ait olduğu henüz belli değil. ${
           cf.sheets
-            ? 'Çıkışlar Google Sheets gider planından ve plan kalemlerinden gelir. Plan kalemleri, Sheets’te olmayan ama hesaba eklenen giderlerdir. Bunlar eklenen saha personeli, Meta işe alım reklamı, satıcı kazanım reklamı ve satış primidir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
+            ? 'Plan kalemleri, Sheets’te olmayan ama hesaba eklenen giderlerdir. Bunlar eklenen saha personeli, Meta işe alım reklamı, satıcı kazanım reklamı ve satış primidir.'
             : 'Sheets gider verisi okunamadı. Bu yüzden çıkışlar yalnız plan kalemlerinden oluşur ve tablo eksiktir. Girişler, gelir planının seçili senaryosundan ve hesap seçeneklerinden gelir.'
         }`}
       />
       <Section
         id="ozet"
         title="Özet"
-        desc={`${ilk.ad} – ${son.ad} arası, ${cf.aylar.length} ay. Girişler, gelir planının seçili senaryosundan ve seçeneklerinden gelir. Çıkışlar, Sheets’teki gider planından gelir. Plan kalemleri Sheets’te olmayan giderlerdir. Bunlar eklenen saha personeli, satış primi ve iki reklamdır. Reklamlar Meta işe alım reklamı ve satıcı kazanım reklamıdır.`}
+        desc={`${ilk.ad} – ${son.ad} arası, ${cf.aylar.length} ay. Girişlerin ve çıkışların kaynağı sayfanın başında yazılıdır.`}
         tools={cubuk()}
       >
         <Stats
@@ -181,7 +184,7 @@ function Icerik() {
           {durum.status === 'setup' ? (
             <>
               {' '}
-              <TextLink to="/giderler/">Giderler sayfası</TextLink>
+              <TextLink to="/giderler/">OPEX (işletme giderleri) sayfası</TextLink>
             </>
           ) : null}
         </p>
@@ -283,7 +286,7 @@ function Icerik() {
           <p>
             Dönem sonu nakit şöyle bulunur. Dönem başı nakde o ayın girişleri eklenir. Sonra o ayın çıkışları düşülür. Nakit açığı tavanı, dönem sonu nakdin en düşük noktasını sıfıra çeken ek nakittir. Yatırım
             girişi ve başlangıç nakdi parametresi bu tutarı değiştirir. Senaryo seçimi girişleri, satış primini ve eklenen saha personelini değiştirir. Sheets giderleri
-            üç senaryoda aynıdır. Gelir planı seçenekleri üç temel senaryoya aynen uygulanır. Tutarlar ₺ cinsindendir. Hesap kuruşla yapılır. Tablo tutarları tam TL’ye yuvarlar. Sıfır “0 ₺” olarak
+            üç senaryoda aynıdır. Gelir planı seçenekleri üç temel senaryoya aynen uygulanır. Tutarlar ₺ cinsindendir. Hesap kuruşla yapılır. Tablo tutarları tam ₺’ya yuvarlar. Sıfır “0 ₺” olarak
             yazılır. Gelir planındaki “En yüksek birikmiş açık” yalnız geliri ve gideri karşılaştırır. Nakit açığı tavanı ise başlangıç nakdini ve yatırım
             girişini de sayar, yani ayrı bir ölçüttür.
           </p>

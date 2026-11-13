@@ -236,7 +236,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Finans sorumlusu elçinin ödeme belgesini belirlesin. Fatura gerekip gerekmediğini açıklasın.",
         "Stopaj, ödemeden yapılan vergi kesintisidir. Mali müşavir vergi ve stopaj uygulamasını doğrular.",
-        "Finans sorumlusu ödeme gününü ve gün sayımının hangi olayla başladığını yazar."
+        "Gün sayımı müşterinin ödeme gününden başlar. Finans sorumlusu ödeme gününü yazar."
       ]
     },
     {
@@ -367,7 +367,7 @@ export const politika: ProjePolitika = {
       "Sayfadaki aylık satış örneği hedef veya garanti değildir.",
       "Ürün gösterimi de yaptıysanız ortaklık sorumlusuna kanıtıyla bildirin.",
       "Ayrı içerik ücreti veya reklam bütçesi bu hesapta bulunmaz.",
-      "İkinci sürümde kurumsal paket kampanyası da tanımlıdır. Şirket bu kampanyayı ayrı etiketler ve birinci sürümle birleştirmez."
+      "İkinci sürümde Enterprise paket kampanyası da tanımlıdır. Şirket bu kampanyayı ayrı etiketler ve birinci sürümle birleştirmez."
     ]
   }
 };

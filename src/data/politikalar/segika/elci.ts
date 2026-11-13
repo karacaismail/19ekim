@@ -251,7 +251,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Finans sorumlusu elçinin ödeme belgesini belirlesin. Fatura gerekip gerekmediğini açıklasın.",
         "Stopaj, ödemeden yapılan vergi kesintisidir. Mali müşavir vergi ve stopaj uygulamasını doğrulamalıdır.",
-        "Finans sorumlusu ödeme gününü ve gün sayımının başladığı olayı yazmalıdır."
+        "Gün sayımı müşterinin ödeme gününden başlar. Finans sorumlusu ödeme gününü yazmalıdır."
       ]
     },
     {

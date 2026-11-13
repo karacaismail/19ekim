@@ -75,7 +75,7 @@ function Icerik({ pathname }: { pathname: string }) {
         purpose="2027’de işletme giderlerini (OPEX) ve yatırım harcamalarını (CAPEX) ay ay gösterir."
         meta={[
           { label: 'Dönem', value: 'Ocak ile Aralık 2027' },
-          { label: 'Fiyat tarihi', value: '5 Kasım 2026' },
+          { label: 'Fiyat tarihi', value: '5 Kasım 2026 Perşembe' },
         ]}
       />
 
@@ -218,7 +218,7 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Nakit ve finansman</dt>
-            <dd>Gelir harcamayı karşılamazsa açık oluşur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılabilir. Hangisinin seçileceğine henüz karar verilmedi. “Parametreler” sayfasında yatırım girişi şu an 0 ₺’dir.</dd>
+            <dd>Gelir harcamayı karşılamazsa açık oluşur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılabilir. Hangisinin seçileceğine henüz karar verilmedi. “Parametreler” sayfasında yatırım girişi şu an 0 ₺’dır.</dd>
           </div>
         </dl>
       </Section>

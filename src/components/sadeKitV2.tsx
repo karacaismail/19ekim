@@ -266,8 +266,11 @@ export function useSeciliSekmeGorunur(secili: string) {
     const serit = ref.current;
     const sekme = serit?.querySelector<HTMLElement>('[aria-selected="true"]');
     if (!serit || !sekme || serit.scrollWidth <= serit.clientWidth) return;
-    const sol = sekme.offsetLeft - serit.offsetLeft;
-    if (sol < serit.scrollLeft || sol + sekme.offsetWidth > serit.scrollLeft + serit.clientWidth) serit.scrollLeft = sol;
+    // Konum ekrandaki kutulardan ölçülür. Şerit yapışık (sticky) olunca offsetLeft şeride göre değişir, bu ölçüm değişmez.
+    const s = serit.getBoundingClientRect();
+    const k = sekme.getBoundingClientRect();
+    const sol = k.left - s.left + serit.scrollLeft;
+    if (k.left < s.left || k.right > s.right) serit.scrollLeft = sol;
   }, [secili]);
   return ref;
 }

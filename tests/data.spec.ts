@@ -85,14 +85,15 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
   test('istihdam sırası kararınızdaki gibi; asistan yoksa dijital 1 Ocak; Segika eklendi', () => {
     expect(m.hiringOrder.map((h) => h.role)).toEqual(['yonetici', 'asistan', 'pazarlamaci', 'saha-uzmani', 'dijital-pazarlama', 'organizator', 'saha-uzmani', 'segika']);
     expect(m.hiringOrder.map((h) => h.date)).toEqual([
+      // Her tarihte gün adı yazılır (kullanıcı kararı 13 Kasım 2026, karar listesi 8.4).
       'Şimdi',
-      '1 Kasım 2026',
-      '1 Kasım 2026',
-      '1 Kasım 2026',
-      '1 Kasım 2026 (asistan yoksa 1 Ocak 2027)',
-      '1 Aralık 2026',
-      '1 Aralık 2026',
-      '1 Kasım 2026',
+      '1 Kasım 2026 Pazar',
+      '1 Kasım 2026 Pazar',
+      '1 Kasım 2026 Pazar',
+      '1 Kasım 2026 Pazar (asistan yoksa 1 Ocak 2027 Cuma)',
+      '1 Aralık 2026 Salı',
+      '1 Aralık 2026 Salı',
+      '1 Kasım 2026 Pazar',
     ]);
     expect(m.hiringOrder.map((h) => h.count)).toEqual(['—', '1', '1', '2', '1', '1', '1', '1']);
     for (const e of m.calendarEvents) expect(e.date >= '2026-10-01' && e.date <= '2027-01-31', e.title).toBe(true);
@@ -223,7 +224,7 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
     expect(x.checkpoints.map((c) => c.date)).toEqual(['2026-12-14', '2027-01-13', '2027-02-13']);
     expect(x.role('pazarlamaci').plan[0].from).toBe(addDays(m.role('pazarlamaci').plan[0].from, 14));
     expect(x.digital.integrations[0].date).toBe(addDays(m.digital.integrations[0].date, 14));
-    expect(x.hiringOrder[2].date).toBe('15 Kasım 2026');
+    expect(x.hiringOrder[2].date).toBe('15 Kasım 2026 Pazar');
     expect(x.managerPlan[1].target).toBe(shiftText(m.managerPlan[1].target, 14));
     // Aralık kohortu kendi parametresine bağlı: program başlangıcı onu kaydırmaz.
     expect(x.role('organizator').plan[0].from).toBe(m.role('organizator').plan[0].from);
@@ -251,6 +252,10 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
     expect(shiftText('Hukuk teyidi 14 Kasım · lider 27 Kasım', 7)).toBe('Hukuk teyidi 21 Kasım · lider 4 Aralık');
     expect(shiftText('1 Kasım 2026 · 08:00–20:00 · 60 arama', 1)).toBe('2 Kasım 2026 · 08:00–20:00 · 60 arama');
     expect(shiftText('30 Aralık', 3)).toBe('2 Ocak');
+    // Gün adı yazılı tarihin gün adı da yeniden hesaplanır (kullanıcı kararı 13 Kasım 2026, karar listesi 8.4).
+    expect(shiftText('23 Kasım Pazartesi günü başlar', 2)).toBe('25 Kasım Çarşamba günü başlar');
+    expect(shiftText('1 Kasım 2026 Pazar', 1)).toBe('2 Kasım 2026 Pazartesi');
+    expect(shiftText('28 Şubat 2027 Pazar ile 1 Mart 2027 Pazartesi arası', 1)).toBe('1 Mart 2027 Pazartesi ile 2 Mart 2027 Salı arası');
   });
 });
 
@@ -508,7 +513,7 @@ test.describe('gelir planı', () => {
 
   test('senaryolar kötümser · medyan · iyimser (kullanıcı kararı 2026-10-27); her senaryonun hunisi ve yıllık etkisi var', () => {
     expect(r.scenarios.map((s) => s.id)).toEqual(['kotumser', 'medyan', 'iyimser']);
-    expect(r.scenarios.map((s) => s.name)).toEqual(['Kötümser', 'Medyan', 'İyimser']);
+    expect(r.scenarios.map((s) => s.name)).toEqual(['Kötümser', 'Plan', 'İyimser']);
     expect(r.byId.medyan.scenario.factor).toBe(1);
     expect(r.byId.medyan.scenario.retention).toBeCloseTo(DEFAULT_PARAMS.planRetention / 100, 5);
     expect(r.byId.kotumser.scenario.factor).toBeCloseTo(DEFAULT_PARAMS.pessimisticFactor / 100, 5);

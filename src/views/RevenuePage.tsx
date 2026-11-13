@@ -172,14 +172,14 @@ function Icerik() {
     durum.status === 'loading'
       ? 'Sheets giderleri okunuyor. Şimdilik plan kadrosunun giderleriyle hesap yapılıyor. Veri gelirse sonuçlar yeniden hesaplanır.'
       : durum.status === 'ready'
-        ? `Sheets giderleri bu sayfa açılırken okundu. Sheets bu verileri ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' })} tarihinde hesapladı. Hesap bu giderlere Sheets’te olmayan kalemleri ekler. Bunlar ikinci ve ek saha personeli ile reklam giderleridir.`
+        ? `Sheets giderleri bu sayfa açılırken okundu. Sheets bu verileri ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })} tarihinde hesapladı. Hesap bu giderlere Sheets’te olmayan kalemleri ekler. Bunlar ikinci ve ek saha personeli ile reklam giderleridir.`
         : `Sheets giderleri okunamadı. Bu sonuçlarda plan kadrosunun giderleri kullanılıyor. Bu kaynak ofis ve yazılım ekibi giderlerini içermez, kapsamı kontrol edin. Teknik neden: ${durum.status === 'setup' ? 'veri ucu erişim anahtarı istiyor' : durum.message}.`;
   const tarihYaz = (k: { date: string; t: number } | null) => (k ? (k.t > H - 1 ? `≈ ${kisaGun(k.date)}` : kisaGun(k.date)) : `${son} sonuna kadar kapanmıyor`);
   const noktaMetni = be.nokta
     ? // Süre, hedef kartları gibi plan başlangıcından sayılır (ay sırası × 30,4 yaklaşımı yerine gerçek gün farkı).
       `${longDate(be.nokta.date)} (${sure(Math.max(0, daysBetween(params.simStartDate, be.nokta.date)))})`
     : be.ongoru.nokta
-      ? `${son} sonuna kadar gerçekleşmiyor. Son 6 ayın eğilimine göre ≈ ${longDate(be.ongoru.nokta.date)} tarihinde beklenir (aylık açık ${tl(-be.ongoru.sonNet)}, açık her ay ${tl(be.ongoru.egim)} daralıyor)`
+      ? `${son} sonuna kadar gerçekleşmiyor. Son 6 ayın eğilimine göre ≈ ${longDate(be.ongoru.nokta.date)} günü beklenir (aylık açık ${tl(-be.ongoru.sonNet)}, açık her ay ${tl(be.ongoru.egim)} daralıyor)`
       : `${son} sonuna kadar gelir gideri geçmiyor ve açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}). Bu seçeneklerle plan sürdürülebilir değil`;
   const fark = (a: number, b: number) => {
     const v = b - a;
@@ -275,9 +275,9 @@ function Icerik() {
   ];
   /* Ana sonuç (ux.md M05, P6.2): yapışkan özetle aynı değerler; durum başabaş öngörüsünden (kritik risk gizlenmez). */
   const sonucDurum = be.nokta
-    ? { ton: 'iyi' as const, metin: `Aylık başabaş ${longDate(be.nokta.date)} tarihindedir. Bu tarihte aylık gelir ilk kez aylık gideri geçer. Birikmiş açığın kapanış tarihi: ${tarihYaz(be.ongoru.geriOdeme)}.` }
+    ? { ton: 'iyi' as const, metin: `Aylık başabaş ${longDate(be.nokta.date)} günüdür. Bu tarihte aylık gelir ilk kez aylık gideri geçer. Birikmiş açığın kapanış tarihi: ${tarihYaz(be.ongoru.geriOdeme)}.` }
     : be.ongoru.nokta
-      ? { ton: 'uyari' as const, metin: `${son} sonuna kadar aylık başabaş yok. Son 6 ayın eğilimine göre ≈ ${longDate(be.ongoru.nokta.date)} tarihinde beklenir (aylık açık ${tl(-be.ongoru.sonNet)}, açık her ay ${tl(be.ongoru.egim)} daralıyor).` }
+      ? { ton: 'uyari' as const, metin: `${son} sonuna kadar aylık başabaş yok. Son 6 ayın eğilimine göre ≈ ${longDate(be.ongoru.nokta.date)} günü beklenir (aylık açık ${tl(-be.ongoru.sonNet)}, açık her ay ${tl(be.ongoru.egim)} daralıyor).` }
       : { ton: 'risk' as const, metin: `${son} sonuna kadar açık kapanmıyor: gelir gideri geçmiyor ve açık ${be.ongoru.yon === 'geri' ? 'büyüyor' : 'daralmıyor'} (son ay ${tl(-be.ongoru.sonNet)}). Bu seçeneklerle plan sürdürülebilir değil. Dönem sonrası için eğilim tahmini yok.` };
   const sonucKiyas = ustUste.map((x) => ({ ad: x.name, role: x.role, deger: tl(Math.min(0, x.be.enDusuk.deger)), secili: x.name === senaryoAdi }));
 
@@ -322,15 +322,16 @@ function Icerik() {
         <Note title={`90 günde ${int(params.activeTarget)} aktif satıcıya ulaşılır mı?`}>
           <p>
             <strong>{aktif100.date && aktif100.date <= r.planDay90 ? 'Evet, bu senaryoda hedefe 90 gün içinde ulaşılır.' : 'Hayır, bu senaryoda hedefe 90 gün içinde ulaşılmaz.'}</strong>{' '}
-            Plan hedefi, 90 günde {int(params.activeTarget)} aktif satıcıya ulaşmaktır. Bu 90 gün, programın başladığı {longDate(m.dates.start)} tarihinden sayılır. Süre {longDate(r.planDay90)} tarihinde biter. Bunun için ayda en az {r.need90} yeni aktif satıcı gerekir. Kadroda 1 saha ve 1 CRM masa başı personeli vardır. Aralık’tan
+            Plan hedefi, 90 günde {int(params.activeTarget)} aktif satıcıya ulaşmaktır. Bu 90 gün, programın başladığı {longDate(m.dates.start)} gününden sayılır. Süre {longDate(r.planDay90)} günü biter. Bunun için ayda en az {r.need90} yeni aktif satıcı gerekir. Kadroda 1 saha satış uzmanı ve 1 İstoç Pazarlama CRM uzmanı vardır. Aralık’tan
             itibaren organizatör, dijital kanal ve temsilciler de çalışır. Bu kadro ilk üç satış ayında {int(Math.round(sim.yeniAktif.slice(1, 4).reduce((a, b) => a + b, 0)))} yeni aktif satıcı getirir.{' '}
-            {int(params.activeTarget)}. aktif satıcıya şu tarihte ulaşılır: {gun(aktif100.date, son)}
-            {aktif100.days !== null ? ` (${sure(aktif100.days)})` : ''}. Bu süreyi üstteki seçeneklerle kısaltabilirsiniz. Örneğin ikinci saha personelini erken alabilirsiniz. Ek saha personeli, saha büyümesi ve reklam bütçesi de süreyi kısaltır.
+            {aktif100.date ? `${int(params.activeTarget)}. aktif satıcıya ${longDate(aktif100.date)} günü ulaşılır.` : `${int(params.activeTarget)}. aktif satıcıya ${son} sonuna kadar ulaşılmaz.`}
+            {aktif100.days !== null ? ` Bu süre ${sure(aktif100.days)} eder.` : ''} Bu süreyi üstteki seçeneklerle kısaltabilirsiniz. Örneğin ikinci saha personelini erken alabilirsiniz. Ek saha personeli, saha büyümesi ve reklam bütçesi de süreyi kısaltır.
           </p>
           <p>
             Gelir hedefi ayrı izlenir. Bu senaryoda yeni satıcıların yüzde {Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder. Kümülatif gelir hedefi {tl(params.ciroTarget)} olur.
-            Bu hedefe şu tarihte ulaşılır: {gun(gelir3m.date, son)}
-            {gelir3m.days !== null ? ` (${sure(gelir3m.days)})` : ''}. Herkes aylık ödeseydi bu tarih şöyle olurdu: {gun(monthlyOnly.gelir3m.date, son)}.
+            {gelir3m.date ? `Bu hedefe ${longDate(gelir3m.date)} günü ulaşılır.` : `Bu hedefe ${son} sonuna kadar ulaşılmaz.`}
+            {gelir3m.days !== null ? ` Bu süre ${sure(gelir3m.days)} eder.` : ''}{' '}
+            {monthlyOnly.gelir3m.date ? `Herkes aylık ödeseydi hedefe ${longDate(monthlyOnly.gelir3m.date)} günü ulaşılırdı.` : `Herkes aylık ödeseydi hedefe ${son} sonuna kadar ulaşılmazdı.`}
           </p>
         </Note>
         <Araclar role={senaryoRol}>{etiket}</Araclar>
@@ -360,7 +361,7 @@ function Icerik() {
         dizin
         index={2}
         title="Kadronun görevi, gideri ve gelire katkısı"
-        desc={`Önce 1 saha personeli satış sistemini kurar. Sistem oturunca ikinci saha personeli başlar. Kârlı senaryolarda büyüme kuralıyla yeni kişiler eklenir. CRM (müşteri ilişkileri yönetimi) masa başı personeli, daha önce görüşülmemiş toptancıları telefonla arar. Bu aramaya soğuk arama denir. Bu personel e-postayla da kayıt toplar. Bu personel dijital kanaldan gelen kayıtları da arar. Organizatör İstoç çarşısındaki toptancıları bir araya getirir. Dijital pazarlama uzmanı ölçümü, reklamı ve video üretimini yürütür. “Gelire katkı” sütunu bir soruyu yanıtlar. Bu kişi ya da satış kanalı olmasaydı ne olurdu? Hesapta bu kaynak çıkarılınca ${H} aylık abonelik ödemesi azalır. Azalan tutar katkıdır. Bu değer bir tahmindir ve kişisel performans ölçümü değildir.`}
+        desc={`Önce 1 saha personeli satış sistemini kurar. Sistem oturunca ikinci saha personeli başlar. Kârlı senaryolarda büyüme kuralıyla yeni kişiler eklenir. İstoç Pazarlama CRM (müşteri ilişkileri yönetimi) uzmanı, daha önce görüşülmemiş toptancıları telefonla arar. Bu aramaya soğuk arama denir. Bu personel e-postayla da kayıt toplar. Bu personel dijital kanaldan gelen kayıtları da arar. Organizatör İstoç çarşısındaki toptancıları bir araya getirir. Dijital pazarlama uzmanı ölçümü, reklamı ve video üretimini yürütür. “Gelire katkı” sütunu bir soruyu yanıtlar. Bu kişi ya da satış kanalı olmasaydı ne olurdu? Hesapta bu kaynak çıkarılınca ${H} aylık abonelik ödemesi azalır. Azalan tutar katkıdır. Bu değer bir tahmindir ve kişisel performans ölçümü değildir.`}
         tools={cubuk()}
       >
         <DataTable
@@ -430,7 +431,7 @@ function Icerik() {
           <DataTable
             id="katki"
             title={katkiBaslik}
-            altNot="Kötümser, medyan ve iyimser senaryolar kendi kapasite, elde tutma ve büyüme kurallarıyla hesaplanır. Diğer seçenekler seçili senaryodan alınır. Senaryoda olmayan satırda “Senaryoda yok” yazar."
+            altNot="Kötümser, Plan ve iyimser senaryolar kendi kapasite, elde tutma ve büyüme kurallarıyla hesaplanır. Diğer seçenekler seçili senaryodan alınır. Senaryoda olmayan satırda “Senaryoda yok” yazar."
             tools={katkiAraclar}
             columns={[
               { key: 'r', header: 'Rol', minWidth: '12rem', rowHeader: true, render: (x: (typeof katkiUcRows)[number]) => <RoleChip role={x.row.role.role} label={x.row.role.name} /> },
@@ -474,12 +475,12 @@ function Icerik() {
         dizin
         index={3}
         title="Dijital pazarlama stratejisi: giderden gelire"
-        desc={`Reklam kayıt getirir. Kayıt olanların bir kısmı ilk ödemeyi yapar. İlk ödemeyi yapanların bir kısmı da aboneliği yeniler. Her adım ölçülür. Bütçe, satıcı değerinin (LTV) satıcı edinme maliyetine (CAC) oranına göre artırılır. Satıcı değeri, bir satıcıdan beklenen toplam gelirdir. Satıcı edinme maliyeti, bir satıcıyı kazanma maliyetidir. Ücretli reklam hızlı ama pahalıdır. Organik içerik ise yavaş ama ucuzdur. İki kanalın kayıtları da CRM’e aynı aşamalarla girer. Video üretimi Dijital pazarlama rol sayfasında anlatılır. Bu bölüm paranın gelire nasıl dönüştüğünü gösterir.`}
+        desc={`Reklam kayıt getirir. Kayıt olanların bir kısmı ilk ödemeyi yapar. İlk ödemeyi yapanların bir kısmı da aboneliği yeniler. Her adım ölçülür. Bütçe artırma kuralı sayfanın sonundaki “Varsayımlar” bölümündedir. Ücretli reklam hızlı ama pahalıdır. Organik içerik ise yavaş ama ucuzdur. İki kanalın kayıtları da CRM’e aynı aşamalarla girer. Video üretimi Dijital pazarlama rol sayfasında anlatılır. Bu bölüm paranın gelire nasıl dönüştüğünü gösterir.`}
         tools={cubuk()}
       >
         <Stats
           items={[
-            { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Reklam ${d.adStart} tarihinde başlar. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe artmıyor.'}` },
+            { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Reklam ${d.adStart} günü başlar. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe artmıyor.'}` },
             { label: 'Kayıt', value: `${zincir.kayit.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (bütçe artmadan önce)` },
             { label: 'Yeni aktif satıcı', value: `${zincir.aktif.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `Kayıtların yüzde ${params.dijitalLeadToActive} kadarı ödemeye geçer. Hesap kapasitenin ${yuzde(inputs.factor)} kadarını kullanır.` },
             { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? 'Uygulanmıyor' : tl(zincir.cac), note: 'Tam verimli bir ayın maliyetidir. Tablodaki maliyet ilk iki ayın düşük verimini de içerir.' },
@@ -513,7 +514,7 @@ function Icerik() {
         <DataTable
           id="kademeler"
           title={`Bütçe kademelerine göre ${d.window} aylık sonuç (${senaryoAdi})`}
-          note={`Hesap ${d.adStart} tarihinden itibaren ${d.window} ayı kapsar. Reklam platformu ilk aylarda hangi kişilere reklam göstereceğini öğrenir. Bu yüzden reklam ilk ay yüzde 50, ikinci ay yüzde 75 verimle çalışır. Tablodaki maliyet bu düşük verimi de içerir. Satıcı değeri (LTV) ${tl(tiers.ltv)} olur. Seçili bütçe vurgulu gösterilir.`}
+          note={`Hesap ${d.adStart} gününden itibaren ${d.window} ayı kapsar. Reklam platformu ilk aylarda hangi kişilere reklam göstereceğini öğrenir. Bu yüzden reklam ilk ay yüzde 50, ikinci ay yüzde 75 verimle çalışır. Tablodaki maliyet bu düşük verimi de içerir. Satıcı değeri (LTV) ${tl(tiers.ltv)} olur. Seçili bütçe vurgulu gösterilir.`}
           tools={cubuk()}
           columns={[
             { key: 'b', header: 'Başlangıç bütçesi', nowrap: true, rowHeader: true, render: (x: (typeof tiers.tiers)[number]) => tierAd(x.butce) },
@@ -628,7 +629,7 @@ function Icerik() {
         dizin
         index={5}
         title="Hazır senaryoları karşılaştırma"
-        desc="Kötümser, medyan ve iyimser senaryolar kendi kapasite, elde tutma ve büyüme kurallarıyla çizilir. Kendi seçeneklerinizi değiştirdiyseniz grafik bunu dördüncü çizgi olarak gösterir. Çizgiler aynı eksende karşılaştırılır. Kötümser senaryo, yatırımcı sunumunda alt sınır olarak kullanılır."
+        desc="Kötümser, Plan ve iyimser senaryolar kendi kapasite, elde tutma ve büyüme kurallarıyla çizilir. Kendi seçeneklerinizi değiştirdiyseniz grafik bunu dördüncü çizgi olarak gösterir. Çizgiler aynı eksende karşılaştırılır. Kötümser senaryo, yatırımcı sunumunda alt sınır olarak kullanılır."
         tools={cubuk()}
       >
         <Chart
@@ -764,7 +765,7 @@ function Icerik() {
               note: `Bu tarihte o güne kadarki toplam gelir, toplam gideri ilk kez karşılar. Bu tarih kredi ya da yatırımcıya ödeme anlamına gelmez. ${be.geriOdeme ? '' : be.ongoru.geriOdeme ? `Açık ${son} sonuna kadar kapanmıyor. Son ayın netiyle (${tl(be.ongoru.sonNet)} / ay) birikmiş açık daha sonra kapanır.` : 'Birikmiş açık kapanmıyor, çünkü aylık net sıfırın altında.'}`,
             },
             { label: 'En yüksek birikmiş açık', value: tl(Math.min(0, be.enDusuk.deger)), note: `En düşük kümülatif net ${months[be.enDusuk.t].ad} ayında görülür. Gereken finansman ${tl(Math.abs(Math.min(0, be.enDusuk.deger)))}.` },
-            { label: 'Başabaş noktası', value: be.adet.nokta === null ? 'Uygulanmıyor' : `${int(Math.ceil(be.adet.nokta))} ödeyen satıcı`, note: be.adet.ulasir ? `Seçili senaryoda bu sayıya ${shortDate(be.adet.ulasir.date)} tarihinde ulaşılır.` : `${son} sonuna kadar bu sayıya ulaşılmıyor.` },
+            { label: 'Başabaş noktası', value: be.adet.nokta === null ? 'Uygulanmıyor' : `${int(Math.ceil(be.adet.nokta))} ödeyen satıcı`, note: be.adet.ulasir ? `Seçili senaryoda bu sayıya ${shortDate(be.adet.ulasir.date)} günü ulaşılır.` : `${son} sonuna kadar bu sayıya ulaşılmıyor.` },
           ]}
         />
         <DataTable
@@ -820,7 +821,7 @@ function Icerik() {
           id="basabas-adet"
           title="Başabaş noktası: ödeyen satıcı adedine göre"
           note={`Yatay eksen ödeyen satıcı sayısını gösterir. Gelir çizgisi satıcı başına ayda ${tl(be.adet.gelirBirim)} artar. Bu tutar son 12 ayın ortalama fiyatıdır. Yıllık peşin ödemeleri de içerir. Gider çizgisi ${tl(be.adet.sabit)} ile başlar. Bu tutar son 12 ayın ortalama sabit gideridir. Gider çizgisi satıcı başına ${tl(be.adet.degisken)} artar. Bu ek tutar, kaybedilen satıcıların yerine yenilerini getiren primdir.`}
-          summary={be.adet.nokta === null ? 'Satıcı başına gelir değişken gideri karşılamıyor. Başabaş noktası yok.' : `Başabaş noktası ${int(Math.ceil(be.adet.nokta))} ödeyen satıcıdır. ${be.adet.ulasir ? `Bu sayıya ${shortDate(be.adet.ulasir.date)} tarihinde ulaşılır` : `${son} sonuna kadar bu sayıya ulaşılmıyor`}.`}
+          summary={be.adet.nokta === null ? 'Satıcı başına gelir değişken gideri karşılamıyor. Başabaş noktası yok.' : `Başabaş noktası ${int(Math.ceil(be.adet.nokta))} ödeyen satıcıdır. ${be.adet.ulasir ? `Bu sayıya ${shortDate(be.adet.ulasir.date)} günü ulaşılır` : `${son} sonuna kadar bu sayıya ulaşılmıyor`}.`}
           tools={cubuk()}
           spec={{ kind: 'basabas-adet', unit: 'ödeyen satıcı', n: be.adet.n, gelir: be.adet.gelir.map(Math.round), gider: be.adet.gider.map(Math.round), nokta: be.adet.nokta, noktaLabel: be.adet.nokta === null ? '' : `Başabaş ${int(Math.ceil(be.adet.nokta))} satıcı` }}
           size="lg"

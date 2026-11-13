@@ -3,7 +3,7 @@ import { cozumKazanci, segikaAylik, type Ayar, type SegikaPaket } from '../../sa
 import { kosulSonucu, seciliKosul, affilateHesabi } from '../../kosullar';
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const yuzde = (n: number) => `yüzde ${sayi(n * 100)}`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });

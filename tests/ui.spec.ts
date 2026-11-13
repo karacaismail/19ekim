@@ -523,7 +523,8 @@ test.describe('grafiklerin dar ekran eşdeğeri (ux.md §8.1, M20/M21, UX-29/UX-
     // Her maddede sorumlu çipi (rol) ve tarih aralığı.
     for (const m of okunan.maddeler) {
       expect(m.role, m.name).not.toBe('');
-      expect(m.range, m.name).toMatch(/^\d+ \p{L}+ ile \d+ \p{L}+ arası$/u);
+      // Her tarihte gün adı yazılır (karar listesi 8.4): “19 Ekim Pazartesi ile 31 Ekim Cumartesi arası”.
+      expect(m.range, m.name).toMatch(/^\d+ \p{L}+ (Pazartesi|Salı|Çarşamba|Perşembe|Cuma|Cumartesi|Pazar) ile \d+ \p{L}+ (Pazartesi|Salı|Çarşamba|Perşembe|Cuma|Cumartesi|Pazar) arası$/u);
     }
     // Kayıt sözleşmesi: başlık öğesi içinde düğme, Enter açar (Açıklama + Tarih + Sorumlu), Space kapatır, hedef ≥ 44 px.
     const madde = ajanda.locator('.ajanda-madde').first();
@@ -921,15 +922,15 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(menu.getByRole('menuitem', { name: 'Kararlar' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Pazarlama' }).click();
-    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['Temsilci ağı', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
+    await expect(page.getByRole('menu', { name: 'Pazarlama' }).getByRole('menuitem')).toHaveText(['MLM (çok katmanlı pazarlama)', 'Satış ortaklığı', 'Değer önerisi', 'Hizmetler', 'Gelir modelleri', 'Küresel pazaryerleri', 'Oyunlaştırma', 'Yeni kayıtlar', 'Çalışma rehberleri']);
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Finans' }).click();
-    await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
+    await expect(page.getByRole('menu', { name: 'Finans' }).getByRole('menuitem')).toHaveText(['Gelir planı', 'OPEX (işletme giderleri)', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Yardımcı' }).click();
     const yardimci = page.getByRole('menu', { name: 'Yardımcı' });
-    await expect(yardimci.getByRole('menuitem')).toHaveText(['Varsayımlar ve ayarlar', 'Notlar', 'Arşiv']);
-    await yardimci.getByRole('menuitem', { name: 'Varsayımlar ve ayarlar' }).click();
+    await expect(yardimci.getByRole('menuitem')).toHaveText(['Parametreler', 'Notlar', 'Arşiv']);
+    await yardimci.getByRole('menuitem', { name: 'Parametreler' }).click();
     await expect(page).toHaveURL(/\/parametreler\/$/);
     await page.getByRole('button', { name: 'Yönetim' }).click();
     await page.getByRole('menu', { name: 'Yönetim' }).getByRole('menuitem', { name: 'Kararlar' }).click();
@@ -1153,10 +1154,10 @@ test.describe('başlık ve İstihdam menüsü', () => {
     await expect(page.locator('.crumbs')).not.toContainText('İsmail Karaca');
     await page.goto('giderler/');
     await icerik(page);
-    await expect(page.locator('.crumbs li')).toHaveText(['19 Ekim', /Finans/, /OpEx/, /Operasyonel Giderler/]);
+    await expect(page.locator('.crumbs li')).toHaveText(['19 Ekim', /Finans/, /OPEX \(işletme giderleri\)/]);
     await expect(page.locator('h1')).toHaveCount(1);
     const h1 = page.locator('.crumbs li[aria-current="page"] h1');
-    await expect(h1).toHaveText('Operasyonel Giderler');
+    await expect(h1).toHaveText('OPEX (işletme giderleri)');
     const [baslik, kirinti] = [await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)), await page.locator('.crumbs a').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize))];
     expect(baslik).toBeGreaterThan(kirinti * 1.4);
     // Kullanıcı kararları 2026-10-21: kırıntılar %10–20 büyük (Giderler 15 → 17 px), başlık %10–20 küçük (32 → ≈ 27 px).
@@ -1182,7 +1183,7 @@ test.describe('başlık ve İstihdam menüsü', () => {
  * Kırıntı derinliği (K5, docs/birlesik_plan.md §4.1; kullanıcı kararı 2026-10-28 “test et, karar ver”): 320×480’de rol
  * sayfasının kırıntısı üç satır tutuyordu (19 Ekim › İstihdam › Organizasyon şeması › başlık). Karar: dar ekranda (< 48em)
  * bağlantısız grup adı gizlenir, bağlantılı ebeveyn ve başlık kalır; geniş ekranda tam yol. Giderler’in belgeli yolu
- * (Finans › OpEx) grup adı değil, her genişlikte kalır.
+ * (Finans) grup adı değil, her genişlikte kalır. 13 Kasım 2026’dan beri sayfanın adı “OPEX (işletme giderleri)”dir.
  */
 test.describe('kırıntı derinliği (K5, 2026-10-28)', () => {
   // Son kırıntı h1 + durum hapı taşır; metin olarak yalnız h1 okunur.
@@ -1202,7 +1203,7 @@ test.describe('kırıntı derinliği (K5, 2026-10-28)', () => {
     expect(await gorunen(page)).toEqual(['19 Ekim', 'Gelir planı']);
     await page.goto('giderler/');
     await icerik(page);
-    expect(await gorunen(page)).toEqual(['19 Ekim', 'Finans', 'OpEx', 'Operasyonel Giderler']);
+    expect(await gorunen(page)).toEqual(['19 Ekim', 'Finans', 'OPEX (işletme giderleri)']);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('roller/ekip-lideri/');
     await icerik(page);
@@ -1266,7 +1267,7 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
     const meta = page.locator('.page-meta');
     // Paket fiyatı başlıkta değil (P6.2: ana sonuç 320×480 ilk ekranda kalsın; fiyat “Fiyat” bölümünde).
     await expect(meta.locator('dt')).toHaveText(['Dönem', 'İlk satış']);
-    await expect(meta).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(meta).toContainText('19 Ekim 2026 Pazartesi – Aralık 2027');
     await expect(meta).toContainText('6 Kasım 2026');
     const [baslik, kirinti] = [
       await page.locator('h1').evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
@@ -1275,7 +1276,7 @@ test.describe('sayfa başlığı ve bölüm başlığı (ux.md §3/§5.4, M03 Pa
     expect(baslik).toBeGreaterThan(kirinti * 1.4);
     await page.goto('nakit-akisi/');
     await icerik(page);
-    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Nakit akış tablosu');
+    await expect(page.locator('.crumbs li[aria-current="page"] h1')).toHaveText('Nakit akışı');
     await expect(page.locator('.page-meta dt')).toHaveText(['Dönem', 'Kaynak']);
     await expect(page.locator('.page-meta')).toContainText('Ekim 2026 – Aralık 2027');
     // Rol sayfası: simge, ad ve durum aynı kırıntı öğesinde; görev amaç satırında; bilgiler dönem satırında.

@@ -16,7 +16,7 @@ export const CHATGPT = {
     { ad: 'Kazanılmış gelir (plan)', claude: '58,7 milyon ₺', chatgpt: '37,1 milyon ₺', not: 'İkisi de yıllık peşin bedeli 12 aya yayar. Kalan fark temsilci ağı ve elde tutma varsayımlarından gelir.' },
     { ad: 'Kazanılmış gelir, kötümser ve iyimser', claude: '43,6 ile 70,0 milyon ₺', chatgpt: '24,9 ile 41,7 milyon ₺', not: 'ChatGPT hesabında elde tutma %55 ile %80 arasında değişir. Satış çarpanı 0,6 ile 1,25 arasında değişir. Claude’un aralığı daha dardır.' },
     { ad: 'Aylık elde tutma (plan)', claude: '%70 ile %78', chatgpt: '%70', not: 'Claude destek rollerine en çok 8 yüzde puanı katkı verir. Bu katkı bir varsayımdır.' },
-    { ad: 'Risk payı', claude: '%16,7 (ChatGPT tanımıyla %25)', chatgpt: '%32,7', not: 'İki hesap risk payını farklı tanımlar. Claude, Medyan öngörüsünü risksiz planla karşılaştırır. ChatGPT, kötümser öngörüyü planla karşılaştırır. ChatGPT’nin tanımıyla Claude’un risk payı %25 olur.' },
+    { ad: 'Risk payı', claude: '%16,7 (ChatGPT tanımıyla %25)', chatgpt: '%32,7', not: 'İki hesap risk payını farklı tanımlar. Claude, Plan öngörüsünü risksiz planla karşılaştırır. ChatGPT, kötümser öngörüyü planla karşılaştırır. ChatGPT’nin tanımıyla Claude’un risk payı %25 olur.' },
     { ad: 'En büyük risk', claude: 'Satış dönüşümü ve elde tutma', chatgpt: 'Müşteri kaybı ve düşük yenileme', not: 'İki analiz de sağlık ve izin etkisinin, yenileme ve dönüşüm etkisinden çok küçük olduğunu bulur.' },
   ],
 };

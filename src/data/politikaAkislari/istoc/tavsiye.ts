@@ -3,12 +3,12 @@ import { aylikFiyat, rolMetinleri, yillikFiyat, type Ayar } from '../../satisOrt
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const avro = (n: number) => `${sayi(n)} €`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
-  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(yillikFiyat(a))} eder.`;
+  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(yillikFiyat(a))} eder.`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const sonlu = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, ...aciklama: string[]): AkisSecenegi =>
@@ -159,7 +159,7 @@ export const akisOlustur: AkisOlustur = (a) => {
       id: 'odul', ad: 'Ücretsiz kullanımı görün', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
       yap: odulVar
         ? [
-            `Ödülünüz ${sayi(a.krediAy)} aylık iStoc kullanımıdır: ${avro(a.istocAyEur * a.krediAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(kredi)} eder.`,
+            `Ödülünüz ${sayi(a.krediAy)} aylık iStoc kullanımıdır: ${avro(a.istocAyEur * a.krediAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(kredi)} eder.`,
             `Yeni müşteri ${sayi(a.yeniKrediAy)} ay ücretsiz kullanım alır.`,
             'Finans sorumlusu ödülün yansıdığı faturayı size bildirir.',
           ]

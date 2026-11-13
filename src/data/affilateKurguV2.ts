@@ -181,7 +181,7 @@ export const HAZIR_SENARYOLAR: HazirSenaryo[] = [
   {
     id: 'on-aylik-fiyat',
     ad: '10 aylık fiyat / 12 aylık hizmet',
-    aciklama: 'Çözüm ortağı modeli, yenilenmeyen tek yıllık paket: Paket fiyatı 10 aylık ücrete, yani 1.000 ₺’ye eşittir. Hizmet 12 ay sürer. 83,33 ₺ tutarındaki aylık eşdeğer yalnız bilgi içindir, komisyon değildir.',
+    aciklama: 'Çözüm ortağı modeli, yenilenmeyen tek yıllık paket: Paket fiyatı 10 aylık ücrete, yani 1.000 ₺’ya eşittir. Hizmet 12 ay sürer. 83,33 ₺ tutarındaki aylık eşdeğer yalnız bilgi içindir, komisyon değildir.',
     kurgu: () => ({ ...baslangicKurgu(), ufukAy: 13, musteriler: [baslangicMusteri({ ortak: 'cozum', iptalHizmetAyi: 12 })] }),
   },
   {

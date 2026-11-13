@@ -65,7 +65,7 @@ function Icerik({ pathname }: { pathname: string }) {
   const harita = [5, 4, 3, 2, 1].map((etki) => ({ etki, hucreler: [1, 2, 3, 4, 5].map((olasilik) => RISKLER.filter((r) => r.etki === etki && r.olasilik === olasilik)) }));
   const ongoruSatirlari = [
     { ad: 'Kötümser (%10)', ciro: o.gelir.kotumser, gelir: o.kazanilan.kotumser, aktif: o.yeniAktif.kotumser },
-    { ad: 'Medyan (plan)', ciro: o.gelir.medyan, gelir: o.kazanilan.medyan, aktif: o.yeniAktif.medyan },
+    { ad: 'Plan', ciro: o.gelir.medyan, gelir: o.kazanilan.medyan, aktif: o.yeniAktif.medyan },
     { ad: 'Ortanca (%50)', ciro: o.gelir.ortanca, gelir: o.kazanilan.ortanca, aktif: o.yeniAktif.ortanca },
     { ad: 'İyimser (%90)', ciro: o.gelir.iyimser, gelir: o.kazanilan.iyimser, aktif: o.yeniAktif.iyimser },
     { ad: 'Risksiz plan', ciro: o.gelir.risksiz, gelir: o.kazanilan.risksiz, aktif: o.yeniAktif.risksiz },
@@ -95,9 +95,9 @@ function Icerik({ pathname }: { pathname: string }) {
         ]}
       />
       <div className="go27-uyari">
-        <p>Gelir, satıcıların abonelik ödemesidir. Gelir, “Gelir planı” sayfasıyla aynı kurallarla hesaplanır. Satıcı aylık ya da yıllık peşin öder. Aylık ödeyen satıcı aboneliğini her ay yeniler. Aylık elde tutma, bir ay ödeyen satıcılardan sonraki ay da ödeyenlerin oranıdır. TL fiyatı döviz kuru arttıkça artar. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir.</p>
+        <p>Gelir, satıcıların abonelik ödemesidir. Gelir, “Gelir planı” sayfasıyla aynı kurallarla hesaplanır. Satıcı aylık ya da yıllık peşin öder. Aylık ödeyen satıcı aboneliğini her ay yeniler. Aylık elde tutma, bir ay ödeyen satıcılardan sonraki ay da ödeyenlerin oranıdır. Fiyatın ₺ karşılığı döviz kuru arttıkça artar. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir.</p>
         <p>
-          Dört öngörü vardır. <strong>Medyan</strong> öngörüsü tek bir plan hesabıdır. Bu hesap risklerin ortalama etkisini kullanır. Bilgisayar 2027 yılını {int(KOSU_SAYISI)} kez hesapladı. Her hesapta riskler rastgele farklı çıktı. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong> öngörüler bu sonuçlardan gelir. Olası yılların %10’u kötümserin altında kalır. Olası yılların yarısı ortancanın altında kalır. Olası yılların %90’ı iyimserin altında kalır.
+          Dört öngörü vardır. <strong>Plan</strong> öngörüsü tek bir hesaptır. Bu hesap risklerin ortalama etkisini kullanır. Bilgisayar 2027 yılını {int(KOSU_SAYISI)} kez hesapladı. Her hesapta riskler rastgele farklı çıktı. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong> öngörüler bu sonuçlardan gelir. Olası yılların %10’u kötümserin altında kalır. Olası yılların yarısı ortancanın altında kalır. Olası yılların %90’ı iyimserin altında kalır.
         </p>
       </div>
 
@@ -116,7 +116,7 @@ function Icerik({ pathname }: { pathname: string }) {
         <Stats
           items={[
             { label: 'Kötümser ciro', value: milyon(o.gelir.kotumser), note: `Olası yılların %10’unda ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.kotumser)} olur.` },
-            { label: 'Medyan ciro (plan)', value: milyon(o.gelir.medyan), note: `Risklerin ortalama etkisiyle yapılan plan hesabıdır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.medyan)} olur.` },
+            { label: 'Plan cirosu', value: milyon(o.gelir.medyan), note: `Risklerin ortalama etkisiyle yapılan plan hesabıdır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.medyan)} olur.` },
             { label: 'Ortanca ciro', value: milyon(o.gelir.ortanca), note: `Olası yılların yarısında ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.ortanca)} olur.` },
             { label: 'İyimser ciro', value: milyon(o.gelir.iyimser), note: `Olası yılların %90’ında ciro bu tutarın altında kalır. Bu öngörüde kazanılmış gelir ${milyon(o.kazanilan.iyimser)} olur.` },
           ]}
@@ -141,23 +141,23 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Risk payı</dt>
-            <dd>Medyan öngörüsü, risksiz plandan {yuzde(o.riskPayi)} düşüktür. Bu farka risk payı denir.</dd>
+            <dd>Plan öngörüsü, risksiz plandan {yuzde(o.riskPayi)} düşüktür. Bu farka risk payı denir.</dd>
           </div>
           <div>
             <dt>Dağılım</dt>
             <dd>
-              {int(KOSU_SAYISI)} olası yılın ortalama cirosu {milyon(o.gelir.ortalama)} olur. Sonuçlar bu ortalamadan genelde {milyon(o.gelir.sapma)} kadar sapar. Bu sapmaya standart sapma denir. Ortanca öngörüsü, Medyan öngörüsünden düşüktür. Çünkü kötü sonuçlar ciroyu, iyi sonuçların artırdığından daha çok düşürür. İşten ayrılma ve düşük elde tutma kötü sonuçlara örnektir.
+              {int(KOSU_SAYISI)} olası yılın ortalama cirosu {milyon(o.gelir.ortalama)} olur. Sonuçlar bu ortalamadan genelde {milyon(o.gelir.sapma)} kadar sapar. Bu sapmaya standart sapma denir. Ortanca öngörüsü, Plan öngörüsünden düşüktür. Çünkü kötü sonuçlar ciroyu, iyi sonuçların artırdığından daha çok düşürür. İşten ayrılma ve düşük elde tutma kötü sonuçlara örnektir.
             </dd>
           </div>
           <div>
             <dt>Dolaylı katkı olmadan</dt>
             <dd>
-              Destek rollerinin elde tutmaya katkısı bir varsayımdır. Bu katkı en çok 8 yüzde puanıdır. Bu katkı sayılmazsa Medyan öngörüsü {milyon(o.dolaylisizMedyan)} olur.
+              Destek rollerinin elde tutmaya katkısı bir varsayımdır. Bu katkı en çok 8 yüzde puanıdır. Bu katkı sayılmazsa Plan öngörüsü {milyon(o.dolaylisizMedyan)} olur.
             </dd>
           </div>
           <div>
             <dt>Gelir planıyla karşılaştırma</dt>
-            <dd>“Gelir planı” sayfasında Medyan senaryosu 2027 için {milyon(GELIR_PLANI_2027)} gelir öngörür. Bu sayfadaki tutar farklıdır. Fark, yeni kadronun ek satış ve destek rollerinden gelir.</dd>
+            <dd>“Gelir planı” sayfasında Plan senaryosu 2027 için {milyon(GELIR_PLANI_2027)} gelir öngörür. Bu sayfadaki tutar farklıdır. Fark, yeni kadronun ek satış ve destek rollerinden gelir.</dd>
           </div>
         </dl>
       </Section>
@@ -217,7 +217,7 @@ function Icerik({ pathname }: { pathname: string }) {
         />
       </Section>
 
-      <Section id="katki" index={4} title="Satışa katkı" desc="Doğrudan roller yeni aktif satıcı getirir. Dolaylı roller aylık elde tutmayı artırır. “Varsayım” yazan katkıların kaynağı yoktur. Bu katkılar ilk 90 günün ölçümüne göre güncellenmeli. Segika masa başı, Segika’nın SGK teşvik yazılımını satar. Bu satışlar istoc.com gelirine sayılmaz.">
+      <Section id="katki" index={4} title="Satışa katkı" desc="Doğrudan roller yeni aktif satıcı getirir. Dolaylı roller aylık elde tutmayı artırır. “Varsayım” yazan katkıların kaynağı yoktur. Bu katkılar ilk 90 günün ölçümüne göre güncellenmeli. Segika CRM, Segika’nın SGK teşvik yazılımını satar. Bu satışlar istoc.com gelirine sayılmaz.">
         <DataTable<(typeof katkilar)[number]>
           id="katki-tablosu"
           title={`${SECENEK_ADI[secili]} seçeneğindeki roller`}
@@ -231,11 +231,11 @@ function Icerik({ pathname }: { pathname: string }) {
           rows={katkilar}
         />
         <p className="go27-not">
-          Medyan öngörüsünde dijital kanal {int(o.medyan.dogrudan.dijital ?? 0)} yeni aktif satıcı getirir. Temsilci ağı, satıcı getiren bağımsız temsilcilerdir. Temsilci ağı {int(o.medyan.dogrudan.temsilci ?? 0)} yeni aktif satıcı getirir. Ekip liderinin etkisi {int(o.medyan.dogrudan.lider ?? 0)} yeni aktif satıcıdır. Aylık elde tutma Ocak’ta {yuzde(o.medyan.eldeTutma[0])}, Aralık’ta {yuzde(o.medyan.eldeTutma[11])} olur.
+          Plan öngörüsünde dijital kanal {int(o.medyan.dogrudan.dijital ?? 0)} yeni aktif satıcı getirir. Temsilci ağı, satıcı getiren bağımsız temsilcilerdir. Temsilci ağı {int(o.medyan.dogrudan.temsilci ?? 0)} yeni aktif satıcı getirir. Ekip liderinin etkisi {int(o.medyan.dogrudan.lider ?? 0)} yeni aktif satıcıdır. Aylık elde tutma Ocak’ta {yuzde(o.medyan.eldeTutma[0])}, Aralık’ta {yuzde(o.medyan.eldeTutma[11])} olur.
         </p>
       </Section>
 
-      <Section id="aylik" index={5} title="Ay ay ciro" desc={`Tutarlar, o ay tahsil edilen abonelik ödemesidir. “Medyan” sütunu plan hesabıdır. Diğer sütunlar ${int(KOSU_SAYISI)} olası yıldan gelir.`}>
+      <Section id="aylik" index={5} title="Ay ay ciro" desc={`Tutarlar, o ay tahsil edilen abonelik ödemesidir. “Plan” sütunu tek hesaptır. Diğer sütunlar ${int(KOSU_SAYISI)} olası yıldan gelir.`}>
         <DataTable<(typeof aylikYuzdelik)[number]>
           id="aylik-gelir"
           title={`${SECENEK_ADI[secili]} seçeneği, 2027`}
@@ -243,7 +243,7 @@ function Icerik({ pathname }: { pathname: string }) {
           columns={[
             { key: 'ay', header: 'Ay', rowHeader: true, nowrap: true, render: (x) => ayAdi(x.ay) },
             { key: 'p10', header: 'Kötümser', nowrap: true, render: (x) => tl(x.p10) },
-            { key: 'medyan', header: 'Medyan', nowrap: true, summary: true, render: (x) => tl(x.medyan) },
+            { key: 'medyan', header: 'Plan', nowrap: true, summary: true, render: (x) => tl(x.medyan) },
             { key: 'p50', header: 'Ortanca', nowrap: true, render: (x) => tl(x.p50) },
             { key: 'p90', header: 'İyimser', nowrap: true, render: (x) => tl(x.p90) },
           ]}
@@ -254,7 +254,7 @@ function Icerik({ pathname }: { pathname: string }) {
       <Section id="risk-payi" index={6} title="Risk payı" desc="Riskler tek tek eklenir. Her satır, o riskin bir önceki satıra göre kaybettirdiği ciroyu gösterir.">
         <DataTable<(typeof asamalar)[number] & { i: number }>
           id="risk-payi-tablosu"
-          title="Risksiz plandan medyana"
+          title="Risksiz plandan Plan öngörüsüne"
           rowKey={(x) => x.a}
           columns={[
             { key: 'ad', header: 'Aşama', rowHeader: true, minWidth: '12rem', render: (x) => ASAMA_ADI[x.a] },
@@ -346,7 +346,7 @@ function Icerik({ pathname }: { pathname: string }) {
           columns={[
             { key: 'ad', header: 'Seçenek', rowHeader: true, render: (x) => SECENEK_ADI[x.s] },
             { key: 'k', header: 'Kötümser', nowrap: true, render: (x) => milyon(x.o.gelir.kotumser) },
-            { key: 'm', header: 'Medyan', nowrap: true, summary: true, render: (x) => milyon(x.o.gelir.medyan) },
+            { key: 'm', header: 'Plan', nowrap: true, summary: true, render: (x) => milyon(x.o.gelir.medyan) },
             { key: 'o', header: 'Ortanca', nowrap: true, render: (x) => milyon(x.o.gelir.ortanca) },
             { key: 'i', header: 'İyimser', nowrap: true, render: (x) => milyon(x.o.gelir.iyimser) },
             { key: 'p', header: 'Risk payı', nowrap: true, render: (x) => yuzde(x.o.riskPayi) },

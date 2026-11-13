@@ -155,7 +155,7 @@ export function quadrantOf(growth: number, share: number): QuadrantKey {
 export const MISTAKES = [
   { mistake: 'Pazarı yanlış tanımlamak', fix: 'Pazar, rakiplerin gerçekten yarıştığı alan olarak tanımlanır. Örneğin “içecek” değil, “Türkiye’de kapsül kahve makinesi” seçilir.' },
   { mistake: 'Mutlak payı göreli pay sanmak', fix: '%20 pay tek başına bir şey söylemez. En büyük rakibin payı %60 ise göreli pay 0,33’tür.' },
-  { mistake: 'Enflasyonlu büyümeyi gerçek büyüme sanmak', fix: 'TL cinsinden ciro enflasyonla şişer. Bu yüzden satılan adedin büyümesine bakın. Ya da fiyat artışının etkisini çıkarıp büyümeyi hesaplayın.' },
+  { mistake: 'Enflasyonlu büyümeyi gerçek büyüme sanmak', fix: '₺ cinsinden ciro enflasyonla şişer. Bu yüzden satılan adedin büyümesine bakın. Ya da fiyat artışının etkisini çıkarıp büyümeyi hesaplayın.' },
   { mistake: 'Köpek’i düşünmeden kapatmak', fix: 'Köpek başka bir ürünün satışına yardım ediyor, müşteriyi tutuyor veya sabit gideri paylaşıyor olabilir. Bu yüzden ürünü kapatmadan önce bu etkileri inceleyin.' },
   { mistake: 'Matrisi bir kez yapıp bırakmak', fix: 'Pazarlar değişir. Bu yüzden matris en az yılda bir yeniden çizilir.' },
 ];

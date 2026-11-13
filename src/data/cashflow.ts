@@ -110,8 +110,6 @@ export interface CashPlan {
 }
 
 /** Sitenin parametrelerinden ve gelir planı senaryolarından nakit planı (Sheets’ten bağımsız kısım). */
-/** Cümle içine alınan açıklamanın yalnız ilk harfini küçültür (“Kapasitenin” → “kapasitenin”). */
-const ilkHarfKucuk = (s: string) => s.charAt(0).toLocaleLowerCase('tr-TR') + s.slice(1);
 
 export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashPlan {
   const aylar = CASH_MONTHS;
@@ -122,9 +120,6 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
   const metaAylik = r2((p.metaWeekly * 52) / 12);
   const yatirimAy = monthNo(monthStart(p.investmentDate));
   const yatirimIcerde = aylar.some((m) => monthNo(m.iso) === yatirimAy);
-  const medyan = rev.byId.medyan.scenario;
-  const kotumser = rev.byId.kotumser.scenario;
-  const iyimser = rev.byId.iyimser.scenario;
   return {
     aylar,
     abonelikTl: prog.SUBSCRIPTION_TRY,
@@ -136,15 +131,15 @@ export function makeCashflow(p: Params, prog: ProgramModel, rev: Revenue): CashP
     baslangicNakit: p.openingCash,
     varsayimlar: [
       `Ödeme yapan her satıcı ayda ${prog.SUBSCRIPTION_EUR} € öder. Hesap 1 € için ${p.eurTry.toLocaleString('tr-TR')} ₺ kullanır. Bu yüzden aylık ücret ${Math.round(prog.SUBSCRIPTION_TRY).toLocaleString('tr-TR')} ₺ olur. Yeni satıcıların yüzde ${p.annualShare} kadarı yıllık peşin öder. Yıllık peşin tutar ${Math.round(prog.ANNUAL_TRY).toLocaleString('tr-TR')} ₺, yani ${p.annualMonths} ayın ücretidir. Ödeme aynı ay tahsil edilir. KDV ayrıca hesaba katılmaz.`,
-      `Yeni aktif satıcı ve yenileme sayıları, gelir planı sayfasının senaryo simülasyonundan gelir. Hesap, her senaryonun kendi kapasitesini ve yenileme oranını kullanır. Kötümser senaryoda ${ilkHarfKucuk(kotumser.desc)} Medyan senaryoda ${ilkHarfKucuk(medyan.desc)} İyimser senaryoda ${ilkHarfKucuk(iyimser.desc)} Seçili senaryo iki sayfada ortaktır ve bu tarayıcıda saklanır.`,
-      `Tablo ${monthName(rev.months[0].iso)} ${rev.months[0].iso.slice(0, 4)} ayında başlar. İlk satış ${monthName(monthStart(p.firstSaleDate))} ${p.firstSaleDate.slice(0, 4)} ayında yapılır. Bu yüzden Ekim 2026’da giriş yoktur. Gelir planı da tablonun ${rev.months.length} ayını kapsar. Kur yılda %${p.eurTryGrowth} arttığı için ₺ fiyat da kurla birlikte artar.`,
+      `Yeni aktif satıcı ve yenileme sayıları, gelir planı sayfasının senaryo simülasyonundan gelir. Hesap, her senaryonun kendi kapasitesini ve yenileme oranını kullanır. Senaryolar kapasite, yenileme oranı ve kadro büyümesiyle ayrılır. Seçili senaryonun açıklaması sayfanın başındaki sonuç kutusundadır. Seçili senaryo iki sayfada ortaktır ve bu tarayıcıda saklanır.`,
+      `Tablo ${monthName(rev.months[0].iso)} ${rev.months[0].iso.slice(0, 4)} ayında başlar. İlk satış ${monthName(monthStart(p.firstSaleDate))} ${p.firstSaleDate.slice(0, 4)} ayında yapılır. Bu yüzden Ekim 2026’da giriş yoktur. Gelir planı da tablonun ${rev.months.length} ayını kapsar. Kur yılda %${p.eurTryGrowth} artar. Bu yüzden fiyatın ₺ karşılığı da kurla birlikte artar.`,
       `Temsilci bulmak için Meta işe alım reklamlarına haftada ${p.metaWeekly.toLocaleString('tr-TR')} ₺ harcanır. Bu, ayda yaklaşık ${metaAylik.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺ eder. Bu gider ${monthName(monthStart(p.metaStartDate))} ${p.metaStartDate.slice(0, 4)} ayından itibaren her aya tam olarak yazılır. Sheets’te bu kalem yoktur.`,
       `Satıcı kazanım reklamı dijital pazarlama stratejisinin parçasıdır. Bütçe ${monthName(monthStart(p.dijitalAdStartDate))} ${p.dijitalAdStartDate.slice(0, 4)} ayında ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile başlar. Satıcıdan beklenen toplam gelir (LTV), satıcıyı kazanma maliyetinin (CAC) en az 3 katı olabilir. Bu durumda bütçe her 3 ayda 1,5 katına çıkar. Bütçe en çok ${p.dijitalScaleMax} katına ulaşır. Kuralın tutup tutmadığı senaryoya göre değişir. Reklamın getirdiği satıcılar girişlerin içindedir. Sheets’te bu kalem de yoktur.`,
       `Her yeni aktif satıcı için en çok ${p.commission.toLocaleString('tr-TR')} ₺ satış primi yazılır. Bu tutar seçili senaryonun yeni aktif satıcı sayısıyla çarpılır. Prim iki durumda ödenir. Satış uzmanı aylık kotasını aşarsa prim alır. Kota, primin başladığı satış tutarıdır. Temsilci her satışında prim alır. Sponsora ve ekip liderine ödenen paylar bu tutarda yoktur.`,
       yatirimIcerde
         ? `Yatırım girişi ${monthName(monthStart(p.investmentDate))} ${p.investmentDate.slice(0, 4)} ayında ${p.investmentAmount.toLocaleString('tr-TR')} ₺ olur. Bu değer bir parametredir. Başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺ olur.`
         : `Yatırım girişi ayı (${p.investmentDate}) tablo dönemi dışında kaldığı için tabloya girmez. Başlangıç nakdi ${p.openingCash.toLocaleString('tr-TR')} ₺ olur.`,
-      'Çıkışlar Google Sheets’teki 15 aylık gider planından gelir. Sistem planı kategori kategori okur. Bordrolu personel için işveren maliyeti kullanılır. Bu maliyetten teşvik düşülür. Serbest çalışanlar (freelancer) için KDV dahil fatura tutarı kullanılır. Bu veri, Giderler sayfasındaki canlı veriyle aynıdır. Her gider, ait olduğu ayda ödenmiş sayılır. SGK ve vergi ödemelerindeki gecikme hesaba katılmaz.',
+      'Çıkışlar Google Sheets’teki 15 aylık gider planından gelir. Sistem planı kategori kategori okur. Bordrolu personel için işveren maliyeti kullanılır. Bu maliyetten teşvik düşülür. Serbest çalışanlar (freelancer) için KDV dahil fatura tutarı kullanılır. Bu veri, “OPEX (işletme giderleri)” sayfasındaki canlı veriyle aynıdır. Her gider, ait olduğu ayda ödenmiş sayılır. SGK ve vergi ödemelerindeki gecikme hesaba katılmaz.',
       `Eklenen saha personeli bir plan kalemidir. Bu kalem ikinci saha personelini, ek saha personelini ve büyüme kuralıyla gelenleri kapsar. Her kişinin maliyeti başladığı aydan itibaren yazılır. Bu maliyet maaşın ${p.costFactor.toLocaleString('tr-TR')} katıdır. İkinci saha personelinin başlangıcı parametrede ${monthName(monthStart(p.secondSahaDate))} ${p.secondSahaDate.slice(0, 4)} olarak tanımlıdır ve gelir planı seçeneğiyle değişebilir. Sheets’te yalnız bir saha personeli vardır. Bu hesap, gelir planının başabaş hesabıyla aynı kuralı kullanır.`,
       'Gelir planı sayfasındaki hesap seçenekleri bu tabloda da kullanılır. Bu seçenekler fiyat, ikinci saha ayı, ek saha, reklam bütçesi ve ölçek, kur artışıdır. Büyüme kuralı, yıllık peşin payı, ek sabit gider ve prim de bu seçeneklerdendir. Gider kaynağı seçeneği burada uygulanmaz. Çıkışlar her zaman Sheets gider planından ve plan kalemlerinden oluşur. Sistem Sheets dosyasını okuyamazsa tablo eksik olur. Bu durumda yalnız plan kalemleri görünür.',
     ],

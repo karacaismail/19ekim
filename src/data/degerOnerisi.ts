@@ -132,7 +132,7 @@ export const KATEGORILER: Kategori[] = [
         platform: 'Figopara gibi fatura finansmanı platformlarına yazılım bağlantısı kurmalı. Platformda alıcı olmasa da bu hizmet işe yarar.',
         ilkGun: 'ortakla',
         risk: 'Düşük. Riski finansman ortağı taşır.',
-        dayanak: 'Figopara genel müdürü (CEO) Koray Bahar’a göre platform aylık 2,5 milyar TL işlem hacmi yönetiyor. İştiraki Figofinans’ın müşterileri arasında toptan ticaret önde geliyor.',
+        dayanak: 'Figopara genel müdürü (CEO) Koray Bahar’a göre platform aylık 2,5 milyar ₺ işlem hacmi yönetiyor. İştiraki Figofinans’ın müşterileri arasında toptan ticaret önde geliyor.',
       },
       {
         no: 4,
@@ -180,7 +180,7 @@ export const KATEGORILER: Kategori[] = [
         platform: 'Deneme süresini ve aylık ücreti açıkça yazmalı. Ücretsiz paket açılınca satıcı ücretsiz başlayabilir.',
         ilkGun: 'evet',
         risk: 'Aylık ücret küçük esnafı korkutabilir. Ücretsiz paket bu korkuyu azaltır, ama yazılım işi bitmeden açılamaz.',
-        dayanak: 'istoc.com satıcı paketleri ve 13 Kasım 2026 kararları',
+        dayanak: 'istoc.com satıcı paketleri ve 13 Kasım 2026 Cuma kararları',
       },
       {
         no: 8,
@@ -248,7 +248,7 @@ export const KATEGORILER: Kategori[] = [
         platform: 'Destek başvurusunda danışmanlık vermeli. istoc.com da işletmeler arası platformlara verilen e-ihracat tanıtım desteğine başvurabilir. Bu destek yurt dışından alıcı kazanmayı finanse eder.',
         ilkGun: 'kismen',
         risk: 'Düşük. Kesin destek sözü verilmemeli, çünkü onayı Bakanlık verir.',
-        dayanak: 'Bu destek 5986 sayılı Karara dayanır. Kararın 2026 tablosu, işletmeler arası platformlara verilecek desteğe üst sınır koyar. E-ihracat tanıtım desteğinin yıllık üst sınırı 19.728.673 TL’dir. Hedef ülke sayısı 35’tir.',
+        dayanak: 'Bu destek 5986 sayılı Karara dayanır. Kararın 2026 tablosu, işletmeler arası platformlara verilecek desteğe üst sınır koyar. E-ihracat tanıtım desteğinin yıllık üst sınırı 19.728.673 ₺’dır. Hedef ülke sayısı 35’tir.',
       },
       {
         no: 14,
@@ -316,7 +316,7 @@ export const KATEGORILER: Kategori[] = [
         platform: 'E-fatura hizmeti veren firmalara ve muhasebe programlarına yazılım bağlantısı kurmalı.',
         ilkGun: 'ortakla',
         risk: 'Orta. Bu yazılım bağlantılarını geliştirmek gerekir.',
-        dayanak: '2026’da e-arşiv tutar sınırı kalkıyor. E-fatura eşiği 3 milyon TL’dir.',
+        dayanak: '2026’da e-arşiv tutar sınırı kalkıyor. E-fatura eşiği 3 milyon ₺’dır.',
       },
       {
         no: 20,

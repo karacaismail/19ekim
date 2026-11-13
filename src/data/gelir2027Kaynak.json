@@ -5,7 +5,7 @@
    "id": "takvim.2027.yilbasi",
    "konu": "1 Ocak 2027 Yılbaşı",
    "deger": "2027-01-01 Cuma",
-   "metin": "1 Ocak 2027, Cuma",
+   "metin": "1 Ocak 2027 Cuma",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -21,7 +21,7 @@
    "id": "takvim.2027.ramazan_bayrami",
    "konu": "Ramazan Bayramı 2027 (arife yarım gün ve 3 gün)",
    "deger": "Arife 2027-03-08 Pazartesi (yarım gün), bayram 2027-03-09 Salı, 2027-03-10 Çarşamba, 2027-03-11 Perşembe",
-   "metin": "Arife 8 Mart 2027, Pazartesi (yarım gün). Bayram 9 Mart 2027 Salı günü başlar ve 11 Mart 2027 Perşembe günü biter.",
+   "metin": "Arife 8 Mart 2027 Pazartesi (yarım gün). Bayram 9 Mart 2027 Salı günü başlar ve 11 Mart 2027 Perşembe günü biter.",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -35,14 +35,14 @@
      "tarih": "1981-03-17"
     }
    ],
-   "aciklama": "Diyanet takvimine göre Ramazan 8 Şubat 2027'de başlar ve bayram 9 ile 11 Mart arasındadır. Bu bayram hafta içinde 3 tam gün ve 1 yarım gün iş kaybı yaratır.",
+   "aciklama": "Diyanet takvimine göre Ramazan 8 Şubat 2027 Pazartesi günü başlar ve bayram 9 Mart Salı ile 11 Mart Perşembe arasındadır. Bu bayram hafta içinde 3 tam gün ve 1 yarım gün iş kaybı yaratır.",
    "tahmin": false
   },
   {
    "id": "takvim.2027.23_nisan",
    "konu": "23 Nisan Ulusal Egemenlik ve Çocuk Bayramı",
    "deger": "2027-04-23 Cuma",
-   "metin": "23 Nisan 2027, Cuma",
+   "metin": "23 Nisan 2027 Cuma",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -58,7 +58,7 @@
    "id": "takvim.2027.1_mayis",
    "konu": "1 Mayıs Emek ve Dayanışma Günü",
    "deger": "2027-05-01 Cumartesi",
-   "metin": "1 Mayıs 2027, Cumartesi",
+   "metin": "1 Mayıs 2027 Cumartesi",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -72,9 +72,9 @@
   },
   {
    "id": "takvim.2027.kurban_bayrami",
-   "konu": "Kurban Bayramı 2027 (arife yarım gün ve 4 gün) ile 19 Mayıs",
+   "konu": "Kurban Bayramı 2027 (arife yarım gün ve 4 gün) ile 19 Mayıs Çarşamba",
    "deger": "Arife 2027-05-15 Cumartesi, bayram 2027-05-16 Pazar, 2027-05-17 Pazartesi, 2027-05-18 Salı, 2027-05-19 Çarşamba",
-   "metin": "Arife 15 Mayıs 2027, Cumartesi. Bayram 16 Mayıs 2027 Pazar günü başlar ve 19 Mayıs 2027 Çarşamba günü biter. 19 Mayıs bayramın son gününe denk gelir.",
+   "metin": "Arife 15 Mayıs 2027 Cumartesi. Bayram 16 Mayıs 2027 Pazar günü başlar ve 19 Mayıs 2027 Çarşamba günü biter. 19 Mayıs Çarşamba bayramın son gününe denk gelir.",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -88,14 +88,14 @@
      "tarih": "2026"
     }
    ],
-   "aciklama": "Arife ve bayramın ilk günü hafta sonuna denk gelir. Bayramın son günü 19 Mayıs ile çakıştığı için ek tatil oluşmaz ve hafta içinde 3 tam gün kaybedilir.",
+   "aciklama": "Arife ve bayramın ilk günü hafta sonuna denk gelir. Bayramın son günü 19 Mayıs Çarşamba ile çakıştığı için ek tatil oluşmaz ve hafta içinde 3 tam gün kaybedilir.",
    "tahmin": false
   },
   {
    "id": "takvim.2027.15_temmuz",
    "konu": "15 Temmuz Demokrasi ve Millî Birlik Günü",
    "deger": "2027-07-15 Perşembe",
-   "metin": "15 Temmuz 2027, Perşembe",
+   "metin": "15 Temmuz 2027 Perşembe",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -111,7 +111,7 @@
    "id": "takvim.2027.30_agustos",
    "konu": "30 Ağustos Zafer Bayramı",
    "deger": "2027-08-30 Pazartesi",
-   "metin": "30 Ağustos 2027, Pazartesi",
+   "metin": "30 Ağustos 2027 Pazartesi",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -127,7 +127,7 @@
    "id": "takvim.2027.cumhuriyet_bayrami",
    "konu": "28 Ekim (yarım gün) ve 29 Ekim Cumhuriyet Bayramı",
    "deger": "2027-10-28 Perşembe yarım gün, 2027-10-29 Cuma tam gün",
-   "metin": "28 Ekim 2027, Perşembe (yarım gün). 29 Ekim 2027, Cuma (tam gün).",
+   "metin": "28 Ekim 2027 Perşembe (yarım gün). 29 Ekim 2027 Cuma (tam gün).",
    "birim": "tarih",
    "kaynaklar": [
     {
@@ -136,7 +136,7 @@
      "tarih": "1981-03-17"
     }
    ],
-   "aciklama": "28 Ekim saat 13.00'ten sonra ve 29 Ekim tam gün tatildir. 2027'de ikisi de hafta içinde olduğu için 1,5 iş günü kaybedilir.",
+   "aciklama": "28 Ekim Perşembe saat 13.00'ten sonra ve 29 Ekim Cuma tam gün tatildir. 2027'de ikisi de hafta içinde olduğu için 1,5 iş günü kaybedilir.",
    "tahmin": false
   },
   {
@@ -210,7 +210,7 @@
    "deger": "Bilinmiyor",
    "metin": "Henüz bilinmiyor.",
    "birim": "gün",
-   "aralik": "0 ile 3 gün (12 Mart Cuma, 20 ve 21 Mayıs Perşembe ile Cuma, 16 Temmuz Cuma adaydır)",
+   "aralik": "0 ile 3 gün (12 Mart Cuma, 20 Mayıs Perşembe ve 21 Mayıs Cuma, 16 Temmuz Cuma adaydır)",
    "kaynaklar": [
     {
      "ad": "Milli Gazete, 2027 Kurban Bayramı için idari izin kararı yok",
@@ -230,7 +230,7 @@
    "id": "takvim.2027.ramazan_ayi",
    "konu": "2027 Ramazan ayı dönemi",
    "deger": "2027-02-08 ile 2027-03-08 arası",
-   "metin": "8 Şubat 2027 ile 8 Mart 2027 arası",
+   "metin": "8 Şubat 2027 Pazartesi ile 8 Mart 2027 Pazartesi arası",
    "birim": "tarih aralığı",
    "kaynaklar": [
     {
@@ -239,7 +239,7 @@
      "tarih": "2026-08-24"
     }
    ],
-   "aciklama": "Oruç 8 Şubat 2027 Pazartesi başlar ve arife 8 Mart'tadır. İstanbul'da bu dönemde oruç süresi yaklaşık 12 ile 13 saattir, bu süre gün uzunluğundan yapılmış kaba bir tahmindir.",
+   "aciklama": "Oruç 8 Şubat 2027 Pazartesi başlar ve arife 8 Mart Pazartesi günüdür. İstanbul'da bu dönemde oruç süresi yaklaşık 12 ile 13 saattir, bu süre gün uzunluğundan yapılmış kaba bir tahmindir.",
    "tahmin": false
   },
   {
@@ -294,7 +294,7 @@
      "tarih": "2026-06-23"
     }
    ],
-   "aciklama": "Ölüm izni anne, baba, eş, kardeş veya çocuğun ölümünde verilir. 1 Mayıs 2026'da yürürlüğe giren 7578 sayılı Kanun babalık iznini 5 günden 10 güne çıkardı.",
+   "aciklama": "Ölüm izni anne, baba, eş, kardeş veya çocuğun ölümünde verilir. 1 Mayıs 2026 Cuma günü yürürlüğe giren 7578 sayılı Kanun babalık iznini 5 günden 10 güne çıkardı.",
    "tahmin": false
   },
   {
@@ -306,7 +306,7 @@
    "aralik": "Tekil gebelikte doğumdan önce 8, sonra 16 hafta. Çoğul gebelikte toplam 26 hafta",
    "kaynaklar": [
     {
-     "ad": "Forbes Türkiye, 7578 sayılı Kanun (Resmî Gazete 1 Mayıs 2026, sayı 33240)",
+     "ad": "Forbes Türkiye, 7578 sayılı Kanun (Resmî Gazete 1 Mayıs 2026 Cuma, sayı 33240)",
      "url": "https://www.forbes.com.tr/hukuk/beklenen-duzenleme-yururluge-girdi-analik-ve-babalik-izinlerinde-sureler-uzatildi",
      "tarih": "2026-06-23"
     }
@@ -534,7 +534,7 @@
      "tarih": "2023-02-17"
     }
    ],
-   "aciklama": "İspanya'da izin hekim raporuna bağlıdır ve 1 Haziran 2023'te başladı. Japonya'da kullanım çok düşüktür, bu da yasal iznin tek başına verim kaybını çözmediğini, esnek çalışmanın daha çok istendiğini gösterir.",
+   "aciklama": "İspanya'da izin hekim raporuna bağlıdır ve 1 Haziran 2023 Perşembe günü başladı. Japonya'da kullanım çok düşüktür, bu da yasal iznin tek başına verim kaybını çözmediğini, esnek çalışmanın daha çok istendiğini gösterir.",
    "tahmin": true
   },
   {
@@ -584,7 +584,7 @@
    "aralik": "Satış dışı işler %70. Önceki baskıda satış payı %28",
    "kaynaklar": [
     {
-     "ad": "Salesforce State of Sales, 6. baskı (27 ülkede 5.500 satış profesyoneli, 8 Mart ile 18 Nisan 2024 arası anket)",
+     "ad": "Salesforce State of Sales, 6. baskı (27 ülkede 5.500 satış profesyoneli, 8 Mart 2024 Cuma ile 18 Nisan 2024 Perşembe arası anket)",
      "url": "https://www.salesforce.com/news/stories/sales-ai-statistics-2024/",
      "tarih": "2024-07-25"
     }
@@ -866,7 +866,7 @@
    "id": "risk.okul_tatilleri",
    "konu": "2026-2027 okul tatilleri (MEB)",
    "deger": "Yarıyıl 2027-01-25 ile 2027-02-05, ara tatil 2027-03-08 ile 2027-03-12, yaz tatili 2027-06-26'dan itibaren",
-   "metin": "Yarıyıl tatili 25 Ocak 2027 ile 5 Şubat 2027 arası. Ara tatil 8 Mart 2027 ile 12 Mart 2027 arası. Yaz tatili 26 Haziran 2027’de başlar.",
+   "metin": "Yarıyıl tatili 25 Ocak 2027 Pazartesi ile 5 Şubat 2027 Cuma arası. Ara tatil 8 Mart 2027 Pazartesi ile 12 Mart 2027 Cuma arası. Yaz tatili 26 Haziran 2027 Cumartesi günü başlar.",
    "birim": "tarih aralığı",
    "aralik": "Kasım ara tatili 2026-11-16 ile 2026-11-20. 2027-2028 takvimi henüz yayımlanmadı",
    "kaynaklar": [

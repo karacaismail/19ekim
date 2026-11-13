@@ -27,7 +27,7 @@ import {
 
 const gun = (iso: string) => new Date(`${iso}T00:00:00`);
 const gunFarki = (a: string, b: string) => Math.round((gun(b).getTime() - gun(a).getTime()) / 86_400_000);
-const uzunTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(gun(iso));
+const uzunTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(gun(iso));
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(gun(iso));
 const ayKisa = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'short' }).format(gun(iso));
 const haftaGunu = (iso: string) => new Intl.DateTimeFormat('tr-TR', { weekday: 'long' }).format(gun(iso));
@@ -251,10 +251,10 @@ export function IstihdamPlanGorunumu() {
     <>
       <Stats
         items={[
-          { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => `“${a.ad.split(': ')[1]}”`).join(' ve ') : 'Plan 3 Kasım 2026’da başlar.' },
+          { label: 'Şu anki aşama', value: etkin.length ? etkin.map((a) => a.ad.split(':')[0]).join(' ve ') : bugun && bugun < ASAMALAR[0].bas ? 'Başlamadı' : 'Takip', note: etkin.length ? etkin.map((a) => `“${a.ad.split(': ')[1]}”`).join(' ve ') : 'Plan 3 Kasım 2026 Salı günü başlar.' },
           { label: 'Sıradaki adım', value: siradaki ? uzunTarih(siradaki.tarih) : 'Yok', note: siradaki?.baslik },
-          { label: 'Birinci dalga', value: '23 Kasım 2026', note: 'Bu tarihte 6 kişi birlikte işe başlar.' },
-          { label: 'İkinci dalga', value: '1 Aralık 2026', note: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar.' },
+          { label: 'Birinci dalga', value: '23 Kasım 2026 Pazartesi', note: 'Bu tarihte 6 kişi birlikte işe başlar.' },
+          { label: 'İkinci dalga', value: '1 Aralık 2026 Salı', note: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar.' },
         ]}
       />
       <Section
@@ -479,8 +479,8 @@ export function GuncelPlan() {
   return (
     <Section
       id="guncel"
-      title="Güncel plan (3 Kasım 2026)"
-      desc="Bu adımlar 3 Kasım 2026’da hazırlanan iki plandan gelir. Biri “Kadro kapasitesi” sayfasındaki plandır. Diğeri, bugünkü durum ile hedef arasındaki farkı kapatan eylem planıdır. Dalga, aynı gün işe başlayan kişi grubudur. Birinci dalga 23 Kasım 2026’da, ikinci dalga 1 Aralık 2026’da başlar. Dalgaların gün sırası, dalganın işe başladığı günden sayılır. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır. Başlangıç tarihi kararı verilince bu satırlar güncellenir."
+      title="Güncel plan (3 Kasım 2026 Salı)"
+      desc="Bu adımlar 3 Kasım 2026 Salı günü hazırlanan iki plandan gelir. Biri “Kadro kapasitesi” sayfasındaki plandır. Diğeri, bugünkü durum ile hedef arasındaki farkı kapatan eylem planıdır. Dalga, aynı gün işe başlayan kişi grubudur. Birinci dalga 23 Kasım 2026 Pazartesi günü, ikinci dalga 1 Aralık 2026 Salı günü başlar. Dalgaların gün sırası, dalganın işe başladığı günden sayılır. Aşağıdaki eski satırlar sitenin başlangıç tarihine göre hesaplanır. Başlangıç tarihi kararı verilince bu satırlar güncellenir."
     >
       <ol className="tk-kararlar">
         {satirlar.map((r) => (

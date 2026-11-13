@@ -103,7 +103,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
     <div className="v2-ag">
       <p className="v2-so2-alt-baslik">Ağ diyagramı</p>
       <p className="v2-ag-ipucu">
-        Bir kişiye tıklayın. O kişinin bir Standart paket satışından kimin ne kazandığı görünür. Diyagram, pay alanların gereken segmentte olduğunu varsayar: 1. kademe payı için Gümüş ve üstü, 2. kademe payı için Altın ve üstü. Satış yapanın komisyonu seçili segment ve katkıyla hesaplanır.
+        Bir kişiye tıklayın. O kişinin bir Basic paket satışından kimin ne kazandığı görünür. Diyagram, pay alanların gereken segmentte olduğunu varsayar: 1. kademe payı için Gümüş ve üstü, 2. kademe payı için Altın ve üstü. Satış yapanın komisyonu seçili segment ve katkıyla hesaplanır.
       </p>
       <div className="v2-ag-kap">
         <svg className="v2-ag-svg" width={G} height={Y} viewBox={`0 0 ${G} ${Y}`} role="group" aria-label="Ortak ağı: kişiyi seçin">

@@ -4,13 +4,13 @@ import { agDerinlik, agSatisPayi, seciliKosul } from '../../kosullar';
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const avro = (n: number) => `${sayi(n)} €`;
 const yuzde = (n: number) => `%${sayi(n * 100)}`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
-  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(yillikFiyat(a))} eder.`;
+  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(yillikFiyat(a))} eder.`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const son = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, ...aciklama: string[]): AkisSecenegi =>
@@ -118,7 +118,7 @@ function anaAkis(a: Ayar): AkisAdimi[] {
       id: 'odeme', ad: 'Sözleşme ve ödeme', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
       yap: ['Şirket sözleşmeyi hazırlar. İşletme ödemeyi şirkete yapar.', yillikPaket(a), `Komisyon için işletmenin ödemesi gerekir. ${odemeMetni(a)}`],
       soru: 'İşletmenin ödeme durumu nedir?',
-      dikkat: `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günlerin hangi olaydan sayılacağını finans sorumlusu yazacak.`,
+      dikkat: `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günler müşterinin ödeme gününden sayılır.`,
       secenekler: [
         devam('odedi', 'İşletme ödemeyi yaptığını bildirdi', 'kurulum'),
         son('bekle', 'odemedi', 'Ödeme henüz yapılmadı', 'Tahsilat bekleniyor',

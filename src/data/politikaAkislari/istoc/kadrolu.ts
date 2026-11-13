@@ -4,13 +4,13 @@ import { kosulSonucu, seciliKosul } from '../../kosullar';
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const avro = (n: number) => `${sayi(n)} €`;
 const yuzde = (n: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(n * 100)}`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
-  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(yillikFiyat(a))} eder.`;
+  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(yillikFiyat(a))} eder.`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const son = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, aciklama: string[]): AkisSecenegi =>
@@ -190,7 +190,7 @@ export const akisOlustur: AkisOlustur = (a) => {
     yap: [
       `Teklifi fiyat tablosundaki fiyatla hazırlayın. ${yillikPaket(a)}`,
       'Katalogdaki ürün gruplarını teklife yazın.',
-      'Teklifteki TL tutarı için kuru finans ekibinden öğrenin.',
+      'Teklifteki ₺ tutarı için kuru finans ekibinden öğrenin.',
     ],
     dikkat: `Fiyat avroyla belirlenir. Aylık bedel ${avro(a.istocAyEur)} olur. Fiyat herkes için aynıdır ve kimse değiştiremez.`,
     soru: 'Teklifin durumu nedir?',

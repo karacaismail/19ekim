@@ -27,7 +27,7 @@ export interface Kaynak {
 export const RAPOR = {
   baslik: 'Küresel B2B Pazaryerleri: Ekosistem, Gelir ve Freemium Mimarisi',
   yazar: 'titanlar.com',
-  tarih: '12 Kasım 2026',
+  tarih: '12 Kasım 2026 Perşembe',
 };
 
 /** Belgedeki bütün kaynaklar. Her bağlantı belgedeki adresle aynıdır. */
@@ -557,7 +557,7 @@ export const DUVAR_ILKELERI: Ilke[] = [
         [K.walmartYeni],
       ),
       o('AliExpressDirect', 'ABD yerel satıcılarına tanıtım döneminde %0 komisyon uygular. Ücretsiz müşteri hizmeti desteği de verir.', [K.aeBulten]),
-      o('Faire', '“No Commission Trial” programı 1 Ağustos 2026 tarihlidir. Program deneme süresinde komisyonu ve yeni müşteri ücretini kaldırır. Ödeme ücreti kalır.', [K.faireDeneme]),
+      o('Faire', '“No Commission Trial” programı 1 Ağustos 2026 Cumartesi tarihlidir. Program deneme süresinde komisyonu ve yeni müşteri ücretini kaldırır. Ödeme ücreti kalır.', [K.faireDeneme]),
     ],
   },
   {

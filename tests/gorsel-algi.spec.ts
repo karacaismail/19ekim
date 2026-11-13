@@ -53,7 +53,7 @@ test.describe('gorsel_algi GA-1: seçenek etiketi, bağlanma modu, sunum', () =>
     const anahtar = kapasite.getByRole('switch', { name: /Senaryoyla birlikte güncellenir/ });
     await expect(kapasite.getByRole('button', { name: '%100', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await expect(anahtar).toHaveAttribute('aria-checked', 'true');
-    await expect(kapasite.locator('.anahtar-aciklama')).toContainText(/seçili senaryodan gelir\. Medyan senaryosunda değer %100 olur/);
+    await expect(kapasite.locator('.anahtar-aciklama')).toContainText(/seçili senaryodan gelir\. Plan senaryosunda değer %100 olur/);
     expect(await anahtar.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
     // Temel senaryo değişince otomatik değer senaryoyu izler.
     await kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Kötümser' }).click();

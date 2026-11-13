@@ -39,7 +39,7 @@ const ROLE_ICONS: Record<RoleKey, typeof IconPhoneCall> = {
 };
 
 export const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
+  new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 
 export function RoleChip({ role, label }: { role: RoleKey; label?: string }) {
   return (
@@ -848,7 +848,7 @@ export function Chart({
  * Değerler: BCG ürünleri kutularına göre, sayılar grafiğin ipucuyla aynı biçimde.
  */
 // Ajanda tarihi ay adını tam yazar: “2 Kasım”. Kısa ay adı (“Kas”) okuru zorlar. Yıl ay başlığında yazılıdır.
-const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
+const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 const ayBasligi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 const sayi = new Intl.NumberFormat('tr-TR');
 

@@ -7,8 +7,8 @@ test('karar seçimleri: seçim ilerlemeyi ve JSON’u günceller, Sonraki ile so
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   const panel = page.locator('.ks-soru-panel');
   await expect(panel.locator('.ks-soru')).toHaveText('Sitenin bütün hesaplarındaki başlangıç tarihi ne olsun?');
-  await panel.getByRole('radio', { name: /1 Kasım kalsın/ }).click();
-  await expect(panel.getByRole('radio', { name: /1 Kasım kalsın/ })).toHaveAttribute('aria-checked', 'true');
+  await panel.getByRole('radio', { name: /1 Kasım Pazar kalsın/ }).click();
+  await expect(panel.getByRole('radio', { name: /1 Kasım Pazar kalsın/ })).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('.ks-ilerleme-metin')).toContainText('16 açık sorudan 1 tanesi cevaplandı');
   await page.getByRole('button', { name: 'Sonraki' }).click();
   await expect(panel.locator('.ks-soru')).toHaveText('Temsilci ağı sayfası ne olsun?');

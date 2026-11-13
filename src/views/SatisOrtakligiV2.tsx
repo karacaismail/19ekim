@@ -160,7 +160,7 @@ function StandartAyarlar({ a, g }: { a: Ayar; g: G }) {
       </Grup>
       <Grup baslik="Kampanyalar">
         <Girdi label="İlk 90 gün ek oran" yuzdeMi value={a.hizliBaslangic} onChange={(v) => g({ hizliBaslangic: Math.min(1, v) })} />
-        {a.marka === 'istoc' ? <Girdi label="Kurumsal paket ek oranı" yuzdeMi value={a.kurumsalEk} onChange={(v) => g({ kurumsalEk: Math.min(1, v) })} /> : null}
+        {a.marka === 'istoc' ? <Girdi label="Enterprise paket ek oranı" yuzdeMi value={a.kurumsalEk} onChange={(v) => g({ kurumsalEk: Math.min(1, v) })} /> : null}
         <ArkadasiniGetir a={a} g={g} />
         <Girdi label="Yılda en çok tavsiye" value={a.tavsiyeSinir} onChange={(v) => g({ tavsiyeSinir: v })} />
       </Grup>
@@ -190,7 +190,7 @@ function FiyatAyarlari({ a, g }: { a: Ayar; g: G }) {
     return (
       <Grup baslik="Fiyat">
         {(Object.keys(ISTOC_PAKET_ADI) as IstocPaket[]).map((id) => (
-          <Girdi key={id} label={id === 'kurumsal' ? 'Kurumsal, örnek teklif' : `${ISTOC_PAKET_ADI[id]} paket`} birim="€ / ay" value={a.istocPaketEur[id]} onChange={(v) => g({ istocPaketEur: { ...a.istocPaketEur, [id]: v } })} />
+          <Girdi key={id} label={id === 'kurumsal' ? `${ISTOC_PAKET_ADI[id]}, örnek teklif` : `${ISTOC_PAKET_ADI[id]} paket`} birim="€ / ay" value={a.istocPaketEur[id]} onChange={(v) => g({ istocPaketEur: { ...a.istocPaketEur, [id]: v } })} />
         ))}
         <Girdi label="1 euro kaç ₺?" step={0.1} value={a.kur} onChange={(v) => g({ kur: v })} />
         <Girdi label="Yıllık pakette kaç ayın ücreti ödenir?" value={a.istocYilAy} onChange={(v) => g({ istocYilAy: v })} />
@@ -533,7 +533,7 @@ function BagimsizSonuc({ a, persona }: { a: Ayar; persona: RolMetni }) {
       <Kirilim
         satirlar={[
           { ad: 'Satış komisyonu', deger: tl(b.komisyon), not: `${tl(b.s.ciro)} × ${yuzde(b.oran)}` },
-          ...(a.marka === 'istoc' ? [{ ad: 'Kurumsal paket kampanyası', deger: tl(b.kurumsal), not: b.kurumsal > 0 ? `Kurumsal ciro × ${yuzde(a.kurumsalEk)}` : 'Yalnız kurumsal paket satılınca ödenir', kapali: b.kurumsal === 0 }] : []),
+          ...(a.marka === 'istoc' ? [{ ad: 'Enterprise paket kampanyası', deger: tl(b.kurumsal), not: b.kurumsal > 0 ? `Enterprise paket cirosu × ${yuzde(a.kurumsalEk)}` : 'Yalnız Enterprise paket satılınca ödenir', kapali: b.kurumsal === 0 }] : []),
           { ad: 'Ağ, 1. kademe', deger: tl(b.k1), not: b.k1Acik ? `${sayi(b.dal)} ortağın satışından` : 'Ortak Gümüş ortak ya da üstü olunca ödenir. Ortağın o ay en az 1 satış yapması gerekir.', kapali: !b.k1Acik },
           { ad: 'Ağ, 2. kademe', deger: tl(b.k2), not: b.k2Acik ? `${sayi(b.dal * b.dal)} ortağın satışından` : 'Ortak Altın ortak ya da üstü olunca ödenir. Ortağın o ay en az 1 satış yapması gerekir.', kapali: !b.k2Acik },
           { ad: 'Aylık toplam', deger: tl(b.aylik), toplam: true },
@@ -1023,7 +1023,8 @@ export function SatisOrtakligiV2({ surum }: { surum: ReactNode }) {
         </div>
       </div>
       </div>
-      <div className="v2-so2-ozet-kap" id="v2-so2-ozet" tabIndex={-1}>
+      {/* Özet geniş ekranda kendi içinde kayar. Klavyeyle de odaklanır ve kayar (role="region", ad: Özet). */}
+      <div className="v2-so2-ozet-kap" id="v2-so2-ozet" tabIndex={0} role="region" aria-label="Özet">
         <OzetPaneli a={a} rol={rol} onKosullar={(el) => kosullariAc(secili.sozlesme === 'kadrolu' ? 'kariyer' : 'segment', el)} />
       </div>
       </div>

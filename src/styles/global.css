@@ -1881,6 +1881,33 @@ html[data-js] .chart-canvas:not([data-chart-failed]) .chart-fallback {
   position: relative;
 }
 
+/* Rol sayfasındaki “Kavramlar” kutusu: terim kalın, tanım yanında ya da altında. */
+.rol-kavramlar {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.rol-kavramlar > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+}
+
+.rol-kavramlar dt {
+  font-weight: var(--weight-semibold);
+}
+
+.rol-kavramlar dd {
+  margin: 0;
+}
+
+@media (max-width: 29.99em) {
+  .rol-kavramlar > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Tablo kutuya sığmayınca tablonun altında görünen yazılı ipucu. */
 .table-kaydir-ipucu {
   margin: var(--space-2) 0 0;

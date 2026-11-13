@@ -66,14 +66,14 @@ const slug = (s: string) =>
 /** 19 Ekim kararlarının kimliği, yürürlük günü, etkisi ve ilgili sayfaları (konu başlığına göre; eşleşmeyen konu genel kalır). */
 function tahtaKarari(prog: Program, topic: string): Pick<KararKaydi, 'id' | 'yururlukTarihi' | 'etki' | 'ilgili'> {
   const { dates } = prog;
-  if (topic.startsWith('Ücret, prim')) return { id: 'ucret-prim-kota', yururlukTarihi: dates.start, etki: 'Rol sayfalarının ücret özeti, plan kadrosu maliyeti (Gelir planı ve Nakit akışı) ve Giderler sayfasındaki plan kadrosu', ilgili: ['/roller/saha-uzmani/', '/gelir-plani/'] };
+  if (topic.startsWith('Ücret, prim')) return { id: 'ucret-prim-kota', yururlukTarihi: dates.start, etki: 'Rol sayfalarının ücret özeti, plan kadrosu maliyeti (Gelir planı ve Nakit akışı) ve “OPEX (işletme giderleri)” sayfasındaki plan kadrosu', ilgili: ['/roller/saha-uzmani/', '/gelir-plani/'] };
   if (topic.startsWith('Diğer rollerin maaşları')) return { id: 'diger-maaslar', yururlukTarihi: dates.start, etki: 'Rol sayfaları, plan kadrosu maliyeti ve Applet örnek değerleri', ilgili: ['/roller/dijital-pazarlama/', '/applet/'] };
-  if (topic.startsWith('CRM aracı')) return { id: 'crm-asamalari', yururlukTarihi: dates.start, etki: 'CRM aşamaları, prim kriterleri ve masa başı ile saha rollerinin görevleri', ilgili: ['/roller/pazarlamaci/'] };
+  if (topic.startsWith('CRM aracı')) return { id: 'crm-asamalari', yururlukTarihi: dates.start, etki: 'CRM aşamaları, prim kriterleri ve İstoç Pazarlama CRM uzmanı ile saha satış uzmanı rollerinin görevleri', ilgili: ['/roller/pazarlamaci/'] };
   if (topic.startsWith('Kazanç planı')) return { id: 'mlm-kazanc', yururlukTarihi: dates.dec, etki: 'Temsilci ağının kazanç kuralı ve satış primi (Nakit akışı plan kalemi)', ilgili: ['/buyume-modeli/', '/nakit-akisi/'] };
   if (topic.startsWith('Ekip lideri primi')) return { id: 'ekip-lideri-primi', yururlukTarihi: dates.dec, etki: 'Ekip lideri ücreti ve pay kuralı', ilgili: ['/roller/ekip-lideri/'] };
   if (topic.startsWith('Kapasite açığı')) return { id: 'kapasite-acigi', yururlukTarihi: dates.dec, etki: 'Aralık saha takviyesi, istihdam takvimi ve kadro maliyeti', ilgili: ['/istihdam/', '/hedefler/'] };
   if (topic.startsWith('Programın ilk 3 ayında ve sonrasında mesai')) return { id: 'mesai-modeli', yururlukTarihi: dates.firstDay, etki: 'Mesai dönemleri, yasal tavan ve rollerin günlük düzeni', ilgili: ['/roller/saha-uzmani/'] };
-  if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika masa başı rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/satis-ortakligi/'] };
+  if (topic.includes('Segika')) return { id: 'segika-plani', yururlukTarihi: dates.start, etki: 'Segika CRM rolü (iStoc CRM rolünün kopyası) ve kadro', ilgili: ['/roller/segika/', '/satis-ortakligi/'] };
   return { id: slug(topic), yururlukTarihi: undefined, etki: 'Plan sayfaları', ilgili: ['/karar/'] };
 }
 
@@ -86,11 +86,11 @@ function acikTahtaKarari(topic: string): Pick<KararKaydi, 'etki' | 'ilgili'> {
 export function makeKararlar(_p: Params, prog: Program) {
   const tahta: KararKaydi[] = prog.decisions.map((d) => {
     const e = tahtaKarari(prog, d.topic);
-    return { id: e.id, soru: d.topic, etki: e.etki, sahip: 'yonetici', durum: 'verildi', sonuc: d.decision, kararTarihi: '2026-10-19', yururlukTarihi: e.yururlukTarihi, kaynak: '19 Ekim 2026 tahta kararları', ilgili: e.ilgili };
+    return { id: e.id, soru: d.topic, etki: e.etki, sahip: 'yonetici', durum: 'verildi', sonuc: d.decision, kararTarihi: '2026-10-19', yururlukTarihi: e.yururlukTarihi, kaynak: '19 Ekim 2026 Pazartesi tahta kararları', ilgili: e.ilgili };
   });
   const acik: KararKaydi[] = prog.openDecisions.map((d) => {
     const e = acikTahtaKarari(d.topic);
-    return { id: slug(d.topic), soru: d.topic, oneri: d.proposal, etki: e.etki, sahip: d.owner, hazirlayan: d.preparer, sonTarih: d.deadline, durum: 'bekliyor', kaynak: '19 Ekim 2026 tahtası (açık soru)', ilgili: e.ilgili };
+    return { id: slug(d.topic), soru: d.topic, oneri: d.proposal, etki: e.etki, sahip: d.owner, hazirlayan: d.preparer, sonTarih: d.deadline, durum: 'bekliyor', kaynak: '19 Ekim 2026 Pazartesi tahtası (açık soru)', ilgili: e.ilgili };
   });
   const yirmiSekizEkim: KararKaydi[] = [
     {
@@ -104,7 +104,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'Bu karar şu sayfaları etkiler: “Gelir planı”, “Nakit akışı”, “Satış ortaklığı” ve “Genel bakış”. Gelir ve nakit hesabı bugün koşullu abonelik modeliyle yapılır.',
       sahip: 'yonetici',
       durum: 'bekliyor',
-      kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim: cevap bekleniyor, cevap gelmemesi onay sayılmaz)',
+      kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim Çarşamba: cevap bekleniyor, cevap gelmemesi onay sayılmaz)',
       ilgili: ['/gelir-plani/', '/satis-ortakligi/', '/nakit-akisi/'],
     },
     {
@@ -113,11 +113,11 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'İş ortaklığı politika metni, Affilate başlangıç değerleri ve politika sürümü seçimi',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Segika satış ortağı aylık abonelik satışında %10 komisyon alır. Yıllık abonelik satışında %15 komisyon alır. Sahip bu oranları 28 Ekim’de belirledi. Oranlar sonradan değiştirilebilir. Önceki metinlerde iki taslak örnek vardı. Bunlar “ilk 6 ay %15” ve “12 ay %15, ardından 12 ay %10” oranlarıydı.',
+      sonuc: 'Segika satış ortağı aylık abonelik satışında %10 komisyon alır. Yıllık abonelik satışında %15 komisyon alır. Sahip bu oranları 28 Ekim Çarşamba günü belirledi. Oranlar sonradan değiştirilebilir. Önceki metinlerde iki taslak örnek vardı. Bunlar “ilk 6 ay %15” ve “12 ay %15, ardından 12 ay %10” oranlarıydı.',
       kararTarihi: '2026-10-28',
-      politika: 'Bu kural, 28 Ekim 2026 tarihli Segika komisyon politikasıdır. Politikanın bu sürümü taslaktır ve uygulanmayı bekliyor.',
+      politika: 'Bu kural, 28 Ekim 2026 Çarşamba tarihli Segika komisyon politikasıdır. Politikanın bu sürümü taslaktır ve uygulanmayı bekliyor.',
       acik: ['Komisyon her ödemede mi ödenir, yoksa yalnız ilk yıl mı?', 'Komisyon net tahsilattan mı hesaplanır?', 'Oran bütün ortak türleri için aynı mı?'],
-      kaynak: 'docs/contents.md F03; birleşik plan K2 (sahip cevabı 28 Ekim)',
+      kaynak: 'docs/contents.md F03; birleşik plan K2 (sahip cevabı 28 Ekim Çarşamba)',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -126,10 +126,10 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'Giderler ve Nakit akışı kapsamı ile şirket bazında gelir, gider ve nakit görünümü (adım 3)',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'Türksab bir şirketler grubudur. Mogem (Segika ve SGK projesi) ile iStoc Company (iStoc ve Toptan) ayrı şirketlerdir. Her şirketin kendi geliri ve gideri vardır, grup toplamı Türksab’da görünür. Mogem’in geliri Türksab’a aktarılır. Türksab, iStoc’a yatırım yapar ve Mogem’in giderini öder (sahip, 28 Ekim). Tutarlar Sheets dosyasında tutulur.',
+      sonuc: 'Türksab bir şirketler grubudur. Mogem (Segika ve SGK projesi) ile iStoc Company (iStoc ve Toptan) ayrı şirketlerdir. Her şirketin kendi geliri ve gideri vardır, grup toplamı Türksab’da görünür. Mogem’in geliri Türksab’a aktarılır. Türksab, iStoc’a yatırım yapar ve Mogem’in giderini öder (sahip, 28 Ekim Çarşamba). Tutarlar Sheets dosyasında tutulur.',
       kararTarihi: '2026-10-28',
       acik: ['Toptan projesi nasıl tanımlanacak?', 'Mogem giderleri hangi Sheets kalemleridir (Şirket sütunu)?', 'Mogem gelirlerinin “Gelirler” sayfasında nasıl gösterileceğine henüz karar verilmedi.'],
-      kaynak: 'docs/contents.md F16; birleşik plan K3 (sahip cevabı 28 Ekim)',
+      kaynak: 'docs/contents.md F16; birleşik plan K3 (sahip cevabı 28 Ekim Çarşamba)',
       ilgili: ['/giderler/', '/nakit-akisi/'],
     },
     {
@@ -152,8 +152,8 @@ export function makeKararlar(_p: Params, prog: Program) {
       durum: 'verildi',
       sonuc: 'Menüde ve başlıkta “SMART hedefler” adı kullanılır. SMART (belirli, ölçülebilir, ulaşılabilir, ilgili ve süreli) hedefin İngilizce kısaltmasıdır. Kural bütün sayfalara uygulanır.',
       kararTarihi: '2026-10-28',
-      acik: ['Kural Kararlar, Temsilci ağı ve “Varsayımlar ve ayarlar” sayfalarında da geçerli mi?'],
-      kaynak: 'birleşik plan K4 (sahip cevabı 28 Ekim)',
+      acik: ['Kural “Kararlar”, “MLM (çok katmanlı pazarlama)” ve “Parametreler” sayfalarında da geçerli mi?'],
+      kaynak: 'birleşik plan K4 (sahip cevabı 28 Ekim Çarşamba)',
       ilgili: ['/hedefler/'],
     },
     {
@@ -189,7 +189,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       durum: 'verildi',
       sonuc: 'Segika SaaS (abonelikle sunulan yazılım) satışı ile iStoc paket satışı iki ayrı akıştır. Her akışta aşamalar sırasıyla faturalanan gelir, tahsilat ve kasa olarak adlandırılır.',
       kararTarihi: '2026-10-28',
-      kaynak: 'docs/ifade.md; birleşik plan K11 (sahip cevabı 28 Ekim)',
+      kaynak: 'docs/ifade.md; birleşik plan K11 (sahip cevabı 28 Ekim Çarşamba)',
       ilgili: ['/gelir-plani/', '/nakit-akisi/', '/hedefler/'],
     },
     {
@@ -215,7 +215,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Satış ortaklığı sayfası ana kaynaktır. Değişmez ama geliştirilebilir. “Temsilci ağı”, “İş ortaklığı” ve “Affilate” sayfalarındaki ortak türleri bu sayfaya taşındı. Her ortak türü burada kendi kurallarıyla seçilir. İş ortaklığı ve Affilate sayfaları kaldırıldı.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -227,7 +227,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'İki model de seçilebilir. Birinci modelde oran ortağın işine göre değişir. Ortak yalnız iki tarafı tanıştırırsa %8 alır. Ürünü müşteriye tanıtırsa (demo) %12 alır. Satışı kendisi tamamlarsa %18 alır. İkinci modelde ortağa her satış için 2.500 ₺ ödenir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı cevabı',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -239,7 +239,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'iStoc yıllık paketi 10 aylık ücrettir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı cevabı',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -251,7 +251,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Ödül para olarak verilmez. Ödül ücretsiz kullanım süresidir. Müşteriyi tavsiye eden kişi 2 ay ücretsiz kullanır. Yeni müşteri 1 ay ücretsiz kullanır. Bu süreler sonradan değiştirilebilir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı cevabı',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -263,7 +263,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Komisyon ya da müşterisine indirim seçilebilir. Oranlar ve seviyeler sayfada değiştirilebilir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 cevabı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı cevabı',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -275,7 +275,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Ortak %25 alır ve müşteri desteğini kendisi verir. CRM yazılımını biz sağlarız. Yılda 8 saat program eğitimi ücretsizdir. Fazlası saat başına ücretlidir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı (yalnız Segika)',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı (yalnız Segika)',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -287,7 +287,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'SGK’lı çalışandır ve kotayı aşınca %10 prim alır. Müşteri desteğini şirketin destek uzmanı verir, CRM yazılımını biz sağlarız.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı (yalnız Segika)',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı (yalnız Segika)',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -299,7 +299,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Evet. Satışı yapan kişinin üstündeki kişiler de pay alır. Satışı yapana uzak olan kişi daha az pay alır. Şu an en çok 2 kademe yukarıya pay gider. Kademe sayısı ve paylar sayfada değiştirilebilir. Kazanç yalnız gerçek satıştan doğar.',
       kararTarihi: '2026-11-03',
       acik: ['Kademe sayısı kaç olacak? Bu sayı sözleşme imzalanmadan önce avukatla kesinleşmeli.'],
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı (Ahmet, Mehmet, Ayşe, Fatma örneği)',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı (Ahmet, Mehmet, Ayşe, Fatma örneği)',
       ilgili: ['/satis-ortakligi/'],
     },
     {
@@ -308,11 +308,11 @@ export function makeKararlar(_p: Params, prog: Program) {
       etki: 'İstihdam takvimi ve Kadro kapasitesi',
       sahip: 'yonetici',
       durum: 'verildi',
-      sonuc: 'İstihdam takvimi iki belgeye göre güncellendi. Birincisi 3 Kasım 2026 tarihli Kadro Kapasite Planıdır. İkincisi fark analizi (GAP) eylem planıdır. Bu plan eksikleri ve yapılacak işleri gösterir. Roller, kapasite ve kararlar “Kadro kapasitesi” sayfasında ayrı gösterilir.',
+      sonuc: 'İstihdam takvimi iki belgeye göre güncellendi. Birincisi 3 Kasım 2026 Salı tarihli Kadro Kapasite Planıdır. İkincisi fark analizi (GAP) eylem planıdır. Bu plan eksikleri ve yapılacak işleri gösterir. Roller, kapasite ve kararlar “Kadro kapasitesi” sayfasında ayrı gösterilir.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      acik: ['Sitenin ortak başlangıç tarihi henüz 1 Kasım. 23 Kasım’a çekilip çekilmeyeceği karar seçimlerinde soruldu.'],
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      acik: ['Sitenin ortak başlangıç tarihi henüz 1 Kasım Pazar. 23 Kasım Pazartesi gününe çekilip çekilmeyeceği karar seçimlerinde soruldu.'],
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı',
       ilgili: ['/istihdam/', '/kadro-kapasitesi/'],
     },
     {
@@ -324,7 +324,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Bütün metinler yalın Türkçe kuralıyla yazılır: tam cümle, günlük kelime ve açık özne. Sayılar ve koşullar korunur.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 kalıcı yazım talimatı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı kalıcı yazım talimatı',
       ilgili: [],
     },
     {
@@ -336,7 +336,7 @@ export function makeKararlar(_p: Params, prog: Program) {
       sonuc: 'Acil durumda site testler beklenmeden yayınlanır. Bütün testler hemen sonra çalıştırılır. Bir sorun çıkarsa site yeniden yayınlanır. Normal yayında testler yayından önce çalıştırılır.',
       kararTarihi: '2026-11-03',
       yururlukTarihi: '2026-11-03',
-      kaynak: 'Sahibin 3 Kasım 2026 talimatı',
+      kaynak: 'Sahibin 3 Kasım 2026 Salı talimatı',
       ilgili: [],
     },
   ];

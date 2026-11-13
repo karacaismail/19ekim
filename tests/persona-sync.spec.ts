@@ -180,7 +180,7 @@ test('tablodaki geçersiz alan bağlantı hatası gibi gösterilmez', async () =
   const store = new PersonaSync('istoc', async () => ({ ok: false, code: 'invalid', invalidFields: ['kur'], message: 'Geçersiz hücre' }));
   try {
     store.connect('');
-    await expect.poll(() => store.getSnapshot().error).toContain('Avronun TL karşılığı');
+    await expect.poll(() => store.getSnapshot().error).toContain('Avronun ₺ karşılığı');
     expect(store.getSnapshot().fields.kur).toBe(56);
     expect(store.getSnapshot().loaded).toBe(false);
   } finally { store.stop(); }
@@ -190,7 +190,7 @@ test('geçersiz başarılı yanıt son geçerli hesabı değiştirmez', async ()
   const store = new PersonaSync('istoc', async () => success(snapshot({ kur: Number.NaN })));
   try {
     store.connect('');
-    await expect.poll(() => store.getSnapshot().error).toContain('Avronun TL karşılığı ortak kayıtta geçerli değil');
+    await expect.poll(() => store.getSnapshot().error).toContain('Avronun ₺ karşılığı ortak kayıtta geçerli değil');
     expect(store.getSnapshot().fields.kur).toBe(56);
   } finally { store.stop(); }
 });

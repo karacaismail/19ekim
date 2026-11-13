@@ -49,12 +49,12 @@ const change = (now: number, before: number) => (before ? signed(now / before - 
 const PARA_SIMGESI: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€' };
 const money = (value: number, currency: string) =>
   `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} ${PARA_SIMGESI[currency] ?? currency}`;
-/** Görünen para birimi adı: veri kodu “TRY” kalır, okur “TL” görür. */
-export const paraAdi = (kod: string) => (kod === 'TRY' ? 'TL' : kod);
+/** Görünen para birimi adı: veri kodu “TRY” kalır, okur “₺” görür (kullanıcı kararı 13 Kasım 2026: her yerde ₺). */
+export const paraAdi = (kod: string) => (kod === 'TRY' ? '₺' : kod);
 const rate = (value: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value)} ₺`;
 const clock = (iso: string | null | undefined) =>
   iso ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso)) : 'Veri yok';
-const stamp = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+const stamp = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 
 const KUME_TONE: Record<KumeKod, OpexTone> = { teknoloji: 'tech', insan: 'people', ofis: 'office' };
 const KUME_AD: Record<KumeKod, string> = { teknoloji: 'Teknoloji', insan: 'Personel', ofis: 'Ofis ve işletme' };
@@ -1440,7 +1440,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
             {coklu('Kategori', [...katRenk.keys()], kategoriSec, setKategoriSec)}
             {buAyVar ? coklu('Bu ay', secenek(all.map((r) => r.durum?.ad ?? '').filter(Boolean)), durumSec, setDurumSec) : null}
             {coklu('Tür', ['Gider', 'Bordrolu', 'Freelancer'], turSec, setTurSec)}
-            {coklu('Para birimi', secenek(all.map((r) => r.para)).map(paraAdi), paraSec.map(paraAdi), (v) => setParaSec(v.map((x) => (x === 'TL' ? 'TRY' : x))))}
+            {coklu('Para birimi', secenek(all.map((r) => r.para)).map(paraAdi), paraSec.map(paraAdi), (v) => setParaSec(v.map((x) => (x === '₺' ? 'TRY' : x))))}
             {coklu('2027 artışı', ARTIS_SECENEK, artisSec, setArtisSec)}
             <NumberInput
               label="Toplam ₺ en az"
@@ -2006,9 +2006,9 @@ function Body() {
   );
   return (
     <>
-      {/* Sayfa başlığı kırıntıda: 19 Ekim › Finans › OpEx › Operasyonel Giderler; ilk ekran yoğunluğu için amaç satırı yok
+      {/* Sayfa başlığı kırıntıda: 19 Ekim › Finans › OPEX (işletme giderleri); ilk ekran yoğunluğu için amaç satırı yok
           (kullanıcı kararı 2026-10-21). Araç yeri (kurlar) bu satırda. */}
-      <PageHeader title="Operasyonel Giderler" />
+      <PageHeader title="OPEX (işletme giderleri)" />
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}
       </p>

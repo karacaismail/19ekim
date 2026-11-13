@@ -78,7 +78,7 @@ function sonucVerisi(a: Ayar, secili: RolMetni, rol: RolId) {
     ek: `Yılda ${tl(b.aylik * 12)} eder.`,
     satirlar: [
       { ad: 'Satış komisyonu', deger: tl(b.komisyon), kapali: b.komisyon === 0 },
-      ...(b.kurumsal > 0 ? [{ ad: 'Kurumsal paket kampanyası', deger: tl(b.kurumsal) }] : []),
+      ...(b.kurumsal > 0 ? [{ ad: 'Enterprise paket kampanyası', deger: tl(b.kurumsal) }] : []),
       { ad: 'Ağ, 1. kademe', deger: tl(b.k1), kapali: !b.k1Acik },
       { ad: 'Ağ, 2. kademe', deger: tl(b.k2), kapali: !b.k2Acik },
       { ad: 'Bize kalan, en az', deger: tl(b.bize), ayri: true },

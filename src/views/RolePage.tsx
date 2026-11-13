@@ -31,6 +31,7 @@ import {
 import { useModel } from '../components/ModelContext';
 import { addDays } from '../lib/dates';
 import type { PlanRow, Role, ScheduleRow, Task } from '../data/types';
+import { metindekiKavramlar } from '../data/kavramlar';
 
 const minutes = (time: string) => {
   const [from, to] = time.split('–').map((t) => {
@@ -52,7 +53,7 @@ function timeShare(rows: ScheduleRow[]) {
 
 const hours = (min: number) => [Math.floor(min / 60) ? `${Math.floor(min / 60)} saat` : '', min % 60 ? `${min % 60} dakika` : ''].filter(Boolean).join(' ');
 const range = (row: { from: string; to: string }) => `${formatDate(row.from)} – ${formatDate(row.to)}`;
-const shortDate = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
+const shortDate = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 const shortRange = (row: { from: string; to: string }) => `${formatDate(row.from)} – ${formatDate(row.to)}`;
 
 /**
@@ -99,10 +100,10 @@ function DaySection({ role, index }: { role: Role; index: number }) {
       {/* İki dönem ayrı maddededir. Saatler tek paragrafta birleşip metin duvarına dönüşmez. */}
       <ul className="bullets rol-donemler">
         <li>
-          <strong>Dönem 1:</strong> {formatDate(p1.from)} tarihinden {formatDate(p1.to)} tarihine kadar sürer. {role.hours.weekday} {role.hours.saturday} {role.hours.weeklyNet}
+          <strong>Dönem 1:</strong> {formatDate(p1.from)} gününden {formatDate(p1.to)} gününe kadar sürer. {role.hours.weekday} {role.hours.saturday} {role.hours.weeklyNet}
         </li>
         <li>
-          <strong>Dönem 2:</strong> {formatDate(p2.from)} tarihinde başlar. {role.hours.fromFeb}
+          <strong>Dönem 2:</strong> {formatDate(p2.from)} günü başlar. {role.hours.fromFeb}
         </li>
         <li>Fazla çalışmanın yıllık bir üst sınırı vardır. Dönem 2 düzeni bu sınır yüzünden uygulanır.</li>
       </ul>
@@ -167,7 +168,7 @@ function DigitalSections({ role }: { role: Role }) {
         id="olcum"
         index={1}
         title="Ölçüm ve entegrasyonlar"
-        desc={`İlk işiniz ölçüm araçlarını kurmaktır. Böylece her içeriğin ve reklamın kaç kayıt getirdiği görünür. Kaç aktif satıcı getirdiği de görünür. ${integrations.length} ölçüm bağlantısını ${shortDate(last.date)} tarihine kadar kurun.`}
+        desc={`İlk işiniz ölçüm araçlarını kurmaktır. Böylece her içeriğin ve reklamın kaç kayıt getirdiği görünür. Kaç aktif satıcı getirdiği de görünür. ${integrations.length} ölçüm bağlantısını ${shortDate(last.date)} gününe kadar kurun.`}
       >
         <Chart
           id="entegrasyon"
@@ -220,7 +221,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<AiTool>
           id="arac"
           title="Araçlar ve aylık bütçe"
-          note={`Araçlara ayda en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim’de verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık’ta ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
+          note={`Araçlara ayda en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim Pazartesi günü verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık Çarşamba günü ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
             { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },
@@ -251,7 +252,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<Channel>
           id="kanal"
           title="Kanallar"
-          note="Bütün kanallardaki paylaşımlar tek bir paylaşım listesinden otomatik yapılır. İsmail Karaca kanal listesini 6 Kasım’da onaylar. Onay, içerik planının 1. sürümüyle birlikte verilir."
+          note="Bütün kanallardaki paylaşımlar tek bir paylaşım listesinden otomatik yapılır. İsmail Karaca kanal listesini 6 Kasım Cuma günü onaylar. Onay, içerik planının 1. sürümüyle birlikte verilir."
           columns={[
             { key: 'channel', header: 'Kanal', minWidth: '12rem', rowHeader: true, render: (r) => r.channel },
             { key: 'content', header: 'Ne paylaşılır', minWidth: '16rem', render: (r) => r.content },
@@ -343,7 +344,7 @@ function DigitalSections({ role }: { role: Role }) {
           rows={digitalPlan}
         />
         <Note title="Asistan alınmazsa">
-          <p>Asistan işe alınmazsa {formatDate(m.params.dijitalAltDate)} tarihinde başlarsınız. Bu durumda sayfadaki tarihler de ileri kayar. Meta reklamlarını {formatDate(m.params.dijitalAltDate)} tarihine kadar İsmail Karaca yönetir.</p>
+          <p>Asistan işe alınmazsa {formatDate(m.params.dijitalAltDate)} günü başlarsınız. Bu durumda sayfadaki tarihler de ileri kayar. Meta reklamlarını {formatDate(m.params.dijitalAltDate)} gününe kadar İsmail Karaca yönetir.</p>
         </Note>
       </Section>
 
@@ -384,7 +385,7 @@ function GenericSections({ role }: { role: Role }) {
         <Chart
           id="rol-gantt"
           title="Zaman çizelgesi"
-          summary={role.plan.map((p, i) => `${i + 1}. adım ${formatDate(p.from)} tarihinde başlar ve ${formatDate(p.to)} tarihinde biter. ${p.action.replace(/\.?$/, '.')} Hedef: ${p.target.replace(/\.?$/, '.')}`).join(' ')}
+          summary={role.plan.map((p, i) => `${i + 1}. adım ${formatDate(p.from)} günü başlar ve ${formatDate(p.to)} günü biter. ${p.action.replace(/\.?$/, '.')} Hedef: ${p.target.replace(/\.?$/, '.')}`).join(' ')}
           spec={{
             kind: 'gantt',
             start: role.plan[0].from,
@@ -412,6 +413,27 @@ function GenericSections({ role }: { role: Role }) {
   );
 }
 
+/**
+ * Kavramlar kutusu (kullanıcı kararı 13 Kasım 2026, karar listesi 7.1). Kutu yalnız bu rolün metninde geçen terimleri
+ * tanımlar. Terim geçmiyorsa kutu görünmez.
+ */
+function RolKavramlari({ role }: { role: Role }) {
+  const kavramlar = metindekiKavramlar(JSON.stringify(role));
+  if (!kavramlar.length) return null;
+  return (
+    <Note title="Kavramlar">
+      <dl className="rol-kavramlar">
+        {kavramlar.map((k) => (
+          <div key={k.terim}>
+            <dt>{k.terim}</dt>
+            <dd>{k.tanim}</dd>
+          </div>
+        ))}
+      </dl>
+    </Note>
+  );
+}
+
 function RoleContent({ slug }: { slug: string }) {
   const role = useModel().role(slug);
   return (
@@ -420,6 +442,7 @@ function RoleContent({ slug }: { slug: string }) {
       {/* Görev tanımının ve ücretin kalanı başlığın altında tam cümlelerle okunur. Başlık kısa kalır. */}
       {gorevParcalari(role.mission)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.mission)[1]}</p> : null}
       {gorevParcalari(role.pay)[1] ? <p className="rol-gorev-ozeti">{gorevParcalari(role.pay)[1]}</p> : null}
+      <RolKavramlari role={role} />
       {role.slug === 'dijital-pazarlama' ? <DigitalSections role={role} /> : <GenericSections role={role} />}
     </>
   );

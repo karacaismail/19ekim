@@ -175,7 +175,7 @@ export function fixedCosts(p: Params, prog: ProgramModel, months: RevMonth[], f:
       values: months.map((m) => r2(buAy(m.iso) + meta(m) + reklam[m.t] + sahaEk[m.t] + f.ekSabit)),
       kaynak: 'sheets',
       fallback: false,
-      note: `Sabit giderler Google Sheets’ten alınır. Bu veri Giderler sayfasıyla aynıdır. Veri bordrolu personelin işveren maliyetini, teknoloji ve ofis kalemlerini kapsar. Personel maliyetinden teşvik düşülür. Plan 2027 sonundan sonraya uzatılırsa 2028 ayları için 2027 ortalaması kullanılır. Sheets’te olmayan üç kalem ayrıca eklenir. Birincisi Meta işe alım reklamıdır. İkincisi satıcı kazanım reklam bütçesidir. Bu bütçe başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay olur ve kural sağlanırsa büyür. Üçüncüsü ikinci, ek ve büyüme saha personelinin işveren maliyetidir. Bu maliyet kişinin başladığı aydan itibaren sayılır. Maliyet maaşın ${p.costFactor.toLocaleString('tr-TR')} katıdır.`,
+      note: `Sabit giderler Google Sheets’ten alınır. Bu veri “OPEX (işletme giderleri)” sayfasıyla aynıdır. Veri bordrolu personelin işveren maliyetini, teknoloji ve ofis kalemlerini kapsar. Personel maliyetinden teşvik düşülür. Plan 2027 sonundan sonraya uzatılırsa 2028 ayları için 2027 ortalaması kullanılır. Sheets’te olmayan üç kalem ayrıca eklenir. Birincisi Meta işe alım reklamıdır. İkincisi satıcı kazanım reklam bütçesidir. Bu bütçe başlangıçta ${budget.toLocaleString('tr-TR')} ₺ / ay olur ve kural sağlanırsa büyür. Üçüncüsü ikinci, ek ve büyüme saha personelinin işveren maliyetidir. Bu maliyet kişinin başladığı aydan itibaren sayılır. Maliyet maaşın ${p.costFactor.toLocaleString('tr-TR')} katıdır.`,
     };
   }
   const kadro = staffCosts(p, prog, months, inputs);

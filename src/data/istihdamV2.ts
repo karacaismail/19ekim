@@ -165,7 +165,7 @@ function payAraligi() {
 export const DIKKAT: { baslik: string; metin: string }[] = [
   {
     baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
-    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları da eklenince şirket 2027’de zarar eder. “Varsayımlar ve ayarlar” sayfasında dışarıdan gelecek yatırım 0 ₺’dir. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
+    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları da eklenince şirket 2027’de zarar eder. “Parametreler” sayfasında dışarıdan gelecek yatırım 0 ₺’dır. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
   },
   {
     baslik: 'Saha personeli sayısı iki planda farklı',
@@ -181,7 +181,7 @@ export const DIKKAT: { baslik: string; metin: string }[] = [
   },
   {
     baslik: 'Segika gideri ayrılmalı',
-    metin: 'Segika masa başı ve SGK danışmanı Segika’ya aittir. iStoc ve Segika ayrı şirketlerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyetin nasıl paylaşılacağı işveren kararına bağlıdır.',
+    metin: 'Segika CRM ve SGK danışmanı Segika’ya aittir. iStoc ve Segika ayrı şirketlerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyetin nasıl paylaşılacağı işveren kararına bağlıdır.',
   },
 ];
 
@@ -191,7 +191,7 @@ export const ACIK_SORULAR: string[] = [
   'Yatırım girişinin tutarı ve tarihi nedir?',
   'Sepet, sipariş ve ödeme akışı 2027’de açılacak mı? Ek geliştirici, test uzmanı ve güvenlik testi bu karara bağlıdır.',
   'Mevcut yazılım ekibinin gerçek ücretleri nedir? Plan bu ekip için tahmini piyasa ücreti kullanır.',
-  'Bugünkü sunucu ve altyapı hizmetinin (DevOps) bedeli nedir? Ekonomik ve medyan seçenekte bu bedel bilinmediği için toplama eklenmedi.',
+  'Bugünkü sunucu ve altyapı hizmetinin (DevOps) bedeli nedir? Ekonomik ve Medyan seçenekte bu bedel bilinmediği için toplama eklenmedi.',
   'Satış ekip lideri mevcut saha personelinden mi seçilecek? Seçilirse yeni kişi yerine liderlik farkı ödenir.',
   '2027 asgari ücreti Aralık 2026’da açıklanınca bütün maaşlar yeniden hesaplanmalıdır.',
 ];

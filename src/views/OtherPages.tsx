@@ -30,8 +30,11 @@ import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 const lira = (value: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(value))} ₺`;
 const pct = (value: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(value * 100)}`;
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
+/** Olayın günü: “1 Aralık Salı” (her tarihte gün adı, kullanıcı kararı 13 Kasım 2026). */
 const shortDate = (iso: string) =>
-  new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
+  new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
+/** Grafik ekseninin ölçek yazısı: “1 Aralık”. Eksen bir olayın günü değildir, gün adı yazılmaz. */
+const eksenTarihi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(`${iso}T00:00:00`));
 
 /* ---------- İstihdam takvimi: plan görünümü (IstihdamPlani.tsx) ve kadro katkısı ---------- */
 
@@ -42,7 +45,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
   const st = m.staffing.byId[sid];
   const sc = st.scenario;
   const H = m.staffing.horizon;
-  const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
+  const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
   return (
     <>
       <PageHeader title="İstihdam takvimi" purpose="Kimin hangi tarihte başladığını ve sıradaki adımları gösterir." />
@@ -54,7 +57,7 @@ export function HiringContent({ surum }: { surum?: ReactNode }) {
         id="katki"
         index={2}
         title="Görev, gider ve gelir katkısı (senaryo)"
-        desc={`İstihdam planı 27 Ekim 2026’da alınan kararla gelir planına bağlandı. Tablo her rolün görevini ve işveren maliyetini gösterir. Tablo, seçili senaryoda ${m.revenue.months[0].ad} ile ${m.revenue.months[H - 1].ad} arasındaki ${H} ayda gelire katkıyı da gösterir. Katkıyı şöyle hesaplarız: Gelir planından bu rolü çıkarırız. Kaybolan gelir, rolün katkısıdır. Doğrudan satış yapmayan rollerin katkısı hesaplanmaz. Burada seçilen senaryo, gelir planında ve nakit akış tablosunda da geçerli olur.`}
+        desc={`İstihdam planı 27 Ekim 2026 Salı günü alınan kararla gelir planına bağlandı. Tablo her rolün görevini ve işveren maliyetini gösterir. Tablo, seçili senaryoda ${m.revenue.months[0].ad} ile ${m.revenue.months[H - 1].ad} arasındaki ${H} ayda gelire katkıyı da gösterir. Katkıyı şöyle hesaplarız: Gelir planından bu rolü çıkarırız. Kaybolan gelir, rolün katkısıdır. Doğrudan satış yapmayan rollerin katkısı hesaplanmaz. Burada seçilen senaryo, “Gelir planı” ve “Nakit akışı” sayfalarında da geçerli olur.`}
         tools={
           <Araclar role={sc.role}>
             <SenaryoSecimi scenarios={m.revenue.scenarios} value={sid} onChange={setSid} />
@@ -122,7 +125,7 @@ function GoalsContent() {
     <>
       <PageHeader
         title="90 gün hedefleri"
-        purpose={`Aktif satıcı ayda ${SUBSCRIPTION_EUR} € öder, ancak bazıları ilk aydan sonra bırakabilir.`}
+        purpose="Aktif satıcı, ilk ödemesini yapmış ve ürünleri yayında olan satıcıdır."
         meta={[{ label: 'Dönem', value: `${longDate(dates.start)} ile ${longDate(dates.day90)} arası` }]}
       >
         <Stats items={targets} />
@@ -193,7 +196,7 @@ function GoalsContent() {
         />
       </Section>
 
-      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, satış kanallarına göre yeni aktif satıcı ve kayıt sayısını gösterir. Aralık takviyesi olmadan hedefe 45 kayıt ve 8 aktif satıcı eksik kalır. Takviye ${longDate(dates.dec)} tarihinde başlar ve bu eksiği kapatır (${labels.sahaDecLabel || 'takviye yok'}).`}>
+      <Section id="kaynak" index={4} title="Kaynaklara göre" desc={`Bu bölüm, satış kanallarına göre yeni aktif satıcı ve kayıt sayısını gösterir. Aralık takviyesi olmadan hedefe 45 kayıt ve 8 aktif satıcı eksik kalır. Takviye ${longDate(dates.dec)} günü başlar ve bu eksiği kapatır (${labels.sahaDecLabel || 'takviye yok'}).`}>
         <Chart
           id="kaynak-ay"
           title="Satış kanalına ve aya göre yeni aktif satıcı"
@@ -248,11 +251,11 @@ function PlanContent() {
 
       <GuncelPlan />
 
-      <Section id="gantt" index={1} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} tarihi 60. gündür. ${longDate(dates.day90)} tarihi 90. gündür.`}>
+      <Section id="gantt" index={1} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} günü 60. gündür. ${longDate(dates.day90)} günü 90. gündür.`}>
         <Chart
           id="gantt"
           title="Kişilere göre zaman çizelgesi"
-          summary={`Satırlar kişileri, sütunlar zamanı gösterir. Çizelgede ${formatDate(start)} ile ${formatDate(end)} arasında ${actionRows.length} eylem var. Kontrol günleri ${longDate(dates.day60)} ve ${longDate(dates.day90)} tarihleridir.`}
+          summary={`Satırlar kişileri, sütunlar zamanı gösterir. Çizelgede ${formatDate(start)} ile ${formatDate(end)} arasında ${actionRows.length} eylem var. Kontrol günleri ${longDate(dates.day60)} ve ${longDate(dates.day90)} günleridir.`}
           spec={{
             kind: 'gantt',
             start,
@@ -300,7 +303,7 @@ function AuthorityContent({ ilkNo }: { ilkNo: number }) {
         <Chart
           id="yetki"
           title="Yatırımcıdan İsmail Karaca’ya karar yetkisi"
-          summary={`Yatırımcı ürüne ve bütçeye karar verir. En çok ne kadar zarar edilebileceğine de yatırımcı karar verir. İsmail Karaca maliyeti, kanıtı ve ekibin kapasitesini yönetir. Harcama yetki sınırını aşmıyorsa İsmail Karaca karar verir. Harcama bu sınırı aşıyorsa yatırımcı karar verir. Müşteri bulmak için iki kanal var. A kanalı iç satış ve sahadır. B kanalı dijital yoldan müşteri bulmaktır. Yalnız biri kullanılır. Bugün A kanalı seçili. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} tarihlerinde yapılır. Her kontrolde planı sürdürme, iyileştirme veya durdurma kararı verilir.`}
+          summary={`Yatırımcı ürüne ve bütçeye karar verir. En çok ne kadar zarar edilebileceğine de yatırımcı karar verir. İsmail Karaca maliyeti, kanıtı ve ekibin kapasitesini yönetir. Harcama yetki sınırını aşmıyorsa İsmail Karaca karar verir. Harcama bu sınırı aşıyorsa yatırımcı karar verir. Müşteri bulmak için iki kanal var. A kanalı iç satış ve sahadır. B kanalı dijital yoldan müşteri bulmaktır. Yalnız biri kullanılır. Bugün A kanalı seçili. Kontroller ${shortDate(dates.day60)} ve ${shortDate(dates.day90)} günlerinde yapılır. Her kontrolde planı sürdürme, iyileştirme veya durdurma kararı verilir.`}
           spec={{ kind: 'gov', root: govChart(governanceTree) }}
           size="xxl"
           wide
@@ -366,7 +369,7 @@ function PendingContent() {
   };
   const sorted = bekleyenler.filter((k) => k.sonTarih);
   const [p1, p2] = workPeriods;
-  const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => shortDate(addDays(dates.firstDay, w * 7)));
+  const weekLabels = Array.from({ length: CUMULATIVE_WEEKS }, (_, w) => eksenTarihi(addDays(dates.firstDay, w * 7)));
   const decWeek = Math.max(1, Math.round((new Date(dates.dec).getTime() - new Date(dates.firstDay).getTime()) / (7 * 86_400_000)) + 1);
   const deadlines = sorted.map((d) => d.sonTarih!);
   // Grafik son tarihten 14 gün sonra biter. Bugün daha ileriyse grafik bugünü de gösterir (gecikme görünür).
@@ -446,7 +449,7 @@ function PendingContent() {
         />
       </Section>
 
-      <Section id="kesin" index={2} title="Verilen kararlar" desc="Tablo üç tarihteki kararları listeler: 19 Ekim 2026, 28 Ekim 2026 ve 3 Kasım 2026. 19 Ekim kararları “Arşiv” sayfasındaki tahta notlarına dayanır. 28 Ekim ve 3 Kasım kararlarını sahip verdi. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
+      <Section id="kesin" index={2} title="Verilen kararlar" desc="Tablo üç günün kararlarını listeler. İlk kararlar 19 Ekim 2026 Pazartesi günü alındı. Sonrakiler 28 Ekim 2026 Çarşamba ve 3 Kasım 2026 Salı günleri alındı. 19 Ekim Pazartesi kararları “Arşiv” sayfasındaki tahta notlarına dayanır. 28 Ekim Çarşamba ve 3 Kasım Salı kararlarını sahip verdi. “Yürürlükte” etiketi yalnız uygulamada karşılığı olan kararlar için kullanılır. Ücret, CRM ve mesai ayrıntıları aşağıdaki bölümlerdedir.">
         <DataTable<KararKaydi>
           id="verilen"
           title="Verilen kararların listesi"
@@ -480,7 +483,7 @@ function PendingContent() {
               key: 'durum',
               header: 'Durum',
               nowrap: true,
-              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} (${shortDate(d.yururlukTarihi!)})` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi}. ${shortDate(d.yururlukTarihi)} tarihinde yürürlüğe girer.` : `${KARAR_DURUM_ADI.verildi}. Uygulama bekliyor.`),
+              render: (d) => (gorunum(d) === 'yururlukte' ? `${KARAR_DURUM_ADI.yururlukte} (${shortDate(d.yururlukTarihi!)})` : d.yururlukTarihi ? `${KARAR_DURUM_ADI.verildi}. ${shortDate(d.yururlukTarihi)} günü yürürlüğe girer.` : `${KARAR_DURUM_ADI.verildi}. Uygulama bekliyor.`),
             },
             {
               key: 'ilgili',
@@ -629,9 +632,9 @@ function GrowthContent() {
 
   return (
     <>
-      <PageHeader title="Çok katmanlı pazarlama ağı (MLM)" purpose="Bu sayfa, yalnız gerçek satıştan kazanan bağımsız temsilcilerle doğrudan satış modelini gösterir." />
+      <PageHeader title="MLM (çok katmanlı pazarlama)" purpose="Bu sayfa, yalnız gerçek satıştan kazanan bağımsız temsilcilerle doğrudan satış modelini gösterir." />
 
-      <Section id="kademe" index={1} title="Kademeler" desc={`Bu kademeler ${longDate(dates.day90)} için hedeftir. Çekirdek ekipte saha, masa başı, dijital pazarlama ve organizatör çalışanları var. Ekip lideri bu sayıya girmez.`}>
+      <Section id="kademe" index={1} title="Kademeler" desc={`Bu kademeler ${longDate(dates.day90)} için hedeftir. Çekirdek ekipte saha satış uzmanı, İstoç Pazarlama CRM uzmanı, dijital pazarlama uzmanı ve organizatör var. Ekip lideri bu sayıya girmez.`}>
         <Chart
           id="piramit"
           title="Kademe şeması"
@@ -688,7 +691,7 @@ function GrowthContent() {
 export function ArchivePage({ pathname }: { pathname: string }) {
   return (
     <AppFrame pathname={pathname}>
-      <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim tahta notlarının plandaki karşılığını toplantı için değil, kayıt için gösterir." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 tahta notları' }]} />
+      <PageHeader title="Arşiv: tahtadan karara" purpose="19 Ekim Pazartesi tahta notlarının plandaki karşılığını toplantı için değil, kayıt için gösterir." meta={[{ label: 'Kaynak', value: '19 Ekim 2026 Pazartesi tahta notları' }]} />
       <DataTable<BoardRow>
         id="tahta"
         title="Tahta notundan karara ve sayfaya"

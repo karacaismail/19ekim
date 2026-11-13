@@ -71,7 +71,8 @@ export const KOSULLAR: Record<RolId, KosulTanim[]> = {
 /** Örnek zincir: Haydar ve Ömer üst kademe, Ahmet odak kişi, Mehmet, Ayşe ve Fatma alt kademeler. */
 export const AG_ISIMLER = ['Haydar', 'Ömer', 'Ahmet', 'Mehmet', 'Ayşe', 'Fatma'];
 export const AG_ODAK = 2;
-export const agDerinlik = (a: Ayar) => Math.min(3, Math.max(1, Math.round(a.agDerinlik)));
+/** Pay en çok 2 kademe yukarı gider (kullanıcı kararı 13 Kasım 2026, karar listesi 5.9). */
+export const agDerinlik = (a: Ayar) => Math.min(2, Math.max(1, Math.round(a.agDerinlik)));
 
 /** Bir satışın dağılımı: [satış yapana, 1. kademe üstüne, 2. kademe üstüne, …]. */
 export const agSatisPayi = (a: Ayar) => [a.agKomisyon, ...a.agKademePay.slice(0, agDerinlik(a))];
@@ -258,7 +259,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
         'Temsilci, kendi şirketi olan bağımsız bir iş insanıdır. Maaş almaz, hizmet faturası keser.',
         'Temsilci iki koşul sağlanınca kazancını hak eder. Şirket müşterinin ilk ödemesini tahsil etmiş olmalıdır. Satıcı da aktif olmalıdır.',
         'Reklamda kazanç vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',
-        `“Temsilci ağı” sayfasında ağ tek kademeliydi. Bu hesap ${d} kademe kullanır. Kademe sayısı sözleşmeden ve hukuk kontrolünden önce kesinleşmelidir.`,
+        `“MLM (çok katmanlı pazarlama)” sayfasında da pay en çok 2 kademe yukarı gider. Orada ikinci kademenin tutarı henüz belirlenmedi. Bu hesap ${d} kademe kullanır. Kademe sayısı sözleşmeden ve hukuk kontrolünden önce kesinleşmelidir.`,
       ],
       veri: {
         satisBasina: a.agKomisyon,
@@ -347,7 +348,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
             'Ortak fiyatı değiştiremez, garanti veremez ve tahsilat yapamaz.',
             ...SEGIKA_ORTAK_KURALLARI,
           ]
-        : ['Ortak en çok 5 aday satıcıyla başlar ve en az 3’ünü satışa hazır hâle getirir.', 'Oran örnektir. Finans sorumlusu oranı 14. gün kesinleştirir. Günün hangi olaydan sonra sayılacağını finans sorumlusu yazacak.', ...ISTOC_ORTAK_KURALLARI],
+        : ['Ortak en çok 5 aday satıcıyla başlar ve en az 3’ünü satışa hazır hâle getirir.', 'Oran örnektir. Finans sorumlusu oranı 14. gün kesinleştirir. Günler müşterinin ödeme gününden sayılır.', ...ISTOC_ORTAK_KURALLARI],
       veri: { oran, ay, musteriBasina: Math.round(birim), yillikMusteri: n, yillikKazanc: Math.round(birim * n) },
     };
   }

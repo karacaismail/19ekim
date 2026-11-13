@@ -31,7 +31,7 @@ test.describe('gelir planı', () => {
     await hydrated(page);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gelir planı');
     // Dönem ve ilk satış tek PageHeader’ın dönem satırında (ux.md M03, P6.1).
-    await expect(page.locator('.page-meta')).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(page.locator('.page-meta')).toContainText('19 Ekim 2026 Pazartesi – Aralık 2027');
     await expect(page.locator('.page-meta')).toContainText('6 Kasım 2026');
     // ux.md §5.4 sırası (P6.2, M05): amaç → bağlam/senaryo ve ana sonuç (yapışkan özet + sonuç bloğu) → eylem (kurucu) →
     // destekleyici veri (bölümler). Kurucu ilk bölümden önce kalır (kullanıcı kararı 2026-10-27).
@@ -77,10 +77,10 @@ test.describe('gelir planı', () => {
     await hydrated(page);
     const kurucu = page.locator('.kurucu');
     const hazir = kurucu.getByRole('group', { name: 'Hazır senaryolar' });
-    await expect(hazir.getByRole('button')).toHaveText(['Kötümser', 'Medyan', 'İyimser', 'Saha ağırlıklı', 'Dijital ağırlıklı', 'Tutumlu', 'Yatırımlı büyüme']);
-    await expect(hazir.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(hazir.getByRole('button')).toHaveText(['Kötümser', 'Plan', 'İyimser', 'Saha ağırlıklı', 'Dijital ağırlıklı', 'Tutumlu', 'Yatırımlı büyüme']);
+    await expect(hazir.getByRole('button', { name: 'Plan' })).toHaveAttribute('aria-pressed', 'true');
     const ozet = page.locator('.yapiskan');
-    await expect(ozet.locator('.yapiskan-ad')).toHaveText('Medyan');
+    await expect(ozet.locator('.yapiskan-ad')).toHaveText('Plan');
     await expect(ozet.locator('.yapiskan-cip')).toHaveCount(6);
     const aktifMedyan = await ozet.locator('.yapiskan-cip').first().locator('.yapiskan-deger').textContent();
     const kartMedyan = await page.locator('.gelir-hedef', { hasText: '100 aktif satıcı' }).locator('.gelir-hedef-tarih').textContent();
@@ -105,10 +105,10 @@ test.describe('gelir planı', () => {
     // Bir seçenek değişince senaryo “özel” olur; sıfırla hazır senaryoya döner.
     await secenekler.getByRole('group', { name: 'Yıllık kur artışı' }).getByRole('button', { name: '%0', exact: true }).click();
     await expect(hazir.getByRole('button', { name: /^Özel/ })).toHaveAttribute('aria-pressed', 'true');
-    await expect(ozet.locator('.yapiskan-ad')).toContainText('Özel: Medyan');
+    await expect(ozet.locator('.yapiskan-ad')).toContainText('Özel: Plan');
     await expect(page).toHaveURL(/kur=0/);
     await kurucu.getByRole('button', { name: 'Sayfa seçeneklerini sıfırla' }).click();
-    await expect(hazir.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(hazir.getByRole('button', { name: 'Plan' })).toHaveAttribute('aria-pressed', 'true');
     // Adres çubuğundan açılış: aynı seçenekler.
     await page.goto('gelir-plani/?senaryo=iyimser&eksaha=1&reklam=2');
     await icerik(page);
@@ -202,11 +202,11 @@ test.describe('gelir planı', () => {
     expect(kutu.top, 'ana sonuç ilk ekranda').toBeGreaterThanOrEqual(0);
     expect(kutu.bottom, 'ana sonuç kaydırmadan tam görünür').toBeLessThanOrEqual(480);
     await expect(sonuc.locator('.sonuc-etiket')).toContainText('En yüksek birikmiş açık');
-    await expect(sonuc.locator('.sonuc-donem')).toContainText('19 Ekim 2026 – Aralık 2027');
+    await expect(sonuc.locator('.sonuc-donem')).toContainText('19 Ekim 2026 Pazartesi – Aralık 2027');
     // Kıyas temeli: hazır senaryolar aynı ölçüyle; seçili olan işaretli.
     const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
-    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Medyan/, /İyimser/]);
-    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Medyan');
+    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Plan/, /İyimser/]);
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Plan');
     // Durum görünür (accordion/gizli kapsayıcı içinde değil) ve veriyle tutarlı: başabaş varsa tarih, yoksa eğilim/kapanmıyor.
     const durum = sonuc.locator('.sonuc-durum');
     await expect(durum).toBeVisible();
@@ -316,8 +316,8 @@ test.describe('gelir planı', () => {
     const katki = kadro.locator('.table-block:has(#katki-tablo) tbody tr');
     await expect(katki).toHaveCount(11);
     await expect(katki.filter({ hasText: 'Büyümeyle eklenen saha personeli' })).toHaveCount(1);
-    await expect(katki.filter({ hasText: 'Yönetici asistanı' })).toHaveAttribute('data-tone', 'total');
-    await expect(katki.filter({ hasText: 'Yönetici asistanı' }).locator('td', { hasText: /^Dolaylı$/ })).toHaveCount(1);
+    await expect(katki.filter({ hasText: 'Asistan' })).toHaveAttribute('data-tone', 'total');
+    await expect(katki.filter({ hasText: 'Asistan' }).locator('td', { hasText: /^Dolaylı$/ })).toHaveCount(1);
     await kadro.locator('.table-block:has(#katki-tablo)').getByRole('group', { name: 'Görünüm' }).getByRole('button', { name: 'Üç senaryo' }).click();
     await expect(kadro.locator('.table-block:has(#katki-tablo) thead th')).toHaveCount(8);
     await page.goto('istihdam/');
@@ -364,9 +364,9 @@ test.describe('gelir planı', () => {
     await expect(kadro.first().locator('.kayit-ozet-etiket')).toContainText(/katkı/i);
     const senaryolar = page.locator('.table-block:has(#senaryolar-tablo) .kayit');
     await expect(senaryolar.first().locator('.kayit-ad')).toHaveText('Varsayım');
-    await expect(senaryolar.first().locator('.kayit-ozet-etiket')).toHaveText('Medyan');
+    await expect(senaryolar.first().locator('.kayit-ozet-etiket')).toHaveText('Plan');
     await expect(senaryolar.last().locator('.kayit-ad')).toHaveText('En yüksek birikmiş açık');
-    await expect(senaryolar.last().locator('dl.kayit-alanlar dt')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
+    await expect(senaryolar.last().locator('dl.kayit-alanlar dt')).toHaveText(['Kötümser', 'Plan', 'İyimser']);
   });
 
   // gorsel_algi.md (kullanıcı kararı 2026-10-28) F15 / süreklilik ilkesi ve kullanıcının ekran görüntüsü: görünüm varyantı

@@ -18,7 +18,7 @@ import { sayfayiGez, TUM_SAYFALAR } from './sayfa-gezgini';
  * - Tam cümlede okla fikir bağlanmaz.
  * - Açıklama cümlesi en çok 15, talimat cümlesi en çok 10 kelimedir.
  * - Açıklama “Etiket: açıklama.” biçiminde kurulmaz. Kısa değer alanı (“Kayıt: Yalnız bu tarayıcı”) serbesttir.
- * - Okunur yazım (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027, Cumartesi” biçimindedir, ISO tarih yazılmaz.
+ * - Okunur yazım (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027 Cumartesi” biçimindedir, ISO tarih yazılmaz.
  *   Ondalık sayı virgülle yazılır (“8,9”). Yüzde işareti sayıdan önce gelir (“%36”). Birim zinciri (“gün/kadın/yıl”)
  *   yerine söz kullanılır (“kadın başına yılda”).
  *
@@ -145,7 +145,7 @@ function ihlaller(metin: string, tur: string) {
   // Okunur yazım (kullanıcı kararı 13 Kasım 2026): tarih, ondalık sayı, yüzde ve birim okurun diliyle yazılır.
   // Kaynak künyesi yayının kendi adıdır. Künyede bu kurallar uygulanmaz.
   if (tur !== 'kunye') {
-    if (/\b\d{4}-\d{2}-\d{2}\b/.test(metin)) sonuc.push('ISO tarih: “1 Mayıs 2027, Cumartesi” biçiminde yazın');
+    if (/\b\d{4}-\d{2}-\d{2}\b/.test(metin)) sonuc.push('ISO tarih: “1 Mayıs 2027 Cumartesi” biçiminde yazın');
     if (/\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/.test(metin)) sonuc.push('sayılı tarih: “1 Mayıs 2027” biçiminde yazın');
     if (/(?<![\p{L}\d.,])\d{1,3}\.\d{1,2}(?![\d.])/u.test(metin)) sonuc.push('ondalık nokta: “8,9” biçiminde virgülle yazın');
     if (/\d\s?%(?!\d)/.test(metin)) sonuc.push('yüzde: işaret sayıdan önce gelir, “%36” yazın');
@@ -161,7 +161,9 @@ function ihlaller(metin: string, tur: string) {
     const etiket = metin.match(/^([\p{Lu}][\p{L} ]{0,24}):\s+(.+)$/u);
     if (etiket) {
       const deger = etiket[2].trim();
-      const veriAlani = kelimeler(deger).length <= 3 && !/[.!?…]$/.test(deger);
+      // Tek bir tarih de veri alanıdır: “1 Mayıs 2027 Cumartesi” (her tarihte gün adı, kullanıcı kararı 13 Kasım 2026).
+      const tekTarih = /^\d{1,2} \p{L}+( \d{4})? (Pazartesi|Salı|Çarşamba|Perşembe|Cuma|Cumartesi|Pazar)$/u.test(deger);
+      const veriAlani = (kelimeler(deger).length <= 3 || tekTarih) && !/[.!?…]$/.test(deger);
       // Yüklemli giriş liste başlatır ve serbesttir: “En büyük bloklar şunlardır:”, “Şu belgeyi ekleyin:”.
       const giris = etiket[1].trim();
       const yuklemli = giris.split(/\s+/).length >= 2 && /(d|t)[ıiuü]r$|şöyle$|\p{L}+(ılır|ilir|ulur|ülür|nır|nir|nur|nür)$|\p{L}+(y?[ıiuü]n|y?[ıiuü]n[ıiuü]z)$/u.test(giris);
@@ -196,8 +198,8 @@ const BILINEN = new Set(['TL', 'KDV', 'SGK', 'CRM', 'ABD', 'AB', 'USD', 'EUR', '
 // Marka, ürün ve kurum adları ile satıştaki ürün özelliği adları. Bunlar açılmaz, çünkü adın kendisidir. Örnek: Garanti
 // BBVA, TÜV SÜD, Mercer IPE, IPS monitör.
 const ADLAR = new Set(['İSTOÇ', 'İBB', 'MEB', 'TÜİK', 'AVM', 'DJI', 'JBL', 'HP', 'ASUS', 'IKEA', 'BMJ', 'DHL', 'UPS', 'PTT', 'MNG', 'BOE', 'NHS', 'PwC', 'EY', 'KPMG', 'OECD', 'IMF', 'TBMM', 'GE', 'BBVA', 'GDX', 'GO', 'RB', 'SGS', 'TÜV', 'SÜD', 'PYMNTS', 'CLS', 'PR', 'MATCH', 'IPE', 'GGS', 'ETA', 'IPS', 'UHF', 'DHgate', 'TikTok', 'CapCut', 'GitLab', 'WTW', 'YouTube']);
-// Kullanıcı kararıyla kırıntıda duran ad: “Finans › OpEx › Operasyonel Giderler”. Kırıntıdaki sonraki ad açılımdır.
-const KARARLI = new Set(['OpEx']);
+// Kullanıcı kararıyla duran adlar. 13 Kasım 2026’dan beri OPEX sayfasının adı “OPEX (işletme giderleri)”dir, kısaltma adda açılır.
+const KARARLI = new Set<string>([]);
 // Anlamı kaynakta yazmayan kısaltmalar. Bunlar uydurularak açılmaz, kullanıcıya sorulur. ECA, notlardaki kullanıcı notudur.
 const SORULACAK = new Set(['ECA']);
 function aciklanmayanKisaltmalar(bloklar: { metin: string; tur: string }[]) {

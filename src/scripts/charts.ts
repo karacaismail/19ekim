@@ -36,7 +36,8 @@ const millions = (v: number) => (v === 0 ? '0' : `${new Intl.NumberFormat('tr-TR
 const ms = (iso: string) => new Date(`${iso}T00:00:00`).getTime();
 const shortDate = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(t));
 /** Okunan tarih: ay adı tam yazılır (“2 Kasım”). Kısa biçim yalnız eksen etiketinde kalır, çünkü orada yer dardır. */
-const gunAy = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(t));
+/** Olayın günü: “1 Aralık Salı” (her tarihte gün adı, kullanıcı kararı 13 Kasım 2026). Eksen ölçeği `shortDate` ile gün adsız yazılır. */
+const gunAy = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }).format(new Date(t));
 
 /** --text-sm (rem) → px; kök yazı boyutu büyütülürse grafik metni de büyür. Alt sınır 14 CSS px. */
 function fontPx() {

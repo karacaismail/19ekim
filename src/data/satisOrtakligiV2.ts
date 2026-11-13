@@ -214,7 +214,8 @@ export const VARSAYILAN_AYAR: Ayar = {
 
 export const SEVIYE_ADI: Record<Seviye, string> = { A: 'Yalnız tanıştırır', B: 'Ürünü de gösterir', C: 'Satışı kendisi kapatır' };
 export const PAKET_ADI: Record<SegikaPaket, string> = { ikisi: 'Teşvik ve Otomasyon', tesvik: 'SGK Teşvik', otomasyon: 'SGK Otomasyon' };
-export const ISTOC_PAKET_ADI: Record<IstocPaket, string> = { standart: 'Standart', pro: 'Pro', kurumsal: 'Kurumsal' };
+/** Paket adları istoc.com’daki gibidir (kullanıcı kararı 13 Kasım 2026, karar listesi 5.3; canlı ad: gelirModelleri.ts → BASIC). */
+export const ISTOC_PAKET_ADI: Record<IstocPaket, string> = { standart: 'Basic', pro: 'Platinium', kurumsal: 'Enterprise' };
 export const SEGMENT_ADI = ['Başlangıç ortağı', 'Gümüş ortak', 'Altın ortak', 'Profesyonel çözüm ortağı'];
 export const KARIYER_ADI = ['Satış uzmanı yardımcısı', 'Satış uzmanı', 'Kıdemli satış uzmanı', 'Takım lideri'];
 export const ALAN_ADI: Record<KadroluAlan, string> = { saha: 'Saha satışı', ic: 'Telefon ve çevrim içi satış', kurumsal: 'Kurumsal müşteri' };
@@ -479,7 +480,7 @@ export function donemKazanci(a: Ayar, sozlesme: Sozlesme): DonemSatiri[] {
   }
   const b = bagimsizKazanc(a);
   const satirlar: DonemSatiri[] = [{ ad: 'Satış komisyonu', yillik: b.komisyon * 12, formul: `${tl(b.komisyon)} × 12 ay` }];
-  if (b.kurumsal > 0) satirlar.push({ ad: 'Kurumsal paket kampanyası', yillik: b.kurumsal * 12, formul: `${tl(b.kurumsal)} × 12 ay, kampanya sürerse` });
+  if (b.kurumsal > 0) satirlar.push({ ad: 'Enterprise paket kampanyası', yillik: b.kurumsal * 12, formul: `${tl(b.kurumsal)} × 12 ay, kampanya sürerse` });
   if (b.k1 > 0) satirlar.push({ ad: 'Ağ, 1. kademe', yillik: b.k1 * 12, formul: `${tl(b.k1)} × 12 ay` });
   if (b.k2 > 0) satirlar.push({ ad: 'Ağ, 2. kademe', yillik: b.k2 * 12, formul: `${tl(b.k2)} × 12 ay` });
   satirlar.push({ ad: 'Toplam', yillik: b.aylik * 12, formul: `${tl(b.aylik)} × 12 ay` });
@@ -592,10 +593,10 @@ export const KAMPANYALAR: Kampanya[] = [
   },
   {
     id: 'kurumsal',
-    ad: 'Kurumsal paket ek primi',
+    ad: 'Enterprise paket ek primi',
     kimler: ['oncu', 'cozum', 'elci'],
     marka: ['istoc'],
-    ozet: (a) => `Kurumsal paket satışında segment oranına ek olarak ${yuzde(a.kurumsalEk)} ödenir. Kampanya, duyurulan dönemin sonunda biter.`,
+    ozet: (a) => `Enterprise paket satışında segment oranına ek olarak ${yuzde(a.kurumsalEk)} ödenir. Kampanya, duyurulan dönemin sonunda biter.`,
   },
   {
     id: 'arkadasini-getir',

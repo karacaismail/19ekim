@@ -1,7 +1,7 @@
 import type { AkisAdimi, AkisOlustur } from '../types';
 import { satisKazanci, segikaAylik, yillikFiyat, type SegikaPaket, type Seviye } from '../../satisOrtakligi';
 
-const para = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const para = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const oranMetni = (n: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n * 100)}`;
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(n);
 
@@ -257,7 +257,7 @@ export const akisOlustur: AkisOlustur = (a) => {
           'Ödeme gelince bu adıma dönün.',
         ] } },
         { id: 'kural-yok', metin: 'Ödeme günü kuralı yazılı değil', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralını netleştirin', metin: [
-          'Şirket ödeme gününün hangi olaydan sayılacağını henüz yazmadı.',
+          'Ödeme günü müşterinin ödeme gününden sayılır.',
           'Finans sorumlusu kuralı anlaşmaya yazar.',
           'Kural yazılınca bu adıma dönün.',
         ] } },

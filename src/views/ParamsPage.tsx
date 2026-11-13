@@ -244,8 +244,8 @@ function Derived() {
     { label: 'Saha kotası (prim eşiği)', value: `${tl(m.quota)} satış / ay` },
     { label: 'Saha satış: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.saha)}, işveren maliyeti ${tl(m.salaries.saha * p.costFactor)}` },
     { label: 'Ekip lideri: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.lead)}, işveren maliyeti ${tl(m.salaries.lead * p.costFactor)}` },
-    { label: 'Masa başı (CRM): maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.masa)}, işveren maliyeti ${tl(m.salaries.masa * p.costFactor)}` },
-    { label: 'Segika (CRM): maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.segika)}, işveren maliyeti ${tl(m.salaries.segika * p.costFactor)}` },
+    { label: 'İstoç Pazarlama CRM uzmanı: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.masa)}, işveren maliyeti ${tl(m.salaries.masa * p.costFactor)}` },
+    { label: 'Segika CRM: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.segika)}, işveren maliyeti ${tl(m.salaries.segika * p.costFactor)}` },
     { label: 'Dijital pazarlama: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.dijital)}, işveren maliyeti ${tl(m.salaries.dijital * p.costFactor)}` },
     { label: 'Asistan: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.asistan)}, işveren maliyeti ${tl(m.salaries.asistan * p.costFactor)}` },
     { label: 'Organizatör: maaş ve işveren maliyeti', value: `Maaş ${tl(m.salaries.organizator)}, işveren maliyeti ${tl(m.salaries.organizator * p.costFactor)}` },
@@ -256,7 +256,7 @@ function Derived() {
     { label: 'Ciro hedefi için gereken aylık elde tutma', value: m.retentionThreshold === null ? 'Abonelik tek başına yetmez' : `En az ${pct(m.retentionThreshold)}` },
     { label: 'Meta reklam bütçesi (aylık)', value: tl((p.metaWeekly * 52) / 12) },
     { label: '60. ve 90. gün kontrolleri', value: `${longDate(m.dates.day60)} ve ${longDate(m.dates.day90)}` },
-    { label: 'Dönem 2 mesai düzeni (haftada 45 saat)', value: `${longDate(m.dates.period2Start)} tarihinden başlar` },
+    { label: 'Dönem 2 mesai düzeni (haftada 45 saat)', value: `${longDate(m.dates.period2Start)} gününden başlar` },
   ];
   return (
     <DataTable

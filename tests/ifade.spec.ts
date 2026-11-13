@@ -83,7 +83,7 @@ test.describe('ifade: finans ve kayıt anlamı (ifade.md §10.2 birinci grup)', 
     await expect(kopyala).toHaveText('Senaryo bağlantısını kopyala');
     // Sıfırlama: temel senaryo korunur, sayfa seçenekleri plan değerine döner.
     await sifirla.click();
-    await expect(kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(kurucu.getByRole('group', { name: 'Hazır senaryolar' }).getByRole('button', { name: 'Plan' })).toHaveAttribute('aria-pressed', 'true');
     await page.evaluate(() => {
       localStorage.removeItem('istoc-plan-senaryo');
       localStorage.removeItem('istoc-plan-senaryo-secenekler');

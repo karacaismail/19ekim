@@ -40,7 +40,7 @@ export function ilkPaket(anahtar: string): PaketId | null {
 
 export const paket = (id: PaketId) => CANLI_PAKETLER.find((p) => p.id === id)!;
 export const eur = (n: number) => `${n.toLocaleString('tr-TR')} €`;
-export const tarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${iso}T00:00:00`));
+export const tarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 /** Paket fiyatı: tutar, ücretsiz ya da teklif. */
 export const fiyatMetni = (aylik: number | null) => (aylik === null ? 'Teklif' : aylik === 0 ? 'Ücretsiz' : eur(aylik));
 
@@ -61,7 +61,7 @@ export function bas(anahtar: string): string {
  * - `alici`: alıcıya ait bir özelliktir. Satıcı paketine bağlı değildir.
  */
 export type YazilimDurumu = 'yakinda' | 'hazir-degil' | 'hepsinde' | 'alici';
-export const YAZILIM_KAYNAGI = 'istoc.com yazılımının 13 Kasım 2026 tarihli kod incelemesi';
+export const YAZILIM_KAYNAGI = 'istoc.com yazılımının 13 Kasım 2026 Cuma tarihli kod incelemesi';
 const ALICI_NOTU = 'Bu bir alıcı özelliğidir. Satıcı paketine bağlı değildir.';
 export const YAZILIM_DURUMU: Record<string, { durum: YazilimDurumu; not: string }> = {
   'quota.max_active_listings': { durum: 'yakinda', not: 'Yazılımda bu sayı için sınır denetimi yok. Kayıtlı ürün sınırı çalışır.' },
@@ -166,7 +166,7 @@ export const ILKE = {
   etiket: 'Araştırmanın ilkesi',
   baslik: 'Alıcı ücretsiz kullanır. Satıcı ücretsiz başlar ve platformdan fayda görünce öder.',
   metin: 'Talebi alıcı getirir. Bu yüzden alıcı arama, mesaj ve teklif isteği için ödeme yapmaz. Satıcının ödemeye başladığı ana ödeme duvarı denir. Bu an, satıcının platformdan fayda gördüğü andır.',
-  kaynak: 'İşletmeden işletmeye satış (B2B) yapan küresel pazar yerleri araştırması, 12 Kasım 2026',
+  kaynak: 'İşletmeden işletmeye satış (B2B) yapan küresel pazar yerleri araştırması, 12 Kasım 2026 Perşembe',
 };
 
 /** Bugün istoc.com’da: sayfa başındaki rakamlar. Hepsi canlı veriden türetilir. */

@@ -106,11 +106,10 @@ test('koşul setleri: ana program korunur, kademeli ağ ve diyagram, İş ortakl
   await page.getByRole('button', { name: 'Fatma: satış yapan olarak seç' }).click();
   await expect(aciklama).toHaveText('Fatma bir satış yaptığında Fatma 2.500 ₺, Ayşe 500 ₺ ve Mehmet 250 ₺ kazanır. Ahmet, Ömer ve Haydar bu satıştan pay almaz.');
 
-  // Üç kademe: Ahmet Fatma’dan 100 ₺ alır; bir satışta 3.350 ₺ ödenir ve 3.250 ₺ tavanı aşılır.
+  // Pay en çok 2 kademe yukarı gider (kullanıcı kararı 13 Kasım 2026, karar listesi 5.9): 3 yazılsa da 2 kademe kalır.
   await page.getByRole('textbox', { name: 'Kaç kademe yukarı pay gider?' }).fill('3');
-  await expect(page.getByRole('textbox', { name: '3. kademe payı' })).toBeVisible();
-  await expect(aciklama).toContainText('Mehmet 250 ₺ ve Ahmet 100 ₺ kazanır');
-  await expect(page.locator('.so2-kurallar')).toContainText('tavanı aşılır');
+  await expect(page.getByRole('textbox', { name: '3. kademe payı' })).toHaveCount(0);
+  await expect(aciklama).toContainText('Ahmet, Ömer ve Haydar bu satıştan pay almaz');
 
   // Klavye: düğüm Enter ile seçilir.
   await page.getByRole('button', { name: 'Haydar: satış yapan olarak seç' }).focus();

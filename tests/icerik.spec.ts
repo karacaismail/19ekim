@@ -127,11 +127,11 @@ test.describe('içerik envanteri', () => {
   });
 
   test('F15: kırıntı ana ebeveynden türer, sunum sırasından bağımsız', () => {
-    expect(kirinti('/roller/asistan/')).toEqual(['İstihdam', 'Organizasyon şeması', 'Yönetici asistanı']);
+    expect(kirinti('/roller/asistan/')).toEqual(['İstihdam', 'Organizasyon şeması', 'Asistan']);
     expect(kirinti('/gelir-plani/')).toEqual(['Finans', 'Gelir planı']);
     expect(kirinti('/satis-ortakligi/')).toEqual(['Pazarlama', 'Satış ortaklığı programı']);
     expect(kirinti('/bcg/')).toEqual(['BCG matrisi eğitimi']);
-    expect(kirinti('/giderler/')).toEqual(['Finans', 'OpEx', 'Operasyonel Giderler']); // kullanıcı kararı 2026-10-21 korunur
+    expect(kirinti('/giderler/')).toEqual(['Finans', 'OPEX (işletme giderleri)']); // kullanıcı kararı 13 Kasım 2026 (karar listesi 1.2): sayfanın adı OPEX
     expect(kirinti('/applet/')).toEqual(['İstihdam', 'Ücret ve performans hesap araçları']);
     expect(kirinti('/notlar/')).toEqual(['Yardımcı', 'Notlar']);
     expect(kirinti('/arsiv/')).toEqual(['Yardımcı', 'Arşiv: tahtadan karara']);
@@ -155,7 +155,7 @@ test('B2c (MS-11): her kaydın türetim kaynağı var; ön cümle yalnız tahtad
   const turler = ['tahta', 'sheets', 'oneri', 'ornek', 'egitim', 'kisisel', 'sistem'];
   for (const k of ICERIK) expect(turler, k.id).toContain(k.turetim);
   expect(altBilgiOnCumle('/19ekim/roller/asistan/')).toMatch(/19 Ekim 2026/);
-  expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/gerçek sonuçlara göre düzeltilir/);
+  expect(altBilgiOnCumle('/19ekim/hedefler/')).toMatch(/gerçek sonuçlara göre düzeltir/);
   for (const p of ['/19ekim/bcg/', '/19ekim/notlar/', '/19ekim/email/', '/19ekim/applet/', '/19ekim/giderler/', '/19ekim/404/', '/bilinmeyen/']) expect(altBilgiOnCumle(p), p).toBe('');
   // Nakit akışı kapsam cümlesi mevcut davranışı anlatır: hesap seçenekleri uygulanır, gider kaynağı seçeneği uygulanmaz; gelecek vaadi yok.
   const nakit = altBilgiKapsami('/19ekim/nakit-akisi/');
@@ -174,8 +174,8 @@ test.describe('içerik envanteri — sayfada', () => {
       expect(alt, id).toContain(k.kapsam.slice(0, 40));
       if (['bcg', 'applet', 'notlar'].includes(id)) expect(alt, id).not.toMatch(/kesinleşen/i);
       // B2c (MS-11): tahtadan türetilmeyen sayfada “19 Ekim … kalibre edilir” ön cümlesi yok.
-      if (k.turetim === 'tahta') expect(alt, id).toMatch(/gerçek sonuçlara göre düzeltilir/);
-      else expect(alt, id).not.toMatch(/gerçek sonuçlara göre düzeltilir|tahtaya yazılan kararlardan/);
+      if (k.turetim === 'tahta') expect(alt, id).toMatch(/gerçek sonuçlara göre düzeltir/);
+      else expect(alt, id).not.toMatch(/gerçek sonuçlara göre düzeltir|tahtaya yazılan kararlardan/);
     }
   });
 });

@@ -7,7 +7,7 @@ import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
 
 export const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
-export const tl = (n: number) => `${sayi(n)} TL`;
+export const tl = (n: number) => `${sayi(n)} ₺`;
 export const yuzde = (n: number) => `%${sayi(n * 100)}`;
 export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: string }[]; aciklama: string[] }
 export interface OzelProgram { id: string; ad: string; urun: string; etiket: string; donem: string; sonuc: string; aciklama: string; hesap: { ad: string; formul: string; sonuc: string }[]; kurallar: string[] }
@@ -161,7 +161,7 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
       ? ['Prim için tahsilat ve iade koşullarının tamamlanması gerekir.', 'Ödeme günü ile iade süresini finans ekibi prim ekinde belirtmelidir.']
       : [`Bu örnekte komisyonun ${yuzde(a.ilkOdeme)} kısmı ilk ödemede verilir.`,
          `Şirket ilk ödemeyi ${a.ilkGun}. gün yapar. Kalan ödemeyi ${a.kalanGun}. gün yapar.`,
-         'Şirket günlerin hangi olaydan sonra sayılacağını henüz yazmadı. Finans sorumlusu bunu sözleşmeye yazsın.',
+         'Günler müşterinin ödeme gününden sayılır. Finans sorumlusu bu kuralı sözleşmeye yazar.',
          'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.'];
   const secili = programlar.find((p) => p.id === a.kosul?.[rol]);
   const seciliOrnek: HesapOrnegi | null = secili ? { urun: secili.urun,

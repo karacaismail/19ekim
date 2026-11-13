@@ -1149,6 +1149,36 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Açılır katman (mutlak konumlu ve kendi zemini olan alt öğe) kendi kutusu olarak ölçülür. Katmandaki yazı üst öğenin
   ölçümüne katılmaz (`katmanIcinde`). Örnek: yapışık özet şeridinin altında açılan liste.
 
+### Karar listesi cevapları (kullanıcı kararları 13 Kasım 2026)
+
+Kullanıcı karar listesini düğmeli sorularla cevapladı. Cevaplar `reports/yalin-turkce/karar-listesi.md` dosyasındadır.
+Sitede uygulanan kalıcı kurallar şunlardır:
+
+- Rol adı her yerde menüdeki addır. Örneğin “İstoç Pazarlama CRM uzmanı”, “Saha satış uzmanı”, “Segika CRM”. “Ağaç” ve
+  “Kurmay” önekleri kullanılmaz. İstoç ve Segika iki ayrı projedir, iki CRM rolü birleştirilmez.
+- Sayfa adları şunlardır: “Parametreler”, “Nakit akışı”, “MLM (çok katmanlı pazarlama)”, “OPEX (işletme giderleri)”.
+  Kısaltma adın içinde açılır. OPEX kırıntısı “Finans › OPEX (işletme giderleri)” olur.
+- “Medyan” senaryosunun ve gelir öngörüsünün adı “Plan”dır. İstihdam v2’deki kadro seçeneği “Medyan” adını korur, çünkü
+  karar yalnız senaryo içindir. Gerçek istatistik ortancası yine “medyan” yazılabilir.
+- Para birimi her yerde “₺” yazılır. Ek “lira” sözüne göre ses uyumu alır: “₺’dır”, “₺’dan”, “₺’ya”, “₺’lık”. Gizli
+  e-posta sayfasındaki kişisel mektup metni bu kuralın dışındadır.
+- Her tarihte gün adı yazılır, tablo ve grafik dahil (`src/lib/dates.ts → longDate`, `shortDate`). Cümlede tarihten sonra
+  “günü” gelir: “23 Kasım Pazartesi günü başlar”, “gününden”, “gününe”. Grafik ekseninin ölçek yazısı gün adsızdır, çünkü
+  eksen bir olayın günü değil, ölçektir. Bayram ve olay adlarının içindeki tarihe gün adı eklenmez. Kırıntının kökündeki “19 Ekim” sitenin
+  adıdır, tarih değildir. `shiftText` gün adını yeniden hesaplar ve tarihin biçimini korur.
+- Aktif satıcı, ilk ödemesini yapmış ve ürünleri yayında olan satıcıdır. Rol sayfalarındaki “Kavramlar” kutusu yalnız o
+  sayfada geçen terimleri tanımlar (`src/data/kavramlar.ts`). Tanımı kaynakta olmayan terim eklenmez.
+- Ortağa ödeme günleri müşterinin ödeme gününden sayılır. “İlk 90 gün” ve “6. ay” kayıt gününden sayılır. Haftalar
+  programın başlangıcından sayılır.
+- Hedefleri İsmail Karaca günceller. Ekip liderini İsmail Karaca seçer. Temsilci ağının uyum kurallarını her ay İsmail
+  Karaca kontrol eder. Harcama yetki sınırının tutarı henüz belirlenmedi.
+- Temsilci ağında pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru (`agDerinlik` en çok 2). MLM sayfasında
+  ikinci kademenin tutarı henüz belirlenmedi. Tutar uydurulmaz, kullanıcıya sorulur.
+- Gelir planında reklam bütçesi kuralı “Varsayımlar” bölümünde bir kez tam yazılır. Öteki yerler bu bölüme gönderir.
+- Nakit akışında senaryo açıklaması yalnız sayfa başındaki sonuç kutusunda yazar (`SenaryoSecimi aciklamasiz`).
+- Satış ortaklığı v2: paket adları Basic, Platinium, Enterprise. Sayfa kayınca araç satırındaki grup başlıkları görünmez
+  olur, ekran okuyucuda grup adı kalır. Persona sekmeleri tek satırdadır ve yana kayar. Özet sütunu kendi içinde kayar.
+
 ### Görsel inceleme kararları (13 Kasım 2026)
 
 Kullanıcı bütün sayfa görsellerinin incelenmesini istedi. İnceleme bulguları `reports/gorsel-inceleme/bulgular/`

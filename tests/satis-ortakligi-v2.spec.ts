@@ -66,11 +66,11 @@ test('Koşullar penceresi: sabit koşullar burada, panelde kısa segment durumu'
   await expect(pencere(page).locator('.v2-sg-basamak')).toHaveCount(4);
 });
 
-test('fiyatlandırma robotu: üç iStoc paketi ciroyu verir, Kurumsal teklifle satılır', async ({ page, browserName }) => {
+test('fiyatlandırma robotu: üç iStoc paketi ciroyu verir, Enterprise teklifle satılır (paket adları istoc.com’daki gibi, karar listesi 5.3)', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız masaüstü Chrome');
   await ac(page);
   await expect(page.locator('.v2-so2-fiyat strong')).toHaveText('223.440 ₺');
-  await robot(page).getByRole('textbox', { name: /Kurumsal paket/ }).fill('1');
+  await robot(page).getByRole('textbox', { name: /Enterprise paket/ }).fill('1');
   // 1.200 € × 56 ₺ × 10 ay = 672.000 ₺ eklenir.
   await expect(page.locator('.v2-so2-fiyat strong')).toHaveText('895.440 ₺');
   await page.getByRole('button', { name: 'Aylık abonelik' }).click();
@@ -85,7 +85,7 @@ test('segment merdiveni: satış ve koşullar yükseltir, rozet desteği verene 
   await expect(page.locator('.v2-sg-durum')).toContainText('Altın ortak olmak için');
   const gumus = await sekmeTutari(page, 'oncu');
 
-  await robot(page).getByRole('textbox', { name: /Standart paket/ }).fill('3');
+  await robot(page).getByRole('textbox', { name: /Basic paket/ }).fill('3');
   await page.getByRole('button', { name: 'Ürün sertifikası' }).click();
   await page.getByRole('textbox', { name: 'Yenileme oranı' }).fill('80');
   await expect(page.locator('.v2-sg-adimlar [data-durum="simdi"]')).toContainText('Altın ortak');
@@ -289,7 +289,7 @@ test('320 px önce: sayfada sonuç, ayarlar alttaki çubuktan açılan çekmeced
   await dugme.click();
   const cekmece = page.getByRole('dialog', { name: 'Ayarlar' });
   await expect(cekmece).toBeVisible();
-  await cekmece.getByRole('group', { name: 'Satış: ayda kaç yeni müşteri?' }).getByRole('textbox', { name: /Standart paket/ }).fill('2');
+  await cekmece.getByRole('group', { name: 'Satış: ayda kaç yeni müşteri?' }).getByRole('textbox', { name: /Basic paket/ }).fill('2');
   // Sonuç çekmece kapanmadan güncellenir: 2 × 223.440 × %15 + ağ 13.406 = 80.438.
   await expect(cekmece.locator('.v2-cekmece-sonuc strong')).toContainText('80.438 ₺');
   await cekmece.getByRole('button', { name: 'Persona' }).click();

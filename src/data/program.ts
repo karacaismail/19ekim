@@ -4,7 +4,7 @@ import { DEFAULT_PARAMS, type Params } from './params';
 import type { PlanRow, RoleKey, Status } from './types';
 
 export const meta = {
-  planDate: '19 Ekim 2026',
+  planDate: '19 Ekim 2026 Pazartesi',
   siteTitle: 'iStoc Satış ve Pazarlama Planı',
   shortTitle: 'Satış ve Pazarlama Planı',
   description: 'iStoc’un 90 günlük satış ve pazarlama planı. Kimin ne zaman ne yapacağını, hedefleri ve eylem planını gösterir.',
@@ -110,12 +110,12 @@ const BASE_TARGET_PLAN: TargetRow[] = [
   { source: 'Saha ekibi ve ekip lideri', short: 'Saha ekibi', role: 'saha-uzmani', kayit: [80, 145, 195], aktif: [10, 22, 31] },
   { source: 'Çok katmanlı pazarlama ağı', short: 'MLM ağı', role: 'ekip-lideri', kayit: [0, 15, 30], aktif: [0, 3, 6] },
   { source: 'Organizatör eğitimleri (Aralık’tan)', short: 'Organizatör', role: 'organizator', kayit: [0, 20, 40], aktif: [0, 4, 8] },
-  { source: 'Masa başı ve dijital (uzaktan)', short: 'Masa başı + dijital', role: 'pazarlamaci', kayit: [15, 25, 35], aktif: [2, 6, 8] },
+  { source: 'İstoç Pazarlama CRM uzmanı ve dijital pazarlama uzmanı (uzaktan)', short: 'CRM uzmanı ve dijital', role: 'pazarlamaci', kayit: [15, 25, 35], aktif: [2, 6, 8] },
 ];
 
 export const crmStages: CrmStage[] = [
-  { stage: 'Aday', rule: 'Adayın iletişim bilgisi ve geldiği kanal kayda yazıldı', owner: 'Masa başı, dijital, temsilci', commission: false },
-  { stage: 'Randevu', rule: 'Saha personelinin ya da temsilcinin ziyaret tarihi belli oldu', owner: 'Masa başı', commission: false },
+  { stage: 'Aday', rule: 'Adayın iletişim bilgisi ve geldiği kanal kayda yazıldı', owner: 'İstoç Pazarlama CRM uzmanı, dijital pazarlama uzmanı ya da temsilci', commission: false },
+  { stage: 'Randevu', rule: 'Saha personelinin ya da temsilcinin ziyaret tarihi belli oldu', owner: 'İstoç Pazarlama CRM uzmanı', commission: false },
   { stage: 'Kayıt', rule: 'Satıcı istoc.com’da üye hesabı açtı', owner: 'Saha ekibi veya temsilci', commission: false },
   { stage: 'Onboarding', rule: 'Müşterinin başlangıç (onboarding) kontrol listesi 48 saat içinde tamamlandı', owner: 'Saha ekibi veya temsilci', commission: true },
   { stage: 'Mağaza açıldı', rule: 'istoc.com mağazası yayında', owner: 'Saha ekibi veya temsilci', commission: true },
@@ -210,7 +210,7 @@ export function makeProgram(p: Params) {
   const gap = Math.max(0, CIRO_TARGET - worstCiro);
 
   const targets = [
-    { label: 'Aktif satıcı', value: int(p.activeTarget), note: `Ayda ${p.subscriptionEur} € ödeyen satıcı. Hedef günü ${longDate(day90)}.` },
+    { label: 'Aktif satıcı', value: int(p.activeTarget), note: `Ayda ${p.subscriptionEur} € öder. Hedef günü ${longDate(day90)}.` },
     { label: 'Üye satıcı', value: int(p.memberTarget), note: `Kayıtlı ama ödeme yapmayan satıcı. Hedef günü ${longDate(day90)}.` },
     { label: 'Ciro', value: `En az ${tl(CIRO_TARGET)}`, note: `${longDate(start)} ile ${longDate(day90)} arası` },
     {
@@ -232,9 +232,9 @@ export function makeProgram(p: Params) {
     return { aktif: cumAktif, kayit: cumKayit, ciro: Math.round(cumPaid * SUBSCRIPTION_TRY) };
   });
   const checkpoints: Checkpoint[] = [
-    { day: '30. gün', date: day30, ...cumulative[0], rule: t1('Ekip lideri seçildi mi (27 Kasım)? Başarı ölçütleri (KPI) gerçek sonuçlara göre yeniden ayarlanır.') },
+    { day: '30. gün', date: day30, ...cumulative[0], rule: t1('Ekip lideri seçildi mi (27 Kasım Cuma)? Başarı ölçütleri (KPI) gerçek sonuçlara göre yeniden ayarlanır.') },
     { day: '60. gün', date: day60, ...cumulative[1], rule: 'Planı sürdür, iyileştir veya durdur.' },
-    { day: '90. gün', date: day90, ...cumulative[2], rule: `2. çeyrek planı hazırlanır. Dönem 2 mesai düzeni ${longDate(period2Start)} tarihinden itibaren geçerlidir.` },
+    { day: '90. gün', date: day90, ...cumulative[2], rule: `2. çeyrek planı hazırlanır. Dönem 2 mesai düzeni ${longDate(period2Start)} gününden itibaren geçerlidir.` },
   ];
 
   /* Kadro */
@@ -297,7 +297,7 @@ export function makeProgram(p: Params) {
       commission: `Kota ay içinde ${tl(quota)} satıştır. Kotadan sonra satış başına ${tl(p.commission)} prim ödenir.`,
     },
     {
-      who: `Ekip lideri (saha ekibinden seçilir, ${shortDate(dec)} tarihinde başlar)`,
+      who: `Ekip lideri (saha ekibinden seçilir, ${shortDate(dec)} günü başlar)`,
       role: 'ekip-lideri',
       status: 'SGK’lı çalışan',
       fixed: `Ayda ${tl(salaries.lead)} maaş (saha maaşı ve ${tl(p.leadUplift)} liderlik farkı)`,
@@ -310,10 +310,10 @@ export function makeProgram(p: Params) {
       status: 'Çalışan değildir, kendi şirketi üzerinden hizmet faturası keser',
       fixed: 'Yok',
       cost: '0 ₺ sabit',
-      commission: `İlk satıştan başlayarak her satış için ${tl(p.commission)} alır. Getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} sponsor payı da alır. Daha uzaktaki temsilcilerden pay almaz.`,
+      commission: `İlk satıştan başlayarak her satış için ${tl(p.commission)} alır. Getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} sponsor payı da alır. Pay en çok 2 kademe yukarı gider. İkinci kademenin tutarı henüz belirlenmedi.`,
     },
-    sgk('Masa başı (CRM)', 'pazarlamaci', salaries.masa),
-    sgk('Segika masa başı (CRM)', 'segika', salaries.segika),
+    sgk('İstoç Pazarlama CRM uzmanı', 'pazarlamaci', salaries.masa),
+    sgk('Segika CRM', 'segika', salaries.segika),
     sgk('Dijital pazarlama', 'dijital-pazarlama', salaries.dijital, p.dijitalMultiplier),
     sgk('Asistan', 'asistan', salaries.asistan, p.asistanMultiplier),
     sgk('Organizatör', 'organizator', salaries.organizator),
@@ -322,19 +322,19 @@ export function makeProgram(p: Params) {
   /* Takvim */
   const calendarEvents: CalendarEvent[] = [
     { date: p.metaStartDate, title: 'Meta reklamları başlar', role: 'yonetici', detail: `${tl(p.metaWeekly)} / hafta, sürekli. Sorumlu İsmail Karaca.`, status: 'karar' },
-    { date: s1('2026-10-28'), title: 'Teklifler', role: 'yonetici', detail: `${initialCount} kişi: asistan, masa başı, Segika, ${p.sahaCount} saha, dijital`, status: 'karar' },
+    { date: s1('2026-10-28'), title: 'Teklifler', role: 'yonetici', detail: `${initialCount} kişi: asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, ${p.sahaCount} saha satış uzmanı, dijital pazarlama uzmanı`, status: 'karar' },
     { date: s1('2026-10-30'), title: 'Sözleşme ve SGK', role: 'yonetici', detail: 'Fazla çalışma için yazılı onay dahil', status: 'karar' },
     {
       date: start,
       title: `${initialCount} kişi başlar`,
       role: 'saha-uzmani',
-      detail: `Asistan, masa başı (CRM), Segika (CRM), saha ekibi (${p.sahaCount}), dijital pazarlama. İlk iş günü ${shortDate(firstDay)}.`,
+      detail: `Asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, saha satış uzmanı (${p.sahaCount}), dijital pazarlama uzmanı. İlk iş günü ${shortDate(firstDay)}.`,
       status: 'karar',
     },
     { date: s1('2026-11-16'), title: 'Temsilci reklamları başlar', role: 'dijital-pazarlama', detail: `Haftada en fazla ~${int(p.applicationsWeekly)} başvuru`, status: 'karar' },
     { date: s1('2026-11-23'), title: 'İlk MLM bilgilendirme', role: 'ekip-lideri', detail: 'Ofis toplantı salonu', status: 'oneri' },
     { date: s1('2026-11-27'), title: 'Ekip lideri kararı', role: 'ekip-lideri', detail: 'Puan tablosuyla, mevcut ekipten seçilir', status: 'karar' },
-    { date: dec, title: decTitle, role: 'organizator', detail: t2('Eğitimler 7 Aralık’tan itibaren her iş günü 17:00'), status: 'karar' },
+    { date: dec, title: decTitle, role: 'organizator', detail: t2('Eğitimler 7 Aralık Pazartesi gününden itibaren her iş günü 17:00'), status: 'karar' },
     { date: day60, title: '60. gün kontrolü', role: 'yatirimci', detail: `≥ ${cumulative[1].aktif} aktif satıcı, ≥ ${millions(cumulative[1].ciro)}`, status: 'karar' },
     { date: p.dijitalAltDate, title: 'Asistan yoksa: dijital başlar', role: 'dijital-pazarlama', detail: `İlk iş günü ${shortDate(firstWorkday(p.dijitalAltDate))}`, status: 'bekliyor' },
     { date: day90, title: '90. gün değerlendirmesi', role: 'yatirimci', detail: `${int(p.activeTarget)} aktif, ${int(p.memberTarget)} üye, ≥ ${tl(CIRO_TARGET)}`, status: 'karar' },
@@ -343,21 +343,21 @@ export function makeProgram(p: Params) {
   /** İstihdam sırası (kararınız); Segika sonradan eklendi. */
   const hiringOrder: HiringStep[] = [
     { no: 1, title: 'İsmail Karaca', role: 'yonetici', date: 'Şimdi', count: '—', note: 'Strateji ve operasyonu yönetir. Dijital pazarlama uzmanı gelene kadar Meta reklamlarını da yürütür', status: 'karar' },
-    { no: 2, title: 'Asistan', role: 'asistan', date: longDate(start), count: String(p.asistanCount), note: `Onay bekliyor. Asistan alınmazsa dijital pazarlama ${longDate(p.dijitalAltDate)} tarihinde başlar`, status: 'bekliyor' },
-    { no: 3, title: 'Masa başı pazarlama (CRM)', role: 'pazarlamaci', date: longDate(start), count: String(p.masaCount), note: 'Günde 60 arama, 3 randevu', status: 'karar' },
-    { no: 4, title: 'Saha pazarlama ekibi', role: 'saha-uzmani', date: longDate(start), count: String(p.sahaCount), note: 'Kayıt, onboarding ve abonelik işlerini yürütür, sonra ağla büyür', status: 'karar' },
-    { no: 5, title: 'Dijital pazarlama', role: 'dijital-pazarlama', date: `${longDate(start)} (asistan yoksa ${longDate(p.dijitalAltDate)})`, count: String(p.dijitalCount), note: t1('Ölçüm araçları Google Analytics 4 (GA4), Yandex Metrica ve Google Tag Manager (GTM) 13 Kasım’da kurulur. Ocak’ta günde 3 video, %80 otomatik paylaşım'), status: 'karar' },
+    { no: 2, title: 'Asistan', role: 'asistan', date: longDate(start), count: String(p.asistanCount), note: `Onay bekliyor. Asistan alınmazsa dijital pazarlama ${longDate(p.dijitalAltDate)} günü başlar`, status: 'bekliyor' },
+    { no: 3, title: 'İstoç Pazarlama CRM uzmanı', role: 'pazarlamaci', date: longDate(start), count: String(p.masaCount), note: 'Günde 60 arama, 3 randevu', status: 'karar' },
+    { no: 4, title: 'Saha satış uzmanı', role: 'saha-uzmani', date: longDate(start), count: String(p.sahaCount), note: 'Kayıt, onboarding ve abonelik işlerini yürütür, sonra ağla büyür', status: 'karar' },
+    { no: 5, title: 'Dijital pazarlama', role: 'dijital-pazarlama', date: `${longDate(start)} (asistan yoksa ${longDate(p.dijitalAltDate)})`, count: String(p.dijitalCount), note: t1('Ölçüm araçları Google Analytics 4 (GA4), Yandex Metrica ve Google Tag Manager (GTM) 13 Kasım Cuma günü kurulur. Ocak’ta günde 3 video, %80 otomatik paylaşım'), status: 'karar' },
     { no: 6, title: 'Organizatör', role: 'organizator', date: longDate(dec), count: String(p.organizatorCount), note: 'Haftada 5 eğitim, ≥ 50 katılımcı', status: 'karar' },
-    { no: 7, title: 'Saha pazarlama ekibi: Aralık takviyesi', role: 'saha-uzmani', date: longDate(dec), count: String(p.sahaDecCount), note: 'Kapasite açığını kapatır: 45 kayıt, 8 aktif satıcı', status: 'karar' },
-    { no: 8, title: 'Segika masa başı (CRM)', role: 'segika', date: longDate(start), count: String(p.segikaCount), note: 'SGK teşvik yazılımını satar. Görevleri masa başı rolünün kopyasıdır', status: 'karar' },
+    { no: 7, title: 'Saha satış uzmanı: Aralık takviyesi', role: 'saha-uzmani', date: longDate(dec), count: String(p.sahaDecCount), note: 'Kapasite açığını kapatır: 45 kayıt, 8 aktif satıcı', status: 'karar' },
+    { no: 8, title: 'Segika CRM', role: 'segika', date: longDate(start), count: String(p.segikaCount), note: 'SGK teşvik yazılımını satar. Görevleri İstoç Pazarlama CRM uzmanının görevleriyle aynıdır', status: 'karar' },
   ];
 
   /* İsmail Karaca’nın eylem planı */
   const managerPlan: PlanRow[] = [
-    { from: s1('2026-10-19'), to: s1('2026-10-31'), action: `${longDate(p.metaStartDate)} tarihinde Meta reklamlarını başlatır. ${initialCount} kişiyi işe alır. CRM’i kurar`, target: t1('Sözleşmeler 30 Ekim 2026’ya kadar imzalanır. CRM 31 Ekim 2026’ya kadar kurulur'), milestone: true },
-    { from: s1('2026-11-02'), to: s1('2026-11-27'), action: `Kazanç planını hukuk açısından kontrol ettirir. Organizatör ve ${sahaDecLabel || 'saha personeli'} için işe alım yapar. Ekip liderini seçer`, target: t1('Hukuk kontrolü 14 Kasım 2026’ya kadar biter. Ekip lideri 27 Kasım 2026’ya kadar seçilir') },
-    { from: s1('2026-11-30'), to: day60, action: `${decTitle} (${longDate(dec)}). 60. gün kontrolünü yapar`, target: `${longDate(day60)} tarihine kadar en az ${cumulative[1].aktif} aktif satıcı olur`, milestone: true },
-    { from: s1('2027-01-04'), to: day90, action: `90. gün değerlendirmesini yapar. 2. çeyrek planını hazırlar. ${longDate(period2Start)} tarihinde yeni çalışma düzeni başlar. Bu düzende haftada 45 saat çalışılır`, target: `Karar ${longDate(day90)} tarihinde verilir`, milestone: true },
+    { from: s1('2026-10-19'), to: s1('2026-10-31'), action: `${longDate(p.metaStartDate)} günü Meta reklamlarını başlatır. ${initialCount} kişiyi işe alır. CRM’i kurar`, target: t1('Sözleşmeler 30 Ekim 2026 Cuma gününe kadar imzalanır. CRM 31 Ekim 2026 Cumartesi gününe kadar kurulur'), milestone: true },
+    { from: s1('2026-11-02'), to: s1('2026-11-27'), action: `Kazanç planını hukuk açısından kontrol ettirir. Organizatör ve ${sahaDecLabel || 'saha personeli'} için işe alım yapar. Ekip liderini seçer`, target: t1('Hukuk kontrolü 14 Kasım 2026 Cumartesi gününe kadar biter. Ekip lideri 27 Kasım 2026 Cuma gününe kadar seçilir') },
+    { from: s1('2026-11-30'), to: day60, action: `${decTitle} (${longDate(dec)}). 60. gün kontrolünü yapar`, target: `${longDate(day60)} gününe kadar en az ${cumulative[1].aktif} aktif satıcı olur`, milestone: true },
+    { from: s1('2027-01-04'), to: day90, action: `90. gün değerlendirmesini yapar. 2. çeyrek planını hazırlar. ${longDate(period2Start)} günü yeni çalışma düzeni başlar. Bu düzende haftada 45 saat çalışılır`, target: `Karar ${longDate(day90)} günü verilir`, milestone: true },
   ];
 
   /** Planlama panosundaki karar şeması (ağaç). */
@@ -370,7 +370,7 @@ export function makeProgram(p: Params) {
         role: 'yonetici',
         children: [
           {
-            name: 'Harcama yetki sınırı',
+            name: 'Harcama yetki sınırı (tutar henüz belirlenmedi)',
             role: 'yonetici',
             children: [
               { name: 'Sınır içindeyse İsmail Karaca karar verir', role: 'yonetici' },
@@ -456,11 +456,11 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Diğer rollerin maaşları',
-      decision: `Net maaşlar 27 Ekim 2026 tarihli kullanıcı kararıyla belirlendi. Masa başı ${tl(salaries.masa)}, Segika ${tl(salaries.segika)}, organizatör ${tl(salaries.organizator)} alır. Net asgari ücret ${tlExact(p.minWage)} tutarındadır. Dijital pazarlama uzmanı bunun ${num(p.dijitalMultiplier)} katını alır. Bu tutar ${tl(salaries.dijital)} eder. Asistan asgari ücretin ${num(p.asistanMultiplier)} katını alır. Bu tutar ${tl(salaries.asistan)} eder.`,
+      decision: `Net maaşlar 27 Ekim 2026 Salı tarihli kullanıcı kararıyla belirlendi. İstoç Pazarlama CRM uzmanı ${tl(salaries.masa)}, Segika ${tl(salaries.segika)}, organizatör ${tl(salaries.organizator)} alır. Net asgari ücret ${tlExact(p.minWage)} tutarındadır. Dijital pazarlama uzmanı bunun ${num(p.dijitalMultiplier)} katını alır. Bu tutar ${tl(salaries.dijital)} eder. Asistan asgari ücretin ${num(p.asistanMultiplier)} katını alır. Bu tutar ${tl(salaries.asistan)} eder.`,
     },
     {
       topic: 'CRM aracı ve aşamaları',
-      decision: t1('Frappe CRM kullanılır. Araç açık kaynaktır. Yani programın kodu herkese açıktır. Program şirketin kendi sunucusunda çalışır. Kullanıcı başına lisans ücreti ödenmez. Bu yüzden temsilciler ek maliyet getirmez. CRM aşamaları prim koşullarıyla aynıdır. Segika satışları CRM’de ayrı bir listede izlenir. CRM 31 Ekim’de kurulur. 1 Kasım’da bütün ekip CRM’i kullanır.'),
+      decision: t1('Frappe CRM kullanılır. Araç açık kaynaktır. Yani programın kodu herkese açıktır. Program şirketin kendi sunucusunda çalışır. Kullanıcı başına lisans ücreti ödenmez. Bu yüzden temsilciler ek maliyet getirmez. CRM aşamaları prim koşullarıyla aynıdır. Segika satışları CRM’de ayrı bir listede izlenir. CRM 31 Ekim Cumartesi günü kurulur. 1 Kasım Pazar günü bütün ekip CRM’i kullanır.'),
     },
     {
       topic: 'Yapay zekâ ve otomasyon araç bütçesi',
@@ -468,7 +468,7 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Kazanç planı (MLM)',
-      decision: `Temsilci her satış için ${tl(p.commission)} kazanır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, yalnız kendi getirdiği temsilcinin satışlarından pay alır. Her satış için ${tl(p.sponsorShare)} alır. Daha uzaktaki temsilcilerden pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya getirme primi yoktur. Bir satışta ödenen toplam pay en çok ${tl(maxPayout)} olur. ${t1('Sözleşmenin ve hukuki onayın tarihi 14 Kasım.')}`,
+      decision: `Temsilci her satış için ${tl(p.commission)} kazanır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, yalnız kendi getirdiği temsilcinin satışlarından pay alır. Her satış için ${tl(p.sponsorShare)} alır. Daha uzaktaki temsilcilerden pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya getirme primi yoktur. Bir satışta ödenen toplam pay en çok ${tl(maxPayout)} olur. ${t1('Sözleşmenin ve hukuki onayın tarihi 14 Kasım Cumartesi.')}`,
     },
     {
       topic: 'Ekip lideri primi',
@@ -476,20 +476,20 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Kapasite açığı 45 kayıt ve 8 aktif satıcı',
-      decision: `${sahaDecLabel ? `${sahaDecLabel.replace(/^./, (c) => c.toUpperCase())} ${longDate(dec)} tarihinde başlar` : 'Aralık takviyesi yok'}. Ücret ve prim kuralı aynıdır. Bu takviyenin hedefi ekipteki açığı kapatmaktır. Açık, 45 kayıt ve 8 aktif satıcıdır. Aralık’ta 15 kayıt ve 2 aktif satıcı hedeflenir. Ocak’ta 30 kayıt ve 6 aktif satıcı hedeflenir. Bu takviye ${decMonths} ayda ${tl(cost(p.sahaDecCount * decMonths * p.sahaSalary))} ek sabit maliyet getirir.`,
+      decision: `${sahaDecLabel ? `${sahaDecLabel.replace(/^./, (c) => c.toUpperCase())} ${longDate(dec)} günü başlar` : 'Aralık takviyesi yok'}. Ücret ve prim kuralı aynıdır. Bu takviyenin hedefi ekipteki açığı kapatmaktır. Açık, 45 kayıt ve 8 aktif satıcıdır. Aralık’ta 15 kayıt ve 2 aktif satıcı hedeflenir. Ocak’ta 30 kayıt ve 6 aktif satıcı hedeflenir. Bu takviye ${decMonths} ayda ${tl(cost(p.sahaDecCount * decMonths * p.sahaSalary))} ek sabit maliyet getirir.`,
     },
     {
       topic: 'Programın ilk 3 ayında ve sonrasında mesai düzeni',
-      decision: `Dönem 1, ${longDate(firstDay)} tarihinde başlar ve ${longDate(day90)} tarihinde biter. Bu dönemde pazartesiden cumaya kadar günde 11 saat çalışılır. Cumartesi 5 saat çalışılır. Haftada toplam 60 saat eder. Bunun 15 saati fazla çalışmadır. Program başında başlayanlar ${overtimeUsed.kasim} saat fazla çalışma kullanır. Aralık’ta başlayanlar ${overtimeUsed.aralik} saat kullanır. Aralık’ta başlayan organizatör ${overtimeUsed.organizator} saat kullanır. Dönem 2, ${longDate(period2Start)} tarihinde başlar. Bu dönemde pazartesiden cumaya kadar günde 8 saat çalışılır. Cumartesi 5 saat çalışılır. Haftada toplam 45 saat eder. Planlı fazla çalışma yoktur. Kalan fazla çalışma hakkı en az ${int(Math.max(0, OVERTIME_CAP - overtimeUsed.kasim))} saattir. Bu hak yalnız kampanya haftalarında ve yazılı onayla kullanılır.`,
+      decision: `Dönem 1, ${longDate(firstDay)} günü başlar ve ${longDate(day90)} günü biter. Bu dönemde pazartesiden cumaya kadar günde 11 saat çalışılır. Cumartesi 5 saat çalışılır. Haftada toplam 60 saat eder. Bunun 15 saati fazla çalışmadır. Program başında başlayanlar ${overtimeUsed.kasim} saat fazla çalışma kullanır. Aralık’ta başlayanlar ${overtimeUsed.aralik} saat kullanır. Aralık’ta başlayan organizatör ${overtimeUsed.organizator} saat kullanır. Dönem 2, ${longDate(period2Start)} günü başlar. Bu dönemde pazartesiden cumaya kadar günde 8 saat çalışılır. Cumartesi 5 saat çalışılır. Haftada toplam 45 saat eder. Planlı fazla çalışma yoktur. Kalan fazla çalışma hakkı en az ${int(Math.max(0, OVERTIME_CAP - overtimeUsed.kasim))} saattir. Bu hak yalnız kampanya haftalarında ve yazılı onayla kullanılır.`,
     },
     {
       topic: 'Segika SGK teşvik yazılımı için satış planı (tahtadaki “istoç SGK” notu)',
-      decision: `Segika markalı SGK teşvik yazılımını satmak için bir pazarlama planı hazırlanır. Bu iş, masa başı pazarlama (CRM) işiyle aynıdır. Görevler, başarı ölçütleri (KPI), günlük düzen ve ücret de aynıdır. ${p.segikaCount} kişi ${longDate(start)} tarihinde başlar.`,
+      decision: `Segika markalı SGK teşvik yazılımını satmak için bir pazarlama planı hazırlanır. Bu iş, İstoç Pazarlama CRM uzmanının işiyle aynıdır. Görevler, başarı ölçütleri (KPI), günlük düzen ve ücret de aynıdır. ${p.segikaCount} kişi ${longDate(start)} günü başlar.`,
     },
   ];
 
   const openDecisions: OpenDecision[] = [
-    { topic: 'Asistan alınacak mı?', proposal: `Asistan alınmazsa dijital pazarlama ${longDate(p.dijitalAltDate)} tarihinde başlar.`, owner: 'yatirimci', deadline: s1('2026-10-26') },
+    { topic: 'Asistan alınacak mı?', proposal: `Asistan alınmazsa dijital pazarlama ${longDate(p.dijitalAltDate)} günü başlar.`, owner: 'yatirimci', deadline: s1('2026-10-26') },
     {
       topic: 'İlk pazarlama işi teklif isteği (RFQ) reklamı olsun mu?',
       proposal:

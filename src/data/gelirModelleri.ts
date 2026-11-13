@@ -71,7 +71,7 @@ export const PRO_AYLIK_EUR = 599;
 export const eur = (n: number) => `${n.toLocaleString('tr-TR')} €`;
 
 /** Kararların alındığı gün. */
-export const KARAR_TARIHI = '13 Kasım 2026';
+export const KARAR_TARIHI = '13 Kasım 2026 Cuma';
 
 /** Basic pakete CRM ekinin aylık ücreti (€). Kullanıcı kararı 13 Kasım 2026. Yıllık ücret Parametreler’deki ay sayısıyla hesaplanır. */
 export const CRM_EKI_AYLIK_EUR = 99;
@@ -493,7 +493,7 @@ export const ONCELIK_ONERISI: { id: string; neden: string }[] = [
 ];
 
 export const ONCELIK_NOTU =
-  'Satıştan komisyon alınmayacak. Bu, 13 Kasım 2026 kararıdır. Emanet ödeme ileride ayrı bir özellik olarak gelecek. Sipariş ve ödeme akışı çalışmadan emanet ödeme denenemez.';
+  'Satıştan komisyon alınmayacak. Bu, 13 Kasım 2026 Cuma kararıdır. Emanet ödeme ileride ayrı bir özellik olarak gelecek. Sipariş ve ödeme akışı çalışmadan emanet ödeme denenemez.';
 
 /** Araştırma notu: temkinli dil, “kaynaklara göre”. Doğrulanmış pazar verisi değildir. */
 export const ARASTIRMA_NOTU: string[] = [

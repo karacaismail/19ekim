@@ -4,15 +4,15 @@ import { kosulSonucu, seciliKosul } from '../../kosullar';
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} TL`;
+const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
 const avro = (n: number) => `${sayi(n)} €`;
 const yuzde = (n: number) => `yüzde ${sayi(n * 100)}`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
-  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(yillikFiyat(a))} eder.`;
+  `Yıllık paket ${sayi(a.istocYilAy)} aylık bedeldir: ${avro(a.istocAyEur * a.istocYilAy)}. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(yillikFiyat(a))} eder.`;
 const aylikBedel = (a: Ayar) =>
-  `Satıcının aylık bedeli ${avro(a.istocAyEur)} olur. Bu örnekte kur ${sayi(a.kur)} TL olduğu için ${tl(aylikFiyat(a))} eder.`;
+  `Satıcının aylık bedeli ${avro(a.istocAyEur)} olur. Bu örnekte kur ${sayi(a.kur)} ₺ olduğu için ${tl(aylikFiyat(a))} eder.`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const son = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, ...aciklama: string[]): AkisSecenegi =>
@@ -167,7 +167,7 @@ function anaAkis(a: Ayar): IsAkisi {
       ],
     },
     odemeAdimi([yillikPaket(a), odemeMetni,
-      `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günlerin hangi olaydan sayılacağını finans sorumlusu yazacak.`]),
+      `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günler müşterinin ödeme gününden sayılır.`]),
   );
   return {
     baslik: s === 'A' ? 'Tanıştıran danışman' : s === 'B' ? 'Gösterim yapan danışman' : 'Satışı kapatan danışman',
@@ -186,7 +186,7 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
     : 'Ortaklık sorumlusu aday ve hazır satıcı sayısını program ekine yazar.';
   const oranGunu = kuralSayisi(a, p, 'Oran örnektir');
   const oranKurali = oranGunu
-    ? `Bu oran örnektir. Finans sorumlusu oranı ${oranGunu}. günde kesinleştirir. Günün hangi olaydan sayılacağını finans sorumlusu yazacak.`
+    ? `Bu oran örnektir. Finans sorumlusu oranı ${oranGunu}. günde kesinleştirir. Gün, müşterinin ödeme gününden sayılır.`
     : 'Bu oran örnektir. Finans sorumlusu oranı kesinleştirir.';
   const [kabulGunu, korumaGunu] = kuralSayilari(a, p, 'iş günü');
   const kabulKurali = kabulGunu && korumaGunu

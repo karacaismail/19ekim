@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import { NO_SECOND_SAHA, SENS_RETENTIONS } from '../data/breakeven';
 import type { Params } from '../data/params';
-import { SCALE_RULE } from '../data/revenue';
 import { monthName } from '../lib/dates';
 import { int, tl } from '../lib/format';
 import { href } from '../lib/paths';
@@ -195,7 +194,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
             { id: 'kural', name: 'LTV ÷ CAC kuralı' },
             { id: 'sabit', name: 'Sabit bütçe' },
           ]}
-          note={`Sistem önce satıcı değerini (LTV) hesaplar. Satıcı değeri, bir satıcıdan beklenen toplam abonelik geliridir. Bu değer kâr değildir. Sistem bu değeri satıcı edinme maliyetiyle (CAC) karşılaştırır. Değer maliyetin en az ${SCALE_RULE.threshold} katıysa bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok başlangıcın ${p.dijitalScaleMax} katına ulaşır. Formül dijital strateji bölümündedir.`}
+          note={`Sistem önce satıcı değerini (LTV) hesaplar. Satıcı değeri, bir satıcıdan beklenen toplam abonelik geliridir. Bu değer kâr değildir. Sistem bu değeri satıcı edinme maliyetiyle (CAC) karşılaştırır. Bütçe bu orana göre büyür. Kuralın tamamı sayfanın sonundaki “Varsayımlar” bölümündedir.`}
           onChange={(v) => set('dijitalScale', v === 'kural')}
         />
         <Choice
@@ -203,7 +202,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.fxGrowth ?? kurGecerli)}
           options={degerler([0, 0.1, 0.4], kurGecerli, opts.fxGrowth).map((v) => ({ id: String(v), name: `%${Math.round(v * 100)}` }))}
           baglam={<Baglanti kaynak="parametre" acik={opts.fxGrowth === null} deger={`%${Math.round((opts.fxGrowth ?? kurGecerli) * 100)}`} onChange={(acik) => set('fxGrowth', acik ? null : kurGecerli)} />}
-          note="Abonelik fiyatı euro olarak değişmez. Euro kuru her ay biraz artar. Her ayın artışı bir önceki ayın kuruna eklenir. Bu yüzden fiyatın TL karşılığı her ay yükselir. %0 seçilirse kur sabit kalır. Sheets giderleri ₺ cinsindendir ve kendi 2027 artışıyla hesaplanır."
+          note="Abonelik fiyatı euro olarak değişmez. Euro kuru her ay biraz artar. Her ayın artışı bir önceki ayın kuruna eklenir. Bu yüzden fiyatın ₺ karşılığı her ay yükselir. %0 seçilirse kur sabit kalır. Sheets giderleri ₺ cinsindendir ve kendi 2027 artışıyla hesaplanır."
           onChange={(v) => set('fxGrowth', Number(v))}
         />
         <Choice

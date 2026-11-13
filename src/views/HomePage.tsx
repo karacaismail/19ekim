@@ -26,7 +26,7 @@ function OrgChart() {
         id="organizasyon"
         title="İsmail Karaca, kurmay ekip ve dört ağaç"
         note="Bir kutuya tıklayınca o rolün sayfası açılır. Aynı sayfalara üst menüden de ulaşabilirsiniz."
-        summary={`Organizasyon şeması, ${count(ORG)} kutu. Tepede İsmail Karaca var. Altında asistan ve yazılım ekibi bulunur. Dört ağaç şunlardır: 1 dijital pazarlama, 2 masa başı pazarlama (CRM), 3 saha satış, 4 organizatör. Saha satış ağacında saha ekibi, ekip lideri ve bağımsız temsilciler yer alır. Ayrıca Segika masa başı (CRM) da vardır.`}
+        summary={`Organizasyon şeması, ${count(ORG)} kutu. Tepede İsmail Karaca var. Altında asistan ve yazılım ekibi bulunur. Dört ekip şunlardır: dijital pazarlama uzmanı, İstoç Pazarlama CRM uzmanı, saha satış uzmanı ve organizatör. Saha satış uzmanının altında saha ekibi, ekip lideri ve bağımsız temsilciler yer alır. Ayrıca Segika CRM de vardır.`}
         spec={{ kind: 'org', root: toChart(ORG) }}
         size="xl"
         wide

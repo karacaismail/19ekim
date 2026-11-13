@@ -215,7 +215,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   const tumu = aktif(() => true, () => 1);
   const hatli = aktif((y) => ['saha', 'cagri'].includes(rolOf(y.pozisyon)) || ['Yönetici', 'Yönetim'].includes(y.pozisyon.seviye), () => 1);
   const saha = aktif((y) => rolOf(y.pozisyon) === 'saha', () => 1);
-  ekle({ id: 'lisans', grup: 'kisi', tur: 'opex', ad: 'Microsoft 365 lisansı', kural: 'Her yeni kişiye 1 lisans alınır. Lisansın fiyatı dolarla belirlenir. Bu yüzden 2027 için %29,73 artış uygulanmaz. Hesapta 5 Kasım 2026 kuruyla bulunan fiyat kullanılır. “Kullanılan fiyatlar” tablosundaki 2027 fiyatı bu kalemde kullanılmaz.', fiyatId: 'microsoft-365-business-standard', aylik: tumu.map((n) => n * fiyat('microsoft-365-business-standard')) });
+  ekle({ id: 'lisans', grup: 'kisi', tur: 'opex', ad: 'Microsoft 365 lisansı', kural: 'Her yeni kişiye 1 lisans alınır. Lisansın fiyatı dolarla belirlenir. Bu yüzden 2027 için %29,73 artış uygulanmaz. Hesapta 5 Kasım 2026 Perşembe kuruyla bulunan fiyat kullanılır. “Kullanılan fiyatlar” tablosundaki 2027 fiyatı bu kalemde kullanılmaz.', fiyatId: 'microsoft-365-business-standard', aylik: tumu.map((n) => n * fiyat('microsoft-365-business-standard')) });
   ekle({ id: 'hat', grup: 'kisi', tur: 'opex', ad: 'Kurumsal mobil hat', kural: 'Saha, çağrı ve satış ekibine 1 hat alınır. Yöneticilere de 1 hat alınır.', fiyatId: 'mobil-hat-kurumsal-20gb', aylik: hatli.map((n) => n * fiyat('mobil-hat-kurumsal-20gb')) });
   ekle({ id: 'ulasim', grup: 'kisi', tur: 'opex', ad: 'Saha ulaşımı (İstanbulkart)', kural: 'Yeni saha personeline aylık İstanbulkart aboneliği alınır. Saha işi İSTOÇ içinde yürür. Bu yüzden araç kiralanmaz.', fiyatId: 'istanbulkart-abonman', aylik: saha.map((n) => n * fiyat('istanbulkart-abonman')) });
   ekle({ id: 'egitim', grup: 'kisi', tur: 'opex', ad: 'Eğitim bütçesi', kural: 'Her yeni kişi için yıllık eğitim bütçesi ayrılır. Hesap her ay bu bütçenin 12’de 1’ini sayar.', fiyatId: 'egitim-butcesi-kisi-yil', aylik: tumu.map((n) => (n * fiyat('egitim-butcesi-kisi-yil')) / 12) });
@@ -229,7 +229,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
 
   // 4. Pazarlama ve etkinlik.
   const meta = (DEFAULT_PARAMS.metaWeekly * 52) / 12;
-  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `“Parametreler” sayfasında haftalık reklam bütçesi ${new Intl.NumberFormat('tr-TR').format(DEFAULT_PARAMS.metaWeekly)} ₺’dir. Tutar yılda 52 hafta için hesaplanır. Bu kalem Sheets planında yoktur.`, aylik: sifir().map(() => meta) });
+  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `“Parametreler” sayfasında haftalık reklam bütçesi ${new Intl.NumberFormat('tr-TR').format(DEFAULT_PARAMS.metaWeekly)} ₺’dır. Tutar yılda 52 hafta için hesaplanır. Bu kalem Sheets planında yoktur.`, aylik: sifir().map(() => meta) });
   const e = ETKINLIK[s];
   const ikram = fiyat('etkinlik-coffee-break-50');
   ekle({ id: 'etkinlik-ikram', grup: 'pazarlama', tur: 'opex', ad: 'Etkinlik ikramı', kural: `Her ay ${e.ic + e.dis} satıcı eğitimi yapılır. Her eğitimde 50 kişilik kahve arası ikramı verilir.`, fiyatId: 'etkinlik-coffee-break-50', aylik: sifir().map(() => (e.ic + e.dis) * ikram) });

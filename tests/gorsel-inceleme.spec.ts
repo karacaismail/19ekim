@@ -85,7 +85,7 @@ test('Kararlar 375 px: kart başlığı soru, tarih özette; gecikmiş karar uya
   expect(await gecikti.evaluate((e) => getComputedStyle(e).color)).toBe(await tokenRengi(page, '--pill-missing-fg'));
   const verilen = page.locator('.table-block:has(#verilen-tablo)');
   await expect(verilen.locator('.kayit-ozet-etiket').first()).toHaveText('Karar tarihi');
-  for (const ad of (await verilen.locator('.kayit-ad').allInnerTexts()).slice(0, 5)) expect(ad).not.toMatch(/^\d+ \p{L}+ \d{4}$/u);
+  for (const ad of (await verilen.locator('.kayit-ad').allInnerTexts()).slice(0, 5)) expect(ad).not.toMatch(/^\d+ \p{L}+ \d{4}( \p{L}+)?$/u);
 });
 
 for (const genislik of [320, 390]) {
@@ -144,4 +144,50 @@ test('hesap araçları 1280 px: yan menü kayınca yapışık kırıntı satır�
     })
     .toBeGreaterThanOrEqual(0);
   await expect(menu.locator('.applet-gezgin-baslik').first()).toBeInViewport({ ratio: 1 });
+});
+
+/* ---------- Karar listesi cevapları (kullanıcı kararları 13 Kasım 2026) ---------- */
+
+test('rol sayfası: Kavramlar kutusu sayfada geçen terimleri tanımlar (karar listesi 7.1 ve 2.1)', async ({ page }) => {
+  await ac(page, 'roller/saha-uzmani/', 1280);
+  const kutu = page.getByRole('complementary', { name: 'Kavramlar' });
+  await expect(kutu.locator('dt')).toHaveText(['Aktif satıcı', 'Kayıt']);
+  await expect(kutu.locator('dd').first()).toHaveText('İlk ödemesini yapmış ve ürünleri yayında olan satıcıdır.');
+});
+
+test('nakit akışı: senaryo açıklaması ve kaynak bilgisi sayfada bir kez yazar (karar listesi 8.5 ve 7.3)', async ({ page }) => {
+  await ac(page, 'nakit-akisi/', 1280);
+  const metin = await page.locator('main').innerText();
+  const say = (parca: string) => metin.split(parca).length - 1;
+  expect(say('Aylık abonelerin %70 kadarı her ay aboneliğini yeniler.')).toBe(1);
+  expect(say('Girişler gelir planının senaryo ve seçeneklerinden gelir.')).toBe(1);
+  // Senaryo adı “Plan” (karar listesi 1.4).
+  expect(metin).not.toMatch(/\bMedyan\b/);
+});
+
+test('satış ortaklığı v2 1280 px: kayınca şeritler incelir, özet kendi içinde kayar (karar listesi 8.1, 8.2, 8.3)', async ({ page }) => {
+  await ac(page, 'satis-ortakligi/?surum=v2', 1280);
+  await page.mouse.move(640, 500);
+  for (let i = 0; i < 6; i++) {
+    await page.mouse.wheel(0, 250);
+    await page.waitForTimeout(40);
+  }
+  await expect(page.locator('html')).toHaveAttribute('data-kaydirildi', '');
+  const arac = page.locator('.v2-so2-arac');
+  // “Ürün” ve “Müşteri öder” başlıkları görünmez, grup adı ekran okuyucuda kalır.
+  const urun = arac.getByRole('group', { name: 'Ürün' });
+  await expect(urun).toBeVisible();
+  expect(await urun.locator('.secim-etiket').evaluate((e) => e.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  // “Koşullar” düğmesi ürün satırındadır.
+  const ust = async (l: import('@playwright/test').Locator) => (await l.boundingBox())!.y + (await l.boundingBox())!.height / 2;
+  expect(Math.abs((await ust(arac.getByRole('button', { name: 'Koşullar' }))) - (await ust(urun)))).toBeLessThan(30);
+  // Persona sekmeleri tek satırdadır.
+  const ustler = await page.locator('.v2-so2-rol').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  expect(new Set(ustler).size).toBe(1);
+  // Özet klavyeyle odaklanan bir bölgedir. Üstü yapışık şeritlerin altında görünür, içi kayar.
+  const ozet = page.getByRole('region', { name: 'Özet' });
+  await expect(ozet).toHaveAttribute('tabindex', '0');
+  const kirinti = (await page.locator('.crumbs-row').boundingBox())!;
+  expect((await ozet.boundingBox())!.y).toBeGreaterThanOrEqual(kirinti.y + kirinti.height - 1);
+  expect(await ozet.evaluate((e) => getComputedStyle(e).overflowY)).toBe('auto');
 });

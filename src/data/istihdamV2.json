@@ -12,7 +12,7 @@
   "iseAlimAyi": "İşe alım ayının başında başlandığı varsayılır. 2027’den önce başlayanlar için 12 ay sayılır.",
   "asgariUcret2027": {
    "aciklandi": false,
-   "durum": "5 Kasım 2026’ya kadar 2027 asgari ücreti açıklanmadı. Asgari Ücret Tespit Komisyonu Aralık 2026’da toplanır. Yeni ücret 1 Ocak 2027’de başlar.",
+   "durum": "5 Kasım 2026 Perşembe gününe kadar 2027 asgari ücreti açıklanmadı. Asgari Ücret Tespit Komisyonu Aralık 2026’da toplanır. Yeni ücret 1 Ocak 2027 Cuma günü başlar.",
    "varsayilanArtis": "yüzde 29,73",
    "net": 36422.35,
    "brut": 42849.82,
@@ -26,7 +26,7 @@
      "net": 36498
     }
    },
-   "gerekce": "Kullanıcı kararıyla (5 Kasım 2026) Google Sheets gider tablosundaki varsayım kullanılır. Tablo 2027 artışını Eylül 2026 yıllık TÜFE (tüketici fiyat endeksi) değeriyle, yüzde 29,73 alır. Böylece kadro planı ile gider planı aynı asgari ücreti kullanır. 2026 artışı yüzde 27 oldu. Haberlerde aktarılan beklentiler yüzde 21 ile 30 arasındadır.",
+   "gerekce": "Kullanıcı kararıyla (5 Kasım 2026 Perşembe) Google Sheets gider tablosundaki varsayım kullanılır. Tablo 2027 artışını Eylül 2026 yıllık TÜFE (tüketici fiyat endeksi) değeriyle, yüzde 29,73 alır. Böylece kadro planı ile gider planı aynı asgari ücreti kullanır. 2026 artışı yüzde 27 oldu. Haberlerde aktarılan beklentiler yüzde 21 ile 30 arasındadır.",
    "kaynak": [
     "milligazete-2027-asgari",
     "politikam-asgari-senaryo",
@@ -46,7 +46,7 @@
     "hedef2027": "yüzde 21"
    },
    "piyasaBeklentisi": "Ağustos 2026 Piyasa Katılımcıları Anketi 2027 yıl sonu için yüzde 21,5 bekler.",
-   "sonVeri": "Eylül 2026 yıllık TÜFE yüzde 29,73. Ekim 2026 verisi 3 Kasım 2026’da açıklandı ama bu çalışmada doğrulanamadı.",
+   "sonVeri": "Eylül 2026 yıllık TÜFE yüzde 29,73. Ekim 2026 verisi 3 Kasım 2026 Salı günü açıklandı ama bu çalışmada doğrulanamadı.",
    "not": "TCMB’nin 2026 yılı dördüncü Enflasyon Raporu bu tarih itibarıyla bulunamadı. Bulunursa 2027 tahmini güncellenmelidir.",
    "kaynak": [
     "alomaliye-tcmb-2026-iii",
@@ -55,7 +55,7 @@
   },
   "maasArtisi": {
    "oran": "yüzde 29,73",
-   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı. Maaşlar en yakın 50 ₺’ye yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar varsayılan asgari ücretle hesaplandı. Dijital pazarlama maaşı asgari ücretin 1,25 katı, asistan maaşı 1,5 katıdır.",
+   "yontem": "eleman.net’in 2026 İstanbul ortalamaları 2027 için yüzde 29,73 artırıldı. Maaşlar en yakın 50 ₺’ya yuvarlandı. Bu oran Google Sheets gider tablosundaki 2027 artışıdır (Eylül 2026 yıllık TÜFE). Mevcut kullanıcı kararlarındaki net tutarlar da aynı oranla artırıldı. Asgari ücrete bağlı maaşlar varsayılan asgari ücretle hesaplandı. Dijital pazarlama maaşı asgari ücretin 1,25 katı, asistan maaşı 1,5 katıdır.",
    "sinir": "Ücret verisini eleman.net, iş ilanı ve özgeçmişteki ücret beyanından hesaplar. Veri, tutarın net mi brüt mü olduğunu yazmaz. Bu plan tutarları net kabul eder. Kariyer.net sayfaları erişime kapalı olduğu için arama sonucundaki özetler yalnız kontrol amacıyla kullanıldı. Michael Page, Hays ve Youthall’ın 2026 Türkiye ücret rehberleri bu çalışmada bulunamadı.",
    "kaynak": [
     "eleman-net-2026"
@@ -63,7 +63,7 @@
   },
   "gelirHedefleri": {
    "kaynak": "Projenin gelir planı simülasyonu (src/data/revenue.ts) varsayılan parametrelerle çalıştırıldı. Ayrı bir 2027 gelir hedefi kararı bulunmadı. Bu yüzden her seçenek kendi senaryosunun 2027 gelirine göre boyutlandırıldı.",
-   "gelirTanimi": "Gelir yalnız abonelik ödemesidir (399 € / ay, yıllık peşin 3.990 €). Pro (599 €) ve Kurumsal paket, işlem komisyonu, güvenli ödeme ve ihracat gelire dahil değildir. Kur yılda yüzde 25 artar. KDV ve tahsilat gecikmesi yoktur.",
+   "gelirTanimi": "Gelir yalnız abonelik ödemesidir (399 € / ay, yıllık peşin 3.990 €). Platinium (599 €) ve Enterprise paket, işlem komisyonu, güvenli ödeme ve ihracat gelire dahil değildir. Kur yılda yüzde 25 artar. KDV ve tahsilat gecikmesi yoktur.",
    "senaryolar": {
     "ekonomik": {
      "senaryo": "Kötümser",
@@ -76,7 +76,7 @@
      "kapasite": "yüzde 60"
     },
     "medyan": {
-     "senaryo": "Medyan",
+     "senaryo": "Plan",
      "gelir2027": 68205762,
      "gelirAralik2027": 9432233,
      "yeniAktif2027": 634,
@@ -96,12 +96,12 @@
      "kapasite": "yüzde 130"
     }
    },
-   "doksanGunHedefi": "90 günde 100 aktif satıcı, 500 üye satıcı ve en az 3.000.000 TL ciro (Parametreler)."
+   "doksanGunHedefi": "90 günde 100 aktif satıcı, 500 üye satıcı ve en az 3.000.000 ₺ ciro (Parametreler)."
   },
   "kadroBoyutlama": [
    "Satıcı uyumu: yeni aktif satıcı başına 4 saat kurulum, kişi başı ayda net 125 saat (istihdam takviminin NET_SAAT değeri).",
    "Satıcı başarısı: bir yönetici için yaklaşık 150 ödeyen satıcı (tahmin).",
-   "Saha personeli: gelir planının büyüme kuralı. Medyan senaryoda 2027 sonunda 3, iyimserde 4 kişi.",
+   "Saha personeli: gelir planının büyüme kuralı. Plan senaryosunda 2027 sonunda 3, iyimserde 4 kişi.",
    "Diğer roller: ek roller listesindeki tetikler ve iş yükü varsayımları."
   ]
  },
@@ -215,7 +215,7 @@
    "seviye": "Yönetim",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "İşlem komisyonu ve güvenli ödeme gibi gelir modelleri sepet, sipariş ve ödeme akışı olmadan başlamaz. Güçlü seçenekte ürün ve teknoloji ekibi 12 kişiyi aşar ve ödeme kuruluşu entegrasyonu ile bilgi güvenliğinin tek bir teknik sahibi olmalıdır. Ekonomik ve medyan seçenekte bu iş mevcut yazılım ekibinin en kıdemli kişisinde kalır.",
+   "gerekce": "İşlem komisyonu ve güvenli ödeme gibi gelir modelleri sepet, sipariş ve ödeme akışı olmadan başlamaz. Güçlü seçenekte ürün ve teknoloji ekibi 12 kişiyi aşar ve ödeme kuruluşu entegrasyonu ile bilgi güvenliğinin tek bir teknik sahibi olmalıdır. Ekonomik ve Medyan seçenekte bu iş mevcut yazılım ekibinin en kıdemli kişisinde kalır.",
    "nitelikler": [
     "Bilgisayar mühendisliği ya da eşdeğer alanda lisans",
     "En az 10 yıl yazılım, en az 3 yıl ekip yönetimi deneyimi",
@@ -224,7 +224,7 @@
     "İyi düzeyde İngilizce"
    ],
    "netMaas2027": 207550,
-   "maasDayanagi": "eleman.net 2026 verisinde Yazılım Mühendisi için en yüksek ücret 128.600 TL, DevOps Mühendisi için 139.200 TL görünür. Direktör için 160.000 TL alınıp yüzde 29,73 artırıldı. Tahmindir.",
+   "maasDayanagi": "eleman.net 2026 verisinde Yazılım Mühendisi için en yüksek ücret 128.600 ₺, DevOps Mühendisi için 139.200 ₺ görünür. Direktör için 160.000 ₺ alınıp yüzde 29,73 artırıldı. Tahmindir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -253,7 +253,7 @@
    "id": "istoc-masa-basi",
    "kume": "satis",
    "departman": "Satış",
-   "unvan": "İstoç masa başı",
+   "unvan": "İstoç Pazarlama CRM uzmanı",
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": true,
@@ -266,7 +266,7 @@
     "Esnafla rahat iletişim kurabilme"
    ],
    "netMaas2027": 45405.5,
-   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 29,73 artışla 45.405,50 TL. 2026 tutarı 2027 asgari ücret varsayımının (net 36.422 TL) altında kaldığı için artış zorunludur. Bu tutar Google Sheets’teki 2027 tutarıyla aynıdır.",
+   "maasDayanagi": "2026 kullanıcı kararı net 35.000 ₺. Yüzde 29,73 artışla 45.405,50 ₺. 2026 tutarı 2027 asgari ücret varsayımının (net 36.422 ₺) altında kaldığı için artış zorunludur. Bu tutar Google Sheets’teki 2027 tutarıyla aynıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -313,7 +313,7 @@
     "Günlük rota ve CRM kaydı disiplini"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 29,73 artışla 64.865 TL.",
+   "maasDayanagi": "2026 kullanıcı kararı net 50.000 ₺. Yüzde 29,73 artışla 64.865 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 2,
@@ -361,7 +361,7 @@
     "Koşullar sağlanınca alınır"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 TL’dir. Yüzde 29,73 artışla 64.865 TL olur.",
+   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 ₺’dır. Yüzde 29,73 artışla 64.865 ₺ olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -405,7 +405,7 @@
     "Tercihen İSTOÇ dışındaki toptan merkezlerini tanıma"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 TL’dir. Yüzde 29,73 artışla 64.865 TL olur.",
+   "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 ₺’dır. Yüzde 29,73 artışla 64.865 ₺ olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -438,7 +438,7 @@
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Kural sağlanırsa satıcı bulma reklam bütçesi her 3 ayda 1,5 katına çıkar. Bütçe en çok başlangıcın 4 katına ulaşır. Bu durumda ayda yaklaşık 50 olan reklam kaydı 200’e yaklaşır. Tek masa başı personeli bu kayıtları 48 saat içinde arayamaz ve kayıt soğur.",
+   "gerekce": "Kural sağlanırsa satıcı bulma reklam bütçesi her 3 ayda 1,5 katına çıkar. Bütçe en çok başlangıcın 4 katına ulaşır. Bu durumda ayda yaklaşık 50 olan reklam kaydı 200’e yaklaşır. Tek İstoç Pazarlama CRM uzmanı bu kayıtları 48 saat içinde arayamaz ve kayıt soğur.",
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
     "En az 1 yıl telefonla satış deneyimi",
@@ -446,7 +446,7 @@
     "Günde 60 aramayı sürdürebilme"
    ],
    "netMaas2027": 45405.5,
-   "maasDayanagi": "Maaş İstoç masa başı uzmanıyla aynıdır. 2026’da net 35.000 TL’dir. Yüzde 29,73 artışla yaklaşık 45.406 TL olur.",
+   "maasDayanagi": "Maaş İstoç Pazarlama CRM uzmanıyla aynıdır. 2026’da net 35.000 ₺’dır. Yüzde 29,73 artışla yaklaşık 45.406 ₺ olur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -482,7 +482,7 @@
    "seviye": "Ekip lideri",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Ek roller listesine göre satış personeli 5 kişiye ulaşınca ekip lideri gerekir. Mevcut takvimde 3 saha, 1 masa başı ve organizatörle bu eşik Aralık 2026’da aşılır. Ekonomik seçenekte bu iş kurucuda kalır ve en başarılı saha personeline liderlik farkı ödenebilir.",
+   "gerekce": "Ek roller listesine göre satış personeli 5 kişiye ulaşınca ekip lideri gerekir. Mevcut takvimde bu eşik Aralık 2026’da aşılır. O ayda 3 saha satış uzmanı, 1 İstoç Pazarlama CRM uzmanı ve organizatör çalışır. Ekonomik seçenekte bu iş kurucuda kalır ve en başarılı saha personeline liderlik farkı ödenebilir.",
    "nitelikler": [
     "En az 3 yıl saha satışı, en az 1 yıl ekip yönetimi",
     "Günlük toplantı, kota ve prim takibi",
@@ -490,7 +490,7 @@
     "Tercihen mevcut ekipten terfi"
    ],
    "netMaas2027": 77838,
-   "maasDayanagi": "Saha maaşı 64.865 TL’dir. Projedeki liderlik farkı 10.000 TL’dir. Bu fark yüzde 29,73 artınca 12.973 TL olur. Maaş bu iki tutarın toplamıdır.",
+   "maasDayanagi": "Saha maaşı 64.865 ₺’dır. Projedeki liderlik farkı 10.000 ₺’dır. Bu fark yüzde 29,73 artınca 12.973 ₺ olur. Maaş bu iki tutarın toplamıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -525,7 +525,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Pro paket aylık 599 €’dur ve Kurumsal paketin fiyatı teklifle belirlenir. Çok mağazalı toptancıya, üreticiye ve İSTOÇ dışındaki toptan merkezlerine dükkân ziyaretiyle satış yapılmaz. Bu müşterilere teklif verilir ve sözleşme yapılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
+   "gerekce": "Platinium paket aylık 599 €’dur ve Enterprise paketin fiyatı teklifle belirlenir. Çok mağazalı toptancıya, üreticiye ve İSTOÇ dışındaki toptan merkezlerine dükkân ziyaretiyle satış yapılmaz. Bu müşterilere teklif verilir ve sözleşme yapılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
    "nitelikler": [
     "Üniversite mezunu",
     "En az 4 yıl B2B (işletmeler arası) satış ya da hesap yönetimi deneyimi",
@@ -533,7 +533,7 @@
     "İyi düzeyde İngilizce tercih sebebidir"
    ],
    "netMaas2027": 77850,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, Bölge Satış Müdürü 95.000 TL. İkisinin arasındaki 60.000 TL düzeyi yüzde 29,73 artırıldı.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 ₺, Bölge Satış Müdürü 95.000 ₺. İkisinin arasındaki 60.000 ₺ düzeyi yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -576,7 +576,7 @@
     "Kota, prim ve satış tahmini kurma"
    ],
    "netMaas2027": 119350,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Satış Müdürü 91.800 TL, yüzde 29,73 artışla yaklaşık 119.350 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Satış Müdürü 91.800 ₺, yüzde 29,73 artışla yaklaşık 119.350 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -609,14 +609,14 @@
    "seviye": "Destek",
    "calismaBicimi": "Yarı zamanlı",
    "eski": false,
-   "gerekce": "Arama listesi temiz değilse masa başı personelinin verimi düşer. Ek roller listesi bu işi asistanın kapasitesi dolunca yarı zamanlı birine vermeyi öngörür.",
+   "gerekce": "Arama listesi temiz değilse İstoç Pazarlama CRM uzmanının verimi düşer. Ek roller listesi bu işi asistanın kapasitesi dolunca yarı zamanlı birine vermeyi öngörür.",
    "nitelikler": [
     "Lise mezunu",
     "Excel ya da Google Sheets kullanabilme",
     "Dikkatli veri girişi"
    ],
    "netMaas2027": 41500,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL. Giriş düzeyi için 32.000 TL alınıp yüzde 29,73 artırıldı. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 ₺. Giriş düzeyi için 32.000 ₺ alınıp yüzde 29,73 artırıldı. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -647,18 +647,18 @@
    "id": "segika-masa-basi",
    "kume": "satis",
    "departman": "Segika",
-   "unvan": "Segika masa başı",
+   "unvan": "Segika CRM",
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": true,
    "planRolu": "segika",
    "gerekce": "Mevcut istihdam takvimindeki roldür ve değiştirilmeden korunur. Kardeş ürün Segika için günde 40, sonra 60 arama yapar.",
    "nitelikler": [
-    "Masa başı rolüyle aynı nitelikler",
+    "İstoç Pazarlama CRM uzmanı rolüyle aynı nitelikler",
     "SGK ve bordro konularına ilgi"
    ],
    "netMaas2027": 45405.5,
-   "maasDayanagi": "2026 kullanıcı kararı net 35.000 TL. Yüzde 29,73 artışla 45.405,50 TL.",
+   "maasDayanagi": "2026 kullanıcı kararı net 35.000 ₺. Yüzde 29,73 artışla 45.405,50 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -696,7 +696,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Ek roller listesi bu rolü kritik sayar ve uyum işi ayda 30 saati geçince açar. Medyan senaryoda 2027’de ayda ortalama 53 yeni aktif satıcı gelir. Hesapta her satıcının kurulumunun 4 saat sürdüğü varsayılır. Buna göre bu ay toplam iş yaklaşık 210 saat eder. Bir kişi ayda net 125 saat çalışır. Bu yüzden 2 kişi gerekir.",
+   "gerekce": "Ek roller listesi bu rolü kritik sayar ve uyum işi ayda 30 saati geçince açar. Plan senaryosunda 2027’de ayda ortalama 53 yeni aktif satıcı gelir. Hesapta her satıcının kurulumunun 4 saat sürdüğü varsayılır. Buna göre bu ay toplam iş yaklaşık 210 saat eder. Bir kişi ayda net 125 saat çalışır. Bu yüzden 2 kişi gerekir.",
    "nitelikler": [
     "Ön lisans ya da lisans mezunu",
     "En az 1 yıl e-ticaret, pazar yeri ya da müşteri destek deneyimi",
@@ -704,7 +704,7 @@
     "Telefon ve yüz yüze eğitim verebilme"
    ],
    "netMaas2027": 64850,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması E-ticaret Uzmanı 49.900 TL, yüzde 29,73 artışla yaklaşık 64.850 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması E-ticaret Uzmanı 49.900 ₺, yüzde 29,73 artışla yaklaşık 64.850 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -751,7 +751,7 @@
     "Kategori ve ürün özelliği girişinde dikkat"
    ],
    "netMaas2027": 51900,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İçerik Editörü 46.800 TL. Giriş düzeyi için 40.000 TL alınıp yüzde 29,73 artırıldı.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İçerik Editörü 46.800 ₺. Giriş düzeyi için 40.000 ₺ alınıp yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -789,7 +789,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Gelir planı medyan senaryoda her ay yüzde 70 yenileme varsayar. Kötümser senaryoda bu oran yüzde 50’dir. Yenileme oranındaki her puan geliri doğrudan değiştirir. Satıcı başarı yöneticisi, ödeyen satıcının alıcı talebi alıp almadığını izler. Yenilemeyi ve Pro pakete geçişi de yönetir. Bir yönetici için yaklaşık 150 ödeyen satıcı varsayılmıştır, bu oran tahmindir.",
+   "gerekce": "Gelir planındaki Plan senaryosu her ay yüzde 70 yenileme varsayar. Kötümser senaryoda bu oran yüzde 50’dir. Yenileme oranındaki her puan geliri doğrudan değiştirir. Satıcı başarı yöneticisi, ödeyen satıcının alıcı talebi alıp almadığını izler. Yenilemeyi ve Platinium pakete geçişi de yönetir. Bir yönetici için yaklaşık 150 ödeyen satıcı varsayılmıştır, bu oran tahmindir.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 2 yıl müşteri başarısı, hesap yönetimi ya da B2B satış deneyimi",
@@ -797,7 +797,7 @@
     "Esnafla güven ilişkisi kurabilme"
    ],
    "netMaas2027": 73700,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 29,73 artışla yaklaşık 73.700 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 ₺, yüzde 29,73 artışla yaklaşık 73.700 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -845,7 +845,7 @@
     "İyi düzeyde İngilizce tercih sebebidir"
    ],
    "netMaas2027": 73700,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 TL, yüzde 29,73 artışla yaklaşık 73.700 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İş Geliştirme Uzmanı 56.900 ₺, yüzde 29,73 artışla yaklaşık 73.700 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -890,7 +890,7 @@
     "Telefon ve yazılı iletişimde netlik"
    ],
    "netMaas2027": 54750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 29,73 artışla yaklaşık 54.750 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 ₺, yüzde 29,73 artışla yaklaşık 54.750 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -933,7 +933,7 @@
     "Satın alma birimleriyle çalışma ve ihale süreçlerini bilme"
    ],
    "netMaas2027": 77850,
-   "maasDayanagi": "Kurumsal satış yöneticisiyle aynı: 60.000 TL düzeyi yüzde 29,73 artırıldı.",
+   "maasDayanagi": "Kurumsal satış yöneticisiyle aynı: 60.000 ₺ düzeyi yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -977,7 +977,7 @@
     "Kısa video üretimi ve ölçüm araçları"
    ],
    "netMaas2027": 45527.94,
-   "maasDayanagi": "2026 kararı asgari ücretin 1,25 katıdır. 2027 asgari ücret varsayımıyla 1,25 x 36.422 TL yaklaşık 45.528 TL eder.",
+   "maasDayanagi": "2026 kararı asgari ücretin 1,25 katıdır. 2027 asgari ücret varsayımıyla 1,25 x 36.422 ₺ yaklaşık 45.528 ₺ eder.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1023,7 +1023,7 @@
     "Salon, izin ve ikram planlaması"
    ],
    "netMaas2027": 64865,
-   "maasDayanagi": "2026 kullanıcı kararı net 50.000 TL. Yüzde 29,73 artışla 64.865 TL.",
+   "maasDayanagi": "2026 kullanıcı kararı net 50.000 ₺. Yüzde 29,73 artışla 64.865 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1068,7 +1068,7 @@
     "Serbest meslek makbuzu ya da fatura kesebilme"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Oturum başı 5.000 TL bedel varsayılmıştır (tahmin). Ekonomik seçenekte ayda 8, medyanda 12, güçlüde 20 oturum hesaplanır.",
+   "maasDayanagi": "Oturum başı 5.000 ₺ bedel varsayılmıştır (tahmin). Ekonomik seçenekte ayda 8, medyanda 12, güçlüde 20 oturum hesaplanır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 3,
@@ -1124,7 +1124,7 @@
     "Akşam saatlerinde çalışabilme"
    ],
    "netMaas2027": 36422.35,
-   "maasDayanagi": "2027 asgari ücret varsayımı net 36.422 TL. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
+   "maasDayanagi": "2027 asgari ücret varsayımı net 36.422 ₺. Yarı zamanlı olduğu için maliyetin yarısı sayılır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1167,7 +1167,7 @@
     "Kayıt başına maliyet ve dönüşüm raporlama"
    ],
    "netMaas2027": 73950,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Dijital Pazarlama Uzmanı 57.000 TL, yüzde 29,73 artışla yaklaşık 73.950 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Dijital Pazarlama Uzmanı 57.000 ₺, yüzde 29,73 artışla yaklaşık 73.950 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1210,7 +1210,7 @@
     "Kategori metni ve rehber içerik yazabilme"
    ],
    "netMaas2027": 88750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması SEO Uzmanı 68.400 TL, yüzde 29,73 artışla yaklaşık 88.750 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması SEO Uzmanı 68.400 ₺, yüzde 29,73 artışla yaklaşık 88.750 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1252,7 +1252,7 @@
     "Telefonla çekim ve dikey video formatları"
    ],
    "netMaas2027": 72650,
-   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması Grafik Tasarımcı 76.000 TL, en düşük 53.200 TL. Orta düzey 56.000 TL alınıp yüzde 29,73 artırıldı. Serbest çalışan bedeli ayda 30.000 ile 45.000 TL varsayılmıştır (tahmin).",
+   "maasDayanagi": "Tam zamanlı için: eleman.net 2026 İstanbul ortalaması Grafik Tasarımcı 76.000 ₺, en düşük 53.200 ₺. Orta düzey 56.000 ₺ alınıp yüzde 29,73 artırıldı. Serbest çalışan bedeli ayda 30.000 ile 45.000 ₺ varsayılmıştır (tahmin).",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1299,7 +1299,7 @@
     "Bütçe ve kanal performansı yönetimi"
    ],
    "netMaas2027": 132850,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Pazarlama Müdürü 102.300 TL, yüzde 29,73 artışla yaklaşık 132.850 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Pazarlama Müdürü 102.300 ₺, yüzde 29,73 artışla yaklaşık 132.850 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1338,7 +1338,7 @@
     "Kriz iletişimi planı hazırlayabilme"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Ajans bedeli ayda 100.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Ajans bedeli ayda 100.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1378,7 +1378,7 @@
     "Mevcut ekip"
    ],
    "netMaas2027": 101700,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 29,73 artışla yaklaşık 101.700 TL. Ekibin gerçek ücretleri Google Sheets’tedir ve burada kullanılmadı.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 ₺, yüzde 29,73 artışla yaklaşık 101.700 ₺. Ekibin gerçek ücretleri Google Sheets’tedir ve burada kullanılmadı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 4,
@@ -1432,7 +1432,7 @@
     "Scrum ekibiyle çalışma"
    ],
    "netMaas2027": 126100,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ürün Müdürü 97.200 TL, yüzde 29,73 artışla yaklaşık 126.100 TL. Kariyer.net 2026 Ürün Geliştirme Yöneticisi ortalaması 97.004 TL ile uyumludur.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ürün Müdürü 97.200 ₺, yüzde 29,73 artışla yaklaşık 126.100 ₺. Kariyer.net 2026 Ürün Geliştirme Yöneticisi ortalaması 97.004 ₺ ile uyumludur.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1475,7 +1475,7 @@
     "Test yazma ve kod incelemesi alışkanlığı"
    ],
    "netMaas2027": 101700,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 TL, yüzde 29,73 artışla yaklaşık 101.700 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Yazılım Mühendisi 78.400 ₺, yüzde 29,73 artışla yaklaşık 101.700 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1522,7 +1522,7 @@
     "Erişilebilirlik kurallarını bilme"
    ],
    "netMaas2027": 88200,
-   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. 2026 İstanbul ortalaması Grafik Tasarımcı için 76.000 TL, Yazılım Mühendisi için 78.400 TL’dir. Hesapta bunların altında 68.000 TL alındı. Bu tutar yüzde 29,73 artırıldı. Tahmindir.",
+   "maasDayanagi": "eleman.net’te bu unvan için veri bulunamadı. 2026 İstanbul ortalaması Grafik Tasarımcı için 76.000 ₺, Yazılım Mühendisi için 78.400 ₺’dır. Hesapta bunların altında 68.000 ₺ alındı. Bu tutar yüzde 29,73 artırıldı. Tahmindir.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1564,7 +1564,7 @@
     "Kohort (aynı ay gelen müşteri grubu) ve yenileme analizi"
    ],
    "netMaas2027": 93400,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Veri Analisti 71.900 TL, yüzde 29,73 artışla yaklaşık 93.400 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Veri Analisti 71.900 ₺, yüzde 29,73 artışla yaklaşık 93.400 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1606,7 +1606,7 @@
     "Otomatik test aracı (ör. Playwright) kullanabilme"
    ],
    "netMaas2027": 84050,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Test Uzmanı 64.700 TL, yüzde 29,73 artışla yaklaşık 84.050 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Test Uzmanı 64.700 ₺, yüzde 29,73 artışla yaklaşık 84.050 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1639,14 +1639,14 @@
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "Sunucu, yedekleme, izleme ve yayına alma işleri platform çalıştığı sürece gereklidir. Ekonomik ve medyan seçenekte bu iş bugünkü dış düzenle sürer. Güçlü seçenekte ödeme akışı ve trafik artışı nedeniyle kadroya alınır.",
+   "gerekce": "Sunucu, yedekleme, izleme ve yayına alma işleri platform çalıştığı sürece gereklidir. Ekonomik ve Medyan seçenekte bu iş bugünkü dış düzenle sürer. Güçlü seçenekte ödeme akışı ve trafik artışı nedeniyle kadroya alınır.",
    "nitelikler": [
     "En az 4 yıl Linux sunucu ve bulut altyapısı",
     "Yedekleme, izleme ve otomatik yayına alma (CI/CD) kurulumu",
     "Güvenlik güncellemelerini takip etme"
    ],
    "netMaas2027": 116750,
-   "maasDayanagi": "Tam zamanlı çalışan için eleman.net 2026 İstanbul ortalaması alındı. DevOps Mühendisi için bu tutar 89.900 TL’dir. Yüzde 29,73 artışla yaklaşık 116.750 TL olur. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
+   "maasDayanagi": "Tam zamanlı çalışan için eleman.net 2026 İstanbul ortalaması alındı. DevOps Mühendisi için bu tutar 89.900 ₺’dır. Yüzde 29,73 artışla yaklaşık 116.750 ₺ olur. Bugünkü dış düzenin bedeli bilinmiyor ve toplama eklenmedi.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1693,7 +1693,7 @@
     "Rapor ve düzeltme sonrası yeniden test"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Yılda bir test için 200.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Yılda bir test için 200.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "yillikBedel": 200000,
    "secenekler": {
     "ekonomik": {
@@ -1737,7 +1737,7 @@
     "Süreç yazma ve hedef takibi"
    ],
    "netMaas2027": 147900,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Operasyon Müdürü 113.800 TL, yüzde 29,73 artışla yaklaşık 147.900 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Operasyon Müdürü 113.800 ₺, yüzde 29,73 artışla yaklaşık 147.900 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1772,7 +1772,7 @@
    "seviye": "Operasyon",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Satıcı ve alıcı soruları, şifre, fatura ve şikâyet talepleri bugün satış personeline düşer. Medyan senaryoda 2027 sonunda yaklaşık 300 ödeyen satıcı ve 3.200’ü aşan kayıtlı satıcı vardır. Destek işini satıştan ayırmak satış kapasitesini korur.",
+   "gerekce": "Satıcı ve alıcı soruları, şifre, fatura ve şikâyet talepleri bugün satış personeline düşer. Plan senaryosunda 2027 sonunda yaklaşık 300 ödeyen satıcı ve 3.200’ü aşan kayıtlı satıcı vardır. Destek işini satıştan ayırmak satış kapasitesini korur.",
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
     "En az 1 yıl çağrı merkezi ya da canlı destek deneyimi",
@@ -1780,7 +1780,7 @@
     "Destek talebi yazılımı kullanabilme"
    ],
    "netMaas2027": 54750,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 TL, yüzde 29,73 artışla yaklaşık 54.750 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi 42.200 ₺, yüzde 29,73 artışla yaklaşık 54.750 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1828,7 +1828,7 @@
     "Kurallara bağlı karar verme ve kayıt tutma"
    ],
    "netMaas2027": 62250,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi için 42.200 TL, Kalite Kontrol Uzmanı için 55.500 TL’dir. Hesapta bu ikisinin arasından 48.000 TL alındı. Bu tutar yüzde 29,73 artırıldı.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Müşteri Temsilcisi için 42.200 ₺, Kalite Kontrol Uzmanı için 55.500 ₺’dır. Hesapta bu ikisinin arasından 48.000 ₺ alındı. Bu tutar yüzde 29,73 artırıldı.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -1871,7 +1871,7 @@
     "SGK teşvikleri bilgisi"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "İstanbul Serbest Muhasebeci Mali Müşavirler Odası (İSMMMO) 2026 tarifesine ulaşılamadı. Aylık bedel ekonomikte 30.000, medyanda 40.000, güçlüde 55.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "İstanbul Serbest Muhasebeci Mali Müşavirler Odası (İSMMMO) 2026 tarifesine ulaşılamadı. Aylık bedel ekonomikte 30.000, medyanda 40.000, güçlüde 55.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1911,14 +1911,14 @@
    "seviye": "Uzman yardımcısı",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Ek roller listesine göre 20 aboneden sonra fatura, gecikme ve yenileme takibi gerekir. Medyan senaryo bu eşiği Ocak 2027’de geçer. Abonelik euro ile fiyatlandığı için kur farkı ve e-fatura işi her ay tekrarlanır.",
+   "gerekce": "Ek roller listesine göre 20 aboneden sonra fatura, gecikme ve yenileme takibi gerekir. Plan senaryosu bu eşiği Ocak 2027’de geçer. Abonelik euro ile fiyatlandığı için kur farkı ve e-fatura işi her ay tekrarlanır.",
    "nitelikler": [
     "Muhasebe ya da finans alanında ön lisans veya lisans",
     "En az 2 yıl ön muhasebe ve tahsilat deneyimi",
     "e-Fatura ve muhasebe yazılımı (ör. Logo, Paraşüt) kullanabilme"
    ],
    "netMaas2027": 56300,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Muhasebe Elemanı 43.400 TL, yüzde 29,73 artışla yaklaşık 56.300 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Muhasebe Elemanı 43.400 ₺, yüzde 29,73 artışla yaklaşık 56.300 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1964,7 +1964,7 @@
     "Nakit akışı ve bütçe modeli kurma"
    ],
    "netMaas2027": 123000,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Finans Müdürü 94.800 TL, yüzde 29,73 artışla yaklaşık 123.000 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Finans Müdürü 94.800 ₺, yüzde 29,73 artışla yaklaşık 123.000 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2005,7 +2005,7 @@
     "Yapılandırılmış mülakat yürütebilme"
    ],
    "netMaas2027": 66150,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İnsan Kaynakları Uzmanı 51.000 TL, yüzde 29,73 artışla yaklaşık 66.150 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması İnsan Kaynakları Uzmanı 51.000 ₺, yüzde 29,73 artışla yaklaşık 66.150 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2047,7 +2047,7 @@
     "Ofis ve saha çalışmasını kapsayan risk değerlendirmesi"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Aylık bedel ekonomikte 10.000, medyanda 15.000, güçlüde 25.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Aylık bedel ekonomikte 10.000, medyanda 15.000, güçlüde 25.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2093,7 +2093,7 @@
     "Marka ve KVKK konusunda çalışmış olma"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "İstanbul Barosu 2026 tavsiye çizelgesinde limited şirket için aylık sürekli danışmanlık 79.750 TL’dir. Yüzde 29,73 artışla 2027 için yaklaşık 103.500 TL varsayılmıştır. Dava ücretleri ayrıdır.",
+   "maasDayanagi": "İstanbul Barosu 2026 tavsiye çizelgesinde limited şirket için aylık sürekli danışmanlık 79.750 ₺’dır. Yüzde 29,73 artışla 2027 için yaklaşık 103.500 ₺ varsayılmıştır. Dava ücretleri ayrıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2139,7 +2139,7 @@
     "Veri envanteri ve aydınlatma metni hazırlama"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Aylık 25.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Aylık 25.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2183,7 +2183,7 @@
     "Sözleşme taslağı hazırlama"
    ],
    "netMaas2027": 87700,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Avukat 67.700 TL, yüzde 29,73 artışla yaklaşık 87.700 TL.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Avukat 67.700 ₺, yüzde 29,73 artışla yaklaşık 87.700 ₺.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2222,7 +2222,7 @@
     "Yazılı görüş verebilme"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Aylık 20.000 TL varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Aylık 20.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2270,7 +2270,7 @@
     "Gizlilik ve düzen"
    ],
    "netMaas2027": 54633.52,
-   "maasDayanagi": "2026 kararı asgari ücretin 1,5 katıdır. 2027 asgari ücret varsayımıyla 1,5 x 36.422 TL yaklaşık 54.634 TL eder.",
+   "maasDayanagi": "2026 kararı asgari ücretin 1,5 katıdır. 2027 asgari ücret varsayımıyla 1,5 x 36.422 ₺ yaklaşık 54.634 ₺ eder.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -2316,7 +2316,7 @@
     "Demirbaş ve hesap (yazılım lisansı) envanteri tutma"
    ],
    "netMaas2027": 60600,
-   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 TL, yüzde 29,73 artışla yaklaşık 60.600 TL. Satın Alma Uzmanı ortalaması 61.500 TL’dir.",
+   "maasDayanagi": "eleman.net 2026 İstanbul ortalaması Ofis Asistanı 46.700 ₺, yüzde 29,73 artışla yaklaşık 60.600 ₺. Satın Alma Uzmanı ortalaması 61.500 ₺’dır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 0,
@@ -2435,8 +2435,8 @@
    "payAciklamasi": "gelirPayi, 2027 toplam kadro ve hizmet giderinin aynı senaryonun 2027 abonelik gelirine oranıdır (yüzde). aralikGelirPayi, Aralık 2027 aylık giderinin Aralık 2027 aylık gelirine oranıdır. Reklam, prim, ofis ve yazılım araçları bu oranlara dahil değildir."
   },
   "medyan": {
-   "aciklama": "Gelir planının medyan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yönetici ya da uzman alır. Sipariş ve ödeme akışı için 2 ek geliştirici alınır. Bu seçenek iki koşul birlikte sağlanırsa seçilir. 31 Mart 2027’ye kadar 50 aktif satıcıya ulaşılmalıdır. Yatırım da bu gideri karşılamalıdır.",
-   "dayandigiSenaryo": "Medyan",
+   "aciklama": "Gelir planının Plan senaryosuna göre kurulur. Satıcı başarısı, alıcı talebi, ürün ve operasyon birer yönetici ya da uzman alır. Sipariş ve ödeme akışı için 2 ek geliştirici alınır. Bu seçenek iki koşul birlikte sağlanırsa seçilir. 31 Mart 2027 Çarşamba gününe kadar 50 aktif satıcıya ulaşılmalıdır. Yatırım da bu gideri karşılamalıdır.",
+   "dayandigiSenaryo": "Plan",
    "toplamKisi": 40,
    "toplamKisiAciklama": "Aralık 2027 sonunda bordrodaki kişi sayısıdır. Kurucu ve mevcut 4 kişilik yazılım ekibi dahildir. Yarı zamanlı çalışanlar 1 kişi sayılır.",
    "yariZamanli": 2,

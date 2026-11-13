@@ -73,7 +73,7 @@ test.describe('nakit akış tablosu', () => {
     await page.goto('nakit-akisi/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nakit akış tablosu');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nakit akışı');
     await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
 
     const nav = page.getByRole('navigation', { name: 'Ana gezinme' });
@@ -82,7 +82,7 @@ test.describe('nakit akış tablosu', () => {
     await expect(tetik).toHaveAttribute('data-section', 'true');
     await tetik.click();
     const menu = page.getByRole('menu', { name: 'Finans' });
-    await expect(menu.getByRole('menuitem')).toHaveText(['Gelir planı', 'Giderler', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
+    await expect(menu.getByRole('menuitem')).toHaveText(['Gelir planı', 'OPEX (işletme giderleri)', 'Nakit akışı', '2027 bütçesi', '2027 gelir öngörüsü']);
     await expect(menu.getByRole('menuitem', { name: 'Nakit akışı' })).toHaveAttribute('aria-current', 'page');
     await page.keyboard.press('Escape');
 
@@ -127,13 +127,13 @@ test.describe('nakit akış tablosu', () => {
     await expect(page.locator('.nakit-kaynak')).toContainText('Google Sheets', { timeout: 10_000 });
     const seciciler = page.getByRole('group', { name: 'Senaryo' });
     expect(await seciciler.count()).toBeGreaterThanOrEqual(5);
-    for (const g of await seciciler.all()) await expect(g.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+    for (const g of await seciciler.all()) await expect(g.getByRole('button', { name: 'Plan' })).toHaveAttribute('aria-pressed', 'true');
     const sayi = (s: string) => Number(s.replace(/[^\d-]/g, ''));
     const giris = page.locator('.stat').first().locator('.stat-value');
     const medyan = sayi((await giris.textContent()) ?? '0');
     const karsilastirma = page.locator('.table-block:has(#senaryo-karsilastirma-tablo) tbody tr');
     await expect(karsilastirma).toHaveCount(3);
-    await expect(karsilastirma.locator('th')).toHaveText(['Kötümser', 'Medyan', 'İyimser']);
+    await expect(karsilastirma.locator('th')).toHaveText(['Kötümser', 'Plan', 'İyimser']);
     await expect(karsilastirma.nth(1)).toHaveAttribute('data-tone', 'secili');
     await seciciler.last().getByRole('button', { name: 'Kötümser' }).click();
     for (const g of await seciciler.all()) await expect(g.getByRole('button', { name: 'Kötümser' })).toHaveAttribute('aria-pressed', 'true');
@@ -270,8 +270,8 @@ test.describe('nakit akış tablosu', () => {
     await expect(sonuc.locator('.sonuc-ikincil, .sonuc')).toContainText('Kalıcı toparlanma');
     const kiyas = sonuc.locator('.sonuc-kiyas dl > div');
     await expect(kiyas).toHaveCount(3);
-    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Medyan/, /İyimser/]);
-    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Medyan');
+    await expect(kiyas.locator('dt')).toContainText([/Kötümser/, /Plan/, /İyimser/]);
+    await expect(sonuc.locator('.sonuc-kiyas dl > div[data-secili] dt')).toContainText('Plan');
     // Tek kaynak: özet kutusu ve karşılaştırma tablosundaki seçili satır aynı değer.
     const t = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').trim();
     const kutuDeger = t(await page.locator('.stat', { hasText: 'Nakit açığı tavanı' }).locator('.stat-value').textContent());
@@ -301,12 +301,12 @@ test.describe('nakit akış tablosu', () => {
     });
     expect(tablo.headers[1]).toBe('En düşük nakit');
     expect(tablo.headers[2]).toBe('Nakit açığı tavanı');
-    expect(tablo.rows.map((r) => r[0])).toEqual(['Kötümser', 'Medyan', 'İyimser']);
+    expect(tablo.rows.map((r) => r[0])).toEqual(['Kötümser', 'Plan', 'İyimser']);
     await page.setViewportSize({ width: 320, height: 480 });
     const kayitlar = blok.locator('.kayit');
     await expect(kayitlar).toHaveCount(tablo.headers.length - 1);
     await expect(kayitlar.first().locator('.kayit-ad')).toHaveText('En düşük nakit');
-    await expect(kayitlar.first().locator('.kayit-ozet-etiket')).toHaveText('Medyan');
+    await expect(kayitlar.first().locator('.kayit-ozet-etiket')).toHaveText('Plan');
     await expect(kayitlar.first().locator('.kayit-ozet-deger')).toHaveText(tablo.rows[1][1]);
     const alanlar = await kayitlar.first().locator('dl.kayit-alanlar > div').evaluateAll((divs) => divs.map((d) => [d.querySelector('dt')?.textContent?.trim(), d.querySelector('dd')?.textContent?.replace(/\s+/g, ' ').trim()]));
     expect(alanlar).toEqual(tablo.rows.map((r) => [r[0], r[1]]));
@@ -367,7 +367,7 @@ test.describe('nakit akış tablosu', () => {
     await icerik(page);
     await hydrated(page);
     await expect(page.locator('.nakit-kaynak')).toContainText('erişim anahtarı', { timeout: 10_000 });
-    await expect(page.locator('.nakit-kaynak').getByRole('link', { name: 'Giderler sayfası' })).toHaveAttribute('href', /\/giderler\/$/);
+    await expect(page.locator('.nakit-kaynak').getByRole('link', { name: 'OPEX (işletme giderleri) sayfası' })).toHaveAttribute('href', /\/giderler\/$/);
     // Ana sonuç eksik Sheets verisini tam plan gibi göstermez (ux.md §9).
     await expect(page.locator('.sonuc-kaynak')).toContainText('okunamadı');
     // B2c (MS-02): Sheets yokken eksik gider kapsamı ana sonuçta tam finansman hesabı gibi sunulmaz.

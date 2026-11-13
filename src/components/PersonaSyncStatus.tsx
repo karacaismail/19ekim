@@ -18,7 +18,7 @@ export function PersonaSyncStatus({ sync, store, inputError = '' }: { sync: Sync
     {inputError && <p role="alert">{inputError} Geçerli bir değer girin.</p>}
     {sync.access === 'development-public' && <p className="persona-sync-zaman">Geliştirme erişimi açık. Bağlantıyı bilenler ortak değerleri değiştirebilir.</p>}
     {sync.pending > 0 && <p>{sync.pending} alan için kayıt onayı bekleniyor.</p>}
-    {sync.state === 'synced' && sync.readAt && <p className="persona-sync-zaman">Son kontrol zamanı şudur: {new Date(sync.readAt).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' })}.</p>}
+    {sync.state === 'synced' && sync.readAt && <p className="persona-sync-zaman">Son kontrol zamanı şudur: {new Date(sync.readAt).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}.</p>}
     {sync.state === 'error' && <button className="persona-action" onClick={() => store.retry()}>Yeniden dene</button>}
     {sync.conflicts.map((field) => <div className="persona-cakisma" key={field}>
       <h3>{labels.find((d) => d.field === field)?.label ?? 'Değişen alan'}</h3>

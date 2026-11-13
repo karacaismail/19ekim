@@ -431,7 +431,7 @@ function KosulAyarlari({ rol, kosul, a, g }: { rol: RolId; kosul: string; a: Aya
         <Girdi label="Satış başı komisyon" birim="₺" step={100} value={a.agKomisyon} onChange={(v) => g({ agKomisyon: v })} />
         <Girdi label="Kişi başı aylık satış" value={a.agAltSatis} onChange={(v) => g({ agAltSatis: v })} />
         <Girdi label="Kişi başı getirilen temsilci" birim="kişi" value={a.agAltTemsilci} onChange={(v) => g({ agAltTemsilci: Math.min(6, v) })} />
-        <Girdi label="Kaç kademe yukarı pay gider?" birim="kademe" min={1} value={a.agDerinlik} onChange={(v) => g({ agDerinlik: Math.min(3, Math.max(1, v)) })} />
+        <Girdi label="Kaç kademe yukarı pay gider?" birim="kademe" min={1} value={a.agDerinlik} onChange={(v) => g({ agDerinlik: Math.min(2, Math.max(1, v)) })} />
         {a.agKademePay.slice(0, Math.min(3, Math.max(1, a.agDerinlik))).map((p, i) => (
           <Girdi key={i} label={`${i + 1}. kademe payı`} birim="₺ / satış" step={50} value={p} onChange={(v) => g({ agKademePay: a.agKademePay.map((x, j) => (j === i ? v : x)) as Ayar['agKademePay'] })} />
         ))}

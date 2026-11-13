@@ -3,7 +3,7 @@ import { aylikFiyat, rolMetinleri } from '../../satisOrtakligi';
 import { KOSULLAR, affilateHesabi } from '../../kosullar';
 
 const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
-const tl = (n: number) => `${sayi(n)} TL`;
+const tl = (n: number) => `${sayi(n)} ₺`;
 const yuzde = (n: number) => `%${sayi(n * 100)}`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });

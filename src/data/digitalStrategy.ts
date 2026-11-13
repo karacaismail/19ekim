@@ -74,15 +74,15 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
     { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'Dijital pazarlama uzmanı ölçüm araçlarını kurar. Bunlar Google Tag Manager (GTM), Google Analytics 4 (GA4), Yandex Metrica ve Meta Pixel araçlarıdır. Meta’ya satış verisi gönderen dönüşüm bağlantısı (Conversions API) da kurulur. Bağlantı etiketi (UTM) standardı ve CRM kaynak alanı eklenir. Kayıt sayfası, kayıt formu ve WhatsApp mesaj dizisi hazırlanır.', olcut: '8 ölçüm aracının hepsi çalışıyor. Kaynağı boş kayıt yok.' },
     { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `Kayıt maliyeti en çok ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺. Ödemeye geçiş oranı en az %${p.dijitalLeadToActive}.` },
     { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'Düzenli video üretimi', is: 'Videolar altı ana konuda hazırlanır. Günde 3 video yayınlanır. Paylaşımların yüzde 80’i otomatik yapılır. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
-    { ay: longDate(prog.dates.day90), adim: 'Bütçe artırma kararı', is: `Bütçe, satıcı değerinin (LTV) maliyete oranına göre belirlenir. Oran ${SCALE_RULE.threshold} veya üstündeyse bütçe ${SCALE_RULE.step.toLocaleString('tr-TR')} katına çıkar. Bütçe en çok başlangıcın ${p.dijitalScaleMax} katına ulaşır. Oran 1,5 ile 3 arasındaysa bütçe aynı kalır. Oran 1,5’in altındaysa reklam durur. Kayıt sayfası ve mesajlar düzeltilir.`, olcut: '90. gün değerlendirmesi' },
+    { ay: longDate(prog.dates.day90), adim: 'Bütçe artırma kararı', is: 'Bütçe, “Varsayımlar” bölümündeki kurala göre artar, aynı kalır ya da durur.', olcut: '90. gün değerlendirmesi' },
   ];
 
   const kurallar = [
     'Her reklama ve paylaşıma kaynak etiketi (UTM) eklenir. CRM’e kaynağı boş kayıt girmeyin. Ölçülmeyen kanala bütçe verilmez.',
     'Bütçe her ay adım adım artar. Önce küçük bütçe denenir, sonra bütçe büyütülür. Önceki ay kayıt maliyeti ve ödemeye geçiş hedefi tuttuysa bütçe bir adım artar.',
-    `LTV ÷ CAC oranı ${SCALE_RULE.threshold} veya üstündeyse bütçe her ${SCALE_RULE.everyMonths} ayda ${SCALE_RULE.step.toLocaleString('tr-TR')} ile çarpılır. Bütçe başlangıcın en çok ${p.dijitalScaleMax} katına çıkar ve simülasyon bu kuralı uygular. Oran 1,5–3 arasındaysa bütçe korunur ve dönüşüm iyileştirilir. 1,5’in altındaysa reklam durdurulur, kayıt sayfası ve CRM mesaj dizisi düzeltilir.`,
+    'Bütçe artırma kuralı “Varsayımlar” bölümündedir. Simülasyon bu kuralı uygular.',
     'Organik içerik reklamın yerine geçmez, onu tamamlar. Reklam hızlı ama pahalıdır, içerik yavaş ama ucuzdur. İkisinden gelen kayıtlar da CRM’de aynı aşamalardan geçer.',
-    'Satıcıyı tutmak, yeni satıcı bulmak kadar önemlidir. CRM masa başı personeli her ay değer raporu gönderir ve yenileme çağrısı yapar. Bu yapılmazsa kazanılan satıcı zamanla ayrılır.',
+    'Satıcıyı tutmak, yeni satıcı bulmak kadar önemlidir. İstoç Pazarlama CRM uzmanı her ay değer raporu gönderir ve yenileme çağrısı yapar. Bu yapılmazsa kazanılan satıcı zamanla ayrılır.',
   ];
 
   const tierBudgets = [...new Set([0, 15_000, 30_000, 60_000, 120_000, p.dijitalAdBudgetMonthly])].sort((a, b) => a - b);

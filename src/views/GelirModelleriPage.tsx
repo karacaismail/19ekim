@@ -118,7 +118,7 @@ function HazirlikEtiketi({ h }: { h: Hazirlik }) {
 }
 
 /** Tutar ve yüzde kalın yazılır. Okur örnek hesaptaki sayıları hemen görür. Metin değişmez. */
-const SAYI = /(\d[\d.,]*\u00a0(?:€|₺|TL)|%\d[\d.,]*)/u;
+const SAYI = /(\d[\d.,]*\u00a0(?:€|₺|₺)|%\d[\d.,]*)/u;
 function SayiVurgulu({ metin }: { metin: string }) {
   return (
     <>
