@@ -202,7 +202,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       yer: 1,
       ad: 'Telefonu açmadı',
       adimlar: [
-        'Satıcıya SMS ile kısa bir mesaj gönderin. Mesajda adınızı ve istoc.com kaydı için aradığınızı yazın.',
+        'Satıcıya SMS (cep telefonu kısa mesajı) gönderin. Mesajda adınızı ve istoc.com kaydı için aradığınızı yazın.',
         'Kayıttan sonraki 1. gün öğleden sonra yeniden arayın.',
         'Açmazsa 3. gün sabah bir kez daha arayın.',
         'Üç arama da cevapsız kalırsa 5. gün e-posta gönderin.',

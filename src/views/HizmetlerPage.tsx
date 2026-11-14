@@ -44,7 +44,8 @@ import '../styles/pazar.css';
 /**
  * Hizmetler (kullanıcı kararı 2026-11-12, adres `/services/`): giriş (araştırmanın ilkesi ve bugünkü dört rakam) → kim ne
  * öder (alıcı ve satıcı şeridi) → paketler → paket karşılaştırması (özellik grubu seçilir) → hizmet haritası (ücretsiz,
- * pakette, planlanan) → ödeme ne zaman başlar (bugün ve araştırmanın kuralı) → ilgili sayfalar. Veri
+ * pakette, planlanan) → ödeme ne zaman başlar (bugün ve araştırmanın kuralı). Sayfa sonundaki “İlgili sayfalar”
+ * bağlantılarını ortak çerçeve (AppFrame) `icerik.ts` kaydından kurar. Veri
  * `src/data/hizmetler.ts` ve canlı paket anlık görüntüsü `src/data/canliPaketler.ts`, stil `src/styles/pazar.css`.
  * Yeşil yalnız bugün ücretsiz olanı gösterir. Planlanan hizmetin hazırlık etiketi nötrdür.
  */

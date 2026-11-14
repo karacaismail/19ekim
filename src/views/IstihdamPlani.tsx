@@ -449,11 +449,6 @@ function KadroIcerik() {
             </section>
           ))}
         </div>
-        <p>
-          <TextLink to="/istihdam/" standalone>
-            İstihdam takvimi
-          </TextLink>
-        </p>
       </Section>
     </div>
     </>

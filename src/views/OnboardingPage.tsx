@@ -82,8 +82,8 @@ function HazirMetin({ s }: { s: Sablon }) {
   return (
     <div className="ob-sablon">
       <p className="ob-etiket">Bu durumda “{s.ad}” hazır metnini kullanın.</p>
-      {s.konu ? <p className="ob-sablon-konu">Konu: {s.konu}</p> : null}
-      <p className="ob-sablon-metin">{tutarBitisik(s.metin)}</p>
+      {s.konu ? <p className="ob-sablon-konu" data-yalin="veri">Konu: {s.konu}</p> : null}
+      <p className="ob-sablon-metin" data-yalin="veri">{tutarBitisik(s.metin)}</p>
       <div className="ob-sablon-arac">
         <button type="button" className="ob-kopyala" onClick={kopyala}>
           Metni kopyala
@@ -101,11 +101,11 @@ function DurumKarti({ d, no, adOf, sablon }: { d: Durum; no?: string; adOf: (id:
     <li className="ob-durum-oge">
       <details className="ob-durum" id={durumId(d.id)}>
         <summary className="ob-durum-ozet" data-no={no ? '' : undefined}>
-          {no ? <span className="ob-durum-no">{no}</span> : null}
+          {no ? <span className="ob-durum-no" data-yalin="kod">{no}</span> : null}
           <span className="ob-durum-ad">{tutarBitisik(d.ad)}</span>
         </summary>
         <div className="ob-durum-govde">
-          <ol className="ob-adimlar">
+          <ol className="ob-adimlar" data-yalin="veri">
             {d.adimlar.map((a) => (
               <li key={typeof a === 'string' ? a : a.metin + a.git} className="ob-adim">
                 <AdimMetni a={a} adOf={adOf} />
@@ -166,7 +166,7 @@ function AsamaHaritasi() {
         </li>
       </ol>
       <p className="ob-harita-not">
-        Fiyat sorusu gibi, hangi aşamada olursa olsun çıkabilecek durumlar sayfanın sonundadır:{' '}
+        Bazı durumlar her aşamada çıkabilir. Örneğin satıcı fiyat sorabilir. Bu durumlar sayfanın sonundadır:{' '}
         <a className="text-link" href="#her-an">
           Herhangi bir aşamada çıkabilecek durumlar
         </a>
@@ -251,7 +251,7 @@ function Icerik() {
       <div className="ob-sayfa">
         <SayfaGirisi>
           <p>
-          Bu sayfa, istoc.com’a yeni kaydolan bir satıcıyı ilk günden ücretli pakete kadar nasıl takip edeceğinizi gösterir. Süreç dört aşamadan oluşur. Satıcının hangi aşamada olduğunu, CRM (müşteri ilişkileri yönetimi) programındaki kayıt kartında yazan durumdan anlarsınız. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
+          istoc.com’a yeni kaydolan satıcıyı ücretli pakete kadar siz takip edersiniz. Süreç dört aşamadan oluşur. CRM (müşteri ilişkileri yönetimi) programında her satıcının bir kayıt kartı vardır. Kayıt kartındaki durum, satıcının aşamasını gösterir. Bir aşama bitince kayıt kartındaki durumu siz değiştirirsiniz. Yeni durum, kaydın hangi aşamaya geçtiğini gösterir.
           </p>
         </SayfaGirisi>
 
@@ -260,7 +260,7 @@ function Icerik() {
         </Section>
 
         <Section id="kurallar" title="Her zaman geçerli kurallar" desc="Bu kurallar her aşamada geçerlidir.">
-          <ul className="ob-kurallar-liste">
+          <ul className="ob-kurallar-liste" data-yalin="veri">
             {HER_DURUMDA.map((k) => (
               <li key={k}>{k}</li>
             ))}

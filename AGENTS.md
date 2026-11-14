@@ -1071,8 +1071,8 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 
 ### Bütün sayfalarda yalın Türkçe (kullanıcı kararı 2026-11-11)
 
-- Genel yazım politikası onboarding dışındaki bütün sayfalara da uygulandı. Ölçüt, okurken desteğe ihtiyaç duyan kişinin
-  metni ilk okuyuşta anlamasıdır.
+- Genel yazım politikası bütün sayfalara uygulanır. Ölçüt, okurken desteğe ihtiyaç duyan kişinin metni ilk okuyuşta
+  anlamasıdır. Onboarding ve Arşiv sayfaları da 14 Kasım 2026'dan beri bu testtedir.
 - Test `tests/yalin-turkce.spec.ts` dosyasıdır. Test her kayıtlı sayfayı 1280 px ve 375 px genişlikte açar. Kapalı
   panelleri, anahtarları ve sekmeleri tek tek açar. Ana içeriği ve alt bilgiyi denetler. Applet’lerin her biri kendi
   adresinde denetlenir. İstihdam ve satış ortaklığı sayfalarında v2 de denetlenir.
@@ -1081,7 +1081,11 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   biçiminde kurulmaz. Kısa değer alanı (en çok 3 kelime) ve yüklemli giriş (“… şunlardır:”) serbesttir.
 - Başlık ve grafik özeti yalnız işaretler için denetlenir. Grafik özeti bir veri listesidir. Bu yüzden özet maddeleri
   `join('. ')` ile ayrılır, noktalı virgül kullanılmaz.
-- Kesin istisnalar (kullanıcı kararı 2026-11-11): Arşiv sayfası tahta notlarının aynen kopyasıdır ve değiştirilmez.
+- Kesin istisnalar (kullanıcı kararı 2026-11-11): Arşiv sayfasındaki tahta notları aynen kopyadır ve değiştirilmez.
+  Bu notlar `data-yalin="alinti"` taşır ve denetlenmez. Arşivin geri kalanı denetlenir. Durum numarası (“1.3”)
+  `data-yalin="kod"` taşır, ondalık sayı sayılmaz. Onboarding verisinden gelen adım, kural ve hazır e-posta metni
+  `data-yalin="veri"` taşır. Bu metni `tests/onboarding.spec.ts` satır satır denetler. `veri` işareti başka sayfada
+  kullanılırsa test başarısız olur.
   Boş hücredeki tek `—` işareti veri işaretidir. Bu işareti anlatan açıklama işareti tırnak içinde yazar (“—”).
   Kaynak künyesi `data-yalin="kunye"` taşır. Google Sheets’ten gelen metin `data-kaynak="sheets"` taşır ve Sheets’te
   düzeltilir. Örneğin teşvik koşulları Sheets verisidir.

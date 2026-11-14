@@ -701,7 +701,7 @@ export function ArchivePage({ pathname }: { pathname: string }) {
           id="tahta"
           title="Notlar ve kararlar"
           columns={[
-            { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => r.board },
+            { key: 'board', header: 'Tahtadaki not', minWidth: '16rem', rowHeader: true, render: (r) => <span data-yalin="alinti">{r.board}</span> },
             { key: 'decision', header: 'Plandaki karar', summary: true, minWidth: '18rem', render: (r) => r.decision },
             { key: 'where', header: 'Sayfa', nowrap: true, render: (r) => <TextLink to={r.where.path}>{r.where.label}</TextLink> },
           ]}

@@ -4,7 +4,7 @@ import { sayfayiGez, TUM_SAYFALAR } from './sayfa-gezgini';
 
 /**
  * Yalın Türkçe kuralları (Claude ve Codex ortak kural seti, 10 Kasım 2026). Kullanıcı kararı 11 Kasım 2026: sitenin
- * bütün sayfaları bu kurallara uyar. Onboarding'in kendi dil testleri vardır (onboarding.spec.ts).
+ * bütün sayfaları bu kurallara uyar. Onboarding'in ayrıca kendi dil testleri vardır (onboarding.spec.ts).
  *
  * Test her sayfayı açar. Kapalı panelleri, anahtarları, sekmeleri, açılır pencereleri ve seçim listelerini tek tek açar.
  * Ana sayfada üst menüler ve menü çekmecesi de açılır. Görünen metni bloklara ayırır. Sekme adı, sayfa açıklaması,
@@ -22,13 +22,15 @@ import { sayfayiGez, TUM_SAYFALAR } from './sayfa-gezgini';
  *   Ondalık sayı virgülle yazılır (“8,9”). Yüzde işareti sayıdan önce gelir (“%36”). Birim zinciri (“gün/kadın/yıl”)
  *   yerine söz kullanılır (“kadın başına yılda”).
  *
- * İstisnalar (kullanıcı kararı 11 Kasım 2026): Arşiv sayfası tahtadaki notların aynen kopyasıdır. Aynen korunan
- * alıntı değiştirilmez. Kaynak künyesi (`data-yalin="kunye"`) yayın adı ve başlıktır, etiket dizisi sayılmaz. Google
+ * İstisnalar (kullanıcı kararı 11 Kasım 2026): Arşiv sayfasındaki tahta notları aynen kopyadır. Aynen korunan alıntı
+ * (`data-yalin="alinti"`) değiştirilmez ve denetlenmez. Arşiv sayfasının geri kalanı denetlenir. Durum numarası
+ * (`data-yalin="kod"`, ör. “1.3”) bir kimliktir, ondalık sayı değildir. Onboarding verisinden gelen adımlar, kurallar
+ * ve hazır e-postalar (`data-yalin="veri"`) onboarding.spec.ts dosyasında satır satır denetlenir. Bu işaret yalnız
+ * Onboarding sayfasında kullanılabilir. Sayfanın kendi metni (giriş, harita, bölüm açıklamaları) burada denetlenir. Kaynak künyesi (`data-yalin="kunye"`) yayın adı ve başlıktır, etiket dizisi sayılmaz. Google
  * Sheets’ten gelen metin (`data-kaynak="sheets"`) site metni değildir, Sheets’te düzeltilir.
  */
 
-const ATLA = new Set(['/onboarding/', '/arsiv/']);
-const SAYFALAR = TUM_SAYFALAR.filter((p) => !ATLA.has(p));
+const SAYFALAR = TUM_SAYFALAR;
 
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbTestDeploymentId_1234567890abcdef/exec';
 const KEY = 'opex_test_anahtari_123';
@@ -59,7 +61,7 @@ function bloklar(kokSecici = 'main, .app-footer') {
     }
     if (n.nodeType !== 1) return;
     const el = n as HTMLElement;
-    if (ATLANAN.has(el.tagName) || el.dataset.kaynak === 'sheets' || el.classList.contains('chart-fallback') || el.classList.contains('visually-hidden') || el.getAttribute('aria-hidden') === 'true') return;
+    if (ATLANAN.has(el.tagName) || el.dataset.kaynak === 'sheets' || el.dataset.yalin === 'alinti' || el.dataset.yalin === 'kod' || el.dataset.yalin === 'veri' || el.classList.contains('chart-fallback') || el.classList.contains('visually-hidden') || el.getAttribute('aria-hidden') === 'true') return;
     const cs = getComputedStyle(el);
     const satirIci = cs.display === 'none' ? INLINE.has(el.tagName) : cs.display === 'inline' || cs.display === 'contents';
     // Satır içi kaynak bağlantısı yayın adıdır. Cümlede yer tutucu olarak kalır, adı ayrıca künye olarak kaydedilir.
@@ -251,6 +253,7 @@ test.describe('yalın Türkçe: sitenin bütün sayfaları', () => {
         for (const b of await page.evaluate(bloklar, "main, .app-footer")) toplanan.set(`${b.tur}\u0000${b.metin}`, b.tur);
       });
       const bulgular = new Set<string>();
+      if (yol !== '/onboarding/') expect(await page.locator('[data-yalin="veri"]').count(), 'veri işareti yalnız Onboarding sayfasında').toBe(0);
       for (const k of aciklanmayanKisaltmalar([...toplanan].map(([k, tur]) => ({ metin: k.split('\u0000')[1], tur })))) bulgular.add(`[kısaltma açıklanmadı] ${k}`);
       for (const [k, tur] of toplanan) {
         const metin = k.split('\u0000')[1];

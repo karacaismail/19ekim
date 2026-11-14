@@ -396,7 +396,7 @@ function ParamsContent() {
       <Section id="parametre-gruplari" title="Değerler" desc="Değerler konularına göre gruplara ayrıldı. Örneğin maaşlar “Ücret” grubundadır.">
         <Gruplar acik={acik} setAcik={setAcik} sorgu={sorgu} setSorgu={setSorgu} />
       </Section>
-      <Section id="turetilen" title="Türetilen değerler" desc="Site bu değerleri yukarıdaki değerlerden hesaplar. Bütün sayfalar bu sonuçları kullanır.">
+      <Section id="turetilen" title="Türetilen değerler" desc="Site bu değerleri “Değerler” bölümündeki değerlerden hesaplar. Bütün sayfalar bu sonuçları kullanır.">
         <Derived />
       </Section>
     </DatesProvider>
