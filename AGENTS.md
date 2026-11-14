@@ -1428,6 +1428,8 @@ Sayfaya özel kopya yazılmaz.
   kişi başı 10 m² ile tahmin edilir ve doğrulanmalıdır. Yemek kartı ve sağlık sigortası politika anahtarıdır, varsayılan kapalı.
 - Testler: `tests/butce-2027-veri.spec.ts` (model, yalnız Chromium) ve `tests/butce-2027.spec.ts` (sayfa, sahte Sheets yanıtıyla).
 - Nakit akış tablosu bu eklemeleri henüz içermez.
+- Gelir ve Meta reklam kalemi “Parametreler” sayfasında kaydedilen ayarlarla hesaplanır (`butce(…, model)`). Ayrıntı
+  “2027 sayfalarının gelir kaynağı” bölümündedir.
 
 ### 2027 gelir öngörüsü (kullanıcı kararı 2026-11-05)
 
@@ -1447,6 +1449,8 @@ Sayfaya özel kopya yazılmaz.
   tohum 2027) yüzde 10, 50, 90 noktaları. Risk payı = 1 eksi medyan ÷ risksiz plan.
 - ChatGPT analizi Codex CLI ile terminalden, ortak girdi paketiyle ve Claude sonuçlarını görmeden yapıldı. Ona kişi adı
   ve gerçek ücret gönderilmez. Karşılaştırma rakamları 5 Kasım 2026 hesabıdır, model değişirse güncellenmelidir.
+- Model kaydedilen ayarlarla çalışır (`gelirBaglami(model)`). Ayar değişince ChatGPT bölümü karşılaştırmanın varsayılan
+  ayarlarla yapıldığını yazar.
 - Testler: `tests/gelir-2027-veri.spec.ts` (yalnız Chromium) ve `tests/gelir-2027.spec.ts`.
 
 ## Sayfa ekleme ve bozulma koruması (kullanıcı kararı 2026-11-05)
@@ -1526,11 +1530,6 @@ Pages yayınından önce çalıştırır.
   uyarıyı hemen siler. Önbellekte gönderilmemiş değişiklik varsa sessizce kaybolur.
 - 1. sürümün girdi uyarısı “Ortak kayıt” alanındadır. Uyarı alana `aria-invalid` ya da `aria-describedby` ile bağlı değildir.
 - Applet kaydında iç içe alanın türü denetlenmez (`appletStore.ts → dilimBirlestir`). Örneğin metin olan ücret “NaN” gösterir.
-- Yaklaşık 15 sayfa kendi `tl` kopyasını kullanır (örnek `SatisOrtakligiV2.tsx`). Bu kopyalar `src/lib/format.ts`
-  kuralına uymaz. Eksi yarım değeri sıfıra doğru yuvarlar ve “-0” yazabilir. Ortak işleve taşınmaları ayrı bir iştir.
-- `/gelir-ongorusu-2027/` modeli ve `/butce-2027/` geliri varsayılan parametrelerle hesaplanır. `/gelir-plani/` bu
-  tarayıcıda kaydedilen parametreleri kullanır. Parametre değişince sayfalar farklı gelir gösterir. Hangisinin doğru
-  olduğu kullanıcı kararıdır.
 
 ## Davranış testleri ve düzeltmeler (13 Kasım 2026)
 
@@ -1583,6 +1582,42 @@ Testlerin bulduğu hatalar düzeltildi. Geçerli kurallar şunlardır:
 
 Birden çok çalışma ağacı aynı klasörde test koşarsa `test-results/` klasörü çakışır. Kendi çıktı klasörünüzü verin:
 `PW_PORT=4341 npx playwright test --output=<klasör>`.
+
+## 2027 sayfalarının gelir kaynağı (kullanıcı kararı 14 Kasım 2026)
+
+Önceden üç sayfa geliri varsayılan ayarlarla hesaplıyordu. Gelir planı ise kaydedilen ayarları kullanıyordu. Bu yüzden
+ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 2026 Cumartesi günü bu farkın kapatılmasını istedi.
+
+- Gelir öngörüsü, 2027 bütçesi ve İstihdam takvimi v2 geliri gelir planından alır (`src/data/planGeliri.ts`).
+- Gelir planı “Parametreler” sayfasında kaydedilen ayarlarla hesaplanır. Böylece dört sayfa aynı geliri gösterir.
+- Her kadro seçeneği bir senaryoya dayanır (`SECENEK_SENARYOSU`). Ekonomik seçenek kötümser senaryoya dayanır. Medyan
+  seçenek plan senaryosuna, güçlü seçenek iyimser senaryoya dayanır.
+- Plan Aralık 2027'den önce biterse hesap yalnız bitiş tarihini Aralık 2027 yapar (`plan2027`). Öteki ayarlar aynı
+  kalır. Sayfa bunu sayfa notunda yazar (`PlanDurumuNotu`).
+- Senaryo Aralık 2026'dan sonra başlarsa gelir öngörüsü varsayılan ayarları kullanır. Çünkü hesap Aralık 2026 sonundaki
+  satıcı sayısıyla başlar. Sayfa bunu da yazar.
+- Senaryo 2027'den sonra başlarsa 2027 geliri 0 ₺ sayılır. İstihdam v2 bu durumda oran yazmaz. Uyarı kutusu gelirin
+  oluşmadığını yazar.
+- 2027 bütçesinin Meta kalemi kaydedilen başlangıç ayından başlar. Nakit akışı sayfası da aynı kuralı kullanır. Önceki
+  aylar 0 ₺ sayılır. Bütçedeki yatırım cümlesi kaydedilen yatırım tutarını yazar.
+- `istihdamV2.json` içindeki gelir varsayılan ayarların sonucudur. `tests/plan-geliri.spec.ts` iki değerin aynı kaldığını
+  denetler. Varsayılan ayar değişirse veri dosyası da güncellenmelidir.
+- İstihdam v2 uyarı kutusu oranları yeni gelirle yazar (`dikkatOf`). Yatırım tutarı “Parametreler” sayfasından gelir.
+  En düşük oran %85'in altına inerse “şirket zarar eder” cümlesi yazılmaz. Çünkü reklam, prim, ofis ve yazılım giderleri
+  bu sayfada hesaplanmaz. Bu durumda kutu okuru “2027 bütçesi” sayfasına yönlendirir.
+
+## Ortak sayı biçimi (kullanıcı kararı 14 Kasım 2026)
+
+- Bütün sayı, para ve yüzde metinleri `src/lib/format.ts` işlevlerinden geçer. Örneğin eksi yarım tutar her sayfada
+  aynı yuvarlanır ve “-0 ₺” yazılmaz.
+- Başka dosyada `new Intl.NumberFormat(` ve sayının `toLocaleString(` biçimi kullanılmaz. `tests/bicim-ortak.spec.ts`
+  bunu denetler. Tarih için `Intl.DateTimeFormat` ya da `src/lib/dates.ts` kullanılır.
+- Dışarıdan gelen zaman `tarihSaat` ile yazılır (`src/lib/dates.ts`). Değer okunamazsa işlev `null` döner. Sayfa zamanı
+  yazmaz, hata da atmaz. Örneğin Sheets yanıtındaki hesap zamanı bozuk gelebilir.
+- Ondalık hanesi seçilen biçim için `sayiBicimi(n)`, `yuzdeBicimi(n)` ve `sabitOndalikBicimi(n)` vardır. Bu işlevler tek
+  bağımsız değişkenli bir biçimleyici döndürür. Bu yüzden `.map(...)` içinde güvenle kullanılır.
+- Öteki ortak biçimler `tl`, `tlBitisik`, `tlExact`, `int`, `num`, `pct`, `times`, `milyon` ve `avro` işlevleridir.
+  `tlBitisik` sayı ile ₺ arasına bölünmeyen boşluk koyar. Dar hücrede “₺” alt satıra düşmez.
 
 ## Menüde yeni öğe işareti (kullanıcı isteği 2026-11-12)
 

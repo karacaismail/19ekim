@@ -5,8 +5,9 @@ import { KOSULLAR, kosulSonucu, affilateModeli, affilateHesabi, affilateYillari 
 import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
+import { num } from '../../lib/format';
 
-export const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+export const sayi = num;
 export const tl = (n: number) => `${sayi(n)} ₺`;
 export const yuzde = (n: number) => `%${sayi(n * 100)}`;
 export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: string }[]; aciklama: string[] }

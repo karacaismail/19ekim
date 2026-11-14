@@ -53,12 +53,13 @@ import { POLITIKA_ADI } from '../data/affilateKurguV2';
 import type { Politika } from '../data/affilateV2';
 import { basamakDurumu, personaOzeti, segmentDurumu, type Tur } from '../data/ozetV2';
 import '../styles/satisOrtakligiV2.css';
+import { num, pct, sayiBicimi, tlBitisik } from '../lib/format';
 
 /** Model değişti (2026-11-03): eski v2 kaydı yeni alanlarla karışmasın diye anahtar yenilendi. */
 const ANAHTAR = 'turksab-satis-ortakligi-v2-segment';
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const tl = tlBitisik;
+const yuzde = pct;
+const sayi = num;
 
 function useAyar() {
   const [ayar, setAyar] = useState<Ayar>(VARSAYILAN_AYAR);
@@ -205,7 +206,7 @@ function FiyatAyarlari({ a, g }: { a: Ayar; g: G }) {
         <Girdi label="Yıllık pakette kaç ayın ücreti ödenir?" value={a.istocYilAy} onChange={(v) => g({ istocYilAy: v })} />
       </Grup>
     );
-  const sayiTr = (n: number) => new Intl.NumberFormat('tr-TR').format(n);
+  const sayiTr = sayiBicimi(3);
   return (
     <>
       <Grup baslik="Fiyat">

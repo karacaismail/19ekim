@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { tarihSaat } from '../lib/dates';
 import { Checkbox, NumberInput, Popover, Table, TextInput, type NumberInputProps } from '@mantine/core';
 import { IconArrowDown, IconArrowUp, IconArrowsSort, IconChevronDown, IconExternalLink, IconFilter, IconFilterFilled, IconRefresh, IconSettings } from '@tabler/icons-react';
 import { AppFrame, HEADER_TOOLS_ID, PAGE_TOOLS_ID } from '../components/AppFrame';
@@ -37,24 +38,25 @@ import {
   type YilKey,
 } from '../data/opex';
 import type { OpexTone } from '../lib/chartSpec';
-import { tl, tlExact } from '../lib/format';
+import { num, sabitOndalikBicimi, tl, tlExact, yuzdeBicimi } from '../lib/format';
 
 /* ---------- Biçimler ---------- */
 
-const pct2 = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(r * 100)}`;
+const pct2 = yuzdeBicimi(2);
+const kuruslu = sabitOndalikBicimi(2);
+const dortOndalik = sabitOndalikBicimi(4);
 const signed = (r: number) => `${r > 0 ? '+' : r < 0 ? '−' : ''}${pct2(Math.abs(r))}`;
 /** Değişim oranı; önceki değer 0 ise (ör. tüm kalemleri işaretsiz ay) “—”. */
 const change = (now: number, before: number) => (before ? signed(now / before - 1) : 'Uygulanmıyor');
 /** Tutar sayfanın geri kalanı gibi yazılır: simge sayıdan sonra gelir (“4.899,00 ₺”, “50,00 €”). */
 const PARA_SIMGESI: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€' };
 const money = (value: number, currency: string) =>
-  `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} ${PARA_SIMGESI[currency] ?? currency}`;
+  `${kuruslu(value)} ${PARA_SIMGESI[currency] ?? currency}`;
 /** Görünen para birimi adı: veri kodu “TRY” kalır, okur “₺” görür (kullanıcı kararı 13 Kasım 2026: her yerde ₺). */
 export const paraAdi = (kod: string) => (kod === 'TRY' ? '₺' : kod);
-const rate = (value: number) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value)} ₺`;
-const clock = (iso: string | null | undefined) =>
-  iso ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso)) : 'Veri yok';
-const stamp = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+const rate = (value: number) => `${dortOndalik(value)} ₺`;
+const clock = (iso: string | null | undefined) => (iso && tarihSaat(iso, { hour: '2-digit', minute: '2-digit', second: '2-digit' })) || 'Veri yok';
+const stamp = (iso: string) => tarihSaat(iso, { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit' });
 
 const KUME_TONE: Record<KumeKod, OpexTone> = { teknoloji: 'tech', insan: 'people', ofis: 'office' };
 const KUME_AD: Record<KumeKod, string> = { teknoloji: 'Teknoloji', insan: 'Personel', ofis: 'Ofis ve işletme' };
@@ -1873,7 +1875,7 @@ function Assumptions({ m, d }: { m: OpexModel; d: Donem }) {
 }
 
 function Incentives({ m, d }: { m: OpexModel; d: Donem }) {
-  const value = (t: Tesvik, v: number) => (t.tur === 'Aylık tutar' ? tlExact(v) : t.tur === 'Puan indirimi' ? `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(v * 100)} puan` : pct2(v));
+  const value = (t: Tesvik, v: number) => (t.tur === 'Aylık tutar' ? tlExact(v) : t.tur === 'Puan indirimi' ? `${num(v * 100)} puan` : pct2(v));
   const columns: Column<Tesvik>[] = [
     {
       key: 'ad',
@@ -1981,7 +1983,7 @@ function Content({ data, yil, donemler, onYil }: { data: OpexData; yil: Yil; don
         </div>
       </div>
       <SayfaKaynagi>
-        Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. Hesap aracının sürümü <code>{m.surum}</code>, özet kodu <code>{data.ozet}</code> olur.
+        {stamp(m.hesaplandi) ? <>Bu hesap {stamp(m.hesaplandi)} tarihinde yapıldı. </> : 'Hesap zamanı okunamadı. '}Hesap aracının sürümü <code>{m.surum}</code>, özet kodu <code>{data.ozet}</code> olur.
       </SayfaKaynagi>
     </OzetContext.Provider>
   );

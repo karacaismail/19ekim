@@ -11,6 +11,10 @@ import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
 import { SCALE_RULE, adCapacity, adSchedule, buildSources, growthHires, saleFactor, simulate, type RevMonth, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
+import { sayiBicimi } from '../lib/format';
+
+const sayi = sayiBicimi(3);
+const sayi1 = sayiBicimi(1);
 
 export interface StaffRole {
   id: string;
@@ -155,7 +159,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'dijital-pazarlama',
       count: 0,
       gorev: `Bu bütçeyle kayıt formlu reklamlar ve arama reklamları yayımlanır. Siteyi daha önce ziyaret edenlere yeniden reklam gösterilir. Kayıtlar CRM’e aktarılır. Bir satıcıdan beklenen toplam geliri, o satıcıyı kazanma maliyetiyle karşılaştırırız. Gelir bu maliyetin en az ${SCALE_RULE.threshold} katıysa reklam bütçesini artırırız.`,
-      katkiYolu: `Ayda ${inp.dijitalBudget.toLocaleString('tr-TR')} ₺ bütçeyle yaklaşık ${Math.round(kayit)} kayıt beklenir. Yaklaşık ${kap.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ilk ödeme beklenir. Bu değer, reklam tam verimle çalışırken ve bütçe artmadan önceki değerdir.${ad.scales ? ` Gelir, kazanma maliyetinin en az ${SCALE_RULE.threshold} katı olduğu için bütçe en çok ${p.dijitalScaleMax} katına çıkar.` : ''}`,
+      katkiYolu: `Ayda ${sayi(inp.dijitalBudget)} ₺ bütçeyle yaklaşık ${Math.round(kayit)} kayıt beklenir. Yaklaşık ${sayi1(kap)} ilk ödeme beklenir. Bu değer, reklam tam verimle çalışırken ve bütçe artmadan önceki değerdir.${ad.scales ? ` Gelir, kazanma maliyetinin en az ${SCALE_RULE.threshold} katı olduğu için bütçe en çok ${p.dijitalScaleMax} katına çıkar.` : ''}`,
       maas: null,
       maliyet: inp.dijitalBudget,
       startIso: monthStart(p.dijitalAdStartDate),
@@ -208,7 +212,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'yazilim',
       count: 0,
       gorev: 'Kendi çevresinden satıcı getirir. Temsilciler çok katlı pazarlama (MLM) ağı kurar. Her temsilcinin ağda bir üstü vardır. Bu üst kişiye sponsor denir. Temsilci primini hizmet faturası keserek alır. Ağ her ay büyür.',
-      katkiYolu: `Her satış için temsilciye ${p.commission.toLocaleString('tr-TR')} ₺ prim öderiz. Satış arttıkça bu gider de artar. Ağa her ay ${p.repPerMonth} yeni temsilci katılır. Ağda en çok ${p.repCap} temsilci olur.`,
+      katkiYolu: `Her satış için temsilciye ${sayi(p.commission)} ₺ prim öderiz. Satış arttıkça bu gider de artar. Ağa her ay ${p.repPerMonth} yeni temsilci katılır. Ağda en çok ${p.repCap} temsilci olur.`,
       maas: null,
       maliyet: 0,
       startIso: monthStart(p.decStartDate),

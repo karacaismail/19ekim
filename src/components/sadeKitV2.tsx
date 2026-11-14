@@ -1,6 +1,7 @@
 /* v2 kopyası (2026-11-03): v1 dosyası ayrı durur, bu dosyadaki değişiklik v1'i etkilemez. */
 import { useEffect, useRef, type ReactNode } from 'react';
 import { NumberInput } from '@mantine/core';
+import { tlBitisik } from '../lib/format';
 
 /**
  * Sade sayfa parçaları (satış ortaklığı ve affilate; kullanıcı kararı 2026-11-03): sayı alanı, seçenek grubu,
@@ -185,7 +186,7 @@ export function KararJson({ veri, dosyaAdi }: { veri: unknown; dosyaAdi: string 
 
 /** Dönemsel kazanç tablosu: her satır bir kazanç kalemi; sütunlar günlük, haftalık, aylık, yıllık. */
 export function Donemler({ satirlar }: { satirlar: { ad: string; yillik: number; formul: string }[] }) {
-  const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
+  const tl = tlBitisik;
   const donem = [
     { ad: 'Günlük', bol: 365 },
     { ad: 'Haftalık', bol: 52 },

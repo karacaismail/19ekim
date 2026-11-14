@@ -1,22 +1,25 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { Modal } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import '@mantine/core/styles/Modal.layer.css';
+import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
+import { PlanDurumuNotu } from '../components/PlanDurumuNotu';
 import { Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { useMotionMs } from '../lib/motion';
-import { int, tl } from '../lib/format';
+import { int, pct, sayiBicimi, tl } from '../lib/format';
+import { plan2027, secenekGelirleri } from '../data/planGeliri';
 import {
   ACIK_SORULAR,
   AYLAR_2027,
-  DIKKAT,
+  dikkatOf,
+  gelirleOzet,
   HESAP_TARIHI,
   KAYNAKLAR,
   KUMELER,
   POZISYONLAR,
   SECENEKLER,
   SECENEK_ADI,
-  SECENEK_OZETI,
   VARSAYIMLAR,
   takvim2027,
   type Pozisyon,
@@ -33,7 +36,9 @@ import '../styles/istihdamV2.css';
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}-01T00:00:00`));
 const tarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v)}`;
+/** Veri yüzde sayısıdır (87,9). Ortak biçim oran bekler. */
+const yuzde = (v: number) => pct(v / 100);
+const birOndalik = sayiBicimi(1);
 const hizmetMi = (p: Pozisyon, s: SecenekId) => ['Dış hizmet', 'Serbest çalışan'].includes(p.secenekler[s].bicim);
 
 /** İşe alım ayları: “Mart 2027 (2 kişi)” biçiminde. Mevcut takvim rolünde plan tarihi gün olarak yazılır. */
@@ -222,7 +227,12 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
   const acan = useRef<HTMLElement | null>(null);
   const sure = useMotionMs('--motion-duration-base');
   const dar = useMediaQuery('(max-width: 47.99em), (max-height: 31.99em)', false, { getInitialValueInEffect: false });
-  const oz = SECENEK_OZETI[secili];
+  // Gelir “Parametreler” sayfasında kaydedilen ayarlarla hesaplanır. Gelir planı da bu ayarları kullanır.
+  const model = useModel();
+  const durum = useMemo(() => plan2027(model).durum, [model]);
+  const ozet = useMemo(() => gelirleOzet(secenekGelirleri(model)), [model]);
+  const dikkat = useMemo(() => dikkatOf(ozet, model.params.investmentAmount), [ozet, model]);
+  const oz = ozet[secili];
   const takvim = takvim2027(secili);
   const asgari = VARSAYIMLAR.asgariUcret2027;
   const eskiSayisi = POZISYONLAR.filter((p) => p.eski).length;
@@ -251,6 +261,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
       {surum}
 
       <SayfaNotu>
+      <PlanDurumuNotu durum={durum} />
       <p>
         Bu sürüm, 1. sürümdeki {eskiSayisi} rolü aynen korur. Bu roller “Eski” etiketiyle görünür. Bu sürüm 11 kümede {yeniSayisi} yeni pozisyon ekler. Her seçenek bu pozisyonların bir kısmını kullanır. Dış hizmetler ve serbest çalışanlar kişi sayısına girmez.</p><p>Maaşlar 2027 için tahmindir. 2027 asgari ücreti henüz açıklanmadı. Plan, yıllık TÜFE kadar {asgari.varsayilanArtis} artış varsayar. Google Sheets gider tablosu da bu oranı kullanır. Net asgari ücret {tl(asgari.net)} alınır. İşveren maliyeti net maaşın 2 katıdır. Dış hizmet ve serbest çalışan bedeli fatura tutarıdır ve 2 ile çarpılmaz. Asgari ücret açıklanınca bütün tutarlar yeniden hesaplanmalıdır.
       </p>
@@ -273,7 +284,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
             { label: 'Aralık 2027 kadro', value: `${int(oz.toplamKisi)} kişi`, note: `Bu sayıya kurucu ve yazılım ekibi de dahildir. Bunların ${int(oz.yeniKadroKisi)} kişisi yeni alınır.` },
             { label: 'Dış hizmet ve serbest', value: `${int(oz.disHizmetSayisi + oz.serbestCalisanSayisi)} hizmet`, note: `${int(oz.disHizmetSayisi)} dış hizmet, ${int(oz.serbestCalisanSayisi)} serbest çalışan` },
             { label: '2027 kadro ve hizmet gideri', value: tl(oz.toplamMaliyet2027), note: `Aralık 2027’de aylık ${tl(oz.aylikMaliyetAralik2027)}` },
-            { label: 'Giderin gelire oranı', value: yuzde(oz.gelirPayi), note: `Oran, ${oz.dayandigiSenaryo} senaryosunun 2027 abonelik gelirine göre hesaplanır. Bu gelir ${tl(oz.gelirHedefi2027)} olur. Her 100 ₺ gelirin ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(oz.gelirPayi)} ₺ kadarı kadro ve hizmet giderine gider.` },
+            { label: 'Giderin gelire oranı', value: yuzde(oz.gelirPayi), note: Number.isFinite(oz.gelirPayi) ? `Oran, ${oz.dayandigiSenaryo} senaryosunun 2027 abonelik gelirine göre hesaplanır. Bu gelir ${tl(oz.gelirHedefi2027)} olur. Her 100 ₺ gelirin ${birOndalik(oz.gelirPayi)} ₺ kadarı kadro ve hizmet giderine gider.` : `Oran, ${oz.dayandigiSenaryo} senaryosunun 2027 abonelik gelirine göre hesaplanır. Kaydedilen ayarlarla bu gelir 0 ₺ olduğu için oran hesaplanmaz.` },
           ]}
         />
       </Section>
@@ -286,13 +297,13 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
           rowTone={(s) => (s === secili ? 'secili' : undefined)}
           columns={[
             { key: 'ad', header: 'Seçenek', rowHeader: true, render: (s) => SECENEK_ADI[s] },
-            { key: 'senaryo', header: 'Gelir senaryosu', render: (s) => SECENEK_OZETI[s].dayandigiSenaryo },
-            { key: 'kadro', header: 'Aralık 2027 kadro', nowrap: true, render: (s) => `${int(SECENEK_OZETI[s].toplamKisi)} kişi` },
-            { key: 'yeni', header: 'Yeni kadro', nowrap: true, render: (s) => `${int(SECENEK_OZETI[s].yeniKadroKisi)} kişi` },
-            { key: 'gider', header: '2027 gideri', nowrap: true, summary: true, render: (s) => tl(SECENEK_OZETI[s].toplamMaliyet2027) },
-            { key: 'gelir', header: '2027 geliri', nowrap: true, render: (s) => tl(SECENEK_OZETI[s].gelirHedefi2027) },
-            { key: 'oran', header: 'Gider oranı', nowrap: true, render: (s) => yuzde(SECENEK_OZETI[s].gelirPayi) },
-            { key: 'aralik', header: 'Aralık 2027’de aylık gider oranı', minWidth: '8rem', render: (s) => yuzde(SECENEK_OZETI[s].aralikGelirPayi) },
+            { key: 'senaryo', header: 'Gelir senaryosu', render: (s) => ozet[s].dayandigiSenaryo },
+            { key: 'kadro', header: 'Aralık 2027 kadro', nowrap: true, render: (s) => `${int(ozet[s].toplamKisi)} kişi` },
+            { key: 'yeni', header: 'Yeni kadro', nowrap: true, render: (s) => `${int(ozet[s].yeniKadroKisi)} kişi` },
+            { key: 'gider', header: '2027 gideri', nowrap: true, summary: true, render: (s) => tl(ozet[s].toplamMaliyet2027) },
+            { key: 'gelir', header: '2027 geliri', nowrap: true, render: (s) => tl(ozet[s].gelirHedefi2027) },
+            { key: 'oran', header: 'Gider oranı', nowrap: true, render: (s) => yuzde(ozet[s].gelirPayi) },
+            { key: 'aralik', header: 'Aralık 2027’de aylık gider oranı', minWidth: '8rem', render: (s) => yuzde(ozet[s].aralikGelirPayi) },
           ]}
           rows={SECENEKLER}
         />
@@ -388,7 +399,7 @@ export function IstihdamV2({ surum }: { surum: ReactNode }) {
 
       <Section id="dikkat" index={6} title="Dikkat edilmesi gerekenler" desc="Bu plan projenin bugünkü kararlarıyla bazı noktalarda çelişir. Bir seçenek seçmeden önce aşağıdaki noktalar incelenmeli ve sorular cevaplanmalıdır.">
         <dl className="iv2-dikkat">
-          {DIKKAT.map((d) => (
+          {dikkat.map((d) => (
             <div key={d.baslik}>
               <dt>{d.baslik}</dt>
               <dd>{d.metin}</dd>

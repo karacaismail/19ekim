@@ -15,6 +15,9 @@
  */
 import { CANLI_DENEME_GUN, CANLI_GRUPLAR, CANLI_KAYNAK, CANLI_PAKETLER, type CanliOzellik, type OzellikDegeri, type PaketId } from './canliPaketler';
 import { CRM_EKI_AYLIK_EUR, MODELLER, UCRETSIZ_URUN, type GelirModeli } from './gelirModelleri';
+import { sayiBicimi } from '../lib/format';
+
+const sayi = sayiBicimi(3);
 
 export const PAKET_SIRASI: PaketId[] = ['basic', 'platinium', 'enterprise'];
 
@@ -39,7 +42,7 @@ export function ilkPaket(anahtar: string): PaketId | null {
 }
 
 export const paket = (id: PaketId) => CANLI_PAKETLER.find((p) => p.id === id)!;
-export const eur = (n: number) => `${n.toLocaleString('tr-TR')} €`;
+export const eur = (n: number) => `${sayi(n)} €`;
 export const tarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 /** Paket fiyatı: tutar, ücretsiz ya da teklif. */
 export const fiyatMetni = (aylik: number | null) => (aylik === null ? 'Teklif' : aylik === 0 ? 'Ücretsiz' : eur(aylik));

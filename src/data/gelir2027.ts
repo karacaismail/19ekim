@@ -1,7 +1,9 @@
 import kaynakVerisi from './gelir2027Kaynak.json' with { type: 'json' };
-import { buildModel } from './model';
-import { DEFAULT_PARAMS } from './params';
+import { DEFAULT_MODEL, type Model } from './model';
+import { DEFAULT_PARAMS, type Params } from './params';
 import { AYLAR_2027, POZISYONLAR, type Pozisyon, type SecenekId } from './istihdamV2';
+import { plan2027, secenekGelirleri, type PlanDurumu } from './planGeliri';
+import { num } from '../lib/format';
 
 /**
  * 2027 gelir öngörüsü: kadronun çalışma saati, verimi, riskleri ve satışa katkısı (kullanıcı kararı 2026-11-05).
@@ -181,7 +183,6 @@ export function yillikDokum(g: SaatGirdisi = MEDYAN_SAAT) {
 
 /* ---------- 2. Kadro ve katkı ---------- */
 
-const P = DEFAULT_PARAMS;
 export type KatkiTuru = 'dogrudan' | 'dijital' | 'lider' | 'elde-tutma' | 'yok';
 export interface Katki {
   tur: KatkiTuru;
@@ -190,27 +191,32 @@ export interface Katki {
   dayanak: string;
   varsayim: boolean;
 }
-/** Pozisyonların satışa katkısı. Listede olmayan pozisyonun doğrudan satış katkısı yoktur (destek ve yönetim). */
-export const KATKI: Record<string, Katki> = {
-  'istoc-saha-ekibi': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: `Her saha personeli tam kapasitede ayda ${P.sahaActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
-  'ucuncu-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
-  'ek-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
-  'istoc-masa-basi': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: `Bu rol tam kapasitede ayda ${P.crmActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
-  'masa-basi-satis-uzmani-ek': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: 'Hesap, İstoç Pazarlama CRM uzmanı rolüyle aynı kurala dayanır.', varsayim: false },
-  'etkinlik-organizatoru': { tur: 'dogrudan', deger: P.organizatorActivesMonthly, dayanak: `Organizatör ayda ${P.organizatorActivesMonthly} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
-  'kurumsal-satis-yoneticisi': { tur: 'dogrudan', deger: 2, dayanak: 'Büyük müşterilerde satışın tamamlanması uzun sürer. Bu rol tam kapasitede ayda 2 yeni aktif satıcı getirir. Yan sütundaki sayı 2027 toplamıdır. Toplam, işe başlama ayına ve kapasiteye göre hesaplanır.', varsayim: true },
-  'dijital-pazarlama-uzmani': { tur: 'dijital', deger: 1, dayanak: '“Gelir planı” sayfasındaki dijital satış kaynağı reklamdan ve ücretsiz içerikten oluşur. Bu kaynağın getirdiği satış bu kişinin çalışma saatine bağlıdır.', varsayim: false },
-  'performans-pazarlama-uzmani': { tur: 'dijital', deger: 0.2, dayanak: 'Reklam verimini %20 artırır.', varsayim: true },
-  'seo-icerik-uzmani': { tur: 'dogrudan', deger: 2, dayanak: 'İşe başladıktan 3 ay sonra ücretsiz arama sonuçlarından ayda 2 yeni aktif satıcı gelir.', varsayim: true },
-  'satis-ekip-lideri': { tur: 'lider', deger: 0.1, dayanak: 'Saha satış uzmanlarının ve İstoç Pazarlama CRM uzmanının çıktısını %10 artırır.', varsayim: true },
-  'satici-uyum-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'katalog-operatoru': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'satici-basari-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'musteri-hizmetleri-temsilcisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'alici-talep-sorumlusu': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Satıcıya alıcı getirir. Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'teklif-operasyon-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-  'kurumsal-alici-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
-};
+/**
+ * Pozisyonların satışa katkısı. Listede olmayan pozisyonun doğrudan satış katkısı yoktur (destek ve yönetim). Saha, CRM
+ * ve organizatör sayıları “Parametreler” sayfasındaki ayarlardan gelir.
+ */
+export function katkilar(P: Params): Record<string, Katki> {
+  return {
+    'istoc-saha-ekibi': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: `Her saha personeli tam kapasitede ayda ${num(P.sahaActivesMonthly)} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+    'ucuncu-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
+    'ek-saha-personeli': { tur: 'dogrudan', deger: P.sahaActivesMonthly, dayanak: 'Hesap, saha personeliyle aynı kurala dayanır.', varsayim: false },
+    'istoc-masa-basi': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: `Bu rol tam kapasitede ayda ${num(P.crmActivesMonthly)} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+    'masa-basi-satis-uzmani-ek': { tur: 'dogrudan', deger: P.crmActivesMonthly, dayanak: 'Hesap, İstoç Pazarlama CRM uzmanı rolüyle aynı kurala dayanır.', varsayim: false },
+    'etkinlik-organizatoru': { tur: 'dogrudan', deger: P.organizatorActivesMonthly, dayanak: `Organizatör ayda ${num(P.organizatorActivesMonthly)} yeni aktif satıcı getirir. Bu sayı “Parametreler” sayfasından gelir. Yan sütundaki sayı 2027 toplamıdır.`, varsayim: false },
+    'kurumsal-satis-yoneticisi': { tur: 'dogrudan', deger: 2, dayanak: 'Büyük müşterilerde satışın tamamlanması uzun sürer. Bu rol tam kapasitede ayda 2 yeni aktif satıcı getirir. Yan sütundaki sayı 2027 toplamıdır. Toplam, işe başlama ayına ve kapasiteye göre hesaplanır.', varsayim: true },
+    'dijital-pazarlama-uzmani': { tur: 'dijital', deger: 1, dayanak: '“Gelir planı” sayfasındaki dijital satış kaynağı reklamdan ve ücretsiz içerikten oluşur. Bu kaynağın getirdiği satış bu kişinin çalışma saatine bağlıdır.', varsayim: false },
+    'performans-pazarlama-uzmani': { tur: 'dijital', deger: 0.2, dayanak: 'Reklam verimini %20 artırır.', varsayim: true },
+    'seo-icerik-uzmani': { tur: 'dogrudan', deger: 2, dayanak: 'İşe başladıktan 3 ay sonra ücretsiz arama sonuçlarından ayda 2 yeni aktif satıcı gelir.', varsayim: true },
+    'satis-ekip-lideri': { tur: 'lider', deger: 0.1, dayanak: 'Saha satış uzmanlarının ve İstoç Pazarlama CRM uzmanının çıktısını %10 artırır.', varsayim: true },
+    'satici-uyum-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'katalog-operatoru': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'satici-basari-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'musteri-hizmetleri-temsilcisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'alici-talep-sorumlusu': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Satıcıya alıcı getirir. Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'teklif-operasyon-uzmani': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+    'kurumsal-alici-yoneticisi': { tur: 'elde-tutma', deger: 0.01, dayanak: 'Aylık elde tutma oranını 1 yüzde puanı artırır. Örneğin %70 oranı %71 olur.', varsayim: true },
+  };
+}
 /** Dolaylı katkının üst sınırı: aylık elde tutmaya en çok 8 puan. */
 export const ELDE_TUTMA_TAVAN = 0.08;
 
@@ -219,43 +225,89 @@ export interface Kisi {
   /** 2027 ay sırasına göre işe başlama (negatif: 2027 öncesi; Kasım 2026 = -2). */
   basla: number;
 }
+/** Katkısı tanımlı pozisyonlar. Liste ayarlara bağlı değildir. */
+const KATKILI = new Set(Object.keys(katkilar(DEFAULT_PARAMS)));
 export function kisiler(s: SecenekId): Kisi[] {
-  return POZISYONLAR.filter((p) => KATKI[p.id] && p.secenekler[s].kisi > 0).flatMap((p) =>
+  return POZISYONLAR.filter((p) => KATKILI.has(p.id) && p.secenekler[s].kisi > 0).flatMap((p) =>
     p.secenekler[s].iseAlim.map((iso) => ({ pozisyon: p, basla: (Number(iso.slice(0, 4)) - 2027) * 12 + Number(iso.slice(5, 7)) - 1 })),
   );
 }
 
 /* ---------- 3. Gelir motoru (gelir planıyla aynı kurallar) ---------- */
 
-const MODEL = buildModel(DEFAULT_PARAMS);
-const REV = MODEL.revenue;
-const OCAK = REV.months.findIndex((m) => m.iso === '2027-01-01');
-const MEDYAN_SIM = REV.byId.medyan;
-const dilim = (xs: number[]) => xs.slice(OCAK, OCAK + 12);
-/** 2027 ₺ fiyatlar (kurla büyüyen), gelir planı medyan senaryosundan. */
-export const FIYAT = { aylik: dilim(MEDYAN_SIM.fiyat.abonelik), yillik: dilim(MEDYAN_SIM.fiyat.yillik) };
-/** Aralık 2026 sonunda aylık ödeyen satıcı (gelir planı medyan senaryosu). */
-export const BASLANGIC_ODEYEN = MEDYAN_SIM.aylikOdeyen[OCAK - 1];
-const kaynak = (id: string) => dilim(REV.sources.find((x) => x.id === id)?.values ?? AYLAR_2027.map(() => 0));
-/** Dijital (reklam ve organik) ve temsilci ağı: gelir planındaki çarpansız 2027 değerleri. */
-export const DIJITAL = kaynak('dijital');
-export const TEMSILCI = kaynak('rep');
-export const PLAN_ELDE_TUTMA = P.planRetention / 100;
-export const YILLIK_PAY = P.annualShare / 100;
 /**
- * 2026'da yıllık peşin ödeyenlerin 2027'ye düşen kazanılmış geliri: yıllık bedel 12 aya yayılır (TFRS 15 yaklaşımı).
- * Gelir planı medyan senaryosundaki 2026 yıllık ödemelerinden.
+ * Gelir motorunun girdileri. Hepsi gelir planının Plan (medyan) senaryosundan gelir. Gelir planı “Parametreler”
+ * sayfasında kaydedilen ayarlarla hesaplanır. Bu yüzden ayar değişince bu sayfa da değişir.
  */
-export const DEVREDEN_YILLIK = AYLAR_2027.map((_, i) => {
-  let t = 0;
-  for (let k = 0; k < OCAK; k++) {
-    const ay = k - OCAK; // 2027 Ocak'a göre (negatif)
-    if (i <= ay + 11) t += (MEDYAN_SIM.yillik[k] * MEDYAN_SIM.fiyat.yillik[k]) / 12;
+export interface GelirBaglami {
+  /** Hesabın dayandığı ayarlar (planGeliri.ts → PlanDurumu). */
+  durum: PlanDurumu;
+  katki: Record<string, Katki>;
+  /** 2027 ₺ fiyatlar (kurla büyüyen). */
+  fiyat: { aylik: number[]; yillik: number[] };
+  /** Aralık 2026 sonunda aylık ödeyen satıcı. */
+  baslangicOdeyen: number;
+  /** Dijital (reklam ve organik) ve temsilci ağı: gelir planındaki çarpansız 2027 değerleri. */
+  dijital: number[];
+  temsilci: number[];
+  planEldeTutma: number;
+  yillikPay: number;
+  /**
+   * 2026'da yıllık peşin ödeyenlerin 2027'ye düşen kazanılmış geliri: yıllık bedel 12 aya yayılır (TFRS 15 yaklaşımı).
+   */
+  devredenYillik: number[];
+  /** Gelir planı Plan senaryosunun 2027 geliri (karşılaştırma için). */
+  gelirPlani2027: number;
+}
+
+export function gelirBaglami(model: Model): GelirBaglami {
+  const plan = plan2027(model);
+  let m = plan.model;
+  let durum: PlanDurumu = plan.durum;
+  let ocak = m.revenue.months.findIndex((x) => x.iso === '2027-01-01');
+  // Hesap Aralık 2026 sonundaki ödeyen satıcıdan başlar. Senaryo 2027'de başlarsa bu sayı yoktur.
+  if (ocak < 1) {
+    m = DEFAULT_MODEL;
+    durum = 'varsayilan';
+    ocak = m.revenue.months.findIndex((x) => x.iso === '2027-01-01');
   }
-  return t;
-});
-/** Gelir planı medyan senaryosunun 2027 geliri (karşılaştırma için). */
-export const GELIR_PLANI_2027 = toplam(dilim(MEDYAN_SIM.gelir));
+  const rev = m.revenue;
+  const sim = rev.byId.medyan;
+  const dilim = (xs: number[]) => xs.slice(ocak, ocak + 12);
+  const kaynak = (id: string) => dilim(rev.sources.find((x) => x.id === id)?.values ?? AYLAR_2027.map(() => 0));
+  const devredenYillik = AYLAR_2027.map((_, i) => {
+    let t = 0;
+    for (let k = 0; k < ocak; k++) {
+      const ay = k - ocak; // 2027 Ocak'a göre (negatif)
+      if (i <= ay + 11) t += (sim.yillik[k] * sim.fiyat.yillik[k]) / 12;
+    }
+    return t;
+  });
+  return {
+    durum,
+    katki: katkilar(m.params),
+    fiyat: { aylik: dilim(sim.fiyat.abonelik), yillik: dilim(sim.fiyat.yillik) },
+    baslangicOdeyen: sim.aylikOdeyen[ocak - 1],
+    dijital: kaynak('dijital'),
+    temsilci: kaynak('rep'),
+    planEldeTutma: m.params.planRetention / 100,
+    yillikPay: m.params.annualShare / 100,
+    devredenYillik,
+    gelirPlani2027: secenekGelirleri(m).medyan.yil,
+  };
+}
+
+/** Varsayılan ayarlarla bağlam. Aşağıdaki adlar varsayılan ayarların değerleridir. Testler bu değerlerle karşılaştırır. */
+export const VARSAYILAN_BAGLAM = gelirBaglami(DEFAULT_MODEL);
+export const KATKI = VARSAYILAN_BAGLAM.katki;
+export const FIYAT = VARSAYILAN_BAGLAM.fiyat;
+export const BASLANGIC_ODEYEN = VARSAYILAN_BAGLAM.baslangicOdeyen;
+export const DIJITAL = VARSAYILAN_BAGLAM.dijital;
+export const TEMSILCI = VARSAYILAN_BAGLAM.temsilci;
+export const PLAN_ELDE_TUTMA = VARSAYILAN_BAGLAM.planEldeTutma;
+export const YILLIK_PAY = VARSAYILAN_BAGLAM.yillikPay;
+export const DEVREDEN_YILLIK = VARSAYILAN_BAGLAM.devredenYillik;
+export const GELIR_PLANI_2027 = VARSAYILAN_BAGLAM.gelirPlani2027;
 
 /** Mevsim etkisi (satış dönüşümüne): Ramazan ve bayram (Şubat, Mart), yaz durgunluğu (Temmuz, Ağustos). Varsayım. */
 export const MEVSIM = [1, 0.95, 0.9, 1, 0.97, 1, 0.95, 0.85, 1, 1, 1, 1];
@@ -285,7 +337,7 @@ export interface Sonuc {
   dogrudan: Record<string, number>;
 }
 
-export function gelirHesabi(ks: Kisi[], k: Kosu): Sonuc {
+export function gelirHesabi(ks: Kisi[], k: Kosu, b: GelirBaglami = VARSAYILAN_BAGLAM): Sonuc {
   const yeniAktif: number[] = [];
   const gelir: number[] = [];
   const kazanilan: number[] = [];
@@ -293,7 +345,7 @@ export function gelirHesabi(ks: Kisi[], k: Kosu): Sonuc {
   const odeyen: number[] = [];
   const eldeTutma: number[] = [];
   const dogrudan: Record<string, number> = {};
-  let onceki = BASLANGIC_ODEYEN;
+  let onceki = b.baslangicOdeyen;
   for (let i = 0; i < 12; i++) {
     let yeni = 0;
     let ekip = 0;
@@ -304,7 +356,7 @@ export function gelirHesabi(ks: Kisi[], k: Kosu): Sonuc {
     for (const x of ks) {
       const c = k.kapasite(x, i);
       if (c <= 0) continue;
-      const kt = KATKI[x.pozisyon.id];
+      const kt = b.katki[x.pozisyon.id];
       if (kt.tur === 'dogrudan') {
         const gecikme = x.pozisyon.id === 'seo-icerik-uzmani' ? 3 : 0;
         const v = i - x.basla >= gecikme ? c * kt.deger : 0;
@@ -317,19 +369,19 @@ export function gelirHesabi(ks: Kisi[], k: Kosu): Sonuc {
       } else if (kt.tur === 'lider') lider = Math.max(lider, c * kt.deger);
       else if (kt.tur === 'elde-tutma') et += c * kt.deger;
     }
-    const dij = DIJITAL[i] * dijital * (1 + dijitalEk);
+    const dij = b.dijital[i] * dijital * (1 + dijitalEk);
     dogrudan['dijital'] = (dogrudan['dijital'] ?? 0) + dij * k.satis * k.mevsim[i];
     dogrudan['lider'] = (dogrudan['lider'] ?? 0) + ekip * lider * k.satis * k.mevsim[i];
-    dogrudan['temsilci'] = (dogrudan['temsilci'] ?? 0) + TEMSILCI[i] * k.temsilci * k.mevsim[i];
-    const toplamYeni = (yeni + ekip * lider + dij) * k.satis * k.mevsim[i] + TEMSILCI[i] * k.temsilci * k.mevsim[i];
-    const r = Math.min(0.95, Math.max(0, PLAN_ELDE_TUTMA + (k.dolayli === false ? 0 : Math.min(ELDE_TUTMA_TAVAN, et)) + k.eldeTutmaSapma));
+    dogrudan['temsilci'] = (dogrudan['temsilci'] ?? 0) + b.temsilci[i] * k.temsilci * k.mevsim[i];
+    const toplamYeni = (yeni + ekip * lider + dij) * k.satis * k.mevsim[i] + b.temsilci[i] * k.temsilci * k.mevsim[i];
+    const r = Math.min(0.95, Math.max(0, b.planEldeTutma + (k.dolayli === false ? 0 : Math.min(ELDE_TUTMA_TAVAN, et)) + k.eldeTutmaSapma));
     const y = onceki * r;
-    const m = toplamYeni * (1 - YILLIK_PAY) + y;
-    const aylikKisim = toplamYeni * (1 - YILLIK_PAY) * FIYAT.aylik[i] + y * FIYAT.aylik[i];
-    const yillikOdeme = toplamYeni * YILLIK_PAY * FIYAT.yillik[i];
+    const m = toplamYeni * (1 - b.yillikPay) + y;
+    const aylikKisim = toplamYeni * (1 - b.yillikPay) * b.fiyat.aylik[i] + y * b.fiyat.aylik[i];
+    const yillikOdeme = toplamYeni * b.yillikPay * b.fiyat.yillik[i];
     yillikBirikim += yillikOdeme / 12;
     gelir.push(yillikOdeme + aylikKisim);
-    kazanilan.push(aylikKisim + yillikBirikim + DEVREDEN_YILLIK[i]);
+    kazanilan.push(aylikKisim + yillikBirikim + b.devredenYillik[i]);
     yeniAktif.push(toplamYeni);
     odeyen.push(m);
     eldeTutma.push(r);
@@ -356,7 +408,7 @@ export const ASAMA_ADI: Record<Asama, string> = {
 };
 
 /** Riskleri sırayla ekleyerek tek hesap. `asama` dahil olmak üzere önceki bütün riskler uygulanır. */
-export function tekHesap(s: SecenekId, asama: Asama, saat: SaatGirdisi = MEDYAN_SAAT, dolayli = true): Sonuc {
+export function tekHesap(s: SecenekId, asama: Asama, saat: SaatGirdisi = MEDYAN_SAAT, dolayli = true, b: GelirBaglami = VARSAYILAN_BAGLAM): Sonuc {
   const sira: Asama[] = ['risksiz', 'saat', 'gecikme', 'devir', 'mevsim'];
   const n = sira.indexOf(asama);
   const carpan = n >= 1 ? aySaatleri(saat).map((a) => a.carpan) : AYLAR_2027.map(() => 1);
@@ -374,7 +426,7 @@ export function tekHesap(s: SecenekId, asama: Asama, saat: SaatGirdisi = MEDYAN_
     eldeTutmaSapma: 0,
     temsilci: 1,
     dolayli,
-  });
+  }, b);
 }
 
 /* ---------- 5. Monte Carlo ---------- */
@@ -407,7 +459,7 @@ export interface Dagilim {
 }
 export const KOSU_SAYISI = 1000;
 
-export function monteCarlo(s: SecenekId, regl: ReglPolitikasi = 'ikisi', n = KOSU_SAYISI, tohum = 2027): Dagilim {
+export function monteCarlo(s: SecenekId, regl: ReglPolitikasi = 'ikisi', n = KOSU_SAYISI, tohum = 2027, b: GelirBaglami = VARSAYILAN_BAGLAM): Dagilim {
   const rnd = uretec(tohum);
   const ks = kisiler(s);
   const sonuc: Dagilim = { n, gelir: [], kazanilan: [], yeniAktif: [], odeyenAralik: [], aylikGelir: [] };
@@ -456,7 +508,7 @@ export function monteCarlo(s: SecenekId, regl: ReglPolitikasi = 'ikisi', n = KOS
       mevsim: MEVSIM.map((m) => 1 - (1 - m) * mevsimGucu),
       eldeTutmaSapma: ucgen(rnd(), VARSAYIM.eldeTutmaSapma),
       temsilci: ucgen(rnd(), { dusuk: 0.5, medyan: 1, yuksek: 1.2 }),
-    });
+    }, b);
     sonuc.gelir.push(toplam(r.gelir));
     sonuc.kazanilan.push(toplam(r.kazanilan));
     sonuc.yeniAktif.push(toplam(r.yeniAktif));
@@ -479,10 +531,10 @@ export const standartSapma = (xs: number[]) => {
 };
 
 /** Dört öngörü: kötümser (yüzde 10), medyan (plan, beklenen), ortanca (yüzde 50), iyimser (yüzde 90). */
-export function ongoru(s: SecenekId, regl: ReglPolitikasi = 'ikisi') {
-  const d = monteCarlo(s, regl);
-  const medyan = tekHesap(s, 'mevsim', { ...MEDYAN_SAAT, regl });
-  const risksiz = tekHesap(s, 'risksiz');
+export function ongoru(s: SecenekId, regl: ReglPolitikasi = 'ikisi', b: GelirBaglami = VARSAYILAN_BAGLAM) {
+  const d = monteCarlo(s, regl, KOSU_SAYISI, 2027, b);
+  const medyan = tekHesap(s, 'mevsim', { ...MEDYAN_SAAT, regl }, true, b);
+  const risksiz = tekHesap(s, 'risksiz', MEDYAN_SAAT, true, b);
   const g = (p: number) => yuzdelik(d.gelir, p);
   return {
     dagilim: d,
@@ -493,7 +545,7 @@ export function ongoru(s: SecenekId, regl: ReglPolitikasi = 'ikisi') {
     yeniAktif: { kotumser: yuzdelik(d.yeniAktif, 0.1), medyan: toplam(medyan.yeniAktif), ortanca: yuzdelik(d.yeniAktif, 0.5), iyimser: yuzdelik(d.yeniAktif, 0.9), risksiz: toplam(risksiz.yeniAktif) },
     riskPayi: 1 - toplam(medyan.gelir) / toplam(risksiz.gelir),
     /** Duyarlılık: destek rollerinin elde tutma katkısı olmadan medyan gelir. */
-    dolaylisizMedyan: toplam(tekHesap(s, 'mevsim', { ...MEDYAN_SAAT, regl }, false).gelir),
+    dolaylisizMedyan: toplam(tekHesap(s, 'mevsim', { ...MEDYAN_SAAT, regl }, false, b).gelir),
   };
 }
 

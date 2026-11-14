@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
+import { useModel, useParams } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
+import { PlanDurumuNotu } from '../components/PlanDurumuNotu';
 import { Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { icerikOf } from '../data/icerik';
 import { AYLAR_2027, POZISYONLAR, SECENEKLER, SECENEK_ADI, type SecenekId } from '../data/istihdamV2';
 import {
   ASAMA_ADI,
-  GELIR_PLANI_2027,
-  KATKI,
   KAYNAKLAR,
   KOSU_SAYISI,
   MEDYAN_SAAT,
@@ -17,6 +17,7 @@ import {
   RISKLER,
   VARSAYIM,
   aySaatleri,
+  gelirBaglami,
   ongoru,
   reglKaybi,
   riskDuzeyi,
@@ -29,7 +30,7 @@ import {
   type ReglPolitikasi,
 } from '../data/gelir2027';
 import { CHATGPT } from '../data/gelir2027ChatGPT';
-import { int, tl } from '../lib/format';
+import { int, milyon, pct, sabitOndalikBicimi, tl } from '../lib/format';
 import '../styles/gelirOngorusu.css';
 
 /**
@@ -39,10 +40,9 @@ import '../styles/gelirOngorusu.css';
  */
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(new Date(`${iso}-01T00:00:00`));
-const milyon = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon ₺`;
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
-const saat = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v)} saat`;
-const ondalik = (v: number, b = 1) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: b, minimumFractionDigits: b }).format(v);
+const yuzde = pct;
+const saat = (v: number) => `${int(v)} saat`;
+const ondalik = sabitOndalikBicimi(1);
 const POLITIKALAR: ReglPolitikasi[] = ['ikisi', 'evden', 'izin', 'yok'];
 const ASAMALAR: Asama[] = ['risksiz', 'saat', 'gecikme', 'devir', 'mevsim'];
 const KATKI_TURU = { dogrudan: 'Doğrudan satış', dijital: 'Dijital kanal', lider: 'Ekip verimi', 'elde-tutma': 'Elde tutma (dolaylı)', yok: 'Yok' } as const;
@@ -51,17 +51,21 @@ function Icerik({ pathname }: { pathname: string }) {
   const kayit = icerikOf(pathname)!;
   const [secili, setSecili] = useState<SecenekId>('medyan');
   const [regl, setRegl] = useState<ReglPolitikasi>('ikisi');
-  const o = useMemo(() => ongoru(secili, regl), [secili, regl]);
-  const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, o: s === secili ? o : ongoru(s, regl) })), [secili, regl, o]);
+  // Hesap “Parametreler” sayfasında kaydedilen ayarlarla yapılır. Gelir planı da aynı ayarları kullanır.
+  const model = useModel();
+  const { changed } = useParams();
+  const b = useMemo(() => gelirBaglami(model), [model]);
+  const o = useMemo(() => ongoru(secili, regl, b), [secili, regl, b]);
+  const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, o: s === secili ? o : ongoru(s, regl, b) })), [secili, regl, o, b]);
   const saatGirdisi = { ...MEDYAN_SAAT, regl };
   const dokum = yillikDokum(saatGirdisi);
   const aylar = aySaatleri(saatGirdisi);
-  const asamalar = ASAMALAR.map((a) => ({ a, gelir: toplam(tekHesap(secili, a, saatGirdisi).gelir) }));
+  const asamalar = ASAMALAR.map((a) => ({ a, gelir: toplam(tekHesap(secili, a, saatGirdisi, true, b).gelir) }));
   const aylikYuzdelik = AYLAR_2027.map((ay, i) => {
     const xs = o.dagilim.aylikGelir.map((r) => r[i]);
     return { ay, i, p10: yuzdelik(xs, 0.1), p50: yuzdelik(xs, 0.5), p90: yuzdelik(xs, 0.9), medyan: o.medyan.gelir[i] };
   });
-  const katkilar = POZISYONLAR.filter((p) => KATKI[p.id] && p.secenekler[secili].kisi > 0).map((p) => ({ p, k: KATKI[p.id], beklenen: o.medyan.dogrudan[p.id] }));
+  const katkilar = POZISYONLAR.filter((p) => b.katki[p.id] && p.secenekler[secili].kisi > 0).map((p) => ({ p, k: b.katki[p.id], beklenen: o.medyan.dogrudan[p.id] }));
   const harita = [5, 4, 3, 2, 1].map((etki) => ({ etki, hucreler: [1, 2, 3, 4, 5].map((olasilik) => RISKLER.filter((r) => r.etki === etki && r.olasilik === olasilik)) }));
   const ongoruSatirlari = [
     { ad: 'Kötümser (%10)', ciro: o.gelir.kotumser, gelir: o.kazanilan.kotumser, aktif: o.yeniAktif.kotumser },
@@ -95,6 +99,7 @@ function Icerik({ pathname }: { pathname: string }) {
         ]}
       />
       <SayfaNotu>
+        <PlanDurumuNotu durum={b.durum} />
         <p>Gelir, satıcıların abonelik ödemesidir. Gelir, “Gelir planı” sayfasıyla aynı kurallarla hesaplanır. Satıcı aylık ya da yıllık peşin öder. Aylık ödeyen satıcı aboneliğini her ay yeniler. Aylık elde tutma, bir ay ödeyen satıcılardan sonraki ay da ödeyenlerin oranıdır. Fiyatın ₺ karşılığı döviz kuru arttıkça artar. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir.</p>
         <p>
           Dört öngörü vardır. <strong>Plan</strong> öngörüsü tek bir hesaptır. Bu hesap risklerin ortalama etkisini kullanır. Bilgisayar 2027 yılını {int(KOSU_SAYISI)} kez hesapladı. Her hesapta riskler rastgele farklı çıktı. <strong>Kötümser</strong>, <strong>ortanca</strong> ve <strong>iyimser</strong> öngörüler bu sonuçlardan gelir. Olası yılların %10’u kötümserin altında kalır. Olası yılların yarısı ortancanın altında kalır. Olası yılların %90’ı iyimserin altında kalır.
@@ -157,7 +162,15 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Gelir planıyla karşılaştırma</dt>
-            <dd>“Gelir planı” sayfasında Plan senaryosu 2027 için {milyon(GELIR_PLANI_2027)} gelir öngörür. Bu sayfadaki tutar farklıdır. Fark, yeni kadronun ek satış ve destek rollerinden gelir.</dd>
+            <dd>
+              {b.durum === 'varsayilan' ? (
+                <>Varsayılan ayarlarla “Gelir planı” sayfasındaki Plan senaryosu 2027 için {milyon(b.gelirPlani2027)} gelir öngörür.</>
+              ) : b.durum === 'uzatildi' ? (
+                <>“Gelir planı” sayfasının kurallarıyla Plan senaryosu 2027 için {milyon(b.gelirPlani2027)} gelir öngörür. Bu hesap Aralık 2027 sonuna kadar uzatıldı.</>
+              ) : (
+                <>“Gelir planı” sayfasında Plan senaryosu 2027 için {milyon(b.gelirPlani2027)} gelir öngörür.</>
+              )}{' '}
+              Bu sayfadaki tutar farklıdır. Fark, yeni kadronun ek satış ve destek rollerinden gelir.</dd>
           </div>
         </dl>
       </Section>
@@ -356,6 +369,11 @@ function Icerik({ pathname }: { pathname: string }) {
       </Section>
 
       <Section id="chatgpt" index={10} title="ChatGPT analizi ile karşılaştırma" desc={CHATGPT.ozet}>
+        {changed || b.durum !== 'ayni' ? (
+          <p className="go27-not">
+            Bu karşılaştırma 5 Kasım 2026 Perşembe günü varsayılan ayarlarla yapıldı. Bu sayfanın hesabı ise kaydedilen ayarları kullanır. Bu yüzden sayfadaki öngörüler bu tablodan farklı olabilir.
+          </p>
+        ) : null}
         <DataTable<(typeof CHATGPT.satirlar)[number]>
           id="chatgpt-karsilastirma"
           title="Medyan kadro seçeneği"

@@ -1,12 +1,13 @@
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { kadrolu, yillikFiyat, type Ayar } from '../../satisOrtakligi';
 import { kosulSonucu, seciliKosul } from '../../kosullar';
+import { num, pct, tlBitisik } from '../../../lib/format';
 
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const sayi = num;
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
+const tl = tlBitisik;
 const avro = (n: number) => `${sayi(n)} €`;
-const yuzde = (n: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(n * 100)}`;
+const yuzde = pct;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>

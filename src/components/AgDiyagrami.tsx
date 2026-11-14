@@ -2,6 +2,7 @@ import { useState, type KeyboardEvent } from 'react';
 import { AG_ISIMLER, agDerinlik, agKisiKazanci, agSatisPayi } from '../data/kosullar';
 import type { Ayar } from '../data/satisOrtakligi';
 import { Canli } from './sadeKit';
+import { sayiBicimi, tlBitisik } from '../lib/format';
 
 /**
  * Kademeli temsilci ağı diyagramı (kullanıcı kararı 2026-11-03). Zincir: Haydar → Ömer → Ahmet → Mehmet → Ayşe → Fatma.
@@ -25,7 +26,8 @@ interface Dugum {
   grup?: number;
 }
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const tl = tlBitisik;
+const sayi = sayiBicimi(3);
 
 function agiKur(dal: number): Dugum[] {
   const ciz = Math.min(3, dal);
@@ -199,7 +201,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
                 {s.kademeler.map((k, i) => (
                   <td key={i}>
                     <Canli deger={k.tutar}>{tl(k.tutar)}</Canli>
-                    <small>{k.kisi ? `${new Intl.NumberFormat('tr-TR').format(k.kisi)} kişi` : 'kademe yok'}</small>
+                    <small>{k.kisi ? `${sayi(k.kisi)} kişi` : 'kademe yok'}</small>
                   </td>
                 ))}
                 <td>
@@ -210,7 +212,7 @@ export function AgDiyagrami({ a }: { a: Ayar }) {
           </tbody>
         </table>
       </div>
-      <p className="so2-donem-not">Herkes ayda {new Intl.NumberFormat('tr-TR').format(a.agAltSatis)} satış yapar ve {dal} temsilci getirir. Ağ Fatma’nın kuşağında biter.</p>
+      <p className="so2-donem-not">Herkes ayda {sayi(a.agAltSatis)} satış yapar ve {dal} temsilci getirir. Ağ Fatma’nın kuşağında biter.</p>
     </div>
   );
 }

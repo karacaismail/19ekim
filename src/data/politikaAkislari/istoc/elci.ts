@@ -1,9 +1,10 @@
 import type { AkisAdimi, AkisOlustur } from '../types';
 import { satisKazanci, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
+import { num, tlBitisik } from '../../../lib/format';
 
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const sayi = num;
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
-const para = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
+const para = tlBitisik;
 const avro = (n: number) => `${sayi(n)} €`;
 const oranMetni = (n: number) => `%${sayi(n * 100)}`;
 

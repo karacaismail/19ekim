@@ -59,7 +59,7 @@ import {
   type SeviyeSeti,
 } from '../data/applet';
 import { ornekDegerlereDon, useAppletKaydi, useAppletOzeti, useDilim } from '../lib/appletStore';
-import { int, num, pct, times, tlExact } from '../lib/format';
+import { int, num, pct, sabitOndalikBicimi, times, tlExact } from '../lib/format';
 
 /* ---------- Ortak ---------- */
 
@@ -69,13 +69,13 @@ function useBaz() {
   const { params } = useParams();
   const baz = bazTutari(ortak.bazKaynak, params.minWage, params.minWageGross, ortak.ozelTutar);
   const birim = ortak.bazKaynak === 'ozel' ? ortak.paraBirimi : '₺';
-  const kesin = (v: number) => (Number.isInteger(v) ? `${int(v)} ${birim}` : `${KURUSLU.format(v)} ${birim}`);
+  const kesin = (v: number) => (Number.isInteger(v) ? `${int(v)} ${birim}` : `${KURUSLU(v)} ${birim}`);
   // Küçük tutar (özel birimle saatlik oran, iç katsayı) kuruşlu; büyük tutar tam sayı.
-  const tutar = (v: number) => (Math.abs(v) < 100 && v !== 0 ? `${KURUSLU.format(v)} ${birim}` : `${int(v)} ${birim}`);
+  const tutar = (v: number) => (Math.abs(v) < 100 && v !== 0 ? `${KURUSLU(v)} ${birim}` : `${int(v)} ${birim}`);
   return { ortak, baz, birim, tutar, kesin, para: (kat: number) => tutar(kat * baz) };
 }
 
-const KURUSLU = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const KURUSLU = sabitOndalikBicimi(2);
 const meslekVerisi = (ms: Meslek[]): SecimVerisi => ms.map((m) => ({ value: m.id, label: m.ad }));
 const uzmanlikVerisi = (m: Meslek | undefined): SecimVerisi => (m?.uzmanliklar ?? []).map((u) => ({ value: u.id, label: u.ad }));
 const seviyeVerisi = (ss: Seviye[]): SecimVerisi => ss.map((s) => ({ value: s.kod, label: `${s.kod}: ${s.ad}` }));

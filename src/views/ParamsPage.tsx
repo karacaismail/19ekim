@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { DataTable, OnayDugmesi, Section } from '../components/ui';
 import { DEFAULT_PARAMS, PARAM_GROUPS, type ParamDef, type ParamKey, type Params, paramEtiketi } from '../data/params';
 import { longDate } from '../lib/dates';
-import { int, num, pct, times, tl, tlExact } from '../lib/format';
+import { int, num, pct, sayiBicimi, times, tl, tlExact } from '../lib/format';
 import { useMotionMs } from '../lib/motion';
 
 /**
@@ -80,7 +80,7 @@ function SayiAlani({ def, value, decimals, common, onCommit }: { def: ParamDef; 
   const [duzeltme, setDuzeltme] = useState<string | null>(null);
   const sinirda = (n: number) => (def.min === undefined || n >= def.min) && (def.max === undefined || n <= def.max);
   const kirp = (n: number) => Math.min(def.max ?? Number.POSITIVE_INFINITY, Math.max(def.min ?? Number.NEGATIVE_INFINITY, n));
-  const bicim = (n: number) => `${n.toLocaleString('tr-TR', { maximumFractionDigits: decimals })}${def.unit ? ` ${def.unit}` : ''}`;
+  const bicim = (n: number) => `${sayiBicimi(decimals)(n)}${def.unit ? ` ${def.unit}` : ''}`;
   return (
     <>
     <NumberInput

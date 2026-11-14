@@ -9,6 +9,7 @@
 import { karsilastir, type OrtakId, type Sonuc as MotorSonuc } from './affilateV2';
 import { baslangicKurgu, senaryoKur } from './affilateKurguV2';
 import { agBirimPaylari, aylikFiyat, sureMetni, yillikFiyat, type Ayar, type DonemSatiri, type Marka, type RolId } from './satisOrtakligiV2';
+import { pct, sayiBicimi, tlBitisik } from '../lib/format';
 
 export type KaynakSayfa = 'Satış ortaklığı' | 'Temsilci ağı' | 'İş ortaklığı' | 'Affilate';
 
@@ -138,9 +139,9 @@ export function seciliKosul(a: Ayar, rol: RolId): KosulTanim {
   return liste.find((k) => k.id === a.kosul?.[rol]) ?? ANA;
 }
 
-const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
-const sayi = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
+const t = tlBitisik;
+const yuzde = pct;
+const sayi = sayiBicimi(1);
 
 /* ---------- Yıllara yayılan komisyon: ay ay satış takvimi ve hizmet ayında hakediş ---------- */
 

@@ -1,8 +1,9 @@
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { aylikFiyat, rolMetinleri } from '../../satisOrtakligi';
 import { KOSULLAR, affilateHesabi } from '../../kosullar';
+import { num } from '../../../lib/format';
 
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const sayi = num;
 const tl = (n: number) => `${sayi(n)} ₺`;
 const yuzde = (n: number) => `%${sayi(n * 100)}`;
 

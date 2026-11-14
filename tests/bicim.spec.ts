@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures/persona';
 import { toCsv } from '../src/lib/csv';
-import { int, num, pct, times, tl, tlExact } from '../src/lib/format';
+import { avro, int, milyon, num, pct, sayiBicimi, times, tl, tlBitisik, tlExact, yuzdeBicimi } from '../src/lib/format';
 
 /**
  * Sayı biçimi (src/lib/format.ts) ve CSV dosyası (src/lib/csv.ts) için birim testleri.
@@ -86,6 +86,47 @@ test.describe('sayı biçimi', () => {
       expect.soft(int(v), `int(${v})`).not.toMatch(bozuk);
       expect.soft(pct(v), `pct(${v})`).not.toMatch(bozuk);
       expect.soft(times(v), `times(${v})`).not.toMatch(bozuk);
+    }
+  });
+});
+
+test.describe('ek biçimler', () => {
+  test('ondalık hanesi seçilen sayı ve yüzde aynı kuralla yuvarlanır', () => {
+    const bir = sayiBicimi(1);
+    expect.soft(bir(2.25)).toBe('2,3');
+    expect.soft(bir(-2.25)).toBe('-2,3');
+    expect.soft(bir(-0.04)).toBe('0');
+    expect.soft(bir(1234.5)).toBe('1.234,5');
+    expect.soft(sayiBicimi(0)(-0.5)).toBe('-1');
+    const tam = yuzdeBicimi(0);
+    expect.soft(tam(0.875)).toBe('%88');
+    expect.soft(tam(-0.004)).toBe('%0');
+    expect.soft(yuzdeBicimi(2)(0.12345)).toBe('%12,35');
+    expect.soft(yuzdeBicimi(1)(-0.05)).toBe('-%5');
+  });
+
+  test('biçimleyici tek bağımsız değişken alır, dizi sırası haneyi değiştirmez', () => {
+    // `.map(bicim)` ikinci bağımsız değişken olarak sıra numarası verir. Biçim bundan etkilenmemeli.
+    expect([1.234, 1.234, 1.234].map(sayiBicimi(1))).toEqual(['1,2', '1,2', '1,2']);
+    expect([0.5, 0.5].map(tl)).toEqual(['1 ₺', '1 ₺']);
+  });
+
+  test('milyon, avro ve bitişik tutar', () => {
+    expect.soft(milyon(68_205_762)).toBe('68,2 milyon ₺');
+    expect.soft(milyon(-1_250_000)).toBe('-1,3 milyon ₺');
+    expect.soft(milyon(-40_000)).toBe('0 milyon ₺');
+    expect.soft(avro(399)).toBe('399 €');
+    expect.soft(avro(3990.5)).toBe('3.990,5 €');
+    expect.soft(avro(-0.001)).toBe('0 €');
+    expect.soft(tlBitisik(60000)).toBe('60.000\u00a0₺');
+    expect.soft(tlBitisik(-0.4)).toBe('0\u00a0₺');
+    const bozuk = /NaN|∞|Infinity/;
+    for (const v of [Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect.soft(milyon(v)).not.toMatch(bozuk);
+      expect.soft(avro(v)).not.toMatch(bozuk);
+      expect.soft(tlBitisik(v)).not.toMatch(bozuk);
+      expect.soft(sayiBicimi(1)(v)).not.toMatch(bozuk);
+      expect.soft(yuzdeBicimi(0)(v)).not.toMatch(bozuk);
     }
   });
 });

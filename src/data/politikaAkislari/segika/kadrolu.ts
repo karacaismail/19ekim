@@ -1,9 +1,9 @@
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { kadrolu, rolMetinleri, segikaAylik, yillikFiyat, type SegikaPaket } from '../../satisOrtakligi';
+import { pct, sayiBicimi, tl } from '../../../lib/format';
 
-const tl = (n: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(n))} ₺`;
-const yuzde = (n: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(n * 100)}`;
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(n);
+const yuzde = pct;
+const sayi = sayiBicimi(1);
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const son = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, aciklama: string[]): AkisSecenegi =>

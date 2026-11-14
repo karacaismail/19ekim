@@ -1,6 +1,8 @@
 import fiyatVerisi from './butce2027.json' with { type: 'json' };
-import { DEFAULT_PARAMS } from './params';
-import { AYLAR_2027, POZISYONLAR, SECENEK_OZETI, aylikGider, type Pozisyon, type SecenekId } from './istihdamV2';
+import { num } from '../lib/format';
+import { AYLAR_2027, POZISYONLAR, aylikGider, type Pozisyon, type SecenekId } from './istihdamV2';
+import { DEFAULT_MODEL, type Model } from './model';
+import { secenekGelirleri } from './planGeliri';
 import type { OpexModel } from './opex';
 
 /**
@@ -182,7 +184,11 @@ export interface Butce {
   gelir2027: number;
 }
 
-export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYILAN_AYAR): Butce {
+/**
+ * Bütçe, “Parametreler” sayfasında kaydedilen ayarlarla hesaplanır (`model`). Gelir, gelir planının aynı senaryosundan
+ * gelir (planGeliri.ts). Meta reklam bütçesi de bu ayarlardan gelir.
+ */
+export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYILAN_AYAR, model: Model = DEFAULT_MODEL): Butce {
   const k: Kalem[] = [];
   const ekle = (x: Omit<Kalem, 'aylik'> & { aylik?: number[] }) => {
     const kalem = { ...x, aylik: x.aylik ?? sifir() };
@@ -228,8 +234,13 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   if (ayar.saglik) ekle({ id: 'saglik', grup: 'kisi', tur: 'opex', ad: 'Tamamlayıcı sağlık sigortası', kural: 'Bütün bordrolu çalışanlara yapılır. Hesap her ay yıllık primin 12’de 1’ini sayar.', fiyatId: 'tamamlayici-saglik-sigortasi', aylik: bordroluSayisi.map((n) => (n * fiyat('tamamlayici-saglik-sigortasi')) / 12) });
 
   // 4. Pazarlama ve etkinlik.
-  const meta = (DEFAULT_PARAMS.metaWeekly * 52) / 12;
-  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `“Parametreler” sayfasında haftalık reklam bütçesi ${new Intl.NumberFormat('tr-TR').format(DEFAULT_PARAMS.metaWeekly)} ₺’dır. Tutar yılda 52 hafta için hesaplanır. Bu kalem Sheets planında yoktur.`, aylik: sifir().map(() => meta) });
+  // Gider, Nakit akışı sayfasındaki gibi başlangıç ayından itibaren her aya tam yazılır.
+  const meta = (model.params.metaWeekly * 52) / 12;
+  const metaBasla = model.params.metaStartDate.slice(0, 7);
+  const metaAylik = AYLAR_2027.map((ay) => (ay >= metaBasla ? meta : 0));
+  const metaIlk = metaAylik.findIndex((v) => v > 0);
+  const metaBaslangic = metaBasla > '2027-12' ? ' Gider 2027’den sonra başladığı için 2027’de bu kalem 0 ₺’dır.' : metaIlk > 0 ? ` Gider ${ayAdi(metaIlk)} ayında başlar. Önceki aylar 0 ₺ sayılır.` : '';
+  ekle({ id: 'meta', grup: 'pazarlama', tur: 'opex', ad: 'Meta reklam bütçesi', kural: `“Parametreler” sayfasında haftalık reklam bütçesi ${num(model.params.metaWeekly)} ₺’dır. Tutar yılda 52 hafta için hesaplanır.${metaBaslangic} Bu kalem Sheets planında yoktur.`, aylik: metaAylik });
   const e = ETKINLIK[s];
   const ikram = fiyat('etkinlik-coffee-break-50');
   ekle({ id: 'etkinlik-ikram', grup: 'pazarlama', tur: 'opex', ad: 'Etkinlik ikramı', kural: `Her ay ${e.ic + e.dis} satıcı eğitimi yapılır. Her eğitimde 50 kişilik kahve arası ikramı verilir.`, fiyatId: 'etkinlik-coffee-break-50', aylik: sifir().map(() => (e.ic + e.dis) * ikram) });
@@ -294,7 +305,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   ekle({ id: 'ongorulemeyen', grup: 'diger', tur: 'opex', ad: 'Öngörülemeyen giderler', kural: `Tutar, “Mevcut plan” dışındaki eklemelerin %${ONGORULEMEYEN * 100}’idir.`, aylik: pay });
 
   const topla = (tur: Kalem['tur']) => AYLAR_2027.map((_, i) => k.filter((x) => x.tur === tur).reduce((t, x) => t + x.aylik[i], 0));
-  return { kalemler: k, opex: topla('opex'), capex: topla('capex'), tabanVar: !!taban, kadroAylik: kisiSayisi, kapasite, ekM2, gelir2027: SECENEK_OZETI[s].gelirHedefi2027 };
+  return { kalemler: k, opex: topla('opex'), capex: topla('capex'), tabanVar: !!taban, kadroAylik: kisiSayisi, kapasite, ekM2, gelir2027: secenekGelirleri(model)[s].yil };
 }
 
 export const toplam = (a: number[]) => a.reduce((t, v) => t + v, 0);

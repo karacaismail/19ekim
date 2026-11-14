@@ -30,9 +30,11 @@ import {
 import { affilateHesabi, affilateModeli, kosulListesi, kosulOzeti, kosulSonucu, seciliKosul, type KosulSonuc } from '../data/kosullar';
 import { POLITIKA_ADI } from '../data/affilateKurgu';
 import type { Politika } from '../data/affilate';
+import { int, num, pct, sayiBicimi, tlBitisik } from '../lib/format';
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const tl = tlBitisik;
+const sayi3 = sayiBicimi(3);
+const yuzde = pct;
 
 
 function SeviyeSec({ value, onChange }: { value: Seviye; onChange: (s: Seviye) => void }) {
@@ -201,7 +203,7 @@ function Elci({ a }: { a: Ayar }) {
 
 /* ---------- Hesap dökümü: soldaki her değerin sonuca etkisi ---------- */
 
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const sayi = num;
 
 function fiyatSatirlari(a: Ayar) {
   if (a.marka === 'istoc') {
@@ -561,7 +563,7 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
               <div className="so2-hazir" role="group" aria-label="Örnek firma büyüklüğü">
                 {[25, 250, 1_000, 20_000].map((n) => (
                   <button key={n} type="button" className="so2-hazir-dugme" aria-pressed={a.calisan === n} onClick={() => g({ calisan: n })}>
-                    {new Intl.NumberFormat('tr-TR').format(n)}
+                    {int(n)}
                   </button>
                 ))}
               </div>
@@ -577,7 +579,7 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
           {a.kademeler.map((k, i) => {
             const son = i === a.kademeler.length - 1;
             const alt = i === 0 ? 1 : a.kademeler[i - 1].ust + 1;
-            const sayi = (n: number) => new Intl.NumberFormat('tr-TR').format(n);
+            const sayi = sayi3;
             return (
               <div key={i} className="so2-kademe">
                 <p className="so2-kademe-ad">{son ? `${sayi(alt)} çalışan ve üstü` : `${sayi(alt)}–${sayi(k.ust)} çalışan`}</p>
@@ -603,7 +605,7 @@ function OrtakAyarlar({ a, g, ana }: { a: Ayar; g: (p: Partial<Ayar>) => void; a
 function segikaOzet(a: Ayar) {
   const s = segikaAylik(a);
   const indirim = s.listeFiyati > 0 ? 1 - s.toplam / s.listeFiyati : 0;
-  return `${PAKET_ADI[a.segikaPaket]}, ${new Intl.NumberFormat('tr-TR').format(s.kisi)} çalışan, aylık ${tl(s.toplam)}${indirim > 0.0005 ? `, indirim ${yuzde(indirim)}` : ''}`;
+  return `${PAKET_ADI[a.segikaPaket]}, ${sayi3(s.kisi)} çalışan, aylık ${tl(s.toplam)}${indirim > 0.0005 ? `, indirim ${yuzde(indirim)}` : ''}`;
 }
 
 /** Diğer sayfalardan gelen koşul setinin sonucu: kaynak, büyük sonuç, dönemler, hesap ve kurallar. */

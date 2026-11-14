@@ -11,6 +11,9 @@ import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
 import { adCapacity, adSchedule, ltvOf, SCALE_RULE, simulate, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
+import { sayiBicimi } from '../lib/format';
+
+const sayi = sayiBicimi(3);
 
 export interface Channel {
   kanal: string;
@@ -62,7 +65,7 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
   ];
 
   const kpis = [
-    { metrik: 'Kayıt maliyeti (CPL)', hedef: `En çok ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺`, sik: 'Haftalık', kaynak: 'Reklam hesabı + CRM kaynak alanı' },
+    { metrik: 'Kayıt maliyeti (CPL)', hedef: `En çok ${sayi(p.dijitalCostPerLead)} ₺`, sik: 'Haftalık', kaynak: 'Reklam hesabı + CRM kaynak alanı' },
     { metrik: 'Kayıttan ilk ödemeye geçiş', hedef: `En az %${p.dijitalLeadToActive}`, sik: 'Haftalık', kaynak: 'CRM aşamaları' },
     { metrik: 'Kazanım maliyeti (CAC)', hedef: 'Satıcı değeri (LTV) maliyetin en az 3 katı', sik: 'Aylık', kaynak: 'Bütçe ve yeni aktif satıcı sayısı' },
     { metrik: '30 gün elde tutma', hedef: `≥ %${Math.round(prog.planRetention * 100)}`, sik: 'Aylık', kaynak: 'Abonelik olayları (GA4) + CRM' },
@@ -72,7 +75,7 @@ export function makeDigitalStrategy(p: Params, prog: ProgramModel, rev: Revenue)
 
   const takvim = [
     { ay: longDate(prog.dates.start), adim: 'Kurulum', is: 'Dijital pazarlama uzmanı ölçüm araçlarını kurar. Bunlar Google Tag Manager (GTM), Google Analytics 4 (GA4), Yandex Metrica ve Meta Pixel araçlarıdır. Meta’ya satış verisi gönderen dönüşüm bağlantısı (Conversions API) da kurulur. Bağlantı etiketi (UTM) standardı ve CRM kaynak alanı eklenir. Kayıt sayfası, kayıt formu ve WhatsApp mesaj dizisi hazırlanır.', olcut: '8 ölçüm aracının hepsi çalışıyor. Kaynağı boş kayıt yok.' },
-    { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${p.dijitalAdBudgetMonthly.toLocaleString('tr-TR')} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `Kayıt maliyeti en çok ${p.dijitalCostPerLead.toLocaleString('tr-TR')} ₺. Ödemeye geçiş oranı en az %${p.dijitalLeadToActive}.` },
+    { ay: longDate(monthStart(p.dijitalAdStartDate)), adim: 'Test bütçesi', is: `Meta ve Google’da ayda ${sayi(p.dijitalAdBudgetMonthly)} ₺ ile 3 reklam seti çalışır. İlk ay öğrenme ayıdır ve kapasitenin yarısıyla (%50) çalışılır.`, olcut: `Kayıt maliyeti en çok ${sayi(p.dijitalCostPerLead)} ₺. Ödemeye geçiş oranı en az %${p.dijitalLeadToActive}.` },
     { ay: longDate(monthStart(p.dijitalOrganicStartDate)), adim: 'Düzenli video üretimi', is: 'Videolar altı ana konuda hazırlanır. Günde 3 video yayınlanır. Paylaşımların yüzde 80’i otomatik yapılır. Organik kayıtlar CRM’de izlenir.', olcut: 'Haftada 10 organik talep. Organik yoldan ayda ' + p.dijitalOrganicActivesMonthly + ' aktif satıcı.' },
     { ay: longDate(prog.dates.day90), adim: 'Bütçe artırma kararı', is: 'Bütçe, “Varsayımlar” bölümündeki kurala göre artar, aynı kalır ya da durur.', olcut: '90. gün değerlendirmesi' },
   ];

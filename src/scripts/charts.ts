@@ -6,6 +6,7 @@
  * Seçenekler kapsayıcı genişliğine göre kurulur (açıklama satırları, eksen etiket genişliği).
  */
 import type { ChartSpec, ChartTreeNode, OpexTone } from '../lib/chartSpec';
+import { kisaSayi, num, pct, sayiBicimi, tl } from '../lib/format';
 
 type EChartsModule = typeof import('../lib/echarts-setup');
 type Instance = ReturnType<EChartsModule['echarts']['init']>;
@@ -26,13 +27,14 @@ let loader: Promise<EChartsModule> | null = null;
 
 const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const number = new Intl.NumberFormat('tr-TR');
+const sayi = sayiBicimi(3);
+const sayi1 = sayiBicimi(1);
 const lira = (value: number) =>
   value >= 1_000_000
-    ? `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(value / 1_000_000)} milyon ₺`
-    : `${number.format(Math.round(value))} ₺`;
+    ? `${num(value / 1_000_000)} milyon ₺`
+    : tl(value);
 // Eksen değeri “3,6 milyon” biçimindedir: ondalık virgül, kısaltma yok.
-const millions = (v: number) => (v === 0 ? '0' : `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon`);
+const millions = (v: number) => (v === 0 ? '0' : `${sayi1(v / 1_000_000)} milyon`);
 const ms = (iso: string) => new Date(`${iso}T00:00:00`).getTime();
 const shortDate = (t: number) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' }).format(new Date(t));
 /** Okunan tarih: ay adı tam yazılır (“2 Kasım”). Kısa biçim yalnız eksen etiketinde kalır, çünkü orada yer dardır. */
@@ -140,7 +142,7 @@ function axis(): Opt {
   return {
     // Satır yüksekliği: sarılan eksen etiketinin satırları her motorda birbirine binmez.
     // Sayı ekseni Türkçe biçimdedir (“10.000”, “10,000” değil). Kategori ekseninin yazısı aynen kalır.
-    axisLabel: { color: muted, fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 6, formatter: (v: unknown) => (typeof v === 'number' ? number.format(v) : String(v)) },
+    axisLabel: { color: muted, fontSize: FONT_SIZE, lineHeight: FONT_SIZE + 6, formatter: (v: unknown) => (typeof v === 'number' ? sayi(v) : String(v)) },
     nameTextStyle: { color: muted, fontSize: FONT_SIZE },
     axisLine: { lineStyle: { color: token('--rule-strong') } },
     splitLine: { lineStyle: { color: token('--rule') } },
@@ -169,9 +171,8 @@ const VIZ: Record<OpexTone, string> = {
 const viz = (t: OpexTone) => token(VIZ[t]);
 /** Sheets’ten gelen ad ve kategori HTML ipucuna kaçışlanarak yazılır (metin, işaretleme değil). */
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
-const compact = new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 });
-const shortLira = (v: number) => (v === 0 ? '0' : `${compact.format(v)} ₺`);
-const ratio = (r: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(r * 100)}`;
+const shortLira = (v: number) => (v === 0 ? '0' : `${kisaSayi(v)} ₺`);
+const ratio = pct;
 /** Bu genişliğin altındaki kapsayıcıda değer etiketleri gizlenir (değer ekseni, ipucu ve tablo taşır); auto yığın yataylaşır. */
 const OPEX_NARROW = 568;
 /** Çubuk ucundaki etiket için sağ pay: en uzun etiketin yaklaşık genişliği (SVG dışına taşmasın). */
@@ -666,7 +667,7 @@ function build(spec: ChartSpec, width: number): Opt {
           trigger: 'item',
           formatter: (p: { data?: { name?: string; value?: number[]; revenue?: number; quadrant?: string } }) =>
             p.data?.value
-              ? `${p.data.name}<br/>Pazar büyümesi ${p.data.value[1] < 0 ? '−' : ''}%${number.format(Math.abs(p.data.value[1]))}, göreli pay ${number.format(p.data.value[0])}×<br/>Ciro ${number.format(p.data.revenue ?? 0)} milyon ₺, ${name(p.data.quadrant ?? '')}`
+              ? `${p.data.name}<br/>Pazar büyümesi ${p.data.value[1] < 0 ? '−' : ''}%${sayi(Math.abs(p.data.value[1]))}, göreli pay ${sayi(p.data.value[0])}×<br/>Ciro ${sayi(p.data.revenue ?? 0)} milyon ₺, ${name(p.data.quadrant ?? '')}`
               : '',
         },
         xAxis: {
@@ -682,7 +683,7 @@ function build(spec: ChartSpec, width: number): Opt {
           ...axis(),
           axisLine: { show: false },
           splitLine: { show: false },
-          axisLabel: { ...(axis().axisLabel as Opt), showMinLabel: false, formatter: (v: number) => `${number.format(v)}×` },
+          axisLabel: { ...(axis().axisLabel as Opt), showMinLabel: false, formatter: (v: number) => `${sayi(v)}×` },
         },
         yAxis: {
           type: 'value',
@@ -716,7 +717,7 @@ function build(spec: ChartSpec, width: number): Opt {
                 distance: 8,
                 fontSize: FONT_SIZE,
                 color: text,
-                formatter: `{n|${item.name}}\n{v|${number.format(item.revenue)} milyon ₺}`,
+                formatter: `{n|${item.name}}\n{v|${sayi(item.revenue)} milyon ₺}`,
                 rich: { n: { fontSize: FONT_SIZE, fontWeight: 600, color: text, lineHeight: FONT_SIZE + 4 }, v: { fontSize: FONT_SIZE, color: muted, lineHeight: FONT_SIZE + 4 } },
               },
             })),
@@ -758,7 +759,7 @@ function build(spec: ChartSpec, width: number): Opt {
       return {
         ...base(),
         grid: { ...grid, top: legendTop(names, width) },
-        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(v)} ${spec.unit}` },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${sayi(v)} ${spec.unit}` },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false } },
         // Üst sınır 100’ün katıdır. Böylece son eksen etiketi (ör. 450) bir öncekine (400) sıkışmaz.
@@ -787,7 +788,7 @@ function build(spec: ChartSpec, width: number): Opt {
     case 'hedef-adim': {
       // Geçit hedefleri: yatay gruplanmış çubuk (dar ekranda adım adları sarılmaz); değer çubuğun ucunda, açıklama üstte.
       const names = spec.series.map((s) => s.name);
-      const labels = spec.series.flatMap((s) => s.values.map((v) => number.format(v)));
+      const labels = spec.series.flatMap((s) => s.values.map((v) => sayi(v)));
       return {
         ...base(),
         tooltip: { ...(base().tooltip as Opt), trigger: 'axis', axisPointer: { ...((base().tooltip as Opt).axisPointer as Opt), type: 'shadow' } },
@@ -802,7 +803,7 @@ function build(spec: ChartSpec, width: number): Opt {
           barMaxWidth: 16,
           barGap: '30%',
           itemStyle: { color: token(`--role-${s.role}`), borderRadius: 0 },
-          label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => number.format(p.value) },
+          label: { show: true, position: 'right', fontSize: FONT_SIZE, color: text, formatter: (p: { value: number }) => sayi(p.value) },
         })),
       };
     }
@@ -842,7 +843,7 @@ function build(spec: ChartSpec, width: number): Opt {
       return {
         ...base(),
         grid: { ...grid, right: tailRoom(spec.labels), top: legendTop(names, width) },
-        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${number.format(Math.round(v * 10) / 10)} ${spec.unit}` },
+        tooltip: { ...(base().tooltip as Opt), trigger: 'axis', valueFormatter: (v: number) => `${sayi(Math.round(v * 10) / 10)} ${spec.unit}` },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'category', data: spec.labels, boundaryGap: false, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
         yAxis: { type: 'value', minInterval: 1, ...axis() },
@@ -935,7 +936,7 @@ function build(spec: ChartSpec, width: number): Opt {
           ...(base().tooltip as Opt),
           trigger: 'axis',
           formatter: (ps: { axisValue: number; seriesName: string; value: number[] }[]) =>
-            `${number.format(ps[0].axisValue)} ${spec.unit}<br/>${ps.map((x) => `${x.seriesName}: ${lira(x.value[1])}`).join('<br/>')}`,
+            `${sayi(ps[0].axisValue)} ${spec.unit}<br/>${ps.map((x) => `${x.seriesName}: ${lira(x.value[1])}`).join('<br/>')}`,
         },
         legend: { ...(base().legend as Opt), data: names },
         xAxis: { type: 'value', max: nMax, ...axis(), splitLine: { show: false }, axisLabel: { ...(axis().axisLabel as Opt), hideOverlap: true } },
@@ -1150,7 +1151,7 @@ function build(spec: ChartSpec, width: number): Opt {
 
     case 'huni': {
       const t = tone(spec.role);
-      const label = (p: { name: string; value: number }) => `${p.name}: ${number.format(p.value)}`;
+      const label = (p: { name: string; value: number }) => `${p.name}: ${sayi(p.value)}`;
       return {
         ...base(),
         tooltip: { ...(base().tooltip as Opt), trigger: 'item', formatter: label },

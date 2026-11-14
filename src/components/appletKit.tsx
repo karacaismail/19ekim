@@ -3,6 +3,7 @@ import { Checkbox, NumberInput, Select, TextInput } from '@mantine/core';
 import { useMotionMs } from '../lib/motion';
 import { OnayDugmesi } from './ui';
 import { yuvarla, type Durum } from '../data/applet';
+import { sayiBicimi } from '../lib/format';
 
 /**
  * Applet form ve sonuç parçaları. Parametreler sayfasıyla aynı alan sınıfları (param-*): tam ve nötr kenarlık, odakta
@@ -51,7 +52,7 @@ export function Sayi({
     if (!odakta.current) setTaslak(goster);
   }, [goster]);
   const isle = (v: number) => onChange(yuzde ? v / 100 : v);
-  const bicim = (v: number) => `${yuzde ? '%' : ''}${v.toLocaleString('tr-TR', { maximumFractionDigits: ondalik })}${birim ? ` ${birim}` : ''}`;
+  const bicim = (v: number) => `${yuzde ? '%' : ''}${sayiBicimi(ondalik)(v)}${birim ? ` ${birim}` : ''}`;
   const sinirMetni = Number.isFinite(ust) ? `Değer ${bicim(min)} ile ${bicim(ust)} arasında olmalı.` : min > 0 ? `Değer en az ${bicim(min)} olmalı.` : null;
   const aciklamaTam = sinirMetni ? (aciklama ? <>{aciklama} {sinirMetni}</> : sinirMetni) : aciklama;
   return (

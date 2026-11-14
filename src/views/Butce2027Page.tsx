@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
+import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
+import { PlanDurumuNotu } from '../components/PlanDurumuNotu';
 import { Anahtar, Choice, DataTable, SayfaNotu, Section, Stats } from '../components/ui';
 import { icerikOf } from '../data/icerik';
 import { AYLAR_2027, SECENEKLER, SECENEK_ADI, SECENEK_OZETI, type SecenekId } from '../data/istihdamV2';
@@ -20,7 +22,8 @@ import {
   type Grup,
   type Kalem,
 } from '../data/butce2027';
-import { tl } from '../lib/format';
+import { milyon, pct, tl } from '../lib/format';
+import { plan2027 } from '../data/planGeliri';
 import { useOpexOnce } from '../lib/useOpex';
 import '../styles/butce2027.css';
 
@@ -32,8 +35,7 @@ import '../styles/butce2027.css';
  */
 
 const ayAdi = (iso: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(`${iso}-01T00:00:00`));
-const milyon = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v / 1_000_000)} milyon ₺`;
-const yuzde = (v: number) => (v > 0 && v < 0.0005 ? '%0,1’den az' : `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`);
+const yuzde = (v: number) => (v > 0 && v < 0.0005 ? '%0,1’den az' : pct(v));
 const GRUPLAR: Grup[] = ['mevcut', 'kadro', 'kisi', 'pazarlama', 'ofis', 'diger'];
 const TUR_ADI = { opex: 'İşletme gideri', capex: 'Yatırım harcaması' } as const;
 
@@ -43,21 +45,24 @@ function Icerik({ pathname }: { pathname: string }) {
   const taban = opex.status === 'ready' ? tabanOf(opex.model) : null;
   const [secili, setSecili] = useState<SecenekId>('medyan');
   const [ayar, setAyar] = useState<Ayarlar>(VARSAYILAN_AYAR);
-  const b = useMemo(() => butce(taban, secili, ayar), [taban, secili, ayar]);
-  const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, b: butce(taban, s, ayar) })), [taban, ayar]);
+  // Gelir ve Meta reklam bütçesi “Parametreler” sayfasında kaydedilen ayarlardan gelir. Gelir planı da bu ayarları kullanır.
+  const model = useModel();
+  const durum = useMemo(() => plan2027(model).durum, [model]);
+  const b = useMemo(() => butce(taban, secili, ayar, model), [taban, secili, ayar, model]);
+  const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, b: butce(taban, s, ayar, model) })), [taban, ayar, model]);
   const opexT = toplam(b.opex);
   const capexT = toplam(b.capex);
   const fark = b.gelir2027 - opexT - capexT; const farkYazisi = (v: number) => `${milyon(Math.abs(v))} ${v < 0 ? 'açık' : 'fazla'}`;
   const yemekEtkisi = useMemo(() => {
-    const acik = butce(taban, secili, { ...ayar, yemek: true });
-    const kapali = butce(taban, secili, { ...ayar, yemek: false });
+    const acik = butce(taban, secili, { ...ayar, yemek: true }, model);
+    const kapali = butce(taban, secili, { ...ayar, yemek: false }, model);
     return toplam(acik.opex) - toplam(kapali.opex);
-  }, [taban, secili, ayar]);
+  }, [taban, secili, ayar, model]);
   const saglikEtkisi = useMemo(() => {
-    const acik = butce(taban, secili, { ...ayar, saglik: true });
-    const kapali = butce(taban, secili, { ...ayar, saglik: false });
+    const acik = butce(taban, secili, { ...ayar, saglik: true }, model);
+    const kapali = butce(taban, secili, { ...ayar, saglik: false }, model);
     return toplam(acik.opex) - toplam(kapali.opex);
-  }, [taban, secili, ayar]);
+  }, [taban, secili, ayar, model]);
   const ciftSayim = taban && (taban.bordrolu !== BEKLENEN_SHEETS.bordrolu || taban.faturali !== BEKLENEN_SHEETS.faturali);
   const gruplar = GRUPLAR.flatMap((g) =>
     (['opex', 'capex'] as const)
@@ -80,6 +85,7 @@ function Icerik({ pathname }: { pathname: string }) {
       />
 
       <SayfaNotu>
+        <PlanDurumuNotu durum={durum} />
         <p>
           İşletme gideri her ay tekrarlanır. Maaş, kira, lisans ve reklam işletme gideridir. Yatırım harcaması bir kez yapılır. Alınan şey yıllarca kullanılır. Bilgisayar, mobilya ve tadilat yatırım harcamasıdır. Bütçe iki parçadan oluşur. İlk parça, Google Sheets gider tablosundaki 2027 planıdır. Bu sayfada bu parçaya “Mevcut plan” denir. Mevcut plan sayfa açılırken okunur. İkinci parça, seçilen kadro seçeneğinin eklediği giderlerdir. Eklemeler iki bilgiyle hesaplanır. Biri seçilen kadro seçeneğidir. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir. Diğeri kaynağı gösterilen birim fiyatlardır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Bu oran Sheets gider tablosundaki 2027 artışıdır. Yatırım kalemleri bütçeye KDV’siz tutarla girer. Çünkü şirketin bu KDV’yi vergi borcundan düşebileceği varsayılır. Fiyatı KDV dahil olan kalemde tutar 1,2’ye bölünür.
         </p>
@@ -112,7 +118,7 @@ function Icerik({ pathname }: { pathname: string }) {
             { label: '2027 işletme gideri', value: milyon(opexT), note: b.tabanVar ? `Aylık ortalama ${tl(opexT / 12)}` : '“Mevcut plan” yok. Yalnız eklemeler sayıldı.' },
             { label: '2027 yatırım harcaması', value: milyon(capexT), note: 'KDV hariç' },
             { label: 'Toplam harcama', value: milyon(opexT + capexT), note: `Aralık 2027’de ${b.kadroAylik[11]} kişi` },
-            { label: 'Gelirden harcama düşülünce kalan', value: farkYazisi(fark), note: `“Gelir planı” sayfasındaki ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosuna göre 2027 abonelik geliri ${milyon(b.gelir2027)} olur.` },
+            { label: 'Gelirden harcama düşülünce kalan', value: farkYazisi(fark), note: durum === 'uzatildi' ? `“Gelir planı” sayfasının kurallarıyla ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosunun 2027 abonelik geliri ${milyon(b.gelir2027)} olur. Bu hesap Aralık 2027 sonuna kadar uzatıldı.` : `“Gelir planı” sayfasındaki ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosuna göre 2027 abonelik geliri ${milyon(b.gelir2027)} olur.` },
           ]}
         />
         {fark < 0 ? <p className="b27-not">Gelir 2027 harcamasını karşılamaz. Açık {milyon(-fark)} olur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılmalı. “Nakit akışı” sayfası bu sayfadaki eklemeleri henüz içermez.</p> : null}
@@ -218,7 +224,7 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Nakit ve finansman</dt>
-            <dd>Gelir harcamayı karşılamazsa açık oluşur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılabilir. Hangisinin seçileceğine henüz karar verilmedi. “Parametreler” sayfasında yatırım girişi şu an 0 ₺’dır.</dd>
+            <dd>Gelir harcamayı karşılamazsa açık oluşur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılabilir. Hangisinin seçileceğine henüz karar verilmedi. “Parametreler” sayfasında yatırım girişi şu an {tl(model.params.investmentAmount)}’dır.</dd>
           </div>
         </dl>
       </Section>

@@ -16,6 +16,9 @@
  */
 import { CANLI_PAKETLER, type PaketId } from './canliPaketler';
 import type { Params } from './params';
+import { sayiBicimi } from '../lib/format';
+
+const sayi = sayiBicimi(3);
 
 /** Hazırlık durumu: bugün satılabilir mi? */
 export type Hazirlik = 'hazir' | 'yakinda' | 'hazir-degil';
@@ -68,7 +71,7 @@ export const ENTERPRISE = canliAd('enterprise');
 /** Platinium paketin aylık ücreti (€). Henüz Parametreler’de değildir. */
 export const PRO_AYLIK_EUR = 599;
 
-export const eur = (n: number) => `${n.toLocaleString('tr-TR')} €`;
+export const eur = (n: number) => `${sayi(n)} €`;
 
 /** Kararların alındığı gün. */
 export const KARAR_TARIHI = '13 Kasım 2026 Cuma';

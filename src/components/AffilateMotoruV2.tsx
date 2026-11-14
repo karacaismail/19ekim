@@ -3,6 +3,7 @@ import { affilateHesabi, affilateYillari } from '../data/kosullarV2';
 import type { OrtakId } from '../data/affilateV2';
 import type { Ayar } from '../data/satisOrtakligiV2';
 import { Canli } from './sadeKitV2';
+import { tlBitisik } from '../lib/format';
 
 /**
  * Ödeme takvimi (kullanıcı kararı 2026-11-03: Affilate sayfası satış ortaklığına taşındı). Affilate kaynaklı koşul
@@ -10,7 +11,7 @@ import { Canli } from './sadeKitV2';
  * Hesap Affilate motorundan gelir (src/data/affilate.ts). Stiller global.css → .v2-so2-donem-*, .am-*.
  */
 
-const tl = (kurus: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(kurus / 100))} ₺`;
+const tl = (kurus: number) => tlBitisik(kurus / 100);
 const ayAdi = (ay: string) => {
   const [y, m] = ay.split('-').map(Number);
   return new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(new Date(Date.UTC(y, m - 1, 1)));

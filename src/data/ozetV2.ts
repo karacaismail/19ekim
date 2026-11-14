@@ -4,8 +4,9 @@
  */
 import { kosulSonucu } from './kosullarV2';
 import { bagimsizKazanc, kadroluKazanc, musteriKazanc, type Ayar, type RolMetni, type SegmentSonucu } from './satisOrtakligiV2';
+import { tlBitisik } from '../lib/format';
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const tl = tlBitisik;
 
 /** Sekmelerdeki tutar: özel program varsa onun özeti, yoksa sözleşmeye göre standart sonuç. */
 export function personaOzeti(a: Ayar, r: RolMetni) {

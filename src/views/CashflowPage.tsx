@@ -7,6 +7,7 @@ import { Araclar, ModSecimi, SenaryoSecimi, type Mod } from '../components/Senar
 import { Chart, DataTable, Note, RoleChip, Section, Stats, TextLink } from '../components/ui';
 import { inputsOf } from '../data/breakeven';
 import { buildCashflow, cashSeriesOf, type CashLine, type Cashflow } from '../data/cashflow';
+import { tarihSaat } from '../lib/dates';
 import { tl } from '../lib/format';
 import type { ScenarioId } from '../lib/scenario';
 import { scenarioLabel, useScenarioOptions } from '../lib/scenarioOptions';
@@ -84,9 +85,12 @@ function Icerik() {
   const rows = satirlar(cf, ayrintili);
   const ilk = cf.aylar[0];
   const son = cf.aylar[cf.aylar.length - 1];
+  const hesapZamani = durum.status === 'ready' ? tarihSaat(durum.model.hesaplandi, { dateStyle: 'full', timeStyle: 'short' }) : null;
   const kaynakNotu =
     durum.status === 'ready'
-      ? `Giderler Google Sheets’ten okundu (hesaplanma zamanı: ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })}).`
+      ? hesapZamani
+        ? `Giderler Google Sheets’ten okundu (hesaplanma zamanı: ${hesapZamani}).`
+        : 'Giderler Google Sheets’ten okundu.'
       : durum.status === 'loading'
         ? 'Giderler Sheets’ten okunuyor…'
         : durum.status === 'setup'

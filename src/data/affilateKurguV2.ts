@@ -30,6 +30,7 @@ import {
   type Senaryo,
   type Tahsilat,
 } from './affilateV2';
+import { num } from '../lib/format';
 
 export const KURGU_SURUM = 1;
 
@@ -327,7 +328,7 @@ export interface Degisiklik {
   simdi: string;
 }
 
-export const yuzde = (bp: Bp) => `%${bpToYuzde(bp).toLocaleString('tr-TR', { maximumFractionDigits: 2 })}`;
+export const yuzde = (bp: Bp) => `%${num(bpToYuzde(bp))}`;
 const ay = (n: number) => `${n} ay`;
 export const POLITIKA_ADI: Record<Politika, string> = { tahsilatta: 'Tahsilatta kazan, aynı ay öde', 'hizmet-ayi': 'Her hizmet ayı sonunda kazan ve öde', 'tahsilatta-taksit': 'Tahsilatta kazan, taksitlerle öde' };
 export const KAYNAK_ADI: Record<Fiyat['kaynak'], string> = { paket: 'Paket fiyatını gir', kat: 'Aylık fiyatın katı', indirim: 'İndirim oranıyla hesapla', indirimsiz: 'İndirimsiz hesapla' };

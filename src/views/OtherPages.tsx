@@ -24,12 +24,13 @@ import { useModel } from '../components/ModelContext';
 import { Araclar, SenaryoSecimi } from '../components/Senaryo';
 import type { StaffResult } from '../data/staffing';
 import { addDays, longDate } from '../lib/dates';
-import { int } from '../lib/format';
+import { int, num, pct, sayiBicimi, tl } from '../lib/format';
 import { useScenario } from '../lib/scenario';
 import type { ChartTreeNode, GanttRow } from '../lib/chartSpec';
 
-const lira = (value: number) => `${new Intl.NumberFormat('tr-TR').format(Math.round(value))} ₺`;
-const pct = (value: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(value * 100)}`;
+const lira = tl;
+const sayi = sayiBicimi(3);
+const sayi1 = sayiBicimi(1);
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 /** Olayın günü: “1 Aralık Salı” (her tarihte gün adı, kullanıcı kararı 13 Kasım 2026). */
 const shortDate = (iso: string) =>
@@ -138,7 +139,7 @@ function GoalsContent() {
         id="kopru"
         index={1}
         title="Ciro hedefinin hesabı"
-        desc={`Hesapta 1 € için ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(m.params.eurTry)} ₺ kullanıldı. ${firstTotal} aktif satıcının ilk ödemeleri toplam ${lira(firstTotal * SUBSCRIPTION_TRY)} eder. Bir satıcının bir aylık ödemesine “satıcı-ay” denir. Hedefe ulaşmak için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir. Aylık elde tutma, bir ay ödeyen satıcılardan ertesi ay yine ödeyenlerin oranıdır. ${m.retentionThreshold === null ? 'Abonelik tek başına bu hedefe yetmez' : `Bunun için aylık elde tutma en az ${pct(m.retentionThreshold)} olmalıdır`}.`}
+        desc={`Hesapta 1 € için ${num(m.params.eurTry)} ₺ kullanıldı. ${firstTotal} aktif satıcının ilk ödemeleri toplam ${lira(firstTotal * SUBSCRIPTION_TRY)} eder. Bir satıcının bir aylık ödemesine “satıcı-ay” denir. Hedefe ulaşmak için 90 günde ${Math.ceil(CIRO_TARGET / SUBSCRIPTION_TRY)} satıcı-ay ödeme gerekir. Aylık elde tutma, bir ay ödeyen satıcılardan ertesi ay yine ödeyenlerin oranıdır. ${m.retentionThreshold === null ? 'Abonelik tek başına bu hedefe yetmez' : `Bunun için aylık elde tutma en az ${pct(m.retentionThreshold)} olmalıdır`}.`}
       >
         <Chart
           id="kopru"
@@ -157,7 +158,7 @@ function GoalsContent() {
           title="Senaryolar"
           columns={[
             { key: 'r', header: 'Aylık elde tutma', nowrap: true, rowHeader: true, render: (s: (typeof scenarios)[number]) => pct(s.r) },
-            { key: 'm', header: 'Satıcı-ay', nowrap: true, render: (s) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(s.months) },
+            { key: 'm', header: 'Satıcı-ay', nowrap: true, render: (s) => sayi1(s.months) },
             { key: 'c', header: 'Ciro', summary: true, nowrap: true, render: (s) => lira(s.ciro) },
             { key: 'g', header: 'Hedefe göre', nowrap: true, render: (s) => (s.ciro >= CIRO_TARGET ? `+${lira(s.ciro - CIRO_TARGET)}` : `−${lira(CIRO_TARGET - s.ciro)}`) },
           ]}
@@ -515,7 +516,7 @@ function PendingContent() {
         id="ucret"
         index={4}
         title="Ücret ve prim"
-        desc={`İşveren maliyeti maaşın ${params.costFactor.toLocaleString('tr-TR')} katıdır. Bu tutara SGK, yemek, bilgisayar, vergi ve diğer giderler dahildir. Prim yalnız CRM’deki ${crmStages.filter((c) => c.commission).length} prim koşulu tamamlanan satış için ödenir. Bu koşullar bir sonraki bölümde yazılı. Saha kotası, ay içinde ${lira(m.quota)} tutarında satıştır.`}
+        desc={`İşveren maliyeti maaşın ${sayi(params.costFactor)} katıdır. Bu tutara SGK, yemek, bilgisayar, vergi ve diğer giderler dahildir. Prim yalnız CRM’deki ${crmStages.filter((c) => c.commission).length} prim koşulu tamamlanan satış için ödenir. Bu koşullar bir sonraki bölümde yazılı. Saha kotası, ay içinde ${lira(m.quota)} tutarında satıştır.`}
       >
         <DataTable<PayRule>
           id="ucret"
@@ -660,7 +661,7 @@ function GrowthContent() {
         <Chart
           id="huni"
           title="Başvurudan aktif temsilciye (haftalık)"
-          summary={`Haftalık ortalama kişi sayısı. ${recruitmentFunnel.map((f) => `${f.stage}: ${new Intl.NumberFormat('tr-TR').format(f.value)} kişi`).join('. ')}`}
+          summary={`Haftalık ortalama kişi sayısı. ${recruitmentFunnel.map((f) => `${f.stage}: ${sayi(f.value)} kişi`).join('. ')}`}
           spec={{ kind: 'huni', role: 'ekip-lideri', items: recruitmentFunnel.map((f) => ({ name: f.stage, value: f.value })) }}
           size="lg"
         />

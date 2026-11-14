@@ -12,9 +12,10 @@ import { Choice } from './ui';
 import { useMotionMs } from '../lib/motion';
 import { basamakDurumu, segmentDurumu, type Tur } from '../data/ozetV2';
 import { KAMPANYALAR, PRO_GEREKCE, bagimsizKazanc, kadroluKazanc, rolMetinleri, type Ayar, type SegmentSonucu } from '../data/satisOrtakligiV2';
+import { pct, tlBitisik } from '../lib/format';
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
+const tl = tlBitisik;
+const yuzde = pct;
 
 /** Segment ya da kariyer merdiveni (Koşullar penceresinde): her basamağın koşulları ve şu anki durumu. */
 function Merdiven({ sg, tur }: { sg: SegmentSonucu; tur: Tur }) {

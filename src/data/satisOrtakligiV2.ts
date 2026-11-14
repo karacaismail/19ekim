@@ -14,6 +14,8 @@
  * Bütün sayılar değiştirilebilir başlangıç değeridir (`VARSAYILAN_AYAR`). Tutarlar ₺, oranlar 0–1 arasıdır.
  */
 
+import { num, pct, sayiBicimi, tlBitisik } from '../lib/format';
+
 export type Marka = 'istoc' | 'segika';
 export type Model = 'oran' | 'sabit';
 export type Seviye = 'A' | 'B' | 'C';
@@ -221,15 +223,15 @@ export const KARIYER_ADI = ['Satış uzmanı yardımcısı', 'Satış uzmanı', 
 export const ALAN_ADI: Record<KadroluAlan, string> = { saha: 'Saha satışı', ic: 'Telefon ve çevrim içi satış', kurumsal: 'Kurumsal müşteri' };
 export const SOZLESME_ADI: Record<Sozlesme, string> = { bagimsiz: 'Bağımsız ortak', kadrolu: 'Kadrolu çalışan', musteri: 'Müşteri' };
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
+const tl = tlBitisik;
 /** Süre hesabında her ay 30 gün sayılır (kullanıcı kararı 2026-11-04). 3 ay = 90 gün. */
 export const AY_GUN = 30;
 export const ayGun = (ay: number) => Math.round(ay * AY_GUN);
 /** “3 ay (90 gün)” biçiminde süre. */
-export const sureMetni = (ay: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(ay)} ay (${ayGun(ay)} gün)`;
+export const sureMetni = (ay: number) => `${num(ay)} ay (${ayGun(ay)} gün)`;
 
-const yuzde = (v: number) => `%${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v * 100)}`;
-const sayi = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
+const yuzde = pct;
+const sayi = sayiBicimi(1);
 
 /* ---------- Fiyatlandırma robotu ---------- */
 

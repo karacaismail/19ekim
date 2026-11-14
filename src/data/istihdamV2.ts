@@ -1,4 +1,6 @@
 import veri from './istihdamV2.json' with { type: 'json' };
+import { sayiBicimi, tl } from '../lib/format';
+import type { SecenekGeliri } from './planGeliri';
 
 /**
  * İstihdam takvimi v2 (kullanıcı kararı 2026-11-05): istoc.com için 2027 kadro planı. Üç seçenek (ekonomik, medyan,
@@ -166,36 +168,84 @@ export const SECENEK_OZETI = Object.fromEntries(
 
 export const seceneginPozisyonlari = (s: SecenekId) => POZISYONLAR.filter((p) => p.secenekler[s].kisi > 0);
 
-const yuzdeTam = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v);
-/** Seçeneklerin gider ÷ gelir aralığı: “yüzde 87 ile 94’ü” biçiminde (veriden). */
-function payAraligi() {
-  const paylar = SECENEKLER.map((s) => SECENEK_OZETI[s].gelirPayi);
+const oranYuzde = (gider: number, gelir: number) => (gelir > 0 ? Math.round((gider / gelir) * 1000) / 10 : Number.NaN);
+
+/**
+ * Seçenek özetinin gelire bağlı alanları (kullanıcı kararı 14 Kasım 2026). Veri dosyasındaki gelir varsayılan ayarlarla
+ * hesaplandı. Sayfa geliri “Parametreler” sayfasında kaydedilen ayarlarla yeniden hesaplar (planGeliri.ts). Oranlar
+ * yeni gelire göre bulunur. Gider ayarlara bağlı değildir.
+ */
+export function gelirleOzet(gelir: Record<SecenekId, SecenekGeliri>): Record<SecenekId, SecenekOzeti> {
+  const sonuc = {} as Record<SecenekId, SecenekOzeti>;
+  for (const s of SECENEKLER) {
+    const z = SECENEK_OZETI[s];
+    sonuc[s] = {
+      ...z,
+      gelirHedefi2027: gelir[s].yil,
+      gelirAralik2027: gelir[s].aralik,
+      gelirPayi: oranYuzde(z.toplamMaliyet2027, gelir[s].yil),
+      aralikGelirPayi: oranYuzde(z.aylikMaliyetAralik2027, gelir[s].aralik),
+    };
+  }
+  return sonuc;
+}
+
+const yuzdeTam = sayiBicimi(0);
+/** Hesaplanabilen gider ÷ gelir oranları. Geliri 0 ₺ olan seçeneğin oranı yoktur. */
+const paylarOf = (ozet: Record<SecenekId, SecenekOzeti>) => SECENEKLER.map((s) => ozet[s].gelirPayi).filter(Number.isFinite);
+/** Seçeneklerin gider ÷ gelir aralığı: “yüzde 87 ile 94’ü” biçiminde. */
+function payAraligi(paylar: number[]) {
   return `%${yuzdeTam(Math.min(...paylar))} ile %${yuzdeTam(Math.max(...paylar))}’ü`;
 }
 
+/**
+ * Zarar cümlesinin eşiği. 5 Kasım 2026 notunda en düşük oran %87’ydi. Not bu oranla “şirket zarar eder” der. Reklam,
+ * prim, ofis ve yazılım giderleri bu sayfada hesaplanmaz. Bu yüzden oran %85’in altına inerse zarar kesin değildir.
+ * Bu durumda not okuru “2027 bütçesi” sayfasına yönlendirir.
+ */
+const ZARAR_ESIGI = 85;
+
 /** Projenin bugünkü kararlarıyla çelişen ya da karar bekleyen noktalar (araştırma notlarından, 2026-11-05). */
-export const DIKKAT: { baslik: string; metin: string }[] = [
-  {
-    baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
-    metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi()} arasındadır. Reklam, prim, ofis ve yazılım araçları da eklenince şirket 2027’de zarar eder. “Parametreler” sayfasında dışarıdan gelecek yatırım 0 ₺’dır. Bu açığı kapatacak kaynak henüz tanımlı değildir.`,
-  },
-  {
-    baslik: 'Saha personeli sayısı iki planda farklı',
-    metin: 'Gelir planında 2. ve 3. saha personeli daha geç başlar. İstihdam takviminde ise Aralık 2026’da 3 saha personeli çalışır. Bu yüzden gelir planı Ocak ile Haziran 2027 arasında saha ekibinin bütün satışlarını saymaz.',
-  },
-  {
-    baslik: 'Güçlü seçenek 50 çalışan eşiğini aşar',
-    metin: 'Şirkette 50 ya da daha çok çalışan olunca üç yeni yükümlülük başlar. Birincisi VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydıdır. İkincisi %3 engelli çalışan yükümlülüğüdür. Üçüncüsü iş sağlığı ve güvenliği kuruludur. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
-  },
-  {
-    baslik: 'İhracat ve bağımsız temsilciler kadroda yok',
-    metin: 'İhracat altyapısı hazır olmadığı için dış ticaret rolü eklenmedi. Bağımsız satış temsilcileri maaş almaz ve hizmet faturası keser. Bu yüzden kişi sayısına ve maliyete dahil edilmediler.',
-  },
-  {
-    baslik: 'Segika gideri ayrılmalı',
-    metin: 'Segika CRM ve SGK danışmanı Segika’ya aittir. iStoc ve Segika ayrı şirketlerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyetin nasıl paylaşılacağı işveren kararına bağlıdır.',
-  },
-];
+export function dikkatOf(ozet: Record<SecenekId, SecenekOzeti>, yatirim: number): { baslik: string; metin: string }[] {
+  const paylar = paylarOf(ozet);
+  const zarar = paylar.length > 0 && Math.min(...paylar) >= ZARAR_ESIGI;
+  const yatirimCumlesi =
+    yatirim > 0
+      ? `“Parametreler” sayfasında dışarıdan gelecek yatırım ${tl(yatirim)} olarak yazılıdır. Yatırımın açığı kapatıp kapatmadığı “Nakit akışı” sayfasında görünür.`
+      : '“Parametreler” sayfasında dışarıdan gelecek yatırım 0 ₺’dır. Bu açığı kapatacak kaynak henüz tanımlı değildir.';
+  return [
+    paylar.length === 0
+      ? {
+          baslik: '2027’de abonelik geliri yok',
+          metin: `Kaydedilen ayarlarla 2027’de abonelik geliri oluşmuyor. Bu yüzden gider oranı hesaplanmaz. Kadro ve hizmet gideri yine de ödenir. ${yatirimCumlesi}`,
+        }
+      : zarar
+      ? {
+          baslik: 'Kadro gideri gelirin büyük kısmını tüketir',
+          metin: `Üç seçenekte de 2027 kadro ve hizmet gideri yüksektir. Gider, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi(paylar)} arasındadır. Reklam, prim, ofis ve yazılım araçları da eklenince şirket 2027’de zarar eder. ${yatirimCumlesi}`,
+        }
+      : {
+          baslik: 'Kadro giderinin gelire oranı',
+          metin: `2027 kadro ve hizmet gideri, dayandığı senaryonun 2027 abonelik gelirinin ${payAraligi(paylar)} arasındadır. Reklam, prim, ofis ve yazılım araçları bu orana dahil değildir. Gelirin bütün harcamayı karşılayıp karşılamadığı “2027 bütçesi” sayfasında hesaplanır.`,
+        },
+    {
+      baslik: 'Saha personeli sayısı iki planda farklı',
+      metin: 'Gelir planında 2. ve 3. saha personeli daha geç başlar. İstihdam takviminde ise Aralık 2026’da 3 saha personeli çalışır. Bu yüzden gelir planı Ocak ile Haziran 2027 arasında saha ekibinin bütün satışlarını saymaz.',
+    },
+    {
+      baslik: 'Güçlü seçenek 50 çalışan eşiğini aşar',
+      metin: 'Şirkette 50 ya da daha çok çalışan olunca üç yeni yükümlülük başlar. Birincisi VERBİS (Veri Sorumluları Sicil Bilgi Sistemi) kaydıdır. İkincisi %3 engelli çalışan yükümlülüğüdür. Üçüncüsü iş sağlığı ve güvenliği kuruludur. Hukuk ve uyum uzmanı bu yüzden yalnız güçlü seçenektedir.',
+    },
+    {
+      baslik: 'İhracat ve bağımsız temsilciler kadroda yok',
+      metin: 'İhracat altyapısı hazır olmadığı için dış ticaret rolü eklenmedi. Bağımsız satış temsilcileri maaş almaz ve hizmet faturası keser. Bu yüzden kişi sayısına ve maliyete dahil edilmediler.',
+    },
+    {
+      baslik: 'Segika gideri ayrılmalı',
+      metin: 'Segika CRM ve SGK danışmanı Segika’ya aittir. iStoc ve Segika ayrı şirketlerdir. Bu planda gider istoc.com toplamına yazıldı. Maliyetin nasıl paylaşılacağı işveren kararına bağlıdır.',
+    },
+  ];
+}
 
 /** Seçenek kararından önce yanıtlanması gereken sorular. */
 export const ACIK_SORULAR: string[] = [

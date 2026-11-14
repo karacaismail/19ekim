@@ -18,6 +18,7 @@ import type { ChartSpec, ChartTreeNode, GanttRow } from '../lib/chartSpec';
 import { monthName } from '../lib/dates';
 import { useMotionMs } from '../lib/motion';
 import { href } from '../lib/paths';
+import { sayiBicimi } from '../lib/format';
 
 const STATUS_LABELS: Record<Status, string> = {
   karar: 'Karar verildi',
@@ -976,7 +977,7 @@ export function Chart({
 // Ajanda tarihi ay adını tam yazar: “2 Kasım”. Kısa ay adı (“Kas”) okuru zorlar. Yıl ay başlığında yazılıdır.
 const kisaTarih = (iso: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }).format(new Date(`${iso}T00:00:00`));
 const ayBasligi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
-const sayi = new Intl.NumberFormat('tr-TR');
+const sayi = sayiBicimi(3);
 
 function grafikEsdegeri(spec: ChartSpec, titleId: string): ReactNode | null {
   switch (spec.kind) {
@@ -1160,7 +1161,7 @@ function Degerler({ titleId, spec }: { titleId: string; spec: Extract<ChartSpec,
                   <li key={i.name} className="degerler-madde">
                     <span className="kayit-ad">{i.name}</span>
                     <span className="degerler-sayilar">
-                      Pazar büyümesi {i.growth < 0 ? '−' : ''}%{sayi.format(Math.abs(i.growth))}, göreli pay {sayi.format(i.share)}×, ciro {sayi.format(i.revenue)} milyon ₺
+                      Pazar büyümesi {i.growth < 0 ? '−' : ''}%{sayi(Math.abs(i.growth))}, göreli pay {sayi(i.share)}×, ciro {sayi(i.revenue)} milyon ₺
                     </span>
                   </li>
                 ))}

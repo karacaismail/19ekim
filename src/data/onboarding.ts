@@ -15,8 +15,9 @@
  */
 import type { Params } from './params';
 import { eur, paketler } from './gelirModelleri';
+import { tl as paraTl } from '../lib/format';
 
-export const tl = (n: number) => `${Math.round(n).toLocaleString('tr-TR')} ₺`;
+export const tl = paraTl;
 
 /** “A, B ve C” biçiminde liste. */
 export const ve = (xs: string[], baglac = 've') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${baglac} ${xs.at(-1)}`);

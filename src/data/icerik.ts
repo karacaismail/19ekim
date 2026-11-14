@@ -545,7 +545,7 @@ export const ICERIK: IcerikKaydi[] = [
     asOf: '2026-11-05',
     gozdenGecirme: 'Kadro seçeneği, gelir parametreleri ya da ilk 90 günün ölçümleri değişince',
     duzenleme: 'yok',
-    kapsam: 'Bu sayfadaki tutarlar 2027 için olasılıklı öngörüdür, kesinleşmiş gelir değildir. Saat ve risk değerleri kaynaklıdır ya da varsayım olarak işaretlidir. Satış katkısının bir kısmı varsayımdır. Bu kısım ilk 90 günün ölçümüne göre güncellenmeli.',
+    kapsam: `Bu sayfadaki tutarlar 2027 için olasılıklı öngörüdür, kesinleşmiş gelir değildir. Saat ve risk değerleri kaynaklıdır ya da varsayım olarak işaretlidir. Satış katkısının bir kısmı varsayımdır. Bu kısım ilk 90 günün ölçümüne göre güncellenmeli. ${PARAM_NOTU}`,
     iliskili: ['gelir-plani', 'istihdam', 'butce-2027'],
     menu: '2027 gelir öngörüsü',
   },

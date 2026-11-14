@@ -31,6 +31,15 @@ export function shortDate(iso: string) {
 export const monthName = (iso: string) => MONTHS_TR[new Date(toUtc(iso)).getUTCMonth()];
 
 /** Ayın ilk günü (ISO) */
+/**
+ * Tarih ve saat metni. Değer okunamazsa `null` döner. Böylece ekrana “Invalid Date” yazılmaz ve biçim hata atmaz.
+ * Örneğin Sheets yanıtındaki hesap zamanı boş gelebilir.
+ */
+export function tarihSaat(deger: string | number | Date, secenek: Intl.DateTimeFormatOptions): string | null {
+  const d = new Date(deger);
+  return Number.isNaN(d.getTime()) ? null : new Intl.DateTimeFormat('tr-TR', secenek).format(d);
+}
+
 export const monthStart = (iso: string) => `${iso.slice(0, 7)}-01`;
 
 /** Bir sonraki ayın ilk günü */

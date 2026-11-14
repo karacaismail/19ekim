@@ -227,3 +227,26 @@ test.describe('Nakit akışı: seçenek notu ve toparlanma durumu', () => {
     expect(metin(await deger(page, 'En düşük nakit').textContent())).toBe(`${tl(plan.enDusuk.deger)} (${plan.enDusuk.ay.kisa})`);
   });
 });
+
+test('Sheets hesap zamanı bozuksa nakit akışı, gelir planı ve giderler çökmez', async ({ page }) => {
+  // Hesap zamanı okunamazsa sayfa zamanı yazmaz. "Invalid Date" yazmaz ve hata atmaz.
+  const hatalar: string[] = [];
+  page.on('pageerror', (e) => hatalar.push(e.message));
+  const model = { ...buildModel(), hesaplandi: 'bozuk' };
+  await page.route('https://script.google.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(reply(model, 'ozet-bozuk-zaman')) }),
+  );
+  await page.goto('nakit-akisi/');
+  await expect(page.getByText('Giderler Google Sheets’ten okundu.')).toBeVisible();
+  await page.goto('gelir-plani/');
+  await expect(page.getByText('Sheets giderleri bu sayfa açılırken okundu.').first()).toBeVisible();
+  await page.goto('giderler/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  for (const adres of ['nakit-akisi/', 'gelir-plani/', 'giderler/']) {
+    await page.goto(adres);
+    await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+    await expect(page.locator('body')).not.toContainText('Invalid Date');
+  }
+  expect(hatalar).toEqual([]);
+});

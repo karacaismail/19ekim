@@ -11,6 +11,10 @@
  * yuvarlamayla yapılır (§8.1); parçalı tahsilat toplamı değiştirmez (§7.1).
  */
 
+import { sabitOndalikBicimi } from '../lib/format';
+
+const kuruslu = sabitOndalikBicimi(2);
+
 export type Kurus = number;
 export type Bp = number;
 export type ParaBirimi = 'TRY' | 'EUR';
@@ -264,7 +268,7 @@ export const bpToYuzde = (bp: Bp) => bp / 100;
 /** TL / € ondalık → kuruş. */
 export const kurus = (tutar: number): Kurus => Math.round(tutar * 100);
 export const kurusFormat = (k: Kurus, pb: ParaBirimi = 'TRY') =>
-  `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(k / 100)} ${pb === 'TRY' ? '₺' : '€'}`;
+  `${kuruslu(k / 100)} ${pb === 'TRY' ? '₺' : '€'}`;
 
 /**
  * Taksit dağıtımı (§8.1): kümülatif(k) = roundHalfUp(C × k / N); taksit(k) = kümülatif(k) − kümülatif(k − 1). Toplam

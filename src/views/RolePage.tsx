@@ -34,6 +34,9 @@ import { useModel } from '../components/ModelContext';
 import { addDays } from '../lib/dates';
 import type { PlanRow, Role, ScheduleRow, Task } from '../data/types';
 import { metindekiKavramlar } from '../data/kavramlar';
+import { sayiBicimi } from '../lib/format';
+
+const sayi = sayiBicimi(3);
 
 const minutes = (time: string) => {
   const [from, to] = time.split('–').map((t) => {
@@ -223,7 +226,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<AiTool>
           id="arac"
           title="Araçlar ve aylık bütçe"
-          note={`Araçlara ayda en çok ${new Intl.NumberFormat('tr-TR').format(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim Pazartesi günü verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık Çarşamba günü ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
+          note={`Araçlara ayda en çok ${sayi(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim Pazartesi günü verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık Çarşamba günü ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
             { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },

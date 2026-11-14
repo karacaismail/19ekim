@@ -17,6 +17,7 @@ import {
 import { kosulSonucu, seciliKosul } from '../data/kosullarV2';
 import { personaOzeti, segmentDurumu } from '../data/ozetV2';
 import '../styles/ozetPaneliV2.css';
+import { num, tl } from '../lib/format';
 
 /**
  * Özet paneli (kullanıcı kararı 2026-11-03): seçimleri ve ana sonuçları tek bakışta gösteren, salt okunur sütun.
@@ -24,8 +25,7 @@ import '../styles/ozetPaneliV2.css';
  * MusteriSonuc, segmentDurumu). Yapışma ve yerleşim sayfanın işidir. Bu bileşen yalnız içeriği verir.
  */
 
-const tl = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))} ₺`;
-const sayi = (n: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
+const sayi = num;
 
 interface Satir {
   ad: string;

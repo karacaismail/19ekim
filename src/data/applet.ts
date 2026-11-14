@@ -5,6 +5,8 @@
  * Bu dosya yalnız saf hesap ve varsayılan veridir; arayüz src/views/AppletPage.tsx.
  */
 
+import { sayiBicimi } from '../lib/format';
+
 export type ParaBirimi = '₺' | '€' | '$';
 export type BazKaynak = 'net' | 'brut' | 'ozel';
 export type Hat = 'IC' | 'M';
@@ -169,10 +171,13 @@ export const BAND_KADEMELERI: { id: string; ad: string; carpan: number }[] = [
 /* ---------- Ortak yardımcılar ---------- */
 
 export const yuvarla = (v: number, d = 2) => Math.round(v * 10 ** d) / 10 ** d;
+const sayi3 = sayiBicimi(3);
+/** Sayıyı yuvarlar ve yazar. Önce mutlak değer yuvarlanır. Sonra işaret geri eklenir. Böylece eksi yarım değer de sıfırdan uzağa gider. */
+const yuvarlaMetni = (v: number, d: number) => sayi3(Math.sign(v) * yuvarla(Math.abs(v), d));
 /** Bölen sıfır veya negatifse 0 (kullanıcı çarpanı 0 yaptığında NaN/∞ yayılmasın). */
 export const bol = (a: number, b: number) => (b > 0 && Number.isFinite(a) ? a / b : 0);
 /** Türkçe ondalık yazımı (0,85). */
-export const ondalik = (v: number, d = 2) => yuvarla(v, d).toLocaleString('tr-TR');
+export const ondalik = (v: number, d = 2) => yuvarlaMetni(v, d);
 const toplam = (a: number[]) => a.reduce((x, y) => x + y, 0);
 const ortalama = (a: number[]) => (a.length ? toplam(a) / a.length : 0);
 const sinirla = (v: number, alt: number, ust: number) => Math.min(ust, Math.max(alt, v));
@@ -528,7 +533,7 @@ export function yillikZam(g: ZamGirdi, matris: number[][]) {
   const adimlar: ZamAdim[] = [];
   let orta = g.orta * (1 + g.yapi);
   let ucret = g.ucret;
-  const yuz = (v: number) => `%${yuvarla(v * 100, 1).toLocaleString('tr-TR')}`;
+  const yuz = (v: number) => `%${yuvarlaMetni(v * 100, 1)}`;
 
   const min = orta * (1 - g.yariGenislik);
   const yapiTutar = Math.max(0, min - ucret);
@@ -1022,8 +1027,8 @@ export interface Kontrol {
   dayanak: string;
 }
 
-const yuzde = (v: number) => `%${yuvarla(v * 100, 1).toLocaleString('tr-TR')}`;
-const kat = (v: number) => `${yuvarla(v).toLocaleString('tr-TR')} ×`;
+const yuzde = (v: number) => `%${yuvarlaMetni(v * 100, 1)}`;
+const kat = (v: number) => `${yuvarlaMetni(v, 2)} ×`;
 const derecele = (v: number, iyi: [number, number], kabul: [number, number]): Durum =>
   v >= iyi[0] - 1e-9 && v <= iyi[1] + 1e-9 ? 'gecti' : v >= kabul[0] - 1e-9 && v <= kabul[1] + 1e-9 ? 'uyari' : 'kaldi';
 
@@ -1043,7 +1048,7 @@ export function yapiDenetimi(g: { meslekler: Meslek[]; seviyeler: Seviye[]; kade
   const kontroller: Kontrol[] = [
     {
       ad: 'En yüksek ücretin en düşük ücrete oranı',
-      deger: enAz > 0 ? `${yuvarla(enCok / enAz, 1).toLocaleString('tr-TR')} : 1` : 'Veri yok',
+      deger: enAz > 0 ? `${yuvarlaMetni(enCok / enAz, 1)} : 1` : 'Veri yok',
       durum: enAz > 0 ? derecele(enCok / enAz, [0, 6], [0, 9]) : 'kaldi',
       aciklama: 'Katalogdaki bütün hücreler (meslek × uzmanlık × seviye) karşılaştırılır.',
       dayanak: 'Mondragon kooperatiflerinde en yüksek ücret, en düşük ücretin 6 katıdır. Bazı üst yönetici ücretlerinde bu oran 9 kattır.',

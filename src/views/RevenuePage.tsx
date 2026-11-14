@@ -11,10 +11,13 @@ import { computeBreakeven, defaultFilters, inputsOf, sensitivity, SENS_FACTORS, 
 import { buildSources, simulate, sure, type Milestone, type SimInputs } from '../data/revenue';
 import { makeStaffing, staffScenario, type StaffResult } from '../data/staffing';
 import { downloadCsv } from '../lib/csv';
-import { daysBetween, longDate, monthName, shortDate } from '../lib/dates';
-import { int, tl } from '../lib/format';
+import { daysBetween, longDate, monthName, shortDate, tarihSaat } from '../lib/dates';
+import { int, milyon, sayiBicimi, tl } from '../lib/format';
 import { presetOptions, scenarioLabel, useScenarioOptions } from '../lib/scenarioOptions';
 import { useOpexOnce } from '../lib/useOpex';
+
+const sayi = sayiBicimi(3);
+const sayi1 = sayiBicimi(1);
 
 /**
  * Gelir planı (kullanıcı kararı 2026-10-27, UX-first yeniden kurulum): sayfanın başında senaryo kurucu (hazır senaryolar
@@ -32,7 +35,7 @@ const ayAdi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 const yuzde = (v: number) => `%${Math.round(v * 100)}`;
 const binTl = (v: number) => Math.round(v / 1000);
 /** Kartın büyük sayısı: para hedefleri milyon ₺ (“3 M₺”), adetler “100 aktif” / “500 üye”. */
-const esik = (m: Milestone) => (m.kind === 'gelir' ? `${(m.threshold / 1_000_000).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} milyon ₺` : `${int(m.threshold)} ${m.kind === 'uye' ? 'üye' : 'aktif'}`);
+const esik = (m: Milestone) => (m.kind === 'gelir' ? milyon(m.threshold) : `${int(m.threshold)} ${m.kind === 'uye' ? 'üye' : 'aktif'}`);
 
 function HedefKartlari({ milestones, digerleri, son }: { milestones: Milestone[]; digerleri: { name: string; milestones: Milestone[] }[]; son: string }) {
   return (
@@ -168,11 +171,12 @@ function Icerik() {
   const [modKum, setModKum] = useState<Mod>('ucu');
   const [modBas, setModBas] = useState<'aylik' | 'kumulatif'>('aylik');
 
+  const sheetsZamani = durum.status === 'ready' ? tarihSaat(durum.model.hesaplandi, { dateStyle: 'full', timeStyle: 'short' }) : null;
   const sheetsNotu =
     durum.status === 'loading'
       ? 'Sheets giderleri okunuyor. Şimdilik plan kadrosunun giderleriyle hesap yapılıyor. Veri gelirse sonuçlar yeniden hesaplanır.'
       : durum.status === 'ready'
-        ? `Sheets giderleri bu sayfa açılırken okundu. Sheets bu verileri ${new Date(durum.model.hesaplandi).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' })} tarihinde hesapladı. Hesap bu giderlere Sheets’te olmayan kalemleri ekler. Bunlar ikinci ve ek saha personeli ile reklam giderleridir.`
+        ? `Sheets giderleri bu sayfa açılırken okundu. ${sheetsZamani ? `Sheets bu verileri ${sheetsZamani} tarihinde hesapladı. ` : ''}Hesap bu giderlere Sheets’te olmayan kalemleri ekler. Bunlar ikinci ve ek saha personeli ile reklam giderleridir.`
         : `Sheets giderleri okunamadı. Bu sonuçlarda plan kadrosunun giderleri kullanılıyor. Bu kaynak ofis ve yazılım ekibi giderlerini içermez, kapsamı kontrol edin. Teknik neden: ${durum.status === 'setup' ? 'veri ucu erişim anahtarı istiyor' : durum.message}.`;
   const tarihYaz = (k: { date: string; t: number } | null) => (k ? (k.t > H - 1 ? `≈ ${kisaGun(k.date)}` : kisaGun(k.date)) : `${son} sonuna kadar kapanmıyor`);
   const noktaMetni = be.nokta
@@ -374,7 +378,7 @@ function Icerik() {
             { key: 'n', header: 'Kaynak', minWidth: '12rem', rowHeader: true, render: (x: (typeof kaynaklar)[number]) => <RoleChip role={x.role} label={x.name} /> },
             { key: 's', header: 'Başlangıç', nowrap: true, render: (x) => shortDate(x.start) },
             { key: 'r', header: 'Günlük ve haftalık düzen', minWidth: '22rem', render: (x) => x.routine },
-            { key: 'c', header: 'Tam kapasite', nowrap: true, render: (x) => `${x.capacity.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay` },
+            { key: 'c', header: 'Tam kapasite', nowrap: true, render: (x) => `${sayi1(x.capacity)} / ay` },
             { key: 'i', header: 'İlk 3 satış ayı', nowrap: true, render: (x) => int(Math.round(x.values.slice(1, 4).reduce((a, b, i) => a + b * r.satis[i + 1], 0) * inputs.factor)) },
             { key: 'o', header: '12 ay', summary: true, nowrap: true, render: (x) => int(Math.round(x.values.slice(0, 12).reduce((a, b, i) => a + b * r.satis[i], 0) * inputs.factor)) },
           ]}
@@ -422,7 +426,7 @@ function Icerik() {
               { key: 'a', header: 'Yeni aktif', nowrap: true, render: (x) => (x.dogrudan ? int(Math.round(x.aktif)) : 'Uygulanmıyor') },
               { key: 'k', header: 'Gelire katkı', nowrap: true, summary: true, render: (x) => (x.dogrudan ? tl(x.katki) : 'Dolaylı') },
               { key: 'n', header: 'Net', nowrap: true, render: (x) => tl(x.net) },
-              { key: 'o', header: 'Katkı, giderin kaç katı', nowrap: true, render: (x) => (x.oran === null ? 'Uygulanmıyor' : `${x.oran.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
+              { key: 'o', header: 'Katkı, giderin kaç katı', nowrap: true, render: (x) => (x.oran === null ? 'Uygulanmıyor' : `${sayi1(x.oran)} ×`) },
             ]}
             rows={katkiRows}
             rowKey={(x) => x.role.id}
@@ -482,11 +486,11 @@ function Icerik() {
         <Stats
           items={[
             { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Reklam ${d.adStart} günü başlar. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe artmıyor.'}` },
-            { label: 'Kayıt', value: `${zincir.kayit.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (bütçe artmadan önce)` },
-            { label: 'Yeni aktif satıcı', value: `${zincir.aktif.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ay`, note: `Kayıtların yüzde ${params.dijitalLeadToActive} kadarı ödemeye geçer. Hesap kapasitenin ${yuzde(inputs.factor)} kadarını kullanır.` },
+            { label: 'Kayıt', value: `${sayi1(zincir.kayit)} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (bütçe artmadan önce)` },
+            { label: 'Yeni aktif satıcı', value: `${sayi1(zincir.aktif)} / ay`, note: `Kayıtların yüzde ${params.dijitalLeadToActive} kadarı ödemeye geçer. Hesap kapasitenin ${yuzde(inputs.factor)} kadarını kullanır.` },
             { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? 'Uygulanmıyor' : tl(zincir.cac), note: 'Tam verimli bir ayın maliyetidir. Tablodaki maliyet ilk iki ayın düşük verimini de içerir.' },
             { label: 'Satıcı başına gelir (LTV)', value: tl(zincir.ltv), note: `Elde tutma ${yuzde(inputs.retention)}, yıllık peşin payı ${yuzde(inputs.annualShare)}` },
-            { label: 'LTV ÷ CAC', value: zincir.ltvCac === null ? 'Uygulanmıyor' : `${zincir.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`, note: zincir.ltvCac === null ? 'Reklam yok' : zincir.ltvCac >= 3 ? 'Kurala göre bütçe artırılır' : zincir.ltvCac >= 1.5 ? 'Kurala göre bütçe korunur ve dönüşüm iyileştirilir' : 'Kurala göre reklam durdurulur ve dönüşüm düzeltilir' },
+            { label: 'LTV ÷ CAC', value: zincir.ltvCac === null ? 'Uygulanmıyor' : `${sayi1(zincir.ltvCac)} ×`, note: zincir.ltvCac === null ? 'Reklam yok' : zincir.ltvCac >= 3 ? 'Kurala göre bütçe artırılır' : zincir.ltvCac >= 1.5 ? 'Kurala göre bütçe korunur ve dönüşüm iyileştirilir' : 'Kurala göre reklam durdurulur ve dönüşüm düzeltilir' },
           ]}
         />
         <DataTable
@@ -525,7 +529,7 @@ function Icerik() {
             { key: 'r', header: 'Gelire katkı', nowrap: true, render: (x) => tl(x.katki) },
             { key: 'n', header: 'Net', summary: true, nowrap: true, render: (x) => tl(x.net) },
             { key: 'c', header: 'CAC', nowrap: true, render: (x) => (x.cac === null ? 'Uygulanmıyor' : tl(x.cac)) },
-            { key: 'l', header: 'LTV ÷ CAC', nowrap: true, render: (x) => (x.ltvCac === null ? 'Uygulanmıyor' : `${x.ltvCac.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} ×`) },
+            { key: 'l', header: 'LTV ÷ CAC', nowrap: true, render: (x) => (x.ltvCac === null ? 'Uygulanmıyor' : `${sayi1(x.ltvCac)} ×`) },
           ]}
           rows={tiers.tiers}
           rowKey={(x) => String(x.butce)}
@@ -681,7 +685,7 @@ function Icerik() {
         dizin
         index={6}
         title="Fiyat ve paket"
-        desc={`Hesap 1 € için ${params.eurTry.toLocaleString('tr-TR')} ₺ kullanır. Kur yılda ${yuzde(inputs.fxGrowth)} artar. Yeni satıcıların yüzde ${Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder. Yıllık peşin ödemede nakit önden gelir ve yıl içinde bu satıcıyı kaybetme riski olmaz.`}
+        desc={`Hesap 1 € için ${sayi(params.eurTry)} ₺ kullanır. Kur yılda ${yuzde(inputs.fxGrowth)} artar. Yeni satıcıların yüzde ${Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder. Yıllık peşin ödemede nakit önden gelir ve yıl içinde bu satıcıyı kaybetme riski olmaz.`}
         tools={cubuk()}
       >
         <DataTable

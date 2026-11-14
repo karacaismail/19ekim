@@ -5,6 +5,8 @@
  * Bütün sayılar değiştirilebilir başlangıç değeridir (`VARSAYILAN_AYAR`); kaynak docs: satis-ortakligi-programi.md.
  */
 
+import { sayiBicimi, tlBitisik } from '../lib/format';
+
 export type Marka = 'istoc' | 'segika';
 export type Model = 'oran' | 'sabit';
 export type Seviye = 'A' | 'B' | 'C';
@@ -245,8 +247,8 @@ export interface DonemSatiri {
  * haftalık = yıllık ÷ 52, aylık = yıllık ÷ 12. Satış adetleri her ay aynı kabul edilir; öncü ortakta ilk yıl aşamalarla hesaplanır.
  */
 export function donemKazanci(a: Ayar, rol: RolId): DonemSatiri[] {
-  const n = (v: number) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(v);
-  const t = (v: number) => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v))}\u00a0₺`;
+  const n = sayiBicimi(1);
+  const t = tlBitisik;
   if (rol === 'oncu') {
     const birim = satisKazanci(a, a.oncuSeviye);
     const ilkYilSatis = a.oncuAsama.reduce((top, adet, i) => top + (adet * ASAMA_GUN[i]) / GUN_AY, 0);
