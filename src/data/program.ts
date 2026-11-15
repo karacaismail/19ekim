@@ -187,7 +187,7 @@ export function makeProgram(p: Params) {
   const ANNUAL_TRY = SUBSCRIPTION_TRY * p.annualMonths;
   const planRetention = p.planRetention / 100;
   const targetPlan = scalePlan(BASE_TARGET_PLAN, p.activeTarget, p.activeTarget + p.memberTarget).map((r) =>
-    r.role === 'saha-uzmani' ? { ...r, source: `Saha ekibi (${p.sahaCount + p.sahaDecCount} kişi) ve ekip lideri` } : r,
+    r.role === 'saha-uzmani' ? { ...r, source: `Saha ekibi (${int(p.sahaCount + p.sahaDecCount)} kişi) ve ekip lideri` } : r,
   );
   const NEW_ACTIVE = [0, 1, 2].map((m) => targetPlan.reduce((sum, t) => sum + t.aktif[m], 0));
   const NEW_KAYIT = [0, 1, 2].map((m) => targetPlan.reduce((sum, t) => sum + t.kayit[m], 0));
@@ -210,7 +210,7 @@ export function makeProgram(p: Params) {
   const gap = Math.max(0, CIRO_TARGET - worstCiro);
 
   const targets = [
-    { label: 'Aktif satıcı', value: int(p.activeTarget), note: `Ayda ${p.subscriptionEur} € öder. Hedef günü ${longDate(day90)}.` },
+    { label: 'Aktif satıcı', value: int(p.activeTarget), note: `Ayda ${num(p.subscriptionEur)} € öder. Hedef günü ${longDate(day90)}.` },
     { label: 'Üye satıcı', value: int(p.memberTarget), note: `Kayıtlı ama ödeme yapmayan satıcı. Hedef günü ${longDate(day90)}.` },
     { label: 'Ciro', value: `En az ${tl(CIRO_TARGET)}`, note: `${longDate(start)} ile ${longDate(day90)} arası` },
     {
@@ -242,8 +242,8 @@ export function makeProgram(p: Params) {
     p.sahaDecCount === 0
       ? ''
       : p.sahaDecCount === 1
-        ? `${p.sahaCount + 1}. saha personeli`
-        : `${p.sahaCount + 1}.–${p.sahaCount + p.sahaDecCount}. saha personeli`;
+        ? `${int(p.sahaCount + 1)}. saha personeli`
+        : `${int(p.sahaCount + 1)}.–${int(p.sahaCount + p.sahaDecCount)}. saha personeli`;
   const initialCount = p.asistanCount + p.masaCount + p.segikaCount + p.sahaCount + p.dijitalCount;
   const decStarters = [p.organizatorCount ? 'organizatör' : '', 'ekip lideri', sahaDecLabel].filter(Boolean);
   const decTitle = `${decStarters.join(', ').replace(/^./, (c) => c.toUpperCase())} başlar`;
@@ -322,13 +322,13 @@ export function makeProgram(p: Params) {
   /* Takvim */
   const calendarEvents: CalendarEvent[] = [
     { date: p.metaStartDate, title: 'Meta reklamları başlar', role: 'yonetici', detail: `${tl(p.metaWeekly)} / hafta, sürekli. Sorumlu İsmail Karaca.`, status: 'karar' },
-    { date: s1('2026-10-28'), title: 'Teklifler', role: 'yonetici', detail: `${initialCount} kişi: asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, ${p.sahaCount} saha satış uzmanı, dijital pazarlama uzmanı`, status: 'karar' },
+    { date: s1('2026-10-28'), title: 'Teklifler', role: 'yonetici', detail: `${initialCount} kişi: asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, ${int(p.sahaCount)} saha satış uzmanı, dijital pazarlama uzmanı`, status: 'karar' },
     { date: s1('2026-10-30'), title: 'Sözleşme ve SGK', role: 'yonetici', detail: 'Fazla çalışma için yazılı onay dahil', status: 'karar' },
     {
       date: start,
       title: `${initialCount} kişi başlar`,
       role: 'saha-uzmani',
-      detail: `Asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, saha satış uzmanı (${p.sahaCount}), dijital pazarlama uzmanı. İlk iş günü ${shortDate(firstDay)}.`,
+      detail: `Asistan, İstoç Pazarlama CRM uzmanı, Segika CRM, saha satış uzmanı (${int(p.sahaCount)}), dijital pazarlama uzmanı. İlk iş günü ${shortDate(firstDay)}.`,
       status: 'karar',
     },
     { date: s1('2026-11-16'), title: 'Temsilci reklamları başlar', role: 'dijital-pazarlama', detail: `Haftada en fazla ~${int(p.applicationsWeekly)} başvuru`, status: 'karar' },
@@ -484,7 +484,7 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Segika SGK teşvik yazılımı için satış planı (tahtadaki “istoç SGK” notu)',
-      decision: `Segika markalı SGK teşvik yazılımını satmak için bir pazarlama planı hazırlanır. Bu iş, İstoç Pazarlama CRM uzmanının işiyle aynıdır. Görevler, başarı ölçütleri (KPI), günlük düzen ve ücret de aynıdır. ${p.segikaCount} kişi ${longDate(start)} günü başlar.`,
+      decision: `Segika markalı SGK teşvik yazılımını satmak için bir pazarlama planı hazırlanır. Bu iş, İstoç Pazarlama CRM uzmanının işiyle aynıdır. Görevler, başarı ölçütleri (KPI), günlük düzen ve ücret de aynıdır. ${int(p.segikaCount)} kişi ${longDate(start)} günü başlar.`,
     },
   ];
 

@@ -11,6 +11,7 @@ import type { KayitDurum } from '../components/ui';
 import { defaultFilters, type BreakevenFilters } from '../data/breakeven';
 import type { Params } from '../data/params';
 import type { RoleKey } from '../data/types';
+import { num } from './format';
 import { SCENARIO_IDS, SCENARIO_KEY, useScenario, type ScenarioId } from './scenario';
 
 export type ScenarioOptions = BreakevenFilters;
@@ -29,9 +30,9 @@ export interface Preset {
 /** Hazır senaryolar: üç temel küme ve dört örnek bileşim (kullanıcı kararı 2026-10-27). */
 export function presetsOf(p: Params): Preset[] {
   return [
-    { id: 'kotumser', name: 'Kötümser', role: 'dijital-pazarlama', base: 'kotumser', desc: `Kapasitenin yüzde ${p.pessimisticFactor} kadarı kullanılır. Aylık abonelerin yüzde ${p.pessimisticRetention} kadarının sonraki ay yenilediği varsayılır. Saha kadrosu büyümez. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
-    { id: 'medyan', name: 'Plan', role: 'saha-uzmani', base: 'medyan', desc: `Plan senaryosu budur. Bu senaryo planın varsayımlarından kurulur. Satış kanalları tanımlı tam kapasiteyle çalışır. Aylık abonelerin yüzde ${p.planRetention} kadarının ertesi ay yenilediği varsayılır. İkinci saha çalışanından sonra her 6 ayda bir saha çalışanı eklenir. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
-    { id: 'iyimser', name: 'İyimser', role: 'pazarlamaci', base: 'iyimser', desc: `Kapasitenin yüzde 130 kadarı kullanılır. Aylık yenileme oranı %${p.planRetention} yerine %${Math.min(90, p.planRetention + 10)} alınır. Bu oran plan senaryosundan 10 yüzde puan yüksektir. İkinci saha çalışanından sonra her 4 ayda bir saha çalışanı eklenir. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
+    { id: 'kotumser', name: 'Kötümser', role: 'dijital-pazarlama', base: 'kotumser', desc: `Kapasitenin yüzde ${num(p.pessimisticFactor)} kadarı kullanılır. Aylık abonelerin yüzde ${num(p.pessimisticRetention)} kadarının sonraki ay yenilediği varsayılır. Saha kadrosu büyümez. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
+    { id: 'medyan', name: 'Plan', role: 'saha-uzmani', base: 'medyan', desc: `Plan senaryosu budur. Bu senaryo planın varsayımlarından kurulur. Satış kanalları tanımlı tam kapasiteyle çalışır. Aylık abonelerin yüzde ${num(p.planRetention)} kadarının ertesi ay yenilediği varsayılır. İkinci saha çalışanından sonra her 6 ayda bir saha çalışanı eklenir. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
+    { id: 'iyimser', name: 'İyimser', role: 'pazarlamaci', base: 'iyimser', desc: `Kapasitenin yüzde 130 kadarı kullanılır. Aylık yenileme oranı %${num(p.planRetention)} yerine %${num(Math.min(90, p.planRetention + 10))} alınır. Bu oran plan senaryosundan 10 yüzde puan yüksektir. İkinci saha çalışanından sonra her 4 ayda bir saha çalışanı eklenir. Diğer değerler genel plan ayarlarından alınır.`, options: {} },
     { id: 'saha', name: 'Saha ağırlıklı', role: 'ekip-lideri', base: 'medyan', desc: 'Plan senaryosuna göre ikinci saha personeli Aralık’ta başlar, 2 ek saha personeli alınır ve her 4 ayda 1 saha personeli eklenir. Satıcı kazanım reklamı verilmez.', options: { secondSahaIso: '2026-12-01', extraSaha: 2, sahaGrowthEvery: 4, dijitalBudgetFactor: 0 } },
     { id: 'dijital', name: 'Dijital ağırlıklı', role: 'organizator', base: 'medyan', desc: 'Plan senaryosuna göre reklam bütçesi 4 katına çıkar. Bütçe, satıcıdan beklenen toplam gelirin (LTV) satıcıyı kazanma maliyetine (CAC) oranına göre büyür. Saha kadrosu büyümez, ikinci saha personeli Mart 2027’de başlar.', options: { dijitalBudgetFactor: 4, sahaGrowthEvery: 0, secondSahaIso: '2027-03-01' } },
     { id: 'tutumlu', name: 'Tutumlu', role: 'asistan', base: 'medyan', desc: 'Plan senaryosuna göre kur ve reklam bütçesi sabit kalır, bütçe ölçeklenmez. Saha kadrosu büyümez, ikinci saha personeli Mart 2027’de başlar. Yeni satıcıların yüzde 40 kadarı yıllık peşin öder.', options: { fxGrowth: 0, dijitalScale: false, sahaGrowthEvery: 0, secondSahaIso: '2027-03-01', annualShare: 0.4 } },

@@ -15,7 +15,7 @@
  */
 import type { Params } from './params';
 import { eur, paketler } from './gelirModelleri';
-import { tl as paraTl } from '../lib/format';
+import { int, tl as paraTl } from '../lib/format';
 
 export const tl = paraTl;
 
@@ -330,7 +330,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       adimlar: [
         'İlk günlerde neler olduğunu iki cümleyle özetleyin.',
         `${std.ad} paketi önerin: aylık ${eur(aylik)}, yaklaşık ${tl(aylik * p.eurTry)}.`,
-        `Yıllık peşin seçeneğini söyleyin: ${eur(yillik)}. 12 ay için ${p.annualMonths} ayın ücreti ödenir.`,
+        `Yıllık peşin seçeneğini söyleyin: ${eur(yillik)}. 12 ay için ${int(p.annualMonths)} ayın ücreti ödenir.`,
         'Türk lirası karşılığının ödeme günündeki kurla hesaplandığını söyleyin.',
         'Doğrudan sorun: “Bu paketle devam etmek ister misiniz?”',
         { metin: 'Evet derse:', git: 'evet' },
@@ -383,7 +383,7 @@ export function durumlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths' | 'e
       adimlar: [
         `Aylık fiyatları söyleyin: ${tabloAylik}.`,
         `Yıllık peşin fiyatları söyleyin: ${tabloYillik}.`,
-        `Yıllık peşin ödemede 12 ay için ${p.annualMonths} ayın ücreti ödenir.`,
+        `Yıllık peşin ödemede 12 ay için ${int(p.annualMonths)} ayın ücreti ödenir.`,
         'Türk lirası karşılığının ödeme günündeki kurla hesaplandığını söyleyin.',
         'Satıcı henüz Aşama 4’e gelmediyse önce vitrini açmayı önerin.',
         '“Kaydınızın 14. gününde sonuçlara birlikte bakalım.” deyin.',
@@ -596,7 +596,7 @@ export function sablonlar(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): 
       id: 'teklif',
       ad: 'Teklif e-postası',
       konu: 'Konuştuğumuz paket',
-      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nKonuştuğumuz gibi ${std.ad} paketle devam ediyoruz.\n- Aylık ücret: ${eur(std.aylikEur!)}\n- Yıllık peşin: ${eur(std.yillikEur!)} (12 ay için ${p.annualMonths} ayın ücreti)\n- Türk lirası karşılığı ödeme günündeki kurla hesaplanır.\n\nÖdemeyi şöyle yapabilirsiniz: [ödeme adımı]\n\n${IMZA}\n\nBu tür e-postaları almak istemiyorsanız “istemiyorum” yazmanız yeterlidir.`,
+      metin: `Merhaba [Ad] Bey ya da Hanım,\n\nKonuştuğumuz gibi ${std.ad} paketle devam ediyoruz.\n- Aylık ücret: ${eur(std.aylikEur!)}\n- Yıllık peşin: ${eur(std.yillikEur!)} (12 ay için ${int(p.annualMonths)} ayın ücreti)\n- Türk lirası karşılığı ödeme günündeki kurla hesaplanır.\n\nÖdemeyi şöyle yapabilirsiniz: [ödeme adımı]\n\n${IMZA}\n\nBu tür e-postaları almak istemiyorsanız “istemiyorum” yazmanız yeterlidir.`,
     },
     {
       id: 'simdi-degil',

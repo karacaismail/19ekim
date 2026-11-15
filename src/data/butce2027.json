@@ -501,12 +501,12 @@
   {
    "id": "mobil-hat-kurumsal-20gb",
    "tur": "opex",
-   "ad": "Kurumsal mobil hat, 20 GB internet ve 1000 dakika (Türk Telekom Cepte Dijital)",
+   "ad": "Kurumsal mobil hat, 20 GB internet ve 1.000 dakika (Türk Telekom Cepte Dijital)",
    "birim": "hat/ay",
    "fiyat2026": 470,
    "fiyat2027": 609.73,
    "kdv": "bilinmiyor",
-   "dayanak": "Türk Telekom kurumsal tarifeleri 12 ay taahhütlüdür. 20 GB paket aylık 470 ₺'dır. 40 GB ve 3000 dakikalık paket 640 ₺'dır. Sayfa, bazı vergi ve ücretlerin fiyata dahil olmadığını yazar. Bunlar telsiz kullanım ücreti, yeni hatta alınan ruhsatname ve özel iletişim vergisidir.",
+   "dayanak": "Türk Telekom kurumsal tarifeleri 12 ay taahhütlüdür. 20 GB paket aylık 470 ₺'dır. 40 GB ve 3.000 dakikalık paket 640 ₺'dır. Sayfa, bazı vergi ve ücretlerin fiyata dahil olmadığını yazar. Bunlar telsiz kullanım ücreti, yeni hatta alınan ruhsatname ve özel iletişim vergisidir.",
    "kaynaklar": [
     {
      "ad": "Türk Telekom Kurumsal, mobil kurumsal tarifeler",

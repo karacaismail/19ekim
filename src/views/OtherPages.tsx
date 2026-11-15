@@ -122,7 +122,7 @@ function GoalsContent() {
   const plan = payments(m.planRetention);
   const options = [
     { option: 'Yıllık peşin (10 ay ücreti, 2 ay bedava)', unit: lira(ANNUAL_TRY), count: Math.ceil(gap / (ANNUAL_TRY - SUBSCRIPTION_TRY)), note: 'Aylık yerine peşin ödeyen aktif satıcı' },
-    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${SUBSCRIPTION_EUR} €`, count: gapMonths, note: m.params.memberTarget > 0 ? `${int(m.params.memberTarget)} üyenin ${pct(gapMonths / m.params.memberTarget)} kadarı` : 'Üye satıcı hedefi 0 olduğu için oran hesaplanmaz.' },
+    { option: 'Üye satıcıyı aktif satıcıya dönüştürmek', unit: `Ayda ${num(SUBSCRIPTION_EUR)} €`, count: gapMonths, note: m.params.memberTarget > 0 ? `${int(m.params.memberTarget)} üyenin ${pct(gapMonths / m.params.memberTarget)} kadarı` : 'Üye satıcı hedefi 0 olduğu için oran hesaplanmaz.' },
   ];
 
   return (
@@ -532,7 +532,7 @@ function PendingContent() {
         />
         <Note title="Hesap">
           <p>
-            90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} tutarı saha ekibinin maliyetidir. Saha ekibinde {params.sahaCount} kişi 3 ay, {params.sahaDecCount} kişi {m.decMonths} ay çalışır.
+            90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} tutarı saha ekibinin maliyetidir. Saha ekibinde {int(params.sahaCount)} kişi 3 ay, {int(params.sahaDecCount)} kişi {m.decMonths} ay çalışır.
           </p>
           <p>
             Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Temsilci {lira(params.commission)}, sponsor {lira(params.sponsorShare)} ve ekip lideri {lira(params.leadTeamShare)} alır.

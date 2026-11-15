@@ -12,7 +12,7 @@ import { buildSources, simulate, sure, type Milestone, type SimInputs } from '..
 import { makeStaffing, staffScenario, type StaffResult } from '../data/staffing';
 import { downloadCsv } from '../lib/csv';
 import { daysBetween, longDate, monthName, shortDate, tarihSaat } from '../lib/dates';
-import { int, milyon, sayiBicimi, tl } from '../lib/format';
+import { int, milyon, sayiBicimi, tl, yuzdeBicimi } from '../lib/format';
 import { presetOptions, scenarioLabel, useScenarioOptions } from '../lib/scenarioOptions';
 import { useOpexOnce } from '../lib/useOpex';
 
@@ -32,7 +32,7 @@ const gun = (d: string | null, son: string) => (d ? longDate(d) : `${son} sonuna
 /* “—” sözlüğü (gorsel_algi.md F17): ulaşılmayan tarih “Dönem içinde yok”, geçerli olmayan süre/oran “Uygulanmıyor”, sıfır fark 0. */
 const kisaGun = (d: string | null) => (d ? shortDate(d) : 'Dönem içinde yok');
 const ayAdi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
-const yuzde = (v: number) => `%${Math.round(v * 100)}`;
+const yuzde = yuzdeBicimi(0);
 const binTl = (v: number) => Math.round(v / 1000);
 /** Kartın büyük sayısı: para hedefleri milyon ₺ (“3 M₺”), adetler “100 aktif” / “500 üye”. */
 const esik = (m: Milestone) => (m.kind === 'gelir' ? milyon(m.threshold) : `${int(m.threshold)} ${m.kind === 'uye' ? 'üye' : 'aktif'}`);
@@ -487,7 +487,7 @@ function Icerik() {
           items={[
             { label: 'Reklam bütçesi', value: `${tl(zincir.butce)} / ay`, note: `Reklam ${d.adStart} günü başlar. ${zincir.olcek ? `Kural sağlandığı için dönem sonunda bütçe ${tl(zincir.sonButce)} / ay olur.` : 'Bütçe artmıyor.'}` },
             { label: 'Kayıt', value: `${sayi1(zincir.kayit)} / ay`, note: `${tl(params.dijitalCostPerLead)} / kayıt (bütçe artmadan önce)` },
-            { label: 'Yeni aktif satıcı', value: `${sayi1(zincir.aktif)} / ay`, note: `Kayıtların yüzde ${params.dijitalLeadToActive} kadarı ödemeye geçer. Hesap kapasitenin ${yuzde(inputs.factor)} kadarını kullanır.` },
+            { label: 'Yeni aktif satıcı', value: `${sayi1(zincir.aktif)} / ay`, note: `Kayıtların yüzde ${sayi(params.dijitalLeadToActive)} kadarı ödemeye geçer. Hesap kapasitenin ${yuzde(inputs.factor)} kadarını kullanır.` },
             { label: 'Kazanım maliyeti (CAC)', value: zincir.cac === null ? 'Uygulanmıyor' : tl(zincir.cac), note: 'Tam verimli bir ayın maliyetidir. Tablodaki maliyet ilk iki ayın düşük verimini de içerir.' },
             { label: 'Satıcı başına gelir (LTV)', value: tl(zincir.ltv), note: `Elde tutma ${yuzde(inputs.retention)}, yıllık peşin payı ${yuzde(inputs.annualShare)}` },
             { label: 'LTV ÷ CAC', value: zincir.ltvCac === null ? 'Uygulanmıyor' : `${sayi1(zincir.ltvCac)} ×`, note: zincir.ltvCac === null ? 'Reklam yok' : zincir.ltvCac >= 3 ? 'Kurala göre bütçe artırılır' : zincir.ltvCac >= 1.5 ? 'Kurala göre bütçe korunur ve dönüşüm iyileştirilir' : 'Kurala göre reklam durdurulur ve dönüşüm düzeltilir' },
@@ -685,7 +685,7 @@ function Icerik() {
         dizin
         index={6}
         title="Fiyat ve paket"
-        desc={`Hesap 1 € için ${sayi(params.eurTry)} ₺ kullanır. Kur yılda ${yuzde(inputs.fxGrowth)} artar. Yeni satıcıların yüzde ${Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder. Yıllık peşin ödemede nakit önden gelir ve yıl içinde bu satıcıyı kaybetme riski olmaz.`}
+        desc={`Hesap 1 € için ${sayi(params.eurTry)} ₺ kullanır. Kur yılda ${yuzde(inputs.fxGrowth)} artar. Yeni satıcıların yüzde ${int(inputs.annualShare * 100)} kadarı yıllık peşin öder. Yıllık peşin ödemede nakit önden gelir ve yıl içinde bu satıcıyı kaybetme riski olmaz.`}
         tools={cubuk()}
       >
         <DataTable
@@ -710,7 +710,7 @@ function Icerik() {
             { key: 'k12', header: '12 ay kümülatif', summary: true, nowrap: true, render: (x) => tl(x.kum12) },
           ]}
           rows={[
-            { ad: `Yeni satıcıların yüzde ${Math.round(inputs.annualShare * 100)} kadarı yıllık peşin öder (seçili)`, tarih: gelir3m.date, kum90: sim.kumulatif[2], kum12: sim.kumulatif[11] },
+            { ad: `Yeni satıcıların yüzde ${int(inputs.annualShare * 100)} kadarı yıllık peşin öder (seçili)`, tarih: gelir3m.date, kum90: sim.kumulatif[2], kum12: sim.kumulatif[11] },
             { ad: 'Herkes aylık öder (yıllık payı %0)', tarih: monthlyOnly.gelir3m.date, kum90: monthlyOnly.kum90, kum12: monthlyOnly.kum12 },
           ]}
         />

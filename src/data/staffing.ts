@@ -11,7 +11,7 @@ import type { Params } from './params';
 import type { Program as ProgramModel } from './program';
 import { SCALE_RULE, adCapacity, adSchedule, buildSources, growthHires, saleFactor, simulate, type RevMonth, type Revenue, type Scenario, type SimInputs } from './revenue';
 import type { RoleKey } from './types';
-import { sayiBicimi } from '../lib/format';
+import { int, sayiBicimi } from '../lib/format';
 
 const sayi = sayiBicimi(3);
 const sayi1 = sayiBicimi(1);
@@ -59,7 +59,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'saha-uzmani',
       count: 1,
       gorev: 'İstoç’ta randevulu ve randevusuz ziyaret yapar. Satıcıyı kaydeder. Satıcının 48 saat içinde sistemi kullanmaya başlamasını sağlar. Aboneliği ve yenilemeyi takip eder. Ziyaret rotası ve kontrol listesiyle satış sistemini kurar.',
-      katkiYolu: `Tam kapasitede ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir. İlk ay kapasitenin yüzde 50’si, ikinci ay yüzde 75’i kullanılır.`,
+      katkiYolu: `Tam kapasitede ayda ${sayi(p.sahaActivesMonthly)} yeni aktif satıcı getirir. İlk ay kapasitenin yüzde 50’si, ikinci ay yüzde 75’i kullanılır.`,
       maas: p.sahaSalary,
       maliyet: cost(s.saha),
       startIso: monthStart(p.startDate),
@@ -72,7 +72,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'ekip-lideri',
       count: 1,
       gorev: 'Birinci saha personelinin rotasını ve kontrol listesini devralır ve ikinci bölgede çalışır.',
-      katkiYolu: `Ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir. ${longDate(monthStart(inp.secondSahaIso))} günü başlar.`,
+      katkiYolu: `Ayda ${sayi(p.sahaActivesMonthly)} yeni aktif satıcı getirir. ${longDate(monthStart(inp.secondSahaIso))} günü başlar.`,
       maas: p.sahaSalary,
       maliyet: cost(s.saha),
       startIso: monthStart(inp.secondSahaIso),
@@ -87,7 +87,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
             role: 'yonetici' as RoleKey,
             count: inp.extraSaha,
             gorev: 'Senaryo seçeneğiyle eklenen saha personelidir. İkinci saha personeliyle aynı ay başlar.',
-            katkiYolu: `Her kişi ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir.`,
+            katkiYolu: `Her kişi ayda ${sayi(p.sahaActivesMonthly)} yeni aktif satıcı getirir.`,
             maas: p.sahaSalary,
             maliyet: r2(cost(s.saha) * inp.extraSaha),
             startIso: monthStart(inp.secondSahaIso),
@@ -103,8 +103,8 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
             short: `Büyüme saha +${hires.length}`,
             role: 'yatirimci' as RoleKey,
             count: hires.length,
-            gorev: `İkinci saha personelinden sonra her ${inp.sahaGrowthEvery} ayda 1 saha personeli eklenir. Başlangıç ayları şunlardır: ${hires.map((t) => months[t].ad).join(', ')}. Saha personeli sayısı en çok ${p.sahaMaxCount} olur.`,
-            katkiYolu: `Her kişi ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir. Kötümser senaryoda bu satır yoktur.`,
+            gorev: `İkinci saha personelinden sonra her ${inp.sahaGrowthEvery} ayda 1 saha personeli eklenir. Başlangıç ayları şunlardır: ${hires.map((t) => months[t].ad).join(', ')}. Saha personeli sayısı en çok ${int(p.sahaMaxCount)} olur.`,
+            katkiYolu: `Her kişi ayda ${sayi(p.sahaActivesMonthly)} yeni aktif satıcı getirir. Kötümser senaryoda bu satır yoktur.`,
             maas: p.sahaSalary,
             maliyet: cost(s.saha),
             startIso: months[hires[0]].iso,
@@ -120,7 +120,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'pazarlamaci',
       count: p.masaCount,
       gorev: 'Bizi tanımayan satıcıları günde yaklaşık 40 kez arar. Günde 100 e-posta gönderir. CRM kayıtlarından sorumludur ve dijital kanaldan gelen kayıtları arar. Etkinlik haftalarında organizatöre destek verir.',
-      katkiYolu: `Ayda ${p.crmActivesMonthly} yeni aktif satıcı getirir. İnternetten kaydolan satıcıların ödeme yapmasını sağlar.`,
+      katkiYolu: `Ayda ${sayi(p.crmActivesMonthly)} yeni aktif satıcı getirir. İnternetten kaydolan satıcıların ödeme yapmasını sağlar.`,
       maas: p.masaSalary,
       maliyet: r2(cost(s.masa) * p.masaCount),
       startIso: monthStart(p.startDate),
@@ -133,7 +133,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'organizator',
       count: p.organizatorCount,
       gorev: 'Her iş günü 17:00 ile 18:00 arasında eğitim verir. İstoç çarşısındaki toptancılarla ayda 2 buluşma düzenler. Her buluşmaya yaklaşık 25 kişi katılır. Kurumsal iş birlikleri kurar.',
-      katkiYolu: `Ayda ${p.organizatorActivesMonthly} yeni aktif satıcı getirir ve temsilci ağına yeni kişiler kazandırır.`,
+      katkiYolu: `Ayda ${sayi(p.organizatorActivesMonthly)} yeni aktif satıcı getirir ve temsilci ağına yeni kişiler kazandırır.`,
       maas: p.organizatorSalary,
       maliyet: r2(cost(s.organizator) * p.organizatorCount),
       startIso: monthStart(p.decStartDate),
@@ -146,7 +146,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'dijital-pazarlama',
       count: p.dijitalCount,
       gorev: 'Sitenin ziyaretçi ve reklam sonuçlarını ölçen araçları kurar. Google Tag Manager (GTM) ve Google Analytics 4 (GA4) bu araçlardandır. Uzman Yandex Metrica, Meta Pixel ve bağlantı etiketini (UTM) de kurar. Satıcı kazanım reklamlarını yönetir. Yapay zekâ araçlarıyla günde 3 video üretir. WhatsApp ve e-postayla satıcıya kayıttan yenilemeye kadar mesaj gönderir.',
-      katkiYolu: `Reklam olmayan paylaşımlar ${longDate(monthStart(p.dijitalOrganicStartDate))} gününden itibaren ayda ${p.dijitalOrganicActivesMonthly} yeni aktif satıcı getirir. Reklamın katkısı ayrı satırda gösterilir.`,
+      katkiYolu: `Reklam olmayan paylaşımlar ${longDate(monthStart(p.dijitalOrganicStartDate))} gününden itibaren ayda ${sayi(p.dijitalOrganicActivesMonthly)} yeni aktif satıcı getirir. Reklamın katkısı ayrı satırda gösterilir.`,
       maas: r2(s.dijital),
       maliyet: r2(cost(s.dijital) * p.dijitalCount),
       startIso: monthStart(dijitalStart),
@@ -159,7 +159,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'dijital-pazarlama',
       count: 0,
       gorev: `Bu bütçeyle kayıt formlu reklamlar ve arama reklamları yayımlanır. Siteyi daha önce ziyaret edenlere yeniden reklam gösterilir. Kayıtlar CRM’e aktarılır. Bir satıcıdan beklenen toplam geliri, o satıcıyı kazanma maliyetiyle karşılaştırırız. Gelir bu maliyetin en az ${SCALE_RULE.threshold} katıysa reklam bütçesini artırırız.`,
-      katkiYolu: `Ayda ${sayi(inp.dijitalBudget)} ₺ bütçeyle yaklaşık ${Math.round(kayit)} kayıt beklenir. Yaklaşık ${sayi1(kap)} ilk ödeme beklenir. Bu değer, reklam tam verimle çalışırken ve bütçe artmadan önceki değerdir.${ad.scales ? ` Gelir, kazanma maliyetinin en az ${SCALE_RULE.threshold} katı olduğu için bütçe en çok ${p.dijitalScaleMax} katına çıkar.` : ''}`,
+      katkiYolu: `Ayda ${sayi(inp.dijitalBudget)} ₺ bütçeyle yaklaşık ${int(kayit)} kayıt beklenir. Yaklaşık ${sayi1(kap)} ilk ödeme beklenir. Bu değer, reklam tam verimle çalışırken ve bütçe artmadan önceki değerdir.${ad.scales ? ` Gelir, kazanma maliyetinin en az ${SCALE_RULE.threshold} katı olduğu için bütçe en çok ${sayi(p.dijitalScaleMax)} katına çıkar.` : ''}`,
       maas: null,
       maliyet: inp.dijitalBudget,
       startIso: monthStart(p.dijitalAdStartDate),
@@ -212,7 +212,7 @@ export function staffRoles(p: Params, prog: ProgramModel, months: RevMonth[], in
       role: 'yazilim',
       count: 0,
       gorev: 'Kendi çevresinden satıcı getirir. Temsilciler çok katlı pazarlama (MLM) ağı kurar. Her temsilcinin ağda bir üstü vardır. Bu üst kişiye sponsor denir. Temsilci primini hizmet faturası keserek alır. Ağ her ay büyür.',
-      katkiYolu: `Her satış için temsilciye ${sayi(p.commission)} ₺ prim öderiz. Satış arttıkça bu gider de artar. Ağa her ay ${p.repPerMonth} yeni temsilci katılır. Ağda en çok ${p.repCap} temsilci olur.`,
+      katkiYolu: `Her satış için temsilciye ${sayi(p.commission)} ₺ prim öderiz. Satış arttıkça bu gider de artar. Ağa her ay ${sayi(p.repPerMonth)} yeni temsilci katılır. Ağda en çok ${int(p.repCap)} temsilci olur.`,
       maas: null,
       maliyet: 0,
       startIso: monthStart(p.decStartDate),

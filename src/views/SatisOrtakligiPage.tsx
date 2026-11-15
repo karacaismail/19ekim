@@ -694,7 +694,7 @@ export function SatisOrtakligiV1({ surum }: { surum: ReactNode }) {
 
         <p className="so2-fiyat">
           Yıllık paket <strong>{tl(yillik)}</strong>
-          <span>{a.marka === 'istoc' ? `${a.istocAyEur} € × ${a.istocYilAy} ay × ${sayi(a.kur)} ₺` : segikaOzet(a)}</span>
+          <span>{a.marka === 'istoc' ? `${sayi(a.istocAyEur)} € × ${sayi(a.istocYilAy)} ay × ${sayi(a.kur)} ₺` : segikaOzet(a)}</span>
         </p>
       </div>
 

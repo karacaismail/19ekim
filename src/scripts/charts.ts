@@ -698,7 +698,7 @@ function build(spec: ChartSpec, width: number): Opt {
           ...axis(),
           axisLine: { show: false },
           splitLine: { show: false },
-          axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => (v < 0 ? `−%${-v}` : `%${v}`) },
+          axisLabel: { ...(axis().axisLabel as Opt), formatter: (v: number) => (v < 0 ? `−%${num(-v)}` : `%${num(v)}`) },
         },
         series: [
           {

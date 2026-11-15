@@ -32,6 +32,7 @@ import { AppFrame } from '../components/AppFrame';
 import { useModel } from '../components/ModelContext';
 import { PageHeader } from '../components/PageHeader';
 import { paraBolunmez, SayfaGirisi, Section } from '../components/ui';
+import { int } from '../lib/format';
 import { useMotionMs } from '../lib/motion';
 import {
   ARASTIRMA_NOTU,
@@ -332,7 +333,7 @@ function Icerik() {
           </ol>
         </Section>
 
-        <Section id="bugunku-model" title="Bugünkü model: abonelik" desc={`Satıcı üç paketten birini seçer. Yıllık pakette ${params.annualMonths} ayın ücreti ödenir.`}>
+        <Section id="bugunku-model" title="Bugünkü model: abonelik" desc={`Satıcı üç paketten birini seçer. Yıllık pakette ${int(params.annualMonths)} ayın ücreti ödenir.`}>
           <ul className="gm-paketler">
             {paketler(params).map((p) => (
               <li key={p.id} className="gm-paket" data-paket={p.id}>

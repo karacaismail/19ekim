@@ -302,7 +302,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   ekle({ id: 'marka', grup: 'diger', tur: 'capex', ad: 'Marka tescili', kural: 'Şubat 2027’de 1 marka için 3 sınıfta başvuru yapılır. Sınıf, markanın korunacağı ürün ya da hizmet grubudur. Marka zaten tescil edildiyse bu kalem bütçeden çıkarılmalı.', fiyatId: 'marka-tescil-3-sinif', aylik: marka });
   const ekler = k.filter((x) => x.grup !== 'mevcut');
   const pay = AYLAR_2027.map((_, i) => ekler.reduce((t, x) => t + x.aylik[i], 0) * ONGORULEMEYEN);
-  ekle({ id: 'ongorulemeyen', grup: 'diger', tur: 'opex', ad: 'Öngörülemeyen giderler', kural: `Tutar, “Mevcut plan” dışındaki eklemelerin %${ONGORULEMEYEN * 100}’idir.`, aylik: pay });
+  ekle({ id: 'ongorulemeyen', grup: 'diger', tur: 'opex', ad: 'Öngörülemeyen giderler', kural: `Tutar, “Mevcut plan” dışındaki eklemelerin %${num(ONGORULEMEYEN * 100)}’idir.`, aylik: pay });
 
   const topla = (tur: Kalem['tur']) => AYLAR_2027.map((_, i) => k.filter((x) => x.tur === tur).reduce((t, x) => t + x.aylik[i], 0));
   return { kalemler: k, opex: topla('opex'), capex: topla('capex'), tabanVar: !!taban, kadroAylik: kisiSayisi, kapasite, ekM2, gelir2027: secenekGelirleri(model)[s].yil };

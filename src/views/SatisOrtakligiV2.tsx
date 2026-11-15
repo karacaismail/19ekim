@@ -112,7 +112,7 @@ function Robot({ a, g }: { a: Ayar; g: G }) {
     <Grup baslik="Satış: ayda kaç yeni müşteri?">
       {a.marka === 'istoc'
         ? (Object.keys(ISTOC_PAKET_ADI) as IstocPaket[]).map((id) => (
-            <Girdi key={id} label={`${ISTOC_PAKET_ADI[id]} paket`} birim={id === 'kurumsal' ? 'teklifle fiyatlanır' : `${a.istocPaketEur[id]} € / ay`} value={a.istocSatis[id]} onChange={(v) => g({ istocSatis: { ...a.istocSatis, [id]: v } })} />
+            <Girdi key={id} label={`${ISTOC_PAKET_ADI[id]} paket`} birim={id === 'kurumsal' ? 'teklifle fiyatlanır' : `${sayi(a.istocPaketEur[id])} € / ay`} value={a.istocSatis[id]} onChange={(v) => g({ istocSatis: { ...a.istocSatis, [id]: v } })} />
           ))
         : (Object.keys(PAKET_ADI) as SegikaPaket[]).map((id) => (
             <Girdi key={id} label={PAKET_ADI[id]} birim={`${tl(segikaAylik(a, id).toplam)} / ay`} value={a.segikaSatis[id]} onChange={(v) => g({ segikaSatis: { ...a.segikaSatis, [id]: v } })} />

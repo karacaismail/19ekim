@@ -185,7 +185,7 @@ function BcgContent() {
         id="ornek"
         index={6}
         title="Çalışılmış örnek"
-        desc={`“Örnek Ev Aletleri A.Ş.” kurgusal bir şirkettir. Sayılar yalnız yöntemi göstermek içindir. Bu örnekte pazar büyümesi için eşik değeri %${GROWTH_SPLIT} olarak alınır. Göreli pay için eşik değeri ${SHARE_SPLIT} olarak alınır.`}
+        desc={`“Örnek Ev Aletleri A.Ş.” kurgusal bir şirkettir. Sayılar yalnız yöntemi göstermek içindir. Bu örnekte pazar büyümesi için eşik değeri %${num(GROWTH_SPLIT)} olarak alınır. Göreli pay için eşik değeri ${num(SHARE_SPLIT)} olarak alınır.`}
       >
         <DataTable
           id="ornek"
@@ -205,7 +205,7 @@ function BcgContent() {
           id="ornek-matris"
           title="Örnek matris"
           note="Balon büyüklüğü ciroyu gösterir. Kesikli çizgiler eşikleri gösterir. Göreli pay için eşik 1’dir. Pazar büyümesi için eşik %10’dur. Yatay eksende aralıklar oranı gösterir. Örneğin 0,1 ile 1 arası, 1 ile 10 arası kadar yer kaplar."
-          summary={rows.map((r) => `${r.name}: büyüme ${r.growth < 0 ? '−' : ''}%${Math.abs(r.growth)}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('. ')}
+          summary={rows.map((r) => `${r.name}: büyüme ${r.growth < 0 ? '−' : ''}%${num(Math.abs(r.growth))}, göreli pay ${num(Math.round(r.rel * 100) / 100)}, ${quadrantName(r.quadrant)}`).join('. ')}
           spec={{
             kind: 'bcg-num',
             quadrants: quadrantSpec,

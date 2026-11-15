@@ -16,7 +16,7 @@
  */
 import { CANLI_PAKETLER, type PaketId } from './canliPaketler';
 import type { Params } from './params';
-import { sayiBicimi } from '../lib/format';
+import { int, sayiBicimi } from '../lib/format';
 
 const sayi = sayiBicimi(3);
 
@@ -196,14 +196,14 @@ export function paketler(p: Pick<Params, 'subscriptionEur' | 'annualMonths'>): P
       ad: BASIC,
       aylikEur: p.subscriptionEur,
       yillikEur: yillik(p.subscriptionEur),
-      not: `Yıllık peşin ödemede ${eur(yillik(p.subscriptionEur))} ödenir. Bu tutar ${p.annualMonths} aylık ücrete eşittir.`,
+      not: `Yıllık peşin ödemede ${eur(yillik(p.subscriptionEur))} ödenir. Bu tutar ${int(p.annualMonths)} aylık ücrete eşittir.`,
     },
     {
       id: 'pro',
       ad: PLATINIUM,
       aylikEur: PRO_AYLIK_EUR,
       yillikEur: yillik(PRO_AYLIK_EUR),
-      not: `Yıllık peşin ödemede ${eur(yillik(PRO_AYLIK_EUR))} ödenir. Bu tutar ${p.annualMonths} aylık ücrete eşittir.`,
+      not: `Yıllık peşin ödemede ${eur(yillik(PRO_AYLIK_EUR))} ödenir. Bu tutar ${int(p.annualMonths)} aylık ücrete eşittir.`,
     },
     {
       id: 'kurumsal',

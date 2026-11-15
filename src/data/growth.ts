@@ -45,7 +45,7 @@ export function makeGrowth(p: Params, prog: Program) {
     { metric: 'Başvuru', target: `Haftada en çok yaklaşık ${int(p.applicationsWeekly)} başvuru`, when: t('16 Kasım 2026 Pazartesi gününden başlayarak her hafta') },
     { metric: 'Aktif temsilci', target: 'Önce yaklaşık 3, sonra yaklaşık 5', when: t('Önce 30 Aralık 2026 Çarşamba, sonra 30 Ocak 2027 Cumartesi') },
     { metric: 'Aktif temsilci başına maliyet', target: monthlyReps ? `Yaklaşık ${tl(monthlyMeta / monthlyReps)}` : '—', when: 'Her ay ölçülür' },
-    { metric: `Ağın getirdiği aktif satıcı (ayda ${p.subscriptionEur} € ödeyen müşteri)`, target: `Yaklaşık ${int(mlm.aktif.reduce((a, b) => a + b, 0))}`, when: t('30 Ocak 2027 Cumartesi') },
+    { metric: `Ağın getirdiği aktif satıcı (ayda ${num(p.subscriptionEur)} € ödeyen müşteri)`, target: `Yaklaşık ${int(mlm.aktif.reduce((a, b) => a + b, 0))}`, when: t('30 Ocak 2027 Cumartesi') },
     { metric: 'Temsilci kazancı', target: `Satış başına ${tl(p.commission)}. Temsilciye maaş ödenmez. Temsilci hizmet faturası keser.`, when: 'İlk satıştan' },
     { metric: 'Sponsor payı', target: `Temsilciyi ağa getiren kişi sponsordur. Sponsor, bu temsilcinin her satışından ${tl(p.sponsorShare)} alır. Pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru. İkinci kademenin tutarı henüz belirlenmedi.`, when: 'Satış prim kriterleri tamamlanınca' },
     { metric: 'Uyum kuralı ihlali', target: '0', when: 'İsmail Karaca her ay kontrol eder' },

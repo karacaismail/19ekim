@@ -5,7 +5,7 @@ import { KOSULLAR, kosulSonucu, affilateModeli, affilateHesabi, affilateYillari 
 import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
-import { num } from '../../lib/format';
+import { int, num } from '../../lib/format';
 
 export const sayi = num;
 export const tl = (n: number) => `${sayi(n)} ₺`;
@@ -173,7 +173,7 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
     ornekler: [seciliOrnek ?? ornek(rol, marka, a)], odeme: secili ? ['Finans sorumlusu bu programın ödeme koşullarını yazılı anlaşmada doğrulasın.'] : odeme,
     digerSurum: [ikinciSurum(rol, marka)], programlar,
     plan: marka === 'segika' ? [
-      `Genel planda Segika ekibi ${DEFAULT_PARAMS.segikaCount} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
+      `Genel planda Segika ekibi ${int(DEFAULT_PARAMS.segikaCount)} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Genel kadro planında net maaş ${tl(DEFAULT_PARAMS.segikaSalary)} olarak yazılıdır.`,
       'Bu tutar genel kadro planına aittir. Satış hesabındaki örnek maaşın yerine geçmez. Örnek maaşın net mi brüt mü olduğu henüz yazılmadı.',
       'Şirket Segika için ayrı reklam bütçesi belirlemedi.',
@@ -182,7 +182,7 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
       'Operasyon yöneticisi hizmeti devralacak kişiyi belirlesin.',
       'Ekip kapasitesi veya başlangıç tarihi değişirse bekleyen işleri yeniden planlayın.',
     ] : [
-      `Genel planda saha satış ekibi ${DEFAULT_PARAMS.sahaCount} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
+      `Genel planda saha satış ekibi ${int(DEFAULT_PARAMS.sahaCount)} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Genel planda yeni satıcı bulmak için aylık ${tl(DEFAULT_PARAMS.dijitalAdBudgetMonthly)} reklam payı var. Bu tutar harcama izni değildir.`,
       'Bütçe sıfırsa ücretli reklam başlatmayın. Onaylı bütçe varsa harcama sınırını sorumluyla belirleyin.',
       'Görevi devralacak çalışan yoksa yeni teslim tarihi vermeyin. Operasyon yöneticisi kabul edecek kişiyi belirlesin.',

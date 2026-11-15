@@ -3,7 +3,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { NO_SECOND_SAHA, SENS_RETENTIONS } from '../data/breakeven';
 import type { Params } from '../data/params';
 import { monthName } from '../lib/dates';
-import { int, tl } from '../lib/format';
+import { avro, int, num, tl, yuzdeBicimi } from '../lib/format';
 import { href } from '../lib/paths';
 import type { useScenarioOptions } from '../lib/scenarioOptions';
 import { Anahtar, Choice, KayitDurumu } from './ui';
@@ -15,7 +15,7 @@ import { Anahtar, Choice, KayitDurumu } from './ui';
  */
 export type ScenarioState = ReturnType<typeof useScenarioOptions>;
 
-const yuzde = (v: number) => `%${Math.round(v * 100)}`;
+const yuzde = yuzdeBicimi(0);
 const ayAdi = (iso: string) => `${monthName(iso)} ${iso.slice(0, 4)}`;
 
 /**
@@ -151,8 +151,8 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
         <Choice
           label="Aylık abonelik fiyatı"
           value={String(opts.priceEur)}
-          options={fiyatlar.map((v) => ({ id: String(v), name: `${v} €` }))}
-          baglam={<ParametreKaynagi deger={`${p.subscriptionEur} €`} />}
+          options={fiyatlar.map((v) => ({ id: String(v), name: avro(v) }))}
+          baglam={<ParametreKaynagi deger={avro(p.subscriptionEur)} />}
           note="Bu değer, bir satıcının aylık abonelik fiyatıdır. Fiyat euro cinsindendir. Fiyat gelir hesabını değiştirir. Personel maaşları değişmez."
           onChange={(v) => set('priceEur', Number(v))}
         />
@@ -168,7 +168,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           label="Ek saha personeli"
           value={String(opts.extraSaha)}
           options={degerler([0, 1, 2, 3], opts.extraSaha).map((v) => ({ id: String(v), name: v ? `${v} kişi daha` : 'Yok' }))}
-          note={`Ek saha personeli ikinci saha personeliyle aynı ay başlar. Her kişinin işveren maliyeti ayda ${tl(p.sahaSalary * p.costFactor)} olur. Her kişi ayda ${p.sahaActivesMonthly} yeni aktif satıcı getirir.`}
+          note={`Ek saha personeli ikinci saha personeliyle aynı ay başlar. Her kişinin işveren maliyeti ayda ${tl(p.sahaSalary * p.costFactor)} olur. Her kişi ayda ${num(p.sahaActivesMonthly)} yeni aktif satıcı getirir.`}
           onChange={(v) => set('extraSaha', Number(v))}
         />
         <Choice
@@ -176,7 +176,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.sahaGrowthEvery ?? sahaGrowthDefault)}
           options={[0, ...degerler([6, 4, 3], sahaGrowthDefault || null, opts.sahaGrowthEvery || null).reverse()].map((v) => ({ id: String(v), name: v ? `Her ${v} ayda 1 kişi` : 'Yok' }))}
           baglam={<Baglanti kaynak="senaryo" kaynakAdi={temel.name} acik={opts.sahaGrowthEvery === null} deger={(opts.sahaGrowthEvery ?? sahaGrowthDefault) ? `her ${opts.sahaGrowthEvery ?? sahaGrowthDefault} ayda 1 kişi` : 'yok'} onChange={(acik) => set('sahaGrowthEvery', acik ? null : sahaGrowthDefault)} />}
-          note={`Yeni saha personeli ikinci saha personelinden sonra eklenir. Saha personeli sayısı en çok ${p.sahaMaxCount} olur. Her yeni kişi hem gideri hem satış kapasitesini artırır.`}
+          note={`Yeni saha personeli ikinci saha personelinden sonra eklenir. Saha personeli sayısı en çok ${int(p.sahaMaxCount)} olur. Her yeni kişi hem gideri hem satış kapasitesini artırır.`}
           onChange={(v) => set('sahaGrowthEvery', Number(v))}
         />
         <Choice
@@ -184,7 +184,7 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
           value={String(opts.dijitalBudgetFactor)}
           options={degerler([0, 0.5, 1, 2, 4], opts.dijitalBudgetFactor).map((v) => ({ id: String(v), name: v === 0 ? 'Yok' : tl(p.dijitalAdBudgetMonthly * v) }))}
           baglam={<ParametreKaynagi deger={`ayda ${tl(p.dijitalAdBudgetMonthly)}`} />}
-          note={`Satıcı kazanım reklamı hem gider oluşturur hem kayıt getirir. Hesapta bir kaydın reklam maliyeti ${tl(p.dijitalCostPerLead)} olur. Kayıt olanların yüzde ${p.dijitalLeadToActive} kadarı ilk ödemeyi yapar.`}
+          note={`Satıcı kazanım reklamı hem gider oluşturur hem kayıt getirir. Hesapta bir kaydın reklam maliyeti ${tl(p.dijitalCostPerLead)} olur. Kayıt olanların yüzde ${num(p.dijitalLeadToActive)} kadarı ilk ödemeyi yapar.`}
           onChange={(v) => set('dijitalBudgetFactor', Number(v))}
         />
         <Choice
@@ -200,8 +200,8 @@ export function SenaryoKurucu({ p, state, sahaGrowthDefault, retentionDefault, f
         <Choice
           label="Yıllık kur artışı"
           value={String(opts.fxGrowth ?? kurGecerli)}
-          options={degerler([0, 0.1, 0.4], kurGecerli, opts.fxGrowth).map((v) => ({ id: String(v), name: `%${Math.round(v * 100)}` }))}
-          baglam={<Baglanti kaynak="parametre" acik={opts.fxGrowth === null} deger={`%${Math.round((opts.fxGrowth ?? kurGecerli) * 100)}`} onChange={(acik) => set('fxGrowth', acik ? null : kurGecerli)} />}
+          options={degerler([0, 0.1, 0.4], kurGecerli, opts.fxGrowth).map((v) => ({ id: String(v), name: yuzde(v) }))}
+          baglam={<Baglanti kaynak="parametre" acik={opts.fxGrowth === null} deger={yuzde(opts.fxGrowth ?? kurGecerli)} onChange={(acik) => set('fxGrowth', acik ? null : kurGecerli)} />}
           note="Abonelik fiyatı euro olarak değişmez. Euro kuru her ay biraz artar. Her ayın artışı bir önceki ayın kuruna eklenir. Bu yüzden fiyatın ₺ karşılığı her ay yükselir. %0 seçilirse kur sabit kalır. Sheets giderleri ₺ cinsindendir ve kendi 2027 artışıyla hesaplanır."
           onChange={(v) => set('fxGrowth', Number(v))}
         />

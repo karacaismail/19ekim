@@ -18,6 +18,7 @@ import {
   type OlayTuru,
   type Seviye,
 } from '../data/istihdamPlani';
+import { int } from '../lib/format';
 
 /**
  * İstihdam takvimi, 3 Kasım 2026 planı (kullanıcı kararları 2026-11-03): görünüm seçiciyle zaman çizelgesi ya da tam
@@ -333,7 +334,7 @@ function KadroIcerik() {
                 <KapasiteCubugu saat={r.saat} oneri={r.oneriSaat} />
                 <p>
                   <strong>{r.saat} saat</strong> gerekir.{' '}
-                  {r.saat > NET_SAAT ? `Kapasiteyi %${Math.round(((r.saat - NET_SAAT) / NET_SAAT) * 100)} aşar.` : 'Kapasiteye sığar.'}
+                  {r.saat > NET_SAAT ? `Kapasiteyi %${int(((r.saat - NET_SAAT) / NET_SAAT) * 100)} aşar.` : 'Kapasiteye sığar.'}
                   {r.oneriSaat ? ` Önerilen düzenlemeyle ${r.oneriSaat} saate iner.` : ''}
                 </p>
               </div>

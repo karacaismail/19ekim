@@ -318,7 +318,7 @@ function talepAkis(a: Ayar): IsAkisi {
   const aylik = kuralSayisi(a, p, 'ayda en az');
   const [ilkPay, kalanPay] = kuralSayilari(a, p, 'Görev ücretinin');
   const ucretKurali = ilkPay && kalanPay
-    ? `Şirket görev ücretinin %${ilkPay} kadarını kapsam kabul edilince öder. Kalan %${kalanPay} kadarını sonuç takibinde öder.`
+    ? `Şirket görev ücretinin %${ilkPay} kadarını kapsam kabul edilince öder. Kalan %${kalanPay} kadarını sonuç takibinde öder.` // sayi-yazimi: atla. Sayı kural metninden alınmış yazıdır.
     : 'Şirket görev ücretini iki parçada öder.';
   return {
     baslik: 'Alım talebi toplayan ortak',

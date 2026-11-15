@@ -428,7 +428,7 @@ export function makeRoles(p: Params, prog: Program): Role[] {
 
   let sahaRole: Role = {
     ...shift(saha, d1),
-    count: `${person(p.sahaCount + p.sahaDecCount)}. ${p.sahaCount} kişi ${shortDate(p.startDate)}, ${p.sahaDecCount} kişi ${shortDate(p.decStartDate)} günü başlar. Ekip sonra temsilci ağıyla büyür.`,
+    count: `${person(p.sahaCount + p.sahaDecCount)}. ${int(p.sahaCount)} kişi ${shortDate(p.startDate)}, ${int(p.sahaDecCount)} kişi ${shortDate(p.decStartDate)} günü başlar. Ekip sonra temsilci ağıyla büyür.`,
     start: `${start}. Ek saha personeli ${dec} günü başlar.`,
     pay: `Aylık ${tl(p.sahaSalary)} maaş alırsınız. Aylık satış kotanız ${tl(prog.quota)}. Kotayı doldurduktan sonra her satış için ${tl(p.commission)} prim alırsınız.`,
     ramp: { ...saha.ramp, values: sahaRow.kayit, second: { metric: saha.ramp.second!.metric, values: sahaRow.aktif } },

@@ -1156,7 +1156,7 @@ function KalemTablosu({ m, p }: { m: OpexModel; p: Plan }) {
       }),
     ),
     ...p.donemler.map(
-      (d, y): Sutun => ({ id: `yil-${d.yil}`, baslik: <Num>{`${d.yil} ₺`}</Num>, ad: `${d.yil} ₺`, grup: 'yil', sayi: true, deger: (r) => r.yillar[y], metin: (r) => tlExact(r.yillar[y]), hucre: (r) => para(r.yillar[y]) }),
+      (d, y): Sutun => ({ id: `yil-${d.yil}`, baslik: <Num>{`${d.yil} ₺`}</Num>, ad: `${d.yil} ₺`, grup: 'yil', sayi: true, deger: (r) => r.yillar[y], metin: (r) => tlExact(r.yillar[y]), hucre: (r) => para(r.yillar[y]) }), // sayi-yazimi: atla. Sayı yıldır.
     ),
     { id: 'donem', baslik: <Num>Toplam ₺</Num>, ad: 'Toplam ₺', sayi: true, deger: (r) => r.donem, metin: (r) => tlExact(r.donem), hucre: (r) => para(r.donem) },
     ...(p.donemler.some((d) => d.yil === 2027)

@@ -1616,6 +1616,11 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   aynı yuvarlanır ve “-0 ₺” yazılmaz.
 - Başka dosyada `new Intl.NumberFormat(` ve sayının `toLocaleString(` biçimi kullanılmaz. `tests/bicim-ortak.spec.ts`
   bunu denetler. Tarih için `Intl.DateTimeFormat` ya da `src/lib/dates.ts` kullanılır.
+- Metindeki sayı da bu işlevlerden geçer. Örneğin `ayda ${num(p.subscriptionEur)} €` yazılır, `ayda ${p.subscriptionEur} €`
+  yazılmaz. Biçimsiz yazımda ondalıklı ayar “399.25 €” görünür. Binlik ayırıcı da kaybolur, örneğin “1000” yazılır.
+- `tests/sayi-yazimi.spec.ts` iki denetim yapar. Kaynak denetimi biçimsiz ayar değerini ve birime bitişik biçimsiz sayıyı
+  arar. Sayfa denetimi ayarları ondalıklı değerlerle kaydeder. Sonra sayfa metninde noktalı ondalık ve binlik ayırıcısız
+  sayı arar. Bilinçli istisnanın satırına `// sayi-yazimi: atla` yazılır.
 - Dışarıdan gelen zaman `tarihSaat` ile yazılır (`src/lib/dates.ts`). Değer okunamazsa işlev `null` döner. Sayfa zamanı
   yazmaz, hata da atmaz. Örneğin Sheets yanıtındaki hesap zamanı bozuk gelebilir.
 - Ondalık hanesi seçilen biçim için `sayiBicimi(n)`, `yuzdeBicimi(n)` ve `sabitOndalikBicimi(n)` vardır. Bu işlevler tek
