@@ -29,10 +29,10 @@ test('varsayılan v1; sürüm seçici v2’ye geçer, adres ?surum=v2 olur, geri
   await expect(page.locator('#katki')).toHaveCount(1);
 });
 
-test('seçenek değişince özet, takvim ve tablolar değişir; varsayılan medyan', async ({ page }) => {
+test('seçenek değişince özet, takvim ve tablolar değişir; varsayılan Orta', async ({ page }) => {
   await ac(page, 1280);
   const secim = page.getByRole('group', { name: 'Seçenek' });
-  await expect(secim.getByRole('button', { name: 'Medyan' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(secim.getByRole('button', { name: 'Orta' })).toHaveAttribute('aria-pressed', 'true');
   const stats = page.locator('#secenek .stats');
   await expect(stats).toContainText(`${SECENEK_OZETI.medyan.toplamKisi} kişi`);
   await expect(stats).toContainText(tl(SECENEK_OZETI.medyan.toplamMaliyet2027));

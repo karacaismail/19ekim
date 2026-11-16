@@ -583,12 +583,12 @@
   {
    "id": "ofis-kira-m2-mahmutbey",
    "tur": "opex",
-   "ad": "Ofis kirası, Mahmutbey ve İSTOÇ çevresi",
+   "ad": "Ofis kirası, Mahmutbey ve İstoç çevresi",
    "birim": "m²/ay",
    "fiyat2026": 482,
    "fiyat2027": 625.3,
    "kdv": "bilinmiyor",
-   "dayanak": "Emlakjet’teki Ekim 2026 ilanlarına bakıldı. Ağaoğlu My Office 212 binası Bağcılar Mahmutbey’dedir. Bu binada ortanca kira m² başına aylık yaklaşık 482 ₺’dır. Aynı listede İSTOÇ sitesinde 1.000 m² hazır ofis vardır. Bu ofisin kirası aylık 300.000 ₺, yani m² başına 300 ₺'dır. İlanların bir kısmı fiyatın KDV'li olduğunu belirtir.",
+   "dayanak": "Emlakjet’teki Ekim 2026 ilanlarına bakıldı. Ağaoğlu My Office 212 binası Bağcılar Mahmutbey’dedir. Bu binada ortanca kira m² başına aylık yaklaşık 482 ₺’dır. Aynı listede İstoç sitesinde 1.000 m² hazır ofis vardır. Bu ofisin kirası aylık 300.000 ₺, yani m² başına 300 ₺'dır. İlanların bir kısmı fiyatın KDV'li olduğunu belirtir.",
    "kaynaklar": [
     {
      "ad": "Emlakjet, İstanbul Bağcılar kiralık ofis ilanları",

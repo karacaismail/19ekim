@@ -1825,7 +1825,8 @@ test.describe('parametreler', () => {
     await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
-    await expect(page.locator('#kontrol')).toContainText('13 Ocak');
+    // Başlangıç günü 0. gündür: 15 Kasım 2026’dan 60 gün sonrası 14 Ocak 2027’dir (kullanıcı kararı 16 Kasım 2026, 3.4).
+    await expect(page.locator('#kontrol')).toContainText('14 Ocak');
     await page.evaluate(() => localStorage.removeItem('istoc-plan-parametreler'));
   });
 
@@ -2223,7 +2224,7 @@ test.describe('parametre kaydı doğrulaması — sayfada (MS-05)', () => {
 /* ---------- Karar defteri sayfası (docs/birlesik_plan.md B1; docs/missings.md MS-13; 2026-10-28) ---------- */
 
 test.describe('karar defteri — sayfada (adım 1a)', () => {
-  test('bekleyen kararlar gecikme durumuyla; iş modeli açık soru olarak; verilen kararlar sonucu, tarihi ve durumuyla; açık alt sorular görünür', async ({ page }) => {
+  test('bekleyen kararlar gecikme durumuyla; iş modeli verilen karar olarak; verilen kararlar sonucu, tarihi ve durumuyla; açık alt sorular görünür', async ({ page }) => {
     await page.goto('karar/');
     await icerik(page);
     await hydrated(page);
@@ -2234,11 +2235,14 @@ test.describe('karar defteri — sayfada (adım 1a)', () => {
     const asistan = bekleyen.locator('tbody tr', { hasText: 'Asistan alınacak mı?' });
     await expect(asistan).toHaveCount(1);
     await expect(asistan).toContainText(/Gecikti/);
-    const isModeli = bekleyen.locator('tbody tr', { hasText: /abonelik/ });
-    await expect(isModeli).toHaveCount(1);
-    await expect(isModeli).toContainText(/Son tarih yok|Tarih yok/);
-    await expect(isModeli).not.toContainText(/Gecikti/);
+    // İş modeli kararı 16 Kasım 2026'da verildi: abonelik esas alınır. Satır bekleyenlerden verilenlere geçti.
+    await expect(bekleyen.locator('tbody tr', { hasText: /likidite pilotu mu/ })).toHaveCount(0);
     const verilen = page.locator('.table-block:has(#verilen-tablo)');
+    const isModeli = verilen.locator('tbody tr', { hasText: /likidite pilotu mu/ });
+    await expect(isModeli).toHaveCount(1);
+    await expect(isModeli).toContainText('Abonelik esas alınır.');
+    await expect(isModeli).toContainText(/Verildi/);
+    await expect(isModeli).toContainText(/16 Kasım 2026/);
     const komisyon = verilen.locator('tbody tr', { hasText: 'Segika satış ortağı' });
     await expect(komisyon).toHaveCount(1);
     await expect(komisyon).toContainText('%10');

@@ -2,7 +2,7 @@ import { Alinti } from '../components/Alinti';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
 import { BolumDizini, SayfaNotu, Section } from '../components/ui';
-import { BASLANGIC_NOTU, ESKI_SOZLER, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, KATEGORILER, KISALTMALAR, ORTAK_NOKTA, type Oneri } from '../data/degerOnerisi';
+import { BASLANGIC_NOTU, ESKI_SOZLER, ESNAF_TIPLERI, GUCLU_SOZLER, ILK_30_SANIYE, ILK_GUN_ADI, KATEGORILER, KISALTMALAR, ORTAK_NOKTA, type Oneri } from '../data/degerOnerisi';
 
 /**
  * Değer önerisi (kullanıcı kararı 2026-11-03): saha ekibinin esnafa söyleyeceği sözler alt alta, alıntı olarak.
@@ -127,7 +127,15 @@ function Icerik() {
       </Section>
 
       <Section id="butun-oneriler" title="Bütün öneriler" desc={`${KATEGORILER.reduce((n, k) => n + k.oneriler.length, 0)} öneri ${KATEGORILER.length} başlıkta toplandı.`} dizin>
-        <p className="dg-bolum-giris">“Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar, araştırma raporundaki esnaf tiplerini gösterir. Bu tiplerin tanımları sayfaya henüz eklenmedi.</p>
+        <p className="dg-bolum-giris">“Kime söylenir?” satırındaki P1 ile P7 arasındaki kodlar esnaf tipleridir. Her tanım o tipe yazılan sözlerden çıkarıldı.</p>
+        <dl className="dg-kisaltmalar" id="esnaf-tipleri" aria-label="Esnaf tipleri">
+          {ESNAF_TIPLERI.map((t) => (
+            <div key={t.kod}>
+              <dt>{t.kod}</dt>
+              <dd>{t.tanim}</dd>
+            </div>
+          ))}
+        </dl>
         {KATEGORILER.map((k) => (
           <section key={k.id} className="dg-bolum dg-kategori" id={k.id} aria-labelledby={`${k.id}-baslik`}>
             <header className="dg-bolum-ust">

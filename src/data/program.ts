@@ -172,9 +172,11 @@ export function makeProgram(p: Params) {
 
   const start = p.startDate;
   const dec = p.decStartDate;
-  const day30 = addDays(start, 29);
-  const day60 = addDays(start, 59);
+  /** Tek kural: başlangıç günü 0. gündür, “N. gün” başlangıçtan N gün sonradır (kullanıcı kararı 16 Kasım 2026, 3.4). */
+  const day30 = addDays(start, 30);
+  const day60 = addDays(start, 60);
   const day90 = addDays(start, 90);
+  const gunSirasi = `Gün sırası ${longDate(start)} gününden sayılır`;
   const period2Start = addDays(day90, 2);
   const firstDay = firstWorkday(start);
   const MONTHS = [monthName(start), monthName(nextMonth(start)), monthName(nextMonth(nextMonth(start)))];
@@ -275,7 +277,7 @@ export function makeProgram(p: Params) {
     [p.organizatorCount * decMonths, salaries.organizator],
   ].reduce((sum, [months, salary]) => sum + cost(months * salary), 0);
   const sahaCost90 = cost((p.sahaCount * 3 + p.sahaDecCount * decMonths) * p.sahaSalary);
-  const maxPayout = p.commission + p.sponsorShare + p.leadTeamShare;
+  const maxPayout = p.commission + p.sponsorShare + p.sponsorShare2 + p.leadTeamShare;
 
   /** Çarpan verilirse asgari ücret çarpanı yazılır; verilmezse net ₺ karar (kullanıcı kararı 2026-10-27). */
   const sgk = (who: string, role: RoleKey, salary: number, multiplier?: number): PayRule => ({
@@ -310,7 +312,7 @@ export function makeProgram(p: Params) {
       status: 'Çalışan değildir, kendi şirketi üzerinden hizmet faturası keser',
       fixed: 'Yok',
       cost: '0 ₺ sabit',
-      commission: `İlk satıştan başlayarak her satış için ${tl(p.commission)} alır. Getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} sponsor payı da alır. Pay en çok 2 kademe yukarı gider. İkinci kademenin tutarı henüz belirlenmedi.`,
+      commission: `İlk satıştan başlayarak her satış için ${tl(p.commission)} alır. Getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} sponsor payı da alır. Pay en çok 2 kademe yukarı gider. Sponsorun sponsoru aynı satıştan ${tl(p.sponsorShare2)} alır.`,
     },
     sgk('İstoç Pazarlama CRM uzmanı', 'pazarlamaci', salaries.masa),
     sgk('Segika CRM', 'segika', salaries.segika),
@@ -356,8 +358,8 @@ export function makeProgram(p: Params) {
   const managerPlan: PlanRow[] = [
     { from: s1('2026-10-19'), to: s1('2026-10-31'), action: `${longDate(p.metaStartDate)} günü Meta reklamlarını başlatır. ${initialCount} kişiyi işe alır. CRM’i kurar`, target: t1('Sözleşmeler 30 Ekim 2026 Cuma gününe kadar imzalanır. CRM 31 Ekim 2026 Cumartesi gününe kadar kurulur'), milestone: true },
     { from: s1('2026-11-02'), to: s1('2026-11-27'), action: `Kazanç planını hukuk açısından kontrol ettirir. Organizatör ve ${sahaDecLabel || 'saha personeli'} için işe alım yapar. Ekip liderini seçer`, target: t1('Hukuk kontrolü 14 Kasım 2026 Cumartesi gününe kadar biter. Ekip lideri 27 Kasım 2026 Cuma gününe kadar seçilir') },
-    { from: s1('2026-11-30'), to: day60, action: `${decTitle} (${longDate(dec)}). 60. gün kontrolünü yapar`, target: `${longDate(day60)} gününe kadar en az ${cumulative[1].aktif} aktif satıcı olur`, milestone: true },
-    { from: s1('2027-01-04'), to: day90, action: `90. gün değerlendirmesini yapar. 2. çeyrek planını hazırlar. ${longDate(period2Start)} günü yeni çalışma düzeni başlar. Bu düzende haftada 45 saat çalışılır`, target: `Karar ${longDate(day90)} günü verilir`, milestone: true },
+    { from: s1('2026-11-30'), to: day60, action: `${decTitle} (${longDate(dec)}). 60. gün kontrolünü yapar. ${gunSirasi}`, target: `${longDate(day60)} gününe kadar en az ${cumulative[1].aktif} aktif satıcı olur`, milestone: true },
+    { from: s1('2027-01-04'), to: day90, action: `90. gün değerlendirmesini yapar. ${gunSirasi}. 2. çeyrek planını hazırlar. ${longDate(period2Start)} günü yeni çalışma düzeni başlar. Bu düzende haftada 45 saat çalışılır`, target: `Karar ${longDate(day90)} günü verilir`, milestone: true },
   ];
 
   /** Planlama panosundaki karar şeması (ağaç). */
@@ -468,7 +470,7 @@ export function makeProgram(p: Params) {
     },
     {
       topic: 'Kazanç planı (MLM)',
-      decision: `Temsilci her satış için ${tl(p.commission)} kazanır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, yalnız kendi getirdiği temsilcinin satışlarından pay alır. Her satış için ${tl(p.sponsorShare)} alır. Daha uzaktaki temsilcilerden pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya getirme primi yoktur. Bir satışta ödenen toplam pay en çok ${tl(maxPayout)} olur. ${t1('Sözleşmenin ve hukuki onayın tarihi 14 Kasım Cumartesi.')}`,
+      decision: `Temsilci her satış için ${tl(p.commission)} kazanır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} alır. Sponsorun sponsoru aynı satıştan ${tl(p.sponsorShare2)} alır. Daha üstteki kişi o satıştan pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya getirme primi yoktur. Bir satışta ödenen toplam pay en çok ${tl(maxPayout)} olur. ${t1('Sözleşmenin ve hukuki onayın tarihi 14 Kasım Cumartesi.')}`,
     },
     {
       topic: 'Ekip lideri primi',

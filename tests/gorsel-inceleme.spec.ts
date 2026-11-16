@@ -1,4 +1,7 @@
 import { expect, test, type Page } from './fixtures/persona';
+import { DEFAULT_MODEL } from '../src/data/model';
+import { KAVRAMLAR, rolKavramMetni } from '../src/data/kavramlar';
+import { contentPlan } from '../src/data/digital';
 
 /**
  * Görsel inceleme kararları (13 Kasım 2026). Kullanıcı bütün sayfa görsellerinin incelenmesini istedi. Bu dosya
@@ -151,7 +154,7 @@ test('hesap araçları 1280 px: yan menü kayınca yapışık kırıntı satır�
 test('rol sayfası: Kavramlar kutusu sayfada geçen terimleri tanımlar (karar listesi 7.1 ve 2.1)', async ({ page }) => {
   await ac(page, 'roller/saha-uzmani/', 1280);
   const kutu = page.getByRole('complementary', { name: 'Kavramlar' });
-  await expect(kutu.locator('dt')).toHaveText(['Aktif satıcı', 'Kayıt']);
+  await expect(kutu.locator('dt')).toHaveText(['Aktif satıcı', 'Kayıt', 'Üye satıcı']);
   await expect(kutu.locator('dd').first()).toHaveText('İlk ödemesini yapmış ve ürünleri yayında olan satıcıdır.');
 });
 
@@ -190,4 +193,25 @@ test('satış ortaklığı v2 1280 px: kayınca şeritler incelir, özet kendi i
   const kirinti = (await page.locator('.crumbs-row').boundingBox())!;
   expect((await ozet.boundingBox())!.y).toBeGreaterThanOrEqual(kirinti.y + kirinti.height - 1);
   expect(await ozet.evaluate((e) => getComputedStyle(e).overflowY)).toBe('auto');
+});
+
+test('rol sayfaları: karar 16 Kasım 2026 kavramları kendi rolünde tanımlanır', async ({ page }) => {
+  for (const [yol, terim] of [
+    ['roller/pazarlamaci/', 'Nitelikli görüşme'],
+    ['roller/segika/', 'Segika hattı'],
+    ['roller/ekip-lideri/', 'Aktif temsilci'],
+    ['roller/organizator/', 'Eğitim modülleri (M1–M5)'],
+  ] as const) {
+    await ac(page, yol, 1280);
+    const kutu = page.getByRole('complementary', { name: 'Kavramlar' });
+    await expect(kutu.locator('dt', { hasText: terim })).toHaveCount(1);
+  }
+  // Dijital pazarlama sayfası içerik planındaki “M1–M5” sözünü de tanımlar.
+  await ac(page, 'roller/dijital-pazarlama/', 1280);
+  await expect(page.getByRole('complementary', { name: 'Kavramlar' }).locator('dt', { hasText: 'Eğitim modülleri (M1–M5)' })).toHaveCount(1);
+});
+
+test('kavram listesindeki her terim en az bir rol sayfasında görünür', () => {
+  const metinler = DEFAULT_MODEL.roles.map((r) => rolKavramMetni(r, JSON.stringify(contentPlan)));
+  for (const k of KAVRAMLAR) expect(metinler.some((m) => k.ara.test(m)), k.terim).toBe(true);
 });

@@ -38,7 +38,7 @@ test('birinci sürümde bir alan değişince ortak kayda tek yazı gider ve sayf
   await birinciSurum(page);
   await kurAlani(page).fill('60');
   await expect.poll(() => personaServer.writes.length).toBe(1);
-  expect(personaServer.writes[0]).toMatchObject({ service: 'persona', action: 'patch', project: 'istoc', changes: [{ field: 'kur', before: 56, value: 60 }] });
+  expect(personaServer.writes[0]).toMatchObject({ service: 'persona', action: 'patch', project: 'istoc', changes: [{ field: 'kur', before: 55.31, value: 60 }] });
   expect(personaServer.snapshot('istoc').fields.kur).toBe(60);
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   await expect(kayit(page).getByRole('status')).toHaveText('Ortak kayıt güncel.');
@@ -72,7 +72,7 @@ test('kayıt onayı gecikince bekleyen alan sayısı görünür ve sayfadan çı
   birak();
   await expect.poll(() => personaServer.writes.length).toBe(2);
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
-  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 56, value: 60 }], [{ field: 'istocAyEur', before: 399, value: 400 }]]);
+  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 55.31, value: 60 }], [{ field: 'istocAyEur', before: 399, value: 400 }]]);
   await expect(kayit(page).getByText(/^\d+ alan/)).toHaveCount(0);
   await expect(yillikPaket(page)).toHaveText(tl(yillikFiyat(ayar({ kur: 60, istocAyEur: 400 }))));
   // Bütün yazılar onaylanınca çıkış uyarısı kalkar.
@@ -104,7 +104,7 @@ test('yazı başarısız olunca “Yeniden dene” aynı yazıyı gönderir ve k
   await dugme.click();
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   await expect(dugme).toHaveCount(0);
-  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 56, value: 60 }]]);
+  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 55.31, value: 60 }]]);
   // Yeniden deneme aynı işlem kimliğini kullanır. Böylece sunucu aynı yazıyı iki kez uygulamaz.
   expect(kimlikler).toHaveLength(2);
   expect(kimlikler[1]).toBe(kimlikler[0]);
@@ -130,13 +130,13 @@ test('bağlantı geri gelince (online olayı) bekleyen yazı kendiliğinden yeni
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   expect(deneme).toBe(2);
-  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 56, value: 60 }]]);
+  expect(personaServer.writes.map((w) => w.changes)).toEqual([[{ field: 'kur', before: 55.31, value: 60 }]]);
 });
 
 /** Kullanıcı kaydederken başka biri aynı alanı 75 yapar. Sunucu çakışma yanıtı verir. */
 async function cakismaKur(page: Page, personaServer: PersonaTestServer) {
   await page.route(ADRES, async (route) => {
-    if (istek(route).action === 'patch' && personaServer.snapshot('istoc').fields.kur === 56) personaServer.seed('istoc', { kur: 75 });
+    if (istek(route).action === 'patch' && personaServer.snapshot('istoc').fields.kur === 55.31) personaServer.seed('istoc', { kur: 75 });
     await route.fallback();
   });
   await birinciSurum(page);
@@ -240,11 +240,11 @@ test('bu cihazdaki geçerli bekleyen yazı sayfa yeniden açılınca ortak kayda
   await page.addInitScript(() => {
     if (sessionStorage.getItem('test-hazir')) return;
     sessionStorage.setItem('test-hazir', '1');
-    sessionStorage.setItem('turksab-persona-bekleyen-v1-istoc', JSON.stringify({ snapshot: null, draft: { kur: 70 }, before: { kur: 56 }, flight: null }));
+    sessionStorage.setItem('turksab-persona-bekleyen-v1-istoc', JSON.stringify({ snapshot: null, draft: { kur: 70 }, before: { kur: 55.31 }, flight: null }));
   });
   await page.goto('satis-ortakligi/?surum=v1');
   await expect.poll(() => personaServer.writes.length).toBe(1);
-  expect(personaServer.writes[0].changes).toEqual([{ field: 'kur', before: 56, value: 70 }]);
+  expect(personaServer.writes[0].changes).toEqual([{ field: 'kur', before: 55.31, value: 70 }]);
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   await expect(kurAlani(page)).toHaveValue('70');
 });

@@ -205,7 +205,7 @@ const SEGIKA_ORTAK_KURALLARI = [
   '60 gün boyunca ilerleme olmazsa kayıt yeniden incelenir. Son 90 günde Segika ile teması olan firma yeni müşteri sayılmaz.',
   '%15’lik bütçe ortaklar arasında paylaştırılır. Her ortak için ayrıca %15 eklenmez.',
   'Liste fiyatının altında satış yapılmaz.',
-  'Ortak programa 14 günlük başlangıç süresiyle girer. Ortak bu sürede sertifika eğitimini bitirir. Aynı sürede ilk 5 mükellefini ekler. Aktivasyon 45 gün içinde beklenir.',
+  'Ortak programa 14 günlük başlangıç süresiyle girer. Ortak bu sürede sertifika eğitimini bitirir. Aynı sürede ilk 5 mükellefini ekler. Aktivasyon, ortağın getirdiği ilk müşterinin ilk ödemesini yapmasıdır. Aktivasyon 45 gün içinde beklenir.',
   'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
@@ -213,7 +213,7 @@ const ISTOC_ORTAK_KURALLARI = [
   'Ortağın bildirdiği iş fırsatı 2 iş günü içinde kabul edilir. Fırsat 90 gün boyunca ortak adına korunur.',
   '30 gün boyunca ilerleme olmazsa fırsat gözden geçirilir.',
   'Ortağa münhasırlık, yani tek yetkili olma hakkı verilmez. Ortak, “iStoc Program Ortağı” adını kullanır.',
-  'Ortak programa 21 günlük başlangıç süresiyle girer. Ortak bu sürede 60 dakikalık bir eğitim alır. Aktivasyon süresi 60 gündür.',
+  'Ortak programa 21 günlük başlangıç süresiyle girer. Ortak bu sürede 60 dakikalık bir eğitim alır. Aktivasyon, ortağın getirdiği ilk müşterinin ilk ödemesini yapmasıdır. Aktivasyon süresi 60 gündür.',
   'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
@@ -260,7 +260,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
         'Temsilci, kendi şirketi olan bağımsız bir iş insanıdır. Maaş almaz, hizmet faturası keser.',
         'Temsilci iki koşul sağlanınca kazancını hak eder. Şirket müşterinin ilk ödemesini tahsil etmiş olmalıdır. Satıcı da aktif olmalıdır.',
         'Reklamda kazanç vaadi ve “MLM fırsatı” ifadesi kullanılmaz.',
-        `“MLM (çok katmanlı pazarlama)” sayfasında da pay en çok 2 kademe yukarı gider. Orada ikinci kademenin tutarı henüz belirlenmedi. Bu hesap ${d} kademe kullanır. Kademe sayısı sözleşmeden ve hukuk kontrolünden önce kesinleşmelidir.`,
+        `“MLM (çok katmanlı pazarlama)” sayfasında da pay en çok 2 kademe yukarı gider. Orada ikinci kademenin payı “Parametreler” sayfasındadır. MLM sayfasındaki en yüksek pay, ekip liderinin payını da sayar. Bu hesap ${d} kademe kullanır. Kademe sayısı sözleşmeden ve hukuk kontrolünden önce kesinleşmelidir.`,
       ],
       veri: {
         satisBasina: a.agKomisyon,
@@ -366,7 +366,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
       donemler: [],
       hesap: [{ ad: 'Seviye', formul: `Ofisin ${m} aktif mükellefi var. Gümüş seviye için en az 10, Altın seviye için en az 50 aktif mükellef gerekir.`, sonuc: seviye }],
       kurallar: [
-        'Kayıtlı Ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitimi ve bu eğitimin kaydını alır. Ayrıca paneli alır. 2 mükellef için ücretsiz deneme ve tanıtım malzemeleri de alır.',
+        'Kayıtlı Ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitimi ve bu eğitimin kaydını alır. Ayrıca paneli alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır. 2 mükellef için ücretsiz deneme ve tanıtım malzemeleri de alır.',
         'Gümüş seviyesi için en az 10 aktif mükellef gerekir. Bu seviyede ofis toptan fiyatın 1. kademesini ve ofis markalı Aylık Değer Raporunu alır. Destek taleplerine 4 saat içinde yanıt verilir.',
         'Altın seviyesi için en az 50 aktif mükellef gerekir. Bu seviyede ofis 2. kademe fiyatı, yalnız onunla ilgilenen bir ortak başarı yöneticisini, ortak pazarlama fonunu ve API erişimini, yani yazılımını doğrudan bağlama imkânını alır.',
         'Toptan fiyat bantları mükellef sayısına göre üçe ayrılır. Birinci bant 10 ile 49, ikinci bant 50 ile 199 mükellef içindir. Üçüncü bant 200 ve daha çok mükellef içindir. Yıllık peşin ödemede ek indirim vardır.',
@@ -401,7 +401,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
     osgb: ['Yönlendirme anlaşması', 'Bu ortaklıkta karşı taraf bir OSGB, yani ortak sağlık ve güvenlik birimidir. Müşterilerini Segika’ya yönlendirir.', ['Yönlendirme anlaşmasıyla çalışır.', 'Bu ortaklık ikinci aşamada başlar.']],
     dernek: ['Ortak eğitim', 'Bu ortaklıkta karşı taraf bir dernek, organize sanayi bölgesi ya da odadır. Üyelerine Segika ile birlikte eğitim düzenler.', ['Ortak eğitim programıyla çalışır.', 'Bu ortaklık ikinci aşamada başlar.']],
     franchise: ['Merkez sözleşmesi', 'Ortak, bayilik (franchise) sistemiyle çalışan ya da zincir olan bir işletmedir. Bütün şubeler için merkezle tek sözleşme yapılır.', ['Merkezle sözleşme yapılır.', 'Bu ortaklık ikinci aşamada başlar.']],
-    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur. Bu kurum üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'Ortak kendi markasını taşıyan bir program sayfası alır. Üyelerini izleyeceği bir ekran da alır. Üç ayda bir sonuç raporu alır. Üyeleri için özel avantaj da alır.', 'Platform, başarılı satışlardan %3 ile %8 arasında komisyon alır. Kendi alıcılarını getiren üretici ilk 6 ay komisyon ödemez.', 'İlk dönemde 3 ortakla çalışılır.', 'Ortağın aktif sayılması için şirketin doğruladığı en az 20 mağaza sayfası, yani vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
+    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur. Bu kurum üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'Ortak kendi markasını taşıyan bir program sayfası alır. Üyelerini izleyeceği bir ekran da alır. Üç ayda bir sonuç raporu alır. Üyeleri için özel avantaj da alır.', 'Platform satıştan komisyon almaz. Üyeler yalnız paket ücretini öder.', 'İlk dönemde 3 ortakla çalışılır.', 'Ortağın aktif sayılması için şirketin doğruladığı en az 20 mağaza sayfası, yani vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
     talep: ['Görev ücreti', 'Ortak, alıcıların satın alma taleplerini toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin %50’sini şirket, görevin kapsamı kabul edilince öder. Kalan %50’sini sonuç takibi yapılınca öder.', 'Ortak ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Ortak, kapalı alıcı kulübüne erişir.', 'Ortağın aktif sayılması için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
     hizmet: ['Gelir paylaşımı', 'Ortak, ödeme ya da lojistik gibi bir hizmet verir. Hizmetini “iStoc Onaylı Hizmet” adıyla sunar.', ['Lojistik, ödeme, gümrük, kalite ya da katalog hizmeti verebilir.', 'Gelir paylaşımı ya da yönlendirme ücreti alır.', '“iStoc Onaylı Hizmet” rozetini ve şirketin belirlediği iş adımlarını kullanır.', ...ISTOC_ORTAK_KURALLARI]],
     teknoloji: ['Karşılıklı indirim', 'Ortak, iStoc’a doğrudan yazılım bağlantısıyla (API) bağlanan bir yazılımdır.', ['Kataloglar otomatik eşitlenir ve iki taraf birlikte pazarlama yapar.', 'Liste fiyatında karşılıklı indirim uygulanır.', 'Bu ortaklık ikinci aşamada başlar.']],

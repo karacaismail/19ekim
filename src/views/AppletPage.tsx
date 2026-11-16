@@ -841,7 +841,7 @@ function TerfiKapisi() {
         <Sayi label="Yeni bantta hedef compa" value={t.hedefCompa} min={0.6} max={1.2} step={0.01} onChange={(v) => g({ hedefCompa: v })} />
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Kalite kapısından geçti" acik={t.kaliteGecti} onChange={(v) => g({ kaliteGecti: v })} />
+        <Anahtar ad="Kalite kapısından geçti" acik={t.kaliteGecti} onChange={(v) => g({ kaliteGecti: v })} aciklama="Kalite kapısı, kalite puanının en az 80 olması koşuludur. Kapıdan geçemeyen kişi terfi etmez." />
         {sev.hat === 'M' ? <Anahtar ad="Yönetici hattında açık pozisyon var" acik={t.acikPozisyon} onChange={(v) => g({ acikPozisyon: v })} /> : null}
       </Araclar>
       <DataTable<string>
@@ -961,10 +961,10 @@ function PerformansKarnesi() {
   const PRIM = { uygun: { d: 'gecti', ad: 'Uygun' }, yok: { d: 'kaldi', ad: 'Prim yok (uyum kapısı)' }, inceleme: { d: 'uyari', ad: 'İnceleme sonucu bekleniyor' } } as const;
   type Boyut = (typeof boyutlar)[number];
   return (
-    <Bolum id="performans-karnesi" dayanak="Dengeli karne ve SPACE (geliştirici verimliliği çerçevesi), çıktının tek boyutla ölçülemeyeceğini söyler. DORA’nın (DevOps araştırma programı) kalite ölçüleri ücreti doğrudan etkilemez. Bu ölçüler yalnız kalite kapısında kullanılır. 90 ile 109 arasındaki skor beklenen performanstır.">
+    <Bolum id="performans-karnesi" dayanak="Dengeli karne ve SPACE (geliştirici verimliliği çerçevesi), çıktının tek boyutla ölçülemeyeceğini söyler. DORA’nın (DevOps araştırma programı) kalite ölçüleri ücreti doğrudan etkilemez. Bu ölçüler yalnız kalite kapısında kullanılır. Kalite kapısı, kalite puanının en az 80 olması koşuludur. 90 ile 109 arasındaki skor beklenen performanstır.">
       <Dugmeler label="Meslek şablonu" value={sablon.id} data={KARNE_SABLONLARI.map((x) => ({ value: x.id, label: x.ad }))} onChange={(v) => setKr({ ...kr, sablonId: v })} />
       <Araclar>
-        <Anahtar ad="Kritik olay var" acik={kr.kritikOlay} onChange={(v) => setKr({ ...kr, kritikOlay: v })} aciklama="Kritik olay varsa bu seçeneği açın. Prim, inceleme bitene kadar ödenmez." />
+        <Anahtar ad="Kritik olay var" acik={kr.kritikOlay} onChange={(v) => setKr({ ...kr, kritikOlay: v })} aciklama="Kritik olay, müşteriye ya da şirkete ciddi zarar veren olaydır. Örneğin müşteri verisi dışarı sızar. Kritik olay varsa bu seçeneği açın. Prim, inceleme bitene kadar ödenmez." />
       </Araclar>
       <Ozet
         items={[
@@ -1147,7 +1147,7 @@ function PrimEgrisiApplet() {
         <Sayi label="Aylık taban" birim="× baz" value={e.ucret} min={0.1} step={0.05} onChange={(v) => setE({ ...e, ucret: v })} />
       </Girdiler>
       <Araclar>
-        <Anahtar ad="Kalite kapısından geçti" acik={e.kaliteGecti} onChange={(v) => setE({ ...e, kaliteGecti: v })} aciklama="Kişi kalite kapısından geçemezse prim en çok hedef primin %50’si olur." />
+        <Anahtar ad="Kalite kapısından geçti" acik={e.kaliteGecti} onChange={(v) => setE({ ...e, kaliteGecti: v })} aciklama="Kalite kapısı, kalite puanının en az 80 olması koşuludur. Kişi kapıdan geçemezse prim en çok hedef primin %50’si olur." />
       </Araclar>
       <Ozet
         items={[

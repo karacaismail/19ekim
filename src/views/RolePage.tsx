@@ -31,9 +31,9 @@ import {
   type PipelineStep,
 } from '../data/digital';
 import { useModel } from '../components/ModelContext';
-import { addDays } from '../lib/dates';
+import { addDays, longDate } from '../lib/dates';
 import type { PlanRow, Role, ScheduleRow, Task } from '../data/types';
-import { metindekiKavramlar } from '../data/kavramlar';
+import { metindekiKavramlar, rolKavramMetni } from '../data/kavramlar';
 import { sayiBicimi } from '../lib/format';
 
 const sayi = sayiBicimi(3);
@@ -226,7 +226,7 @@ function DigitalSections({ role }: { role: Role }) {
         <DataTable<AiTool>
           id="arac"
           title="Araçlar ve aylık bütçe"
-          note={`Araçlara ayda en çok ${sayi(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim Pazartesi günü verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe 30 Aralık Çarşamba günü ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
+          note={`Araçlara ayda en çok ${sayi(AI_TOOL_BUDGET)} ₺ harcanır. Bu bütçe kararı 19 Ekim Pazartesi günü verildi. Bu tutarı aşmak için İsmail Karaca’nın onayı gerekir. Bütçe ${longDate(m.dates.day60)} günü ölçüm panosundaki sonuçlara göre yeniden incelenir.`}
           columns={[
             { key: 'tool', header: 'Araç', nowrap: true, rowHeader: true, render: (r) => r.tool },
             { key: 'use', header: 'Ne için', summary: true, minWidth: '18rem', render: (r) => r.use },
@@ -315,7 +315,7 @@ function DigitalSections({ role }: { role: Role }) {
         />
       </Section>
 
-      <Section id="eylem-plani" index={5} title="90 günlük plan" desc="Planda dört iş akışı var. Her işin tarihi ve hedefi aşağıdadır.">
+      <Section id="eylem-plani" index={5} title="90 günlük plan" desc={`Planda dört iş akışı var. Her işin tarihi ve hedefi aşağıdadır. Gün sırası ${longDate(m.dates.start)} gününden sayılır.`}>
         <Chart
           id="dijital-gantt"
           title="İş akışı × zaman"
@@ -423,7 +423,7 @@ function GenericSections({ role }: { role: Role }) {
  * tanımlar. Terim geçmiyorsa kutu görünmez.
  */
 function RolKavramlari({ role }: { role: Role }) {
-  const kavramlar = metindekiKavramlar(JSON.stringify(role));
+  const kavramlar = metindekiKavramlar(rolKavramMetni(role, JSON.stringify(contentPlan)));
   if (!kavramlar.length) return null;
   return (
     <SayfaNotu baslik="Kavramlar">

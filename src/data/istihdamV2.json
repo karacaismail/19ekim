@@ -172,10 +172,10 @@
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
    "mevcut": true,
-   "gerekce": "Yatırımcı ilişkisi, İSTOÇ çarşı yönetimiyle ilişki ve bütün kritik kararlar bu roldedir. Projenin karar kuralına göre karar veren yalnız İsmail Karaca veya yatırımcıdır. Bu plan, kurucunun yükünü azaltan yönetici rollerini bu rolün üstüne ekler.",
+   "gerekce": "Yatırımcı ilişkisi, İstoç çarşı yönetimiyle ilişki ve bütün kritik kararlar bu roldedir. Projenin karar kuralına göre karar veren yalnız İsmail Karaca veya yatırımcıdır. Bu plan, kurucunun yükünü azaltan yönetici rollerini bu rolün üstüne ekler.",
    "nitelikler": [
     "Mevcut kurucu, görevde",
-    "İSTOÇ esnaf ağı ve toptan ticaret bilgisi"
+    "İstoç esnaf ağı ve toptan ticaret bilgisi"
    ],
    "netMaas2027": 0,
    "maasDayanagi": "Kurucu ücreti bu planın dışında tutulur. Karar kurucunundur.",
@@ -215,7 +215,7 @@
    "seviye": "Yönetim",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "İşlem komisyonu ve güvenli ödeme gibi gelir modelleri sepet, sipariş ve ödeme akışı olmadan başlamaz. Güçlü seçenekte ürün ve teknoloji ekibi 12 kişiyi aşar ve ödeme kuruluşu entegrasyonu ile bilgi güvenliğinin tek bir teknik sahibi olmalıdır. Ekonomik ve Medyan seçenekte bu iş mevcut yazılım ekibinin en kıdemli kişisinde kalır.",
+   "gerekce": "İşlem komisyonu ve güvenli ödeme gibi gelir modelleri sepet, sipariş ve ödeme akışı olmadan başlamaz. Güçlü seçenekte ürün ve teknoloji ekibi 12 kişiyi aşar ve ödeme kuruluşu entegrasyonu ile bilgi güvenliğinin tek bir teknik sahibi olmalıdır. Ekonomik ve Orta seçenekte bu iş mevcut yazılım ekibinin en kıdemli kişisinde kalır.",
    "nitelikler": [
     "Bilgisayar mühendisliği ya da eşdeğer alanda lisans",
     "En az 10 yıl yazılım, en az 3 yıl ekip yönetimi deneyimi",
@@ -309,7 +309,7 @@
    "nitelikler": [
     "Lise ya da ön lisans mezunu",
     "En az 2 yıl saha satışı deneyimi. Toptan ya da KOBİ (küçük ve orta boy işletme) satışı tercih edilir.",
-    "İSTOÇ ya da benzer çarşı esnafını tanıma",
+    "İstoç ya da benzer çarşı esnafını tanıma",
     "Günlük rota ve CRM kaydı disiplini"
    ],
    "netMaas2027": 64865,
@@ -402,7 +402,7 @@
    "gerekce": "Gelir planının iyimser senaryosu, büyüme kuralıyla 2027 sonunda 4 saha personeli varsayar. Mevcut takvimde saha personeli 3 kişidir. Güçlü seçenek bu farkı kapatır ve yalnız 3. saha personelinin koşulları sağlanmışsa açılır.",
    "nitelikler": [
     "Saha ekibiyle aynı nitelikler",
-    "Tercihen İSTOÇ dışındaki toptan merkezlerini tanıma"
+    "Tercihen İstoç dışındaki toptan merkezlerini tanıma"
    ],
    "netMaas2027": 64865,
    "maasDayanagi": "Maaş saha ekibiyle aynıdır. 2026’da net 50.000 ₺’dır. Yüzde 29,73 artışla 64.865 ₺ olur.",
@@ -525,7 +525,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Platinium paket aylık 599 €’dur ve Enterprise paketin fiyatı teklifle belirlenir. Çok mağazalı toptancıya, üreticiye ve İSTOÇ dışındaki toptan merkezlerine dükkân ziyaretiyle satış yapılmaz. Bu müşterilere teklif verilir ve sözleşme yapılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
+   "gerekce": "Platinium paket aylık 599 €’dur ve Enterprise paketin fiyatı teklifle belirlenir. Çok mağazalı toptancıya, üreticiye ve İstoç dışındaki toptan merkezlerine dükkân ziyaretiyle satış yapılmaz. Bu müşterilere teklif verilir ve sözleşme yapılır. Alibaba.com da Türkiye’de ücretli üyeliklerini yerel iş ortağının satış ve müşteri hizmetleri ekibiyle satmıştır.",
    "nitelikler": [
     "Üniversite mezunu",
     "En az 4 yıl B2B (işletmeler arası) satış ya da hesap yönetimi deneyimi",
@@ -1068,7 +1068,7 @@
     "Serbest meslek makbuzu ya da fatura kesebilme"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Oturum başı 5.000 ₺ bedel varsayılmıştır (tahmin). Ekonomik seçenekte ayda 8, medyanda 12, güçlüde 20 oturum hesaplanır.",
+   "maasDayanagi": "Oturum başı 5.000 ₺ bedel varsayılmıştır (tahmin). Ekonomik seçenekte ayda 8, Orta seçenekte 12, Güçlü seçenekte 20 oturum hesaplanır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 3,
@@ -1639,7 +1639,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Dış hizmet",
    "eski": false,
-   "gerekce": "Sunucu, yedekleme, izleme ve yayına alma işleri platform çalıştığı sürece gereklidir. Ekonomik ve Medyan seçenekte bu iş bugünkü dış düzenle sürer. Güçlü seçenekte ödeme akışı ve trafik artışı nedeniyle kadroya alınır.",
+   "gerekce": "Sunucu, yedekleme, izleme ve yayına alma işleri platform çalıştığı sürece gereklidir. Ekonomik ve Orta seçenekte bu iş bugünkü dış düzenle sürer. Güçlü seçenekte ödeme akışı ve trafik artışı nedeniyle kadroya alınır.",
    "nitelikler": [
     "En az 4 yıl Linux sunucu ve bulut altyapısı",
     "Yedekleme, izleme ve otomatik yayına alma (CI/CD) kurulumu",
@@ -1729,7 +1729,7 @@
    "seviye": "Yönetici",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Medyan seçenekte satıcı uyumu, müşteri hizmetleri, içerik denetimi ve doğrulama işi büyür. Bu işlerde 8 ile 10 kişi çalışır. Bu ekip doğrudan kurucuya bağlı kalırsa yenileme oranının ve şikâyet sürelerinin sahibi olmaz. Operasyon müdürü bu göstergelerin sahibidir.",
+   "gerekce": "Orta seçenekte satıcı uyumu, müşteri hizmetleri, içerik denetimi ve doğrulama işi büyür. Bu işlerde 8 ile 10 kişi çalışır. Bu ekip doğrudan kurucuya bağlı kalırsa yenileme oranının ve şikâyet sürelerinin sahibi olmaz. Operasyon müdürü bu göstergelerin sahibidir.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 6 yıl operasyon ya da müşteri deneyimi, en az 2 yıl yöneticilik",
@@ -1871,7 +1871,7 @@
     "SGK teşvikleri bilgisi"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "İstanbul Serbest Muhasebeci Mali Müşavirler Odası (İSMMMO) 2026 tarifesine ulaşılamadı. Aylık bedel ekonomikte 30.000, medyanda 40.000, güçlüde 55.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "İstanbul Serbest Muhasebeci Mali Müşavirler Odası (İSMMMO) 2026 tarifesine ulaşılamadı. Aylık bedel, Ekonomik seçenekte 30.000, Orta seçenekte 40.000, Güçlü seçenekte 55.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,
@@ -1997,7 +1997,7 @@
    "seviye": "Uzman",
    "calismaBicimi": "Tam zamanlı",
    "eski": false,
-   "gerekce": "Medyan seçenekte 2027’de 25’ten fazla yeni kişi işe alınır. Kasım 2026 planında yöneticinin 96 saati yalnız işe alıma gitmiştir. İşe alım, deneme süresi değerlendirmesi ve özlük dosyası bir uzmana geçmelidir. Yoksa kurucu satış ve ürün işine zaman ayıramaz.",
+   "gerekce": "Orta seçenekte 2027’de 25’ten fazla yeni kişi işe alınır. Kasım 2026 planında yöneticinin 96 saati yalnız işe alıma gitmiştir. İşe alım, deneme süresi değerlendirmesi ve özlük dosyası bir uzmana geçmelidir. Yoksa kurucu satış ve ürün işine zaman ayıramaz.",
    "nitelikler": [
     "Lisans mezunu",
     "En az 3 yıl işe alım ve özlük işleri deneyimi",
@@ -2047,7 +2047,7 @@
     "Ofis ve saha çalışmasını kapsayan risk değerlendirmesi"
    ],
    "netMaas2027": null,
-   "maasDayanagi": "Aylık bedel ekonomikte 10.000, medyanda 15.000, güçlüde 25.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
+   "maasDayanagi": "Aylık bedel, Ekonomik seçenekte 10.000, Orta seçenekte 15.000, Güçlü seçenekte 25.000 ₺ varsayılmıştır (tahmin). Teklifle doğrulanmalıdır.",
    "secenekler": {
     "ekonomik": {
      "kisi": 1,

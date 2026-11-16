@@ -1,4 +1,4 @@
-import { daysBetween, shiftText } from '../lib/dates';
+import { daysBetween, longDate, shiftText } from '../lib/dates';
 import { int, num, tl } from '../lib/format';
 import { DEFAULT_PARAMS, type Params } from './params';
 import type { Program } from './program';
@@ -43,16 +43,16 @@ export function makeGrowth(p: Params, prog: Program) {
   const growthKpis = [
     { metric: 'Meta reklam bütçesi', target: `Haftada ${tl(p.metaWeekly)}, ayda yaklaşık ${tl(monthlyMeta)}`, when: t('20 Ekim 2026 Salı gününden başlayarak her hafta') },
     { metric: 'Başvuru', target: `Haftada en çok yaklaşık ${int(p.applicationsWeekly)} başvuru`, when: t('16 Kasım 2026 Pazartesi gününden başlayarak her hafta') },
-    { metric: 'Aktif temsilci', target: 'Önce yaklaşık 3, sonra yaklaşık 5', when: t('Önce 30 Aralık 2026 Çarşamba, sonra 30 Ocak 2027 Cumartesi') },
+    { metric: 'Aktif temsilci', target: 'Önce yaklaşık 3, sonra yaklaşık 5', when: `Önce ${longDate(prog.dates.day60)}, sonra ${longDate(prog.dates.day90)}` },
     { metric: 'Aktif temsilci başına maliyet', target: monthlyReps ? `Yaklaşık ${tl(monthlyMeta / monthlyReps)}` : '—', when: 'Her ay ölçülür' },
     { metric: `Ağın getirdiği aktif satıcı (ayda ${num(p.subscriptionEur)} € ödeyen müşteri)`, target: `Yaklaşık ${int(mlm.aktif.reduce((a, b) => a + b, 0))}`, when: t('30 Ocak 2027 Cumartesi') },
     { metric: 'Temsilci kazancı', target: `Satış başına ${tl(p.commission)}. Temsilciye maaş ödenmez. Temsilci hizmet faturası keser.`, when: 'İlk satıştan' },
-    { metric: 'Sponsor payı', target: `Temsilciyi ağa getiren kişi sponsordur. Sponsor, bu temsilcinin her satışından ${tl(p.sponsorShare)} alır. Pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru. İkinci kademenin tutarı henüz belirlenmedi.`, when: 'Satış prim kriterleri tamamlanınca' },
+    { metric: 'Sponsor payı', target: `Temsilciyi ağa getiren kişi sponsordur. Sponsor, bu temsilcinin her satışından ${tl(p.sponsorShare)} alır. Pay en çok 2 kademe yukarı gider. Sponsorun sponsoru aynı satıştan ${tl(p.sponsorShare2)} alır.`, when: 'Satış prim kriterleri tamamlanınca' },
     { metric: 'Uyum kuralı ihlali', target: '0', when: 'İsmail Karaca her ay kontrol eder' },
   ];
 
   const compliance = [
-    `Kazanç yalnız gerçek satıştan doğar. Temsilci her satıştan ${tl(p.commission)} alır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} alır. Pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru. İkinci kademenin tutarı henüz belirlenmedi. Daha üstteki kişi o satıştan pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya kişi getirme primi yoktur. Kimse yalnız kişi getirdiği için para almaz. Piramit satış, 6502 sayılı Tüketicinin Korunması Hakkında Kanun’la yasaktır.`,
+    `Kazanç yalnız gerçek satıştan doğar. Temsilci her satıştan ${tl(p.commission)} alır. Bir temsilciyi ağa getiren kişiye sponsor denir. Sponsor, getirdiği temsilcinin her satışından ${tl(p.sponsorShare)} alır. Pay en çok 2 kademe yukarı gider. Sponsorun sponsoru aynı satıştan ${tl(p.sponsorShare2)} alır. Daha üstteki kişi o satıştan pay almaz. Giriş ücreti, zorunlu alım, kayıt primi veya kişi getirme primi yoktur. Kimse yalnız kişi getirdiği için para almaz. Piramit satış, 6502 sayılı Tüketicinin Korunması Hakkında Kanun’la yasaktır.`,
     'Temsilci çalışan değildir. Temsilci kendi şirketini kurar ve hizmet faturası keser. Temsilciye mesai, çalışma yeri ya da talimat vermeyin. Verirseniz ilişki gizli işçilik (muvazaa) sayılabilir.',
     t('İsmail Karaca, kazanç planını ve sözleşmeyi 14 Kasım 2026 Cumartesi gününe kadar onaylatır. Onayı hukuk danışmanı ve mali müşavir verir.'),
     'Meta reklamında ürünü ve temsilcinin yapacağı işi açıkça anlatın. Reklamda gelir sözü vermeyin. “MLM fırsatı” ifadesini kullanmayın.',

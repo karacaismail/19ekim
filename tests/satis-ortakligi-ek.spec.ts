@@ -1,3 +1,4 @@
+import { DEFAULT_PARAMS } from '../src/data/params';
 import { expect, test, type Page } from './fixtures/persona';
 import { alanGecerli, alanTanimlari } from '../src/data/personaFields';
 import { VARSAYILAN_AYAR, aylikFiyat, cozumKazanci, kadrolu, satisKazanci, segikaAylik, yillikFiyat, type Ayar } from '../src/data/satisOrtakligi';
@@ -83,7 +84,7 @@ test('birinci sürüm “Başa dön”: vazgeçince hiçbir şey değişmez, ona
   // Onayla: alanlar varsayılana döner. Bu projenin ortak kaydına tek yazı gider.
   await page.getByRole('button', { name: 'Başa dön', exact: true }).click();
   await onayla.click();
-  await expect(kutu(page, '1 euro kaç ₺?')).toHaveValue('56');
+  await expect(kutu(page, '1 euro kaç ₺?')).toHaveValue(String(DEFAULT_PARAMS.eurTry).replace('.', ','));
   await expect(kutu(page, '90. günden sonra: ayda kaç satış?')).toHaveValue('4');
   await expect(yillikPaket(page)).toHaveText(tl(yillikFiyat(ayar())));
   await expect(sonuc(page)).toHaveText(tl(4 * satisKazanci(ayar(), 'B')));
@@ -92,7 +93,7 @@ test('birinci sürüm “Başa dön”: vazgeçince hiçbir şey değişmez, ona
   const son = personaServer.writes.at(-1)!;
   expect(son.project).toBe('istoc');
   expect(son.changes).toHaveLength(2);
-  expect(son.changes).toEqual(expect.arrayContaining([{ field: 'kur', before: 60, value: 56 }, { field: 'oncuAsama.3', before: 6, value: 4 }]));
+  expect(son.changes).toEqual(expect.arrayContaining([{ field: 'kur', before: 60, value: DEFAULT_PARAMS.eurTry }, { field: 'oncuAsama.3', before: 6, value: 4 }]));
   const varsayilan = Object.fromEntries(alanTanimlari('istoc').map((d) => [d.field, d.value]));
   expect(personaServer.snapshot('istoc').fields).toEqual(varsayilan);
   expect(personaServer.writes.every((w) => w.project === 'istoc')).toBe(true);

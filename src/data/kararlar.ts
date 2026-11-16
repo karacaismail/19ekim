@@ -96,15 +96,12 @@ export function makeKararlar(_p: Params, prog: Program) {
     {
       id: 'is-modeli',
       soru: 'iStoc nasıl para kazanacak: satıcı aboneliği mi, işlem gelirine dayalı likidite pilotu mu?',
-      secenekler: [
-        'Abonelik esas alınır, likidite yaklaşımı seçenek olarak görünür kalır.',
-        'Likidite pilotu esas alınır, abonelik hesabı koşullu tahmin olarak kalır. Likidite için henüz hesap modeli yok.',
-        'İkisi birlikte yürütülür, kapsam ve geçiş koşulu yazılı olarak belirlenir.',
-      ],
-      etki: 'Bu karar şu sayfaları etkiler: “Gelir planı”, “Nakit akışı”, “Satış ortaklığı” ve “Genel bakış”. Gelir ve nakit hesabı bugün koşullu abonelik modeliyle yapılır.',
+      etki: 'Bu karar şu sayfaları etkiler: “Gelir planı”, “Nakit akışı”, “Satış ortaklığı” ve “Genel bakış”. Gelir ve nakit hesabı abonelik modeliyle yapılır.',
       sahip: 'yonetici',
-      durum: 'bekliyor',
-      kaynak: 'docs/contents.md F02; birleşik plan K1 (28 Ekim Çarşamba: cevap bekleniyor, cevap gelmemesi onay sayılmaz)',
+      durum: 'verildi',
+      sonuc: 'Abonelik esas alınır. Satıştan komisyon alınmaz. Likidite pilotu seçenek olarak görünür kalır.',
+      kararTarihi: '2026-11-16',
+      kaynak: 'docs/contents.md F02; birleşik plan K1. Karar 16 Kasım 2026 Pazartesi günü verildi. Kullanıcı kararları ajana bıraktı.',
       ilgili: ['/gelir-plani/', '/satis-ortakligi/', '/nakit-akisi/'],
     },
     {

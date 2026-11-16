@@ -530,6 +530,12 @@ export const standartSapma = (xs: number[]) => {
   return Math.sqrt(ortalama(xs.map((x) => (x - m) ** 2)));
 };
 
+/**
+ * Plan öngörüsünün 2027 cirosu (karar listesi 5.4). “Gelir öngörüsü” sayfasının varsayılan seçimiyle aynı tek hesaptır.
+ * Bütçe sayfası bu tutarı kendi abonelik gelirinin yanında söyler.
+ */
+export const planCirosu = (s: SecenekId, b: GelirBaglami = VARSAYILAN_BAGLAM): number => toplam(tekHesap(s, 'mevsim', { ...MEDYAN_SAAT, regl: 'ikisi' }, true, b).gelir);
+
 /** Dört öngörü: kötümser (yüzde 10), medyan (plan, beklenen), ortanca (yüzde 50), iyimser (yüzde 90). */
 export function ongoru(s: SecenekId, regl: ReglPolitikasi = 'ikisi', b: GelirBaglami = VARSAYILAN_BAGLAM) {
   const d = monteCarlo(s, regl, KOSU_SAYISI, 2027, b);

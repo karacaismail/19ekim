@@ -255,7 +255,7 @@ function PlanContent() {
 
       <GuncelPlan />
 
-      <Section id="gantt" index={2} title="Zaman çizelgesi (Gantt şeması)" desc={`Gün sırası program başlangıcından (${longDate(dates.start)}) sayılır. Kesikli çizgiler iki kontrol gününü gösterir. ${longDate(dates.day60)} günü 60. gündür. ${longDate(dates.day90)} günü 90. gündür.`}>
+      <Section id="gantt" index={2} title="Zaman çizelgesi (Gantt şeması)" desc={`Program ${longDate(dates.start)} günü başlar. Gün sırası bu günden sayılır. Kesikli çizgiler iki kontrol gününü gösterir. 60. gün, başlangıçtan 60 gün sonraki ${longDate(dates.day60)} günüdür. 90. gün, başlangıçtan 90 gün sonraki ${longDate(dates.day90)} günüdür.`}>
         <Chart
           id="gantt"
           title="Kişilere göre zaman çizelgesi"
@@ -314,7 +314,7 @@ function AuthorityContent({ ilkNo }: { ilkNo: number }) {
         />
       </Section>
 
-      <Section id="kontrol" index={ilkNo + 1} title="Kontrol noktaları" desc={`Ciro hesaplanırken şu varsayıldı: Satıcıların ${pct(m.planRetention)} kadarı her ay aboneliğini sürdürür.`}>
+      <Section id="kontrol" index={ilkNo + 1} title="Kontrol noktaları" desc={`Gün sırası program başlangıcından, ${longDate(m.dates.start)} gününden sayılır. Ciro hesaplanırken şu varsayıldı: Satıcıların ${pct(m.planRetention)} kadarı her ay aboneliğini sürdürür.`}>
         <Chart
           id="kontrol"
           title="Başlangıçtan bu yana aktif satıcı ve ciro"
@@ -535,7 +535,7 @@ function PendingContent() {
             90 günlük personel maliyeti işveren için {lira(m.staffCost90)} tutarındadır. Bunun {lira(m.sahaCost90)} tutarı saha ekibinin maliyetidir. Saha ekibinde {int(params.sahaCount)} kişi 3 ay, {int(params.sahaDecCount)} kişi {m.decMonths} ay çalışır.
           </p>
           <p>
-            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Temsilci {lira(params.commission)}, sponsor {lira(params.sponsorShare)} ve ekip lideri {lira(params.leadTeamShare)} alır.
+            Bir temsilci satışında toplam pay en çok {lira(m.maxPayout)} olur. Temsilci {lira(params.commission)} alır. Sponsor {lira(params.sponsorShare)}, sponsorun sponsoru {lira(params.sponsorShare2)} ve ekip lideri {lira(params.leadTeamShare)} alır.
           </p>
         </Note>
       </Section>

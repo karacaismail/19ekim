@@ -1,3 +1,4 @@
+import { DEFAULT_PARAMS } from '../src/data/params';
 import { expect, test, type Page } from './fixtures/persona';
 
 /**
@@ -7,7 +8,14 @@ import { expect, test, type Page } from './fixtures/persona';
  */
 const tutar = (s: string) => Number(s.replace(/[^\d]/g, ''));
 
-async function ac(page: Page, genislik = 1512) {
+/** Senaryo tutarları örnek kurla (1 € = 56 ₺) yazıldı. Varsayılan kur ayrı testte denetlenir (karar listesi 5.6). */
+const ORNEK_KUR = 56;
+async function ac(page: Page, genislik = 1512, kur: number | null = ORNEK_KUR) {
+  if (kur !== null)
+    await page.addInitScript((k) => {
+      const anahtar = 'turksab-satis-ortakligi-v2-segment';
+      if (!localStorage.getItem(anahtar)) localStorage.setItem(anahtar, JSON.stringify({ kur: k }));
+    }, kur);
   await page.setViewportSize({ width: genislik, height: 945 });
   await page.goto('satis-ortakligi/?surum=v2');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
@@ -351,9 +359,8 @@ test('320 px: alttaki çubuk sayfanın sonunu ve odaklanan öğeyi örtmez', asy
 
 test('1024 × 768: seçimler önce, özet sonda, canlı sonuç alttaki çubukta', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'şimdilik yalnız Chrome');
+  await ac(page, 1024);
   await page.setViewportSize({ width: 1024, height: 768 });
-  await page.goto('satis-ortakligi/?surum=v2');
-  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await expect(page.locator('.v2-so2-arac')).toBeInViewport();
   const ozetUst = await page.locator('.v2-so2-ozet-kap').evaluate((e) => e.getBoundingClientRect().top);
   const panelUst = await page.locator('.v2-so2-panel').evaluate((e) => e.getBoundingClientRect().top);
@@ -397,4 +404,9 @@ test('ikinci sürüm, ayarlarının ortak tabloya gitmediğini söyler', async (
   await page.goto('satis-ortakligi/?surum=v2');
   await expect(page.locator('[data-v2-yerel-not]')).toHaveText('Bu sürümde yaptığınız ayarlar yalnız bu tarayıcıda saklanır. Ortak kayda yalnız 1. sürümün ayarları kaydedilir.');
   expect(personaServer.writes).toHaveLength(0);
+});
+
+test('varsayılan kur sitenin genel kurudur (karar listesi 5.6)', async ({ page }) => {
+  await ac(page, 1512, null);
+  await expect(page.getByRole('textbox', { name: '1 euro kaç ₺?' })).toHaveValue(String(DEFAULT_PARAMS.eurTry).replace('.', ','));
 });

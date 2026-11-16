@@ -511,7 +511,7 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
 
   test('ayrı gider sayfalarında grubu sayfa belirler (Küme sütunu çelişse de); birleşik eski sayfada Küme sütunu', () => {
     // Kullanıcı kararı 2026-10-20: Giderler TEKNOLOJİ’deki her kalem teknoloji, Giderler OFİS’teki her kalem ofis.
-    const tek = [['Microsoft 365', 'greatdoers', 'Ofis ve işletme', 'Ofis & Lisans', 'USD', 13.13, 'Kur', false, true, '', '']];
+    const tek = [['Microsoft 365', 'greatdoers', 'Ofis ve işletme', 'Ofis ve Lisans', 'USD', 13.13, 'Kur', false, true, '', '']];
     const ofis = [['Kira', '', 'Teknoloji', 'Kira', 'TRY', 1000, 'Kira', false, true, '', '']];
     const ayri = buildModel({ personel: [], giderler: tek, giderler2: ofis });
     expect(ayri.giderler.map((g) => [g.kalem, g.kume])).toEqual([['Microsoft 365', 'teknoloji'], ['Kira', 'ofis']]);
@@ -535,7 +535,17 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
     expect(ekim('Kira')).toBe(1000);
     expect(ekim('Kişi A')).toBe(mm.kisiler[0].y2026.aylar[9].maliyet);
     expect(ekim('Hepsi toplamı')).toBe(Math.round((1000 + mm.giderler[0].tl + mm.kisiler[0].y2026.aylar[9].maliyet) * 100) / 100);
-    expect(r.find((x) => x[1] === 'Araç')![2]).toBe('bt · USD');
+    expect(r.find((x) => x[1] === 'Araç')![2]).toBe('bt (USD)');
+  });
+
+  test('“hepsi” raporunun Ayrıntı sütunu kısa değer: parantezli, orta nokta yok', () => {
+    const tek = [
+      ['Araç', 'bt', 'Teknoloji', 'Yapay Zekâ', 'USD', 100, 'Kur', false, true, '', ''],
+      ['Yerel', '', 'Teknoloji', 'Yapay Zekâ', 'TRY', 10, 'Genel', false, true, '', ''],
+    ];
+    const mm = buildModel({ personel: [NET('Kişi A', 50000), NET('Asgari', '', 'Asgari ücret'), SERBEST], giderler: tek });
+    const ayrinti = Object.fromEntries(motor.rapor(mm, 'hepsi').slice(1).map((x) => [x[1], x[2]]));
+    expect(ayrinti).toMatchObject({ Araç: 'bt (USD)', Yerel: 'TRY', 'Kişi A': 'Bordrolu (Net)', Asgari: 'Bordrolu (Asgari ücret)', Serbest: 'Freelancer (fatura)' });
   });
 
   test('ızgara yoksa her ay etkin ve varsayılan tutar (eski Sheets kurulumu)', () => {
@@ -545,5 +555,56 @@ test.describe('OPEX motoru: aylık ızgara (ay ay etkin / tutar)', () => {
       expect([...g.aktif.y2026, ...g.aktif.y2027].every(Boolean)).toBe(true);
     }
     for (const k of m.kisiler) expect([...k.ozel.y2026, ...k.ozel.y2027].some(Boolean)).toBe(false);
+  });
+});
+
+/**
+ * Sheets ve sayfa modelindeki okur metinleri (kullanıcı onayı 13 Kasım 2026): noktalı virgül, uzun çizgi, orta nokta,
+ * “&” ve ok kullanılmaz; açıklama cümlesi en çok 15 kelimedir. Kategori adları “ve” ile yazılır; eski adlar okunur.
+ */
+test.describe('OPEX motoru: Sheets metinleri yalın Türkçe', () => {
+  const YASAK = /;|—|–| · |→| & /;
+  const cumleler = (metin: string) => metin.split(/(?<=[.!?])\s+/).map((c) => c.trim()).filter(Boolean);
+  const kelimeSayisi = (c: string) => c.split(/\s+/).filter((w) => /[\p{L}\d]/u.test(w)).length;
+  const satir = (kalem: string, kategori: string, tutar: number) => [kalem, '', 'Teknoloji', kategori, 'TRY', tutar, 'Genel', false, true, '', ''];
+
+  test('kategori adları “ve” ile; eski adlar (Sunucu & Bulut, Ofis & Lisans) yeni ada çevrilir, özel ad korunur', () => {
+    expect(motor.SECENEKLER.kategori).toEqual(['Yapay Zekâ', 'Sunucu ve Bulut', 'Ofis ve Lisans', 'Kira', 'Faturalar', 'Ofis ihtiyaçları']);
+    const mm = buildModel({
+      personel: [],
+      giderler: [satir('Sunucu', 'Sunucu & Bulut', 100), satir('Bulut', 'Sunucu ve Bulut', 50), satir('Lisans', ' Ofis & Lisans ', 10), satir('Özel', 'Ar&Ge', 5)],
+    });
+    expect(mm.giderler.map((g) => g.kategori)).toEqual(['Sunucu ve Bulut', 'Sunucu ve Bulut', 'Ofis ve Lisans', 'Ar&Ge']);
+    const sunucu = mm.kategoriler.filter((k) => k.kategori.startsWith('Sunucu'));
+    expect(sunucu, 'eski ve yeni ad tek kategoride toplanır').toHaveLength(1);
+    expect(sunucu[0].buAy).toBe(150);
+    expect(motor.rapor(mm, 'teknoloji').slice(1).map((r) => r[1])).not.toContain('Sunucu & Bulut');
+  });
+
+  test('parametre ve teşvik metinleri ile uyarılar: yasak işaret yok, cümle en çok 15 kelime', () => {
+    const kisi = (ad: string, tutar: number | string, tesvik = '') => [ad, 'Bordrolu', 'Net', tutar, 'Evet', tesvik, 'Otomatik', true, ''];
+    const input = buildInput({
+      params: { kur_usd: '#N/A', tufe_yillik: 29.73, rapor_ayi: 13, zam_elle: 'abc' },
+      personel: [kisi('Aynı', 40000), kisi('Aynı', 50000), kisi('Tutarsız', ''), kisi('Kodlu', 40000, 'YOK-KOD')],
+      giderler: [['Bilinmez', '', 'Başka küme', 'Kira', 'GBP', 10, 'Genel', false, true, '', '']],
+    });
+    input.parametreler = input.parametreler!.filter((r) => r[4] !== 'damga');
+    input.tesvikler = [...input.tesvikler!, ['YENI', 'Yeni teşvik', 'Bilinmez tür', 1, 1, 'Koşullu', 'Evet', true, '']];
+    const uyarilar = motor.hesapla(input, { simdi: NOW }).uyarilar;
+    const basliksiz = buildInput();
+    basliksiz.personel = exampleTohum.personel;
+    uyarilar.push(...motor.hesapla(basliksiz, { simdi: NOW }).uyarilar);
+    expect(uyarilar.length, 'her uyarı türü üretildi').toBeGreaterThanOrEqual(11);
+    const metinler = [
+      ...motor.PARAMETRE_TANIMLARI.map((t) => t.aciklama),
+      ...motor.TESVIK_TANIMLARI.flatMap((t) => [t.ad, t.kosul]),
+      ...uyarilar,
+    ];
+    for (const metin of metinler) {
+      expect(metin, metin).not.toMatch(YASAK);
+      for (const c of cumleler(metin)) expect(kelimeSayisi(c), c).toBeLessThanOrEqual(15);
+    }
+    // Adda eğik çizgiyle iki fikir birleşmez (“Ar-Ge / tasarım” yerine “Ar-Ge veya tasarım”).
+    for (const t of motor.TESVIK_TANIMLARI) expect(t.ad, t.ad).not.toMatch(/ \/ /);
   });
 });

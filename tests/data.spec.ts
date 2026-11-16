@@ -12,7 +12,8 @@ import { buildModel } from '../src/data/model';
 import { kararDurumu, makeKararlar, type KararKaydi } from '../src/data/kararlar';
 import { DEFAULT_PARAMS, loadParams, loadParamsDetay, PARAM_GROUPS, PARAMS_KEY, type Params } from '../src/data/params';
 import type { OrgNode } from '../src/data/tree';
-import { addDays, monthStart, shiftText } from '../src/lib/dates';
+import { addDays, longDate, monthStart, shiftText } from '../src/lib/dates';
+import { ASAMALAR, OLAYLAR, TAKVIM_SON } from '../src/data/istihdamPlani';
 import { presetOptions, presetsOf } from '../src/lib/scenarioOptions';
 import { acikAd, acikTerimler } from '../src/data/politikalar/terimler';
 import { buildModel as buildOpex } from './opex-fixture';
@@ -77,7 +78,8 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
   });
 
   test('kontrol noktaları model ile aynı: 30/60/90. gün, kümülatif aktif 12 / 47 / 100', () => {
-    expect(m.checkpoints.map((c) => c.date)).toEqual(['2026-11-30', '2026-12-30', '2027-01-30']);
+    // Başlangıç günü 0. gündür: “N. gün” = başlangıç + N gün (kullanıcı kararı 16 Kasım 2026, karar listesi 3.4).
+    expect(m.checkpoints.map((c) => c.date)).toEqual(['2026-12-01', '2026-12-31', '2027-01-30']);
     expect(m.checkpoints.map((c) => c.aktif)).toEqual([12, 47, 100]);
     expect(m.checkpoints.map((c) => c.kayit)).toEqual([95, 300, 600]);
   });
@@ -121,7 +123,7 @@ test.describe('veri tutarlılığı (varsayılan parametreler)', () => {
     expect(m.salaries.dijital).toBeCloseTo(28_075.5 * 1.25);
     expect(m.payRules[7].fixed).toContain('Ayda 50.000 ₺ net maaş');
     expect(m.payRules.map((r) => r.role)).toEqual(['saha-uzmani', 'ekip-lideri', 'ekip-lideri', 'pazarlamaci', 'segika', 'dijital-pazarlama', 'asistan', 'organizator']);
-    expect(m.maxPayout).toBe(3_250);
+    expect(m.maxPayout).toBe(3_500);
   });
 
   test('mesai modeli yasal tavanda: günde ≤ 11 sa, Dönem 2 haftada 45 sa, yıllık fazla çalışma ≤ 270 sa', () => {
@@ -221,7 +223,7 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
 
   test('program başlangıcı kayınca kontroller, takvim, planlar ve metindeki tarihler birlikte kayar', () => {
     const x = withParams({ startDate: '2026-11-15' });
-    expect(x.checkpoints.map((c) => c.date)).toEqual(['2026-12-14', '2027-01-13', '2027-02-13']);
+    expect(x.checkpoints.map((c) => c.date)).toEqual(['2026-12-15', '2027-01-14', '2027-02-13']);
     expect(x.role('pazarlamaci').plan[0].from).toBe(addDays(m.role('pazarlamaci').plan[0].from, 14));
     expect(x.digital.integrations[0].date).toBe(addDays(m.digital.integrations[0].date, 14));
     expect(x.hiringOrder[2].date).toBe('15 Kasım 2026 Pazar');
@@ -256,6 +258,92 @@ test.describe('parametreler: değişiklik tüm verilere tutarlı yansır', () =>
     expect(shiftText('23 Kasım Pazartesi günü başlar', 2)).toBe('25 Kasım Çarşamba günü başlar');
     expect(shiftText('1 Kasım 2026 Pazar', 1)).toBe('2 Kasım 2026 Pazartesi');
     expect(shiftText('28 Şubat 2027 Pazar ile 1 Mart 2027 Pazartesi arası', 1)).toBe('1 Mart 2027 Pazartesi ile 2 Mart 2027 Salı arası');
+  });
+});
+
+/**
+ * Gün sayımı, plan sonu ve sorumlular (kullanıcı kararları 16 Kasım 2026, karar listesi 3.4, 4. konu, 5.7 ve 5.8).
+ * Sitenin tek kuralı: başlangıç günü 0. gündür. “N. gün”, başlangıçtan N gün sonraki gündür.
+ */
+test.describe('gün sayımı, plan sonu ve sorumlular', () => {
+  const GUN_SIRASI = /(?<![\d.])(30|60|90)\. gün/u;
+  for (const startDate of [DEFAULT_PARAMS.startDate, '2026-11-15']) {
+    test(`başlangıç ${startDate}: N. gün başlangıçtan N gün sonradır, her yerde aynı kural`, () => {
+      const x = withParams({ startDate });
+      expect([x.dates.day30, x.dates.day60, x.dates.day90]).toEqual([30, 60, 90].map((n) => addDays(startDate, n)));
+      expect(x.checkpoints.map((c) => [c.day, c.date])).toEqual([
+        ['30. gün', x.dates.day30],
+        ['60. gün', x.dates.day60],
+        ['90. gün', x.dates.day90],
+      ]);
+      // Dijital pazarlama Gantt’ının işaretleri aynı kuralla çizilir.
+      expect(x.digital.marks.map((k) => k.date)).toEqual([x.dates.day60, x.dates.day90]);
+      // Asistanın 60. ve 90. gün raporları kontrol gününde biter.
+      const asistan = x.role('asistan').plan;
+      for (const [n, gun] of [[60, x.dates.day60], [90, x.dates.day90]] as const) {
+        const rapor = asistan.find((r) => r.action.includes(`${n}. gün raporunu`))!;
+        expect(rapor.to, `${n}. gün raporu`).toBe(gun);
+        expect(rapor.target, `${n}. gün raporu`).toContain(longDate(gun));
+      }
+      // Büyüme modeli: aktif temsilci hedefleri 60. ve 90. gündedir.
+      expect(x.growth.growthKpis.find((k) => k.metric === 'Aktif temsilci')?.when).toBe(`Önce ${longDate(x.dates.day60)}, sonra ${longDate(x.dates.day90)}`);
+      // Eski plandaki her “N. gün” sözü hangi günden sayıldığını söyler.
+      const satirlar = [...x.managerPlan, ...x.roles.flatMap((r) => r.plan)].filter((r) => GUN_SIRASI.test(r.action));
+      expect(satirlar.length).toBeGreaterThanOrEqual(4);
+      for (const r of satirlar) expect(r.action).toContain(`Gün sırası ${longDate(startDate)} gününden sayılır`);
+    });
+  }
+
+  test('eski kontrol günleri ve eski plan sonu veride kalmadı', () => {
+    // 30 Aralık 2026 eski kuralla 60. gündü. 27 Şubat 2027 eski plan sonuydu.
+    const ESKI = ['2026-12-30', '30 Aralık', '2027-02-27', '27 Şubat'];
+    const bulunan: string[] = [];
+    const gez = (o: unknown, yol: string) => {
+      if (typeof o === 'string') for (const e of ESKI) if (o.includes(e)) bulunan.push(`${yol}: ${o.slice(0, 120)}`);
+      if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) gez(v, `${yol}.${k}`);
+    };
+    // Gelir öngörüsünün hesapladığı hedef günleri plan tarihi değildir. Plan verisi taranır.
+    const { roles: rolList, managerPlan, calendarEvents, checkpoints, digital, growth, decisions, openDecisions, governanceTree, workPeriods, hiringOrder } = m;
+    gez({ rolList, managerPlan, calendarEvents, checkpoints, digital, growth, decisions, openDecisions, governanceTree, workPeriods, hiringOrder }, 'plan');
+    expect(bulunan).toEqual([]);
+  });
+
+  test('organizatör: ilk protokol hedefi 16 Ocak 2027, en geç 30 Ocak 2027; 3 protokol plan sonuna kadar', () => {
+    const org = m.role('organizator');
+    const is = org.tasks.find((t) => t.task.startsWith('Oda, dernek'))!.measure;
+    for (const tarih of ['16 Ocak 2027 Cumartesi', '30 Ocak 2027 Cumartesi', longDate(TAKVIM_SON)]) expect(is).toContain(tarih);
+    expect(longDate(TAKVIM_SON)).toBe('28 Şubat 2027 Pazar');
+    expect(org.kpis.find((k) => k.metric === 'Kurumsal iş birliği protokolü')?.when).toBe(`${longDate(TAKVIM_SON)} gününe kadar toplam`);
+    expect(org.plan[1].target).toContain('16 Ocak 2027 Cumartesi');
+    expect(org.plan[1].target).toContain('30 Ocak 2027 Cumartesi');
+    expect(org.plan.at(-1)!.to).toBe(TAKVIM_SON);
+    expect(org.plan.at(-1)!.target).toContain(longDate(TAKVIM_SON));
+  });
+
+  test('güncel plan: her aşamanın ve her olayın sorumlusu var', () => {
+    const ISMAIL = 'İsmail Karaca';
+    expect(Object.fromEntries(ASAMALAR.map((a) => [a.id, a.sorumlu]))).toEqual({ f0: ISMAIL, f1: ISMAIL, f2: ISMAIL, f3: ISMAIL, d1: ISMAIL, d2: ISMAIL, f4: ISMAIL });
+    const ozel: Record<string, string> = {
+      '2026-11-06': 'İsmail Karaca ve mali müşavir',
+      '2026-11-10': 'İsmail Karaca ve avukat',
+      '2026-11-13': 'Avukat ve geliştirici ekip',
+      '2026-12-15': 'Organizatör',
+      '2026-12-31': 'İsmail Karaca ve mali müşavir',
+    };
+    expect(OLAYLAR).toHaveLength(17);
+    for (const o of OLAYLAR) expect(o.sorumlu, o.baslik).toBe(ozel[o.tarih] ?? ISMAIL);
+  });
+
+  test('güncel plan: dalga kontrol günü dalganın başladığı günden N gün sonradır, açıklama başlangıcı söyler', () => {
+    const dalga = { Birinci: ASAMALAR.find((a) => a.id === 'd1')!.bas, İkinci: ASAMALAR.find((a) => a.id === 'd2')!.bas };
+    const kontroller = OLAYLAR.filter((o) => /dalganın \d+\. günü/u.test(o.baslik));
+    expect(kontroller).toHaveLength(5);
+    for (const o of kontroller) {
+      const [, ad, n] = o.baslik.match(/^(Birinci|İkinci) dalganın (\d+)\. günü/u)!;
+      const bas = dalga[ad as keyof typeof dalga];
+      expect(o.tarih, o.baslik).toBe(addDays(bas, Number(n)));
+      expect(o.aciklama, o.baslik).toContain(`${ad} dalga ${longDate(bas)} günü başlar. Bu tarih o günden ${n} gün sonradır.`);
+    }
   });
 });
 
@@ -926,7 +1014,7 @@ test.describe('karar defteri (adım 1a)', () => {
     expect(kararDurumu({ ...verilen, yururlukTarihi: undefined }, '2030-01-01')).toBe('verildi');
   });
 
-  test('19 Ekim kararları verildi, program açık kararları bekliyor (26 Ekim son tarihli ikisi bugün gecikmiş); yeni kayıtlar: iş modeli açık, Segika komisyonu ve gider kapsamı 28 Ekim verildi', () => {
+  test('19 Ekim kararları verildi, program açık kararları bekliyor (26 Ekim son tarihli ikisi bugün gecikmiş); yeni kayıtlar: iş modeli 16 Kasım verildi, Segika komisyonu ve gider kapsamı 28 Ekim verildi', () => {
     for (const d of m.decisions) expect(k.kayitlar.some((x) => x.durum === 'verildi' && x.soru.includes(d.topic) || x.sonuc === d.decision), d.topic).toBe(true);
     for (const d of m.openDecisions) {
       const x = k.kayitlar.find((y) => y.soru === d.topic)!;
@@ -935,9 +1023,11 @@ test.describe('karar defteri (adım 1a)', () => {
       expect(x.sonTarih).toBe(d.deadline);
       expect(kararDurumu(x, '2026-10-28')).toBe('gecikti');
     }
+    // Karar 16 Kasım 2026: abonelik esas alınır (karar listesi 5.1 ve 9.7).
     const is = by('is-modeli');
-    expect(is.durum).toBe('bekliyor');
-    expect(is.secenekler!.length).toBeGreaterThanOrEqual(2);
+    expect(is.durum).toBe('verildi');
+    expect(is.sonuc).toMatch(/Abonelik esas alınır/);
+    expect(is.kararTarihi).toBe('2026-11-16');
     expect(is.soru).toMatch(/aboneli/i);
     expect(is.ilgili).toEqual(expect.arrayContaining(['/gelir-plani/', '/satis-ortakligi/']));
     const kom = by('segika-komisyon');
@@ -956,7 +1046,8 @@ test.describe('karar defteri (adım 1a)', () => {
     expect(kararDurumu(aktarim, '2026-10-29')).toBe('yururlukte');
     // Özetler
     const ozet = k.ozet('2026-10-28');
-    expect(ozet.bekleyen).toBeGreaterThanOrEqual(3);
+    // İş modeli kararı 16 Kasım 2026'da verildi. Bekleyen kayıt bir azaldı.
+    expect(ozet.bekleyen).toBeGreaterThanOrEqual(2);
     expect(ozet.gecikmis).toBe(2);
     expect(ozet.verilen).toBeGreaterThanOrEqual(6 + 2);
     // Gizlilik: kişi adı ve Mogem gelir tutarı kayıtlarda yok.

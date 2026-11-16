@@ -1096,7 +1096,7 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   bağımsızdır, bu yüzden test yalnız Chromium’da çalışır.
 - Sayfa listesi ve gezinme `tests/sayfa-gezgini.ts` dosyasındadır. Liste derlenmiş `dist` klasöründen okunur. Böylece
   `/politikalar/cozum/` gibi alt sayfalar da denetlenir. Yalın Türkçe ve boşluk testleri aynı gezgini kullanır.
-- Okunur değer yazımı (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027, Cumartesi” biçimindedir. “2027-05-01”
+- Okunur değer yazımı (kullanıcı kararı 13 Kasım 2026): tarih “1 Mayıs 2027 Cumartesi” biçimindedir. “2027-05-01”
   yazılmaz. Ondalık ayırıcı virgüldür: “3,5”. Yüzde işareti sayıdan öncedir: “%20”. Birimler eğik çizgiyle zincir
   yapılmaz, cümle yazılır. Kaynak tablosundaki değer için `metin` alanı vardır (`gelir2027Kaynak.json`). Test bu biçimleri
   künye dışındaki bütün metinde arar.
@@ -1125,8 +1125,8 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
 - Sayfa başlığındaki amaç satırı tek cümledir (ux.md P6.1). Rol sayfasında görev tanımının ve ücretin yalnız ilk cümlesi
   başlıkta durur. Kalan cümleler başlığın hemen altındaki paragraftadır (`.rol-gorev-ozeti`).
 - Yüzde alanında işaret sayıdan önce gelir (“%70”). Giderler sayfasında tutar simgesi sayıdan sonra gelir
-  (“50,00 €”). Para birimi süzgecinde “TRY” yerine “TL” görünür. Veri kodu “TRY” kalır.
-- Ajandada tarih ay adıyla yazılır (“2 Kasım”). Aralık “2 Kasım ile 27 Kasım arası” biçimindedir.
+  (“50,00 €”). Para birimi süzgecinde “TRY” yerine “₺” görünür. Veri kodu “TRY” kalır.
+- Ajandada tarih ay adı ve gün adıyla yazılır (“2 Kasım Pazartesi”). Aralık “2 Kasım Pazartesi ile 27 Kasım Cuma arası” biçimindedir.
 - Başabaş kesişimi, değerin ilk kez sıfıra indiği ayın içindedir (`breakeven.ts` `crossing()`). Eski kod tarihi bir ay
   erken gösteriyordu. Test `tests/data.spec.ts` “başabaş kesişimi” testidir.
 - Çalışma rehberlerinde proje ayrımı korunur. iStoc rehberinde “Segika”, Segika rehberinde “iStoc” adı geçmez
@@ -1162,8 +1162,8 @@ Sitede uygulanan kalıcı kurallar şunlardır:
   “Kurmay” önekleri kullanılmaz. İstoç ve Segika iki ayrı projedir, iki CRM rolü birleştirilmez.
 - Sayfa adları şunlardır: “Parametreler”, “Nakit akışı”, “MLM (çok katmanlı pazarlama)”, “OPEX (işletme giderleri)”.
   Kısaltma adın içinde açılır. OPEX kırıntısı “Finans › OPEX (işletme giderleri)” olur.
-- “Medyan” senaryosunun ve gelir öngörüsünün adı “Plan”dır. İstihdam v2’deki kadro seçeneği “Medyan” adını korur, çünkü
-  karar yalnız senaryo içindir. Gerçek istatistik ortancası yine “medyan” yazılabilir.
+- “Medyan” senaryosunun ve gelir öngörüsünün adı “Plan”dır. İstihdam v2’deki kadro seçeneğinin adı “Orta”dır (karar 16
+  Kasım 2026). Kodda kimlik `medyan` kalır. Gerçek istatistik ortancası yine “medyan” yazılabilir.
 - Para birimi her yerde “₺” yazılır. Ek “lira” sözüne göre ses uyumu alır: “₺’dır”, “₺’dan”, “₺’ya”, “₺’lık”. Gizli
   e-posta sayfasındaki kişisel mektup metni bu kuralın dışındadır.
 - Her tarihte gün adı yazılır, tablo ve grafik dahil (`src/lib/dates.ts → longDate`, `shortDate`). Cümlede tarihten sonra
@@ -1171,13 +1171,31 @@ Sitede uygulanan kalıcı kurallar şunlardır:
   eksen bir olayın günü değil, ölçektir. Bayram ve olay adlarının içindeki tarihe gün adı eklenmez. Kırıntının kökündeki “19 Ekim” sitenin
   adıdır, tarih değildir. `shiftText` gün adını yeniden hesaplar ve tarihin biçimini korur.
 - Aktif satıcı, ilk ödemesini yapmış ve ürünleri yayında olan satıcıdır. Rol sayfalarındaki “Kavramlar” kutusu yalnız o
-  sayfada geçen terimleri tanımlar (`src/data/kavramlar.ts`). Tanımı kaynakta olmayan terim eklenmez.
+  sayfada geçen terimleri tanımlar (`src/data/kavramlar.ts`). Kullanıcı 16 Kasım 2026'da kararları ajana bıraktı
+  (“kararları sen ver”). Bu yüzden kaynakta tanımı olmayan terimin anlamı, terimin sitedeki kullanımından çıkarılır.
+  Tanım kavram listesine ya da terimin geçtiği tek cümleye yazılır. Örneğin “ECA (olay, koşul, eylem)”.
 - Ortağa ödeme günleri müşterinin ödeme gününden sayılır. “İlk 90 gün” ve “6. ay” kayıt gününden sayılır. Haftalar
   programın başlangıcından sayılır.
 - Hedefleri İsmail Karaca günceller. Ekip liderini İsmail Karaca seçer. Temsilci ağının uyum kurallarını her ay İsmail
-  Karaca kontrol eder. Harcama yetki sınırının tutarı henüz belirlenmedi.
-- Temsilci ağında pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru (`agDerinlik` en çok 2). MLM sayfasında
-  ikinci kademenin tutarı henüz belirlenmedi. Tutar uydurulmaz, kullanıcıya sorulur.
+  Karaca kontrol eder. Harcama yetki sınırının tutarı henüz belirlenmedi. Güncel eylem planındaki her aşamanın ve olayın
+  sorumlusu yazılıdır (`istihdamPlani.ts → sorumlu`).
+- Gün sayma kuralı tektir (karar 16 Kasım 2026): başlangıç günü 0. gündür. “N. gün”, başlangıçtan N gün sonradır.
+  Her “30., 60., 90. gün” yazısı hangi günden sayıldığını söyler.
+- Temsilci ağında pay en çok 2 kademe yukarı gider: sponsor ve sponsorun sponsoru (`agDerinlik` en çok 2). İkinci
+  kademenin tutarı satış başına 250 ₺’dır (karar 16 Kasım 2026, `params.sponsorShare2`). Bu tutar satış ortaklığı
+  hesabındaki ikinci kademe payıyla aynıdır.
+- Satıştan komisyon alınmaz (karar listesi 9.7). Komisyon alındığını ya da komisyon indirimi verildiğini söyleyen metin
+  yazılmaz. Ortağa ödenen komisyon bu kuralın dışındadır. Emanet ödeme (escrow) ileri tarihli bir özelliktir. Değer
+  önerisi bu sözü “İleride verilir” rozetiyle ve gelecek zamanla yazar. Kupon kalır (9.6). Pazar hedefi globaldir (9.5).
+- İş modeli kararı verildi (16 Kasım 2026, `kararlar.ts → is-modeli`): abonelik esas alınır. Likidite pilotu seçenek
+  olarak görünür kalır. Oyunlaştırma ödülleri abonelik üzerinden verilir.
+- Satış ortaklığı hesabının varsayılan kuru sitenin genel kurudur (`DEFAULT_PARAMS.eurTry`, karar listesi 5.6). Ortak
+  kayıttaki (Sheets “Persona Ayarları”) kur da bu değerdir. Sürüm 2 testlerinin senaryoları örnek kurla (56) çalışır.
+- 2027 bütçesi abonelik gelirini kullanır. Gelir kartı, gelir öngörüsünün aynı kadroyla öngördüğü ciroyu da söyler
+  (karar listesi 5.4, `planCirosu`). Fiyat tablosu ile hesap aynı 2027 fiyatını kullanır (`fiyat2027Of`). Dolar fiyatlı
+  kalemde 2027 artışı yoktur (5.5).
+- Değer önerisindeki P1 ile P7 arasındaki esnaf tipleri `ESNAF_TIPLERI` içinde tanımlıdır. Tanımlar her tipe yazılan
+  sözlerden çıkarıldı.
 - Gelir planında reklam bütçesi kuralı “Varsayımlar” bölümünde bir kez tam yazılır. Öteki yerler bu bölüme gönderir.
 - Nakit akışında senaryo açıklaması yalnız sayfa başındaki sonuç kutusunda yazar (`SenaryoSecimi aciklamasiz`).
 - Satış ortaklığı v2: paket adları Basic, Platinium, Enterprise. Sayfa kayınca araç satırındaki grup başlıkları görünmez
@@ -1200,7 +1218,7 @@ içindedir. Uygulanan kalıcı kararlar şunlardır:
   Tarih özet satırındadır. Uzun özet değeri sağa yaslanmaz, satırın başından okunur.
 - Gecikmiş karar uyarı rengiyle yazılır. “Gecikti” sözü metinde de vardır.
 - Son tarih grafiğinde “Bugün” çizgisi vardır. Bugün son tarihten sonraysa grafik bugünü de gösterir.
-- Gantt çubuğunun etiketi kısa tarih aralığıdır (“1 Ara – 26 Ara”). Uzun aralık metni özet ve listede kalır.
+- Gantt çubuğunun etiketi gün adlı tarih aralığıdır (“1 Aralık Salı – 26 Aralık Cumartesi”). Uzun aralık metni özet ve listede kalır.
 - İşveren maliyeti bileşim grafiğinde gelir vergisi ile damga vergisi tek dilimdir (aynı ton). Ayrıntı özet cümlesindedir.
 - Yapışık özet şeridinde telefonda açılan liste şeridin altında katman olarak açılır. Sayfa kayınca ya da Escape ile kapanır.
 - JSON panelinde kapalıyken “+”, açıkken “−” görünür.

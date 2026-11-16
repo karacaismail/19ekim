@@ -376,7 +376,7 @@ function Icerik({ pathname }: { pathname: string }) {
         ) : null}
         <DataTable<(typeof CHATGPT.satirlar)[number]>
           id="chatgpt-karsilastirma"
-          title="Medyan kadro seçeneği"
+          title="Orta kadro seçeneği"
           rowKey={(x) => x.ad}
           columns={[
             { key: 'ad', header: 'Ölçü', rowHeader: true, minWidth: '12rem', render: (x) => x.ad },

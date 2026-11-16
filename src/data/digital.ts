@@ -169,9 +169,10 @@ export function makeDigital(p: Params) {
     })),
     planStart: addDays('2026-11-02', d),
     planEnd: addDays('2027-01-30', d),
+    // Başlangıç günü 0. gündür: “N. gün” program başlangıcından N gün sonradır (kullanıcı kararı 16 Kasım 2026, 3.4).
     marks: [
-      { date: addDays('2026-12-30', d), label: 'Planın 60. günü' },
-      { date: addDays('2027-01-30', d), label: 'Planın 90. günü' },
+      { date: addDays(p.startDate, 60), label: 'Planın 60. günü' },
+      { date: addDays(p.startDate, 90), label: 'Planın 90. günü' },
     ],
   };
 }

@@ -7,7 +7,7 @@ test('masaüstü: beş rol sekmesi, ürün ve rol değişir, ayar sonucu güncel
   await page.goto('satis-ortakligi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
   await expect(page.getByRole('tab')).toHaveCount(5);
-  await expect(page.locator('.so2-fiyat strong')).toHaveText('223.440 ₺');
+  await expect(page.locator('.so2-fiyat strong')).toHaveText('220.687 ₺'); // 399 € × 55,31 ₺ (sitenin genel kuru) × 10 ay
   await page.getByRole('button', { name: 'Segika' }).click();
   await expect(page.locator('.so2-fiyat strong')).toHaveText('31.200 ₺');
   await page.getByRole('tab', { name: /Kadrolu/ }).click();
@@ -95,7 +95,7 @@ test('koşul setleri: ana program korunur, kademeli ağ ve diyagram, İş ortakl
   await page.setViewportSize({ width: 1512, height: 945 });
   await page.goto('satis-ortakligi/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
-  await expect(page.locator('.so2-fiyat strong')).toHaveText('223.440 ₺');
+  await expect(page.locator('.so2-fiyat strong')).toHaveText('220.687 ₺'); // 399 € × 55,31 ₺ (sitenin genel kuru) × 10 ay
 
   // Temsilci ağı: herkes ayda 2 satış, 2 temsilci getirir; Ahmet = 2 × 2.500 + 2 × 2 × 500 + 4 × 2 × 250 = 9.000 ₺.
   await page.getByRole('button', { name: /Bağımsız temsilci, kademeli ağ/ }).click();
@@ -176,7 +176,7 @@ test('sürüm seçici: v1 ve v2 ayrı ayarlarla çalışır, v2 adresten açıl�
   await expect(page).toHaveURL(/[?&]surum=v2/);
   await expect(page.getByRole('tab')).toHaveCount(5);
   // v2 kendi ayarıyla başlar: v1'deki Segika seçimi v2'ye geçmez.
-  await expect(page.locator('.v2-so2-fiyat strong')).toHaveText('223.440 ₺');
+  await expect(page.locator('.v2-so2-fiyat strong')).toHaveText('220.687 ₺'); // 399 € × 55,31 ₺ (sitenin genel kuru) × 10 ay
   // v2 kendi stil dosyasıyla biçimlenir.
   expect(await page.locator('.v2-so2-roller').evaluate((e) => getComputedStyle(e).display)).toBe('grid');
   await page.getByText('Karar verisi (JSON)').click();

@@ -263,20 +263,21 @@ const organizator: Role = {
   tasks: [
     { task: 'Her iş günü satıcı eğitimi (5 modül, M1–M5)', measure: 'Eğitim 17:00’de başlar ve 18:00’de biter. Haftada 5 eğitim oturumu yapın. Bir haftada toplam en az 50 kişi katılsın.' },
     { task: '15 kişilik segment organizasyonu', measure: 'Haftada 2 (Salı ve Perşembe)' },
-    { task: 'Oda, dernek ve sektör topluluklarıyla iş birliği', measure: '30 Ocak Cumartesi gününe kadar 1 iş birliği protokolü yapın. 27 Şubat Cumartesi gününe kadar toplam 3 protokol yapın.' },
+    // İlk protokolün hedef ve son günü (karar listesi 5.8) ile plan sonu (5.7): kullanıcı kararları 16 Kasım 2026.
+    { task: 'Oda, dernek ve sektör topluluklarıyla iş birliği', measure: 'İlk iş birliği protokolünün hedefi 16 Ocak 2027 Cumartesi günüdür. İlk protokolü en geç 30 Ocak 2027 Cumartesi günü yapın. 28 Şubat 2027 Pazar gününe kadar toplam 3 protokol yapın.' },
     { task: 'Eğitimden kayıt ve aktif satıcı', measure: '90 günlük plan süresince eğitimden yaklaşık 60 kayıt gelir. Aynı sürede yaklaşık 12 aktif satıcı kazanılır.' },
   ],
   kpis: [
     { metric: 'Eğitim oturumu', value: '5', unit: 'oturum', when: 'Her hafta, 7 Aralık Pazartesi gününden başlayarak' },
     { metric: 'Katılımcı', value: 'En az 50', unit: 'kişi', when: 'Her hafta toplam, 14 Aralık Pazartesi gününden başlayarak' },
     { metric: 'Eğitimden kayıt', value: 'Aralık’ta 5, Ocak’ta 10', unit: 'kayıt', when: 'Haftalık hedef' },
-    { metric: 'Kurumsal iş birliği protokolü', value: '3', unit: 'protokol', when: '27 Şubat Cumartesi gününe kadar toplam' },
+    { metric: 'Kurumsal iş birliği protokolü', value: '3', unit: 'protokol', when: '28 Şubat 2027 Pazar gününe kadar toplam' },
   ],
   ramp: { metric: 'Haftalık katılımcı', values: [30, 50, 60], months: ['Aralık', 'Ocak', 'Şubat'] },
   plan: [
     { from: '2026-12-01', to: '2026-12-12', action: 'İşe uyum eğitimi alır. Salonu düzenler. Bir deneme oturumu yapar. Sonra her gün eğitim verir', target: 'Haftada 5 oturum yapılır. Katılımcı hedefi 30 kişidir' },
-    { from: '2026-12-14', to: '2027-01-16', action: 'Tam çalışma düzenine geçer. Haftada 5 eğitim ve 2 organizasyon yapar. Kurumlarla görüşür', target: 'Haftada 50 katılımcı gelir. Bir oda ya da dernekle 1 iş birliği protokolü imzalanır' },
-    { from: '2027-01-18', to: '2027-02-27', action: 'Satıcıları aktif hâle getirmek için kampanya yapar. Rehberlik (mentor) programını başlatır. 2. ve 3. protokolü imzalar', target: 'Haftada 60 katılımcı gelir. Toplam 3 protokol imzalanmış olur', milestone: true },
+    { from: '2026-12-14', to: '2027-01-16', action: 'Tam çalışma düzenine geçer. Haftada 5 eğitim ve 2 organizasyon yapar. Kurumlarla görüşür', target: 'Haftada 50 katılımcı gelir. Bir oda ya da dernekle ilk iş birliği protokolü imzalanır. Protokolün hedef tarihi 16 Ocak 2027 Cumartesi günüdür. En geç 30 Ocak 2027 Cumartesi günü imzalanır' },
+    { from: '2027-01-18', to: '2027-02-28', action: 'Satıcıları aktif hâle getirmek için kampanya yapar. Rehberlik (mentor) programını başlatır. 2. ve 3. protokolü imzalar', target: 'Haftada 60 katılımcı gelir. 28 Şubat 2027 Pazar gününe kadar toplam 3 protokol imzalanır', milestone: true },
   ],
   hours: {
     weekday: WEEKDAY,
@@ -336,8 +337,8 @@ const asistan: Role = {
   ramp: { metric: 'Aylık teslim (doküman ve rapor)', values: [10, 12, 12] },
   plan: [
     { from: '2026-11-02', to: '2026-11-27', action: 'Şablonları hazırlar. Kazanç planı seçeneklerini ve ekip lideri seçim belgesini hazırlar', target: 'Teslim tarihleri 14 Kasım 2026 Cumartesi ve 27 Kasım 2026 Cuma günüdür', milestone: true },
-    { from: '2026-11-30', to: '2026-12-30', action: '5 eğitim sunumunu (M1’den M5’e kadar) hazırlar. 60. gün raporunu hazırlar', target: '5 sunum 26 Aralık 2026 Cumartesi gününe kadar biter. Rapor 30 Aralık 2026 Çarşamba gününe kadar biter' },
-    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabını yazar. 90. gün raporunu hazırlar. 1 Şubat 2027 Pazartesi günü başlayan yeni çalışma düzeninin vardiya listesini hazırlar', target: 'Rapor 30 Ocak 2027 Cumartesi gününe kadar biter', milestone: true },
+    { from: '2026-11-30', to: '2026-12-31', action: '5 eğitim sunumunu (M1’den M5’e kadar) hazırlar. 60. gün raporunu hazırlar. Gün sırası 1 Kasım 2026 Pazar gününden sayılır', target: '5 sunum 26 Aralık 2026 Cumartesi gününe kadar biter. Rapor 31 Aralık 2026 Perşembe gününe kadar biter' },
+    { from: '2027-01-04', to: '2027-01-30', action: 'Temsilci el kitabını yazar. 90. gün raporunu hazırlar. Gün sırası 1 Kasım 2026 Pazar gününden sayılır. 1 Şubat 2027 Pazartesi günü başlayan yeni çalışma düzeninin vardiya listesini hazırlar', target: 'Rapor 30 Ocak 2027 Cumartesi gününe kadar biter', milestone: true },
   ],
   hours: { weekday: WEEKDAY, saturday: SATURDAY, weeklyNet: WEEKLY, fromFeb: FROM_FEB },
   daily: day([

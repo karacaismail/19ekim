@@ -88,7 +88,7 @@ function kurulum() {
   // Kurulum sürerken düzenleme tetikleyicisi hesap yazmaz (aynı betik kilidi).
   var kilit = kilitAl_(30000);
   if (kilit === false) {
-    var mesgul = 'Hesaplar yazılıyor; Kurulum’u birkaç saniye sonra yeniden çalıştırın.';
+    var mesgul = 'Hesaplar yazılıyor. Kurulum’u birkaç saniye sonra yeniden çalıştırın.';
     console.log(mesgul);
     try {
       ss.toast(mesgul, 'OPEX', 10);
@@ -131,7 +131,7 @@ function kurulumAdimlari_(ss) {
     SpreadsheetApp.flush();
   }
   if (i < OPEX_KURULUM_ADIMLARI.length) {
-    var mesaj = 'Kurulum sürüyor: ' + i + '/' + OPEX_KURULUM_ADIMLARI.length + ' adım tamam. Kalanlar için OPEX → Kurulum / onarım’ı yeniden çalıştırın.';
+    var mesaj = 'Kurulum sürüyor. ' + OPEX_KURULUM_ADIMLARI.length + ' adımın ' + i + ' tanesi bitti. Kalan adımlar için OPEX menüsünden “Kurulum / onarım” komutunu yeniden çalıştırın.';
     console.log(mesaj);
     try {
       ss.toast(mesaj, 'OPEX', 10);
@@ -149,7 +149,7 @@ function kurulumAdimlari_(ss) {
   try {
     baglantiBilgisi();
   } catch (hata) {
-    console.log('Kurulum tamam. Web bağlantısı bilgisi: Sheets → OPEX → Web bağlantısı bilgisi.');
+    console.log('Kurulum tamam. Web bağlantısı bilgisi için Sheets’te OPEX menüsünden “Web bağlantısı bilgisi” komutunu açın.');
   }
   console.log('Kurulum tamam.');
 }
@@ -265,7 +265,8 @@ function eskiGiderSutunlariniKaldir_(sh) {
   var bosluk = !n || sh.getRange(4, 12, n, 1).getValues().every(function (r) { return r[0] === ''; });
   var uygun = beklenen.every(function (x, i) { return h[i] === x; }) && (hesap === '' || /gider-sutun/.test(hesap)) && bosluk;
   if (!uygun) {
-    throw new Error(sh.getName() + ': H:N beklenen eski sütunlar değil (' + h.join(' | ') + (bosluk ? '' : '; L sütununda veri var') + '); dokunulmadı. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+    throw new Error(sh.getName() + ' sayfasında H:N sütunları beklenen eski sütunlar değil (' + h.map(function (x) { return '“' + x + '”'; }).join(', ') + ').' +
+      (bosluk ? '' : ' L sütununda veri var.') + ' Sütunlara dokunulmadı. İçeriği taşıyın ve Kurulum’u yeniden çalıştırın.');
   }
   // “Dahil = hayır” satırı hariç kalmalı: Dahil sütunu silinmeden önce o satırın bütün ay kutuları işaretsiz yapılır
   // (eski ızgara P’den başlar; tutar hücrelerindeki formüller korunur).
@@ -316,7 +317,7 @@ function toplamSatirlariniSil_(sh, k) {
     var girdi = sh.getRange(4 + i, 2, 1, OPEX_GIRDI_SUTUN[k] - 1);
     var f = girdi.getFormulas()[0];
     if (girdi.getValues()[0].some(function (v, j) { return v !== '' && !f[j]; })) {
-      throw new Error(sh.getName() + ': ' + (4 + i) + '. satır “' + a[i][0] + '” ama girdi sütunlarında değer var; dokunulmadı. Satırı yeniden adlandırın veya temizleyin.');
+      throw new Error(sh.getName() + ' sayfasının ' + (4 + i) + '. satırının adı “' + a[i][0] + '”. Bu satırın girdi sütunlarında değer var. Satıra dokunulmadı. Satırı yeniden adlandırın ya da temizleyin.');
     }
     sh.deleteRow(4 + i);
   }
@@ -350,10 +351,11 @@ function ayIzgarasiKur_(sh, ilk, n, alan, tutarAciklama, tutarBicimi, varsayilan
   var bos = mevcut.every(function (h) { return h === ''; });
   var veriVar = n && sh.getRange(4, ilk, n, g).getValues().some(function (r) { return r.some(function (v) { return v !== ''; }); });
   if (yabanci.length || (bos && veriVar)) {
-    throw new Error(sh.getName() + ': ' + sutunHarfi_(ilk) + ':' + sutunHarfi_(ilk + g - 1) + ' aylık ızgara alanında başka içerik var (' +
-      (yabanci[0] || 'başlıksız veri') + '). Taşıyın veya silin, sonra Kurulum’u yeniden çalıştırın.');
+    throw new Error(sh.getName() + ' sayfasında ' + sutunHarfi_(ilk) + ':' + sutunHarfi_(ilk + g - 1) + ' aylık ızgara alanında başka içerik var (' +
+      (yabanci[0] || 'başlıksız veri') + '). İçeriği taşıyın ya da silin. Sonra Kurulum’u yeniden çalıştırın.');
   }
-  sh.getRange(2, ilk).setValue('Ay ay: onay kutusu = o ay etkin (işaretsiz ayda gider yok). Tutar: formül varsayılandır; üzerine yazılan tutar o aya özeldir (' + tutarAciklama + ').').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange(2, ilk).setValue('Her ayın bir onay kutusu ve bir tutar hücresi vardır. Kutu işaretliyse o ay gider sayılır. İşaretsiz ayda gider yoktur. ' +
+    'Tutar hücresindeki formül varsayılan tutarı verir. Formülün üzerine yazılan tutar yalnız o ay için geçerlidir. ' + tutarAciklama).setFontColor(OPEX_STIL.ikincil);
   // Metin biçimi: “Mar 2027”, “May 2027” gibi başlıklar tarihe çevrilmez.
   sh.getRange(3, ilk, 1, g).setNumberFormat('@').setValues([basliklar])
     .setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true).setHorizontalAlignment('center');
@@ -614,7 +616,7 @@ function tesvikleriTasi_(ss, sh) {
     // J ve N+ boş olmalı (K:M eski hesap sütunları: kod yazardı, yeniden üretilir).
     var ek = eski.getRange(1, g + 1, son, ekSutun).getValues();
     var yabanci = ek.some(function (r) { return r.some(function (v, j) { return v !== '' && !(j >= 1 && j <= 3); }); });
-    if (yabanci) throw new Error('Teşvikler sayfasında tablo dışında (J veya N sonrası) içerik var; taşınmadı, sayfa korunuyor. İçeriği taşıyıp Kurulum’u yeniden çalıştırın.');
+    if (yabanci) throw new Error('Teşvikler sayfasında tablo dışında içerik var (J sütununda ya da N sütunundan sonra). Tablo taşınmadı ve sayfa korunuyor. İçeriği taşıyın ve Kurulum’u yeniden çalıştırın.');
   }
   var hedef = sh.getRange(3, OPEX_TESVIK_SUTUN, son - 2, g);
   var kaynak = eski.getRange(3, 1, son - 2, g);
@@ -623,7 +625,7 @@ function tesvikleriTasi_(ss, sh) {
   SpreadsheetApp.flush();
   var ayni = JSON.stringify(kaynak.getValues()) === JSON.stringify(hedef.getValues()) && JSON.stringify(kaynak.getFormulas()) === JSON.stringify(hedef.getFormulas());
   if (!ayni) {
-    throw new Error('Teşvik tablosu Parametreler’e taşınamadı (H:P dolu ya da farklı); Teşvikler sayfası korunuyor. Parametreler H:P’yi boşaltıp Kurulum’u yeniden çalıştırın.');
+    throw new Error('Teşvik tablosu Parametreler’e taşınamadı (H:P dolu ya da farklı). Teşvikler sayfası korunuyor. Parametreler sayfasında H:P alanını boşaltın. Sonra Kurulum’u yeniden çalıştırın.');
   }
   ss.deleteSheet(eski);
   return true;
@@ -636,7 +638,8 @@ function tesvikleriKur_(ss) {
   sutunGarantile_(sh, c + OPEX_TESVIK_GENISLIK - 1);
   tesvikleriTasi_(ss, sh);
   sh.getRange(1, c).setValue('SGK teşvik ve destekleri').setFontSize(18).setFontWeight('bold');
-  sh.getRange(2, c).setValue('Standart: uygun herkese. Koşullu: yalnız Personel → Ek teşvik sütununa kodu yazılan kişiye. Mali müşavirle doğrulayın.').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange(2, c).setValue('Standart teşvik, koşulları sağlayan herkese uygulanır. Koşullu teşvik yalnız kodu yazılan kişiye uygulanır. Kod, “' +
+    OPEX_SAYFA.personel + '” sayfasındaki “' + OpexMotor.BASLIKLAR.personel.tesvik + '” sütununa yazılır. Teşvikleri mali müşavirle doğrulayın.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange(3, c, 1, OPEX_TESVIK_GENISLIK).setValues([[b.kod, b.ad, b.tur, b.deger2026, b.deger2027, b.kapsam, b.birlikte, b.etkin, b.kosul]])
     .setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
   var ilk = sh.getRange(4, c, Math.max(sh.getLastRow() - 3, 1), 1).getValues();
@@ -704,7 +707,9 @@ function personeliKur_(ss) {
   girdiBasligi_(
     sh,
     'Personel ve ücret giderleri',
-    'Bordrolu: Net/Brüt/Asgari ücret; brüt ve işveren maliyeti aylık kümülatif vergiyle hesaplanır (gri sütunlar). Freelancer: KDV dahil fatura.',
+    'Bordrolu kişinin ücret esası Net, Brüt ya da Asgari ücret olabilir. Brüt ücret ve işveren maliyeti gri sütunlarda hesaplanır. ' +
+      'Gelir vergisi, yıl başından beri biriken vergi matrahına göre her ay hesaplanır. Vergi matrahı, verginin hesaplandığı tutardır. ' +
+      'Freelancer tutarı KDV dahil fatura tutarıdır.',
     [b.ad, b.tur, b.esas, b.tutar, b.zam, b.tesvik, b.asgariDestek, b.dahil, b.not],
     5,
     11,
@@ -739,7 +744,9 @@ function personeliKur_(ss) {
   // Hesap sütunları kod sonucudur (hesap yazımı düz değer yazar): mavi.
   sh.getRange(4, 11, alan, 5).setBackground(OPEX_STIL.hesap).setNumberFormat(OPEX_BICIM.tl).setFontColor(OPEX_STIL.formul);
   bantla_(sh, n, 9);
-  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.personel, n, alan, 'Net: net, Brüt: brüt, Asgari ücret: net, Freelancer: KDV dahil fatura; 0 = o ay ödeme yok', OPEX_BICIM.tl, personelVarsayilani_);
+  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA.personel, n, alan,
+    'Tutar, ücret esasına göre yazılır. Net ve Asgari ücret esasında tutar net ücrettir. Brüt esasında tutar brüt ücrettir. ' +
+      'Freelancer tutarı KDV dahil fatura tutarıdır. 0 yazılan ayda ödeme yoktur.', OPEX_BICIM.tl, personelVarsayilani_);
   toplamSatiriKur_(sh, 'personel', n);
   var rules = [
     SpreadsheetApp.newConditionalFormatRule().setGradientMinpoint('#ffffff').setGradientMaxpoint('#fbd3c2').setRanges([sh.getRange(4, 12, alan, 1)]).build(),
@@ -765,6 +772,26 @@ var OPEX_GIDER_METNI = {
   },
 };
 
+/**
+ * Kategori sütunundaki (D) eski adlar yeni adla yazılır (yalın Türkçe, kullanıcı onayı 13 Kasım 2026: “Sunucu & Bulut”
+ * → “Sunucu ve Bulut”). Yalnız formül olmayan ve eski adı taşıyan hücre yazılır; tekrar çalıştırılınca bir şey yazmaz.
+ * Yazılan hücre sayısını döner.
+ */
+function eskiKategorileriYenile_(sh, n) {
+  if (!(n > 0)) return 0;
+  var eski = OpexMotor.ESKI_KATEGORILER;
+  var aralik = sh.getRange(4, 4, n, 1);
+  var formuller = aralik.getFormulas();
+  var yazilan = 0;
+  aralik.getValues().forEach(function (r, i) {
+    var ad = String(r[0]).trim();
+    if (formuller[i][0] || !Object.prototype.hasOwnProperty.call(eski, ad)) return;
+    sh.getRange(4 + i, 4).setValue(eski[ad]);
+    yazilan += 1;
+  });
+  return yazilan;
+}
+
 /** Küme sütunu → 'teknoloji' / 'ofis' (motorla aynı kural; boş ya da tanınmayan teknoloji sayılır). */
 function kumeAdi_(v) {
   return OpexMotor.kumeKodu(v) === 'ofis' ? 'ofis' : 'teknoloji';
@@ -783,14 +810,14 @@ function giderSatirlari_(sh) {
   var b = OpexMotor.BASLIKLAR.giderler;
   var bas = sh.getRange(3, 1, 1, 7).getDisplayValues()[0];
   if (bas[0] !== b.kalem || bas[2] !== b.kume) {
-    throw new Error(sh.getName() + ': 3. satır başlıkları beklenen değil (A3 “' + b.kalem + '”, C3 “' + b.kume + '”); ayırma yapılmadı.');
+    throw new Error(sh.getName() + ' sayfasında 3. satırın başlıkları beklenen başlıklar değil. A3 hücresi “' + b.kalem + '”, C3 hücresi “' + b.kume + '” olmalıdır. Sayfa ayrılmadı.');
   }
   var aralik = sh.getRange(4, 1, son - 3, 7);
   var f = aralik.getFormulas();
   return aralik.getValues().map(function (r, i) {
     var toplam = toplamSatiriMi_(r[0]);
     if (toplam && r.slice(1).some(function (v, j) { return v !== '' && !f[i][j + 1]; })) {
-      throw new Error(sh.getName() + ': ' + (4 + i) + '. satır “' + r[0] + '” toplam satırı gibi adlandırılmış ama girdisi var; ayırma yapılmadı. Satırı yeniden adlandırın.');
+      throw new Error(sh.getName() + ' sayfasının ' + (4 + i) + '. satırının adı “' + r[0] + '”. Bu ad bir toplam satırına benziyor ama satırda girdi var. Sayfa ayrılmadı. Satırı yeniden adlandırın.');
     }
     return { satir: 4 + i, bos: r.every(function (v) { return v === ''; }), toplam: toplam, kume: kumeAdi_(r[2]) };
   });
@@ -847,8 +874,8 @@ function giderleriKur_(ss, k) {
   girdiBasligi_(
     sh,
     OPEX_GIDER_METNI[k].baslik,
-    'Döviz kalemleri Parametreler → USD/EUR kuruyla ₺’ye çevrilir. 2027 artış esası: Kur, Kira, Genel veya Yok. Küme boşsa “' +
-      OPEX_GIDER_METNI[k].kume + '” sayılır. Tüm giderler “' + OPEX_SAYFA.hepsi + '” sayfasında, personel “' + OPEX_SAYFA.personel + '” sayfasındadır.',
+    'Döviz kalemleri, Parametreler sayfasındaki USD ve EUR kuruyla ₺’ye çevrilir. 2027 artış esası Kur, Kira, Genel ya da Yok olabilir. Küme boşsa kalem “' +
+      OPEX_GIDER_METNI[k].kume + '” sayılır. Bütün giderler “' + OPEX_SAYFA.hepsi + '” sayfasındadır. Personel giderleri “' + OPEX_SAYFA.personel + '” sayfasındadır.',
     [b.kalem, b.hesap, b.kume, b.kategori, b.para, b.tutar, b.artis],
   );
   var n = veriSatiriSayisi_(sh);
@@ -868,12 +895,13 @@ function giderleriKur_(ss, k) {
     var kume = sh.getRange(4, 3, n, 1);
     kume.setValues(ak.map(function (r) { return [String(r[0]).trim() === '' || toplamSatiriMi_(r[0]) ? r[2] : OPEX_GIDER_METNI[k].kume]; }));
   }
+  eskiKategorileriYenile_(sh, n);
   sh.getRange(4, 3, alan, 1).setDataValidation(liste_([OPEX_GIDER_METNI[k].kume]));
   sh.getRange(4, 4, alan, 1).setDataValidation(liste_(s.kategori, true));
   sh.getRange(4, 5, alan, 1).setDataValidation(liste_(s.para));
   sh.getRange(4, 7, alan, 1).setDataValidation(liste_(s.artis));
   bantla_(sh, n, OPEX_GIRDI_SUTUN[k]);
-  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA[k], n, alan, 'satırın para biriminde, Para sütunu', '#,##0.00', giderVarsayilani_);
+  var izgaraKurallari = ayIzgarasiKur_(sh, OPEX_IZGARA[k], n, alan, 'Tutar, satırın “' + b.para + '” sütunundaki para birimindedir.', '#,##0.00', giderVarsayilani_);
   paraBiciminiUygula_(sh, 4, n);
   toplamSatiriKur_(sh, k, n);
   var rules = [
@@ -896,8 +924,8 @@ function hepsiKur_(ss) {
   sutunGarantile_(sh, 3 + 24 + 1);
   temelStil_(sh);
   sh.getRange('A1').setValue('Giderler Hepsi: ofis, teknoloji ve personel (ay ay, ₺)').setFontSize(18).setFontWeight('bold');
-  sh.getRange('A2').setValue('Kod hesaplar; değişiklik “' + OPEX_SAYFA.ofis + '”, “' + OPEX_SAYFA.teknoloji + '” ve “' + OPEX_SAYFA.personel +
-    '” sayfalarından yapılır. Gider: satırın kuruyla ₺, yalnız işaretli aylar; personel: işveren maliyeti (freelancer: fatura).').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange('A2').setValue('Bu sayfayı kod hesaplar. Değişikliği “' + OPEX_SAYFA.ofis + '”, “' + OPEX_SAYFA.teknoloji + '” ve “' + OPEX_SAYFA.personel +
+    '” sayfalarında yapın. Gider tutarı satırın kuruyla ₺’ye çevrilir. Yalnız işaretli aylar sayılır. Personel tutarı işveren maliyetidir. Freelancer tutarı fatura tutarıdır.').setFontColor(OPEX_STIL.ikincil);
   sh.setRowHeight(1, 40);
   sh.getRange(3, 1, 1, 28).setFontWeight('bold').setBackground(OPEX_STIL.murekkep).setFontColor('#ffffff').setWrap(true);
   sh.getRange(3, 4, 1, 25).setHorizontalAlignment('right');
@@ -924,7 +952,8 @@ function bordroyuKur_(ss) {
   sutunGarantile_(sh, 32);
   temelStil_(sh);
   sh.getRange('A1').setValue('Bordro: netten brüte, aylık kümülatif').setFontSize(18).setFontWeight('bold');
-  sh.getRange('A2').setValue('Hesaplanır (düzenlemeyin). Gelir vergisi kümülatif matrahla; asgari ücret GV/DV istisnası ve SGK tavanı uygulanır.').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange('A2').setValue('Bu sayfayı kod hesaplar. Bu sayfayı düzenlemeyin. Gelir vergisi, yıl başından beri biriken vergi matrahına göre hesaplanır. ' +
+    'Asgari ücret için gelir vergisi ve damga vergisi istisnası uygulanır. SGK tavanı da uygulanır.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange('A3').setValue('2026').setFontSize(14).setFontWeight('bold');
   sh.getRange('Q3').setValue('2027 (zam ve varsayımlarla)').setFontSize(14).setFontWeight('bold');
   [1, 17].forEach(function (c) {
@@ -984,8 +1013,8 @@ function panoyuKur_(ss) {
   for (var c = 1; c <= sutun; c++) sh.setColumnWidth(c, 112);
   sh.getRange(1, 1, 300, sutun).setBackground(OPEX_STIL.zemin);
 
-  sh.getRange('A1:L1').merge().setValue('Türksab · OPEX panosu').setFontSize(22).setFontWeight('bold');
-  sh.getRange('A2:H2').merge().setValue('Teknoloji ve insan kümeleri + ofis/işletme. Google Sheets değişince GitHub Pages sayfası birkaç saniyede güncellenir.').setFontColor(OPEX_STIL.ikincil);
+  sh.getRange('A1:L1').merge().setValue('Türksab OPEX panosu').setFontSize(22).setFontWeight('bold');
+  sh.getRange('A2:H2').merge().setValue('Pano teknoloji, personel ve ofis giderlerini gösterir. Google Sheets değişince GitHub Pages sayfası birkaç saniyede güncellenir.').setFontColor(OPEX_STIL.ikincil);
   sh.getRange('I2:L2').merge().setFontColor(OPEX_STIL.ikincil).setHorizontalAlignment('right');
   sh.setRowHeight(1, 46);
   sh.setRowHeight(2, 30);
@@ -1086,7 +1115,7 @@ function panoyuCiz() {
     4,
     ortak(
       sh.newChart().setChartType(Charts.ChartType.COLUMN).addRange(aralik('ozet', 0, 1, 4)).addRange(aralik('ozet', 2, 1, 4)).addRange(aralik('ozet', 4, 1, 4)).setMergeStrategy(Charts.ChartMergeStrategy.MERGE_COLUMNS),
-      'Aylık ortalama: 2026 → 2027 (₺)',
+      'Aylık ortalama: 2026 ve 2027 (₺)',
     ),
   );
   ekle(5, ortak(sh.newChart().setChartType(Charts.ChartType.BAR).addRange(aralik('bilesen', 0, 5, 20)), 'Bordro bileşenleri (bu ay, ₺)').setOption('isStacked', true));

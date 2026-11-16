@@ -46,11 +46,17 @@ const KDV = 0.2;
 /** Dolar fiyatlı kalemler: Sheets'teki gibi kur artışı yok, 2027 tutarı 2026 tutarıdır. */
 const DOLAR_FIYATLI = new Set(['microsoft-365-business-standard']);
 
+/**
+ * Kaynak fiyatının 2027 karşılığı (karar listesi 5.5). Dolar fiyatlı kalemde 2027 artışı yoktur. Fiyat tablosu ve
+ * hesap aynı değeri kullanır.
+ */
+export const fiyat2027Of = (f: Fiyat): number => (DOLAR_FIYATLI.has(f.id) ? f.fiyat2026 : f.fiyat2027);
+
 /** 2027 birim fiyatı. Yatırımda KDV dahil fiyat KDV hariçe çevrilir. */
 export function fiyat(id: string): number {
   const f = FIYATLAR.find((x) => x.id === id);
   if (!f) throw new Error(`Fiyat yok: ${id}`);
-  const tutar = DOLAR_FIYATLI.has(id) ? f.fiyat2026 : f.fiyat2027;
+  const tutar = fiyat2027Of(f);
   return f.tur === 'capex' && f.kdv === 'dahil' ? tutar / (1 + KDV) : tutar;
 }
 
@@ -154,7 +160,7 @@ export interface Ayarlar {
 }
 export const VARSAYILAN_AYAR: Ayarlar = { yemek: false, saglik: false };
 
-/** Etkinlik sayısı (ayda): ofiste ya da İSTOÇ'ta yapılan ve dış salonda yapılan. Organizatör planı: haftada 2 ile 5. */
+/** Etkinlik sayısı (ayda): ofiste ya da İstoç'ta yapılan ve dış salonda yapılan. Organizatör planı: haftada 2 ile 5. */
 export const ETKINLIK: Record<SecenekId, { ic: number; dis: number }> = {
   ekonomik: { ic: 8, dis: 0 },
   medyan: { ic: 11, dis: 1 },
@@ -223,7 +229,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   const saha = aktif((y) => rolOf(y.pozisyon) === 'saha', () => 1);
   ekle({ id: 'lisans', grup: 'kisi', tur: 'opex', ad: 'Microsoft 365 lisansı', kural: 'Her yeni kişiye 1 lisans alınır. Lisansın fiyatı dolarla belirlenir. Bu yüzden 2027 için %29,73 artış uygulanmaz. Hesapta 5 Kasım 2026 Perşembe kuruyla bulunan fiyat kullanılır. “Kullanılan fiyatlar” tablosundaki 2027 fiyatı bu kalemde kullanılmaz.', fiyatId: 'microsoft-365-business-standard', aylik: tumu.map((n) => n * fiyat('microsoft-365-business-standard')) });
   ekle({ id: 'hat', grup: 'kisi', tur: 'opex', ad: 'Kurumsal mobil hat', kural: 'Saha, çağrı ve satış ekibine 1 hat alınır. Yöneticilere de 1 hat alınır.', fiyatId: 'mobil-hat-kurumsal-20gb', aylik: hatli.map((n) => n * fiyat('mobil-hat-kurumsal-20gb')) });
-  ekle({ id: 'ulasim', grup: 'kisi', tur: 'opex', ad: 'Saha ulaşımı (İstanbulkart)', kural: 'Yeni saha personeline aylık İstanbulkart aboneliği alınır. Saha işi İSTOÇ içinde yürür. Bu yüzden araç kiralanmaz.', fiyatId: 'istanbulkart-abonman', aylik: saha.map((n) => n * fiyat('istanbulkart-abonman')) });
+  ekle({ id: 'ulasim', grup: 'kisi', tur: 'opex', ad: 'Saha ulaşımı (İstanbulkart)', kural: 'Yeni saha personeline aylık İstanbulkart aboneliği alınır. Saha işi İstoç içinde yürür. Bu yüzden araç kiralanmaz.', fiyatId: 'istanbulkart-abonman', aylik: saha.map((n) => n * fiyat('istanbulkart-abonman')) });
   ekle({ id: 'egitim', grup: 'kisi', tur: 'opex', ad: 'Eğitim bütçesi', kural: 'Her yeni kişi için yıllık eğitim bütçesi ayrılır. Hesap her ay bu bütçenin 12’de 1’ini sayar.', fiyatId: 'egitim-butcesi-kisi-yil', aylik: tumu.map((n) => (n * fiyat('egitim-butcesi-kisi-yil')) / 12) });
   const ilan = sifir();
   for (const y of kisiler) if (!y.oncedenBasladi) ilan[y.ay] += fiyat('kariyer-net-ilan');
@@ -244,7 +250,7 @@ export function butce(taban: Taban | null, s: SecenekId, ayar: Ayarlar = VARSAYI
   const e = ETKINLIK[s];
   const ikram = fiyat('etkinlik-coffee-break-50');
   ekle({ id: 'etkinlik-ikram', grup: 'pazarlama', tur: 'opex', ad: 'Etkinlik ikramı', kural: `Her ay ${e.ic + e.dis} satıcı eğitimi yapılır. Her eğitimde 50 kişilik kahve arası ikramı verilir.`, fiyatId: 'etkinlik-coffee-break-50', aylik: sifir().map(() => (e.ic + e.dis) * ikram) });
-  if (e.dis) ekle({ id: 'etkinlik-salon', grup: 'pazarlama', tur: 'opex', ad: 'Dış salon kirası', kural: `Her ay ${e.dis} etkinlik dış salonda yapılır. Salon yarım gün kiralanır. Diğer etkinlikler ofiste ya da İSTOÇ’ta yapılır.`, fiyatId: 'etkinlik-salon-yarim-gun', aylik: sifir().map(() => e.dis * fiyat('etkinlik-salon-yarim-gun')) });
+  if (e.dis) ekle({ id: 'etkinlik-salon', grup: 'pazarlama', tur: 'opex', ad: 'Dış salon kirası', kural: `Her ay ${e.dis} etkinlik dış salonda yapılır. Salon yarım gün kiralanır. Diğer etkinlikler ofiste ya da İstoç’ta yapılır.`, fiyatId: 'etkinlik-salon-yarim-gun', aylik: sifir().map(() => e.dis * fiyat('etkinlik-salon-yarim-gun')) });
   const ekipman = sifir();
   ekipman[0] = fiyat('etkinlik-tv-65') + fiyat('etkinlik-ses-sistemi') + fiyat('etkinlik-katlanir-sandalye-50') + 2 * fiyat('roll-up-banner');
   ekle({ id: 'etkinlik-ekipman', grup: 'pazarlama', tur: 'capex', ad: 'Etkinlik ekipmanı', kural: 'Ocak 2027’de bir kez alınır. 65 inç ekran, ses sistemi ve 2 mikrofon alınır. 50 katlanır sandalye ve 2 tanıtım afişi (roll-up) alınır.', aylik: ekipman });

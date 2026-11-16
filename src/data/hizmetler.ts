@@ -145,7 +145,7 @@ const KOMISYON_DEGERI = deger('quota.commission_rate', PAKET_SIRASI[0]);
 export const KOMISYON_METNI = String(degerMetni(KOMISYON_DEGERI));
 export const KOMISYON_YOK = KOMISYON_DEGERI === 'Şu an yok' || KOMISYON_DEGERI === false;
 export const KOMISYON = KOMISYON_YOK ? '%0' : String(KOMISYON_DEGERI);
-export const KOMISYON_CUMLESI = KOMISYON_YOK ? 'Satıştan şu an komisyon alınmaz.' : `Satış komisyonu ${KOMISYON}.`;
+export const KOMISYON_CUMLESI = KOMISYON_YOK ? 'Satıştan komisyon alınmaz.' : `Satış komisyonu ${KOMISYON}.`;
 
 /** Paket fiyatlarının okunduğu gün (canlı anlık görüntü). */
 export const OKUNDU = tarih(CANLI_KAYNAK.okundu);

@@ -17,11 +17,13 @@ export const OLAY_TURU_ADI: Record<OlayTuru, string> = {
   hukuk: 'Hukuk ve uyum',
 };
 
+/** Sorumlu: işi yürüten kişi ya da kişiler (kullanıcı kararı 16 Kasım 2026, karar listesi 4. konu). */
 export interface PlanOlayi {
   tarih: string;
   baslik: string;
   aciklama: string;
   tur: OlayTuru;
+  sorumlu: string;
 }
 
 export interface Asama {
@@ -30,40 +32,44 @@ export interface Asama {
   bas: string;
   son: string;
   aciklama: string;
+  sorumlu: string;
 }
+
+/** Yönetici. Hedefleri, ekip liderini ve uyum kontrolünü İsmail Karaca yürütür (kullanıcı kararları 4.1 ile 4.3). */
+const YONETICI = 'İsmail Karaca';
 
 export const PLAN_TARIHI = '2026-11-03';
 export const TAKVIM_BAS = '2026-11-01';
 export const TAKVIM_SON = '2027-02-28';
 
 export const ASAMALAR: Asama[] = [
-  { id: 'f0', ad: 'Aşama 0: Kararlar', bas: '2026-11-03', son: '2026-11-07', aciklama: 'İşveren, hedef ve asistan kararları verilir.' },
-  { id: 'f1', ad: 'Aşama 1: Sistemi hazırla', bas: '2026-11-04', son: '2026-11-20', aciklama: 'CRM, telefon hatları ve İleti Yönetim Sistemi (İYS) kaydı hazırlanır. İYS, ticari mesaj izinlerinin kaydedildiği resmî sistemdir. Satış için gereken belge ve malzemeler de hazırlanır.' },
-  { id: 'f2', ad: 'Aşama 2: Bul ve seç', bas: '2026-11-04', son: '2026-11-20', aciklama: 'Her rol için en az 5 aday görüşülür.' },
-  { id: 'f3', ad: 'Aşama 3: Göreve başlat', bas: '2026-11-23', son: '2026-12-23', aciklama: 'Yeni personel önce eğitim alır. Personelin hedefi zamanla artar.' },
-  { id: 'd1', ad: 'Birinci dalga: ilk 90 gün', bas: '2026-11-23', son: '2027-02-21', aciklama: 'Yönetici, işe başladıktan sonraki 30., 60. ve 90. günde karar verir. Karar devam, değiştir ya da durdur olabilir.' },
-  { id: 'd2', ad: 'İkinci dalga: ilk 90 gün', bas: '2026-12-01', son: '2027-02-28', aciklama: 'Organizatör ve 3. saha personeli için aynı değerlendirme yapılır. 3. saha personeli yalnız koşullar sağlanırsa başlar.' },
-  { id: 'f4', ad: 'Aşama 4: Düzenli takip toplantıları', bas: '2026-11-23', son: '2027-02-28', aciklama: 'Günlük 15 dakikalık toplantı, haftalık ekip toplantısı ve birebir görüşmeler sürer.' },
+  { id: 'f0', ad: 'Aşama 0: Kararlar', bas: '2026-11-03', son: '2026-11-07', aciklama: 'İşveren, hedef ve asistan kararları verilir.', sorumlu: YONETICI },
+  { id: 'f1', ad: 'Aşama 1: Sistemi hazırla', bas: '2026-11-04', son: '2026-11-20', aciklama: 'CRM, telefon hatları ve İleti Yönetim Sistemi (İYS) kaydı hazırlanır. İYS, ticari mesaj izinlerinin kaydedildiği resmî sistemdir. Satış için gereken belge ve malzemeler de hazırlanır.', sorumlu: YONETICI },
+  { id: 'f2', ad: 'Aşama 2: Bul ve seç', bas: '2026-11-04', son: '2026-11-20', aciklama: 'Her rol için en az 5 aday görüşülür.', sorumlu: YONETICI },
+  { id: 'f3', ad: 'Aşama 3: Göreve başlat', bas: '2026-11-23', son: '2026-12-23', aciklama: 'Yeni personel önce eğitim alır. Personelin hedefi zamanla artar.', sorumlu: YONETICI },
+  { id: 'd1', ad: 'Birinci dalga: ilk 90 gün', bas: '2026-11-23', son: '2027-02-21', aciklama: 'Yönetici, işe başladıktan sonraki 30., 60. ve 90. günde karar verir. Karar devam, değiştir ya da durdur olabilir.', sorumlu: YONETICI },
+  { id: 'd2', ad: 'İkinci dalga: ilk 90 gün', bas: '2026-12-01', son: '2027-02-28', aciklama: 'Organizatör ve 3. saha personeli için aynı değerlendirme yapılır. 3. saha personeli yalnız koşullar sağlanırsa başlar. Bu dalganın 90. günü 1 Mart 2027 Pazartesi günüdür. Bu kontrol planın son gününden sonra yapılır.', sorumlu: YONETICI },
+  { id: 'f4', ad: 'Aşama 4: Düzenli takip toplantıları', bas: '2026-11-23', son: '2027-02-28', aciklama: 'Günlük 15 dakikalık toplantı, haftalık ekip toplantısı ve birebir görüşmeler sürer.', sorumlu: YONETICI },
 ];
 
 export const OLAYLAR: PlanOlayi[] = [
-  { tarih: '2026-11-03', baslik: 'Üç kritik karar netleşir', aciklama: 'Üç karar konuşulur. Personelin hangi şirketin çalışanı olacağı belirlenir. Etkinliklerin ne sıklıkla yapılacağı belirlenir. Asistan alınıp alınmayacağı belirlenir.', tur: 'karar' },
-  { tarih: '2026-11-04', baslik: 'Mali müşavir ve avukat görüşmesi', aciklama: 'Sözleşme ve maliyet konuşulur. İş ilanları hazırlanır.', tur: 'hukuk' },
-  { tarih: '2026-11-05', baslik: 'İlanlar yayımlanır', aciklama: 'Dükkân dükkân satış ve afiş için çarşı ve plaza yönetimine izin sorulur.', tur: 'ise-alim' },
-  { tarih: '2026-11-06', baslik: 'İşveren, tanımlar, prim ve bütçe kararı', aciklama: 'Personelin hangi şirketin çalışanı olacağı kesinleşir. iStoc ile Segika’nın maliyeti nasıl paylaşacağı da kesinleşir. Randevu, kayıt ve aktif satıcının ne sayılacağı yazılı olarak tanımlanır. İşveren kararından İsmail Karaca ve mali müşavir sorumludur.', tur: 'karar' },
-  { tarih: '2026-11-07', baslik: 'CRM testi ve sorumlular', aciklama: 'Senaryo sahibi ve geliştirici sorumlusu atanır. Dükkân dükkân satış ve afiş için çarşı izni bu tarihe kadar netleşir. Bu izinden İsmail Karaca sorumludur.', tur: 'karar' },
-  { tarih: '2026-11-09', baslik: 'İlk aday görüşmeleri', aciklama: 'Önce telefonla ön görüşme yapılır. Sonra görev testi verilir. Sonra her adaya aynı soruların sorulduğu görüşme yapılır. En son referanslar kontrol edilir.', tur: 'ise-alim' },
-  { tarih: '2026-11-10', baslik: 'Ödeme, fiyat ve marka engelleri', aciklama: 'Ödeme sistemi satışa hazır olmalıdır. Fiyat, para birimi, KDV ve iade kuralı netleşmelidir. Esnaf istoc.com’u çarşının resmî sitesi sanabilir. Avukat bu marka riskini inceler. Bu engeller aşılmazsa satış hedefi ertelenir.', tur: 'karar' },
-  { tarih: '2026-11-13', baslik: 'İleti Yönetim Sistemi (İYS), satış vaatleri ve ölçüm', aciklama: 'Hukuk kontrolü biter. Ölçüm kurulumunu geliştirici ekip tamamlar.', tur: 'hukuk' },
-  { tarih: '2026-11-20', baslik: 'Teklifler ve alıcı planı', aciklama: 'İlk işe başlayacak 6 kişilik gruba (birinci dalga) iş teklifi verilir. Etkinlik saatini seçmek için 30 dükkânla yapılan anket biter. İsmail Karaca satıcıya alıcı getirme planını hazırlar.', tur: 'ise-alim' },
-  { tarih: '2026-11-23', baslik: 'Birinci dalga başlar: 6 kişi', aciklama: 'Birinci dalgada 6 kişi işe başlar. Asistan, İstoç Pazarlama CRM uzmanı ve dijital pazarlama uzmanı başlar. 2 saha personeli ile Segika CRM de başlar.', tur: 'baslangic' },
-  { tarih: '2026-12-01', baslik: 'İkinci dalga başlar', aciklama: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar. Bunun için 10 iş günlük veri ve ölçülmüş dönüşüm gerekir. Uyum kuyruğu, rota kapasitesi ve net katkı da uygun olmalıdır.', tur: 'baslangic' },
-  { tarih: '2026-12-15', baslik: 'Ramazan ve sezon kontrolü', aciklama: 'Şubat ve Mart 2027 etkinlik saatleri kesinleştirilir. Bu işten organizatör sorumludur.', tur: 'karar' },
-  { tarih: '2026-12-23', baslik: 'Birinci dalganın 30. günü', aciklama: 'Her çalışan kendi iş sonuçlarını sunar. Yönetici devam, koçluk ya da rol değişikliği kararı verir.', tur: 'kontrol' },
-  { tarih: '2026-12-31', baslik: 'İkinci dalganın 30. günü ve asgari ücret', aciklama: 'Organizatör değerlendirilir. Yeni asgari ücrete göre Ocak 2027 maaşları ve bütçe modeli güncellenir. Bu güncellemeden mali müşavir sorumludur.', tur: 'kontrol' },
-  { tarih: '2027-01-22', baslik: 'Birinci dalganın 60. günü', aciklama: 'Birinci dalgadaki çalışanların deneme süresi yakında biter. Yönetici bu süre bitmeden her çalışan için son kararı verir. Karar avukat ve mali müşavirle birlikte verilir.', tur: 'kontrol' },
-  { tarih: '2027-01-30', baslik: 'İkinci dalganın 60. günü', aciklama: 'Organizatör ve 3. saha personeli için son karar verilir.', tur: 'kontrol' },
-  { tarih: '2027-02-21', baslik: 'Birinci dalganın 90. günü', aciklama: 'Devam et, değiştir ya da durdur kararı verilir.', tur: 'kontrol' },
+  { tarih: '2026-11-03', baslik: 'Üç kritik karar netleşir', aciklama: 'Üç karar konuşulur. Personelin hangi şirketin çalışanı olacağı belirlenir. Etkinliklerin ne sıklıkla yapılacağı belirlenir. Asistan alınıp alınmayacağı belirlenir.', tur: 'karar', sorumlu: YONETICI },
+  { tarih: '2026-11-04', baslik: 'Mali müşavir ve avukat görüşmesi', aciklama: 'Sözleşme ve maliyet konuşulur. İş ilanları hazırlanır.', tur: 'hukuk', sorumlu: YONETICI },
+  { tarih: '2026-11-05', baslik: 'İlanlar yayımlanır', aciklama: 'Dükkân dükkân satış ve afiş için çarşı ve plaza yönetimine izin sorulur.', tur: 'ise-alim', sorumlu: YONETICI },
+  { tarih: '2026-11-06', baslik: 'İşveren, tanımlar, prim ve bütçe kararı', aciklama: 'Personelin hangi şirketin çalışanı olacağı kesinleşir. iStoc ile Segika’nın maliyeti nasıl paylaşacağı da kesinleşir. Randevu, kayıt ve aktif satıcının ne sayılacağı yazılı olarak tanımlanır. İşveren kararından İsmail Karaca ve mali müşavir sorumludur.', tur: 'karar', sorumlu: 'İsmail Karaca ve mali müşavir' },
+  { tarih: '2026-11-07', baslik: 'CRM testi ve sorumlular', aciklama: 'Senaryo sahibi ve geliştirici sorumlusu atanır. Dükkân dükkân satış ve afiş için çarşı izni bu tarihe kadar netleşir. Bu izinden İsmail Karaca sorumludur.', tur: 'karar', sorumlu: YONETICI },
+  { tarih: '2026-11-09', baslik: 'İlk aday görüşmeleri', aciklama: 'Önce telefonla ön görüşme yapılır. Sonra görev testi verilir. Sonra her adaya aynı soruların sorulduğu görüşme yapılır. En son referanslar kontrol edilir.', tur: 'ise-alim', sorumlu: YONETICI },
+  { tarih: '2026-11-10', baslik: 'Ödeme, fiyat ve marka engelleri', aciklama: 'Ödeme sistemi satışa hazır olmalıdır. Fiyat, para birimi, KDV ve iade kuralı netleşmelidir. Esnaf istoc.com’u çarşının resmî sitesi sanabilir. Avukat bu marka riskini inceler. Bu engeller aşılmazsa satış hedefi ertelenir.', tur: 'karar', sorumlu: 'İsmail Karaca ve avukat' },
+  { tarih: '2026-11-13', baslik: 'İleti Yönetim Sistemi (İYS), satış vaatleri ve ölçüm', aciklama: 'Hukuk kontrolü biter. Ölçüm kurulumunu geliştirici ekip tamamlar.', tur: 'hukuk', sorumlu: 'Avukat ve geliştirici ekip' },
+  { tarih: '2026-11-20', baslik: 'Teklifler ve alıcı planı', aciklama: 'İlk işe başlayacak 6 kişilik gruba (birinci dalga) iş teklifi verilir. Etkinlik saatini seçmek için 30 dükkânla yapılan anket biter. İsmail Karaca satıcıya alıcı getirme planını hazırlar.', tur: 'ise-alim', sorumlu: YONETICI },
+  { tarih: '2026-11-23', baslik: 'Birinci dalga başlar: 6 kişi', aciklama: 'Birinci dalgada 6 kişi işe başlar. Asistan, İstoç Pazarlama CRM uzmanı ve dijital pazarlama uzmanı başlar. 2 saha personeli ile Segika CRM de başlar.', tur: 'baslangic', sorumlu: YONETICI },
+  { tarih: '2026-12-01', baslik: 'İkinci dalga başlar', aciklama: 'Organizatör başlar. Koşullar sağlanırsa 3. saha personeli de başlar. Bunun için 10 iş günlük veri ve ölçülmüş dönüşüm gerekir. Uyum kuyruğu, rota kapasitesi ve net katkı da uygun olmalıdır.', tur: 'baslangic', sorumlu: YONETICI },
+  { tarih: '2026-12-15', baslik: 'Ramazan ve sezon kontrolü', aciklama: 'Şubat ve Mart 2027 etkinlik saatleri kesinleştirilir. Bu işten organizatör sorumludur.', tur: 'karar', sorumlu: 'Organizatör' },
+  { tarih: '2026-12-23', baslik: 'Birinci dalganın 30. günü', aciklama: 'Birinci dalga 23 Kasım 2026 Pazartesi günü başlar. Bu tarih o günden 30 gün sonradır. Her çalışan kendi iş sonuçlarını sunar. Yönetici devam, koçluk ya da rol değişikliği kararı verir.', tur: 'kontrol', sorumlu: YONETICI },
+  { tarih: '2026-12-31', baslik: 'İkinci dalganın 30. günü ve asgari ücret', aciklama: 'İkinci dalga 1 Aralık 2026 Salı günü başlar. Bu tarih o günden 30 gün sonradır. İsmail Karaca organizatörü değerlendirir. Yeni asgari ücrete göre Ocak 2027 maaşları ve bütçe modeli güncellenir. Bu güncellemeden mali müşavir sorumludur.', tur: 'kontrol', sorumlu: 'İsmail Karaca ve mali müşavir' },
+  { tarih: '2027-01-22', baslik: 'Birinci dalganın 60. günü', aciklama: 'Birinci dalga 23 Kasım 2026 Pazartesi günü başlar. Bu tarih o günden 60 gün sonradır. Birinci dalgadaki çalışanların deneme süresi yakında biter. Yönetici bu süre bitmeden her çalışan için son kararı verir. Karar avukat ve mali müşavirle birlikte verilir.', tur: 'kontrol', sorumlu: YONETICI },
+  { tarih: '2027-01-30', baslik: 'İkinci dalganın 60. günü', aciklama: 'İkinci dalga 1 Aralık 2026 Salı günü başlar. Bu tarih o günden 60 gün sonradır. Organizatör ve 3. saha personeli için son karar verilir.', tur: 'kontrol', sorumlu: YONETICI },
+  { tarih: '2027-02-21', baslik: 'Birinci dalganın 90. günü', aciklama: 'Birinci dalga 23 Kasım 2026 Pazartesi günü başlar. Bu tarih o günden 90 gün sonradır. Devam et, değiştir ya da durdur kararı verilir.', tur: 'kontrol', sorumlu: YONETICI },
 ];
 
 export interface PlanRolu {

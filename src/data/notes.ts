@@ -39,7 +39,7 @@ export const DEFAULT_NOTES: NotesState = {
     { id: 'p5', list: 'partner', text: 'Partner ağı için yeni personel istihdam etmiyoruz', done: false, created: '2026-10-19' },
     { id: 'i1', list: 'ik', text: 'Asgari ücret çarpanları bize uygun mu?', done: false, created: '2026-10-19' },
     { id: 'i2', list: 'ik', text: 'İnsan kaynakları yönetiminde daha gelişmiş bir ücret matrisi belirlemeli', done: false, created: '2026-10-19' },
-    { id: 'i3', list: 'ik', text: 'İnsan kaynakları yönetiminde ECA kurallarını belirlemeli', done: false, created: '2026-10-19' },
+    { id: 'i3', list: 'ik', text: 'İnsan kaynakları yönetiminde ECA (olay, koşul, eylem) kurallarını belirlemeli', done: false, created: '2026-10-19' },
     { id: 'i4', list: 'ik', text: 'Prim sistemi eklemeli', done: false, created: '2026-10-19' },
     { id: 'i5', list: 'ik', text: 'Efor sistemi eklemeli', done: false, created: '2026-10-19' },
   ],

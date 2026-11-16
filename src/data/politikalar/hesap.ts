@@ -73,7 +73,7 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
       }
       const m = v1.musavir(a);
       aciklama.push(m.tur === 'indirim'
-        ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır.`
+        ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.`
         : `Mali müşavir seçeneğinde müşteri başına ${tl(m.musteriBasina)} komisyon hesaplanır.`);
       aciklama.push('Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez. Hukuk danışmanı meslek kurallarına uygunluğu ayrıca kontrol etsin.');
     }
@@ -186,8 +186,12 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
       `Genel planda yeni satıcı bulmak için aylık ${tl(DEFAULT_PARAMS.dijitalAdBudgetMonthly)} reklam payı var. Bu tutar harcama izni değildir.`,
       'Bütçe sıfırsa ücretli reklam başlatmayın. Onaylı bütçe varsa harcama sınırını sorumluyla belirleyin.',
       'Görevi devralacak çalışan yoksa yeni teslim tarihi vermeyin. Operasyon yöneticisi kabul edecek kişiyi belirlesin.',
-      `Genel planda 1 avro ${tl(DEFAULT_PARAMS.eurTry)} sayılır. Satış hesabında 1 avro ${tl(a.kur)} sayılır.`,
-      'Bu iki kaynağı aynı ödeme hesabında karıştırmayın. Finans sorumlusu sözleşmede kullanılacak kuru belirlesin.',
+      ...(a.kur !== DEFAULT_PARAMS.eurTry
+        ? [
+            `Genel planda 1 avro ${tl(DEFAULT_PARAMS.eurTry)} sayılır. Satış hesabında 1 avro ${tl(a.kur)} sayılır.`,
+            'Bu iki kaynağı aynı ödeme hesabında karıştırmayın. Finans sorumlusu sözleşmede kullanılacak kuru belirlesin.',
+          ]
+        : []),
       'Başlangıç tarihi veya kapasite değişirse bekleyen işlerin takvimini yeniden değerlendirin.',
     ],
   };

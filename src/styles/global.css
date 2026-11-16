@@ -9542,6 +9542,11 @@ html[data-focus-mode='keyboard'] .ag-dugum:focus-visible .ag-odak {
   color: var(--text-secondary);
 }
 
+/* Sorumlu satırı açıklamadan boşlukla ayrılır. “Sorumlu” etiketi kendi değerine yakın durur. */
+.tk-karar-kim {
+  margin-top: var(--space-3);
+}
+
 .tk-alt-baslik {
   margin: var(--space-8) 0 var(--space-3);
   font-size: var(--text-lg);

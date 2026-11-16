@@ -50,3 +50,20 @@ test('değer önerisi: aylık ücret, kurulum ücreti ve komisyon kararlarıyla 
   expect(metin).toContain('399 €');
   expect(metin).toContain('150 €');
 });
+
+/**
+ * Kararlar 16 Kasım 2026 (karar listesi 9.7 ve 2. konu): emanet ödeme ileri tarihli bir özelliktir. Değer önerisi
+ * siparişin parasının bugün güvende olduğunu söylemez. Emanet ödeme sözü “İleride verilir” rozetini taşır. P1 ile P7
+ * arasındaki esnaf tiplerinin her biri sayfada tanımlıdır.
+ */
+test('değer önerisi: emanet ödeme bugün varmış gibi anlatılmaz, esnaf tipleri tanımlıdır', async ({ page }) => {
+  await page.goto('deger-onerisi/');
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  const metin = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
+  expect(metin).not.toMatch(/siparişin parası (garanti|güvende)\./i);
+  expect(metin).not.toMatch(/tanımları sayfaya henüz eklenmedi/i);
+  await expect(page.locator('#oneri-1 .dg-rozet')).toHaveText('İleride verilir');
+  const tipler = page.locator('#esnaf-tipleri dt');
+  await expect(tipler).toHaveText(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7']);
+  for (const dd of await page.locator('#esnaf-tipleri dd').all()) expect((await dd.innerText()).trim().length).toBeGreaterThan(10);
+});

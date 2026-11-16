@@ -42,6 +42,9 @@ export interface Motor {
   SEMA: number;
   SURUM: string;
   BASLIKLAR: Record<'parametreler' | 'personel' | 'giderler' | 'tesvikler', Record<string, string>>;
+  SECENEKLER: Record<string, string[]>;
+  /** Eski kategori adı → yeni adı (“Sunucu & Bulut” → “Sunucu ve Bulut”). */
+  ESKI_KATEGORILER: Record<string, string>;
   PARAMETRE_TANIMLARI: ParamDef[];
   TESVIK_TANIMLARI: TesvikDef[];
   hesapla(girdi: Girdi, secenek?: { simdi?: Date }): OpexModel;
@@ -85,7 +88,7 @@ export interface IzgaraSatiri {
 export function izgara(satirlar: IzgaraSatiri[], basliklar: unknown[] = IZGARA_BASLIKLARI): Table {
   return [
     [''],
-    ['Ay ay: onay kutusu = o ay etkin.'],
+    ['Her ayın bir onay kutusu ve bir tutar hücresi vardır.'],
     basliklar,
     ...satirlar.map((x) => IZGARA_AYLARI.flatMap((a) => [x.aktif?.[a] ?? true, x.tutar?.[a] ?? ''])),
   ];

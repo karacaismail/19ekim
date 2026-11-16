@@ -20,7 +20,8 @@ import {
 import { AYLAR_2027, POZISYONLAR, SECENEKLER, SECENEK_ADI, SECENEK_OZETI, type SecenekId } from '../src/data/istihdamV2';
 import { buildModel as siteModel } from '../src/data/model';
 import { DEFAULT_PARAMS } from '../src/data/params';
-import { int, tl } from '../src/lib/format';
+import { int, milyon as milyonYaz, tl } from '../src/lib/format';
+import { gelirBaglami, planCirosu } from '../src/data/gelir2027';
 import { buildModel, reply } from './opex-fixture';
 
 /**
@@ -256,4 +257,21 @@ test.describe('2027 gelir öngörüsü', () => {
     expect(puanlar).toEqual([...puanlar].sort((a, b) => b - a));
     expect(metin(liste[0][1])).toMatch(/Yüksek\)$/);
   });
+});
+
+/* ---------- Kararlar 16 Kasım 2026 (karar listesi 5.4 ve 5.5) ---------- */
+
+test('2027 bütçesi: dolar fiyatlı Microsoft lisansı fiyat tablosunda 2027’de de 2026 fiyatıyla görünür', async ({ page }) => {
+  await butceAc(page);
+  const satir = tablo(page, 'Kullanılan fiyatlar').locator('tbody tr', { hasText: 'Microsoft 365' });
+  const [, , f26, f27] = (await satir.first().locator('th, td').allTextContents()).map(metin);
+  expect(f27).toBe(f26);
+});
+
+test('2027 bütçesi: gelir kartı yeni kadronun ek satışını sayan öngörüyü de söyler', async ({ page }) => {
+  await butceAc(page);
+  const kart = page.locator('#secenek').getByText('Yeni kadronun ek satışı bu tutara dahil değildir.');
+  await expect(kart).toBeVisible();
+  const ciro = milyonYaz(planCirosu('medyan', gelirBaglami(siteModel(DEFAULT_PARAMS))));
+  await expect(page.locator('#secenek')).toContainText(`“Gelir öngörüsü” sayfası bu kadroyla ${ciro} ciro öngörür.`);
 });

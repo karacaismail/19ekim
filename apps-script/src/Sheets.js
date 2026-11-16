@@ -98,9 +98,9 @@ function panoGostergeleri_(kpi) {
   return [
     satir('Bu ay toplam OPEX', 'Teknoloji', 'Personel', 'Ofis ve işletme'),
     satir(d['Bu ay toplam OPEX'], d['Teknoloji'], d['Personel'], d['Ofis ve işletme']),
-    satir(d['Rapor dönemi'], 'Yazılım, yapay zekâ, sunucu, API, AWS vb.', 'Bordro işveren maliyeti + freelancer', 'Kira, faturalar, ofis ihtiyaçları'),
+    satir(d['Rapor dönemi'], 'Yazılım, yapay zekâ, sunucu, API, AWS vb.', 'Bordro işveren maliyeti ve Freelancer', 'Kira, faturalar, ofis ihtiyaçları'),
     satir('', '', '', ''),
-    satir('2027 aylık ortalama', '2027 değişim (aylık ort.)', 'Uygulanan 2027 zammı', 'USD/TRY · EUR/TRY'),
+    satir('2027 aylık ortalama', '2027 değişim (aylık ort.)', 'Uygulanan 2027 zammı', 'USD/TRY ve EUR/TRY'),
     satir(d['2027 aylık ortalama'], d['2027 değişim'], d['Uygulanan zam'], d['USD/TRY']),
     satir('2027 yıllık: ' + tlMetni_(d['2027 yıllık OPEX']), '2026 aylık ortalamasına göre', d['Zam esası'], 'EUR/TRY ' + kur),
   ];
@@ -325,7 +325,7 @@ function hesapBloklari_(ss, girdi, modelAl) {
   panoBlok('kpi', function () { return panoGostergeleri_(OpexMotor.rapor(modelAl(), 'kpi', girdi)); }, true);
   panoBlok('uyariOzet', function () {
     var n = modelAl().uyarilar.length;
-    return [[n ? '⚠ ' + n + ' uyarı: aşağıda Uyarılar' : 'Uyarı yok']];
+    return [[n ? '⚠ ' + n + ' uyarı var. Uyarılar aşağıdadır.' : 'Uyarı yok']];
   }, true);
   ['ozet', 'kopru', 'plan', 'kisi', 'kategori', 'aylik', 'bilesen', 'teknoloji', 'uyari'].forEach(function (ad) { panoBlok(ad, rapor(ad)); });
   var hs = OPEX_HESAP_SUTUNLARI;
@@ -414,7 +414,7 @@ function hesaplariYaz_(secenek) {
       if (b.enCok && degerler.length > b.enCok) {
         var fazla = degerler.length - b.enCok + 1;
         degerler = degerler.slice(0, b.enCok - 1);
-        var not = ["'… " + fazla + ' satır daha Pano’ya sığmadı (tamamı Giderler sayfasında)'];
+        var not = ["'… " + fazla + ' satır daha Pano’ya sığmadı. Tamamı Giderler sayfalarındadır.'];
         while (not.length < b.genislik) not.push('');
         degerler.push(not);
       }
@@ -478,7 +478,7 @@ function hesaplariTetikle_(e) {
 /** OPEX menüsü → Hesapları yenile: tüm hesap tabloları yeniden yazılır. */
 function hesaplariYenile() {
   var sonuc = hesaplariYaz_({ zorla: true });
-  var mesaj = sonuc.durum === 'mesgul' ? 'Başka bir hesap yazımı sürüyor; birkaç saniye sonra yeniden deneyin.' : 'Hesaplar yenilendi (' + sonuc.yazilan.length + ' tablo).';
+  var mesaj = sonuc.durum === 'mesgul' ? 'Başka bir hesap yazımı sürüyor. Birkaç saniye sonra yeniden deneyin.' : 'Hesaplar yenilendi (' + sonuc.yazilan.length + ' tablo).';
   try {
     SpreadsheetApp.getActiveSpreadsheet().toast(mesaj, 'OPEX', 5);
   } catch (hata) {
@@ -596,7 +596,7 @@ function doPost(e) {
 function erisimDenetle_(acik, istek, p) {
   if (acik) return null;
   var gercek = p[OPEX_ANAHTAR_OZELLIGI];
-  if (!gercek) return json_({ ok: false, hata: 'kurulum', mesaj: 'Erişim anahtarı tanımlı değil; Sheets’te OPEX → Kurulum / onarım çalıştırın.' });
+  if (!gercek) return json_({ ok: false, hata: 'kurulum', mesaj: 'Erişim anahtarı tanımlı değil. Sheets’te OPEX menüsünden “Kurulum / onarım” komutunu çalıştırın.' });
   // Bekleme yok: anahtar ≈ 244 bit rastgeledir; bekleme yalnız eşzamanlı çalışma kotasını tüketirdi.
   if (typeof istek.anahtar !== 'string' || !sabitZamanliEsit_(istek.anahtar, gercek)) {
     return json_({ ok: false, hata: 'yetki', mesaj: 'Bu veri ucu erişim anahtarı istiyor ya da anahtar geçersiz.' });
@@ -745,21 +745,30 @@ function baglantiBilgisi() {
   }
   var html = HtmlService.createHtmlOutput(
     '<div style="font-family:Roboto,Arial,sans-serif;font-size:15px;line-height:1.5">' +
-      '<p><b>Erişim anahtarı</b> (yalnız güvendiğiniz kişilerle paylaşın):</p>' +
+      '<p><b>Erişim anahtarı</b></p>' +
+      '<p>Anahtarı yalnız güvendiğiniz kişilerle paylaşın.</p>' +
       '<p><code style="font-size:15px;user-select:all">' + anahtar + '</code></p>' +
-      '<p><b>Web uygulaması adresi</b>: ' + (url ? '<code style="font-size:15px;user-select:all">' + url + '</code>' : 'henüz dağıtılmadı — Dağıt → Yeni dağıtım → Web uygulaması (Ben olarak çalıştır, Erişim: Herkes).') + '</p>' +
-      '<p>Sayfada (karacaismail.github.io/19ekim/giderler/) “Bağlantı” alanına adresi ve anahtarı girin.</p>' +
+      '<p><b>Web uygulaması adresi</b></p>' +
+      (url
+        ? '<p><code style="font-size:15px;user-select:all">' + url + '</code></p>'
+        : '<p>Web uygulaması henüz dağıtılmadı. Dağıtmak için şu adımları izleyin:</p>' +
+          '<ol><li>Apps Script’te “Dağıt” menüsünden “Yeni dağıtım” komutunu seçin.</li>' +
+          '<li>Dağıtım türü olarak “Web uygulaması” seçin.</li>' +
+          '<li>“Şu kullanıcı olarak çalıştır” için “Ben” seçeneğini seçin.</li>' +
+          '<li>“Erişimi olanlar” için “Herkes” seçeneğini seçin.</li></ol>') +
+      '<p>Giderler sayfasını açın (karacaismail.github.io/19ekim/giderler/).</p>' +
+      '<p>Adresi ve anahtarı sayfadaki “Bağlantı” formuna girin.</p>' +
       '</div>',
   )
     .setWidth(560)
-    .setHeight(300);
+    .setHeight(url ? 340 : 480);
   SpreadsheetApp.getUi().showModalDialog(html, 'OPEX web bağlantısı');
 }
 
 
 function anahtariYenile() {
   var ui = SpreadsheetApp.getUi();
-  var cevap = ui.alert('Yeni erişim anahtarı', 'Eski anahtar geçersiz olur; sayfayı açan herkes yeni anahtarı girmelidir. Devam edilsin mi?', ui.ButtonSet.YES_NO);
+  var cevap = ui.alert('Yeni erişim anahtarı', 'Eski anahtar geçersiz olur. Sayfayı açan herkes yeni anahtarı girmelidir. Devam edilsin mi?', ui.ButtonSet.YES_NO);
   if (cevap !== ui.Button.YES) return;
   PropertiesService.getScriptProperties().setProperty(OPEX_ANAHTAR_OZELLIGI, anahtarUret_());
   baglantiBilgisi();

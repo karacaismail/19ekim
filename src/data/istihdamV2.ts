@@ -14,7 +14,7 @@ import type { SecenekGeliri } from './planGeliri';
 
 export type SecenekId = 'ekonomik' | 'medyan' | 'guclu';
 export const SECENEKLER: SecenekId[] = ['ekonomik', 'medyan', 'guclu'];
-export const SECENEK_ADI: Record<SecenekId, string> = { ekonomik: 'Ekonomik', medyan: 'Medyan', guclu: 'Güçlü' };
+export const SECENEK_ADI: Record<SecenekId, string> = { ekonomik: 'Ekonomik', medyan: 'Orta', guclu: 'Güçlü' };
 
 export type CalismaBicimi = 'Tam zamanlı' | 'Yarı zamanlı' | 'Dış hizmet' | 'Serbest çalışan';
 
@@ -253,7 +253,7 @@ export const ACIK_SORULAR: string[] = [
   'Yatırım girişinin tutarı ve tarihi nedir?',
   'Sepet, sipariş ve ödeme akışı 2027’de açılacak mı? Ek geliştirici, test uzmanı ve güvenlik testi bu karara bağlıdır.',
   'Mevcut yazılım ekibinin gerçek ücretleri nedir? Plan bu ekip için tahmini piyasa ücreti kullanır.',
-  'Bugünkü sunucu ve altyapı hizmetinin (DevOps) bedeli nedir? Ekonomik ve Medyan seçenekte bu bedel bilinmediği için toplama eklenmedi.',
+  'Bugünkü sunucu ve altyapı hizmetinin (DevOps) bedeli nedir? Ekonomik ve Orta seçenekte bu bedel bilinmediği için toplama eklenmedi.',
   'Satış ekip lideri mevcut saha personelinden mi seçilecek? Seçilirse yeni kişi yerine liderlik farkı ödenir.',
   '2027 asgari ücreti Aralık 2026’da açıklanınca bütün maaşlar yeniden hesaplanmalıdır.',
 ];

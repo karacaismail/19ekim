@@ -6,6 +6,7 @@
  */
 
 import { sayiBicimi, tlBitisik } from '../lib/format';
+import { DEFAULT_PARAMS } from './params';
 
 export type Marka = 'istoc' | 'segika';
 export type Model = 'oran' | 'sabit';
@@ -114,7 +115,8 @@ export const VARSAYILAN_AYAR: Ayar = {
   marka: 'istoc',
   model: 'oran',
   istocAyEur: 399,
-  kur: 56,
+  // Karar 16 Kasım 2026 (karar listesi 5.6): varsayılan kur sitenin genel kurudur (Parametreler).
+  kur: DEFAULT_PARAMS.eurTry,
   istocYilAy: 10,
   segikaPaket: 'ikisi',
   segikaFiyat: { ikisi: 2_600, tesvik: 1_850, otomasyon: 1_600 },

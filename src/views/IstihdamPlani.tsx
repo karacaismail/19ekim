@@ -49,6 +49,18 @@ function durumu(tarih: string, bugun: string | null): Durum | null {
   return f < 0 ? 'gecti' : f === 0 ? 'bugun' : f <= 7 ? 'yakin' : 'plan';
 }
 
+/** “Sorumlu” satırı. Kadro kapasitesi, eylem planı ve takvim aynı biçimi kullanır (kullanıcı kararı 16 Kasım 2026, 4. konu). */
+function SorumluSatiri({ kim }: { kim: string }) {
+  return (
+    <dl className="tk-rol-bilgi tk-karar-kim">
+      <div>
+        <dt>Sorumlu</dt>
+        <dd>{kim}</dd>
+      </div>
+    </dl>
+  );
+}
+
 function DurumEtiketi({ durum }: { durum: Durum | null }) {
   return durum ? (
     <span className="tk-durum" data-durum={durum}>
@@ -86,7 +98,7 @@ function AsamaCubuklari({ bugun }: { bugun: string | null }) {
           const y = 36 + i * SATIR;
           return (
             <g key={a.id} className="tk-gantt-satir" data-tur={a.id.startsWith('d') ? 'dalga' : 'faz'}>
-              <title>{`${a.ad}: ${uzunTarih(a.bas)} ile ${uzunTarih(a.son)} arası. ${a.aciklama}`}</title>
+              <title>{`${a.ad}: ${uzunTarih(a.bas)} ile ${uzunTarih(a.son)} arası. ${a.aciklama} Bu işten ${a.sorumlu} sorumludur.`}</title>
               <text className="tk-gantt-ad" x={0} y={y + 24}>
                 {a.ad}
               </text>
@@ -135,6 +147,7 @@ function ZamanCizelgesi({ bugun }: { bugun: string | null }) {
                   </p>
                   <h4 className="tk-olay-baslik">{o.baslik}</h4>
                   <p className="tk-olay-aciklama">{o.aciklama}</p>
+                  <SorumluSatiri kim={o.sorumlu} />
                 </div>
               </li>
             ))}
@@ -229,6 +242,7 @@ function Takvim({ bugun }: { bugun: string | null }) {
               <span className="tk-ajanda-tarih">{uzunTarih(o.tarih)}</span>
               <span className="tk-ajanda-baslik">{o.baslik}</span>
               <span className="tk-ajanda-aciklama">{o.aciklama}</span>
+              <SorumluSatiri kim={o.sorumlu} />
             </li>
           ))
         ) : (
@@ -402,12 +416,7 @@ function KadroIcerik() {
                   </span>
                 </p>
                 <p className="tk-karar-neden">{k.neden}</p>
-                <dl className="tk-rol-bilgi tk-karar-kim">
-                  <div>
-                    <dt>Sorumlu</dt>
-                    <dd>{k.kim}</dd>
-                  </div>
-                </dl>
+                <SorumluSatiri kim={k.kim} />
               </div>
             </li>
           ))}
@@ -470,8 +479,8 @@ export function KadroKapasitesiPage({ pathname }: { pathname: string }) {
 export function GuncelPlan() {
   const bugun = useBugun();
   const satirlar = [
-    ...ASAMALAR.filter((a) => a.id.startsWith('f')).map((a) => ({ bas: a.bas, son: a.son, ad: a.ad, aciklama: a.aciklama, tur: 'Aşama' })),
-    ...OLAYLAR.map((o) => ({ bas: o.tarih, son: o.tarih, ad: o.baslik, aciklama: o.aciklama, tur: OLAY_TURU_ADI[o.tur] })),
+    ...ASAMALAR.filter((a) => a.id.startsWith('f')).map((a) => ({ bas: a.bas, son: a.son, ad: a.ad, aciklama: a.aciklama, sorumlu: a.sorumlu, tur: 'Aşama' })),
+    ...OLAYLAR.map((o) => ({ bas: o.tarih, son: o.tarih, ad: o.baslik, aciklama: o.aciklama, sorumlu: o.sorumlu, tur: OLAY_TURU_ADI[o.tur] })),
     // Aynı gün başlayan aşama, olaydan önce gelir. Aşamalar kendi aralarında ad sırasıyla dizilir (Faz 3, Faz 4’ten önce).
   ].sort((x, y) => x.bas.localeCompare(y.bas) || Number(y.tur === 'Aşama') - Number(x.tur === 'Aşama') || x.ad.localeCompare(y.ad, 'tr'));
   const tarih = (b: string, s: string) => (b === s ? uzunTarih(b) : `${uzunTarih(b)} ile ${uzunTarih(s)} arası`);
@@ -501,6 +510,7 @@ export function GuncelPlan() {
                 <span className="tk-seviye">{r.tur}</span>
               </p>
               <p className="tk-karar-neden">{r.aciklama}</p>
+              <SorumluSatiri kim={r.sorumlu} />
             </div>
           </li>
         ))}

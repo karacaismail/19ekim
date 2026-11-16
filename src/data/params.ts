@@ -42,6 +42,8 @@ export const DEFAULT_PARAMS = {
   /* Prim */
   commission: 2_500,
   sponsorShare: 500,
+  /* Kullanıcı kararı 16 Kasım 2026: ikinci kademe (sponsorun sponsoru) satış başına 250 ₺. */
+  sponsorShare2: 250,
   leadTeamShare: 250,
   /* Bütçe */
   metaWeekly: 5_000,
@@ -169,7 +171,8 @@ export const PARAM_GROUPS: ParamGroup[] = [
     desc: 'Saha satış uzmanı bir ayda belli bir tutarın üstünde satış yaparsa prim alır. Bu tutara kota denir. Kota, uzmanın şirkete aylık maliyetine eşittir. Örneğin maliyet 100.000 ₺ ise kota ayda 100.000 ₺ satıştır.',
     fields: [
       { key: 'commission', label: 'Satış başına prim', kind: 'money', unit: '₺', min: 0, step: 100 },
-      { key: 'sponsorShare', label: 'Sponsor payı (1. kademe)', kind: 'money', unit: '₺ / satış', min: 0, step: 50, help: 'MLM (çok katmanlı pazarlama) ağında temsilci satış yapınca bir üstündeki kişiye de pay ödenir. Bu kişiye sponsor denir. Pay en çok 2 kademe yukarı gider. İkinci kademenin tutarı henüz belirlenmedi.' },
+      { key: 'sponsorShare', label: 'Sponsor payı (1. kademe)', kind: 'money', unit: '₺ / satış', min: 0, step: 50, help: 'MLM (çok katmanlı pazarlama) ağında temsilci satış yapınca bir üstündeki kişiye de pay ödenir. Bu kişiye sponsor denir. Pay en çok 2 kademe yukarı gider.' },
+      { key: 'sponsorShare2', label: 'Sponsor payı (2. kademe)', kind: 'money', unit: '₺ / satış', min: 0, step: 50, help: 'Sponsorun sponsoru aynı satıştan bu payı alır. Daha üstteki kişi o satıştan pay almaz.' },
       { key: 'leadTeamShare', label: 'Ekip lideri ekip payı', kind: 'money', unit: '₺ / satış', min: 0, step: 50 },
     ],
   },

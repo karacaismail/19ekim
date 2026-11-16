@@ -6,17 +6,17 @@ const endpoint = 'https://script.google.com/macros/s/persona-isolation-test/exec
 test('tarayıcı testleri gerçek Google kaydı yerine ayrı test kaydını değiştirir', async ({ page, personaServer }) => {
   await page.goto('politikalar/');
   const reply = await page.evaluate(async (endpoint) => {
-    const response = await fetch(endpoint, { method: 'POST', body: JSON.stringify({ service: 'persona', action: 'patch', project: 'istoc', key: '', operationId: 'fixture-check-1', changes: [{ field: 'kur', before: 56, value: 62 }] }) });
+    const response = await fetch(endpoint, { method: 'POST', body: JSON.stringify({ service: 'persona', action: 'patch', project: 'istoc', key: '', operationId: 'fixture-check-1', changes: [{ field: 'kur', before: 55.31, value: 62 }] }) });
     return response.json();
   }, endpoint);
   expect(reply.ok).toBe(true);
   expect(personaServer.snapshot('istoc').fields.kur).toBe(62);
-  expect(personaServer.snapshot('segika').fields.kur).toBe(56);
+  expect(personaServer.snapshot('segika').fields.kur).toBe(55.31);
   expect(personaServer.writes).toHaveLength(1);
 });
 
 test('önceki testin değişikliği yeni teste taşınmaz', async ({ personaServer }) => {
-  expect(personaServer.snapshot('istoc').fields.kur).toBe(56);
+  expect(personaServer.snapshot('istoc').fields.kur).toBe(55.31);
   expect(personaServer.writes).toHaveLength(0);
 });
 

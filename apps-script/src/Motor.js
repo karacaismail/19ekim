@@ -13,7 +13,7 @@ var OpexMotor = (function () {
   'use strict';
 
   var SEMA = 1;
-  var SURUM = '2026-10-20.6';
+  var SURUM = '2026-11-16.1';
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var KISA_AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
   var YILLAR = [2026, 2027];
@@ -33,39 +33,39 @@ var OpexMotor = (function () {
    * tur: oran (kesir, %29,73 = 0,2973), tutar (₺), kur, sayi, metin, liste.
    */
   var PARAMETRE_TANIMLARI = [
-    { grup: 'Dönem', ad: 'Rapor yılı', anahtar: 'rapor_yili', deger: 2026, birim: 'yıl', tur: 'sayi', formul: '=YEAR(TODAY())', aciklama: '“Bu ay” ve 12 aylık planın başlangıç yılı; hesap 2026 ve 2027’yi kapsar.' },
-    { grup: 'Dönem', ad: 'Rapor ayı', anahtar: 'rapor_ayi', deger: 10, birim: 'ay', tur: 'sayi', formul: '=MONTH(TODAY())', aciklama: 'Varsayılan bugünün ayı; sabit bir ay için 1–12 yazın.' },
+    { grup: 'Dönem', ad: 'Rapor yılı', anahtar: 'rapor_yili', deger: 2026, birim: 'yıl', tur: 'sayi', formul: '=YEAR(TODAY())', aciklama: '“Bu ay” ve 12 aylık plan bu yıldan başlar. Hesap 2026 ve 2027 yıllarını kapsar.' },
+    { grup: 'Dönem', ad: 'Rapor ayı', anahtar: 'rapor_ayi', deger: 10, birim: 'ay', tur: 'sayi', formul: '=MONTH(TODAY())', aciklama: 'Varsayılan değer bugünün ayıdır. Sabit ay için 1 ile 12 arasında sayı yazın.' },
 
-    { grup: 'Döviz', ad: 'USD/TRY', anahtar: 'kur_usd', deger: 48.9889, birim: '₺', tur: 'kur', formul: '=IFERROR(GOOGLEFINANCE("CURRENCY:USDTRY"),p_kur_usd_yedek)', aciklama: 'Canlı kur (Google Finance); okunamazsa yedek kur.' },
-    { grup: 'Döviz', ad: 'EUR/TRY', anahtar: 'kur_eur', deger: 55.731, birim: '₺', tur: 'kur', formul: '=IFERROR(GOOGLEFINANCE("CURRENCY:EURTRY"),p_kur_eur_yedek)', aciklama: 'Canlı kur (Google Finance); okunamazsa yedek kur.' },
-    { grup: 'Döviz', ad: 'USD/TRY yedek', anahtar: 'kur_usd_yedek', deger: 48.9889, birim: '₺', tur: 'kur', aciklama: 'Gider takibindeki kur.' },
-    { grup: 'Döviz', ad: 'EUR/TRY yedek', anahtar: 'kur_eur_yedek', deger: 55.731, birim: '₺', tur: 'kur', aciklama: 'Gider takibindeki kur.' },
+    { grup: 'Döviz', ad: 'USD/TRY', anahtar: 'kur_usd', deger: 48.9889, birim: '₺', tur: 'kur', formul: '=IFERROR(GOOGLEFINANCE("CURRENCY:USDTRY"),p_kur_usd_yedek)', aciklama: 'Canlı kur Google Finance’ten gelir. Canlı kur okunamazsa yedek kur kullanılır.' },
+    { grup: 'Döviz', ad: 'EUR/TRY', anahtar: 'kur_eur', deger: 55.731, birim: '₺', tur: 'kur', formul: '=IFERROR(GOOGLEFINANCE("CURRENCY:EURTRY"),p_kur_eur_yedek)', aciklama: 'Canlı kur Google Finance’ten gelir. Canlı kur okunamazsa yedek kur kullanılır.' },
+    { grup: 'Döviz', ad: 'USD/TRY yedek', anahtar: 'kur_usd_yedek', deger: 48.9889, birim: '₺', tur: 'kur', aciklama: 'Bu kur, gider takibinde kullanılan kurdur.' },
+    { grup: 'Döviz', ad: 'EUR/TRY yedek', anahtar: 'kur_eur_yedek', deger: 55.731, birim: '₺', tur: 'kur', aciklama: 'Bu kur, gider takibinde kullanılan kurdur.' },
 
-    { grup: 'Enflasyon 2026', ad: 'Yıllık TÜFE', anahtar: 'tufe_yillik', deger: 0.2973, birim: '%', tur: 'oran', aciklama: 'TÜİK, Eylül 2026. Kaynak: enflasyon_kaynak.' },
-    { grup: 'Enflasyon 2026', ad: 'Aylık TÜFE', anahtar: 'tufe_aylik', deger: 0.0184, birim: '%', tur: 'oran', aciklama: 'TÜİK, Eylül 2026.' },
-    { grup: 'Enflasyon 2026', ad: '12 aylık ortalama TÜFE', anahtar: 'tufe_ort12', deger: 0.3149, birim: '%', tur: 'oran', aciklama: 'Ekim 2026 kira artış tavanı.' },
-    { grup: 'Enflasyon 2026', ad: 'Yİ-ÜFE aylık (eski TEFE)', anahtar: 'yiufe_aylik', deger: 0.0207, birim: '%', tur: 'oran', aciklama: 'TÜİK, Eylül 2026.' },
-    { grup: 'Enflasyon 2026', ad: 'Enflasyon dönemi', anahtar: 'enflasyon_donemi', deger: 'Eylül 2026', birim: '', tur: 'metin', aciklama: 'Yukarıdaki oranların ait olduğu ay.' },
-    { grup: 'Enflasyon 2026', ad: 'Enflasyon kaynağı', anahtar: 'enflasyon_kaynak', deger: ENFLASYON_KAYNAGI, birim: '', tur: 'metin', aciklama: 'Parametrelerden arındırılmış arama adresi.' },
+    { grup: 'Enflasyon 2026', ad: 'Yıllık TÜFE', anahtar: 'tufe_yillik', deger: 0.2973, birim: '%', tur: 'oran', aciklama: 'TÜFE, tüketici fiyat endeksidir. Oran, Türkiye İstatistik Kurumunun (TÜİK) Eylül 2026 verisidir. Kaynak adresi “Enflasyon kaynağı” satırındadır.' },
+    { grup: 'Enflasyon 2026', ad: 'Aylık TÜFE', anahtar: 'tufe_aylik', deger: 0.0184, birim: '%', tur: 'oran', aciklama: 'Oran, TÜİK’in Eylül 2026 verisidir.' },
+    { grup: 'Enflasyon 2026', ad: '12 aylık ortalama TÜFE', anahtar: 'tufe_ort12', deger: 0.3149, birim: '%', tur: 'oran', aciklama: 'Bu oran, Ekim 2026 için kira artış tavanıdır.' },
+    { grup: 'Enflasyon 2026', ad: 'Yİ-ÜFE aylık (eski TEFE)', anahtar: 'yiufe_aylik', deger: 0.0207, birim: '%', tur: 'oran', aciklama: 'Yİ-ÜFE, yurt içi üretici fiyat endeksidir. Oran, TÜİK’in Eylül 2026 verisidir.' },
+    { grup: 'Enflasyon 2026', ad: 'Enflasyon dönemi', anahtar: 'enflasyon_donemi', deger: 'Eylül 2026', birim: '', tur: 'metin', aciklama: 'Enflasyon oranları bu aya aittir.' },
+    { grup: 'Enflasyon 2026', ad: 'Enflasyon kaynağı', anahtar: 'enflasyon_kaynak', deger: ENFLASYON_KAYNAGI, birim: '', tur: 'metin', aciklama: 'Bu adres, enflasyon verisinin arama adresidir. Adresteki ek parametreler silindi.' },
 
-    { grup: '2027 zam ve artışlar', ad: 'Zam esası', anahtar: 'zam_esasi', deger: 'Yıllık TÜFE', birim: '', tur: 'liste', secenekler: ['Yıllık TÜFE', '12 aylık ortalama TÜFE', 'Elle'], aciklama: 'Personel sayfasında “2027 zam: Evet” olan herkese uygulanır.' },
-    { grup: '2027 zam ve artışlar', ad: 'Elle zam oranı', anahtar: 'zam_elle', deger: 0.3, birim: '%', tur: 'oran', aciklama: 'Zam esası “Elle” ise kullanılır.' },
-    { grup: '2027 zam ve artışlar', ad: 'Ek zam (refah payı)', anahtar: 'zam_ek_puan', deger: 0, birim: '%', tur: 'oran', aciklama: 'Esasa eklenen puan.' },
-    { grup: '2027 zam ve artışlar', ad: 'Uygulanan zam oranı', anahtar: 'zam_orani', deger: 0.2973, birim: '%', tur: 'oran', formul: '=IFS(p_zam_esasi="Yıllık TÜFE",p_tufe_yillik,p_zam_esasi="12 aylık ortalama TÜFE",p_tufe_ort12,TRUE,p_zam_elle)+p_zam_ek_puan', aciklama: 'Hesaplanır: esas + ek zam.' },
-    { grup: '2027 zam ve artışlar', ad: 'Kira artışı', anahtar: 'kira_artis_2027', deger: 0.3149, birim: '%', tur: 'oran', formul: '=p_tufe_ort12', aciklama: 'Varsayılan: 12 aylık ortalama TÜFE (kira artış tavanı).' },
-    { grup: '2027 zam ve artışlar', ad: 'Genel artış (fatura, ofis)', anahtar: 'genel_artis_2027', deger: 0.2973, birim: '%', tur: 'oran', formul: '=p_tufe_yillik', aciklama: '“Genel” artış esaslı kalemler; varsayılan yıllık TÜFE.' },
-    { grup: '2027 zam ve artışlar', ad: 'Döviz kalemlerinde ₺ artışı', anahtar: 'kur_artis_2027', deger: 0, birim: '%', tur: 'oran', aciklama: '“Kur” esaslı kalemler. Varsayım: kur sabit (%0).' },
+    { grup: '2027 zam ve artışlar', ad: 'Zam esası', anahtar: 'zam_esasi', deger: 'Yıllık TÜFE', birim: '', tur: 'liste', secenekler: ['Yıllık TÜFE', '12 aylık ortalama TÜFE', 'Elle'], aciklama: 'Zam, “Giderler PERSONEL” sayfasında “2027 zam” sütunu “Evet” olan herkese uygulanır.' },
+    { grup: '2027 zam ve artışlar', ad: 'Elle zam oranı', anahtar: 'zam_elle', deger: 0.3, birim: '%', tur: 'oran', aciklama: 'Bu oran, zam esası “Elle” ise kullanılır.' },
+    { grup: '2027 zam ve artışlar', ad: 'Ek zam (refah payı)', anahtar: 'zam_ek_puan', deger: 0, birim: '%', tur: 'oran', aciklama: 'Bu puan, zam esasına eklenir.' },
+    { grup: '2027 zam ve artışlar', ad: 'Uygulanan zam oranı', anahtar: 'zam_orani', deger: 0.2973, birim: '%', tur: 'oran', formul: '=IFS(p_zam_esasi="Yıllık TÜFE",p_tufe_yillik,p_zam_esasi="12 aylık ortalama TÜFE",p_tufe_ort12,TRUE,p_zam_elle)+p_zam_ek_puan', aciklama: 'Bu oran hesaplanır. Oran, zam esası ile ek zamın toplamıdır.' },
+    { grup: '2027 zam ve artışlar', ad: 'Kira artışı', anahtar: 'kira_artis_2027', deger: 0.3149, birim: '%', tur: 'oran', formul: '=p_tufe_ort12', aciklama: 'Varsayılan değer 12 aylık ortalama TÜFE’dir. Bu oran, kira artış tavanıdır.' },
+    { grup: '2027 zam ve artışlar', ad: 'Genel artış (fatura, ofis)', anahtar: 'genel_artis_2027', deger: 0.2973, birim: '%', tur: 'oran', formul: '=p_tufe_yillik', aciklama: 'Bu oran, artış esası “Genel” olan kalemlere uygulanır. Varsayılan değer yıllık TÜFE’dir.' },
+    { grup: '2027 zam ve artışlar', ad: 'Döviz kalemlerinde ₺ artışı', anahtar: 'kur_artis_2027', deger: 0, birim: '%', tur: 'oran', aciklama: 'Bu oran, artış esası “Kur” olan kalemlere uygulanır. Varsayıma göre kur sabittir (%0).' },
 
-    { grup: 'Bordro 2026', ad: 'Brüt asgari ücret 2026', anahtar: 'asgari_brut_2026', deger: 33030, birim: '₺', tur: 'tutar', aciklama: 'Aylık; net 28.075,50 ₺.' },
-    { grup: 'Bordro 2026', ad: 'SGK tavanı katsayısı', anahtar: 'sgk_tavan_kat', deger: 9, birim: '×', tur: 'sayi', aciklama: 'Prime esas kazanç üst sınırı = brüt asgari × katsayı (2026: 297.270 ₺).' },
-    { grup: 'Bordro 2026', ad: 'SGK işçi payı', anahtar: 'sgk_isci', deger: 0.14, birim: '%', tur: 'oran', aciklama: 'Malullük-yaşlılık-ölüm %9 + genel sağlık %5.' },
+    { grup: 'Bordro 2026', ad: 'Brüt asgari ücret 2026', anahtar: 'asgari_brut_2026', deger: 33030, birim: '₺', tur: 'tutar', aciklama: 'Tutar aylıktır. Net asgari ücret 28.075,50 ₺’dır.' },
+    { grup: 'Bordro 2026', ad: 'SGK tavanı katsayısı', anahtar: 'sgk_tavan_kat', deger: 9, birim: '×', tur: 'sayi', aciklama: 'Prime esas kazanç üst sınırı, brüt asgari ücret ile bu katsayının çarpımıdır. 2026 yılında üst sınır 297.270 ₺’dır.' },
+    { grup: 'Bordro 2026', ad: 'SGK işçi payı', anahtar: 'sgk_isci', deger: 0.14, birim: '%', tur: 'oran', aciklama: 'Bu pay, malullük, yaşlılık ve ölüm sigortası %9 ile genel sağlık sigortası %5’in toplamıdır.' },
     { grup: 'Bordro 2026', ad: 'İşsizlik işçi payı', anahtar: 'issizlik_isci', deger: 0.01, birim: '%', tur: 'oran', aciklama: '' },
-    { grup: 'Bordro 2026', ad: 'SGK işveren payı', anahtar: 'sgk_isveren', deger: 0.2175, birim: '%', tur: 'oran', aciklama: 'MYÖ %12 + kısa vade %2,25 + GSS %7,5 (7566 sayılı Kanun, 2026).' },
+    { grup: 'Bordro 2026', ad: 'SGK işveren payı', anahtar: 'sgk_isveren', deger: 0.2175, birim: '%', tur: 'oran', aciklama: 'Bu pay üç oranın toplamıdır. Malullük, yaşlılık ve ölüm (MYÖ) sigortası %12’dir. Kısa vadeli sigorta %2,25’tir. Genel sağlık sigortası (GSS) %7,5’tir. Oranlar 2026 için 7566 sayılı Kanuna göredir.' },
     { grup: 'Bordro 2026', ad: 'İşsizlik işveren payı', anahtar: 'issizlik_isveren', deger: 0.02, birim: '%', tur: 'oran', aciklama: '' },
-    { grup: 'Bordro 2026', ad: 'Damga vergisi', anahtar: 'damga', deger: 0.00759, birim: '%', tur: 'oran', aciklama: 'Binde 7,59.' },
-    { grup: 'Bordro 2026', ad: 'GV 1. dilim üst sınırı', anahtar: 'gv_d1_2026', deger: 190000, birim: '₺', tur: 'tutar', aciklama: 'Ücretliler tarifesi (GVK 103), 2026.' },
+    { grup: 'Bordro 2026', ad: 'Damga vergisi', anahtar: 'damga', deger: 0.00759, birim: '%', tur: 'oran', aciklama: 'Oran binde 7,59’dur.' },
+    { grup: 'Bordro 2026', ad: 'GV 1. dilim üst sınırı', anahtar: 'gv_d1_2026', deger: 190000, birim: '₺', tur: 'tutar', aciklama: 'GV, gelir vergisi demektir. Dilimler 2026 ücretliler tarifesine göredir. Dayanak, Gelir Vergisi Kanununun (GVK) 103. maddesidir.' },
     { grup: 'Bordro 2026', ad: 'GV 2. dilim üst sınırı', anahtar: 'gv_d2_2026', deger: 400000, birim: '₺', tur: 'tutar', aciklama: '' },
-    { grup: 'Bordro 2026', ad: 'GV 3. dilim üst sınırı', anahtar: 'gv_d3_2026', deger: 1500000, birim: '₺', tur: 'tutar', aciklama: 'Ücret gelirleri.' },
+    { grup: 'Bordro 2026', ad: 'GV 3. dilim üst sınırı', anahtar: 'gv_d3_2026', deger: 1500000, birim: '₺', tur: 'tutar', aciklama: 'Bu sınır, ücret gelirleri içindir.' },
     { grup: 'Bordro 2026', ad: 'GV 4. dilim üst sınırı', anahtar: 'gv_d4_2026', deger: 5300000, birim: '₺', tur: 'tutar', aciklama: '' },
     { grup: 'Bordro 2026', ad: 'GV oranı 1. dilim', anahtar: 'gv_o1', deger: 0.15, birim: '%', tur: 'oran', aciklama: '' },
     { grup: 'Bordro 2026', ad: 'GV oranı 2. dilim', anahtar: 'gv_o2', deger: 0.2, birim: '%', tur: 'oran', aciklama: '' },
@@ -73,20 +73,20 @@ var OpexMotor = (function () {
     { grup: 'Bordro 2026', ad: 'GV oranı 4. dilim', anahtar: 'gv_o4', deger: 0.35, birim: '%', tur: 'oran', aciklama: '' },
     { grup: 'Bordro 2026', ad: 'GV oranı 5. dilim', anahtar: 'gv_o5', deger: 0.4, birim: '%', tur: 'oran', aciklama: '' },
 
-    { grup: 'Bordro 2027 (varsayım)', ad: 'Brüt asgari ücret 2027', anahtar: 'asgari_brut_2027', deger: 42849.82, birim: '₺', tur: 'tutar', formul: '=ROUND(p_asgari_brut_2026*(1+p_zam_orani),2)', aciklama: 'Açıklanana kadar 2026 × (1 + zam oranı); açıklanınca tutarı yazın.' },
-    { grup: 'Bordro 2027 (varsayım)', ad: 'Vergi dilimi artışı', anahtar: 'dilim_artis_2027', deger: 0.2973, birim: '%', tur: 'oran', formul: '=p_tufe_yillik', aciklama: 'Yeniden değerleme varsayımı; dilimler bininci liraya yuvarlanır.' },
+    { grup: 'Bordro 2027 (varsayım)', ad: 'Brüt asgari ücret 2027', anahtar: 'asgari_brut_2027', deger: 42849.82, birim: '₺', tur: 'tutar', formul: '=ROUND(p_asgari_brut_2026*(1+p_zam_orani),2)', aciklama: 'Tutar açıklanana kadar 2026 tutarı zam oranı kadar artırılır. Tutar açıklanınca bu hücreye yazın.' },
+    { grup: 'Bordro 2027 (varsayım)', ad: 'Vergi dilimi artışı', anahtar: 'dilim_artis_2027', deger: 0.2973, birim: '%', tur: 'oran', formul: '=p_tufe_yillik', aciklama: 'Bu oran, yeniden değerleme varsayımıdır. Dilimler en yakın bin liraya yuvarlanır.' },
     { grup: 'Bordro 2027 (varsayım)', ad: 'GV 1. dilim üst sınırı 2027', anahtar: 'gv_d1_2027', deger: 246000, birim: '₺', tur: 'tutar', formul: '=ROUND(p_gv_d1_2026*(1+p_dilim_artis_2027),-3)', aciklama: '' },
     { grup: 'Bordro 2027 (varsayım)', ad: 'GV 2. dilim üst sınırı 2027', anahtar: 'gv_d2_2027', deger: 519000, birim: '₺', tur: 'tutar', formul: '=ROUND(p_gv_d2_2026*(1+p_dilim_artis_2027),-3)', aciklama: '' },
     { grup: 'Bordro 2027 (varsayım)', ad: 'GV 3. dilim üst sınırı 2027', anahtar: 'gv_d3_2027', deger: 1946000, birim: '₺', tur: 'tutar', formul: '=ROUND(p_gv_d3_2026*(1+p_dilim_artis_2027),-3)', aciklama: '' },
     { grup: 'Bordro 2027 (varsayım)', ad: 'GV 4. dilim üst sınırı 2027', anahtar: 'gv_d4_2027', deger: 6876000, birim: '₺', tur: 'tutar', formul: '=ROUND(p_gv_d4_2026*(1+p_dilim_artis_2027),-3)', aciklama: 'SGK oranları ve tavan katsayısı 2027’de aynı varsayılır.' },
 
-    { grup: 'Teşvik ve OPEX ayarları', ad: 'Sektör', anahtar: 'sektor', deger: 'İmalat dışı', birim: '', tur: 'liste', secenekler: ['İmalat dışı', 'İmalat'], aciklama: 'Genel prim indirimi puanını belirler.' },
-    { grup: 'Teşvik ve OPEX ayarları', ad: 'Genel indirim (imalat)', anahtar: 'tesvik_puan_imalat', deger: 0.05, birim: '%', tur: 'oran', aciklama: '5510/81-ı, 2026: 5 puan.' },
-    { grup: 'Teşvik ve OPEX ayarları', ad: 'Genel indirim (imalat dışı)', anahtar: 'tesvik_puan_diger', deger: 0.02, birim: '%', tur: 'oran', aciklama: '5510/81-ı, 2026: 2 puan (2025: 4 puan).' },
+    { grup: 'Teşvik ve OPEX ayarları', ad: 'Sektör', anahtar: 'sektor', deger: 'İmalat dışı', birim: '', tur: 'liste', secenekler: ['İmalat dışı', 'İmalat'], aciklama: 'Sektör, genel prim indiriminin puanını belirler.' },
+    { grup: 'Teşvik ve OPEX ayarları', ad: 'Genel indirim (imalat)', anahtar: 'tesvik_puan_imalat', deger: 0.05, birim: '%', tur: 'oran', aciklama: 'İndirim 2026 yılında 5 puandır (5510/81-ı).' },
+    { grup: 'Teşvik ve OPEX ayarları', ad: 'Genel indirim (imalat dışı)', anahtar: 'tesvik_puan_diger', deger: 0.02, birim: '%', tur: 'oran', aciklama: 'İndirim 2026 yılında 2 puandır (5510/81-ı). İndirim 2025 yılında 4 puandı.' },
     { grup: 'Teşvik ve OPEX ayarları', ad: 'Freelancer KDV oranı', anahtar: 'kdv_orani', deger: 0.2, birim: '%', tur: 'oran', aciklama: 'Fatura tutarı KDV dahil girilir.' },
-    { grup: 'Teşvik ve OPEX ayarları', ad: 'Freelancer OPEX tutarı', anahtar: 'opex_kdv', deger: 'KDV dahil', birim: '', tur: 'liste', secenekler: ['KDV dahil', 'KDV hariç'], aciklama: 'KDV dahil = nakit çıkışı; KDV hariç = gider (KDV indirilir).' },
+    { grup: 'Teşvik ve OPEX ayarları', ad: 'Freelancer OPEX tutarı', anahtar: 'opex_kdv', deger: 'KDV dahil', birim: '', tur: 'liste', secenekler: ['KDV dahil', 'KDV hariç'], aciklama: '“KDV dahil” seçilirse tutar nakit çıkışıdır. “KDV hariç” seçilirse KDV indirilir ve tutar gider sayılır.' },
 
-    { grup: 'Yayın', ad: 'Sayfa erişimi', anahtar: 'erisim', deger: 'Anahtarla', birim: '', tur: 'liste', secenekler: ['Anahtarla', 'Herkese açık'], aciklama: 'Herkese açık: Giderler sayfası veriyi anahtarsız okur; isimler, ücretler, hesaplar ve tutarlar adresi bilen herkese görünür. Anahtarla: yalnız erişim anahtarını girenler.' },
+    { grup: 'Yayın', ad: 'Sayfa erişimi', anahtar: 'erisim', deger: 'Anahtarla', birim: '', tur: 'liste', secenekler: ['Anahtarla', 'Herkese açık'], aciklama: '“Herkese açık” seçilirse Giderler sayfası veriyi anahtarsız okur. Bu durumda adresi bilen herkes isimleri, ücretleri, hesapları ve tutarları görür. “Anahtarla” seçilirse veriyi yalnız erişim anahtarını girenler görür.' },
   ];
 
   /**
@@ -100,27 +100,27 @@ var OpexMotor = (function () {
       kod: 'STD-PUAN', ad: '5510/81-ı genel prim indirimi', tur: 'Puan indirimi', deger2026: 0.02, deger2027: 0.02,
       formul2026: '=IF(p_sektor="İmalat",p_tesvik_puan_imalat,p_tesvik_puan_diger)', formul2027: '=IF(p_sektor="İmalat",p_tesvik_puan_imalat,p_tesvik_puan_diger)',
       kapsam: 'Standart', birlikte: 'Evet', etkin: true,
-      kosul: '4/a sigortalılar; vadesi geçmiş SGK borcu olmaması, bildirgelerin süresinde verilmesi. 2026: imalat 5 puan, imalat dışı 2 puan (7566 sayılı Kanun).',
+      kosul: 'İndirim, 4/a sigortalılar (bir işverene bağlı çalışanlar) için uygulanır. İşverenin vadesi geçmiş SGK borcu olmamalıdır. Bildirgeler süresinde verilmelidir. İndirim 2026 yılında imalatta 5 puan, imalat dışında 2 puandır (7566 sayılı Kanun).',
     },
     {
       kod: 'ASGARI-DESTEK', ad: 'Asgari ücret desteği', tur: 'Aylık tutar', deger2026: 1269.9, deger2027: 0,
       kapsam: 'Standart', birlikte: 'Evet', etkin: true,
-      kosul: 'Özel sektör, 4/a, emekli olmayan sigortalı; günlük 42,33 ₺ × 30 gün (SGK 2026/8 Genelgesi). 2025’in aynı ayında günlük PEK ≤ 1.300 ₺ bildirilen gün sayısıyla sınırlı. 2027 tutarı açıklanmadı (0).',
+      kosul: 'Destek, özel sektördeki emekli olmayan 4/a sigortalılar için uygulanır. Destek, günlük 42,33 ₺ ile 30 günün çarpımıdır (SGK 2026/8 Genelgesi). Destek verilen gün sayısı, 2025’in aynı ayında bildirilen gün sayısını geçemez. 2025’te yalnız günlük PEK (prime esas kazanç) tutarı en çok 1.300 ₺ olan günler sayılır. 2027 tutarı açıklanmadı. Bu yüzden 2027 değeri 0’dır.',
     },
     {
       kod: 'ENGELLI', ad: 'Engelli istihdamı (4857/30)', tur: 'Asgari ücret üzerinden işveren payı', deger2026: 1, deger2027: 1,
       kapsam: 'Koşullu', birlikte: 'Evet', etkin: true,
-      kosul: 'Engelli sigortalı; işveren SGK hissesinin asgari ücret üzerinden tamamı Hazine’den.',
+      kosul: 'Teşvik, engelli sigortalılar için uygulanır. Asgari ücret üzerinden hesaplanan işveren SGK payının tamamını Hazine öder.',
     },
     {
-      kod: 'ARGE-5746', ad: 'Ar-Ge / tasarım merkezi personeli (5746)', tur: 'İşveren payı oranı', deger2026: 0.5, deger2027: 0.5,
+      kod: 'ARGE-5746', ad: 'Ar-Ge veya tasarım merkezi personeli (5746)', tur: 'İşveren payı oranı', deger2026: 0.5, deger2027: 0.5,
       kapsam: 'Koşullu', birlikte: 'Evet', etkin: true,
-      kosul: 'Ar-Ge veya tasarım merkezi belgesi; işveren SGK hissesinin yarısı. Gelir vergisi stopaj teşviki bu hesapta yok.',
+      kosul: 'Teşvik için Ar-Ge veya tasarım merkezi belgesi gerekir. Teşvik, işveren SGK payının yarısıdır. Gelir vergisi stopajı (ücretten kesilen vergi) teşviki bu hesapta yoktur.',
     },
     {
-      kod: 'TEKNOKENT-4691', ad: 'Teknokent Ar-Ge / yazılım personeli (4691)', tur: 'İşveren payı oranı', deger2026: 0.5, deger2027: 0.5,
+      kod: 'TEKNOKENT-4691', ad: 'Teknokent Ar-Ge veya yazılım personeli (4691)', tur: 'İşveren payı oranı', deger2026: 0.5, deger2027: 0.5,
       kapsam: 'Koşullu', birlikte: 'Evet', etkin: true,
-      kosul: 'Teknoloji geliştirme bölgesinde çalışma; işveren SGK hissesinin yarısı. Gelir vergisi istisnası bu hesapta yok.',
+      kosul: 'Personel, teknoloji geliştirme bölgesinde çalışmalıdır. Teşvik, işveren SGK payının yarısıdır. Gelir vergisi istisnası bu hesapta yoktur.',
     },
   ];
 
@@ -152,11 +152,22 @@ var OpexMotor = (function () {
     evetHayir: ['Evet', 'Hayır'],
     asgariDestek: ['Otomatik', 'Evet', 'Hayır'],
     kume: ['Teknoloji', 'Ofis ve işletme'],
-    kategori: ['Yapay Zekâ', 'Sunucu & Bulut', 'Ofis & Lisans', 'Kira', 'Faturalar', 'Ofis ihtiyaçları'],
+    kategori: ['Yapay Zekâ', 'Sunucu ve Bulut', 'Ofis ve Lisans', 'Kira', 'Faturalar', 'Ofis ihtiyaçları'],
     para: ['TRY', 'USD', 'EUR'],
     artis: ['Kur', 'Kira', 'Genel', 'Yok'],
     kapsam: ['Standart', 'Koşullu'],
   };
+  /**
+   * Eski kategori adları (yalın Türkçe, kullanıcı onayı 13 Kasım 2026: “&” yerine “ve”). Sheets’te eski adla kalmış
+   * hücre yeni adla okunur; Kurulum eski adları yeni adla yeniden yazar. Kullanıcının yazdığı başka adlar değişmez.
+   */
+  var ESKI_KATEGORILER = { 'Sunucu & Bulut': 'Sunucu ve Bulut', 'Ofis & Lisans': 'Ofis ve Lisans' };
+
+  /** Gider kategorisi: boşsa “Diğer”, eski adsa yeni adı. */
+  function kategoriAdi(v) {
+    var s = metin(v);
+    return Object.prototype.hasOwnProperty.call(ESKI_KATEGORILER, s) ? ESKI_KATEGORILER[s] : s || 'Diğer';
+  }
 
   /* ---------- Yardımcılar ---------- */
 
@@ -332,11 +343,11 @@ var OpexMotor = (function () {
         v = sayi(ham);
         // %29,73 yerine 29,73 yazılmışsa (yüzde biçimi yoksa) kesire çevrilir.
         if (t.tur === 'oran' && Number.isFinite(v) && Math.abs(v) > 1.5) {
-          uyarilar.push('“' + (t.ad || k) + '” oranı ' + v + ' okundu; yüzde olarak alındı (%' + v + ').');
+          uyarilar.push('“' + (t.ad || k) + '” oranı ' + v + ' okundu. Değer yüzde olarak alındı (%' + v + ').');
           v = v / 100;
         }
         if (!Number.isFinite(v)) {
-          if (!(t.tur === 'kur' || /_2027$/.test(k))) uyarilar.push('“' + (t.ad || k) + '” sayı değil; varsayılan kullanıldı.');
+          if (!(t.tur === 'kur' || /_2027$/.test(k))) uyarilar.push('“' + (t.ad || k) + '” sayı değil. Varsayılan değer kullanıldı.');
           v = undefined;
         }
       } else v = typeof ham === 'number' ? ham : metin(ham);
@@ -344,7 +355,7 @@ var OpexMotor = (function () {
       liste.push({ grup: metin(s.grup) || (t ? t.grup : ''), ad: metin(s.ad) || (t ? t.ad : k), anahtar: k, deger: v === undefined ? (t ? t.deger : '') : v, birim: metin(s.birim) || (t ? t.birim : ''), tur: t ? t.tur : (typeof ham === 'number' ? 'sayi' : 'metin'), aciklama: metin(s.aciklama) || (t ? t.aciklama : '') });
     });
     PARAMETRE_TANIMLARI.forEach(function (t) {
-      if (!gorulen[t.anahtar] && satirlar) uyarilar.push('Parametre “' + t.anahtar + '” sayfada yok; varsayılan (' + t.deger + ') kullanıldı.');
+      if (!gorulen[t.anahtar] && satirlar) uyarilar.push('Parametre “' + t.anahtar + '” sayfada yok. Varsayılan değer (' + t.deger + ') kullanıldı.');
       if (!gorulen[t.anahtar]) liste.push({ grup: t.grup, ad: t.ad, anahtar: t.anahtar, deger: t.deger, birim: t.birim, tur: t.tur, aciklama: t.aciklama });
     });
     var p = {};
@@ -359,7 +370,7 @@ var OpexMotor = (function () {
       if (Number.isFinite(canli) && canli > 0) kur[c[0]] = { deger: canli, kaynak: canli === yedek ? 'yedek' : 'canlı' };
       else {
         kur[c[0]] = { deger: yedek, kaynak: 'yedek' };
-        if (satirlar) uyarilar.push(c[0] + '/TRY canlı kuru okunamadı; yedek kur (' + yedek + ') kullanıldı.');
+        if (satirlar) uyarilar.push(c[0] + '/TRY canlı kuru okunamadı. Yedek kur (' + yedek + ') kullanıldı.');
       }
     });
     kur.TRY = { deger: 1, kaynak: 'sabit' };
@@ -384,7 +395,7 @@ var OpexMotor = (function () {
 
     var ay = Math.round(sayi(p.rapor_ayi));
     if (!(ay >= 1 && ay <= 12)) {
-      uyarilar.push('Rapor ayı 1–12 arasında değil; 1 kullanıldı.');
+      uyarilar.push('Rapor ayı 1 ile 12 arasında değil. Rapor ayı olarak 1 kullanıldı.');
       ay = 1;
     }
     p.rapor_ayi = ay;
@@ -409,7 +420,7 @@ var OpexMotor = (function () {
       if (!kod) return;
       var tur = metin(s.tur);
       if (TESVIK_TURLERI.indexOf(tur) < 0) {
-        uyarilar.push('Teşvik “' + kod + '” türü tanınmadı (' + tur + '); uygulanmadı.');
+        uyarilar.push('Teşvik “' + kod + '” türü tanınmadı (' + tur + '). Bu teşvik uygulanmadı.');
         return;
       }
       var d26 = sayi(s.deger2026);
@@ -665,7 +676,7 @@ var OpexMotor = (function () {
     (girdi && girdi.personel ? tabloyuOku(girdi.personel, 'personel', uyarilar) || [] : []).forEach(function (s) {
       var ad = metin(s.ad);
       if (!ad || toplamSatiri(ad)) return;
-      if (gorulenAd[ad]) uyarilar.push('Personel “' + ad + '” birden çok satırda (' + gorulenAd[ad] + ' ve ' + s.satir + '); ayırt etmek için adı değiştirin.');
+      if (gorulenAd[ad]) uyarilar.push('Personel “' + ad + '” birden çok satırda (' + gorulenAd[ad] + ' ve ' + s.satir + '). Kişileri ayırmak için adı değiştirin.');
       gorulenAd[ad] = gorulenAd[ad] || s.satir;
       if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
       var tur = metin(s.tur) === 'Freelancer' ? 'Freelancer' : 'Bordrolu';
@@ -678,14 +689,14 @@ var OpexMotor = (function () {
       var ayTutari = [2026, 2027].some(function (y) { return pa.tutar[y].some(function (v) { return v !== null && v > 0; }); });
       if (esas !== 'Asgari ücret' && !(tutar > 0)) {
         if (!ayTutari) {
-          uyarilar.push('Personel “' + ad + '” için tutar yok; Tutar sütununa veya ay sütunlarına net/brüt/fatura tutarını yazın.');
+          uyarilar.push('Personel “' + ad + '” için tutar yok. Tutarı “' + BASLIKLAR.personel.tutar + '” sütununa ya da ay sütunlarına yazın. Tutar, ücret esasına göre net, brüt ya da fatura tutarıdır.');
           return;
         }
         tutar = 0;
       }
       var tesvik = metin(s.tesvik);
       if (tesvik && !tesvikKodlari[tesvik]) {
-        uyarilar.push('Personel “' + ad + '”: teşvik kodu “' + tesvik + '” Parametreler’deki teşvik tablosunda yok.');
+        uyarilar.push('Personel “' + ad + '” için yazılan teşvik kodu “' + tesvik + '”, Parametreler’deki teşvik tablosunda yok.');
         tesvik = '';
       }
       var destek = metin(s.asgariDestek) || 'Otomatik';
@@ -764,12 +775,12 @@ var OpexMotor = (function () {
         if (metin(s.dahil) !== '' && !evet(s.dahil)) return;
         var kume = ayriSayfalar || metin(s.kume) === '' ? kaynak.kume : kumeKodu(s.kume);
         if (!kume) {
-          uyarilar.push('Gider “' + kalem + '” kümesi tanınmadı (' + metin(s.kume) + '); ' + KUME_ADI[kaynak.kume] + ' sayıldı.');
+          uyarilar.push('Gider “' + kalem + '” kümesi tanınmadı (' + metin(s.kume) + '). Kalem “' + KUME_ADI[kaynak.kume] + '” kümesine sayıldı.');
           kume = kaynak.kume;
         }
         var para = metin(s.para).toUpperCase() || 'TRY';
         if (!ps.kur[para]) {
-          uyarilar.push('Gider “' + kalem + '” para birimi tanınmadı (' + para + '); TRY sayıldı.');
+          uyarilar.push('Gider “' + kalem + '” para birimi tanınmadı (' + para + '). Tutar TRY sayıldı.');
           para = 'TRY';
         }
         var tutar = sayi(s.tutar);
@@ -802,7 +813,7 @@ var OpexMotor = (function () {
           kalem: kalem,
           hesap: metin(s.hesap),
           kume: kume,
-          kategori: metin(s.kategori) || 'Diğer',
+          kategori: kategoriAdi(s.kategori),
           para: para,
           tutar: tutar,
           tl: tl,
@@ -1109,7 +1120,7 @@ var OpexMotor = (function () {
       case 'uyari':
         return [['Uyarılar']].concat(m.uyarilar.length ? m.uyarilar.map(function (u) { return [u]; }) : [['Uyarı yok.']]);
       default:
-        return [['Bilinmeyen rapor: ' + ad + '. Geçerli: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, hepsi, asgari-net-2026, asgari-net-2027, uyari.']];
+        return [['Rapor adı “' + ad + '” tanınmadı. Geçerli rapor adları şunlardır: kpi, ozet, kategori, aylik, kisi, bilesen, teknoloji, kopru, plan, bordro-2026, bordro-2027, personel-sutun, gider-sutun, tesvik-sutun, gider-toplam, personel-toplam, hepsi, asgari-net-2026, asgari-net-2027, uyari.']];
     }
   }
 
@@ -1170,11 +1181,11 @@ var OpexMotor = (function () {
       };
       if (grup.kume === 'insan') {
         m.kisiler.forEach(function (kisi) {
-          ekle(kisi.ad, kisi.tur === 'Freelancer' ? 'Freelancer · fatura' : kisi.tur + ' · ' + kisi.esas, aylar.map(function (a) { return kisi['y' + a.yil].aylar[a.ay].maliyet; }));
+          ekle(kisi.ad, kisi.tur === 'Freelancer' ? 'Freelancer (fatura)' : kisi.tur + ' (' + kisi.esas + ')', aylar.map(function (a) { return kisi['y' + a.yil].aylar[a.ay].maliyet; }));
         });
       } else {
         m.giderler.filter(function (g) { return g.kume === grup.kume; }).forEach(function (g) {
-          ekle(g.kalem, (g.hesap ? g.hesap + ' · ' : '') + g.para, aylar.map(function (a) { return g.aylikTl['y' + a.yil][a.ay]; }));
+          ekle(g.kalem, g.hesap ? g.hesap + ' (' + g.para + ')' : g.para, aylar.map(function (a) { return g.aylikTl['y' + a.yil][a.ay]; }));
         });
       }
       satirYaz(grup.ad, grup.ad + ' toplamı', '', ara);
@@ -1240,6 +1251,7 @@ var OpexMotor = (function () {
     PARAMETRE_TANIMLARI: PARAMETRE_TANIMLARI,
     TESVIK_TANIMLARI: TESVIK_TANIMLARI,
     TESVIK_TURLERI: TESVIK_TURLERI,
+    ESKI_KATEGORILER: ESKI_KATEGORILER,
     ENFLASYON_KAYNAGI: ENFLASYON_KAYNAGI,
     hesapla: hesapla,
     kumeKodu: kumeKodu,

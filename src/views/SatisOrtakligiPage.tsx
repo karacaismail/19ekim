@@ -148,7 +148,7 @@ function Cozum({ a }: { a: Ayar }) {
         <p>
           {m.tur === 'komisyon'
             ? `Müşavir her müşteriden ${tl(m.musteriBasina)} komisyon alır.`
-            : `Müşavirin müşterisi paketi ${yuzde(a.musavirIndirim)} indirimle alır. Müşavire komisyon ödemeyiz. Bunun yerine ona panel veririz.`}
+            : `Müşavirin müşterisi paketi ${yuzde(a.musavirIndirim)} indirimle alır. Müşavire komisyon ödemeyiz. Bunun yerine ona panel veririz. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.`}
         </p>
       </div>
     </>

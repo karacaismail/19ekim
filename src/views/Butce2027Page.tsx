@@ -15,6 +15,7 @@ import {
   VARSAYILAN_AYAR,
   butce,
   fiyat,
+  fiyat2027Of,
   tabanOf,
   toplam,
   type Ayarlar,
@@ -24,6 +25,7 @@ import {
 } from '../data/butce2027';
 import { milyon, pct, tl } from '../lib/format';
 import { plan2027 } from '../data/planGeliri';
+import { gelirBaglami, planCirosu } from '../data/gelir2027';
 import { useOpexOnce } from '../lib/useOpex';
 import '../styles/butce2027.css';
 
@@ -49,6 +51,8 @@ function Icerik({ pathname }: { pathname: string }) {
   const model = useModel();
   const durum = useMemo(() => plan2027(model).durum, [model]);
   const b = useMemo(() => butce(taban, secili, ayar, model), [taban, secili, ayar, model]);
+  // Karar listesi 5.4: bütçe abonelik gelirini kullanır. Gelir öngörüsü aynı kadronun ek satışını da sayar.
+  const ongoruCirosu = useMemo(() => planCirosu(secili, gelirBaglami(model)), [secili, model]);
   const hepsi = useMemo(() => SECENEKLER.map((s) => ({ s, b: butce(taban, s, ayar, model) })), [taban, ayar, model]);
   const opexT = toplam(b.opex);
   const capexT = toplam(b.capex);
@@ -87,7 +91,7 @@ function Icerik({ pathname }: { pathname: string }) {
       <SayfaNotu>
         <PlanDurumuNotu durum={durum} />
         <p>
-          İşletme gideri her ay tekrarlanır. Maaş, kira, lisans ve reklam işletme gideridir. Yatırım harcaması bir kez yapılır. Alınan şey yıllarca kullanılır. Bilgisayar, mobilya ve tadilat yatırım harcamasıdır. Bütçe iki parçadan oluşur. İlk parça, Google Sheets gider tablosundaki 2027 planıdır. Bu sayfada bu parçaya “Mevcut plan” denir. Mevcut plan sayfa açılırken okunur. İkinci parça, seçilen kadro seçeneğinin eklediği giderlerdir. Eklemeler iki bilgiyle hesaplanır. Biri seçilen kadro seçeneğidir. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir. Diğeri kaynağı gösterilen birim fiyatlardır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Bu oran Sheets gider tablosundaki 2027 artışıdır. Yatırım kalemleri bütçeye KDV’siz tutarla girer. Çünkü şirketin bu KDV’yi vergi borcundan düşebileceği varsayılır. Fiyatı KDV dahil olan kalemde tutar 1,2’ye bölünür.
+          İşletme gideri her ay tekrarlanır. Maaş, kira, lisans ve reklam işletme gideridir. Yatırım harcaması bir kez yapılır. Alınan şey yıllarca kullanılır. Bilgisayar, mobilya ve tadilat yatırım harcamasıdır. Bütçe iki parçadan oluşur. İlk parça, Google Sheets gider tablosundaki 2027 planıdır. Bu sayfada bu parçaya “Mevcut plan” denir. Mevcut plan sayfa açılırken okunur. İkinci parça, seçilen kadro seçeneğinin eklediği giderlerdir. Eklemeler iki bilgiyle hesaplanır. Biri seçilen kadro seçeneğidir. Kadro seçenekleri “İstihdam takvimi” sayfasının “v2” sürümündedir. Diğeri kaynağı gösterilen birim fiyatlardır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Bu oran Sheets gider tablosundaki 2027 artışıdır. Dolar fiyatlı kalemde 2027 fiyatı 2026 fiyatıyla aynıdır. Yatırım kalemleri bütçeye KDV’siz tutarla girer. Çünkü şirketin bu KDV’yi vergi borcundan düşebileceği varsayılır. Fiyatı KDV dahil olan kalemde tutar 1,2’ye bölünür.
         </p>
         {opex.status === 'loading' ? <p className="b27-durum">Sheets’teki 2027 planı okunuyor. Bu sırada yalnız eklemeler gösterilir.</p> : null}
         {opex.status === 'failed' || opex.status === 'setup' ? <p className="b27-durum" role="alert">Sheets’teki 2027 planı okunamadı: {opex.message} Bu yüzden toplamlarda “Mevcut plan” yoktur. Toplamlarda yalnız eklemeler vardır.</p> : null}
@@ -118,7 +122,7 @@ function Icerik({ pathname }: { pathname: string }) {
             { label: '2027 işletme gideri', value: milyon(opexT), note: b.tabanVar ? `Aylık ortalama ${tl(opexT / 12)}` : '“Mevcut plan” yok. Yalnız eklemeler sayıldı.' },
             { label: '2027 yatırım harcaması', value: milyon(capexT), note: 'KDV hariç' },
             { label: 'Toplam harcama', value: milyon(opexT + capexT), note: `Aralık 2027’de ${b.kadroAylik[11]} kişi` },
-            { label: 'Gelirden harcama düşülünce kalan', value: farkYazisi(fark), note: durum === 'uzatildi' ? `“Gelir planı” sayfasının kurallarıyla ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosunun 2027 abonelik geliri ${milyon(b.gelir2027)} olur. Bu hesap Aralık 2027 sonuna kadar uzatıldı.` : `“Gelir planı” sayfasındaki ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosuna göre 2027 abonelik geliri ${milyon(b.gelir2027)} olur.` },
+            { label: 'Gelirden harcama düşülünce kalan', value: farkYazisi(fark), note: durum === 'uzatildi' ? `“Gelir planı” sayfasının kurallarıyla ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosunun 2027 abonelik geliri ${milyon(b.gelir2027)} olur. Bu hesap Aralık 2027 sonuna kadar uzatıldı. Yeni kadronun ek satışı bu tutara dahil değildir. “Gelir öngörüsü” sayfası bu kadroyla ${milyon(ongoruCirosu)} ciro öngörür.` : `“Gelir planı” sayfasındaki ${SECENEK_OZETI[secili].dayandigiSenaryo} senaryosuna göre 2027 abonelik geliri ${milyon(b.gelir2027)} olur. Yeni kadronun ek satışı bu tutara dahil değildir. “Gelir öngörüsü” sayfası bu kadroyla ${milyon(ongoruCirosu)} ciro öngörür.` },
           ]}
         />
         {fark < 0 ? <p className="b27-not">Gelir 2027 harcamasını karşılamaz. Açık {milyon(-fark)} olur. Bu açık yatırımla ya da başlangıç nakdiyle kapatılmalı. “Nakit akışı” sayfası bu sayfadaki eklemeleri henüz içermez.</p> : null}
@@ -203,7 +207,7 @@ function Icerik({ pathname }: { pathname: string }) {
           <div>
             <dt>Etkinlik sayısı ve ikram</dt>
             <dd>
-              Ekonomik seçenekte ayda {ETKINLIK.ekonomik.ic + ETKINLIK.ekonomik.dis}, medyanda {ETKINLIK.medyan.ic + ETKINLIK.medyan.dis}, güçlüde {ETKINLIK.guclu.ic + ETKINLIK.guclu.dis} satıcı eğitimi sayılır. Her eğitimde 50 kişilik kahve arası ikramı verilir. Bir ikram {tl(fiyat('etkinlik-coffee-break-50'))} tutar. Bu kalem bütçenin büyük kalemlerindendir. İkram ofiste hazırlanırsa tutar belirgin düşer.
+              Ekonomik seçenekte ayda {ETKINLIK.ekonomik.ic + ETKINLIK.ekonomik.dis}, Orta seçenekte {ETKINLIK.medyan.ic + ETKINLIK.medyan.dis}, Güçlü seçenekte {ETKINLIK.guclu.ic + ETKINLIK.guclu.dis} satıcı eğitimi sayılır. Her eğitimde 50 kişilik kahve arası ikramı verilir. Bir ikram {tl(fiyat('etkinlik-coffee-break-50'))} tutar. Bu kalem bütçenin büyük kalemlerindendir. İkram ofiste hazırlanırsa tutar belirgin düşer.
             </dd>
           </div>
           <div>
@@ -216,7 +220,7 @@ function Icerik({ pathname }: { pathname: string }) {
           </div>
           <div>
             <dt>Sunucu ve altyapı hizmeti (DevOps)</dt>
-            <dd>Bugünkü altyapı hizmetinin bedeli bilinmiyor. Bu bedel Ekonomik ve Medyan seçeneklerin toplamında yoktur. Güçlü seçenekte bu iş kadroya alınır ve maaşı toplama girer.</dd>
+            <dd>Bugünkü altyapı hizmetinin bedeli bilinmiyor. Bu bedel Ekonomik ve Orta seçeneklerin toplamında yoktur. Güçlü seçenekte bu iş kadroya alınır ve maaşı toplama girer.</dd>
           </div>
           <div>
             <dt>Marka tescili ve işyeri sigortası</dt>
@@ -229,7 +233,7 @@ function Icerik({ pathname }: { pathname: string }) {
         </dl>
       </Section>
 
-      <Section id="fiyatlar" index={7} title="Birim fiyatlar ve kaynaklar" desc="2026 fiyatı kaynakta bulunan fiyattır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. “Tahmin” yazan fiyatların kaynağı zayıftır. Bu fiyatlar teklif alınarak doğrulanmalı.">
+      <Section id="fiyatlar" index={7} title="Birim fiyatlar ve kaynaklar" desc="2026 fiyatı kaynakta bulunan fiyattır. 2027 fiyatı, 2026 fiyatının %29,73 fazlasıdır. Dolar fiyatlı kalemde 2027 fiyatı 2026 fiyatıyla aynıdır. “Tahmin” yazan fiyatların kaynağı zayıftır. Bu fiyatlar teklif alınarak doğrulanmalı.">
         <DataTable<Fiyat>
           id="fiyat-listesi"
           title="Kullanılan fiyatlar"
@@ -238,7 +242,7 @@ function Icerik({ pathname }: { pathname: string }) {
             { key: 'ad', header: 'Kalem', rowHeader: true, minWidth: '14rem', render: (f) => f.ad },
             { key: 'birim', header: 'Birim', nowrap: true, render: (f) => f.birim },
             { key: 'f26', header: '2026 fiyatı', nowrap: true, render: (f) => tl(f.fiyat2026) },
-            { key: 'f27', header: '2027 fiyatı', nowrap: true, summary: true, render: (f) => tl(f.fiyat2027) },
+            { key: 'f27', header: '2027 fiyatı', nowrap: true, summary: true, render: (f) => tl(fiyat2027Of(f)) },
             { key: 'kdv', header: 'Kaynak fiyatında KDV', nowrap: true, render: (f) => (f.kdv === 'bilinmiyor' ? 'Bilinmiyor' : f.kdv === 'uygulanmaz' ? 'KDV yok' : `KDV ${f.kdv}`) },
             { key: 'dayanak', header: 'Dayanak', minWidth: '18rem', render: (f) => `${f.tahmin ? 'Tahmin. ' : ''}${f.dayanak}` },
             {

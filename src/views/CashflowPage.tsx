@@ -182,7 +182,7 @@ function Icerik() {
         <Stats
           items={[
             { label: 'Nakit girişi', value: tl(cf.toplam.giris), note: `15 ay toplamı (${senaryoAdi})` },
-            { label: 'Nakit çıkışı', value: tl(cf.toplam.cikis), note: cf.sheets ? 'Sheets + plan kalemleri' : 'Yalnız plan kalemleri' },
+            { label: 'Nakit çıkışı', value: tl(cf.toplam.cikis), note: cf.sheets ? '15 ay toplamı' : 'Yalnız plan kalemleri sayıldı' },
             { label: 'Net nakit akışı', value: tl(cf.toplam.net), note: `15 ay toplamı (${senaryoAdi})` },
             { label: 'En düşük nakit', value: tl(cf.enDusuk.deger), note: `${cf.enDusuk.ay.ad} sonu` },
             { label: 'Nakit açığı tavanı', value: cf.acik ? tl(cf.acik) : '0 ₺', note: cf.acik ? 'Kasayı hiçbir ay eksiye düşürmeyen en küçük ek para' : 'Dönem sonu nakit hiç negatife düşmüyor' },
@@ -201,12 +201,12 @@ function Icerik() {
         <p className="nakit-secenekler">
           {changes ? `Gelir planı seçenekleri uygulandı: ${changes} değişiklik (${senaryoAdi}). ` : 'Bu tarayıcıda gelir planı seçenekleri değiştirilmedi. Bu yüzden sayfa genel plan değerlerini kullanıyor. '}
           {opts.kaynak === 'plan' ? 'Gelir planında seçili gider kaynağı (plan kadrosu) burada uygulanmaz. ' : ''}
-          Seçenekleri <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirebilirsiniz. Gider kaynağı seçeneği dışındaki bütün seçenekler iki sayfada aynıdır. Bu sayfada çıkışlar her zaman Sheets gider planından ve plan kalemlerinden oluşur.
+          Seçenekleri <TextLink to="/gelir-plani/">Gelir planı</TextLink> sayfasında değiştirebilirsiniz. Gider kaynağı seçeneği dışındaki bütün seçenekler iki sayfada aynıdır.
         </p>
         <DataTable
           id="senaryo-karsilastirma"
           title="Üç senaryo: 15 ayın özeti"
-          note="Üç senaryoda Sheets giderleri ve seçenekler aynıdır. Girişler, satış primi ve eklenen saha personeli temel senaryoya göre değişir. Seçili senaryo vurgulanır."
+          note="Üç senaryoda giderler ve seçenekler aynıdır. Girişler, satış primi ve eklenen saha personeli temel senaryoya göre değişir. Seçili senaryo vurgulanır."
           tools={cubuk()}
           columns={[
             // Ölçüt sırası riske göre (ux_v2.md §3.1): önce en düşük nakit ve ayı, açık tavanı, toparlanma, dönem sonu; akışlar sonra.

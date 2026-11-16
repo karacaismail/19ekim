@@ -502,6 +502,42 @@ test.describe('Apps Script veri ucu (doPost / doGet)', () => {
     expect(lDolu.silinen).toEqual([]);
   });
 
+  test('Kurulum: eski kategori adları (Sunucu & Bulut, Ofis & Lisans) yeni ada yazılır; formül ve özel ad korunur, ikinci kez yazmaz', () => {
+    const { ctx } = loadScript(SHEETS);
+    vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);
+    const yenile = ctx.eskiKategorileriYenile_ as (sh: unknown, n: number) => number;
+    const d = [['Sunucu & Bulut'], ['Ofis ve Lisans'], [' Ofis & Lisans '], ['Sunucu & Bulut'], ['Ar&Ge'], ['']];
+    const f = [[''], [''], [''], ['=IF(TRUE,"Sunucu & Bulut")'], [''], ['']];
+    const yazilan: string[] = [];
+    const sh = {
+      getRange: (r: number, c: number, nr = 1) => ({
+        getValues: () => d.slice(r - 4, r - 4 + nr).map((x) => [...x]),
+        getFormulas: () => f.slice(r - 4, r - 4 + nr).map((x) => [...x]),
+        setValue: (v: string) => {
+          yazilan.push(`${String.fromCharCode(64 + c)}${r}=${v}`);
+          d[r - 4] = [v];
+        },
+      }),
+    };
+    expect(yenile(sh, d.length)).toBe(2);
+    expect(yazilan).toEqual(['D4=Sunucu ve Bulut', 'D6=Ofis ve Lisans']);
+    expect(yenile(sh, d.length), 'ikinci kez').toBe(0);
+    expect(yenile(sh, 0)).toBe(0);
+    expect(String(ctx.giderleriKur_), 'gider sayfası kurulumu eski adları yeniler').toContain('eskiKategorileriYenile_(sh, n)');
+  });
+
+  test('Sheets’e yazılan metinlerde noktalı virgül, uzun çizgi, orta nokta, “&” ve ok yok (kullanıcı onayı 13 Kasım 2026)', () => {
+    const eski = new Set(Object.keys(motor.ESKI_KATEGORILER));
+    // Sayı biçimi (“+0.0%;-0.0%;0.0%”) ve boş hücredeki tek “—” veri işaretidir.
+    const serbest = (s: string) => s === '—' || /#|0\.0+%/.test(s) || eski.has(s);
+    for (const dosya of ['Motor.js', 'Sheets.js', 'Kurulum.js']) {
+      const kod = file(`../apps-script/src/${dosya}`).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+      const metinler = [...kod.matchAll(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g)].map((x) => x[0].slice(1, -1).replace(/<[^>]*>/g, ''));
+      expect(metinler.length, dosya).toBeGreaterThan(50);
+      expect(metinler.filter((s) => !serbest(s) && /;|—|–| · |→| & /.test(s)), dosya).toEqual([]);
+    }
+  });
+
   test('Kurulum: onay kutusu dönüşümü — satırda açık işaret varsa boş = işaretsiz, yoksa boş = işaretli', () => {
     const { ctx } = loadScript(SHEETS);
     vm.runInContext(file('../apps-script/src/Kurulum.js'), ctx);

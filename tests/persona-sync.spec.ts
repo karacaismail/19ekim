@@ -44,7 +44,7 @@ test('yazma sürerken yeni değer kaybolmaz ve yalnız değişen yaprak gönderi
     const writes = calls.filter((r) => r.action === 'patch');
     expect(writes).toHaveLength(2);
     expect(writes[0].changes).toEqual([{ field: 'oran.B', before: 0.12, value: 0.2 }]);
-    expect(writes[1].changes).toEqual([{ field: 'oran.B', before: 0.2, value: 0.3 }, { field: 'kur', before: 56, value: 60 }]);
+    expect(writes[1].changes).toEqual([{ field: 'oran.B', before: 0.2, value: 0.3 }, { field: 'kur', before: 55.31, value: 60 }]);
     expect(store.getSnapshot().fields['oran.B']).toBe(0.3);
   } finally { store.stop(); }
 });
@@ -104,7 +104,7 @@ test('bağlantı kapandıktan sonra gelen yanıt durumu değiştirmez', async ()
   store.connect(''); store.stop();
   late.resolve(success(snapshot({ kur: 100 })));
   await late.promise;
-  expect(store.getSnapshot().fields.kur).toBe(56);
+  expect(store.getSnapshot().fields.kur).toBe(55.31);
 });
 
 test('geçersiz ortak değerler hesap motoruna giremez', () => {
@@ -135,7 +135,7 @@ test('ilk yazma beklerken başka alandaki uzak değişiklik sessizce ezilmez', a
     await expect.poll(() => store.getSnapshot().state).toBe('conflict');
     expect(remote.fields.kur).toBe(75);
     expect(store.getSnapshot().fields.kur).toBe(60);
-    expect(writes[1].changes).toEqual([{ field: 'kur', before: 56, value: 60 }]);
+    expect(writes[1].changes).toEqual([{ field: 'kur', before: 55.31, value: 60 }]);
   } finally { store.stop(); }
 });
 
@@ -181,7 +181,7 @@ test('tablodaki geçersiz alan bağlantı hatası gibi gösterilmez', async () =
   try {
     store.connect('');
     await expect.poll(() => store.getSnapshot().error).toContain('Avronun ₺ karşılığı');
-    expect(store.getSnapshot().fields.kur).toBe(56);
+    expect(store.getSnapshot().fields.kur).toBe(55.31);
     expect(store.getSnapshot().loaded).toBe(false);
   } finally { store.stop(); }
 });
@@ -191,6 +191,6 @@ test('geçersiz başarılı yanıt son geçerli hesabı değiştirmez', async ()
   try {
     store.connect('');
     await expect.poll(() => store.getSnapshot().error).toContain('Avronun ₺ karşılığı ortak kayıtta geçerli değil');
-    expect(store.getSnapshot().fields.kur).toBe(56);
+    expect(store.getSnapshot().fields.kur).toBe(55.31);
   } finally { store.stop(); }
 });

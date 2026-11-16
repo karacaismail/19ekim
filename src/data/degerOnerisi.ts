@@ -1,7 +1,11 @@
 /**
  * Değer önerisi (kullanıcı kararı 2026-11-03): saha ekibinin esnafa söyleyeceği sözler ve her sözü tutmak için
  * platformun yapması gerekenler. Kaynak: kullanıcının paylaştığı araştırma raporu (bölüm 1, 5 ve 6). Sözler tek hitapla
- * (“siz”) yazıldı; açıklamalar tam cümledir. Persona kodları (P1–P7) raporun 3. bölümündeki esnaf tipleridir.
+ * (“siz”) yazıldı; açıklamalar tam cümledir. Persona kodları (P1–P7) raporun 3. bölümündeki esnaf tipleridir. Rapor
+ * repoda yoktur. Tiplerin tanımı (karar 16 Kasım 2026) her tipe yazılan sözlerden çıkarıldı (`ESNAF_TIPLERI`).
+ *
+ * Karar 16 Kasım 2026 (karar listesi 9.7): emanet ödeme ileri tarihlidir. Bu söz “İleride verilir” rozetini taşır ve
+ * gelecek zamanla yazılır. iStoc bugün ödemeyi tutmaz.
  *
  * Kullanıcı kararları 13 Kasım 2026 (karar listesi 5.1, 5.2 ve 9.7): satıcı Basic paket için aylık ücret öder. Kurulum
  * ücretlidir, bir kez 150 €. Satıştan komisyon alınmaz. Bu üç olguyla çelişen söz yazılmaz (`tests/deger-onerisi.spec.ts`).
@@ -19,7 +23,7 @@ export interface GucluSoz {
   gucluTarafi: string;
 }
 
-export type IlkGun = 'evet' | 'ortakla' | 'kismen';
+export type IlkGun = 'evet' | 'ortakla' | 'kismen' | 'ileride';
 
 export interface Oneri {
   no: number;
@@ -44,7 +48,19 @@ export const ILK_GUN_ADI: Record<IlkGun, string> = {
   evet: 'İlk günden verilir',
   ortakla: 'Bir ortakla verilir',
   kismen: 'Kısmen verilir',
+  ileride: 'İleride verilir',
 };
+
+/** Esnaf tipleri: her tanım o tipe yazılan sözlerden çıkarıldı (karar 16 Kasım 2026). */
+export const ESNAF_TIPLERI: { kod: string; tanim: string }[] = [
+  { kod: 'P1', tanim: 'Vadeli satan ve cari hesap tutan yerleşik toptancıdır. Çek ve alacak riski taşır.' },
+  { kod: 'P2', tanim: 'Dijitale yeni açılan küçük toptancıdır. Google’da görünmek ve hızlı teklif vermek ister.' },
+  { kod: 'P3', tanim: 'Anadolu’daki perakendecilere ve kurumsal alıcılara satan toptancıdır. Döviz, kargo ve parti mal işiyle uğraşır.' },
+  { kod: 'P4', tanim: 'İhracata hazırlanan toptancı ya da üreticidir. Yabancı alıcı, çok dilli katalog ve devlet desteği ister.' },
+  { kod: 'P5', tanim: 'Nakit çalışan küçük dükkândır. Tahsilat güvencesi ve toplu indirim ister.' },
+  { kod: 'P6', tanim: 'Dükkânına gelen yabancı tüccara satan esnaftır. Bavul ticaretinin düşmesinden etkilenir.' },
+  { kod: 'P7', tanim: 'Sezonluk ya da parti mal satan esnaftır. Elinde satılmayan stok kalma riski taşır.' },
+];
 
 export const GUCLU_SOZLER: GucluSoz[] = [
   {
@@ -64,7 +80,7 @@ export const GUCLU_SOZLER: GucluSoz[] = [
   },
   {
     baslik: 'Ödemenizi güvence altına alın',
-    soz: 'Yeni müşteriye mal satarken paranızı alamama riskinizi azaltalım. Güvenli ödeme ve doğrulanmış alıcılarla çalışın.',
+    soz: 'Yeni müşteriye mal satarken paranızı alamama riskinizi azaltalım. Doğrulanmış alıcılarla çalışın. Güvenli ödeme ileride gelecek.',
     gucluTarafi: 'Tahsilat riskini azaltmak, yalnız daha fazla müşteri bulmaktan daha değerli olabilir. Bu güvence için ödeme altyapısı ve sözleşme gerekir.',
   },
 
@@ -106,11 +122,11 @@ export const KATEGORILER: Kategori[] = [
     oneriler: [
       {
         no: 1,
-        soz: 'Platformdan gelen siparişin parası garanti. Alıcı parayı öder. Para, mal teslim edilene kadar güvenli bir hesapta bekler. Teslimden sonra en geç 5 iş günü içinde para hesabınıza geçer.',
+        soz: 'Emanet ödeme (escrow) ileride gelecek. O zaman alıcı parayı öder. Para, mal teslim edilene kadar güvenli bir hesapta bekler. Teslimden sonra en geç 5 iş günü içinde para hesabınıza geçer. Bugün iStoc ödemeyi tutmaz.',
         persona: ['P1', 'P5', 'P6'],
         sikinti: 'Karşılıksız çek ve tahsil edilemeyen alacak',
         platform: 'Lisanslı bir ödeme kuruluşuyla güvenli havuz ödeme (escrow) kurmalı. Güvenli ödeme alıcıyı da platforma çeker.',
-        ilkGun: 'ortakla',
+        ilkGun: 'ileride',
         risk: 'Düşük ile orta. Ödeme kuruluşu komisyon alır. Elektronik ticaret kanunu (ETK) pazar yerine bir ödeme süresi koyar. Bu kural kanunun Ek 1. maddesinin 2. fıkrasının (a) bendindedir. Pazar yeri satış bedelini 5 iş günü içinde satıcıya öder. Süre, sipariş alıcıya ulaştıktan sonra başlar.',
         dayanak: 'Alibaba Trade Assurance, Faire, ETK Ek 1',
       },
@@ -424,7 +440,7 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 29,
-        soz: 'Sizinle yaptığımız sözleşme sade. Komisyonu tek taraflı değiştiremeyiz. Değişiklik olursa 30 gün önceden yazılı bildiririz.',
+        soz: 'Sizinle yaptığımız sözleşme sade. Paket ücretini tek taraflı değiştiremeyiz. Değişiklik olursa 30 gün önceden yazılı bildiririz.',
         persona: ['P1'],
         sikinti: 'Platforma güvenmemek',
         platform: 'ETK’ya uygun, sade bir aracılık sözleşmesi hazırlamalı.',
@@ -462,12 +478,12 @@ export const KATEGORILER: Kategori[] = [
       },
       {
         no: 32,
-        soz: 'Getirdiğiniz her komşu esnaf için komisyon indirimi kazanın.',
+        soz: 'Getirdiğiniz her komşu esnaf için tavsiye kredisi kazanın. Kredi ücretsiz kullanım ayına dönüşür.',
         persona: ['Hepsi'],
         sikinti: 'Ek gelir isteği ve tanıdığa duyulan güven',
         platform: 'Satıcı referans programı kurmalı. Böylece satıcılar başka satıcıları getirir.',
         ilkGun: 'evet',
-        risk: 'Düşük ile orta. İndirim maliyeti vardır.',
+        risk: 'Düşük ile orta. Ücretsiz ayın maliyeti vardır.',
         dayanak: 'Lenny Rachitsky (2019): Referans programları görüşülen pazar yerlerinin yaklaşık üçte birinde büyük başarı sağladı. Uber’de ilk yolculukların yaklaşık üçte biri referanstan geldi.',
       },
       {
@@ -495,7 +511,7 @@ export const KATEGORILER: Kategori[] = [
         soz: 'Platform kurallarını ve yeni özellikleri ilk kullanan 100 esnafla birlikte belirleyelim. Kurucu satıcı olun.',
         persona: ['P2', 'P4'],
         sikinti: 'Söz hakkı ve statü isteği',
-        platform: 'Kurucu satıcılardan bir kurul oluşturmalı. İlk katılan satıcılara ömür boyu düşük komisyon gibi haklar vermeli.',
+        platform: 'Kurucu satıcılardan bir kurul oluşturmalı. İlk katılan satıcılara fiyat güvencesi gibi haklar vermeli.',
         ilkGun: 'evet',
         risk: 'Düşük. Verilen avantaj geri alınamaz, bu yüzden sınırlı tutulmalı.',
         dayanak: 'Öneri',
@@ -565,7 +581,7 @@ export const KATEGORILER: Kategori[] = [
 /** Esnaf kapısında ilk 30 saniye: kaynaklı acı noktalarına ve ilk günden verilebilirliğe göre sıra. */
 export const ILK_30_SANIYE: { ad: string; oneriler: number[]; soz: string }[] = [
   { ad: 'Açılış', oneriler: [6, 7], soz: `Kendi müşterilerinizden siparişi burada alın. Satışlarınızdan komisyon almayız. Paketi ${CANLI_DENEME_GUN} gün ücretsiz deneyin.` },
-  { ad: 'Para', oneriler: [1], soz: 'Platformdan gelen siparişin parası güvende. Çek ve senet derdi yok.' },
+  { ad: 'Para', oneriler: [5, 11], soz: 'Ödeme hatırlatmasını müşterinize WhatsApp’tan otomatik gönderin. Yeni müşterinin kimliği ve vergi numarası doğrulanmış olur.' },
   { ad: 'Zaman', oneriler: [17, 18, 19], soz: 'WhatsApp’tan gelen siparişleri tek ekranda görürsünüz. Fiyatları tek tuşla güncellersiniz. Faturalar kendiliğinden kesilir.' },
   { ad: 'Kurulum', oneriler: [20], soz: `Fotoğrafı biz çekeriz, mağazanız bugün açılır. Kurulum bir kez ${KURULUM} tutar.` },
   { ad: 'İhracata ilgi duyan esnafa', oneriler: [36, 40], soz: 'İhracat hedefimiz var. Bugün katılırsanız, altyapımız hazır olduğunda ilk sırada siz olursunuz.' },
@@ -577,8 +593,8 @@ export const BASLANGIC_NOTU =
 export const ESKI_SOZLER: { eski: string; yeni: string; neden: string; not?: string }[] = [
   {
     eski: '%100 satış garantisi',
-    yeni: 'Platformdan gelen siparişin parası garanti. Yeni alıcıdan ilk 90 günde sipariş gelmezse hiçbir ücret ödemezsiniz.',
-    neden: 'Bu söz tutulabilir. Risk, ödeme ortağında ve platformun kendi gelirinde kalır. Faire’in “her sipariş garantili satış” anlayışına denk düşer.',
+    yeni: 'Yeni alıcıların taleplerini size ulaştırırız. Emanet ödeme geldiğinde siparişin parası teslimata kadar güvenli hesapta bekler.',
+    neden: '“%100 satış garantisi” sözünün tanımı yok. iStoc ödemeyi tutmaz. Bu yüzden garanti sözü verilmez. Yeni söz bugünkü işi ve ileride gelecek emanet ödemeyi ayrı söyler.',
   },
   {
     eski: 'RFQ ile gelmiş alıcı teklifleri',

@@ -205,7 +205,7 @@ const SEGIKA_ORTAK_KURALLARI = [
   '60 gün boyunca ilerleme olmazsa kayıt gözden geçirilir. Son 90 günde Segika ile teması olan firma yeni kazanım sayılmaz.',
   'Yüzde 15’lik bütçe ortaklar arasında paylaştırılır. Her ortak için ayrıca yüzde 15 eklenmez.',
   'Liste fiyatının altında satış yapılmaz.',
-  'Uyum süreci 14 gündür. Ortak bu sürede sertifika eğitimini bitirir ve ilk 5 mükellefini ekler. Aktivasyon 45 gün içinde beklenir.',
+  'Uyum süreci 14 gündür. Ortak bu sürede sertifika eğitimini bitirir ve ilk 5 mükellefini ekler. Aktivasyon, ortağın getirdiği ilk müşterinin ilk ödemesini yapmasıdır. Aktivasyon 45 gün içinde beklenir.',
   'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
@@ -213,7 +213,7 @@ const ISTOC_ORTAK_KURALLARI = [
   'Bildirilen fırsat 2 iş günü içinde kabul edilir. Fırsat 90 gün boyunca ortak adına korunur.',
   '30 gün boyunca ilerleme olmazsa fırsat gözden geçirilir.',
   'Ortağa münhasırlık, yani tek yetkili olma hakkı verilmez. Ortak, “iStoc Program Ortağı” adını kullanır.',
-  'Uyum süreci 21 gün sürer ve 60 dakikalık eğitimi içerir. Aktivasyon süresi 60 gündür.',
+  'Uyum süreci 21 gün sürer ve 60 dakikalık eğitimi içerir. Aktivasyon, ortağın getirdiği ilk müşterinin ilk ödemesini yapmasıdır. Aktivasyon süresi 60 gündür.',
   'Ortaklık her yıl değerlendirilir. Ortakların tavsiye puanı (NPS) en az 40 olmalıdır.',
 ];
 
@@ -285,7 +285,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
       donemler: [],
       hesap: [{ ad: 'Seviye', formul: `${m} aktif mükellef. Gümüş için en az 10, Altın için en az 50`, sonuc: seviye }],
       kurallar: [
-        'Kayıtlı Ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitimi ve bu eğitimin kaydını alır. Ayrıca paneli, 2 mükellef için ücretsiz denemeyi ve kampanya kitini alır.',
+        'Kayıtlı Ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitimi ve bu eğitimin kaydını alır. Ayrıca paneli, 2 mükellef için ücretsiz denemeyi ve kampanya kitini alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.',
         'Gümüş seviyesi için en az 10 aktif mükellef gerekir. Bu seviyede ofis toptan fiyatın 1. kademesini ve ofis markalı Aylık Değer Raporunu alır. Destek taleplerine 4 saat içinde yanıt verilir.',
         'Altın seviyesi için en az 50 aktif mükellef gerekir. Bu seviyede ofis 2. kademe fiyatı, yalnız onunla ilgilenen bir ortak başarı yöneticisini, ortak pazarlama fonunu ve API erişimini, yani yazılımını doğrudan bağlama imkânını alır.',
         'Toptan fiyat bantları 10–49, 50–199 ve 200 üstü mükellef sayısına göre belirlenir. Yıllık peşin ödemede ek indirim vardır.',
@@ -320,8 +320,8 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
     osgb: ['Yönlendirme anlaşması', 'Bu ortaklıkta karşı taraf bir OSGB, yani ortak sağlık ve güvenlik birimidir. Müşterilerini Segika’ya yönlendirir.', ['Yönlendirme anlaşmasıyla çalışır.', 'Bu ortaklık ikinci dalgada başlar.']],
     dernek: ['Ortak eğitim', 'Bu ortaklıkta karşı taraf bir dernek, organize sanayi bölgesi ya da odadır. Üyelerine Segika ile birlikte eğitim düzenler.', ['Ortak eğitim programıyla çalışır.', 'Bu ortaklık ikinci dalgada başlar.']],
     franchise: ['Merkez sözleşmesi', 'Ortak, bir franchise ya da zincir işletmedir. Bütün şubeler için merkezle tek sözleşme yapılır.', ['Merkezle sözleşme yapılır.', 'Bu ortaklık ikinci dalgada başlar.']],
-    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur, yani kurumsal arz toplayıcıdır. Üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'Ortak, markalı program sayfası, üye panosu, çeyreklik sonuç raporu ve üyelerine özel avantaj alır.', 'Platformun başarı komisyonu yüzde 3 ile 8 arasındadır. Kendi alıcılarını getiren üretici ilk 6 ay komisyon ödemez.', 'İlk dönemde 3 ortakla çalışılır.', 'Aktivasyon için en az 20 doğrulanmış vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
-    talep: ['Görev ücreti', 'Ortak, alıcıların satın alma taleplerini toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin yüzde 50’si kapsam kabul edilince, kalan yüzde 50’si sonuç takibinde ödenir.', 'Ortak ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Ortak, kapalı alıcı kulübüne erişir.', 'Aktivasyon için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
+    arz: ['Nakit ödeme yok', 'Ortak, satıcı üyeleri olan bir kurumdur, yani kurumsal arz toplayıcıdır. Üyelerini iStoc’a satıcı olarak getirir.', ['Nakit ödeme yapılmaz. Protokol imzalanır ve üyelerin sonuç raporu paylaşılır.', 'Ortak, markalı program sayfası, üye panosu, çeyreklik sonuç raporu ve üyelerine özel avantaj alır.', 'Platform satıştan komisyon almaz. Üyeler yalnız paket ücretini öder.', 'İlk dönemde 3 ortakla çalışılır.', 'Aktivasyon için en az 20 doğrulanmış vitrin gerekir.', ...ISTOC_ORTAK_KURALLARI]],
+    talep: ['Görev ücreti', 'Ortak, alıcıların satın alma taleplerini toplar. İşlem payı ya da görev ücreti alır.', ['Görev ücretinin yüzde 50’si kapsam kabul edilince, kalan yüzde 50’si sonuç takibinde ödenir.', 'Ortak ayda en az 2 izinli alım talebi getirir.', 'Kayıt başına ödeme yapılmaz.', 'Ortak, kapalı alıcı kulübüne erişir.', 'Ortağın aktif sayılması için en az 10 nitelikli talep gerekir.', 'İlk dönemde 1 ya da 2 ortakla çalışılır.', ...ISTOC_ORTAK_KURALLARI]],
     hizmet: ['Gelir paylaşımı', 'Ortak, ödeme ya da lojistik gibi bir hizmet verir. Hizmetini “iStoc Onaylı Hizmet” adıyla sunar.', ['Lojistik, ödeme, gümrük, kalite ya da katalog hizmeti verebilir.', 'Gelir paylaşımı ya da yönlendirme ücreti alır.', '“iStoc Onaylı Hizmet” rozetini ve iş akışını kullanır.', ...ISTOC_ORTAK_KURALLARI]],
     teknoloji: ['Karşılıklı indirim', 'Ortak, iStoc’a doğrudan yazılım bağlantısıyla (API) bağlanan bir yazılımdır.', ['Kataloglar otomatik eşitlenir ve iki taraf birlikte pazarlama yapar.', 'Liste fiyatında karşılıklı indirim uygulanır.', 'Bu ortaklık ikinci dalgada başlar.']],
     bolge: ['Aktif satıcı başı ödeme', 'Ortak, bir bölgede satıcı ağı kurar. Aktif satıcı başına ödeme ve işlem payı alır.', ['Bu ortaklık yalnız 6. aydan sonra ve pazarın canlı olduğu kanıtlanınca başlar.', ...ISTOC_ORTAK_KURALLARI]],
