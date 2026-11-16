@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { kadrolu, yillikFiyat, type Ayar } from '../../satisOrtakligi';
 import { kosulSonucu, seciliKosul } from '../../kosullar';
@@ -50,7 +51,7 @@ function primBilgisi(a: Ayar, p: Program) {
   };
 }
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const p = seciliKosul(a, 'kadrolu').id as Program;
   const prim = primBilgisi(a, p);
   const saha = p !== 'ana';
@@ -324,3 +325,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar,
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { aylikFiyat, rolMetinleri } from '../../satisOrtakligi';
 import { KOSULLAR, affilateHesabi } from '../../kosullar';
@@ -12,7 +13,7 @@ const sonlu = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, ba
   ({ id, metin, tur, sonuc: { baslik, metin: aciklama } });
 
 /** Segika mevcut müşteri tavsiyesi. Ana program ücretsiz kullanım, ayrı program tek seferlik komisyon verir. */
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const secili = a.kosul?.tavsiye;
   const program = KOSULLAR.tavsiye.some((k) => k.id === secili && k.marka.includes('segika')) ? secili! : 'ana';
   const komisyonYolu = program === 'tek-sefer';
@@ -296,3 +297,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar: komisyonVar ? adimlar : adimlar.slice(0, 2),
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { satisKazanci, segikaAylik, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
 import { affilateHesabi, seciliKosul } from '../../kosullar';
@@ -235,7 +236,7 @@ function yillaraAkisi(a: Ayar): AkisAdimi[] {
   ];
 }
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const program = seciliKosul(a, 'oncu').id;
   if (program === 'yillara') return {
     baslik: 'Öncü satış ortağı için yıllara yayılan komisyon',
@@ -252,3 +253,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar: anaAkis(a),
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

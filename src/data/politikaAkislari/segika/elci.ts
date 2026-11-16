@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur } from '../types';
 import { satisKazanci, segikaAylik, yillikFiyat, type SegikaPaket, type Seviye } from '../../satisOrtakligi';
 import { int, tl, yuzdeBicimi } from '../../../lib/format';
@@ -18,7 +19,7 @@ const SEVIYE_OZET: Record<Seviye, string> = {
   C: 'Siz şirketin onayladığı teklifle satış görüşmesini yürütürsünüz.',
 };
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const seviye = a.elciSeviye;
   const komisyon = satisKazanci(a, seviye);
   const fiyat = segikaAylik(a);
@@ -302,3 +303,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar,
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

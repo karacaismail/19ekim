@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { aylikFiyat, rolMetinleri, yillikFiyat, type Ayar } from '../../satisOrtakligi';
 import { num, tlBitisik } from '../../../lib/format';
@@ -16,7 +17,7 @@ const sonlu = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, ba
   ({ id, metin, tur, sonuc: { baslik, metin: aciklama } });
 
 /** iStoc mevcut müşteri tavsiyesi. Bu projede yalnız ana program vardır. */
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const kredi = aylikFiyat(a) * a.krediAy;
   const odulVar = a.krediAy > 0 && a.tavsiyeSinir > 0;
   // Kullanım süresi satış ortaklığı hesabındaki tavsiye kuralından gelir. Sayı bu dosyada yazılmaz.
@@ -191,3 +192,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar,
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

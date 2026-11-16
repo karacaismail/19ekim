@@ -5,17 +5,18 @@ test('rehber yalnız mevcut işi açar ve koşul yanıtıyla ilerler', async ({ 
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const etkin = page.locator('[data-akis-etkin]');
   await expect(etkin).toHaveCount(1);
-  await expect(etkin).toContainText('Çalışma anlaşmanız ne durumda?');
-  await expect(page.locator('.pol-belge')).toHaveCount(0);
-  await etkin.getByRole('button', { name: 'Anlaşma henüz taslak', exact: true }).click();
-  await expect(page.locator('[data-akis-sonuc="bekle"]')).toContainText('Anlaşma bekleniyor');
-  await expect(etkin).toContainText('Çalışma anlaşmanız ne durumda?');
-  await etkin.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  // 16 Kasım 2026: yazılı anlaşma adımı çıktı. Rehber dükkân kaydıyla başlar.
   await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await expect(page.locator('.pol-belge')).toHaveCount(0);
+  await etkin.getByRole('button', { name: 'Başka ortak bu dükkânı bildirmiş', exact: true }).click();
+  await expect(page.locator('[data-akis-sonuc="bekle"]')).toBeVisible();
+  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await etkin.getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
+  await expect(etkin).toContainText('İşletme ne yanıt verdi?');
   await expect(etkin.getByRole('heading').first()).toBeFocused();
   await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Yazılı anlaşma yanıtını değiştir', exact: true }).click();
-  await expect(etkin).toContainText('Çalışma anlaşmanız ne durumda?');
+  await page.getByRole('button', { name: 'Dükkânı kaydedin yanıtını değiştir', exact: true }).click();
+  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
   await expect(page.locator('[data-akis-gecmis]')).toHaveCount(0);
 });
 
@@ -41,10 +42,10 @@ test('varsayılandan farklı ortak ayarla ilerleme yenilemede korunur', async ({
   }, fields);
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const etkin = page.locator('[data-akis-etkin]');
-  await etkin.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
-  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await etkin.getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
+  await expect(etkin).toContainText('İşletme ne yanıt verdi?');
   await page.reload();
-  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await expect(etkin).toContainText('İşletme ne yanıt verdi?');
   await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
 });
 
@@ -54,16 +55,16 @@ test('ayrıntı kaynağı gelmezse etkin iş ve yanıtlar korunur', async ({ pag
   await page.route(/PolitikaAkisAyrinti\.[\w-]+\.js$/, (route) => route.abort());
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const etkin = page.locator('[data-akis-etkin]');
-  await etkin.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await etkin.getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('İş adımlarınız korunuyor.');
-  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await expect(etkin).toContainText('İşletme ne yanıt verdi?');
   await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
   expect(errors).toEqual([]);
   await page.unroute(/PolitikaAkisAyrinti\.[\w-]+\.js$/);
   await page.getByRole('button', { name: 'Ayrıntıları yeniden yükle', exact: true }).click();
   await expect(page.locator('.pol-belge')).toBeVisible();
-  await expect(etkin).toContainText('Kayıt sonucu ne oldu?');
+  await expect(etkin).toContainText('İşletme ne yanıt verdi?');
 });
 
 test('adım ayrıntısı iki yönde pozitif süre ve hareket azaltma tercihi kullanır', async ({ page }) => {
@@ -86,13 +87,13 @@ test('zaman çizelgesi sıradaki olası adımları gösterir ve yanıtla güncel
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const sonraki = page.locator('[data-akis-sonraki]');
   await expect(sonraki).toContainText('Sonraki olası adımlar');
-  await expect(sonraki.locator('li').first()).toHaveText('Dükkânı kaydedin');
-  await expect(sonraki).toContainText('Yanıtınız bu sırayı değiştirebilir.');
-  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
-  await expect(sonraki).not.toContainText('Dükkânı kaydedin');
   await expect(sonraki.locator('li').first()).toHaveText('İşletmeyle görüşün');
+  await expect(sonraki).toContainText('Yanıtınız bu sırayı değiştirebilir.');
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
+  await expect(sonraki).not.toContainText('İşletmeyle görüşün');
+  await expect(sonraki.locator('li').first()).toHaveText('Ürün gösterimi');
   // Bekleme yanıtı seçilince ileriki adımlar gösterilmez. Okur önce koşulun değişmesini bekler.
-  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Başka ortak bu dükkânı bildirmiş', exact: true }).click();
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Ürün bilgisini hazırlayacak kimse yok', exact: true }).click();
   await expect(sonraki).toHaveCount(0);
 });
 
@@ -114,9 +115,9 @@ test('on rehberin sonraki adım zinciri döngüsüz ve sonludur', async ({ brows
 test('sorumlu bilgisi tam cümledir', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   const etkin = page.locator('[data-akis-etkin]');
-  await expect(etkin.locator('.pol-sorumlu')).toHaveText('Bu adımı ortaklık sorumlusu yürütür. Şirket bu görevi henüz kimseye atamadı.');
-  await etkin.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
   await expect(etkin.locator('.pol-sorumlu')).toHaveText('Bu adımı siz yürütürsünüz.');
+  for (const yanit of ['Kayıt benim adıma açıldı', 'İşletme yeni alıcı arıyor', 'İşletme teklif istedi']) await etkin.getByRole('button', { name: yanit, exact: true }).click();
+  await expect(etkin.locator('.pol-sorumlu')).toHaveText('Bu adımı satış yöneticisi ile birlikte siz yürütürsünüz. Şirket bu görevi henüz kimseye atamadı.');
 });
 
 test('önce yapılacaklar, sonra soru gelir', async ({ page }) => {
@@ -129,7 +130,7 @@ test('önce yapılacaklar, sonra soru gelir', async ({ page }) => {
 test('sekme kapanınca ilerleme bu cihazda korunur', async ({ context }) => {
   const ilk = await context.newPage();
   await ilk.goto('politikalar/?proje=istoc&rol=oncu');
-  await ilk.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await ilk.locator('[data-akis-etkin]').getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
   await expect(ilk.locator('[data-akis-gecmis]')).toHaveCount(1);
   await ilk.close();
   const ikinci = await context.newPage();
@@ -140,7 +141,7 @@ test('sekme kapanınca ilerleme bu cihazda korunur', async ({ context }) => {
 test('akışı değiştirmeyen ortak değer ilerlemeyi sıfırlamaz, akışı değiştiren sıfırlar', async ({ page, personaServer }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   await expect(page.locator('[data-sync-state="synced"]')).toBeVisible();
-  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Yazılı anlaşmam var', exact: true }).click();
+  await page.locator('[data-akis-etkin]').getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true }).click();
   await expect(page.locator('[data-akis-gecmis]')).toHaveCount(1);
   personaServer.seed('istoc', { kur: 61 });
   const kur = () => page.evaluate(() => JSON.parse(localStorage.getItem('turksab-persona-ortak-v1-istoc') ?? '{}')?.snapshot?.fields?.kur);

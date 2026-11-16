@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi, IsAkisi } from '../types';
 import { cozumKazanci, segikaAylik, type Ayar, type SegikaPaket } from '../../satisOrtakligi';
 import { kosulSonucu, seciliKosul, affilateHesabi } from '../../kosullar';
@@ -637,7 +638,7 @@ function franchiseAkis(): IsAkisi {
   };
 }
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   switch (seciliKosul(a, 'cozum').id) {
     case 'yillara': return yillaraAkis(a);
     case 'yonlendirme': return yonlendirmeAkis(a);
@@ -650,3 +651,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     default: return anaAkis(a);
   }
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

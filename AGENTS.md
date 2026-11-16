@@ -1808,3 +1808,9 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
 - `/satis-ortakligi/` sayfası yayında kalır ama geçersizdir. En üstte “BU SAYFA ARTIK GEÇERSİZDİR” uyarısı durur.
   Sayfanın bütün yazısı gri ve üstü çizilidir (`.sayfa-gecersiz`, `global.css`).
 - Bu kuralları `tests/kazanc-plani.spec.ts` ve `tests/satis-ortakligi-arsiv.spec.ts` denetler.
+- Rehberde belge adımları sorulmaz (kullanıcı kararı 16 Kasım 2026: “yalnız belge adımları”).
+  Çıkan adımlar yazılı anlaşma, görev tanımı ve prim eki ile yazılı ödül koşulu adımlarıdır.
+  Bu adımlar her iki projede ve bütün rollerde çıkar. Satış adımları kalır.
+  `motor.ts → belgeAdimlariniCikar` adımı çıkarır. Bu adıma giden yanıt, adımın sonraki adımına bağlanır.
+  Adım metinleri dosyada durur. Kullanıcı isterse adımlar kolayca geri gelir.
+  Bu kuralı `tests/politika-belge-adimi.spec.ts` denetler.

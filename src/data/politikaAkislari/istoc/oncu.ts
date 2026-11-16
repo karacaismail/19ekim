@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { satisKazanci, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
 import { agDerinlik, agSatisPayi, seciliKosul } from '../../kosullar';
@@ -241,7 +242,7 @@ function agAkisi(a: Ayar): AkisAdimi[] {
   ];
 }
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   const program = seciliKosul(a, 'oncu').id;
   if (program === 'ag') return {
     baslik: 'Öncü satış ortağının kademeli temsilci ağı',
@@ -258,3 +259,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar: anaAkis(a),
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

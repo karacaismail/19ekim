@@ -1,3 +1,4 @@
+import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
 import { kadrolu, rolMetinleri, segikaAylik, yillikFiyat, type SegikaPaket } from '../../satisOrtakligi';
 import { pct, sayiBicimi, tl } from '../../../lib/format';
@@ -16,7 +17,7 @@ const PAKET: Record<SegikaPaket, string> = {
   otomasyon: 'sigorta otomasyonu paketi',
 };
 
-export const akisOlustur: AkisOlustur = (a) => {
+const akisOlusturTam: AkisOlustur = (a) => {
   // Bu projede kadrolu rol için yalnız ana program vardır.
   const kurallar = rolMetinleri('segika').find((r) => r.id === 'kadrolu')!.kurallar;
   const odemeKurali = kurallar.find((k) => k.startsWith('Prim')) ?? kurallar[kurallar.length - 1];
@@ -247,3 +248,6 @@ export const akisOlustur: AkisOlustur = (a) => {
     adimlar,
   };
 };
+
+/** Rehberde belge adımları sorulmaz (motor.ts → belgeAdimlariniCikar). */
+export const akisOlustur: AkisOlustur = (a) => belgeAdimlariniCikar(akisOlusturTam(a));

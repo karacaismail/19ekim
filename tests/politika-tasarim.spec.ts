@@ -25,13 +25,13 @@ test('320 px: adımın işi kaydırmadan görünür ve soru işin hemen ardında
 
 test('klavye ile ilerleyince yeni kararın başlığı görünür odak taşır', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
-  const yanit = page.getByRole('button', { name: 'Yazılı anlaşmam var', exact: true });
+  const yanit = page.getByRole('button', { name: 'Kayıt benim adıma açıldı', exact: true });
   await yanit.focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');
   await page.keyboard.press('Enter');
   const baslik = page.locator('[data-akis-etkin] h3');
-  await expect(baslik).toHaveText('Dükkânı kaydedin');
+  await expect(baslik).toHaveText('İşletmeyle görüşün');
   await expect(baslik).toBeFocused();
   expect(await baslik.evaluate((el) => {
     const s = getComputedStyle(el);
@@ -41,6 +41,8 @@ test('klavye ile ilerleyince yeni kararın başlığı görünür odak taşır',
 
 test('önerilen sorumlu atanmış kişi gibi gösterilmez', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=oncu');
+  // 16 Kasım 2026'dan beri ilk adım okurun kendi işidir. Önerilen görev teklif adımında görünür.
+  for (const yanit of ['Kayıt benim adıma açıldı', 'İşletme yeni alıcı arıyor', 'İşletme teklif istedi']) await page.locator('[data-akis-etkin]').getByRole('button', { name: yanit, exact: true }).click();
   await expect(page.locator('[data-akis-etkin] .pol-sorumlu')).toContainText('Şirket bu görevi henüz kimseye atamadı.');
 });
 
@@ -54,7 +56,7 @@ test('dar ekranda doğrudan açılan rolün sekmesi görünür', async ({ page }
 test('bekleme yanıtı sonucu görünür odağa getirir', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('politikalar/?proje=istoc&rol=oncu');
-  await page.getByRole('button', { name: 'Anlaşma henüz taslak', exact: true }).click();
+  await page.getByRole('button', { name: 'Başka ortak bu dükkânı bildirmiş', exact: true }).click();
   const sonuc = page.locator('[data-akis-sonuc="bekle"] h4');
   await expect(sonuc).toBeFocused();
   await expect(sonuc).toBeInViewport();

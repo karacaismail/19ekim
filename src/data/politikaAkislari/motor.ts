@@ -52,3 +52,28 @@ export function sorumluCumlesi(sorumlu: string): string {
   if (birlikte) return `Bu adımı ${kucuk(birlikte[1])} ile birlikte siz yürütürsünüz.${ek}`;
   return `Bu adımı ${kucuk(ad)} yürütür.${ek}`;
 }
+
+/**
+ * Belge adımlarını çıkarır (kullanıcı kararı 16 Kasım 2026 Pazartesi: “yalnız belge adımları”). Kullanıcı yalnız kazanç
+ * planını, herkesin iş ortağı olmasını ve kadrolu uzmanın maaşını ve primini belirtti. Bu yüzden yazılı anlaşma, görev
+ * tanımı ve prim eki ile yazılı ödül koşulu adımları rehberde sorulmaz. Akışın ilk adımı olan anlaşma ve görev adımı ile
+ * tavsiyedeki yazılı koşul adımı çıkar. Bu adıma giden yanıt, adımın “devam” yanıtının gittiği adıma bağlanır.
+ */
+export function belgeAdimlariniCikar(akis: IsAkisi): IsAkisi {
+  const cikan = new Map<string, string>();
+  for (const adim of akis.adimlar) {
+    const belge = adim.id === 'kosul' || (adim.id === akis.ilk && (adim.id === 'anlasma' || adim.id === 'gorev'));
+    const devam = adim.secenekler.find((s) => s.tur === 'devam');
+    if (belge && devam?.tur === 'devam') cikan.set(adim.id, devam.sonraki);
+  }
+  if (!cikan.size) return akis;
+  const hedef = (id: string) => { const gorulen = new Set<string>(); while (cikan.has(id) && !gorulen.has(id)) { gorulen.add(id); id = cikan.get(id)!; } return id; };
+  return {
+    ...akis,
+    ilk: hedef(akis.ilk),
+    adimlar: akis.adimlar.filter((a) => !cikan.has(a.id)).map((a) => ({
+      ...a,
+      secenekler: a.secenekler.map((s) => (s.tur === 'devam' ? { ...s, sonraki: hedef(s.sonraki) } : s)),
+    })),
+  };
+}
