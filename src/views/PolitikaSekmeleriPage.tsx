@@ -115,12 +115,13 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
               {PERSONALAR.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
             </Tabs.List>
             {PERSONALAR.map((p) => <Tabs.Panel key={p.id} value={p.id}>
-              <KazancPlaniBolumu proje={secim.proje} rol={secim.rol} />
               {etkinBelge ? <PolitikaAkisi key={secili} proje={secim.proje} rol={secim.rol} olustur={etkinBelge} />
                 : hata === secili ? <div className="pol-yukleme" role="alert">
                   <p>Rehber yüklenemedi. İnternet bağlantınızı kontrol edin.</p>
                   <button className="pol-sekme" type="button" onClick={() => window.location.reload()}>Sayfayı yeniden yükle</button>
                 </div> : <p className="pol-yukleme" role="status">{proje.ad} rehberi yükleniyor.</p>}
+              {/* Kazanç planı iş sırasından sonra gelir. Telefonda okur önce sıradaki işi görür. */}
+              <KazancPlaniBolumu proje={secim.proje} rol={secim.rol} />
             </Tabs.Panel>)}
           </Tabs>
         </Tabs.Panel>)}

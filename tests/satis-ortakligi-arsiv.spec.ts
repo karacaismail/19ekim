@@ -5,8 +5,10 @@ for (const surum of ['v1', 'v2'] as const) for (const genislik of [320, 1280]) {
   test(`satış ortaklığı ${surum} ${genislik} px: en üstte geçersizlik uyarısı, bütün yazı gri ve üstü çizili`, async ({ page }) => {
     await page.setViewportSize({ width: genislik, height: 800 });
     await page.goto(`satis-ortakligi/?surum=${surum}`);
-    const uyari = page.getByRole('alert').filter({ hasText: 'BU SAYFA ARTIK GEÇERSİZDİR' });
+    const uyari = page.getByRole('alert');
     await expect(uyari).toBeVisible();
+    // Ekranda büyük harfle görünür. Ekran okuyucu ve yalın Türkçe testi normal yazımı okur.
+    await expect(uyari.locator('p').first()).toHaveText('BU SAYFA ARTIK GEÇERSİZDİR.', { useInnerText: true });
     await expect(page.locator('h1')).toBeVisible();
     // Uyarı, sayfa başlığından ve bütün içerikten önce gelir.
     const sira = await page.evaluate(() => {
@@ -45,5 +47,5 @@ for (const surum of ['v1', 'v2'] as const) for (const genislik of [320, 1280]) {
 test('geçersiz sayfa adresten açılır ve uyarı ekran okuyucuya okunur', async ({ page }) => {
   const yanit = await page.goto('satis-ortakligi/');
   expect(yanit?.status()).toBe(200);
-  await expect(page.getByRole('alert')).toHaveText(/BU SAYFA ARTIK GEÇERSİZDİR/);
+  await expect(page.getByRole('alert')).toContainText('Bu sayfa artık geçersizdir.');
 });

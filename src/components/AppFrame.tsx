@@ -264,10 +264,13 @@ export function AppFrame({
   pathname,
   children,
   wide = false,
+  gecersiz,
 }: {
   pathname: string;
   children: ReactNode;
   wide?: boolean;
+  /** Geçersiz sayfa (kullanıcı kararı 16 Kasım 2026). Uyarı en üstte durur. Sayfanın bütün yazısı gri ve üstü çizilidir. */
+  gecersiz?: ReactNode;
 }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
@@ -387,7 +390,10 @@ export function AppFrame({
         </header>
         {girisli ? <ParamsNotice rehber={current === normalizePath(href('/politikalar/'))} /> : null}
         <main className="app-main" id="icerik" tabIndex={-1}>
-          <div className="wrap" data-wide={wide && girisli ? '' : undefined}>
+          {girisli && gecersiz ? <div className="gecersiz-not" role="alert" data-arsiv-uyari>
+            <div className="gecersiz-not-ic" data-wide={wide ? '' : undefined}>{gecersiz}</div>
+          </div> : null}
+          <div className="wrap" data-wide={wide && girisli ? '' : undefined} data-arsiv={girisli && gecersiz ? 'gecersiz' : undefined}>
             {!girisli ? (
               <GirisEkrani />
             ) : (

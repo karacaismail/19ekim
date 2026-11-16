@@ -22,16 +22,13 @@ export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
     </div>
   );
   return (
-    <AppFrame pathname={pathname} wide>
-      {/* Kullanıcı kararı 16 Kasım 2026: sayfa yayında kalır ama geçersizdir. Geçerli kazanç planı çalışma rehberlerindedir. */}
-      <div className="sayfa-gecersiz-uyari" role="alert" data-arsiv-uyari>
-        <p className="sayfa-gecersiz-baslik">BU SAYFA ARTIK GEÇERSİZDİR</p>
-        <p>Bu sayfadaki oranlar ve kurallar artık kullanılmaz. Geçerli kazanç planı çalışma rehberlerindedir.</p>
-      </div>
-      <div className="sayfa-gecersiz" data-arsiv="gecersiz">
-        {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
-        <PolitikaBaglantilari />
-      </div>
+    // Kullanıcı kararı 16 Kasım 2026: sayfa yayında kalır ama geçersizdir. Geçerli kazanç planı çalışma rehberlerindedir.
+    <AppFrame pathname={pathname} wide gecersiz={<>
+      <p className="gecersiz-not-baslik">Bu sayfa artık geçersizdir.</p>
+      <p>Bu sayfadaki oranlar ve kurallar artık kullanılmaz. Geçerli kazanç planı çalışma rehberlerindedir.</p>
+    </>}>
+      {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
+      <PolitikaBaglantilari />
     </AppFrame>
   );
 }

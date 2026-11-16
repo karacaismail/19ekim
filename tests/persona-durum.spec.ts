@@ -1,5 +1,6 @@
 import { expect, test, type Page, type PersonaTestServer, type Route } from './fixtures/persona';
 import { alanlardanAyar } from '../src/data/personaFields';
+import { KAZANC_VARSAYILAN, planliAyar } from '../src/data/kazancPlani';
 import { SEVIYE_ADI, VARSAYILAN_AYAR, aylikFiyat, satisKazanci, yillikFiyat, type Ayar } from '../src/data/satisOrtakligi';
 import type { Request as PersonaIstegi } from '../src/lib/personaSync';
 
@@ -249,9 +250,11 @@ test('bu cihazdaki geçerli bekleyen yazı sayfa yeniden açılınca ortak kayda
   await expect(kurAlani(page)).toHaveValue('70');
 });
 
-test('rehberin “Kazanç” bölümü ortak kayıttaki değerlerle hesaplanır', async ({ page, personaServer }) => {
+// Kur ve katkı ortak kayıttan gelir. Oran 16 Kasım 2026'dan beri kâğıttaki kazanç planından gelir (tests/kazanc-plani.spec.ts).
+test('rehberin “Kazanç” bölümü ortak kaydı ve kazanç planını birlikte kullanır', async ({ page, personaServer }) => {
   personaServer.seed('istoc', { kur: 60, oncuSeviye: 'C', 'oran.C': 0.2 });
-  const a = alanlardanAyar('istoc', personaServer.snapshot('istoc').fields);
+  const plan = (x: Ayar) => planliAyar(x, KAZANC_VARSAYILAN);
+  const a = plan(alanlardanAyar('istoc', personaServer.snapshot('istoc').fields));
   await page.goto('politikalar/?proje=istoc&rol=oncu');
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
@@ -267,8 +270,8 @@ test('rehberin “Kazanç” bölümü ortak kayıttaki değerlerle hesaplanır'
     };
   };
   let beklenen = ornek(a);
-  // 399 € × 60 ₺ = 23.940 ₺. 10 ay = 239.400 ₺. Satışı kapatan %20 alır: 47.880 ₺.
-  expect(beklenen.komisyon).toBe('239.400 ₺ × %20 = 47.880 ₺');
+  // 399 € × 60 ₺ = 23.940 ₺. 10 ay = 239.400 ₺. Satışı kapatan planda %15 alır. Ortak kayıttaki %20 kullanılmaz.
+  expect(beklenen.komisyon).toBe('239.400 ₺ × %15 = 35.910 ₺');
   await expect(deger('Aylık liste fiyatı')).toHaveText(beklenen.aylik);
   await expect(deger('Yıllık paket bedeli')).toHaveText(beklenen.yillik);
   await expect(deger('Satıştaki katkınız')).toHaveText(SEVIYE_ADI.C);
@@ -277,7 +280,7 @@ test('rehberin “Kazanç” bölümü ortak kayıttaki değerlerle hesaplanır'
 
   // Rehber açıkken ortak değer değişirse tutarlar da değişir.
   personaServer.seed('istoc', { kur: 61 });
-  beklenen = ornek(alanlardanAyar('istoc', personaServer.snapshot('istoc').fields));
+  beklenen = ornek(plan(alanlardanAyar('istoc', personaServer.snapshot('istoc').fields)));
   await expect(deger('Bir yıllık paket için komisyon')).toHaveText(beklenen.komisyon, { timeout: 10_000 });
   await expect(deger('Aylık liste fiyatı')).toHaveText(beklenen.aylik);
   expect(personaServer.writes).toHaveLength(0);

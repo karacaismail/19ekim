@@ -10346,20 +10346,25 @@ html[data-focus-mode='keyboard'] .oy-pencere-kapat:focus-visible {
 }
 
 /* Geçersiz sayfa (kullanıcı kararı 16 Kasım 2026: satış ortaklığı sayfası). Sayfa açılır ama bütün yazısı gri ve üstü
- * çizilidir. Sayfanın kendi renk kuralları bu kuralı ezmesin diye `!important` kullanılır. Uyarı kutusu bu kuralın dışındadır. */
-.sayfa-gecersiz *,
-.sayfa-gecersiz *::placeholder {
+ * çizilidir. Sayfanın kendi renk kuralları bu kuralı ezmesin diye `!important` kullanılır. Uyarı `.wrap` dışında, en
+ * üstte durur ve bu kuralın dışındadır. */
+.wrap[data-arsiv='gecersiz'] *,
+.wrap[data-arsiv='gecersiz'] *::placeholder {
   color: var(--text-secondary) !important;
   text-decoration-line: line-through !important;
   text-decoration-color: var(--text-secondary) !important;
 }
-.sayfa-gecersiz-uyari {
-  display: grid;
-  gap: var(--space-2);
-  margin-block: 0 var(--space-6);
-  padding: var(--clear-block) var(--clear-inline);
+.gecersiz-not {
   background: var(--surface-changed);
   color: var(--text-primary);
 }
-.sayfa-gecersiz-uyari p { margin: 0; }
-.sayfa-gecersiz-baslik { font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); }
+.gecersiz-not-ic {
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--clear-block) var(--page-gutter);
+}
+.gecersiz-not-ic[data-wide] { max-width: var(--content-wide-max); }
+.gecersiz-not-ic p { margin: 0; }
+.gecersiz-not-baslik { text-transform: uppercase; font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); }
