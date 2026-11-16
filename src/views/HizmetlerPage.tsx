@@ -2,7 +2,7 @@ import { IconBan, IconCheck, IconClock, IconDoor, IconMinus, IconSparkles } from
 import { useState, type ReactNode } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PageHeader } from '../components/PageHeader';
-import { BolumDizini, Choice, DataTable, Section, type Column } from '../components/ui';
+import { BolumDizini, Choice, DataTable, Section, YeniHap, type Column } from '../components/ui';
 import { CANLI_DENEME_GUN, CANLI_PAKETLER, type CanliOzellik, type PaketId } from '../data/canliPaketler';
 import { HAZIRLIK_ADI } from '../data/gelirModelleri';
 import {
@@ -27,6 +27,8 @@ import {
   YOL_KARARI,
   YOL_NOTU,
   degerMetni,
+  EKLENDI_HAPI,
+  EKLENDI_NOTU,
   hizmetHaritasi,
   isaret,
   paket,
@@ -347,11 +349,13 @@ function Icerik() {
           desc="Her hizmette üç bilgi var. Bunlar bugün ücretsiz olan, bugün pakette olan ve planlanan ek hizmettir. Planlanan hizmet bugün satılmaz."
           dizin
         >
+          <p className="pz-not">{EKLENDI_NOTU}</p>
           <ul className="pz-hizmetler">
             {harita.map((h) => (
               <li key={h.id} className="pz-hizmet" id={`hizmet-${h.id}`}>
                 <div className="pz-hizmet-bas">
                   <h3 className="pz-hizmet-ad">{h.ad}</h3>
+                  {h.eklendi ? <YeniHap>{EKLENDI_HAPI}</YeniHap> : null}
                   <p className="pz-hizmet-soru">{h.soru}</p>
                   <span className="chip pz-cip">{h.icin}</span>
                   {h.katman ? (
@@ -368,8 +372,20 @@ function Icerik() {
                   <Alan ad="Pakette, bugün" bos={!h.pakette}>
                     <p className={h.pakette ? undefined : 'pz-alan-bos'}>{h.pakette ?? 'Paketlerde yok.'}</p>
                   </Alan>
-                  <Alan ad="Planlanan ek hizmet" bos={!h.planlanan.length}>
-                    {h.planlanan.length ? (
+                  <Alan ad="Planlanan ek hizmet" bos={!h.planlanan.length && !h.sozden?.length}>
+                    {h.sozden?.length ? (
+                      <ul className="pz-planlanan" data-kaynak="deger-onerisi">
+                        {h.sozden.map((s) => (
+                          <li key={s.ad}>
+                            <div className="pz-planlanan-ust">
+                              <a href={href(s.oneri === null ? '/deger-onerisi/#en-guclu' : `/deger-onerisi/#oneri-${s.oneri}`)}>{s.ad}</a>
+                              <span className="chip pz-cip">Planlanan</span>
+                            </div>
+                            <p className="pz-planlanan-not">{s.not}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : h.planlanan.length ? (
                       <ul className="pz-planlanan">
                         {h.planlanan.map((p) => (
                           <li key={p.model.id}>

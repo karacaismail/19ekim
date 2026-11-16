@@ -988,6 +988,35 @@ html:not([data-js]) .giris-form {
   white-space: nowrap;
 }
 
+/* Yeni eklenen içeriğin hapı (YeniHap, kullanıcı isteği 16 Kasım 2026). Zemin nötrdür ve kenarlık yoktur. Büyük nokta
+ * menüdeki yeni öğe noktasıyla aynı belgeli döngüyle yanıp söner: sonsuz, gidip gelen, döngü süresi ve simetrik eğri.
+ * Hareket azaltma tercihinde nokta durur ve yeşil kalır. */
+.chip.yeni-hap {
+  gap: var(--space-2);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.chip.yeni-hap::before {
+  content: '';
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: var(--new-mark);
+  animation-name: yeni-nokta;
+  animation-duration: var(--motion-duration-loop);
+  animation-timing-function: var(--motion-ease-standard);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip.yeni-hap::before {
+    animation-name: none;
+  }
+}
+
 .chip[data-status='oneri'] { background: var(--status-oneri-bg); color: var(--status-oneri-fg); }
 .chip[data-status='bekliyor'] { background: var(--status-bekliyor-bg); color: var(--status-bekliyor-fg); }
 
@@ -1150,14 +1179,14 @@ html:not([data-js]) .giris-form {
   width: 0.5rem;
   height: 0.5rem;
   background-color: var(--new-mark);
-  animation-name: navmenu-yeni;
+  animation-name: yeni-nokta;
   animation-duration: var(--motion-duration-loop);
   animation-timing-function: var(--motion-ease-standard);
   animation-iteration-count: infinite;
   animation-direction: alternate;
 }
 
-@keyframes navmenu-yeni {
+@keyframes yeni-nokta {
   from {
     opacity: 1;
   }

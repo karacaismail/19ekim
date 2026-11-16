@@ -124,7 +124,7 @@ test('hizmetler: planlanan hizmetler gelir modellerindeki kartlara bağlanır, h
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('services/');
   await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
-  const planlanan = await page.locator('.pz-planlanan li').evaluateAll((els) =>
+  const planlanan = await page.locator('.pz-planlanan:not([data-kaynak]) li').evaluateAll((els) =>
     els.map((li) => {
       const cip = li.querySelector('.chip')!;
       return { href: li.querySelector('a')!.getAttribute('href') ?? '', etiket: cip.textContent!.trim(), ton: cip.getAttribute('data-ton') };

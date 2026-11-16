@@ -50,6 +50,18 @@ export function RoleChip({ role, label }: { role: RoleKey; label?: string }) {
   );
 }
 
+/**
+ * Yeni eklenen içeriğin hapı (kullanıcı isteği 16 Kasım 2026). Hapın büyük noktası menüdeki yeni öğe noktasıyla aynı
+ * döngüyle yanıp söner. Nokta boş içerikli sözde öğedir. Ekran okuyucu noktayı okumaz, yalnız hapın metnini okur.
+ */
+export function YeniHap({ children }: { children: ReactNode }) {
+  return (
+    <Badge unstyled component="span" className="chip yeni-hap">
+      {children}
+    </Badge>
+  );
+}
+
 export function StatusChip({ status }: { status: Status }) {
   return (
     <Badge unstyled component="span" className="chip" data-status={status}>

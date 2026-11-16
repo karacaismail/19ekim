@@ -287,7 +287,25 @@ export interface HizmetSatiri {
   katman?: string;
   /** Bu hizmetle ilgili karar (kullanıcı kararı 13 Kasım 2026). istoc.com’da henüz uygulanmadı. */
   karar?: string;
+  /** Satır 16 Kasım 2026’da değer önerisinden eklendi. Satır “16 Kasım’da eklendi” hapını taşır. */
+  eklendi?: true;
+  /** Değer önerisinden gelen planlanan hizmetler. Canlı paket bunları sunmaz. */
+  sozden?: SozHizmeti[];
 }
+
+/**
+ * Değer önerisinden eklenen planlanan hizmet (kullanıcı isteği 16 Kasım 2026 Pazartesi). `oneri` değer önerisindeki
+ * önerinin numarasıdır. En güçlü sözlerden gelen hizmette `oneri` boştur. Hizmet bugün yoktur ve esnafa söz verilmez.
+ */
+export interface SozHizmeti {
+  ad: string;
+  not: string;
+  oneri: number | null;
+}
+export const EKLENDI_HAPI = '16 Kasım’da eklendi';
+export const EKLENDI_NOTU =
+  '16 Kasım 2026 Pazartesi günü değer önerisinden yeni hizmetler eklendi. Bu hizmetler bugün yok. Hepsi planlanan hizmettir. Eklenen her satır “16 Kasım’da eklendi” hapını taşır.';
+const soz = (oneri: number | null, ad: string, not: string): SozHizmeti => ({ oneri, ad, not });
 
 const model = (id: string, not: string): Planlanan => {
   const m = MODELLER.find((x) => x.id === id);
@@ -428,6 +446,130 @@ export function hizmetHaritasi(): HizmetSatiri[] {
       ucretsiz: null,
       pakette: `${ad(ilk)} paketinde ${destekMetni(ilk)} var. ${ad(orta)} paketinde ${destekMetni(orta)} var. ${ad(son)} paketinde ${destekMetni(son)} var.`,
       planlanan: [],
+    },
+    // Kullanıcı isteği 16 Kasım 2026 Pazartesi: değer önerisinde olup bu sayfada olmayan sözler. Hepsi planlanandır.
+    {
+      id: 'musteri-getirme',
+      ad: 'Müşteri getirme ve bulunma',
+      soru: 'Satıcı yeni alıcıya nasıl ulaşır?',
+      icin: 'Satıcı',
+      ucretsiz: null,
+      pakette: null,
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(6, 'Davet bağlantısı', 'Satıcı kendi müşterilerini özel bir bağlantıyla platforma çağırır.'),
+        soz(32, 'Tavsiye kredisi', 'Satıcı komşu esnafı platforma getirir. Her yeni esnaf için ücretsiz kullanım ayı kazanır.'),
+        soz(8, 'İlk sipariş indirimi', 'Satıcıdan ilk kez alan işletmeye platform indirim verir. Satıcının fiyatı değişmez.'),
+        soz(10, 'Google’da bulunan sayfalar', 'Ürün ve mağaza sayfaları Google aramasında satıcının adıyla çıkar.'),
+        soz(30, 'Çarşı adresiyle mağaza', 'Mağaza dijitalde İstoç’taki çarşı ve blok adresiyle görünür.'),
+      ],
+    },
+    {
+      id: 'tahsilat',
+      ad: 'Tahsilat ve alıcı bilgisi',
+      soru: 'Satıcı parasını nasıl güvenle alır?',
+      icin: 'Satıcı',
+      ucretsiz: null,
+      pakette: null,
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(3, 'Faturayı nakde çevirme', 'Satıcı vadeli faturasını bir finans ortağı aracılığıyla birkaç günde nakde çevirir.'),
+        soz(4, 'Alıcının ödeme geçmişi', 'Satıcı yeni alıcıya mal vermeden önce alıcının ödeme geçmişini görür.'),
+        soz(5, 'Cari hesap ve ödeme hatırlatması', 'Cari hesap özeti ve ödeme hatırlatması müşteriye WhatsApp’tan kendiliğinden gider.'),
+        soz(11, 'Alıcının vergi numarası doğrulaması', 'Alıcı kayıt olurken vergi numarası doğrulanır.'),
+      ],
+      fark: 'Ödeme ve finansman satırındaki vadeli satış platformdaki siparişe bağlıdır. Faturayı nakde çevirme satıcının kendi faturası içindir.',
+    },
+    {
+      id: 'araclar',
+      ad: 'Günlük işler için araçlar',
+      soru: 'Satıcı günlük işini nasıl kısaltır?',
+      icin: 'Satıcı',
+      ucretsiz: null,
+      pakette: ozellikCumlesi('toplu ürün aktarımı', 'feature.pim.bulk_import'),
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(17, 'WhatsApp sipariş bağlantısı', 'Satıcı müşterisine katalog bağlantısı gönderir. Müşteri sepetini kendisi doldurur.'),
+        soz(18, 'Toplu fiyat güncelleme', 'Kur değişince satıcı bütün fiyatları tek seferde yüzdeyle günceller.'),
+        soz(19, 'E-fatura ve e-arşiv', 'Siparişin faturası kendiliğinden kesilir. Fatura muhasebe programına aktarılır.'),
+        soz(22, 'Teklif PDF’i', 'Satıcı müşterisine 2 dakikada fiyat teklifi hazırlar.'),
+        soz(23, 'Stok paneli', 'Satıcı stoğunu ve en çok satan ürününü telefondan görür.'),
+        soz(16, 'Dövizle fiyat', 'Satıcı fiyatı dolar ya da avroyla girer. Alıcı fiyatı kendi para biriminde görür.'),
+        soz(26, 'Müşteri grubuna özel fiyat', 'Herkes standart fiyatı görür. Satıcının onayladığı grup kendi özel fiyatını görür.'),
+      ],
+      fark: 'Paketteki toplu aktarım ürün kaydı içindir. Planlanan araç yalnız fiyatları günceller.',
+    },
+    {
+      id: 'stok-eritme',
+      ad: 'Stok eritme',
+      soru: 'Satıcı elinde kalan malı nasıl satar?',
+      icin: 'Satıcı',
+      ucretsiz: null,
+      pakette: null,
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(24, 'Kapalı parti mal vitrini', 'Parti malı yalnız doğrulanmış toptan alıcılar görür. Böylece açık piyasada fiyat düşmez.'),
+        soz(25, 'Sezon kampanya takvimi', 'Satıcı okul ve bayram sezonundan önce kampanyaya katılır. Katılım isteğe bağlıdır.'),
+      ],
+    },
+    {
+      id: 'carsi',
+      ad: 'Çarşı olarak birlikte',
+      soru: 'Esnaf komşularıyla nasıl güç birliği yapar?',
+      icin: 'Alıcı ve satıcı',
+      ucretsiz: null,
+      pakette: null,
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(31, 'Birkaç dükkândan tek sepet', 'Alıcı aynı bloktaki birkaç dükkândan tek siparişle alır. Mal tek koliyle gider.'),
+        soz(33, 'Toplu alım indirimi', 'Çarşı olarak ambalajda, kartla ödeme cihazında (POS) ve sigortada toplu indirim alınır.'),
+        soz(34, 'Esnaf eğitimleri', 'Çarşı derneği ve İstoç yönetimiyle e-ihracat, e-fatura ve dijital satış eğitimi verilir.'),
+        soz(35, 'Kurucu satıcı kurulu', 'İlk katılan 100 esnaf platformun kurallarını birlikte belirler.'),
+      ],
+      fark: 'Kargo ve sevkiyat satırındaki anlaşma yalnız kargo içindir. Toplu alım indirimi ambalajı, ödeme cihazını ve sigortayı kapsar.',
+    },
+    {
+      id: 'ihracat',
+      ad: 'İhracat ve yabancı alıcı',
+      soru: 'Satıcı yurt dışına nasıl satar?',
+      icin: 'Alıcı ve satıcı',
+      ucretsiz: null,
+      pakette: [
+        ozellikCumlesi('yapay zekâ ile çeviri', 'feature.ai.translate'),
+        ozellikCumlesi('vergi ve ihracat danışmanlığı', 'feature.support.vat_refund_advisory'),
+      ].join(' '),
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(12, 'Mikro ihracat evrakı', 'Küçük gönderi yurt dışına kargoyla gider. Evrakı platform hazırlar.'),
+        soz(13, 'E-ihracat desteği başvurusu', 'Satıcı devletin e-ihracat desteğine platformun yardımıyla başvurur.'),
+        soz(14, 'Dört dilde katalog', 'Katalog Arapça, Rusça, Fransızca ve İngilizce olarak hazırlanır.'),
+        soz(15, 'Yabancı tüccara uzaktan sipariş', 'Dükkâna gelen yabancı tüccar telefondan sipariş verir. Ödemeyi dövizle yapar.'),
+        soz(36, 'İhracat bekleme listesi', 'İhracata ilgi duyan satıcı kaydedilir. Altyapı hazır olunca önce bu satıcılarla başlanır.'),
+        soz(38, 'Yabancı alıcı listesi', 'Yurt dışından gelen alıcı ilgisi kaydedilir. Teslim ya da tarih sözü verilmez.'),
+        soz(37, 'Ürün kartında ihracat bilgisi', 'Ürün kartına ölçü, ağırlık, malzeme ve üretildiği ülke yazılır.'),
+      ],
+      fark: 'Paketteki çeviri ve danışmanlık bugün çalışmıyor. Planlanan hizmetler ihracatın evrakını, ödemesini ve hazırlığını kapsar.',
+    },
+    {
+      id: 'sorun',
+      ad: 'Sorun çıkınca',
+      soru: 'Alıcı ve satıcı anlaşamazsa ne olur?',
+      icin: 'Alıcı ve satıcı',
+      ucretsiz: null,
+      pakette: ozellikCumlesi('Ticaret Güvencesi', 'feature.commerce.trade_assurance'),
+      planlanan: [],
+      eklendi: true,
+      sozden: [
+        soz(28, 'Uyuşmazlık ve iade yönetimi', 'Anlaşmazlıkta çözümü platform yönetir. İade edilen malın taşınmasını belirli kurallarla platform üstlenir.'),
+        soz(null, 'Sonuç alınamazsa ücret iadesi', 'Belirlenen sürede ölçülebilir sonuç çıkmazsa satıcının ücreti iade edilir. Bu söz için önce sözleşme, ölçüt ve bütçe gerekir.'),
+      ],
+      fark: 'Ticaret Güvencesi sipariş koşullarını kayıt altına alır. Planlanan hizmette çözümü ve iade taşımasını platform üstlenir.',
     },
   ];
 }

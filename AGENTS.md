@@ -1682,6 +1682,19 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
 - Nokta yalnız menü açıkken görünür. Menü kapanınca yanıp sönme de durur.
 - `tests/yeni-isaret.spec.ts` bu davranışı iki temada ve 3:1 karşıtlıkla denetler.
 
+## Değer önerisinden eklenen hizmetler (kullanıcı isteği 16 Kasım 2026 Pazartesi)
+
+- Değer önerisindeki bazı sözler Hizmetler sayfasında yoktu. Bu sözler hizmet haritasına yedi yeni satır olarak eklendi.
+- Satırlar `hizmetler.ts → hizmetHaritasi()` içindedir. Her satırda `eklendi: true` ve `sozden` listesi vardır.
+- Canlı paket verisi bu hizmetleri sunmaz. Bu yüzden her söz “Planlanan” hapıyla görünür. Ücretsiz alanı boştur.
+- Her söz değer önerisindeki kartına bağlanır (`/deger-onerisi/#oneri-N`). En güçlü sözden gelen söz `#en-guclu` adresine gider.
+- Sözleşme (29) ve yol haritası (40) hizmet değildir. Bu iki söz eklenmedi.
+- Eklenen satır “16 Kasım’da eklendi” hapını taşır. Hap ortak `YeniHap` bileşenidir (`ui.tsx`, `.chip.yeni-hap`).
+- Hapın büyük noktası menüdeki yeni öğe noktasıyla aynı döngüyle yanıp söner. İkisi aynı `yeni-nokta` animasyonunu kullanır.
+- Nokta boş içerikli sözde öğedir. Ekran okuyucu noktayı okumaz. Hareket azaltma tercihinde nokta durur.
+- Satır artık yeni sayılmayınca `eklendi` alanını silin. Hap da kalkar.
+- `tests/hizmet-ekleri.spec.ts` veriyi, hapı, noktayı ve iki temayı denetler.
+
 ## Projeye göre çalışma rehberleri
 
 - Menüde tek “Çalışma rehberleri” bağlantısı bulunur. Ana adres `/politikalar/` olur.
