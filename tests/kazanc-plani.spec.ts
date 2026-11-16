@@ -108,6 +108,7 @@ test('kadrolu uzman sekmesi maaşı, kotayı ve SGK kaydını söyler', async ({
   await page.goto('politikalar/?proje=istoc&rol=kadrolu');
   const plan = page.getByRole('region', { name: 'Kazanç planı' });
   await expect(plan).toContainText('SGK');
+  await expect(plan).not.toContainText('Herkes iş ortağıdır.');
   await expect(plan).toContainText('50.000 ₺ ile 60.000 ₺');
   await expect(plan.getByRole('textbox', { name: 'Aylık maaş', exact: true })).toHaveValue('50.000');
   await expect(plan.getByRole('textbox', { name: 'Kota oranı', exact: true })).toHaveValue('%250');

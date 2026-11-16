@@ -105,8 +105,8 @@ function Kadrolu({ plan, guncelle }: { plan: KazancPlani; guncelle: ReturnType<t
 export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) {
   const { plan, guncelle } = useKazancPlani(proje);
   return <Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
-    <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler.</p>
     {rol === 'kadrolu' ? <Kadrolu plan={plan} guncelle={guncelle} /> : <>
+      <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler.</p>
       <p>Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3, yıllık ciro kotalarıdır.</p>
       <p>Ciro bir kotayı geçerse o kotanın artışı oranınıza eklenir.</p>
       <Grup baslik="Kota eşikleri ve örnek ciro">
