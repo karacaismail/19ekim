@@ -199,7 +199,7 @@ function ihlaller(metin: string, tur: string) {
 const BILINEN = new Set(['TL', 'KDV', 'SGK', 'CRM', 'ABD', 'AB', 'USD', 'EUR', 'KOBİ', 'TÜFE', 'GPS', 'GB', 'TB', 'USB', 'LED', 'QR', 'PDF', 'TV', 'DVD', 'HD', 'JSON', 'CSV', 'URL', 'II', 'III', 'IV', 'VI', 'VII', 'VIII', 'IX', 'XI', 'XII']);
 // Marka, ürün ve kurum adları ile satıştaki ürün özelliği adları. Bunlar açılmaz, çünkü adın kendisidir. Örnek: Garanti
 // BBVA, TÜV SÜD, Mercer IPE, IPS monitör.
-const ADLAR = new Set(['İSTOÇ', 'İBB', 'MEB', 'TÜİK', 'AVM', 'DJI', 'JBL', 'HP', 'ASUS', 'IKEA', 'BMJ', 'DHL', 'UPS', 'PTT', 'MNG', 'BOE', 'NHS', 'PwC', 'EY', 'KPMG', 'OECD', 'IMF', 'TBMM', 'GE', 'BBVA', 'GDX', 'GO', 'RB', 'SGS', 'TÜV', 'SÜD', 'PYMNTS', 'CLS', 'PR', 'MATCH', 'IPE', 'GGS', 'ETA', 'IPS', 'UHF', 'DHgate', 'TikTok', 'CapCut', 'GitLab', 'WTW', 'YouTube']);
+const ADLAR = new Set(['İSTOÇ', 'İBB', 'MEB', 'TÜİK', 'AVM', 'DJI', 'JBL', 'HP', 'ASUS', 'IKEA', 'BMJ', 'DHL', 'UPS', 'PTT', 'MNG', 'BOE', 'NHS', 'PwC', 'EY', 'KPMG', 'OECD', 'IMF', 'TBMM', 'GE', 'BBVA', 'GDX', 'GO', 'RB', 'SGS', 'TÜV', 'SÜD', 'PYMNTS', 'CLS', 'PR', 'MATCH', 'IPE', 'GGS', 'ETA', 'IPS', 'UHF', 'DHgate', 'TikTok', 'CapCut', 'GitLab', 'WTW', 'YouTube', 'VIP']);
 // Kullanıcı kararıyla duran adlar. 13 Kasım 2026’dan beri OPEX sayfasının adı “OPEX (işletme giderleri)”dir, kısaltma adda açılır.
 const KARARLI = new Set<string>([]);
 // Anlamı kaynakta yazmayan kısaltmalar. Bunlar uydurularak açılmaz, kullanıcıya sorulur. ECA, notlardaki kullanıcı notudur.

@@ -137,8 +137,10 @@ export const MARKETING_NAV: NavLink[] = [
   menu('buyume-modeli'),
   menu('satis-ortakligi'),
   menu('deger-onerisi'),
-  // Hizmetler ve küresel pazaryerleri (kullanıcı kararı 2026-11-12): değer önerisi → hizmetler → gelir modelleri → küresel örnekler.
+  // Hizmetler, fiyatlandırma ve küresel pazaryerleri (kullanıcı kararları 2026-11-12): değer önerisi → hizmetler →
+  // fiyatlandırma önerisi → gelir modelleri → küresel örnekler.
   menu('services'),
+  menu('pricing'),
   menu('gelir-modelleri'),
   menu('kuresel-pazaryerleri'),
   menu('oyunlastirma'),

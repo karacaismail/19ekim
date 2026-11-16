@@ -32,7 +32,11 @@
 .pz-hizmet,
 .pz-hizmet-alanlar,
 .pz-alan,
-.pz-yol {
+.pz-yol,
+.pz-ilgili,
+.pz-kapsam,
+.pz-elestiri,
+.pz-modul {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -223,6 +227,19 @@
 
 .chip.pz-cip[data-ton='yok'],
 .chip.pz-cip[data-ton='planlandi'] {
+  background-color: var(--surface-break);
+  color: var(--text-secondary);
+}
+
+/* Fiyatlandırma kapsamı: bugüne göre değişen ve yeni hücre değişim yüzeyindedir. Planlanan ve vizyon nötrdür. */
+.chip.pz-cip[data-durum='degisti'],
+.chip.pz-cip[data-durum='yeni'] {
+  background-color: var(--surface-changed);
+  color: var(--text-primary);
+}
+
+.chip.pz-cip[data-durum='planlanan'],
+.chip.pz-cip[data-durum='vizyon'] {
   background-color: var(--surface-break);
   color: var(--text-secondary);
 }
@@ -1154,6 +1171,214 @@
   font-weight: var(--weight-bold);
 }
 
+/* ---- Fiyatlandırma: bugün ve öneri, eleştiri, kapsam, ek modüller ---- */
+
+/* Bugün ve öneri: her öğe kendi üst çizgisiyle ayrılır. Eksik kalan ızgara hücresi boş kalır, gri görünmez. */
+.pz-degisimler {
+  display: grid;
+  column-gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pz-degisim {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.pz-degisim-ad {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.pz-degisim-satir {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.pz-degisim-satir div {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.pz-degisim-satir dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.pz-degisim-satir dd {
+  margin: 0;
+}
+
+.pz-degisim-bugun {
+  color: var(--text-secondary);
+}
+
+.pz-degisim-oneri {
+  font-weight: var(--weight-bold);
+}
+
+.pz-elestiriler {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: pz-elestiri;
+}
+
+.pz-elestiri {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--inset-lg);
+  background-color: var(--surface-raised);
+}
+
+.pz-elestiri-ad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+.pz-elestiri-ad::before {
+  counter-increment: pz-elestiri;
+  content: counter(pz-elestiri);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--surface-changed);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+.pz-elestiri-alanlar {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.pz-alan[data-ton='oneri'] {
+  --edge-color: var(--accent);
+}
+
+.pz-alan[data-ton='oneri'] dt {
+  color: var(--accent-strong);
+}
+
+.pz-alan dd p {
+  margin: 0;
+}
+
+.pz-paket-vaat {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+
+.pz-paket-gecis {
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--rule);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.pz-hucre {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.pz-moduller {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pz-modul {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--inset-lg);
+  background-color: var(--surface-raised);
+}
+
+.pz-modul-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.pz-modul-ad {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.pz-modul-verir {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+
+.pz-modul-bilgi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  background-color: var(--surface-sunken);
+}
+
+.pz-modul-bilgi div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.pz-modul-bilgi dt {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.pz-modul-bilgi dd {
+  margin: 0;
+}
+
+/* Altı kapsam tablosu aynı sütun hizasında durur: sütun genişliği içerikten değil tablodan gelir. */
+.pz-kapsam {
+  display: grid;
+  gap: var(--space-2);
+}
+
+
+.pz-kurallar + .pz-ilgili {
+  margin-top: var(--space-6);
+}
+
+.pz-modul-bag {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: var(--hit-min);
+}
+
 /* Geniş ekran düzenleri */
 @media (min-width: 48em) {
   .pz-giris {
@@ -1180,6 +1405,17 @@
   }
 
   .pz-paketler {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Dört paket tablette iki sütundur, geniş ekranda dört sütun olur. */
+  .pz-paketler[data-sayi='4'],
+  .pz-degisimler,
+  .pz-moduller {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pz-elestiri-alanlar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1230,5 +1466,22 @@
 
   .pz-kartlar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pz-paketler[data-sayi='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .pz-degisimler {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Geniş ekranda altı kapsam tablosu aynı sütun hizasında durur. Daha darda sütunlar içeriğe göre genişler. */
+  .pz-kapsam table {
+    table-layout: fixed;
+  }
+
+  .pz-kapsam th:first-child {
+    width: 30%;
   }
 }

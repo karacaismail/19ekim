@@ -259,7 +259,12 @@ export function paketKartlari(): PaketKarti[] {
       buyukHarf(destekMetni('platinium')),
       yanitMaddesi('platinium'),
     ]),
-    kart('enterprise', 'Kurumsal ve holding ölçeği için', [urun('enterprise'), yanitMaddesi('enterprise'), buyukHarf(destekMetni('enterprise'))]),
+    kart('enterprise', 'Kurumsal ve holding ölçeği için', [
+      urun('enterprise'),
+      yanitMaddesi('enterprise'),
+      varsa('enterprise', ['feature.commerce.custom_payment_terms', 'feature.support.event_invitations'], 'Alıcıya özel ödeme koşulu ve fuar daveti'),
+      buyukHarf(destekMetni('enterprise')),
+    ]),
   ];
 }
 

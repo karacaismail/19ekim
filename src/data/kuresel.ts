@@ -31,7 +31,7 @@ export const RAPOR = {
 };
 
 /** Belgedeki bütün kaynaklar. Her bağlantı belgedeki adresle aynıdır. */
-const K = {
+export const KURESEL_KAYNAK = {
   aeBulten: { ad: 'AliExpressDirect basın bülteni', url: 'https://www.prnewswire.com/news-releases/aliexpress-invites-us-retailers-to-sell-on-the-platform-302291208.html' },
   alibaba: { ad: 'Alibaba Group', url: 'https://www.alibabagroup.com/document-1696296090350911488' },
   amz123: { ad: 'DHgate platform kullanım ücreti SSS', url: 'https://www.amz123.com/t/rYj497Km' },
@@ -68,7 +68,7 @@ const K = {
 } satisfies Record<string, Kaynak>;
 
 /** Belgedeki bütün bağlantılar. Sayfa her birini en az bir kez gösterir. */
-export const BELGE_BAGLANTILARI: string[] = Object.values(K).map((k) => k.url);
+export const BELGE_BAGLANTILARI: string[] = Object.values(KURESEL_KAYNAK).map((k) => k.url);
 
 /** Türkçe liste: “a, b ve c”. */
 const liste = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ve ${xs[xs.length - 1]}`);
@@ -146,8 +146,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Ana sayfa sıralaması paket puanıyla alınır.',
     ucretsiz: 'Alıcıya arama, tedarikçiyle yazışma ve teklif isteği. Satıcıya deneme paketi.',
     duvar: 'Doğrulanmış statü, daha yüksek teklif kotası ve fuar standı.',
-    gelirKaynagi: K.gsPaket,
-    ucretsizKaynagi: K.gsKarsilastirma,
+    gelirKaynagi: KURESEL_KAYNAK.gsPaket,
+    ucretsizKaynagi: KURESEL_KAYNAK.gsKarsilastirma,
   },
   {
     id: 'europages',
@@ -159,8 +159,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Top Ranking adlı üst sıra, kategori başına sabit fiyatla.',
     ucretsiz: 'Standart profil, alıcı araması ve Request Hub talep havuzu.',
     duvar: 'Ürün sınırı, üst sıra (Top Ranking) ve ziyaretçi kimliği.',
-    gelirKaynagi: K.visableMakale,
-    ucretsizKaynagi: K.visableUrun,
+    gelirKaynagi: KURESEL_KAYNAK.visableMakale,
+    ucretsizKaynagi: KURESEL_KAYNAK.visableUrun,
   },
   {
     id: 'kompass',
@@ -172,8 +172,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Görsel reklam ve yönetilen tıklama başına reklam. Bu reklamları yalnız Booster abonesi alır.',
     ucretsiz: 'Dizinde şirket profili.',
     duvar: 'İkinci dil, ürün sınırı, rakip reklamı göstermeyen profil, yurt dışı talepleri ve veri tabanı erişimi.',
-    gelirKaynagi: K.kompassFiyat,
-    ucretsizKaynagi: K.kompassBooster,
+    gelirKaynagi: KURESEL_KAYNAK.kompassFiyat,
+    ucretsizKaynagi: KURESEL_KAYNAK.kompassBooster,
   },
   {
     id: 'aliexpress',
@@ -185,8 +185,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Tıklama başına ücretli arama reklamı ve satış başına ücretli ortaklık programı (affiliate).',
     ucretsiz: 'Mağaza açılışı ve listeleme. ABD yerel satıcısına tanıtım döneminde %0 komisyon.',
     duvar: 'İlk satış (komisyon). Görünürlük için reklam.',
-    gelirKaynagi: K.channable,
-    ucretsizKaynagi: K.aeBulten,
+    gelirKaynagi: KURESEL_KAYNAK.channable,
+    ucretsizKaynagi: KURESEL_KAYNAK.aeBulten,
   },
   {
     id: 'walmart',
@@ -198,8 +198,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Walmart Connect Sponsored Search, tıklama başına ücretli.',
     ucretsiz: 'Kurulum ve listeleme ücretsiz. Aylık ücret yok. Yeni satıcıya komisyon indirimi ve reklam kredisi.',
     duvar: 'İlk satış (komisyon). Hızlı teslimat etiketi için Walmart’ın depo ve kargo hizmeti (WFS).',
-    gelirKaynagi: K.walmartYeni,
-    ucretsizKaynagi: K.walmartYeni,
+    gelirKaynagi: KURESEL_KAYNAK.walmartYeni,
+    ucretsizKaynagi: KURESEL_KAYNAK.walmartYeni,
   },
   {
     id: 'faire',
@@ -211,8 +211,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Promoted Listings, tıklama başına ücretli.',
     ucretsiz: 'Kayıt, vitrin, sipariş ve müşteri kayıt araçları (CRM). Kendi getirdiği müşteride %0 komisyon.',
     duvar: 'Pazaryerinden gelen sipariş (%15). Her siparişte ödeme ücreti.',
-    gelirKaynagi: K.faireFiyat,
-    ucretsizKaynagi: K.faireFiyat,
+    gelirKaynagi: KURESEL_KAYNAK.faireFiyat,
+    ucretsizKaynagi: KURESEL_KAYNAK.faireFiyat,
   },
   {
     id: 'dhgate',
@@ -224,8 +224,8 @@ export const PLATFORMLAR: Platform[] = [
     reklam: 'Site içi reklam sistemi. Üst paketlerde ön ödemeli kredi.',
     ucretsiz: 'Ücretsiz kademe yok.',
     duvar: 'Kayıt anı. Şubat 2019’dan beri her yeni hesap platform kullanım ücreti öder.',
-    gelirKaynagi: K.pai,
-    ucretsizKaynagi: K.amz123,
+    gelirKaynagi: KURESEL_KAYNAK.pai,
+    ucretsizKaynagi: KURESEL_KAYNAK.amz123,
   },
 ];
 
@@ -292,9 +292,9 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ad: 'Talep verisi ve analitik',
     neden: '“Kim baktı, ne arıyor” verisi satıcıyı her gün yönetim paneline geri getirir.',
     ornekler: [
-      o('Europages', 'Premium profildeki “Your visitors” ekranı, profili ziyaret eden şirketleri adıyla gösterir. “Business Insights” ayrı bir panodur.', [K.epZiyaretci]),
-      o('Kompass', 'Booster paketleri ziyaret ve tıklama sayısını verir. Aylık performans raporu da verir. Şirket sitesine verilen bağlantıların raporu (backlink) da pakettedir.', [K.kompassBooster]),
-      o('Global Sources', 'Supplier Center satış fırsatlarını ve alıcı sorularını yönetir. Fuar öncesinde ön kayıtlı alıcı listesi açılır.', [K.gsBrosur]),
+      o('Europages', 'Premium profildeki “Your visitors” ekranı, profili ziyaret eden şirketleri adıyla gösterir. “Business Insights” ayrı bir panodur.', [KURESEL_KAYNAK.epZiyaretci]),
+      o('Kompass', 'Booster paketleri ziyaret ve tıklama sayısını verir. Aylık performans raporu da verir. Şirket sitesine verilen bağlantıların raporu (backlink) da pakettedir.', [KURESEL_KAYNAK.kompassBooster]),
+      o('Global Sources', 'Supplier Center satış fırsatlarını ve alıcı sorularını yönetir. Fuar öncesinde ön kayıtlı alıcı listesi açılır.', [KURESEL_KAYNAK.gsBrosur]),
     ],
     istoc: {
       durum: 'kismen',
@@ -306,10 +306,10 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ad: 'Teklif isteği ve talep eşleştirme',
     neden: 'Satıcı beklemez. Açık bir talebe kendisi teklif verir.',
     ornekler: [
-      o('Europages Request Hub', 'Doğrulanmış talepler yapay zekâ ile satıcı profiline eşleştirilir. Almanya’daki B2B dizini wlw’nin ve Alibaba.com’un talepleri de aynı havuza akar.', [K.requestHub]),
-      o('Global Sources', 'Satıcının günde verebileceği teklif sayısı üyeliğine göre değişir. Fuara katılan satıcı günde 5 teklif verir. 1 ile 5 yıldızlı üye günde 10 teklif verir. 6 yıldızlı üye günde 20 teklif verir.', [K.gsTeklif]),
-      o('AliExpress Business', 'Küçük işletmelere ve stok tutmadan satan alıcılara (dropshipping) teklif isteği araçları sunar. Adede göre değişen toptan fiyat da sunar.', [K.worldfirst]),
-      o('Kompass', 'Booster aboneleri özel ihalelere erişir. International pakette yurt dışı ihaleler sınırsızdır.', [K.kompassBooster]),
+      o('Europages Request Hub', 'Doğrulanmış talepler yapay zekâ ile satıcı profiline eşleştirilir. Almanya’daki B2B dizini wlw’nin ve Alibaba.com’un talepleri de aynı havuza akar.', [KURESEL_KAYNAK.requestHub]),
+      o('Global Sources', 'Satıcının günde verebileceği teklif sayısı üyeliğine göre değişir. Fuara katılan satıcı günde 5 teklif verir. 1 ile 5 yıldızlı üye günde 10 teklif verir. 6 yıldızlı üye günde 20 teklif verir.', [KURESEL_KAYNAK.gsTeklif]),
+      o('AliExpress Business', 'Küçük işletmelere ve stok tutmadan satan alıcılara (dropshipping) teklif isteği araçları sunar. Adede göre değişen toptan fiyat da sunar.', [KURESEL_KAYNAK.worldfirst]),
+      o('Kompass', 'Booster aboneleri özel ihalelere erişir. International pakette yurt dışı ihaleler sınırsızdır.', [KURESEL_KAYNAK.kompassBooster]),
     ],
     istoc: {
       durum: 'kismen',
@@ -321,9 +321,9 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ad: 'Emanet ödeme ve ödeme güvencesi',
     neden: 'Alıcıyı platform içinde ödemeye ikna eden şey güvendir.',
     ornekler: [
-      o('DHgate', 'Ödeme platformda tutulur. Alıcı teslimatı onaylayınca para satıcıya geçer.', [K.fastlane]),
-      o('AliExpress', 'Aynı düzen işler. Satıcı parayı alıcı teslimatı onayladıktan sonra alır.', [K.saleslayer]),
-      o('Faire', 'Emanet yerine vade garantisi kurar. Perakendeci 60 gün vadeyle alır. Gecikme, dolandırıcılık ve ödememe (temerrüt) riskini Faire üstlenir.', [K.faireFiyat]),
+      o('DHgate', 'Ödeme platformda tutulur. Alıcı teslimatı onaylayınca para satıcıya geçer.', [KURESEL_KAYNAK.fastlane]),
+      o('AliExpress', 'Aynı düzen işler. Satıcı parayı alıcı teslimatı onayladıktan sonra alır.', [KURESEL_KAYNAK.saleslayer]),
+      o('Faire', 'Emanet yerine vade garantisi kurar. Perakendeci 60 gün vadeyle alır. Gecikme, dolandırıcılık ve ödememe (temerrüt) riskini Faire üstlenir.', [KURESEL_KAYNAK.faireFiyat]),
     ],
     istoc: {
       durum: 'kismen',
@@ -335,9 +335,9 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ad: 'Finansman ve nakit hızı',
     neden: 'Satıcı ihtiyaç duyduğu parayı platformdan alır. Bu yüzden platformdan ayrılmak istemez.',
     ornekler: [
-      o('Faire', 'Satıcı ödeme hızını kendisi seçer. Seçenekler ertesi gün, 30 gün ve 60 gündür.', [K.faireFiyat]),
-      o('Walmart Marketplace Capital', 'Satış geçmişine göre nakit avans verir. Üç program vardır. En az altı aylık satış geçmişi gerekir.', [K.walmartCapital]),
-      o('DHgate', 'DHgate kendini şöyle tanımlar: kargo, yurt dışı ödeme ve internetten finansman hizmetini birlikte sunan platform. Belgenin yazarı güncel kredi ürününün koşullarını doğrulayamadı.', [K.dhgateBulten]),
+      o('Faire', 'Satıcı ödeme hızını kendisi seçer. Seçenekler ertesi gün, 30 gün ve 60 gündür.', [KURESEL_KAYNAK.faireFiyat]),
+      o('Walmart Marketplace Capital', 'Satış geçmişine göre nakit avans verir. Üç program vardır. En az altı aylık satış geçmişi gerekir.', [KURESEL_KAYNAK.walmartCapital]),
+      o('DHgate', 'DHgate kendini şöyle tanımlar: kargo, yurt dışı ödeme ve internetten finansman hizmetini birlikte sunan platform. Belgenin yazarı güncel kredi ürününün koşullarını doğrulayamadı.', [KURESEL_KAYNAK.dhgateBulten]),
     ],
     istoc: {
       durum: 'yok',
@@ -349,14 +349,14 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     ad: 'Lojistik ve depolama',
     neden: 'Satıcının malı platformun deposundaysa satıcının platformdan ayrılması zorlaşır.',
     ornekler: [
-      o('Walmart WFS', 'Kayıt ve aylık ücret yoktur. Ücret birim başınadır. Karşılığında hızlı teslimat etiketi gelir.', [K.ecomclips]),
+      o('Walmart WFS', 'Kayıt ve aylık ücret yoktur. Ücret birim başınadır. Karşılığında hızlı teslimat etiketi gelir.', [KURESEL_KAYNAK.ecomclips]),
       o(
         'AliExpress Choice',
         'Mart 2023’te açıldı. Alibaba’nın lojistik şirketi Cainiao’nun ortak depolarıyla çalışır.',
-        [K.alibaba],
+        [KURESEL_KAYNAK.alibaba],
         'Yarı yönetimli modelde fiyatı satıcı belirler. Lojistiği ve iadeyi platform üstlenir.',
       ),
-      o('Faire Insider', 'Üye perakendeciye binlerce markada ücretsiz kargo verir. Maliyetin çoğunu Faire karşılar.', [K.faireInsider]),
+      o('Faire Insider', 'Üye perakendeciye binlerce markada ücretsiz kargo verir. Maliyetin çoğunu Faire karşılar.', [KURESEL_KAYNAK.faireInsider]),
     ],
     istoc: {
       durum: 'kismen',
@@ -367,7 +367,7 @@ export const TUTMA_KATMANLARI: TutmaKatmani[] = [
     id: 'cevrim-disi',
     ad: 'Fuar ve yüz yüze buluşma',
     neden: 'Bu katman yalnız Global Sources’ta var.',
-    ornekler: [o('Global Sources', 'Hong Kong fuarları, sanal fuarlar ve MATCH birebir eşleştirme hizmeti çevrim içi üyelikle birlikte satılır.', [K.gsBrosur])],
+    ornekler: [o('Global Sources', 'Hong Kong fuarları, sanal fuarlar ve MATCH birebir eşleştirme hizmeti çevrim içi üyelikle birlikte satılır.', [KURESEL_KAYNAK.gsBrosur])],
     istoc: {
       durum: 'kismen',
       metin: `Fuar ve etkinlik daveti ${bas('feature.support.event_invitations')}. “Gelir modelleri” sayfasında İstoç çarşısındaki eşleştirme günlerinin durumu “${hazirlik('eslestirme-etkinlikleri')}”.`,
@@ -396,9 +396,9 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Katmanlı abonelik',
     ozet: 'Dizin modelinin ana geliridir. Paketler birbirinden üç şeyle ayrılır: dil sayısı, ürün sınırı ve talebin kapsamı.',
     ornekler: [
-      o('Kompass', 'Booster Premium 2 dil ve yurt içinde öncelikli sıra verir. Booster International 26 dil, dil başına 200 ürün ve 25 katalog verir. International yurt dışı taleplerini de ekler.', [K.kompassBooster]),
-      o('Global Sources', 'İki yıllık “Advanced” paket 1.200 ürün vitrini ve 150 video içerir. Paket 5 alt hesap ve günde 15 teklif hakkı da verir.', [K.gsPaket]),
-      o('Europages', 'Ürün ve hizmet sayısı pakete göre sınırlanır. Üst paket sınırı büyütür.', [K.epProfil]),
+      o('Kompass', 'Booster Premium 2 dil ve yurt içinde öncelikli sıra verir. Booster International 26 dil, dil başına 200 ürün ve 25 katalog verir. International yurt dışı taleplerini de ekler.', [KURESEL_KAYNAK.kompassBooster]),
+      o('Global Sources', 'İki yıllık “Advanced” paket 1.200 ürün vitrini ve 150 video içerir. Paket 5 alt hesap ve günde 15 teklif hakkı da verir.', [KURESEL_KAYNAK.gsPaket]),
+      o('Europages', 'Ürün ve hizmet sayısı pakete göre sınırlanır. Üst paket sınırı büyütür.', [KURESEL_KAYNAK.epProfil]),
     ],
   },
   {
@@ -409,13 +409,13 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
       o(
         'Faire Promoted Listings',
         'Reklamın tıklama fiyatını satıcı değil Faire belirler. Faire bunu tıklamanın siparişe dönme olasılığına göre yapar. En düşük aylık bütçe 200 USD, 150 EUR ya da 125 İngiliz sterlinidir (GBP).',
-        [K.faireTiklama, K.faireButce],
+        [KURESEL_KAYNAK.faireTiklama, KURESEL_KAYNAK.faireButce],
       ),
-      o('Walmart Connect', 'Sponsored Search yalnız tıklamada ücretlenir.', [K.walmartReklam]),
+      o('Walmart Connect', 'Sponsored Search yalnız tıklamada ücretlenir.', [KURESEL_KAYNAK.walmartReklam]),
       o(
         'DHgate',
         'Platform kullanım ücretiyle reklam kredisi hediye edilir. Kredi doğrudan reklam hesabına yüklenir. Üst paketlerde bedelin çoğu ön ödemeli reklamdır. Örneğin 29.800 CNY’lik paketin 24.000 CNY’si reklamdır.',
-        [K.amz123, K.cls],
+        [KURESEL_KAYNAK.amz123, KURESEL_KAYNAK.cls],
       ),
     ],
   },
@@ -424,8 +424,8 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Sabit fiyatlı görünürlük',
     ozet: 'Bazı dizin modeli platformları tıklama başına ücret almaz. Bunun yerine üst sıraları sabit fiyatla satar.',
     ornekler: [
-      o('Europages Top Ranking', 'Reklam kategorisindeki ilk üç sıra sabit fiyatla satılır. Sırayı ilk başvuran alır.', [K.topRanking]),
-      o('Global Sources', 'Paketle 324.000’e kadar sıralama puanı (SAB puanı) gelir. Bu puan ana sayfadaki sıralama alanına çevrilir. Tıklama ücreti yoktur.', [K.gsPaket]),
+      o('Europages Top Ranking', 'Reklam kategorisindeki ilk üç sıra sabit fiyatla satılır. Sırayı ilk başvuran alır.', [KURESEL_KAYNAK.topRanking]),
+      o('Global Sources', 'Paketle 324.000’e kadar sıralama puanı (SAB puanı) gelir. Bu puan ana sayfadaki sıralama alanına çevrilir. Tıklama ücreti yoktur.', [KURESEL_KAYNAK.gsPaket]),
     ],
   },
   {
@@ -433,24 +433,24 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Ödeme ve nakit hızı ücreti',
     ozet: 'Komisyondan bağımsızdır ve her işlemde alınır.',
     ornekler: [
-      o('Faire', 'Satıcı parasını ertesi gün isterse %3,5 öder. 30 gün sonra isterse %2,4 öder. 60 gün sonra isterse %1,9 öder. Her ödemeye 0,30 USD eklenir. Faire Direct siparişinde komisyon sıfırdır. Ama bu ücret kalır.', [K.faireFiyat]),
-      o('Walmart Marketplace Capital', 'Parafin programında tek bir sabit sermaye ücreti alınır. Geri ödeme satışın yüzdesiyle yapılır.', [K.pymnts]),
+      o('Faire', 'Satıcı parasını ertesi gün isterse %3,5 öder. 30 gün sonra isterse %2,4 öder. 60 gün sonra isterse %1,9 öder. Her ödemeye 0,30 USD eklenir. Faire Direct siparişinde komisyon sıfırdır. Ama bu ücret kalır.', [KURESEL_KAYNAK.faireFiyat]),
+      o('Walmart Marketplace Capital', 'Parafin programında tek bir sabit sermaye ücreti alınır. Geri ödeme satışın yüzdesiyle yapılır.', [KURESEL_KAYNAK.pymnts]),
     ],
   },
   {
     id: 'alici-aboneligi',
     ad: 'Alıcı tarafında abonelik',
     ozet: 'Bu kalıp yalnız Faire’de var.',
-    ornekler: [o('Faire Insider', 'Ayda 19,99 USD tutar ve 30 günlük ücretsiz denemeyle başlar.', [K.faireInsider])],
+    ornekler: [o('Faire Insider', 'Ayda 19,99 USD tutar ve 30 günlük ücretsiz denemeyle başlar.', [KURESEL_KAYNAK.faireInsider])],
   },
   {
     id: 'guven-rozeti',
     ad: 'Doğrulama ve güven rozeti',
     ozet: 'Üç ayrı fiyat mantığı görülüyor.',
     ornekler: [
-      o('Global Sources', 'Verified Supplier doğrulamasını SGS, Experian ve TÜV SÜD gibi bağımsız kuruluşlar yapar. Statü ücretli üyeliğin parçasıdır.', [K.gsBrosur]),
-      o('Kompass', '“Trusted supplier” sertifikası Booster paketine dahildir.', [K.kompassBooster]),
-      o('Walmart', 'Pro Seller rozeti satılmaz. Rozet satış performansıyla kazanılır. İkincil kaynaklara göre rozet %10 komisyon indirimi getirir.', [K.feedvisor]),
+      o('Global Sources', 'Verified Supplier doğrulamasını SGS, Experian ve TÜV SÜD gibi bağımsız kuruluşlar yapar. Statü ücretli üyeliğin parçasıdır.', [KURESEL_KAYNAK.gsBrosur]),
+      o('Kompass', '“Trusted supplier” sertifikası Booster paketine dahildir.', [KURESEL_KAYNAK.kompassBooster]),
+      o('Walmart', 'Pro Seller rozeti satılmaz. Rozet satış performansıyla kazanılır. İkincil kaynaklara göre rozet %10 komisyon indirimi getirir.', [KURESEL_KAYNAK.feedvisor]),
     ],
   },
   {
@@ -458,8 +458,8 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     ad: 'Veri ve yazılım bağlantısı (API)',
     ozet: 'Veri satan platform var. Yazılım bağlantısı (API) satan platform yok.',
     ornekler: [
-      o('Kompass', 'Şirket bilgilerini ayrı bir ürün olarak satar. EasyBusiness aboneliği 70 ülkede 60 milyondan fazla şirketi kapsar.', [K.kompassFiyat]),
-      o('AliExpress', 'API’yi gelir kalemi olarak sunmaz. API, satıcının kendi sistemini platforma bağladığı bir araçtır.', [K.aeBulten]),
+      o('Kompass', 'Şirket bilgilerini ayrı bir ürün olarak satar. EasyBusiness aboneliği 70 ülkede 60 milyondan fazla şirketi kapsar.', [KURESEL_KAYNAK.kompassFiyat]),
+      o('AliExpress', 'API’yi gelir kalemi olarak sunmaz. API, satıcının kendi sistemini platforma bağladığı bir araçtır.', [KURESEL_KAYNAK.aeBulten]),
     ],
     not: 'Belgenin yazarı taradığı kaynaklarda yedi platformun hiçbirinde ayrı bir API erişim ücreti görmedi.',
   },
@@ -467,7 +467,7 @@ export const GELIR_KALIPLARI: GelirKalibi[] = [
     id: 'fiyata-gomme',
     ad: 'Komisyonu alıcı fiyatına ekleme',
     ozet: 'Satıcı eline geçecek tutarı girer. Komisyonu alıcının ödediği fiyat taşır.',
-    ornekler: [o('DHgate', 'Satıcı eline geçecek fiyatı girer. Platform komisyonu alıcı fiyatına ekler. Oran sipariş büyüdükçe düşer. Bu düzen toptan sepeti teşvik eder.', [K.cls])],
+    ornekler: [o('DHgate', 'Satıcı eline geçecek fiyatı girer. Platform komisyonu alıcı fiyatına ekler. Oran sipariş büyüdükçe düşer. Bu düzen toptan sepeti teşvik eder.', [KURESEL_KAYNAK.cls])],
   },
 ];
 
@@ -528,23 +528,23 @@ export const DUVAR_ILKELERI: Ilke[] = [
     ad: '“Kendi müşterinizi getirin” teşviki',
     metin:
       'Satıcı müşterisini kendi bağlantısıyla getirirse Faire Direct’te %0 komisyon öder. Platform böylece ücretsiz alıcı kazanır. Faire yeni gelen perakendeciye bir yıl ücretsiz kargo verir.',
-    kaynaklar: [K.faireFiyat],
+    kaynaklar: [KURESEL_KAYNAK.faireFiyat],
   },
   {
     id: 'kota',
     ad: 'Kotayla sınırlama',
     metin: 'Ücretsiz kullanan satıcı platformun işine yaradığını görür. İşi büyüyünce ücretsiz sınır yetmez.',
     maddeler: [
-      o('Global Sources', 'Teklif kotası üyelik düzeyiyle günde 5’ten 20’ye çıkar.', [K.gsTeklif]),
-      o('Kompass', 'Giriş kademesi 5 ürün gösterir. International pakette sınır dil başına 200 üründür.', [K.kompassBooster]),
-      o('Europages', 'Ürün sınırı pakete bağlıdır.', [K.epProfil]),
+      o('Global Sources', 'Teklif kotası üyelik düzeyiyle günde 5’ten 20’ye çıkar.', [KURESEL_KAYNAK.gsTeklif]),
+      o('Kompass', 'Giriş kademesi 5 ürün gösterir. International pakette sınır dil başına 200 üründür.', [KURESEL_KAYNAK.kompassBooster]),
+      o('Europages', 'Ürün sınırı pakete bağlıdır.', [KURESEL_KAYNAK.epProfil]),
     ],
   },
   {
     id: 'kimlik',
     ad: 'Alıcının kimliği sonradan açılır',
     metin: 'Europages Request Hub alıcının bilgisini satıcı yanıt verene kadar gizler. Profili kimin ziyaret ettiği ise yalnız Premium pakette görünür.',
-    kaynaklar: [K.requestHub, K.epZiyaretci],
+    kaynaklar: [KURESEL_KAYNAK.requestHub, KURESEL_KAYNAK.epZiyaretci],
   },
   {
     id: 'yeni-satici',
@@ -554,17 +554,17 @@ export const DUVAR_ILKELERI: Ilke[] = [
       o(
         'Walmart',
         'Satıcının ilk 50.000 USD cirosunda komisyon %20 indirimlidir. 50.000 ile 500.000 USD arasında indirim %30’dur. Walmart 500 USD Walmart Connect kredisi ve 1.000 USD arama motoru reklam kredisi de verir.',
-        [K.walmartYeni],
+        [KURESEL_KAYNAK.walmartYeni],
       ),
-      o('AliExpressDirect', 'ABD yerel satıcılarına tanıtım döneminde %0 komisyon uygular. Ücretsiz müşteri hizmeti desteği de verir.', [K.aeBulten]),
-      o('Faire', '“No Commission Trial” programı 1 Ağustos 2026 Cumartesi tarihlidir. Program deneme süresinde komisyonu ve yeni müşteri ücretini kaldırır. Ödeme ücreti kalır.', [K.faireDeneme]),
+      o('AliExpressDirect', 'ABD yerel satıcılarına tanıtım döneminde %0 komisyon uygular. Ücretsiz müşteri hizmeti desteği de verir.', [KURESEL_KAYNAK.aeBulten]),
+      o('Faire', '“No Commission Trial” programı 1 Ağustos 2026 Cumartesi tarihlidir. Program deneme süresinde komisyonu ve yeni müşteri ücretini kaldırır. Ödeme ücreti kalır.', [KURESEL_KAYNAK.faireDeneme]),
     ],
   },
   {
     id: 'giriste-duvar',
     ad: 'Girişte duvar (ters örnek)',
     metin: 'DHgate kayıt anında ücret alır. Süresi dolan hesabın ürünleri yayından kalkar. Ücret düşük kaliteli satıcıyı eler. Ama DHgate satıcıyı iki şeyle çeker. Bunlar çok sayıda alıcı ve sipariş büyüdükçe düşen komisyondur.',
-    kaynaklar: [K.amz123],
+    kaynaklar: [KURESEL_KAYNAK.amz123],
   },
 ];
 
@@ -618,15 +618,15 @@ export const ISTOC_SONUC = {
 
 export const KAYNAK_NOTU =
   'Belgenin yazarı aşağıdaki sayfaları açıp okudu. Yazar bazı sayfaları açamadı. Bunlar Kompass paket sayfası, Global Sources teklif yardım sayfası, DHgate komisyon duyuruları ve Walmart sayfalarıdır. Bu sayfaların verileri arama sonucu özetlerinden alındı. “İkincil kaynak” etiketli veriler platformun kendi yayını değildir.';
-const SAYFA_ETIKETLI = Object.values(K as Record<string, Kaynak>).filter((k) => k.ikincil === 'sayfa');
-const BELGE_ETIKETLI = Object.values(K as Record<string, Kaynak>).filter((k) => k.ikincil === 'belge');
+const SAYFA_ETIKETLI = Object.values(KURESEL_KAYNAK as Record<string, Kaynak>).filter((k) => k.ikincil === 'sayfa');
+const BELGE_ETIKETLI = Object.values(KURESEL_KAYNAK as Record<string, Kaynak>).filter((k) => k.ikincil === 'belge');
 export const IKINCIL_NOTU = `Belge ${BELGE_ETIKETLI.length} kaynağı “ikincil kaynak” diye etiketledi. Bu sayfa platformun kendi yayını olmayan ${SAYFA_ETIKETLI.length} kaynağı daha etiketledi. Bunlar ${liste(SAYFA_ETIKETLI.map((k) => site(k.url)))} sayfalarıdır.`;
 
 export const OKUNAN_KAYNAKLAR: { platform: string; kaynaklar: Kaynak[] }[] = [
-  { platform: 'Europages', kaynaklar: [K.visableUrun, K.requestHub] },
-  { platform: 'Kompass', kaynaklar: [{ ...K.kompassFiyat, ad: 'Kompass North America fiyat duyurusu' }] },
-  { platform: 'Global Sources', kaynaklar: [K.gsBrosur, { ...K.gsPaket, ad: 'Global Sources iki yıllık paket duyurusu' }] },
-  { platform: 'Faire', kaynaklar: [K.faireFiyat, K.faireInsider, K.faireButce] },
-  { platform: 'DHgate', kaynaklar: [{ ...K.amz123, ad: 'Platform kullanım ücreti SSS (DHgate kaynaklı, AMZ123’te yayımlandı)' }] },
-  { platform: 'AliExpress', kaynaklar: [K.aeBulten] },
+  { platform: 'Europages', kaynaklar: [KURESEL_KAYNAK.visableUrun, KURESEL_KAYNAK.requestHub] },
+  { platform: 'Kompass', kaynaklar: [{ ...KURESEL_KAYNAK.kompassFiyat, ad: 'Kompass North America fiyat duyurusu' }] },
+  { platform: 'Global Sources', kaynaklar: [KURESEL_KAYNAK.gsBrosur, { ...KURESEL_KAYNAK.gsPaket, ad: 'Global Sources iki yıllık paket duyurusu' }] },
+  { platform: 'Faire', kaynaklar: [KURESEL_KAYNAK.faireFiyat, KURESEL_KAYNAK.faireInsider, KURESEL_KAYNAK.faireButce] },
+  { platform: 'DHgate', kaynaklar: [{ ...KURESEL_KAYNAK.amz123, ad: 'Platform kullanım ücreti SSS (DHgate kaynaklı, AMZ123’te yayımlandı)' }] },
+  { platform: 'AliExpress', kaynaklar: [KURESEL_KAYNAK.aeBulten] },
 ];

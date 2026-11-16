@@ -111,7 +111,7 @@ function SatirIciKaynak({ kaynaklar }: { kaynaklar: Kaynak[] }) {
       {kaynaklar.length > 1 ? 'Kaynaklar: ' : 'Kaynak: '}
       {kaynaklar.map((k, i) => (
         <Fragment key={k.url}>
-          {i ? ' ve ' : null}
+          {i === 0 ? null : i === kaynaklar.length - 1 ? ' ve ' : ', '}
           <a className="text-link" href={k.url} target="_blank" rel="noopener noreferrer" data-yalin="kunye">
             {k.ad}
           </a>

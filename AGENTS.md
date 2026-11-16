@@ -998,8 +998,9 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   ücretlidir. Kullanıcı kararı 13 Kasım 2026 (5.3): bütün sayfalar istoc.com’daki adları yazar: Basic, Platinium, Enterprise.
   Adlar canlı paket verisinden gelir (`gelirModelleri.ts → BASIC`, `PLATINIUM`, `ENTERPRISE`). İç kimlikler (`standart`,
   `pro`, `kurumsal`) onboarding için kalır.
-- Menü sırası: Değer önerisi → Hizmetler → Gelir modelleri → Küresel pazaryerleri. İki öğe `yeni` işaretlidir. Öğe artık yeni
-  sayılmayınca `yeni` alanı içerik kaydından silinir ve menü testlerindeki “Yeni” sayısı düşürülür.
+- Menü sırası: Değer önerisi → Hizmetler → Fiyatlandırma → Gelir modelleri → Küresel pazaryerleri. Hizmetler, Fiyatlandırma
+  ve Küresel pazaryerleri `yeni` işaretlidir. Öğe artık yeni sayılmayınca `yeni` alanı içerik kaydından silinir. Menü
+  testlerindeki “Yeni” sayısı da düşürülür. Menü sırasını denetleyen testler sırayı sabit sayıyla değil komşu öğeyle arar.
 - Ortak stil `src/styles/pazar.css` (`.pz-*`): düz köşeli yüzeyler, kenar sistemi (`data-edge`), tanıştıran küme `--viz-1`,
   ödemeyi taşıyan küme `--viz-credit`, ücretsiz durum yeşili, ücretli vurgu yüzeyi. Kapı ve duvar anı iki temada da
   `--surface-changed` yüzeyini kullanır. Renkli ya da gömük kutudaki hap kart yüzeyine çıkar. Hap biçimi yalnız
@@ -1010,6 +1011,31 @@ gizlenir (`icerik.ts → kirintiGrubu`, `PageHeader` `li[data-grup]`, CSS), bağ
   1280 px ile yatay telefon (844 × 390) olur. Testler taşmayı, en küçük metni ve noktalı virgül ile uzun çizgi yasağını
   denetler. Canlı paket değerlerini, görünür notları, belgedeki bütün bağlantıları, planlanan hizmetin gelir modeli
   kartına bağlantısını ve menü yerini de denetler.
+
+### Fiyatlandırma önerisi sayfası (kullanıcı isteği 2026-11-12)
+
+- `/pricing/` (menüde ve başlıkta “Fiyatlandırma”; adres kullanıcının istediği gibi İngilizce) bugünkü satıcı paketlerini
+  eleştirir ve yeni paket adlarını, fiyatlarını, kapsamlarını ve ek modülleri önerir. Menüde Hizmetler’den sonra gelir.
+- İki ad ayrı tutulur. “istoc.com fiyat planları” canlı sitedeki paketlerdir (`canliPaketler.ts`). “Fiyat tablosu” sitenin
+  kararlaştırılmış fiyatıdır (`paketler(params)`, gelir modelleri sayfası). Sayfa yayın varsayılanını (`DEFAULT_PARAMS`) kullanır.
+- Sayfa öneridir. Fiyat tablosu, istoc.com fiyat planları ve gelir planı parametreleri değişmez. Fiyat kuralı ve indirim
+  yasağı (2026-11-10) korunur. Öneri indirim, pazarlık ya da kişiye özel süre içermez. Ücretsiz paket herkes için aynı
+  kuraldır. Önerilen Basic ve Platinium fiyatı fiyat tablosundan gelir. Test, paketler bölümündeki her euro tutarının fiyat
+  tablosunda olduğunu denetler.
+- 13 Kasım 2026 kararları sayfaya işlendi (16 Kasım 2026). Paket adları istoc.com’daki adlardır ve tablodan gelir. Sayfa
+  ad değiştirmeyi önermez. Ücretsiz paketin ürün sınırı `UCRETSIZ_URUN` değeridir. Ücretsiz paket teklif isteğine yanıt
+  vermez. Kararlaştırılan konu “Karar bekleyen sorular” listesine yazılmaz. Test: `fiyatlandırma: 13 Kasım 2026 kararlarına uyar`.
+- Her eleştiri yalnız koşulu canlı veride hâlâ geçerliyse görünür. Pakette karşılığı olmayan madde yazılmaz. Önerilen
+  deneme, canlı deneme ayarının bağlı olduğu paketi korur (`CANLI_DENEME_PAKETI`).
+- Bugünkü değerler canlı paket anlık görüntüsünden türetilir. Canlı paket açıklamasındaki çelişki yalnız açıklama hâlâ
+  tabloyla çelişiyorsa yazılır (`aciklamaCeliskileri`). Üretici betik plan kodunu, açıklamayı ve canlı özellik adını da saklar.
+- Önerinin yeni sayıları `ONERI_SAYILARI` içindedir ve başlangıç değeridir. Basic ve Platinium paketlerinin teklif yanıt kotası
+  Alibaba.com Starter ve Growth paketlerine dayanır. Sayfa bunu kapsam tablosunun önünde yazar.
+- Küresel fiyatlar 12 Kasım 2026 günü okundu. TL karşılığı TCMB’nin o günkü döviz satış kuruyla hesaplanır (`KUR`). Bir
+  fiyat değişirse kaynak yeniden okunur ve tarih güncellenir.
+- Ek modüllerin hazırlığı ve örnek hesabı `gelirModelleri.ts` dosyasından gelir. Hazır olmayan modül satılmaz ve esnafa söz
+  verilmez. Kapsam tabloları `.pz-kapsam` içinde aynı sütun hizasında durur.
+- Veri `src/data/fiyatlandirma.ts`, görünüm `src/views/FiyatlandirmaPage.tsx`, test `tests/fiyatlandirma.spec.ts`.
 
 ### Oyunlaştırma sayfası (kullanıcı kararları 2026-11-04)
 

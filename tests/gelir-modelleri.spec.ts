@@ -168,12 +168,15 @@ test('gelir modelleri: öncelik bağlantısı ilgili modele gider', async ({ pag
   await expect(page.locator('#model-kurulum-egitim')).toBeInViewport();
 });
 
-test('gelir modelleri: Pazarlama menüsünde Değer önerisinden sonra', async ({ page }) => {
+test('gelir modelleri: Pazarlama menüsünde Fiyatlandırma’dan sonra', async ({ page }) => {
   await ac(page);
   await page.getByRole('button', { name: 'Pazarlama' }).click();
   const menu = page.getByRole('menu', { name: 'Pazarlama' });
-  // Oyunlaştırma (2026-11-04) Gelir modellerinden sonra gelir.
-  await expect(menu.getByRole('menuitem').nth(4)).toHaveText('Gelir modelleri');
+  // Sıra (kullanıcı kararları 2026-11-12): Değer önerisi → Hizmetler → Fiyatlandırma → Gelir modelleri → Küresel pazaryerleri.
+  // Oyunlaştırma (2026-11-04) bunlardan sonra gelir.
+  await expect(menu).toBeVisible();
+  const ogeler = await menu.getByRole('menuitem').allInnerTexts();
+  expect(ogeler.indexOf('Gelir modelleri')).toBe(ogeler.indexOf('Fiyatlandırma') + 1);
   await expect(menu.getByRole('menuitem', { name: 'Gelir modelleri' })).toHaveAttribute('aria-current', 'page');
 });
 
