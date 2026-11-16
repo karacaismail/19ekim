@@ -8,8 +8,9 @@ import { SEVIYE_ADI, type Marka, type RolId, type Seviye } from '../data/satisOr
 import type { AkisOlustur, AkisYaniti } from '../data/politikaAkislari/types';
 import { akisGorunumu, olasiSonrakiler, sorumluCumlesi } from '../data/politikaAkislari/motor';
 import { usePersonaAyar } from '../lib/personaStore';
+import { useKazancPlani } from '../components/KazancPlaniBolumu';
+import { planliAyar } from '../data/kazancPlani';
 import { useMotionMs } from '../lib/motion';
-import { href } from '../lib/paths';
 import { acikAd } from '../data/politikalar/terimler';
 import '../styles/politikalar.css';
 
@@ -30,7 +31,10 @@ function Ayrinti(props: AyrintiProps) {
 const EK_ADI = { kitle: 'Hedef kitleyi ve ilk mesajı görün', kazanc: 'Hesabı ve ödeme koşullarını görün', anlasma: 'Anlaşmada yazılacakları görün', sinir: 'Yetkinizin sınırlarını görün', plan: 'İş planını görün' };
 
 export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolId; olustur: AkisOlustur }) {
-  const { ayar, guncelle, sync, store, hazir, inputError } = usePersonaAyar(proje);
+  const { ayar: ortakAyar, guncelle, sync, store, hazir, inputError } = usePersonaAyar(proje);
+  // Kâğıttaki kazanç planı (16 Kasım 2026) oranları, maaşı ve kotayı belirler. Ortak kayıttaki eski oranlar burada kullanılmaz.
+  const { plan } = useKazancPlani(proje);
+  const ayar = useMemo(() => planliAyar(ortakAyar, plan), [ortakAyar, plan]);
   const akis = useMemo(() => olustur(ayar), [ayar, olustur]);
   // Yalnız akışın yapısı değişince ilerleme sıfırlanır. Kur gibi metindeki sayıyı değiştiren alan ilerlemeyi silmez.
   const fingerprint = useMemo(() => JSON.stringify([akis.ilk, akis.adimlar.map((a) => [a.id, a.secenekler.map((s) => [s.id, s.tur, s.tur === 'devam' ? s.sonraki : ''])])]), [akis]);
@@ -140,9 +144,9 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
             <p>Seçim iş sırasını değiştirirse önceki adım yanıtları sıfırlanır.</p>
             <Sec label="Hangi programla çalışırsınız?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
               onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
-            {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'B', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo da', 'Ürün gösterimi de') }))}
+            {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo da', 'Ürün gösterimi de') }))}
               onChange={(value) => guncelle({ [seviyeKey]: value })} />}
-            <a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${proje}&rol=${rol}`}>Hesapta kullanılan bütün değerleri açın</a>
+            <a className="pol-belge-baglanti" href="#kazanc-plani">Kazanç planının değerlerini görün</a>
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

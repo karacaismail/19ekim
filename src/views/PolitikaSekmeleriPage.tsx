@@ -6,6 +6,7 @@ import { PERSONALAR, type Marka, type RolId } from '../data/politikalar/types';
 import type { AkisOlustur } from '../data/politikaAkislari/types';
 import { href } from '../lib/paths';
 import { PolitikaAkisi } from './PolitikaAkisi';
+import { KazancPlaniBolumu } from '../components/KazancPlaniBolumu';
 
 const PROJELER = [{ id: 'istoc', ad: 'iStoc' }, { id: 'segika', ad: 'Segika' }] as const;
 const KISA_ADLAR: Record<RolId, string> = {
@@ -114,6 +115,7 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
               {PERSONALAR.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
             </Tabs.List>
             {PERSONALAR.map((p) => <Tabs.Panel key={p.id} value={p.id}>
+              <KazancPlaniBolumu proje={secim.proje} rol={secim.rol} />
               {etkinBelge ? <PolitikaAkisi key={secili} proje={secim.proje} rol={secim.rol} olustur={etkinBelge} />
                 : hata === secili ? <div className="pol-yukleme" role="alert">
                   <p>Rehber yüklenemedi. İnternet bağlantınızı kontrol edin.</p>

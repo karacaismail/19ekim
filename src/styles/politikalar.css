@@ -135,3 +135,18 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-bosluk > h4:first-child { margin-block-start: 0; }
 .pol-bosluk h5 { margin-block: 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
 .pol-bosluk .pol-alt-bolum + .pol-alt-bolum { margin-block-start: var(--space-5); }
+
+/* Kâğıttaki kazanç planı (16 Kasım 2026). Telefonda alt alta, geniş ekranda iki katkı türü yan yana durur. */
+.pol-kz-plan { display: grid; gap: var(--space-4); }
+.pol-kz-plan p { margin: 0; }
+.pol-kz-katkilar { display: grid; gap: var(--space-6); }
+@media (min-width: 64em) { .pol-kz-katkilar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pol-kz-katki { display: grid; gap: var(--space-4); align-content: start; }
+.pol-kz-katki h3 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-sonuc { margin: 0; display: grid; gap: var(--space-2); }
+.pol-kz-sonuc > div { display: grid; gap: var(--space-1); }
+.pol-kz-sonuc dt { color: var(--text-secondary); }
+.pol-kz-sonuc dd { margin: 0; font-weight: var(--weight-semibold); }
+.pol-kz-yillar { margin: 0; padding-inline-start: var(--space-5); }
+.pol-kz-yillar li { margin-block: var(--space-1); }
+.pol-kz-not { color: var(--text-secondary); }

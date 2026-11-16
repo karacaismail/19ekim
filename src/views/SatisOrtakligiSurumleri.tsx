@@ -23,8 +23,15 @@ export function SatisOrtakligiPage({ pathname }: { pathname: string }) {
   );
   return (
     <AppFrame pathname={pathname} wide>
-      {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
-      <PolitikaBaglantilari />
+      {/* Kullanıcı kararı 16 Kasım 2026: sayfa yayında kalır ama geçersizdir. Geçerli kazanç planı çalışma rehberlerindedir. */}
+      <div className="sayfa-gecersiz-uyari" role="alert" data-arsiv-uyari>
+        <p className="sayfa-gecersiz-baslik">BU SAYFA ARTIK GEÇERSİZDİR</p>
+        <p>Bu sayfadaki oranlar ve kurallar artık kullanılmaz. Geçerli kazanç planı çalışma rehberlerindedir.</p>
+      </div>
+      <div className="sayfa-gecersiz" data-arsiv="gecersiz">
+        {surum === 'v2' ? <SatisOrtakligiV2 surum={secici} /> : <SatisOrtakligiV1 surum={secici} />}
+        <PolitikaBaglantilari />
+      </div>
     </AppFrame>
   );
 }

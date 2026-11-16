@@ -1787,3 +1787,24 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   İstemci kontrolü: `npx playwright test tests/persona-sync.spec.ts`.
   Rehber kontrolü: `npx playwright test tests/politika-akis.spec.ts tests/politika-hesap.spec.ts`.
   Gerçek Sheets yazımı ayrıca canlı serviste doğrulanır.
+
+## Kâğıttaki kazanç planı (kullanıcı kararı 16 Kasım 2026)
+
+- Persona fark etmez. Herkes iş ortağıdır ve aynı koşullarla kazanır.
+  Yalnız kadrolu uzman SGK'lı çalışandır. Kadrolu uzman maaş ve prim alır.
+- Plan iki katkı türü taşır. Oranlar ciro üzerinden yüzdedir.
+  - Yalnız tanıştıranın taban oranı %7'dir. Sonraki dört yılın oranları %5, %2, %2 ve %1'dir.
+  - Satışı kapatanın taban oranı %15'tir. K1 10 puan, K2 7 puan, K3 5 puan ekler.
+    Sonraki dört yılın oranları %10, %7, %5 ve %2'dir.
+  Satışı kapatan ürünü de gösterir ve kurulumu da yapar. Eski “Ürünü de gösterir” seçeneği kalktı.
+- Kâğıtta tanıştırma için 2. yılın oranı %2,5 yazar. Kullanıcının yazdığı metin %2 der. Sitede %2 kullanılır.
+- K1, K2 ve K3 ciro eşikleri belirlenmedi. Eşik kutusu boş gelir. Boş eşikten sonraki kota uygulanmaz.
+- Kadrolu uzmanın maaşı ayda 50.000 ₺ ile 60.000 ₺ arasıdır. Kota, maaşın %250'si kadar cirodur.
+  Kullanıcı “%125” yazdı, örneği ise 50.000 ₺ maaşta 125.000 ₺ ciroydu. Varsayılan örneğe uyar. Prim oranı belirlenmedi.
+- Kaynak `src/data/kazancPlani.ts`, görünüm `src/components/KazancPlaniBolumu.tsx` dosyasıdır.
+  Bölüm `/politikalar/` sayfasında her rol sekmesinin başındadır. Her oran değiştirilebilir sayı kutusudur.
+  Değerler proje başına yalnız okurun tarayıcısında saklanır (`turksab-kazanc-plani-v1-<proje>`). Ortak Sheets kaydına gitmez.
+  `planliAyar` planı rehberin eski hesap ayarına uygular. Ortak kayıttaki eski oranlar rehberde kullanılmaz.
+- `/satis-ortakligi/` sayfası yayında kalır ama geçersizdir. En üstte “BU SAYFA ARTIK GEÇERSİZDİR” uyarısı durur.
+  Sayfanın bütün yazısı gri ve üstü çizilidir (`.sayfa-gecersiz`, `global.css`).
+- Bu kuralları `tests/kazanc-plani.spec.ts` ve `tests/satis-ortakligi-arsiv.spec.ts` denetler.
