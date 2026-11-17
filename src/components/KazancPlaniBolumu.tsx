@@ -109,9 +109,14 @@ function Kutu({ label, kisa, value, onChange, yuzdeMi = false, bosOlur = false, 
   if (useGizli(kural)) {
     if (!yerTutulur(kural)) return null;
     // Alan kalıcı yapıldı. Aynı boyda bir not yerinde kalır, aşağıdaki içerik kaymaz.
-    // Not, gerçek kutuyla aynı bileşenle çizilir. Böylece yüksekliği kutuyla birebir aynıdır.
-    return <div className={`pol-kz-alan pol-kz-yer${kisa ? ' pol-kz-sikisik' : ''}`} data-yer-tutucu={kural}>
-      <div className="pol-kz-sikisik-ust"><span className="so2-girdi-ad">{kisa ?? label}</span></div>
+    // Not, gerçek alanla aynı çerçevede durur. Böylece yüksekliği alanla birebir aynıdır.
+    if (kisa) return <div className="pol-kz-tek pol-kz-yer" data-yer-tutucu={kural}>
+      <span className="pol-kz-tek-sol"><IconLock aria-hidden="true" size={18} stroke={1.75} /> Kalıcı</span>
+      <span className="pol-kz-tek-deger" aria-label={`${label}: kalıcı kural oldu`}>Parametrelerde</span>
+      <span className="pol-kz-tek-ad">{kisa}</span>
+    </div>;
+    return <div className="pol-kz-alan pol-kz-yer" data-yer-tutucu={kural}>
+      <div className="pol-kz-sikisik-ust"><span className="so2-girdi-ad">{label}</span></div>
       <TextInput className="so2-girdi" classNames={{ input: 'param-input so2-girdi-kutu pol-kz-yer-girdi' }} aria-label={`${label}: kalıcı kural oldu`}
         value="Kalıcı kural oldu" readOnly size="md" />
     </div>;
@@ -129,15 +134,14 @@ function Kutu({ label, kisa, value, onChange, yuzdeMi = false, bosOlur = false, 
     hideControls allowNegative={false} thousandSeparator="." decimalSeparator="," allowedDecimalSeparators={[',']} decimalScale={2}
     prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />;
   // Kullanıcı kararı 17 Kasım 2026 Salı: alan az yer kaplar. Kısa ad ve “Kalıcı” kutusu aynı satırdadır.
-  if (kural && kisa && !pencerede) return <div className="pol-kz-alan pol-kz-sikisik">
-    <div className="pol-kz-sikisik-ust">
-      <label className="so2-girdi-ad" htmlFor={kimlik}>{kisa}{birim ? <span className="so2-girdi-birim"> {birim}</span> : null}</label>
-      <Kalici kural={kural} ad={label} kisa />
-    </div>
-    <NumberInput id={kimlik} className="so2-girdi" classNames={{ input: 'param-input so2-girdi-kutu' }} aria-label={label}
+  // Kullanıcı kararı 17 Kasım 2026 Salı: “Kalıcı” kutusu, değer ve ad tek çerçevede, tek satırda durur.
+  if (kural && kisa && !pencerede) return <div className="pol-kz-tek">
+    <span className="pol-kz-tek-sol"><Kalici kural={kural} ad={label} kisa /></span>
+    <NumberInput id={kimlik} className="pol-kz-tek-kutu" classNames={{ input: 'pol-kz-tek-girdi' }} aria-label={label}
       value={goster} onChange={degis}
       hideControls allowNegative={false} thousandSeparator="." decimalSeparator="," allowedDecimalSeparators={[',']} decimalScale={2}
-      prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />
+      prefix={yuzdeMi ? '%' : undefined} suffix={birim ? ' ₺' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />
+    <label className="pol-kz-tek-ad" htmlFor={kimlik}>{kisa}</label>
   </div>;
   return kural ? <div className="pol-kz-alan">{kutu}<Kalici kural={kural} ad={label} /></div> : kutu;
 }
@@ -171,7 +175,7 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />);
       const artislar = p.kotaArtis.map((a, i) => <Kutu key={`a${i}`} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />);
-      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={donemAdi(i)} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
+      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={`${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />);
       const tum = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)];
       const gorunen = tum.filter((k) => !plan.kalici.includes(k) || buOturumda.has(k)).length;
