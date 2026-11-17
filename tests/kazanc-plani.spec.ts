@@ -190,7 +190,9 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('30.000 ₺');
   await expect(kutu(page, 'Tanıştırma 13. ay ile 24. ay arası komisyonu')).toHaveValue('%5');
   // Grup içindeki görünür ad kısadır. Tam ad ekran okuyucuya gider.
-  await expect(oranlar.locator('[data-etkin] label', { hasText: /^K1 eşiği/ })).toBeVisible();
+  await expect(oranlar.locator('[data-etkin] label', { hasText: /^K1 için aylık ciro/ })).toBeVisible();
+  // Kutunun ne olduğu ve nasıl değiştirileceği yazılıdır.
+  await expect(oranlar.locator('[data-etkin] .pol-kz-nasil')).toContainText('beyaz kutuya tıklayın');
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveCount(0);
   await anahtar.click();
   await expect(anahtar).toHaveAttribute('aria-checked', 'true');
@@ -341,10 +343,17 @@ test('Segika: Parametreler penceresi kalıcı kuralları ve JSON çıktısını 
   await expect(pencere.getByRole('heading', { name: 'Kalıcı kurallar' })).toBeVisible();
   await expect(pencere.getByRole('button', { name: /kalıcı kuraldan çıkarın$/ })).toHaveCount(19);
   // Pencere tam ekran değildir: genişlik en çok %80, yükseklik en çok %90.
+  await expect.poll(() => page.locator('.pol-kz-pencere').evaluate((el) => getComputedStyle(el).transform)).toMatch(/none|matrix\(1, 0, 0, 1, 0, 0\)/);
   const boyut = await page.locator('.pol-kz-pencere').evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width / innerWidth, r.height / innerHeight, el.scrollHeight > el.clientHeight]; });
   expect(boyut[0]).toBeLessThanOrEqual(0.81);
   expect(boyut[1]).toBeLessThanOrEqual(0.91);
   expect(boyut[2]).toBe(true);
+  // Pencere ekranın tam ortasındadır. Sol ve sağ, üst ve alt boşluklar eşittir.
+  // Açılış hareketi bitene kadar beklenir.
+  await expect.poll(() => page.locator('.pol-kz-pencere').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return Math.abs(r.left - (innerWidth - r.right)) <= 1 && Math.abs(r.top - (innerHeight - r.bottom)) <= 1 && r.left > 0;
+  })).toBe(true);
   const json = JSON.parse(await pencere.getByRole('textbox', { name: 'Kazanç planı JSON' }).inputValue());
   expect(json).toMatchObject({ proje: 'segika', gorunum: 'Segika', surum: 2 });
   expect(json.kurallar).toHaveLength(19);

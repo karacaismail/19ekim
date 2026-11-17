@@ -538,7 +538,9 @@ Kabul: `tests/ifade.spec.ts` (12 senaryo, Chromium/Firefox/WebKit) içerik ve il
 durum · erişilebilirlik · onay · doğrulama). Kayıtlı olanlar: **K-01** hap (`StatePill`: `.chip`, `.opex-state`,
 `.opex-pill`, `.yapiskan-ad`, `.bcg-flow-chip`, `.ortak-bolum-program`) — kısa durum/kategori etiketi, pill şekli etiketi
 eylemden ayırır; yalnız metin etiketi; onay ux.md §1.1; kapı + tarayıcı testi. **K-02** anahtar izi/topuzu (`Switch`:
-tema anahtarı, `Anahtar` role="switch" bileşenleri) — ikili durum göstergesi; onay ux.md §1.1. **K-03** yazısız nokta
+tema anahtarı, `Anahtar` role="switch" bileşenleri, kazanç planının büyük katkı anahtarı `.pol-kz-anahtar-iz` /
+`.pol-kz-anahtar-top`) — ikili durum göstergesi; onay ux.md §1.1, kazanç planı anahtarı için kullanıcı onayı
+17 Kasım 2026 Salı (“switch button radius %100 olsun”). **K-03** yazısız nokta
 işareti (rol noktası, menü noktası, legend/durum noktası ≤ 16 px) — semantik çizim geometrisi; sözde öğe ya da `.opex-dot`
 / `.opex-live-dot`. Başka yüzey (avatar, numara rozeti, kart, sekme, düğme) kayıtsızdır ve köşelidir.
 

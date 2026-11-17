@@ -1539,7 +1539,8 @@ test.describe('köşe sözleşmesi (ux.md §6.3)', () => {
         await icerik(page);
         const bad = await page.evaluate(() => {
           const PILL = '.chip, .opex-state, .opex-pill, .yapiskan-ad, .bcg-flow-chip';
-          const SWITCH = '.theme-track, .theme-thumb, [role="switch"] *';
+          // K-02: anahtar izi ve topuzu. Kazanç planı anahtarının izi role="switch" düğmesinin kendisidir.
+          const SWITCH = '.theme-track, .theme-thumb, [role="switch"], [role="switch"] *';
           const out: string[] = [];
           for (const el of document.querySelectorAll<HTMLElement>('body *')) {
             if (!el.getClientRects().length || el.closest('svg')) continue;

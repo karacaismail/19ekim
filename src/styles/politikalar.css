@@ -258,22 +258,17 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 
 /* ===== Büyük katkı anahtarı (kullanıcı kararı 17 Kasım 2026 Salı). Bütün katkı seçimleri bu tek bileşeni kullanır. ===== */
 .pol-kz-anahtar-kap { container-type: inline-size; }
-.pol-kz-anahtar { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'iz' 'sol' 'sag'; justify-items: center; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); text-align: center; }
+.pol-kz-anahtar { display: grid; grid-template-columns: auto auto; grid-template-areas: 'iz iz' 'sol sag'; justify-content: center; justify-items: center; align-items: center; gap: var(--space-2) var(--space-4); inline-size: fit-content; max-inline-size: 100%; padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); text-align: center; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:first-child { grid-area: sol; }
 .pol-kz-anahtar > .pol-kz-anahtar-iz { grid-area: iz; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { grid-area: sag; }
-/* Anahtar kendi genişliğine göre dizilir. Yazı büyütülünce de seçenekler sığar. */
-@container (min-width: 18em) {
-  .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'iz iz' 'sol sag'; }
-  .pol-kz-anahtar > .pol-kz-anahtar-ad:first-child { justify-self: start; text-align: start; }
-  .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { justify-self: end; text-align: end; }
-}
-@container (min-width: 34em) { .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'sol iz sag'; } }
+/* Kullanıcı kararı 17 Kasım 2026 Salı: yazılar anahtara yanaşır, ortada boşluk kalmaz. Yer yetince üçü tek satırdadır. */
+@container (min-width: 26em) { .pol-kz-anahtar { grid-template-columns: auto auto auto; grid-template-areas: 'sol iz sag'; gap: var(--space-3); } }
 .pol-kz-anahtar-ad { font-size: var(--text-md); line-height: var(--leading-snug); color: var(--text-secondary); cursor: pointer; user-select: none; }
 .pol-kz-anahtar-ad[data-secili] { color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
-.pol-kz-anahtar-iz { position: relative; inline-size: 5.5rem; block-size: 3rem; padding: 0; border: 0; background: var(--accent); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-anahtar-iz { position: relative; inline-size: 5.5rem; block-size: 3rem; padding: 0; border: 0; border-radius: var(--radius-switch); background: var(--accent); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-anahtar-iz[aria-checked='true'] { background: var(--policy-active-ink); }
-.pol-kz-anahtar-top { position: absolute; inset-block: .375rem; inset-inline-start: .375rem; inline-size: 2.25rem; background: var(--surface-raised); box-shadow: var(--shadow-soft); transition-property: translate; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-anahtar-top { position: absolute; inset-block: .375rem; inset-inline-start: .375rem; inline-size: 2.25rem; border-radius: var(--radius-switch); background: var(--surface-raised); box-shadow: var(--shadow-soft); transition-property: translate; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-anahtar-iz[aria-checked='true'] .pol-kz-anahtar-top { translate: 2.5rem 0; }
 @media (min-width: 40rem) { .pol-kz-anahtar-ad { font-size: var(--text-lg); } }
 
@@ -381,13 +376,16 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-karar .pol-kz-yigin-oge { display: grid; gap: var(--space-3); align-content: start; }
 
 /* ===== Tek satırlık alan (kullanıcı kararı 17 Kasım 2026 Salı): solda “Kalıcı”, ortada değer, sağda ad. ===== */
-.pol-kz-tek { display: grid; grid-template-columns: auto minmax(4.5rem, 1fr) auto; align-items: center; gap: var(--space-2); min-block-size: var(--hit-min); padding-inline: var(--space-3); border: var(--hairline) solid var(--rule-strong); background: var(--surface-control); min-inline-size: 0; transition-property: border-color, background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-tek { display: grid; grid-template-columns: auto minmax(6rem, 1fr) auto; align-items: center; gap: var(--space-2); min-block-size: var(--hit-min); padding: var(--space-1) var(--space-3); border: var(--hairline) solid var(--rule-strong); background: var(--surface-control); min-inline-size: 0; transition-property: border-color, background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-tek:hover { border-color: var(--text-primary); }
 .pol-kz-tek-sol { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--text-secondary); }
 .pol-kz-tek-sol .applet-onay-ad { font-size: var(--text-sm); }
 .pol-kz-tek-sol .pol-kz-kalici .applet-onay-ad { min-block-size: var(--hit-min); }
 .pol-kz-tek-kutu { min-inline-size: 0; }
-.pol-kz-tek-girdi { min-block-size: var(--hit-min); padding-inline: var(--space-2); border: 0; background: transparent; color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-semibold); text-align: center; font-variant-numeric: tabular-nums; }
+.pol-kz-tek-girdi { --input-height: var(--hit-min); min-block-size: var(--hit-min); block-size: var(--hit-min); padding-inline: var(--space-2) var(--space-8); border: var(--hairline) solid var(--rule-strong); background: var(--surface-raised); color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-semibold); text-align: center; font-variant-numeric: tabular-nums; cursor: text; transition-property: border-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+/* Yazılabilir kutu belli olsun: beyaz zemin, kenarlık ve kalem işareti. Fare gelince kenarlık koyulaşır. */
+.pol-kz-tek-girdi:hover { border-color: var(--text-primary); }
+.pol-kz-tek-kalem { color: var(--text-secondary); }
 .pol-kz-tek-girdi:focus { outline: none; }
 .pol-kz-tek-ad { color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-snug); text-align: end; }
 .pol-kz-tek-deger { text-align: center; color: var(--text-secondary); }
@@ -397,8 +395,9 @@ html[data-focus-mode='keyboard'] .pol-kz-tek:has(.pol-kz-tek-girdi:focus-visible
 /* Dar ekranda ad, çerçevenin içinde üst satıra geçer. “Kalıcı” kutusu ve değer alt satırda durur. Hiçbir şey taşmaz. */
 /* Çerçeve kendi genişliğine göre dizilir. Dar çerçevede ad üst satıra geçer. Böylece alanlar yan yana sığar. */
 .pol-kz-tek-kap { container-type: inline-size; min-inline-size: 0; }
-@container (max-width: 16rem) {
-  .pol-kz-tek { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'ad ad' 'sol deger'; row-gap: 0; padding-block-start: var(--space-2); }
+@container (max-width: 22rem) {
+  /* Dar çerçevede üstte ad ve “Kalıcı” kutusu, altta tam genişlikte değer kutusu durur. Değer kesilmez. */
+  .pol-kz-tek { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'ad sol' 'deger deger'; row-gap: var(--space-1); padding-block: var(--space-2); }
   .pol-kz-tek > .pol-kz-tek-ad { grid-area: ad; text-align: start; white-space: normal; }
   .pol-kz-tek > .pol-kz-tek-sol { grid-area: sol; }
   .pol-kz-tek > .pol-kz-tek-kutu, .pol-kz-tek > .pol-kz-tek-deger { grid-area: deger; }
@@ -410,3 +409,9 @@ html[data-focus-mode='keyboard'] .pol-kz-merdiven-dugme:focus-visible { outline:
 @media (min-width: 48em) {
   .pol-kz-plan .pol-kz-katki .so2-grup-alanlar { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 }
+.pol-kz-grup-aciklama { margin: 0 0 var(--space-2); color: var(--text-secondary); }
+.pol-kz-nasil { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-accent); color: var(--text-primary); }
+.pol-kz-sozluk { margin: 0; padding-inline-start: var(--space-5); display: grid; gap: var(--space-1); }
+/* Kullanıcı kararı 17 Kasım 2026 Salı: Parametreler penceresi ekranın tam ortasındadır. Sol ve sağ, üst ve alt boşluklar eşittir. */
+.pol-kz-pencere-kabuk { display: flex; align-items: center; justify-content: center; padding: 0; }
+.pol-kz-pencere-kabuk > .pol-kz-pencere { margin: 0; }

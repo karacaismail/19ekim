@@ -1,7 +1,7 @@
 import { createContext, useId, type CSSProperties, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { Checkbox, Modal, NumberInput, TextInput } from '@mantine/core';
 import { useMotionMs } from '../lib/motion';
-import { IconAdjustmentsHorizontal, IconCalendarStats, IconChartLine, IconFlame, IconLock, IconLockOpen, IconRocket, IconStar, IconStarFilled, IconTarget, IconTrophy } from '@tabler/icons-react';
+import { IconPencil, IconAdjustmentsHorizontal, IconCalendarStats, IconChartLine, IconFlame, IconLock, IconLockOpen, IconRocket, IconStar, IconStarFilled, IconTarget, IconTrophy } from '@tabler/icons-react';
 import { useGiris } from '../lib/giris';
 import { GirisEkrani } from './Giris';
 import { Choice } from './ui';
@@ -137,17 +137,18 @@ function Kutu({ label, kisa, value, onChange, yuzdeMi = false, bosOlur = false, 
   // Kullanıcı kararı 17 Kasım 2026 Salı: “Kalıcı” kutusu, değer ve ad tek çerçevede, tek satırda durur.
   if (kural && kisa && !pencerede) return <div className="pol-kz-tek-kap"><div className="pol-kz-tek">
     <span className="pol-kz-tek-sol"><Kalici kural={kural} ad={label} kisa /></span>
-    <NumberInput id={kimlik} className="pol-kz-tek-kutu" classNames={{ input: 'pol-kz-tek-girdi' }} aria-label={label}
+    <NumberInput id={kimlik} className="pol-kz-tek-kutu" classNames={{ input: 'pol-kz-tek-girdi', section: 'pol-kz-tek-kalem' }} aria-label={label}
       value={goster} onChange={degis}
       hideControls allowNegative={false} thousandSeparator="." decimalSeparator="," allowedDecimalSeparators={[',']} decimalScale={2}
-      prefix={yuzdeMi ? '%' : undefined} suffix={birim ? ' ₺' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />
+      prefix={yuzdeMi ? '%' : undefined} suffix={birim ? ' ₺' : undefined} max={yuzdeMi ? 100 : undefined} size="md"
+      rightSection={<IconPencil aria-hidden="true" size={16} stroke={1.75} />} rightSectionPointerEvents="none" />
     <label className="pol-kz-tek-ad" htmlFor={kimlik}>{kisa}</label>
   </div></div>;
   return kural ? <div className="pol-kz-alan">{kutu}<Kalici kural={kural} ad={label} /></div> : kutu;
 }
 
 /** Bütün alanları kalıcı olan grup ana ekranda çizilmez. */
-function GrupVarsa({ baslik, kurallar, children }: { baslik: string; kurallar: string[]; children: ReactNode }) {
+function GrupVarsa({ baslik, aciklama, kurallar, children }: { baslik: string; aciklama?: ReactNode; kurallar: string[]; children: ReactNode }) {
   const b = useContext(PlanBaglami);
   const pencerede = useContext(PencereBaglami);
   const kimlik = useId();
@@ -155,6 +156,7 @@ function GrupVarsa({ baslik, kurallar, children }: { baslik: string; kurallar: s
   // fieldset yerine grup rolü: WebKit, ekran daralınca legend genişliğini güncellemiyor ve sayfa taşıyor.
   return <div role="group" aria-labelledby={kimlik} className="so2-grup">
     <p id={kimlik} className="so2-grup-baslik">{baslik}</p>
+    {aciklama ? <div className="pol-kz-grup-aciklama">{aciklama}</div> : null}
     <div className="so2-grup-alanlar">{children}</div>
   </div>;
 }
@@ -168,29 +170,36 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
     <p>{tur === 'tanistir'
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
       : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
+    <p className="pol-kz-nasil">Değeri değiştirmek için beyaz kutuya tıklayın. Sonra yeni sayıyı yazın. Sonuç hemen değişir. “Kalıcı” kutusunu yalnız yönetici işaretler. İşaretlenen değer sabitlenir.</p>
     {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Yönetici bu değerleri “Parametreler” düğmesinden yönetir.</p>}
     {(() => {
-      const taban = <Kutu label={`${ad} taban oranı`} kisa="Taban oran" value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
-      const esikler = p.kotaEsik.map((e, i) => <Kutu key={`e${i}`} label={`${ad} K${i + 1} ciro eşiği`} kisa={`K${i + 1} eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
+      const taban = <Kutu label={`${ad} taban oranı`} kisa="İlk 12 ay oranı" value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
+      const esikler = p.kotaEsik.map((e, i) => <Kutu key={`e${i}`} label={`${ad} K${i + 1} ciro eşiği`} kisa={`K${i + 1} için aylık ciro`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />);
-      const artislar = p.kotaArtis.map((a, i) => <Kutu key={`a${i}`} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
+      const artislar = p.kotaArtis.map((a, i) => <Kutu key={`a${i}`} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} ek puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />);
-      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={`${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
+      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={`${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay oranı`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />);
       const tum = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)];
       const gorunen = tum.filter((k) => !plan.kalici.includes(k) || buOturumda.has(k)).length;
+      const gorunur = (kurallar: string[]) => kurallar.some((k) => !plan.kalici.includes(k) || buOturumda.has(k));
       const bosEsik = p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>;
       // Kullanıcı kararı 17 Kasım 2026 Salı: az alan kaldıysa alanlar tek satırda, tek grupta durur.
       if (gorunen > 0 && gorunen <= 4) return <>
-        <GrupVarsa kurallar={tum} baslik={`${ad} için değerler`}>{taban}{esikler}{artislar}{sonrakiler}</GrupVarsa>
+        <GrupVarsa kurallar={tum} baslik={`${ad} için değerler`} aciklama={<ul className="pol-kz-sozluk">
+          {gorunur([`${tur}.taban`]) && <li>“İlk 12 ay oranı” kutusu: Satıcı ilk 12 ayda bu oranı alır.</li>}
+          {gorunur(ids('kotaEsik', 3)) && <li>“Aylık ciro” kutusu: Satıcı ayda bu kadar ciro yaparsa bir üst seviyeye geçer.</li>}
+          {gorunur(ids('kotaArtis', 3)) && <li>“Ek puan” kutusu: Satıcı bir üst seviyeye geçince oranına bu puan eklenir.</li>}
+          {gorunur(ids('gecmis', 4)) && <li>“Ay oranı” kutusu: Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.</li>}
+        </ul>}>{taban}{esikler}{artislar}{sonrakiler}</GrupVarsa>
         {bosEsik}
       </>;
       return <>
-        <GrupVarsa kurallar={[`${tur}.taban`]} baslik={`${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>{taban}</GrupVarsa>
-        <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik={`${ad} için aylık ciro kotaları`}>{esikler}</GrupVarsa>
+        <GrupVarsa kurallar={[`${tur}.taban`]} baslik="İlk 12 ayın oranı" aciklama="Satıcı ilk 12 ayda bu oranı alır.">{taban}</GrupVarsa>
+        <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik="Seviye atlamak için gereken aylık ciro" aciklama="Satıcı ayda bu kadar ciro yaparsa bir üst seviyeye geçer. K1, K2 ve K3 seviyelerin adıdır.">{esikler}</GrupVarsa>
         {bosEsik}
-        <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik={`${ad} için kota geçilince eklenen puan`}>{artislar}</GrupVarsa>
-        <GrupVarsa kurallar={ids('gecmis', 4)} baslik={`${ad} için 13. aydan sonraki oranlar`}>{sonrakiler}</GrupVarsa>
+        <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik="Seviye atlayınca eklenen puan" aciklama="Satıcı bir üst seviyeye geçince oranına bu puan eklenir.">{artislar}</GrupVarsa>
+        <GrupVarsa kurallar={ids('gecmis', 4)} baslik="13. aydan sonraki oranlar" aciklama="Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.">{sonrakiler}</GrupVarsa>
       </>;
     })()}
   </div>;
@@ -442,10 +451,10 @@ function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Ma
     <button ref={acan} type="button" className="pol-kz-parametreler" aria-haspopup="dialog" aria-label="Parametreler" title="Parametreler" onClick={() => setAcik(true)}>
       <IconAdjustmentsHorizontal aria-hidden="true" size={26} stroke={1.75} />
     </button>
-    <Modal opened={acik} onClose={kapat} title="Parametreler" size="80vw" radius={0} returnFocus={false}
+    <Modal opened={acik} onClose={kapat} title="Parametreler" size="80vw" centered radius={0} returnFocus={false}
       transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }} overlayProps={{ backgroundOpacity: 0.55 }}
       closeButtonProps={{ 'aria-label': 'Pencereyi kapat', size: 'xl' }}
-      classNames={{ content: 'oy-pencere pol-kz-pencere', header: 'oy-pencere-ust pol-kz-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>
+      classNames={{ inner: 'pol-kz-pencere-kabuk', content: 'oy-pencere pol-kz-pencere', header: 'oy-pencere-ust pol-kz-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>
       <PencereBaglami.Provider value>
         {!girisli ? <GirisEkrani pencerede aciklama="Parametreler yalnız ekip içindir. Görmek için kullanıcı adı ve parolayla giriş yapın." /> : <>
         <h3 className="pol-kz-pencere-ara">Kalıcı kurallar</h3>
