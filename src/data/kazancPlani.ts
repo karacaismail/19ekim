@@ -80,6 +80,8 @@ export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
   istoc: {},
   segika: {
     'tanistir.taban': 0.07,
+    // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatma taban oranı da kalıcı kuraldır.
+    'kapatir.taban': 0.15,
     'tanistir.kotaArtis.0': 0.1, 'tanistir.kotaArtis.1': 0.07, 'tanistir.kotaArtis.2': 0.05,
     'tanistir.gecmis.0': 0.05, 'tanistir.gecmis.1': 0.025, 'tanistir.gecmis.2': 0, 'tanistir.gecmis.3': 0,
     'kapatir.kotaArtis.0': 0.1, 'kapatir.kotaArtis.1': 0.07, 'kapatir.kotaArtis.2': 0.05,

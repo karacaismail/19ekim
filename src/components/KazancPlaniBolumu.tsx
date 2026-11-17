@@ -17,8 +17,8 @@ const tl = (n: number) => `${num(n)} ₺`;
 const yuzde = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 
 /* Plan her proje için ayrı anahtarda, yalnız bu tarayıcıda saklanır. Aynı sayfadaki bütün okuyucular aynı değeri görür. */
-// v2: kalıcı kurallar penceresi (17 Kasım 2026 Salı). Eski kayıt yeni başlangıç değerlerini ezmesin.
-const anahtar = (proje: Marka) => `turksab-kazanc-plani-v2-${proje}`;
+// v3: satışı kapatma taban oranı da kalıcı kural oldu (17 Kasım 2026 Salı). Eski kayıt yeni başlangıç değerlerini ezmesin.
+const anahtar = (proje: Marka) => `turksab-kazanc-plani-v3-${proje}`;
 const dinleyiciler = new Set<() => void>();
 const bellek = new Map<Marka, KazancPlani>();
 function oku(proje: Marka): KazancPlani {
