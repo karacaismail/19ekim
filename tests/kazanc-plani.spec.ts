@@ -296,9 +296,13 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 kotasına 20.000 ₺ kaldı.');
   await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 eşiğinde aylık kazancınız 17.500 ₺ olur.');
   await expect(oyun.getByRole('progressbar', { name: 'K2 hedefine ilerleme' })).toHaveAttribute('aria-valuenow', '71');
-  await expect(oyun.getByRole('list', { name: 'Kota seviyeleri' }).locator('[aria-current="step"]')).toContainText('K1');
+  // Seviye kutuları kaydırıcının altında kümelenir. Bulunulan seviye basılı görünür.
+  const seviyeler = panel.getByRole('group', { name: /Kota seviyeleri/ });
+  await expect(seviyeler.getByRole('button', { name: /^K1:/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K1');
-  await panel.getByRole('button', { name: /K2 eşiği:/ }).click();
+  // Seviye kutusuna basınca ciro o seviyenin eşiğine gelir.
+  await seviyeler.getByRole('button', { name: /^K2:/ }).click();
+  await expect(panel.getByRole('slider')).toHaveValue('70000');
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('17.500 ₺');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K2');
   // Kota kuralı: K1 tamamlanmazsa 13. aydan sonra pay yoktur.

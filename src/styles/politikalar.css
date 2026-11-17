@@ -316,9 +316,12 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 @media (min-width: 40rem) { .pol-kz-skor { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .pol-kz-rutbe { justify-items: end; } }
 .pol-kz-merdiven { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
 @media (min-width: 30rem) { .pol-kz-merdiven { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.pol-kz-merdiven > li { display: grid; justify-items: center; gap: var(--space-1); padding: var(--space-3); background: var(--surface-sunken); color: var(--text-secondary); text-align: center; }
-.pol-kz-merdiven > li[data-durum='gecti'] { background: var(--surface-accent); color: var(--policy-active-ink); }
-.pol-kz-merdiven > li[data-durum='simdi'] { background: var(--accent); color: var(--text-on-accent); box-shadow: var(--shadow-soft); }
+.pol-kz-merdiven-dugme { display: grid; justify-items: center; gap: var(--space-1); min-block-size: var(--hit-min); padding: var(--space-3); border: 0; background: var(--surface-sunken); color: var(--text-secondary); font: inherit; text-align: center; cursor: pointer; transition-property: background-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-merdiven-dugme:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
+.pol-kz-merdiven-dugme:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); }
+.pol-kz-merdiven-esik { font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.pol-kz-merdiven-dugme[data-durum='gecti'] { background: var(--surface-accent); color: var(--policy-active-ink); }
+.pol-kz-merdiven-dugme[data-durum='simdi'], .pol-kz-merdiven-dugme[data-durum='simdi']:hover { background: var(--accent); color: var(--text-on-accent); box-shadow: var(--shadow-soft); }
 .pol-kz-merdiven-ad { font-weight: var(--weight-semibold); }
 .pol-kz-merdiven-oran { font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .pol-kz-gorev { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: start; padding: var(--inset-lg); background: var(--surface-raised); box-shadow: var(--shadow-soft); color: var(--policy-active-ink); }
@@ -402,3 +405,6 @@ html[data-focus-mode='keyboard'] .pol-kz-tek:has(.pol-kz-tek-girdi:focus-visible
   .pol-kz-tek > .pol-kz-tek-sol { grid-area: sol; }
   .pol-kz-tek > .pol-kz-tek-kutu, .pol-kz-tek > .pol-kz-tek-deger { grid-area: deger; }
 }
+/* Klavye odağı çevrelemez: seviye kutusunun sol iç kenarında tek çubuk görünür. */
+html[data-focus-mode='keyboard'] .pol-kz-merdiven-dugme:focus-visible { outline: none; box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator); }
+.pol-kz-merdiven-dugme:focus { outline: none; }

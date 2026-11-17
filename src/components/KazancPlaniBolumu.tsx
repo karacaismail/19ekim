@@ -553,6 +553,7 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
   const doluEsikler = p.kotaEsik.map((e, i) => ({ e, i })).filter((x): x is { e: number; i: number } => x.e !== null);
   const enCok = Math.max(Math.ceil(((doluEsikler.at(-1)?.e ?? 100_000) * 1.5) / 10_000) * 10_000, ciro);
   const setCiro = (v: number) => guncelle((x) => { x.ornekCiro = Math.max(0, Math.round(v)); });
+  const { kota } = katkiOrani(plan, tur, ciro);
   return <section className="pol-kz-oyun" aria-labelledby="pol-kz-oyun-baslik">
     <div className="pol-kz-oyun-ust">
       <p className="pol-kz-oyun-etiket">Kazanç simülatörü</p>
@@ -566,15 +567,24 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
       <p className="pol-kz-ciro-deger" aria-hidden="true">{tl(ciro)}</p>
       <input type="range" className="pol-kz-kaydirici" min={0} max={enCok} step={1000} value={Math.min(ciro, enCok)}
         aria-label="Aylık ciroyu kaydırarak seçin" aria-valuetext={tl(ciro)} onChange={(e) => setCiro(Number(e.currentTarget.value))} />
-      {/* Eşik düğmeleri en uzun hâlleri kadar yer ayırır. Katkı değişince alan zıplamaz. */}
-      <Yigin etkin={0}>{[
-        doluEsikler.length > 0 ? <div key="atla" className="pol-kz-atla" role="group" aria-label="Kota eşiğine atlayın">
-          {doluEsikler.map(({ e, i }) => <button key={i} type="button" className="pol-sekme" aria-pressed={ciro === e} onClick={() => setCiro(e)}>
-            {SEVIYE_ADI[i + 1]} eşiği: {tl(e)}
-          </button>)}
-        </div> : <p key="atla" className="pol-kz-not">Kota eşiği belirlenmedi.</p>,
-        <div key="yer" className="pol-kz-atla">{[1, 2, 3].map((i) => <span key={i} className="pol-sekme">{SEVIYE_ADI[i]} eşiği: {tl(9_999_999)}</span>)}</div>,
-      ]}</Yigin>
+      {/* Kullanıcı kararı 17 Kasım 2026 Salı: seviye kutuları kaydırıcının altında kümelenir.
+          Bir kutuya basınca ciro o seviyenin eşiğine gelir. Kota yok seviyesinin eşiği 0 ₺'dir. */}
+      <div className="pol-kz-merdiven" role="group" aria-label="Kota seviyeleri. Seviyeye basınca ciro o eşiğe gelir.">
+        {SEVIYE_ADI.map((ad, i) => {
+          const esik = i === 0 ? 0 : p.kotaEsik[i - 1];
+          const ulasilir = i === 0 || p.kotaEsik.slice(0, i).every((e) => e !== null);
+          const oran = Math.round((p.taban + p.kotaArtis.slice(0, i).reduce((t, x) => t + x, 0)) * 10_000) / 10_000;
+          const durum = i < kota ? 'gecti' : i === kota ? 'simdi' : 'sonra';
+          return <button key={ad} type="button" className="pol-kz-merdiven-dugme" data-durum={durum} aria-pressed={i === kota}
+            disabled={esik === null || !ulasilir} onClick={() => esik !== null && setCiro(esik)}
+            aria-label={`${ad}: ${esik === null ? 'eşik belirlenmedi' : `aylık ciro ${tl(esik)} ve üstü`}, cari ay oranı ${ulasilir ? yuzde(oran) : 'yok'}`}>
+            <span className="pol-kz-merdiven-ikon" aria-hidden="true">{i <= kota ? (i === 0 ? <IconRocket size={22} stroke={1.75} /> : <IconStarFilled size={22} />) : <IconLock size={22} stroke={1.75} />}</span>
+            <span className="pol-kz-merdiven-ad" aria-hidden="true">{ad}</span>
+            <span className="pol-kz-merdiven-oran" aria-hidden="true">{ulasilir ? yuzde(oran) : 'Yok'}</span>
+            <span className="pol-kz-merdiven-esik" aria-hidden="true">{esik === null ? 'Eşik yok' : `${tl(esik)}+`}</span>
+          </button>;
+        })}
+      </div>
       <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => setCiro(v ?? 0)} />
     </div>
 
@@ -630,13 +640,6 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
       </div>
     </div>
 
-    <ol className="pol-kz-merdiven" aria-label="Kota seviyeleri">
-      {satirlar.map((r) => <li key={r.ad} data-durum={r.i < kota ? 'gecti' : r.i === kota ? 'simdi' : 'sonra'} aria-current={r.i === kota ? 'step' : undefined}>
-        <span className="pol-kz-merdiven-ikon" aria-hidden="true">{r.i <= kota ? (r.i === 0 ? <IconRocket size={22} stroke={1.75} /> : <IconStarFilled size={22} />) : <IconLock size={22} stroke={1.75} />}</span>
-        <span className="pol-kz-merdiven-ad">{r.ad}</span>
-        <span className="pol-kz-merdiven-oran">{r.ulasilir ? yuzde(r.oran) : 'Yok'}</span>
-      </li>)}
-    </ol>
 
     {/* Hedef kartı bütün hâlleri kadar yer ayırır. Ciro ya da seviye değişince alttaki içerik kaymaz. */}
     <Yigin etkin={sonraki !== null && kalan !== null && hedefKazanc !== null ? 0 : kota === 3 ? 2 : 3}>{[
