@@ -370,11 +370,24 @@
   --radio-checked: #0b7a52;
   /* Menüde yeni öğe noktası (kullanıcı isteği 2026-11-12): menü yüzeyinde ve seçili öğe zemininde yeşil, ≥ 3:1 */
   --new-mark: #0b7a52;
+  /* Koyu kart (kullanıcı kararı 17 Kasım 2026 Salı): sonuç kartları koyu zeminlidir. Metin ≥ 4.5:1. */
+  --surface-ink: #16181a;
+  --text-on-ink: #f7f6f2;
+  --text-on-ink-secondary: #b9bec3;
+  --accent-on-ink: #ffa94d;
+  --rule-on-ink: #3d444b;
 }
 
 /* Koyu tema */
 :root[data-mantine-color-scheme='dark'] {
   color-scheme: dark;
+
+  /* Koyu temada koyu kart sayfadan bir ton açıktır. */
+  --surface-ink: #24282c;
+  --text-on-ink: #eceeef;
+  --text-on-ink-secondary: #b9bec3;
+  --accent-on-ink: #ffa94d;
+  --rule-on-ink: #3d444b;
 
   --surface-page: #121416;
   --surface-raised: #1a1d20;
