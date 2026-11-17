@@ -41,23 +41,31 @@ export function useKazancPlani(proje: Marka) {
 type Guncelle = ReturnType<typeof useKazancPlani>['guncelle'];
 const PlanBaglami = createContext<{ plan: KazancPlani; guncelle: Guncelle } | null>(null);
 
+/** Değer kalıcı kural olarak işaretliyse kilitlidir. Kilitli değer değiştirilemez (kullanıcı kararı 17 Kasım 2026 Salı). */
+function useKilitli(kural?: string) {
+  const b = useContext(PlanBaglami);
+  return Boolean(kural && b?.plan.kalici.includes(kural));
+}
+
 /** “Kalıcı kural” kutusu. İşaretli değer, yöneticinin kalıcı kural adayıdır. */
 function Kalici({ kural, ad }: { kural: string; ad: string }) {
   const b = useContext(PlanBaglami);
   if (!b) return null;
   const isaretli = b.plan.kalici.includes(kural);
-  return <Checkbox label="Kalıcı kural" aria-label={`${ad} kalıcı kural`} checked={isaretli}
+  return <><Checkbox label="Kalıcı kural" aria-label={`${ad} kalıcı kural`} checked={isaretli}
     onChange={(e) => {
       const acik = e.currentTarget.checked;
       b.guncelle((x) => { x.kalici = acik ? [...x.kalici.filter((k) => k !== kural), kural] : x.kalici.filter((k) => k !== kural); });
     }}
-    classNames={{ root: 'applet-onay pol-kz-kalici', body: 'applet-onay-govde', input: 'applet-onay-kutu', label: 'applet-onay-ad', icon: 'applet-onay-ikon' }} />;
+    classNames={{ root: 'applet-onay pol-kz-kalici', body: 'applet-onay-govde', input: 'applet-onay-kutu', label: 'applet-onay-ad', icon: 'applet-onay-ikon' }} />
+    {isaretli && <p className="pol-kz-not">Bu değer kilitli. Değiştirmek için “Kalıcı kural” işaretini kaldırın.</p>}</>;
 }
 
 /** Boş bırakılabilen sayı kutusu. Yüzde alanında değer oran olarak saklanır. */
 function Kutu({ label, value, onChange, yuzdeMi = false, bosOlur = false, birim, kural }: {
   label: string; value: Esik; onChange: (v: Esik) => void; yuzdeMi?: boolean; bosOlur?: boolean; birim?: string; kural?: string;
 }) {
+  const kilitli = useKilitli(kural);
   const goster = value === null ? '' : yuzdeMi ? Math.round(value * 1000) / 10 : value;
   const kutu = <NumberInput className="so2-girdi" classNames={{ label: 'so2-girdi-ad', input: 'param-input so2-girdi-kutu' }}
     label={birim ? <>{label} <span className="so2-girdi-birim">{birim}</span></> : label}
@@ -68,7 +76,7 @@ function Kutu({ label, value, onChange, yuzdeMi = false, bosOlur = false, birim,
       if (typeof v === 'number' && Number.isFinite(v) && v >= 0) onChange(yuzdeMi ? v / 100 : v);
     }}
     hideControls allowNegative={false} thousandSeparator="." decimalSeparator="," allowedDecimalSeparators={[',']} decimalScale={2}
-    prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />;
+    prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" disabled={kilitli} />;
   return kural ? <div className="pol-kz-alan">{kutu}<Kalici kural={kural} ad={label} /></div> : kutu;
 }
 
@@ -120,6 +128,7 @@ const SEKME_SINIFI = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-
 
 /** Seçmeli düğme grubu. APG radyo grubu gibi çalışır: ok tuşları, Home ve End seçimi taşır. */
 function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) => void }) {
+  const kilitli = useKilitli('paylasim.sureAy');
   const grup = useRef<HTMLDivElement>(null);
   const odakla = useRef(false);
   // Seçilen düğme, çizimden hemen sonra odağı alır. Sonraki tuş doğru düğmeden başlar.
@@ -144,7 +153,7 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
   return <div className="pol-kz-sure">
     <p id="pol-kz-sure-ad" className="pol-kz-sure-ad">Tanıştırmanın geçerlilik süresi</p>
     <div ref={grup} role="radiogroup" aria-labelledby="pol-kz-sure-ad" className="pol-sekme-listesi pol-kz-sure-liste">
-      {SURE_SECENEKLERI.map((ay, i) => <button key={ay} type="button" role="radio" aria-checked={ay === value} data-ay={ay}
+      {SURE_SECENEKLERI.map((ay, i) => <button key={ay} type="button" role="radio" aria-checked={ay === value} data-ay={ay} disabled={kilitli}
         tabIndex={ay === value ? 0 : -1} className="pol-sekme" onClick={() => sec(i)} onKeyDown={(e) => tus(e, i)}>{ay} ay</button>)}
     </div>
     <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
@@ -154,9 +163,12 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
 /** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
 function Kararlar({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
   const soru = (anahtar: keyof typeof BOLUSME_SORUSU) => <div className="pol-kz-alan">
-    <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={plan.paylasim[anahtar]}
-      options={(['dus', 'tam'] as const).map((id) => ({ id, name: BOLUSME_ADI[id] }))}
-      onChange={(v) => guncelle((x) => { x.paylasim[anahtar] = v; })} />
+    {/* Kalıcı kural işaretliyse seçim kilitlenir. Kapalı fieldset içindeki düğmeler de kapanır. */}
+    <fieldset className="pol-kz-kilit" disabled={plan.kalici.includes(`paylasim.${anahtar}`)}>
+      <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={plan.paylasim[anahtar]}
+        options={(['dus', 'tam'] as const).map((id) => ({ id, name: BOLUSME_ADI[id] }))}
+        onChange={(v) => guncelle((x) => { x.paylasim[anahtar] = v; })} />
+    </fieldset>
     <Kalici kural={`paylasim.${anahtar}`} ad={BOLUSME_SORUSU[anahtar]} />
   </div>;
   return <div className="pol-kz-adim-govde">
