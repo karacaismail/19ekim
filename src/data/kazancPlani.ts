@@ -3,9 +3,10 @@
  *
  * - Persona fark etmez. Herkes iş ortağıdır ve aynı koşullarla kazanır.
  * - Yalnız kadrolu uzman SGK'lı çalışandır. Maaş ve prim alır.
- * - İki katkı türü vardır: yalnız tanıştırır ve satışı kapatır. Satışı kapatan ürünü de gösterir ve kurulumu da yapar.
+ * - Üç katkı türü vardır: tanıştırır, satışı kapatır ve onboarding yapar. Satışı kapatan ürünü de gösterir.
+ *   Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Onboarding yapanın oranları ayrıdır (kullanıcı kararı 17 Kasım 2026 Salı).
  *   Eski ortadaki “Ürünü de gösterir” seçeneği kalktı.
- * - Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 kotaları oranı sırayla artırır. Artış orana puan olarak eklenir.
+ * - Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. Kotalar oranı sırayla artırır. Artış orana puan olarak eklenir.
  * - Yıllara yayılan komisyon 4 yıl sürer ve her yıl azalır.
  *
  * Bütün değerler okur tarafından değiştirilebilir. Değerler yalnız okurun tarayıcısında saklanır (ortak kayda gitmez).
@@ -13,10 +14,11 @@
 import type { Ayar, Marka, Seviye } from './satisOrtakligi';
 import { num } from '../lib/format';
 
-export type KatkiTuru = 'tanistir' | 'kapatir';
+export type KatkiTuru = 'tanistir' | 'kapatir' | 'onboard';
+export const KATKI_TURLERI = ['tanistir', 'kapatir', 'onboard'] as const;
 export type Esik = number | null;
 export interface KatkiPlani {
-  /** Yıllık ciro eşikleri. Her katkı türünün eşiği ayrıdır. Kâğıtta yazmıyor, bu yüzden varsayılanı boştur. */
+  /** Aylık ciro eşikleri. Her katkı türünün eşiği ayrıdır. Kâğıtta yazmıyor, bu yüzden varsayılanı boştur. */
   kotaEsik: [Esik, Esik, Esik];
   /** Ciro üzerinden taban oran. */
   taban: number;
@@ -28,7 +30,8 @@ export interface KatkiPlani {
 export interface KazancPlani {
   tanistir: KatkiPlani;
   kapatir: KatkiPlani;
-  /** Örnek hesapta kullanılan yıllık ciro. Gerçek satış değildir. */
+  onboard: KatkiPlani;
+  /** Örnek hesapta kullanılan aylık ciro. Gerçek satış değildir. */
   ornekCiro: number;
   kadrolu: { maas: number; kotaOrani: number; primOrani: Esik };
   /** Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi. Yönetici seçer (kullanıcı kararı 17 Kasım 2026). */
@@ -49,19 +52,21 @@ export const BOLUSME_SORUSU = { ilkSatis: 'İlk satışta pay', yillar: 'Sonraki
 export const SURE_SECENEKLERI = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
 export type SureAy = (typeof SURE_SECENEKLERI)[number];
 
-export const KATKI_ADI: Record<KatkiTuru, string> = { tanistir: 'Tanıştırma', kapatir: 'Satışı kapatma' };
+export const KATKI_ADI: Record<KatkiTuru, string> = { tanistir: 'Tanıştırma', kapatir: 'Satışı kapatma', onboard: 'Onboarding' };
 /** Kadrolu uzmanın aylık maaş aralığı (kullanıcı kararı). */
 export const MAAS_ARALIGI = [50_000, 60_000] as const;
 
 export const KAZANC_VARSAYILAN: KazancPlani = {
-  // Kâğıtta tanıştırma için kota artışı yazmıyor. Okur değeri kendisi girer.
-  tanistir: { kotaEsik: [null, null, null], taban: 0.07, kotaArtis: [0, 0, 0], gecmis: [0.05, 0.02, 0.02, 0.01] },
+  // Kullanıcı kararı 17 Kasım 2026 Salı: tanıştırmanın varsayılanları. Bunlar kalıcı kural değildir.
+  tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0.07, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.05, 0.025, 0, 0] },
   kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0.02] },
+  // Onboarding oranları kâğıtta yok. Uydurulmaz. Yönetici değerleri girer.
+  onboard: { kotaEsik: [null, null, null], taban: 0, kotaArtis: [0, 0, 0], gecmis: [0, 0, 0, 0] },
   ornekCiro: 100_000,
   // Kullanıcının örneği: 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
   kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2.5, primOrani: null },
   // Her soruda varsayılan, şirketi zarardan koruyan düşme seçeneğidir.
-  paylasim: { sureAy: 2, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' },
+  paylasim: { sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' },
   kalici: [],
 };
 
@@ -119,7 +124,7 @@ export function kuralListesi(plan: KazancPlani) {
   const oran = (id: string, ad: string, v: number | null): Kural => ({ id, ad, deger: v, gosterim: v === null ? 'Belirlenmedi' : yuzdeMetni(v) });
   const para = (id: string, ad: string, v: number | null): Kural => ({ id, ad, deger: v, gosterim: v === null ? 'Belirlenmedi' : tlMetni(v) });
   const liste: Kural[] = [];
-  for (const tur of ['tanistir', 'kapatir'] as const) {
+  for (const tur of KATKI_TURLERI) {
     const ad = KATKI_ADI[tur];
     const p = plan[tur];
     liste.push(oran(`${tur}.taban`, `${ad} taban oranı`, p.taban));
@@ -153,12 +158,14 @@ export function kaliciJson(plan: KazancPlani, proje: Marka, simdi: Date) {
   const secili = new Set(plan.kalici);
   return {
     tur: 'kazanc-plani-kalici-kurallar',
-    surum: 1,
+    surum: 2,
     proje,
     gorunum,
     tarih,
     tarihMetni: `${simdi.getDate()} ${AYLAR[simdi.getMonth()]} ${simdi.getFullYear()} ${GUNLER[simdi.getDay()]}`,
     kurallar: kuralListesi(plan).filter((k) => secili.has(k.id)).map((k) => ({ ...k, gorunum, tarih })),
+    // Kullanıcı kararı 17 Kasım 2026 Salı: JSON, işaretli olmasa da bütün güncel değerleri içerir.
+    degerler: kuralListesi(plan).map((k) => ({ ...k, kalici: secili.has(k.id) })),
   };
 }
 
@@ -190,7 +197,7 @@ export function planOku(ham: unknown): KazancPlani {
   const esikMi = (e: unknown): e is KatkiPlani['kotaEsik'] => Array.isArray(e) && e.length === 3 && e.every(ESIK);
   // Eski kayıtta tek eşik listesi vardı. Bu liste iki katkı türüne de geçer.
   const eskiEsik = (ham as { kotaEsik?: unknown }).kotaEsik;
-  for (const tur of ['tanistir', 'kapatir'] as const) {
+  for (const tur of KATKI_TURLERI) {
     if (esikMi(eskiEsik)) v[tur].kotaEsik = [...eskiEsik];
     const k = h[tur] as Partial<KatkiPlani> | undefined;
     if (k && typeof k === 'object' && esikMi(k.kotaEsik)) v[tur].kotaEsik = [...k.kotaEsik];

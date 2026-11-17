@@ -4,7 +4,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -86,12 +86,14 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
   return <div className="pol-kz-katki" data-katki={tur}>
     <p>{tur === 'tanistir'
       ? 'Müşteriyi şirketle tanıştırırsınız. Satışı şirket yapar.'
-      : 'Satışı siz kapatırsınız. Ürünü de siz gösterirsiniz. Kurulumu da siz yaparsınız.'}</p>
-    <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
+      : tur === 'kapatir' ? 'Satışı siz kapatırsınız. Ürünü de siz gösterirsiniz.'
+      : 'Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Bu işi siz yaparsınız.'}</p>
+    {tur === 'onboard' && <p className="pol-kz-not">Onboarding oranları henüz belirlenmedi. Değerleri yönetici girer.</p>}
+    <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
     <Grup baslik={`1. grup: ${ad} için bu yılki oran`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
     </Grup>
-    <Grup baslik={`2. grup: ${ad} için yıllık ciro kotaları`}>
+    <Grup baslik={`2. grup: ${ad} için aylık ciro kotaları`}>
       {p.kotaEsik.map((e, i) => <Kutu key={i} label={`${ad} K${i + 1} ciro eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />)}
     </Grup>
@@ -112,21 +114,21 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
   const { oran, kota } = katkiOrani(plan, tur, plan.ornekCiro);
   return <section className="pol-kz-kart" aria-labelledby={`pol-kz-sonuc-${tur}`}>
     <h4 id={`pol-kz-sonuc-${tur}`}>{KATKI_SEKMESI[tur]}</h4>
-    <p className="pol-kz-not">Bu yılki kazancınız</p>
+    <p className="pol-kz-not">Bu ayki kazancınız</p>
     <p className="pol-kz-rakam" data-kazanc={`${tur}-tutar`}>{tl(Math.round(plan.ornekCiro * oran))}</p>
     <dl className="pol-kz-sonuc pol-kz-sonuc-satir">
       <div><dt>Hesap</dt><dd data-kazanc={`${tur}-bu-yil`}>{tl(plan.ornekCiro)} × {yuzde(oran)} = {tl(Math.round(plan.ornekCiro * oran))}</dd></div>
       <div><dt>Geçerli oran</dt><dd data-kazanc={`${tur}-oran`}>{yuzde(oran)}</dd></div>
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
-    <p>Müşteri sonraki yıllarda da aynı ciroyu yaparsa şu tutarları alırsınız:</p>
+    <p>Müşteri sonraki yıllarda da aynı aylık ciroyu yaparsa her ay şu tutarları alırsınız:</p>
     <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
       {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.yil}. yıl sonra {yuzde(s.oran)} ile {tl(s.tutar)}</li>)}
     </ul>
   </section>;
 }
 
-const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştırırsanız', kapatir: 'Satışı kapatırsanız' };
+const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştırırsanız', kapatir: 'Satışı kapatırsanız', onboard: 'Onboarding yaparsanız' };
 const SEKME_SINIFI = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
 
 /** Karar kartı: üstte soru, ortada seçim, altta “Kalıcı kural”. Her karar ayrı yüzeyde durur. */
@@ -210,7 +212,7 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
   const p = paylasim(plan, ciro);
   return <section className="pol-kz-kart" aria-labelledby="pol-kz-pay-sonuc">
     <h4 id="pol-kz-pay-sonuc">Ahmet tanıştırır, Mehmet satışı kapatırsa</h4>
-    <p>Tanıştırma {plan.paylasim.sureAy} ay geçerlidir. Satış {tl(ciro)} olursa ilk satışta pay şöyle bölünür:</p>
+    <p>Tanıştırma {plan.paylasim.sureAy} ay geçerlidir. Aylık ciro {tl(ciro)} olursa ilk satışta pay şöyle bölünür:</p>
     <p className="pol-kz-rakam">{tl(p.toplam)}<span className="pol-kz-rakam-ek"> şirketin ödediği toplam</span></p>
     <div className="pol-kz-bolus" aria-hidden="true" style={{ '--pay-a': String(p.toplam ? p.tanistiran / p.toplam : 0) } as CSSProperties}>
       <span className="pol-kz-bolus-a" /><span className="pol-kz-bolus-m" />
@@ -267,8 +269,9 @@ function KaliciKurallar({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
   const { json, kopyala, indir, durum } = useKaliciJson(plan, proje);
   return <div className="pol-kz-adim-govde">
     <p>Yönetici bir değeri kalıcı yapmak isterse yanındaki “Kalıcı kural” kutusunu işaretler.</p>
-    <p>{plan.kalici.length ? `${plan.kalici.length} değer işaretli. JSON aşağıdadır.` : 'Henüz hiçbir değer işaretlenmedi.'}</p>
-    {plan.kalici.length > 0 && <>
+    <p>{plan.kalici.length ? `${plan.kalici.length} değer kalıcı kural olarak işaretli.` : 'Henüz hiçbir değer kalıcı kural olarak işaretlenmedi.'}</p>
+    <p>JSON bütün güncel değerleri içerir. İşaretli olmayan değerler de JSON'dadır. Her değerin yanında kalıcı olup olmadığı yazar.</p>
+    {<>
       <p>JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
       <textarea className="param-input pol-kz-json" aria-label="Kalıcı kurallar JSON" readOnly value={json()} rows={10} />
       <div className="pol-kz-dugmeler">
@@ -365,23 +368,24 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
       <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
       <Sihirbaz key="ortak" adimlar={[
         { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} /> },
-        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir.', icerik:
+        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki üç sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır.', icerik:
           /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
             <Tabs.List aria-label="Satıştaki katkınız">
-              {(['tanistir', 'kapatir'] as const).map((t) => <Tabs.Tab key={t} value={t}>{KATKI_SEKMESI[t]}</Tabs.Tab>)}
+              {KATKI_TURLERI.map((t) => <Tabs.Tab key={t} value={t}>{KATKI_SEKMESI[t]}</Tabs.Tab>)}
             </Tabs.List>
-            {(['tanistir', 'kapatir'] as const).map((t) => <Tabs.Panel key={t} value={t}>
+            {KATKI_TURLERI.map((t) => <Tabs.Panel key={t} value={t}>
               <Katki tur={t} plan={plan} guncelle={guncelle} />
             </Tabs.Panel>)}
           </Tabs> },
-        { baslik: 'Sonucu görün', aciklama: 'Bir örnek satış tutarı girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.', icerik: <>
+        { baslik: 'Sonucu görün', aciklama: 'Bir örnek aylık ciro girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.', icerik: <>
           <Grup baslik="Örnek satış">
-            <Kutu label="Örnek yıllık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => guncelle((x) => { x.ornekCiro = v ?? 0; })} />
+            <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => guncelle((x) => { x.ornekCiro = v ?? 0; })} />
           </Grup>
           <div className="pol-kz-kartlar">
             <KatkiSonucu tur="tanistir" plan={plan} />
             <KatkiSonucu tur="kapatir" plan={plan} />
+            <KatkiSonucu tur="onboard" plan={plan} />
           </div>
           <PaySonucu plan={plan} />
         </> },
