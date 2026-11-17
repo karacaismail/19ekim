@@ -13,6 +13,8 @@ export interface AkisAdimi {
   ad: string;
   /** İşi yapan kişi. Atanmış kişi bilinmiyorsa önerilen görev adı kullanılır. */
   sorumlu: string;
+  /** Adımdaki zor kelimelerin kısa açıklaması. Yapılacak işlerden ayrı gösterilir (kullanıcı kararı 17 Kasım 2026). */
+  terimler?: string[];
   yap: string[];
   soru: string;
   dikkat?: string;

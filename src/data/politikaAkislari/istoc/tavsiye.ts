@@ -29,8 +29,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const kosulAdimi: AkisAdimi = odulVar
     ? {
         id: 'kosul', ad: 'Yazılı koşulu alın', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'kazanc',
+        terimler: ['Sürüm, koşulların belli bir dönemdeki hâlidir.'],
         yap: [
-          'Sürüm, koşulların belli bir dönemdeki hâlidir.',
           `Her uygun tavsiye için ${sayi(a.krediAy)} ay ücretsiz kullanım alırsınız.`,
           `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeyi ödüle çevirir.`,
           'Müşteri sorumlusu bu koşulu size yazılı gönderir.',
@@ -62,9 +62,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const adimlar: AkisAdimi[] = [
     {
       id: 'deneyim', ad: 'Deneyiminizi değerlendirin', sorumlu: 'Siz', ek: 'sinir',
+      terimler: ['Katalog, ürünlerinizin listesidir.', 'Tavsiye, başka bir işletmeyi şirkete tanıtmaktır.'],
       yap: [
-        'Katalog, ürünlerinizin listesidir.',
-        'Tavsiye, başka bir işletmeyi şirkete tanıtmaktır.',
         'Ürünlerinizi iStoc ile nasıl sunduğunuzu düşünün.',
         'Yalnız yaşadığınız deneyimi anlatmaya hazırlanın.',
         'Alıcı veya sipariş artışı vaat etmeyin.',
@@ -81,8 +80,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     kosulAdimi,
     {
       id: 'isletme', ad: 'Uygun işletmeyi seçin', sorumlu: 'Siz', ek: 'kitle',
+      terimler: ['İşletme, dükkân ya da firma demektir.'],
       yap: [
-        'İşletme, dükkân ya da firma demektir.',
         'Komşu dükkâna ürünlerini nasıl sunduğunu sorun.',
         'Ödül alabileceğinizi açıkça söyleyin.',
         'Kendi alıcı listenizi ve fiyatlarınızı paylaşmayın.',
@@ -98,8 +97,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     },
     {
       id: 'basvuru', ad: 'Başvuruyu kaydettirin', sorumlu: 'Siz ve müşteri sorumlusu (önerilen görev)', ek: 'sinir',
+      terimler: ['Başvuru, işletmenin şirkete yaptığı kayıt isteğidir.'],
       yap: [
-        'Başvuru, işletmenin şirkete yaptığı kayıt isteğidir.',
         'Şirketin başvuru yolunu işletmeye verin.',
         'İşletme başvuruda sizin dükkânınızın adını yazar.',
         'Müşteri sorumlusu tavsiyenin size bağlandığını yazılı bildirir.',
@@ -115,8 +114,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     },
     {
       id: 'satis', ad: 'Satışı şirkete bırakın', sorumlu: 'Satış uzmanı (önerilen görev)',
+      terimler: ['Yıllık paket, bir yıllık kullanım için alınan pakettir.'],
       yap: [
-        'Yıllık paket, bir yıllık kullanım için alınan pakettir.',
         'Satış uzmanı işletmeye fiyat tablosundaki fiyatla teklif verir.',
         'Satış uzmanı ürün bilgisinin nasıl yükleneceğini anlatır.',
         'Siz işletme adına karar vermezsiniz.',

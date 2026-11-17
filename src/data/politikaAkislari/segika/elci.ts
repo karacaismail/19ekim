@@ -25,13 +25,11 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const fiyat = segikaAylik(a);
   const odemeMetni = a.model === 'oran'
     ? [
-        'Komisyon, satış için size ödenen paydır.',
         `Bu örnekte ${sayi(fiyat.kisi)} çalışanlık ${PAKET[a.segikaPaket]} yılda ${para(yillikFiyat(a))} eder.`,
         `Katkınız için komisyon oranı ${oranMetni(a.oran[seviye])} olur.`,
         `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
       ]
     : [
-        'Komisyon, satış için size ödenen paydır.',
         'Bu örnekte şirket her satış için sabit tutar öder.',
         `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
         'Sabit tutar yetkinizi değiştirmez.',
@@ -42,8 +40,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'anlasma',
       ad: 'Anlaşmayı ve onaylı bilgiyi alın',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
+      terimler: ['Onaylı liste, şirketin doğru dediği bilgilerin listesidir.'],
       yap: [
-        'Onaylı liste, şirketin doğru dediği bilgilerin listesidir.',
         'Pazarlama sorumlusu size yazılı anlaşmayı gönderir.',
         'Pazarlama sorumlusu onaylı Segika bilgi listesini verir.',
         'Anlaşma, yasa danışmanlığı yapmadığınızı yazar.',
@@ -68,8 +66,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'icerik',
       ad: 'Teşvik ve bordro içeriği hazırlayın',
       sorumlu: 'Siz',
+      terimler: ['Teşvik, devletin işverene sağladığı destektir.'],
       yap: [
-        'Teşvik, devletin işverene sağladığı destektir.',
         'Kural anlatıyorsanız ürün sorumlusuna kontrol ettirin.',
         'İçeriğe hazırlandığı tarihi yazın.',
       ],
@@ -94,8 +92,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'baglanti',
       ad: 'Bağlantıyı ve kodu deneyin',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
+      terimler: ['Deneme başvurusu, bağlantıyı sınamak için yaptığınız başvurudur.'],
       yap: [
-        'Deneme başvurusu, bağlantıyı sınamak için yaptığınız başvurudur.',
         'Pazarlama sorumlusu size özel bir bağlantı veya kod verir.',
         'Pazarlama sorumlusu formun çalışan bilgisi istemediğini kontrol eder.',
         'Siz bağlantıyı başka bir tarayıcı penceresinde açıp deneyin.',
@@ -120,8 +118,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'yayin',
       ad: 'Reklam ibaresiyle yayımlayın',
       sorumlu: 'Siz',
+      terimler: ['İbare, metne eklenen kısa yazıdır.'],
       yap: [
-        'İbare, metne eklenen kısa yazıdır.',
         '“Reklam” ibaresini metnin başına yazın.',
         'Seminerde iş birliğini baştan söyleyin.',
         'Yorumlardaki kişisel bilgileri gizleyin.',
@@ -141,8 +139,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'basvuru',
       ad: 'Gelen başvuruyu kontrol edin',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
+      terimler: ['İşveren, çalışanı olan firmadır.'],
       yap: [
-        'İşveren, çalışanı olan firmadır.',
         'Pazarlama sorumlusu başvuranın işveren olup olmadığını kaydeder.',
         'Pazarlama sorumlusu danışmanın da aynı işvereni önerip önermediğine bakar.',
         'Pazarlama sorumlusu sonucu size bildirir.',
@@ -169,8 +167,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'gosterim',
       ad: 'Ürün gösterimini yapın',
       sorumlu: 'Siz',
+      terimler: ['Ürün gösterimi, programı işverene çalışırken göstermektir.'],
       yap: [
-        'Ürün gösterimi, programı işverene çalışırken göstermektir.',
         'Yalnız örnek kayıtlı gösterim ortamını kullanın.',
         'İşverenin çalışan bilgilerini istemeyin.',
         'Teşvik hakkı sorulursa soruyu şirkete iletin.',
@@ -197,8 +195,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'teklif',
       ad: 'Onaylı teklifle görüşün',
       sorumlu: 'Siz',
+      terimler: ['Teklif, şirketin yazılı fiyat önerisidir.'],
       yap: [
-        'Teklif, şirketin yazılı fiyat önerisidir.',
         'Yalnız şirketin onayladığı teklifi kullanın.',
         `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar.`,
         'Fiyat herkes için aynıdır.',
@@ -230,9 +228,10 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'devir',
       ad: seviye === 'A' ? 'Başvuruyu satış ekibine bırakın' : 'Kapanışı şirkete devredin',
       sorumlu: 'Satış uzmanı (önerilen görev)',
+      terimler: ['Satış uzmanı, satışı yapan şirket çalışanıdır.'],
       yap: seviye === 'A'
-        ? ['Satış uzmanı, satışı yapan şirket çalışanıdır.', 'Satış uzmanı başvuruyu devralır.', 'Siz ürün gösterimi yapmazsınız.', 'Teşvik sorularını satış uzmanı yanıtlar.']
-        : ['Satış uzmanı, satışı yapan şirket çalışanıdır.', 'Siz gösterim notlarını satış uzmanına iletin.', 'Satış uzmanı teklifi ve sözleşmeyi hazırlar.', 'Siz fiyat konuşmazsınız.'],
+        ? [ 'Satış uzmanı başvuruyu devralır.', 'Siz ürün gösterimi yapmazsınız.', 'Teşvik sorularını satış uzmanı yanıtlar.']
+        : [ 'Siz gösterim notlarını satış uzmanına iletin.', 'Satış uzmanı teklifi ve sözleşmeyi hazırlar.', 'Siz fiyat konuşmazsınız.'],
       soru: 'Satış görüşmesi ne durumda?',
       secenekler: [
         { id: 'satis-oldu', metin: 'İşveren paketi satın almayı kabul etti', tur: 'devam', sonraki: 'odeme' },
@@ -255,6 +254,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'odeme',
       ad: 'Ödeme sonucunu izleyin',
       sorumlu: 'Finans sorumlusu (önerilen görev)',
+      terimler: ['Komisyon, satış için size ödenen paydır.'],
       yap: odemeMetni,
       soru: 'İşverenin ödemesi ne durumda?',
       dikkat: 'Bu hesap örnektir. Kazanç garantisi değildir.',

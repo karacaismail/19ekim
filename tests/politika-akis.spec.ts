@@ -230,3 +230,49 @@ test('sonuç satırı cevabın türünü doğru söyler', async ({ page }) => {
   await expect(await satir('Kayıt için henüz yanıt gelmedi')).toHaveText('Burada durursunuz. Durum değişince bu soruya dönün.');
   await expect(await satir('İşletmenin başka ortağa kayıtlı olduğunu öğrendim')).toHaveText('Bu iş burada biter.');
 });
+
+// Kullanıcı kararı 17 Kasım 2026 Salı: terim açıklamaları yapılacak işlerden ayrı bir bölümde görünür.
+// Açıklama veride ayrı alandır (`terimler`). Numaralı listede yalnız yapılacak işler kalır.
+// “Kelime, ... -dır.” biçimindeki tanım cümlesi. “Bu program ... içindir.” gibi bilgi cümlesi tanım sayılmaz.
+// Sayı ya da yüzde taşıyan cümle bir kuraldır, kelime açıklaması değildir. Örneğin ödül oranı.
+const TANIM = /^(?!Bu )(?!.*[%\d])[^,.?!]{2,40}, [^.?!]+(dır|dir|dur|dür|tır|tir|tur|tür|demektir)\.$/;
+test('akış verisinde terim açıklaması yapılacak işler listesinde durmaz', async ({ browserName }) => {
+  test.skip(browserName !== 'chromium', 'Veri denetimi bir kez çalışır.');
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  const { KAZANC_VARSAYILAN, planliAyar } = await import('../src/data/kazancPlani');
+  const { kosulListesi } = await import('../src/data/kosullar');
+  let terimSayisi = 0;
+  for (const proje of ['istoc', 'segika'] as const) for (const rol of ['kadrolu', 'cozum', 'tavsiye', 'elci'] as const) {
+    const { akisOlustur } = await import(`../src/data/politikaAkislari/${proje}/${rol}.ts`);
+    for (const model of ['oran', 'sabit'] as const) for (const seviye of ['A', 'C'] as const) {
+      const temel = planliAyar({ ...VARSAYILAN_AYAR, marka: proje, model, cozumSeviye: seviye, elciSeviye: seviye }, KAZANC_VARSAYILAN);
+      for (const k of kosulListesi(temel, rol)) {
+        const akis = akisOlustur({ ...temel, kosul: { ...temel.kosul, [rol]: k.id } });
+        for (const adim of akis.adimlar) {
+          for (const is of adim.yap) expect(is, `${proje}/${rol}/${k.id}/${adim.id}`).not.toMatch(TANIM);
+          terimSayisi += adim.terimler?.length ?? 0;
+        }
+      }
+    }
+  }
+  expect(terimSayisi).toBeGreaterThan(100);
+});
+
+for (const proje of ['istoc', 'segika'] as const) test(`${proje}: terimler numaralı listenin üstünde ayrı bölümde görünür`, async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto(`politikalar/?proje=${proje}&rol=kadrolu`);
+  const is = page.locator('[data-akis-etkin] .pol-is-aciklamasi');
+  const bolum = is.locator('.pol-terimler');
+  await expect(bolum.getByRole('heading', { name: 'Bu adımdaki kelimeler', exact: true })).toBeVisible();
+  await expect(bolum.locator('li')).not.toHaveCount(0);
+  for (const metin of await is.locator('.pol-yap li').allInnerTexts()) expect(metin).not.toMatch(TANIM);
+  const yer = await page.evaluate(() => {
+    const k = document.querySelector('[data-akis-etkin] .pol-is-aciklamasi')!;
+    const b = k.querySelector('.pol-terimler')!;
+    const s = getComputedStyle(b);
+    return { ustte: b.getBoundingClientRect().bottom <= k.querySelector('.pol-yap')!.getBoundingClientRect().top, kenar: s.borderTopStyle + s.borderLeftStyle, zemin: s.backgroundColor };
+  });
+  expect(yer.ustte).toBe(true);
+  expect(yer.kenar).toBe('nonenone');
+  expect(yer.zemin).not.toBe('rgba(0, 0, 0, 0)');
+});

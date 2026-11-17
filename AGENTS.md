@@ -1831,6 +1831,8 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
 - Rehberde her sorunun altında “Ne olduğunu seçin. Sayfa size sonraki adımı gösterir.” açıklaması vardır (kullanıcı kararı 17 Kasım 2026).
   Her cevap kutusunun altında seçimin sonucunu söyleyen satır vardır. Satır, akış verisindeki türden üretilir (`motor.ts → sonucSatiri`).
   Akışlardaki sorular ve cevaplar sadeleşti. Cevap, kişinin gördüğünü ya da duyduğunu anlatır. Zor terim, adımın ilk maddesinde açıklanır.
+  Zor kelimelerin açıklaması veride ayrı alandadır (`terimler`). Ekranda “Bu adımdaki kelimeler” bölümünde görünür.
+  Bu bölüm numaralı iş listesinin üstündedir. Kenarlıksızdır, yüzey tonuyla ayrılır. İş listesinde tanım cümlesi durmaz.
   Bunu `tests/politika-akis.spec.ts` denetler.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
   Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.

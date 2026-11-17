@@ -47,7 +47,8 @@ function baslangicAdimi(sonraki: string, aciklama: string, ek?: AkisAdimi['ek'])
 function kayitAdimi(a: Ayar, program: string, sonraki: string): AkisAdimi {
   return {
     id: 'kayit', ad: 'İşvereni kaydettirin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kitle',
-    yap: ['İşveren, Segika’yı satın alacak firmadır.', 'Ortak, Segika’yı işverene öneren kişi ya da firmadır.', 'Siz işvereni ortaklık sorumlusuna bildirin.', 'Siz kayda çalışan sayısını ve istenen paketi yazın.',
+    terimler: ['İşveren, Segika’yı satın alacak firmadır.', 'Ortak, Segika’yı işverene öneren kişi ya da firmadır.'],
+    yap: [ 'Siz işvereni ortaklık sorumlusuna bildirin.', 'Siz kayda çalışan sayısını ve istenen paketi yazın.',
       program === 'ana' ? 'Şirket her firmayı yalnız bir ortağın kaydına yazar.' : kural(a, program, 'korunur', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.')],
     soru: 'İşverenin kaydı ne oldu?',
     secenekler: [
@@ -69,7 +70,8 @@ function anaAkis(a: Ayar): IsAkisi {
   const egitim: AkisAdimi = ekGider > 0
     ? {
         id: 'egitim', ad: 'Ek eğitimi onaylatın', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Ek eğitim, ücretsiz saatlerden sonra verilen eğitimdir.', `Şirket yılda ${sayi(a.egitimSaat)} saat program eğitimini ücretsiz verir.`,
+        terimler: ['Ek eğitim, ücretsiz saatlerden sonra verilen eğitimdir.'],
+        yap: [ `Şirket yılda ${sayi(a.egitimSaat)} saat program eğitimini ücretsiz verir.`,
           `Bu örnekte ${sayi(a.ekEgitimSaat)} saat ek eğitim ${tl(ekGider)} tutar.`,
           'Finans sorumlusu bu gideri komisyonunuzdan düşer.'],
         soru: 'Ek eğitimin ücreti için ne oldu?',
@@ -109,7 +111,8 @@ function anaAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'meslek', ad: 'Meslek kurallarını kontrol edin', sorumlu: 'Hukuk danışmanı (önerilen görev)', ek: 'sinir',
-        yap: ['Bazı meslekler kendi kurallarına uymak zorundadır.', 'Hukuk danışmanı, yasal konularda görüş veren kişidir.', 'Komisyon, satıştan size ödenen paydır.', 'Mali müşavir ve avukat meslek kurallarına bağlıdır.',
+        terimler: ['Hukuk danışmanı, yasal konularda görüş veren kişidir.', 'Komisyon, satıştan size ödenen paydır.'],
+        yap: ['Bazı meslekler kendi kurallarına uymak zorundadır.', 'Mali müşavir ve avukat meslek kurallarına bağlıdır.',
           a.musavirModel === 'indirim' ? 'Bu örnekte mali müşavir komisyon yerine programın müşteri indirimini seçer.' : 'Bu örnekte mali müşavir komisyon seçeneğini seçer.',
           'Hukuk danışmanı bu seçeneğin meslek kurallarına uyduğunu kontrol eder.',
           'Bu seçenek komisyonunuzla kendiliğinden birleşmez.'],
@@ -124,7 +127,8 @@ function anaAkis(a: Ayar): IsAkisi {
       kayitAdimi(a, 'ana', 'ihtiyac'),
       {
         id: 'ihtiyac', ad: 'Teşvik ve bordro ihtiyacını konuşun', sorumlu: 'Siz',
-        yap: ['İşveren, Segika’yı satın alacak firmadır.', 'Teşvik, devletin işverene verdiği destektir.', 'Bordro, çalışanların maaş listesidir.', 'Teşvik takibini ve bordro adımlarını sorun.', 'Mesaj göndermeden önce kişinin iznini kontrol edin.'],
+        terimler: ['İşveren, Segika’yı satın alacak firmadır.', 'Teşvik, devletin işverene verdiği destektir.', 'Bordro, çalışanların maaş listesidir.'],
+        yap: [ 'Teşvik takibini ve bordro adımlarını sorun.', 'Mesaj göndermeden önce kişinin iznini kontrol edin.'],
         soru: 'İşveren ne dedi?',
         secenekler: [
           devam('var', 'İşveren teşvik ya da bordro için yardım istedi', 'gosterim'),
@@ -134,7 +138,8 @@ function anaAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'gosterim', ad: 'Ürün gösterimi yapın', sorumlu: 'Siz',
-        yap: ['Teklif, fiyatı ve koşulları yazan öneridir.', 'Gerçek çalışan bilgisi kullanmayın.', `Bu örnek ${PAKET[a.segikaPaket]} içindir.`,
+        terimler: ['Teklif, fiyatı ve koşulları yazan öneridir.'],
+        yap: [ 'Gerçek çalışan bilgisi kullanmayın.', `Bu örnek ${PAKET[a.segikaPaket]} içindir.`,
           `Bu örnekte şirket fiyatı ${sayi(fiyat.kisi)} çalışana göre hesaplar.`, 'Teşvik tutarı için söz vermeyin.'],
         dikkat: 'Çalışan sayısı aynı blokta kalırsa fiyat değişmez. Fiyat herkes için aynıdır.',
         soru: 'Programı gösterdikten sonra işveren ne dedi?',
@@ -147,7 +152,8 @@ function anaAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'teklif', ad: 'Onaylı teklif ve sözleşme', sorumlu: 'Yetkili satış sorumlusu',
-        yap: ['Teklif, fiyatı ve koşulları yazan öneridir.', 'Yetkili satış sorumlusu teklifi tablo fiyatıyla hazırlar.', 'Siz fiyatı değiştirmeyin. Fiyat herkes için aynıdır.',
+        terimler: ['Teklif, fiyatı ve koşulları yazan öneridir.'],
+        yap: [ 'Yetkili satış sorumlusu teklifi tablo fiyatıyla hazırlar.', 'Siz fiyatı değiştirmeyin. Fiyat herkes için aynıdır.',
           'Siz kendi hizmet bedelinizi tekliften ayrı gösterin.'],
         soru: 'Teklif için ne oldu?',
         secenekler: [
@@ -159,7 +165,8 @@ function anaAkis(a: Ayar): IsAkisi {
       egitim,
       {
         id: 'odeme', ad: 'Desteği verin ve ödemeyi izleyin', sorumlu: 'Siz ve finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Komisyon, satıştan size ödenen paydır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.', odemeMetni, `Bu örnekte bir işverenden komisyonunuz ${tl(cozumKazanci(a))} olur.`,
+        terimler: ['Komisyon, satıştan size ödenen paydır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
+        yap: [ odemeMetni, `Bu örnekte bir işverenden komisyonunuz ${tl(cozumKazanci(a))} olur.`,
           'Şirketin komisyon listesini destek kayıtlarınızla karşılaştırın.'],
         soru: 'Destek ve ödeme konusunda ne oldu?',
         secenekler: [
@@ -243,7 +250,8 @@ function yillaraAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'odeme', ad: 'Dönem komisyonunu izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Dönem, komisyonun hesaplandığı zaman aralığıdır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.', !s.hatalar.length ? `Bir işverenden ${a.affUfukAy} ayda örnek kazancınız ${tl(toplam)} olur.` : 'Bu koşullarla örnek hesap çıkmıyor.',
+        terimler: ['Dönem, komisyonun hesaplandığı zaman aralığıdır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
+        yap: [ !s.hatalar.length ? `Bir işverenden ${a.affUfukAy} ayda örnek kazancınız ${tl(toplam)} olur.` : 'Bu koşullarla örnek hesap çıkmıyor.',
           'Bu tutar örnektir. Kazanılmış hak sayılmaz.', 'Müşteri ödemezse komisyon doğmaz.'],
         soru: 'Bu dönemin ödemesi için ne oldu?',
         secenekler: [
@@ -278,7 +286,8 @@ function yonlendirmeAkis(a: Ayar): IsAkisi {
       kayitAdimi(a, p, 'yonlendir'),
       {
         id: 'yonlendir', ad: 'Satış ekibine yönlendirin', sorumlu: 'Siz ve satış ekibi',
-        yap: ['İşveren, Segika’yı satın alacak firmadır.', 'İşvereni satış ekibiyle tanıştırın.', 'Teklif ve fiyat konuşmayın.', 'Satış ekibi tablo fiyatıyla teklif verir.'],
+        terimler: ['İşveren, Segika’yı satın alacak firmadır.'],
+        yap: [ 'İşvereni satış ekibiyle tanıştırın.', 'Teklif ve fiyat konuşmayın.', 'Satış ekibi tablo fiyatıyla teklif verir.'],
         soru: 'Satış ekibiyle tanışma nasıl geçti?',
         secenekler: [
           devam('devraldi', 'Satış ekibi işverenle ilgilenmeye başladı', 'destek'),
@@ -308,7 +317,8 @@ function yonlendirmeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'odeme', ad: 'Komisyonu izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Komisyon, satıştan size ödenen paydır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.', kural(a, p, 'vergi ve iadeler', 'Komisyon, müşterinin ödediği tutardan vergi ve iadeler düşülerek hesaplanır.'), kural(a, p, 'Ödeme, takip eden', 'Finans sorumlusu ödeme gününü yazılı bildirir.')],
+        terimler: ['Komisyon, satıştan size ödenen paydır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
+        yap: [ kural(a, p, 'vergi ve iadeler', 'Komisyon, müşterinin ödediği tutardan vergi ve iadeler düşülerek hesaplanır.'), kural(a, p, 'Ödeme, takip eden', 'Finans sorumlusu ödeme gününü yazılı bildirir.')],
         soru: 'Komisyonunuz geldi mi?',
         secenekler: [
           son('tamamla', 'odendi', 'Komisyon geldi ve faturamı kestim', 'Bu işin rehberi tamamlandı', 'Ödemeyi kendi kaydınızla karşılaştırın.'),
@@ -331,7 +341,8 @@ function smmmAkis(a: Ayar): IsAkisi {
     adimlar: [
       {
         id: 'uygunluk', ad: 'Ofis koşullarını kontrol edin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kitle',
-        yap: ['Bordro, çalışanların maaş listesidir.', 'Sertifika, eğitimi bitirince verilen belgedir.', kural(a, p, 'bordro hizmeti vermeli', 'Ofis bordro hizmeti vermeli ve sertifika eğitimini bitirmelidir.'),
+        terimler: ['Bordro, çalışanların maaş listesidir.', 'Sertifika, eğitimi bitirince verilen belgedir.'],
+        yap: [ kural(a, p, 'bordro hizmeti vermeli', 'Ofis bordro hizmeti vermeli ve sertifika eğitimini bitirmelidir.'),
           'Ortaklık sorumlusu bu koşulları ofisinizle kontrol eder.'],
         soru: 'Ofisiniz bu koşulları sağlıyor mu?',
         secenekler: [
@@ -342,7 +353,8 @@ function smmmAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'model', ad: 'Ödeme modelini anlayın', sorumlu: 'Siz', ek: 'sinir',
-        yap: ['Toptan fiyat, çok alana yapılan indirimli fiyattır.', 'Komisyon, satıştan size ödenen paydır.', kural(a, p, 'nakit, hediye', 'Bu modelde nakit veya hediye verilmez.'), 'Ofisiniz toptan fiyattan yararlanır.'],
+        terimler: ['Toptan fiyat, çok alana yapılan indirimli fiyattır.', 'Komisyon, satıştan size ödenen paydır.'],
+        yap: [ kural(a, p, 'nakit, hediye', 'Bu modelde nakit veya hediye verilmez.'), 'Ofisiniz toptan fiyattan yararlanır.'],
         soru: 'Bu ödeme şekli size uyuyor mu?',
         secenekler: [
           devam('kabul', 'Toptan fiyatla çalışmayı kabul ediyoruz', 'meslek'),
@@ -351,7 +363,8 @@ function smmmAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'meslek', ad: 'Meslek kurallarını kontrol edin', sorumlu: 'Hukuk danışmanı (önerilen görev)',
-        yap: ['Hukuk danışmanı, yasal konularda görüş veren kişidir.', 'Hukuk danışmanı mali müşavirlik meslek kurallarını ayrıca kontrol eder.', 'Bu kontrolü sistem kendiliğinden yapmaz.'],
+        terimler: ['Hukuk danışmanı, yasal konularda görüş veren kişidir.'],
+        yap: [ 'Hukuk danışmanı mali müşavirlik meslek kurallarını ayrıca kontrol eder.', 'Bu kontrolü sistem kendiliğinden yapmaz.'],
         soru: 'Hukuk danışmanı meslek kuralları için ne dedi?',
         secenekler: [
           devam('uygun', 'Hukuk danışmanı engel olmadığını yazdı', 'seviye'),
@@ -360,7 +373,8 @@ function smmmAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'seviye', ad: 'Seviyenizi belirleyin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Mükellef, ofisinizin hizmet verdiği firmadır.', s ? `Bu örnekte ${sayi(a.smmmMukellef)} aktif mükellefle seviyeniz ${s.deger} olur.` : 'Ortaklık sorumlusu seviyeyi aktif mükellef sayısına göre belirler.',
+        terimler: ['Mükellef, ofisinizin hizmet verdiği firmadır.'],
+        yap: [ s ? `Bu örnekte ${sayi(a.smmmMukellef)} aktif mükellefle seviyeniz ${s.deger} olur.` : 'Ortaklık sorumlusu seviyeyi aktif mükellef sayısına göre belirler.',
           'Ortaklık sorumlusu mükellef sayısının hangi kayıtla kanıtlanacağını yazar.'],
         soru: 'Mükellef sayınızı nasıl gösterdiniz?',
         secenekler: [
@@ -370,7 +384,8 @@ function smmmAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'veri', ad: 'Mükellef verisinin dayanağı', sorumlu: 'Hukuk danışmanı (önerilen görev)', ek: 'anlasma',
-        yap: ['Siz mükellef verisini yasal dayanak olmadan paylaşmayın.', 'Yasal dayanak, veriyi paylaşmaya izin veren hukuk kuralıdır.',
+        terimler: ['Yasal dayanak, veriyi paylaşmaya izin veren hukuk kuralıdır.'],
+        yap: ['Siz mükellef verisini yasal dayanak olmadan paylaşmayın.',
           'Hukuk danışmanı aydınlatma metnini ve açık rızayı ayrı değerlendirir.'],
         soru: 'Yasal dayanak belli oldu mu?',
         secenekler: [
@@ -380,7 +395,8 @@ function smmmAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'fiyat', ad: 'Toptan fiyatı netleştirin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-        yap: ['Fiyat bandı, mükellef sayısına göre değişen fiyat basamağıdır.', kural(a, p, 'bantları', 'Fiyat bantları mükellef sayısına göre belirlenir.'), 'Şirket bant tutarlarını henüz yayımlamadı.',
+        terimler: ['Fiyat bandı, mükellef sayısına göre değişen fiyat basamağıdır.'],
+        yap: [ kural(a, p, 'bantları', 'Fiyat bantları mükellef sayısına göre belirlenir.'), 'Şirket bant tutarlarını henüz yayımlamadı.',
           'Finans sorumlusu ofisinizin bant fiyatını yazılı bildirir. Bu fiyat pazarlıkla değişmez.'],
         soru: 'Fiyat bandınız size yazıldı mı?',
         secenekler: [
@@ -402,7 +418,8 @@ function altyapiAkis(a: Ayar): IsAkisi {
     adimlar: [
       {
         id: 'uygunluk', ad: 'Hizmetinizi tanımlayın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kitle',
-        yap: ['Teşvik, devletin işverene verdiği destektir.', 'Dış kaynaklı bordro, başka firmanın maaş listesini hazırlamaktır.', kural(a, p, 'teşvik danışmanlığı', 'Ortak teşvik danışmanlığı ya da dış kaynaklı bordro hizmeti verir.'),
+        terimler: ['Teşvik, devletin işverene verdiği destektir.', 'Dış kaynaklı bordro, başka firmanın maaş listesini hazırlamaktır.'],
+        yap: [ kural(a, p, 'teşvik danışmanlığı', 'Ortak teşvik danışmanlığı ya da dış kaynaklı bordro hizmeti verir.'),
           'Ortaklık sorumlusu hizmetinizi bu koşula göre değerlendirir.'],
         soru: 'Bu hizmeti veriyor musunuz?',
         secenekler: [
@@ -412,7 +429,8 @@ function altyapiAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'taahhut', ad: 'Yıllık taahhüdü yazın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        yap: ['Taahhüt, bir yılda kaç firma getireceğinize dair sözünüzdür.', kural(a, p, 'taahhüt eder', 'Ortak yıllık firma taahhüdü verir.'), 'Ortaklık sorumlusu taahhüt karşılanmazsa ne olacağını yazar.'],
+        terimler: ['Taahhüt, bir yılda kaç firma getireceğinize dair sözünüzdür.'],
+        yap: [ kural(a, p, 'taahhüt eder', 'Ortak yıllık firma taahhüdü verir.'), 'Ortaklık sorumlusu taahhüt karşılanmazsa ne olacağını yazar.'],
         soru: 'Taahhüt sayınız yazıldı mı?',
         secenekler: [
           devam('yazili', 'Taahhüt sayımız yazıyla belli oldu', 'fiyat'),
@@ -431,7 +449,8 @@ function altyapiAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'sla', ad: 'Hizmet seviyesi sözleşmesi', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Taslak, henüz bitmemiş ilk metindir.', 'Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.', 'Bu sözleşme destek süresini ve hizmet kalitesini yazar.',
+        terimler: ['Taslak, henüz bitmemiş ilk metindir.'],
+        yap: [ 'Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.', 'Bu sözleşme destek süresini ve hizmet kalitesini yazar.',
           'Ortaklık sorumlusu destek sorumlusunu sözleşmeye yazar.'],
         soru: 'Hizmet sözleşmesi imzalandı mı?',
         secenekler: [
@@ -441,7 +460,8 @@ function altyapiAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'yol', ad: 'Yol haritasını hazırlayın', sorumlu: 'Siz ve ürün sorumlusu',
-        yap: ['Ürün yol haritasını ürün sorumlusuyla birlikte hazırlayın.', 'Yol haritası, ürünün sıradaki işlerini gösteren plandır.',
+        terimler: ['Yol haritası, ürünün sıradaki işlerini gösteren plandır.'],
+        yap: ['Ürün yol haritasını ürün sorumlusuyla birlikte hazırlayın.',
           'Markanızın kullanım kurallarını da yazın.'],
         soru: 'Yol haritası hazır mı?',
         secenekler: [
@@ -462,7 +482,8 @@ function entegrasyonAkis(): IsAkisi {
     adimlar: [
       {
         id: 'uygunluk', ad: 'Yazılımınızı tanımlayın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        yap: ['Bordro, çalışanların maaş listesidir.', 'Bu program bordro veya insan kaynakları yazılımı geliştiren firma içindir.'],
+        terimler: ['Bordro, çalışanların maaş listesidir.'],
+        yap: [ 'Bu program bordro veya insan kaynakları yazılımı geliştiren firma içindir.'],
         soru: 'Firmanızın böyle bir yazılımı var mı?',
         secenekler: [
           devam('var', 'Bordro ya da insan kaynakları yazılımımız var', 'teknik'),
@@ -481,7 +502,8 @@ function entegrasyonAkis(): IsAkisi {
       },
       {
         id: 'veri', ad: 'Veri erişimini yazın', sorumlu: 'Hukuk danışmanı (önerilen görev)',
-        yap: ['Yasal dayanak, bilgiyi paylaşmaya izin veren hukuk kuralıdır.', 'Hukuk danışmanı hangi çalışan verisinin aktarılacağını yazar.', 'Hukuk danışmanı erişimin yasal dayanağını belirler.'],
+        terimler: ['Yasal dayanak, bilgiyi paylaşmaya izin veren hukuk kuralıdır.'],
+        yap: [ 'Hukuk danışmanı hangi çalışan verisinin aktarılacağını yazar.', 'Hukuk danışmanı erişimin yasal dayanağını belirler.'],
         soru: 'Hangi bilgilerin aktarılacağı yazıldı mı?',
         secenekler: [
           devam('yazili', 'Bilgilerin kapsamı ve yasal dayanağı yazıldı', 'anlasma'),
@@ -490,7 +512,8 @@ function entegrasyonAkis(): IsAkisi {
       },
       {
         id: 'anlasma', ad: 'Ortak pazarlama anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Ortak pazarlama, iki firmanın birlikte tanıtım yapmasıdır.', 'Ortaklık sorumlusu bağlantı ve ortak pazarlama anlaşmasını hazırlar.', 'Şirket bu programın komisyon tutarını henüz belirlemedi.'],
+        terimler: ['Ortak pazarlama, iki firmanın birlikte tanıtım yapmasıdır.'],
+        yap: [ 'Ortaklık sorumlusu bağlantı ve ortak pazarlama anlaşmasını hazırlar.', 'Şirket bu programın komisyon tutarını henüz belirlemedi.'],
         soru: 'Ortak pazarlama anlaşması imzalandı mı?',
         secenekler: [
           devam('imza', 'Anlaşma imzalandı', 'tanitim'),
@@ -520,7 +543,8 @@ function osgbAkis(): IsAkisi {
       baslangicAdimi('meslek', 'Bu ortaklık yönlendirme anlaşmasıyla çalışır.'),
       {
         id: 'meslek', ad: 'Meslek kurallarını kontrol edin', sorumlu: 'Hukuk danışmanı (önerilen görev)', ek: 'sinir',
-        yap: ['Hukuk danışmanı, yasal konularda görüş veren kişidir.', 'Hukuk danışmanı kurumunuzun meslek kurallarını değerlendirir.'],
+        terimler: ['Hukuk danışmanı, yasal konularda görüş veren kişidir.'],
+        yap: [ 'Hukuk danışmanı kurumunuzun meslek kurallarını değerlendirir.'],
         soru: 'Hukuk danışmanı meslek kuralları için ne dedi?',
         secenekler: [
           devam('uygun', 'Hukuk danışmanı engel olmadığını yazdı', 'veri'),
@@ -538,7 +562,8 @@ function osgbAkis(): IsAkisi {
       },
       {
         id: 'anlasma', ad: 'Yönlendirme anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Yönlendirme, işvereni şirketin satış ekibine götürmektir.', 'Ortaklık sorumlusu yönlendirme anlaşmasını hazırlar.', 'Şirket yönlendirme ücretini henüz belirlemedi.'],
+        terimler: ['Yönlendirme, işvereni şirketin satış ekibine götürmektir.'],
+        yap: [ 'Ortaklık sorumlusu yönlendirme anlaşmasını hazırlar.', 'Şirket yönlendirme ücretini henüz belirlemedi.'],
         soru: 'Yönlendirme anlaşması ve ücret yazıldı mı?',
         secenekler: [
           devam('imza', 'Anlaşmayı ve ücreti yazılı gördüm', 'yonlendir'),
@@ -547,7 +572,8 @@ function osgbAkis(): IsAkisi {
       },
       {
         id: 'yonlendir', ad: 'İşvereni yönlendirin', sorumlu: 'Siz', ek: 'kitle',
-        yap: ['İşveren, Segika’yı satın alacak firmadır.', 'İşvereni şirketin satış ekibiyle tanıştırın.', 'Teklif ve fiyatı satış ekibi verir.', 'Fiyat herkes için aynıdır.'],
+        terimler: ['İşveren, Segika’yı satın alacak firmadır.'],
+        yap: [ 'İşvereni şirketin satış ekibiyle tanıştırın.', 'Teklif ve fiyatı satış ekibi verir.', 'Fiyat herkes için aynıdır.'],
         soru: 'Satış ekibiyle tanışma nasıl geçti?',
         secenekler: [
           son('tamamla', 'devraldi', 'Satış ekibi işverenle ilgilenmeye başladı', 'Bu işin rehberi tamamlandı', 'Yönlendirmeyi kayda yazın.'),
@@ -607,7 +633,8 @@ function franchiseAkis(): IsAkisi {
       baslangicAdimi('merkez', 'Bu ortaklık merkez sözleşmesiyle çalışır.', 'kitle'),
       {
         id: 'merkez', ad: 'Merkez sözleşmesi', sorumlu: 'Yetkili satış sorumlusu', ek: 'anlasma',
-        yap: ['Merkez, bütün şubeleri yöneten ana işletmedir.', 'Yetkili satış sorumlusu sözleşmeyi merkezinizle yapar.', 'Yetkili satış sorumlusu teklifi tablo fiyatıyla hazırlar.'],
+        terimler: ['Merkez, bütün şubeleri yöneten ana işletmedir.'],
+        yap: [ 'Yetkili satış sorumlusu sözleşmeyi merkezinizle yapar.', 'Yetkili satış sorumlusu teklifi tablo fiyatıyla hazırlar.'],
         soru: 'Merkez sözleşmeye ne dedi?',
         secenekler: [
           devam('imza', 'Merkez sözleşmeyi kabul ettiğini söyledi', 'sube'),
@@ -626,7 +653,8 @@ function franchiseAkis(): IsAkisi {
       },
       {
         id: 'veri', ad: 'Şube veri sınırını yazın', sorumlu: 'Teknik ekip',
-        yap: ['Kurulum, programın şubelerde çalışır hale getirilmesidir.', 'Teknik ekip her şubenin yalnız kendi verisini görmesini sağlar.', 'Teknik ekip erişim sınırını kurulumdan önce test eder.'],
+        terimler: ['Kurulum, programın şubelerde çalışır hale getirilmesidir.'],
+        yap: [ 'Teknik ekip her şubenin yalnız kendi verisini görmesini sağlar.', 'Teknik ekip erişim sınırını kurulumdan önce test eder.'],
         soru: 'Teknik ekibin testi nasıl geçti?',
         secenekler: [
           son('tamamla', 'test', 'Test geçti ve kurulum başlayabilir', 'Bu işin rehberi tamamlandı', 'Test sonucunu kayda yazın.'),

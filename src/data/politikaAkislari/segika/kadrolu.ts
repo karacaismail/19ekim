@@ -35,8 +35,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'gorev',
       ad: 'Görevinizi ve prim ekinizi alın',
       sorumlu: 'Siz ve insan kaynakları sorumlusu',
+      terimler: ['Görev tanımı, işte yapacağınız işleri yazan belgedir.'],
       yap: [
-        'Görev tanımı, işte yapacağınız işleri yazan belgedir.',
         'İnsan kaynakları size yazılı görev tanımı verir.', 'Prim eki, iş sözleşmenize eklenen prim belgesidir. Primin nasıl hesaplanacağını ve ne zaman ödeneceğini yazar.',
         'Prim ekindeki başlangıç dönemi kuralını okuyun.',
         'Maaşın net mi brüt mü olduğunu sorun.',
@@ -61,9 +61,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'kayit',
       ad: 'İşveren kaydını kontrol edin',
       sorumlu: 'Siz',
+      terimler: ['İşveren, programı satın alabilecek firmadır.', 'Mali müşavir, firmanın muhasebe işlerini yapan kişidir.'],
       yap: [
-        'İşveren, programı satın alabilecek firmadır.',
-        'Mali müşavir, firmanın muhasebe işlerini yapan kişidir.',
         'İşvereni müşteri takip sisteminde arayın.',
         'İşverenin mali müşaviri kaydı önceden açmış olabilir.',
         'Kişinin iletişim tercihini kontrol edin.',
@@ -87,10 +86,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'ihtiyac',
       ad: 'Teşvik ve bordro sürecini öğrenin',
       sorumlu: 'Siz',
+      terimler: ['Teşvik, devletin işverene verdiği destektir.', 'Bordro, çalışanların maaş listesidir.', 'Mali müşavir, firmanın muhasebe işlerini yapan kişidir.'],
       yap: [
-        'Teşvik, devletin işverene verdiği destektir.',
-        'Bordro, çalışanların maaş listesidir.',
-        'Mali müşavir, firmanın muhasebe işlerini yapan kişidir.',
         'Teşvik kontrolünü kimin yaptığını sorun.',
         'Bordroyu kimin hazırladığını öğrenin.',
         'Yaklaşık çalışan sayısını sorun.',
@@ -111,8 +108,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'gosterim',
       ad: 'Gerçek kişi bilgisi olmayan örnekle gösterim yapın',
       sorumlu: 'Siz',
+      terimler: ['Teşvik, devletin işverene verdiği destektir.'],
       yap: [
-        'Teşvik, devletin işverene verdiği destektir.',
         'Yalnız gerçek kişi bilgisi olmayan örnek veri kullanın.',
         'Gerçek çalışan dosyası istemeyin.',
         'Teşvik tutarı veya sonuç sözü vermeyin.',
@@ -136,8 +133,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'teklif',
       ad: 'Paket ve çalışan sayısıyla teklif hazırlayın',
       sorumlu: 'Siz ve satış yöneticisi',
+      terimler: ['Teklif, işverene yazılı verilen fiyat belgesidir.'],
       yap: [
-        'Teklif, işverene yazılı verilen fiyat belgesidir.',
         `Bu örnekte işverenin ${sayi(a.calisan)} çalışanı vardır. Örnek ${PAKET[a.segikaPaket]} için hesaplanır.`,
         `Bu örnekte yıllık paket ${tl(yillikFiyat(a))} eder.`,
         'Teklife paketi ve çalışan sayısını yazın.',
@@ -167,8 +164,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'sozlesme',
       ad: 'Sözleşmeyi ve veri metinlerini tamamlayın',
       sorumlu: 'Yetkili imza sahibi ve finans ekibi',
+      terimler: ['Sözleşme, iki tarafın imzaladığı anlaşma belgesidir.'],
       yap: [
-        'Sözleşme, iki tarafın imzaladığı anlaşma belgesidir.',
         'Finans ekibi paketi, çalışan sayısını ve fiyatı sözleşmeye yazar.',
         'Yetkili imza sahibi sözleşmeyi şirket adına imzalar.',
         'Siz şirketin kişisel veri metinlerini sözleşmeyle işverene verin.',
@@ -193,8 +190,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'devir',
       ad: 'Kuruluma ve desteğe devredin',
       sorumlu: 'Siz ve kurulum ekibi',
+      terimler: ['Devretmek, işi kurulum ekibine yazılı olarak vermektir.'],
       yap: [
-        'Devretmek, işi kurulum ekibine yazılı olarak vermektir.',
         'Paketi, çalışan sayısını ve iletişim kişisini yazılı iletin.',
         'Çalışan verisinin aktarımını kurulum ekibine bırakın.',
         'Desteği şirketin destek uzmanı verir.',
@@ -219,8 +216,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       id: 'prim',
       ad: 'Prim sonucunu kontrol edin',
       sorumlu: 'Finans ekibi',
+      terimler: ['İade süresi, müşterinin satıştan vazgeçebildiği süredir.'],
       yap: [
-        'İade süresi, müşterinin satıştan vazgeçebildiği süredir.',
         `Bu örnekte kota ${tl(k.kota)} olur. Kota, prim eşiğidir.`,
         primKurali,
         odemeKurali,

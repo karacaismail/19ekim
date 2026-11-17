@@ -21,10 +21,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
 
   const deneyim: AkisAdimi = {
     id: 'deneyim', ad: 'Deneyimi ve yetkiyi kontrol edin', sorumlu: 'Siz ve firmanızın yetkilisi', ek: 'sinir',
+    terimler: ['Teşvik, devletin firmalara verdiği destektir.', 'Bordro, çalışanların maaş listesidir.', 'Yetkili, firmanız adına karar veren kişidir.'],
     yap: [
-      'Teşvik, devletin firmalara verdiği destektir.',
-      'Bordro, çalışanların maaş listesidir.',
-      'Yetkili, firmanız adına karar veren kişidir.',
       'Firmanızın teşvik ve bordro deneyimini değerlendirin.',
       'Firmanızın yetkilisinden tavsiye için onay alın.',
       'Teşvik tutarı veya bordro sonucu vaat etmeyin.',
@@ -43,8 +41,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
 
   const firma: AkisAdimi = {
     id: 'firma', ad: 'Uygun firmayı seçin', sorumlu: 'Siz', ek: 'kitle',
+    terimler: ['Teşvik, devletin firmalara verdiği destektir.'],
     yap: [
-      'Teşvik, devletin firmalara verdiği destektir.',
       'İnsan kaynakları veya muhasebe yöneticisiyle izinli konuşun.',
       'Ödül alabileceğinizi açıkça söyleyin.',
       'Çalışan verisini veya teşvik tutarınızı göstermeyin.',
@@ -63,9 +61,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
 
   const basvuru: AkisAdimi = {
     id: 'basvuru', ad: 'Başvuruyu kaydettirin', sorumlu: 'Karşı firma ve müşteri sorumlusu (önerilen görev)', ek: 'sinir',
+    terimler: ['Bordro, çalışanların maaş listesidir.', 'Grup şirketi, aynı sahibe bağlı başka bir şirkettir.'],
     yap: [
-      'Bordro, çalışanların maaş listesidir.',
-      'Grup şirketi, aynı sahibe bağlı başka bir şirkettir.',
       'Karşı firmanın yetkili yöneticisi başvuruyu yapar.',
       'Karşı firma başvuruya çalışan listesi veya bordro dosyası eklemez.',
       'Müşteri sorumlusu tavsiyenin firmanıza bağlandığını yazılı bildirir.',
@@ -90,8 +87,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       odulVar
         ? {
             id: 'kosul', ad: 'Yazılı koşulu alın', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'kazanc',
+            terimler: ['Sürüm, koşulların belli bir dönemdeki hâlidir.'],
             yap: [
-              'Sürüm, koşulların belli bir dönemdeki hâlidir.',
               `Her uygun tavsiye için ${sayi(a.krediAy)} ay ücretsiz kullanım alırsınız.`,
               `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeyi ödüle çevirir.`,
               'Müşteri sorumlusu ödülün işleneceği hesabı yazılı bildirir.',
@@ -120,8 +117,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
       basvuru,
       {
         id: 'satis', ad: 'Satışı şirkete bırakın', sorumlu: 'Satış uzmanı (önerilen görev)',
+        terimler: ['Yıllık paket, bir yıllık kullanım için alınan pakettir.'],
         yap: [
-          'Yıllık paket, bir yıllık kullanım için alınan pakettir.',
           'Satış uzmanı firmanın çalışan sayısına göre teklif verir.',
           `Şirket fiyatı, çalışan sayısını ${sayi(a.blok)} kişilik gruplara yukarı yuvarlayarak hesaplar.`,
           'Fiyat herkes için aynıdır.',
@@ -205,7 +202,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const ayniAy = faturaAylari.length > 0 && odemeAylari[0] === faturaAylari[0];
   const komisyonVar = a.tekSeferOran > 0 && komisyon > 0;
   const tabanMetni = a.affOdeme === 'paket'
-    ? 'İlk fatura, yeni müşterinin yıllık paket faturasıdır.'
+    ? 'Bu örnekte ilk fatura yıllık paket faturasıdır.'
     : 'Bu örnekte ilk fatura bir aylık faturadır.';
   const zamanMetni = odemeAylari.length === 0
     ? 'Bu örnekte hesap süresi içinde ödeme yok.'
@@ -218,8 +215,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     komisyonVar
       ? {
           id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
+          terimler: ['Komisyon, satıştan size ödenen paydır.'],
           yap: [
-            'Komisyon, satıştan size ödenen paydır.',
             `Ödül, ilk faturanın ${yuzde(a.tekSeferOran)} kadarı nakit komisyondur.`,
             'Bu seçenek ücretsiz kullanımla birleşmez.',
             `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeye komisyon öder.`,
@@ -236,7 +233,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
         }
       : {
           id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
-          yap: ['Komisyon, satıştan size ödenen paydır.', 'Şu anki koşullarda komisyon tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirir.'],
+          terimler: ['Komisyon, satıştan size ödenen paydır.'],
+          yap: [ 'Şu anki koşullarda komisyon tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirir.'],
           soru: 'Komisyon oranı size yazılı olarak geldi mi?',
           secenekler: [
             sonlu('bekle', 'oran-yok', 'Oran bize henüz bildirilmedi', 'Oranı bekleyin',
@@ -273,7 +271,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     },
     {
       id: 'odeme', ad: 'Komisyon ödemesini izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-      yap: ['Komisyon, satıştan size ödenen paydır.', `Bu örnekte komisyonunuz ${tl(komisyon)} olur.`, zamanMetni, 'Finans sorumlusu ödeme belgesini ve vergi işlemini henüz belirlemedi.'],
+      terimler: ['Komisyon, satıştan size ödenen paydır.'],
+      yap: [ `Bu örnekte komisyonunuz ${tl(komisyon)} olur.`, zamanMetni, 'Finans sorumlusu ödeme belgesini ve vergi işlemini henüz belirlemedi.'],
       dikkat: 'Ödeme zamanını yazılı tavsiye koşulu belirler.',
       soru: 'Komisyon ödemesi size geldi mi?',
       secenekler: [
@@ -286,7 +285,8 @@ const akisOlusturTam: AkisOlustur = (a) => {
     },
     {
       id: 'iade', ad: 'İade durumunu bilin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-      yap: ['İade, ödenen paranın geri verilmesidir.', 'Yeni firma iade alırsa şirket komisyonu geri alır.', 'Finans sorumlusu geri alma yöntemini yazılı açıklar.'],
+      terimler: ['İade, ödenen paranın geri verilmesidir.'],
+      yap: [ 'Yeni firma iade alırsa şirket komisyonu geri alır.', 'Finans sorumlusu geri alma yöntemini yazılı açıklar.'],
       soru: 'Yeni firma parasını geri istedi mi?',
       secenekler: [
         sonlu('tamamla', 'iade-yok', 'Bildiğimiz bir iade isteği yok', 'Tavsiye işi bitti',

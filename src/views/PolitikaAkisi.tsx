@@ -104,6 +104,11 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
             <div className="pol-is-aciklamasi">
               <h4>Bu adımda yapılacaklar</h4>
               <p className="pol-sorumlu">{sorumluCumlesi(etkin.sorumlu)}</p>
+              {/* Kullanıcı kararı 17 Kasım 2026: kelime açıklamaları yapılacak işlerden ayrı bölümde durur. */}
+              {etkin.terimler?.length ? <section className="pol-terimler" aria-labelledby={`${kimlik}-terimler`}>
+                <h5 id={`${kimlik}-terimler`}>Bu adımdaki kelimeler</h5>
+                <ul>{etkin.terimler.map((t) => <li key={t}>{t}</li>)}</ul>
+              </section> : null}
               <ol className="pol-yap">{etkin.yap.map((line) => <li key={line}>{line}</li>)}</ol>
               {etkin.ek && <Accordion key={etkin.id} value={detail} onChange={setDetail} classNames={accordionClasses} transitionDuration={motion}>
                 <Accordion.Item value="ek"><Accordion.Control>{EK_ADI[etkin.ek]}</Accordion.Control>

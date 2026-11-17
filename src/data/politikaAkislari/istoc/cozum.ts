@@ -38,7 +38,8 @@ const itiraz = son('bekle', 'itiraz', 'Bana ödenen tutarı yanlış buldum', '�
 
 function odemeAdimi(yap: string[], ek: AkisAdimi['ek'] = 'kazanc'): AkisAdimi {
   return {
-    id: 'odeme', ad: 'Ödemenizi izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek, yap,
+    id: 'odeme', ad: 'Ödemenizi izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek,
+    terimler: ['Fatura, aldığınız para için kestiğiniz resmi belgedir.'], yap,
     soru: 'Ödemeniz geldi mi?',
     secenekler: [
       son('tamamla', 'odendi', 'Müşteri ödedi ve ben faturamı kestim', 'Bu işin rehberi tamamlandı',
@@ -64,7 +65,8 @@ function anaAkis(a: Ayar): IsAkisi {
   const adimlar: AkisAdimi[] = [
     {
       id: 'anlasma', ad: 'Katkı anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-      yap: ['Ortaklık anlaşması, şirketle aranızdaki yazılı sözleşmedir.', 'Ortaklık sorumlusu katkı seviyenizi sizinle yazılı belirler.', SEVIYE_METNI[s], 'Kurulumu ve desteği şirket yapar.'],
+      terimler: ['Ortaklık anlaşması, şirketle aranızdaki yazılı sözleşmedir.'],
+      yap: [ 'Ortaklık sorumlusu katkı seviyenizi sizinle yazılı belirler.', SEVIYE_METNI[s], 'Kurulumu ve desteği şirket yapar.'],
       soru: 'Ortaklık anlaşmanız yazılı mı?',
       secenekler: [
         devam('var', 'Elimde yazılı anlaşma var', 'kayit'),
@@ -74,7 +76,8 @@ function anaAkis(a: Ayar): IsAkisi {
     },
     {
       id: 'kayit', ad: 'İşletmeyi kaydettirin', sorumlu: 'Siz ve ortaklık sorumlusu (önerilen görev)',
-      yap: ['Ortak, şirketle birlikte çalışan kişi ya da firmadır.', 'Siz işletmeyi ortaklık sorumlusuna bildirin.', 'Kayda ürün grubunu ve hedef alıcıyı yazın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.'],
+      terimler: ['Ortak, şirketle birlikte çalışan kişi ya da firmadır.'],
+      yap: [ 'Siz işletmeyi ortaklık sorumlusuna bildirin.', 'Kayda ürün grubunu ve hedef alıcıyı yazın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.'],
       soru: 'İşletmenin kaydı ne oldu?',
       secenekler: [
         devam('acik', 'Ortaklık sorumlusu işletmeyi benim adıma yazdı', 'ihtiyac'),
@@ -98,7 +101,8 @@ function anaAkis(a: Ayar): IsAkisi {
   if (s === 'A') {
     adimlar.push({
       id: 'tanistirma', ad: 'Ürün uzmanıyla tanıştırın', sorumlu: 'Siz ve ürün uzmanı', ek: 'sinir',
-      yap: ['Ürün uzmanı, ürünü işletmeye gösteren kişidir.', 'Ortak bir görüşme planlayın.', 'Ürün gösterimini ürün uzmanı yapar.', 'Fiyat sorulursa fiyat tablosundaki fiyatı söyleyin. Teklif konuşmayın.'],
+      terimler: ['Ürün uzmanı, ürünü işletmeye gösteren kişidir.'],
+      yap: [ 'Ortak bir görüşme planlayın.', 'Ürün gösterimini ürün uzmanı yapar.', 'Fiyat sorulursa fiyat tablosundaki fiyatı söyleyin. Teklif konuşmayın.'],
       soru: 'Tanıştırma görüşmesi nasıl geçti?',
       secenekler: [
         devam('devraldi', 'Görüşme oldu ve ürün uzmanı işi üstlendi', 'satis'),
@@ -109,7 +113,8 @@ function anaAkis(a: Ayar): IsAkisi {
   } else {
     adimlar.push({
       id: 'gosterim', ad: 'Ürün gösterimini yapın', sorumlu: 'Siz', ek: 'sinir',
-      yap: ['Gösterim, iStoc’un nasıl çalıştığını işletmeye göstermektir.', 'İşletmenin izin verdiği ürünlerle gösterim yapın.', 'Görsellerin sahibini işletmeye sorun.', 'Görüşme notunu kayda ekleyin.'],
+      terimler: ['Gösterim, iStoc’un nasıl çalıştığını işletmeye göstermektir.'],
+      yap: [ 'İşletmenin izin verdiği ürünlerle gösterim yapın.', 'Görsellerin sahibini işletmeye sorun.', 'Görüşme notunu kayda ekleyin.'],
       soru: 'Ürünü gösterdikten sonra ne oldu?',
       secenekler: [
         s === 'B'
@@ -125,7 +130,8 @@ function anaAkis(a: Ayar): IsAkisi {
     adimlar.push(
       {
         id: 'teklif', ad: 'Onaylı teklifle görüşün', sorumlu: 'Siz ve yetkili satış sorumlusu',
-        yap: ['Teklif, işletmeye yazılı verilen fiyat önerisidir.', 'Yetkili satış sorumlusu teklifi fiyat tablosundaki fiyatla hazırlar.', 'Siz yalnız bu onaylı teklifi işletmeye iletin.', 'Fiyatı değiştirmeyin. İndirim sözü vermeyin.'],
+        terimler: ['Teklif, işletmeye yazılı verilen fiyat önerisidir.'],
+        yap: [ 'Yetkili satış sorumlusu teklifi fiyat tablosundaki fiyatla hazırlar.', 'Siz yalnız bu onaylı teklifi işletmeye iletin.', 'Fiyatı değiştirmeyin. İndirim sözü vermeyin.'],
         soru: 'Teklifte ne oldu?',
         secenekler: [
           devam('onayli', 'Onaylı teklifi işletmeye verdim', 'sozlesme'),
@@ -137,7 +143,8 @@ function anaAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'sozlesme', ad: 'Sözleşmeyi tamamlayın', sorumlu: 'Yetkili satış sorumlusu', ek: 'anlasma',
-        yap: ['Sözleşme, işletme ile şirket arasındaki yazılı anlaşmadır.', 'Yetkili satış sorumlusu sözleşmeyi işletme ile şirket arasında hazırlar.', 'Danışmanlık bedeliniz varsa siz bu bedeli teklifte ayrı gösterin.'],
+        terimler: ['Sözleşme, işletme ile şirket arasındaki yazılı anlaşmadır.'],
+        yap: [ 'Yetkili satış sorumlusu sözleşmeyi işletme ile şirket arasında hazırlar.', 'Danışmanlık bedeliniz varsa siz bu bedeli teklifte ayrı gösterin.'],
         soru: 'İşletme sözleşme için ne dedi?',
         secenekler: [
           devam('kabul', 'İşletme sözleşmeyi kabul etti', 'kurulum'),
@@ -149,7 +156,8 @@ function anaAkis(a: Ayar): IsAkisi {
   } else {
     adimlar.push({
       id: 'satis', ad: 'Satış sonucunu izleyin', sorumlu: 'Satış ekibi',
-      yap: ['Sözleşme, işletme ile şirket arasındaki yazılı anlaşmadır.', 'Satış ekibi satışı ve sözleşmeyi fiyat tablosundaki fiyatla yürütür.', 'Siz işletmenin sorularını satış ekibine iletin.'],
+      terimler: ['Sözleşme, işletme ile şirket arasındaki yazılı anlaşmadır.'],
+      yap: [ 'Satış ekibi satışı ve sözleşmeyi fiyat tablosundaki fiyatla yürütür.', 'Siz işletmenin sorularını satış ekibine iletin.'],
       soru: 'Satış ekibinden ne haber aldınız?',
       secenekler: [
         devam('imza', 'İşletme sözleşmeyi imzaladı', 'kurulum'),
@@ -161,14 +169,15 @@ function anaAkis(a: Ayar): IsAkisi {
   adimlar.push(
     {
       id: 'kurulum', ad: 'Kurulumu şirkete devredin', sorumlu: 'Siz ve kurulum ekibi', ek: 'plan',
-      yap: ['Kurulum, programın işletme için hazırlanıp açılmasıdır.', 'Siz devir notuna işletmenin ihtiyacını ve hazır ürün bilgisini yazın.', 'Kurulum ekibi işi devralır ve kurulumu yapar.', 'İşletme destek isterse siz onu şirketin destek ekibine yönlendirin.'],
+      terimler: ['Kurulum, programın işletme için hazırlanıp açılmasıdır.'],
+      yap: [ 'Siz devir notuna işletmenin ihtiyacını ve hazır ürün bilgisini yazın.', 'Kurulum ekibi işi devralır ve kurulumu yapar.', 'İşletme destek isterse siz onu şirketin destek ekibine yönlendirin.'],
       soru: 'Kurulum ekibi işi aldı mı?',
       secenekler: [
         devam('devraldi', 'Kurulum ekibi işi üstlendi', 'odeme'),
         son('bekle', 'tarih', 'Kurulum için tarih verilmedi', 'Kurulum tarihi bekleniyor', 'Operasyon yöneticisi kurulum kapasitesini doğrular.', 'İşletmeye kendiniz tarih vermeyin.', 'Tarih bildirilince bu adıma dönün.'),
       ],
     },
-    odemeAdimi(['Fatura, aldığınız para için kestiğiniz resmi belgedir.', yillikPaket(a), odemeMetni,
+    odemeAdimi([yillikPaket(a), odemeMetni,
       `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günler müşterinin ödeme gününden sayılır.`]),
   );
   return {
@@ -202,7 +211,8 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
     adimlar: [
       {
         id: 'ek', ad: 'Program ekini hazırlatın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Program eki, anlaşmaya eklenen yazılı kurallardır.', adayKurali, 'Ortaklık sorumlusu hazır sayılma ölçütünü ekte yazar.'],
+        terimler: ['Program eki, anlaşmaya eklenen yazılı kurallardır.'],
+        yap: [ adayKurali, 'Ortaklık sorumlusu hazır sayılma ölçütünü ekte yazar.'],
         soru: 'Program eki imzalandı mı?',
         secenekler: [
           devam('imza', 'Program ekini imzaladık', 'oran'),
@@ -211,7 +221,8 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'oran', ad: 'Oranı kesinleştirin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Oran, satıcının ödediği ücretten size düşen paydır.', oranKurali, aylikBedel(a),
+        terimler: ['Oran, satıcının ödediği ücretten size düşen paydır.'],
+        yap: [ oranKurali, aylikBedel(a),
           `Bu örnekte oran, satıcının ilk ${a.gelistirmeAy} aylık ücretinde ${yuzde(a.gelistirmeOran)} olur. Bir satıcıdan komisyonunuz ${tl(saticiBasi)} olur.`],
         soru: 'Oran size yazılı bildirildi mi?',
         secenekler: [
@@ -221,7 +232,8 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'aday', ad: 'Aday satıcıları bildirin', sorumlu: 'Siz', ek: 'kitle',
-        yap: ['Aday satıcı, iStoc’ta satış yapmaya başlayabilecek firmadır.', 'Aday satıcıları ortaklık sorumlusuna bildirin.', kabulKurali],
+        terimler: ['Aday satıcı, iStoc’ta satış yapmaya başlayabilecek firmadır.'],
+        yap: [ 'Aday satıcıları ortaklık sorumlusuna bildirin.', kabulKurali],
         soru: 'Adaylar için ne yanıt aldınız?',
         secenekler: [
           devam('kabul', 'Adaylar kabul edildi', 'hazirlik'),
@@ -231,7 +243,8 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'hazirlik', ad: 'Satıcıyı hazırlayın', sorumlu: 'Siz',
-        yap: ['Ölçüt, satıcının hazır sayılması için gerekenlerin listesidir.', 'Görsel izni, ürün resimlerini kullanma iznidir.', 'Ürün bilgisini satıcının yetkilisine onaylatın.', 'Görsellerin sahibini satıcıyla yazılı belirleyin.'],
+        terimler: ['Ölçüt, satıcının hazır sayılması için gerekenlerin listesidir.', 'Görsel izni, ürün resimlerini kullanma iznidir.'],
+        yap: [ 'Ürün bilgisini satıcının yetkilisine onaylatın.', 'Görsellerin sahibini satıcıyla yazılı belirleyin.'],
         soru: 'Satıcı satışa hazır mı?',
         secenekler: [
           devam('hazir', 'Satıcı ölçütteki her şeyi tamamladı', 'kabul'),
@@ -248,7 +261,7 @@ function gelistirmeAkis(a: Ayar): IsAkisi {
           son('bekle', 'eksik', 'Ortaklık sorumlusu eksikleri bildirdi', 'Düzeltme bekleniyor', 'Bildirilen eksikleri satıcıyla tamamlayın.', 'Sonra kabul için yeniden başvurun.'),
         ],
       },
-      odemeAdimi(['Fatura, aldığınız para için kestiğiniz resmi belgedir.', `Şirket komisyonu satıcının ilk ${a.gelistirmeAy} aylık ücretinden hesaplar.`, 'Satıcı ödemeden komisyon kesinleşmez.']),
+      odemeAdimi([`Şirket komisyonu satıcının ilk ${a.gelistirmeAy} aylık ücretinden hesaplar.`, 'Satıcı ödemeden komisyon kesinleşmez.']),
     ],
   };
 }
@@ -274,7 +287,8 @@ function arzAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'protokol', ad: 'Protokolü imzalayın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Taslak, henüz bitmemiş ilk metindir.', 'Protokol, kurumunuzla şirket arasındaki yazılı anlaşmadır.', 'Ortaklık sorumlusu veri paylaşım sınırını protokole yazar.'],
+        terimler: ['Protokol, kurumunuzla şirket arasındaki yazılı anlaşmadır.', 'Taslak, henüz bitmemiş ilk metindir.'],
+        yap: ['Ortaklık sorumlusu veri paylaşım sınırını protokole yazar.'],
         soru: 'Protokol imzalandı mı?',
         secenekler: [
           devam('imza', 'Protokol imzalandı', 'duyuru'),
@@ -292,7 +306,8 @@ function arzAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'vitrin', ad: 'Açılan mağaza sayısını izleyin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        yap: ['Mağaza sayfası, satıcının iStoc’taki kendi sayfasıdır.', esik ? `Program, şirketin doğruladığı en az ${esik} mağaza sayfası açılınca başlar.` : 'Ortaklık sorumlusu programın başlaması için gereken mağaza sayısını yazılı bildirir.',
+        terimler: ['Mağaza sayfası, satıcının iStoc’taki kendi sayfasıdır.'],
+        yap: [ esik ? `Program, şirketin doğruladığı en az ${esik} mağaza sayfası açılınca başlar.` : 'Ortaklık sorumlusu programın başlaması için gereken mağaza sayısını yazılı bildirir.',
           'Şirket açılan mağaza sayfalarını kontrol eder.'],
         soru: 'Yeterli mağaza sayfası açıldı mı?',
         secenekler: [
@@ -302,7 +317,8 @@ function arzAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'rapor', ad: 'Sonuç raporunu alın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Sonuç raporu, üyelerin iStoc’taki sonuçlarını gösterir.', 'Ortaklık sorumlusu üyelerin sonuç raporunu üç ayda bir kurumunuza gönderir.', 'Raporda yalnız protokolde izin verilen bilgiler bulunur.'],
+        terimler: ['Sonuç raporu, üyelerin iStoc’taki sonuçlarını gösterir.'],
+        yap: [ 'Ortaklık sorumlusu üyelerin sonuç raporunu üç ayda bir kurumunuza gönderir.', 'Raporda yalnız protokolde izin verilen bilgiler bulunur.'],
         soru: 'Sonuç raporu geldi mi?',
         secenekler: [
           son('tamamla', 'geldi', 'Sonuç raporunu aldık', 'Bu işin rehberi tamamlandı', 'Raporu protokoldeki veri sınırıyla kontrol edin.'),
@@ -338,7 +354,8 @@ function talepAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'kapsam', ad: 'Görev kapsamını yazın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Görev kapsamı, yapacağınız işlerin yazılı listesidir.', ucretKurali, 'Şirket görev ücretinin tutarını henüz belirlemedi.'],
+        terimler: ['Görev kapsamı, yapacağınız işlerin yazılı listesidir.'],
+        yap: [ ucretKurali, 'Şirket görev ücretinin tutarını henüz belirlemedi.'],
         soru: 'Görev ve ücret yazılı kabul edildi mi?',
         secenekler: [
           devam('kabul', 'Görev ve ücret yazılı olarak kabul edildi', 'izin'),
@@ -356,7 +373,8 @@ function talepAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'esik', ad: 'Talep sayısını izleyin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        yap: ['Talep, alıcının bir ürünü satın alma isteğidir.', 'Nitelikli talep, işe yarar ve gerçek bir alım isteğidir.', esik ? `Ortaklığınız en az ${esik} nitelikli talep gelince başlar.` : 'Ortaklık sorumlusu ortaklığın başlaması için gereken talep sayısını yazılı bildirir.',
+        terimler: ['Talep, alıcının bir ürünü satın alma isteğidir.', 'Nitelikli talep, işe yarar ve gerçek bir alım isteğidir.'],
+        yap: [ esik ? `Ortaklığınız en az ${esik} nitelikli talep gelince başlar.` : 'Ortaklık sorumlusu ortaklığın başlaması için gereken talep sayısını yazılı bildirir.',
           aylik ? `Siz ayda en az ${aylik} izinli alım talebi getirirsiniz.` : 'Ortaklık sorumlusu aylık talep sayısını yazılı bildirir.'],
         soru: 'Yeterli talep geldi mi?',
         secenekler: [
@@ -366,7 +384,8 @@ function talepAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'sonuc', ad: 'Sonucu takip edin', sorumlu: 'Siz ve finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Fatura, aldığınız para için kestiğiniz resmi belgedir.', 'Her talebin sonucunu kayda yazın.', 'Şirket görev ücretinin kalanını sonuç takibinde öder.'],
+        terimler: ['Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
+        yap: [ 'Her talebin sonucunu kayda yazın.', 'Şirket görev ücretinin kalanını sonuç takibinde öder.'],
         soru: 'Taleplerin sonucu belli oldu mu?',
         secenekler: [
           son('tamamla', 'kayitli', 'Sonuçları kaydettim ve faturamı kestim', 'Bu işin rehberi tamamlandı', 'Ödemeyi kendi kaydınızla karşılaştırın.'),
@@ -396,7 +415,8 @@ function hizmetAkis(): IsAkisi {
       },
       {
         id: 'model', ad: 'Ödeme modelini yazın', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Ödeme modeli, size paranın nasıl ödeneceğini gösterir.', 'Bu programda gelir paylaşımı veya yönlendirme ücreti alırsınız.', 'Şirket oranı ve tutarı henüz belirlemedi.'],
+        terimler: ['Ödeme modeli, size paranın nasıl ödeneceğini gösterir.'],
+        yap: [ 'Bu programda gelir paylaşımı veya yönlendirme ücreti alırsınız.', 'Şirket oranı ve tutarı henüz belirlemedi.'],
         soru: 'Ödeme şekli ve tutarı yazıldı mı?',
         secenekler: [
           devam('yazili', 'Ödeme şekli ve tutar yazılı kabul edildi', 'rozet'),
@@ -405,7 +425,8 @@ function hizmetAkis(): IsAkisi {
       },
       {
         id: 'rozet', ad: 'Rozet iznini alın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'sinir',
-        yap: ['Rozet, hizmetinizin iStoc onaylı olduğunu gösteren işarettir.', 'Ortaklık sorumlusu hizmet sorumluluğunu anlaşmaya yazar.', 'Siz “iStoc Onaylı Hizmet” rozetini yalnız izin verilen biçimde kullanın.'],
+        terimler: ['Rozet, hizmetinizin iStoc onaylı olduğunu gösteren işarettir.'],
+        yap: ['Ortaklık sorumlusu hizmet sorumluluğunu anlaşmaya yazar.', 'Siz “iStoc Onaylı Hizmet” rozetini yalnız izin verilen biçimde kullanın.'],
         soru: 'Rozeti kullanma izni aldınız mı?',
         secenekler: [
           devam('izin', 'Rozet iznini yazılı olarak aldık', 'is'),
@@ -421,7 +442,7 @@ function hizmetAkis(): IsAkisi {
           son('bitir', 'vazgecti', 'Satıcı hizmetten vazgeçti', 'Bu iş kapandı', 'Gerekçeyi kayda yazın.'),
         ],
       },
-      odemeAdimi(['Fatura, aldığınız para için kestiğiniz resmi belgedir.', 'Şirket ödemeyi yazılı ödeme modeline göre yapar.', 'Satıcı ödemeden gelir payınız kesinleşmez.']),
+      odemeAdimi(['Şirket ödemeyi yazılı ödeme modeline göre yapar.', 'Satıcı ödemeden gelir payınız kesinleşmez.']),
     ],
   };
 }
@@ -444,7 +465,8 @@ function teknolojiAkis(): IsAkisi {
       },
       {
         id: 'teknik', ad: 'Bağlantıyı doğrulatın', sorumlu: 'Teknik ekip',
-        yap: ['Bağlantı, yazılımınızın iStoc ile bilgi alışverişidir.', 'Teknik ekip yazılım bağlantısını test eder.', 'Siz katalog eşitlemesini teknik ekiple örnek veriyle deneyin.'],
+        terimler: ['Bağlantı, yazılımınızın iStoc ile bilgi alışverişidir.'],
+        yap: [ 'Teknik ekip yazılım bağlantısını test eder.', 'Siz katalog eşitlemesini teknik ekiple örnek veriyle deneyin.'],
         soru: 'Teknik ekip ne dedi?',
         secenekler: [
           devam('kabul', 'Teknik ekip bağlantıyı kabul etti', 'indirim'),
@@ -454,7 +476,8 @@ function teknolojiAkis(): IsAkisi {
       },
       {
         id: 'indirim', ad: 'Ticari koşulları yazın', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'anlasma',
-        yap: ['Ticari koşullar, ortaklıktaki para ve ödeme kurallarıdır.', 'Finans sorumlusu ortaklığın ticari koşullarını anlaşmaya yazar.', 'Siz müşterilere indirim sözü vermeyin. Müşteri fiyat tablosundaki fiyatı öder.'],
+        terimler: ['Ticari koşullar, ortaklıktaki para ve ödeme kurallarıdır.'],
+        yap: [ 'Finans sorumlusu ortaklığın ticari koşullarını anlaşmaya yazar.', 'Siz müşterilere indirim sözü vermeyin. Müşteri fiyat tablosundaki fiyatı öder.'],
         soru: 'Ticari koşullar yazıldı mı?',
         secenekler: [
           devam('yazili', 'Ticari koşullar yazılı anlaşmaya girdi', 'tanitim'),
@@ -524,7 +547,8 @@ function bolgeAkis(a: Ayar): IsAkisi {
       },
       {
         id: 'aktif', ad: 'Aktif satıcıları izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-        yap: ['Aktif satıcı, finans sorumlusunun ölçütüne uyan satıcıdır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.', 'Finans sorumlusu aktif sayılma ölçütünü yazılı bildirir.', 'Siz aktif satıcı listesini ayda bir kendi listenizle karşılaştırın.'],
+        terimler: ['Aktif satıcı, finans sorumlusunun ölçütüne uyan satıcıdır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
+        yap: [ 'Finans sorumlusu aktif sayılma ölçütünü yazılı bildirir.', 'Siz aktif satıcı listesini ayda bir kendi listenizle karşılaştırın.'],
         soru: 'Aktif satıcılarda ne oldu?',
         secenekler: [
           son('tamamla', 'kayitli', 'Aktif satıcılar kayıtlı ve faturamı kestim', 'Bu işin rehberi tamamlandı', 'Ödemeyi kendi listenizle karşılaştırın.'),

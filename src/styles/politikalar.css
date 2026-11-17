@@ -110,6 +110,12 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-is-aciklamasi h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin: 0; }
 .pol-sorumlu { margin-block: var(--space-2) var(--space-3); color: var(--text-secondary); }
 .pol-yap { padding-inline-start: var(--space-5); margin-block: var(--space-3); }
+.pol-terimler { margin-block: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-control); }
+.pol-terimler h5 { margin: 0 0 var(--space-1); font-size: var(--text-md); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+/* Kelime bölümünden sonra liste yakın başlar. Telefonda ilk iş kaydırmadan görünür. */
+.pol-terimler + .pol-yap { margin-block-start: var(--space-2); }
+/* Açıklamalar numarasız ve madde imsizdir. Böylece yapılacak işlerden ayrı görünür. */
+.pol-terimler ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); }
 .pol-yap > li { padding-inline-start: var(--space-1); margin-block: var(--space-2); }
 .pol-yap > li::marker { color: var(--text-secondary); }
 .pol-yol-link { display: inline-flex; align-items: center; min-block-size: var(--hit-min); padding: 0; border: 0; background: transparent; color: var(--text-link); font: inherit; cursor: pointer; }
