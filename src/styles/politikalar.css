@@ -393,13 +393,15 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-tek-kutu { min-inline-size: 0; }
 .pol-kz-tek-girdi { min-block-size: var(--hit-min); padding-inline: var(--space-1); border: 0; background: transparent; color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-semibold); text-align: center; font-variant-numeric: tabular-nums; }
 .pol-kz-tek-girdi:focus { outline: none; }
-.pol-kz-tek-ad { color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-snug); text-align: end; white-space: nowrap; }
+.pol-kz-tek-ad { color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-snug); text-align: end; }
 .pol-kz-tek-deger { text-align: center; color: var(--text-secondary); }
 /* Klavye odağı çevrelemez: çerçevenin sol iç kenarında tek çubuk görünür. */
 html[data-focus-mode='keyboard'] .pol-kz-tek:has(.pol-kz-tek-girdi:focus-visible) { box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator); }
 .pol-kz-plan .pol-kz-katki .so2-grup-alanlar { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
 /* Dar ekranda ad, çerçevenin içinde üst satıra geçer. “Kalıcı” kutusu ve değer alt satırda durur. Hiçbir şey taşmaz. */
-@media (max-width: 29.99rem) {
+/* Çerçeve kendi genişliğine göre dizilir. Dar çerçevede ad üst satıra geçer. Böylece alanlar yan yana sığar. */
+.pol-kz-tek-kap { container-type: inline-size; min-inline-size: 0; }
+@container (max-width: 16rem) {
   .pol-kz-tek { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'ad ad' 'sol deger'; row-gap: 0; padding-block-start: var(--space-2); }
   .pol-kz-tek > .pol-kz-tek-ad { grid-area: ad; text-align: start; white-space: normal; }
   .pol-kz-tek > .pol-kz-tek-sol { grid-area: sol; }
@@ -408,3 +410,7 @@ html[data-focus-mode='keyboard'] .pol-kz-tek:has(.pol-kz-tek-girdi:focus-visible
 /* Klavye odağı çevrelemez: seviye kutusunun sol iç kenarında tek çubuk görünür. */
 html[data-focus-mode='keyboard'] .pol-kz-merdiven-dugme:focus-visible { outline: none; box-shadow: inset var(--focus-indicator-width) 0 0 0 var(--focus-indicator); }
 .pol-kz-merdiven-dugme:focus { outline: none; }
+/* Kullanıcı kararı 17 Kasım 2026 Salı: tablet, dizüstü ve masaüstünde bir grubun alanları tek satırda yan yana durur. */
+@media (min-width: 48em) {
+  .pol-kz-plan .pol-kz-katki .so2-grup-alanlar { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+}

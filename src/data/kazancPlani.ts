@@ -59,7 +59,8 @@ export const MAAS_ARALIGI = [50_000, 60_000] as const;
 
 export const KAZANC_VARSAYILAN: KazancPlani = {
   // Kullanıcı kararı 17 Kasım 2026 Salı: tanıştırmanın varsayılanları. Bunlar kalıcı kural değildir.
-  tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0.07, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.05, 0.025, 0, 0] },
+  // Kullanıcı kararı 17 Kasım 2026 Salı: yalnız tanıştıranın oranı K0'da %0, K1'de %7, K2'de %10, K3'te %15'tir.
+  tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0, kotaArtis: [0.07, 0.03, 0.05], gecmis: [0.05, 0.025, 0, 0] },
   // Kullanıcı kararı 17 Kasım 2026 Salı: satış yılı 1. yıldır ve %15'tir. 2. yıl %10, 3. yıl %7, 4. yıl %5 olur. Eski %2 kalktı.
   // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatanın eşikleri 0, 30.000, 70.000 ve 120.000 ₺'dir.
   // Oran K0'da %15, K1'de %20, K2'de %25, K3'te %30'dur. Her kota oranı 5 puan artırır.
@@ -81,10 +82,10 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
 export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
   istoc: {},
   segika: {
-    'tanistir.taban': 0.07,
+    'tanistir.taban': 0,
     // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatma taban oranı da kalıcı kuraldır.
     'kapatir.taban': 0.15,
-    'tanistir.kotaArtis.0': 0.1, 'tanistir.kotaArtis.1': 0.07, 'tanistir.kotaArtis.2': 0.05,
+    'tanistir.kotaArtis.0': 0.07, 'tanistir.kotaArtis.1': 0.03, 'tanistir.kotaArtis.2': 0.05,
     'tanistir.gecmis.0': 0.05, 'tanistir.gecmis.1': 0.025, 'tanistir.gecmis.2': 0, 'tanistir.gecmis.3': 0,
     'kapatir.kotaArtis.0': 0.05, 'kapatir.kotaArtis.1': 0.05, 'kapatir.kotaArtis.2': 0.05,
     'kapatir.gecmis.0': 0.1, 'kapatir.gecmis.1': 0.07, 'kapatir.gecmis.2': 0.05,
@@ -117,6 +118,12 @@ export function projeVarsayilani(proje: Marka): KazancPlani {
   v.kalici = Object.keys(SABIT_KURALLAR[proje]);
   return v;
 }
+
+/**
+ * Koşullu kümülatif hesap (kullanıcı kararı 17 Kasım 2026 Salı): ulaşılan seviyenin oranı cironun tamamına uygulanır.
+ * Örnek: satışı kapatan 1.000.000 ₺ ciroda K3'e ulaşır. Oran %30'dur. Kazanç 300.000 ₺ olur.
+ */
+export const KUMULATIF_KURALI = 'Ulaştığınız seviyenin oranı cironun tamamına uygulanır. Örneğin satışı kapatan 1.000.000 ₺ ciroda K3 seviyesindedir. Oranı %30 olur ve 300.000 ₺ alır.';
 
 /** Ulaşılan kota sayısı ve geçerli oran. Eşikler sırayla aranır. Boş eşikten sonra kota sayılmaz. */
 export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { oran: number; kota: 0 | 1 | 2 | 3 } {
