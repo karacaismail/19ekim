@@ -29,7 +29,10 @@ test.describe('giriş kapısı', () => {
     expect(TUM_SAYFALAR.length).toBeGreaterThan(15);
     for (const yol of TUM_SAYFALAR) {
       const html = await (await request.get(yol)).text();
-      expect(html, yol).toContain('giris-form');
+      // Kullanıcı kararı 17 Kasım 2026 Salı: Çalışma rehberleri herkese açıktır. İçerik yalnız tarayıcıda çizilir.
+      // Bu yüzden rehberin statik HTML'inde ne giriş formu ne de içerik vardır.
+      if (yol.startsWith('politikalar/')) expect(html, yol).not.toContain('giris-form');
+      else expect(html, yol).toContain('giris-form');
       for (const yok of ['mainnav-list', 'class="crumbs', 'app-footer', 'pager-link', '₺', 'Bordro', 'İsmail Karaca', '3.000.000']) expect(html, `${yol}: ${yok}`).not.toContain(yok);
       // Sayfa açıklaması da veri taşımaz (tüm sayfalarda genel); arama motorları dizinlemez.
       expect(html, yol).toContain('content="Bu site Türksab’ın pazarlama ve finansal planlamasını gösterir. Görmek için giriş yapın."');

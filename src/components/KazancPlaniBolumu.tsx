@@ -112,8 +112,13 @@ function Kutu({ label, kisa, value, onChange, yuzdeMi = false, bosOlur = false, 
 function GrupVarsa({ baslik, kurallar, children }: { baslik: string; kurallar: string[]; children: ReactNode }) {
   const b = useContext(PlanBaglami);
   const pencerede = useContext(PencereBaglami);
+  const kimlik = useId();
   if (!pencerede && b && kurallar.every((k) => b.plan.kalici.includes(k))) return null;
-  return <Grup baslik={baslik}>{children}</Grup>;
+  // fieldset yerine grup rolü: WebKit, ekran daralınca legend genişliğini güncellemiyor ve sayfa taşıyor.
+  return <div role="group" aria-labelledby={kimlik} className="so2-grup">
+    <p id={kimlik} className="so2-grup-baslik">{baslik}</p>
+    <div className="so2-grup-alanlar">{children}</div>
+  </div>;
 }
 
 function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; guncelle: Guncelle }) {
@@ -157,7 +162,7 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
       <div><dt>Geçerli oran</dt><dd data-kazanc={`${tur}-oran`}>{yuzde(oran)}</dd></div>
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
-    <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri sonraki aylarda da aynı aylık ciroyu yaparsa şu tutarları alırsınız:</p>
+    <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri her ay aynı ciroyu yaparsa şu tutarları alırsınız:</p>
     {!kotaTamam(plan, tur, plan.ornekCiro) && <p className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>}
     <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
       {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
@@ -270,13 +275,14 @@ function OrnekHesap({ plan }: { plan: KazancPlani }) {
       const h = ornekHesap(plan, t);
       return <div>
           {h.satirlar.length === 0 ? <p className="pol-kz-not">Bu katkının oranları henüz girilmedi.</p> : <>
-            <div className="table-frame"><div className="table-scroll" role="region" aria-label={`${KATKI_SEKMESI[t]}: örnek hesap`} tabIndex={0}>
-              <table className="data-table pol-kz-tablo" data-ornek-hesap={t}>
-                <thead><tr><th scope="col">Dönem</th><th scope="col">Oran</th><th scope="col">Ciro</th><th scope="col">Kazanç</th></tr></thead>
-                <tbody>{h.satirlar.map((r) => <tr key={r.ad}>
-                  <th scope="row">{r.ad}</th><td>{yuzde(r.oran)}</td><td>{tl(r.ciro)}</td><td>{tl(r.tutar)}</td>
+            <p className="pol-kz-tablo-ad" id={`pol-kz-ornek-tablo-${t}`}>{KATKI_SEKMESI[t]}: örnek hesap</p>
+            <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby={`pol-kz-ornek-tablo-${t}`} tabIndex={0}>
+              <table role="table" className="data-table pol-kz-tablo" data-ornek-hesap={t}>
+                <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Dönem</th><th role="columnheader" scope="col">Oran</th><th role="columnheader" scope="col">Ciro</th><th role="columnheader" scope="col">Kazanç</th></tr></thead>
+                <tbody role="rowgroup">{h.satirlar.map((r) => <tr role="row" key={r.ad}>
+                  <th role="rowheader" scope="row">{r.ad}</th><td role="cell" data-ad="Oran">{yuzde(r.oran)}</td><td role="cell" data-ad="Ciro">{tl(r.ciro)}</td><td role="cell" data-ad="Kazanç">{tl(r.tutar)}</td>
                 </tr>)}</tbody>
-                <tfoot><tr><th scope="row" colSpan={3}>Toplam</th><td data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
+                <tfoot role="rowgroup"><tr role="row"><th role="rowheader" scope="row" colSpan={3}>Toplam</th><td role="cell" data-ad="Toplam kazanç" data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
               </table>
             </div></div>
             {h.k1Bos && <p className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>}
@@ -441,14 +447,14 @@ const SEVIYE_ADI = ['Kota yok', 'K1', 'K2', 'K3'] as const;
  */
 function KatkiAnahtari({ value, onChange }: { value: KatkiTuru; onChange: (v: KatkiTuru) => void }) {
   const kapatir = value === 'kapatir';
-  return <div className="pol-kz-anahtar" data-deger={value}>
+  return <div className="pol-kz-anahtar-kap"><div className="pol-kz-anahtar" data-deger={value}>
     <span className="pol-kz-anahtar-ad" data-secili={!kapatir ? '' : undefined} aria-hidden="true" onClick={() => onChange('tanistir')}>{KATKI_SEKMESI.tanistir}</span>
     <button type="button" role="switch" aria-checked={kapatir} aria-label={`Satıştaki katkınız: ${KATKI_SEKMESI[value]}. Satışı kapatmak için açın.`}
       className="pol-kz-anahtar-iz" onClick={() => onChange(kapatir ? 'tanistir' : 'kapatir')}>
       <span className="pol-kz-anahtar-top" aria-hidden="true" />
     </button>
     <span className="pol-kz-anahtar-ad" data-secili={kapatir ? '' : undefined} aria-hidden="true" onClick={() => onChange('kapatir')}>{KATKI_SEKMESI.kapatir}</span>
-  </div>;
+  </div></div>;
 }
 
 /** Seviyedeki yıldızlar. K1 bir, K2 iki, K3 üç yıldızdır. */
@@ -574,17 +580,18 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
       </li>)}</ul>
     </section>
 
-    <div className="table-frame"><div className="table-scroll" role="region" aria-label="Seviyelere göre kazanç tablosu" tabIndex={0}>
-      <table className="data-table pol-kz-tablo pol-kz-sim-tablo" data-sim-tablo={tur}>
-        <thead><tr><th scope="col">Seviye</th><th scope="col">Koşul</th><th scope="col">Cari ay oranı</th><th scope="col">Eşikteki aylık kazanç</th><th scope="col">13. aydan sonra</th></tr></thead>
-        <tbody>{satirlar.map((r) => {
+    <p className="pol-kz-tablo-ad" id="pol-kz-seviye-tablo">Seviyelere göre kazanç tablosu</p>
+    <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby="pol-kz-seviye-tablo" tabIndex={0}>
+      <table role="table" className="data-table pol-kz-tablo pol-kz-sim-tablo" data-sim-tablo={tur}>
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Seviye</th><th role="columnheader" scope="col">Koşul</th><th role="columnheader" scope="col">Cari ay oranı</th><th role="columnheader" scope="col">Eşikteki aylık kazanç</th><th role="columnheader" scope="col">13. aydan sonra</th></tr></thead>
+        <tbody role="rowgroup">{satirlar.map((r) => {
           const etkin = r.i === kota;
-          return <tr key={r.ad} data-etkin={etkin ? '' : undefined} aria-current={etkin ? 'true' : undefined}>
-            <th scope="row">{r.ad}{etkin && <span className="pol-kz-burasi">Buradasınız</span>}</th>
-            <td>{r.kosul}</td>
-            <td>{r.ulasilir ? yuzde(r.oran) : 'Yok'}</td>
-            <td>{etkin ? <>{tl(buAy)}<span className="pol-kz-hucre-not">sizin cironuzla</span></> : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}</td>
-            <td>{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
+          return <tr role="row" key={r.ad} data-etkin={etkin ? '' : undefined} aria-current={etkin ? 'true' : undefined}>
+            <th role="rowheader" scope="row">{r.ad}{etkin && <span className="pol-kz-burasi">Buradasınız</span>}</th>
+            <td role="cell" data-ad="Koşul">{r.kosul}</td>
+            <td role="cell" data-ad="Cari ay oranı">{r.ulasilir ? yuzde(r.oran) : 'Yok'}</td>
+            <td role="cell" data-ad="Eşikteki aylık kazanç">{etkin ? <>{tl(buAy)}<span className="pol-kz-hucre-not">sizin cironuzla</span></> : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}</td>
+            <td role="cell" data-ad="13. aydan sonra">{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
           </tr>;
         })}</tbody>
       </table>

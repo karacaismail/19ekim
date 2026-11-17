@@ -201,7 +201,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-rakam { margin: 0; font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: 1.1; color: var(--policy-active-ink); font-variant-numeric: tabular-nums; }
 .pol-kz-rakam-ek { display: block; margin-block-start: var(--space-1); font-size: var(--text-md); font-weight: var(--weight-regular); color: var(--text-secondary); }
 .pol-kz-sonuc-satir > div { gap: var(--space-1); padding-block: var(--space-2); }
-.pol-kz-sonuc-satir > div + div { box-shadow: 0 -1px 0 var(--rule); }
 .pol-kz-sonuc-satir dd { font-variant-numeric: tabular-nums; }
 /* Geniş ekranda ad solda, değer sağda durur. Telefonda alt alta durur, satır sıkışmaz. */
 @media (min-width: 40rem) {
@@ -249,7 +248,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-kart { grid-template-columns: minmax(0, 1fr); }
 
 /* “Parametreler” düğmesi (kullanıcı kararı 17 Kasım 2026 Salı): yalnız ikon. Sağ kenara yapışık, dikeyde ortada. */
-.pol-kz-parametreler { position: fixed; z-index: 30; inset-inline-end: 0; inset-block-start: 50%; translate: 0 -50%; display: flex; align-items: center; justify-content: center; inline-size: var(--hit-min); block-size: calc(var(--hit-min) * 1.5); padding: 0; border: 0; background: var(--policy-active-ink); color: var(--surface-raised); box-shadow: var(--shadow-soft); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-parametreler { position: fixed; z-index: 30; margin: 0; inset-inline-end: 0; inset-block-start: 50%; translate: 0 -50%; display: flex; align-items: center; justify-content: center; inline-size: calc(var(--hit-min) + var(--space-2)); block-size: calc(var(--hit-min) * 1.5); padding: 0; border: 0; background: var(--policy-active-ink); color: var(--surface-raised); box-shadow: var(--shadow-soft); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-parametreler:hover { background: var(--accent-strong); }
 .pol-kz-pencere-ara { margin: 0; font-size: var(--text-xl); }
 /* Parametreler penceresi kendi içinde kayar. Başlık ve kapatma düğmesi üstte kalır. */
@@ -258,14 +257,19 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-pencere-ust { position: sticky; inset-block-start: 0; z-index: 1; }
 
 /* ===== Büyük katkı anahtarı (kullanıcı kararı 17 Kasım 2026 Salı). Bütün katkı seçimleri bu tek bileşeni kullanır. ===== */
-.pol-kz-anahtar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'iz iz' 'sol sag'; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); }
+.pol-kz-anahtar-kap { container-type: inline-size; }
+.pol-kz-anahtar { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'iz' 'sol' 'sag'; justify-items: center; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); text-align: center; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:first-child { grid-area: sol; }
-.pol-kz-anahtar > .pol-kz-anahtar-iz { grid-area: iz; justify-self: center; }
+.pol-kz-anahtar > .pol-kz-anahtar-iz { grid-area: iz; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { grid-area: sag; }
-/* Geniş ekranda iki seçenek anahtarın iki yanında durur. */
-@media (min-width: 40rem) { .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'sol iz sag'; } }
+/* Anahtar kendi genişliğine göre dizilir. Yazı büyütülünce de seçenekler sığar. */
+@container (min-width: 18em) {
+  .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'iz iz' 'sol sag'; }
+  .pol-kz-anahtar > .pol-kz-anahtar-ad:first-child { justify-self: start; text-align: start; }
+  .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { justify-self: end; text-align: end; }
+}
+@container (min-width: 34em) { .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: 'sol iz sag'; } }
 .pol-kz-anahtar-ad { font-size: var(--text-md); line-height: var(--leading-snug); color: var(--text-secondary); cursor: pointer; user-select: none; }
-.pol-kz-anahtar-ad:last-child { text-align: end; }
 .pol-kz-anahtar-ad[data-secili] { color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
 .pol-kz-anahtar-iz { position: relative; inline-size: 5.5rem; block-size: 3rem; padding: 0; border: 0; background: var(--accent); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-anahtar-iz[aria-checked='true'] { background: var(--policy-active-ink); }
@@ -286,7 +290,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-kart-koyu h4, .pol-kz-kart-koyu p, .pol-kz-kart-koyu li, .pol-kz-kart-koyu dd { color: var(--text-on-ink); }
 .pol-kz-kart-koyu .pol-kz-not, .pol-kz-kart-koyu dt { color: var(--text-on-ink-secondary); }
 .pol-kz-kart-koyu .pol-kz-rakam { color: var(--accent-on-ink); }
-.pol-kz-kart-koyu .pol-kz-sonuc-satir > div + div { box-shadow: 0 -1px 0 var(--rule-on-ink); }
 .pol-kz-kart-koyu .pol-kz-uyari { background: var(--surface-changed); color: var(--text-primary); }
 
 /* ===== Kazanç oyunu: satıcı adayını motive eden panel ===== */
@@ -311,8 +314,9 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-skor .pol-kz-rutbe-ad { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
 .pol-kz-yildizlar { display: inline-flex; gap: var(--space-1); color: var(--accent-on-ink); }
 @media (min-width: 40rem) { .pol-kz-skor { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .pol-kz-rutbe { justify-items: end; } }
-.pol-kz-merdiven { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
-.pol-kz-merdiven > li { display: grid; justify-items: center; gap: var(--space-1); padding: var(--space-3) var(--space-1); background: var(--surface-sunken); color: var(--text-secondary); text-align: center; }
+.pol-kz-merdiven { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+@media (min-width: 30rem) { .pol-kz-merdiven { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.pol-kz-merdiven > li { display: grid; justify-items: center; gap: var(--space-1); padding: var(--space-3); background: var(--surface-sunken); color: var(--text-secondary); text-align: center; }
 .pol-kz-merdiven > li[data-durum='gecti'] { background: var(--surface-accent); color: var(--policy-active-ink); }
 .pol-kz-merdiven > li[data-durum='simdi'] { background: var(--accent); color: var(--text-on-accent); box-shadow: var(--shadow-soft); }
 .pol-kz-merdiven-ad { font-weight: var(--weight-semibold); }
@@ -334,3 +338,29 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-rozetler li[data-acik] .pol-kz-rozet-ikon { color: var(--accent-on-ink); }
 .pol-kz-rozet-ad { display: block; font-weight: var(--weight-semibold); }
 .pol-kz-rozet-metin { display: block; }
+
+.pol-kz-tablo-ad { margin: 0; font-weight: var(--weight-semibold); }
+/* Fieldset kendiliğinden içeriği kadar geniş kalır. Dar ekranda ve WebKit'te grup başlığı satır sarar, sayfa taşmaz. */
+.pol-kz-plan .so2-grup { min-inline-size: 0; }
+.pol-kz-plan .so2-grup-baslik { margin-block: 0 var(--space-1); white-space: normal; }
+/* Çok büyük yazıda uzun kelime dar kartı taşırmaz. Tablolar kelime bölmez, kendi kutusunda kayar. */
+.pol-kz-plan, .pol-kz-pencere { overflow-wrap: break-word; }
+.pol-kz-plan .data-table :is(th, td) { overflow-wrap: normal; }
+.pol-kz-rozetler li { display: flex; flex-wrap: wrap; }
+.pol-kz-rozetler li > span:last-child { flex: 1 1 8em; min-inline-size: 0; }
+
+/* Dar ekranda (< 48em) tablo yana kaymaz (ux.md §8, UX-01). Her satır bir kart olur. Hücrenin adı solda, değeri sağda durur. */
+@media (max-width: 47.99em) {
+  .pol-kz-tablo { min-inline-size: 0; }
+  .pol-kz-tablo thead { display: none; }
+  .pol-kz-tablo, .pol-kz-tablo :is(tbody, tfoot, tr) { display: block; }
+  .pol-kz-tablo tr { padding-block: var(--space-2); }
+  .pol-kz-tablo tbody tr + tr :is(th, td) { box-shadow: none; }
+  .pol-kz-tablo tbody tr + tr { margin-block-start: var(--space-2); }
+  .pol-kz-tablo :is(th, td) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); padding: var(--space-1) var(--space-3); white-space: normal; text-align: end; }
+  .pol-kz-tablo th[scope='row'] { display: block; text-align: start; }
+  .pol-kz-tablo td::before { content: attr(data-ad); text-align: start; color: var(--text-secondary); font-weight: var(--weight-regular); }
+  .pol-kz-sim-tablo td:nth-child(2) { min-inline-size: 0; text-align: end; }
+}
+/* Bölüm başlığından sonraki ilk öğenin üst boşluğu sabit düğmeyi aşağı itmesin. */
+.section.pol-kz-plan > .pol-kz-parametreler { margin: 0; }
