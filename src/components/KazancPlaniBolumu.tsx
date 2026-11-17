@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
+import { createContext, type CSSProperties, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { Checkbox, NumberInput, Tabs } from '@mantine/core';
 import { Choice } from './ui';
 import { Section } from './ui';
@@ -112,8 +112,10 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
   const { oran, kota } = katkiOrani(plan, tur, plan.ornekCiro);
   return <section className="pol-kz-kart" aria-labelledby={`pol-kz-sonuc-${tur}`}>
     <h4 id={`pol-kz-sonuc-${tur}`}>{KATKI_SEKMESI[tur]}</h4>
-    <dl className="pol-kz-sonuc">
-      <div><dt>Bu yılki kazanç</dt><dd className="pol-kz-buyuk" data-kazanc={`${tur}-bu-yil`}>{tl(plan.ornekCiro)} × {yuzde(oran)} = {tl(Math.round(plan.ornekCiro * oran))}</dd></div>
+    <p className="pol-kz-not">Bu yılki kazancınız</p>
+    <p className="pol-kz-rakam" data-kazanc={`${tur}-tutar`}>{tl(Math.round(plan.ornekCiro * oran))}</p>
+    <dl className="pol-kz-sonuc pol-kz-sonuc-satir">
+      <div><dt>Hesap</dt><dd data-kazanc={`${tur}-bu-yil`}>{tl(plan.ornekCiro)} × {yuzde(oran)} = {tl(Math.round(plan.ornekCiro * oran))}</dd></div>
       <div><dt>Geçerli oran</dt><dd data-kazanc={`${tur}-oran`}>{yuzde(oran)}</dd></div>
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
@@ -126,6 +128,16 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
 
 const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştırırsanız', kapatir: 'Satışı kapatırsanız' };
 const SEKME_SINIFI = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
+
+/** Karar kartı: üstte soru, ortada seçim, altta “Kalıcı kural”. Her karar ayrı yüzeyde durur. */
+function KararKarti({ no, baslik, aciklama, children }: { no: number; baslik: string; aciklama?: string; children: ReactNode }) {
+  return <section className="pol-kz-karar" aria-labelledby={`pol-kz-karar-${no}`}>
+    <p className="pol-kz-karar-no">{no}. karar</p>
+    <h4 id={`pol-kz-karar-${no}`}>{baslik}</h4>
+    {aciklama && <p className="pol-kz-not">{aciklama}</p>}
+    {children}
+  </section>;
+}
 
 /** Seçmeli düğme grubu. APG radyo grubu gibi çalışır: ok tuşları, Home ve End seçimi taşır. */
 function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) => void }) {
@@ -152,7 +164,7 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
     sec(hedef);
   };
   return <div className="pol-kz-sure">
-    <p id="pol-kz-sure-ad" className="pol-kz-sure-ad">Tanıştırmanın geçerlilik süresi</p>
+    <p id="pol-kz-sure-ad" className="pol-kz-gizli">Tanıştırmanın geçerlilik süresi</p>
     <div ref={grup} role="radiogroup" aria-labelledby="pol-kz-sure-ad" className="pol-sekme-listesi pol-kz-sure-liste">
       {SURE_SECENEKLERI.map((ay, i) => <button key={ay} type="button" role="radio" aria-checked={ay === value} data-ay={ay} disabled={kilitli}
         tabIndex={ay === value ? 0 : -1} className="pol-sekme" onClick={() => sec(i)} onKeyDown={(e) => tus(e, i)}>{ay} ay</button>)}
@@ -163,7 +175,12 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
 
 /** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
 function Kararlar({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
-  const soru = (anahtar: keyof typeof BOLUSME_SORUSU) => <div className="pol-kz-alan">
+  const SORU_ACIKLAMASI: Record<keyof typeof BOLUSME_SORUSU, string> = {
+    ilkSatis: 'Müşteri ilk kez satın aldığında pay nasıl bölünür?',
+    kota: 'Satış bir kotayı geçerse artan pay nasıl bölünür?',
+    yillar: 'Müşteri sonraki yıllarda da öderse pay nasıl bölünür?',
+  };
+  const soru = (anahtar: keyof typeof BOLUSME_SORUSU, no: number) => <KararKarti no={no} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
     {/* Kalıcı kural işaretliyse seçim kilitlenir. Kapalı fieldset içindeki düğmeler de kapanır. */}
     <fieldset className="pol-kz-kilit" disabled={plan.kalici.includes(`paylasim.${anahtar}`)}>
       <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={plan.paylasim[anahtar]}
@@ -171,15 +188,20 @@ function Kararlar({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle })
         onChange={(v) => guncelle((x) => { x.paylasim[anahtar] = v; })} />
     </fieldset>
     <Kalici kural={`paylasim.${anahtar}`} ad={BOLUSME_SORUSU[anahtar]} />
-  </div>;
+  </KararKarti>;
   return <div className="pol-kz-adim-govde">
-    <p>Bir kişi müşteriyi tanıştırabilir. Başka bir kişi satışı kapatabilir. Örneğin Ahmet müşteriyi tanıştırır. İki hafta sonra Mehmet satışı kapatır.</p>
-    <p>CRM, müşteri kayıtlarının tutulduğu programdır. Tanıştırma CRM'e kaydedilir.</p>
-    <SureSecimi value={plan.paylasim.sureAy} onChange={(v) => guncelle((x) => { x.paylasim.sureAy = v; })} />
-    <p>Payın nasıl bölüneceğini yönetici seçer. İlk seçenek şirketi zarardan korur.</p>
-    {soru('ilkSatis')}
-    {soru('kota')}
-    {soru('yillar')}
+    <aside className="pol-kz-ornek" aria-label="Örnek">
+      <p className="pol-kz-ornek-ad">Örnek</p>
+      <p>Ahmet müşteriyi tanıştırır. İki hafta sonra Mehmet satışı kapatır. İkisi de pay ister.</p>
+      <p>CRM, müşteri kayıtlarının tutulduğu programdır. Tanıştırma CRM'e kaydedilir.</p>
+    </aside>
+    <KararKarti no={1} baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
+      <SureSecimi value={plan.paylasim.sureAy} onChange={(v) => guncelle((x) => { x.paylasim.sureAy = v; })} />
+    </KararKarti>
+    <p className="pol-kz-ara">Sonraki üç kararda ilk seçenek şirketi zarardan korur.</p>
+    {soru('ilkSatis', 2)}
+    {soru('kota', 3)}
+    {soru('yillar', 4)}
   </div>;
 }
 
@@ -189,10 +211,14 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
   return <section className="pol-kz-kart" aria-labelledby="pol-kz-pay-sonuc">
     <h4 id="pol-kz-pay-sonuc">Ahmet tanıştırır, Mehmet satışı kapatırsa</h4>
     <p>Tanıştırma {plan.paylasim.sureAy} ay geçerlidir. Satış {tl(ciro)} olursa ilk satışta pay şöyle bölünür:</p>
-    <dl className="pol-kz-sonuc">
-      <div><dt>Ahmet'in payı</dt><dd data-paylasim="tanistiran">{tl(ciro)} × {yuzde(p.tanistiranOran)} = {tl(p.tanistiran)}</dd></div>
-      <div><dt>Mehmet'in payı</dt><dd data-paylasim="kapatan">{tl(ciro)} × {yuzde(p.kapatanOran)} = {tl(p.kapatan)}</dd></div>
-      <div><dt>Şirketin ödediği toplam</dt><dd className="pol-kz-buyuk" data-paylasim="toplam">{tl(p.toplam)}</dd></div>
+    <p className="pol-kz-rakam">{tl(p.toplam)}<span className="pol-kz-rakam-ek"> şirketin ödediği toplam</span></p>
+    <div className="pol-kz-bolus" aria-hidden="true" style={{ '--pay-a': String(p.toplam ? p.tanistiran / p.toplam : 0) } as CSSProperties}>
+      <span className="pol-kz-bolus-a" /><span className="pol-kz-bolus-m" />
+    </div>
+    <dl className="pol-kz-sonuc pol-kz-sonuc-satir">
+      <div><dt><span className="pol-kz-isaret pol-kz-isaret-a" aria-hidden="true" />Ahmet'in payı</dt><dd data-paylasim="tanistiran">{tl(ciro)} × {yuzde(p.tanistiranOran)} = {tl(p.tanistiran)}</dd></div>
+      <div><dt><span className="pol-kz-isaret pol-kz-isaret-m" aria-hidden="true" />Mehmet'in payı</dt><dd data-paylasim="kapatan">{tl(ciro)} × {yuzde(p.kapatanOran)} = {tl(p.kapatan)}</dd></div>
+      <div><dt>Şirketin ödediği toplam</dt><dd data-paylasim="toplam">{tl(p.toplam)}</dd></div>
     </dl>
     <p>Sonraki yıllarda oranlar şöyle olur:</p>
     <ul className="pol-kz-yillar" data-paylasim="yillar">
@@ -297,16 +323,19 @@ function Sihirbaz({ adimlar }: { adimlar: AdimTanimi[] }) {
   const a = adimlar[etkin];
   const toplam = adimlar.length;
   return <div className="pol-kz-sihirbaz">
-    <p className="pol-kz-konum" data-kz-konum>{toplam} adımın {etkin + 1}. adımındasınız.</p>
-    <ol className="pol-kz-adim-listesi" aria-label="Kazanç planı adımları">
-      {adimlar.map((x, i) => <li key={x.baslik}>
-        <button type="button" className="pol-kz-adim-dugme" aria-current={i === etkin ? 'step' : undefined}
-          data-durum={i < etkin ? 'bitti' : i === etkin ? 'simdi' : 'sonra'} onClick={() => git(i)}>
-          <span className="pol-kz-adim-no" aria-hidden="true">{i + 1}</span>
-          <span>{x.baslik}<span className="pol-kz-adim-durum">{i < etkin ? 'Geçtiniz' : i === etkin ? 'Şu an buradasınız' : 'Sırada'}</span></span>
-        </button>
-      </li>)}
-    </ol>
+    <nav className="pol-kz-ilerleme" aria-label="Kazanç planı adımları">
+      <p className="pol-kz-konum" data-kz-konum>{toplam} adımın {etkin + 1}. adımındasınız.</p>
+      <ol className="pol-kz-adim-listesi" style={{ '--adim-sayisi': String(toplam) } as CSSProperties}>
+        {adimlar.map((x, i) => <li key={x.baslik}>
+          <button type="button" className="pol-kz-adim-dugme" aria-current={i === etkin ? 'step' : undefined}
+            aria-label={`${i + 1}. adım: ${x.baslik}. ${i < etkin ? 'Geçtiniz' : i === etkin ? 'Şu an buradasınız' : 'Sırada'}`}
+            data-durum={i < etkin ? 'bitti' : i === etkin ? 'simdi' : 'sonra'} onClick={() => git(i)}>
+            <span className="pol-kz-adim-no" aria-hidden="true">{i < etkin ? '✓' : i + 1}</span>
+            <span className="pol-kz-adim-ad" aria-hidden="true">{x.baslik}</span>
+          </button>
+        </li>)}
+      </ol>
+    </nav>
     <section className="pol-kz-adim-icerik" aria-labelledby="pol-kz-adim-baslik">
       <div className="pol-adim-basligi">
         <p className="pol-yol-ust">{etkin + 1}. adım</p>

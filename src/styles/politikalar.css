@@ -170,33 +170,89 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-json { inline-size: 100%; min-block-size: 12rem; font-family: var(--font-mono); font-size: var(--text-md); }
 .pol-kz-dugmeler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .pol-sekme[aria-checked='true'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
-/* Kazanç planı adımları (kullanıcı kararı 17 Kasım 2026 Salı): önce kararlar, sonra oranlar, sonra sonuç. */
-.pol-kz-adimlar { margin-block-end: 0; }
-.pol-kz-adim-icerik { display: grid; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-2); }
+/* ===== Kazanç planı (kullanıcı kararı 17 Kasım 2026 Salı): mobil öncelikli, adım adım sihirbaz. ===== */
+.pol-kz-sihirbaz { display: grid; gap: var(--space-6); }
+.pol-kz-gizli { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* İlerleme: numaralı noktalar bir çizgiyle bağlıdır. Dar ekranda yalnız etkin adımın adı görünür. */
+.pol-kz-ilerleme { display: grid; gap: var(--space-3); }
+.pol-kz-konum { margin: 0; font-size: var(--text-md); font-weight: var(--weight-semibold); color: var(--text-secondary); }
+.pol-kz-adim-listesi { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--adim-sayisi), minmax(0, 1fr)); position: relative; }
+.pol-kz-adim-listesi > li { position: relative; display: flex; justify-content: center; }
+.pol-kz-adim-listesi > li + li::before { content: ''; position: absolute; inset-block-start: calc(var(--hit-min) / 2); inset-inline: -50% 50%; block-size: 2px; background: var(--rule-strong); }
+.pol-kz-adim-listesi > li:has(> [data-durum='bitti']) + li::before,
+.pol-kz-adim-listesi > li:has(> [data-durum='simdi'])::before { background: var(--policy-active-ink); }
+.pol-kz-adim-dugme { position: relative; z-index: 1; display: grid; justify-items: center; gap: var(--space-2); inline-size: 100%; padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: var(--text-sm); text-align: center; cursor: pointer; }
+.pol-kz-adim-no { display: flex; align-items: center; justify-content: center; inline-size: var(--hit-min); block-size: var(--hit-min); background: var(--surface-sunken); color: var(--text-secondary); font-size: var(--text-md); font-weight: var(--weight-semibold); transition-property: background-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-adim-dugme:hover .pol-kz-adim-no { background: var(--surface-hover); }
+.pol-kz-adim-dugme[data-durum='bitti'] .pol-kz-adim-no { background: var(--policy-active-surface); color: var(--policy-active-ink); }
+.pol-kz-adim-dugme[aria-current='step'] .pol-kz-adim-no { background: var(--policy-active-ink); color: var(--surface-raised); box-shadow: var(--shadow-soft); }
+.pol-kz-adim-dugme[aria-current='step'] { color: var(--text-primary); font-weight: var(--weight-semibold); }
+.pol-kz-adim-ad { display: none; line-height: var(--leading-snug); }
+.pol-kz-adim-dugme[aria-current='step'] .pol-kz-adim-ad { display: block; }
+@media (min-width: 40rem) { .pol-kz-adim-ad { display: block; } }
+
+/* Adım içeriği yükseltilmiş bir yüzeydir. Başlık, açıklama ve alanlar boşlukla ayrılır. */
+.pol-kz-adim-icerik { display: grid; gap: var(--space-5); min-inline-size: 0; padding: var(--inset-lg); background: var(--surface-raised); box-shadow: var(--shadow-soft); }
 .pol-kz-adim-icerik > .pol-adim-basligi { margin-block-end: 0; }
 .pol-kz-adim-icerik h3 { margin: 0; font-size: var(--text-xl); line-height: var(--leading-snug); }
+.pol-kz-adim-icerik h3:focus { outline: none; }
 .pol-kz-adim-govde { display: grid; gap: var(--space-4); }
-.pol-kz-kartlar { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
-.pol-kz-kart { display: grid; gap: var(--space-3); align-content: start; padding: var(--inset-lg); background: var(--surface-raised); }
+
+/* Örnek kutusu: ton farkıyla ayrılır, kenarlık kullanmaz. */
+.pol-kz-ornek { display: grid; gap: var(--space-2); padding: var(--inset-lg); background: var(--surface-accent); }
+.pol-kz-ornek p { margin: 0; }
+.pol-kz-ornek-ad { font-size: var(--text-sm); font-weight: var(--weight-semibold); letter-spacing: .04em; text-transform: uppercase; color: var(--policy-active-ink); }
+.pol-kz-ara { margin: 0; padding-block-start: var(--space-2); font-weight: var(--weight-semibold); }
+
+/* Karar kartı */
+.pol-kz-karar { display: grid; gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; }
+.pol-kz-karar > p, .pol-kz-karar > h4 { margin: 0; }
+.pol-kz-karar-no { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--policy-active-ink); }
+.pol-kz-karar h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-karar .secim-etiket { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+
+/* Oran grupları kart olarak durur. */
+.pol-kz-plan .pol-kz-katki .so2-grup { padding: var(--inset-lg); background: var(--surface-page); }
+.pol-kz-burada { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-accent); font-weight: var(--weight-semibold); }
+
+/* Sonuç kartları ve büyük rakam */
+.pol-kz-kartlar { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.pol-kz-kart { display: grid; gap: var(--space-3); align-content: start; padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; }
 .pol-kz-kart h4 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-rakam { margin: 0; font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: 1.1; color: var(--policy-active-ink); font-variant-numeric: tabular-nums; }
+.pol-kz-rakam-ek { display: block; margin-block-start: var(--space-1); font-size: var(--text-md); font-weight: var(--weight-regular); color: var(--text-secondary); }
+.pol-kz-sonuc-satir > div { gap: var(--space-1); padding-block: var(--space-2); }
+.pol-kz-sonuc-satir > div + div { box-shadow: 0 -1px 0 var(--rule); }
+.pol-kz-sonuc-satir dd { font-variant-numeric: tabular-nums; }
+/* Geniş ekranda ad solda, değer sağda durur. Telefonda alt alta durur, satır sıkışmaz. */
+@media (min-width: 40rem) {
+  .pol-kz-sonuc-satir > div { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-3); }
+  .pol-kz-sonuc-satir dd { text-align: end; }
+}
 .pol-kz-buyuk { font-size: var(--text-lg); }
+
+/* Bölüşme çubuğu: Ahmet ve Mehmet'in toplam içindeki payı. */
+.pol-kz-bolus { display: flex; block-size: var(--space-3); background: var(--surface-sunken); overflow: hidden; }
+.pol-kz-bolus-a { flex: 0 0 calc(var(--pay-a) * 100%); background: var(--accent); transition-property: flex-basis; transition-duration: var(--motion-duration-base); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-bolus-m { flex: 1 1 auto; background: var(--policy-active-ink); }
+.pol-kz-isaret { display: inline-block; inline-size: .75rem; block-size: .75rem; margin-inline-end: var(--space-2); vertical-align: baseline; }
+.pol-kz-isaret-a { background: var(--accent); }
+.pol-kz-isaret-m { background: var(--policy-active-ink); }
+
+/* Gezinti: telefonda ileri düğmesi tam genişliktir ve önce gelir. */
+.pol-kz-gezinti { display: flex; flex-direction: column-reverse; gap: var(--space-3); }
+.pol-kz-gezinti .pol-sekme { inline-size: 100%; min-block-size: var(--hit-min); justify-content: center; text-align: center; }
+.pol-kz-ileri { background: var(--policy-active-ink); color: var(--surface-raised); font-weight: var(--weight-semibold); }
+.pol-kz-ileri:hover { background: var(--accent-strong); color: var(--surface-raised); }
+@media (min-width: 40rem) {
+  .pol-kz-gezinti { flex-direction: row; justify-content: space-between; }
+  .pol-kz-gezinti .pol-sekme { inline-size: auto; }
+  .pol-kz-ileri { margin-inline-start: auto; }
+}
 /* Kalıcı kural işaretli seçim kilitlidir. Fieldset yalnız kapatmak için vardır, görünüm eklemez. */
 .pol-kz-kilit { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
 .pol-kz-kilit:disabled, .pol-kz-sure-liste .pol-sekme:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
-/* Kazanç planı sihirbazı: okur hangi adımda olduğunu her an görür. */
-.pol-kz-sihirbaz { display: grid; gap: var(--space-5); }
-.pol-kz-konum { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
-.pol-kz-adim-listesi { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
-.pol-kz-adim-dugme { display: flex; gap: var(--space-3); align-items: center; inline-size: 100%; min-block-size: var(--hit-min); padding: var(--inset-md, var(--space-3)); border: 0; background: var(--surface-sunken); color: var(--text-primary); font: inherit; text-align: start; cursor: pointer; }
-.pol-kz-adim-dugme:hover { background: var(--surface-hover); }
-.pol-kz-adim-dugme[aria-current='step'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
-.pol-kz-adim-no { flex: none; display: flex; align-items: center; justify-content: center; inline-size: 2rem; block-size: 2rem; background: var(--surface-page); font-weight: var(--weight-semibold); }
-.pol-kz-adim-dugme[aria-current='step'] .pol-kz-adim-no { background: var(--policy-active-ink); color: var(--surface-raised); }
-.pol-kz-adim-durum { display: block; color: var(--text-secondary); font-weight: var(--weight-regular); }
-.pol-kz-adim-icerik h3:focus { outline: none; }
-.pol-kz-burada { font-weight: var(--weight-semibold); }
-.pol-kz-gezinti { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; }
-.pol-kz-ileri { margin-inline-start: auto; background: var(--policy-active-ink); color: var(--surface-raised); font-weight: var(--weight-semibold); }
 /* Kalıcı kural çubuğu: işaretli değer varken her adımda görünür ve ekranın üstüne yapışır. */
 .pol-kz-cubuk { position: sticky; inset-block-start: 0; z-index: 2; display: grid; gap: var(--space-2); padding: var(--inset-lg); background: var(--policy-active-surface); color: var(--text-primary); }
 .pol-kz-cubuk p { margin: 0; }
