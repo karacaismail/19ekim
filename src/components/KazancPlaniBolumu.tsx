@@ -4,7 +4,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  donemAdi, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -207,6 +207,38 @@ function Kararlar({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle })
   </div>;
 }
 
+/** Kâğıttaki örnek hesap tablosu. Her katkı türü kendi sekmesindedir. Açık gelen sekme satışı kapatmadır. */
+function OrnekHesap({ plan }: { plan: KazancPlani }) {
+  return <section className="pol-kz-kart pol-kz-ornek-hesap" aria-labelledby="pol-kz-ornek-hesap">
+    <h4 id="pol-kz-ornek-hesap">Kâğıttaki örnek hesap</h4>
+    <p>Müşterinin aylık cirosu {tl(plan.ornekCiro)} olsun. Müşteri her ay aynı ciroyu yapsın.</p>
+    <Tabs defaultValue="kapatir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
+      <Tabs.List aria-label="Örnek hesabın katkı türü">
+        {KATKI_TURLERI.map((t) => <Tabs.Tab key={t} value={t}>{KATKI_SEKMESI[t]}</Tabs.Tab>)}
+      </Tabs.List>
+      {KATKI_TURLERI.map((t) => {
+        const h = ornekHesap(plan, t);
+        return <Tabs.Panel key={t} value={t}>
+          {h.satirlar.length === 0 ? <p className="pol-kz-not">Bu katkının oranları henüz girilmedi.</p> : <>
+            <div className="table-frame"><div className="table-scroll" role="region" aria-label={`${KATKI_SEKMESI[t]}: örnek hesap`} tabIndex={0}>
+              <table className="data-table pol-kz-tablo" data-ornek-hesap={t}>
+                <thead><tr><th scope="col">Dönem</th><th scope="col">Oran</th><th scope="col">Ciro</th><th scope="col">Kazanç</th></tr></thead>
+                <tbody>{h.satirlar.map((r) => <tr key={r.ad}>
+                  <th scope="row">{r.ad}</th><td>{yuzde(r.oran)}</td><td>{tl(r.ciro)}</td><td>{tl(r.tutar)}</td>
+                </tr>)}</tbody>
+                <tfoot><tr><th scope="row" colSpan={3}>Toplam</th><td data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
+              </table>
+            </div></div>
+            {h.k1Bos && <p className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>}
+            {!h.k1Gecti && <p className="pol-kz-not">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur.</p>}
+            <p className="pol-kz-not">Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla hesaplanır. Sonraki dönemler 12 aylık ciroyla hesaplanır.</p>
+          </>}
+        </Tabs.Panel>;
+      })}
+    </Tabs>
+  </section>;
+}
+
 function PaySonucu({ plan }: { plan: KazancPlani }) {
   const ciro = plan.ornekCiro;
   const p = paylasim(plan, ciro);
@@ -387,6 +419,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
             <KatkiSonucu tur="kapatir" plan={plan} />
             <KatkiSonucu tur="onboard" plan={plan} />
           </div>
+          <OrnekHesap plan={plan} />
           <PaySonucu plan={plan} />
         </> },
         kalici,

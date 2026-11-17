@@ -65,7 +65,8 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
   kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
   // Onboarding oranları kâğıtta yok. Uydurulmaz. Yönetici değerleri girer.
   onboard: { kotaEsik: [null, null, null], taban: 0, kotaArtis: [0, 0, 0], gecmis: [0, 0, 0, 0] },
-  ornekCiro: 100_000,
+  // Kâğıttaki örnek: aylık ciro 40.000 ₺ (kullanıcı kararı 17 Kasım 2026 Salı).
+  ornekCiro: 40_000,
   // Kullanıcının örneği: 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
   kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2.5, primOrani: null },
   // Her soruda varsayılan, şirketi zarardan koruyan düşme seçeneğidir.
@@ -88,6 +89,25 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
 
 export function yillaraKazanc(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
   return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, donem: donemAdi(i), oran, tutar: Math.round(ciro * oran) }));
+}
+
+/**
+ * Kâğıttaki örnek hesap (kullanıcı kararı 17 Kasım 2026 Salı). Aylık ciro sabit kabul edilir.
+ * Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla yazılır. Sonraki dönemler 12 aylık ciroyla yazılır.
+ * K1 eşiği boşsa örnek, kâğıttaki gibi K1'in geçildiğini kabul eder. Eşik doluysa ciro eşikle karşılaştırılır.
+ */
+export function ornekHesap(plan: KazancPlani, tur: KatkiTuru) {
+  const p = plan[tur];
+  const ciro = plan.ornekCiro;
+  const k1 = p.kotaEsik[0];
+  const k1Gecti = k1 === null || ciro >= k1;
+  const satirlar = [
+    { ad: 'Cari ay', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
+    { ad: 'Cari ay kota (K1)', oran: p.kotaArtis[0], ciro, tutar: k1Gecti ? Math.round(ciro * p.kotaArtis[0]) : 0 },
+    { ad: '1. ay ile 12. ay arası', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
+    ...p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: Math.round(ciro * 12 * g) })),
+  ].filter((s) => s.oran > 0);
+  return { satirlar, k1Gecti, k1Bos: k1 === null, toplam: satirlar.reduce((t, s) => t + s.tutar, 0) };
 }
 
 const yuvarla = (n: number) => Math.max(0, Math.round(n * 10_000) / 10_000);
