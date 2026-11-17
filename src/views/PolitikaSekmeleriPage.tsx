@@ -11,7 +11,9 @@ import { KazancPlaniBolumu } from '../components/KazancPlaniBolumu';
 const PROJELER = [{ id: 'istoc', ad: 'iStoc' }, { id: 'segika', ad: 'Segika' }] as const;
 // Kullanıcı kararı 17 Kasım 2026: “Öncü ortak” rolü ve bütün içeriği bu sayfadan kalktı. Eski adres ilk role döner.
 type RehberRol = Exclude<RolId, 'oncu'>;
-const ROLLER = PERSONALAR.filter((p): p is typeof p & { id: RehberRol } => p.id !== 'oncu');
+/* Kullanıcı kararı 17 Kasım 2026 Salı: "Çözüm ortağı" ilk sekmedir ve sayfa bu sekmeyle açılır. */
+const ROLLER = PERSONALAR.filter((p): p is typeof p & { id: RehberRol } => p.id !== 'oncu')
+  .sort((a, b) => Number(b.id === 'cozum') - Number(a.id === 'cozum'));
 const KISA_ADLAR: Record<RehberRol, string> = {
   kadrolu: 'Kadrolu uzman', cozum: 'Çözüm ortağı', tavsiye: 'Mevcut müşteri', elci: 'Marka elçisi',
 };

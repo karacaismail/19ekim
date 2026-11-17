@@ -42,7 +42,7 @@ for (const rol of ['kadrolu', 'cozum', 'tavsiye', 'elci']) {
 
 test('geçersiz seçim varsayılana döner ve klavye sekmeleri çalışır', async ({ page }) => {
   await page.goto('politikalar/?proje=olmayan&rol=olmayan');
-  await expect(page).toHaveURL(/proje=istoc&rol=kadrolu$/);
+  await expect(page).toHaveURL(/proje=istoc&rol=cozum$/);
   const tabs = page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab');
   await tabs.first().focus();
   await page.keyboard.press('Tab');
@@ -156,9 +156,9 @@ test('rehber parçaları önyükleme bağlantısıyla yüklenmez', async ({ page
 // Kullanıcı kararı 17 Kasım 2026 Salı: “Öncü ortak” rolü ve bütün içeriği çalışma rehberlerinden kalktı.
 for (const proje of ['istoc', 'segika'] as const) test(`${proje}: çalışma rehberlerinde “Öncü ortak” rolü ve içeriği yoktur`, async ({ page }) => {
   await page.goto(`politikalar/?proje=${proje}&rol=oncu`);
-  await expect(page).toHaveURL(new RegExp(`proje=${proje}&rol=kadrolu$`));
+  await expect(page).toHaveURL(new RegExp(`proje=${proje}&rol=cozum$`));
   const roller = page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab');
-  await expect(roller).toHaveText(['Kadrolu uzman', 'Çözüm ortağı', 'Mevcut müşteri', 'Marka elçisi']);
+  await expect(roller).toHaveText(['Çözüm ortağı', 'Kadrolu uzman', 'Mevcut müşteri', 'Marka elçisi']);
   for (let i = 0; i < 4; i++) {
     await roller.nth(i).click();
     await expect(page.locator('.pol-etkin-baslik')).toBeVisible();
@@ -168,6 +168,6 @@ for (const proje of ['istoc', 'segika'] as const) test(`${proje}: çalışma reh
 
 test('eski “Öncü ortak” adresi ilk rolü açar', async ({ page }) => {
   await page.goto('politikalar/oncu/');
-  await expect(page).toHaveURL(/politikalar\/\?proje=istoc&rol=kadrolu$/);
+  await expect(page).toHaveURL(/politikalar\/\?proje=istoc&rol=cozum$/);
   await expect(page.locator('main')).not.toContainText(/öncü/i);
 });
