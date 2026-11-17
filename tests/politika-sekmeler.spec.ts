@@ -51,7 +51,7 @@ test('geçersiz seçim varsayılana döner ve klavye sekmeleri çalışır', asy
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toBeFocused();
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(page).toHaveURL(/rol=cozum$/);
+  await expect(page).toHaveURL(/rol=kadrolu$/);
   await page.keyboard.press('End');
   await expect(tabs.last()).toBeFocused();
   await page.keyboard.press('Enter');

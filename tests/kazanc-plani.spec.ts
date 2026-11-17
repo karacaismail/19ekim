@@ -1,4 +1,8 @@
-import { expect, test } from './fixtures/persona';
+import { expect, test, type Locator } from './fixtures/persona';
+
+// Kullanıcı kararı 17 Kasım 2026 Salı: kazanç planı adım adım ilerler. Ekranda yalnız etkin adım durur.
+const adimaGit = (plan: Locator, baslik: string) =>
+  plan.getByRole('navigation', { name: 'Kazanç planı adımları' }).getByRole('button', { name: new RegExp(`adım: ${baslik}\\.`) }).click();
 
 // Kullanıcı kararı 16 Kasım 2026 Pazartesi: kâğıttaki kazanç planı. Persona fark etmez, herkes iş ortağıdır.
 // Yalnız kadrolu uzman SGK'lı çalışandır ve maaş alır.
@@ -66,6 +70,7 @@ for (const proje of ['istoc', 'segika'] as const) {
     await expect(plan).toBeVisible();
     await expect(plan).toContainText('Herkes iş ortağıdır.');
     const kutu = (ad: string) => plan.getByRole('textbox', { name: ad, exact: true });
+    await adimaGit(plan, 'Oranları girin');
     await expect(kutu('Tanıştırma taban oranı')).toHaveValue('%7');
     const tanistirGecmis = ['%5', '%2', '%2', '%1'];
     const kapatirGecmis = ['%10', '%7', '%5', '%2'];
@@ -81,8 +86,10 @@ for (const proje of ['istoc', 'segika'] as const) {
     await expect(plan).toContainText(/henüz belirlenmedi/i);
     // Okur oranı değiştirir. Örnek hesap hemen değişir. Değer yenilemeden sonra kalır.
     await kutu('Satışı kapatma taban oranı').fill('%20');
+    await adimaGit(plan, 'Sonucu görün');
     await expect(plan.locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('20.000 ₺');
     await page.reload();
+    await adimaGit(page.getByRole('region', { name: 'Kazanç planı' }), 'Oranları girin');
     await page.getByRole('tab', { name: 'Satışı kapatırsanız', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Kazanç planı' }).getByRole('textbox', { name: 'Satışı kapatma taban oranı', exact: true })).toHaveValue('%20');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -91,18 +98,23 @@ for (const proje of ['istoc', 'segika'] as const) {
 
 test('iki projenin planı ayrı saklanır', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=cozum');
+  await adimaGit(page.getByRole('region', { name: 'Kazanç planı' }), 'Oranları girin');
   await page.getByRole('region', { name: 'Kazanç planı' }).getByRole('textbox', { name: 'Tanıştırma taban oranı', exact: true }).fill('%9');
   await page.goto('politikalar/?proje=segika&rol=cozum');
+  await adimaGit(page.getByRole('region', { name: 'Kazanç planı' }), 'Oranları girin');
   await expect(page.getByRole('region', { name: 'Kazanç planı' }).getByRole('textbox', { name: 'Tanıştırma taban oranı', exact: true })).toHaveValue('%7');
 });
 
 test('kota eşiği girilince oran sırayla artar', async ({ page }) => {
   await page.goto('politikalar/?proje=istoc&rol=elci');
   const plan = page.getByRole('region', { name: 'Kazanç planı' });
+  await adimaGit(plan, 'Sonucu görün');
   await plan.getByRole('textbox', { name: 'Örnek yıllık ciro', exact: true }).fill('300.000');
+  await adimaGit(plan, 'Oranları girin');
   await plan.getByRole('tab', { name: 'Satışı kapatırsanız', exact: true }).click();
   await plan.getByRole('textbox', { name: 'Satışı kapatma K1 ciro eşiği', exact: true }).fill('100.000');
   await plan.getByRole('textbox', { name: 'Satışı kapatma K2 ciro eşiği', exact: true }).fill('250.000');
+  await adimaGit(plan, 'Sonucu görün');
   await expect(plan.locator('[data-kazanc="kapatir-oran"]')).toHaveText('%32');
   await expect(plan.locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('96.000 ₺');
 });
@@ -115,8 +127,9 @@ test('kadrolu uzman sekmesi maaşı, kotayı ve SGK kaydını söyler', async ({
   await expect(plan).toContainText('50.000 ₺ ile 60.000 ₺');
   await expect(plan.getByRole('textbox', { name: 'Aylık maaş', exact: true })).toHaveValue('50.000');
   await expect(plan.getByRole('textbox', { name: 'Kota oranı', exact: true })).toHaveValue('%250');
-  await expect(plan.locator('[data-kazanc="kadrolu-kota"]')).toContainText('125.000 ₺');
   await expect(plan.getByRole('textbox', { name: 'Kota üstü prim oranı', exact: true })).toHaveValue('');
+  await adimaGit(plan, 'Sonucu görün');
+  await expect(plan.locator('[data-kazanc="kadrolu-kota"]')).toContainText('125.000 ₺');
 });
 
 test('satışta katkı seçiminde orta seçenek yoktur', async ({ page }) => {
@@ -132,6 +145,7 @@ for (const proje of ['istoc', 'segika'] as const) test(`${proje}: katkı türler
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto(`politikalar/?proje=${proje}&rol=elci`);
   const plan = page.getByRole('region', { name: 'Kazanç planı' });
+  await adimaGit(plan, 'Oranları girin');
   const liste = plan.getByRole('tablist', { name: 'Satıştaki katkınız' });
   const tanistir = liste.getByRole('tab', { name: 'Yalnız tanıştırırsanız', exact: true });
   const kapatir = liste.getByRole('tab', { name: 'Satışı kapatırsanız', exact: true });
@@ -177,6 +191,7 @@ for (const proje of ['istoc', 'segika'] as const) test(`${proje}: iki katkı sek
   const plan = page.getByRole('region', { name: 'Kazanç planı' });
   const sekme = (ad: string) => plan.getByRole('tab', { name: ad, exact: true });
   const kutu = (ad: string) => plan.getByRole('tabpanel').getByRole('textbox', { name: ad, exact: true });
+  await adimaGit(plan, 'Oranları girin');
   for (const k of ['K1', 'K2', 'K3']) await expect(kutu(`Tanıştırma ${k} ciro eşiği`)).toHaveValue('');
   await kutu('Tanıştırma K1 ciro eşiği').fill('100.000');
   await sekme('Satışı kapatırsanız').click();
@@ -185,6 +200,7 @@ for (const proje of ['istoc', 'segika'] as const) test(`${proje}: iki katkı sek
   await sekme('Yalnız tanıştırırsanız').click();
   await expect(kutu('Tanıştırma K1 ciro eşiği')).toHaveValue('100.000');
   await page.reload();
+  await adimaGit(page.getByRole('region', { name: 'Kazanç planı' }), 'Oranları girin');
   await expect(page.getByRole('region', { name: 'Kazanç planı' }).getByRole('textbox', { name: 'Tanıştırma K1 ciro eşiği', exact: true })).toHaveValue('100.000');
   await page.getByRole('tab', { name: 'Satışı kapatırsanız', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Satışı kapatma K1 ciro eşiği', exact: true })).toHaveValue('250.000');
@@ -248,55 +264,65 @@ for (const proje of ['istoc', 'segika'] as const) test(`${proje}: pay bölüşme
   let disaGiden = 0;
   page.on('request', (r) => { if (/kalici|kazanc-plani/.test(`${r.url()} ${r.postData() ?? ''}`)) disaGiden++; });
   await page.goto(`politikalar/?proje=${proje}&rol=cozum`);
-  const bolum = page.getByRole('region', { name: 'Tanıştıran ve satışı kapatan farklı kişiyse' });
-  await expect(bolum).toContainText("Tanıştırma CRM'e kaydedilir.");
-  await expect(bolum).not.toContainText('henüz karar verilmedi');
-  const sure = bolum.getByRole('radiogroup', { name: 'Tanıştırmanın geçerlilik süresi' });
+  const plan = page.getByRole('region', { name: 'Kazanç planı' });
+  // 1. adım: kararlar önce gelir.
+  await expect(plan.locator('[data-kz-konum]')).toHaveText('4 adımın 1. adımındasınız.');
+  await expect(plan).toContainText("Tanıştırma CRM'e kaydedilir.");
+  await expect(plan).not.toContainText('henüz karar verilmedi');
+  const sure = plan.getByRole('radiogroup', { name: 'Tanıştırmanın geçerlilik süresi' });
   await expect(sure.getByRole('radio')).toHaveText(['1 ay', '2 ay', '3 ay', '4 ay', '5 ay', '6 ay', '8 ay', '10 ay', '12 ay']);
-  await expect(bolum).toContainText('Tanıştırma 2 ay geçerlidir.');
+  await expect(plan).toContainText('Tanıştırma 2 ay geçerlidir.');
   // Varsayılan şirketi zarardan korur.
   for (const soru of ['İlk satışta pay', 'Sonraki 4 yılın payı', 'Kota artışında pay']) {
-    await expect(bolum.getByRole('group', { name: soru }).getByRole('button', { name: "Ahmet'in payı Mehmet'in payından düşülür", exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(plan.getByRole('group', { name: soru }).getByRole('button', { name: "Ahmet'in payı Mehmet'in payından düşülür", exact: true })).toHaveAttribute('aria-pressed', 'true');
   }
-  await expect(bolum.locator('[data-paylasim="tanistiran"]')).toHaveText('100.000 ₺ × %7 = 7.000 ₺');
-  await expect(bolum.locator('[data-paylasim="kapatan"]')).toHaveText('100.000 ₺ × %8 = 8.000 ₺');
-  await expect(bolum.locator('[data-paylasim="toplam"]')).toHaveText('15.000 ₺');
-  await expect(bolum.locator('[data-paylasim="yillar"] li').first()).toHaveText('1. yılda Ahmet %5, Mehmet %5 alır.');
+  await adimaGit(plan, 'Sonucu görün');
+  await expect(plan.locator('[data-kz-konum]')).toHaveText('4 adımın 3. adımındasınız.');
+  await expect(plan.locator('[data-paylasim="tanistiran"]')).toHaveText('100.000 ₺ × %7 = 7.000 ₺');
+  await expect(plan.locator('[data-paylasim="kapatan"]')).toHaveText('100.000 ₺ × %8 = 8.000 ₺');
+  await expect(plan.locator('[data-paylasim="toplam"]')).toHaveText('15.000 ₺');
+  await expect(plan.locator('[data-paylasim="yillar"] li').first()).toHaveText('1. yılda Ahmet %5, Mehmet %5 alır.');
   // İkisine de tam ödeme seçilince toplam artar.
-  const ilk = bolum.getByRole('group', { name: 'İlk satışta pay' });
-  await ilk.getByRole('button', { name: 'Şirket ikisine de tam öder', exact: true }).click();
-  await expect(bolum.locator('[data-paylasim="kapatan"]')).toHaveText('100.000 ₺ × %15 = 15.000 ₺');
-  await expect(bolum.locator('[data-paylasim="toplam"]')).toHaveText('22.000 ₺');
+  await adimaGit(plan, 'Kararları seçin');
+  await plan.getByRole('group', { name: 'İlk satışta pay' }).getByRole('button', { name: 'Şirket ikisine de tam öder', exact: true }).click();
   // Klavye ile seçim.
-  const yillar = bolum.getByRole('group', { name: 'Sonraki 4 yılın payı' });
-  await yillar.getByRole('button', { name: 'Şirket ikisine de tam öder', exact: true }).focus();
+  await plan.getByRole('group', { name: 'Sonraki 4 yılın payı' }).getByRole('button', { name: 'Şirket ikisine de tam öder', exact: true }).focus();
   await page.keyboard.press('Enter');
-  await expect(bolum.locator('[data-paylasim="yillar"] li').first()).toHaveText('1. yılda Ahmet %5, Mehmet %10 alır.');
   await sure.getByRole('radio', { name: '2 ay', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
-  await expect(bolum).toContainText('Tanıştırma 3 ay geçerlidir.');
+  await expect(plan).toContainText('Tanıştırma 3 ay geçerlidir.');
   await page.keyboard.press('End');
-  await expect(bolum).toContainText('Tanıştırma 12 ay geçerlidir.');
+  await expect(plan).toContainText('Tanıştırma 12 ay geçerlidir.');
   await page.keyboard.press('Home');
-  await expect(bolum).toContainText('Tanıştırma 1 ay geçerlidir.');
+  await expect(plan).toContainText('Tanıştırma 1 ay geçerlidir.');
   await page.keyboard.press('ArrowLeft');
-  await expect(bolum).toContainText('Tanıştırma 12 ay geçerlidir.');
-  // Kalıcı kural kutuları.
-  const plan = page.getByRole('region', { name: 'Kazanç planı' });
+  await expect(plan).toContainText('Tanıştırma 12 ay geçerlidir.');
+  await adimaGit(plan, 'Sonucu görün');
+  await expect(plan.locator('[data-paylasim="kapatan"]')).toHaveText('100.000 ₺ × %15 = 15.000 ₺');
+  await expect(plan.locator('[data-paylasim="toplam"]')).toHaveText('22.000 ₺');
+  await expect(plan.locator('[data-paylasim="yillar"] li').first()).toHaveText('1. yılda Ahmet %5, Mehmet %10 alır.');
+  // Kalıcı kural kutuları. İşaretli değer kilitlenir. JSON çubuğu hemen görünür.
+  await adimaGit(plan, 'Kararları seçin');
   await plan.getByRole('checkbox', { name: 'İlk satışta pay kalıcı kural', exact: true }).check();
+  await expect(plan.getByRole('group', { name: 'İlk satışta pay' }).getByRole('button').first()).toBeDisabled();
   await plan.getByRole('checkbox', { name: 'Tanıştırmanın geçerlilik süresi kalıcı kural', exact: true }).check();
+  await expect(sure.getByRole('radio').first()).toBeDisabled();
+  await expect(plan.getByRole('region', { name: 'Kalıcı kurallar', exact: true })).toContainText('2 değer kalıcı kural olarak işaretli.');
+  await adimaGit(plan, 'Oranları girin');
   await plan.getByRole('checkbox', { name: 'Tanıştırma taban oranı kalıcı kural', exact: true }).check();
+  await expect(plan.getByRole('textbox', { name: 'Tanıştırma taban oranı', exact: true })).toBeDisabled();
   await plan.getByRole('tab', { name: 'Satışı kapatırsanız', exact: true }).click();
   await plan.getByRole('checkbox', { name: 'Satışı kapatma K1 ciro eşiği kalıcı kural', exact: true }).check();
-  await plan.getByRole('button', { name: 'Kalıcı kuralları JSON olarak al', exact: true }).click();
+  await adimaGit(plan, 'Kalıcı kuralları alın');
   const metin = plan.getByRole('textbox', { name: 'Kalıcı kurallar JSON', exact: true });
   const json = JSON.parse(await metin.inputValue());
   expect(json).toMatchObject({ proje, gorunum: proje === 'istoc' ? 'iStoc' : 'Segika' });
   expect(json.kurallar.map((k: { id: string; deger: unknown }) => [k.id, k.deger])).toEqual([
     ['tanistir.taban', 0.07], ['kapatir.kotaEsik.0', null], ['paylasim.sureAy', 12], ['paylasim.ilkSatis', 'tam'],
   ]);
-  await expect(plan.getByRole('button', { name: "JSON'u kopyalayın", exact: true })).toBeVisible();
-  await expect(plan.getByRole('button', { name: 'JSON dosyasını indirin', exact: true })).toBeVisible();
+  const cubuk = plan.getByRole('region', { name: 'Kalıcı kurallar', exact: true });
+  await expect(cubuk.getByRole('button', { name: "JSON'u kopyalayın", exact: true })).toBeVisible();
+  await expect(cubuk.getByRole('button', { name: 'JSON dosyasını indirin', exact: true })).toBeVisible();
   // İşaret yenilemeden sonra kalır. JSON hiçbir sunucuya gönderilmez.
   await page.reload();
   await expect(page.getByRole('checkbox', { name: 'İlk satışta pay kalıcı kural', exact: true })).toBeChecked();

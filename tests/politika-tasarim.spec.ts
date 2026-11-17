@@ -12,6 +12,8 @@ test('320 px: adımın işi kaydırmadan görünür ve soru işin hemen ardında
   const karar = page.locator('[data-akis-etkin] .pol-karar');
   await expect(karar).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
+  // Kullanıcı kararı 17 Kasım 2026 Salı: kazanç planı rehberin üstündedir. Okur rehbere kaydırarak gelir.
+  await page.locator('[data-akis-etkin]').evaluate((el) => el.scrollIntoView({ block: 'start' }));
   const is = await page.locator('[data-akis-etkin] .pol-is-aciklamasi h4').boundingBox();
   const ilkIs = await page.locator('[data-akis-etkin] .pol-yap li').first().boundingBox();
   const soru = await karar.locator('legend').boundingBox();

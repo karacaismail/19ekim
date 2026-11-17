@@ -156,8 +156,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-yillar { margin: 0; padding-inline-start: var(--space-5); }
 .pol-kz-yillar li { margin-block: var(--space-1); }
 .pol-kz-not { color: var(--text-secondary); }
-.pol-kz-paylasim { display: grid; gap: var(--space-4); }
-.pol-kz-paylasim h3 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
 .pol-kz-sure { display: grid; gap: var(--space-2); }
 .pol-kz-sure-ad { font-weight: var(--weight-semibold); }
 .pol-kz-sure-liste { margin: 0; }
@@ -206,7 +204,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-ara { margin: 0; padding-block-start: var(--space-2); font-weight: var(--weight-semibold); }
 
 /* Karar kartı */
-.pol-kz-karar { display: grid; gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; }
+.pol-kz-karar { display: grid; gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; overflow-x: clip; }
 .pol-kz-karar > p, .pol-kz-karar > h4 { margin: 0; }
 .pol-kz-karar-no { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--policy-active-ink); }
 .pol-kz-karar h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
