@@ -24,7 +24,7 @@ export interface KatkiPlani {
   taban: number;
   /** K1, K2 ve K3 kotasına ulaşınca eklenen yüzde puan. */
   kotaArtis: [number, number, number];
-  /** Getirilen müşterinin sonraki 1., 2., 3. ve 4. yıl cirosundan alınan oran. */
+  /** Satış yılı 1. yıldır ve taban oranı kullanır. Bu liste müşterinin 2., 3., 4. ve 5. yıl cirosundan alınan orandır. */
   gecmis: [number, number, number, number];
 }
 export interface KazancPlani {
@@ -59,7 +59,8 @@ export const MAAS_ARALIGI = [50_000, 60_000] as const;
 export const KAZANC_VARSAYILAN: KazancPlani = {
   // Kullanıcı kararı 17 Kasım 2026 Salı: tanıştırmanın varsayılanları. Bunlar kalıcı kural değildir.
   tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0.07, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.05, 0.025, 0, 0] },
-  kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0.02] },
+  // Kullanıcı kararı 17 Kasım 2026 Salı: satış yılı 1. yıldır ve %15'tir. 2. yıl %10, 3. yıl %7, 4. yıl %5 olur. Eski %2 kalktı.
+  kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
   // Onboarding oranları kâğıtta yok. Uydurulmaz. Yönetici değerleri girer.
   onboard: { kotaEsik: [null, null, null], taban: 0, kotaArtis: [0, 0, 0], gecmis: [0, 0, 0, 0] },
   ornekCiro: 100_000,
@@ -84,7 +85,7 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
 }
 
 export function yillaraKazanc(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
-  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 1, oran, tutar: Math.round(ciro * oran) }));
+  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, oran, tutar: Math.round(ciro * oran) }));
 }
 
 const yuvarla = (n: number) => Math.max(0, Math.round(n * 10_000) / 10_000);
@@ -110,7 +111,7 @@ export function paylasim(plan: KazancPlani, ciro: number) {
   return {
     tanistiranOran, kapatanOran, tanistiran, kapatan, toplam: tanistiran + kapatan,
     yillar: plan.tanistir.gecmis.map((g, i) => ({
-      yil: i + 1, tanistiran: g, kapatan: yuvarla(plan.kapatir.gecmis[i] - (b.yillar === 'dus' ? g : 0)),
+      yil: i + 2, tanistiran: g, kapatan: yuvarla(plan.kapatir.gecmis[i] - (b.yillar === 'dus' ? g : 0)),
     })),
   };
 }
@@ -130,7 +131,7 @@ export function kuralListesi(plan: KazancPlani) {
     liste.push(oran(`${tur}.taban`, `${ad} taban oranı`, p.taban));
     p.kotaEsik.forEach((e, i) => liste.push(para(`${tur}.kotaEsik.${i}`, `${ad} K${i + 1} ciro eşiği`, e)));
     p.kotaArtis.forEach((a, i) => liste.push(oran(`${tur}.kotaArtis.${i}`, `${ad} K${i + 1} artışı`, a)));
-    p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${i + 1}. yıl komisyonu`, g)));
+    p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${i + 2}. yıl komisyonu`, g)));
   }
   liste.push({ id: 'paylasim.sureAy', ad: 'Tanıştırmanın geçerlilik süresi', deger: plan.paylasim.sureAy, gosterim: `${plan.paylasim.sureAy} ay` });
   for (const soru of ['ilkSatis', 'yillar', 'kota'] as const) {
