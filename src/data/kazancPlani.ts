@@ -73,7 +73,8 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
 
 /**
  * Yöneticinin kalıcı kuralları (kullanıcı kararı 17 Kasım 2026 Salı, Segika JSON çıktısı).
- * Bu değerler sabittir. Ekranda kutu yerine düz metin olarak durur. Okur bu değerleri değiştiremez.
+ * Bu değerler başlangıçta kalıcı kural olarak işaretlidir. Ana ekranda görünmezler.
+ * Yönetici bu değerleri “KALICI KURALLAR” penceresinden değiştirir ya da kalıcı kuraldan çıkarır.
  */
 export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
   istoc: {},
@@ -104,20 +105,13 @@ function degerYaz(plan: KazancPlani, id: string, deger: number | string | null) 
   hedef[yol[yol.length - 1]] = deger;
 }
 
-export const sabitMi = (proje: Marka, id: string) => id in SABIT_KURALLAR[proje];
-
 /** Projenin başlangıç planı. Sabit kurallar ve proje varsayılanları uygulanmıştır. */
 export function projeVarsayilani(proje: Marka): KazancPlani {
   const v = structuredClone(KAZANC_VARSAYILAN);
   for (const [id, d] of Object.entries(PROJE_VARSAYILANI[proje])) degerYaz(v, id, d);
-  return sabitleriUygula(v, proje);
-}
-
-/** Sabit kurallar her zaman kazanır. Tarayıcıdaki eski kayıt sabit değeri değiştiremez. */
-export function sabitleriUygula(plan: KazancPlani, proje: Marka): KazancPlani {
-  for (const [id, d] of Object.entries(SABIT_KURALLAR[proje])) degerYaz(plan, id, d);
-  plan.kalici = plan.kalici.filter((k) => !sabitMi(proje, k));
-  return plan;
+  for (const [id, d] of Object.entries(SABIT_KURALLAR[proje])) degerYaz(v, id, d);
+  v.kalici = Object.keys(SABIT_KURALLAR[proje]);
+  return v;
 }
 
 /** Ulaşılan kota sayısı ve geçerli oran. Eşikler sırayla aranır. Boş eşikten sonra kota sayılmaz. */
@@ -239,7 +233,7 @@ export function kaliciJson(plan: KazancPlani, proje: Marka, simdi: Date) {
   const iki = (n: number) => String(n).padStart(2, '0');
   const tarih = `${simdi.getFullYear()}-${iki(simdi.getMonth() + 1)}-${iki(simdi.getDate())}`;
   const gorunum = GORUNUM_ADI[proje];
-  const secili = new Set([...plan.kalici, ...Object.keys(SABIT_KURALLAR[proje])]);
+  const secili = new Set(plan.kalici);
   return {
     tur: 'kazanc-plani-kalici-kurallar',
     surum: 2,
@@ -306,5 +300,5 @@ export function planOku(ham: unknown, proje?: Marka): KazancPlani {
     const gecerli = new Set(kuralListesi(v).map((k) => k.id));
     v.kalici = [...new Set(h.kalici.filter((x): x is string => typeof x === 'string' && gecerli.has(x)))];
   }
-  return proje ? sabitleriUygula(v, proje) : v;
+  return v;
 }

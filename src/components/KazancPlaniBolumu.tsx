@@ -1,10 +1,12 @@
 import { createContext, type CSSProperties, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
-import { Checkbox, NumberInput, Tabs } from '@mantine/core';
+import { Checkbox, Modal, NumberInput, Tabs } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
+import { useMotionMs } from '../lib/motion';
 import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KOTA_KURALI, kotaTamam, projeVarsayilani, sabitMi, donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  KOTA_KURALI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -15,7 +17,8 @@ const tl = (n: number) => `${num(n)} ₺`;
 const yuzde = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 
 /* Plan her proje için ayrı anahtarda, yalnız bu tarayıcıda saklanır. Aynı sayfadaki bütün okuyucular aynı değeri görür. */
-const anahtar = (proje: Marka) => `turksab-kazanc-plani-v1-${proje}`;
+// v2: kalıcı kurallar penceresi (17 Kasım 2026 Salı). Eski kayıt yeni başlangıç değerlerini ezmesin.
+const anahtar = (proje: Marka) => `turksab-kazanc-plani-v2-${proje}`;
 const dinleyiciler = new Set<() => void>();
 const bellek = new Map<Marka, KazancPlani>();
 function oku(proje: Marka): KazancPlani {
@@ -43,42 +46,36 @@ export function useKazancPlani(proje: Marka) {
 
 type Guncelle = ReturnType<typeof useKazancPlani>['guncelle'];
 const PlanBaglami = createContext<{ plan: KazancPlani; guncelle: Guncelle; proje: Marka } | null>(null);
+/** Alan kalıcı kurallar penceresinin içindeyse doğrudur. Pencere dışında kalıcı alanlar görünmez. */
+const PencereBaglami = createContext(false);
 
-/** Değer kalıcı kural olarak işaretliyse kilitlidir. Kilitli değer değiştirilemez (kullanıcı kararı 17 Kasım 2026 Salı). */
-function useKilitli(kural?: string) {
+/**
+ * Kullanıcı kararı 17 Kasım 2026 Salı: kalıcı kural ana ekranda görünmez.
+ * Yönetici kalıcı kuralı yalnız “KALICI KURALLAR” penceresinden değiştirir.
+ */
+function useGizli(kural?: string) {
   const b = useContext(PlanBaglami);
-  return Boolean(kural && b?.plan.kalici.includes(kural));
+  const pencerede = useContext(PencereBaglami);
+  return Boolean(kural && !pencerede && b?.plan.kalici.includes(kural));
 }
 
-/** “Kalıcı kural” kutusu. İşaretli değer, yöneticinin kalıcı kural adayıdır. */
+/** Ana ekranda “Kalıcı kural” kutusu. Pencerede “Kalıcı kuraldan çıkarın” düğmesi. */
 function Kalici({ kural, ad }: { kural: string; ad: string }) {
   const b = useContext(PlanBaglami);
+  const pencerede = useContext(PencereBaglami);
   if (!b) return null;
-  if (sabitMi(b.proje, kural)) return <p className="pol-kz-sabit-not">Kalıcı kural. Yönetici bu değeri sabitledi.</p>;
-  const isaretli = b.plan.kalici.includes(kural);
-  return <><Checkbox label="Kalıcı kural" aria-label={`${ad} kalıcı kural`} checked={isaretli}
-    onChange={(e) => {
-      const acik = e.currentTarget.checked;
-      b.guncelle((x) => { x.kalici = acik ? [...x.kalici.filter((k) => k !== kural), kural] : x.kalici.filter((k) => k !== kural); });
-    }}
-    classNames={{ root: 'applet-onay pol-kz-kalici', body: 'applet-onay-govde', input: 'applet-onay-kutu', label: 'applet-onay-ad', icon: 'applet-onay-ikon' }} />
-    {isaretli && <p className="pol-kz-not">Bu değer kilitli. Değiştirmek için “Kalıcı kural” işaretini kaldırın.</p>}</>;
+  const cikar = () => b.guncelle((x) => { x.kalici = x.kalici.filter((k) => k !== kural); });
+  if (pencerede) return <button type="button" className="pol-sekme pol-kz-cikar" aria-label={`${ad}: kalıcı kuraldan çıkarın`} onClick={cikar}>Kalıcı kuraldan çıkarın</button>;
+  return <Checkbox label="Kalıcı kural" aria-label={`${ad} kalıcı kural`} checked={false}
+    onChange={(e) => { if (e.currentTarget.checked) b.guncelle((x) => { x.kalici = [...x.kalici.filter((k) => k !== kural), kural]; }); }}
+    classNames={{ root: 'applet-onay pol-kz-kalici', body: 'applet-onay-govde', input: 'applet-onay-kutu', label: 'applet-onay-ad', icon: 'applet-onay-ikon' }} />;
 }
 
 /** Boş bırakılabilen sayı kutusu. Yüzde alanında değer oran olarak saklanır. */
 function Kutu({ label, value, onChange, yuzdeMi = false, bosOlur = false, birim, kural }: {
   label: string; value: Esik; onChange: (v: Esik) => void; yuzdeMi?: boolean; bosOlur?: boolean; birim?: string; kural?: string;
 }) {
-  const kilitli = useKilitli(kural);
-  const b = useContext(PlanBaglami);
-  if (kural && b && sabitMi(b.proje, kural)) {
-    const metin = value === null ? 'Belirlenmedi' : yuzdeMi ? yuzde(value) : `${num(value)}${birim ? ' ₺' : ''}`;
-    return <div className="pol-kz-alan pol-kz-sabit" data-sabit={kural}>
-      <p className="so2-girdi-ad">{label}</p>
-      <p className="pol-kz-sabit-deger">{metin}</p>
-      <Kalici kural={kural} ad={label} />
-    </div>;
-  }
+  if (useGizli(kural)) return null;
   const goster = value === null ? '' : yuzdeMi ? Math.round(value * 1000) / 10 : value;
   const kutu = <NumberInput className="so2-girdi" classNames={{ label: 'so2-girdi-ad', input: 'param-input so2-girdi-kutu' }}
     label={birim ? <>{label} <span className="so2-girdi-birim">{birim}</span></> : label}
@@ -89,34 +86,45 @@ function Kutu({ label, value, onChange, yuzdeMi = false, bosOlur = false, birim,
       if (typeof v === 'number' && Number.isFinite(v) && v >= 0) onChange(yuzdeMi ? v / 100 : v);
     }}
     hideControls allowNegative={false} thousandSeparator="." decimalSeparator="," allowedDecimalSeparators={[',']} decimalScale={2}
-    prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" disabled={kilitli} />;
+    prefix={yuzdeMi ? '%' : undefined} max={yuzdeMi ? 100 : undefined} size="md" />;
   return kural ? <div className="pol-kz-alan">{kutu}<Kalici kural={kural} ad={label} /></div> : kutu;
+}
+
+/** Bütün alanları kalıcı olan grup ana ekranda çizilmez. */
+function GrupVarsa({ baslik, kurallar, children }: { baslik: string; kurallar: string[]; children: ReactNode }) {
+  const b = useContext(PlanBaglami);
+  const pencerede = useContext(PencereBaglami);
+  if (!pencerede && b && kurallar.every((k) => b.plan.kalici.includes(k))) return null;
+  return <Grup baslik={baslik}>{children}</Grup>;
 }
 
 function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; guncelle: Guncelle }) {
   const ad = KATKI_ADI[tur];
   const p = plan[tur];
+  const ids = (alan: string, n: number) => Array.from({ length: n }, (_, i) => `${tur}.${alan}.${i}`);
+  const hepsiKalici = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)].every((k) => plan.kalici.includes(k));
   return <div className="pol-kz-katki" data-katki={tur}>
     <p>{tur === 'tanistir'
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
       : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
-    <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
-    <Grup baslik={`1. grup: ${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
+    <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz.</p>
+    {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Değerleri “KALICI KURALLAR” düğmesinden yönetin.</p>}
+    <GrupVarsa kurallar={[`${tur}.taban`]} baslik={`${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
-    </Grup>
-    <Grup baslik={`2. grup: ${ad} için aylık ciro kotaları`}>
+    </GrupVarsa>
+    <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik={`${ad} için aylık ciro kotaları`}>
       {p.kotaEsik.map((e, i) => <Kutu key={i} label={`${ad} K${i + 1} ciro eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />)}
-    </Grup>
+    </GrupVarsa>
     {p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>}
-    <Grup baslik={`3. grup: ${ad} için kota geçilince eklenen puan`}>
+    <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik={`${ad} için kota geçilince eklenen puan`}>
       {p.kotaArtis.map((a, i) => <Kutu key={i} label={`${ad} K${i + 1} artışı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />)}
-    </Grup>
-    <Grup baslik={`4. grup: ${ad} için 13. aydan sonraki oranlar`}>
+    </GrupVarsa>
+    <GrupVarsa kurallar={ids('gecmis', 4)} baslik={`${ad} için 13. aydan sonraki oranlar`}>
       {p.gecmis.map((g, i) => <Kutu key={i} label={`${ad} ${donemAdi(i)} komisyonu`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />)}
-    </Grup>
+    </GrupVarsa>
   </div>;
 }
 
@@ -144,10 +152,11 @@ const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştı
 const SEKME_SINIFI = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
 
 /** Karar kartı: üstte soru, ortada seçim, altta “Kalıcı kural”. Her karar ayrı yüzeyde durur. */
-function KararKarti({ no, baslik, aciklama, children }: { no: number; baslik: string; aciklama?: string; children: ReactNode }) {
-  return <section className="pol-kz-karar" aria-labelledby={`pol-kz-karar-${no}`}>
-    <p className="pol-kz-karar-no">{no}. karar</p>
-    <h4 id={`pol-kz-karar-${no}`}>{baslik}</h4>
+function KararKarti({ no, baslik, aciklama, children }: { no: string; baslik: string; aciklama?: string; children: ReactNode }) {
+  const pencerede = useContext(PencereBaglami);
+  const kimlik = `pol-kz-karar-${no}${pencerede ? '-pencere' : ''}`;
+  return <section className="pol-kz-karar" aria-labelledby={kimlik}>
+    <h4 id={kimlik}>{baslik}</h4>
     {aciklama && <p className="pol-kz-not">{aciklama}</p>}
     {children}
   </section>;
@@ -155,9 +164,8 @@ function KararKarti({ no, baslik, aciklama, children }: { no: number; baslik: st
 
 /** Seçmeli düğme grubu. APG radyo grubu gibi çalışır: ok tuşları, Home ve End seçimi taşır. */
 function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) => void }) {
-  const kilitli = useKilitli('paylasim.sureAy');
-  const b = useContext(PlanBaglami);
-  const sabit = Boolean(b && sabitMi(b.proje, 'paylasim.sureAy'));
+  const pencerede = useContext(PencereBaglami);
+  const adKimligi = pencerede ? 'pol-kz-sure-ad-pencere' : 'pol-kz-sure-ad';
   const grup = useRef<HTMLDivElement>(null);
   const odakla = useRef(false);
   // Seçilen düğme, çizimden hemen sonra odağı alır. Sonraki tuş doğru düğmeden başlar.
@@ -179,50 +187,57 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
     e.preventDefault();
     sec(hedef);
   };
-  if (sabit) return <div className="pol-kz-sure pol-kz-sabit" data-sabit="paylasim.sureAy">
-    <p className="pol-kz-sabit-deger">{value} ay</p>
-    <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
-  </div>;
   return <div className="pol-kz-sure">
-    <p id="pol-kz-sure-ad" className="pol-kz-gizli">Tanıştırmanın geçerlilik süresi</p>
-    <div ref={grup} role="radiogroup" aria-labelledby="pol-kz-sure-ad" className="pol-sekme-listesi pol-kz-sure-liste">
-      {SURE_SECENEKLERI.map((ay, i) => <button key={ay} type="button" role="radio" aria-checked={ay === value} data-ay={ay} disabled={kilitli}
+    <p id={adKimligi} className="pol-kz-gizli">Tanıştırmanın geçerlilik süresi</p>
+    <div ref={grup} role="radiogroup" aria-labelledby={adKimligi} className="pol-sekme-listesi pol-kz-sure-liste">
+      {SURE_SECENEKLERI.map((ay, i) => <button key={ay} type="button" role="radio" aria-checked={ay === value} data-ay={ay}
         tabIndex={ay === value ? 0 : -1} className="pol-sekme" onClick={() => sec(i)} onKeyDown={(e) => tus(e, i)}>{ay} ay</button>)}
     </div>
-    <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
   </div>;
 }
 
-/** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
-function Kararlar({ plan, guncelle, proje }: { plan: KazancPlani; guncelle: Guncelle; proje: Marka }) {
-  const SORU_ACIKLAMASI: Record<keyof typeof BOLUSME_SORUSU, string> = {
-    ilkSatis: 'Müşteri ilk kez satın aldığında pay nasıl bölünür?',
-    kota: 'Satış bir kotayı geçerse artan pay nasıl bölünür?',
-    yillar: 'Müşteri sonraki yıllarda da öderse pay nasıl bölünür?',
-  };
-  const soru = (anahtar: keyof typeof BOLUSME_SORUSU, no: number) => <KararKarti no={no} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
-    {sabitMi(proje, `paylasim.${anahtar}`) ? <p className="pol-kz-sabit-deger" data-sabit={`paylasim.${anahtar}`}>{BOLUSME_ADI[plan.paylasim[anahtar]]}</p> : <>
-    {/* Kalıcı kural işaretliyse seçim kilitlenir. Kapalı fieldset içindeki düğmeler de kapanır. */}
-    <fieldset className="pol-kz-kilit" disabled={plan.kalici.includes(`paylasim.${anahtar}`)}>
-      <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={plan.paylasim[anahtar]}
-        options={(['dus', 'tam'] as const).map((id) => ({ id, name: BOLUSME_ADI[id] }))}
-        onChange={(v) => guncelle((x) => { x.paylasim[anahtar] = v; })} />
-    </fieldset></>}
-    <Kalici kural={`paylasim.${anahtar}`} ad={BOLUSME_SORUSU[anahtar]} />
+const SORU_ACIKLAMASI: Record<keyof typeof BOLUSME_SORUSU, string> = {
+  ilkSatis: 'Müşteri ilk kez satın aldığında pay nasıl bölünür? İlk seçenek şirketi zarardan korur.',
+  kota: 'Satış bir kotayı geçerse artan pay nasıl bölünür? İlk seçenek şirketi zarardan korur.',
+  yillar: 'Müşteri sonraki yıllarda da öderse pay nasıl bölünür? İlk seçenek şirketi zarardan korur.',
+};
+
+/** Pay sorusu kartı. Ana ekranda kalıcıysa çizilmez. */
+function PaySorusu({ anahtar }: { anahtar: keyof typeof BOLUSME_SORUSU }) {
+  const b = useContext(PlanBaglami)!;
+  const id = `paylasim.${anahtar}`;
+  if (useGizli(id)) return null;
+  return <KararKarti no={anahtar} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
+    <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={b.plan.paylasim[anahtar]}
+      options={(['dus', 'tam'] as const).map((x) => ({ id: x, name: BOLUSME_ADI[x] }))}
+      onChange={(v) => b.guncelle((x) => { x.paylasim[anahtar] = v; })} />
+    <Kalici kural={id} ad={BOLUSME_SORUSU[anahtar]} />
   </KararKarti>;
+}
+
+function SureKarti() {
+  const b = useContext(PlanBaglami)!;
+  if (useGizli('paylasim.sureAy')) return null;
+  return <KararKarti no="sure" baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${b.plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
+    <SureSecimi value={b.plan.paylasim.sureAy} onChange={(v) => b.guncelle((x) => { x.paylasim.sureAy = v; })} />
+    <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
+  </KararKarti>;
+}
+
+/** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
+function Kararlar({ plan }: { plan: KazancPlani }) {
+  const hepsiKalici = ['paylasim.sureAy', 'paylasim.ilkSatis', 'paylasim.kota', 'paylasim.yillar'].every((k) => plan.kalici.includes(k));
   return <div className="pol-kz-adim-govde">
     <aside className="pol-kz-ornek" aria-label="Örnek">
       <p className="pol-kz-ornek-ad">Örnek</p>
       <p>Ahmet müşteriyi tanıştırır. İki hafta sonra Mehmet satışı kapatır. İkisi de pay ister.</p>
       <p>CRM, müşteri kayıtlarının tutulduğu programdır. Tanıştırma CRM'e kaydedilir.</p>
     </aside>
-    <KararKarti no={1} baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
-      <SureSecimi value={plan.paylasim.sureAy} onChange={(v) => guncelle((x) => { x.paylasim.sureAy = v; })} />
-    </KararKarti>
-    <p className="pol-kz-ara">Sonraki üç kararda ilk seçenek şirketi zarardan korur.</p>
-    {soru('ilkSatis', 2)}
-    {soru('kota', 3)}
-    {soru('yillar', 4)}
+    {hepsiKalici && <p className="pol-kz-not">Bütün kararlar kalıcı kuraldır. Kararları “KALICI KURALLAR” düğmesinden yönetin.</p>}
+    <SureKarti />
+    <PaySorusu anahtar="ilkSatis" />
+    <PaySorusu anahtar="kota" />
+    <PaySorusu anahtar="yillar" />
   </div>;
 }
 
@@ -299,39 +314,92 @@ function useKaliciJson(plan: KazancPlani, proje: Marka) {
   return { json, kopyala, indir, durum };
 }
 
-/**
- * Kalıcı kural çubuğu (kullanıcı kararı 17 Kasım 2026 Salı).
- * Bir değer işaretlenince çubuk her adımda görünür. JSON hemen alınabilir.
- */
-function KaliciCubugu({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
-  const { kopyala, indir, durum } = useKaliciJson(plan, proje);
-  if (!plan.kalici.length) return null;
-  return <section className="pol-kz-cubuk" aria-label="Kalıcı kurallar">
-    <p><strong>{plan.kalici.length} değer kalıcı kural olarak işaretli.</strong> JSON'u şimdi alabilirsiniz.</p>
+function JsonBolumu({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
+  const { json, kopyala, indir, durum } = useKaliciJson(plan, proje);
+  return <div className="pol-kz-adim-govde">
+    <p>JSON bütün güncel değerleri içerir. Her değerin yanında kalıcı kural olup olmadığı yazar.</p>
+    <p>JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
+    <textarea className="param-input pol-kz-json" aria-label="Kazanç planı JSON" readOnly value={json()} rows={10} />
     <div className="pol-kz-dugmeler">
-      <button type="button" className="pol-sekme pol-kz-ileri" onClick={kopyala}>JSON'u kopyalayın</button>
+      <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
       <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
     </div>
     <p role="status">{durum}</p>
-  </section>;
+  </div>;
 }
 
-function KaliciKurallar({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
-  const { json, kopyala, indir, durum } = useKaliciJson(plan, proje);
-  return <div className="pol-kz-adim-govde">
-    <p>Yönetici bir değeri kalıcı yapmak isterse yanındaki “Kalıcı kural” kutusunu işaretler.</p>
-    <p>{plan.kalici.length ? `${plan.kalici.length} değer kalıcı kural olarak işaretli.` : 'Henüz hiçbir değer kalıcı kural olarak işaretlenmedi.'}</p>
-    <p>JSON bütün güncel değerleri içerir. İşaretli olmayan değerler de JSON'dadır. Her değerin yanında kalıcı olup olmadığı yazar.</p>
-    {<>
-      <p>JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
-      <textarea className="param-input pol-kz-json" aria-label="Kalıcı kurallar JSON" readOnly value={json()} rows={10} />
-      <div className="pol-kz-dugmeler">
-        <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
-        <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
-      </div>
-      <p role="status">{durum}</p>
-    </>}
-  </div>;
+/** Kalıcı kuralın düzenleme alanı. Kimliğe göre doğru kutuyu ya da seçimi çizer. */
+function KuralAlani({ id }: { id: string }) {
+  const { plan, guncelle } = useContext(PlanBaglami)!;
+  const [bolum, alan, sira] = id.split('.');
+  if (bolum === 'paylasim') return alan === 'sureAy' ? <SureKartiPencere /> : <PaySorusu anahtar={alan as keyof typeof BOLUSME_SORUSU} />;
+  if (bolum === 'tanistir' || bolum === 'kapatir') {
+    const tur = bolum as KatkiTuru;
+    const ad = KATKI_ADI[tur];
+    const i = Number(sira);
+    if (alan === 'taban') return <Kutu label={`${ad} taban oranı`} value={plan[tur].taban} yuzdeMi kural={id} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
+    if (alan === 'kotaEsik') return <Kutu label={`${ad} K${i + 1} ciro eşiği`} birim="(₺)" bosOlur value={plan[tur].kotaEsik[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />;
+    if (alan === 'kotaArtis') return <Kutu label={`${ad} K${i + 1} artışı`} yuzdeMi value={plan[tur].kotaArtis[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />;
+    return <Kutu label={`${ad} ${donemAdi(i)} komisyonu`} yuzdeMi value={plan[tur].gecmis[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />;
+  }
+  const k = plan.kadrolu;
+  if (alan === 'maas') return <Kutu label="Aylık maaş" birim="(₺)" value={k.maas} kural={id} onChange={(v) => guncelle((x) => { x.kadrolu.maas = v ?? 0; })} />;
+  if (alan === 'kotaOrani') return <Kutu label="Kota oranı" yuzdeMi value={k.kotaOrani} kural={id} onChange={(v) => guncelle((x) => { x.kadrolu.kotaOrani = v ?? 0; })} />;
+  return <Kutu label="Kota üstü prim oranı" yuzdeMi bosOlur value={k.primOrani} kural={id} onChange={(v) => guncelle((x) => { x.kadrolu.primOrani = v; })} />;
+}
+const SureKartiPencere = () => <SureKarti />;
+
+const KURAL_BOLUMLERI: { onek: string; ad: string }[] = [
+  { onek: 'paylasim.', ad: 'Kararlar' },
+  { onek: 'tanistir.', ad: 'Tanıştırma' },
+  { onek: 'kapatir.', ad: 'Satışı kapatma' },
+  { onek: 'kadrolu.', ad: 'Kadrolu uzman' },
+];
+
+/**
+ * “KALICI KURALLAR” düğmesi ve penceresi (kullanıcı kararı 17 Kasım 2026 Salı).
+ * Düğme yalnız kalıcı kural varsa görünür. Pencerede yönetici kalıcı değeri değiştirir ya da kalıcı kuraldan çıkarır.
+ */
+function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
+  const [acik, setAcik] = useState(false);
+  const acan = useRef<HTMLButtonElement>(null);
+  const dar = useMediaQuery('(max-width: 47.99em), (max-height: 31.99em)', false, { getInitialValueInEffect: false });
+  const sure = useMotionMs('--motion-duration-base');
+  const { kopyala, indir, durum } = useKaliciJson(plan, proje);
+  const sayi = plan.kalici.length;
+  if (!sayi && !acik) return null;
+  const sirali = kuralListesi(plan).map((k) => k.id).filter((id) => plan.kalici.includes(id));
+  const kapat = () => { setAcik(false); window.setTimeout(() => acan.current?.focus(), 0); };
+  return <>
+    <div className="pol-kz-ust">
+      <p>{sayi} değer kalıcı kuraldır. Bu değerler aşağıda görünmez.</p>
+      <button ref={acan} type="button" className="pol-kz-kalici-dugme" aria-haspopup="dialog" aria-label={`KALICI KURALLAR, ${sayi} kural`} onClick={() => setAcik(true)}>
+        KALICI KURALLAR <span className="pol-kz-rozet" aria-hidden="true">{sayi}</span>
+      </button>
+    </div>
+    <Modal opened={acik} onClose={kapat} title="Kalıcı kurallar" size="48rem" fullScreen={dar} radius={0} returnFocus={false}
+      transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }} overlayProps={{ backgroundOpacity: 0.55 }}
+      closeButtonProps={{ 'aria-label': 'Pencereyi kapat', size: 'xl' }}
+      classNames={{ content: 'oy-pencere', header: 'oy-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>
+      <PencereBaglami.Provider value>
+        <p>Yönetici bu değerleri sabitledi. Değeri burada değiştirebilirsiniz. “Kalıcı kuraldan çıkarın” düğmesi değeri ana ekrana geri getirir.</p>
+        {sayi === 0 && <p className="pol-kz-not">Kalıcı kural kalmadı. Pencereyi kapatabilirsiniz.</p>}
+        {KURAL_BOLUMLERI.map((b) => {
+          const ids = sirali.filter((id) => id.startsWith(b.onek));
+          if (!ids.length) return null;
+          return <section key={b.onek} className="pol-kz-pencere-bolum" aria-label={b.ad}>
+            <h3>{b.ad}</h3>
+            <div className="pol-kz-pencere-alanlar" data-tek-sutun={b.onek === 'paylasim.' ? '' : undefined}>{ids.map((id) => <KuralAlani key={id} id={id} />)}</div>
+          </section>;
+        })}
+        <div className="pol-kz-dugmeler">
+          <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
+          <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
+        </div>
+        <p role="status">{durum}</p>
+      </PencereBaglami.Provider>
+    </Modal>
+  </>;
 }
 
 function KadroluGirdi({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
@@ -358,92 +426,131 @@ function KadroluSonuc({ plan }: { plan: KazancPlani }) {
   </section>;
 }
 
-interface AdimTanimi { baslik: string; aciklama: string; icerik: ReactNode }
+const SEVIYE_ADI = ['Kota yok', 'K1', 'K2', 'K3'] as const;
 
 /**
- * Adım adım sihirbaz (kullanıcı kararı 17 Kasım 2026 Salı).
- * Okur her an hangi adımda olduğunu görür. Ekranda yalnız o adımın alanları durur.
+ * Kazanç simülasyonu (kullanıcı kararı 17 Kasım 2026 Salı).
+ * Okur aylık ciroyu girer. Tablo her seviyenin koşulunu gösterir. Okurun cirosuna denk gelen satır vurgulanır.
+ * Üstteki seviye yolu ve sonraki kotaya kalan tutar, okura nerede olduğunu ve neyi hedefleyeceğini söyler.
  */
-function Sihirbaz({ adimlar }: { adimlar: AdimTanimi[] }) {
-  const [etkin, setEtkin] = useState(0);
-  const baslik = useRef<HTMLHeadingElement>(null);
-  const odakla = useRef(false);
-  useLayoutEffect(() => {
-    if (!odakla.current) return;
-    odakla.current = false;
-    baslik.current?.focus();
-  }, [etkin]);
-  const git = (i: number) => { odakla.current = true; setEtkin(i); };
-  const a = adimlar[etkin];
-  const toplam = adimlar.length;
-  return <div className="pol-kz-sihirbaz">
-    <nav className="pol-kz-ilerleme" aria-label="Kazanç planı adımları">
-      <p className="pol-kz-konum" data-kz-konum>{toplam} adımın {etkin + 1}. adımındasınız.</p>
-      <ol className="pol-kz-adim-listesi" style={{ '--adim-sayisi': String(toplam) } as CSSProperties}>
-        {adimlar.map((x, i) => <li key={x.baslik}>
-          <button type="button" className="pol-kz-adim-dugme" aria-current={i === etkin ? 'step' : undefined}
-            aria-label={`${i + 1}. adım: ${x.baslik}. ${i < etkin ? 'Geçtiniz' : i === etkin ? 'Şu an buradasınız' : 'Sırada'}`}
-            data-durum={i < etkin ? 'bitti' : i === etkin ? 'simdi' : 'sonra'} onClick={() => git(i)}>
-            <span className="pol-kz-adim-no" aria-hidden="true">{i < etkin ? '✓' : i + 1}</span>
-            <span className="pol-kz-adim-ad" aria-hidden="true">{x.baslik}</span>
-          </button>
-        </li>)}
-      </ol>
-    </nav>
-    <section className="pol-kz-adim-icerik" aria-labelledby="pol-kz-adim-baslik">
-      <div className="pol-adim-basligi">
-        <p className="pol-yol-ust">{etkin + 1}. adım</p>
-        <h3 id="pol-kz-adim-baslik" ref={baslik} tabIndex={-1}>{a.baslik}</h3>
-      </div>
-      <p className="pol-kz-not">{a.aciklama}</p>
-      {a.icerik}
-    </section>
-    <div className="pol-kz-gezinti">
-      {etkin > 0 && <button type="button" className="pol-sekme" onClick={() => git(etkin - 1)}>Önceki adım: {adimlar[etkin - 1].baslik}</button>}
-      {etkin < toplam - 1 && <button type="button" className="pol-sekme pol-kz-ileri" onClick={() => git(etkin + 1)}>Sonraki adım: {adimlar[etkin + 1].baslik}</button>}
+function KazancSimulasyonu({ plan }: { plan: KazancPlani }) {
+  const [tur, setTur] = useState<KatkiTuru>('kapatir');
+  const ciro = plan.ornekCiro;
+  const p = plan[tur];
+  const { oran, kota } = katkiOrani(plan, tur, ciro);
+  const devam = kotaTamam(plan, tur, ciro);
+  const esik = (i: number) => p.kotaEsik[i];
+  // Seviye satırları: her satırın koşulu, cari ay oranı ve eşikteki örnek kazancı.
+  const satirlar = SEVIYE_ADI.map((ad, i) => {
+    const alt = i === 0 ? 0 : esik(i - 1);
+    const ust = i < 3 ? esik(i) : null;
+    const seviyeOrani = Math.round((p.taban + p.kotaArtis.slice(0, i).reduce((t, x) => t + x, 0)) * 10_000) / 10_000;
+    const kosul = i === 0
+      ? (esik(0) === null ? 'K1 eşiği belirlenmedi' : `Aylık ciro ${tl(esik(0)!)} altında`)
+      : alt === null ? 'Eşik belirlenmedi'
+      : ust === null ? `Aylık ciro ${tl(alt)} ve üstü` : `Aylık ciro ${tl(alt)} ile ${tl(ust)} arası`;
+    const ulasilir = i === 0 || p.kotaEsik.slice(0, i).every((e) => e !== null);
+    return { ad, i, kosul, seviyeOrani, ulasilir, esikteKazanc: alt ? Math.round(alt * seviyeOrani) : null };
+  });
+  const sonraki = kota < 3 ? esik(kota) : null;
+  const kalan = sonraki === null ? null : Math.max(0, sonraki - ciro);
+  const ilerleme = sonraki ? Math.min(1, ciro / sonraki) : 1;
+  const buAy = Math.round(ciro * oran);
+  const ilkYil = buAy * 12;
+  const sonrakiYillar = devam ? p.gecmis.reduce((t, g) => t + Math.round(ciro * 12 * g), 0) : 0;
+  return <section className="pol-kz-sim" aria-labelledby="pol-kz-sim-baslik">
+    <h4 id="pol-kz-sim-baslik">Cironuza göre kazancınız</h4>
+    <p>Aylık ciroyu yukarıdaki kutuya girin. Tablo hemen değişir. Turuncu satır sizin durumunuzdur.</p>
+    <Choice<KatkiTuru> label="Satıştaki katkınız" value={tur} options={KATKI_TURLERI.map((t) => ({ id: t, name: KATKI_SEKMESI[t] }))} onChange={setTur} />
+    <ol className="pol-kz-seviye-yolu" aria-label="Kota seviyeleri">
+      {SEVIYE_ADI.map((ad, i) => <li key={ad} data-durum={i < kota ? 'gecti' : i === kota ? 'simdi' : 'sonra'} aria-current={i === kota ? 'step' : undefined}>
+        <span className="pol-kz-seviye-nokta" aria-hidden="true">{i < kota ? '✓' : i}</span>
+        <span>{ad}</span>
+      </li>)}
+    </ol>
+    <div className="pol-kz-kpi">
+      <div className="pol-kz-kpi-kutu" data-kpi="seviye"><p>Seviyeniz</p><p className="pol-kz-kpi-deger">{SEVIYE_ADI[kota]}</p><p>Cari ay oranınız {yuzde(oran)}</p></div>
+      <div className="pol-kz-kpi-kutu" data-kpi="bu-ay"><p>Bu ay kazancınız</p><p className="pol-kz-kpi-deger" data-sim="bu-ay">{tl(buAy)}</p><p>{tl(ciro)} × {yuzde(oran)}</p></div>
+      <div className="pol-kz-kpi-kutu" data-kpi="toplam"><p>4 yılda toplam</p><p className="pol-kz-kpi-deger" data-sim="toplam">{tl(ilkYil + sonrakiYillar)}</p><p>Müşteri her ay aynı ciroyu yaparsa</p></div>
     </div>
-  </div>;
+    {sonraki !== null && kalan !== null && <div className="pol-kz-hedef" data-sim="hedef">
+      <p><strong>{SEVIYE_ADI[kota + 1]} kotasına {tl(kalan)} kaldı.</strong> {SEVIYE_ADI[kota + 1]} kotasına ulaşınca oranınız {yuzde(satirlar[kota + 1].seviyeOrani)} olur.</p>
+      <div className="pol-kz-hedef-iz" aria-hidden="true"><span style={{ '--ilerleme': String(ilerleme) } as CSSProperties} /></div>
+    </div>}
+    {kota === 3 && <p className="pol-kz-hedef" data-sim="hedef"><strong>En üst seviyedesiniz.</strong> Bütün kota puanları oranınıza eklendi.</p>}
+    {sonraki === null && kota < 3 && <p className="pol-kz-not">Sonraki kota eşiği belirlenmedi. Bu yüzden hedef gösterilmez.</p>}
+    <p className={devam ? 'pol-kz-kural' : 'pol-kz-uyari'} data-sim="devam">{devam
+      ? '13. aydan sonra da pay alırsınız. K1 kotası tamamlandı.'
+      : 'K1 kotası tamamlanmadı. 13. aydan sonra pay almazsınız.'}</p>
+    <div className="table-frame"><div className="table-scroll" role="region" aria-label="Seviyelere göre kazanç tablosu" tabIndex={0}>
+      <table className="data-table pol-kz-tablo pol-kz-sim-tablo" data-sim-tablo={tur}>
+        <thead><tr><th scope="col">Seviye</th><th scope="col">Koşul</th><th scope="col">Cari ay oranı</th><th scope="col">Eşikteki aylık kazanç</th><th scope="col">13. aydan sonra</th></tr></thead>
+        <tbody>{satirlar.map((r) => {
+          const etkin = r.i === kota;
+          return <tr key={r.ad} data-etkin={etkin ? '' : undefined} aria-current={etkin ? 'true' : undefined}>
+            <th scope="row">{r.ad}{etkin && <span className="pol-kz-burasi">Buradasınız</span>}</th>
+            <td>{r.kosul}</td>
+            <td>{r.ulasilir ? yuzde(r.seviyeOrani) : 'Yok'}</td>
+            <td>{etkin ? <>{tl(buAy)}<span className="pol-kz-hucre-not">sizin cironuzla</span></> : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}</td>
+            <td>{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
+          </tr>;
+        })}</tbody>
+      </table>
+    </div></div>
+    <p className="pol-kz-not">“Eşikteki aylık kazanç”, ciro tam eşik tutarında olursa alınan aylık paydır. 13. aydan sonraki oranlar 13. ay ile 24. ay arasından başlayarak sırayla yazılır.</p>
+  </section>;
+}
+
+/** Planın bir bölümü. Bölümler alt alta durur (kullanıcı kararı 17 Kasım 2026 Salı: adım çubuğu kalktı). */
+function Bolum({ no, baslik, aciklama, children }: { no: number; baslik: string; aciklama: string; children: ReactNode }) {
+  return <section className="pol-kz-adim-icerik" aria-labelledby={`pol-kz-bolum-${no}`}>
+    <div className="pol-adim-basligi">
+      <p className="pol-yol-ust">{no}. bölüm</p>
+      <h3 id={`pol-kz-bolum-${no}`}>{baslik}</h3>
+    </div>
+    <p className="pol-kz-not">{aciklama}</p>
+    {children}
+  </section>;
 }
 
 export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) {
   const { plan, guncelle } = useKazancPlani(proje);
-  const kalici = { baslik: 'Kalıcı kuralları alın', aciklama: 'Bu adım yalnız yönetici içindir.', icerik: <KaliciKurallar plan={plan} proje={proje} /> };
-  // Kullanıcı kararı 17 Kasım 2026 Salı: önce seçenekler ve kararlar, sonra sonuç. Okur adımları sırayla izler.
+  // Kullanıcı kararı 17 Kasım 2026 Salı: önce kararlar, sonra oranlar, sonra sonuç. Kalıcı kurallar pencerededir.
   return <PlanBaglami.Provider value={{ plan, guncelle, proje }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
-    <KaliciCubugu plan={plan} proje={proje} />
-    {rol === 'kadrolu' ? <Sihirbaz key="kadrolu" adimlar={[
-      { baslik: 'Maaşı ve kotayı girin', aciklama: 'Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır.', icerik: <KadroluGirdi plan={plan} guncelle={guncelle} /> },
-      { baslik: 'Sonucu görün', aciklama: 'Sonuç, 1. adımdaki değerlere göre hesaplanır.', icerik: <KadroluSonuc plan={plan} /> },
-      kalici,
-    ]} /> : <>
-      <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
-      <Sihirbaz key="ortak" adimlar={[
-        { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} proje={proje} /> },
-        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KOTA_KURALI, icerik:
-          /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
+    <KaliciKurallarPenceresi plan={plan} proje={proje} />
+    <div className="pol-kz-bolumler">
+      {rol === 'kadrolu' ? <>
+        <Bolum no={1} baslik="Maaş ve kota" aciklama="Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır."><KadroluGirdi plan={plan} guncelle={guncelle} /></Bolum>
+        <Bolum no={2} baslik="Sonuç" aciklama="Sonuç, 1. bölümdeki değerlere göre hesaplanır."><KadroluSonuc plan={plan} /></Bolum>
+        <Bolum no={3} baslik="JSON" aciklama="Bu bölüm yalnız yönetici içindir."><JsonBolumu plan={plan} proje={proje} /></Bolum>
+      </> : <>
+        <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
+        <Bolum no={1} baslik="Kararlar" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir."><Kararlar plan={plan} /></Bolum>
+        <Bolum no={2} baslik="Oranlar" aciklama={'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki değerleri doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KOTA_KURALI}>
+          {/* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */}
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
             <Tabs.List aria-label="Satıştaki katkınız">
               {KATKI_TURLERI.map((t) => <Tabs.Tab key={t} value={t}>{KATKI_SEKMESI[t]}</Tabs.Tab>)}
             </Tabs.List>
-            {KATKI_TURLERI.map((t) => <Tabs.Panel key={t} value={t}>
-              <Katki tur={t} plan={plan} guncelle={guncelle} />
-            </Tabs.Panel>)}
-          </Tabs> },
-        { baslik: 'Sonucu görün', aciklama: 'Bir örnek aylık ciro girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.', icerik: <>
+            {KATKI_TURLERI.map((t) => <Tabs.Panel key={t} value={t}><Katki tur={t} plan={plan} guncelle={guncelle} /></Tabs.Panel>)}
+          </Tabs>
+        </Bolum>
+        <Bolum no={3} baslik="Sonuç" aciklama="Bir örnek aylık ciro girin. Sonuçlar 1. ve 2. bölümdeki değerlere göre hesaplanır.">
           <p className="pol-kz-kural" data-kota-kurali="">{KOTA_KURALI}</p>
           <Grup baslik="Örnek satış">
             <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => guncelle((x) => { x.ornekCiro = v ?? 0; })} />
           </Grup>
+          <KazancSimulasyonu plan={plan} />
           <div className="pol-kz-kartlar">
             <KatkiSonucu tur="tanistir" plan={plan} />
             <KatkiSonucu tur="kapatir" plan={plan} />
           </div>
           <OrnekHesap plan={plan} />
           <PaySonucu plan={plan} />
-        </> },
-        kalici,
-      ]} />
-    </>}
+        </Bolum>
+        <Bolum no={4} baslik="JSON" aciklama="Bu bölüm yalnız yönetici içindir."><JsonBolumu plan={plan} proje={proje} /></Bolum>
+      </>}
+    </div>
     <button type="button" className="pol-sekme" onClick={() => yaz(proje, projeVarsayilani(proje))}>Planın ilk değerlerine dönün</button>
   </Section></PlanBaglami.Provider>;
 }
