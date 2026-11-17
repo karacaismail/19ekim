@@ -170,3 +170,13 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-json { inline-size: 100%; min-block-size: 12rem; font-family: var(--font-mono); font-size: var(--text-md); }
 .pol-kz-dugmeler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .pol-sekme[aria-checked='true'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
+/* Kazanç planı adımları (kullanıcı kararı 17 Kasım 2026 Salı): önce kararlar, sonra oranlar, sonra sonuç. */
+.pol-kz-adimlar { margin-block-end: 0; }
+.pol-kz-adim-icerik { display: grid; gap: var(--space-4); min-inline-size: 0; padding-block-end: var(--space-2); }
+.pol-kz-adim-icerik > .pol-adim-basligi { margin-block-end: 0; }
+.pol-kz-adim-icerik h3 { margin: 0; font-size: var(--text-xl); line-height: var(--leading-snug); }
+.pol-kz-adim-govde { display: grid; gap: var(--space-4); }
+.pol-kz-kartlar { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.pol-kz-kart { display: grid; gap: var(--space-3); align-content: start; padding: var(--inset-lg); background: var(--surface-raised); }
+.pol-kz-kart h4 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-buyuk { font-size: var(--text-lg); }
