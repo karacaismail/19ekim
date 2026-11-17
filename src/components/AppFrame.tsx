@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { Drawer, MantineProvider, Menu, useMantineColorScheme, type MantineColorSchemeManager } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconChecklist, IconChevronDown, IconMenu2, IconMoon, IconReceipt2, IconSettings, IconSpeakerphone, IconSun, IconUsersGroup, type Icon } from '@tabler/icons-react';
@@ -260,17 +260,22 @@ export { PAGE_TOOLS_ID } from './PageHeader';
 /** Üst bantta tema düğmesinin solundaki sayfa araçları yeri (ör. Giderler canlı durumu; kullanıcı kararı 2026-10-21). */
 export const HEADER_TOOLS_ID = 'bant-araclari';
 
+const istemciAbone = () => () => {};
+
 export function AppFrame({
   pathname,
   children,
   wide = false,
   gecersiz,
+  herkeseAcik = false,
 }: {
   pathname: string;
   children: ReactNode;
   wide?: boolean;
   /** Geçersiz sayfa (kullanıcı kararı 16 Kasım 2026). Uyarı en üstte durur. Sayfanın bütün yazısı gri ve üstü çizilidir. */
   gecersiz?: ReactNode;
+  /** Kullanıcı kararı 17 Kasım 2026 Salı: Çalışma rehberleri herkese açıktır. Öteki sayfalar giriş ister. */
+  herkeseAcik?: boolean;
 }) {
   const current = normalizePath(pathname);
   const index = SEQUENCE.findIndex((stop) => normalizePath(href(stop.path)) === current);
@@ -281,6 +286,10 @@ export function AppFrame({
   // Giriş kapısı (kullanıcı kararı 2026-10-21): giriş yoksa gezinme, sayfa içeriği ve alt bilgi çizilmez; statik
   // HTML'de yalnız giriş formu bulunur.
   const girisli = useGiris();
+  // Herkese açık sayfada içerik ve gezinme girişsiz çizilir. Menüden açılan öteki sayfalar yine giriş ister.
+  // İçerik yalnız tarayıcıda çizilir (rehber adresi okur). Sunucu çiziminde herkese açık sayfa da boş kalır.
+  const istemcide = useSyncExternalStore(istemciAbone, () => true, () => false);
+  const acik = girisli || (herkeseAcik && istemcide);
   // Gezinme kabuğu (kullanıcı kararı 2026-10-27): ≥ 48em şerit, altında çekmece. İçerik yalnız istemcide çizildiğinden
   // ilk değer gerçek pencereden okunur; iki kabuk aynı anda mount edilmez.
   const genis = useMediaQuery(GENIS_GEZINME, true, { getInitialValueInEffect: false });
@@ -288,7 +297,7 @@ export function AppFrame({
   // Tablet şeridinde (48–64em) etkin bağlantı görünür alana gelir (animasyonsuz, boyamadan önce). Gezinme girişten
   // sonra çizildiğinden sayfa betiği yerine burada.
   useLayoutEffect(() => {
-    if (!girisli || !genis) return;
+    if (!acik || !genis) return;
     document.querySelectorAll<HTMLElement>('.mainnav-list').forEach((list) => {
       const active = list.querySelector<HTMLElement>('[aria-current="page"]') ?? list.querySelector<HTMLElement>('[data-section="true"]');
       if (!active || list.scrollWidth <= list.clientWidth) return;
@@ -296,12 +305,12 @@ export function AppFrame({
       const box = active.getBoundingClientRect();
       if (box.left < listBox.left || box.right > listBox.right) list.scrollLeft += box.left - listBox.left - (listBox.width - box.width) / 2;
     });
-  }, [girisli, genis]);
+  }, [acik, genis]);
 
   // Kullanıcı kararı 2026-10-21: aşağı kaydırınca üst bant gizlenir, kırıntı satırı üstte yapışık kalır; yukarı
   // kaydırınca (veya odak banda girince) bant görünür. Yalnız bandın yapışık olduğu ekranlarda etkilidir (CSS).
   useEffect(() => {
-    if (!girisli) return;
+    if (!acik) return;
     const root = document.documentElement;
     const bant = document.querySelector<HTMLElement>('.topbar');
     if (!bant) return;
@@ -347,7 +356,7 @@ export function AppFrame({
       root.removeAttribute('data-bant-gizli');
       root.removeAttribute('data-kaydirildi');
     };
-  }, [girisli]);
+  }, [acik]);
 
   return (
     <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="auto" colorSchemeManager={themeManager}>
@@ -370,7 +379,7 @@ export function AppFrame({
             </a>
             {/* Gezinme: ≥ 48em şerit (kullanıcı kararı 2026-10-21: geniş ekranda üst satırda); dar ekranda çekmece
                 (kullanıcı kararı 2026-10-27, ux.md §3). */}
-            {girisli && genis ? (
+            {acik && genis ? (
               <nav className="mainnav" aria-label="Ana gezinme">
                 <ul className="mainnav-list">
                   {NAV_MENUS.map((menu) => (
@@ -383,19 +392,19 @@ export function AppFrame({
             ) : null}
             <div className="topbar-tools">
               <div className="header-tools" id={HEADER_TOOLS_ID} />
-              {girisli && !genis ? <CekmeceGezinme current={current} /> : null}
+              {acik && !genis ? <CekmeceGezinme current={current} /> : null}
               <ThemeToggle />
             </div>
           </div>
         </header>
         {girisli ? <ParamsNotice rehber={current === normalizePath(href('/politikalar/'))} /> : null}
         <main className="app-main" id="icerik" tabIndex={-1}>
-          {girisli && gecersiz ? <div className="gecersiz-not" role="alert" data-arsiv-uyari>
+          {acik && gecersiz ? <div className="gecersiz-not" role="alert" data-arsiv-uyari>
             <div className="gecersiz-not-ic" data-wide={wide ? '' : undefined}>{gecersiz}</div>
           </div> : null}
-          <div className="wrap" data-wide={wide && girisli ? '' : undefined} data-arsiv={girisli && gecersiz ? 'gecersiz' : undefined}>
-            {!girisli ? (
-              <GirisEkrani />
+          <div className="wrap" data-wide={wide && acik ? '' : undefined} data-arsiv={acik && gecersiz ? 'gecersiz' : undefined}>
+            {!acik ? (
+              herkeseAcik ? null : <GirisEkrani />
             ) : (
               <>
                 {children}
@@ -423,7 +432,7 @@ export function AppFrame({
             )}
           </div>
         </main>
-        {girisli ? (
+        {acik ? (
           <footer className="app-footer">
             <div className="wrap">
               {/* Ön cümle kayıt bazlı (B2c, docs/missings.md MS-11): yalnız tahtadan türetilen sayfada; kapsam cümlesi her sayfada kayıttan. */}
@@ -435,7 +444,7 @@ export function AppFrame({
                 <a className="text-link" data-standalone="" href={href('/arsiv/')}>
                   Arşiv: tahtadan karara
                 </a>
-                <CikisDugmesi />
+                {girisli ? <CikisDugmesi /> : null}
               </p>
             </div>
           </footer>

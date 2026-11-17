@@ -10368,3 +10368,12 @@ html[data-focus-mode='keyboard'] .oy-pencere-kapat:focus-visible {
 .gecersiz-not-ic[data-wide] { max-width: var(--content-wide-max); }
 .gecersiz-not-ic p { margin: 0; }
 .gecersiz-not-baslik { text-transform: uppercase; font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); }
+
+/* Pencere içindeki giriş formu girişli tarayıcıda da görünür. Pencere yalnız girişsizken formu çizer. */
+html[data-giris] .giris.giris-pencere {
+  display: block;
+}
+
+.giris.giris-pencere {
+  margin: 0;
+}

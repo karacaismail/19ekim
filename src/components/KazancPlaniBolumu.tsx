@@ -2,6 +2,9 @@ import { createContext, type CSSProperties, type ReactNode, useContext, useLayou
 import { Checkbox, Modal, NumberInput, Tabs } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useMotionMs } from '../lib/motion';
+import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
+import { useGiris } from '../lib/giris';
+import { GirisEkrani } from './Giris';
 import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
@@ -108,7 +111,7 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
       : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
     <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz.</p>
-    {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Değerleri “KALICI KURALLAR” düğmesinden yönetin.</p>}
+    {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Yönetici bu değerleri “Parametreler” düğmesinden yönetir.</p>}
     <GrupVarsa kurallar={[`${tur}.taban`]} baslik={`${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
     </GrupVarsa>
@@ -233,7 +236,7 @@ function Kararlar({ plan }: { plan: KazancPlani }) {
       <p>Ahmet müşteriyi tanıştırır. İki hafta sonra Mehmet satışı kapatır. İkisi de pay ister.</p>
       <p>CRM, müşteri kayıtlarının tutulduğu programdır. Tanıştırma CRM'e kaydedilir.</p>
     </aside>
-    {hepsiKalici && <p className="pol-kz-not">Bütün kararlar kalıcı kuraldır. Kararları “KALICI KURALLAR” düğmesinden yönetin.</p>}
+    {hepsiKalici && <p className="pol-kz-not">Bütün kararlar kalıcı kuraldır. Yönetici kararları “Parametreler” düğmesinden yönetir.</p>}
     <SureKarti />
     <PaySorusu anahtar="ilkSatis" />
     <PaySorusu anahtar="kota" />
@@ -314,20 +317,6 @@ function useKaliciJson(plan: KazancPlani, proje: Marka) {
   return { json, kopyala, indir, durum };
 }
 
-function JsonBolumu({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
-  const { json, kopyala, indir, durum } = useKaliciJson(plan, proje);
-  return <div className="pol-kz-adim-govde">
-    <p>JSON bütün güncel değerleri içerir. Her değerin yanında kalıcı kural olup olmadığı yazar.</p>
-    <p>JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
-    <textarea className="param-input pol-kz-json" aria-label="Kazanç planı JSON" readOnly value={json()} rows={10} />
-    <div className="pol-kz-dugmeler">
-      <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
-      <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
-    </div>
-    <p role="status">{durum}</p>
-  </div>;
-}
-
 /** Kalıcı kuralın düzenleme alanı. Kimliğe göre doğru kutuyu ya da seçimi çizer. */
 function KuralAlani({ id }: { id: string }) {
   const { plan, guncelle } = useContext(PlanBaglami)!;
@@ -366,22 +355,23 @@ function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Ma
   const dar = useMediaQuery('(max-width: 47.99em), (max-height: 31.99em)', false, { getInitialValueInEffect: false });
   const sure = useMotionMs('--motion-duration-base');
   const { kopyala, indir, durum } = useKaliciJson(plan, proje);
+  const girisli = useGiris();
+  const { json } = useKaliciJson(plan, proje);
   const sayi = plan.kalici.length;
-  if (!sayi && !acik) return null;
   const sirali = kuralListesi(plan).map((k) => k.id).filter((id) => plan.kalici.includes(id));
   const kapat = () => { setAcik(false); window.setTimeout(() => acan.current?.focus(), 0); };
   return <>
-    <div className="pol-kz-ust">
-      <p>{sayi} değer kalıcı kuraldır. Bu değerler aşağıda görünmez.</p>
-      <button ref={acan} type="button" className="pol-kz-kalici-dugme" aria-haspopup="dialog" aria-label={`KALICI KURALLAR, ${sayi} kural`} onClick={() => setAcik(true)}>
-        KALICI KURALLAR <span className="pol-kz-rozet" aria-hidden="true">{sayi}</span>
-      </button>
-    </div>
-    <Modal opened={acik} onClose={kapat} title="Kalıcı kurallar" size="48rem" fullScreen={dar} radius={0} returnFocus={false}
+    {/* Kullanıcı kararı 17 Kasım 2026 Salı: yalnız ikonlu “Parametreler” düğmesi. Sağ kenara yapışık, dikeyde ortada. */}
+    <button ref={acan} type="button" className="pol-kz-parametreler" aria-haspopup="dialog" aria-label="Parametreler" title="Parametreler" onClick={() => setAcik(true)}>
+      <IconAdjustmentsHorizontal aria-hidden="true" size={26} stroke={1.75} />
+    </button>
+    <Modal opened={acik} onClose={kapat} title="Parametreler" size="48rem" fullScreen={dar} radius={0} returnFocus={false}
       transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }} overlayProps={{ backgroundOpacity: 0.55 }}
       closeButtonProps={{ 'aria-label': 'Pencereyi kapat', size: 'xl' }}
-      classNames={{ content: 'oy-pencere', header: 'oy-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>
+      classNames={{ content: 'oy-pencere pol-kz-pencere', header: 'oy-pencere-ust pol-kz-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>
       <PencereBaglami.Provider value>
+        {!girisli ? <GirisEkrani pencerede aciklama="Parametreler yalnız ekip içindir. Görmek için kullanıcı adı ve parolayla giriş yapın." /> : <>
+        <h3 className="pol-kz-pencere-ara">Kalıcı kurallar</h3>
         <p>Yönetici bu değerleri sabitledi. Değeri burada değiştirebilirsiniz. “Kalıcı kuraldan çıkarın” düğmesi değeri ana ekrana geri getirir.</p>
         {sayi === 0 && <p className="pol-kz-not">Kalıcı kural kalmadı. Pencereyi kapatabilirsiniz.</p>}
         {KURAL_BOLUMLERI.map((b) => {
@@ -392,11 +382,17 @@ function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Ma
             <div className="pol-kz-pencere-alanlar" data-tek-sutun={b.onek === 'paylasim.' ? '' : undefined}>{ids.map((id) => <KuralAlani key={id} id={id} />)}</div>
           </section>;
         })}
-        <div className="pol-kz-dugmeler">
-          <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
-          <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
-        </div>
-        <p role="status">{durum}</p>
+        <section className="pol-kz-pencere-bolum" aria-labelledby="pol-kz-json-baslik">
+          <h3 id="pol-kz-json-baslik">JSON</h3>
+          <p>JSON bütün güncel değerleri içerir. Her değerin yanında kalıcı kural olup olmadığı yazar. JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
+          <textarea className="param-input pol-kz-json" aria-label="Kazanç planı JSON" readOnly value={json()} rows={10} />
+          <div className="pol-kz-dugmeler">
+            <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
+            <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
+          </div>
+          <p role="status">{durum}</p>
+        </section>
+        </>}
       </PencereBaglami.Provider>
     </Modal>
   </>;
@@ -522,7 +518,6 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
       {rol === 'kadrolu' ? <>
         <Bolum no={1} baslik="Maaş ve kota" aciklama="Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır."><KadroluGirdi plan={plan} guncelle={guncelle} /></Bolum>
         <Bolum no={2} baslik="Sonuç" aciklama="Sonuç, 1. bölümdeki değerlere göre hesaplanır."><KadroluSonuc plan={plan} /></Bolum>
-        <Bolum no={3} baslik="JSON" aciklama="Bu bölüm yalnız yönetici içindir."><JsonBolumu plan={plan} proje={proje} /></Bolum>
       </> : <>
         <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
         <Bolum no={1} baslik="Kararlar" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir."><Kararlar plan={plan} /></Bolum>
@@ -548,7 +543,6 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
           <OrnekHesap plan={plan} />
           <PaySonucu plan={plan} />
         </Bolum>
-        <Bolum no={4} baslik="JSON" aciklama="Bu bölüm yalnız yönetici içindir."><JsonBolumu plan={plan} proje={proje} /></Bolum>
       </>}
     </div>
     <button type="button" className="pol-sekme" onClick={() => yaz(proje, projeVarsayilani(proje))}>Planın ilk değerlerine dönün</button>

@@ -219,11 +219,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-isaret-a { background: var(--accent); }
 .pol-kz-isaret-m { background: var(--policy-active-ink); }
 
-/* Gezinti: telefonda ileri düğmesi tam genişliktir ve önce gelir. */
-@media (min-width: 40rem) {
-}
-/* Kalıcı kural işaretli seçim kilitlidir. Fieldset yalnız kapatmak için vardır, görünüm eklemez. */
-/* Kalıcı kural çubuğu: işaretli değer varken her adımda görünür ve ekranın üstüne yapışır. */
 /* Kâğıttaki örnek hesap tablosu: sayılar sağa yaslanır. Dar ekranda tablo kendi kutusunda kayar. */
 .pol-kz-tablo { inline-size: 100%; min-inline-size: 30rem; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .pol-kz-tablo :is(th, td) { padding: var(--space-2) var(--space-3); text-align: end; white-space: nowrap; }
@@ -234,16 +229,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-kural { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-accent); font-weight: var(--weight-semibold); }
 .pol-kz-uyari { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-changed); color: var(--text-primary); }
 
-/* Kalıcı kurallar düğmesi: kalıcı kural varsa planın en üstünde durur. */
-.pol-kz-ust { display: grid; gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-accent); }
-.pol-kz-ust p { margin: 0; }
-.pol-kz-kalici-dugme { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-3); inline-size: 100%; min-block-size: var(--hit-min); padding: var(--space-3) var(--space-5); border: 0; background: var(--policy-active-ink); color: var(--surface-raised); font: inherit; font-weight: var(--weight-semibold); letter-spacing: .06em; cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
-.pol-kz-kalici-dugme:hover { background: var(--accent-strong); }
-.pol-kz-rozet { display: inline-flex; align-items: center; justify-content: center; min-inline-size: 1.75rem; block-size: 1.75rem; padding-inline: var(--space-2); background: var(--surface-raised); color: var(--policy-active-ink); letter-spacing: 0; }
-@media (min-width: 40rem) {
-  .pol-kz-ust { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-  .pol-kz-kalici-dugme { inline-size: auto; }
-}
 .pol-kz-bolumler { display: grid; gap: var(--space-6); }
 .pol-kz-pencere-bolum { display: grid; gap: var(--space-4); }
 .pol-kz-pencere-bolum h3 { margin: 0; font-size: var(--text-lg); }
@@ -280,3 +265,12 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-pencere-alanlar > * { min-inline-size: 0; }
 .pol-kz-pencere-alanlar[data-tek-sutun] { grid-template-columns: minmax(0, 1fr); }
 .pol-kz-kart { grid-template-columns: minmax(0, 1fr); }
+
+/* “Parametreler” düğmesi (kullanıcı kararı 17 Kasım 2026 Salı): yalnız ikon. Sağ kenara yapışık, dikeyde ortada. */
+.pol-kz-parametreler { position: fixed; z-index: 30; inset-inline-end: 0; inset-block-start: 50%; translate: 0 -50%; display: flex; align-items: center; justify-content: center; inline-size: var(--hit-min); block-size: calc(var(--hit-min) * 1.5); padding: 0; border: 0; background: var(--policy-active-ink); color: var(--surface-raised); box-shadow: var(--shadow-soft); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
+.pol-kz-parametreler:hover { background: var(--accent-strong); }
+.pol-kz-pencere-ara { margin: 0; font-size: var(--text-xl); }
+/* Parametreler penceresi kendi içinde kayar. Başlık ve kapatma düğmesi üstte kalır. */
+.pol-kz-pencere { max-block-size: calc(100dvh - var(--space-12)); overflow-y: auto; overscroll-behavior: contain; }
+.pol-kz-pencere[data-full-screen] { max-block-size: 100dvh; }
+.pol-kz-pencere-ust { position: sticky; inset-block-start: 0; z-index: 1; }

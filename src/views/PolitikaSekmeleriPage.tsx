@@ -134,5 +134,5 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
 }
 
 export function PolitikaSekmeleriPage({ eskiRol }: { eskiRol?: RolId }) {
-  return <AppFrame pathname={href('/politikalar/')}><RehberSekmeleri eskiRol={eskiRol} /></AppFrame>;
+  return <AppFrame pathname={href('/politikalar/')} herkeseAcik><RehberSekmeleri eskiRol={eskiRol} /></AppFrame>;
 }

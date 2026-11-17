@@ -9,7 +9,11 @@ const KULLANICI_ALANI = 'giris-kullanici';
  * Notlar formuyla ortak. Alanların `name` özniteliği yok ve düğme hidrasyona kadar kapalı: JavaScript hazır olmadan
  * form tarayıcıya gönderilmez, parola adres çubuğuna düşmez.
  */
-export function GirisEkrani() {
+export function GirisEkrani({ pencerede = false, aciklama = 'Bu plan ekip içindir. Görmek için kullanıcı adı ve parolayla giriş yapın.' }: {
+  /** Pencere içinde başlık h2 olur ve başarıdan sonra odak pencerede kalır. */
+  pencerede?: boolean;
+  aciklama?: string;
+} = {}) {
   const [ad, setAd] = useState('');
   const [parola, setParola] = useState('');
   const [hata, setHata] = useState(false);
@@ -31,8 +35,8 @@ export function GirisEkrani() {
     }
     setBekliyor(false);
     if (tamam) {
-      // Form kalkar; odak gövdeye düşmesin diye içerik alanına taşınır.
-      requestAnimationFrame(() => document.getElementById('icerik')?.focus());
+      // Form kalkar; odak gövdeye düşmesin diye içerik alanına taşınır. Pencerede odak pencereye bırakılır.
+      if (!pencerede) requestAnimationFrame(() => document.getElementById('icerik')?.focus());
     } else {
       setHata(true);
       setParola('');
@@ -42,11 +46,11 @@ export function GirisEkrani() {
 
   const alan = { className: 'note-field', classNames: { label: 'note-field-label', input: 'note-input', error: 'giris-hata' }, size: 'md' as const };
   return (
-    <section className="giris" aria-labelledby="giris-baslik">
-      <h1 className="giris-baslik" id="giris-baslik">
+    <section className={pencerede ? 'giris giris-pencere' : 'giris'} aria-labelledby={pencerede ? 'giris-baslik-pencere' : 'giris-baslik'}>
+      {pencerede ? <h2 className="giris-baslik" id="giris-baslik-pencere">Giriş</h2> : <h1 className="giris-baslik" id="giris-baslik">
         Giriş
-      </h1>
-      <p className="giris-aciklama">Bu plan ekip içindir. Görmek için kullanıcı adı ve parolayla giriş yapın.</p>
+      </h1>}
+      <p className="giris-aciklama">{aciklama}</p>
       <p className="giris-jsyok">Giriş yapmak için tarayıcınızda JavaScript açık olmalı. Kapalıysa tarayıcı ayarlarından açın.</p>
       <form
         className="giris-form"
@@ -59,7 +63,7 @@ export function GirisEkrani() {
         <TextInput
           {...alan}
           ref={adAlani}
-          id={KULLANICI_ALANI}
+          id={pencerede ? `${KULLANICI_ALANI}-pencere` : KULLANICI_ALANI}
           label="Kullanıcı adı"
           autoComplete="username"
           autoCapitalize="none"
