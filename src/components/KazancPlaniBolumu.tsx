@@ -1,6 +1,5 @@
 import { createContext, type CSSProperties, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { Checkbox, Modal, NumberInput, Tabs } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
 import { useMotionMs } from '../lib/motion';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { useGiris } from '../lib/giris';
@@ -352,7 +351,6 @@ const KURAL_BOLUMLERI: { onek: string; ad: string }[] = [
 function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
   const [acik, setAcik] = useState(false);
   const acan = useRef<HTMLButtonElement>(null);
-  const dar = useMediaQuery('(max-width: 47.99em), (max-height: 31.99em)', false, { getInitialValueInEffect: false });
   const sure = useMotionMs('--motion-duration-base');
   const { kopyala, indir, durum } = useKaliciJson(plan, proje);
   const girisli = useGiris();
@@ -365,7 +363,7 @@ function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Ma
     <button ref={acan} type="button" className="pol-kz-parametreler" aria-haspopup="dialog" aria-label="Parametreler" title="Parametreler" onClick={() => setAcik(true)}>
       <IconAdjustmentsHorizontal aria-hidden="true" size={26} stroke={1.75} />
     </button>
-    <Modal opened={acik} onClose={kapat} title="Parametreler" size="48rem" fullScreen={dar} radius={0} returnFocus={false}
+    <Modal opened={acik} onClose={kapat} title="Parametreler" size="80vw" radius={0} returnFocus={false}
       transitionProps={{ duration: sure, timingFunction: 'var(--motion-ease-standard)' }} overlayProps={{ backgroundOpacity: 0.55 }}
       closeButtonProps={{ 'aria-label': 'Pencereyi kapat', size: 'xl' }}
       classNames={{ content: 'oy-pencere pol-kz-pencere', header: 'oy-pencere-ust pol-kz-pencere-ust', title: 'oy-pencere-baslik', body: 'oy-pencere-govde', close: 'oy-pencere-kapat' }}>

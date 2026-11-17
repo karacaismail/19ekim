@@ -271,6 +271,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-parametreler:hover { background: var(--accent-strong); }
 .pol-kz-pencere-ara { margin: 0; font-size: var(--text-xl); }
 /* Parametreler penceresi kendi içinde kayar. Başlık ve kapatma düğmesi üstte kalır. */
-.pol-kz-pencere { max-block-size: calc(100dvh - var(--space-12)); overflow-y: auto; overscroll-behavior: contain; }
-.pol-kz-pencere[data-full-screen] { max-block-size: 100dvh; }
+/* Kullanıcı kararı 17 Kasım 2026 Salı: pencere tam ekran açılmaz. Genişlik en çok %80, yükseklik en çok %90'dır. */
+.pol-kz-pencere { inline-size: 80vw; max-inline-size: 80vw; max-block-size: 90dvh; overflow-y: auto; overscroll-behavior: contain; }
 .pol-kz-pencere-ust { position: sticky; inset-block-start: 0; z-index: 1; }
