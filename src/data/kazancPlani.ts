@@ -3,8 +3,8 @@
  *
  * - Persona fark etmez. Herkes iş ortağıdır ve aynı koşullarla kazanır.
  * - Yalnız kadrolu uzman SGK'lı çalışandır. Maaş ve prim alır.
- * - Üç katkı türü vardır: tanıştırır, satışı kapatır ve onboarding yapar. Satışı kapatan ürünü de gösterir.
- *   Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Onboarding yapanın oranları ayrıdır (kullanıcı kararı 17 Kasım 2026 Salı).
+ * - İki katkı türü vardır: tanıştırır ve satışı kapatır. Satışı kapatan ürünü gösterir ve onboarding de yapar.
+ *   Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Ayrı bir katkı türü değildir (kullanıcı kararı 17 Kasım 2026 Salı).
  *   Eski ortadaki “Ürünü de gösterir” seçeneği kalktı.
  * - Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. Kotalar oranı sırayla artırır. Artış orana puan olarak eklenir.
  * - Yıllara yayılan komisyon 4 yıl sürer ve her yıl azalır.
@@ -14,10 +14,10 @@
 import type { Ayar, Marka, Seviye } from './satisOrtakligi';
 import { num } from '../lib/format';
 
-export type KatkiTuru = 'tanistir' | 'kapatir' | 'onboard';
+export type KatkiTuru = 'tanistir' | 'kapatir';
 /** Kâğıttaki ay aralıkları. Satış ayından sonraki 12 aylık dönemler: 13–24, 25–36, 37–48 ve 49–60. ay. */
 export const donemAdi = (i: number) => `${12 * (i + 1) + 1}. ay ile ${12 * (i + 2)}. ay arası`;
-export const KATKI_TURLERI = ['tanistir', 'kapatir', 'onboard'] as const;
+export const KATKI_TURLERI = ['tanistir', 'kapatir'] as const;
 export type Esik = number | null;
 export interface KatkiPlani {
   /** Aylık ciro eşikleri. Her katkı türünün eşiği ayrıdır. Kâğıtta yazmıyor, bu yüzden varsayılanı boştur. */
@@ -32,7 +32,6 @@ export interface KatkiPlani {
 export interface KazancPlani {
   tanistir: KatkiPlani;
   kapatir: KatkiPlani;
-  onboard: KatkiPlani;
   /** Örnek hesapta kullanılan aylık ciro. Gerçek satış değildir. */
   ornekCiro: number;
   kadrolu: { maas: number; kotaOrani: number; primOrani: Esik };
@@ -54,7 +53,7 @@ export const BOLUSME_SORUSU = { ilkSatis: 'İlk satışta pay', yillar: 'Sonraki
 export const SURE_SECENEKLERI = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
 export type SureAy = (typeof SURE_SECENEKLERI)[number];
 
-export const KATKI_ADI: Record<KatkiTuru, string> = { tanistir: 'Tanıştırma', kapatir: 'Satışı kapatma', onboard: 'Onboarding' };
+export const KATKI_ADI: Record<KatkiTuru, string> = { tanistir: 'Tanıştırma', kapatir: 'Satışı kapatma' };
 /** Kadrolu uzmanın aylık maaş aralığı (kullanıcı kararı). */
 export const MAAS_ARALIGI = [50_000, 60_000] as const;
 
@@ -63,8 +62,6 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
   tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0.07, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.05, 0.025, 0, 0] },
   // Kullanıcı kararı 17 Kasım 2026 Salı: satış yılı 1. yıldır ve %15'tir. 2. yıl %10, 3. yıl %7, 4. yıl %5 olur. Eski %2 kalktı.
   kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
-  // Onboarding oranları kâğıtta yok. Uydurulmaz. Yönetici değerleri girer.
-  onboard: { kotaEsik: [null, null, null], taban: 0, kotaArtis: [0, 0, 0], gecmis: [0, 0, 0, 0] },
   // Kâğıttaki örnek: aylık ciro 40.000 ₺ (kullanıcı kararı 17 Kasım 2026 Salı).
   ornekCiro: 40_000,
   // Kullanıcının örneği: 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.

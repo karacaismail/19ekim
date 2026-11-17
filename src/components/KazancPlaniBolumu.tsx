@@ -86,9 +86,7 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
   return <div className="pol-kz-katki" data-katki={tur}>
     <p>{tur === 'tanistir'
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
-      : tur === 'kapatir' ? 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Müşteri satın alınca pay kazanırsınız.'
-      : 'Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Bu işi siz yaparsınız.'}</p>
-    {tur === 'onboard' && <p className="pol-kz-not">Onboarding oranları henüz belirlenmedi. Değerleri yönetici girer.</p>}
+      : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
     <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
     <Grup baslik={`1. grup: ${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
@@ -128,7 +126,7 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
   </section>;
 }
 
-const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştırırsanız', kapatir: 'Satışı kapatırsanız', onboard: 'Onboarding yaparsanız' };
+const KATKI_SEKMESI: Record<KatkiTuru, string> = { tanistir: 'Yalnız tanıştırırsanız', kapatir: 'Satışı kapatırsanız' };
 const SEKME_SINIFI = { list: 'pol-sekme-listesi', tab: 'pol-sekme', panel: 'pol-sekme-paneli' };
 
 /** Karar kartı: üstte soru, ortada seçim, altta “Kalıcı kural”. Her karar ayrı yüzeyde durur. */
@@ -400,7 +398,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
       <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
       <Sihirbaz key="ortak" adimlar={[
         { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} /> },
-        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki üç sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır.', icerik:
+        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır.', icerik:
           /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
             <Tabs.List aria-label="Satıştaki katkınız">
@@ -417,7 +415,6 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
           <div className="pol-kz-kartlar">
             <KatkiSonucu tur="tanistir" plan={plan} />
             <KatkiSonucu tur="kapatir" plan={plan} />
-            <KatkiSonucu tur="onboard" plan={plan} />
           </div>
           <OrnekHesap plan={plan} />
           <PaySonucu plan={plan} />
