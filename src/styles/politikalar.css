@@ -260,3 +260,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-tablo :is(thead th, tbody th, tfoot th) { text-align: start; }
 .pol-kz-tablo tbody tr + tr :is(th, td) { box-shadow: 0 -1px 0 var(--rule); }
 .pol-kz-tablo tfoot :is(th, td) { font-weight: var(--weight-semibold); color: var(--policy-active-ink); box-shadow: 0 -2px 0 var(--rule-strong); }
+/* Kalıcı kural: yöneticinin sabitlediği değer kutu değil, düz metindir. */
+.pol-kz-sabit > p { margin: 0; }
+.pol-kz-sabit-deger { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.pol-kz-sabit-not { margin: 0; color: var(--text-secondary); }

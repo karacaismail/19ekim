@@ -4,7 +4,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  projeVarsayilani, sabitMi, donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -21,7 +21,7 @@ const bellek = new Map<Marka, KazancPlani>();
 function oku(proje: Marka): KazancPlani {
   let plan = bellek.get(proje);
   if (!plan) {
-    try { plan = planOku(JSON.parse(localStorage.getItem(anahtar(proje)) ?? 'null')); } catch { plan = structuredClone(KAZANC_VARSAYILAN); }
+    try { plan = planOku(JSON.parse(localStorage.getItem(anahtar(proje)) ?? 'null'), proje); } catch { plan = projeVarsayilani(proje); }
     bellek.set(proje, plan);
   }
   return plan;
@@ -33,13 +33,16 @@ function yaz(proje: Marka, plan: KazancPlani) {
 }
 const abone = (d: () => void) => { dinleyiciler.add(d); return () => { dinleyiciler.delete(d); }; };
 
+/** Sunucu çiziminde her proje kendi başlangıç planını kullanır. Nesne sabittir. */
+const SUNUCU_PLANI: Record<Marka, KazancPlani> = { istoc: projeVarsayilani('istoc'), segika: projeVarsayilani('segika') };
+
 export function useKazancPlani(proje: Marka) {
-  const plan = useSyncExternalStore(abone, () => oku(proje), () => KAZANC_VARSAYILAN);
+  const plan = useSyncExternalStore(abone, () => oku(proje), () => SUNUCU_PLANI[proje]);
   return { plan, guncelle: (degis: (p: KazancPlani) => void) => { const yeni = structuredClone(plan); degis(yeni); yaz(proje, yeni); } };
 }
 
 type Guncelle = ReturnType<typeof useKazancPlani>['guncelle'];
-const PlanBaglami = createContext<{ plan: KazancPlani; guncelle: Guncelle } | null>(null);
+const PlanBaglami = createContext<{ plan: KazancPlani; guncelle: Guncelle; proje: Marka } | null>(null);
 
 /** Değer kalıcı kural olarak işaretliyse kilitlidir. Kilitli değer değiştirilemez (kullanıcı kararı 17 Kasım 2026 Salı). */
 function useKilitli(kural?: string) {
@@ -51,6 +54,7 @@ function useKilitli(kural?: string) {
 function Kalici({ kural, ad }: { kural: string; ad: string }) {
   const b = useContext(PlanBaglami);
   if (!b) return null;
+  if (sabitMi(b.proje, kural)) return <p className="pol-kz-sabit-not">Kalıcı kural. Yönetici bu değeri sabitledi.</p>;
   const isaretli = b.plan.kalici.includes(kural);
   return <><Checkbox label="Kalıcı kural" aria-label={`${ad} kalıcı kural`} checked={isaretli}
     onChange={(e) => {
@@ -66,6 +70,15 @@ function Kutu({ label, value, onChange, yuzdeMi = false, bosOlur = false, birim,
   label: string; value: Esik; onChange: (v: Esik) => void; yuzdeMi?: boolean; bosOlur?: boolean; birim?: string; kural?: string;
 }) {
   const kilitli = useKilitli(kural);
+  const b = useContext(PlanBaglami);
+  if (kural && b && sabitMi(b.proje, kural)) {
+    const metin = value === null ? 'Belirlenmedi' : yuzdeMi ? yuzde(value) : `${num(value)}${birim ? ' ₺' : ''}`;
+    return <div className="pol-kz-alan pol-kz-sabit" data-sabit={kural}>
+      <p className="so2-girdi-ad">{label}</p>
+      <p className="pol-kz-sabit-deger">{metin}</p>
+      <Kalici kural={kural} ad={label} />
+    </div>;
+  }
   const goster = value === null ? '' : yuzdeMi ? Math.round(value * 1000) / 10 : value;
   const kutu = <NumberInput className="so2-girdi" classNames={{ label: 'so2-girdi-ad', input: 'param-input so2-girdi-kutu' }}
     label={birim ? <>{label} <span className="so2-girdi-birim">{birim}</span></> : label}
@@ -142,6 +155,8 @@ function KararKarti({ no, baslik, aciklama, children }: { no: number; baslik: st
 /** Seçmeli düğme grubu. APG radyo grubu gibi çalışır: ok tuşları, Home ve End seçimi taşır. */
 function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) => void }) {
   const kilitli = useKilitli('paylasim.sureAy');
+  const b = useContext(PlanBaglami);
+  const sabit = Boolean(b && sabitMi(b.proje, 'paylasim.sureAy'));
   const grup = useRef<HTMLDivElement>(null);
   const odakla = useRef(false);
   // Seçilen düğme, çizimden hemen sonra odağı alır. Sonraki tuş doğru düğmeden başlar.
@@ -163,6 +178,10 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
     e.preventDefault();
     sec(hedef);
   };
+  if (sabit) return <div className="pol-kz-sure pol-kz-sabit" data-sabit="paylasim.sureAy">
+    <p className="pol-kz-sabit-deger">{value} ay</p>
+    <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
+  </div>;
   return <div className="pol-kz-sure">
     <p id="pol-kz-sure-ad" className="pol-kz-gizli">Tanıştırmanın geçerlilik süresi</p>
     <div ref={grup} role="radiogroup" aria-labelledby="pol-kz-sure-ad" className="pol-sekme-listesi pol-kz-sure-liste">
@@ -174,19 +193,20 @@ function SureSecimi({ value, onChange }: { value: SureAy; onChange: (v: SureAy) 
 }
 
 /** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
-function Kararlar({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
+function Kararlar({ plan, guncelle, proje }: { plan: KazancPlani; guncelle: Guncelle; proje: Marka }) {
   const SORU_ACIKLAMASI: Record<keyof typeof BOLUSME_SORUSU, string> = {
     ilkSatis: 'Müşteri ilk kez satın aldığında pay nasıl bölünür?',
     kota: 'Satış bir kotayı geçerse artan pay nasıl bölünür?',
     yillar: 'Müşteri sonraki yıllarda da öderse pay nasıl bölünür?',
   };
   const soru = (anahtar: keyof typeof BOLUSME_SORUSU, no: number) => <KararKarti no={no} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
+    {sabitMi(proje, `paylasim.${anahtar}`) ? <p className="pol-kz-sabit-deger" data-sabit={`paylasim.${anahtar}`}>{BOLUSME_ADI[plan.paylasim[anahtar]]}</p> : <>
     {/* Kalıcı kural işaretliyse seçim kilitlenir. Kapalı fieldset içindeki düğmeler de kapanır. */}
     <fieldset className="pol-kz-kilit" disabled={plan.kalici.includes(`paylasim.${anahtar}`)}>
       <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={plan.paylasim[anahtar]}
         options={(['dus', 'tam'] as const).map((id) => ({ id, name: BOLUSME_ADI[id] }))}
         onChange={(v) => guncelle((x) => { x.paylasim[anahtar] = v; })} />
-    </fieldset>
+    </fieldset></>}
     <Kalici kural={`paylasim.${anahtar}`} ad={BOLUSME_SORUSU[anahtar]} />
   </KararKarti>;
   return <div className="pol-kz-adim-govde">
@@ -388,7 +408,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
   const { plan, guncelle } = useKazancPlani(proje);
   const kalici = { baslik: 'Kalıcı kuralları alın', aciklama: 'Bu adım yalnız yönetici içindir.', icerik: <KaliciKurallar plan={plan} proje={proje} /> };
   // Kullanıcı kararı 17 Kasım 2026 Salı: önce seçenekler ve kararlar, sonra sonuç. Okur adımları sırayla izler.
-  return <PlanBaglami.Provider value={{ plan, guncelle }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
+  return <PlanBaglami.Provider value={{ plan, guncelle, proje }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
     <KaliciCubugu plan={plan} proje={proje} />
     {rol === 'kadrolu' ? <Sihirbaz key="kadrolu" adimlar={[
       { baslik: 'Maaşı ve kotayı girin', aciklama: 'Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır.', icerik: <KadroluGirdi plan={plan} guncelle={guncelle} /> },
@@ -397,7 +417,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
     ]} /> : <>
       <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
       <Sihirbaz key="ortak" adimlar={[
-        { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} /> },
+        { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} proje={proje} /> },
         { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır.', icerik:
           /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
@@ -422,6 +442,6 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
         kalici,
       ]} />
     </>}
-    <button type="button" className="pol-sekme" onClick={() => yaz(proje, structuredClone(KAZANC_VARSAYILAN))}>Planın ilk değerlerine dönün</button>
+    <button type="button" className="pol-sekme" onClick={() => yaz(proje, projeVarsayilani(proje))}>Planın ilk değerlerine dönün</button>
   </Section></PlanBaglami.Provider>;
 }

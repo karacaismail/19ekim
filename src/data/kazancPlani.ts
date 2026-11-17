@@ -71,6 +71,55 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
   kalici: [],
 };
 
+/**
+ * Yöneticinin kalıcı kuralları (kullanıcı kararı 17 Kasım 2026 Salı, Segika JSON çıktısı).
+ * Bu değerler sabittir. Ekranda kutu yerine düz metin olarak durur. Okur bu değerleri değiştiremez.
+ */
+export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
+  istoc: {},
+  segika: {
+    'tanistir.taban': 0.07,
+    'tanistir.kotaArtis.0': 0.1, 'tanistir.kotaArtis.1': 0.07, 'tanistir.kotaArtis.2': 0.05,
+    'tanistir.gecmis.0': 0.05, 'tanistir.gecmis.1': 0.025, 'tanistir.gecmis.2': 0, 'tanistir.gecmis.3': 0,
+    'kapatir.kotaArtis.0': 0.1, 'kapatir.kotaArtis.1': 0.07, 'kapatir.kotaArtis.2': 0.05,
+    'kapatir.gecmis.0': 0.1, 'kapatir.gecmis.1': 0.07, 'kapatir.gecmis.2': 0.05,
+    'paylasim.sureAy': 6, 'paylasim.ilkSatis': 'dus', 'paylasim.yillar': 'dus', 'paylasim.kota': 'dus',
+  },
+};
+
+/** Kalıcı olmayan ama yöneticinin JSON'da verdiği başlangıç değerleri (kullanıcı kararı 17 Kasım 2026 Salı). */
+const PROJE_VARSAYILANI: Record<Marka, Record<string, number | string | null>> = {
+  istoc: {},
+  segika: {
+    'tanistir.kotaEsik.0': 30_000, 'tanistir.kotaEsik.1': 70_000, 'tanistir.kotaEsik.2': 100_000,
+    'kapatir.kotaEsik.0': 30_000, 'kapatir.kotaEsik.1': 70_000, 'kapatir.kotaEsik.2': 100_000,
+  },
+};
+
+/** Kimliği `a.b.0` biçimindeki değeri plana yazar. */
+function degerYaz(plan: KazancPlani, id: string, deger: number | string | null) {
+  const yol = id.split('.');
+  let hedef: Record<string, unknown> = plan as unknown as Record<string, unknown>;
+  for (const parca of yol.slice(0, -1)) hedef = hedef[parca] as Record<string, unknown>;
+  hedef[yol[yol.length - 1]] = deger;
+}
+
+export const sabitMi = (proje: Marka, id: string) => id in SABIT_KURALLAR[proje];
+
+/** Projenin başlangıç planı. Sabit kurallar ve proje varsayılanları uygulanmıştır. */
+export function projeVarsayilani(proje: Marka): KazancPlani {
+  const v = structuredClone(KAZANC_VARSAYILAN);
+  for (const [id, d] of Object.entries(PROJE_VARSAYILANI[proje])) degerYaz(v, id, d);
+  return sabitleriUygula(v, proje);
+}
+
+/** Sabit kurallar her zaman kazanır. Tarayıcıdaki eski kayıt sabit değeri değiştiremez. */
+export function sabitleriUygula(plan: KazancPlani, proje: Marka): KazancPlani {
+  for (const [id, d] of Object.entries(SABIT_KURALLAR[proje])) degerYaz(plan, id, d);
+  plan.kalici = plan.kalici.filter((k) => !sabitMi(proje, k));
+  return plan;
+}
+
 /** Ulaşılan kota sayısı ve geçerli oran. Eşikler sırayla aranır. Boş eşikten sonra kota sayılmaz. */
 export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { oran: number; kota: 0 | 1 | 2 | 3 } {
   const p = plan[tur];
@@ -175,7 +224,7 @@ export function kaliciJson(plan: KazancPlani, proje: Marka, simdi: Date) {
   const iki = (n: number) => String(n).padStart(2, '0');
   const tarih = `${simdi.getFullYear()}-${iki(simdi.getMonth() + 1)}-${iki(simdi.getDate())}`;
   const gorunum = GORUNUM_ADI[proje];
-  const secili = new Set(plan.kalici);
+  const secili = new Set([...plan.kalici, ...Object.keys(SABIT_KURALLAR[proje])]);
   return {
     tur: 'kazanc-plani-kalici-kurallar',
     surum: 2,
@@ -210,8 +259,8 @@ const ORAN = (v: unknown, enCok = 1) => typeof v === 'number' && Number.isFinite
 const ESIK = (v: unknown) => v === null || (typeof v === 'number' && Number.isFinite(v) && v >= 0);
 
 /** Tarayıcıdaki kaydı doğrular. Geçersiz alan varsayılanı alır. */
-export function planOku(ham: unknown): KazancPlani {
-  const v = structuredClone(KAZANC_VARSAYILAN);
+export function planOku(ham: unknown, proje?: Marka): KazancPlani {
+  const v = proje ? projeVarsayilani(proje) : structuredClone(KAZANC_VARSAYILAN);
   if (!ham || typeof ham !== 'object') return v;
   const h = ham as Partial<Record<keyof KazancPlani, unknown>>;
   const esikMi = (e: unknown): e is KatkiPlani['kotaEsik'] => Array.isArray(e) && e.length === 3 && e.every(ESIK);
@@ -242,5 +291,5 @@ export function planOku(ham: unknown): KazancPlani {
     const gecerli = new Set(kuralListesi(v).map((k) => k.id));
     v.kalici = [...new Set(h.kalici.filter((x): x is string => typeof x === 'string' && gecerli.has(x)))];
   }
-  return v;
+  return proje ? sabitleriUygula(v, proje) : v;
 }
