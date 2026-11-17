@@ -51,7 +51,6 @@ export const KOSULLAR: Record<RolId, KosulTanim[]> = {
     { id: 'yillara', ad: 'Destek veren çözüm ortağı, yıllara yayılan', kaynak: 'Affilate', marka: ['segika'] },
     { id: 'yonlendirme', ad: 'Ticari yönlendirme ortağı', kaynak: 'İş ortaklığı', marka: ['segika'] },
     { id: 'smmm', ad: 'Mali müşavir ofisi, seviyeli', kaynak: 'İş ortaklığı', marka: ['segika'] },
-    { id: 'altyapi', ad: 'Altyapı ve kendi markası', kaynak: 'İş ortaklığı', marka: ['segika'] },
     { id: 'entegrasyon', ad: 'Bordro ve İK yazılımı', kaynak: 'İş ortaklığı', marka: ['segika'] },
     { id: 'osgb', ad: 'OSGB', kaynak: 'İş ortaklığı', marka: ['segika'] },
     { id: 'dernek', ad: 'Dernek, OSB ve oda', kaynak: 'İş ortaklığı', marka: ['segika'] },
@@ -396,7 +395,6 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
   }
 
   const nakitsiz: Record<string, [string, string, string[]]> = {
-    altyapi: ['Yıllık taahhüt', 'Ortak, Segika’yı kendi markasıyla sunar. İş hacmine göre fiyat alır.', ['Ortak, yılda en az kaç firma getireceğini taahhüt eder.', 'Ortak ile şirket bir hizmet seviyesi sözleşmesi (SLA) imzalar. Bu sözleşme hizmetin hangi sürede ve hangi kalitede verileceğini yazar.', 'Fiyat, iş hacmine göre belirlenir.', 'Ortak, teşvik danışmanlığı ya da dış kaynaklı bordro hizmeti verir.', 'Ortak ile şirket, ürünün ileride nasıl gelişeceğini birlikte planlar.']],
     entegrasyon: ['Ortak pazarlama', 'Ortak, bir bordro ya da İK yazılımıdır. Bu yazılım Segika’ya doğrudan yazılım bağlantısıyla (API) bağlanır. İki taraf birlikte pazarlama yapar.', ['İki yazılım birbirine bağlanır. Taraflar ayrıca ortak pazarlama anlaşması yapar.', 'İlk hedef, 2 görüşme yapmak ve 1 anlaşma imzalamaktır.']],
     osgb: ['Yönlendirme anlaşması', 'Bu ortaklıkta karşı taraf bir OSGB, yani ortak sağlık ve güvenlik birimidir. Müşterilerini Segika’ya yönlendirir.', ['Yönlendirme anlaşmasıyla çalışır.', 'Bu ortaklık ikinci aşamada başlar.']],
     dernek: ['Ortak eğitim', 'Bu ortaklıkta karşı taraf bir dernek, organize sanayi bölgesi ya da odadır. Üyelerine Segika ile birlikte eğitim düzenler.', ['Ortak eğitim programıyla çalışır.', 'Bu ortaklık ikinci aşamada başlar.']],

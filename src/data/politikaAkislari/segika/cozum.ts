@@ -408,71 +408,6 @@ function smmmAkis(a: Ayar): IsAkisi {
   };
 }
 
-function altyapiAkis(a: Ayar): IsAkisi {
-  const p = 'altyapi';
-  return {
-    baslik: 'Kendi markasıyla sunan ortak',
-    ozet: 'Segika hizmetini kendi markanızla sunarsınız. Fiyat iş hacmine göre belirlenir.',
-    hedef: 'Taahhüt, fiyat tablosu ve hizmet seviyesi yazılı olsun.',
-    ilk: 'uygunluk',
-    adimlar: [
-      {
-        id: 'uygunluk', ad: 'Hizmetinizi tanımlayın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kitle',
-        terimler: ['Teşvik, devletin işverene verdiği destektir.', 'Dış kaynaklı bordro, başka firmanın maaş listesini hazırlamaktır.'],
-        yap: [ kural(a, p, 'teşvik danışmanlığı', 'Ortak teşvik danışmanlığı ya da dış kaynaklı bordro hizmeti verir.'),
-          'Ortaklık sorumlusu hizmetinizi bu koşula göre değerlendirir.'],
-        soru: 'Bu hizmeti veriyor musunuz?',
-        secenekler: [
-          devam('veriyoruz', 'Bu hizmeti veriyoruz', 'taahhut'),
-          son('bitir', 'vermiyoruz', 'Bu hizmeti vermiyoruz', 'Bu program uygun değil', 'Başka programı ortaklık sorumlusuyla konuşun.'),
-        ],
-      },
-      {
-        id: 'taahhut', ad: 'Yıllık taahhüdü yazın', sorumlu: 'Ortaklık sorumlusu (önerilen görev)',
-        terimler: ['Taahhüt, bir yılda kaç firma getireceğinize dair sözünüzdür.'],
-        yap: [ kural(a, p, 'taahhüt eder', 'Ortak yıllık firma taahhüdü verir.'), 'Ortaklık sorumlusu taahhüt karşılanmazsa ne olacağını yazar.'],
-        soru: 'Taahhüt sayınız yazıldı mı?',
-        secenekler: [
-          devam('yazili', 'Taahhüt sayımız yazıyla belli oldu', 'fiyat'),
-          son('bekle', 'yok', 'Taahhüt sayımız henüz belli değil', 'Taahhüt bekleniyor', 'Ortaklık sorumlusu sizinle sayıyı belirler.', 'Sayı yazılınca bu adıma dönün.'),
-        ],
-      },
-      {
-        id: 'fiyat', ad: 'Hacim fiyatını alın', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-        yap: ['Bu programda fiyat iş hacmine göre belirlenir.', 'Şirket bu programın fiyat tablosunu henüz yayımlamadı.',
-          'Finans sorumlusu tabloyu yazılı verir. Fiyat pazarlıkla değişmez.'],
-        soru: 'Fiyat tablosu size geldi mi?',
-        secenekler: [
-          devam('teklif', 'Finans sorumlusu fiyat tablosunu yazıyla verdi', 'sla'),
-          son('bekle', 'yok', 'Fiyat henüz belli değil', 'Fiyat tablosunu bekleyin', 'Finans sorumlusu fiyat tablosunu hazırlar.', 'Tablo gelmeden müşteriye fiyat söylemeyin.'),
-        ],
-      },
-      {
-        id: 'sla', ad: 'Hizmet seviyesi sözleşmesi', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
-        terimler: ['Taslak, henüz bitmemiş ilk metindir.'],
-        yap: [ 'Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.', 'Bu sözleşme destek süresini ve hizmet kalitesini yazar.',
-          'Ortaklık sorumlusu destek sorumlusunu sözleşmeye yazar.'],
-        soru: 'Hizmet sözleşmesi imzalandı mı?',
-        secenekler: [
-          devam('imza', 'Sözleşme imzalandı', 'yol'),
-          son('bekle', 'taslak', 'Sözleşme henüz taslak halinde', 'Sözleşme bekleniyor', 'Ortaklık sorumlusu taslağı tamamlar.', 'Sözleşme imzalanınca bu adıma dönün.'),
-        ],
-      },
-      {
-        id: 'yol', ad: 'Yol haritasını hazırlayın', sorumlu: 'Siz ve ürün sorumlusu',
-        terimler: ['Yol haritası, ürünün sıradaki işlerini gösteren plandır.'],
-        yap: ['Ürün yol haritasını ürün sorumlusuyla birlikte hazırlayın.',
-          'Markanızın kullanım kurallarını da yazın.'],
-        soru: 'Yol haritası hazır mı?',
-        secenekler: [
-          son('tamamla', 'hazir', 'Yol haritası hazır', 'Bu işin rehberi tamamlandı', 'Haritayı sözleşmeye ek olarak saklayın.'),
-          son('bekle', 'yok', 'Yol haritası hazır değil', 'Yol haritası bekleniyor', 'Ürün sorumlusu taslağı hazırlar.', 'Taslak gelince bu adıma dönün.'),
-        ],
-      },
-    ],
-  };
-}
-
 function entegrasyonAkis(): IsAkisi {
   return {
     baslik: 'Bordro yazılımı ortağı',
@@ -671,7 +606,6 @@ const akisOlusturTam: AkisOlustur = (a) => {
     case 'yillara': return yillaraAkis(a);
     case 'yonlendirme': return yonlendirmeAkis(a);
     case 'smmm': return smmmAkis(a);
-    case 'altyapi': return altyapiAkis(a);
     case 'entegrasyon': return entegrasyonAkis();
     case 'osgb': return osgbAkis();
     case 'dernek': return dernekAkis();

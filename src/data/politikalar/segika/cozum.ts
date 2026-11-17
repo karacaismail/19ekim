@@ -209,26 +209,6 @@ export const politika: ProjePolitika = {
         "sonrasi": "Sezon başlangıç ayını ofis takviminize yazın."
       }
     ],
-    "altyapi": [
-      {
-        "urun": "Segika",
-        "ad": "Teşvik danışmanınızdan hizmet alan 50 ile 500 çalışanlı üretici",
-        "ihtiyac": "Üretici teşvik durumunu her ay bir raporla görmek ister.",
-        "ulasim": "Yıllık danışmanlık sözleşmesini yenilerken genel müdürle konuşun.",
-        "mesaj": "Teşvik durumunuzu her ay kendi panelinizden görmek ister misiniz?",
-        "uygunluk": "Hizmet seviyesi sözleşmesi imzalanmadan kurulum tarihi vermeyin.",
-        "sonrasi": "Müşteriyi bu yıl getirmeye söz verdiğiniz firma sayısına ekleyin."
-      },
-      {
-        "urun": "Segika",
-        "ad": "Bordrosunu dışarıdan yaptıran 5 ile 30 mağazalı perakende zinciri",
-        "ihtiyac": "Zincir mağaza bordrolarını tek panelden izlemek ister.",
-        "ulasim": "Bordro hizmet sözleşmesinin yıllık değerlendirmesinde insan kaynakları müdürüne sorun.",
-        "mesaj": "Mağazalarınızın bordrosunu tek panelden izlemek ister misiniz?",
-        "uygunluk": "Her mağaza yalnız kendi verisini görmelidir. Teknik ekip bunu doğrulamadan söz vermeyin.",
-        "sonrasi": "Mağaza ve çalışan sayısını kurulum planına yazın."
-      }
-    ],
     "entegrasyon": [
       {
         "urun": "Segika",
@@ -461,7 +441,7 @@ export const politika: ProjePolitika = {
       "eksik": "Şirket üç bilgiyi henüz yayımlamadı. Bunlar iş miktarına göre fiyat tablosu, hizmet bedeli ve gelirden ortağa düşen paydır.",
       "islem": "Finans sorumlusu seçilen program için fiyat tablosu hazırlasın.",
       "kanit": "Finans sorumlusu örnek bir işi iki tarafa göstersin. İki taraf aynı bedeli bulursa tablo yeterince açıktır.",
-      "firsat": "Fiyat tablosu hazır olunca şirket “Altyapı ve kendi markası” programını başlatır.",
+      "firsat": "Fiyat tablosu hazır olunca şirket ücretli programları başlatabilir.",
       "durdur": "Fiyat tablosu ve kabul ölçütü belirlenmeden ücretli işe başlamayın."
     }
   ],
@@ -550,13 +530,6 @@ export const politika: ProjePolitika = {
       "Komisyon veya müşteri indirimi istiyorsanız ortaklık sorumlusu ana programı değerlendirir. İki model birlikte uygulanmaz.",
       "Aktif mükellef sayısını hangi kaydın kanıtlayacağını ortaklık sorumlusu belirlesin.",
       "Fiyat bandı ve mesleki uygunluk kabul edilmeden müşteriye teklif vermeyin."
-    ],
-    "altyapi": [
-      "Bu program teşvik danışmanlığı veya dış kaynaklı bordro hizmeti veren firma içindir.",
-      "Hizmeti kendi markanızla sunarsınız. Bunun için ayrı sözleşme gerekir.",
-      "Her yıl en az kaç firma getireceğinize yazılı söz verirsiniz. Ortaklık sorumlusu hizmet seviyesi sözleşmesini hazırlar.",
-      "Fiyat iş hacmine göre belirlenir. Şirket bu programın fiyat tablosunu henüz yayımlamadı.",
-      "Taahhüt karşılanmazsa ne olacağını sözleşmeye yazın."
     ],
     "entegrasyon": [
       "Bu program bordro veya insan kaynakları yazılımı geliştiren firma içindir.",
