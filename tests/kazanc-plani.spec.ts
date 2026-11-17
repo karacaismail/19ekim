@@ -18,12 +18,14 @@ test('kazanç planının varsayılanları kâğıttaki planla aynıdır', async 
   expect(p.tanistir.kotaEsik).toEqual([30_000, 60_000, 100_000]);
   expect(p.tanistir.kotaArtis).toEqual([0.1, 0.07, 0.05]);
   expect(p.tanistir.gecmis).toEqual([0.05, 0.025, 0, 0]);
-  // Kâğıttaki satışı kapatan: cari ay %15, K1 ile %10 eklenir, sonra %10, %7 ve %5. 48. aydan sonra pay yoktur.
+  // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatanın oranı K0'da %15, K1'de %20, K2'de %25, K3'te %30'dur.
+  // Eşikler 0, 30.000, 70.000 ve 120.000 ₺'dir. 13. aydan sonra %10, %7 ve %5. 48. aydan sonra pay yoktur.
   expect(p.kapatir.taban).toBe(0.15);
-  expect(p.kapatir.kotaArtis).toEqual([0.1, 0.07, 0.05]);
+  expect(p.kapatir.kotaArtis).toEqual([0.05, 0.05, 0.05]);
   expect(p.kapatir.gecmis).toEqual([0.1, 0.07, 0.05, 0]);
-  expect(p.kapatir.kotaEsik).toEqual([null, null, null]);
-  expect(p.ornekCiro).toBe(40_000);
+  expect(p.kapatir.kotaEsik).toEqual([30_000, 70_000, 120_000]);
+  expect([0, 29_999, 30_000, 70_000, 120_000].map((c) => k.katkiOrani(p, 'kapatir', c).oran)).toEqual([0.15, 0.15, 0.2, 0.25, 0.3]);
+  expect(p.ornekCiro).toBe(50_000);
   expect(p.paylasim.sureAy).toBe(6);
   expect(p.kadrolu.maas).toBe(50_000);
   // 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
@@ -34,14 +36,13 @@ test('kazanç planının varsayılanları kâğıttaki planla aynıdır', async 
 test('kota eşiği yoksa taban oran, eşik aşılınca artışlar sırayla eklenir', async () => {
   const k = await import('../src/data/kazancPlani');
   const p = k.KAZANC_VARSAYILAN;
-  expect(k.katkiOrani(p, 'kapatir', 1_000_000)).toEqual({ oran: 0.15, kota: 0 });
   const esikli = { ...p, kapatir: { ...p.kapatir, kotaEsik: [100_000, 250_000, 500_000] as [number, number, number] } };
   expect(k.katkiOrani(esikli, 'kapatir', 99_999)).toEqual({ oran: 0.15, kota: 0 });
   expect(k.katkiOrani(esikli, 'kapatir', 100_000).kota).toBe(1);
-  expect(k.katkiOrani(esikli, 'kapatir', 100_000).oran).toBeCloseTo(0.25);
-  expect(k.katkiOrani(esikli, 'kapatir', 300_000).oran).toBeCloseTo(0.32);
+  expect(k.katkiOrani(esikli, 'kapatir', 100_000).oran).toBeCloseTo(0.2);
+  expect(k.katkiOrani(esikli, 'kapatir', 300_000).oran).toBeCloseTo(0.25);
   expect(k.katkiOrani(esikli, 'kapatir', 600_000)).toMatchObject({ kota: 3 });
-  expect(k.katkiOrani(esikli, 'kapatir', 600_000).oran).toBeCloseTo(0.37);
+  expect(k.katkiOrani(esikli, 'kapatir', 600_000).oran).toBeCloseTo(0.3);
   // Eşikler sırayla aranır. K1 boşsa K2 de uygulanmaz.
   expect(k.katkiOrani({ ...p, kapatir: { ...p.kapatir, kotaEsik: [null, 1, 1] } }, 'kapatir', 10).kota).toBe(0);
 });
@@ -66,11 +67,11 @@ test('kota kuralı: K1 tamamlanmazsa 13. aydan sonra pay yoktur', async () => {
   expect(k.kotaTamam(p, 'tanistir', 30_000)).toBe(true);
   expect(k.yillaraKazanc(p, 'tanistir', 20_000).map((s) => s.tutar)).toEqual([0, 0, 0, 0]);
   // K1 eşiği boşsa kural ölçülemez. Örnek kotayı tamamlanmış sayar.
-  expect(k.kotaTamam(p, 'kapatir', 1)).toBe(true);
-  // Kâğıttaki örnek: aylık ciro 40.000 ₺, toplam 121.600 ₺.
-  const h = k.ornekHesap(p, 'kapatir');
-  expect(h.satirlar.map((r) => r.tutar)).toEqual([6_000, 4_000, 6_000, 48_000, 33_600, 24_000]);
-  expect(h.toplam).toBe(121_600);
+  expect(k.kotaTamam({ ...p, kapatir: { ...p.kapatir, kotaEsik: [null, null, null] } }, 'kapatir', 1)).toBe(true);
+  // Kâğıttaki örnek hesap: aylık ciro 40.000 ₺. K1 artışı artık %5'tir.
+  const h = k.ornekHesap({ ...p, ornekCiro: 40_000 }, 'kapatir');
+  expect(h.satirlar.map((r) => r.tutar)).toEqual([6_000, 2_000, 6_000, 48_000, 33_600, 24_000]);
+  expect(h.toplam).toBe(119_600);
   const dusuk = { ...structuredClone(p), ornekCiro: 20_000 };
   dusuk.kapatir.kotaEsik = [30_000, null, null];
   expect(k.ornekHesap(dusuk, 'kapatir').toplam).toBe(6_000);
@@ -81,7 +82,8 @@ test('Segika başlangıç planı yöneticinin JSON çıktısındaki kalıcı kur
   const s = k.projeVarsayilani('segika');
   expect(s.kalici).toHaveLength(19);
   expect(s.kalici).toEqual(expect.arrayContaining(['tanistir.taban', 'kapatir.taban', 'paylasim.sureAy', 'paylasim.ilkSatis']));
-  expect([s.tanistir.kotaEsik, s.kapatir.kotaEsik]).toEqual([[30_000, 70_000, 100_000], [30_000, 70_000, 100_000]]);
+  expect([s.tanistir.kotaEsik, s.kapatir.kotaEsik]).toEqual([[30_000, 70_000, 100_000], [30_000, 70_000, 120_000]]);
+  expect(s.kapatir.kotaArtis).toEqual([0.05, 0.05, 0.05]);
   expect(k.projeVarsayilani('istoc').kalici).toEqual([]);
   // Tarayıcıdaki kayıt kalıcı listesini taşır. Yönetici bir kuralı kalıcıdan çıkarabilir.
   expect(k.planOku({ kalici: ['tanistir.taban'] }, 'segika').kalici).toEqual(['tanistir.taban']);
@@ -129,6 +131,7 @@ test('pay bölüşme hesabı seçime ve kutulardaki oranlara göre yapılır', a
   p.tanistir.kotaArtis = [0, 0, 0];
   p.tanistir.gecmis = [0.05, 0.02, 0.02, 0.01];
   p.kapatir.gecmis = [0.1, 0.07, 0.05, 0.02];
+  p.kapatir.kotaEsik = [null, null, null];
   expect(k.SURE_SECENEKLERI).toEqual([1, 2, 3, 4, 5, 6, 8, 10, 12]);
   expect(k.paylasim(p, 100_000)).toMatchObject({ tanistiranOran: 0.07, kapatanOran: 0.08, tanistiran: 7_000, kapatan: 8_000, toplam: 15_000 });
   expect(k.paylasim(p, 100_000).yillar.map((y) => [y.tanistiran, y.kapatan])).toEqual([[0.05, 0.05], [0.02, 0.05], [0.02, 0.03], [0.01, 0.01]]);
@@ -142,9 +145,9 @@ test('pay bölüşme hesabı seçime ve kutulardaki oranlara göre yapılır', a
   q.tanistir.taban = 0.07;
   q.tanistir.kotaArtis = [0.01, 0, 0];
   q.kapatir.kotaEsik = [50_000, null, null];
-  expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.17 });
+  expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.12 });
   q.paylasim.kota = 'tam';
-  expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.18 });
+  expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.13 });
   expect(k.planOku({ paylasim: { sureAy: 7, ilkSatis: 'x' } }).paylasim).toEqual({ sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' });
   expect(k.planOku({ paylasim: { sureAy: 12, kota: 'tam' } }).paylasim).toMatchObject({ sureAy: 12, kota: 'tam' });
 });
@@ -190,10 +193,11 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(anahtar).toHaveAttribute('aria-checked', 'true');
   await expect(kutu(page, 'Tanıştırma taban oranı')).toHaveCount(0);
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveValue('%15');
-  for (const k of ['K1', 'K2', 'K3']) await expect(kutu(page, `Satışı kapatma ${k} ciro eşiği`)).toHaveValue('');
+  for (const [k, d] of [['K1', '30.000'], ['K2', '70.000'], ['K3', '120.000']]) await expect(kutu(page, `Satışı kapatma ${k} ciro eşiği`)).toHaveValue(d);
   await expect(kutu(page, 'Satışı kapatma 37. ay ile 48. ay arası komisyonu')).toHaveValue('%5');
   await kutu(page, 'Satışı kapatma taban oranı').fill('%20');
-  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toHaveText('40.000 ₺ × %20 = 8.000 ₺');
+  // 50.000 ₺ ciro K1 eşiğini geçer. Oran %20 taban ile %5 puandır.
+  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toHaveText('50.000 ₺ × %25 = 12.500 ₺');
   await page.reload();
   await bolum(page, 'Oranlar').getByRole('switch').click();
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveValue('%20');
@@ -221,8 +225,9 @@ test('kota eşiği girilince oran sırayla artar', async ({ page }) => {
   await bolum(page, 'Oranlar').getByRole('switch').click();
   await kutu(page, 'Satışı kapatma K1 ciro eşiği').fill('100.000');
   await kutu(page, 'Satışı kapatma K2 ciro eşiği').fill('250.000');
-  await expect(plani(page).locator('[data-kazanc="kapatir-oran"]')).toHaveText('%32');
-  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('96.000 ₺');
+  await kutu(page, 'Satışı kapatma K3 ciro eşiği').fill('400.000');
+  await expect(plani(page).locator('[data-kazanc="kapatir-oran"]')).toHaveText('%25');
+  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('75.000 ₺');
 });
 
 test('kadrolu uzman sekmesi maaşı, kotayı ve SGK kaydını söyler', async ({ page }) => {
@@ -267,7 +272,7 @@ test('iki katkının kota eşikleri birbirinden ayrıdır', async ({ page }) => 
   const anahtar = bolum(page, 'Oranlar').getByRole('switch');
   await kutu(page, 'Tanıştırma K1 ciro eşiği').fill('100.000');
   await anahtar.click();
-  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('');
+  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('30.000');
   await kutu(page, 'Satışı kapatma K1 ciro eşiği').fill('250.000');
   await anahtar.click();
   await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('100.000');
@@ -287,14 +292,14 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   const oyun = panel.locator('[data-etkin] > .pol-kz-oyun-govde');
   await expect(oyun).toHaveAttribute('data-sim-tur', 'kapatir');
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('10.000 ₺');
-  await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('225.600 ₺');
-  await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 kotasına 30.000 ₺ kaldı.');
-  await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 eşiğinde aylık kazancınız 22.400 ₺ olur.');
-  await expect(oyun.getByRole('progressbar', { name: 'K2 hedefine ilerleme' })).toHaveAttribute('aria-valuenow', '57');
+  await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('252.000 ₺');
+  await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 kotasına 20.000 ₺ kaldı.');
+  await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 eşiğinde aylık kazancınız 17.500 ₺ olur.');
+  await expect(oyun.getByRole('progressbar', { name: 'K2 hedefine ilerleme' })).toHaveAttribute('aria-valuenow', '71');
   await expect(oyun.getByRole('list', { name: 'Kota seviyeleri' }).locator('[aria-current="step"]')).toContainText('K1');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K1');
   await panel.getByRole('button', { name: /K2 eşiği:/ }).click();
-  await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('22.400 ₺');
+  await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('17.500 ₺');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K2');
   // Kota kuralı: K1 tamamlanmazsa 13. aydan sonra pay yoktur.
   await kutu(page, 'Örnek aylık ciro').fill('20.000');
@@ -303,7 +308,7 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('36.000 ₺');
   // Kaydırıcı ciroyu değiştirir.
   await panel.getByRole('slider', { name: 'Aylık ciroyu kaydırarak seçin' }).fill('70000');
-  await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('22.400 ₺');
+  await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('17.500 ₺');
   // Dar ekranda tablo yana kaymaz. Satırlar kart olur.
   await expect(oyun.locator('.pol-kz-tablo thead')).toBeHidden();
   expect(await oyun.locator('.table-scroll').evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
@@ -345,7 +350,7 @@ test('Segika: Parametreler penceresi kalıcı kuralları ve JSON çıktısını 
   await page.keyboard.press('Escape');
   await expect(dugme).toBeFocused();
   await expect(plani(page).getByRole('group', { name: 'İlk satışta pay' }).getByRole('button', { name: 'Şirket ikisine de tam öder', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(plani(page).locator('[data-paylasim="toplam"]')).toHaveText('12.800 ₺');
+  await expect(plani(page).locator('[data-paylasim="toplam"]')).toHaveText('13.500 ₺');
   // Ana ekranda işaretlenen değer pencereye taşınır.
   // Kutu işaretlenince alan ana ekrandan kalkar. Bu yüzden check() yerine tıklanır.
   await plani(page).getByRole('checkbox', { name: 'İlk satışta pay kalıcı kural', exact: true }).click();

@@ -61,9 +61,11 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
   // Kullanıcı kararı 17 Kasım 2026 Salı: tanıştırmanın varsayılanları. Bunlar kalıcı kural değildir.
   tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0.07, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.05, 0.025, 0, 0] },
   // Kullanıcı kararı 17 Kasım 2026 Salı: satış yılı 1. yıldır ve %15'tir. 2. yıl %10, 3. yıl %7, 4. yıl %5 olur. Eski %2 kalktı.
-  kapatir: { kotaEsik: [null, null, null], taban: 0.15, kotaArtis: [0.1, 0.07, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
-  // Kâğıttaki örnek: aylık ciro 40.000 ₺ (kullanıcı kararı 17 Kasım 2026 Salı).
-  ornekCiro: 40_000,
+  // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatanın eşikleri 0, 30.000, 70.000 ve 120.000 ₺'dir.
+  // Oran K0'da %15, K1'de %20, K2'de %25, K3'te %30'dur. Her kota oranı 5 puan artırır.
+  kapatir: { kotaEsik: [30_000, 70_000, 120_000], taban: 0.15, kotaArtis: [0.05, 0.05, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
+  // Kullanıcı kararı 17 Kasım 2026 Salı: örnek aylık ciro 50.000 ₺ ile açılır.
+  ornekCiro: 50_000,
   // Kullanıcının örneği: 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
   kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2.5, primOrani: null },
   // Her soruda varsayılan, şirketi zarardan koruyan düşme seçeneğidir.
@@ -84,7 +86,7 @@ export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
     'kapatir.taban': 0.15,
     'tanistir.kotaArtis.0': 0.1, 'tanistir.kotaArtis.1': 0.07, 'tanistir.kotaArtis.2': 0.05,
     'tanistir.gecmis.0': 0.05, 'tanistir.gecmis.1': 0.025, 'tanistir.gecmis.2': 0, 'tanistir.gecmis.3': 0,
-    'kapatir.kotaArtis.0': 0.1, 'kapatir.kotaArtis.1': 0.07, 'kapatir.kotaArtis.2': 0.05,
+    'kapatir.kotaArtis.0': 0.05, 'kapatir.kotaArtis.1': 0.05, 'kapatir.kotaArtis.2': 0.05,
     'kapatir.gecmis.0': 0.1, 'kapatir.gecmis.1': 0.07, 'kapatir.gecmis.2': 0.05,
     'paylasim.sureAy': 6, 'paylasim.ilkSatis': 'dus', 'paylasim.yillar': 'dus', 'paylasim.kota': 'dus',
   },
@@ -95,7 +97,7 @@ const PROJE_VARSAYILANI: Record<Marka, Record<string, number | string | null>> =
   istoc: {},
   segika: {
     'tanistir.kotaEsik.0': 30_000, 'tanistir.kotaEsik.1': 70_000, 'tanistir.kotaEsik.2': 100_000,
-    'kapatir.kotaEsik.0': 30_000, 'kapatir.kotaEsik.1': 70_000, 'kapatir.kotaEsik.2': 100_000,
+    'kapatir.kotaEsik.0': 30_000, 'kapatir.kotaEsik.1': 70_000, 'kapatir.kotaEsik.2': 120_000,
   },
 };
 

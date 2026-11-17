@@ -19,8 +19,8 @@ const tl = (n: number) => `${num(n)} ₺`;
 const yuzde = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 
 /* Plan her proje için ayrı anahtarda, yalnız bu tarayıcıda saklanır. Aynı sayfadaki bütün okuyucular aynı değeri görür. */
-// v3: satışı kapatma taban oranı da kalıcı kural oldu (17 Kasım 2026 Salı). Eski kayıt yeni başlangıç değerlerini ezmesin.
-const anahtar = (proje: Marka) => `turksab-kazanc-plani-v3-${proje}`;
+// v4: satışı kapatanın yeni eşikleri ve oranları (17 Kasım 2026 Salı). Eski kayıt yeni başlangıç değerlerini ezmesin.
+const anahtar = (proje: Marka) => `turksab-kazanc-plani-v4-${proje}`;
 const dinleyiciler = new Set<() => void>();
 const bellek = new Map<Marka, KazancPlani>();
 function oku(proje: Marka): KazancPlani {
@@ -165,22 +165,30 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
       : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
     {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Yönetici bu değerleri “Parametreler” düğmesinden yönetir.</p>}
-    <GrupVarsa kurallar={[`${tur}.taban`]} baslik={`${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
-      <Kutu label={`${ad} taban oranı`} kisa="Taban oran" value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
-    </GrupVarsa>
-    <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik={`${ad} için aylık ciro kotaları`}>
-      {p.kotaEsik.map((e, i) => <Kutu key={i} label={`${ad} K${i + 1} ciro eşiği`} kisa={`K${i + 1} eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
-        onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />)}
-    </GrupVarsa>
-    {p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>}
-    <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik={`${ad} için kota geçilince eklenen puan`}>
-      {p.kotaArtis.map((a, i) => <Kutu key={i} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
-        onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />)}
-    </GrupVarsa>
-    <GrupVarsa kurallar={ids('gecmis', 4)} baslik={`${ad} için 13. aydan sonraki oranlar`}>
-      {p.gecmis.map((g, i) => <Kutu key={i} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={donemAdi(i)} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
-        onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />)}
-    </GrupVarsa>
+    {(() => {
+      const taban = <Kutu label={`${ad} taban oranı`} kisa="Taban oran" value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
+      const esikler = p.kotaEsik.map((e, i) => <Kutu key={`e${i}`} label={`${ad} K${i + 1} ciro eşiği`} kisa={`K${i + 1} eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
+        onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />);
+      const artislar = p.kotaArtis.map((a, i) => <Kutu key={`a${i}`} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
+        onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />);
+      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={donemAdi(i)} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
+        onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />);
+      const tum = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)];
+      const gorunen = tum.filter((k) => !plan.kalici.includes(k) || buOturumda.has(k)).length;
+      const bosEsik = p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>;
+      // Kullanıcı kararı 17 Kasım 2026 Salı: az alan kaldıysa alanlar tek satırda, tek grupta durur.
+      if (gorunen > 0 && gorunen <= 4) return <>
+        <GrupVarsa kurallar={tum} baslik={`${ad} için değerler`}>{taban}{esikler}{artislar}{sonrakiler}</GrupVarsa>
+        {bosEsik}
+      </>;
+      return <>
+        <GrupVarsa kurallar={[`${tur}.taban`]} baslik={`${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>{taban}</GrupVarsa>
+        <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik={`${ad} için aylık ciro kotaları`}>{esikler}</GrupVarsa>
+        {bosEsik}
+        <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik={`${ad} için kota geçilince eklenen puan`}>{artislar}</GrupVarsa>
+        <GrupVarsa kurallar={ids('gecmis', 4)} baslik={`${ad} için 13. aydan sonraki oranlar`}>{sonrakiler}</GrupVarsa>
+      </>;
+    })()}
   </div>;
 }
 
