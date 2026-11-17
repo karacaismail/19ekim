@@ -278,10 +278,8 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 @media (min-width: 40rem) { .pol-kz-anahtar-ad { font-size: var(--text-lg); } }
 
 /* ===== Sıkışık değer alanı: ad ve “Kalıcı” kutusu aynı satırda, alanlar yan yana. ===== */
-.pol-kz-sikisik { gap: var(--space-1); }
 .pol-kz-sikisik-ust { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); min-block-size: var(--hit-min); }
 .pol-kz-sikisik-ust .so2-girdi-ad { margin: 0; }
-.pol-kz-sikisik .pol-kz-kalici .applet-onay-ad { min-block-size: var(--hit-min); }
 .pol-kz-plan .pol-kz-katki .so2-grup { padding: var(--space-4); }
 .pol-kz-plan .pol-kz-katki .so2-grup-alanlar { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); }
 
@@ -302,8 +300,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-ciro-ad { color: var(--text-secondary); font-weight: var(--weight-semibold); }
 .pol-kz-ciro-deger { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .pol-kz-kaydirici { inline-size: 100%; block-size: var(--hit-min); margin: 0; accent-color: var(--accent); cursor: pointer; }
-.pol-kz-atla { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.pol-kz-atla .pol-sekme[aria-pressed='true'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
 .pol-kz-skor { display: grid; gap: var(--space-4); padding: var(--inset-lg); background: var(--surface-ink); color: var(--text-on-ink); box-shadow: var(--shadow-soft); }
 .pol-kz-skor p { color: var(--text-on-ink); }
 .pol-kz-skor-ad, .pol-kz-skor-not { color: var(--text-on-ink-secondary); }
@@ -319,7 +315,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-merdiven-dugme { display: grid; justify-items: center; gap: var(--space-1); min-block-size: var(--hit-min); padding: var(--space-3); border: 0; background: var(--surface-sunken); color: var(--text-secondary); font: inherit; text-align: center; cursor: pointer; transition-property: background-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-merdiven-dugme:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .pol-kz-merdiven-dugme:disabled { cursor: not-allowed; opacity: var(--opacity-disabled); }
-.pol-kz-merdiven-esik { font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.pol-kz-merdiven-esik { font-size: var(--text-sm); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pol-kz-merdiven-dugme[data-durum='gecti'] { background: var(--surface-accent); color: var(--policy-active-ink); }
 .pol-kz-merdiven-dugme[data-durum='simdi'], .pol-kz-merdiven-dugme[data-durum='simdi']:hover { background: var(--accent); color: var(--text-on-accent); box-shadow: var(--shadow-soft); }
 .pol-kz-merdiven-ad { font-weight: var(--weight-semibold); }
@@ -391,7 +387,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-tek-sol .applet-onay-ad { font-size: var(--text-sm); }
 .pol-kz-tek-sol .pol-kz-kalici .applet-onay-ad { min-block-size: var(--hit-min); }
 .pol-kz-tek-kutu { min-inline-size: 0; }
-.pol-kz-tek-girdi { min-block-size: var(--hit-min); padding-inline: var(--space-1); border: 0; background: transparent; color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-semibold); text-align: center; font-variant-numeric: tabular-nums; }
+.pol-kz-tek-girdi { min-block-size: var(--hit-min); padding-inline: var(--space-2); border: 0; background: transparent; color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-semibold); text-align: center; font-variant-numeric: tabular-nums; }
 .pol-kz-tek-girdi:focus { outline: none; }
 .pol-kz-tek-ad { color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-snug); text-align: end; }
 .pol-kz-tek-deger { text-align: center; color: var(--text-secondary); }

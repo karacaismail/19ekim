@@ -582,7 +582,7 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
             <span className="pol-kz-merdiven-ikon" aria-hidden="true">{i <= kota ? (i === 0 ? <IconRocket size={22} stroke={1.75} /> : <IconStarFilled size={22} />) : <IconLock size={22} stroke={1.75} />}</span>
             <span className="pol-kz-merdiven-ad" aria-hidden="true">{ad}</span>
             <span className="pol-kz-merdiven-oran" aria-hidden="true">{ulasilir ? yuzde(oran) : 'Yok'}</span>
-            <span className="pol-kz-merdiven-esik" aria-hidden="true">{esik === null ? 'Eşik yok' : `${tl(esik)}+`}</span>
+            <span className="pol-kz-merdiven-esik" aria-hidden="true">{esik === null ? 'Eşik yok' : tl(esik)}</span>
           </button>;
         })}
       </div>
