@@ -1,5 +1,5 @@
 import { createContext, useId, type CSSProperties, type ReactNode, useContext, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
-import { Checkbox, Modal, NumberInput } from '@mantine/core';
+import { Checkbox, Modal, NumberInput, TextInput } from '@mantine/core';
 import { useMotionMs } from '../lib/motion';
 import { IconAdjustmentsHorizontal, IconCalendarStats, IconChartLine, IconFlame, IconLock, IconLockOpen, IconRocket, IconStar, IconStarFilled, IconTarget, IconTrophy } from '@tabler/icons-react';
 import { useGiris } from '../lib/giris';
@@ -52,6 +52,23 @@ const PlanBaglami = createContext<{ plan: KazancPlani; guncelle: Guncelle; proje
 const PencereBaglami = createContext(false);
 
 /**
+ * Bu oturumda ana ekranda kalıcı yapılan değerler. Bu değerlerin yeri boş kalmaz, aynı boyda bir not durur.
+ * Kullanıcı kararı 17 Kasım 2026 Salı: bir şey değişince ekran zıplamaz. Sayfa yenilenince değer yine gizlenir.
+ */
+const buOturumda = new Set<string>();
+
+/**
+ * Yer ayıran yığın (kullanıcı kararı 17 Kasım 2026 Salı: değişimde ekran zıplamaz).
+ * Bütün hâller aynı hücrede üst üste durur. Yalnız etkin hâl görünür. Yükseklik en büyük hâlin yüksekliğidir.
+ */
+function Yigin({ etkin, children }: { etkin: number; children: ReactNode[] }) {
+  return <div className="pol-kz-yigin">
+    {children.map((c, i) => <div key={i} className="pol-kz-yigin-oge" data-etkin={i === etkin ? '' : undefined}
+      aria-hidden={i === etkin ? undefined : true} inert={i !== etkin}>{c}</div>)}
+  </div>;
+}
+
+/**
  * Kullanıcı kararı 17 Kasım 2026 Salı: kalıcı kural ana ekranda görünmez.
  * Yönetici kalıcı kuralı yalnız “KALICI KURALLAR” penceresinden değiştirir.
  */
@@ -61,15 +78,23 @@ function useGizli(kural?: string) {
   return Boolean(kural && !pencerede && b?.plan.kalici.includes(kural));
 }
 
+/** Gizli değer bu oturumda kalıcı yapıldıysa yeri not olarak kalır. */
+const yerTutulur = (kural?: string) => Boolean(kural && buOturumda.has(kural));
+const YER_NOTU = 'Kalıcı kural oldu. Yönetici bu değeri “Parametreler” düğmesinden yönetir.';
+
 /** Ana ekranda “Kalıcı kural” kutusu. Pencerede “Kalıcı kuraldan çıkarın” düğmesi. */
 function Kalici({ kural, ad, kisa = false }: { kural: string; ad: string; kisa?: boolean }) {
   const b = useContext(PlanBaglami);
   const pencerede = useContext(PencereBaglami);
   if (!b) return null;
-  const cikar = () => b.guncelle((x) => { x.kalici = x.kalici.filter((k) => k !== kural); });
+  const cikar = () => { buOturumda.delete(kural); b.guncelle((x) => { x.kalici = x.kalici.filter((k) => k !== kural); }); };
   if (pencerede) return <button type="button" className="pol-sekme pol-kz-cikar" aria-label={`${ad}: kalıcı kuraldan çıkarın`} onClick={cikar}>Kalıcı kuraldan çıkarın</button>;
   return <Checkbox label={kisa ? 'Kalıcı' : 'Kalıcı kural'} aria-label={`${ad} kalıcı kural`} checked={false}
-    onChange={(e) => { if (e.currentTarget.checked) b.guncelle((x) => { x.kalici = [...x.kalici.filter((k) => k !== kural), kural]; }); }}
+    onChange={(e) => {
+      if (!e.currentTarget.checked) return;
+      buOturumda.add(kural);
+      b.guncelle((x) => { x.kalici = [...x.kalici.filter((k) => k !== kural), kural]; });
+    }}
     classNames={{ root: 'applet-onay pol-kz-kalici', body: 'applet-onay-govde', input: 'applet-onay-kutu', label: 'applet-onay-ad', icon: 'applet-onay-ikon' }} />;
 }
 
@@ -81,7 +106,16 @@ function Kutu({ label, kisa, value, onChange, yuzdeMi = false, bosOlur = false, 
 }) {
   const pencerede = useContext(PencereBaglami);
   const kimlik = useId();
-  if (useGizli(kural)) return null;
+  if (useGizli(kural)) {
+    if (!yerTutulur(kural)) return null;
+    // Alan kalıcı yapıldı. Aynı boyda bir not yerinde kalır, aşağıdaki içerik kaymaz.
+    // Not, gerçek kutuyla aynı bileşenle çizilir. Böylece yüksekliği kutuyla birebir aynıdır.
+    return <div className={`pol-kz-alan pol-kz-yer${kisa ? ' pol-kz-sikisik' : ''}`} data-yer-tutucu={kural}>
+      <div className="pol-kz-sikisik-ust"><span className="so2-girdi-ad">{kisa ?? label}</span></div>
+      <TextInput className="so2-girdi" classNames={{ input: 'param-input so2-girdi-kutu pol-kz-yer-girdi' }} aria-label={`${label}: kalıcı kural oldu`}
+        value="Kalıcı kural oldu" readOnly size="md" />
+    </div>;
+  }
   const goster = value === null ? '' : yuzdeMi ? Math.round(value * 1000) / 10 : value;
   const degis = (v: string | number) => {
     if (v === '' && bosOlur) { onChange(null); return; }
@@ -113,7 +147,7 @@ function GrupVarsa({ baslik, kurallar, children }: { baslik: string; kurallar: s
   const b = useContext(PlanBaglami);
   const pencerede = useContext(PencereBaglami);
   const kimlik = useId();
-  if (!pencerede && b && kurallar.every((k) => b.plan.kalici.includes(k))) return null;
+  if (!pencerede && b && kurallar.every((k) => b.plan.kalici.includes(k) && !buOturumda.has(k))) return null;
   // fieldset yerine grup rolü: WebKit, ekran daralınca legend genişliğini güncellemiyor ve sayfa taşıyor.
   return <div role="group" aria-labelledby={kimlik} className="so2-grup">
     <p id={kimlik} className="so2-grup-baslik">{baslik}</p>
@@ -125,7 +159,7 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
   const ad = KATKI_ADI[tur];
   const p = plan[tur];
   const ids = (alan: string, n: number) => Array.from({ length: n }, (_, i) => `${tur}.${alan}.${i}`);
-  const hepsiKalici = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)].every((k) => plan.kalici.includes(k));
+  const hepsiKalici = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
   return <div className="pol-kz-katki" data-katki={tur}>
     <p>{tur === 'tanistir'
       ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
@@ -163,7 +197,10 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
     <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri her ay aynı ciroyu yaparsa şu tutarları alırsınız:</p>
-    {!kotaTamam(plan, tur, plan.ornekCiro) && <p className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>}
+    <Yigin etkin={kotaTamam(plan, tur, plan.ornekCiro) ? 1 : 0}>{[
+      <p key="uyari" className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>,
+      <span key="bos" />,
+    ]}</Yigin>
     <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
       {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
     </ul>
@@ -228,27 +265,35 @@ const SORU_ACIKLAMASI: Record<keyof typeof BOLUSME_SORUSU, string> = {
 function PaySorusu({ anahtar }: { anahtar: keyof typeof BOLUSME_SORUSU }) {
   const b = useContext(PlanBaglami)!;
   const id = `paylasim.${anahtar}`;
-  if (useGizli(id)) return null;
-  return <KararKarti no={anahtar} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
+  const gizli = useGizli(id);
+  if (gizli && !yerTutulur(id)) return null;
+  const icerik = <>
     <Choice<Bolusme> label={BOLUSME_SORUSU[anahtar]} value={b.plan.paylasim[anahtar]}
       options={(['dus', 'tam'] as const).map((x) => ({ id: x, name: BOLUSME_ADI[x] }))}
       onChange={(v) => b.guncelle((x) => { x.paylasim[anahtar] = v; })} />
     <Kalici kural={id} ad={BOLUSME_SORUSU[anahtar]} />
+  </>;
+  return <KararKarti no={anahtar} baslik={BOLUSME_SORUSU[anahtar]} aciklama={SORU_ACIKLAMASI[anahtar]}>
+    {gizli ? <Yigin etkin={1}>{[icerik, <p key="not" className="pol-kz-yer-kutu" data-yer-tutucu={id}>{YER_NOTU}</p>]}</Yigin> : icerik}
   </KararKarti>;
 }
 
 function SureKarti() {
   const b = useContext(PlanBaglami)!;
-  if (useGizli('paylasim.sureAy')) return null;
-  return <KararKarti no="sure" baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${b.plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
+  const gizli = useGizli('paylasim.sureAy');
+  if (gizli && !yerTutulur('paylasim.sureAy')) return null;
+  const icerik = <>
     <SureSecimi value={b.plan.paylasim.sureAy} onChange={(v) => b.guncelle((x) => { x.paylasim.sureAy = v; })} />
     <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
+  </>;
+  return <KararKarti no="sure" baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${b.plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
+    {gizli ? <Yigin etkin={1}>{[icerik, <p key="not" className="pol-kz-yer-kutu" data-yer-tutucu="paylasim.sureAy">{YER_NOTU}</p>]}</Yigin> : icerik}
   </KararKarti>;
 }
 
 /** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
 function Kararlar({ plan }: { plan: KazancPlani }) {
-  const hepsiKalici = ['paylasim.sureAy', 'paylasim.ilkSatis', 'paylasim.kota', 'paylasim.yillar'].every((k) => plan.kalici.includes(k));
+  const hepsiKalici = ['paylasim.sureAy', 'paylasim.ilkSatis', 'paylasim.kota', 'paylasim.yillar'].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
   return <div className="pol-kz-adim-govde">
     <aside className="pol-kz-ornek" aria-label="Örnek">
       <p className="pol-kz-ornek-ad">Örnek</p>
@@ -270,10 +315,10 @@ function OrnekHesap({ plan }: { plan: KazancPlani }) {
     <h4 id="pol-kz-ornek-hesap">Kâğıttaki örnek hesap</h4>
     <p>Müşterinin aylık cirosu {tl(plan.ornekCiro)} olsun. Müşteri her ay aynı ciroyu yapsın.</p>
     <KatkiAnahtari value={tur} onChange={setTur} />
-    {(() => {
-      const t = tur;
+    {/* İki tablo üst üste durur. Anahtar ya da ciro değişince kartın boyu değişmez. */}
+    <Yigin etkin={tur === 'tanistir' ? 0 : 1}>{(['tanistir', 'kapatir'] as const).map((t) => {
       const h = ornekHesap(plan, t);
-      return <div>
+      return <div key={t}>
           {h.satirlar.length === 0 ? <p className="pol-kz-not">Bu katkının oranları henüz girilmedi.</p> : <>
             <p className="pol-kz-tablo-ad" id={`pol-kz-ornek-tablo-${t}`}>{KATKI_SEKMESI[t]}: örnek hesap</p>
             <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby={`pol-kz-ornek-tablo-${t}`} tabIndex={0}>
@@ -285,12 +330,15 @@ function OrnekHesap({ plan }: { plan: KazancPlani }) {
                 <tfoot role="rowgroup"><tr role="row"><th role="rowheader" scope="row" colSpan={3}>Toplam</th><td role="cell" data-ad="Toplam kazanç" data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
               </table>
             </div></div>
-            {h.k1Bos && <p className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>}
-            {!h.k1Gecti && <p className="pol-kz-uyari">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur. Kota tamamlanmadığı için 13. aydan sonra pay da yoktur.</p>}
+            <Yigin etkin={h.k1Bos ? 0 : !h.k1Gecti ? 1 : 2}>{[
+              <p key="bos" className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>,
+              <p key="uyari" className="pol-kz-uyari">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur. Kota tamamlanmadığı için 13. aydan sonra pay da yoktur.</p>,
+              <span key="yok" />,
+            ]}</Yigin>
             <p className="pol-kz-not">Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla hesaplanır. Sonraki dönemler 12 aylık ciroyla hesaplanır.</p>
           </>}
       </div>;
-    })()}
+    })}</Yigin>
   </section>;
 }
 
@@ -464,6 +512,23 @@ function Yildizlar({ sayi, toplam = 3 }: { sayi: number; toplam?: number }) {
   </span>;
 }
 
+/** Sonraki hedef kartı. Yer ayıran kopya, en uzun sayılarla çizilir ve görünmez. */
+function HedefKarti({ etkin, seviye, kalan, hedefKazanc, fark, ilerleme }: { etkin: boolean; seviye: string; kalan: number; hedefKazanc: number; fark: number; ilerleme: number }) {
+  const yuzdeDegeri = Math.round(ilerleme * 100);
+  return <div className="pol-kz-gorev" data-sim={etkin ? 'hedef' : undefined}>
+    <IconTarget aria-hidden="true" size={28} stroke={1.75} />
+    <div>
+      <p className="pol-kz-gorev-ad">Sonraki hedef: {seviye}</p>
+      <p><strong>{seviye} kotasına {tl(kalan)} kaldı.</strong></p>
+      <p>{seviye} eşiğinde aylık kazancınız {tl(hedefKazanc)} olur. Bu tutar şimdikinden {tl(fark)} fazladır.</p>
+      <div className="pol-kz-gorev-iz" role="progressbar" aria-label={`${seviye} hedefine ilerleme`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={yuzdeDegeri}>
+        <span style={{ '--ilerleme': String(ilerleme) } as CSSProperties} />
+      </div>
+      <p className="pol-kz-gorev-yuzde">Hedefin %{yuzdeDegeri} kadarı tamam.</p>
+    </div>
+  </div>;
+}
+
 /**
  * Kazanç oyunu (kullanıcı kararı 17 Kasım 2026 Salı). Satıcı adayını motive etmek için kurulmuştur.
  * Okur katkısını ve aylık cirosunu seçer. Panel seviyeyi, kazancı, sonraki hedefi ve açılan rozetleri gösterir.
@@ -471,6 +536,42 @@ function Yildizlar({ sayi, toplam = 3 }: { sayi: number; toplam?: number }) {
  */
 function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
   const [tur, setTur] = useState<KatkiTuru>('kapatir');
+  const ciro = plan.ornekCiro;
+  const p = plan[tur];
+  const doluEsikler = p.kotaEsik.map((e, i) => ({ e, i })).filter((x): x is { e: number; i: number } => x.e !== null);
+  const enCok = Math.max(Math.ceil(((doluEsikler.at(-1)?.e ?? 100_000) * 1.5) / 10_000) * 10_000, ciro);
+  const setCiro = (v: number) => guncelle((x) => { x.ornekCiro = Math.max(0, Math.round(v)); });
+  return <section className="pol-kz-oyun" aria-labelledby="pol-kz-oyun-baslik">
+    <div className="pol-kz-oyun-ust">
+      <p className="pol-kz-oyun-etiket">Kazanç simülatörü</p>
+      <h4 id="pol-kz-oyun-baslik">Cironuzu seçin. Seviyenizi ve kazancınızı görün.</h4>
+    </div>
+
+    <KatkiAnahtari value={tur} onChange={setTur} />
+
+    <div className="pol-kz-ciro">
+      <p className="pol-kz-ciro-ad">Aylık ciro</p>
+      <p className="pol-kz-ciro-deger" aria-hidden="true">{tl(ciro)}</p>
+      <input type="range" className="pol-kz-kaydirici" min={0} max={enCok} step={1000} value={Math.min(ciro, enCok)}
+        aria-label="Aylık ciroyu kaydırarak seçin" aria-valuetext={tl(ciro)} onChange={(e) => setCiro(Number(e.currentTarget.value))} />
+      {/* Eşik düğmeleri en uzun hâlleri kadar yer ayırır. Katkı değişince alan zıplamaz. */}
+      <Yigin etkin={0}>{[
+        doluEsikler.length > 0 ? <div key="atla" className="pol-kz-atla" role="group" aria-label="Kota eşiğine atlayın">
+          {doluEsikler.map(({ e, i }) => <button key={i} type="button" className="pol-sekme" aria-pressed={ciro === e} onClick={() => setCiro(e)}>
+            {SEVIYE_ADI[i + 1]} eşiği: {tl(e)}
+          </button>)}
+        </div> : <p key="atla" className="pol-kz-not">Kota eşiği belirlenmedi.</p>,
+        <div key="yer" className="pol-kz-atla">{[1, 2, 3].map((i) => <span key={i} className="pol-sekme">{SEVIYE_ADI[i]} eşiği: {tl(9_999_999)}</span>)}</div>,
+      ]}</Yigin>
+      <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => setCiro(v ?? 0)} />
+    </div>
+
+    {/* İki katkının paneli üst üste durur. Anahtar değişince alttaki içerik kaymaz. */}
+    <Yigin etkin={tur === 'tanistir' ? 0 : 1}>{[<OyunGovdesi key="tanistir" plan={plan} tur="tanistir" />, <OyunGovdesi key="kapatir" plan={plan} tur="kapatir" />]}</Yigin>
+  </section>;
+}
+
+function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
   const ciro = plan.ornekCiro;
   const p = plan[tur];
   const { oran, kota } = katkiOrani(plan, tur, ciro);
@@ -495,37 +596,15 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
   // Kâğıttaki dönemler 48. ayda biter. 49. ay ile 60. ay arası bu toplama girmez.
   const sonrakiYillar = devam ? p.gecmis.slice(0, 3).reduce((t, g) => t + Math.round(ciro * 12 * g), 0) : 0;
   const hedefKazanc = sonraki !== null ? Math.round(sonraki * seviyeOrani(kota + 1)) : null;
-  const doluEsikler = p.kotaEsik.map((e, i) => ({ e, i })).filter((x): x is { e: number; i: number } => x.e !== null);
-  const enCok = Math.max(Math.ceil(((doluEsikler.at(-1)?.e ?? 100_000) * 1.5) / 10_000) * 10_000, ciro);
-  const setCiro = (v: number) => guncelle((x) => { x.ornekCiro = Math.max(0, Math.round(v)); });
   const rozetler = [
     ...[0, 1, 2].map((i) => ({
       id: `k${i + 1}`, ad: `${SEVIYE_ADI[i + 1]} kotası`, acik: kota > i,
-      metin: esik(i) === null ? 'Eşik belirlenmedi.' : kota > i ? `Açıldı. Oranınıza ${yuzde(p.kotaArtis[i])} eklendi.` : `Aylık ciro ${tl(esik(i)!)} olunca açılır.`,
+      acikMetin: esik(i) === null ? 'Eşik belirlenmedi.' : `Açıldı. Oranınıza ${yuzde(p.kotaArtis[i])} eklendi.`,
+      kapaliMetin: esik(i) === null ? 'Kilitli. Eşik belirlenmedi.' : `Kilitli. Aylık ciro ${tl(esik(i)!)} olunca açılır.`,
     })),
-    { id: 'uzun', ad: '48 aylık gelir', acik: devam, metin: devam ? 'Açıldı. 13. ay ile 48. ay arası pay devam eder.' : 'K1 kotası tamamlanınca açılır.' },
+    { id: 'uzun', ad: '48 aylık gelir', acik: devam, acikMetin: 'Açıldı. 13. ay ile 48. ay arası pay devam eder.', kapaliMetin: 'Kilitli. K1 kotası tamamlanınca açılır.' },
   ];
-  return <section className="pol-kz-oyun" aria-labelledby="pol-kz-oyun-baslik" data-sim-tur={tur}>
-    <div className="pol-kz-oyun-ust">
-      <p className="pol-kz-oyun-etiket">Kazanç simülatörü</p>
-      <h4 id="pol-kz-oyun-baslik">Cironuzu seçin. Seviyenizi ve kazancınızı görün.</h4>
-    </div>
-
-    <KatkiAnahtari value={tur} onChange={setTur} />
-
-    <div className="pol-kz-ciro">
-      <p className="pol-kz-ciro-ad">Aylık ciro</p>
-      <p className="pol-kz-ciro-deger" aria-hidden="true">{tl(ciro)}</p>
-      <input type="range" className="pol-kz-kaydirici" min={0} max={enCok} step={1000} value={Math.min(ciro, enCok)}
-        aria-label="Aylık ciroyu kaydırarak seçin" aria-valuetext={tl(ciro)} onChange={(e) => setCiro(Number(e.currentTarget.value))} />
-      {doluEsikler.length > 0 && <div className="pol-kz-atla" role="group" aria-label="Kota eşiğine atlayın">
-        {doluEsikler.map(({ e, i }) => <button key={i} type="button" className="pol-sekme" aria-pressed={ciro === e} onClick={() => setCiro(e)}>
-          {SEVIYE_ADI[i + 1]} eşiği: {tl(e)}
-        </button>)}
-      </div>}
-      <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => setCiro(v ?? 0)} />
-    </div>
-
+  return <div className="pol-kz-oyun-govde" data-sim-tur={tur}>
     <div className="pol-kz-skor" data-seviye={kota}>
       <div>
         <p className="pol-kz-skor-ad">Bu ay kazancınız</p>
@@ -547,23 +626,16 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
       </li>)}
     </ol>
 
-    {sonraki !== null && kalan !== null && hedefKazanc !== null && <div className="pol-kz-gorev" data-sim="hedef">
-      <IconTarget aria-hidden="true" size={28} stroke={1.75} />
-      <div>
-        <p className="pol-kz-gorev-ad">Sonraki hedef: {SEVIYE_ADI[kota + 1]}</p>
-        <p><strong>{SEVIYE_ADI[kota + 1]} kotasına {tl(kalan)} kaldı.</strong></p>
-        <p>{SEVIYE_ADI[kota + 1]} eşiğinde aylık kazancınız {tl(hedefKazanc)} olur. Bu tutar şimdikinden {tl(Math.max(0, hedefKazanc - buAy))} fazladır.</p>
-        <div className="pol-kz-gorev-iz" role="progressbar" aria-label={`${SEVIYE_ADI[kota + 1]} hedefine ilerleme`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(ilerleme * 100)}>
-          <span style={{ '--ilerleme': String(ilerleme) } as CSSProperties} />
-        </div>
-        <p className="pol-kz-gorev-yuzde">Hedefin %{Math.round(ilerleme * 100)} kadarı tamam.</p>
-      </div>
-    </div>}
-    {kota === 3 && <div className="pol-kz-gorev" data-sim="hedef" data-tamam="">
-      <IconTrophy aria-hidden="true" size={28} stroke={1.75} />
-      <div><p className="pol-kz-gorev-ad">En üst seviyedesiniz.</p><p>Bütün kota puanları oranınıza eklendi.</p></div>
-    </div>}
-    {sonraki === null && kota < 3 && <p className="pol-kz-not">Sonraki kota eşiği belirlenmedi. Bu yüzden hedef gösterilmez.</p>}
+    {/* Hedef kartı bütün hâlleri kadar yer ayırır. Ciro ya da seviye değişince alttaki içerik kaymaz. */}
+    <Yigin etkin={sonraki !== null && kalan !== null && hedefKazanc !== null ? 0 : kota === 3 ? 2 : 3}>{[
+      <HedefKarti key="hedef" etkin={sonraki !== null} seviye={SEVIYE_ADI[Math.min(kota + 1, 3)]} kalan={kalan ?? 0} hedefKazanc={hedefKazanc ?? 0} fark={Math.max(0, (hedefKazanc ?? 0) - buAy)} ilerleme={ilerleme} />,
+      <HedefKarti key="yer" etkin={false} seviye="K3" kalan={9_999_999} hedefKazanc={9_999_999} fark={9_999_999} ilerleme={1} />,
+      <div key="ust" className="pol-kz-gorev" data-sim={kota === 3 ? 'hedef' : undefined} data-tamam="">
+        <IconTrophy aria-hidden="true" size={28} stroke={1.75} />
+        <div><p className="pol-kz-gorev-ad">En üst seviyedesiniz.</p><p>Bütün kota puanları oranınıza eklendi.</p></div>
+      </div>,
+      <p key="yok" className="pol-kz-not">Sonraki kota eşiği belirlenmedi. Bu yüzden hedef gösterilmez.</p>,
+    ]}</Yigin>
 
     <div className="pol-kz-kpi">
       <div className="pol-kz-kpi-kutu" data-kpi="yil"><IconCalendarStats aria-hidden="true" size={24} stroke={1.75} /><p>12 ayda</p><p className="pol-kz-kpi-deger">{tl(ilkYil)}</p></div>
@@ -572,32 +644,33 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
     </div>
     <p className="pol-kz-not">Toplamlar, müşterinin her ay aynı ciroyu yaptığını varsayar. {KOTA_KURALI}</p>
 
-    <section className="pol-kz-rozetler" aria-labelledby="pol-kz-rozet-baslik">
-      <h5 id="pol-kz-rozet-baslik">Rozetleriniz</h5>
+    <section className="pol-kz-rozetler" aria-labelledby={`pol-kz-rozet-baslik-${tur}`}>
+      <h5 id={`pol-kz-rozet-baslik-${tur}`}>Rozetleriniz</h5>
       <ul>{rozetler.map((r) => <li key={r.id} data-acik={r.acik ? '' : undefined} data-sim={r.id === 'uzun' ? 'devam' : undefined}>
         <span className="pol-kz-rozet-ikon" aria-hidden="true">{r.acik ? <IconLockOpen size={24} stroke={1.75} /> : <IconLock size={24} stroke={1.75} />}</span>
-        <span><span className="pol-kz-rozet-ad">{r.ad}</span><span className="pol-kz-rozet-metin">{r.acik ? '' : 'Kilitli. '}{r.metin}</span></span>
+        <span><span className="pol-kz-rozet-ad">{r.ad}</span>
+          <Yigin etkin={r.acik ? 0 : 1}>{[<span key="a" className="pol-kz-rozet-metin">{r.acikMetin}</span>, <span key="k" className="pol-kz-rozet-metin">{r.kapaliMetin}</span>]}</Yigin></span>
       </li>)}</ul>
     </section>
 
-    <p className="pol-kz-tablo-ad" id="pol-kz-seviye-tablo">Seviyelere göre kazanç tablosu</p>
-    <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby="pol-kz-seviye-tablo" tabIndex={0}>
+    <p className="pol-kz-tablo-ad" id={`pol-kz-seviye-tablo-${tur}`}>Seviyelere göre kazanç tablosu</p>
+    <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby={`pol-kz-seviye-tablo-${tur}`} tabIndex={0}>
       <table role="table" className="data-table pol-kz-tablo pol-kz-sim-tablo" data-sim-tablo={tur}>
         <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Seviye</th><th role="columnheader" scope="col">Koşul</th><th role="columnheader" scope="col">Cari ay oranı</th><th role="columnheader" scope="col">Eşikteki aylık kazanç</th><th role="columnheader" scope="col">13. aydan sonra</th></tr></thead>
         <tbody role="rowgroup">{satirlar.map((r) => {
           const etkin = r.i === kota;
           return <tr role="row" key={r.ad} data-etkin={etkin ? '' : undefined} aria-current={etkin ? 'true' : undefined}>
-            <th role="rowheader" scope="row">{r.ad}{etkin && <span className="pol-kz-burasi">Buradasınız</span>}</th>
+            <th role="rowheader" scope="row">{r.ad}<span className="pol-kz-burasi" data-gizli={etkin ? undefined : ''} aria-hidden={etkin ? undefined : true}>Buradasınız</span></th>
             <td role="cell" data-ad="Koşul">{r.kosul}</td>
             <td role="cell" data-ad="Cari ay oranı">{r.ulasilir ? yuzde(r.oran) : 'Yok'}</td>
-            <td role="cell" data-ad="Eşikteki aylık kazanç">{etkin ? <>{tl(buAy)}<span className="pol-kz-hucre-not">sizin cironuzla</span></> : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}</td>
+            <td role="cell" data-ad="Eşikteki aylık kazanç">{etkin ? tl(buAy) : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}<span className="pol-kz-hucre-not" data-gizli={etkin ? undefined : ''} aria-hidden={etkin ? undefined : true}>sizin cironuzla</span></td>
             <td role="cell" data-ad="13. aydan sonra">{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
           </tr>;
         })}</tbody>
       </table>
     </div></div>
     <p className="pol-kz-not">“Eşikteki aylık kazanç”, ciro tam eşik tutarında olursa alınan aylık paydır.</p>
-  </section>;
+  </div>;
 }
 
 /** Oran girişi. Katkı türü büyük anahtarla seçilir (kullanıcı kararı 17 Kasım 2026 Salı). Yalnız seçili türün alanları görünür. */
@@ -605,7 +678,11 @@ function OranGirisi({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle 
   const [tur, setTur] = useState<KatkiTuru>('tanistir');
   return <div className="pol-kz-adim-govde">
     <KatkiAnahtari value={tur} onChange={setTur} />
-    <Katki key={tur} tur={tur} plan={plan} guncelle={guncelle} />
+    {/* İki katkının alanları üst üste durur. Anahtar değişince bölümün boyu değişmez. */}
+    <Yigin etkin={tur === 'tanistir' ? 0 : 1}>{[
+      <Katki key="tanistir" tur="tanistir" plan={plan} guncelle={guncelle} />,
+      <Katki key="kapatir" tur="kapatir" plan={plan} guncelle={guncelle} />,
+    ]}</Yigin>
   </div>;
 }
 

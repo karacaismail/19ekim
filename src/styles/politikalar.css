@@ -357,10 +357,26 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
   .pol-kz-tablo tr { padding-block: var(--space-2); }
   .pol-kz-tablo tbody tr + tr :is(th, td) { box-shadow: none; }
   .pol-kz-tablo tbody tr + tr { margin-block-start: var(--space-2); }
-  .pol-kz-tablo :is(th, td) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); padding: var(--space-1) var(--space-3); white-space: normal; text-align: end; }
+  /* Ad üstte, değer altta durur. Değer uzayınca satır sayısı değişmez, ekran zıplamaz. */
+  .pol-kz-tablo :is(th, td) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: var(--space-1) var(--space-3); white-space: normal; text-align: start; }
+  .pol-kz-tablo td { white-space: nowrap; }
   .pol-kz-tablo th[scope='row'] { display: block; text-align: start; }
   .pol-kz-tablo td::before { content: attr(data-ad); text-align: start; color: var(--text-secondary); font-weight: var(--weight-regular); }
-  .pol-kz-sim-tablo td:nth-child(2) { min-inline-size: 0; text-align: end; }
+  .pol-kz-sim-tablo td:nth-child(2) { min-inline-size: 0; white-space: normal; }
 }
 /* Bölüm başlığından sonraki ilk öğenin üst boşluğu sabit düğmeyi aşağı itmesin. */
 .section.pol-kz-plan > .pol-kz-parametreler { margin: 0; }
+
+/* ===== Yer ayıran yığın (kullanıcı kararı 17 Kasım 2026 Salı): bir şey değişince ekran zıplamaz. ===== */
+.pol-kz-yigin { display: grid; grid-template-columns: minmax(0, 1fr); }
+.pol-kz-yigin-oge { grid-area: 1 / 1; min-inline-size: 0; }
+.pol-kz-yigin-oge:not([data-etkin]) { visibility: hidden; }
+.pol-kz-yigin-oge > span:empty { display: block; }
+.pol-kz-plan [data-gizli] { visibility: hidden; }
+/* Bu oturumda kalıcı yapılan alanın yeri, alanla aynı boyda bir notla korunur. */
+.pol-kz-yer-kutu { display: flex; align-items: center; justify-content: center; min-block-size: var(--hit-min); margin: 0; padding: var(--space-2) var(--space-3); background: var(--surface-sunken); color: var(--text-secondary); text-align: center; }
+.pol-kz-oyun-govde { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.pol-kz-yer-girdi { color: var(--text-secondary); text-align: center; }
+.pol-kz-kpi-deger, .pol-kz-skor-deger, .pol-kz-ciro-deger { white-space: nowrap; }
+/* Karar kartındaki yığın, kartın boşluk düzenini korur. */
+.pol-kz-karar .pol-kz-yigin-oge { display: grid; gap: var(--space-3); align-content: start; }

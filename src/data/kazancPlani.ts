@@ -158,8 +158,8 @@ export function ornekHesap(plan: KazancPlani, tur: KatkiTuru) {
     { ad: 'Cari ay', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
     { ad: 'Cari ay kota (K1)', oran: p.kotaArtis[0], ciro, tutar: k1Gecti ? Math.round(ciro * p.kotaArtis[0]) : 0 },
     { ad: '1. ay ile 12. ay arası', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
-    // Kota kuralı: K1 tamamlanmazsa 13. aydan sonraki pay yoktur.
-    ...(k1Gecti ? p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: Math.round(ciro * 12 * g) })) : []),
+    // Kota kuralı: K1 tamamlanmazsa 13. aydan sonraki pay yoktur. Satır kalır, tutarı 0 ₺ olur. Tablo boyu değişmez.
+    ...p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: k1Gecti ? Math.round(ciro * 12 * g) : 0 })),
   ].filter((s) => s.oran > 0);
   return { satirlar, k1Gecti, k1Bos: k1 === null, toplam: satirlar.reduce((t, s) => t + s.tutar, 0) };
 }

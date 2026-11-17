@@ -184,7 +184,7 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('30.000');
   await expect(kutu(page, 'Tanıştırma 13. ay ile 24. ay arası komisyonu')).toHaveValue('%5');
   // Grup içindeki görünür ad kısadır. Tam ad ekran okuyucuya gider.
-  await expect(oranlar.locator('label', { hasText: /^K1 eşiği/ })).toBeVisible();
+  await expect(oranlar.locator('[data-etkin] label', { hasText: /^K1 eşiği/ })).toBeVisible();
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveCount(0);
   await anahtar.click();
   await expect(anahtar).toHaveAttribute('aria-checked', 'true');
@@ -281,8 +281,11 @@ test('iki katkının kota eşikleri birbirinden ayrıdır', async ({ page }) => 
 test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('politikalar/?proje=segika&rol=cozum');
-  const oyun = plani(page).locator('.pol-kz-oyun');
-  await expect(oyun.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+  const panel = plani(page).locator('.pol-kz-oyun');
+  await expect(panel.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+  // İki katkının paneli üst üste durur. Yalnız etkin panel görünür.
+  const oyun = panel.locator('[data-etkin] > .pol-kz-oyun-govde');
+  await expect(oyun).toHaveAttribute('data-sim-tur', 'kapatir');
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('10.000 ₺');
   await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('225.600 ₺');
   await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 kotasına 30.000 ₺ kaldı.');
@@ -290,7 +293,7 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   await expect(oyun.getByRole('progressbar', { name: 'K2 hedefine ilerleme' })).toHaveAttribute('aria-valuenow', '57');
   await expect(oyun.getByRole('list', { name: 'Kota seviyeleri' }).locator('[aria-current="step"]')).toContainText('K1');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K1');
-  await oyun.getByRole('button', { name: /K2 eşiği:/ }).click();
+  await panel.getByRole('button', { name: /K2 eşiği:/ }).click();
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('22.400 ₺');
   await expect(oyun.locator('tr[aria-current="true"] th')).toContainText('K2');
   // Kota kuralı: K1 tamamlanmazsa 13. aydan sonra pay yoktur.
@@ -299,11 +302,14 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   await expect(oyun.locator('[data-sim="devam"]')).toContainText('K1 kotası tamamlanınca açılır.');
   await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('36.000 ₺');
   // Kaydırıcı ciroyu değiştirir.
-  await oyun.getByRole('slider', { name: 'Aylık ciroyu kaydırarak seçin' }).fill('70000');
+  await panel.getByRole('slider', { name: 'Aylık ciroyu kaydırarak seçin' }).fill('70000');
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('22.400 ₺');
   // Dar ekranda tablo yana kaymaz. Satırlar kart olur.
   await expect(oyun.locator('.pol-kz-tablo thead')).toBeHidden();
   expect(await oyun.locator('.table-scroll').evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  // Anahtar tanıştırmaya geçince etkin panel değişir.
+  await panel.getByRole('switch').click();
+  await expect(panel.locator('[data-etkin] > .pol-kz-oyun-govde')).toHaveAttribute('data-sim-tur', 'tanistir');
   expect(await tasmaYok(page)).toBe(true);
 });
 
@@ -365,4 +371,42 @@ test.describe('girişsiz okur', () => {
     await page.goto('giderler/');
     await expect(page.getByRole('heading', { name: 'Giriş', level: 1 })).toBeVisible();
   });
+});
+
+// Kullanıcı kararı 17 Kasım 2026 Salı: bir şey değişince ekran zıplamaz. Değişen alan en büyük hâli kadar yer ayırır.
+for (const genislik of [320, 1280]) test(`${genislik} px: anahtar, ciro ve kalıcı kural değişince alttaki içerik kaymaz`, async ({ page }) => {
+  await page.setViewportSize({ width: genislik, height: 800 });
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
+  const ust = (sec: string) => page.locator(sec).first().evaluate((el) => Math.round(el.getBoundingClientRect().top + scrollY));
+  const sonuc = '#pol-kz-bolum-3';
+  const odeme = '.pol-kz-kartlar';
+  // Oranlar bölümündeki anahtar.
+  const once = await ust(sonuc);
+  await bolum(page, 'Oranlar').getByRole('switch').click();
+  expect(await ust(sonuc)).toBe(once);
+  await bolum(page, 'Oranlar').getByRole('switch').click();
+  // Oyun panelinde katkı ve ciro değişimi.
+  const oyun = plani(page).locator('.pol-kz-oyun');
+  const kpiOnce = await ust('[data-etkin] > .pol-kz-oyun-govde .pol-kz-kpi');
+  const kartOnce = await ust(odeme);
+  await oyun.getByRole('switch').click();
+  expect(await ust('[data-etkin] > .pol-kz-oyun-govde .pol-kz-kpi')).toBe(kpiOnce);
+  for (const ciro of ['20.000', '75.000', '150.000', '1.250.000', '5.000']) {
+    await kutu(page, 'Örnek aylık ciro').fill(ciro);
+    expect(await ust('[data-etkin] > .pol-kz-oyun-govde .pol-kz-kpi'), ciro).toBe(kpiOnce);
+    expect(await ust(odeme), ciro).toBe(kartOnce);
+  }
+  // Örnek hesap kartındaki anahtar.
+  const payOnce = await ust('.pol-kz-ornek-hesap + *');
+  await plani(page).locator('.pol-kz-ornek-hesap').getByRole('switch').click();
+  expect(await ust('.pol-kz-ornek-hesap + *')).toBe(payOnce);
+  // Kalıcı kutusu işaretlenince alanın yeri korunur.
+  const sonucOnce = await ust(sonuc);
+  await plani(page).getByRole('checkbox', { name: 'Tanıştırma K2 ciro eşiği kalıcı kural', exact: true }).click();
+  await expect(plani(page).locator('[data-yer-tutucu="tanistir.kotaEsik.1"]')).toBeVisible();
+  expect(await ust(sonuc)).toBe(sonucOnce);
+  await plani(page).getByRole('checkbox', { name: 'İlk satışta pay kalıcı kural', exact: true }).click();
+  await expect(plani(page).locator('[data-yer-tutucu="paylasim.ilkSatis"]')).toBeVisible();
+  expect(await ust(sonuc)).toBe(sonucOnce);
+  expect(await tasmaYok(page)).toBe(true);
 });
