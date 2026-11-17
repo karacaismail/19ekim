@@ -4,7 +4,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  donemAdi, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, KAZANC_VARSAYILAN, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -90,7 +90,7 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
       : 'Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Bu işi siz yaparsınız.'}</p>
     {tur === 'onboard' && <p className="pol-kz-not">Onboarding oranları henüz belirlenmedi. Değerleri yönetici girer.</p>}
     <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” sekmesi için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
-    <Grup baslik={`1. grup: ${ad} için satış yılındaki oran (1. yıl)`}>
+    <Grup baslik={`1. grup: ${ad} için cari ay oranı (1. ay ile 12. ay arası)`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
     </Grup>
     <Grup baslik={`2. grup: ${ad} için aylık ciro kotaları`}>
@@ -102,8 +102,8 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
       {p.kotaArtis.map((a, i) => <Kutu key={i} label={`${ad} K${i + 1} artışı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />)}
     </Grup>
-    <Grup baslik={`4. grup: ${ad} için 2. yıldan sonraki oranlar`}>
-      {p.gecmis.map((g, i) => <Kutu key={i} label={`${ad} ${i + 2}. yıl komisyonu`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
+    <Grup baslik={`4. grup: ${ad} için 13. aydan sonraki oranlar`}>
+      {p.gecmis.map((g, i) => <Kutu key={i} label={`${ad} ${donemAdi(i)} komisyonu`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />)}
     </Grup>
   </div>;
@@ -121,9 +121,9 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
       <div><dt>Geçerli oran</dt><dd data-kazanc={`${tur}-oran`}>{yuzde(oran)}</dd></div>
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
-    <p>Satış yılı 1. yıldır. Müşteri sonraki yıllarda da aynı aylık ciroyu yaparsa şu tutarları alırsınız:</p>
+    <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri sonraki aylarda da aynı aylık ciroyu yaparsa şu tutarları alırsınız:</p>
     <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
-      {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.yil}. yılda {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
+      {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
     </ul>
   </section>;
 }
@@ -222,9 +222,9 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
       <div><dt><span className="pol-kz-isaret pol-kz-isaret-m" aria-hidden="true" />Mehmet'in payı</dt><dd data-paylasim="kapatan">{tl(ciro)} × {yuzde(p.kapatanOran)} = {tl(p.kapatan)}</dd></div>
       <div><dt>Şirketin ödediği toplam</dt><dd data-paylasim="toplam">{tl(p.toplam)}</dd></div>
     </dl>
-    <p>Sonraki yıllarda oranlar şöyle olur:</p>
+    <p>Sonraki aylarda oranlar şöyle olur:</p>
     <ul className="pol-kz-yillar" data-paylasim="yillar">
-      {p.yillar.map((y) => <li key={y.yil}>{y.yil}. yılda Ahmet {yuzde(y.tanistiran)}, Mehmet {yuzde(y.kapatan)} alır.</li>)}
+      {p.yillar.map((y) => <li key={y.yil}>{y.donem}: Ahmet {yuzde(y.tanistiran)}, Mehmet {yuzde(y.kapatan)} alır.</li>)}
     </ul>
   </section>;
 }

@@ -15,6 +15,8 @@ import type { Ayar, Marka, Seviye } from './satisOrtakligi';
 import { num } from '../lib/format';
 
 export type KatkiTuru = 'tanistir' | 'kapatir' | 'onboard';
+/** Kâğıttaki ay aralıkları. Satış ayından sonraki 12 aylık dönemler: 13–24, 25–36, 37–48 ve 49–60. ay. */
+export const donemAdi = (i: number) => `${12 * (i + 1) + 1}. ay ile ${12 * (i + 2)}. ay arası`;
 export const KATKI_TURLERI = ['tanistir', 'kapatir', 'onboard'] as const;
 export type Esik = number | null;
 export interface KatkiPlani {
@@ -85,7 +87,7 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
 }
 
 export function yillaraKazanc(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
-  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, oran, tutar: Math.round(ciro * oran) }));
+  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, donem: donemAdi(i), oran, tutar: Math.round(ciro * oran) }));
 }
 
 const yuvarla = (n: number) => Math.max(0, Math.round(n * 10_000) / 10_000);
@@ -111,7 +113,7 @@ export function paylasim(plan: KazancPlani, ciro: number) {
   return {
     tanistiranOran, kapatanOran, tanistiran, kapatan, toplam: tanistiran + kapatan,
     yillar: plan.tanistir.gecmis.map((g, i) => ({
-      yil: i + 2, tanistiran: g, kapatan: yuvarla(plan.kapatir.gecmis[i] - (b.yillar === 'dus' ? g : 0)),
+      yil: i + 2, donem: donemAdi(i), tanistiran: g, kapatan: yuvarla(plan.kapatir.gecmis[i] - (b.yillar === 'dus' ? g : 0)),
     })),
   };
 }
@@ -131,7 +133,7 @@ export function kuralListesi(plan: KazancPlani) {
     liste.push(oran(`${tur}.taban`, `${ad} taban oranı`, p.taban));
     p.kotaEsik.forEach((e, i) => liste.push(para(`${tur}.kotaEsik.${i}`, `${ad} K${i + 1} ciro eşiği`, e)));
     p.kotaArtis.forEach((a, i) => liste.push(oran(`${tur}.kotaArtis.${i}`, `${ad} K${i + 1} artışı`, a)));
-    p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${i + 2}. yıl komisyonu`, g)));
+    p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${donemAdi(i)} komisyonu`, g)));
   }
   liste.push({ id: 'paylasim.sureAy', ad: 'Tanıştırmanın geçerlilik süresi', deger: plan.paylasim.sureAy, gosterim: `${plan.paylasim.sureAy} ay` });
   for (const soru of ['ilkSatis', 'yillar', 'kota'] as const) {
