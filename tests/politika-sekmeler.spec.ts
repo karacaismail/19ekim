@@ -1,11 +1,11 @@
 import { expect, test } from './fixtures/persona';
 
-test('rehber menüsü tek bağlantıdır ve iki projede beş rol sekmesi vardır', async ({ page }) => {
+test('rehber menüsü tek bağlantıdır ve iki projede dört rol sekmesi vardır', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('politikalar/?proje=segika&rol=cozum');
   await expect(page.getByRole('tablist', { name: 'Proje' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Segika', exact: true })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab')).toHaveCount(5);
+  await expect(page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab')).toHaveCount(4);
   const belge = page.locator('.pol-yol');
   await expect(belge).toHaveAttribute('data-proje', 'segika');
   await expect(belge).toHaveAttribute('data-rol', 'cozum');
@@ -17,7 +17,7 @@ test('rehber menüsü tek bağlantıdır ve iki projede beş rol sekmesi vardır
 });
 
 test('sekmeler adresle eşleşir ve geri dönüş aynı proje ile rolü açar', async ({ page }) => {
-  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
   await expect(page.locator('.pol-yol')).toHaveAttribute('data-proje', 'istoc');
   await page.getByRole('tab', { name: 'Marka elçisi', exact: true }).click();
   await expect(page).toHaveURL(/proje=istoc&rol=elci/);
@@ -32,7 +32,7 @@ test('sekmeler adresle eşleşir ve geri dönüş aynı proje ile rolü açar', 
   await expect(page.locator('.pol-yol')).toHaveAttribute('data-rol', 'elci');
 });
 
-for (const rol of ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci']) {
+for (const rol of ['kadrolu', 'cozum', 'tavsiye', 'elci']) {
   test(`eski ${rol} adresi aynı rolü merkezde açar`, async ({ page }) => {
     await page.goto(`politikalar/${rol}/`);
     await expect(page).toHaveURL(new RegExp(`politikalar/\\?proje=istoc&rol=${rol}$`));
@@ -42,7 +42,7 @@ for (const rol of ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci']) {
 
 test('geçersiz seçim varsayılana döner ve klavye sekmeleri çalışır', async ({ page }) => {
   await page.goto('politikalar/?proje=olmayan&rol=olmayan');
-  await expect(page).toHaveURL(/proje=istoc&rol=oncu$/);
+  await expect(page).toHaveURL(/proje=istoc&rol=kadrolu$/);
   const tabs = page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab');
   await tabs.first().focus();
   await page.keyboard.press('Tab');
@@ -51,7 +51,7 @@ test('geçersiz seçim varsayılana döner ve klavye sekmeleri çalışır', asy
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toBeFocused();
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(page).toHaveURL(/rol=kadrolu$/);
+  await expect(page).toHaveURL(/rol=cozum$/);
   await page.keyboard.press('End');
   await expect(tabs.last()).toBeFocused();
   await page.keyboard.press('Enter');
@@ -78,7 +78,7 @@ const belgeDosyasi = /\/(?:oncu|kadrolu|cozum|tavsiye|elci)\.[\w-]+\.js$/;
 test('yalnız seçilen belge indirilir ve geç yanıt yeni seçimi değiştirmez', async ({ page }) => {
   const istekler: string[] = [];
   page.on('request', (r) => { if (belgeDosyasi.test(r.url())) istekler.push(r.url()); });
-  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
   await expect(page.locator('.pol-yol')).toHaveAttribute('data-proje', 'istoc');
   expect(istekler).toHaveLength(1);
   let serbestBirak!: () => void;
@@ -133,10 +133,10 @@ test('sekme hareketi iki yönde korunur ve büyütülen yazı taşmaz', async ({
 
 
 test('bölüm bağlantısı paylaşılabilir ve yenilemede hedef bölüm açılır', async ({ page }) => {
-  await page.goto('politikalar/?proje=segika&rol=oncu');
+  await page.goto('politikalar/?proje=segika&rol=cozum');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await page.getByRole('navigation', { name: 'Rehber bölümleri' }).getByRole('link', { name: 'Kazanç', exact: true }).click();
-  await expect(page).toHaveURL(/proje=segika&rol=oncu#kazanc$/);
+  await expect(page).toHaveURL(/proje=segika&rol=cozum#kazanc$/);
   await page.reload();
   await expect(page.locator('#kazanc')).toBeInViewport();
   await page.getByRole('tab', { name: 'Marka elçisi', exact: true }).click();
@@ -151,4 +151,23 @@ test('rehber parçaları önyükleme bağlantısıyla yüklenmez', async ({ page
   await expect(page.locator('.pol-belge')).toBeVisible();
   const baglantilar = await page.locator('link[rel="modulepreload"]').evaluateAll((els) => els.map((e) => (e as HTMLLinkElement).href));
   expect(baglantilar.filter((h) => /\/(?:oncu|kadrolu|cozum|tavsiye|elci|PolitikaAkisAyrinti)\.[\w-]+\.js$/.test(h))).toEqual([]);
+});
+
+// Kullanıcı kararı 17 Kasım 2026 Salı: “Öncü ortak” rolü ve bütün içeriği çalışma rehberlerinden kalktı.
+for (const proje of ['istoc', 'segika'] as const) test(`${proje}: çalışma rehberlerinde “Öncü ortak” rolü ve içeriği yoktur`, async ({ page }) => {
+  await page.goto(`politikalar/?proje=${proje}&rol=oncu`);
+  await expect(page).toHaveURL(new RegExp(`proje=${proje}&rol=kadrolu$`));
+  const roller = page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab');
+  await expect(roller).toHaveText(['Kadrolu uzman', 'Çözüm ortağı', 'Mevcut müşteri', 'Marka elçisi']);
+  for (let i = 0; i < 4; i++) {
+    await roller.nth(i).click();
+    await expect(page.locator('.pol-etkin-baslik')).toBeVisible();
+    await expect(page.locator('main')).not.toContainText(/öncü/i);
+  }
+});
+
+test('eski “Öncü ortak” adresi ilk rolü açar', async ({ page }) => {
+  await page.goto('politikalar/oncu/');
+  await expect(page).toHaveURL(/politikalar\/\?proje=istoc&rol=kadrolu$/);
+  await expect(page.locator('main')).not.toContainText(/öncü/i);
 });

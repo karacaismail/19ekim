@@ -252,10 +252,10 @@ test('bu cihazdaki geçerli bekleyen yazı sayfa yeniden açılınca ortak kayda
 
 // Kur ve katkı ortak kayıttan gelir. Oran 16 Kasım 2026'dan beri kâğıttaki kazanç planından gelir (tests/kazanc-plani.spec.ts).
 test('rehberin “Kazanç” bölümü ortak kaydı ve kazanç planını birlikte kullanır', async ({ page, personaServer }) => {
-  personaServer.seed('istoc', { kur: 60, oncuSeviye: 'C', 'oran.C': 0.2 });
+  personaServer.seed('istoc', { kur: 60, cozumSeviye: 'C', 'oran.C': 0.2 });
   const plan = (x: Ayar) => planliAyar(x, KAZANC_VARSAYILAN);
   const a = plan(alanlardanAyar('istoc', personaServer.snapshot('istoc').fields));
-  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
   await expect(kayit(page)).toHaveAttribute('data-sync-state', 'synced');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   const kazanc = page.locator('#kazanc');
@@ -266,7 +266,7 @@ test('rehberin “Kazanç” bölümü ortak kaydı ve kazanç planını birlikt
     return {
       aylik: `${sayi(aylikFiyat(x))} ₺ (KDV hariç)`,
       yillik: `${sayi(yillik)} ₺ (KDV hariç)`,
-      komisyon: `${sayi(yillik)} ₺ × %${sayi(x.oran[x.oncuSeviye] * 100)} = ${sayi(satisKazanci(x, x.oncuSeviye))} ₺`,
+      komisyon: `${sayi(yillik)} ₺ × %${sayi(x.oran[x.cozumSeviye] * 100)} = ${sayi(satisKazanci(x, x.cozumSeviye))} ₺`,
     };
   };
   let beklenen = ornek(a);

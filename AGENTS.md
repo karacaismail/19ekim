@@ -1799,10 +1799,14 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Satışı kapatan ürünü de gösterir ve kurulumu da yapar. Eski “Ürünü de gösterir” seçeneği kalktı.
 - Kâğıtta tanıştırma için 2. yılın oranı %2,5 yazar. Kullanıcının yazdığı metin %2 der. Sitede %2 kullanılır.
 - K1, K2 ve K3 ciro eşikleri belirlenmedi. Eşik kutusu boş gelir. Boş eşikten sonraki kota uygulanmaz.
+  Her katkı türünün K1, K2 ve K3 eşiği ayrıdır (kullanıcı kararı 17 Kasım 2026: “Varsayılanla kalsın”).
+  Eşikler kendi sekmesindedir. Eski kayıttaki tek eşik listesi iki katkı türüne de geçer.
 - Kadrolu uzmanın maaşı ayda 50.000 ₺ ile 60.000 ₺ arasıdır. Kota, maaşın %250'si kadar cirodur.
   Kullanıcı “%125” yazdı, örneği ise 50.000 ₺ maaşta 125.000 ₺ ciroydu. Varsayılan örneğe uyar. Prim oranı belirlenmedi.
 - Kaynak `src/data/kazancPlani.ts`, görünüm `src/components/KazancPlaniBolumu.tsx` dosyasıdır.
-  Bölüm `/politikalar/` sayfasında her rol sekmesinin başındadır. Her oran değiştirilebilir sayı kutusudur.
+  Bölüm `/politikalar/` sayfasında her rol sekmesinde iş sırasının altındadır. Her oran değiştirilebilir sayı kutusudur.
+  İki katkı türü sekmedir (kullanıcı kararı 17 Kasım 2026). “Yalnız tanıştırırsanız” sekmesi açık gelir.
+  Bir sekme açıkken öteki sekmenin içeriği görünmez. Sekmeler sitedeki `pol-sekme` sekmeleriyle aynıdır.
   Değerler proje başına yalnız okurun tarayıcısında saklanır (`turksab-kazanc-plani-v1-<proje>`). Ortak Sheets kaydına gitmez.
   `planliAyar` planı rehberin eski hesap ayarına uygular. Ortak kayıttaki eski oranlar rehberde kullanılmaz.
 - `/satis-ortakligi/` sayfası yayında kalır ama geçersizdir. En üstte “BU SAYFA ARTIK GEÇERSİZDİR” uyarısı durur.
@@ -1814,3 +1818,21 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   `motor.ts → belgeAdimlariniCikar` adımı çıkarır. Bu adıma giden yanıt, adımın sonraki adımına bağlanır.
   Adım metinleri dosyada durur. Kullanıcı isterse adımlar kolayca geri gelir.
   Bu kuralı `tests/politika-belge-adimi.spec.ts` denetler.
+- Tanıştıran ile satışı kapatan farklı kişi olabilir (kullanıcı kararı 17 Kasım 2026).
+  Tanıştırma varsayılan olarak 2 ay geçerlidir. Süre düğme grubuyla 1, 2, 3, 4, 5, 6, 8, 10 veya 12 ay seçilir.
+  Sayfa yalnız “Tanıştırma CRM'e kaydedilir.” der. Kayıt olmazsa ne olacağını sayfa söylemez.
+  Pay bölüşmesi sabit değildir. Yönetici üç soruyu ayrı seçer: ilk satış, sonraki 4 yıl ve kota artışı.
+  Her soruda varsayılan “Ahmet'in payı Mehmet'in payından düşülür” seçeneğidir. Bu seçenek şirketi zarardan korur.
+  Öbür seçenek “Şirket ikisine de tam öder” seçeneğidir. 100.000 ₺ satışta toplam 15.000 ₺ yerine 22.000 ₺ olur.
+  Hesap `kazancPlani.ts → paylasim` işlevindedir.
+- Plandaki her değişken değerin yanında “Kalıcı kural” kutusu vardır. Liste `kazancPlani.ts → kuralListesi` işlevindedir.
+  “Kalıcı kuralları JSON olarak al” düğmesi işaretli değerlerden JSON üretir (`kaliciJson`). JSON sunucuya gitmez.
+  Kullanıcı JSON'u verince her `id` için seçenek kaldırılır ve değer sabit metin olarak yazılır. Bu adım henüz yapılmadı.
+- Rehberde her sorunun altında “Ne olduğunu seçin. Sayfa size sonraki adımı gösterir.” açıklaması vardır (kullanıcı kararı 17 Kasım 2026).
+  Her cevap kutusunun altında seçimin sonucunu söyleyen satır vardır. Satır, akış verisindeki türden üretilir (`motor.ts → sonucSatiri`).
+  Akışlardaki sorular ve cevaplar sadeleşti. Cevap, kişinin gördüğünü ya da duyduğunu anlatır. Zor terim, adımın ilk maddesinde açıklanır.
+  Bunu `tests/politika-akis.spec.ts` denetler.
+- “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
+  Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.
+  `rol=oncu` ve `/politikalar/oncu/` adresleri ilk rolü açar. Öncü akış dosyaları veride durur ama sayfa onları yüklemez.
+  Başka sayfalardaki öncü ortak metinleri değişmedi. Bu kuralı `tests/politika-sekmeler.spec.ts` denetler.

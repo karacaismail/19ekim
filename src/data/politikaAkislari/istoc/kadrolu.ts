@@ -62,21 +62,22 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Görevinizi ve prim ekinizi alın',
     sorumlu: 'İnsan kaynakları sorumlusu',
     yap: [
+      'Görev tanımı, işte yapacağınız işleri yazan belgedir.',
       'İnsan kaynakları sorumlusu yazılı görev tanımınızı size verir.', 'Prim eki, iş sözleşmenize eklenen prim belgesidir. Primin nasıl hesaplanacağını ve ne zaman ödeneceğini yazar.',
       `İnsan kaynakları sorumlusu prim ekine “${programAdi}” adını yazar.`,
       'Siz maaşın net mi brüt mü olduğunu sorun.',
     ],
     dikkat: p === 'ana' ? BASLANGIC : 'Şirket bu seçenek için başlangıç dönemi kuralını henüz yazmadı.',
-    soru: 'Görev tanımınız ve prim ekiniz hazır mı?',
+    soru: 'Görev tanımı ve prim eki size verildi mi?',
     ek: 'anlasma',
     secenekler: [
-      devam('hazir', 'Görev tanımı ve prim eki elimde', p === 'lider' ? 'ekip' : saha ? 'bolge' : 'kayit'),
-      son('bekle', 'ek-yok', 'Görev tanımı var, prim eki yok', 'Prim eki bekleniyor', [
+      devam('hazir', 'Görev tanımını ve prim ekini aldım', p === 'lider' ? 'ekip' : saha ? 'bolge' : 'kayit'),
+      son('bekle', 'ek-yok', 'Görev tanımını aldım ama prim ekini almadım', 'Prim eki bekleniyor', [
         'İnsan kaynakları ve finans ekibi prim ekini yazar.',
         'Ek gelene kadar kendinize prim hesabı yapmayın.',
         'Prim eki gelince bu adıma dönün.',
       ]),
-      son('bekle', 'sozlesme-yok', 'Henüz iş sözleşmem yok', 'İş sözleşmesi bekleniyor', [
+      son('bekle', 'sozlesme-yok', 'Bana henüz iş sözleşmesi verilmedi', 'İş sözleşmesi bekleniyor', [
         'İnsan kaynakları iş sözleşmesini hazırlar.',
         'Sözleşme imzalanınca bu adıma dönün.',
       ]),
@@ -88,15 +89,16 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Ekip listenizi alın',
     sorumlu: 'Satış yöneticisi',
     yap: [
+      'Ekip, sizin yönettiğiniz saha çalışanlarıdır.',
       'Satış yöneticisi ekibinizdeki saha çalışanlarını yazılı listeye alır.',
       'Satış yöneticisi görev değişikliğinin tarihini listeye yazar.',
       'Siz ekip satışını kendi satışınızdan ayrı kaydedin.',
     ],
-    soru: 'Ekibiniz yazılı olarak belirlendi mi?',
+    soru: 'Ekip listeniz size yazılı verildi mi?',
     ek: 'sinir',
     secenekler: [
-      devam('liste-var', 'Ekip listesi yazılı ve tarihli', 'bolge'),
-      son('bekle', 'liste-yok', 'Ekip henüz belirlenmedi', 'Ekip listesi bekleniyor', [
+      devam('liste-var', 'Tarihli ve yazılı ekip listesini aldım', 'bolge'),
+      son('bekle', 'liste-yok', 'Ekibim henüz belli değil', 'Ekip listesi bekleniyor', [
         'Satış yöneticisi ekibi ve başlangıç tarihini yazar.',
         'Liste gelene kadar ekip payı hesaplamayın.',
         'Kendi satışlarınıza devam edebilirsiniz. Liste gelince bu adıma dönün.',
@@ -109,19 +111,20 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Saha ziyaretini planlayın',
     sorumlu: 'Siz ve satış yöneticisi',
     yap: [
+      'Satıcı, iStoc kataloğunu satın alabilecek firmadır.',
       'Satış yöneticisi ziyaret bölgenizi size yazılı verir.',
       'Siz satıcıyı firma adı ve adresiyle kayıtta arayın.',
       'Satıcının ileti almayı kabul edip etmediğini kontrol edin.',
     ],
-    soru: 'Kayıt aramasında ne buldunuz?',
+    soru: 'Kayıtta ne gördünüz?',
     ek: 'kitle',
     secenekler: [
-      devam('bos', 'Satıcı kayıtlı değil, görüşmeyi kabul etti', 'ihtiyac'),
-      son('bekle', 'kayitli', 'Satıcı başka çalışana veya ortağa kayıtlı', 'Kayıt kararı bekleniyor', [
+      devam('bos', 'Satıcı kayıtta yok ve görüşmeye evet dedi', 'ihtiyac'),
+      son('bekle', 'kayitli', 'Kayıtta satıcıda başka çalışanın veya ortağın adı var', 'Kayıt kararı bekleniyor', [
         'Satış yöneticisi kayıt tarihlerine bakarak karar verir.',
         'Karar yazılana kadar teklif göndermeyin.',
       ]),
-      son('bitir', 'ret', 'Satıcı iletişim istemiyor', 'Görüşme kapandı', [
+      son('bitir', 'ret', 'Satıcı bizden ileti almak istemiyor', 'Görüşme kapandı', [
         'Satıcının tercihini müşteri kaydına yazın.',
         'Bu satıcıya pazarlama mesajı göndermeyin.',
       ]),
@@ -134,6 +137,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Satıcı kaydını kontrol edin',
     sorumlu: 'Siz',
     yap: [
+      'Satıcı, iStoc kataloğunu satın alabilecek firmadır.',
       'Satıcıyı müşteri takip sisteminde arayın.',
       'Satıcının ileti almayı kabul edip etmediğini kontrol edin.',
     ],
@@ -144,18 +148,19 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Satıcının ihtiyacını öğrenin',
     sorumlu: 'Siz',
     yap: [
+      'Ürün listesi, satıcının sattığı ürünlerin listesidir.',
       'Satıcıya alıcılarla nasıl çalıştığını sorun.',
       'Ürün listesini kimin hazırladığını öğrenin.',
       'Görüşme sonucunu müşteri kaydına yazın.',
     ],
-    soru: 'Satıcının durumu nedir?',
+    soru: 'Satıcıyla konuşunca ne öğrendiniz?',
     secenekler: [
-      devam('uygun', 'Düzenli ürün listesi var, karar vereni tanıdım', 'gosterim'),
-      son('bekle', 'liste-sahibi-yok', 'Ürün listesini güncelleyecek kişi yok', 'Satıcının sorumlu belirlemesi bekleniyor', [
+      devam('uygun', 'Ürün listesi düzenli ve karar verenle tanıştım', 'gosterim'),
+      son('bekle', 'liste-sahibi-yok', 'Satıcı ürün listesine bakan kimse olmadığını söyledi', 'Satıcının sorumlu belirlemesi bekleniyor', [
         'Satıcı ürün listesinden sorumlu kişiyi belirler.',
         'Sorumlu belli olunca görüşmeyi yeniden planlayın.',
       ]),
-      son('bitir', 'ilgisiz', 'Satıcı ilgilenmiyor', 'Görüşme kapandı', [
+      son('bitir', 'ilgisiz', 'Satıcı ilgilenmediğini söyledi', 'Görüşme kapandı', [
         'Ret nedenini müşteri kaydına yazın.',
       ]),
     ],
@@ -166,19 +171,20 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Satıcının ürünleriyle gösterim yapın',
     sorumlu: 'Siz',
     yap: [
+      'Gösterim, programı satıcının ürünleriyle tanıtmaktır.',
       'Satıcının bir ürün grubunu örnek alın.',
       'Üründe olmayan özelliği göstermeyin.',
       'Alıcı veya sipariş sözü vermeyin.',
     ],
-    soru: 'Gösterimden sonra satıcı ne dedi?',
+    soru: 'Ürünleri gösterdikten sonra satıcı ne dedi?',
     ek: 'sinir',
     secenekler: [
-      devam('teklif-istedi', 'Satıcı teklif istedi', 'teklif'),
-      son('bitir', 'garanti', 'Satıcı sipariş garantisi istiyor', 'Garanti veremezsiniz', [
-        'Garanti veremeyeceğinizi açıkça söyleyin.',
+      devam('teklif-istedi', 'Satıcı fiyat teklifi istedi', 'teklif'),
+      son('bitir', 'garanti', 'Satıcı sipariş geleceğine söz istedi', 'Sipariş sözü veremezsiniz', [
+        'Sipariş sözü veremeyeceğinizi açıkça söyleyin.',
         'Satıcı garanti olmadan devam etmezse görüşmeyi bitirin.',
       ]),
-      son('bekle', 'dusunecek', 'Satıcı daha sonra düşünecek', 'Satıcının kararı bekleniyor', [
+      son('bekle', 'dusunecek', 'Satıcı daha sonra düşüneceğini söyledi', 'Satıcının kararı bekleniyor', [
         'Satıcıyla yeni görüşme tarihi belirleyin.',
         'Görüşme gününde bu adıma dönün.',
       ]),
@@ -190,22 +196,23 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Katalog kapsamıyla teklif hazırlayın',
     sorumlu: 'Siz ve satış yöneticisi',
     yap: [
+      'Teklif, satıcıya yazılı verilen fiyat belgesidir.',
       `Teklifi fiyat tablosundaki fiyatla hazırlayın. ${yillikPaket(a)}`,
       'Katalogdaki ürün gruplarını teklife yazın.',
       'Teklifteki ₺ tutarı için kuru finans ekibinden öğrenin.',
     ],
     dikkat: `Fiyat avroyla belirlenir. Aylık bedel ${avro(a.istocAyEur)} olur. Fiyat herkes için aynıdır ve kimse değiştiremez.`,
-    soru: 'Teklifin durumu nedir?',
+    soru: 'Satıcı teklife ne dedi?',
     ek: 'kazanc',
     secenekler: [
-      devam('kabul', 'Satıcı onaylı teklifi kabul etti', 'sozlesme'),
-      son('bekle', 'indirim', 'Satıcı indirim istiyor', 'Fiyat herkes için aynı', [
+      devam('kabul', 'Satıcı onaylı teklife evet dedi', 'sozlesme'),
+      son('bekle', 'indirim', 'Satıcı indirim istedi', 'Fiyat herkes için aynı', [
         'Satıcıya fiyatın herkes için aynı olduğunu söyleyin.',
         'İndirim yoktur ve fiyat pazarlıkla değişmez.',
         'Talebi kimseye iletmeyin. Yeni teklif hazırlamayın.',
         'Satıcı tablodaki fiyatı kabul ederse bu adıma dönün.',
       ]),
-      son('bitir', 'red', 'Satıcı teklifi reddetti', 'Teklif kapandı', [
+      son('bitir', 'red', 'Satıcı teklife hayır dedi', 'Teklif kapandı', [
         'Ret nedenini müşteri kaydına yazın.',
       ]),
     ],
@@ -216,20 +223,21 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Sözleşmeyi ve ödemeyi izleyin',
     sorumlu: 'Siz ve finans ekibi',
     yap: [
+      'Sözleşme, iki tarafın imzaladığı anlaşma belgesidir.',
       'Kapsamı ve fiyat tablosundaki fiyatı sözleşmeye ekleyin.',
       'Şirketin imza yetkilisi sözleşmeyi imzalar. Satıcı ödemeyi yalnız şirket hesabına yapar.',
       'İmzalı sözleşmeyi müşteri kaydına ekleyin.',
     ],
-    soru: 'Sözleşme ve ödeme ne durumda?',
+    soru: 'Sözleşme imzalandı mı ve ödeme geldi mi?',
     ek: 'anlasma',
     secenekler: [
-      devam('odendi', 'Sözleşme imzalı, satıcı ödemeyi yaptı', 'devir'),
-      son('bekle', 'odeme-bekliyor', 'Sözleşme imzalı, ödeme gelmedi', 'Ödeme bekleniyor', [
+      devam('odendi', 'Sözleşme imzalandı ve satıcı ödemeyi yaptı', 'devir'),
+      son('bekle', 'odeme-bekliyor', 'Sözleşme imzalandı ama ödeme gelmedi', 'Ödeme bekleniyor', [
         'Siz durumu finans ekibine bildirin.',
         'Finans ekibi satıcıya kimin hatırlatma yapacağını belirler.',
         'Ödeme gelince bu adıma dönün.',
       ]),
-      son('bekle', 'imza-yok', 'İmza yetkilisi belli değil', 'İmza yetkilisi bekleniyor', [
+      son('bekle', 'imza-yok', 'Kimin imza atacağı belli değil', 'İmza yetkilisi bekleniyor', [
         'Satış yöneticisi imza yetkilisini yazılı belirler.',
         'Yetkili belli olunca bu adıma dönün.',
       ]),
@@ -241,16 +249,17 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Katalog kurulumuna devredin',
     sorumlu: 'Siz ve kurulum ekibi',
     yap: [
+      'Devretmek, işi kurulum ekibine yazılı olarak vermektir.',
       'Siz ürün gruplarını ve iletişim kişisini kurulum ekibine yazılı iletin.',
       'Kurulum ekibi ürün bilgisini kimin gireceğini sizinle netleştirir.',
       'Siz ürün görsellerinin sahibini satıcıya sorun.',
     ],
-    soru: 'Kurulum ekibi devri aldı mı?',
+    soru: 'Kurulum ekibi işi sizden aldı mı?',
     ek: 'plan',
     secenekler: [
-      devam('kabul', 'Kurulum ekibi devri kabul etti', p === 'lider' ? 'ekip-satis' : 'prim'),
-      son('bekle', 'kapasite', 'Kurulum ekibi şimdi yeni katalog alamıyor', 'Kurulum takvimi bekleniyor', [
-        'Satış yöneticisine kapasite sorununu bildirin.',
+      devam('kabul', 'Kurulum ekibi işi aldığını söyledi', p === 'lider' ? 'ekip-satis' : 'prim'),
+      son('bekle', 'kapasite', 'Kurulum ekibi şu an yeni katalog alamadığını söyledi', 'Kurulum takvimi bekleniyor', [
+        'Satış yöneticisine kurulum ekibinin dolu olduğunu bildirin.',
         'Takvim belli olmadan kurulum tarihi vermeyin.',
         'Takvim gelince bu adıma dönün.',
       ]),
@@ -262,13 +271,14 @@ const akisOlusturTam: AkisOlustur = (a) => {
     ad: 'Ekip satışlarını ayırın',
     sorumlu: 'Finans ekibi',
     yap: [
+      'Ekip satışı, ekibinizdeki çalışanların yaptığı satıştır.',
       'Finans ekibi ekip satışlarını sizin satışlarınızdan ayrı listeler.',
       'Finans ekibi aynı satışın iki listede olmadığını kontrol eder.',
       'Siz iki listeyi kendi kaydınızla karşılaştırın.',
     ],
-    soru: 'Ekip ve kendi satış listeniz ne durumda?',
+    soru: 'İki satış listesinde ne gördünüz?',
     secenekler: [
-      devam('ayri', 'Ekip ve kendi satışlarım ayrı', 'prim'),
+      devam('ayri', 'Ekip satışları ve benim satışlarım ayrı', 'prim'),
       son('bekle', 'cakisma', 'Bir satış iki listede görünüyor', 'Satış kaydı düzeltmesi bekleniyor', [
         'Satış yöneticisi satışın kime yazılacağına karar verir.',
         'Karar yazılınca bu adıma dönün.',
@@ -280,26 +290,26 @@ const akisOlusturTam: AkisOlustur = (a) => {
     id: 'prim',
     ad: 'Prim sonucunu kontrol edin',
     sorumlu: 'Finans ekibi',
-    yap: [prim.kota, prim.kural, ODEME],
+    yap: ['İade süresi, müşterinin satıştan vazgeçebildiği süredir.', prim.kota, prim.kural, ODEME],
     dikkat: prim.ornek,
-    soru: 'Bu satışın prim durumu nedir?',
+    soru: 'Bu satışın primi ne durumda?',
     ek: 'kazanc',
     secenekler: [
-      son('tamamla', 'asti', 'İade süresi geçti, bu ay kota aşıldı', 'Satış prim listesine geçer', [
+      son('tamamla', 'asti', 'İade süresi bitti ve bu ay kotayı aştım', 'Satış prim listesine geçer', [
         'Finans ekibi dönem sonunda prim listesini hazırlar.',
         'Kesin tutarı yazılı prim eki belirler.',
         'Liste hatalıysa siz satış kaydıyla yazılı itiraz edin.',
       ]),
-      son('tamamla', 'asmadi', 'Bu ay kota aşılmadı', 'Satış geçerli, prim oluşmayabilir', [
+      son('tamamla', 'asmadi', 'Bu ay kotayı aşmadım', 'Satış geçerli, prim oluşmayabilir', [
         'Satış kaydınız geçerli kalır.',
         'Bu rehber maaşta kesinti öngörmez.',
         'Yöneticinizle iş yükünü birlikte inceleyin.',
       ]),
-      son('bekle', 'iade', 'İade süresi henüz geçmedi', 'İade süresi bekleniyor', [
+      son('bekle', 'iade', 'İade süresi daha bitmedi', 'İade süresi bekleniyor', [
         'Finans ekibi iade süresini izler.',
         'Süre bitince bu adıma dönün.',
       ]),
-      son('bekle', 'baslangic', p === 'ana' ? 'Kotasız başlangıç dönemindeyim' : 'İşe yeni başladım, başlangıç kuralı yazılmadı', 'Başlangıç dönemi prim kuralı bekleniyor', [
+      son('bekle', 'baslangic', p === 'ana' ? 'Kota olmayan başlangıç dönemindeyim' : 'İşe yeni başladım ama başlangıç kuralı yazılmadı', 'Başlangıç dönemi prim kuralı bekleniyor', [
         'Şirket bu dönemin prim kuralını henüz yazmadı.',
         'İnsan kaynakları ve finans ekibi kuralı yazar.',
         'Kural gelince bu adıma dönün.',

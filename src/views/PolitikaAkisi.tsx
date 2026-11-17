@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ComponentProps } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ComponentProps } from 'react';
 import { Accordion } from '@mantine/core';
 import { Choice, Section } from '../components/ui';
 import { PersonaSyncStatus } from '../components/PersonaSyncStatus';
@@ -6,7 +6,7 @@ import { Sec } from '../components/sadeKit';
 import { kosulListesi, seciliKosul } from '../data/kosullar';
 import { SEVIYE_ADI, type Marka, type RolId, type Seviye } from '../data/satisOrtakligi';
 import type { AkisOlustur, AkisYaniti } from '../data/politikaAkislari/types';
-import { akisGorunumu, olasiSonrakiler, sorumluCumlesi } from '../data/politikaAkislari/motor';
+import { akisGorunumu, olasiSonrakiler, sonucSatiri, sorumluCumlesi } from '../data/politikaAkislari/motor';
 import { usePersonaAyar } from '../lib/personaStore';
 import { useKazancPlani } from '../components/KazancPlaniBolumu';
 import { planliAyar } from '../data/kazancPlani';
@@ -36,6 +36,7 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
   const { plan } = useKazancPlani(proje);
   const ayar = useMemo(() => planliAyar(ortakAyar, plan), [ortakAyar, plan]);
   const akis = useMemo(() => olustur(ayar), [ayar, olustur]);
+  const kimlik = useId();
   // Yalnız akışın yapısı değişince ilerleme sıfırlanır. Kur gibi metindeki sayıyı değiştiren alan ilerlemeyi silmez.
   const fingerprint = useMemo(() => JSON.stringify([akis.ilk, akis.adimlar.map((a) => [a.id, a.secenekler.map((s) => [s.id, s.tur, s.tur === 'devam' ? s.sonraki : ''])])]), [akis]);
   const cacheKey = `turksab-rehber-adim-v1-${proje}-${rol}`;
@@ -113,9 +114,16 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
               </Accordion>}
             </div>
             <div className="pol-karar-alani">
-              <fieldset className="pol-karar"><legend>{etkin.soru}</legend>
-                {etkin.secenekler.map((s) => <button type="button" className="pol-yanit" key={s.id} aria-pressed={sonuc?.id === s.id}
-                  onClick={() => yanitla([...gorunum.yanitlar.slice(0, gecmis.length), { adim: etkin.id, secenek: s.id }])}>{s.metin}</button>)}
+              {/* Kullanıcı kararı 17 Kasım 2026: kutuların üstünde kısa açıklama, her kutunun altında seçimin sonucu vardır. */}
+              <fieldset className="pol-karar" aria-describedby={`${kimlik}-aciklama`}><legend>{etkin.soru}</legend>
+                <p className="pol-karar-aciklama" id={`${kimlik}-aciklama`}>Ne olduğunu seçin. Sayfa size sonraki adımı gösterir.</p>
+                <ul className="pol-yanitlar">
+                  {etkin.secenekler.map((s) => <li key={s.id} className="pol-yanit-satiri">
+                    <button type="button" className="pol-yanit" aria-pressed={sonuc?.id === s.id} aria-describedby={`${kimlik}-${s.id}`}
+                      onClick={() => yanitla([...gorunum.yanitlar.slice(0, gecmis.length), { adim: etkin.id, secenek: s.id }])}>{s.metin}</button>
+                    <p className="pol-yanit-sonucu" id={`${kimlik}-${s.id}`}>{sonucSatiri(s, akis)}</p>
+                  </li>)}
+                </ul>
               </fieldset>
               {sonuc && <div className="pol-sonuc" data-akis-sonuc={sonuc.tur} role="status">
                 <h4 className="pol-sonuc-baslik" ref={resultHeading} tabIndex={-1}>{sonuc.sonuc.baslik}</h4>{sonuc.sonuc.metin.map((line) => <p key={line}>{line}</p>)}

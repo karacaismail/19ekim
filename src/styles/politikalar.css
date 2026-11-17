@@ -100,7 +100,10 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-karar { padding: 0; border: 0; margin: 0; min-inline-size: 0; }
 .pol-karar legend { max-inline-size: 100%; padding: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin-block-end: var(--space-3); }
 .pol-yanit { display: block; inline-size: 100%; min-block-size: var(--hit-min); text-align: start; padding: var(--policy-control-padding); margin: 0; border: var(--hairline) solid var(--rule-strong); border-radius: var(--radius-control); background: var(--surface-raised); color: var(--text-primary); font: inherit; cursor: pointer; }
-.pol-yanit + .pol-yanit { margin-block-start: var(--space-2); }
+.pol-karar-aciklama { margin: 0 0 var(--space-4); font-size: var(--text-md); line-height: var(--leading-body); color: var(--text-secondary); }
+.pol-yanitlar { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.pol-yanit-satiri { display: grid; gap: var(--space-1); }
+.pol-yanit-sonucu { margin: 0; font-size: var(--text-md); line-height: var(--leading-body); color: var(--text-secondary); }
 .pol-yanit { transition-property: background-color, border-color, color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); transition-delay: var(--motion-delay-none); }
 .pol-yanit:hover { background: var(--surface-hover); border-color: var(--text-primary); }
 .pol-yanit[aria-pressed='true'] { background: var(--policy-active-surface); border-color: var(--text-primary); }
@@ -139,10 +142,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 /* Kâğıttaki kazanç planı (16 Kasım 2026). Telefonda alt alta, geniş ekranda iki katkı türü yan yana durur. */
 .pol-kz-plan { display: grid; gap: var(--space-4); }
 .pol-kz-plan p { margin: 0; }
-.pol-kz-katkilar { display: grid; gap: var(--space-6); }
-@media (min-width: 64em) { .pol-kz-katkilar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pol-kz-katki { display: grid; gap: var(--space-4); align-content: start; }
-.pol-kz-katki h3 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
 .pol-kz-sonuc { margin: 0; display: grid; gap: var(--space-2); }
 .pol-kz-sonuc > div { display: grid; gap: var(--space-1); }
 .pol-kz-sonuc dt { color: var(--text-secondary); }
@@ -150,3 +150,17 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-yillar { margin: 0; padding-inline-start: var(--space-5); }
 .pol-kz-yillar li { margin-block: var(--space-1); }
 .pol-kz-not { color: var(--text-secondary); }
+.pol-kz-paylasim { display: grid; gap: var(--space-4); }
+.pol-kz-paylasim h3 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-sure { display: grid; gap: var(--space-2); }
+.pol-kz-sure-ad { font-weight: var(--weight-semibold); }
+.pol-kz-sure-liste { margin: 0; }
+.pol-kz-alan { display: grid; gap: var(--space-2); align-content: start; }
+.pol-kz-alan > .secim { grid-column: auto; }
+/* Ekran daralırken seçim zemininin genişlik geçişi sayfayı yana taşırmaz. */
+.pol-kz-alan { min-inline-size: 0; overflow-x: clip; }
+/* “Kalıcı kural” etiketi kutuyla birlikte en az 44 CSS px dokunma alanıdır. */
+.pol-kz-kalici .applet-onay-ad { display: inline-flex; align-items: center; min-block-size: var(--hit-min); }
+.pol-kz-json { inline-size: 100%; min-block-size: 12rem; font-family: var(--font-mono); font-size: var(--text-md); }
+.pol-kz-dugmeler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pol-sekme[aria-checked='true'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }

@@ -9,19 +9,20 @@ import { PolitikaAkisi } from './PolitikaAkisi';
 import { KazancPlaniBolumu } from '../components/KazancPlaniBolumu';
 
 const PROJELER = [{ id: 'istoc', ad: 'iStoc' }, { id: 'segika', ad: 'Segika' }] as const;
-const KISA_ADLAR: Record<RolId, string> = {
-  oncu: 'Öncü ortak', kadrolu: 'Kadrolu uzman', cozum: 'Çözüm ortağı', tavsiye: 'Mevcut müşteri', elci: 'Marka elçisi',
+// Kullanıcı kararı 17 Kasım 2026: “Öncü ortak” rolü ve bütün içeriği bu sayfadan kalktı. Eski adres ilk role döner.
+type RehberRol = Exclude<RolId, 'oncu'>;
+const ROLLER = PERSONALAR.filter((p): p is typeof p & { id: RehberRol } => p.id !== 'oncu');
+const KISA_ADLAR: Record<RehberRol, string> = {
+  kadrolu: 'Kadrolu uzman', cozum: 'Çözüm ortağı', tavsiye: 'Mevcut müşteri', elci: 'Marka elçisi',
 };
-type Secim = { proje: Marka; rol: RolId };
-type Anahtar = `${Marka}/${RolId}`;
+type Secim = { proje: Marka; rol: RehberRol };
+type Anahtar = `${Marka}/${RehberRol}`;
 const anahtar = ({ proje, rol }: Secim): Anahtar => `${proje}/${rol}`;
 const yukleyiciler: Record<Anahtar, () => Promise<{ akisOlustur: AkisOlustur }>> = {
-  'istoc/oncu': () => import('../data/politikaAkislari/istoc/oncu'),
   'istoc/kadrolu': () => import('../data/politikaAkislari/istoc/kadrolu'),
   'istoc/cozum': () => import('../data/politikaAkislari/istoc/cozum'),
   'istoc/tavsiye': () => import('../data/politikaAkislari/istoc/tavsiye'),
   'istoc/elci': () => import('../data/politikaAkislari/istoc/elci'),
-  'segika/oncu': () => import('../data/politikaAkislari/segika/oncu'),
   'segika/kadrolu': () => import('../data/politikaAkislari/segika/kadrolu'),
   'segika/cozum': () => import('../data/politikaAkislari/segika/cozum'),
   'segika/tavsiye': () => import('../data/politikaAkislari/segika/tavsiye'),
@@ -30,7 +31,7 @@ const yukleyiciler: Record<Anahtar, () => Promise<{ akisOlustur: AkisOlustur }>>
 function adrestenOku(eskiRol?: RolId): Secim {
   const sorgu = new URLSearchParams(window.location.search);
   const proje = sorgu.get('proje') === 'segika' ? 'segika' : 'istoc';
-  const rol = PERSONALAR.find((p) => p.id === sorgu.get('rol'))?.id ?? eskiRol ?? 'oncu';
+  const rol = ROLLER.find((p) => p.id === sorgu.get('rol'))?.id ?? ROLLER.find((p) => p.id === eskiRol)?.id ?? ROLLER[0].id;
   return { proje, rol };
 }
 function adresYaz(secim: Secim, degistir = false) {
@@ -109,12 +110,12 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
           {PROJELER.map((p) => <Tabs.Tab key={p.id} value={p.id}>{p.ad}</Tabs.Tab>)}
         </Tabs.List>
         {PROJELER.map((proje) => <Tabs.Panel key={proje.id} value={proje.id}>
-          <Tabs value={secim.rol} onChange={(rol) => { if (rol) sec({ ...secim, rol: rol as RolId }); }}
+          <Tabs value={secim.rol} onChange={(rol) => { if (rol) sec({ ...secim, rol: rol as RehberRol }); }}
             keepMounted={false} unstyled classNames={siniflar}>
             <Tabs.List aria-label="Çalışma rolü">
-              {PERSONALAR.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
+              {ROLLER.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
             </Tabs.List>
-            {PERSONALAR.map((p) => <Tabs.Panel key={p.id} value={p.id}>
+            {ROLLER.map((p) => <Tabs.Panel key={p.id} value={p.id}>
               {etkinBelge ? <PolitikaAkisi key={secili} proje={secim.proje} rol={secim.rol} olustur={etkinBelge} />
                 : hata === secili ? <div className="pol-yukleme" role="alert">
                   <p>Rehber yüklenemedi. İnternet bağlantınızı kontrol edin.</p>

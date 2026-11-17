@@ -77,3 +77,17 @@ export function belgeAdimlariniCikar(akis: IsAkisi): IsAkisi {
     })),
   };
 }
+
+/**
+ * Cevap kutusunun altındaki satır (kullanıcı kararı 17 Kasım 2026). Satır, seçimin sonucunu söyler.
+ * Satır akış verisindeki türden üretilir. Her kutu için ayrı metin yazılmaz.
+ */
+export function sonucSatiri(secenek: AkisSecenegi, akis: IsAkisi): string {
+  if (secenek.tur === 'devam') {
+    const sonraki = akis.adimlar.find((a) => a.id === secenek.sonraki);
+    return sonraki ? `Sonra “${sonraki.ad}” adımına geçersiniz.` : 'Sonraki adıma geçersiniz.';
+  }
+  if (secenek.tur === 'bekle') return 'Burada durursunuz. Durum değişince bu soruya dönün.';
+  if (secenek.tur === 'bitir') return 'Bu iş burada biter.';
+  return 'Bu iş tamamlanır.';
+}

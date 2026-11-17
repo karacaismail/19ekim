@@ -13,6 +13,10 @@ const BELGE_SORULARI = [
   'Ortaklık anlaşmanız ne durumda?',
   'Görev tanımınız ve prim ekiniz hazır mı?',
   'Elinizde hangi belgeler var?',
+  // 17 Kasım 2026: soru metinleri sadeleşti. Yeni yazımlar da sorulmaz.
+  'Ortaklık anlaşmanız yazılı mı?',
+  'Şirketle yazılı anlaşmanız var mı?',
+  'Görev tanımı ve prim eki size verildi mi?',
 ];
 const roller = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as const;
 
@@ -25,9 +29,12 @@ for (const proje of ['istoc', 'segika'] as const) for (const rol of roller) {
       const ad = `${proje}/${rol}/${k.id}`;
       const kimlikler = new Set(akis.adimlar.map((a: { id: string }) => a.id));
       expect(kimlikler.has(akis.ilk), `${ad}: ilk adım var`).toBe(true);
+      // Metin değişse de belge adımları kimlikleriyle çıkar.
+      expect(kimlikler.has('kosul'), `${ad}: yazılı koşul adımı yok`).toBe(false);
+      expect(['anlasma', 'gorev'], `${ad}: ilk adım belge adımı değil`).not.toContain(akis.ilk);
       for (const adim of akis.adimlar) {
         expect(BELGE_SORULARI, `${ad}: ${adim.soru}`).not.toContain(adim.soru);
-        expect(adim.soru, ad).not.toMatch(/koşulu .*yazılı ulaştı/);
+        expect(adim.soru, ad).not.toMatch(/koşulu .*yazılı (ulaştı|olarak geldi)/);
         for (const s of adim.secenekler) if (s.tur === 'devam') expect(kimlikler.has(s.sonraki), `${ad}: ${s.metin} sonraki adımı var`).toBe(true);
       }
     }
@@ -35,7 +42,7 @@ for (const proje of ['istoc', 'segika'] as const) for (const rol of roller) {
 }
 
 test('rehberin ilk sorusu artık anlaşma sorusu değildir', async ({ page }) => {
-  await page.goto('politikalar/?proje=istoc&rol=oncu');
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
   await expect(page.locator('.pol-etkin-baslik')).toBeVisible();
   await expect(page.locator('.pol-karar legend')).not.toHaveText('Çalışma anlaşmanız ne durumda?');
   await expect(page.getByRole('button', { name: 'Ödeme belgesi belli değil' })).toHaveCount(0);

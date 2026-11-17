@@ -1,7 +1,8 @@
 import { expect, test } from './fixtures/persona';
 import { ICERIK } from '../src/data/icerik';
 
-const roller = ['oncu', 'kadrolu', 'cozum', 'tavsiye', 'elci'] as const;
+// 17 Kasım 2026: “Öncü ortak” rolü çalışma rehberlerinden kalktı.
+const roller = ['kadrolu', 'cozum', 'tavsiye', 'elci'] as const;
 const projeler = ['istoc', 'segika'] as const;
 
 test('on rehber içerik kaydında tek menü bağlantısı kullanır', () => {
@@ -23,7 +24,7 @@ for (const proje of projeler) for (const rol of roller) {
     for (const id of ['gorev', 'is-akisi', 'hedef-kitle', 'kazanc', 'sorunlar', 'anlasma']) {
       await expect(page.locator(`#${id}`)).toBeVisible();
     }
-    await expect(page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab')).toHaveCount(5);
+    await expect(page.getByRole('tablist', { name: 'Çalışma rolü' }).getByRole('tab')).toHaveCount(4);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
@@ -168,7 +169,7 @@ test('özel programın sonuç dönemi ve varsayımları kaybolmaz', async () => 
 });
 
 test('rehber hareketleri iki yönde ortak eğriyi ve azaltma tercihini kullanır', async ({ page }) => {
-  await page.goto('politikalar/oncu/');
+  await page.goto('politikalar/cozum/');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   const button = page.locator('#hedef-kitle .pol-ac').first();
   const chevron = button.locator('.mantine-Accordion-chevron');

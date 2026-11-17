@@ -24,11 +24,13 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const komisyon = satisKazanci(a, seviye);
   const odemeMetni = a.model === 'oran'
     ? [
+        'Komisyon, satış için size ödenen paydır.',
         yillikPaket(a),
         `Şirket yıllık paket bedelinin ${oranMetni(a.oran[seviye])} kadarını size komisyon olarak öder.`,
         `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
       ]
     : [
+        'Komisyon, satış için size ödenen paydır.',
         'Bu örnekte şirket satış başına sabit komisyon öder.',
         `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
         'Sabit tutar yetkinizi değiştirmez.',
@@ -43,6 +45,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Anlaşmayı ve onaylı bilgiyi alın',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
       yap: [
+        'Onaylı liste, şirketin doğru dediği bilgilerin listesidir.',
         'Pazarlama sorumlusu yazılı anlaşmayı size gönderir.',
         'Pazarlama sorumlusu onaylı iStoc bilgi listesini size gönderir.',
         'Siz tanıtım yapacağınız kanalları anlaşmaya yazdırın.',
@@ -50,13 +53,13 @@ const akisOlusturTam: AkisOlustur = (a) => {
       soru: 'Elinizde hangi belgeler var?',
       ek: 'anlasma',
       secenekler: [
-        { id: 'tam', metin: 'Yazılı anlaşma ve onaylı liste var', tur: 'devam', sonraki: 'icerik' },
-        { id: 'liste-yok', metin: 'Anlaşma var, onaylı liste yok', tur: 'bekle', sonuc: { baslik: 'Onaylı listeyi bekleyin', metin: [
+        { id: 'tam', metin: 'Elimde yazılı anlaşma ve onaylı liste var', tur: 'devam', sonraki: 'icerik' },
+        { id: 'liste-yok', metin: 'Anlaşma geldi ama onaylı liste gelmedi', tur: 'bekle', sonuc: { baslik: 'Onaylı listeyi bekleyin', metin: [
           'Onaylı bilgi olmadan içerik yayımlamayın.',
           'Pazarlama sorumlusu listeyi ürün sorumlusuyla hazırlar.',
           'Liste gelince bu adıma dönün.',
         ] } },
-        { id: 'anlasma-yok', metin: 'Henüz yazılı anlaşma yok', tur: 'bekle', sonuc: { baslik: 'Anlaşmayı bekleyin', metin: [
+        { id: 'anlasma-yok', metin: 'Yazılı anlaşma henüz gelmedi', tur: 'bekle', sonuc: { baslik: 'Anlaşmayı bekleyin', metin: [
           'Anlaşma olmadan tanıtım ve komisyon başlamaz.',
           'Pazarlama sorumlusu anlaşma taslağını size gönderir.',
           'İmzalı anlaşma gelince bu adıma dönün.',
@@ -68,21 +71,22 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Satıcılar için içerik hazırlayın',
       sorumlu: 'Siz',
       yap: [
+        'Katalog, satıcının ürün listesidir.',
         'Toptan satıcıların katalog ihtiyacını anlatın.',
         'Yalnız onaylı bilgiyi kullanın.',
         'Gerçek satıcı kataloğu yerine örnek ürün kullanın.',
       ],
-      soru: 'İçerikte ne var?',
+      soru: 'Hazırladığınız içerikte ne var?',
       dikkat: 'Satıcıya alıcı, sipariş veya ciro artışı vaat etmeyin.',
       ek: 'kitle',
       secenekler: [
-        { id: 'onayli', metin: 'Yalnız onaylı bilgi ve örnek ürün var', tur: 'devam', sonraki: 'baglanti' },
-        { id: 'vaat', metin: 'Alıcı veya sipariş vaadi var', tur: 'bekle', sonuc: { baslik: 'Vaadi çıkarın', metin: [
-          'Sonuç vaadi yanlış beklenti yaratır.',
+        { id: 'onayli', metin: 'İçerikte yalnız onaylı bilgi ve örnek ürün var', tur: 'devam', sonraki: 'baglanti' },
+        { id: 'vaat', metin: 'İçerik alıcı veya sipariş sözü veriyor', tur: 'bekle', sonuc: { baslik: 'Bu sözü içerikten çıkarın', metin: [
+          'Böyle bir söz satıcıda yanlış umut yaratır.',
           'Siz bu cümleyi içerikten çıkarın.',
           'İçeriği düzeltince bu adıma dönün.',
         ] } },
-        { id: 'gercek-katalog', metin: 'Gerçek bir satıcının kataloğu var', tur: 'bekle', sonuc: { baslik: 'Satıcının iznini bekleyin', metin: [
+        { id: 'gercek-katalog', metin: 'İçerikte gerçek bir satıcının kataloğu var', tur: 'bekle', sonuc: { baslik: 'Satıcının iznini bekleyin', metin: [
           'Kataloğun ve görsellerin sahibi o satıcı olabilir.',
           'Siz satıcıdan yazılı izin isteyin.',
           'İzin yoksa içeriği örnek ürünle yeniden hazırlayın.',
@@ -94,19 +98,20 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Bağlantıyı ve kodu deneyin',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
       yap: [
+        'Deneme başvurusu, bağlantıyı sınamak için yaptığınız başvurudur.',
         'Pazarlama sorumlusu size özel bir bağlantı veya kod verir.',
         'Siz bağlantıyı başka bir tarayıcı penceresinde açın. Sonra siz deneme başvurusu yapın.',
         'Pazarlama sorumlusu deneme başvurusunun size yazıldığını kontrol eder.',
       ],
-      soru: 'Deneme başvurusu ne oldu?',
+      soru: 'Deneme başvurunuz ne oldu?',
       secenekler: [
-        { id: 'yazildi', metin: 'Deneme başvurusu benim kaydıma yazıldı', tur: 'devam', sonraki: 'yayin' },
-        { id: 'dusmedi', metin: 'Deneme başvurusu kayda düşmedi', tur: 'bekle', sonuc: { baslik: 'Kaydı düzeltin', metin: [
-          'Kayıt çalışmazsa şirket satışı size yazamayabilir.',
+        { id: 'yazildi', metin: 'Başvuru benim adıma kaydedildi', tur: 'devam', sonraki: 'yayin' },
+        { id: 'dusmedi', metin: 'Başvuru benim adıma kaydedilmedi', tur: 'bekle', sonuc: { baslik: 'Kaydı düzeltin', metin: [
+          'Kayıt çalışmazsa şirket satışı sizin adınıza yazamayabilir.',
           'Pazarlama sorumlusu bağlantıyı düzeltir.',
           'Yeni denemeden sonra bu adıma dönün.',
         ] } },
-        { id: 'kod-yok', metin: 'Henüz bağlantı veya kod verilmedi', tur: 'bekle', sonuc: { baslik: 'Bağlantıyı bekleyin', metin: [
+        { id: 'kod-yok', metin: 'Bana henüz bağlantı veya kod verilmedi', tur: 'bekle', sonuc: { baslik: 'Bağlantıyı bekleyin', metin: [
           'Bağlantı olmadan başvuru size bağlanmaz.',
           'Pazarlama sorumlusu bağlantıyı veya kodu hazırlar.',
           'Bağlantı gelince bu adıma dönün.',
@@ -118,17 +123,18 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Reklam ibaresiyle yayımlayın',
       sorumlu: 'Siz',
       yap: [
+        'İbare, metne eklenen kısa yazıdır.',
         '“Reklam” ibaresini metnin başına yazın.',
         'Video ve fuarda iş birliğini sözle de söyleyin.',
         'Fuarda kodu yazılı olarak verin.',
       ],
-      soru: 'Reklam ibaresi nasıl görünüyor?',
+      soru: '“Reklam” yazısı nasıl görünüyor?',
       ek: 'sinir',
       secenekler: [
-        { id: 'gorunuyor', metin: 'İbare ilk bakışta görünüyor', tur: 'devam', sonraki: 'basvuru' },
-        { id: 'gizli', metin: 'İbare gizli veya eksik', tur: 'bekle', sonuc: { baslik: 'İbareyi düzeltin', metin: [
-          'Ticari tanıtımın reklam olduğu açıkça görünmelidir.',
-          'Siz ibareyi ekleyin. Ekleyemiyorsanız paylaşımı kaldırın.',
+        { id: 'gorunuyor', metin: '“Reklam” yazısı hemen görünüyor', tur: 'devam', sonraki: 'basvuru' },
+        { id: 'gizli', metin: '“Reklam” yazısı gizli veya hiç yok', tur: 'bekle', sonuc: { baslik: '“Reklam” yazısını düzeltin', metin: [
+          'Satış için yapılan tanıtımın reklam olduğu açıkça görünmeli.',
+          'Siz “Reklam” yazısını ekleyin. Ekleyemiyorsanız paylaşımı kaldırın.',
           'Paylaşımı düzeltince bu adıma dönün.',
         ] } },
       ],
@@ -138,21 +144,22 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Gelen başvuruyu kontrol edin',
       sorumlu: 'Pazarlama sorumlusu (önerilen görev)',
       yap: [
+        'Toptan satıcı, malı çok sayıda ve başka işyerlerine satan firmadır.',
         'Pazarlama sorumlusu başvuranın toptan satış yapıp yapmadığını kaydeder.',
         'Pazarlama sorumlusu satıcının şirketle önceden görüşüp görüşmediğine bakar.',
         'Pazarlama sorumlusu sonucu size bildirir.',
       ],
-      soru: 'Başvuran satıcı için hangisi doğru?',
+      soru: 'Başvuran satıcı hakkında ne öğrendiniz?',
       secenekler: [
         { id: 'yeni', metin: 'Yeni bir toptan satıcı başvurdu', tur: 'devam', sonraki: seviye === 'A' ? 'devir' : 'gosterim' },
-        { id: 'cakisma', metin: 'Satıcı şirketle zaten görüşüyor', tur: 'bekle', sonuc: { baslik: 'Kaydın sahibini netleştirin', metin: [
+        { id: 'cakisma', metin: 'Satıcı şirketle zaten görüşüyor', tur: 'bekle', sonuc: { baslik: 'Satışın kime yazılacağını öğrenin', metin: [
           'Satışın kime yazılacağını imzalı anlaşma belirler.',
           'Pazarlama sorumlusu kayıt tarihlerini karşılaştırır.',
           'Karar yazılı gelince bu adıma dönün.',
         ] } },
         { id: 'uygun-degil', metin: 'Başvuran toptan satış yapmıyor', tur: 'bitir', sonuc: { baslik: 'Başvuru uygun değil', metin: [
           'Bu kişi iStoc için uygun satıcı değildir.',
-          'Satış baskısı kurmayın.',
+          'Satın alması için ısrar etmeyin.',
           'Bu başvuru için iş burada biter.',
         ] } },
       ],
@@ -165,21 +172,22 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Ürün gösterimini yapın',
       sorumlu: 'Siz',
       yap: [
+        'Ürün gösterimi, programı satıcıya çalışırken göstermektir.',
         'Şirketin gösterim hesabını ve örnek kataloğu kullanın.',
         'Satıcının ürün bilgisi sorunlarını not edin.',
         fiyatCevabi,
       ],
-      soru: 'Gösterim nasıl sonuçlandı?',
+      soru: 'Ürün gösterimi nasıl bitti?',
       secenekler: [
-        { id: 'teklif-istedi', metin: 'Satıcı teklif istedi', tur: 'devam', sonraki: seviye === 'B' ? 'devir' : 'teklif' },
+        { id: 'teklif-istedi', metin: 'Satıcı fiyat teklifi istedi', tur: 'devam', sonraki: seviye === 'B' ? 'devir' : 'teklif' },
         { id: 'egitim-yok', metin: 'Gösterim eğitimini henüz almadım', tur: 'bekle', sonuc: { baslik: 'Eğitimi bekleyin', metin: [
-          'Eğitimsiz gösterim yanlış bilgi verebilir.',
+          'Eğitim almadan gösterim yaparsanız yanlış bilgi verebilirsiniz.',
           'Ortaklık sorumlusu eğitim tarihini bildirir.',
           'Eğitimden sonra bu adıma dönün.',
         ] } },
         { id: 'ilgisiz', metin: 'Satıcı ilgilenmedi', tur: 'bitir', sonuc: { baslik: 'Görüşme kapandı', metin: [
           'Satıcının kararına saygı gösterin.',
-          'Gerekçeyi kayda yazın.',
+          'Satıcının nedenini kayda yazın.',
           'Israr etmeyin.',
         ] } },
       ],
@@ -192,27 +200,28 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Onaylı teklifle görüşün',
       sorumlu: 'Siz',
       yap: [
+        'Teklif, şirketin yazılı fiyat önerisidir.',
         'Yalnız şirketin onayladığı teklifi kullanın.',
         'Fiyatı ve paket koşulunu değiştirmeyin.',
         'Sözleşmeyi şirket hazırlar.',
       ],
-      soru: 'Teklif için hangisi doğru?',
+      soru: 'Teklif ne durumda?',
       ek: 'sinir',
       secenekler: [
         { id: 'kabul', metin: 'Satıcı onaylı teklifi kabul etti', tur: 'devam', sonraki: 'odeme' },
         { id: 'teklif-yok', metin: 'Onaylı teklif henüz gelmedi', tur: 'bekle', sonuc: { baslik: 'Teklifi bekleyin', metin: [
-          'Onaysız teklif vermeyin.',
+          'Şirketin onaylamadığı teklifi vermeyin.',
           'Satış sorumlusu teklifi fiyat tablosundaki fiyatla hazırlar.',
           'Teklif gelince bu adıma dönün.',
         ] } },
         { id: 'fiyat', metin: 'Satıcı farklı fiyat istiyor', tur: 'bekle', sonuc: { baslik: 'Fiyat herkes için aynı', metin: [
           'Satıcıya fiyatın herkes için aynı olduğunu söyleyin.',
           'Fiyat pazarlıkla değişmez.',
-          'Talebi kimseye iletmeyin. Şirket yeni teklif hazırlamaz.',
+          'Bu isteği kimseye iletmeyin. Şirket yeni teklif hazırlamaz.',
           'Satıcı tablodaki fiyatı kabul ederse bu adıma dönün.',
         ] } },
-        { id: 'red', metin: 'Satıcı teklifi reddetti', tur: 'bitir', sonuc: { baslik: 'Teklif reddedildi', metin: [
-          'Gerekçeyi kayda yazın.',
+        { id: 'red', metin: 'Satıcı teklifi kabul etmedi', tur: 'bitir', sonuc: { baslik: 'Teklif kabul edilmedi', metin: [
+          'Nedenini kayda yazın.',
           'Israr etmeyin.',
           'Bu satıcı için iş burada biter.',
         ] } },
@@ -224,19 +233,19 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: seviye === 'A' ? 'Başvuruyu satış ekibine bırakın' : 'Kapanışı şirkete devredin',
       sorumlu: 'Satış uzmanı (önerilen görev)',
       yap: seviye === 'A'
-        ? ['Satış uzmanı başvuruyu devralır ve ürün gösterimini yapar.', 'Siz ürün gösterimi yapmazsınız.', fiyatCevabiSiz]
-        : ['Siz gösterim notlarını satış uzmanına iletin.', 'Satış uzmanı teklifi ve sözleşmeyi hazırlar.', fiyatCevabiSiz],
+        ? ['Satış uzmanı, satışı yapan şirket çalışanıdır.', 'Satış uzmanı başvuruyu devralır ve ürün gösterimini yapar.', 'Siz ürün gösterimi yapmazsınız.', fiyatCevabiSiz]
+        : ['Satış uzmanı, satışı yapan şirket çalışanıdır.', 'Siz gösterim notlarını satış uzmanına iletin.', 'Satış uzmanı teklifi ve sözleşmeyi hazırlar.', fiyatCevabiSiz],
       soru: 'Satış görüşmesi ne durumda?',
       secenekler: [
         { id: 'satis-oldu', metin: 'Satıcı paketi satın almayı kabul etti', tur: 'devam', sonraki: 'odeme' },
-        { id: 'donus-yok', metin: 'Satış uzmanı henüz dönmedi', tur: 'bekle', sonuc: { baslik: 'Satış ekibini bekleyin', metin: [
-          'Satış görüşmesini şirket yürütür.',
+        { id: 'donus-yok', metin: 'Satış uzmanı henüz haber vermedi', tur: 'bekle', sonuc: { baslik: 'Satış ekibini bekleyin', metin: [
+          'Satış görüşmesini şirket yapar.',
           'Pazarlama sorumlusu durumu satış uzmanına sorar.',
           'Haber gelince bu adıma dönün.',
         ] } },
         { id: 'vazgecti', metin: 'Satıcı satın almadı', tur: 'bitir', sonuc: { baslik: 'Satış olmadı', metin: [
           'Satış olmadığı için komisyon oluşmaz.',
-          'Satış uzmanı gerekçeyi kayda yazar.',
+          'Satış uzmanı nedenini kayda yazar.',
           'Bu satıcı için iş burada biter.',
         ] } },
       ],
@@ -249,7 +258,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
       ad: 'Ödeme sonucunu izleyin',
       sorumlu: 'Finans sorumlusu (önerilen görev)',
       yap: odemeMetni,
-      soru: 'Satıcının ödemesi için hangisi doğru?',
+      soru: 'Satıcının ödemesi ne durumda?',
       dikkat: 'Bu hesap örnektir. Kazanç garantisi değildir.',
       ek: 'kazanc',
       secenekler: [
@@ -259,13 +268,13 @@ const akisOlusturTam: AkisOlustur = (a) => {
           'Finans sorumlusu ödeme durumunu izler.',
           'Ödeme gelince bu adıma dönün.',
         ] } },
-        { id: 'kural-yok', metin: 'Ödeme günü kuralı yazılı değil', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralını netleştirin', metin: [
-          'Gün sayımı müşterinin ödeme gününden başlar.',
+        { id: 'kural-yok', metin: 'Ödeme günü kuralı anlaşmada yazmıyor', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralının yazılmasını bekleyin', metin: [
+          'Günler, müşterinin ödeme yaptığı günden sayılır.',
           'Finans sorumlusu kuralı anlaşmaya yazar.',
           'Kural yazılınca bu adıma dönün.',
         ] } },
-        { id: 'iade', metin: 'Satıcı iade istedi', tur: 'bekle', sonuc: { baslik: 'İade kararını bekleyin', metin: [
-          'İadede komisyonun durumunu imzalı anlaşma belirler.',
+        { id: 'iade', metin: 'Satıcı parasını geri istedi', tur: 'bekle', sonuc: { baslik: 'Geri ödeme kararını bekleyin', metin: [
+          'Para geri verilirse komisyona ne olacağını imzalı anlaşma söyler.',
           'Finans sorumlusu kararı size yazılı bildirir.',
           'Karar gelince bu adıma dönün.',
         ] } },
@@ -290,7 +299,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
         { id: 'bitti', metin: 'Anlaşma bitti', tur: 'tamamla', sonuc: { baslik: 'Anlaşma kapandı', metin: [
           'İçeriği anlaşmadaki sürede kaldırın.',
           'Şirket gösterim hesabınızı kapatabilir.',
-          'Finans sorumlusu açık başvuruların sonucunu yazılı bildirir.',
+          'Finans sorumlusu bitmemiş başvuruların sonucunu yazılı bildirir.',
         ] } },
       ],
     },
