@@ -4,7 +4,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  projeVarsayilani, sabitMi, donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  KOTA_KURALI, kotaTamam, projeVarsayilani, sabitMi, donemAdi, ornekHesap, KATKI_TURLERI, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import type { Marka, RolId } from '../data/satisOrtakligi';
@@ -133,6 +133,7 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
     <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri sonraki aylarda da aynı aylık ciroyu yaparsa şu tutarları alırsınız:</p>
+    {!kotaTamam(plan, tur, plan.ornekCiro) && <p className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>}
     <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
       {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
     </ul>
@@ -248,7 +249,7 @@ function OrnekHesap({ plan }: { plan: KazancPlani }) {
               </table>
             </div></div>
             {h.k1Bos && <p className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>}
-            {!h.k1Gecti && <p className="pol-kz-not">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur.</p>}
+            {!h.k1Gecti && <p className="pol-kz-uyari">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur. Kota tamamlanmadığı için 13. aydan sonra pay da yoktur.</p>}
             <p className="pol-kz-not">Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla hesaplanır. Sonraki dönemler 12 aylık ciroyla hesaplanır.</p>
           </>}
         </Tabs.Panel>;
@@ -418,7 +419,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
       <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
       <Sihirbaz key="ortak" adimlar={[
         { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} proje={proje} /> },
-        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır.', icerik:
+        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KOTA_KURALI, icerik:
           /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
             <Tabs.List aria-label="Satıştaki katkınız">
@@ -429,6 +430,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
             </Tabs.Panel>)}
           </Tabs> },
         { baslik: 'Sonucu görün', aciklama: 'Bir örnek aylık ciro girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.', icerik: <>
+          <p className="pol-kz-kural" data-kota-kurali="">{KOTA_KURALI}</p>
           <Grup baslik="Örnek satış">
             <Kutu label="Örnek aylık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => guncelle((x) => { x.ornekCiro = v ?? 0; })} />
           </Grup>

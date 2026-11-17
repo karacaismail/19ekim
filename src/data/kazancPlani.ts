@@ -133,8 +133,19 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
   return { oran: Math.round(oran * 10_000) / 10_000, kota: kota as 0 | 1 | 2 | 3 };
 }
 
+/**
+ * Kota kuralı (kullanıcı kararı 17 Kasım 2026 Salı): kişi ilk 12 ayda K1 kotasını tamamlamazsa
+ * 13. aydan sonraki pay devam etmez. K1 eşiği boşsa kural ölçülemez. Bu durumda örnek kotayı tamamlanmış sayar.
+ */
+export const KOTA_KURALI = 'Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.';
+export function kotaTamam(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
+  const k1 = plan[tur].kotaEsik[0];
+  return k1 === null || ciro >= k1;
+}
+
 export function yillaraKazanc(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
-  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, donem: donemAdi(i), oran, tutar: Math.round(ciro * oran) }));
+  const devam = kotaTamam(plan, tur, ciro);
+  return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, donem: donemAdi(i), oran: devam ? oran : 0, tutar: devam ? Math.round(ciro * oran) : 0 }));
 }
 
 /**
@@ -151,7 +162,8 @@ export function ornekHesap(plan: KazancPlani, tur: KatkiTuru) {
     { ad: 'Cari ay', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
     { ad: 'Cari ay kota (K1)', oran: p.kotaArtis[0], ciro, tutar: k1Gecti ? Math.round(ciro * p.kotaArtis[0]) : 0 },
     { ad: '1. ay ile 12. ay arası', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
-    ...p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: Math.round(ciro * 12 * g) })),
+    // Kota kuralı: K1 tamamlanmazsa 13. aydan sonraki pay yoktur.
+    ...(k1Gecti ? p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: Math.round(ciro * 12 * g) })) : []),
   ].filter((s) => s.oran > 0);
   return { satirlar, k1Gecti, k1Bos: k1 === null, toplam: satirlar.reduce((t, s) => t + s.tutar, 0) };
 }
@@ -178,9 +190,12 @@ export function paylasim(plan: KazancPlani, ciro: number) {
   const kapatan = Math.round(ciro * kapatanOran);
   return {
     tanistiranOran, kapatanOran, tanistiran, kapatan, toplam: tanistiran + kapatan,
-    yillar: plan.tanistir.gecmis.map((g, i) => ({
-      yil: i + 2, donem: donemAdi(i), tanistiran: g, kapatan: yuvarla(plan.kapatir.gecmis[i] - (b.yillar === 'dus' ? g : 0)),
-    })),
+    // Kota kuralı: her kişi kendi K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.
+    yillar: plan.tanistir.gecmis.map((g0, i) => {
+      const g = kotaTamam(plan, 'tanistir', ciro) ? g0 : 0;
+      const k = kotaTamam(plan, 'kapatir', ciro) ? plan.kapatir.gecmis[i] : 0;
+      return { yil: i + 2, donem: donemAdi(i), tanistiran: g, kapatan: yuvarla(k - (b.yillar === 'dus' ? g : 0)) };
+    }),
   };
 }
 

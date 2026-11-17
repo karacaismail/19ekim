@@ -264,3 +264,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-sabit > p { margin: 0; }
 .pol-kz-sabit-deger { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .pol-kz-sabit-not { margin: 0; color: var(--text-secondary); }
+/* Kota kuralı: kural metni ton farkıyla durur. Uyarı, kuralın uygulandığını söyler. */
+.pol-kz-kural { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-accent); font-weight: var(--weight-semibold); }
+.pol-kz-uyari { margin: 0; padding: var(--space-3) var(--space-4); background: var(--surface-changed); color: var(--text-primary); }

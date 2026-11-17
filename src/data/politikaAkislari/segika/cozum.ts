@@ -195,7 +195,7 @@ function yillaraAkis(a: Ayar): IsAkisi {
   const hizmetAyi = a.affPolitika.cozum === 'hizmet-ayi';
   return {
     baslik: 'Yıllara yayılan destek ortağı',
-    ozet: 'Desteği siz verirsiniz. Komisyon destek verdiğiniz aylara göre yıllara yayılır.',
+    ozet: 'Desteği siz verirsiniz. Komisyon destek verdiğiniz aylara göre yıllara yayılır. Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.',
     hedef: 'Her ayın desteği kayıtlı olsun ve dönem komisyonu doğru izlensin.',
     ilk: 'anlasma',
     adimlar: [
