@@ -197,3 +197,6 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-burada { font-weight: var(--weight-semibold); }
 .pol-kz-gezinti { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; }
 .pol-kz-ileri { margin-inline-start: auto; background: var(--policy-active-ink); color: var(--surface-raised); font-weight: var(--weight-semibold); }
+/* Kalıcı kural çubuğu: işaretli değer varken her adımda görünür ve ekranın üstüne yapışır. */
+.pol-kz-cubuk { position: sticky; inset-block-start: 0; z-index: 2; display: grid; gap: var(--space-2); padding: var(--inset-lg); background: var(--policy-active-surface); color: var(--text-primary); }
+.pol-kz-cubuk p { margin: 0; }

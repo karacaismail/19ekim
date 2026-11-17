@@ -202,15 +202,14 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
 }
 
 /** İşaretli değerlerden JSON üretir. JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez. */
-function KaliciKurallar({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
-  const [acik, setAcik] = useState(false);
+function useKaliciJson(plan: KazancPlani, proje: Marka) {
   const [durum, setDurum] = useState('');
-  const json = acik ? JSON.stringify(kaliciJson(plan, proje, new Date()), null, 2) : '';
+  const json = () => JSON.stringify(kaliciJson(plan, proje, new Date()), null, 2);
   const kopyala = async () => {
-    try { await navigator.clipboard.writeText(json); setDurum('JSON kopyalandı.'); } catch { setDurum('JSON kopyalanamadı. Metni kutudan seçip kopyalayın.'); }
+    try { await navigator.clipboard.writeText(json()); setDurum('JSON kopyalandı.'); } catch { setDurum('JSON kopyalanamadı. JSON dosyasını indirin.'); }
   };
   const indir = () => {
-    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const url = URL.createObjectURL(new Blob([json()], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
     a.download = `kalici-kurallar-${proje}.json`;
@@ -218,13 +217,34 @@ function KaliciKurallar({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
     URL.revokeObjectURL(url);
     setDurum('JSON dosyası indirildi.');
   };
+  return { json, kopyala, indir, durum };
+}
+
+/**
+ * Kalıcı kural çubuğu (kullanıcı kararı 17 Kasım 2026 Salı).
+ * Bir değer işaretlenince çubuk her adımda görünür. JSON hemen alınabilir.
+ */
+function KaliciCubugu({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
+  const { kopyala, indir, durum } = useKaliciJson(plan, proje);
+  if (!plan.kalici.length) return null;
+  return <section className="pol-kz-cubuk" aria-label="Kalıcı kurallar">
+    <p><strong>{plan.kalici.length} değer kalıcı kural olarak işaretli.</strong> JSON'u şimdi alabilirsiniz.</p>
+    <div className="pol-kz-dugmeler">
+      <button type="button" className="pol-sekme pol-kz-ileri" onClick={kopyala}>JSON'u kopyalayın</button>
+      <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
+    </div>
+    <p role="status">{durum}</p>
+  </section>;
+}
+
+function KaliciKurallar({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
+  const { json, kopyala, indir, durum } = useKaliciJson(plan, proje);
   return <div className="pol-kz-adim-govde">
     <p>Yönetici bir değeri kalıcı yapmak isterse yanındaki “Kalıcı kural” kutusunu işaretler.</p>
-    <p>{plan.kalici.length ? `${plan.kalici.length} değer işaretli.` : 'Henüz hiçbir değer işaretlenmedi.'}</p>
-    <button type="button" className="pol-sekme" onClick={() => setAcik(true)}>Kalıcı kuralları JSON olarak al</button>
-    {acik && <>
+    <p>{plan.kalici.length ? `${plan.kalici.length} değer işaretli. JSON aşağıdadır.` : 'Henüz hiçbir değer işaretlenmedi.'}</p>
+    {plan.kalici.length > 0 && <>
       <p>JSON yalnız bu tarayıcıda oluşur. Hiçbir sunucuya gönderilmez.</p>
-      <textarea className="param-input pol-kz-json" aria-label="Kalıcı kurallar JSON" readOnly value={json} rows={10} />
+      <textarea className="param-input pol-kz-json" aria-label="Kalıcı kurallar JSON" readOnly value={json()} rows={10} />
       <div className="pol-kz-dugmeler">
         <button type="button" className="pol-sekme" onClick={kopyala}>JSON'u kopyalayın</button>
         <button type="button" className="pol-sekme" onClick={indir}>JSON dosyasını indirin</button>
@@ -307,6 +327,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
   const kalici = { baslik: 'Kalıcı kuralları alın', aciklama: 'Bu adım yalnız yönetici içindir.', icerik: <KaliciKurallar plan={plan} proje={proje} /> };
   // Kullanıcı kararı 17 Kasım 2026 Salı: önce seçenekler ve kararlar, sonra sonuç. Okur adımları sırayla izler.
   return <PlanBaglami.Provider value={{ plan, guncelle }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
+    <KaliciCubugu plan={plan} proje={proje} />
     {rol === 'kadrolu' ? <Sihirbaz key="kadrolu" adimlar={[
       { baslik: 'Maaşı ve kotayı girin', aciklama: 'Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır.', icerik: <KadroluGirdi plan={plan} guncelle={guncelle} /> },
       { baslik: 'Sonucu görün', aciklama: 'Sonuç, 1. adımdaki değerlere göre hesaplanır.', icerik: <KadroluSonuc plan={plan} /> },
