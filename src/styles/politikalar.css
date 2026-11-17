@@ -183,3 +183,17 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 /* Kalıcı kural işaretli seçim kilitlidir. Fieldset yalnız kapatmak için vardır, görünüm eklemez. */
 .pol-kz-kilit { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
 .pol-kz-kilit:disabled, .pol-kz-sure-liste .pol-sekme:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+/* Kazanç planı sihirbazı: okur hangi adımda olduğunu her an görür. */
+.pol-kz-sihirbaz { display: grid; gap: var(--space-5); }
+.pol-kz-konum { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+.pol-kz-adim-listesi { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.pol-kz-adim-dugme { display: flex; gap: var(--space-3); align-items: center; inline-size: 100%; min-block-size: var(--hit-min); padding: var(--inset-md, var(--space-3)); border: 0; background: var(--surface-sunken); color: var(--text-primary); font: inherit; text-align: start; cursor: pointer; }
+.pol-kz-adim-dugme:hover { background: var(--surface-hover); }
+.pol-kz-adim-dugme[aria-current='step'] { background: var(--policy-active-surface); color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
+.pol-kz-adim-no { flex: none; display: flex; align-items: center; justify-content: center; inline-size: 2rem; block-size: 2rem; background: var(--surface-page); font-weight: var(--weight-semibold); }
+.pol-kz-adim-dugme[aria-current='step'] .pol-kz-adim-no { background: var(--policy-active-ink); color: var(--surface-raised); }
+.pol-kz-adim-durum { display: block; color: var(--text-secondary); font-weight: var(--weight-regular); }
+.pol-kz-adim-icerik h3:focus { outline: none; }
+.pol-kz-burada { font-weight: var(--weight-semibold); }
+.pol-kz-gezinti { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; }
+.pol-kz-ileri { margin-inline-start: auto; background: var(--policy-active-ink); color: var(--surface-raised); font-weight: var(--weight-semibold); }

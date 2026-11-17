@@ -87,19 +87,20 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
     <p>{tur === 'tanistir'
       ? 'Müşteriyi şirketle tanıştırırsınız. Satışı şirket yapar.'
       : 'Satışı siz kapatırsınız. Ürünü de siz gösterirsiniz. Kurulumu da siz yaparsınız.'}</p>
-    <Grup baslik="Bu yılki oran">
+    <p className="pol-kz-burada" data-katki-burada={tur}>Şu an “{KATKI_SEKMESI[tur]}” için değer giriyorsunuz. Bu sekmede 4 grup var.</p>
+    <Grup baslik={`1. grup: ${ad} için bu yılki oran`}>
       <Kutu label={`${ad} taban oranı`} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />
     </Grup>
-    <Grup baslik="Kota eşikleri">
+    <Grup baslik={`2. grup: ${ad} için yıllık ciro kotaları`}>
       {p.kotaEsik.map((e, i) => <Kutu key={i} label={`${ad} K${i + 1} ciro eşiği`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />)}
     </Grup>
     {p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>}
-    <Grup baslik="Kota geçilince orana eklenen puan">
+    <Grup baslik={`3. grup: ${ad} için kota geçilince eklenen puan`}>
       {p.kotaArtis.map((a, i) => <Kutu key={i} label={`${ad} K${i + 1} artışı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />)}
     </Grup>
-    <Grup baslik="Sonraki yıllardaki oran">
+    <Grup baslik={`4. grup: ${ad} için sonraki yıllardaki oran`}>
       {p.gecmis.map((g, i) => <Kutu key={i} label={`${ad} ${i + 1}. yıl komisyonu`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />)}
     </Grup>
@@ -257,40 +258,65 @@ function KadroluSonuc({ plan }: { plan: KazancPlani }) {
   </section>;
 }
 
-/** Numaralı adım. Rehberdeki iş sırasıyla aynı görünümü kullanır. */
-function Adim({ no, baslik, aciklama, children }: { no: number; baslik: string; aciklama: string; children: ReactNode }) {
-  return <li className="pol-zaman-etkin pol-kz-adim">
-    <span className="pol-zaman-sayi" aria-hidden="true">{no}</span>
-    <div className="pol-kz-adim-icerik">
+interface AdimTanimi { baslik: string; aciklama: string; icerik: ReactNode }
+
+/**
+ * Adım adım sihirbaz (kullanıcı kararı 17 Kasım 2026 Salı).
+ * Okur her an hangi adımda olduğunu görür. Ekranda yalnız o adımın alanları durur.
+ */
+function Sihirbaz({ adimlar }: { adimlar: AdimTanimi[] }) {
+  const [etkin, setEtkin] = useState(0);
+  const baslik = useRef<HTMLHeadingElement>(null);
+  const odakla = useRef(false);
+  useLayoutEffect(() => {
+    if (!odakla.current) return;
+    odakla.current = false;
+    baslik.current?.focus();
+  }, [etkin]);
+  const git = (i: number) => { odakla.current = true; setEtkin(i); };
+  const a = adimlar[etkin];
+  const toplam = adimlar.length;
+  return <div className="pol-kz-sihirbaz">
+    <p className="pol-kz-konum" data-kz-konum>{toplam} adımın {etkin + 1}. adımındasınız.</p>
+    <ol className="pol-kz-adim-listesi" aria-label="Kazanç planı adımları">
+      {adimlar.map((x, i) => <li key={x.baslik}>
+        <button type="button" className="pol-kz-adim-dugme" aria-current={i === etkin ? 'step' : undefined}
+          data-durum={i < etkin ? 'bitti' : i === etkin ? 'simdi' : 'sonra'} onClick={() => git(i)}>
+          <span className="pol-kz-adim-no" aria-hidden="true">{i + 1}</span>
+          <span>{x.baslik}<span className="pol-kz-adim-durum">{i < etkin ? 'Geçtiniz' : i === etkin ? 'Şu an buradasınız' : 'Sırada'}</span></span>
+        </button>
+      </li>)}
+    </ol>
+    <section className="pol-kz-adim-icerik" aria-labelledby="pol-kz-adim-baslik">
       <div className="pol-adim-basligi">
-        <p className="pol-yol-ust">{no}. adım</p>
-        <h3>{baslik}</h3>
+        <p className="pol-yol-ust">{etkin + 1}. adım</p>
+        <h3 id="pol-kz-adim-baslik" ref={baslik} tabIndex={-1}>{a.baslik}</h3>
       </div>
-      <p className="pol-kz-not">{aciklama}</p>
-      {children}
+      <p className="pol-kz-not">{a.aciklama}</p>
+      {a.icerik}
+    </section>
+    <div className="pol-kz-gezinti">
+      {etkin > 0 && <button type="button" className="pol-sekme" onClick={() => git(etkin - 1)}>Önceki adım: {adimlar[etkin - 1].baslik}</button>}
+      {etkin < toplam - 1 && <button type="button" className="pol-sekme pol-kz-ileri" onClick={() => git(etkin + 1)}>Sonraki adım: {adimlar[etkin + 1].baslik}</button>}
     </div>
-  </li>;
+  </div>;
 }
 
 export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) {
   const { plan, guncelle } = useKazancPlani(proje);
-  const kalici = <KaliciKurallar plan={plan} proje={proje} />;
+  const kalici = { baslik: 'Kalıcı kuralları alın', aciklama: 'Bu adım yalnız yönetici içindir.', icerik: <KaliciKurallar plan={plan} proje={proje} /> };
   // Kullanıcı kararı 17 Kasım 2026 Salı: önce seçenekler ve kararlar, sonra sonuç. Okur adımları sırayla izler.
   return <PlanBaglami.Provider value={{ plan, guncelle }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
-    {rol === 'kadrolu' ? <ol className="pol-zaman pol-kz-adimlar" aria-label="Kazanç planı adımları">
-      <Adim no={1} baslik="Maaşı ve kotayı girin" aciklama="Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır.">
-        <KadroluGirdi plan={plan} guncelle={guncelle} />
-      </Adim>
-      <Adim no={2} baslik="Sonucu görün" aciklama="Sonuç, 1. adımdaki değerlere göre hesaplanır."><KadroluSonuc plan={plan} /></Adim>
-      <Adim no={3} baslik="Kalıcı kuralları alın" aciklama="Bu adım yalnız yönetici içindir.">{kalici}</Adim>
-    </ol> : <>
+    {rol === 'kadrolu' ? <Sihirbaz key="kadrolu" adimlar={[
+      { baslik: 'Maaşı ve kotayı girin', aciklama: 'Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır.', icerik: <KadroluGirdi plan={plan} guncelle={guncelle} /> },
+      { baslik: 'Sonucu görün', aciklama: 'Sonuç, 1. adımdaki değerlere göre hesaplanır.', icerik: <KadroluSonuc plan={plan} /> },
+      kalici,
+    ]} /> : <>
       <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
-      <ol className="pol-zaman pol-kz-adimlar" aria-label="Kazanç planı adımları">
-        <Adim no={1} baslik="Kararları seçin" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.">
-          <Kararlar plan={plan} guncelle={guncelle} />
-        </Adim>
-        <Adim no={2} baslik="Oranları girin" aciklama="Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3, yıllık ciro kotalarıdır. Ciro bir kotayı geçerse o kotanın puanı orana eklenir.">
-          {/* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */}
+      <Sihirbaz key="ortak" adimlar={[
+        { baslik: 'Kararları seçin', aciklama: 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.', icerik: <Kararlar plan={plan} guncelle={guncelle} /> },
+        { baslik: 'Oranları girin', aciklama: 'Önce aşağıdaki iki sekmeden birini seçin. Sonra o sekmedeki 4 grubu sırayla doldurun. Oranlar ciro üzerinden yüzdedir.', icerik:
+          /* Kullanıcı kararı 17 Kasım 2026: iki katkı türü sekmedir. Bir sekme açıkken diğerinin içeriği görünmez. */
           <Tabs defaultValue="tanistir" keepMounted={false} unstyled classNames={SEKME_SINIFI}>
             <Tabs.List aria-label="Satıştaki katkınız">
               {(['tanistir', 'kapatir'] as const).map((t) => <Tabs.Tab key={t} value={t}>{KATKI_SEKMESI[t]}</Tabs.Tab>)}
@@ -298,9 +324,8 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
             {(['tanistir', 'kapatir'] as const).map((t) => <Tabs.Panel key={t} value={t}>
               <Katki tur={t} plan={plan} guncelle={guncelle} />
             </Tabs.Panel>)}
-          </Tabs>
-        </Adim>
-        <Adim no={3} baslik="Sonucu görün" aciklama="Bir örnek satış tutarı girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.">
+          </Tabs> },
+        { baslik: 'Sonucu görün', aciklama: 'Bir örnek satış tutarı girin. Sonuçlar 1. ve 2. adımdaki değerlere göre hesaplanır.', icerik: <>
           <Grup baslik="Örnek satış">
             <Kutu label="Örnek yıllık ciro" birim="(₺)" value={plan.ornekCiro} onChange={(v) => guncelle((x) => { x.ornekCiro = v ?? 0; })} />
           </Grup>
@@ -309,9 +334,9 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
             <KatkiSonucu tur="kapatir" plan={plan} />
           </div>
           <PaySonucu plan={plan} />
-        </Adim>
-        <Adim no={4} baslik="Kalıcı kuralları alın" aciklama="Bu adım yalnız yönetici içindir.">{kalici}</Adim>
-      </ol>
+        </> },
+        kalici,
+      ]} />
     </>}
     <button type="button" className="pol-sekme" onClick={() => yaz(proje, structuredClone(KAZANC_VARSAYILAN))}>Planın ilk değerlerine dönün</button>
   </Section></PlanBaglami.Provider>;
