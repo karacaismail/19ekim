@@ -1,7 +1,7 @@
 /** Rehber hesabı seçili proje, program ve ortak parametrelerden türetilir. */
 import * as v1 from '../satisOrtakligi';
 import * as v2 from '../satisOrtakligiV2';
-import { KOSULLAR, kosulSonucu, affilateModeli, affilateHesabi, affilateYillari } from '../kosullar';
+import { KOSULLAR, kosulSonucu, affilateModeli, affilateHesabi, affilateYillari, rehberdeMi } from '../kosullar';
 import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
@@ -74,18 +74,41 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     aciklama.push('Mevcut müşteri nakit pay almaz. Ödülü ücretsiz kullanımdır.');
     aciklama.push(v1.rolMetinleri(marka).find((r) => r.id === 'tavsiye')!.kurallar[1]);
     aciklama.push('İkinci sürümün koşulu farklıdır. Şirket geçerli koşulu tavsiye öncesinde yazılı bildirmelidir.');
-  } else {
-    // Kullanıcı kararları 20 Kasım 2026 Cuma: eski yıllık paket komisyonu ve ağ payı kalktı.
-    // Pay, sayfanın üstündeki kazanç planına ve ortak ödeme kurallarına göre hesaplanır.
-    satirlar.push({ ad: 'Payınızın oranı', deger: 'Kazanç planındaki seviyenize göre' });
-    aciklama.push('Payın oranını ve örnek tutarı sayfanın üstündeki kazanç planı gösterir.');
+  } else if (marka === 'segika') {
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir. Segika eski hesabıyla kalır.
+    const seviye = rol === 'oncu' ? a.oncuSeviye : rol === 'cozum' ? a.cozumSeviye : a.elciSeviye;
+    const oran = rol === 'cozum' && marka === 'segika' ? a.cozumOran : a.oran[seviye];
+    const komisyon = rol === 'cozum' ? v1.cozumKazanci(a) : v1.satisKazanci(a, seviye);
+    satirlar.push(
+      { ad: 'Satıştaki katkınız', deger: rol === 'cozum' && marka === 'segika' ? 'Müşteri desteğini ortak verir' : v1.SEVIYE_ADI[seviye].replace('Demo da', 'Ürün gösterimi de') },
+      { ad: 'Bir yıllık paket için komisyon', deger: a.model === 'sabit' ? tl(komisyon) : `${tl(fiyat)} × ${yuzde(oran)} = ${tl(komisyon)}` },
+    );
     if (rol === 'cozum') {
+      for (const donem of v1.donemKazanci(a, 'cozum')) {
+        satirlar.push({ ad: `Yıllık örnek: ${donem.ad.toLocaleLowerCase('tr-TR')}`, deger: tl(donem.yillik) });
+      }
+      aciklama.push(`Yıllık örnek, ${sayi(a.cozumMusteri)} yeni müşteri getirdiğinizi varsayar. Bu sayı gerçekleşmiş satış değildir.`);
       if (marka === 'segika') {
         aciklama.push(`Şirket, ortağa ve destek personeline yılda ${sayi(a.egitimSaat)} saat ücretsiz program eğitimi verir.`);
         aciklama.push(`Ek eğitimin bir saati ${tl(a.egitimSaatUcret)} tutar.`);
         aciklama.push(`Örnekte ${sayi(a.ekEgitimSaat)} saat ek eğitim kullanılır. Toplam eğitim gideri ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} olur.`);
         aciklama.push('Ek eğitim giderini kabul etmeden eğitim siparişi vermeyin. Vergi uygulamasını finans sorumlusu açıklasın.');
       }
+      const m = v1.musavir(a);
+      aciklama.push(m.tur === 'indirim'
+        ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.`
+        : `Mali müşavir seçeneğinde müşteri başına ${tl(m.musteriBasina)} komisyon hesaplanır.`);
+      aciklama.push('Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez. Hukuk danışmanı meslek kurallarına uygunluğu ayrıca kontrol etsin.');
+    }
+    if (rol === 'elci') satirlar.push({ ad: 'Aylık satış örneği', deger: `${sayi(a.elciSatis)} satış × ${tl(komisyon)} = ${tl(a.elciSatis * komisyon)}` });
+    aciklama.push('Bu hesap satışın gerçekleştiğini kanıtlamaz. Finans ekibi ödeme koşullarını ayrıca doğrular.');
+    aciklama.push('Kesintiler sonrası elinize geçecek tutar bu hesapta belirlenmez. Vergi ve belge koşulları ayrıca yazılır.');
+  } else {
+    // Kullanıcı kararları 20 Kasım 2026 Cuma (yalnız iStoc): eski yıllık paket komisyonu ve ağ payı kalktı.
+    // Pay, sayfanın üstündeki kazanç planına ve ortak ödeme kurallarına göre hesaplanır.
+    satirlar.push({ ad: 'Payınızın oranı', deger: 'Kazanç planındaki seviyenize göre' });
+    aciklama.push('Payın oranını ve örnek tutarı sayfanın üstündeki kazanç planı gösterir.');
+    if (rol === 'cozum') {
       const m = v1.musavir(a);
       aciklama.push(m.tur === 'indirim'
         ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.`
@@ -141,7 +164,7 @@ function ikinciSurum(rol: RolId, marka: v2.Marka): HesapOrnegi {
 
 export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): RehberHesabi {
   const a = { ...ayar, marka };
-  const programlar = KOSULLAR[rol].filter((k) => k.id !== 'ana' && k.marka.includes(marka)).map((k) => {
+  const programlar = KOSULLAR[rol].filter((k) => k.id !== 'ana' && k.marka.includes(marka) && rehberdeMi(marka, rol, k.id)).map((k) => {
     const sonuc = kosulSonucu({ ...a, marka, kosul: { [rol]: k.id } }, rol)!;
     const model = affilateModeli({ ...a, kosul: { [rol]: k.id } }, rol);
     if (model) {
@@ -151,12 +174,16 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
       const odemeKurali = politika === 'tahsilatta' ? 'Müşteri ödeme yapınca komisyon oluşur. Bu örnekte komisyon, müşterinin ödediği ay ödenir.'
         : politika === 'hizmet-ayi' ? 'Komisyon her hizmet ayının sonunda oluşur ve ödenir.'
           : 'Müşteri ödeme yapınca komisyon oluşur. Şirket komisyonu taksitlerle öder.';
+      // Kullanıcı kararı 20 Kasım 2026 Cuma: tek seferlik tavsiye ödülü nakit değil, Segika panelinde ek kullanım hakkıdır.
+      const odul = k.id === 'tek-sefer';
+      const metin = (x: string) => odul ? x.replace(/Komisyon/g, 'Ödül').replace(/komisyon/g, 'ödül').replace(/ödenir\./g, 'verilir.').replace(/öder\./g, 'verir.') : x;
       return { id: k.id, ad: acikAd(k.ad), urun: marka === 'istoc' ? 'iStoc' : 'Segika',
-        etiket: 'Bir müşteri için planlanan komisyon', donem: `${a.affUfukAy} ay`, sonuc: motor.hatalar.length ? 'Hesaplanamadı' : tl(toplam),
+        etiket: odul ? 'Bir müşteri için planlanan panel kullanım hakkı' : 'Bir müşteri için planlanan komisyon', donem: `${a.affUfukAy} ay`, sonuc: motor.hatalar.length ? 'Hesaplanamadı' : tl(toplam),
         aciklama: `Örnek, bir müşterinin ${a.affOdeme === 'paket' ? 'yıllık paket' : 'aylık abonelik'} ödemesini kullanır. Hesap süresi ${a.affUfukAy} aydır.`,
         hesap: affilateYillari(motor, a.affUfukAy).map((tutar, i) => ({ ad: `${i + 1}. hizmet yılı`, formul: 'Bu örnekte o yıl ödenecek komisyon', sonuc: tl(tutar / 100) })),
-        kurallar: [odemeKurali, ...(model === 'ayse' ? ['Komisyon yalnız ilk fatura için hesaplanır.'] : []),
-          'Müşteri ödemezse komisyon oluşmaz. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez.',
+        kurallar: [...(odul ? ['Ödül nakit ödenmez. Ödül, Segika panelinde ek kullanım hakkıdır.'] : []),
+          ...[odemeKurali, ...(model === 'ayse' ? ['Komisyon yalnız ilk fatura için hesaplanır.'] : []),
+          'Müşteri ödemezse komisyon oluşmaz. İade olursa komisyon geri alınır.'].map(metin),
           'Bu hesap örnektir. Gerçek tahsilatı veya ödemeyi kanıtlamaz.', ...motor.hatalar] };
     }
     // Eski ağ örneğinin kişi adları ve kategorik hukuk iddiası rehbere taşınmaz.
@@ -174,7 +201,12 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
     ? ['Ücretsiz kullanımın hangi faturaya uygulanacağını finans sorumlusu bildirmelidir.', 'İptal, paket değişimi ve kullanılmayan süre için yazılı kural gerekir.']
     : rol === 'kadrolu'
       ? ['Prim için tahsilat ve iade koşullarının tamamlanması gerekir.', 'Ödeme günü ile iade süresini finans ekibi prim ekinde belirtmelidir.']
-      : [...ODEME_KURALLARI, 'Müşteri ödemeyi yapmadan pay oluşmaz. Finans sorumlusu bu kuralları sözleşmeye yazar.'];
+      : marka === 'segika'
+        ? [`Bu örnekte komisyonun ${yuzde(a.ilkOdeme)} kısmı ilk ödemede verilir.`,
+           `Şirket ilk ödemeyi ${a.ilkGun}. gün yapar. Kalan ödemeyi ${a.kalanGun}. gün yapar.`,
+           'Günler müşterinin ödeme gününden sayılır. Finans sorumlusu bu kuralı sözleşmeye yazar.',
+           'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.']
+        : [...ODEME_KURALLARI, 'Müşteri ödemeyi yapmadan pay oluşmaz. Finans sorumlusu bu kuralları sözleşmeye yazar.'];
   const secili = programlar.find((p) => p.id === a.kosul?.[rol]);
   const seciliOrnek: HesapOrnegi | null = secili ? { urun: secili.urun,
     satirlar: [{ ad: 'Çalışma programı', deger: secili.ad }, { ad: secili.etiket, deger: secili.sonuc },
@@ -182,8 +214,8 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
     aciklama: [secili.aciklama, ...secili.kurallar] } : null;
   return {
     ornekler: [seciliOrnek ?? ornek(rol, marka, a)], odeme: secili ? ['Finans sorumlusu bu programın ödeme koşullarını yazılı anlaşmada doğrulasın.'] : odeme,
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi için ikinci sürüm ve ağ hesabı gösterilmez.
-    digerSurum: rol === 'cozum' || rol === 'elci' ? [] : [ikinciSurum(rol, marka)], programlar, ayriProgram: Boolean(secili),
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi için ikinci sürüm ve ağ hesabı gösterilmez.
+    digerSurum: marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? [] : [ikinciSurum(rol, marka)], programlar, ayriProgram: Boolean(secili),
     plan: marka === 'segika' ? [
       `Genel planda Segika ekibi ${int(DEFAULT_PARAMS.segikaCount)} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Genel kadro planında net maaş ${tl(DEFAULT_PARAMS.segikaSalary)} olarak yazılıdır.`,

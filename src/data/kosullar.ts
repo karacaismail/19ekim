@@ -62,7 +62,7 @@ export const KOSULLAR: Record<RolId, KosulTanim[]> = {
     { id: 'teknoloji', ad: 'Teknoloji ortağı', kaynak: 'İş ortaklığı', marka: ['istoc'] },
     { id: 'bolge', ad: 'Bölge temsilcisi', kaynak: 'İş ortaklığı', marka: ['istoc'] },
   ],
-  tavsiye: [ANA, { id: 'tek-sefer', ad: 'Tek seferlik tavsiye komisyonu', kaynak: 'Affilate', marka: ['segika'] }],
+  tavsiye: [ANA, { id: 'tek-sefer', ad: 'Tek seferlik tavsiye ödülü', kaynak: 'Affilate', marka: ['segika'] }],
   elci: [ANA],
 };
 
@@ -133,6 +133,13 @@ export function affilateYillari(r: MotorSonuc, ufukAy: number) {
 
 /** Ürüne uygun setler; seçili set ürüne uymuyorsa ana program. */
 export const kosulListesi = (a: Ayar, rol: RolId) => KOSULLAR[rol].filter((k) => k.marka.includes(a.marka));
+/**
+ * Çalışma rehberinde gösterilmeyen programlar. Kullanıcı kararı 20 Kasım 2026 Cuma: temsilci ağı (MLM) ayrı bir süreçtir.
+ * iStoc kadrolu uzman SGK'lı saha satış uzmanıdır ve yalnız paket kademesi primini alır.
+ */
+export const REHBER_DISI_PROGRAMLAR: Partial<Record<Marka, Partial<Record<RolId, string[]>>>> = { istoc: { kadrolu: ['saha', 'lider'] } };
+export const rehberdeMi = (marka: Marka, rol: RolId, id: string) => !(REHBER_DISI_PROGRAMLAR[marka]?.[rol] ?? []).includes(id);
+export const rehberKosulListesi = (a: Ayar, rol: RolId) => kosulListesi(a, rol).filter((k) => rehberdeMi(a.marka, rol, k.id));
 export function seciliKosul(a: Ayar, rol: RolId): KosulTanim {
   const liste = kosulListesi(a, rol);
   return liste.find((k) => k.id === a.kosul?.[rol]) ?? ANA;
@@ -192,7 +199,7 @@ function yillaraSonuc(a: Ayar, satis: number[], oranlar: readonly number[], kim:
       ...oranlar.map((o, i) => ({ ad: `Müşteri başı ${i + 1}. yıl`, formul: `${t(yillik)} × ${yuzde(o)}`, sonuc: t(yillik * o) })),
       { ad: '3 yılda gelen müşteri', formul: 'Aylık satışların toplamı', sonuc: sayi(musteri) },
     ],
-    kurallar: ['Komisyon hizmet ayında kazanılır ve o ay ödenir.', 'Müşteri ödemezse komisyon doğmaz. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez.', 'Hesap, müşterilerin aboneliği her yıl yenilediğini varsayar.', ...ekKural],
+    kurallar: ['Komisyon hizmet ayında kazanılır ve o ay ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Hesap, müşterilerin aboneliği her yıl yenilediğini varsayar.', ...ekKural],
     veri: { yil1: Math.round(yillar[0]), yil2: Math.round(yillar[1]), yil3: Math.round(yillar[2]), toplam3Yil: Math.round(toplam), musteri3Yil: Math.round(musteri * 10) / 10 },
   };
 }
@@ -200,7 +207,7 @@ function yillaraSonuc(a: Ayar, satis: number[], oranlar: readonly number[], kim:
 /* ---------- Ortak kurallar ---------- */
 
 const SEGIKA_ORTAK_KURALLARI = [
-  'Şirket kaydı 1 iş günü içinde kabul eder ya da reddeder. Kabul edilen firma 90 gün boyunca ortak adına korunur.',
+  'Şirket kaydı 1 iş günü içinde kabul eder ya da reddeder. Kabul edilen firma 12 ay boyunca ortak adına korunur.',
   '60 gün boyunca ilerleme olmazsa kayıt yeniden incelenir. Son 90 günde Segika ile teması olan firma yeni müşteri sayılmaz.',
   '%15’lik bütçe ortaklar arasında paylaştırılır. Her ortak için ayrıca %15 eklenmez.',
   'Liste fiyatının altında satış yapılmaz.',
@@ -383,13 +390,14 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
     return {
       etiket: 'Tavsiye edenin kazancı',
       deger: t(birim),
-      aciklama: `Tavsiye ettiği müşterinin ilk faturasından bir kez ${yuzde(a.tekSeferOran)} alır. Bu tutar para olarak ödenir.`,
+      aciklama: `Tavsiye ettiği müşterinin ilk faturasının ${yuzde(a.tekSeferOran)} değerinde bir kez ödül alır. Ödül nakit ödenmez. Ödül, Segika panelinde ek kullanım hakkıdır.`,
       bize: `Yeni müşterinin yıllık paketinden bize ${t(yillik - birim)} kalır.`,
       ozet: t(birim),
       ozetBirim: '',
       donemler: [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye`, yillik: birim * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(birim)}` }],
       hesap: [{ ad: 'İlk faturadan', formul: `${t(yillik)} × ${yuzde(a.tekSeferOran)}`, sonuc: t(birim) }],
-      kurallar: ['Komisyon, müşteri ödeyince kazanılır ve aynı ay ödenir.', 'Komisyon yalnız ilk fatura için ödenir.', 'Müşteri ödemezse komisyon doğmaz. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez.', 'Müşteri desteğini Segika verir.'],
+      // Kullanıcı kararı 20 Kasım 2026 Cuma: bu program istisna olarak kalır. Ödül nakit değil, panelde ek kullanım hakkıdır.
+      kurallar: ['Ödül, müşteri ödeyince kazanılır ve aynı ay verilir.', 'Ödül yalnız ilk fatura için verilir.', 'Ödül nakit ödenmez. Ödül, Segika panelinde ek kullanım hakkıdır.', 'Müşteri ödemezse ödül doğmaz. İade olursa ödül geri alınır.', 'Müşteri desteğini Segika verir.'],
       veri: { oran: a.tekSeferOran, tavsiyeBasina: Math.round(birim) },
     };
   }

@@ -1844,7 +1844,8 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Bu kural eski “kota üstü prim” hesabının yerine geçer. Segika kadrolu uzman kota üstü prim almaya devam eder.
   Segika primi kotayı aşan cironun %10'udur (kullanıcı kararı 20 Kasım 2026).
   Hesap `kazancPlani.ts → paketPrimi` işlevindedir. Bunu `tests/kazanc-plani.spec.ts` denetler.
-- Ödeme kuralları (kullanıcı kararları 20 Kasım 2026). Bu kurallar yukarıdaki eski dönem oranlarının yerine geçer.
+- Ödeme kuralları (kullanıcı kararları 20 Kasım 2026). Bu kurallar yalnız iStoc içindir. Segika değişmedi.
+  iStoc'ta bu kurallar yukarıdaki eski dönem oranlarının yerine geçer. Segika eski modelle kalır (`odeme: 'eski'`).
   - Ciro, ortağın müşterilerinin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.
   - Kurulum ücreti ciroya girmez. Ortak bu ücretten pay almaz.
   - Aylık pakette satışı kapatan her ay pay alır. Pay en çok 12 ay sürer.
@@ -1855,10 +1856,14 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   - Tanıştırılan müşteri 90 gün ortak adına korunur. Plandaki süre seçicisi 3 ay ile açılır.
   - Müşteri ayrılırsa pay durur. Ödenmiş pay geri istenmez.
   - Rol rehberlerindeki eski kural kalktı. Eski kural yıllık paketin yüzdesini 14. ve 60. günde ödüyordu.
-  - Çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü ve ağ kademesi gösterilmez.
-  - Mevcut müşteri nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede kazanç planı görünmez.
-  - Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır. Rehber bu oranı plandan alır.
-  Cümleler `kazancPlani.ts → ODEME_KURALLARI` listesindedir. Plan ve rehberler aynı listeyi kullanır.
+  - iStoc çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü ve ağ kademesi gösterilmez.
+  - iStoc mevcut müşterisi nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede kazanç planı görünmez.
+  - iStoc kadrolu uzman SGK'lı saha satış uzmanıdır. Yalnız paket kademesi primini alır.
+    Temsilci ağı (MLM) ayrı süreçtir. “Saha personeli” ve “Ekip lideri” programları rehberde görünmez (`REHBER_DISI_PROGRAMLAR`).
+  - Segika için yalnız iki karar alındı. Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır. Rehber bu oranı plandan alır.
+    Segika “Tek seferlik tavsiye ödülü” istisna olarak kalır. Ödül nakit değildir, Segika panelinde ek kullanım hakkıdır.
+    Ek kullanım hakkının değeri, eski komisyon tutarı kadar gösterilir. Bu, kullanıcının sözünden çıkarılan yorumdur.
+  Cümleler `kazancPlani.ts → ODEME_KURALLARI` listesindedir. iStoc planı ve iStoc rehberleri aynı listeyi kullanır.
   Tarayıcı kaydı anahtarı `turksab-kazanc-plani-v6-<proje>` oldu. Bunu `tests/kazanc-plani.spec.ts` denetler.
   Kullanıcıya bildirilen sonuç: yıllık satışta şirket daha az gelir alır ama ortağa daha çok öder. Kullanıcı kuralı böyle onayladı.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).

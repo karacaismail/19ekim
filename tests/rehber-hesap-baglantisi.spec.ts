@@ -6,10 +6,8 @@ import { expect, test, type Page } from './fixtures/persona';
 
 const urun = (page: Page, ad: 'iStoc' | 'Segika') => page.getByRole('group', { name: 'Ürün' }).getByRole('button', { name: ad, exact: true });
 
-// Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi belgesinde hesap sürümü bağlantısı yoktur.
-// Bağlantılar kadrolu uzman belgesinde kalır.
 async function rehberBaglantisi(page: Page, ad: string, secici: string) {
-  await page.goto('politikalar/?proje=segika&rol=kadrolu');
+  await page.goto('politikalar/?proje=segika&rol=cozum');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   const adres = await page.locator(secici).filter({ hasText: ad }).first().getAttribute('href');
   expect(adres, ad).toBeTruthy();
@@ -19,7 +17,7 @@ async function rehberBaglantisi(page: Page, ad: string, secici: string) {
 test('Segika rehberinin birinci sürüm bağlantısı Segika hesabını ve rehberin rolünü açar', async ({ page }) => {
   await page.goto(await rehberBaglantisi(page, 'Birinci sürümdeki hesabı açın', 'a[href*="surum=v1"]'));
   await expect(urun(page, 'Segika')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('tablist', { name: 'Roller' }).getByRole('tab', { selected: true })).toHaveAttribute('id', 'so2-sekme-kadrolu');
+  await expect(page.getByRole('tablist', { name: 'Roller' }).getByRole('tab', { selected: true })).toHaveAttribute('id', 'so2-sekme-cozum');
 });
 
 test('Segika rehberinin ikinci sürüm bağlantısı Segika hesabını açar ve seçimi saklar', async ({ page }) => {

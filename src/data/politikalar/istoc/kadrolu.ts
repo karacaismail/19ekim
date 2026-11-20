@@ -127,7 +127,7 @@ export const politika: ProjePolitika = {
       "baslik": "Priminizi kontrol edin",
       "metin": [
         "Kota uygulanan aylarda prim, kotayı aşan satış tutarından doğar. Kota, prim almak için aşmanız gereken satış tutarıdır.",
-        "Prim ekinde saha veya ekip lideri seçeneği yazıyorsa o seçeneğin hesabı uygulanır.",
+        "Kadrolu uzman yalnız paket kademesi primini alır. Saha personeli ve ekip lideri hesabı bu rehberde yoktur.",
         "Şirket primi satıcı ödeyince ve iade süresi geçince öder.",
         "Dönem sonunda prim listesindeki satıcıları ziyaret kayıtlarınızla karşılaştırın.",
         "Eksik satış varsa satış kaydıyla birlikte yazılı itiraz edin.",

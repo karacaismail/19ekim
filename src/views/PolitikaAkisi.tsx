@@ -3,7 +3,7 @@ import { Accordion } from '@mantine/core';
 import { Choice, Section } from '../components/ui';
 import { PersonaSyncStatus } from '../components/PersonaSyncStatus';
 import { Sec } from '../components/sadeKit';
-import { kosulListesi, seciliKosul } from '../data/kosullar';
+import { rehberKosulListesi, seciliKosul } from '../data/kosullar';
 import { SEVIYE_ADI, type Marka, type RolId, type Seviye } from '../data/satisOrtakligi';
 import type { AkisOlustur, AkisYaniti } from '../data/politikaAkislari/types';
 import { akisGorunumu, olasiSonrakiler, sonucSatiri, sorumluCumlesi } from '../data/politikaAkislari/motor';
@@ -155,12 +155,12 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
             <p>{akis.ozet}</p><p>{akis.hedef}</p>
             <p>Aşağıdaki seçimler bu cihazda kalmaz. “Satış ortaklığı programı” sayfasını ve bu rehberi açan herkes yeni değeri görür.</p>
             <p>Seçim iş sırasını değiştirirse önceki adım yanıtları sıfırlanır.</p>
-            <Sec label="Hangi programla çalışırsınız?" value={seciliKosul(ayar, rol).id} options={kosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
+            <Sec label="Hangi programla çalışırsınız?" value={seciliKosul(ayar, rol).id} options={rehberKosulListesi(ayar, rol).map((k) => ({ id: k.id, name: acikAd(k.ad) }))}
               onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
             {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo da', 'Ürün gösterimi de') }))}
               onChange={(value) => guncelle({ [seviyeKey]: value })} />}
-            {/* Kullanıcı kararı 20 Kasım 2026 Cuma: mevcut müşteri sekmesinde kazanç planı yoktur. */}
-            {rol !== 'tavsiye' && <a className="pol-belge-baglanti" href="#kazanc-plani">Kazanç planının değerlerini görün</a>}
+            {/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc mevcut müşteri sekmesinde kazanç planı yoktur. */}
+            {(rol !== 'tavsiye' || proje === 'segika') && <a className="pol-belge-baglanti" href="#kazanc-plani">Kazanç planının değerlerini görün</a>}
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

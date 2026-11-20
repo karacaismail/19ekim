@@ -243,7 +243,7 @@ export const politika: ProjePolitika = {
         "Sözleşme başvurunun size bağlanma yöntemini açıklamalıdır.",
         "Danışman da aynı işvereni getirebilir. Ortaklık sorumlusu geçerli kaydı belirleme kuralını yazsın.",
         "Görüntülenme veya tıklama tek başına satış komisyonu sayılmaz.",
-        "Komisyon yalnız ödemesi alınan satıştan doğar. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez."
+        "Komisyon yalnız ödemesi alınan satıştan doğar. Sözleşme iade olursa ne olacağını yazmalıdır."
       ]
     },
     {
@@ -251,7 +251,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Finans sorumlusu elçinin ödeme belgesini belirlesin. Fatura gerekip gerekmediğini açıklasın.",
         "Stopaj, ödemeden yapılan vergi kesintisidir. Mali müşavir vergi ve stopaj uygulamasını doğrulamalıdır.",
-        "Pay, müşterinin ödeme yaptığı ayda hesaplanır. Finans sorumlusu ödeme gününü yazmalıdır."
+        "Gün sayımı müşterinin ödeme gününden başlar. Finans sorumlusu ödeme gününü yazmalıdır."
       ]
     },
     {

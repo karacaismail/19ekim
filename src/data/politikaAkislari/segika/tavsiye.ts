@@ -12,7 +12,7 @@ const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ i
 const sonlu = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, ...aciklama: string[]): AkisSecenegi =>
   ({ id, metin, tur, sonuc: { baslik, metin: aciklama } });
 
-/** Segika mevcut müşteri tavsiyesi. Ana program ücretsiz kullanım, ayrı program tek seferlik komisyon verir. */
+/** Segika mevcut müşteri tavsiyesi. Ana program ücretsiz kullanım, ayrı program tek seferlik ödül verir. Ödül nakit değil, panel kullanım hakkıdır. */
 const akisOlusturTam: AkisOlustur = (a) => {
   const secili = a.kosul?.tavsiye;
   const program = KOSULLAR.tavsiye.some((k) => k.id === secili && k.marka.includes('segika')) ? secili! : 'ana';
@@ -193,7 +193,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
     };
   }
 
-  /* Tek seferlik komisyon: tutar ve ödeme zamanı Affilate motorundan okunur. */
+  /* Tek seferlik ödül (kullanıcı kararı 20 Kasım 2026: nakit değil, panel kullanım hakkı): tutar ve ödeme zamanı Affilate motorundan okunur. */
   const r = affilateHesabi(a, 'ayse');
   const ozet = r.ortaklar.find((o) => o.ortak === 'ayse');
   const komisyon = (ozet?.planlanan ?? 0) / 100;
@@ -207,74 +207,74 @@ const akisOlusturTam: AkisOlustur = (a) => {
   const zamanMetni = odemeAylari.length === 0
     ? 'Bu örnekte hesap süresi içinde ödeme yok.'
     : odemeAylari.length === 1
-      ? (ayniAy ? 'Şirket komisyonu tahsilat ayında tek seferde öder.' : 'Şirket komisyonu hizmet ayından sonra tek seferde öder.')
-      : `Şirket komisyonu ${sayi(odemeAylari.length)} aya bölerek öder.`;
+      ? (ayniAy ? 'Şirket ödülü tahsilat ayında tek seferde verir.' : 'Şirket ödülü hizmet ayından sonra tek seferde verir.')
+      : `Şirket ödülü ${sayi(odemeAylari.length)} aya bölerek verir.`;
 
   const adimlar: AkisAdimi[] = [
     deneyim,
     komisyonVar
       ? {
-          id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
-          terimler: ['Komisyon, satıştan size ödenen paydır.'],
+          id: 'secim', ad: 'Ödül seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
+          terimler: ['Ödül, tavsiye karşılığı size verilen panel kullanım hakkıdır.'],
           yap: [
-            `Ödül, ilk faturanın ${yuzde(a.tekSeferOran)} kadarı nakit komisyondur.`,
+            `Ödül, ilk faturanın ${yuzde(a.tekSeferOran)} değerinde panel kullanım hakkıdır.`, 'Ödül nakit ödenmez.',
             'Bu seçenek ücretsiz kullanımla birleşmez.',
-            `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeye komisyon öder.`,
+            `Şirket yılda en çok ${sayi(a.tavsiyeSinir)} tavsiyeye ödül verir.`,
           ],
           dikkat: 'Bu seçenek isteğe bağlıdır. Müşteri sorumlusu seçiminizi yazılı kaydeder.',
           soru: 'Firmanız hangi ödülü yazılı seçti?',
           secenekler: [
-            devam('komisyon', 'Komisyonu yazılı olarak seçtik', 'firma'),
+            devam('komisyon', 'Ödülü yazılı olarak seçtik', 'firma'),
             sonlu('bitir', 'kullanim', 'Ücretsiz kullanımı istiyoruz', 'Bu yol kapandı',
-              'Bu rehber komisyon seçeneğini izler.', 'Ücretsiz kullanım için ana programı müşteri sorumlusuyla konuşun.'),
+              'Bu rehber ödül seçeneğini izler.', 'Ücretsiz kullanım için ana programı müşteri sorumlusuyla konuşun.'),
             sonlu('bekle', 'yazisiz', 'Seçimimiz henüz yazılı değil', 'Yazılı seçimi bekleyin',
               'Müşteri sorumlusu seçimi yazılı kaydeder.', 'Kayıt gelince bu adımı yeniden açın.'),
           ],
         }
       : {
-          id: 'secim', ad: 'Komisyon seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
-          terimler: ['Komisyon, satıştan size ödenen paydır.'],
-          yap: [ 'Şu anki koşullarda komisyon tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirir.'],
-          soru: 'Komisyon oranı size yazılı olarak geldi mi?',
+          id: 'secim', ad: 'Ödül seçeneğini yazılı seçin', sorumlu: 'Müşteri sorumlusu (önerilen görev)', ek: 'anlasma',
+          terimler: ['Ödül, tavsiye karşılığı size verilen panel kullanım hakkıdır.'],
+          yap: [ 'Şu anki koşullarda ödül tutarı oluşmuyor.', 'Müşteri sorumlusu geçerli oranı yazılı bildirir.'],
+          soru: 'Ödül oranı size yazılı olarak geldi mi?',
           secenekler: [
             sonlu('bekle', 'oran-yok', 'Oran bize henüz bildirilmedi', 'Oranı bekleyin',
-              'Oran olmadan komisyon hesaplanmaz.', 'Müşteri sorumlusu oranı yazılı bildirir.', 'Oran yazılınca bu adımı yeniden açın.'),
-            sonlu('bitir', 'vazgec', 'Komisyonsuz tanıştırma yapmayacağız', 'Bu yol kapandı',
-              'Komisyon oluşmadığı için tanıştırma yapmadınız.', 'Mevcut hizmetiniz bundan etkilenmez.'),
+              'Oran olmadan ödül hesaplanmaz.', 'Müşteri sorumlusu oranı yazılı bildirir.', 'Oran yazılınca bu adımı yeniden açın.'),
+            sonlu('bitir', 'vazgec', 'Ödülsüz tanıştırma yapmayacağız', 'Bu yol kapandı',
+              'Ödül oluşmadığı için tanıştırma yapmadınız.', 'Mevcut hizmetiniz bundan etkilenmez.'),
           ],
         },
     firma,
     basvuru,
     {
       id: 'satis', ad: 'İlk faturayı izleyin', sorumlu: 'Satış uzmanı (önerilen görev)',
-      yap: ['Satış uzmanı firmaya tablo fiyatıyla teklif verir.', tabanMetni, 'Şirket komisyonu yalnız ilk fatura için hesaplar.'],
+      yap: ['Satış uzmanı firmaya tablo fiyatıyla teklif verir.', tabanMetni, 'Şirket ödülü yalnız ilk fatura için hesaplar.'],
       soru: 'Yeni firmaya ilk fatura kesildi mi?',
       secenekler: [
         devam('kesildi', 'İlk faturanın kesildiğini öğrendik', 'tahsilat'),
         sonlu('bekle', 'gorusme', 'Görüşme hâlâ sürüyor', 'Satış kararını bekleyin',
           'Görüşmeyi satış uzmanı yürütür.', 'Karar çıkınca bu adımı yeniden açın.'),
         sonlu('bitir', 'vazgecti', 'Firmanın almaktan vazgeçtiğini öğrendik', 'Tavsiye sonuçlanmadı',
-          'Satış olmadığı için komisyon doğmadı.', 'Firmaya yeniden baskı yapmayın.'),
+          'Satış olmadığı için ödül doğmadı.', 'Firmaya yeniden baskı yapmayın.'),
       ],
     },
     {
       id: 'tahsilat', ad: 'Tahsilatı izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)',
-      yap: ['Komisyon, yeni firma ilk faturayı ödeyince doğar.', 'Finans sorumlusu tahsilat durumunu size bildirir.'],
+      yap: ['Ödül, yeni firma ilk faturayı ödeyince doğar.', 'Finans sorumlusu tahsilat durumunu size bildirir.'],
       soru: 'Yeni firma ilk faturayı ödedi mi?',
       secenekler: [
         devam('odedi', 'Firmanın ödediğini öğrendik', 'odeme'),
         sonlu('bekle', 'bekliyor', 'Ödeme henüz yapılmadı', 'Ödemeyi bekleyin',
           'Finans sorumlusu ödeme olunca size bildirir.', 'Bildirim gelince bu adımı yeniden açın.'),
-        sonlu('bitir', 'odemeyecek', 'Firma ödemeyeceğini söyledi', 'Komisyon doğmadı',
-          'Yeni firma ödemezse komisyon doğmaz.', 'Finans sorumlusu sonucu yazılı açıklar.'),
+        sonlu('bitir', 'odemeyecek', 'Firma ödemeyeceğini söyledi', 'Ödül doğmadı',
+          'Yeni firma ödemezse ödül doğmaz.', 'Finans sorumlusu sonucu yazılı açıklar.'),
       ],
     },
     {
-      id: 'odeme', ad: 'Komisyon ödemesini izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
-      terimler: ['Komisyon, satıştan size ödenen paydır.'],
-      yap: [ `Bu örnekte komisyonunuz ${tl(komisyon)} olur.`, zamanMetni, 'Finans sorumlusu ödeme belgesini ve vergi işlemini henüz belirlemedi.'],
+      id: 'odeme', ad: 'Ödül ödemesini izleyin', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
+      terimler: ['Ödül, tavsiye karşılığı size verilen panel kullanım hakkıdır.'],
+      yap: [ `Bu örnekte ödülünüz ${tl(komisyon)} değerinde panel kullanım hakkıdır.`, zamanMetni, 'Finans sorumlusu ödeme belgesini ve vergi işlemini henüz belirlemedi.'],
       dikkat: 'Ödeme zamanını yazılı tavsiye koşulu belirler.',
-      soru: 'Komisyon ödemesi size geldi mi?',
+      soru: 'Ödül ödemesi size geldi mi?',
       secenekler: [
         devam('geldi', 'Ödeme hesabımıza geçti', 'iade'),
         sonlu('bekle', 'plan-yok', 'Ödeme planı bize söylenmedi', 'Ödeme planını bekleyin',
@@ -286,7 +286,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
     {
       id: 'iade', ad: 'İade durumunu bilin', sorumlu: 'Finans sorumlusu (önerilen görev)',
       terimler: ['İade, ödenen paranın geri verilmesidir.'],
-      yap: [ 'Yeni firma iade alırsa şirket komisyonu geri alır.', 'Finans sorumlusu geri alma yöntemini yazılı açıklar.'],
+      yap: [ 'Yeni firma iade alırsa şirket ödülü geri alır.', 'Finans sorumlusu geri alma yöntemini yazılı açıklar.'],
       soru: 'Yeni firma parasını geri istedi mi?',
       secenekler: [
         sonlu('tamamla', 'iade-yok', 'Bildiğimiz bir iade isteği yok', 'Tavsiye işi bitti',
@@ -297,11 +297,11 @@ const akisOlusturTam: AkisOlustur = (a) => {
     },
   ];
   return {
-    baslik: 'Segika tek seferlik tavsiye komisyonu',
-    ozet: 'Başka bir firmayı tanıştırırsınız. Ödül ilk faturadan bir kez nakit komisyondur.',
+    baslik: 'Segika tek seferlik tavsiye ödülü',
+    ozet: 'Başka bir firmayı tanıştırırsınız. Ödül ilk faturadan bir kez nakit ödüldur.',
     hedef: komisyonVar
-      ? 'Yeni firma ilk faturayı öderse firmanız tek seferlik komisyon alır.'
-      : 'Şu anki koşullarda komisyon oluşmuyor. Önce oranı müşteri sorumlusundan öğrenin.',
+      ? 'Yeni firma ilk faturayı öderse firmanız tek seferlik ödül alır.'
+      : 'Şu anki koşullarda ödül oluşmuyor. Önce oranı müşteri sorumlusundan öğrenin.',
     ilk: 'deneyim',
     adimlar: komisyonVar ? adimlar : adimlar.slice(0, 2),
   };

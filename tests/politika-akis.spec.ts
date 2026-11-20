@@ -174,10 +174,8 @@ test('açık konular, gözden kaçabilecek sorunlar ve fırsatlar tek tıkla aç
   expect(await bolum.locator('[data-firsat]').count()).toBeGreaterThanOrEqual(3);
 });
 
-// Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi belgesinde hesap sürümü bağlantısı yoktur.
-// Bağlantılar kadrolu uzman belgesinde kalır.
 test('Segika rehberindeki hesap bağlantısı Segika hesabını açar', async ({ page }) => {
-  await page.goto('politikalar/?proje=segika&rol=kadrolu');
+  await page.goto('politikalar/?proje=segika&rol=cozum');
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Birinci sürümdeki hesabı açın' })).toHaveAttribute('href', /proje=segika/);
   // İkinci sürüm bağlantısı kapalı bir alt bölümdedir. Bağlantının adresi yine denetlenir.
