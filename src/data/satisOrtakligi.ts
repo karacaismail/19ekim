@@ -49,6 +49,8 @@ export interface Ayar {
    * Varsa prim, ulaşılan kademenin oranıyla bütün satıştan hesaplanır. Yoksa eski kota ve prim hesabı geçerlidir.
    */
   kadroluPaket?: { esik: [number, number, number]; oran: [number, number, number] };
+  /** iStoc kadrolu uzmanın bu ay sattığı aylık paket sayısı. Paket kademesinde yıllık paketlerle birlikte sayılır. */
+  kadroluAylikSatis?: number;
   /** iStoc çözüm ortağı: yaptığı işe göre oran (tanıştırır / demo / kapanış). */
   cozumSeviye: Seviye;
   /** Segika çözüm ortağı komisyonu: müşteri desteğini ortak verir (kullanıcı kararı 2026-11-03). */

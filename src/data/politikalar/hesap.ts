@@ -28,12 +28,14 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
   if (rol === 'kadrolu' && marka === 'istoc' && a.kadroluPaket && a.model === 'oran') {
     // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzmanın kotaları paket sayısıdır.
     const kd = a.kadroluPaket;
-    const p = paketPrimi(kd, a.kadroluSatis, fiyat);
+    const aylikAdet = a.kadroluAylikSatis ?? 0;
+    const p = paketPrimi(kd, a.kadroluSatis, fiyat, aylikAdet, v1.aylikFiyat(a));
     const kotaTutari = a.maas * a.kotaCarpan;
     satirlar.push(
       { ad: 'Aylık örnek net maaş', deger: tl(a.maas) },
       { ad: 'Maaş kotası', deger: `${tl(a.maas)} × ${sayi(a.kotaCarpan)} = ${tl(kotaTutari)}` },
       { ad: 'Bu ay satılan yıllık paket', deger: `${sayi(a.kadroluSatis)} adet` },
+      { ad: 'Bu ay satılan aylık paket', deger: `${sayi(aylikAdet)} adet` },
       { ad: 'Bu satışların paket bedeli', deger: tl(p.ciro) },
       { ad: 'Ulaşılan kademe', deger: p.seviye ? `K${p.seviye} (${yuzde(p.oran)})` : 'Prim yok' },
       { ad: 'Örnek prim', deger: p.seviye ? `${tl(p.ciro)} × ${yuzde(p.oran)} = ${tl(p.prim)}` : tl(0) },
@@ -42,7 +44,9 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     aciklama.push(`Maaş kotası, net maaşın ${sayi(a.kotaCarpan)} katıdır.`);
     aciklama.push(`${sayi(kd.esik[0] - 1)} paket ve altında prim yoktur.`);
     kd.esik.forEach((e, i) => aciklama.push(`${sayi(e)} paket ve üstünde K${i + 1} primi ${yuzde(kd.oran[i])} olur.`));
+    aciklama.push('Aylık ve yıllık paketler birlikte sayılır.');
     aciklama.push('Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır.');
+    aciklama.push('Aylık paketin bedeli o ayın bedelidir. Aylık paketin primi 12 aya kadar her ay yeniden ödenir.');
     aciklama.push('Paket sayısı her ay yeniden sayılır.');
     aciklama.push('İlk iki ay kota uygulanmaz. Şirket bu iki ayın primini henüz açıklamadı.');
   } else if (rol === 'kadrolu') {

@@ -442,11 +442,11 @@ test('iStoc kadrolu prim kademesi paket sayısına göre bütün satışa uygula
   expect(p.kadrolu.paketOran).toEqual([0.05, 0.07, 0.1]);
   expect(p.kadrolu.ornekPaket).toBe(8);
   const kademe = { esik: p.kadrolu.paketEsik, oran: p.kadrolu.paketOran };
-  expect(k.paketPrimi(kademe, 4, 100_000)).toEqual({ seviye: 0, oran: 0, ciro: 400_000, prim: 0 });
-  expect(k.paketPrimi(kademe, 5, 100_000)).toEqual({ seviye: 1, oran: 0.05, ciro: 500_000, prim: 25_000 });
-  expect(k.paketPrimi(kademe, 8, 100_000)).toEqual({ seviye: 2, oran: 0.07, ciro: 800_000, prim: 56_000 });
+  expect(k.paketPrimi(kademe, 4, 100_000)).toEqual({ seviye: 0, oran: 0, adet: 4, ciro: 400_000, prim: 0 });
+  expect(k.paketPrimi(kademe, 5, 100_000)).toEqual({ seviye: 1, oran: 0.05, adet: 5, ciro: 500_000, prim: 25_000 });
+  expect(k.paketPrimi(kademe, 8, 100_000)).toEqual({ seviye: 2, oran: 0.07, adet: 8, ciro: 800_000, prim: 56_000 });
   expect(k.paketPrimi(kademe, 11, 100_000)).toMatchObject({ seviye: 2, prim: 77_000 });
-  expect(k.paketPrimi(kademe, 12, 100_000)).toEqual({ seviye: 3, oran: 0.1, ciro: 1_200_000, prim: 120_000 });
+  expect(k.paketPrimi(kademe, 12, 100_000)).toEqual({ seviye: 3, oran: 0.1, adet: 12, ciro: 1_200_000, prim: 120_000 });
   const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
   const a = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc' }, p);
   expect(a.kadroluPaket).toEqual(kademe);
@@ -463,18 +463,22 @@ test('iStoc kadrolu prim kademesi paket sayısına göre bütün satışa uygula
 test('iStoc kadrolu sekmesi paket kademelerini gösterir ve örnek paket sayısıyla hesaplar', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('politikalar/?proje=istoc&rol=kadrolu');
-  for (const [ad, deger] of [['K1 paket eşiği', '5'], ['K2 paket eşiği', '8'], ['K3 paket eşiği', '12'], ['K1 prim oranı', '%5'], ['K2 prim oranı', '%7'], ['K3 prim oranı', '%10'], ['Örnek aylık paket sayısı', '8']]) {
+  for (const [ad, deger] of [['K1 paket eşiği', '5'], ['K2 paket eşiği', '8'], ['K3 paket eşiği', '12'], ['K1 prim oranı', '%5'], ['K2 prim oranı', '%7'], ['K3 prim oranı', '%10'], ['Bu ay satılan yıllık paket', '8'], ['Bu ay satılan aylık paket', '0']]) {
     await expect(kutu(page, ad)).toHaveValue(deger);
   }
   await expect(kutu(page, 'Kota üstü prim oranı')).toHaveCount(0);
   const seviye = plani(page).locator('[data-kazanc="kadrolu-paket-seviye"]');
   const prim = plani(page).locator('[data-kazanc="kadrolu-paket-prim"]');
   await expect(seviye).toHaveText('K2 (%7)');
-  await expect(prim).toContainText('8 paket ×');
+  await expect(prim).toContainText('8 yıllık ve 0 aylık paket');
   await expect(prim).toContainText('× %7 =');
-  await kutu(page, 'Örnek aylık paket sayısı').fill('4');
+  await kutu(page, 'Bu ay satılan yıllık paket').fill('4');
   await expect(seviye).toHaveText('Prim yok');
-  await kutu(page, 'Örnek aylık paket sayısı').fill('12');
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: aylık paketler de kademede sayılır. 4 yıllık ve 1 aylık paket K1'e ulaşır.
+  await kutu(page, 'Bu ay satılan aylık paket').fill('1');
+  await expect(seviye).toHaveText('K1 (%5)');
+  await kutu(page, 'Bu ay satılan aylık paket').fill('0');
+  await kutu(page, 'Bu ay satılan yıllık paket').fill('12');
   await expect(seviye).toHaveText('K3 (%10)');
   await kutu(page, 'K3 prim oranı').fill('%12');
   await expect(seviye).toHaveText('K3 (%12)');
@@ -569,4 +573,28 @@ test('paket eşiği kalıcı kural olunca pencerede doğru kutu açılır', asyn
   const pencere = page.getByRole('dialog', { name: 'Parametreler' });
   await expect(pencere.getByRole('textbox', { name: 'K1 paket eşiği', exact: true })).toHaveValue('5');
   await expect(pencere.getByRole('textbox', { name: 'Kota üstü prim oranı', exact: true })).toHaveCount(0);
+});
+
+// Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzmanın paket kademesinde aylık ve yıllık paketler birlikte sayılır.
+// Prim, ulaşılan kademenin oranıyla bu ay satılan bütün paketlerin bedelinden hesaplanır.
+test('paket kademesinde aylık ve yıllık paketler birlikte sayılır', async () => {
+  const k = await import('../src/data/kazancPlani');
+  const kademe = { esik: [5, 8, 12], oran: [0.05, 0.07, 0.1] };
+  expect(k.paketPrimi(kademe, 6, 100_000, 2, 10_000)).toEqual({ seviye: 2, oran: 0.07, adet: 8, ciro: 620_000, prim: 43_400 });
+  expect(k.paketPrimi(kademe, 4, 100_000)).toMatchObject({ seviye: 0, adet: 4, prim: 0 });
+  expect(k.KAZANC_VARSAYILAN.kadrolu.ornekAylikPaket).toBe(0);
+  expect(k.KADROLU_PRIM_KURALLARI.join(' ')).toContain('aylık ve yıllık paketler birlikte sayılır.');
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  const plan = structuredClone(k.KAZANC_VARSAYILAN);
+  plan.kadrolu.ornekPaket = 4;
+  plan.kadrolu.ornekAylikPaket = 1;
+  const a = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc' }, plan);
+  expect([a.kadroluSatis, a.kadroluAylikSatis]).toEqual([4, 1]);
+  const { rehberHesabi } = await import('../src/data/politikalar/hesap');
+  const satir = (ad: string) => rehberHesabi('kadrolu', 'istoc', a).ornekler[0].satirlar.find((x) => x.ad === ad)?.deger;
+  expect(satir('Bu ay satılan aylık paket')).toBe('1 adet');
+  expect(satir('Ulaşılan kademe')).toBe('K1 (%5)');
+  const { akisOlustur } = await import('../src/data/politikaAkislari/istoc/kadrolu');
+  expect(JSON.stringify(akisOlustur(a))).toContain('Aylık ve yıllık paketler birlikte sayılır.');
+  expect(k.planOku({ kadrolu: { ornekAylikPaket: 3 } }).kadrolu.ornekAylikPaket).toBe(3);
 });

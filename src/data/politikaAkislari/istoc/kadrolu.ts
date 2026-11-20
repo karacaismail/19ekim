@@ -1,6 +1,6 @@
 import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi } from '../types';
-import { kadrolu, yillikFiyat, type Ayar } from '../../satisOrtakligi';
+import { aylikFiyat, kadrolu, yillikFiyat, type Ayar } from '../../satisOrtakligi';
 import { kosulSonucu, seciliKosul } from '../../kosullar';
 import { num, pct, tlBitisik } from '../../../lib/format';
 import { paketPrimi } from '../../kazancPlani';
@@ -27,15 +27,15 @@ const ODEME = 'Şirket primi müşteri ödeyince ve iade süresi geçince öder.
 
 function primBilgisi(a: Ayar, p: Program) {
   if (p === 'ana' && a.kadroluPaket && a.model === 'oran') {
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: kotalar ayda satılan yıllık paket sayısıdır.
+    // Kullanıcı kararları 20 Kasım 2026 Cuma: kotalar ayda satılan paket sayısıdır. Aylık ve yıllık paketler birlikte sayılır.
     const kd = a.kadroluPaket;
-    const pr = paketPrimi(kd, a.kadroluSatis, yillikFiyat(a));
+    const pr = paketPrimi(kd, a.kadroluSatis, yillikFiyat(a), a.kadroluAylikSatis ?? 0, aylikFiyat(a));
     return {
-      kota: `Kotalar ayda sattığınız paket sayısıdır. ${sayi(kd.esik[0] - 1)} paket ve altında prim yoktur.`,
+      kota: `Kotalar ayda sattığınız paket sayısıdır. Aylık ve yıllık paketler birlikte sayılır. ${sayi(kd.esik[0] - 1)} paket ve altında prim yoktur.`,
       kural: `${sayi(kd.esik[0])} paketten itibaren ${yuzde(kd.oran[0])}, ${sayi(kd.esik[1])} paketten itibaren ${yuzde(kd.oran[1])}, ${sayi(kd.esik[2])} paketten itibaren ${yuzde(kd.oran[2])} prim alırsınız. Oran bütün satışa uygulanır.`,
       ornek: pr.seviye
-        ? `Bu örnekte ${sayi(a.kadroluSatis)} paketle priminiz ${tl(pr.prim)} olur.`
-        : `Bu örnekteki ${sayi(a.kadroluSatis)} paket prim kademesine ulaşmaz.`,
+        ? `Bu örnekte ${sayi(pr.adet)} paketle priminiz ${tl(pr.prim)} olur.`
+        : `Bu örnekteki ${sayi(pr.adet)} paket prim kademesine ulaşmaz.`,
     };
   }
   if (p === 'ana') {

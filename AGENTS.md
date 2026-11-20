@@ -1851,7 +1851,8 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
     Aylık pakette prim her ay ödenir, en çok 12 ay sürer. Yıllık pakette bedelin tamamı satış ayına yazılır, prim bir kerede ödenir.
     Yıllık yenilemede 13. ile 24. ay arası %10 prim verilir. 25. aydan sonra prim yoktur.
     Yalnız tanıştıran, ilk 3 aydaki ödemelerden prim alır. Koruma 90 gündür. Müşteri ayrılırsa prim durur, ödenmiş prim geri istenmez.
-    Açık soru: aylık paket satışı paket kademesinde sayılır mı? Paket kademesi bugün yalnız yıllık paketleri sayar.
+    Paket kademesinde aylık ve yıllık paketler birlikte sayılır (kullanıcı kararı 20 Kasım 2026). Hesap `paketPrimi` işlevindedir.
+    Aylık paketin bedeli o ayın bedelidir. Aylık paketin primi 12 aya kadar her ay yeniden ödenir.
   - iStoc kadrolu uzman SGK'lı saha satış uzmanıdır. Yalnız paket kademesi primini alır.
     Temsilci ağı (MLM) ayrı süreçtir. “Saha personeli” ve “Ekip lideri” programları rehberde görünmez (`REHBER_DISI_PROGRAMLAR`).
   - iStoc çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü gösterilmez. Ağ kademesi bu sürümdedir.
