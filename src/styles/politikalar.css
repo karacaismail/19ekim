@@ -424,3 +424,10 @@ html[data-focus-mode='keyboard'] .pol-kz-merdiven-dugme:focus-visible { outline:
 /* Kullanıcı kararı 17 Kasım 2026 Salı: Parametreler penceresi ekranın tam ortasındadır. Sol ve sağ, üst ve alt boşluklar eşittir. */
 .pol-kz-pencere-kabuk { display: flex; align-items: center; justify-content: center; padding: 0; }
 .pol-kz-pencere-kabuk > .pol-kz-pencere { margin: 0; }
+/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzman ve mevcut müşteri belgesinde ikinci hesap sürümü geçersizdir.
+ * Uyarı okunur kalır. Altındaki eski hesap, geçersiz sayfadaki gibi gri ve üstü çizilidir. Bağlantının alt çizgisi de korunur. */
+.pol-gecersiz-uyari { margin: 0 0 var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-changed); color: var(--text-primary); font-weight: var(--weight-semibold); }
+.pol-gecersiz :is(*, *:hover) { color: var(--text-secondary); text-decoration-line: line-through; text-decoration-color: var(--text-secondary); }
+.pol-gecersiz :is(a, a:hover) { text-decoration-line: underline line-through; }
+/* Klavye odağında üstü çizili çizgi kalkar. Yalnız merkezi odak göstergesi, yani odak renkli alt çizgi görünür. */
+html[data-focus-mode='keyboard'] .pol-gecersiz a:focus-visible { text-decoration-line: underline; text-decoration-color: var(--focus-indicator); }

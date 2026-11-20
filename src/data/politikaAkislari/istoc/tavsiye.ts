@@ -41,8 +41,9 @@ const akisOlusturTam: AkisOlustur = (a) => {
           devam('yazili', 'Koşulu yazılı olarak aldım', 'isletme'),
           sonlu('bekle', 'sozlu', 'Koşulu çarşıda yalnız sözle duydum', 'Yazılı koşulu bekleyin',
             'Sözlü duyduğunuz koşulu esas almayın.', 'Müşteri sorumlusundan yazılı koşulu isteyin.', 'Yazı gelince bu adımı yeniden açın.'),
-          sonlu('bekle', 'surum', 'Bana başka bir sürümün koşulu söylendi', 'Geçerli sürümü öğrenin',
-            'Bu rehber birinci sürüm koşulunu izler.', 'Müşteri sorumlusu geçerli sürümü yazılı açıklar.', 'Açıklama gelince bu adımı yeniden açın.'),
+          // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc'ta ikinci hesap sürümü geçersizdir.
+          sonlu('bekle', 'surum', 'Bana başka bir sürümün koşulu söylendi', 'Birinci sürümün koşulu geçerlidir',
+            'İkinci sürüm artık geçerli değildir.', 'Bu rehber birinci sürüm koşulunu izler.', 'Müşteri sorumlusundan yazılı koşulu isteyin.', 'Yazı gelince bu adımı yeniden açın.'),
         ],
       }
     : {

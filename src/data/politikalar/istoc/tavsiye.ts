@@ -33,7 +33,7 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Geçerli koşulu tavsiyeden önce öğrenin",
       "metin": [
-        "Müşteri sorumlusu geçerli hesap sürümünü size yazılı bildirsin.",
+        "Müşteri sorumlusu ödül koşulunu size yazılı bildirsin.",
         "Bu yazıda ödül koşulu ve yıllık tavsiye sınırı bulunsun.",
         "Çarşıda sözlü duyulan koşulu esas almayın. Yazılı koşulu esas alın.",
         "Yazılı koşul gelmeden ödül beklentisiyle tavsiye yapmayın."
@@ -72,8 +72,7 @@ export const politika: ProjePolitika = {
         "Birinci sürümde yeni müşterinin yıllık paket alması gerekir.",
         "Birinci sürümde yeni müşteri iStoc’u 60 gün kullanmaya devam etmelidir. Müşteri sorumlusu 60 günün hangi tarihten sayılacağını yazar.",
         "Bu iki koşul sağlanırsa şirket ücretsiz kullanımı hesabınıza yazar.",
-        "İkinci sürüm seçildiyse şirket ödemeyi tavsiyeden sonraki belirli bir süre içinde tahsil etmelidir. Süre, “İkinci hesap sürümü seçilirse” bölümünde yazar.",
-        "Şirket ödemeyi bu sürede tahsil edemezse ikinci sürümde ödül hakkı oluşmaz.",
+        "İkinci hesap sürümü artık geçerli değildir. Ödülde yalnız birinci sürümün koşulları geçerlidir.",
         "Şirket yeni müşterinin kendi ödülünü ona ayrıca bildirir."
       ]
     },
@@ -196,7 +195,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Şirket hangi satıcıların katılabileceğini açıkça yazar.",
         "Şirket yeni müşteri tanımını, kayıt tarihini ve sınırın dönemini yazar.",
-        "Şirket geçerli hesap sürümünü ve yürürlük tarihini yazar.",
+        "Şirket koşulların yürürlük tarihini yazar.",
         "Birinci sürümde şirket yıllık paket ve 60 gün kullanım koşulunu yazar."
       ]
     },
@@ -248,15 +247,6 @@ export const politika: ProjePolitika = {
     }
   ],
   "acikKonular": [
-    {
-      "baslik": "Hangi kampanya sürümü geçerli?",
-      "mevcut": "İki hesap sürümü ödül koşulunu farklı anlatır.",
-      "eksik": "Her satıcının kabul ettiği sürüm kayıtlı olmayabilir.",
-      "islem": "Müşteri sorumlusu geçerli sürümü tavsiye öncesinde yazılı bildirsin.",
-      "kanit": "Tavsiye kaydında kabul edilen koşulun tarihi bulunsun.",
-      "firsat": "Kısa koşul özeti yanlış beklentiyi azaltır. Satıcı koşulu bildiği için tavsiyeyi güvenle yapar.",
-      "durdur": "Sürüm seçilmeden ödül tarihi vaat etmeyin."
-    },
     {
       "baslik": "60 gün ne zaman başlar?",
       "mevcut": "Birinci sürüm 60 gün kullanmaya devam etme koşulunu koyar.",

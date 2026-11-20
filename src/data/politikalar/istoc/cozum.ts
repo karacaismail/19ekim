@@ -5,12 +5,13 @@ export const politika: ProjePolitika = {
   "proje": "istoc",
   "ad": "Danışman ve hizmet firması",
   "amac": "Hizmet verdiğiniz işletmeyi iStoc ile buluşturun. Ürün bilgisi ve alıcı görüşmesi ihtiyacını doğru aktarın.",
-  "iliski": "Bağımsız hizmet ortağısınız. Şirketin çalışanı değilsiniz. İşletme size zaten güvenir. iStoc’u bu güvene dayanarak önerirsiniz. Kurulumu ve desteği şirket yapar. Kazancınızı şirkete fatura keserek alırsınız.",
+  "iliski": "Bağımsız hizmet ortağısınız. Şirketin çalışanı değilsiniz. İşletme size zaten güvenir. iStoc’u bu güvene dayanarak önerirsiniz. Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız. Sonraki desteği şirket verir. Kazancınızı şirkete fatura keserek alırsınız.",
   "gorev": [
     "Müşterinizin satış, katalog ve alıcı görüşmesi ihtiyacını öğrenin.",
     "Katkı düzeyinizi ortaklık sorumlusuyla yazılı belirleyin.",
     "Müşteri kaydını ortaklık sorumlusuna açtırın.",
-    "Kurulum ve destek için müşteriyi şirkete devredin."
+    "Satışı siz kapatırsanız kurulumu ve ilk eğitimi siz yapın.",
+    "Yalnız tanıştırırsanız müşteriyi kurulum için şirkete devredin."
   ],
   "sinir": [
     "Müşteri adına yetkiniz yoksa sözleşme kabul edemezsiniz.",
@@ -18,7 +19,8 @@ export const politika: ProjePolitika = {
     "Ürün fiyatını değiştiremezsiniz. Müşteriden ürün bedeli alamazsınız.",
     "Alıcı bulma, sipariş veya satış garantisi veremezsiniz.",
     "Müşterinin izni olmadan ürün görselini veya kataloğunu paylaşmayın.",
-    "Kendi adınıza iStoc kurulum veya destek sözü vermeyin. Bu işleri şirket yapar."
+    "Yalnız tanıştırdıysanız kurulum sözü vermeyin. Bu durumda kurulumu şirket yapar.",
+    "Kurulumdan sonraki destek için söz vermeyin. Sonraki desteği şirket verir."
   ],
   "adimlar": [
     {
@@ -72,15 +74,16 @@ export const politika: ProjePolitika = {
         "Yetkili satış sorumlusu teklifi fiyat tablosundaki fiyatla hazırlar.",
         "Kendi danışmanlık bedeliniz varsa teklifte ayrı gösterin.",
         "İşletme indirim isterse fiyatın herkes için aynı olduğunu söyleyin. Talebi kimseye iletmeyin.",
-        "Müşteri sözleşmeyi kabul edince kurulum devrine geçin."
+        "Müşteri sözleşmeyi kabul edince kuruluma geçin."
       ]
     },
     {
-      "baslik": "Kurulumu şirkete devredin",
+      "baslik": "Kurulumu yapın veya şirkete devredin",
       "metin": [
-        "Kurulumu ve desteği şirket yürütür.",
-        "Devir notuna müşterinin ihtiyacını ve hazır ürün bilgisini yazın.",
-        "Müşteri destek için size gelirse talebi şirkete yönlendirin."
+        "Satışı siz kapattıysanız kurulumu siz yapın. İşletmenin hesabını açın ve ürünlerini yükleyin.",
+        "Sonra işletmeye ilk eğitimi verin. Takılırsanız kurulum ekibinden yardım isteyin.",
+        "Yalnız tanıştırdıysanız kurulumu şirket yapar. Devir notuna müşterinin ihtiyacını ve hazır ürün bilgisini yazın.",
+        "Müşteri sonraki destek için size gelirse talebi şirkete yönlendirin."
       ]
     },
     {
@@ -471,7 +474,7 @@ export const politika: ProjePolitika = {
   ],
   "programlar": {
     "ana": [
-      "İşletmeyi iStoc ile tanıştırırsınız. Kurulumu ve desteği şirket yapar.",
+      "İşletmeyi iStoc ile tanıştırırsınız. Satışı siz kapatırsanız kurulumu da siz yaparsınız. Sonraki desteği şirket verir.",
       "Finans ekibi komisyonu yazılı katkı seviyenize göre hesaplar.",
       "Şirket ortak getirmeye para ödemez."
     ],

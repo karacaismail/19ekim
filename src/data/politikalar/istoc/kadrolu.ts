@@ -286,8 +286,8 @@ export const politika: ProjePolitika = {
     {
       "baslik": "Geçerli sürüm ve program",
       "metin": [
-        "İnsan kaynakları prim ekine hangi hesap sürümünün geçerli olduğunu yazar.",
-        "Bir program seçin. Seçenekler ana program, saha personeli ve ekip lideridir."
+        "İkinci hesap sürümü artık geçerli değildir. İnsan kaynakları prim ekine “Prim kuralları” kartındaki kuralları yazar.",
+        "Kadrolu uzman yalnız ana programla çalışır. Temsilci ağı ayrı bir süreçtir."
       ]
     },
     {

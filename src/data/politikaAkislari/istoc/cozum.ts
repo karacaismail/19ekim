@@ -57,6 +57,38 @@ const SEVIYE_METNI: Record<Seviye, string> = {
   C: 'Katkınız gösterim ve onaylı teklifle satışı kapatmaktır.',
 };
 
+/**
+ * Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc'ta kurulumu satışı kapatan kişi yapar.
+ * Kurulum, işletmenin hesabını açmak ve ürünlerini yüklemektir. Satışı kapatan ilk eğitimi de verir.
+ * Yalnız tanıştırılan satışta satışı ve kurulumu şirket yapar. Kurulumdan sonraki desteği her durumda şirket verir.
+ */
+const KURULUM_TERIMI = 'Kurulum, işletmenin iStoc hesabını açmak ve ürünlerini yüklemektir.';
+function kurulumAdimi(kapatan: boolean): AkisAdimi {
+  if (!kapatan) return {
+    id: 'kurulum', ad: 'Kurulumu şirkete devredin', sorumlu: 'Siz ve kurulum ekibi', ek: 'plan',
+    terimler: [KURULUM_TERIMI],
+    yap: [ 'Siz devir notuna işletmenin ihtiyacını ve hazır ürün bilgisini yazın.', 'Satışı şirket kapattığı için kurulumu kurulum ekibi yapar.', 'İşletme destek isterse siz işletmeyi şirketin destek ekibine yönlendirin.'],
+    soru: 'Kurulum ekibi işi aldı mı?',
+    secenekler: [
+      devam('devraldi', 'Kurulum ekibi işi üstlendi', 'odeme'),
+      son('bekle', 'tarih', 'Kurulum için tarih verilmedi', 'Kurulum tarihi bekleniyor', 'Operasyon yöneticisi kurulum kapasitesini doğrular.', 'İşletmeye kendiniz tarih vermeyin.', 'Tarih bildirilince bu adıma dönün.'),
+    ],
+  };
+  return {
+    id: 'kurulum', ad: 'Kurulumu yapın', sorumlu: 'Siz', ek: 'sinir',
+    terimler: [KURULUM_TERIMI, 'İlk eğitim, işletmeye iStoc’u nasıl kullanacağını ilk kez göstermektir.'],
+    yap: [ 'Satışı siz kapattığınız için kurulumu siz yaparsınız.', 'Siz işletmenin hesabını açın ve ürünlerini yükleyin.', 'Siz işletmeye ilk eğitimi verin.', 'Takılırsanız kurulum ekibinden yardım isteyin.', 'Sonraki desteği şirketin destek ekibi verir.'],
+    soru: 'Kurulum ne durumda?',
+    secenekler: [
+      devam('tamam', 'Hesabı açtım, ürünleri yükledim ve ilk eğitimi verdim', 'odeme'),
+      son('bekle', 'bilgi', 'İşletme ürün bilgisini henüz vermedi', 'Ürün bilgisi bekleniyor',
+        'İşletmenin yetkilisi ürün bilgisini ve görsel iznini hazırlar.', 'Bilgi gelince bu adıma dönün.'),
+      son('bekle', 'yardim', 'Kurulumda takıldım', 'Kurulum ekibinin yardımını bekleyin',
+        'Sorunu kurulum ekibine yazılı iletin.', 'Kurulum ekibi size yardım eder.', 'Sorun çözülünce bu adıma dönün.'),
+    ],
+  };
+}
+
 function anaAkis(a: Ayar): IsAkisi {
   const s = a.cozumSeviye;
   const odemeMetni = a.model === 'oran'
@@ -66,7 +98,8 @@ function anaAkis(a: Ayar): IsAkisi {
     {
       id: 'anlasma', ad: 'Katkı anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
       terimler: ['Ortaklık anlaşması, şirketle aranızdaki yazılı sözleşmedir.'],
-      yap: [ 'Ortaklık sorumlusu katkı seviyenizi sizinle yazılı belirler.', SEVIYE_METNI[s], 'Kurulumu ve desteği şirket yapar.'],
+      yap: [ 'Ortaklık sorumlusu katkı seviyenizi sizinle yazılı belirler.', SEVIYE_METNI[s],
+        s === 'C' ? 'Satışı siz kapattığınız için kurulumu ve ilk eğitimi de siz yaparsınız.' : 'Kurulumu ve desteği şirket yapar.'],
       soru: 'Ortaklık anlaşmanız yazılı mı?',
       secenekler: [
         devam('var', 'Elimde yazılı anlaşma var', 'kayit'),
@@ -167,22 +200,15 @@ function anaAkis(a: Ayar): IsAkisi {
     });
   }
   adimlar.push(
-    {
-      id: 'kurulum', ad: 'Kurulumu şirkete devredin', sorumlu: 'Siz ve kurulum ekibi', ek: 'plan',
-      terimler: ['Kurulum, programın işletme için hazırlanıp açılmasıdır.'],
-      yap: [ 'Siz devir notuna işletmenin ihtiyacını ve hazır ürün bilgisini yazın.', 'Kurulum ekibi işi devralır ve kurulumu yapar.', 'İşletme destek isterse siz onu şirketin destek ekibine yönlendirin.'],
-      soru: 'Kurulum ekibi işi aldı mı?',
-      secenekler: [
-        devam('devraldi', 'Kurulum ekibi işi üstlendi', 'odeme'),
-        son('bekle', 'tarih', 'Kurulum için tarih verilmedi', 'Kurulum tarihi bekleniyor', 'Operasyon yöneticisi kurulum kapasitesini doğrular.', 'İşletmeye kendiniz tarih vermeyin.', 'Tarih bildirilince bu adıma dönün.'),
-      ],
-    },
+    kurulumAdimi(s === 'C'),
     odemeAdimi([yillikPaket(a), odemeMetni,
       `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günler müşterinin ödeme gününden sayılır.`]),
   );
   return {
     baslik: s === 'A' ? 'Tanıştıran danışman' : s === 'B' ? 'Gösterim yapan danışman' : 'Satışı kapatan danışman',
-    ozet: 'Hizmet verdiğiniz işletmeyi iStoc ile buluşturursunuz. Kurulumu ve desteği şirket yapar.',
+    ozet: s === 'C'
+      ? 'Hizmet verdiğiniz işletmeyi iStoc ile buluşturursunuz. Satışı kapatır, kurulumu ve ilk eğitimi yaparsınız.'
+      : 'Hizmet verdiğiniz işletmeyi iStoc ile buluşturursunuz. Kurulumu ve desteği şirket yapar.',
     hedef: 'İşletmenin satış ihtiyacı doğru ekibe ulaşsın ve komisyonunuz kayıtlı olsun.',
     ilk: 'anlasma', adimlar,
   };

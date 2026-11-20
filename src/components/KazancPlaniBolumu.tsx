@@ -8,7 +8,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KUMULATIF_KURALI, KOTA_KURALI, KADROLU_PRIM_KURALLARI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
+  KUMULATIF_KURALI, kotaKurali, KADROLU_PRIM_KURALLARI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import { aylikFiyat, yillikFiyat, type Marka, type RolId } from '../data/satisOrtakligi';
@@ -647,6 +647,8 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
 }
 
 function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: K1 kuralı projeye göre yazılır. iStoc'ta K1 kotası her ay tutmalıdır.
+  const { proje } = useContext(PlanBaglami)!;
   const ciro = plan.ornekCiro;
   const p = plan[tur];
   const { oran, kota } = katkiOrani(plan, tur, ciro);
@@ -677,7 +679,7 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
       acikMetin: esik(i) === null ? 'Eşik belirlenmedi.' : `Açıldı. Oranınıza ${yuzde(p.kotaArtis[i])} eklendi.`,
       kapaliMetin: esik(i) === null ? 'Kilitli. Eşik belirlenmedi.' : `Kilitli. Aylık ciro ${tl(esik(i)!)} olunca açılır.`,
     })),
-    { id: 'uzun', ad: '48 aylık gelir', acik: devam, acikMetin: 'Açıldı. 13. ay ile 48. ay arası pay devam eder.', kapaliMetin: 'Kilitli. K1 kotası tamamlanınca açılır.' },
+    { id: 'uzun', ad: '48 aylık gelir', acik: devam, acikMetin: 'Açıldı. 13. ay ile 48. ay arası pay devam eder.', kapaliMetin: proje === 'istoc' ? 'Kilitli. Ciro ilk 12 ayın her birinde K1 kotasına ulaşınca açılır.' : 'Kilitli. K1 kotası tamamlanınca açılır.' },
   ];
   return <div className="pol-kz-oyun-govde" data-sim-tur={tur}>
     <div className="pol-kz-skor" data-seviye={kota}>
@@ -710,7 +712,7 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
       <div className="pol-kz-kpi-kutu" data-kpi="toplam"><IconChartLine aria-hidden="true" size={24} stroke={1.75} /><p>48 ayda toplam</p><p className="pol-kz-kpi-deger" data-sim="toplam">{tl(ilkYil + sonrakiYillar)}</p></div>
       <div className="pol-kz-kpi-kutu" data-kpi="oran"><IconFlame aria-hidden="true" size={24} stroke={1.75} /><p>Cari ay oranınız</p><p className="pol-kz-kpi-deger">{yuzde(oran)}</p></div>
     </div>
-    <p className="pol-kz-not">{KUMULATIF_KURALI} Toplamlar, müşterinin her ay aynı ciroyu yaptığını varsayar. {KOTA_KURALI}</p>
+    <p className="pol-kz-not">{KUMULATIF_KURALI} Toplamlar, müşterinin her ay aynı ciroyu yaptığını varsayar. {kotaKurali(proje)}</p>
 
     <section className="pol-kz-rozetler" aria-labelledby={`pol-kz-rozet-baslik-${tur}`}>
       <h5 id={`pol-kz-rozet-baslik-${tur}`}>Rozetleriniz</h5>
@@ -780,7 +782,7 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
       </> : <>
         <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
         <Bolum no={1} baslik="Kararlar" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir."><Kararlar plan={plan} /></Bolum>
-        <Bolum no={2} baslik="Oranlar" aciklama={'Önce anahtarla katkı türünü seçin. Sonra o katkının değerlerini doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KUMULATIF_KURALI + ' ' + KOTA_KURALI}>
+        <Bolum no={2} baslik="Oranlar" aciklama={'Önce anahtarla katkı türünü seçin. Sonra o katkının değerlerini doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KUMULATIF_KURALI + ' ' + kotaKurali(proje)}>
           <OranGirisi plan={plan} guncelle={guncelle} />
         </Bolum>
         <Bolum no={3} baslik="Sonuç" aciklama="Cironuzu seçin. Sonuçlar 1. ve 2. bölümdeki değerlere göre hemen değişir.">

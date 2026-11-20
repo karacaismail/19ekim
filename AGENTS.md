@@ -1862,6 +1862,22 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
     Ek kullanım hakkının değeri, eski komisyon tutarı kadar gösterilir. Bu, kullanıcının sözünden çıkarılan yorumdur.
   - iStoc'un üç iş ortaklığı programına (satıcı geliştirme, bölge temsilcisi, talep toplayıcı) dokunulmadı. Kullanıcı “Şimdilik dokunma” dedi.
   Tarayıcı kaydı anahtarı `turksab-kazanc-plani-v7-<proje>` oldu. Bunu `tests/kazanc-plani.spec.ts` denetler.
+- Açık kalan kararlar (kullanıcı kararları 20 Kasım 2026 Cuma). Kullanıcı kapsamı seçti. Kararlar yalnız iStoc içindir. Segika değişmedi.
+  - Ayrı çalışma programları değişmedi. iStoc'un üç iş ortaklığı programı için kullanıcı “Şimdilik dokunma” dedi.
+    Segika'nın programları bu kararların kapsamı dışındadır.
+  - Kurulumu satışı kapatan kişi yapar. Kurulum, işletmenin hesabını açmak ve ürünlerini yüklemektir. Satışı kapatan ilk eğitimi de verir.
+    Yalnız tanıştırılan satışta satışı ve kurulumu şirket yapar. Kurulumdan sonraki desteği her durumda şirket verir.
+    Bu kural iStoc çözüm ortağı ve marka elçisi akışında (`kurulumAdimi`, elçi `kurulum` adımı) ve belgesindedir.
+    Kadrolu uzman kazanç planının dışındadır. Kadrolu rehberinde kurulumu yine kurulum ekibi yapar.
+  - Tavsiyeyle gelen yeni müşterinin 1 ay ücretsiz kullanımı kalır. Kullanıcıya göre bu bir çelişki değildir.
+    Bu, tavsiyeyi teşvik eden bir pazarlama ödülüdür. “Fiyat herkes için aynıdır” cümlesi değişmedi.
+  - iStoc kadrolu uzman ve mevcut müşteri belgesinde “İkinci hesap sürümü seçilirse” bölümü kalır, geçersiz diye işaretlenir.
+    Bölümün başında “Bu hesap artık geçerli değildir.” yazar. Eski hesap gri ve üstü çizilidir (`.pol-gecersiz`, `politikalar.css`).
+    Karar `hesap.ts → ikinciSurumGecersiz` işlevindedir. İkinci sürümü geçerli gibi anlatan cümleler kaldırıldı.
+  - iStoc'ta ilk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. K1 kotasını tek ay geçmek yetmez.
+    Tek bir ay K1 kotasının altında kalırsa kişi 13. aydan sonra pay almaz. Metin `kazancPlani.ts → kotaKurali` işlevindedir.
+    Örnek hesap her ay aynı ciroyu varsayar. Bu yüzden hesap değişmedi. Segika eski K1 metnini kullanır.
+  - Bu kararları `tests/politika-acik-kararlar.spec.ts` denetler.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
   Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.
   `rol=oncu` ve `/politikalar/oncu/` adresleri ilk rolü açar. Öncü akış dosyaları veride durur ama sayfa onları yüklemez.

@@ -86,9 +86,12 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
       </Bolum>
       <Bolum id="kazanc" baslik="Kazanç nasıl hesaplanır?">
         {/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi belgesinde ikinci sürüm (ağ kademesi) yoktur. */}
-        {hesap.digerSurum.length
-          ? <p>Satış hesabının iki sürümü var. Bu rehber birinci sürümü ana örnek olarak kullanır. İkinci sürümün koşulları farklıdır ve ayrı bölümde durur. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
-          : <p>Bu rehber birinci sürüm hesabını kullanır. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>}
+        {/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzman ve mevcut müşteri belgesinde ikinci sürüm geçersizdir. */}
+        {hesap.digerSurumGecersiz
+          ? <p>Bu rehber birinci sürüm hesabını kullanır. İkinci sürüm artık geçerli değildir. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
+          : hesap.digerSurum.length
+            ? <p>Satış hesabının iki sürümü var. Bu rehber birinci sürümü ana örnek olarak kullanır. İkinci sürümün koşulları farklıdır ve ayrı bölümde durur. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
+            : <p>Bu rehber birinci sürüm hesabını kullanır. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>}
         <p>Bu değerler değişince rehber de güncellenir. İmzalanmış anlaşmalar kendiliğinden değişmez.</p>
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
@@ -153,11 +156,16 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
             <Paragraflar metin={hesap.plan} />
             <p><a className="pol-belge-baglanti" href={href('/parametreler/')}>“Parametreler” sayfasını açın</a></p>
           </> },
-...(hesap.digerSurum.length ? [          { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
-            <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
-            {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
-            <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&urun=${p.proje}`}>İkinci sürümdeki hesabı açın</a></p>
-          </> }] : []),
+          ...(hesap.digerSurum.length ? [{ id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <div data-surum2="">
+            {/* Kullanıcı kararı 20 Kasım 2026 Cuma: bölüm kalır, geçersiz diye işaretlenir. Uyarı okunur kalır, eski hesap gri ve üstü çizilidir. */}
+            {hesap.digerSurumGecersiz && <p className="pol-gecersiz-uyari" id={`pol-gecersiz-${p.proje}-${p.id}`} data-gecersiz-uyari="">Bu hesap artık geçerli değildir.</p>}
+            <div className={hesap.digerSurumGecersiz ? 'pol-gecersiz' : undefined} data-gecersiz={hesap.digerSurumGecersiz ? '' : undefined}>
+              <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
+              {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
+              <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&urun=${p.proje}`}
+                aria-describedby={hesap.digerSurumGecersiz ? `pol-gecersiz-${p.proje}-${p.id}` : undefined}>İkinci sürümdeki hesabı açın</a></p>
+            </div>
+          </div> }] : []),
           ...hesap.programlar.map((k) => ({ id: `program-${k.id}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
             <p>Bu ayrı bir programdır. Ana programla kendiliğinden birleşmez.</p>
             <Paragraflar metin={p.programlar[k.id] ?? []} />

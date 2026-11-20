@@ -154,6 +154,15 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
  * 13. aydan sonraki pay devam etmez. K1 eşiği boşsa kural ölçülemez. Bu durumda örnek kotayı tamamlanmış sayar.
  */
 export const KOTA_KURALI = 'Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.';
+/**
+ * iStoc kota kuralı (kullanıcı kararı 20 Kasım 2026 Cuma: “Her ay geçmeli”). K1 kotasını tek ay geçmek yetmez.
+ * Örnek hesap her ay aynı ciroyu varsayar. Bu yüzden hesap `kotaTamam` ile aynı kalır. Segika kuralı değişmedi.
+ */
+export const KOTA_KURALI_ISTOC = 'İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. '
+  + 'Ciro tek bir ay bile K1 kotasının altında kalırsa kişi 13. aydan sonra pay almaz. '
+  + 'Örneğin K1 kotası 30.000 ₺ olsun. Ciro 11 ay 35.000 ₺ olsun. Bir ay ise 28.000 ₺ olsun. '
+  + 'Bu durumda kişi 13. aydan sonra pay almaz.';
+export const kotaKurali = (proje: Marka) => (proje === 'istoc' ? KOTA_KURALI_ISTOC : KOTA_KURALI);
 export function kotaTamam(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
   const k1 = plan[tur].kotaEsik[0];
   return k1 === null || ciro >= k1;

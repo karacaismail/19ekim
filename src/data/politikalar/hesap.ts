@@ -13,7 +13,11 @@ export const tl = (n: number) => `${sayi(n)} ₺`;
 export const yuzde = (n: number) => `%${sayi(n * 100)}`;
 export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: string }[]; aciklama: string[] }
 export interface OzelProgram { id: string; ad: string; urun: string; etiket: string; donem: string; sonuc: string; aciklama: string; hesap: { ad: string; formul: string; sonuc: string }[]; kurallar: string[] }
-export interface RehberHesabi { ornekler: HesapOrnegi[]; odeme: string[]; digerSurum: HesapOrnegi[]; programlar: OzelProgram[]; plan: string[] }
+/** `digerSurumGecersiz`: ikinci sürüm bölümü durur ama geçersiz diye işaretlenir (kullanıcı kararı 20 Kasım 2026 Cuma). */
+export interface RehberHesabi { ornekler: HesapOrnegi[]; odeme: string[]; digerSurum: HesapOrnegi[]; digerSurumGecersiz: boolean; programlar: OzelProgram[]; plan: string[] }
+
+/** iStoc kadrolu uzman ve mevcut müşteri belgesinde ikinci hesap sürümü geçersizdir (kullanıcı kararı 20 Kasım 2026 Cuma). */
+export const ikinciSurumGecersiz = (rol: RolId, marka: v1.Marka) => marka === 'istoc' && (rol === 'kadrolu' || rol === 'tavsiye');
 
 function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrnegi {
   const a = { ...ayar, marka };
@@ -76,7 +80,9 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     aciklama.push('Bu tutarlar nakit ödeme değildir. Kabul edilen paket için kullanım karşılığıdır.');
     aciklama.push('Birinci sürüm, yeni müşterinin yıllık paket almasını ister.');
     aciklama.push(v1.rolMetinleri(marka).find((r) => r.id === 'tavsiye')!.kurallar[1]);
-    aciklama.push('İkinci sürümün koşulu farklıdır. Şirket geçerli koşulu tavsiye öncesinde yazılı bildirmelidir.');
+    aciklama.push(ikinciSurumGecersiz(rol, marka)
+      ? 'İkinci sürüm artık geçerli değildir.'
+      : 'İkinci sürümün koşulu farklıdır. Şirket geçerli koşulu tavsiye öncesinde yazılı bildirmelidir.');
   } else {
     const seviye = rol === 'oncu' ? a.oncuSeviye : rol === 'cozum' ? a.cozumSeviye : a.elciSeviye;
     const oran = rol === 'cozum' && marka === 'segika' ? a.cozumOran : a.oran[seviye];
@@ -203,7 +209,8 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
     ornekler: [seciliOrnek ?? ornek(rol, marka, a)], odeme: secili ? ['Finans sorumlusu bu programın ödeme koşullarını yazılı anlaşmada doğrulasın.'] : odeme,
     // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi belgesinde ağ kademesi gösterilmez.
     // Ağ kademesi ikinci hesap sürümündedir. Bu yüzden o belgelerde ikinci sürüm bölümü yoktur.
-    digerSurum: marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? [] : [ikinciSurum(rol, marka)], programlar,
+    digerSurum: marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? [] : [ikinciSurum(rol, marka)],
+    digerSurumGecersiz: ikinciSurumGecersiz(rol, marka), programlar,
     plan: marka === 'segika' ? [
       `Genel planda Segika ekibi ${int(DEFAULT_PARAMS.segikaCount)} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Genel kadro planında net maaş ${tl(DEFAULT_PARAMS.segikaSalary)} olarak yazılıdır.`,

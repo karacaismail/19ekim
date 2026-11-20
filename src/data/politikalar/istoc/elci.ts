@@ -5,7 +5,7 @@ export const politika: ProjePolitika = {
   "proje": "istoc",
   "ad": "Marka elçisi",
   "amac": "Ticaret yapan kitlenize iStoc’u doğru anlatın. İlgilenen satıcıları şirkete yönlendirin.",
-  "iliski": "Bağımsız tanıtım ortağısınız. iStoc’u sosyal medyada, eğitimde veya etkinlikte tanıtırsınız. Satışı, kurulumu ve satıcı desteğini şirket yürütür. Bu ilişki maaşlı iş veya kazanç garantisi değildir.",
+  "iliski": "Bağımsız tanıtım ortağısınız. iStoc’u sosyal medyada, eğitimde veya etkinlikte tanıtırsınız. Yalnız tanıtırsanız satışı ve kurulumu şirket yapar. Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız. Sonraki desteği şirket verir. Bu ilişki maaşlı iş veya kazanç garantisi değildir.",
   "gorev": [
     "Satıcıların katalog ve ürün bilgisi ihtiyacına uygun içerik hazırlayın.",
     "Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.",
@@ -69,7 +69,7 @@ export const politika: ProjePolitika = {
         "Video veya canlı yayında reklam ilişkisini sözle de söyleyin.",
         "Eğitimde veya fuarda konuşuyorsanız iş birliğini baştan belirtin.",
         "Satıcıya kendi isteğiyle başvurabileceği yolu verin.",
-        "Başvuran satıcının satış görüşmesini şirket yürütür."
+        "Yalnız tanıtırsanız başvuran satıcının satış görüşmesini şirket yürütür."
       ]
     },
     {
@@ -90,6 +90,15 @@ export const politika: ProjePolitika = {
         "Satıcı ödeme yaparsa finans sorumlusu komisyon koşullarını kontrol eder.",
         "Satıcı ödemediyse komisyon oluşmaz.",
         "Satıcılar yanlış beklentiyle geliyorsa anlatımı düzeltin."
+      ]
+    },
+    {
+      "baslik": "Kurulumu yapın veya şirkete bırakın",
+      "metin": [
+        "Satışı siz kapattıysanız kurulumu siz yapın. Satıcının hesabını açın ve ürünlerini yükleyin.",
+        "Sonra satıcıya ilk eğitimi verin. Takılırsanız kurulum ekibinden yardım isteyin.",
+        "Yalnız tanıttıysanız kurulumu şirket yapar.",
+        "Satıcı sonraki destek için size gelirse talebi şirkete yönlendirin."
       ]
     },
     {
@@ -200,7 +209,8 @@ export const politika: ProjePolitika = {
       "metin": [
         "Sözleşmede şirket ve elçi taraf olarak yer alır.",
         "Pazarlama sorumlusu tanıtılacak iStoc paketlerini ve kanalları yazar.",
-        "Sözleşmede elçinin satış yapma ve fiyatı değiştirme yetkisi olmadığı yer alır.",
+        "Sözleşmede elçinin fiyatı değiştirme yetkisi olmadığı yer alır.",
+        "Elçi satışı kapatacaksa sözleşme bu yetkiyi ve kurulum görevini ayrıca yazar.",
         "Şirket geçerli sürümü yazar. Yayımlanan varsayılan sürüm birinci sürümdür."
       ]
     },

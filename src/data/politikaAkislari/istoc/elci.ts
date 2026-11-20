@@ -16,7 +16,8 @@ const yillikPaket = (a: Ayar) =>
 const SEVIYE_OZET: Record<Seviye, string> = {
   A: 'Siz yalnız tanıştırırsınız. Ürün gösterimini ve satışı şirket yapar.',
   B: 'Siz ürün gösterimi de yaparsınız. Satışı şirket kapatır.',
-  C: 'Siz şirketin onayladığı teklifle satış görüşmesini yürütürsünüz.',
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc'ta kurulumu satışı kapatan kişi yapar.
+  C: 'Siz şirketin onayladığı teklifle satış görüşmesini yürütürsünüz. Satışı kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.',
 };
 
 const akisOlusturTam: AkisOlustur = (a) => {
@@ -206,7 +207,7 @@ const akisOlusturTam: AkisOlustur = (a) => {
       soru: 'Teklif ne durumda?',
       ek: 'sinir',
       secenekler: [
-        { id: 'kabul', metin: 'Satıcı onaylı teklifi kabul etti', tur: 'devam', sonraki: 'odeme' },
+        { id: 'kabul', metin: 'Satıcı onaylı teklifi kabul etti', tur: 'devam', sonraki: 'kurulum' },
         { id: 'teklif-yok', metin: 'Onaylı teklif henüz gelmedi', tur: 'bekle', sonuc: { baslik: 'Teklifi bekleyin', metin: [
           'Şirketin onaylamadığı teklifi vermeyin.',
           'Satış sorumlusu teklifi fiyat tablosundaki fiyatla hazırlar.',
@@ -222,6 +223,32 @@ const akisOlusturTam: AkisOlustur = (a) => {
           'Nedenini kayda yazın.',
           'Israr etmeyin.',
           'Bu satıcı için iş burada biter.',
+        ] } },
+      ],
+    }, {
+      // Kullanıcı kararı 20 Kasım 2026 Cuma: satışı kapatan kişi kurulumu ve ilk eğitimi yapar. Sonraki desteği şirket verir.
+      id: 'kurulum',
+      ad: 'Kurulumu yapın',
+      sorumlu: 'Siz',
+      terimler: ['Kurulum, satıcının iStoc hesabını açmak ve ürünlerini yüklemektir.', 'İlk eğitim, satıcıya iStoc’u nasıl kullanacağını ilk kez göstermektir.'],
+      yap: [
+        'Satışı siz kapattığınız için kurulumu siz yaparsınız.',
+        'Siz satıcının hesabını açın ve ürünlerini yükleyin.',
+        'Siz satıcıya ilk eğitimi verin.',
+        'Takılırsanız kurulum ekibinden yardım isteyin.',
+        'Sonraki desteği şirketin destek ekibi verir.',
+      ],
+      soru: 'Kurulum ne durumda?',
+      secenekler: [
+        { id: 'tamam', metin: 'Hesabı açtım, ürünleri yükledim ve ilk eğitimi verdim', tur: 'devam', sonraki: 'odeme' },
+        { id: 'bilgi', metin: 'Satıcı ürün bilgisini henüz vermedi', tur: 'bekle', sonuc: { baslik: 'Ürün bilgisi bekleniyor', metin: [
+          'Satıcının yetkilisi ürün bilgisini ve görsel iznini hazırlar.',
+          'Bilgi gelince bu adıma dönün.',
+        ] } },
+        { id: 'yardim', metin: 'Kurulumda takıldım', tur: 'bekle', sonuc: { baslik: 'Kurulum ekibinin yardımını bekleyin', metin: [
+          'Sorunu kurulum ekibine yazılı iletin.',
+          'Kurulum ekibi size yardım eder.',
+          'Sorun çözülünce bu adıma dönün.',
         ] } },
       ],
     });
