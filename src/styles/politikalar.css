@@ -258,11 +258,13 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 
 /* ===== Büyük katkı anahtarı (kullanıcı kararı 17 Kasım 2026 Salı). Bütün katkı seçimleri bu tek bileşeni kullanır. ===== */
 .pol-kz-anahtar-kap { container-type: inline-size; }
-.pol-kz-anahtar { display: grid; grid-template-columns: auto auto; grid-template-areas: 'iz iz' 'sol sag'; justify-content: center; justify-items: center; align-items: center; gap: var(--space-2) var(--space-4); inline-size: fit-content; max-inline-size: 100%; padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); text-align: center; }
+.pol-kz-anahtar { display: grid; grid-template-columns: minmax(0, auto); grid-template-areas: 'iz' 'sol' 'sag'; justify-content: center; justify-items: center; align-items: center; gap: var(--space-2) var(--space-4); inline-size: fit-content; max-inline-size: 100%; padding: var(--space-3) var(--space-4); background: var(--surface-raised); box-shadow: var(--shadow-soft); text-align: center; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:first-child { grid-area: sol; }
 .pol-kz-anahtar > .pol-kz-anahtar-iz { grid-area: iz; }
 .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { grid-area: sag; }
 /* Kullanıcı kararı 17 Kasım 2026 Salı: yazılar anahtara yanaşır, ortada boşluk kalmaz. Yer yetince üçü tek satırdadır. */
+/* Yazı büyütülünce iki ad yan yana sığmaz. Bu durumda adlar alt alta durur. */
+@container (min-width: 14em) { .pol-kz-anahtar { grid-template-columns: auto auto; grid-template-areas: 'iz iz' 'sol sag'; } }
 @container (min-width: 26em) { .pol-kz-anahtar { grid-template-columns: auto auto auto; grid-template-areas: 'sol iz sag'; gap: var(--space-3); } }
 /* Büyütülmüş yazıda iki yazı yan yana sığmaz. Bu durumda yazılar anahtarın altında alt alta durur ve sayfa taşmaz.
    Eşik, kapsayıcının yazı boyuna göredir. 12em, normal yazıda 320 px genişlikte bile devreye girmez. */
