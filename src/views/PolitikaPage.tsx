@@ -85,12 +85,17 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
         {p.ortakBulma && <><h3>Yeni ortak adaylarını nasıl bulursunuz?</h3><Paragraflar metin={p.ortakBulma} /></>}
       </Bolum>
       <Bolum id="kazanc" baslik="Kazanç nasıl hesaplanır?">
-        <p>Satış hesabının iki sürümü var. Bu rehber birinci sürümü ana örnek olarak kullanır. İkinci sürümün koşulları farklıdır ve ayrı bölümde durur. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
+        {/* Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi yalnız kazanç planıyla kazanır. Ağ hesabı kalktı. */}
+        {hesap.digerSurum.length
+          ? <p>Satış hesabının iki sürümü var. Bu rehber birinci sürümü ana örnek olarak kullanır. İkinci sürümün koşulları farklıdır ve ayrı bölümde durur. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
+          : hesap.ayriProgram
+            ? <p>Bu örnek, seçtiğiniz ayrı programa aittir. Ayrı programın ödeme kuralı yazılı anlaşmada durur. Ana programda payınızı kazanç planı belirler.</p>
+            : <p>Payınızı sayfanın üstündeki kazanç planı belirler. Aşağıdaki ödeme kuralları bütün iş ortakları için aynıdır.</p>}
         <p>Bu değerler değişince rehber de güncellenir. İmzalanmış anlaşmalar kendiliğinden değişmez.</p>
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
         <h3>Ödeme ne zaman olur?</h3><Paragraflar metin={hesap.odeme} />
-        <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${p.proje}&rol=${p.id}`}>Birinci sürümdeki hesabı açın</a></p>
+        {hesap.digerSurum.length > 0 && <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${p.proje}&rol=${p.id}`}>Birinci sürümdeki hesabı açın</a></p>}
       </Bolum>
       <Bolum id="sorunlar" baslik="Bir sorun çıkarsa ne yapacaksınız?">
         <dl className="pol-sorunlar">{p.sorunlar.map((s) => <div key={s.kosul}>
@@ -150,11 +155,11 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
             <Paragraflar metin={hesap.plan} />
             <p><a className="pol-belge-baglanti" href={href('/parametreler/')}>“Parametreler” sayfasını açın</a></p>
           </> },
-          { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
+...(hesap.digerSurum.length ? [          { id: 'surum2', ad: 'İkinci hesap sürümü seçilirse', icerik: <>
             <p>İkinci sürüm ayrı koşullar kullanır. Geçiş, kabul edilmiş anlaşmayı kendiliğinden değiştirmez.</p>
             {hesap.digerSurum.map((h) => <Hesap key={h.urun} hesap={h} alt />)}
             <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v2&urun=${p.proje}`}>İkinci sürümdeki hesabı açın</a></p>
-          </> },
+          </> }] : []),
           ...hesap.programlar.map((k) => ({ id: `program-${k.id}`, ad: `${k.urun}: ${k.ad}`, icerik: <>
             <p>Bu ayrı bir programdır. Ana programla kendiliğinden birleşmez.</p>
             <Paragraflar metin={p.programlar[k.id] ?? []} />

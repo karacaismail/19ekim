@@ -1,7 +1,7 @@
 import { expect, test, type Page, type PersonaTestServer, type Route } from './fixtures/persona';
 import { alanlardanAyar } from '../src/data/personaFields';
 import { KAZANC_VARSAYILAN, planliAyar } from '../src/data/kazancPlani';
-import { SEVIYE_ADI, VARSAYILAN_AYAR, aylikFiyat, satisKazanci, yillikFiyat, type Ayar } from '../src/data/satisOrtakligi';
+import { VARSAYILAN_AYAR, aylikFiyat, satisKazanci, yillikFiyat, type Ayar } from '../src/data/satisOrtakligi';
 import type { Request as PersonaIstegi } from '../src/lib/personaSync';
 
 /**
@@ -274,14 +274,15 @@ test('rehberin “Kazanç” bölümü ortak kaydı ve kazanç planını birlikt
   expect(beklenen.komisyon).toBe('239.400 ₺ × %15 = 35.910 ₺');
   await expect(deger('Aylık liste fiyatı')).toHaveText(beklenen.aylik);
   await expect(deger('Yıllık paket bedeli')).toHaveText(beklenen.yillik);
-  await expect(deger('Satıştaki katkınız')).toHaveText(SEVIYE_ADI.C);
-  await expect(deger('Bir yıllık paket için komisyon')).toHaveText(beklenen.komisyon);
+  // Kullanıcı kararları 20 Kasım 2026 Cuma: eski yıllık paket komisyonu kalktı. Payı kazanç planı belirler.
+  await expect(deger('Payınızın oranı')).toHaveText('Kazanç planındaki seviyenize göre');
+  await expect(deger('Bir yıllık paket için komisyon')).toHaveCount(0);
   await expect(kazanc).not.toContainText('223.440');
 
   // Rehber açıkken ortak değer değişirse tutarlar da değişir.
   personaServer.seed('istoc', { kur: 61 });
   beklenen = ornek(plan(alanlardanAyar('istoc', personaServer.snapshot('istoc').fields)));
-  await expect(deger('Bir yıllık paket için komisyon')).toHaveText(beklenen.komisyon, { timeout: 10_000 });
-  await expect(deger('Aylık liste fiyatı')).toHaveText(beklenen.aylik);
+  await expect(deger('Aylık liste fiyatı')).toHaveText(beklenen.aylik, { timeout: 10_000 });
+  await expect(deger('Yıllık paket bedeli')).toHaveText(beklenen.yillik);
   expect(personaServer.writes).toHaveLength(0);
 });

@@ -192,7 +192,7 @@ function yillaraSonuc(a: Ayar, satis: number[], oranlar: readonly number[], kim:
       ...oranlar.map((o, i) => ({ ad: `Müşteri başı ${i + 1}. yıl`, formul: `${t(yillik)} × ${yuzde(o)}`, sonuc: t(yillik * o) })),
       { ad: '3 yılda gelen müşteri', formul: 'Aylık satışların toplamı', sonuc: sayi(musteri) },
     ],
-    kurallar: ['Komisyon hizmet ayında kazanılır ve o ay ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Hesap, müşterilerin aboneliği her yıl yenilediğini varsayar.', ...ekKural],
+    kurallar: ['Komisyon hizmet ayında kazanılır ve o ay ödenir.', 'Müşteri ödemezse komisyon doğmaz. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez.', 'Hesap, müşterilerin aboneliği her yıl yenilediğini varsayar.', ...ekKural],
     veri: { yil1: Math.round(yillar[0]), yil2: Math.round(yillar[1]), yil3: Math.round(yillar[2]), toplam3Yil: Math.round(toplam), musteri3Yil: Math.round(musteri * 10) / 10 },
   };
 }
@@ -200,7 +200,7 @@ function yillaraSonuc(a: Ayar, satis: number[], oranlar: readonly number[], kim:
 /* ---------- Ortak kurallar ---------- */
 
 const SEGIKA_ORTAK_KURALLARI = [
-  'Şirket kaydı 1 iş günü içinde kabul eder ya da reddeder. Kabul edilen firma 12 ay boyunca ortak adına korunur.',
+  'Şirket kaydı 1 iş günü içinde kabul eder ya da reddeder. Kabul edilen firma 90 gün boyunca ortak adına korunur.',
   '60 gün boyunca ilerleme olmazsa kayıt yeniden incelenir. Son 90 günde Segika ile teması olan firma yeni müşteri sayılmaz.',
   '%15’lik bütçe ortaklar arasında paylaştırılır. Her ortak için ayrıca %15 eklenmez.',
   'Liste fiyatının altında satış yapılmaz.',
@@ -389,7 +389,7 @@ export function kosulSonucu(a: Ayar, rol: RolId): KosulSonuc | null {
       ozetBirim: '',
       donemler: [{ ad: `Yılda ${a.tavsiyeSinir} tavsiye`, yillik: birim * a.tavsiyeSinir, formul: `${a.tavsiyeSinir} × ${t(birim)}` }],
       hesap: [{ ad: 'İlk faturadan', formul: `${t(yillik)} × ${yuzde(a.tekSeferOran)}`, sonuc: t(birim) }],
-      kurallar: ['Komisyon, müşteri ödeyince kazanılır ve aynı ay ödenir.', 'Komisyon yalnız ilk fatura için ödenir.', 'Müşteri ödemezse komisyon doğmaz. İade olursa komisyon geri alınır.', 'Müşteri desteğini Segika verir.'],
+      kurallar: ['Komisyon, müşteri ödeyince kazanılır ve aynı ay ödenir.', 'Komisyon yalnız ilk fatura için ödenir.', 'Müşteri ödemezse komisyon doğmaz. Müşteri ayrılırsa komisyon durur. Ödenmiş komisyon geri istenmez.', 'Müşteri desteğini Segika verir.'],
       veri: { oran: a.tekSeferOran, tavsiyeBasina: Math.round(birim) },
     };
   }

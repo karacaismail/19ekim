@@ -1,10 +1,10 @@
 import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur } from '../types';
-import { satisKazanci, segikaAylik, yillikFiyat, type SegikaPaket, type Seviye } from '../../satisOrtakligi';
-import { int, tl, yuzdeBicimi } from '../../../lib/format';
+import { segikaAylik, yillikFiyat, type SegikaPaket, type Seviye } from '../../satisOrtakligi';
+import { AYRILMA_KURALI, ODEME_KURALLARI } from '../../kazancPlani';
+import { int, tl } from '../../../lib/format';
 
 const para = tl;
-const oranMetni = yuzdeBicimi(2);
 const sayi = int;
 
 const PAKET: Record<SegikaPaket, string> = {
@@ -21,19 +21,13 @@ const SEVIYE_OZET: Record<Seviye, string> = {
 
 const akisOlusturTam: AkisOlustur = (a) => {
   const seviye = a.elciSeviye;
-  const komisyon = satisKazanci(a, seviye);
   const fiyat = segikaAylik(a);
-  const odemeMetni = a.model === 'oran'
-    ? [
-        `Bu örnekte ${sayi(fiyat.kisi)} çalışanlık ${PAKET[a.segikaPaket]} yılda ${para(yillikFiyat(a))} eder.`,
-        `Katkınız için komisyon oranı ${oranMetni(a.oran[seviye])} olur.`,
-        `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
-      ]
-    : [
-        'Bu örnekte şirket her satış için sabit tutar öder.',
-        `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
-        'Sabit tutar yetkinizi değiştirmez.',
-      ];
+  // Kullanıcı kararları 20 Kasım 2026 Cuma: pay kazanç planına ve ortak ödeme kurallarına göre hesaplanır.
+  const odemeMetni = [
+    `Bu örnekte ${sayi(fiyat.kisi)} çalışanlık ${PAKET[a.segikaPaket]} yılda ${para(yillikFiyat(a))} eder.`,
+    'Payınızın oranını sayfanın üstündeki kazanç planı belirler.',
+    ...ODEME_KURALLARI.slice(2),
+  ];
 
   const adimlar: AkisAdimi[] = [
     {
@@ -267,12 +261,12 @@ const akisOlusturTam: AkisOlustur = (a) => {
           'Ödeme gelince bu adıma dönün.',
         ] } },
         { id: 'kural-yok', metin: 'Ödeme günü kuralı anlaşmada yazmıyor', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralının yazılmasını bekleyin', metin: [
-          'Günler, müşterinin ödeme yaptığı günden sayılır.',
+          'Pay, müşterinin ödeme yaptığı ayda hesaplanır.',
           'Finans sorumlusu kuralı anlaşmaya yazar.',
           'Kural yazılınca bu adıma dönün.',
         ] } },
         { id: 'iade', metin: 'İşveren parasını geri istedi', tur: 'bekle', sonuc: { baslik: 'Geri ödeme kararını bekleyin', metin: [
-          'Para geri verilirse komisyona ne olacağını imzalı anlaşma söyler.',
+          AYRILMA_KURALI,
           'Finans sorumlusu kararı size yazılı bildirir.',
           'Karar gelince bu adıma dönün.',
         ] } },

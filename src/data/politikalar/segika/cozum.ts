@@ -366,7 +366,7 @@ export const politika: ProjePolitika = {
         "Destek saatlerini ve yanıt süresini ortaklık sorumlusuyla birlikte kararlaştırın.",
         "Sözleşme ücretsiz eğitim saatini ve ek eğitim giderini yazmalıdır.",
         "Ek eğitim gideri kazançtan düşülecekse sözleşme bunu ayrıca yazmalıdır.",
-        "Ödeme günleri müşterinin ödeme gününden sayılır. Finans sorumlusu ödeme gününü sözleşmeye yazar.",
+        "Pay, müşterinin ödeme yaptığı ayda hesaplanır. Finans sorumlusu ödeme gününü sözleşmeye yazar.",
         "Örnek hesaptaki değişiklik anlaşmayı kendiliğinden değiştirmez."
       ]
     },

@@ -1821,9 +1821,10 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Adım metinleri dosyada durur. Kullanıcı isterse adımlar kolayca geri gelir.
   Bu kuralı `tests/politika-belge-adimi.spec.ts` denetler.
 - Tanıştıran ile satışı kapatan farklı kişi olabilir (kullanıcı kararı 17 Kasım 2026).
-  Tanıştırma varsayılan olarak 2 ay geçerlidir. Süre düğme grubuyla 1, 2, 3, 4, 5, 6, 8, 10 veya 12 ay seçilir.
+  Tanıştırma varsayılan olarak 3 ay, yani 90 gün geçerlidir (kullanıcı kararı 20 Kasım 2026; eski değer 2 aydı). Süre düğme grubuyla 1, 2, 3, 4, 5, 6, 8, 10 veya 12 ay seçilir.
   Sayfa yalnız “Tanıştırma CRM'e kaydedilir.” der. Kayıt olmazsa ne olacağını sayfa söylemez.
-  Pay bölüşmesi sabit değildir. Yönetici üç soruyu ayrı seçer: ilk satış, sonraki 4 yıl ve kota artışı.
+  Pay bölüşmesi sabit değildir. Yönetici iki soruyu ayrı seçer: ilk satış ve kota artışı.
+  “Sonraki 4 yılın payı” sorusu 20 Kasım 2026'da kalktı. Tanıştıran artık yalnız ilk 3 ayda pay alır.
   Her soruda varsayılan “Ahmet'in payı Mehmet'in payından düşülür” seçeneğidir. Bu seçenek şirketi zarardan korur.
   Öbür seçenek “Şirket ikisine de tam öder” seçeneğidir. 100.000 ₺ satışta toplam 15.000 ₺ yerine 22.000 ₺ olur.
   Hesap `kazancPlani.ts → paylasim` işlevindedir.
@@ -1840,8 +1841,26 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
 - iStoc kadrolu uzmanın kotaları ayda satılan yıllık paket sayısıdır (kullanıcı kararı 20 Kasım 2026).
   4 paket ve altında prim yoktur. 5 paket ve üstü %5, 8 paket ve üstü %7, 12 paket ve üstü %10 olur.
   Ulaşılan kademenin oranı satılan bütün paketlerin tutarına uygulanır. Paket bedeli yıllık paket bedelidir.
-  Bu kural eski “kota üstü prim” hesabının yerine geçer. Segika kadrolu uzmanın hesabı değişmedi.
+  Bu kural eski “kota üstü prim” hesabının yerine geçer. Segika kadrolu uzman kota üstü prim almaya devam eder.
+  Segika primi kotayı aşan cironun %10'udur (kullanıcı kararı 20 Kasım 2026).
   Hesap `kazancPlani.ts → paketPrimi` işlevindedir. Bunu `tests/kazanc-plani.spec.ts` denetler.
+- Ödeme kuralları (kullanıcı kararları 20 Kasım 2026). Bu kurallar yukarıdaki eski dönem oranlarının yerine geçer.
+  - Ciro, ortağın müşterilerinin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.
+  - Kurulum ücreti ciroya girmez. Ortak bu ücretten pay almaz.
+  - Aylık pakette satışı kapatan her ay pay alır. Pay en çok 12 ay sürer.
+  - Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Pay satış ayında bir kerede ödenir.
+  - Müşteri yıllık paketi yenilerse satışı kapatan 13. ile 24. ay arasında yenileme oranını alır. Oran %10'dur.
+    25. aydan sonra pay yoktur. K1 ilk 12 ayda tamamlanmazsa yenileme payı da yoktur.
+  - Tanıştıran yalnız satıştan sonraki ilk 3 aydaki ödemelerden pay alır. Bu yüzden “Sonraki 4 yılın payı” sorusu kalktı.
+  - Tanıştırılan müşteri 90 gün ortak adına korunur. Plandaki süre seçicisi 3 ay ile açılır.
+  - Müşteri ayrılırsa pay durur. Ödenmiş pay geri istenmez.
+  - Rol rehberlerindeki eski kural kalktı. Eski kural yıllık paketin yüzdesini 14. ve 60. günde ödüyordu.
+  - Çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü ve ağ kademesi gösterilmez.
+  - Mevcut müşteri nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede kazanç planı görünmez.
+  - Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır. Rehber bu oranı plandan alır.
+  Cümleler `kazancPlani.ts → ODEME_KURALLARI` listesindedir. Plan ve rehberler aynı listeyi kullanır.
+  Tarayıcı kaydı anahtarı `turksab-kazanc-plani-v6-<proje>` oldu. Bunu `tests/kazanc-plani.spec.ts` denetler.
+  Kullanıcıya bildirilen sonuç: yıllık satışta şirket daha az gelir alır ama ortağa daha çok öder. Kullanıcı kuralı böyle onayladı.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
   Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.
   `rol=oncu` ve `/politikalar/oncu/` adresleri ilk rolü açar. Öncü akış dosyaları veride durur ama sayfa onları yüklemez.

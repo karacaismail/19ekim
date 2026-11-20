@@ -197,7 +197,7 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 /* Sonuç kartları ve büyük rakam */
 .pol-kz-kartlar { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
 .pol-kz-kart { display: grid; gap: var(--space-3); align-content: start; padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; }
-.pol-kz-kart h4 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+.pol-kz-kart h3, .pol-kz-kart h4 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
 .pol-kz-rakam { margin: 0; font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: 1.1; color: var(--policy-active-ink); font-variant-numeric: tabular-nums; }
 .pol-kz-rakam-ek { display: block; margin-block-start: var(--space-1); font-size: var(--text-md); font-weight: var(--weight-regular); color: var(--text-secondary); }
 .pol-kz-sonuc-satir > div { gap: var(--space-1); padding-block: var(--space-2); }
@@ -264,7 +264,10 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-anahtar > .pol-kz-anahtar-ad:last-child { grid-area: sag; }
 /* Kullanıcı kararı 17 Kasım 2026 Salı: yazılar anahtara yanaşır, ortada boşluk kalmaz. Yer yetince üçü tek satırdadır. */
 @container (min-width: 26em) { .pol-kz-anahtar { grid-template-columns: auto auto auto; grid-template-areas: 'sol iz sag'; gap: var(--space-3); } }
-.pol-kz-anahtar-ad { font-size: var(--text-md); line-height: var(--leading-snug); color: var(--text-secondary); cursor: pointer; user-select: none; }
+/* Büyütülmüş yazıda iki yazı yan yana sığmaz. Bu durumda yazılar anahtarın altında alt alta durur ve sayfa taşmaz.
+   Eşik, kapsayıcının yazı boyuna göredir. 12em, normal yazıda 320 px genişlikte bile devreye girmez. */
+@container (max-width: 12em) { .pol-kz-anahtar { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'iz' 'sol' 'sag'; } }
+.pol-kz-anahtar-ad { min-inline-size: 0; overflow-wrap: break-word; font-size: var(--text-md); line-height: var(--leading-snug); color: var(--text-secondary); cursor: pointer; user-select: none; }
 .pol-kz-anahtar-ad[data-secili] { color: var(--policy-active-ink); font-weight: var(--weight-semibold); }
 .pol-kz-anahtar-iz { position: relative; inline-size: 5.5rem; block-size: 3rem; padding: 0; border: 0; border-radius: var(--radius-switch); background: var(--accent); cursor: pointer; transition-property: background-color; transition-duration: var(--motion-duration-fast); transition-timing-function: var(--motion-ease-standard); }
 .pol-kz-anahtar-iz[aria-checked='true'] { background: var(--policy-active-ink); }
@@ -286,16 +289,18 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-kart-koyu .pol-kz-uyari { background: var(--surface-changed); color: var(--text-primary); }
 
 /* ===== Kazanç oyunu: satıcı adayını motive eden panel ===== */
-.pol-kz-oyun { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; overflow-x: clip; }
+.pol-kz-oyun { container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--inset-lg); background: var(--surface-page); min-inline-size: 0; overflow-x: clip; }
 .pol-kz-oyun p, .pol-kz-oyun h4, .pol-kz-oyun h5 { margin: 0; }
 .pol-kz-oyun-ust { display: grid; gap: var(--space-1); }
 .pol-kz-oyun-etiket { font-size: var(--text-sm); font-weight: var(--weight-semibold); letter-spacing: .06em; text-transform: uppercase; color: var(--policy-active-ink); }
 .pol-kz-oyun-ust h4 { font-size: var(--text-xl); line-height: var(--leading-snug); }
-.pol-kz-ciro { display: grid; gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-raised); box-shadow: var(--shadow-soft); }
+.pol-kz-ciro { container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--inset-lg); background: var(--surface-raised); box-shadow: var(--shadow-soft); }
+/* Büyütülmüş yazıda seviye kutuları tek sütun olur. Ciro tutarı gerekirse iki satıra iner. */
+@container (max-width: 12em) { .pol-kz-ciro .pol-kz-merdiven { grid-template-columns: minmax(0, 1fr); } .pol-kz-ciro .pol-kz-ciro-deger { white-space: normal; } }
 .pol-kz-ciro-ad { color: var(--text-secondary); font-weight: var(--weight-semibold); }
 .pol-kz-ciro-deger { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .pol-kz-kaydirici { inline-size: 100%; block-size: var(--hit-min); margin: 0; accent-color: var(--accent); cursor: pointer; }
-.pol-kz-skor { display: grid; gap: var(--space-4); padding: var(--inset-lg); background: var(--surface-ink); color: var(--text-on-ink); box-shadow: var(--shadow-soft); }
+.pol-kz-skor { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--inset-lg); background: var(--surface-ink); color: var(--text-on-ink); box-shadow: var(--shadow-soft); }
 .pol-kz-skor p { color: var(--text-on-ink); }
 .pol-kz-skor-ad, .pol-kz-skor-not { color: var(--text-on-ink-secondary); }
 .pol-kz-skor .pol-kz-skor-ad, .pol-kz-skor .pol-kz-skor-not { color: var(--text-on-ink-secondary); }
@@ -372,6 +377,8 @@ html[data-focus-mode='keyboard'] .pol-sonuc-baslik:focus-visible { text-decorati
 .pol-kz-oyun-govde { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .pol-kz-yer-girdi { color: var(--text-secondary); text-align: center; }
 .pol-kz-kpi-deger, .pol-kz-skor-deger, .pol-kz-ciro-deger { white-space: nowrap; }
+/* Büyütülmüş yazıda büyük tutarlar gerekirse iki satıra iner. Panel kesilmez. */
+@container (max-width: 12em) { .pol-kz-oyun .pol-kz-skor-deger, .pol-kz-oyun .pol-kz-kpi-deger { white-space: normal; } .pol-kz-oyun .pol-kz-gorev { grid-template-columns: minmax(0, 1fr); } .pol-kz-oyun .pol-kz-gorev > div { overflow-wrap: break-word; } }
 /* Karar kartındaki yığın, kartın boşluk düzenini korur. */
 .pol-kz-karar .pol-kz-yigin-oge { display: grid; gap: var(--space-3); align-content: start; }
 

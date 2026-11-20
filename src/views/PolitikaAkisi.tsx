@@ -159,7 +159,8 @@ export function PolitikaAkisi({ proje, rol, olustur }: { proje: Marka; rol: RolI
               onChange={(id) => guncelle({ kosul: { ...ayar.kosul, [rol]: id } })} />
             {katkili && <Choice<Seviye> label="Satışta katkınız" value={ayar[seviyeKey]} options={(['A', 'C'] as Seviye[]).map((id) => ({ id, name: SEVIYE_ADI[id].replace('Demo da', 'Ürün gösterimi de') }))}
               onChange={(value) => guncelle({ [seviyeKey]: value })} />}
-            <a className="pol-belge-baglanti" href="#kazanc-plani">Kazanç planının değerlerini görün</a>
+            {/* Kullanıcı kararı 20 Kasım 2026 Cuma: mevcut müşteri sekmesinde kazanç planı yoktur. */}
+            {rol !== 'tavsiye' && <a className="pol-belge-baglanti" href="#kazanc-plani">Kazanç planının değerlerini görün</a>}
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

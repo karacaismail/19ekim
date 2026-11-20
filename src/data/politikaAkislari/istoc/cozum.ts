@@ -1,6 +1,7 @@
 import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi, IsAkisi } from '../types';
-import { aylikFiyat, cozumKazanci, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
+import { aylikFiyat, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
+import { ODEME_KURALLARI } from '../../kazancPlani';
 import { kosulSonucu, seciliKosul } from '../../kosullar';
 import { num, tlBitisik } from '../../../lib/format';
 
@@ -59,9 +60,6 @@ const SEVIYE_METNI: Record<Seviye, string> = {
 
 function anaAkis(a: Ayar): IsAkisi {
   const s = a.cozumSeviye;
-  const odemeMetni = a.model === 'oran'
-    ? `Şirket yıllık paket bedelinin ${yuzde(a.oran[s])} kadarını size komisyon olarak öder. Bu örnekte bir yıllık paketin komisyonu ${tl(cozumKazanci(a))} olur.`
-    : `Bu örnekte şirket satış başına sabit komisyon öder. Bir satışın komisyonu ${tl(cozumKazanci(a))} olur.`;
   const adimlar: AkisAdimi[] = [
     {
       id: 'anlasma', ad: 'Katkı anlaşması', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'anlasma',
@@ -77,7 +75,7 @@ function anaAkis(a: Ayar): IsAkisi {
     {
       id: 'kayit', ad: 'İşletmeyi kaydettirin', sorumlu: 'Siz ve ortaklık sorumlusu (önerilen görev)',
       terimler: ['Ortak, şirketle birlikte çalışan kişi ya da firmadır.'],
-      yap: [ 'Siz işletmeyi ortaklık sorumlusuna bildirin.', 'Kayda ürün grubunu ve hedef alıcıyı yazın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.'],
+      yap: [ 'Siz işletmeyi ortaklık sorumlusuna bildirin.', 'Kayda ürün grubunu ve hedef alıcıyı yazın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.', 'Kayıt, kazanç planındaki tanıştırma süresi boyunca geçerlidir. Satış bu sürede kapanmazsa koruma biter.'],
       soru: 'İşletmenin kaydı ne oldu?',
       secenekler: [
         devam('acik', 'Ortaklık sorumlusu işletmeyi benim adıma yazdı', 'ihtiyac'),
@@ -177,8 +175,8 @@ function anaAkis(a: Ayar): IsAkisi {
         son('bekle', 'tarih', 'Kurulum için tarih verilmedi', 'Kurulum tarihi bekleniyor', 'Operasyon yöneticisi kurulum kapasitesini doğrular.', 'İşletmeye kendiniz tarih vermeyin.', 'Tarih bildirilince bu adıma dönün.'),
       ],
     },
-    odemeAdimi([yillikPaket(a), odemeMetni,
-      `Bu örnekte şirket komisyonun ${yuzde(a.ilkOdeme)} kadarını ${a.ilkGun}. günde öder. Kalanını ${a.kalanGun}. günde öder. Günler müşterinin ödeme gününden sayılır.`]),
+    // Kullanıcı kararları 20 Kasım 2026 Cuma: eski yıllık paket komisyonu ve 14. ile 60. gün ödemesi kalktı.
+    odemeAdimi([yillikPaket(a), 'Payınızın oranını sayfanın üstündeki kazanç planı belirler.', ...ODEME_KURALLARI.slice(2)]),
   );
   return {
     baslik: s === 'A' ? 'Tanıştıran danışman' : s === 'B' ? 'Gösterim yapan danışman' : 'Satışı kapatan danışman',

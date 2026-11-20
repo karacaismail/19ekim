@@ -52,7 +52,8 @@ test('rehber hesapları kaynağın varsayılanını kullanır ve bütün özel p
     const kosullar = KOSULLAR[rol].filter((k) => k.marka.includes(marka));
     expect(politika.proje).toBe(marka);
     expect(h.ornekler).toHaveLength(1);
-    expect(h.digerSurum).toHaveLength(1);
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi için ikinci sürüm ve ağ hesabı gösterilmez.
+    expect(h.digerSurum).toHaveLength(rol === 'cozum' || rol === 'elci' ? 0 : 1);
     expect(Object.keys(politika.programlar).sort()).toEqual(kosullar.map((k) => k.id).sort());
     expect(h.programlar.map((k) => k.id).sort()).toEqual(kosullar.filter((k) => k.id !== 'ana').map((k) => k.id).sort());
     expect(politika.kitleler.length).toBeGreaterThanOrEqual(3);
@@ -138,7 +139,7 @@ test('dar ekran ve açık ayrıntılarda metin okunur, gereksiz grafik indirilme
   await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
   await expect(page.locator('.pol-belge')).toBeVisible();
   await page.getByRole('button', { name: 'Başlamadan açık konuları çözün', exact: true }).click();
-  await page.getByRole('button', { name: 'İkinci hesap sürümü seçilirse', exact: true }).click();
+  await page.getByRole('button', { name: 'Personel veya bütçe değişirse', exact: true }).click();
   await page.evaluate(() => document.fonts.ready);
   for (const width of [320, 360, 375, 390, 767, 768, 769, 1280]) {
     await page.setViewportSize({ width, height: 720 });
@@ -201,8 +202,9 @@ test('çözüm ortağının eğitim gideri ve müşavir seçeneği ayrı göster
   const v1 = await import('../src/data/satisOrtakligi');
   const a = { ...v1.VARSAYILAN_AYAR, marka: 'segika' as const };
   const h = rehberHesabi('cozum', 'segika').ornekler.find((h) => h.urun === 'Segika')!;
-  expect(h.satirlar.find((s) => s.ad.endsWith('ek eğitim düşülünce'))?.deger)
-    .toBe(tl(v1.donemKazanci(a, 'cozum').find((s) => s.ad === 'Ek eğitim düşülünce')!.yillik));
+  // Kullanıcı kararları 20 Kasım 2026 Cuma: eski yıllık komisyon örneği kalktı. Pay kazanç planından gelir.
+  expect(h.satirlar.find((s) => s.ad === 'Payınızın oranı')?.deger).toBe('Kazanç planındaki seviyenize göre');
+  expect(h.aciklama.join(' ')).toContain(`Toplam eğitim gideri ${tl(a.ekEgitimSaat * a.egitimSaatUcret)} olur.`);
   expect(h.aciklama.join(' ')).toContain(`${a.egitimSaat} saat ücretsiz`);
   expect(h.aciklama.join(' ')).toContain('Müşavir komisyon yerine panel alır.');
   expect(h.aciklama.join(' ')).toContain('kendiliğinden birleşmez');

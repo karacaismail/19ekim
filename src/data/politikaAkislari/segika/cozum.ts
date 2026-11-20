@@ -1,11 +1,11 @@
 import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur, AkisSecenegi, IsAkisi } from '../types';
-import { cozumKazanci, segikaAylik, type Ayar, type SegikaPaket } from '../../satisOrtakligi';
+import { segikaAylik, type Ayar, type SegikaPaket } from '../../satisOrtakligi';
+import { ODEME_KURALLARI } from '../../kazancPlani';
 import { kosulSonucu, seciliKosul, affilateHesabi } from '../../kosullar';
 import { num, tl } from '../../../lib/format';
 
 const sayi = num;
-const yuzde = (n: number) => `yüzde ${sayi(n * 100)}`;
 
 const devam = (id: string, metin: string, sonraki: string): AkisSecenegi => ({ id, metin, tur: 'devam', sonraki });
 const son = (tur: 'bekle' | 'bitir' | 'tamamla', id: string, metin: string, baslik: string, ...aciklama: string[]): AkisSecenegi =>
@@ -49,7 +49,7 @@ function kayitAdimi(a: Ayar, program: string, sonraki: string): AkisAdimi {
     id: 'kayit', ad: 'İşvereni kaydettirin', sorumlu: 'Ortaklık sorumlusu (önerilen görev)', ek: 'kitle',
     terimler: ['İşveren, Segika’yı satın alacak firmadır.', 'Ortak, Segika’yı işverene öneren kişi ya da firmadır.'],
     yap: [ 'Siz işvereni ortaklık sorumlusuna bildirin.', 'Siz kayda çalışan sayısını ve istenen paketi yazın.',
-      program === 'ana' ? 'Şirket her firmayı yalnız bir ortağın kaydına yazar.' : kural(a, program, 'korunur', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.')],
+      ...(program === 'ana' ? ['Şirket her firmayı yalnız bir ortağın kaydına yazar.', 'Kayıt, kazanç planındaki tanıştırma süresi boyunca geçerlidir. Satış bu sürede kapanmazsa koruma biter.'] : [kural(a, program, 'korunur', 'Şirket her firmayı yalnız bir ortağın kaydına yazar.')])],
     soru: 'İşverenin kaydı ne oldu?',
     secenekler: [
       devam('acik', 'Ortaklık sorumlusu kaydı benim adıma açtı', sonraki),
@@ -64,9 +64,6 @@ function kayitAdimi(a: Ayar, program: string, sonraki: string): AkisAdimi {
 function anaAkis(a: Ayar): IsAkisi {
   const fiyat = segikaAylik(a);
   const ekGider = a.ekEgitimSaat * a.egitimSaatUcret;
-  const odemeMetni = a.model === 'oran'
-    ? `Komisyonunuz yıllık paket bedelinin ${yuzde(a.cozumOran)} kadarıdır.`
-    : 'Bu örnekte şirket her satış için sabit tutar öder.';
   const egitim: AkisAdimi = ekGider > 0
     ? {
         id: 'egitim', ad: 'Ek eğitimi onaylatın', sorumlu: 'Finans sorumlusu (önerilen görev)', ek: 'kazanc',
@@ -166,7 +163,8 @@ function anaAkis(a: Ayar): IsAkisi {
       {
         id: 'odeme', ad: 'Desteği verin ve ödemeyi izleyin', sorumlu: 'Siz ve finans sorumlusu (önerilen görev)', ek: 'kazanc',
         terimler: ['Komisyon, satıştan size ödenen paydır.', 'Fatura, aldığınız para için kestiğiniz resmi belgedir.'],
-        yap: [ odemeMetni, `Bu örnekte bir işverenden komisyonunuz ${tl(cozumKazanci(a))} olur.`,
+        // Kullanıcı kararları 20 Kasım 2026 Cuma: eski yıllık paket komisyonu kalktı. Pay kazanç planına göre hesaplanır.
+        yap: [ 'Payınızın oranını sayfanın üstündeki kazanç planı belirler.', ...ODEME_KURALLARI.slice(2),
           'Şirketin komisyon listesini destek kayıtlarınızla karşılaştırın.'],
         soru: 'Destek ve ödeme konusunda ne oldu?',
         secenekler: [
