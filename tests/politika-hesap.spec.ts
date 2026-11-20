@@ -21,6 +21,9 @@ test('tek seferlik tavsiyede seçili ödeme biçimi ortak motoru kullanır', () 
   const a = { ...VARSAYILAN_AYAR, marka: 'segika' as const, affOdeme: 'aylik' as const, kosul: { tavsiye: 'tek-sefer' } };
   const h = rehberHesabi('tavsiye', 'segika', a);
   const expected = affilateHesabi(a, 'ayse').ortaklar.reduce((sum, o) => sum + o.planlanan, 0) / 100;
-  expect(h.ornekler[0].satirlar.find((s) => s.ad === 'Bir müşteri için planlanan komisyon')?.deger).toBe(tl(expected));
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: tek seferlik tavsiye ödülü nakit değildir, Segika panelinde ek kullanım hakkıdır.
+  // Satırın adı bu yüzden “komisyon” değil “panel kullanım hakkı” olur. Tutar yine ortak motordan gelir.
+  expect(h.ornekler[0].satirlar.find((s) => s.ad === 'Bir müşteri için planlanan komisyon')).toBeUndefined();
+  expect(h.ornekler[0].satirlar.find((s) => s.ad === 'Bir müşteri için planlanan panel kullanım hakkı')?.deger).toBe(tl(expected));
   expect(h.ornekler[0].aciklama.join(' ')).not.toContain('nakit ödeme değildir');
 });
