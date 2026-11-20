@@ -1836,6 +1836,12 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Zor kelimelerin açıklaması veride ayrı alandadır (`terimler`). Ekranda “Bu adımdaki kelimeler” bölümünde görünür.
   Bu bölüm numaralı iş listesinin üstündedir. Kenarlıksızdır, yüzey tonuyla ayrılır. İş listesinde tanım cümlesi durmaz.
   Bunu `tests/politika-akis.spec.ts` denetler.
+- Kadrolu uzmanın maaş kotası net maaşın 2 katıdır (kullanıcı kararı 20 Kasım 2026). 50.000 ₺ maaşta kota 100.000 ₺ olur.
+- iStoc kadrolu uzmanın kotaları ayda satılan yıllık paket sayısıdır (kullanıcı kararı 20 Kasım 2026).
+  4 paket ve altında prim yoktur. 5 paket ve üstü %5, 8 paket ve üstü %7, 12 paket ve üstü %10 olur.
+  Ulaşılan kademenin oranı satılan bütün paketlerin tutarına uygulanır. Paket bedeli yıllık paket bedelidir.
+  Bu kural eski “kota üstü prim” hesabının yerine geçer. Segika kadrolu uzmanın hesabı değişmedi.
+  Hesap `kazancPlani.ts → paketPrimi` işlevindedir. Bunu `tests/kazanc-plani.spec.ts` denetler.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
   Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.
   `rol=oncu` ve `/politikalar/oncu/` adresleri ilk rolü açar. Öncü akış dosyaları veride durur ama sayfa onları yüklemez.

@@ -8,10 +8,11 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KUMULATIF_KURALI, KOTA_KURALI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani,
+  KUMULATIF_KURALI, KOTA_KURALI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
-import type { Marka, RolId } from '../data/satisOrtakligi';
+import { yillikFiyat, type Marka, type RolId } from '../data/satisOrtakligi';
+import { usePersonaAyar } from '../lib/personaStore';
 import { num } from '../lib/format';
 import '../styles/politikalar.css';
 
@@ -484,27 +485,55 @@ function KaliciKurallarPenceresi({ plan, proje }: { plan: KazancPlani; proje: Ma
   </>;
 }
 
-function KadroluGirdi({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle }) {
+function KadroluGirdi({ plan, guncelle, proje }: { plan: KazancPlani; guncelle: Guncelle; proje: Marka }) {
   const k = plan.kadrolu;
+  const paketli = proje === 'istoc';
   return <div className="pol-kz-adim-govde">
     <p>Kadrolu uzman SGK'lı çalışandır. Kadrolu uzman bu iş ortaklığı planının dışındadır.</p>
-    <p>Maaşı ayda {tl(MAAS_ARALIGI[0])} ile {tl(MAAS_ARALIGI[1])} arasındadır. Kadrolu uzman maaşa ek olarak prim alır.</p>
+    <p>Net maaşı ayda {tl(MAAS_ARALIGI[0])} ile {tl(MAAS_ARALIGI[1])} arasındadır. Kadrolu uzman maaşa ek olarak prim alır.</p>
     <Grup baslik="Maaş ve kota">
-      <Kutu label="Aylık maaş" birim="(₺)" value={k.maas} kural="kadrolu.maas" onChange={(v) => guncelle((x) => { x.kadrolu.maas = v ?? 0; })} />
-      <Kutu label="Kota oranı" value={k.kotaOrani} yuzdeMi kural="kadrolu.kotaOrani" onChange={(v) => guncelle((x) => { x.kadrolu.kotaOrani = v ?? 0; })} />
-      <Kutu label="Kota üstü prim oranı" value={k.primOrani} yuzdeMi bosOlur kural="kadrolu.primOrani" onChange={(v) => guncelle((x) => { x.kadrolu.primOrani = v; })} />
+      <Kutu label="Aylık net maaş" birim="(₺)" value={k.maas} kural="kadrolu.maas" onChange={(v) => guncelle((x) => { x.kadrolu.maas = v ?? 0; })} />
+      <Kutu label="Maaş kotası oranı" value={k.kotaOrani} yuzdeMi kural="kadrolu.kotaOrani" onChange={(v) => guncelle((x) => { x.kadrolu.kotaOrani = v ?? 0; })} />
+      {!paketli && <Kutu label="Kota üstü prim oranı" value={k.primOrani} yuzdeMi bosOlur kural="kadrolu.primOrani" onChange={(v) => guncelle((x) => { x.kadrolu.primOrani = v; })} />}
     </Grup>
+    {/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzmanın kotaları aylık paket sayısıdır. */}
+    {paketli && <>
+      <p>Kotalar, ayda sattığınız yıllık paket sayısıdır. Ulaştığınız kademenin oranı bütün satışa uygulanır.</p>
+      <Grup baslik="Paket kademeleri">
+        {k.paketEsik.map((e, i) => <Kutu key={`e${i}`} label={`K${i + 1} paket eşiği`} birim="(adet)" value={e} kural={`kadrolu.paketEsik.${i}`}
+          onChange={(v) => guncelle((x) => { x.kadrolu.paketEsik[i] = Math.round(v ?? 0); })} />)}
+        {k.paketOran.map((o, i) => <Kutu key={`o${i}`} label={`K${i + 1} prim oranı`} value={o} yuzdeMi kural={`kadrolu.paketOran.${i}`}
+          onChange={(v) => guncelle((x) => { x.kadrolu.paketOran[i] = v ?? 0; })} />)}
+        <Kutu label="Örnek aylık paket sayısı" birim="(adet)" value={k.ornekPaket} onChange={(v) => guncelle((x) => { x.kadrolu.ornekPaket = Math.round(v ?? 0); })} />
+      </Grup>
+    </>}
   </div>;
 }
 
-function KadroluSonuc({ plan }: { plan: KazancPlani }) {
+function KadroluSonuc({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
   const k = plan.kadrolu;
-  return <section className="pol-kz-kart" aria-label="Kadrolu uzmanın kotası">
+  const { ayar } = usePersonaAyar(proje);
+  if (proje !== 'istoc') return <section className="pol-kz-kart" aria-label="Kadrolu uzmanın kotası">
     <dl className="pol-kz-sonuc">
-      <div><dt>Aylık kota</dt><dd className="pol-kz-buyuk" data-kazanc="kadrolu-kota">{tl(kadroluKota(plan))} ciro</dd></div>
+      <div><dt>Aylık maaş kotası</dt><dd className="pol-kz-buyuk" data-kazanc="kadrolu-kota">{tl(kadroluKota(plan))} ciro</dd></div>
       <div><dt>Prim oranı</dt><dd>{k.primOrani === null ? 'Henüz belirlenmedi' : yuzde(k.primOrani)}</dd></div>
     </dl>
-    <p>Kota, aylık maaşın {yuzde(k.kotaOrani)} kadarı cirodur. Kotayı geçen ciro için prim hesaplanır.</p>
+    <p>Maaş kotası, net maaşın {yuzde(k.kotaOrani)} kadarı cirodur. Kotayı geçen ciro için prim hesaplanır.</p>
+  </section>;
+  const paketBedeli = Math.round(yillikFiyat({ ...ayar, marka: 'istoc' }));
+  const p = paketPrimi({ esik: k.paketEsik, oran: k.paketOran }, k.ornekPaket, paketBedeli);
+  return <section className="pol-kz-kart" aria-label="Kadrolu uzmanın kotası">
+    <dl className="pol-kz-sonuc">
+      <div><dt>Aylık maaş kotası</dt><dd data-kazanc="kadrolu-kota">{tl(kadroluKota(plan))}</dd></div>
+      <div><dt>Bir yıllık paketin bedeli</dt><dd>{tl(paketBedeli)}</dd></div>
+      <div><dt>Ulaşılan kademe</dt><dd data-kazanc="kadrolu-paket-seviye">{p.seviye ? `K${p.seviye} (${yuzde(p.oran)})` : 'Prim yok'}</dd></div>
+      <div><dt>Örnek prim</dt><dd className="pol-kz-buyuk">{tl(p.prim)}</dd></div>
+      <div><dt>Hesap</dt><dd data-kazanc="kadrolu-paket-prim">{p.seviye
+        ? `${num(k.ornekPaket)} paket × ${tl(paketBedeli)} × ${yuzde(p.oran)} = ${tl(p.prim)}`
+        : `${num(k.ornekPaket)} paket ile prim ${tl(0)}`}</dd></div>
+    </dl>
+    <p>Maaş kotası, net maaşın {yuzde(k.kotaOrani)} kadarıdır.</p>
+    <p>{num(k.paketEsik[0] - 1)} paket ve altında prim yoktur. Paket sayısı her ay yeniden sayılır.</p>
   </section>;
 }
 
@@ -730,8 +759,8 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
     <KaliciKurallarPenceresi plan={plan} proje={proje} />
     <div className="pol-kz-bolumler">
       {rol === 'kadrolu' ? <>
-        <Bolum no={1} baslik="Maaş ve kota" aciklama="Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır."><KadroluGirdi plan={plan} guncelle={guncelle} /></Bolum>
-        <Bolum no={2} baslik="Sonuç" aciklama="Sonuç, 1. bölümdeki değerlere göre hesaplanır."><KadroluSonuc plan={plan} /></Bolum>
+        <Bolum no={1} baslik="Maaş ve kota" aciklama="Değerleri değiştirebilirsiniz. Değerler yalnız bu tarayıcıda saklanır."><KadroluGirdi plan={plan} guncelle={guncelle} proje={proje} /></Bolum>
+        <Bolum no={2} baslik="Sonuç" aciklama="Sonuç, 1. bölümdeki değerlere göre hesaplanır."><KadroluSonuc plan={plan} proje={proje} /></Bolum>
       </> : <>
         <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
         <Bolum no={1} baslik="Kararlar" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir."><Kararlar plan={plan} /></Bolum>

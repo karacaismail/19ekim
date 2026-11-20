@@ -44,6 +44,11 @@ export interface Ayar {
   kotaEk: number;
   kadroluPrim: Record<Marka, number>;
   kadroluSatis: number;
+  /**
+   * iStoc kadrolu uzmanın paket kademeleri (kullanıcı kararı 20 Kasım 2026 Cuma). Kazanç planından gelir.
+   * Varsa prim, ulaşılan kademenin oranıyla bütün satıştan hesaplanır. Yoksa eski kota ve prim hesabı geçerlidir.
+   */
+  kadroluPaket?: { esik: [number, number, number]; oran: [number, number, number] };
   /** iStoc çözüm ortağı: yaptığı işe göre oran (tanıştırır / demo / kapanış). */
   cozumSeviye: Seviye;
   /** Segika çözüm ortağı komisyonu: müşteri desteğini ortak verir (kullanıcı kararı 2026-11-03). */

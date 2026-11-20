@@ -34,7 +34,14 @@ export interface KazancPlani {
   kapatir: KatkiPlani;
   /** Örnek hesapta kullanılan aylık ciro. Gerçek satış değildir. */
   ornekCiro: number;
-  kadrolu: { maas: number; kotaOrani: number; primOrani: Esik };
+  /**
+   * Kadrolu uzmanın maaşı ve kotası. Maaş kotası net maaşın katıdır.
+   * iStoc'ta prim, aylık satılan yıllık paket sayısının kademesine göredir (kullanıcı kararı 20 Kasım 2026 Cuma).
+   */
+  kadrolu: {
+    maas: number; kotaOrani: number; primOrani: Esik;
+    paketEsik: [number, number, number]; paketOran: [number, number, number]; ornekPaket: number;
+  };
   /** Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi. Yönetici seçer (kullanıcı kararı 17 Kasım 2026). */
   paylasim: { sureAy: SureAy; ilkSatis: Bolusme; yillar: Bolusme; kota: Bolusme };
   /** Yöneticinin kalıcı kural adayı olarak işaretlediği değerlerin kimlikleri (`kuralListesi`). */
@@ -67,8 +74,9 @@ export const KAZANC_VARSAYILAN: KazancPlani = {
   kapatir: { kotaEsik: [30_000, 70_000, 120_000], taban: 0.15, kotaArtis: [0.05, 0.05, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
   // Kullanıcı kararı 17 Kasım 2026 Salı: örnek aylık ciro 50.000 ₺ ile açılır.
   ornekCiro: 50_000,
-  // Kullanıcının örneği: 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
-  kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2.5, primOrani: null },
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: maaş kotası net maaşın 2 katıdır. 50.000 ₺ maaşta kota 100.000 ₺ olur.
+  // iStoc'ta 4 paket ve altı prim yoktur. 5 paket ve üstü %5, 8 paket ve üstü %7, 12 paket ve üstü %10 olur.
+  kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2, primOrani: null, paketEsik: [5, 8, 12], paketOran: [0.05, 0.07, 0.1], ornekPaket: 8 },
   // Her soruda varsayılan, şirketi zarardan koruyan düşme seçeneğidir.
   paylasim: { sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' },
   kalici: [],
@@ -226,9 +234,11 @@ export function kuralListesi(plan: KazancPlani) {
     const v = plan.paylasim[soru];
     liste.push({ id: `paylasim.${soru}`, ad: BOLUSME_SORUSU[soru], deger: v, gosterim: BOLUSME_ADI[v] });
   }
-  liste.push(para('kadrolu.maas', 'Aylık maaş', plan.kadrolu.maas));
-  liste.push(oran('kadrolu.kotaOrani', 'Kota oranı', plan.kadrolu.kotaOrani));
+  liste.push(para('kadrolu.maas', 'Aylık net maaş', plan.kadrolu.maas));
+  liste.push(oran('kadrolu.kotaOrani', 'Maaş kotası oranı', plan.kadrolu.kotaOrani));
   liste.push(oran('kadrolu.primOrani', 'Kota üstü prim oranı', plan.kadrolu.primOrani));
+  plan.kadrolu.paketEsik.forEach((e, i) => liste.push({ id: `kadrolu.paketEsik.${i}`, ad: `K${i + 1} paket eşiği`, deger: e, gosterim: `${e} paket` }));
+  plan.kadrolu.paketOran.forEach((o, i) => liste.push(oran(`kadrolu.paketOran.${i}`, `K${i + 1} prim oranı`, o)));
   return liste;
 }
 
@@ -258,6 +268,19 @@ export function kaliciJson(plan: KazancPlani, proje: Marka, simdi: Date) {
   };
 }
 
+/**
+ * Paket kademesi primi (kullanıcı kararı 20 Kasım 2026 Cuma). Kademe, ayda satılan yıllık paket sayısıyla bulunur.
+ * Ulaşılan kademenin oranı satılan bütün paketlerin tutarına uygulanır. Kademeye ulaşılmazsa prim yoktur.
+ * Örnek: 8 paket ve 100.000 ₺ paket bedeli. Kademe K2, oran %7, prim 56.000 ₺ olur.
+ */
+export function paketPrimi(kademe: { esik: readonly number[]; oran: readonly number[] }, adet: number, paketBedeli: number) {
+  let seviye = 0;
+  let oran = 0;
+  kademe.esik.forEach((e, i) => { if (adet >= e) { seviye = i + 1; oran = kademe.oran[i]; } });
+  const ciro = Math.round(adet * paketBedeli);
+  return { seviye: seviye as 0 | 1 | 2 | 3, oran, ciro, prim: Math.round(ciro * oran) };
+}
+
 export const kadroluKota = (plan: KazancPlani) => Math.round(plan.kadrolu.maas * plan.kadrolu.kotaOrani);
 
 /** Plan, rehberin eski hesap ayarına uygulanır. Böylece rehber metni de planın oranlarını kullanır. */
@@ -272,6 +295,11 @@ export function planliAyar(ayar: Ayar, plan: KazancPlani): Ayar {
     maas: plan.kadrolu.maas,
     kotaCarpan: plan.kadrolu.kotaOrani,
     kotaEk: 0,
+    // Paket kademeleri yalnız iStoc kadrolu uzmanı içindir. Segika'nın hesabı değişmez.
+    ...(ayar.marka === 'istoc' ? {
+      kadroluSatis: plan.kadrolu.ornekPaket,
+      kadroluPaket: { esik: [...plan.kadrolu.paketEsik], oran: [...plan.kadrolu.paketOran] },
+    } : {}),
   };
 }
 
@@ -301,6 +329,10 @@ export function planOku(ham: unknown, proje?: Marka): KazancPlani {
     if (ESIK(kd.maas) && kd.maas !== null) v.kadrolu.maas = kd.maas!;
     if (ORAN(kd.kotaOrani, 100)) v.kadrolu.kotaOrani = kd.kotaOrani!;
     if (kd.primOrani === null || ORAN(kd.primOrani)) v.kadrolu.primOrani = kd.primOrani ?? null;
+    const adetMi = (x: unknown) => typeof x === 'number' && Number.isInteger(x) && x >= 0 && x <= 1000;
+    if (Array.isArray(kd.paketEsik) && kd.paketEsik.length === 3 && kd.paketEsik.every(adetMi)) v.kadrolu.paketEsik = [...kd.paketEsik] as KazancPlani['kadrolu']['paketEsik'];
+    if (Array.isArray(kd.paketOran) && kd.paketOran.length === 3 && kd.paketOran.every((x) => ORAN(x))) v.kadrolu.paketOran = [...kd.paketOran] as KazancPlani['kadrolu']['paketOran'];
+    if (adetMi(kd.ornekPaket)) v.kadrolu.ornekPaket = kd.ornekPaket!;
   }
   const pay = h.paylasim as Record<string, unknown> | undefined;
   if (pay && typeof pay === 'object') {

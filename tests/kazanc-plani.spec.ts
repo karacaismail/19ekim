@@ -31,8 +31,8 @@ test('kazanç planının varsayılanları kâğıttaki planla aynıdır', async 
   expect(p.ornekCiro).toBe(50_000);
   expect(p.paylasim.sureAy).toBe(6);
   expect(p.kadrolu.maas).toBe(50_000);
-  // 50.000 ₺ maaşta kota 125.000 ₺ ciro olur.
-  expect(k.kadroluKota(p)).toBe(125_000);
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: maaş kotası net maaşın 2 katıdır. 50.000 ₺ maaşta kota 100.000 ₺ olur.
+  expect(k.kadroluKota(p)).toBe(100_000);
   expect(p.kadrolu.primOrani).toBeNull();
 });
 
@@ -99,7 +99,7 @@ test('plan rehberin hesap ayarına yansır ve orta seçenek kalkar', async () =>
   expect(a.oran).toEqual({ A: 0, B: 0.15, C: 0.15 });
   expect([a.oncuSeviye, a.elciSeviye, a.cozumSeviye]).toEqual(['C', 'C', 'C']);
   expect(a.maas).toBe(50_000);
-  expect(a.maas * a.kotaCarpan * (1 + a.kotaEk)).toBe(125_000);
+  expect(a.maas * a.kotaCarpan * (1 + a.kotaEk)).toBe(100_000);
 });
 
 test('satışta katkı seçiminde orta seçenek yoktur', async ({ page }) => {
@@ -240,10 +240,9 @@ test('kadrolu uzman sekmesi maaşı, kotayı ve SGK kaydını söyler', async ({
   await expect(plani(page)).toContainText('SGK');
   await expect(plani(page)).not.toContainText('Herkes iş ortağıdır.');
   await expect(plani(page)).toContainText('50.000 ₺ ile 60.000 ₺');
-  await expect(kutu(page, 'Aylık maaş')).toHaveValue('50.000');
-  await expect(kutu(page, 'Kota oranı')).toHaveValue('%250');
-  await expect(kutu(page, 'Kota üstü prim oranı')).toHaveValue('');
-  await expect(plani(page).locator('[data-kazanc="kadrolu-kota"]')).toContainText('125.000 ₺');
+  await expect(kutu(page, 'Aylık net maaş')).toHaveValue('50.000');
+  await expect(kutu(page, 'Maaş kotası oranı')).toHaveValue('%200');
+  await expect(plani(page).locator('[data-kazanc="kadrolu-kota"]')).toContainText('100.000 ₺');
 });
 
 // Kullanıcı kararı 17 Kasım 2026 Salı: katkı seçimi büyük anahtardır. Bütün katkı seçimleri aynı bileşeni kullanır.
@@ -431,4 +430,62 @@ for (const genislik of [320, 1280]) test(`${genislik} px: anahtar, ciro ve kalı
   await expect(plani(page).locator('[data-yer-tutucu="paylasim.ilkSatis"]')).toBeVisible();
   expect(await ust(sonuc)).toBe(sonucOnce);
   expect(await tasmaYok(page)).toBe(true);
+});
+
+// Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzmanın kotaları aylık paket sayısıdır.
+// 4 paket ve altı prim yoktur. 5 paket ve üstü K1 %5, 8 paket ve üstü K2 %7, 12 paket ve üstü K3 %10 olur.
+// Ulaşılan kademenin oranı, satılan bütün yıllık paketlerin tutarına uygulanır.
+test('iStoc kadrolu prim kademesi paket sayısına göre bütün satışa uygulanır', async () => {
+  const k = await import('../src/data/kazancPlani');
+  const p = structuredClone(k.KAZANC_VARSAYILAN);
+  expect(p.kadrolu.paketEsik).toEqual([5, 8, 12]);
+  expect(p.kadrolu.paketOran).toEqual([0.05, 0.07, 0.1]);
+  expect(p.kadrolu.ornekPaket).toBe(8);
+  const kademe = { esik: p.kadrolu.paketEsik, oran: p.kadrolu.paketOran };
+  expect(k.paketPrimi(kademe, 4, 100_000)).toEqual({ seviye: 0, oran: 0, ciro: 400_000, prim: 0 });
+  expect(k.paketPrimi(kademe, 5, 100_000)).toEqual({ seviye: 1, oran: 0.05, ciro: 500_000, prim: 25_000 });
+  expect(k.paketPrimi(kademe, 8, 100_000)).toEqual({ seviye: 2, oran: 0.07, ciro: 800_000, prim: 56_000 });
+  expect(k.paketPrimi(kademe, 11, 100_000)).toMatchObject({ seviye: 2, prim: 77_000 });
+  expect(k.paketPrimi(kademe, 12, 100_000)).toEqual({ seviye: 3, oran: 0.1, ciro: 1_200_000, prim: 120_000 });
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  const a = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc' }, p);
+  expect(a.kadroluPaket).toEqual(kademe);
+  expect(a.kadroluSatis).toBe(8);
+  const { rehberHesabi } = await import('../src/data/politikalar/hesap');
+  const satir = (ad: string) => rehberHesabi('kadrolu', 'istoc', a).ornekler[0].satirlar.find((x) => x.ad === ad)?.deger;
+  expect(satir('Ulaşılan kademe')).toBe('K2 (%7)');
+  expect(satir('Örnek prim')).toContain('× %7 =');
+  // Segika kadrolu uzmanın eski hesabı değişmez.
+  const sg = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika' }, p);
+  expect(rehberHesabi('kadrolu', 'segika', sg).ornekler[0].satirlar.some((x) => x.ad === 'Ulaşılan kademe')).toBe(false);
+});
+
+test('iStoc kadrolu sekmesi paket kademelerini gösterir ve örnek paket sayısıyla hesaplar', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('politikalar/?proje=istoc&rol=kadrolu');
+  for (const [ad, deger] of [['K1 paket eşiği', '5'], ['K2 paket eşiği', '8'], ['K3 paket eşiği', '12'], ['K1 prim oranı', '%5'], ['K2 prim oranı', '%7'], ['K3 prim oranı', '%10'], ['Örnek aylık paket sayısı', '8']]) {
+    await expect(kutu(page, ad)).toHaveValue(deger);
+  }
+  await expect(kutu(page, 'Kota üstü prim oranı')).toHaveCount(0);
+  const seviye = plani(page).locator('[data-kazanc="kadrolu-paket-seviye"]');
+  const prim = plani(page).locator('[data-kazanc="kadrolu-paket-prim"]');
+  await expect(seviye).toHaveText('K2 (%7)');
+  await expect(prim).toContainText('8 paket ×');
+  await expect(prim).toContainText('× %7 =');
+  await kutu(page, 'Örnek aylık paket sayısı').fill('4');
+  await expect(seviye).toHaveText('Prim yok');
+  await kutu(page, 'Örnek aylık paket sayısı').fill('12');
+  await expect(seviye).toHaveText('K3 (%10)');
+  await kutu(page, 'K3 prim oranı').fill('%12');
+  await expect(seviye).toHaveText('K3 (%12)');
+  // Rehberin iş sırası da yeni kuralı söyler.
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.locator('.pol-belge')).toContainText('Ulaşılan kademe');
+  expect(await tasmaYok(page)).toBe(true);
+});
+
+test('Segika kadrolu sekmesinde paket kademesi yoktur', async ({ page }) => {
+  await page.goto('politikalar/?proje=segika&rol=kadrolu');
+  await expect(kutu(page, 'Maaş kotası oranı')).toHaveValue('%200');
+  await expect(kutu(page, 'K1 paket eşiği')).toHaveCount(0);
 });

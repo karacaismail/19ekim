@@ -6,6 +6,7 @@ import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
 import { int, num } from '../../lib/format';
+import { paketPrimi } from '../kazancPlani';
 
 export const sayi = num;
 export const tl = (n: number) => `${sayi(n)} ₺`;
@@ -24,7 +25,27 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
   const aciklama = marka === 'istoc'
     ? [`Aylık liste fiyatı ${sayi(a.istocAyEur)} avrodur. Bu örnekte 1 avro ${tl(a.kur)} sayılır.`, `Yıllık pakette 12 ay için ${sayi(a.istocYilAy)} aylık bedel ödenir.`]
     : [`Örnek, ${sayi(a.calisan)} çalışan için ${v1.PAKET_ADI[a.segikaPaket]} paketini kullanır.`, `Fiyat, çalışan sayısı ${sayi(a.blok)} kişilik gruplara yukarı yuvarlanarak hesaplanır. Örneğin ${sayi(a.blok + 1)} ile ${sayi(2 * a.blok)} arası çalışan için ${sayi(2 * a.blok)} çalışanın bedeli ödenir. Sayı başka gruba geçerse bedeli yeniden hesaplayın. Sayı aynı grupta kalırsa bedel değişmez.`];
-  if (rol === 'kadrolu') {
+  if (rol === 'kadrolu' && marka === 'istoc' && a.kadroluPaket && a.model === 'oran') {
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzmanın kotaları paket sayısıdır.
+    const kd = a.kadroluPaket;
+    const p = paketPrimi(kd, a.kadroluSatis, fiyat);
+    const kotaTutari = a.maas * a.kotaCarpan;
+    satirlar.push(
+      { ad: 'Aylık örnek net maaş', deger: tl(a.maas) },
+      { ad: 'Maaş kotası', deger: `${tl(a.maas)} × ${sayi(a.kotaCarpan)} = ${tl(kotaTutari)}` },
+      { ad: 'Bu ay satılan yıllık paket', deger: `${sayi(a.kadroluSatis)} adet` },
+      { ad: 'Bu satışların paket bedeli', deger: tl(p.ciro) },
+      { ad: 'Ulaşılan kademe', deger: p.seviye ? `K${p.seviye} (${yuzde(p.oran)})` : 'Prim yok' },
+      { ad: 'Örnek prim', deger: p.seviye ? `${tl(p.ciro)} × ${yuzde(p.oran)} = ${tl(p.prim)}` : tl(0) },
+      { ad: 'Maaş ve prim toplamı', deger: tl(a.maas + p.prim) },
+    );
+    aciklama.push(`Maaş kotası, net maaşın ${sayi(a.kotaCarpan)} katıdır.`);
+    aciklama.push(`${sayi(kd.esik[0] - 1)} paket ve altında prim yoktur.`);
+    kd.esik.forEach((e, i) => aciklama.push(`${sayi(e)} paket ve üstünde K${i + 1} primi ${yuzde(kd.oran[i])} olur.`));
+    aciklama.push('Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır.');
+    aciklama.push('Paket sayısı her ay yeniden sayılır.');
+    aciklama.push('İlk iki ay kota uygulanmaz. Şirket bu iki ayın primini henüz açıklamadı.');
+  } else if (rol === 'kadrolu') {
     const k = v1.kadrolu(a);
     aciklama.push(a.model === 'oran' ? 'Kota, prim hesabındaki satış eşiğidir. Yalnız bu eşiği aşan tutar prim hesabına girer.' : 'Kota dolunca sonraki satışlar için sabit prim hesaplanır.');
     satirlar.push(
@@ -39,7 +60,7 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     aciklama.push('Bu örnek kota uygulanan bir ayı gösterir. Satılan paket yıllık, prim dönemi aylıktır.');
     if (marka === 'istoc') aciklama.push('İlk iki ay kota uygulanmaz. Şirket bu iki ayın primini henüz açıklamadı.');
     else aciklama.push('Şirket Segika için kotasız başlangıç süresi belirlemedi. Başlamadan prim ekini insan kaynakları sorumlusuyla netleştirin.');
-    aciklama.push('Şirket maaşın net mi brüt mü olduğunu henüz yazmadı. İnsan kaynakları sorumlusu bunu iş sözleşmesine yazsın.');
+    aciklama.push('Kota net maaş üzerinden hesaplanır.');
   } else if (rol === 'tavsiye') {
     const kredi = v1.aylikFiyat(a) * a.krediAy;
     satirlar.push(
