@@ -85,17 +85,15 @@ export function PolitikaBelgesi({ politika: p, hesap }: { politika: ProjePolitik
         {p.ortakBulma && <><h3>Yeni ortak adaylarını nasıl bulursunuz?</h3><Paragraflar metin={p.ortakBulma} /></>}
       </Bolum>
       <Bolum id="kazanc" baslik="Kazanç nasıl hesaplanır?">
-        {/* Kullanıcı kararı 20 Kasım 2026 Cuma: çözüm ortağı ve marka elçisi yalnız kazanç planıyla kazanır. Ağ hesabı kalktı. */}
+        {/* Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi belgesinde ikinci sürüm (ağ kademesi) yoktur. */}
         {hesap.digerSurum.length
           ? <p>Satış hesabının iki sürümü var. Bu rehber birinci sürümü ana örnek olarak kullanır. İkinci sürümün koşulları farklıdır ve ayrı bölümde durur. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>
-          : hesap.ayriProgram
-            ? <p>Bu örnek, seçtiğiniz ayrı programa aittir. Ayrı programın ödeme kuralı yazılı anlaşmada durur. Ana programda payınızı kazanç planı belirler.</p>
-            : <p>Payınızı sayfanın üstündeki kazanç planı belirler. Aşağıdaki ödeme kuralları bütün iş ortakları için aynıdır.</p>}
+          : <p>Bu rehber birinci sürüm hesabını kullanır. Bu örnekler birinci sürümde seçili değerlerle hesaplandı.</p>}
         <p>Bu değerler değişince rehber de güncellenir. İmzalanmış anlaşmalar kendiliğinden değişmez.</p>
         <p>Sonuçlar örnek hesaptır. Gerçekleşmiş satış veya kesin kazanç göstermez.</p>
         {hesap.ornekler.map((h) => <Hesap key={h.urun} hesap={h} />)}
         <h3>Ödeme ne zaman olur?</h3><Paragraflar metin={hesap.odeme} />
-        {hesap.digerSurum.length > 0 && <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${p.proje}&rol=${p.id}`}>Birinci sürümdeki hesabı açın</a></p>}
+        <p><a className="pol-belge-baglanti" href={`${href('/satis-ortakligi/')}?surum=v1&proje=${p.proje}&rol=${p.id}`}>Birinci sürümdeki hesabı açın</a></p>
       </Bolum>
       <Bolum id="sorunlar" baslik="Bir sorun çıkarsa ne yapacaksınız?">
         <dl className="pol-sorunlar">{p.sorunlar.map((s) => <div key={s.kosul}>

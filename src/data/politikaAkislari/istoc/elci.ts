@@ -1,13 +1,13 @@
 import { belgeAdimlariniCikar } from '../motor';
 import type { AkisAdimi, AkisOlustur } from '../types';
-import { yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
-import { AYRILMA_KURALI, ODEME_KURALLARI } from '../../kazancPlani';
+import { satisKazanci, yillikFiyat, type Ayar, type Seviye } from '../../satisOrtakligi';
 import { num, tlBitisik } from '../../../lib/format';
 
 const sayi = num;
 /** Tutar ile birim arasında bölünmez boşluk bulunur. */
 const para = tlBitisik;
 const avro = (n: number) => `${sayi(n)} €`;
+const oranMetni = (n: number) => `%${sayi(n * 100)}`;
 
 /** iStoc fiyatı avroyla belirlenir. TL karşılığı örnek kura bağlıdır. */
 const yillikPaket = (a: Ayar) =>
@@ -21,8 +21,18 @@ const SEVIYE_OZET: Record<Seviye, string> = {
 
 const akisOlusturTam: AkisOlustur = (a) => {
   const seviye = a.elciSeviye;
-  // Kullanıcı kararları 20 Kasım 2026 Cuma: pay kazanç planına ve ortak ödeme kurallarına göre hesaplanır.
-  const odemeMetni = [yillikPaket(a), 'Payınızın oranını sayfanın üstündeki kazanç planı belirler.', ...ODEME_KURALLARI.slice(2)];
+  const komisyon = satisKazanci(a, seviye);
+  const odemeMetni = a.model === 'oran'
+    ? [
+        yillikPaket(a),
+        `Şirket yıllık paket bedelinin ${oranMetni(a.oran[seviye])} kadarını size komisyon olarak öder.`,
+        `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
+      ]
+    : [
+        'Bu örnekte şirket satış başına sabit komisyon öder.',
+        `Bu örnekte bir satışın komisyonu ${para(komisyon)} olur.`,
+        'Sabit tutar yetkinizi değiştirmez.',
+      ];
   const fiyatCevabi = 'Fiyat sorulursa yalnız fiyat tablosundaki fiyatı söyleyin.';
   /** Adımı başka biri yürütürken okurun kendi işi "siz" ile ayrıca söylenir. */
   const fiyatCevabiSiz = 'Fiyat sorulursa siz yalnız fiyat tablosundaki fiyatı söyleyin.';
@@ -259,12 +269,12 @@ const akisOlusturTam: AkisOlustur = (a) => {
           'Ödeme gelince bu adıma dönün.',
         ] } },
         { id: 'kural-yok', metin: 'Ödeme günü kuralı anlaşmada yazmıyor', tur: 'bekle', sonuc: { baslik: 'Ödeme kuralının yazılmasını bekleyin', metin: [
-          'Pay, müşterinin ödeme yaptığı ayda hesaplanır.',
+          'Günler, müşterinin ödeme yaptığı günden sayılır.',
           'Finans sorumlusu kuralı anlaşmaya yazar.',
           'Kural yazılınca bu adıma dönün.',
         ] } },
         { id: 'iade', metin: 'Satıcı parasını geri istedi', tur: 'bekle', sonuc: { baslik: 'Geri ödeme kararını bekleyin', metin: [
-          AYRILMA_KURALI,
+          'Para geri verilirse komisyona ne olacağını imzalı anlaşma söyler.',
           'Finans sorumlusu kararı size yazılı bildirir.',
           'Karar gelince bu adıma dönün.',
         ] } },

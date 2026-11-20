@@ -1821,10 +1821,9 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Adım metinleri dosyada durur. Kullanıcı isterse adımlar kolayca geri gelir.
   Bu kuralı `tests/politika-belge-adimi.spec.ts` denetler.
 - Tanıştıran ile satışı kapatan farklı kişi olabilir (kullanıcı kararı 17 Kasım 2026).
-  Tanıştırma varsayılan olarak 3 ay, yani 90 gün geçerlidir (kullanıcı kararı 20 Kasım 2026; eski değer 2 aydı). Süre düğme grubuyla 1, 2, 3, 4, 5, 6, 8, 10 veya 12 ay seçilir.
+  Tanıştırma varsayılan olarak 6 ay geçerlidir. Süre düğme grubuyla 1, 2, 3, 4, 5, 6, 8, 10 veya 12 ay seçilir.
   Sayfa yalnız “Tanıştırma CRM'e kaydedilir.” der. Kayıt olmazsa ne olacağını sayfa söylemez.
-  Pay bölüşmesi sabit değildir. Yönetici iki soruyu ayrı seçer: ilk satış ve kota artışı.
-  “Sonraki 4 yılın payı” sorusu 20 Kasım 2026'da kalktı. Tanıştıran artık yalnız ilk 3 ayda pay alır.
+  Pay bölüşmesi sabit değildir. Yönetici üç soruyu ayrı seçer: ilk satış, sonraki 4 yıl ve kota artışı.
   Her soruda varsayılan “Ahmet'in payı Mehmet'in payından düşülür” seçeneğidir. Bu seçenek şirketi zarardan korur.
   Öbür seçenek “Şirket ikisine de tam öder” seçeneğidir. 100.000 ₺ satışta toplam 15.000 ₺ yerine 22.000 ₺ olur.
   Hesap `kazancPlani.ts → paylasim` işlevindedir.
@@ -1844,28 +1843,24 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Bu kural eski “kota üstü prim” hesabının yerine geçer. Segika kadrolu uzman kota üstü prim almaya devam eder.
   Segika primi kotayı aşan cironun %10'udur (kullanıcı kararı 20 Kasım 2026).
   Hesap `kazancPlani.ts → paketPrimi` işlevindedir. Bunu `tests/kazanc-plani.spec.ts` denetler.
-- Ödeme kuralları (kullanıcı kararları 20 Kasım 2026). Bu kurallar yalnız iStoc içindir. Segika değişmedi.
-  iStoc'ta bu kurallar yukarıdaki eski dönem oranlarının yerine geçer. Segika eski modelle kalır (`odeme: 'eski'`).
-  - Ciro, ortağın müşterilerinin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.
-  - Kurulum ücreti ciroya girmez. Ortak bu ücretten pay almaz.
-  - Aylık pakette satışı kapatan her ay pay alır. Pay en çok 12 ay sürer.
-  - Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Pay satış ayında bir kerede ödenir.
-  - Müşteri yıllık paketi yenilerse satışı kapatan 13. ile 24. ay arasında yenileme oranını alır. Oran %10'dur.
-    25. aydan sonra pay yoktur. K1 ilk 12 ayda tamamlanmazsa yenileme payı da yoktur.
-  - Tanıştıran yalnız satıştan sonraki ilk 3 aydaki ödemelerden pay alır. Bu yüzden “Sonraki 4 yılın payı” sorusu kalktı.
-  - Tanıştırılan müşteri 90 gün ortak adına korunur. Plandaki süre seçicisi 3 ay ile açılır.
-  - Müşteri ayrılırsa pay durur. Ödenmiş pay geri istenmez.
-  - Rol rehberlerindeki eski kural kalktı. Eski kural yıllık paketin yüzdesini 14. ve 60. günde ödüyordu.
-  - iStoc çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü ve ağ kademesi gösterilmez.
-  - iStoc mevcut müşterisi nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede kazanç planı görünmez.
+- 20 Kasım 2026 kararları. Kullanıcı kapsamı netleştirdi: bugünkü prim kuralları yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir.
+  İş ortaklarının kazanç planı ve rehberleri değişmedi. Segika değişmedi.
+  - iStoc kadrolu uzmanın prim kuralları `kazancPlani.ts → KADROLU_PRIM_KURALLARI` listesindedir.
+    Kurallar kadrolu sekmesinin “Prim kuralları” kartında ve belgenin ödeme bölümünde görünür.
+    Ciro, satılan müşterilerin o ay ödediği paket bedellerinin KDV hariç toplamıdır. Kurulum ücreti ciroya girmez.
+    Aylık pakette prim her ay ödenir, en çok 12 ay sürer. Yıllık pakette bedelin tamamı satış ayına yazılır, prim bir kerede ödenir.
+    Yıllık yenilemede 13. ile 24. ay arası %10 prim verilir. 25. aydan sonra prim yoktur.
+    Yalnız tanıştıran, ilk 3 aydaki ödemelerden prim alır. Koruma 90 gündür. Müşteri ayrılırsa prim durur, ödenmiş prim geri istenmez.
+    Açık soru: aylık paket satışı paket kademesinde sayılır mı? Paket kademesi bugün yalnız yıllık paketleri sayar.
   - iStoc kadrolu uzman SGK'lı saha satış uzmanıdır. Yalnız paket kademesi primini alır.
     Temsilci ağı (MLM) ayrı süreçtir. “Saha personeli” ve “Ekip lideri” programları rehberde görünmez (`REHBER_DISI_PROGRAMLAR`).
-  - Segika için yalnız iki karar alındı. Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır. Rehber bu oranı plandan alır.
+  - iStoc çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü gösterilmez. Ağ kademesi bu sürümdedir.
+  - iStoc mevcut müşterisi nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede kazanç planı görünmez.
+  - Segika için iki karar alındı. Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır. Rehber bu oranı plandan alır.
     Segika “Tek seferlik tavsiye ödülü” istisna olarak kalır. Ödül nakit değildir, Segika panelinde ek kullanım hakkıdır.
     Ek kullanım hakkının değeri, eski komisyon tutarı kadar gösterilir. Bu, kullanıcının sözünden çıkarılan yorumdur.
-  Cümleler `kazancPlani.ts → ODEME_KURALLARI` listesindedir. iStoc planı ve iStoc rehberleri aynı listeyi kullanır.
-  Tarayıcı kaydı anahtarı `turksab-kazanc-plani-v6-<proje>` oldu. Bunu `tests/kazanc-plani.spec.ts` denetler.
-  Kullanıcıya bildirilen sonuç: yıllık satışta şirket daha az gelir alır ama ortağa daha çok öder. Kullanıcı kuralı böyle onayladı.
+  - iStoc'un üç iş ortaklığı programına (satıcı geliştirme, bölge temsilcisi, talep toplayıcı) dokunulmadı. Kullanıcı “Şimdilik dokunma” dedi.
+  Tarayıcı kaydı anahtarı `turksab-kazanc-plani-v7-<proje>` oldu. Bunu `tests/kazanc-plani.spec.ts` denetler.
 - “Öncü ortak” rolü ve bütün içeriği `/politikalar/` sayfasından kalktı (kullanıcı kararı 17 Kasım 2026).
   Karar iStoc ve Segika için geçerlidir. Sayfada dört rol sekmesi vardır. İlk rol “Kadrolu uzman” rolüdür.
   `rol=oncu` ve `/politikalar/oncu/` adresleri ilk rolü açar. Öncü akış dosyaları veride durur ama sayfa onları yüklemez.

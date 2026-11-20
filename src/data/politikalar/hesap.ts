@@ -6,14 +6,14 @@ import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
 import { int, num } from '../../lib/format';
-import { ODEME_KURALLARI, paketPrimi } from '../kazancPlani';
+import { KADROLU_PRIM_KURALLARI, paketPrimi } from '../kazancPlani';
 
 export const sayi = num;
 export const tl = (n: number) => `${sayi(n)} ₺`;
 export const yuzde = (n: number) => `%${sayi(n * 100)}`;
 export interface HesapOrnegi { urun: string; satirlar: { ad: string; deger: string }[]; aciklama: string[] }
 export interface OzelProgram { id: string; ad: string; urun: string; etiket: string; donem: string; sonuc: string; aciklama: string; hesap: { ad: string; formul: string; sonuc: string }[]; kurallar: string[] }
-export interface RehberHesabi { ornekler: HesapOrnegi[]; odeme: string[]; digerSurum: HesapOrnegi[]; programlar: OzelProgram[]; plan: string[]; ayriProgram: boolean }
+export interface RehberHesabi { ornekler: HesapOrnegi[]; odeme: string[]; digerSurum: HesapOrnegi[]; programlar: OzelProgram[]; plan: string[] }
 
 function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrnegi {
   const a = { ...ayar, marka };
@@ -71,11 +71,9 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     );
     aciklama.push('Bu tutarlar nakit ödeme değildir. Kabul edilen paket için kullanım karşılığıdır.');
     aciklama.push('Birinci sürüm, yeni müşterinin yıllık paket almasını ister.');
-    aciklama.push('Mevcut müşteri nakit pay almaz. Ödülü ücretsiz kullanımdır.');
     aciklama.push(v1.rolMetinleri(marka).find((r) => r.id === 'tavsiye')!.kurallar[1]);
     aciklama.push('İkinci sürümün koşulu farklıdır. Şirket geçerli koşulu tavsiye öncesinde yazılı bildirmelidir.');
-  } else if (marka === 'segika') {
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir. Segika eski hesabıyla kalır.
+  } else {
     const seviye = rol === 'oncu' ? a.oncuSeviye : rol === 'cozum' ? a.cozumSeviye : a.elciSeviye;
     const oran = rol === 'cozum' && marka === 'segika' ? a.cozumOran : a.oran[seviye];
     const komisyon = rol === 'cozum' ? v1.cozumKazanci(a) : v1.satisKazanci(a, seviye);
@@ -101,20 +99,6 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
       aciklama.push('Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez. Hukuk danışmanı meslek kurallarına uygunluğu ayrıca kontrol etsin.');
     }
     if (rol === 'elci') satirlar.push({ ad: 'Aylık satış örneği', deger: `${sayi(a.elciSatis)} satış × ${tl(komisyon)} = ${tl(a.elciSatis * komisyon)}` });
-    aciklama.push('Bu hesap satışın gerçekleştiğini kanıtlamaz. Finans ekibi ödeme koşullarını ayrıca doğrular.');
-    aciklama.push('Kesintiler sonrası elinize geçecek tutar bu hesapta belirlenmez. Vergi ve belge koşulları ayrıca yazılır.');
-  } else {
-    // Kullanıcı kararları 20 Kasım 2026 Cuma (yalnız iStoc): eski yıllık paket komisyonu ve ağ payı kalktı.
-    // Pay, sayfanın üstündeki kazanç planına ve ortak ödeme kurallarına göre hesaplanır.
-    satirlar.push({ ad: 'Payınızın oranı', deger: 'Kazanç planındaki seviyenize göre' });
-    aciklama.push('Payın oranını ve örnek tutarı sayfanın üstündeki kazanç planı gösterir.');
-    if (rol === 'cozum') {
-      const m = v1.musavir(a);
-      aciklama.push(m.tur === 'indirim'
-        ? `Mali müşavir seçeneğinde müşteriye ${yuzde(a.musavirIndirim)} indirim uygulanır. Müşavir komisyon yerine panel alır. Panel, müşavirin getirdiği müşterileri ve durumlarını gördüğü ücretsiz ekrandır.`
-        : `Mali müşavir seçeneğinde müşteri başına ${tl(m.musteriBasina)} komisyon hesaplanır.`);
-      aciklama.push('Mali müşavir seçeneği çözüm ortağı komisyonuyla kendiliğinden birleşmez. Hukuk danışmanı meslek kurallarına uygunluğu ayrıca kontrol etsin.');
-    }
     aciklama.push('Bu hesap satışın gerçekleştiğini kanıtlamaz. Finans ekibi ödeme koşullarını ayrıca doğrular.');
     aciklama.push('Kesintiler sonrası elinize geçecek tutar bu hesapta belirlenmez. Vergi ve belge koşulları ayrıca yazılır.');
   }
@@ -200,13 +184,12 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
   const odeme = rol === 'tavsiye'
     ? ['Ücretsiz kullanımın hangi faturaya uygulanacağını finans sorumlusu bildirmelidir.', 'İptal, paket değişimi ve kullanılmayan süre için yazılı kural gerekir.']
     : rol === 'kadrolu'
-      ? ['Prim için tahsilat ve iade koşullarının tamamlanması gerekir.', 'Ödeme günü ile iade süresini finans ekibi prim ekinde belirtmelidir.']
-      : marka === 'segika'
-        ? [`Bu örnekte komisyonun ${yuzde(a.ilkOdeme)} kısmı ilk ödemede verilir.`,
-           `Şirket ilk ödemeyi ${a.ilkGun}. gün yapar. Kalan ödemeyi ${a.kalanGun}. gün yapar.`,
-           'Günler müşterinin ödeme gününden sayılır. Finans sorumlusu bu kuralı sözleşmeye yazar.',
-           'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.']
-        : [...ODEME_KURALLARI, 'Müşteri ödemeyi yapmadan pay oluşmaz. Finans sorumlusu bu kuralları sözleşmeye yazar.'];
+      // Kullanıcı kararları 20 Kasım 2026 Cuma: iStoc'un SGK'lı çalışanı için prim kuralları.
+      ? (marka === 'istoc' ? [...KADROLU_PRIM_KURALLARI] : ['Prim için tahsilat ve iade koşullarının tamamlanması gerekir.', 'Ödeme günü ile iade süresini finans ekibi prim ekinde belirtmelidir.'])
+      : [`Bu örnekte komisyonun ${yuzde(a.ilkOdeme)} kısmı ilk ödemede verilir.`,
+         `Şirket ilk ödemeyi ${a.ilkGun}. gün yapar. Kalan ödemeyi ${a.kalanGun}. gün yapar.`,
+         'Günler müşterinin ödeme gününden sayılır. Finans sorumlusu bu kuralı sözleşmeye yazar.',
+         'Tahsilat ve iade koşulları doğrulanmadan ödeme kesinleşmiş sayılmaz.'];
   const secili = programlar.find((p) => p.id === a.kosul?.[rol]);
   const seciliOrnek: HesapOrnegi | null = secili ? { urun: secili.urun,
     satirlar: [{ ad: 'Çalışma programı', deger: secili.ad }, { ad: secili.etiket, deger: secili.sonuc },
@@ -214,8 +197,9 @@ export function rehberHesabi(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_A
     aciklama: [secili.aciklama, ...secili.kurallar] } : null;
   return {
     ornekler: [seciliOrnek ?? ornek(rol, marka, a)], odeme: secili ? ['Finans sorumlusu bu programın ödeme koşullarını yazılı anlaşmada doğrulasın.'] : odeme,
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi için ikinci sürüm ve ağ hesabı gösterilmez.
-    digerSurum: marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? [] : [ikinciSurum(rol, marka)], programlar, ayriProgram: Boolean(secili),
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi belgesinde ağ kademesi gösterilmez.
+    // Ağ kademesi ikinci hesap sürümündedir. Bu yüzden o belgelerde ikinci sürüm bölümü yoktur.
+    digerSurum: marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? [] : [ikinciSurum(rol, marka)], programlar,
     plan: marka === 'segika' ? [
       `Genel planda Segika ekibi ${int(DEFAULT_PARAMS.segikaCount)} kişi olarak başlar. Bu sayı işe alındığını kanıtlamaz.`,
       `Genel kadro planında net maaş ${tl(DEFAULT_PARAMS.segikaSalary)} olarak yazılıdır.`,

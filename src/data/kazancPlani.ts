@@ -7,9 +7,7 @@
  *   Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Ayrı bir katkı türü değildir (kullanıcı kararı 17 Kasım 2026 Salı).
  *   Eski ortadaki “Ürünü de gösterir” seçeneği kalktı.
  * - Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. Kotalar oranı sırayla artırır. Artış orana puan olarak eklenir.
- * - Ödeme süreleri (kullanıcı kararları 20 Kasım 2026 Cuma): aylık pakette pay en çok 12 ay sürer. Yıllık pakette
- *   bedelin tamamı satış ayının cirosudur ve pay bir kerede ödenir. Yıllık yenilemede 13. ile 24. ay arası düşük oran
- *   uygulanır. 25. aydan sonra pay yoktur. Tanıştıran yalnız satıştan sonraki ilk 3 aydaki ödemelerden pay alır.
+ * - Yıllara yayılan komisyon 4 yıl sürer ve her yıl azalır.
  *
  * Bütün değerler okur tarafından değiştirilebilir. Değerler yalnız okurun tarayıcısında saklanır (ortak kayda gitmez).
  */
@@ -17,29 +15,19 @@ import type { Ayar, Marka, Seviye } from './satisOrtakligi';
 import { num } from '../lib/format';
 
 export type KatkiTuru = 'tanistir' | 'kapatir';
-/** Yıllık yenilemenin ay aralığı. 25. aydan sonra pay yoktur (kullanıcı kararı 20 Kasım 2026 Cuma). */
-export const YENILEME_DONEMI = '13. ile 24. ay arası';
-/** Eski plandaki ay aralıkları. Satış ayından sonraki 12 aylık dönemler: 13–24, 25–36, 37–48 ve 49–60. ay. */
+/** Kâğıttaki ay aralıkları. Satış ayından sonraki 12 aylık dönemler: 13–24, 25–36, 37–48 ve 49–60. ay. */
 export const donemAdi = (i: number) => `${12 * (i + 1) + 1}. ay ile ${12 * (i + 2)}. ay arası`;
-/**
- * Ödeme modeli. Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir.
- * “yeni”: 12 ay, yıllık yenileme ve tanıştıranın 3 ayı. “eski”: 17 Kasım planı, 13. aydan 48. aya kadar azalan oranlar.
- */
-export type OdemeModeli = 'yeni' | 'eski';
 export const KATKI_TURLERI = ['tanistir', 'kapatir'] as const;
 export type Esik = number | null;
 export interface KatkiPlani {
-  /** Aylık ciro eşikleri. Her katkı türünün eşiği ayrıdır. Boş eşikten sonraki kota uygulanmaz. */
+  /** Aylık ciro eşikleri. Her katkı türünün eşiği ayrıdır. Kâğıtta yazmıyor, bu yüzden varsayılanı boştur. */
   kotaEsik: [Esik, Esik, Esik];
   /** Ciro üzerinden taban oran. */
   taban: number;
   /** K1, K2 ve K3 kotasına ulaşınca eklenen yüzde puan. */
   kotaArtis: [number, number, number];
-  /**
-   * Yeni modelde tek değer: yıllık yenilemede 13. ile 24. ay arası oran. Yalnız satışı kapatan için kullanılır.
-   * Eski modelde dört değer: 13–24, 25–36, 37–48 ve 49–60. ay arası oranlar.
-   */
-  gecmis: number[];
+  /** Satış yılı 1. yıldır ve taban oranı kullanır. Bu liste müşterinin 2., 3., 4. ve 5. yıl cirosundan alınan orandır. */
+  gecmis: [number, number, number, number];
 }
 export interface KazancPlani {
   tanistir: KatkiPlani;
@@ -56,8 +44,6 @@ export interface KazancPlani {
   };
   /** Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi. Yönetici seçer (kullanıcı kararı 17 Kasım 2026). */
   paylasim: { sureAy: SureAy; ilkSatis: Bolusme; yillar: Bolusme; kota: Bolusme };
-  /** Projenin ödeme modeli. Okurun kaydından okunmaz, projeden gelir. */
-  odeme: OdemeModeli;
   /** Yöneticinin kalıcı kural adayı olarak işaretlediği değerlerin kimlikleri (`kuralListesi`). */
   kalici: string[];
 }
@@ -69,11 +55,8 @@ export const BOLUSME_ADI: Record<Bolusme, string> = {
   tam: 'Şirket ikisine de tam öder',
 };
 export const BOLUSME_SORUSU = { ilkSatis: 'İlk satışta pay', yillar: 'Sonraki 4 yılın payı', kota: 'Kota artışında pay' } as const;
-/** Kullanıcı kararı 20 Kasım 2026 Cuma: yeni modelde tanıştıran ilk 3 aydan sonra pay almaz. Sonraki yılların sorusu yoktur. */
-export const bolusmeSorulari = (plan: KazancPlani) =>
-  (plan.odeme === 'eski' ? ['ilkSatis', 'yillar', 'kota'] : ['ilkSatis', 'kota']) as (keyof typeof BOLUSME_SORUSU)[];
 
-/** Tanıştırmanın geçerlilik süresi için seçenekler (ay). Varsayılan 3 ay, yani 90 gündür (kullanıcı kararı 20 Kasım 2026 Cuma). */
+/** Tanıştırmanın geçerlilik süresi için seçenekler (ay). */
 export const SURE_SECENEKLERI = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
 export type SureAy = (typeof SURE_SECENEKLERI)[number];
 
@@ -84,21 +67,18 @@ export const MAAS_ARALIGI = [50_000, 60_000] as const;
 export const KAZANC_VARSAYILAN: KazancPlani = {
   // Kullanıcı kararı 17 Kasım 2026 Salı: tanıştırmanın varsayılanları. Bunlar kalıcı kural değildir.
   // Kullanıcı kararı 17 Kasım 2026 Salı: yalnız tanıştıranın oranı K0'da %0, K1'de %7, K2'de %10, K3'te %15'tir.
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: tanıştıran yalnız ilk 3 aydaki ödemelerden pay alır. Yenileme oranı yoktur.
-  tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0, kotaArtis: [0.07, 0.03, 0.05], gecmis: [0] },
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: yıllık yenilemede 13. ile 24. ay arası %10 uygulanır. 25. aydan sonra pay yoktur.
+  tanistir: { kotaEsik: [30_000, 60_000, 100_000], taban: 0, kotaArtis: [0.07, 0.03, 0.05], gecmis: [0.05, 0.025, 0, 0] },
+  // Kullanıcı kararı 17 Kasım 2026 Salı: satış yılı 1. yıldır ve %15'tir. 2. yıl %10, 3. yıl %7, 4. yıl %5 olur. Eski %2 kalktı.
   // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatanın eşikleri 0, 30.000, 70.000 ve 120.000 ₺'dir.
   // Oran K0'da %15, K1'de %20, K2'de %25, K3'te %30'dur. Her kota oranı 5 puan artırır.
-  kapatir: { kotaEsik: [30_000, 70_000, 120_000], taban: 0.15, kotaArtis: [0.05, 0.05, 0.05], gecmis: [0.1] },
+  kapatir: { kotaEsik: [30_000, 70_000, 120_000], taban: 0.15, kotaArtis: [0.05, 0.05, 0.05], gecmis: [0.1, 0.07, 0.05, 0] },
   // Kullanıcı kararı 17 Kasım 2026 Salı: örnek aylık ciro 50.000 ₺ ile açılır.
   ornekCiro: 50_000,
   // Kullanıcı kararı 20 Kasım 2026 Cuma: maaş kotası net maaşın 2 katıdır. 50.000 ₺ maaşta kota 100.000 ₺ olur.
   // iStoc'ta 4 paket ve altı prim yoktur. 5 paket ve üstü %5, 8 paket ve üstü %7, 12 paket ve üstü %10 olur.
   kadrolu: { maas: MAAS_ARALIGI[0], kotaOrani: 2, primOrani: null, paketEsik: [5, 8, 12], paketOran: [0.05, 0.07, 0.1], ornekPaket: 8 },
   // Her soruda varsayılan, şirketi zarardan koruyan düşme seçeneğidir.
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: tanıştırılan müşteri 90 gün, yani 3 ay ortak adına korunur.
-  paylasim: { sureAy: 3, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' },
-  odeme: 'yeni',
+  paylasim: { sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' },
   kalici: [],
 };
 
@@ -127,8 +107,6 @@ const PROJE_VARSAYILANI: Record<Marka, Record<string, number | string | null>> =
   segika: {
     'tanistir.kotaEsik.0': 30_000, 'tanistir.kotaEsik.1': 70_000, 'tanistir.kotaEsik.2': 100_000,
     'kapatir.kotaEsik.0': 30_000, 'kapatir.kotaEsik.1': 70_000, 'kapatir.kotaEsik.2': 120_000,
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir. Segika eski modelle kalır.
-    'odeme': 'eski', 'kapatir.gecmis.3': 0,
     // Kullanıcı kararı 20 Kasım 2026 Cuma: Segika kadrolu uzman, kotayı aşan cironun %10'unu prim alır.
     'kadrolu.primOrani': 0.1,
   },
@@ -172,71 +150,25 @@ export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { o
 
 /**
  * Kota kuralı (kullanıcı kararı 17 Kasım 2026 Salı): kişi ilk 12 ayda K1 kotasını tamamlamazsa
- * 13. aydan sonraki pay devam etmez. 20 Kasım 2026 Cuma kararıyla 13. aydan sonra yalnız yıllık yenileme payı kaldı.
- * K1 eşiği boşsa kural ölçülemez. Bu durumda örnek kotayı tamamlanmış sayar.
+ * 13. aydan sonraki pay devam etmez. K1 eşiği boşsa kural ölçülemez. Bu durumda örnek kotayı tamamlanmış sayar.
  */
-export const KOTA_KURALI = 'Satışı kapatan ilk 12 ayda K1 kotasını tamamlamazsa yıllık yenilemede pay almaz.';
-export const KOTA_KURALI_ESKI = 'Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.';
-export const kotaKurali = (plan: KazancPlani) => (plan.odeme === 'eski' ? KOTA_KURALI_ESKI : KOTA_KURALI);
-
-/** Ödeme süreleri, ay olarak (kullanıcı kararları 20 Kasım 2026 Cuma). */
-export const ODEME_SURESI = { tanistir: 3, aylik: 12, yillik: 24 } as const;
-
-/**
- * Ödeme kuralları (kullanıcı kararları 20 Kasım 2026 Cuma). Kazanç planı ve bütün rol rehberleri bu cümleleri kullanır.
- * Böylece rehber ile plan aynı kuralı söyler.
- */
-export const ODEME_KURALLARI = [
-  'Ciro, getirdiğiniz müşterilerin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.',
-  'Kurulum ücreti ciroya girmez. Bu ücretten pay almazsınız.',
-  'Aylık pakette satışı kapatan her ay pay alır. Pay en çok 12 ay sürer.',
-  'Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Pay satış ayında bir kerede ödenir.',
-  'Müşteri yıllık paketi yenilerse satışı kapatan 13. ile 24. ay arasında yenileme oranını alır. 25. aydan sonra pay yoktur.',
-  'Tanıştıran yalnız satıştan sonraki ilk 3 aydaki ödemelerden pay alır.',
-  'Müşteri ayrılırsa pay durur. Ödenmiş pay geri istenmez.',
-] as const;
-export const AYRILMA_KURALI = ODEME_KURALLARI[6];
+export const KOTA_KURALI = 'Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.';
 export function kotaTamam(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
   const k1 = plan[tur].kotaEsik[0];
   return k1 === null || ciro >= k1;
 }
 
-/** Eski model: 13. aydan sonraki dönemlerin oranı ve aylık payı. K1 tamamlanmazsa pay yoktur. */
 export function yillaraKazanc(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
   const devam = kotaTamam(plan, tur, ciro);
   return plan[tur].gecmis.map((oran, i) => ({ yil: i + 2, donem: donemAdi(i), oran: devam ? oran : 0, tutar: devam ? Math.round(ciro * oran) : 0 }));
 }
 
-/** Yıllık yenilemede satışı kapatanın oranı ve payı. K1 tamamlanmazsa yenileme payı yoktur. */
-export function yenilemeKazanci(plan: KazancPlani, ciro: number) {
-  const oran = kotaTamam(plan, 'kapatir', ciro) ? plan.kapatir.gecmis[0] : 0;
-  return { oran, tutar: Math.round(ciro * oran) };
-}
-
 /**
- * Örnek hesap (kullanıcı kararları 17 ve 20 Kasım 2026). Aylık ciro sabit kabul edilir.
- * Ulaşılan seviyenin oranı bütün ciroya uygulanır. Satışı kapatan en çok 12 ay, tanıştıran en çok 3 ay pay alır.
- * Satışı kapatanın tablosunda yıllık yenileme satırı da durur. K1 tamamlanmazsa bu satırın tutarı 0 ₺ olur.
- * K1 eşiği boşsa örnek, K1'in geçildiğini kabul eder.
+ * Kâğıttaki örnek hesap (kullanıcı kararı 17 Kasım 2026 Salı). Aylık ciro sabit kabul edilir.
+ * Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla yazılır. Sonraki dönemler 12 aylık ciroyla yazılır.
+ * K1 eşiği boşsa örnek, kâğıttaki gibi K1'in geçildiğini kabul eder. Eşik doluysa ciro eşikle karşılaştırılır.
  */
 export function ornekHesap(plan: KazancPlani, tur: KatkiTuru) {
-  if (plan.odeme === 'eski') return ornekHesapEski(plan, tur);
-  const ciro = plan.ornekCiro;
-  const k1 = plan[tur].kotaEsik[0];
-  const k1Gecti = k1 === null || ciro >= k1;
-  const { oran } = katkiOrani(plan, tur, ciro);
-  const ay = tur === 'tanistir' ? ODEME_SURESI.tanistir : ODEME_SURESI.aylik;
-  const aylik = Math.round(ciro * oran);
-  const satirlar = [{ ad: tur === 'tanistir' ? `1. ile ${ay}. ay arası, her ay` : `Aylık pakette, 1. ile ${ay}. ay arası, her ay`, oran, ciro, tutar: aylik }];
-  if (tur === 'kapatir') {
-    // Yenileme bedeli örnekte bu ciroya eşit kabul edilir. Pay yenileme ayında bir kerede ödenir.
-    satirlar.push({ ad: `Yıllık paket yenilenirse, bir kerede`, oran: plan.kapatir.gecmis[0], ciro, tutar: yenilemeKazanci(plan, ciro).tutar });
-  }
-  return { satirlar, ay, k1Gecti, k1Bos: k1 === null, toplam: aylik * ay };
-}
-
-/** Eski model (17 Kasım 2026): cari ay, K1 artışı, 1. ile 12. ay ve sonraki dönemler. Segika bu modeli kullanır. */
-function ornekHesapEski(plan: KazancPlani, tur: KatkiTuru) {
   const p = plan[tur];
   const ciro = plan.ornekCiro;
   const k1 = p.kotaEsik[0];
@@ -245,18 +177,19 @@ function ornekHesapEski(plan: KazancPlani, tur: KatkiTuru) {
     { ad: 'Cari ay', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
     { ad: 'Cari ay kota (K1)', oran: p.kotaArtis[0], ciro, tutar: k1Gecti ? Math.round(ciro * p.kotaArtis[0]) : 0 },
     { ad: '1. ay ile 12. ay arası', oran: p.taban, ciro, tutar: Math.round(ciro * p.taban) },
+    // Kota kuralı: K1 tamamlanmazsa 13. aydan sonraki pay yoktur. Satır kalır, tutarı 0 ₺ olur. Tablo boyu değişmez.
     ...p.gecmis.map((g, i) => ({ ad: donemAdi(i), oran: g, ciro: ciro * 12, tutar: k1Gecti ? Math.round(ciro * 12 * g) : 0 })),
   ].filter((s) => s.oran > 0);
-  return { satirlar, ay: 0, k1Gecti, k1Bos: k1 === null, toplam: satirlar.reduce((t, s) => t + s.tutar, 0) };
+  return { satirlar, k1Gecti, k1Bos: k1 === null, toplam: satirlar.reduce((t, s) => t + s.tutar, 0) };
 }
 
 const yuvarla = (n: number) => Math.max(0, Math.round(n * 10_000) / 10_000);
 
 /**
  * Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi. Örnekte Ahmet tanıştırır, Mehmet satışı kapatır.
- * İki soru ayrı seçilir: ilk satışta taban oran ve kota artışı.
+ * Üç soru ayrı seçilir. İlk satışta taban oran, kota artışı ve sonraki 4 yılın oranı.
  * “dus” seçilirse Ahmet'in oranı Mehmet'in oranından düşülür. “tam” seçilirse şirket ikisine de tam öder.
- * Her kişi kendi katkı türünün kota eşiğini kullanır. Bölüşme yalnız ilk 3 aydadır. Sonra yalnız Mehmet pay alır.
+ * Her kişi kendi katkı türünün kota eşiğini kullanır.
  */
 export function paylasim(plan: KazancPlani, ciro: number) {
   const b = plan.paylasim;
@@ -272,20 +205,14 @@ export function paylasim(plan: KazancPlani, ciro: number) {
   const kapatan = Math.round(ciro * kapatanOran);
   return {
     tanistiranOran, kapatanOran, tanistiran, kapatan, toplam: tanistiran + kapatan,
-    // Kullanıcı kararı 20 Kasım 2026 Cuma (yeni model): 4. aydan sonra Ahmet pay almaz. Mehmet kendi oranının tamamını alır.
-    sonrakiOran: yuvarla(k),
-    yenilemeOran: yenilemeKazanci(plan, ciro).oran,
-    // Eski model: sonraki dönemlerde iki kişinin oranı. Her kişi kendi K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.
+    // Kota kuralı: her kişi kendi K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.
     yillar: plan.tanistir.gecmis.map((g0, i) => {
       const g = kotaTamam(plan, 'tanistir', ciro) ? g0 : 0;
-      const kk = kotaTamam(plan, 'kapatir', ciro) ? plan.kapatir.gecmis[i] ?? 0 : 0;
-      return { yil: i + 2, donem: donemAdi(i), tanistiran: g, kapatan: yuvarla(kk - (b.yillar === 'dus' ? g : 0)) };
+      const k = kotaTamam(plan, 'kapatir', ciro) ? plan.kapatir.gecmis[i] : 0;
+      return { yil: i + 2, donem: donemAdi(i), tanistiran: g, kapatan: yuvarla(k - (b.yillar === 'dus' ? g : 0)) };
     }),
   };
 }
-
-/** Yenileme oranı kutusunun tam adı. Ekran okuyucu ve JSON bu adı kullanır. */
-export const YENILEME_ADI = 'Satışı kapatma yıllık yenileme oranı';
 
 const yuzdeMetni = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 const tlMetni = (n: number) => `${num(n)} ₺`;
@@ -302,11 +229,10 @@ export function kuralListesi(plan: KazancPlani) {
     liste.push(oran(`${tur}.taban`, `${ad} taban oranı`, p.taban));
     p.kotaEsik.forEach((e, i) => liste.push(para(`${tur}.kotaEsik.${i}`, `${ad} K${i + 1} ciro eşiği`, e)));
     p.kotaArtis.forEach((a, i) => liste.push(oran(`${tur}.kotaArtis.${i}`, `${ad} K${i + 1} artışı`, a)));
-    if (plan.odeme === 'eski') p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${donemAdi(i)} komisyonu`, g)));
-    else if (tur === 'kapatir') liste.push(oran('kapatir.gecmis.0', YENILEME_ADI, p.gecmis[0]));
+    p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${donemAdi(i)} komisyonu`, g)));
   }
   liste.push({ id: 'paylasim.sureAy', ad: 'Tanıştırmanın geçerlilik süresi', deger: plan.paylasim.sureAy, gosterim: `${plan.paylasim.sureAy} ay` });
-  for (const soru of bolusmeSorulari(plan)) {
+  for (const soru of ['ilkSatis', 'yillar', 'kota'] as const) {
     const v = plan.paylasim[soru];
     liste.push({ id: `paylasim.${soru}`, ad: BOLUSME_SORUSU[soru], deger: v, gosterim: BOLUSME_ADI[v] });
   }
@@ -359,6 +285,21 @@ export function paketPrimi(kademe: { esik: readonly number[]; oran: readonly num
 
 export const kadroluKota = (plan: KazancPlani) => Math.round(plan.kadrolu.maas * plan.kadrolu.kotaOrani);
 
+/**
+ * iStoc kadrolu uzmanın prim kuralları (kullanıcı kararları 20 Kasım 2026 Cuma).
+ * Bu kurallar yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir. İş ortaklarının kazanç planı değişmedi.
+ */
+export const KADROLU_PRIM_KURALLARI = [
+  'Ciro, sattığınız müşterilerin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.',
+  'Kurulum ücreti ciroya girmez. Bu ücretten prim almazsınız.',
+  'Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.',
+  'Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Prim satış ayında bir kerede ödenir.',
+  'Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında %10 prim alırsınız. 25. aydan sonra prim yoktur.',
+  'Yalnız tanıştırdıysanız, satıştan sonraki ilk 3 aydaki ödemelerden prim alırsınız.',
+  'Tanıştırdığınız müşteri 90 gün sizin adınıza korunur.',
+  'Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.',
+] as const;
+
 /** Plan, rehberin eski hesap ayarına uygulanır. Böylece rehber metni de planın oranlarını kullanır. */
 export function planliAyar(ayar: Ayar, plan: KazancPlani): Ayar {
   const tekle = (s: Seviye): Seviye => (s === 'B' ? 'C' : s);
@@ -371,8 +312,7 @@ export function planliAyar(ayar: Ayar, plan: KazancPlani): Ayar {
     maas: plan.kadrolu.maas,
     kotaCarpan: plan.kadrolu.kotaOrani,
     kotaEk: 0,
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu uzman yalnız paket kademesi primini alır.
-    // Saha personeli ve ekip lideri programları temsilci ağının ayrı sürecidir. Rehberde ana program seçilir.
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: temsilci ağı (MLM) ayrı süreçtir. iStoc kadrolu rehberinde ana program seçilir.
     ...(ayar.marka === 'istoc' && (ayar.kosul?.kadrolu === 'saha' || ayar.kosul?.kadrolu === 'lider') ? { kosul: { ...ayar.kosul, kadrolu: 'ana' } } : {}),
     // Kullanıcı kararı 20 Kasım 2026 Cuma: rehberdeki Segika primi plandaki oranı kullanır. Oran boşsa eski değer kalır.
     kadroluPrim: { ...ayar.kadroluPrim, segika: plan.kadrolu.primOrani ?? ayar.kadroluPrim.segika },
@@ -402,10 +342,7 @@ export function planOku(ham: unknown, proje?: Marka): KazancPlani {
     if (!k || typeof k !== 'object') continue;
     if (ORAN(k.taban)) v[tur].taban = k.taban!;
     if (Array.isArray(k.kotaArtis) && k.kotaArtis.length === 3 && k.kotaArtis.every((x) => ORAN(x))) v[tur].kotaArtis = k.kotaArtis as KatkiPlani['kotaArtis'];
-    // Eski modelde dört dönem okunur. Yeni modelde yalnız ilk dönem, yani yenileme oranı, kalır.
-    if (v.odeme === 'eski') {
-      if (Array.isArray(k.gecmis) && k.gecmis.length === 4 && k.gecmis.every((x) => ORAN(x))) v[tur].gecmis = [...k.gecmis] as number[];
-    } else if (tur === 'kapatir' && Array.isArray(k.gecmis) && k.gecmis.length >= 1 && ORAN(k.gecmis[0])) v.kapatir.gecmis = [k.gecmis[0] as number];
+    if (Array.isArray(k.gecmis) && k.gecmis.length === 4 && k.gecmis.every((x) => ORAN(x))) v[tur].gecmis = k.gecmis as KatkiPlani['gecmis'];
   }
   if (ESIK(h.ornekCiro) && h.ornekCiro !== null) v.ornekCiro = h.ornekCiro as number;
   const kd = h.kadrolu as Partial<KazancPlani['kadrolu']> | undefined;

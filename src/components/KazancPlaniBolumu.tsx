@@ -8,8 +8,8 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KUMULATIF_KURALI, KOTA_KURALI, kotaTamam, projeVarsayilani, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
-  paylasim, planOku, yenilemeKazanci, ODEME_KURALLARI, ODEME_SURESI, YENILEME_ADI, YENILEME_DONEMI, donemAdi, yillaraKazanc, kotaKurali, bolusmeSorulari, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
+  KUMULATIF_KURALI, KOTA_KURALI, KADROLU_PRIM_KURALLARI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
+  paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import { yillikFiyat, type Marka, type RolId } from '../data/satisOrtakligi';
 import { usePersonaAyar } from '../lib/personaStore';
@@ -20,8 +20,8 @@ const tl = (n: number) => `${num(n)} ₺`;
 const yuzde = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 
 /* Plan her proje için ayrı anahtarda, yalnız bu tarayıcıda saklanır. Aynı sayfadaki bütün okuyucular aynı değeri görür. */
-// v6: ödeme süreleri ve 90 günlük koruma (20 Kasım 2026 Cuma). Eski kayıt yeni başlangıç değerlerini ezmesin.
-const anahtar = (proje: Marka) => `turksab-kazanc-plani-v6-${proje}`;
+// v7: 20 Kasım 2026 Cuma düzeltmesi. Bugünkü kurallar yalnız iStoc kadrolu uzmanı içindir. Eski kayıt yeni başlangıç değerlerini ezmesin.
+const anahtar = (proje: Marka) => `turksab-kazanc-plani-v7-${proje}`;
 const dinleyiciler = new Set<() => void>();
 const bellek = new Map<Marka, KazancPlani>();
 function oku(proje: Marka): KazancPlani {
@@ -166,62 +166,41 @@ function Katki({ tur, plan, guncelle }: { tur: KatkiTuru; plan: KazancPlani; gun
   const ad = KATKI_ADI[tur];
   const p = plan[tur];
   const ids = (alan: string, n: number) => Array.from({ length: n }, (_, i) => `${tur}.${alan}.${i}`);
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: yeni modelde yenileme oranı yalnız satışı kapatan içindir.
-  // Eski model (Segika) dört dönem oranını iki katkı türünde de gösterir.
-  const eski = plan.odeme === 'eski';
-  const yenileme = eski ? ids('gecmis', 4) : tur === 'kapatir' ? ['kapatir.gecmis.0'] : [];
-  const hepsiKalici = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...yenileme].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
+  const hepsiKalici = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
   return <div className="pol-kz-katki" data-katki={tur}>
     <p>{tur === 'tanistir'
-      ? `Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.${eski ? '' : ' Pay en çok 3 ay sürer.'}`
-      : `Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri ${eski ? 'satın alınca' : 'satın alırsa'} pay kazanırsınız.`}</p>
+      ? 'Müşteriyi bize yönlendirirsiniz. Satışı biz kapatırız. Müşteri satın alırsa pay kazanırsınız. Müşteri satın almazsa pay yoktur.'
+      : 'Müşteriyi yalnız tanıştırmazsınız. Satışı da siz kapatırsınız. Onboarding de sizin işinizdir. Onboarding, yeni müşterinin kurulumu ve ilk eğitimidir. Müşteri satın alınca pay kazanırsınız.'}</p>
     <p className="pol-kz-nasil">Değeri değiştirmek için beyaz kutuya tıklayın. Sonra yeni sayıyı yazın. Sonuç hemen değişir. “Kalıcı” kutusunu yalnız yönetici işaretler. İşaretlenen değer sabitlenir.</p>
     {hepsiKalici && <p className="pol-kz-not">Bu sekmedeki bütün değerler kalıcı kuraldır. Yönetici bu değerleri “Parametreler” düğmesinden yönetir.</p>}
     {(() => {
-      const taban = <Kutu label={`${ad} taban oranı`} kisa={eski ? 'İlk 12 ay oranı' : 'Başlangıç oranı'} value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
+      const taban = <Kutu label={`${ad} taban oranı`} kisa="İlk 12 ay oranı" value={p.taban} yuzdeMi kural={`${tur}.taban`} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
       const esikler = p.kotaEsik.map((e, i) => <Kutu key={`e${i}`} label={`${ad} K${i + 1} ciro eşiği`} kisa={`K${i + 1} için aylık ciro`} birim="(₺)" value={e} bosOlur kural={`${tur}.kotaEsik.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />);
       const artislar = p.kotaArtis.map((a, i) => <Kutu key={`a${i}`} label={`${ad} K${i + 1} artışı`} kisa={`K${i + 1} ek puanı`} value={a} yuzdeMi kural={`${tur}.kotaArtis.${i}`}
         onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />);
-      const sonrakiler = eski
-        ? p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={`${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay oranı`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
-          onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />)
-        : tur === 'kapatir' && <Kutu label={YENILEME_ADI} kisa="Yenileme oranı" value={p.gecmis[0]} yuzdeMi kural="kapatir.gecmis.0"
-          onChange={(v) => guncelle((x) => { x.kapatir.gecmis[0] = v ?? 0; })} />;
-      const tum = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...yenileme];
+      const sonrakiler = p.gecmis.map((g, i) => <Kutu key={`g${i}`} label={`${ad} ${donemAdi(i)} komisyonu`} kisa={`${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay oranı`} value={g} yuzdeMi kural={`${tur}.gecmis.${i}`}
+        onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />);
+      const tum = [`${tur}.taban`, ...ids('kotaEsik', 3), ...ids('kotaArtis', 3), ...ids('gecmis', 4)];
       const gorunen = tum.filter((k) => !plan.kalici.includes(k) || buOturumda.has(k)).length;
       const gorunur = (kurallar: string[]) => kurallar.some((k) => !plan.kalici.includes(k) || buOturumda.has(k));
       const bosEsik = p.kotaEsik.some((e) => e === null) && <p className="pol-kz-not">Bazı kota eşikleri henüz belirlenmedi. Eşik boşsa o kotanın artışı uygulanmaz.</p>;
       // Kullanıcı kararı 17 Kasım 2026 Salı: az alan kaldıysa alanlar tek satırda, tek grupta durur.
       if (gorunen > 0 && gorunen <= 4) return <>
         <GrupVarsa kurallar={tum} baslik={`${ad} için değerler`} aciklama={<ul className="pol-kz-sozluk">
-          {eski ? <>
-            {gorunur([`${tur}.taban`]) && <li>“İlk 12 ay oranı” kutusu: Satıcı ilk 12 ayda bu oranı alır.</li>}
-            {gorunur(ids('kotaEsik', 3)) && <li>“Aylık ciro” kutusu: Satıcı ayda bu kadar ciro yaparsa bir üst seviyeye geçer.</li>}
-            {gorunur(ids('kotaArtis', 3)) && <li>“Ek puan” kutusu: Satıcı bir üst seviyeye geçince oranına bu puan eklenir.</li>}
-            {gorunur(yenileme) && <li>“Ay oranı” kutusu: Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.</li>}
-          </> : <>
-            {gorunur([`${tur}.taban`]) && <li>“Başlangıç oranı” kutusu: Hiçbir kotaya ulaşmazsanız bu oranı alırsınız.</li>}
-            {gorunur(ids('kotaEsik', 3)) && <li>“Aylık ciro” kutusu: Bu ciroya ulaşırsanız üst seviyeye geçersiniz.</li>}
-            {gorunur(ids('kotaArtis', 3)) && <li>“Ek puan” kutusu: Bir üst seviyeye geçince oranınıza bu puan eklenir.</li>}
-            {gorunur(yenileme) && <li>“Yenileme oranı” kutusu: Yıllık yenilemede bu oranı alırsınız.</li>}
-          </>}
+          {gorunur([`${tur}.taban`]) && <li>“İlk 12 ay oranı” kutusu: Satıcı ilk 12 ayda bu oranı alır.</li>}
+          {gorunur(ids('kotaEsik', 3)) && <li>“Aylık ciro” kutusu: Satıcı ayda bu kadar ciro yaparsa bir üst seviyeye geçer.</li>}
+          {gorunur(ids('kotaArtis', 3)) && <li>“Ek puan” kutusu: Satıcı bir üst seviyeye geçince oranına bu puan eklenir.</li>}
+          {gorunur(ids('gecmis', 4)) && <li>“Ay oranı” kutusu: Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.</li>}
         </ul>}>{taban}{esikler}{artislar}{sonrakiler}</GrupVarsa>
         {bosEsik}
       </>;
-      if (eski) return <>
+      return <>
         <GrupVarsa kurallar={[`${tur}.taban`]} baslik="İlk 12 ayın oranı" aciklama="Satıcı ilk 12 ayda bu oranı alır.">{taban}</GrupVarsa>
         <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik="Seviye atlamak için gereken aylık ciro" aciklama="Satıcı ayda bu kadar ciro yaparsa bir üst seviyeye geçer. K1, K2 ve K3 seviyelerin adıdır.">{esikler}</GrupVarsa>
         {bosEsik}
         <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik="Seviye atlayınca eklenen puan" aciklama="Satıcı bir üst seviyeye geçince oranına bu puan eklenir.">{artislar}</GrupVarsa>
-        <GrupVarsa kurallar={yenileme} baslik="13. aydan sonraki oranlar" aciklama="Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.">{sonrakiler}</GrupVarsa>
-      </>;
-      return <>
-        <GrupVarsa kurallar={[`${tur}.taban`]} baslik="Başlangıç oranı" aciklama="Hiçbir kotaya ulaşmazsanız bu oranı alırsınız.">{taban}</GrupVarsa>
-        <GrupVarsa kurallar={ids('kotaEsik', 3)} baslik="Seviye atlamak için gereken aylık ciro" aciklama="Aylık cironuz bu tutara ulaşırsa bir üst seviyeye geçersiniz. K1, K2 ve K3 seviyelerin adıdır.">{esikler}</GrupVarsa>
-        {bosEsik}
-        <GrupVarsa kurallar={ids('kotaArtis', 3)} baslik="Seviye atlayınca eklenen puan" aciklama="Bir üst seviyeye geçince oranınıza bu puan eklenir.">{artislar}</GrupVarsa>
-        {tur === 'kapatir' && <GrupVarsa kurallar={yenileme} baslik="Yıllık yenileme oranı" aciklama={`Yıllık yenilemede bu oranı alırsınız. Oran ${YENILEME_DONEMI} geçerlidir. 25. aydan sonra pay yoktur.`}>{sonrakiler}</GrupVarsa>}
+        <GrupVarsa kurallar={ids('gecmis', 4)} baslik="13. aydan sonraki oranlar" aciklama="Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.">{sonrakiler}</GrupVarsa>
       </>;
     })()}
   </div>;
@@ -239,31 +218,14 @@ function KatkiSonucu({ tur, plan }: { tur: KatkiTuru; plan: KazancPlani }) {
       <div><dt>Geçerli oran</dt><dd data-kazanc={`${tur}-oran`}>{yuzde(oran)}</dd></div>
       <div><dt>Ulaşılan kota</dt><dd>{kota ? `K${kota}` : 'Kota yok'}</dd></div>
     </dl>
-    {plan.odeme === 'eski' ? <>
-      <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri her ay aynı ciroyu yaparsa şu tutarları alırsınız:</p>
-      <Yigin etkin={kotaTamam(plan, tur, plan.ornekCiro) ? 1 : 0}>{[
-        <p key="uyari" className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>,
-        <span key="bos" />,
-      ]}</Yigin>
-      <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
-        {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
-      </ul>
-    </> : tur === 'tanistir' ? <>
-      <p>Pay en çok {ODEME_SURESI.tanistir} ay sürer. Her ay aynı ciroyu yaparsanız şu tutarı alırsınız:</p>
-      <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
-        <li>{ODEME_SURESI.tanistir} ayda toplam {tl(Math.round(plan.ornekCiro * oran) * ODEME_SURESI.tanistir)}</li>
-      </ul>
-    </> : <>
-      <p>Aylık pakette pay en çok {ODEME_SURESI.aylik} ay sürer. Her ay aynı ciroyu yaparsanız şu tutarları alırsınız:</p>
-      <Yigin etkin={kotaTamam(plan, tur, plan.ornekCiro) ? 1 : 0}>{[
-        <p key="uyari" className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Bu yüzden yıllık yenilemede pay yoktur.</p>,
-        <span key="bos" />,
-      ]}</Yigin>
-      <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
-        <li>{ODEME_SURESI.aylik} ayda toplam {tl(Math.round(plan.ornekCiro * oran) * ODEME_SURESI.aylik)}</li>
-        <li>Yıllık yenilemede, {YENILEME_DONEMI}: {yuzde(yenilemeKazanci(plan, plan.ornekCiro).oran)} ile {tl(yenilemeKazanci(plan, plan.ornekCiro).tutar)}</li>
-      </ul>
-    </>}
+    <p>Cari ay, satıştan sonraki ilk 12 aydır. Müşteri her ay aynı ciroyu yaparsa şu tutarları alırsınız:</p>
+    <Yigin etkin={kotaTamam(plan, tur, plan.ornekCiro) ? 1 : 0}>{[
+      <p key="uyari" className="pol-kz-uyari" data-kota-kurali={tur}>Aylık ciro K1 kotasının altında. Kota tamamlanmadığı için 13. aydan sonra pay yoktur.</p>,
+      <span key="bos" />,
+    ]}</Yigin>
+    <ul className="pol-kz-yillar" data-kazanc={`${tur}-yillar`}>
+      {yillaraKazanc(plan, tur, plan.ornekCiro).map((s) => <li key={s.yil}>{s.donem}: {yuzde(s.oran)} ile her ay {tl(s.tutar)}</li>)}
+    </ul>
   </section>;
 }
 
@@ -346,36 +308,34 @@ function SureKarti() {
     <SureSecimi value={b.plan.paylasim.sureAy} onChange={(v) => b.guncelle((x) => { x.paylasim.sureAy = v; })} />
     <Kalici kural="paylasim.sureAy" ad="Tanıştırmanın geçerlilik süresi" />
   </>;
-  return <KararKarti no="sure" baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${b.plan.paylasim.sureAy} ay geçerlidir. ${b.plan.odeme === 'eski' ? 'Bu süre geçerse Ahmet pay almaz.' : 'Satış bu sürede kapanmazsa Ahmet pay almaz.'}`}>
+  return <KararKarti no="sure" baslik="Tanıştırmanın geçerlilik süresi" aciklama={`Tanıştırma ${b.plan.paylasim.sureAy} ay geçerlidir. Bu süre geçerse Ahmet pay almaz.`}>
     {gizli ? <Yigin etkin={1}>{[icerik, <p key="not" className="pol-kz-yer-kutu" data-yer-tutucu="paylasim.sureAy">{YER_NOTU}</p>]}</Yigin> : icerik}
   </KararKarti>;
 }
 
 /** Yönetici kararları. Tanıştıran ile satışı kapatan farklı kişiyse pay bölüşmesi (kullanıcı kararı 17 Kasım 2026). */
 function Kararlar({ plan }: { plan: KazancPlani }) {
-  const hepsiKalici = ['paylasim.sureAy', ...bolusmeSorulari(plan).map((s) => `paylasim.${s}`)].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
+  const hepsiKalici = ['paylasim.sureAy', 'paylasim.ilkSatis', 'paylasim.kota', 'paylasim.yillar'].every((k) => plan.kalici.includes(k) && !buOturumda.has(k));
   return <div className="pol-kz-adim-govde">
     <aside className="pol-kz-ornek" aria-label="Örnek">
       <p className="pol-kz-ornek-ad">Örnek</p>
       <p>Ahmet müşteriyi tanıştırır. İki hafta sonra Mehmet satışı kapatır. İkisi de pay ister.</p>
-      {plan.odeme === 'yeni' && <p>Ahmet yalnız ilk 3 ayda pay alır. Sonra yalnız Mehmet pay alır.</p>}
       <p>CRM, müşteri kayıtlarının tutulduğu programdır. Tanıştırma CRM'e kaydedilir.</p>
     </aside>
     {hepsiKalici && <p className="pol-kz-not">Bütün kararlar kalıcı kuraldır. Yönetici kararları “Parametreler” düğmesinden yönetir.</p>}
     <SureKarti />
     <PaySorusu anahtar="ilkSatis" />
     <PaySorusu anahtar="kota" />
-    {plan.odeme === 'eski' && <PaySorusu anahtar="yillar" />}
+    <PaySorusu anahtar="yillar" />
   </div>;
 }
 
-/** Örnek hesap tablosu. Her katkı türü kendi sekmesindedir. Açık gelen sekme satışı kapatmadır. */
+/** Kâğıttaki örnek hesap tablosu. Her katkı türü kendi sekmesindedir. Açık gelen sekme satışı kapatmadır. */
 function OrnekHesap({ plan }: { plan: KazancPlani }) {
   const [tur, setTur] = useState<KatkiTuru>('kapatir');
-  const eski = plan.odeme === 'eski';
   return <section className="pol-kz-kart pol-kz-ornek-hesap" aria-labelledby="pol-kz-ornek-hesap">
-    <h4 id="pol-kz-ornek-hesap">{eski ? 'Kâğıttaki örnek hesap' : 'Örnek hesap'}</h4>
-    <p>{eski ? `Müşterinin aylık cirosu ${tl(plan.ornekCiro)} olsun. Müşteri her ay aynı ciroyu yapsın.` : `Aylık cironuz ${tl(plan.ornekCiro)} olsun. Ciro her ay aynı kalsın.`}</p>
+    <h4 id="pol-kz-ornek-hesap">Kâğıttaki örnek hesap</h4>
+    <p>Müşterinin aylık cirosu {tl(plan.ornekCiro)} olsun. Müşteri her ay aynı ciroyu yapsın.</p>
     <KatkiAnahtari value={tur} onChange={setTur} />
     {/* İki tablo üst üste durur. Anahtar ya da ciro değişince kartın boyu değişmez. */}
     <Yigin etkin={tur === 'tanistir' ? 0 : 1}>{(['tanistir', 'kapatir'] as const).map((t) => {
@@ -389,15 +349,15 @@ function OrnekHesap({ plan }: { plan: KazancPlani }) {
                 <tbody role="rowgroup">{h.satirlar.map((r) => <tr role="row" key={r.ad}>
                   <th role="rowheader" scope="row">{r.ad}</th><td role="cell" data-ad="Oran">{yuzde(r.oran)}</td><td role="cell" data-ad="Ciro">{tl(r.ciro)}</td><td role="cell" data-ad="Kazanç">{tl(r.tutar)}</td>
                 </tr>)}</tbody>
-                <tfoot role="rowgroup"><tr role="row"><th role="rowheader" scope="row" colSpan={3}>{eski ? 'Toplam' : t === 'tanistir' ? `${h.ay} ayda toplam` : `Aylık pakette ${h.ay} ayda toplam`}</th><td role="cell" data-ad="Toplam kazanç" data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
+                <tfoot role="rowgroup"><tr role="row"><th role="rowheader" scope="row" colSpan={3}>Toplam</th><td role="cell" data-ad="Toplam kazanç" data-ornek-toplam={t}>{tl(h.toplam)}</td></tr></tfoot>
               </table>
             </div></div>
-            <Yigin etkin={h.k1Bos ? 0 : !h.k1Gecti && (eski || t === 'kapatir') ? 1 : 2}>{[
-              <p key="bos" className="pol-kz-not">{eski ? 'K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.' : 'K1 eşiği boş. Örnek, K1 kotasının geçildiğini kabul eder.'}</p>,
-              <p key="uyari" className="pol-kz-uyari">{eski ? 'Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur. Kota tamamlanmadığı için 13. aydan sonra pay da yoktur.' : 'Aylık ciro K1 eşiğinin altında. Bu yüzden yıllık yenilemede pay yoktur.'}</p>,
+            <Yigin etkin={h.k1Bos ? 0 : !h.k1Gecti ? 1 : 2}>{[
+              <p key="bos" className="pol-kz-not">K1 eşiği boş. Örnek, kâğıttaki gibi K1 kotasının geçildiğini kabul eder.</p>,
+              <p key="uyari" className="pol-kz-uyari">Aylık ciro K1 eşiğinin altında. Bu yüzden cari ay kota payı yoktur. Kota tamamlanmadığı için 13. aydan sonra pay da yoktur.</p>,
               <span key="yok" />,
             ]}</Yigin>
-            <p className="pol-kz-not">{eski ? 'Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla hesaplanır. Sonraki dönemler 12 aylık ciroyla hesaplanır.' : t === 'tanistir' ? 'Tanıştıran yalnız ilk 3 aydaki ödemelerden pay alır.' : 'Yıllık pakette bedelin tamamı satış ayının cirosudur. Pay satış ayında bir kerede ödenir. Yenileme satırı, yenileme bedelinin bu ciroya eşit olduğunu varsayar.'}</p>
+            <p className="pol-kz-not">Cari ay ve 1. ay ile 12. ay arası satırları bir aylık ciroyla hesaplanır. Sonraki dönemler 12 aylık ciroyla hesaplanır.</p>
           </>}
       </div>;
     })}</Yigin>
@@ -409,7 +369,7 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
   const p = paylasim(plan, ciro);
   return <section className="pol-kz-kart" aria-labelledby="pol-kz-pay-sonuc">
     <h4 id="pol-kz-pay-sonuc">Ahmet tanıştırır, Mehmet satışı kapatırsa</h4>
-    <p>Tanıştırma {plan.paylasim.sureAy} ay geçerlidir. Aylık ciro {tl(ciro)} olursa {plan.odeme === 'eski' ? 'ilk satışta' : 'ilk 3 ayda'} pay şöyle bölünür:</p>
+    <p>Tanıştırma {plan.paylasim.sureAy} ay geçerlidir. Aylık ciro {tl(ciro)} olursa ilk satışta pay şöyle bölünür:</p>
     <p className="pol-kz-rakam">{tl(p.toplam)}<span className="pol-kz-rakam-ek"> şirketin ödediği toplam</span></p>
     <div className="pol-kz-bolus" aria-hidden="true" style={{ '--pay-a': String(p.toplam ? p.tanistiran / p.toplam : 0) } as CSSProperties}>
       <span className="pol-kz-bolus-a" /><span className="pol-kz-bolus-m" />
@@ -419,18 +379,10 @@ function PaySonucu({ plan }: { plan: KazancPlani }) {
       <div><dt><span className="pol-kz-isaret pol-kz-isaret-m" aria-hidden="true" />Mehmet'in payı</dt><dd data-paylasim="kapatan">{tl(ciro)} × {yuzde(p.kapatanOran)} = {tl(p.kapatan)}</dd></div>
       <div><dt>Şirketin ödediği toplam</dt><dd data-paylasim="toplam">{tl(p.toplam)}</dd></div>
     </dl>
-    {plan.odeme === 'eski' ? <>
-      <p>Sonraki aylarda oranlar şöyle olur:</p>
-      <ul className="pol-kz-yillar" data-paylasim="yillar">
-        {p.yillar.map((y) => <li key={y.yil}>{y.donem}: Ahmet {yuzde(y.tanistiran)}, Mehmet {yuzde(y.kapatan)} alır.</li>)}
-      </ul>
-    </> : <>
-    <p>Sonraki aylarda pay şöyle olur:</p>
-    <ul className="pol-kz-yillar" data-paylasim="sonraki">
-      <li>Aylık pakette 4. aydan {ODEME_SURESI.aylik}. aya kadar Ahmet pay almaz. Mehmet {yuzde(p.sonrakiOran)} alır.</li>
-      <li>Yıllık yenilemede Ahmet pay almaz. Mehmet {YENILEME_DONEMI} {yuzde(p.yenilemeOran)} alır.</li>
+    <p>Sonraki aylarda oranlar şöyle olur:</p>
+    <ul className="pol-kz-yillar" data-paylasim="yillar">
+      {p.yillar.map((y) => <li key={y.yil}>{y.donem}: Ahmet {yuzde(y.tanistiran)}, Mehmet {yuzde(y.kapatan)} alır.</li>)}
     </ul>
-    </>}
   </section>;
 }
 
@@ -465,8 +417,7 @@ function KuralAlani({ id }: { id: string }) {
     if (alan === 'taban') return <Kutu label={`${ad} taban oranı`} value={plan[tur].taban} yuzdeMi kural={id} onChange={(v) => guncelle((x) => { x[tur].taban = v ?? 0; })} />;
     if (alan === 'kotaEsik') return <Kutu label={`${ad} K${i + 1} ciro eşiği`} birim="(₺)" bosOlur value={plan[tur].kotaEsik[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].kotaEsik[i] = v; })} />;
     if (alan === 'kotaArtis') return <Kutu label={`${ad} K${i + 1} artışı`} yuzdeMi value={plan[tur].kotaArtis[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].kotaArtis[i] = v ?? 0; })} />;
-    if (plan.odeme === 'eski') return <Kutu label={`${ad} ${donemAdi(i)} komisyonu`} yuzdeMi value={plan[tur].gecmis[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />;
-    return <Kutu label={YENILEME_ADI} yuzdeMi value={plan.kapatir.gecmis[0]} kural={id} onChange={(v) => guncelle((x) => { x.kapatir.gecmis[0] = v ?? 0; })} />;
+    return <Kutu label={`${ad} ${donemAdi(i)} komisyonu`} yuzdeMi value={plan[tur].gecmis[i]} kural={id} onChange={(v) => guncelle((x) => { x[tur].gecmis[i] = v ?? 0; })} />;
   }
   const k = plan.kadrolu;
   if (alan === 'maas') return <Kutu label="Aylık net maaş" birim="(₺)" value={k.maas} kural={id} onChange={(v) => guncelle((x) => { x.kadrolu.maas = v ?? 0; })} />;
@@ -574,7 +525,8 @@ function KadroluSonuc({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
   </section>;
   const paketBedeli = Math.round(yillikFiyat({ ...ayar, marka: 'istoc' }));
   const p = paketPrimi({ esik: k.paketEsik, oran: k.paketOran }, k.ornekPaket, paketBedeli);
-  return <section className="pol-kz-kart" aria-label="Kadrolu uzmanın kotası">
+  return <>
+  <section className="pol-kz-kart" aria-label="Kadrolu uzmanın kotası">
     <dl className="pol-kz-sonuc">
       <div><dt>Aylık maaş kotası</dt><dd data-kazanc="kadrolu-kota">{tl(kadroluKota(plan))}</dd></div>
       <div><dt>Bir yıllık paketin bedeli</dt><dd>{tl(paketBedeli)}</dd></div>
@@ -586,7 +538,13 @@ function KadroluSonuc({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
     </dl>
     <p>Maaş kotası, net maaşın {yuzde(k.kotaOrani)} kadarıdır.</p>
     <p>{num(k.paketEsik[0] - 1)} paket ve altında prim yoktur. Paket sayısı her ay yeniden sayılır.</p>
-  </section>;
+  </section>
+  {/* Kullanıcı kararları 20 Kasım 2026 Cuma: bu kurallar yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir. */}
+  <section className="pol-kz-kart" aria-labelledby="pol-kz-prim-kurallari">
+    <h4 id="pol-kz-prim-kurallari">Prim kuralları</h4>
+    <ul className="pol-kz-yillar" data-kadrolu-kurallar="">{KADROLU_PRIM_KURALLARI.map((x) => <li key={x}>{x}</li>)}</ul>
+  </section>
+  </>;
 }
 
 const SEVIYE_ADI = ['Kota yok', 'K1', 'K2', 'K3'] as const;
@@ -668,7 +626,7 @@ function KazancOyunu({ plan, guncelle }: { plan: KazancPlani; guncelle: Guncelle
           const durum = i < kota ? 'gecti' : i === kota ? 'simdi' : 'sonra';
           return <button key={ad} type="button" className="pol-kz-merdiven-dugme" data-durum={durum} aria-pressed={i === kota}
             disabled={esik === null || !ulasilir} onClick={() => esik !== null && setCiro(esik)}
-            aria-label={`${ad}: ${esik === null ? 'eşik belirlenmedi' : `aylık ciro ${tl(esik)} ve üstü`}, oran ${ulasilir ? yuzde(oran) : 'yok'}`}>
+            aria-label={`${ad}: ${esik === null ? 'eşik belirlenmedi' : `aylık ciro ${tl(esik)} ve üstü`}, cari ay oranı ${ulasilir ? yuzde(oran) : 'yok'}`}>
             <span className="pol-kz-merdiven-ikon" aria-hidden="true">{i <= kota ? (i === 0 ? <IconRocket size={22} stroke={1.75} /> : <IconStarFilled size={22} />) : <IconLock size={22} stroke={1.75} />}</span>
             <span className="pol-kz-merdiven-ad" aria-hidden="true">{ad}</span>
             <span className="pol-kz-merdiven-oran" aria-hidden="true">{ulasilir ? yuzde(oran) : 'Yok'}</span>
@@ -705,12 +663,9 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
   const kalan = sonraki === null ? null : Math.max(0, sonraki - ciro);
   const ilerleme = sonraki ? Math.min(1, ciro / sonraki) : 1;
   const buAy = Math.round(ciro * oran);
-  const eski = plan.odeme === 'eski';
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: yeni modelde satışı kapatan en çok 12 ay, tanıştıran en çok 3 ay pay alır.
-  const sure = eski ? 12 : tur === 'tanistir' ? ODEME_SURESI.tanistir : ODEME_SURESI.aylik;
-  // Eski model: kâğıttaki dönemler 48. ayda biter. 49. ay ile 60. ay arası bu toplama girmez.
-  const sonrakiYillar = eski && devam ? p.gecmis.slice(0, 3).reduce((t, g) => t + Math.round(ciro * 12 * g), 0) : 0;
-  const yenileme = yenilemeKazanci(plan, ciro);
+  const ilkYil = buAy * 12;
+  // Kâğıttaki dönemler 48. ayda biter. 49. ay ile 60. ay arası bu toplama girmez.
+  const sonrakiYillar = devam ? p.gecmis.slice(0, 3).reduce((t, g) => t + Math.round(ciro * 12 * g), 0) : 0;
   const hedefKazanc = sonraki !== null ? Math.round(sonraki * seviyeOrani(kota + 1)) : null;
   const rozetler = [
     ...[0, 1, 2].map((i) => ({
@@ -718,8 +673,7 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
       acikMetin: esik(i) === null ? 'Eşik belirlenmedi.' : `Açıldı. Oranınıza ${yuzde(p.kotaArtis[i])} eklendi.`,
       kapaliMetin: esik(i) === null ? 'Kilitli. Eşik belirlenmedi.' : `Kilitli. Aylık ciro ${tl(esik(i)!)} olunca açılır.`,
     })),
-    ...(eski ? [{ id: 'uzun', ad: '48 aylık gelir', acik: devam, acikMetin: 'Açıldı. 13. ay ile 48. ay arası pay devam eder.', kapaliMetin: 'Kilitli. K1 kotası tamamlanınca açılır.' }] : []),
-    ...(!eski && tur === 'kapatir' ? [{ id: 'uzun', ad: 'Yenileme payı', acik: devam, acikMetin: `Açıldı. Yıllık paket yenilenirse ${YENILEME_DONEMI} pay alırsınız.`, kapaliMetin: 'Kilitli. K1 kotası tamamlanınca açılır.' }] : []),
+    { id: 'uzun', ad: '48 aylık gelir', acik: devam, acikMetin: 'Açıldı. 13. ay ile 48. ay arası pay devam eder.', kapaliMetin: 'Kilitli. K1 kotası tamamlanınca açılır.' },
   ];
   return <div className="pol-kz-oyun-govde" data-sim-tur={tur}>
     <div className="pol-kz-skor" data-seviye={kota}>
@@ -748,17 +702,11 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
     ]}</Yigin>
 
     <div className="pol-kz-kpi">
-      <div className="pol-kz-kpi-kutu" data-kpi="yil"><IconCalendarStats aria-hidden="true" size={24} stroke={1.75} /><p>{sure} ayda</p><p className="pol-kz-kpi-deger" data-sim="sure">{tl(buAy * sure)}</p></div>
-      {eski
-        ? <div className="pol-kz-kpi-kutu" data-kpi="toplam"><IconChartLine aria-hidden="true" size={24} stroke={1.75} /><p>48 ayda toplam</p><p className="pol-kz-kpi-deger" data-sim="toplam">{tl(buAy * 12 + sonrakiYillar)}</p></div>
-        : tur === 'kapatir'
-        ? <div className="pol-kz-kpi-kutu" data-kpi="yenileme"><IconChartLine aria-hidden="true" size={24} stroke={1.75} /><p>Yıllık yenilemede</p><p className="pol-kz-kpi-deger" data-sim="yenileme">{devam ? yuzde(yenileme.oran) : 'Pay yok'}</p></div>
-        : <div className="pol-kz-kpi-kutu" data-kpi="yenileme"><IconChartLine aria-hidden="true" size={24} stroke={1.75} /><p>Pay süresi</p><p className="pol-kz-kpi-deger">En çok {sure} ay</p></div>}
-      <div className="pol-kz-kpi-kutu" data-kpi="oran"><IconFlame aria-hidden="true" size={24} stroke={1.75} /><p>{eski ? 'Cari ay oranınız' : 'Oranınız'}</p><p className="pol-kz-kpi-deger">{yuzde(oran)}</p></div>
+      <div className="pol-kz-kpi-kutu" data-kpi="yil"><IconCalendarStats aria-hidden="true" size={24} stroke={1.75} /><p>12 ayda</p><p className="pol-kz-kpi-deger">{tl(ilkYil)}</p></div>
+      <div className="pol-kz-kpi-kutu" data-kpi="toplam"><IconChartLine aria-hidden="true" size={24} stroke={1.75} /><p>48 ayda toplam</p><p className="pol-kz-kpi-deger" data-sim="toplam">{tl(ilkYil + sonrakiYillar)}</p></div>
+      <div className="pol-kz-kpi-kutu" data-kpi="oran"><IconFlame aria-hidden="true" size={24} stroke={1.75} /><p>Cari ay oranınız</p><p className="pol-kz-kpi-deger">{yuzde(oran)}</p></div>
     </div>
-    <p className="pol-kz-not">{eski
-      ? `${KUMULATIF_KURALI} Toplamlar, müşterinin her ay aynı ciroyu yaptığını varsayar. ${kotaKurali(plan)}`
-      : `${KUMULATIF_KURALI} Toplam, her ay aynı ciroyu yaptığınızı varsayar.${tur === 'kapatir' ? ` ${KOTA_KURALI}` : ''}`}</p>
+    <p className="pol-kz-not">{KUMULATIF_KURALI} Toplamlar, müşterinin her ay aynı ciroyu yaptığını varsayar. {KOTA_KURALI}</p>
 
     <section className="pol-kz-rozetler" aria-labelledby={`pol-kz-rozet-baslik-${tur}`}>
       <h5 id={`pol-kz-rozet-baslik-${tur}`}>Rozetleriniz</h5>
@@ -772,19 +720,15 @@ function OyunGovdesi({ plan, tur }: { plan: KazancPlani; tur: KatkiTuru }) {
     <p className="pol-kz-tablo-ad" id={`pol-kz-seviye-tablo-${tur}`}>Seviyelere göre kazanç tablosu</p>
     <div className="table-frame"><div className="table-scroll" role="region" aria-labelledby={`pol-kz-seviye-tablo-${tur}`} tabIndex={0}>
       <table role="table" className="data-table pol-kz-tablo pol-kz-sim-tablo" data-sim-tablo={tur}>
-        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Seviye</th><th role="columnheader" scope="col">Koşul</th><th role="columnheader" scope="col">{eski ? 'Cari ay oranı' : 'Oran'}</th><th role="columnheader" scope="col">Eşikteki aylık kazanç</th><th role="columnheader" scope="col">{eski ? '13. aydan sonra' : tur === 'kapatir' ? 'Yıllık yenilemede' : 'Pay süresi'}</th></tr></thead>
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Seviye</th><th role="columnheader" scope="col">Koşul</th><th role="columnheader" scope="col">Cari ay oranı</th><th role="columnheader" scope="col">Eşikteki aylık kazanç</th><th role="columnheader" scope="col">13. aydan sonra</th></tr></thead>
         <tbody role="rowgroup">{satirlar.map((r) => {
           const etkin = r.i === kota;
           return <tr role="row" key={r.ad} data-etkin={etkin ? '' : undefined} aria-current={etkin ? 'true' : undefined}>
             <th role="rowheader" scope="row">{r.ad}<span className="pol-kz-burasi" data-gizli={etkin ? undefined : ''} aria-hidden={etkin ? undefined : true}>Buradasınız</span></th>
             <td role="cell" data-ad="Koşul">{r.kosul}</td>
-            <td role="cell" data-ad={eski ? 'Cari ay oranı' : 'Oran'}>{r.ulasilir ? yuzde(r.oran) : 'Yok'}</td>
+            <td role="cell" data-ad="Cari ay oranı">{r.ulasilir ? yuzde(r.oran) : 'Yok'}</td>
             <td role="cell" data-ad="Eşikteki aylık kazanç">{etkin ? tl(buAy) : r.esikteKazanc !== null ? tl(r.esikteKazanc) : 'Yok'}<span className="pol-kz-hucre-not" data-gizli={etkin ? undefined : ''} aria-hidden={etkin ? undefined : true}>sizin cironuzla</span></td>
-            {eski
-              ? <td role="cell" data-ad="13. aydan sonra">{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
-              : tur === 'kapatir'
-              ? <td role="cell" data-ad="Yıllık yenilemede">{(r.i === 0 && esik(0) !== null) || !p.gecmis[0] ? 'Pay yok' : yuzde(p.gecmis[0])}</td>
-              : <td role="cell" data-ad="Pay süresi">{`En çok ${sure} ay`}</td>}
+            <td role="cell" data-ad="13. aydan sonra">{r.i === 0 && esik(0) !== null ? 'Pay yok' : p.gecmis.filter((g) => g > 0).map(yuzde).join(', ') || 'Pay yok'}</td>
           </tr>;
         })}</tbody>
       </table>
@@ -820,8 +764,8 @@ function Bolum({ no, baslik, aciklama, children }: { no: number; baslik: string;
 
 export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) {
   const { plan, guncelle } = useKazancPlani(proje);
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: mevcut müşteri nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede plan görünmez.
-  if (rol === 'tavsiye' && plan.odeme === 'yeni') return null;
+  // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc mevcut müşterisi nakit pay almaz, ücretsiz kullanım kazanır. Bu sekmede plan görünmez.
+  if (rol === 'tavsiye' && proje === 'istoc') return null;
   // Kullanıcı kararı 17 Kasım 2026 Salı: önce kararlar, sonra oranlar, sonra sonuç. Kalıcı kurallar pencerededir.
   return <PlanBaglami.Provider value={{ plan, guncelle, proje }}><Section id="kazanc-plani" title="Kazanç planı" className="pol-kz-plan">
     <KaliciKurallarPenceresi plan={plan} proje={proje} />
@@ -831,12 +775,8 @@ export function KazancPlaniBolumu({ proje, rol }: { proje: Marka; rol: RolId }) 
         <Bolum no={2} baslik="Sonuç" aciklama="Sonuç, 1. bölümdeki değerlere göre hesaplanır."><KadroluSonuc plan={plan} proje={proje} /></Bolum>
       </> : <>
         <p>Herkes iş ortağıdır. Kazancınızı rolünüz değil, satıştaki katkınız belirler. Kadrolu uzman bu planın dışındadır.</p>
-        {plan.odeme === 'yeni' && <section className="pol-kz-kart" aria-labelledby="pol-kz-odeme-kurallari">
-          <h3 id="pol-kz-odeme-kurallari">Ödeme kuralları</h3>
-          <ul className="pol-kz-yillar">{ODEME_KURALLARI.map((k) => <li key={k}>{k}</li>)}</ul>
-        </section>}
-        <Bolum no={1} baslik="Kararlar" aciklama={plan.odeme === 'eski' ? 'Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir.' : 'Yönetici bu kararları verir. Seçenekler şirketin ödediği toplamı değiştirebilir.'}><Kararlar plan={plan} /></Bolum>
-        <Bolum no={2} baslik="Oranlar" aciklama={'Önce anahtarla katkı türünü seçin. Sonra o katkının değerlerini doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KUMULATIF_KURALI + ' ' + kotaKurali(plan)}>
+        <Bolum no={1} baslik="Kararlar" aciklama="Yönetici bu kararları verir. Her seçenek şirketin ödediği toplamı değiştirir."><Kararlar plan={plan} /></Bolum>
+        <Bolum no={2} baslik="Oranlar" aciklama={'Önce anahtarla katkı türünü seçin. Sonra o katkının değerlerini doldurun. Oranlar ciro üzerinden yüzdedir. K1, K2 ve K3 aylık ciro kotalarıdır. ' + KUMULATIF_KURALI + ' ' + KOTA_KURALI}>
           <OranGirisi plan={plan} guncelle={guncelle} />
         </Bolum>
         <Bolum no={3} baslik="Sonuç" aciklama="Cironuzu seçin. Sonuçlar 1. ve 2. bölümdeki değerlere göre hemen değişir.">

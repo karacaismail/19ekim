@@ -306,7 +306,7 @@ export const politika: ProjePolitika = {
     },
     {
       "kosul": "Müşteri iade isterse",
-      "islem": "Finans sorumlusu iade talebini incelesin. Ödenmiş komisyon geri istenmez.",
+      "islem": "Finans sorumlusu iade talebini ve komisyon kaydını birlikte incelesin.",
       "sonuc": "Finans sorumlusu komisyonun durumunu imzalı sözleşmeye göre yazılı bildirir."
     },
     {
@@ -345,7 +345,7 @@ export const politika: ProjePolitika = {
       "metin": [
         "Anlaşmanın hangi hesap sürümüne bağlı olduğunu yazın.",
         "Satış ortaklığı hesabındaki bir değişiklik imzalı anlaşmayı kendiliğinden değiştirmez.",
-        "Pay, müşterinin ödeme yaptığı ayda hesaplanır. Finans sorumlusu ödeme gününü sözleşmeye yazar.",
+        "Ödeme günleri müşterinin ödeme gününden sayılır. Finans sorumlusu ödeme gününü sözleşmeye yazar.",
         "Finans ekibi fatura, vergi ve döviz uygulamasını açıklasın."
       ]
     },

@@ -52,7 +52,7 @@ test('rehber hesapları kaynağın varsayılanını kullanır ve bütün özel p
     const kosullar = KOSULLAR[rol].filter((k) => k.marka.includes(marka));
     expect(politika.proje).toBe(marka);
     expect(h.ornekler).toHaveLength(1);
-    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi için ikinci sürüm ve ağ hesabı gösterilmez.
+    // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc çözüm ortağı ve marka elçisi belgesinde ağ kademesi (ikinci sürüm) yoktur.
     expect(h.digerSurum).toHaveLength(marka === 'istoc' && (rol === 'cozum' || rol === 'elci') ? 0 : 1);
     expect(Object.keys(politika.programlar).sort()).toEqual(kosullar.map((k) => k.id).sort());
     // Kullanıcı kararı 20 Kasım 2026 Cuma: iStoc kadrolu sekmesinde saha personeli ve ekip lideri programları yoktur.
@@ -202,7 +202,6 @@ test('çözüm ortağının eğitim gideri ve müşavir seçeneği ayrı göster
   const v1 = await import('../src/data/satisOrtakligi');
   const a = { ...v1.VARSAYILAN_AYAR, marka: 'segika' as const };
   const h = rehberHesabi('cozum', 'segika').ornekler.find((h) => h.urun === 'Segika')!;
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir. Segika eski hesabıyla kalır.
   expect(h.satirlar.find((s) => s.ad.endsWith('ek eğitim düşülünce'))?.deger)
     .toBe(tl(v1.donemKazanci(a, 'cozum').find((s) => s.ad === 'Ek eğitim düşülünce')!.yillik));
   expect(h.aciklama.join(' ')).toContain(`${a.egitimSaat} saat ücretsiz`);

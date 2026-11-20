@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from './fixtures/persona';
 
 // Kullanıcı kararı 17 Kasım 2026 Salı: kazanç planı bölümleri alt alta durur. Adım çubuğu yoktur.
@@ -21,17 +20,16 @@ test('kazanç planının varsayılanları kâğıttaki planla aynıdır', async 
   expect([0, 30_000, 60_000, 100_000].map((c) => k.katkiOrani(p, 'tanistir', c).oran)).toEqual([0, 0.07, 0.1, 0.15]);
   // Koşullu kümülatif: ulaşılan seviyenin oranı cironun tamamına uygulanır. 1.000.000 ₺ ciroda satışı kapatan 300.000 ₺ alır.
   expect(1_000_000 * k.katkiOrani(p, 'kapatir', 1_000_000).oran).toBe(300_000);
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: tanıştıranın yenileme oranı yoktur. Tanıştıran yalnız ilk 3 ayda pay alır.
-  expect(p.tanistir.gecmis).toEqual([0]);
+  expect(p.tanistir.gecmis).toEqual([0.05, 0.025, 0, 0]);
   // Kullanıcı kararı 17 Kasım 2026 Salı: satışı kapatanın oranı K0'da %15, K1'de %20, K2'de %25, K3'te %30'dur.
-  // Eşikler 0, 30.000, 70.000 ve 120.000 ₺'dir. Yıllık yenilemede 13. ile 24. ay arası %10. 25. aydan sonra pay yoktur.
+  // Eşikler 0, 30.000, 70.000 ve 120.000 ₺'dir. 13. aydan sonra %10, %7 ve %5. 48. aydan sonra pay yoktur.
   expect(p.kapatir.taban).toBe(0.15);
   expect(p.kapatir.kotaArtis).toEqual([0.05, 0.05, 0.05]);
-  expect(p.kapatir.gecmis).toEqual([0.1]);
+  expect(p.kapatir.gecmis).toEqual([0.1, 0.07, 0.05, 0]);
   expect(p.kapatir.kotaEsik).toEqual([30_000, 70_000, 120_000]);
   expect([0, 29_999, 30_000, 70_000, 120_000].map((c) => k.katkiOrani(p, 'kapatir', c).oran)).toEqual([0.15, 0.15, 0.2, 0.25, 0.3]);
   expect(p.ornekCiro).toBe(50_000);
-  expect(p.paylasim.sureAy).toBe(3);
+  expect(p.paylasim.sureAy).toBe(6);
   expect(p.kadrolu.maas).toBe(50_000);
   // Kullanıcı kararı 20 Kasım 2026 Cuma: maaş kotası net maaşın 2 katıdır. 50.000 ₺ maaşta kota 100.000 ₺ olur.
   expect(k.kadroluKota(p)).toBe(100_000);
@@ -52,38 +50,39 @@ test('kota eşiği yoksa taban oran, eşik aşılınca artışlar sırayla eklen
   expect(k.katkiOrani({ ...p, kapatir: { ...p.kapatir, kotaEsik: [null, 1, 1] } }, 'kapatir', 10).kota).toBe(0);
 });
 
-// Kullanıcı kararı 20 Kasım 2026 Cuma: 13. aydan sonra yalnız yıllık yenileme payı vardır. 25. aydan sonra pay yoktur.
-test('yıllık yenilemede satışı kapatan 13. ile 24. ay arasında düşük oranı alır', async () => {
+test('13. aydan sonraki pay 12 aylık dönemlerle azalır', async () => {
   const k = await import('../src/data/kazancPlani');
   const p = k.KAZANC_VARSAYILAN;
-  expect(k.YENILEME_DONEMI).toBe('13. ile 24. ay arası');
-  expect(k.yenilemeKazanci(p, 100_000)).toEqual({ oran: 0.1, tutar: 10_000 });
+  for (const tur of ['tanistir', 'kapatir'] as const) {
+    const satirlar = k.yillaraKazanc(p, tur, 100_000);
+    expect(satirlar.map((s) => s.donem)).toEqual(['13. ay ile 24. ay arası', '25. ay ile 36. ay arası', '37. ay ile 48. ay arası', '49. ay ile 60. ay arası']);
+    for (let i = 1; i < 4; i++) expect(satirlar[i].oran).toBeLessThanOrEqual(satirlar[i - 1].oran);
+  }
+  expect(k.yillaraKazanc(p, 'kapatir', 100_000).map((s) => s.tutar)).toEqual([10_000, 7_000, 5_000, 0]);
+  expect(k.yillaraKazanc(p, 'tanistir', 100_000).map((s) => s.tutar)).toEqual([5_000, 2_500, 0, 0]);
 });
 
 // Kullanıcı kararı 17 Kasım 2026 Salı: kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. aydan sonra pay almaz.
-// 20 Kasım 2026 Cuma kararıyla 13. aydan sonra yalnız yıllık yenileme payı kaldı.
-test('kota kuralı: K1 tamamlanmazsa yıllık yenilemede pay yoktur', async () => {
+test('kota kuralı: K1 tamamlanmazsa 13. aydan sonra pay yoktur', async () => {
   const k = await import('../src/data/kazancPlani');
   const p = k.KAZANC_VARSAYILAN;
   expect(k.kotaTamam(p, 'tanistir', 29_999)).toBe(false);
   expect(k.kotaTamam(p, 'tanistir', 30_000)).toBe(true);
-  expect(k.yenilemeKazanci(p, 20_000)).toEqual({ oran: 0, tutar: 0 });
+  expect(k.yillaraKazanc(p, 'tanistir', 20_000).map((s) => s.tutar)).toEqual([0, 0, 0, 0]);
   // K1 eşiği boşsa kural ölçülemez. Örnek kotayı tamamlanmış sayar.
   expect(k.kotaTamam({ ...p, kapatir: { ...p.kapatir, kotaEsik: [null, null, null] } }, 'kapatir', 1)).toBe(true);
-  // Örnek hesap: aylık ciro 40.000 ₺. K1 oranı %20'dir. Yıllık yenilemede %10 uygulanır.
+  // Kâğıttaki örnek hesap: aylık ciro 40.000 ₺. K1 artışı artık %5'tir.
   const h = k.ornekHesap({ ...p, ornekCiro: 40_000 }, 'kapatir');
-  expect(h.satirlar.map((r) => r.tutar)).toEqual([8_000, 4_000]);
-  expect(h.toplam).toBe(96_000);
+  expect(h.satirlar.map((r) => r.tutar)).toEqual([6_000, 2_000, 6_000, 48_000, 33_600, 24_000]);
+  expect(h.toplam).toBe(119_600);
   const dusuk = { ...structuredClone(p), ornekCiro: 20_000 };
   dusuk.kapatir.kotaEsik = [30_000, null, null];
-  expect(k.ornekHesap(dusuk, 'kapatir').satirlar.map((r) => r.tutar)).toEqual([3_000, 0]);
-  expect(k.ornekHesap(dusuk, 'kapatir').toplam).toBe(36_000);
+  expect(k.ornekHesap(dusuk, 'kapatir').toplam).toBe(6_000);
 });
 
 test('Segika başlangıç planı yöneticinin JSON çıktısındaki kalıcı kurallarla açılır', async () => {
   const k = await import('../src/data/kazancPlani');
   const s = k.projeVarsayilani('segika');
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: Segika eski ödeme modeliyle kalır. 19 kalıcı kural vardır.
   expect(s.kalici).toHaveLength(19);
   expect(s.kalici).toEqual(expect.arrayContaining(['tanistir.taban', 'kapatir.taban', 'paylasim.sureAy', 'paylasim.ilkSatis']));
   expect([s.tanistir.kotaEsik, s.kapatir.kotaEsik]).toEqual([[30_000, 70_000, 100_000], [30_000, 70_000, 120_000]]);
@@ -128,17 +127,21 @@ test('kota eşiği her katkı türünde ayrı hesaplanır', async () => {
 test('pay bölüşme hesabı seçime ve kutulardaki oranlara göre yapılır', async () => {
   const k = await import('../src/data/kazancPlani');
   const p = structuredClone(k.KAZANC_VARSAYILAN);
-  expect(p.paylasim).toMatchObject({ sureAy: 3, ilkSatis: 'dus', kota: 'dus' });
-  // Hesap kutulardaki oranlarla yapılır. Bu denemede eşikler boştur.
+  expect(p.paylasim).toEqual({ sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' });
+  // Hesap kutulardaki oranlarla yapılır. Bu denemede eşikler boştur ve eski yıllık oranlar girilir.
   p.tanistir.taban = 0.07;
   p.tanistir.kotaEsik = [null, null, null];
   p.tanistir.kotaArtis = [0, 0, 0];
+  p.tanistir.gecmis = [0.05, 0.02, 0.02, 0.01];
+  p.kapatir.gecmis = [0.1, 0.07, 0.05, 0.02];
   p.kapatir.kotaEsik = [null, null, null];
   expect(k.SURE_SECENEKLERI).toEqual([1, 2, 3, 4, 5, 6, 8, 10, 12]);
-  // Bölüşme ilk 3 aydadır. Sonra Ahmet pay almaz, Mehmet kendi oranının tamamını alır.
-  expect(k.paylasim(p, 100_000)).toMatchObject({ tanistiranOran: 0.07, kapatanOran: 0.08, tanistiran: 7_000, kapatan: 8_000, toplam: 15_000, sonrakiOran: 0.15, yenilemeOran: 0.1 });
+  expect(k.paylasim(p, 100_000)).toMatchObject({ tanistiranOran: 0.07, kapatanOran: 0.08, tanistiran: 7_000, kapatan: 8_000, toplam: 15_000 });
+  expect(k.paylasim(p, 100_000).yillar.map((y) => [y.tanistiran, y.kapatan])).toEqual([[0.05, 0.05], [0.02, 0.05], [0.02, 0.03], [0.01, 0.01]]);
   p.paylasim.ilkSatis = 'tam';
   expect(k.paylasim(p, 100_000)).toMatchObject({ tanistiran: 7_000, kapatan: 15_000, toplam: 22_000 });
+  p.paylasim.yillar = 'tam';
+  expect(k.paylasim(p, 100_000).yillar.map((y) => [y.tanistiran, y.kapatan])).toEqual([[0.05, 0.1], [0.02, 0.07], [0.02, 0.05], [0.01, 0.02]]);
   // Kota artışı: iki katkı türü de K1'e ulaşır. Düşmede tanıştıranın artışı kapatanın artışından düşülür.
   const q = structuredClone(k.KAZANC_VARSAYILAN);
   q.tanistir.kotaEsik = [50_000, null, null];
@@ -148,7 +151,7 @@ test('pay bölüşme hesabı seçime ve kutulardaki oranlara göre yapılır', a
   expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.12 });
   q.paylasim.kota = 'tam';
   expect(k.paylasim(q, 100_000)).toMatchObject({ tanistiranOran: 0.08, kapatanOran: 0.13 });
-  expect(k.planOku({ paylasim: { sureAy: 7, ilkSatis: 'x' } }).paylasim).toEqual({ sureAy: 3, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' });
+  expect(k.planOku({ paylasim: { sureAy: 7, ilkSatis: 'x' } }).paylasim).toEqual({ sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' });
   expect(k.planOku({ paylasim: { sureAy: 12, kota: 'tam' } }).paylasim).toMatchObject({ sureAy: 12, kota: 'tam' });
 });
 
@@ -162,7 +165,7 @@ test('JSON kalıcı kuralları ve bütün güncel değerleri içerir', async () 
   expect(j).toMatchObject({ tur: 'kazanc-plani-kalici-kurallar', surum: 2, proje: 'segika', gorunum: 'Segika', tarih: '2026-11-17', tarihMetni: '17 Kasım 2026 Salı' });
   expect(j.kurallar).toEqual([
     { id: 'kapatir.taban', ad: 'Satışı kapatma taban oranı', deger: 0.15, gosterim: '%15', gorunum: 'Segika', tarih: '2026-11-17' },
-    { id: 'paylasim.sureAy', ad: 'Tanıştırmanın geçerlilik süresi', deger: 3, gosterim: '3 ay', gorunum: 'Segika', tarih: '2026-11-17' },
+    { id: 'paylasim.sureAy', ad: 'Tanıştırmanın geçerlilik süresi', deger: 6, gosterim: '6 ay', gorunum: 'Segika', tarih: '2026-11-17' },
     { id: 'paylasim.ilkSatis', ad: 'İlk satışta pay', deger: 'tam', gosterim: 'Şirket ikisine de tam öder', gorunum: 'Segika', tarih: '2026-11-17' },
   ]);
   // Kullanıcı kararı 17 Kasım 2026 Salı: işaretli olmayan değerler de JSON'da durur.
@@ -185,8 +188,7 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(anahtar).toHaveAttribute('aria-checked', 'false');
   await expect(kutu(page, 'Tanıştırma taban oranı')).toHaveValue('%0');
   await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('30.000 ₺');
-  // Tanıştıranın yenileme oranı yoktur (kullanıcı kararı 20 Kasım 2026 Cuma).
-  await expect(plani(page).getByRole('textbox', { name: /Tanıştırma.*yenileme/ })).toHaveCount(0);
+  await expect(kutu(page, 'Tanıştırma 13. ay ile 24. ay arası komisyonu')).toHaveValue('%5');
   // Grup içindeki görünür ad kısadır. Tam ad ekran okuyucuya gider.
   await expect(oranlar.locator('[data-etkin] label', { hasText: /^K1 için aylık ciro/ })).toBeVisible();
   // Kutunun ne olduğu ve nasıl değiştirileceği yazılıdır.
@@ -197,7 +199,7 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(kutu(page, 'Tanıştırma taban oranı')).toHaveCount(0);
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveValue('%15');
   for (const [k, d] of [['K1', '30.000 ₺'], ['K2', '70.000 ₺'], ['K3', '120.000 ₺']]) await expect(kutu(page, `Satışı kapatma ${k} ciro eşiği`)).toHaveValue(d);
-  await expect(kutu(page, 'Satışı kapatma yıllık yenileme oranı')).toHaveValue('%10');
+  await expect(kutu(page, 'Satışı kapatma 37. ay ile 48. ay arası komisyonu')).toHaveValue('%5');
   await kutu(page, 'Satışı kapatma taban oranı').fill('%20');
   // 50.000 ₺ ciro K1 eşiğini geçer. Oran %20 taban ile %5 puandır.
   await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toHaveText('50.000 ₺ × %25 = 12.500 ₺');
@@ -294,7 +296,6 @@ test('kazanç oyunu: seviye, hedef, rozetler ve tablo ciroya göre değişir', a
   const oyun = panel.locator('[data-etkin] > .pol-kz-oyun-govde');
   await expect(oyun).toHaveAttribute('data-sim-tur', 'kapatir');
   await expect(oyun.locator('[data-sim="bu-ay"]')).toHaveText('10.000 ₺');
-  // Segika eski ödeme modeliyle kalır (kullanıcı kararı 20 Kasım 2026 Cuma).
   await expect(oyun.locator('[data-sim="toplam"]')).toHaveText('252.000 ₺');
   await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 kotasına 20.000 ₺ kaldı.');
   await expect(oyun.locator('[data-sim="hedef"]')).toContainText('K2 eşiğinde aylık kazancınız 17.500 ₺ olur.');
@@ -489,89 +490,59 @@ test('Segika kadrolu sekmesinde paket kademesi yoktur', async ({ page }) => {
   await expect(kutu(page, 'K1 paket eşiği')).toHaveCount(0);
 });
 
-// Kullanıcı kararları 20 Kasım 2026 Cuma: ciro, paket bedellerinin KDV hariç toplamıdır. Kurulum ücreti ciroya girmez.
-// Aylık pakette pay en çok 12 ay sürer. Yıllık pakette bedelin tamamı satış ayının cirosudur ve pay bir kerede ödenir.
-// Yıllık yenilemede 13. ile 24. ay arası düşük oran (%10) uygulanır. 25. aydan sonra pay yoktur.
-// Tanıştıran en çok 3 ay pay alır. Koruma 90 gündür. Müşteri ayrılırsa pay durur, ödenmiş pay geri istenmez.
-// Mevcut müşteri ücretsiz kullanım kazanır. Segika kadrolu primi kotayı aşan cironun %10'udur. Ağ hesabı kalkar.
-test('20 Kasım kararları: ciro, ödeme süreleri, örnek hesap ve pay bölüşmesi', async () => {
-  const k = await import('../src/data/kazancPlani');
-  const p = k.KAZANC_VARSAYILAN;
-  expect(k.ODEME_SURESI).toEqual({ tanistir: 3, aylik: 12, yillik: 24 });
-  expect(p.kapatir.gecmis).toEqual([0.1]);
-  expect(p.paylasim).toMatchObject({ sureAy: 3, ilkSatis: 'dus', kota: 'dus' });
-  expect(p.odeme).toBe('yeni');
-  const kurallar = k.ODEME_KURALLARI.join(' ');
-  for (const metin of ['KDV hariç', 'Kurulum ücreti ciroya girmez.', 'Pay en çok 12 ay sürer.', 'Pay satış ayında bir kerede ödenir.', '25. aydan sonra pay yoktur.', 'ilk 3 ay', 'Ödenmiş pay geri istenmez.']) {
-    expect(kurallar).toContain(metin);
-  }
-  // Örnek hesap ulaşılan seviyenin oranını bütün ciroya uygular. 150.000 ₺ ciroda satışı kapatan %30 alır.
-  const h = k.ornekHesap({ ...p, ornekCiro: 150_000 }, 'kapatir');
-  expect(h.satirlar.map((r) => [r.oran, r.tutar])).toEqual([[0.3, 45_000], [0.1, 15_000]]);
-  expect(h.toplam).toBe(540_000);
-  const t = k.ornekHesap(p, 'tanistir');
-  expect(t.satirlar.map((r) => [r.oran, r.tutar])).toEqual([[0.07, 3_500]]);
-  expect(t.toplam).toBe(10_500);
-  // K1 tamamlanmazsa yıllık yenilemede pay yoktur.
-  expect(k.ornekHesap({ ...p, ornekCiro: 20_000 }, 'kapatir').satirlar[1].tutar).toBe(0);
-  // Pay bölüşmesi yalnız ilk 3 aydadır. Sonra yalnız satışı kapatan pay alır.
-  expect(k.paylasim(p, 50_000)).toMatchObject({ tanistiranOran: 0.07, kapatanOran: 0.13, sonrakiOran: 0.2, yenilemeOran: 0.1 });
-  // Kullanıcı kararı 20 Kasım 2026 Cuma: bugünkü ödeme kararları yalnız iStoc içindir. Segika eski modelle kalır.
-  const s = k.projeVarsayilani('segika');
-  expect(s.odeme).toBe('eski');
-  expect([s.tanistir.gecmis, s.kapatir.gecmis]).toEqual([[0.05, 0.025, 0, 0], [0.1, 0.07, 0.05, 0]]);
-  expect(s.paylasim).toEqual({ sureAy: 6, ilkSatis: 'dus', yillar: 'dus', kota: 'dus' });
-  expect(k.ornekHesap(s, 'kapatir').toplam).toBe(149_500);
-  expect(k.kuralListesi(s).some((x) => x.id === 'paylasim.yillar')).toBe(true);
-  expect(k.kuralListesi(k.KAZANC_VARSAYILAN).some((x) => x.id === 'paylasim.yillar')).toBe(false);
-  // Segika kadrolu uzman kotayı aşan cironun %10'unu alır. Plan ve rehber aynı oranı kullanır.
-  expect(s.kadrolu.primOrani).toBe(0.1);
-  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
-  expect(k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika' }, { ...s, kadrolu: { ...s.kadrolu, primOrani: 0.12 } }).kadroluPrim.segika).toBe(0.12);
-});
-
-test('20 Kasım kararları: iStoc rehberlerinde eski ödeme kuralı ve ağ hesabı yoktur, Segika eski kuralla kalır', async () => {
+// Kullanıcı kararları 20 Kasım 2026 Cuma: bugünkü prim kuralları yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir.
+// İş ortaklarının kazanç planı değişmedi. Ağ kademesi iStoc çözüm ortağı ve marka elçisi belgesinden kalktı.
+// iStoc mevcut müşterisi ücretsiz kullanım kazanır, bu sekmede plan görünmez. Temsilci ağı (MLM) ayrı süreçtir.
+// Segika için iki karar: kadrolu primi %10 ve tek seferlik tavsiye ödülü panelde ek kullanım hakkıdır.
+test('20 Kasım kararları: veri, belge ve programlar', async () => {
   const k = await import('../src/data/kazancPlani');
   const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
   const { rehberHesabi } = await import('../src/data/politikalar/hesap');
-  const akislar = {
-    istoc: { cozum: await import('../src/data/politikaAkislari/istoc/cozum'), elci: await import('../src/data/politikaAkislari/istoc/elci') },
-    segika: { cozum: await import('../src/data/politikaAkislari/segika/cozum'), elci: await import('../src/data/politikaAkislari/segika/elci') },
-  };
-  for (const proje of ['istoc', 'segika'] as const) {
-    const a = k.planliAyar({ ...VARSAYILAN_AYAR, marka: proje }, k.projeVarsayilani(proje));
-    for (const rol of ['cozum', 'elci'] as const) {
-      const metin = JSON.stringify([akislar[proje][rol].akisOlustur(a), rehberHesabi(rol, proje, a)]);
-      if (proje === 'istoc') {
-        expect(metin, `${proje}/${rol}`).toContain('Pay en çok 12 ay sürer.');
-        for (const eski of ['yıllık paket bedelinin', '60. gün', 'ağ kademesi', 'imzalı anlaşma söyler']) expect(metin, `${proje}/${rol}: ${eski}`).not.toContain(eski);
-        expect(rehberHesabi(rol, proje, a).digerSurum).toEqual([]);
-      } else {
-        expect(metin, `${proje}/${rol}`).not.toContain('Pay en çok 12 ay sürer.');
-        expect(rehberHesabi(rol, proje, a).digerSurum).toHaveLength(1);
-      }
-    }
+  const { rehberKosulListesi } = await import('../src/data/kosullar');
+  const kurallar = k.KADROLU_PRIM_KURALLARI.join(' ');
+  for (const m of ['KDV hariç', 'Kurulum ücreti ciroya girmez.', 'Prim en çok 12 ay sürer.', 'Prim satış ayında bir kerede ödenir.', '%10 prim', 'ilk 3 ay', '90 gün', 'Ödenmiş prim geri istenmez.']) {
+    expect(kurallar).toContain(m);
   }
-  // Segika program kuralları eski hâlindedir.
-  expect(readFileSync('src/data/kosullar.ts', 'utf8')).toContain('12 ay boyunca ortak adına korunur');
+  // İş ortaklarının planı dünkü gibidir.
+  expect(k.KAZANC_VARSAYILAN.kapatir.gecmis).toEqual([0.1, 0.07, 0.05, 0]);
+  expect(k.KAZANC_VARSAYILAN.paylasim.sureAy).toBe(6);
+  const istoc = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc', kosul: { kadrolu: 'saha' } }, k.KAZANC_VARSAYILAN);
+  expect(istoc.kosul?.kadrolu).toBe('ana');
+  expect(rehberKosulListesi(istoc, 'kadrolu').map((x) => x.id)).toEqual(['ana']);
+  expect(rehberHesabi('kadrolu', 'istoc', istoc).programlar).toEqual([]);
+  expect(rehberHesabi('kadrolu', 'istoc', istoc).odeme).toEqual([...k.KADROLU_PRIM_KURALLARI]);
+  for (const rol of ['cozum', 'elci'] as const) {
+    expect(rehberHesabi(rol, 'istoc', istoc).digerSurum).toEqual([]);
+    expect(rehberHesabi(rol, 'segika').digerSurum).toHaveLength(1);
+  }
+  const s = k.projeVarsayilani('segika');
+  expect(s.kadrolu.primOrani).toBe(0.1);
+  expect(k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika' }, { ...s, kadrolu: { ...s.kadrolu, primOrani: 0.12 } }).kadroluPrim.segika).toBe(0.12);
+  const segika = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika', kosul: { tavsiye: 'tek-sefer' } }, s);
+  const program = rehberHesabi('tavsiye', 'segika', segika).programlar.find((x) => x.id === 'tek-sefer')!;
+  expect(program.ad).toContain('ödülü');
+  expect(program.etiket).toBe('Bir müşteri için planlanan panel kullanım hakkı');
+  expect(program.kurallar).toContain('Ödül nakit ödenmez. Ödül, Segika panelinde ek kullanım hakkıdır.');
+  const { akisOlustur } = await import('../src/data/politikaAkislari/segika/tavsiye');
+  const akis = JSON.stringify(akisOlustur(segika));
+  expect(akis).toContain('panel kullanım hakkıdır');
+  expect(akis).not.toContain('nakit komisyon');
 });
 
-test('20 Kasım kararları: plan ödeme kurallarını söyler, mevcut müşteri sekmesinde plan yoktur', async ({ page }) => {
+test('20 Kasım kararları: kadrolu sekmesinde prim kuralları, mevcut müşteri sekmesinde plan', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
-  await page.goto('politikalar/?proje=istoc&rol=cozum');
-  await expect(plani(page)).toContainText('Pay en çok 12 ay sürer.');
-  await expect(plani(page)).toContainText('Kurulum ücreti ciroya girmez.');
-  await expect(plani(page)).not.toContainText('48 ay');
-  await expect(plani(page).locator('[data-sim="toplam"]')).toHaveCount(0);
-  await expect(plani(page).getByRole('group', { name: 'Sonraki 4 yılın payı' })).toHaveCount(0);
+  await page.goto('politikalar/?proje=istoc&rol=kadrolu');
+  await expect(plani(page).locator('[data-kadrolu-kurallar]')).toContainText('Prim en çok 12 ay sürer.');
   expect(await tasmaYok(page)).toBe(true);
+  // İş ortaklarının planı değişmedi.
+  await page.goto('politikalar/?proje=istoc&rol=cozum');
+  await expect(plani(page)).toContainText('48 ayda toplam');
+  await expect(plani(page).locator('[data-kadrolu-kurallar]')).toHaveCount(0);
   await page.goto('politikalar/?proje=istoc&rol=tavsiye');
   await expect(page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true })).toBeVisible();
   await expect(plani(page)).toHaveCount(0);
-  // Segika eski hâlinde kalır: mevcut müşteri sekmesinde plan görünür, ödeme kuralları kutusu yoktur.
   await page.goto('politikalar/?proje=segika&rol=tavsiye');
   await expect(plani(page)).toBeVisible();
-  await expect(plani(page)).not.toContainText('Pay en çok 12 ay sürer.');
 });
 
 // Büyütülmüş yazıda anahtar yazıları ve seviye kutuları alt alta geçer. Normal yazıda 320 px genişlikte düzen değişmez.
@@ -598,26 +569,4 @@ test('paket eşiği kalıcı kural olunca pencerede doğru kutu açılır', asyn
   const pencere = page.getByRole('dialog', { name: 'Parametreler' });
   await expect(pencere.getByRole('textbox', { name: 'K1 paket eşiği', exact: true })).toHaveValue('5');
   await expect(pencere.getByRole('textbox', { name: 'Kota üstü prim oranı', exact: true })).toHaveCount(0);
-});
-
-// Kullanıcı kararları 20 Kasım 2026 Cuma: temsilci ağı (MLM) ayrı süreçtir. iStoc kadrolu uzman yalnız paket kademesi primini alır.
-// Segika “Tek seferlik tavsiye ödülü” istisna olarak kalır. Ödül nakit değil, Segika panelinde ek kullanım hakkıdır.
-test('20 Kasım kararları: iStoc kadrolu programları rehberde yok, Segika tavsiye ödülü panel hakkıdır', async () => {
-  const k = await import('../src/data/kazancPlani');
-  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
-  const { rehberHesabi } = await import('../src/data/politikalar/hesap');
-  const { rehberKosulListesi } = await import('../src/data/kosullar');
-  const istoc = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc', kosul: { kadrolu: 'saha' } }, k.KAZANC_VARSAYILAN);
-  expect(istoc.kosul?.kadrolu).toBe('ana');
-  expect(rehberKosulListesi(istoc, 'kadrolu').map((x) => x.id)).toEqual(['ana']);
-  expect(rehberHesabi('kadrolu', 'istoc', istoc).programlar).toEqual([]);
-  const segika = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika', kosul: { tavsiye: 'tek-sefer' } }, k.projeVarsayilani('segika'));
-  const program = rehberHesabi('tavsiye', 'segika', segika).programlar.find((x) => x.id === 'tek-sefer')!;
-  expect(program.ad).toContain('ödülü');
-  expect(program.etiket).toBe('Bir müşteri için planlanan panel kullanım hakkı');
-  expect(program.kurallar).toContain('Ödül nakit ödenmez. Ödül, Segika panelinde ek kullanım hakkıdır.');
-  const { akisOlustur } = await import('../src/data/politikaAkislari/segika/tavsiye');
-  const akis = JSON.stringify(akisOlustur(segika));
-  expect(akis).toContain('panel kullanım hakkıdır');
-  expect(akis).not.toContain('nakit komisyon');
 });
