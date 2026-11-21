@@ -209,3 +209,43 @@ test('iStoc kadrolu sekmesi ve belgesi tanıştırma primini yazar', async ({ pa
   await expect(page.locator('#kazanc')).toBeVisible();
   await expect(page.locator('#kazanc')).not.toContainText('tanıştırdıysanız');
 });
+
+// Kullanıcı kararı 21 Kasım 2026 Cumartesi: iStoc kadrolu uzmanda aylık paketin oranı 12 ay boyunca aynı kalır.
+// Oran, satış ayında ulaşılan kademenin oranıdır. Sonraki ayın paket sayısı bu oranı değiştirmez.
+const AYLIK_ORAN = 'Oran 12 ay boyunca satış ayındaki oranla aynı kalır.';
+const AYLIK_KURAL = `Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer. ${AYLIK_ORAN} `
+  + "Örneğin Ocak'ta 8 paket sattınız. Bu paketlerden biri aylık paketti. Ocak'ın oranı %7 oldu. "
+  + "Şubat'ta yalnız 2 paket sattınız. Bu 2 paketten prim almazsınız. Ocak'ta satılan aylık paketin Şubat primi yine %7 olur.";
+
+test('iStoc kadrolu: aylık paketin oranı 12 ay aynı kalır', async () => {
+  const k = await import('../src/data/kazancPlani');
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  const { rehberHesabi } = await import('../src/data/politikalar/hesap');
+  expect(k.AYLIK_PAKET_ORAN_KURALI).toBe(AYLIK_ORAN);
+  expect(k.KADROLU_PRIM_KURALLARI).toContain(AYLIK_KURAL);
+  expect(k.KADROLU_PRIM_KURALLARI.filter((x) => x.startsWith('Aylık pakette'))).toHaveLength(1);
+  // Örnekteki sayılar varsayılan kademelerle tutarlıdır: 8 paket K2'dir, 2 paket kademeye ulaşmaz.
+  const kademe = { esik: k.KAZANC_VARSAYILAN.kadrolu.paketEsik, oran: k.KAZANC_VARSAYILAN.kadrolu.paketOran };
+  expect(k.paketPrimi(kademe, 7, 1, 1, 1).oran).toBe(0.07);
+  expect(k.paketPrimi(kademe, 2, 1).prim).toBe(0);
+  const istoc = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc' }, k.KAZANC_VARSAYILAN);
+  expect(rehberHesabi('kadrolu', 'istoc', istoc).ornekler[0].aciklama.join(' ')).toContain(AYLIK_ORAN);
+  const segika = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika' }, k.projeVarsayilani('segika'));
+  const segikaHesap = rehberHesabi('kadrolu', 'segika', segika);
+  expect([...segikaHesap.odeme, ...segikaHesap.ornekler.flatMap((o) => o.aciklama)].join(' ')).not.toContain(AYLIK_ORAN);
+});
+
+test('iStoc kadrolu sekmesi ve belgesi aylık paketin oranını yazar', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('politikalar/?proje=istoc&rol=kadrolu');
+  const plan = page.getByRole('region', { name: 'Kazanç planı' });
+  await expect(plan.locator('[data-kadrolu-kurallar]')).toContainText(AYLIK_KURAL);
+  await expect(plan.locator('section[aria-label="Kadrolu uzmanın kotası"]')).toContainText(AYLIK_ORAN);
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.locator('#kazanc')).toContainText(AYLIK_KURAL);
+  await expect(page.locator('#kazanc .pol-hesap').first()).toContainText(AYLIK_ORAN);
+  expect(await tasmaYok(page)).toBe(true);
+  await page.goto('politikalar/?proje=segika&rol=kadrolu');
+  await expect(page.getByRole('region', { name: 'Kazanç planı' })).toBeVisible();
+  await expect(page.locator('main')).not.toContainText(AYLIK_ORAN);
+});

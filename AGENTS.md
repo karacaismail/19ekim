@@ -1855,6 +1855,9 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
     Kural metninde bir örnek vardır: ilk 3 ayda 30.000 ₺ ödeme 2.100 ₺ prim eder. Bunu `tests/politika-acik-kararlar.spec.ts` denetler.
     Paket kademesinde aylık ve yıllık paketler birlikte sayılır (kullanıcı kararı 20 Kasım 2026). Hesap `paketPrimi` işlevindedir.
     Aylık paketin bedeli o ayın bedelidir. Aylık paketin primi 12 aya kadar her ay yeniden ödenir.
+    Aylık paketin oranı 12 ay boyunca satış ayındaki oranla aynı kalır (kullanıcı kararı 21 Kasım 2026 Cumartesi).
+    Örneğin Ocak'ta 8 paket satılır ve oran %7 olur. Şubat'ta 2 paket satılsa da Ocak'ın aylık paketi %7 prim alır.
+    Kural `kazancPlani.ts → AYLIK_PAKET_ORAN_KURALI` sabitindedir. Bunu `tests/politika-acik-kararlar.spec.ts` denetler.
   - iStoc kadrolu uzman SGK'lı saha satış uzmanıdır. Yalnız paket kademesi primini alır.
     Temsilci ağı (MLM) ayrı süreçtir. “Saha personeli” ve “Ekip lideri” programları rehberde görünmez (`REHBER_DISI_PROGRAMLAR`).
   - iStoc çözüm ortağı ve marka elçisi belgesinde ikinci hesap sürümü gösterilmez. Ağ kademesi bu sürümdedir.

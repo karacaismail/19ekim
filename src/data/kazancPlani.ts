@@ -305,6 +305,13 @@ export const KADROLU_TANISTIRMA_ORANI = 0.07;
 const TANISTIRMA_ORNEK_ODEME = 30_000;
 
 /**
+ * Aylık paketin oranı 12 ay boyunca satış ayındaki oranla aynı kalır (kullanıcı kararı 21 Kasım 2026 Cumartesi).
+ * Sonraki ayın paket sayısı bu oranı değiştirmez. Örnek, varsayılan kademelerin K2 değerini kullanır.
+ */
+export const AYLIK_PAKET_ORAN_KURALI = 'Oran 12 ay boyunca satış ayındaki oranla aynı kalır.';
+const AYLIK_ORNEK = KAZANC_VARSAYILAN.kadrolu;
+
+/**
  * iStoc kadrolu uzmanın prim kuralları (kullanıcı kararları 20 Kasım 2026 Cuma).
  * Bu kurallar yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir. İş ortaklarının kazanç planı değişmedi.
  */
@@ -312,7 +319,9 @@ export const KADROLU_PRIM_KURALLARI = [
   'Ciro, sattığınız müşterilerin o ay ödediği paket bedellerinin toplamıdır. KDV hariç tutulur.',
   'Paket kademesinde aylık ve yıllık paketler birlikte sayılır.',
   'Kurulum ücreti ciroya girmez. Bu ücretten prim almazsınız.',
-  'Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.',
+  `Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer. ${AYLIK_PAKET_ORAN_KURALI} `
+    + `Örneğin Ocak'ta ${num(AYLIK_ORNEK.paketEsik[1])} paket sattınız. Bu paketlerden biri aylık paketti. Ocak'ın oranı ${yuzdeMetni(AYLIK_ORNEK.paketOran[1])} oldu. `
+    + `Şubat'ta yalnız 2 paket sattınız. Bu 2 paketten prim almazsınız. Ocak'ta satılan aylık paketin Şubat primi yine ${yuzdeMetni(AYLIK_ORNEK.paketOran[1])} olur.`,
   'Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Prim satış ayında bir kerede ödenir.',
   'Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında %10 prim alırsınız. 25. aydan sonra prim yoktur.',
   `Yalnız tanıştırdıysanız prim oranı ${yuzdeMetni(KADROLU_TANISTIRMA_ORANI)} olur. Prim, satıştan sonraki ilk 3 aydaki ödemelerden hesaplanır. `

@@ -8,7 +8,7 @@ import { Choice } from './ui';
 import { Section } from './ui';
 import { Grup } from './sadeKit';
 import {
-  KUMULATIF_KURALI, kotaKurali, KADROLU_PRIM_KURALLARI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
+  KUMULATIF_KURALI, kotaKurali, AYLIK_PAKET_ORAN_KURALI, KADROLU_PRIM_KURALLARI, kotaTamam, projeVarsayilani, donemAdi, kuralListesi, ornekHesap, BOLUSME_ADI, BOLUSME_SORUSU, KATKI_ADI, MAAS_ARALIGI, SURE_SECENEKLERI, kadroluKota, kaliciJson, katkiOrani, paketPrimi,
   paylasim, planOku, yillaraKazanc, type Bolusme, type Esik, type KatkiTuru, type KazancPlani, type SureAy,
 } from '../data/kazancPlani';
 import { aylikFiyat, yillikFiyat, type Marka, type RolId } from '../data/satisOrtakligi';
@@ -541,7 +541,7 @@ function KadroluSonuc({ plan, proje }: { plan: KazancPlani; proje: Marka }) {
     </dl>
     <p>Maaş kotası, net maaşın {yuzde(k.kotaOrani)} kadarıdır.</p>
     <p>{num(k.paketEsik[0] - 1)} paket ve altında prim yoktur. Paket sayısı her ay yeniden sayılır.</p>
-    <p>Aylık paketin primi 12 aya kadar her ay yeniden ödenir. Örnek yalnız bu ayın primini gösterir.</p>
+    <p>Aylık paketin primi 12 aya kadar her ay yeniden ödenir. {AYLIK_PAKET_ORAN_KURALI} Örnek yalnız bu ayın primini gösterir.</p>
   </section>
   {/* Kullanıcı kararları 20 Kasım 2026 Cuma: bu kurallar yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir. */}
   <section className="pol-kz-kart" aria-labelledby="pol-kz-prim-kurallari">

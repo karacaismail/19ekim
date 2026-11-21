@@ -6,7 +6,7 @@ import { DEFAULT_PARAMS } from '../params';
 import type { RolId } from './types';
 import { acikAd, acikTerimler } from './terimler';
 import { int, num } from '../../lib/format';
-import { KADROLU_PRIM_KURALLARI, paketPrimi } from '../kazancPlani';
+import { AYLIK_PAKET_ORAN_KURALI, KADROLU_PRIM_KURALLARI, paketPrimi } from '../kazancPlani';
 
 export const sayi = num;
 export const tl = (n: number) => `${sayi(n)} ₺`;
@@ -51,6 +51,7 @@ function ornek(rol: RolId, marka: v1.Marka, ayar = v1.VARSAYILAN_AYAR): HesapOrn
     aciklama.push('Aylık ve yıllık paketler birlikte sayılır.');
     aciklama.push('Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır.');
     aciklama.push('Aylık paketin bedeli o ayın bedelidir. Aylık paketin primi 12 aya kadar her ay yeniden ödenir.');
+    aciklama.push(AYLIK_PAKET_ORAN_KURALI);
     aciklama.push('Paket sayısı her ay yeniden sayılır.');
     aciklama.push('İlk iki ay kota uygulanmaz. Şirket bu iki ayın primini henüz açıklamadı.');
   } else if (rol === 'kadrolu') {
