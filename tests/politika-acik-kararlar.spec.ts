@@ -178,3 +178,34 @@ test('kazanç planı K1 kuralını projeye göre yazar', async ({ page }) => {
   await expect(plan).not.toContainText('İlk 12 ayın her birinde');
   await expect(plan).toContainText('Kilitli. K1 kotası tamamlanınca açılır.');
 });
+
+// Kullanıcı kararı 21 Kasım 2026 Cumartesi: iStoc kadrolu uzman yalnız tanıştırdıysa prim oranı %7'dir.
+// Prim, satıştan sonraki ilk 3 aydaki ödemelerden hesaplanır. Segika kadrolu kuralları değişmez.
+const TANISTIRMA_KURALI = 'Yalnız tanıştırdıysanız prim oranı %7 olur. Prim, satıştan sonraki ilk 3 aydaki ödemelerden hesaplanır. '
+  + 'Örneğin müşteri ilk 3 ayda toplam 30.000 ₺ öder. Bu durumda 2.100 ₺ prim alırsınız.';
+
+test('iStoc kadrolu: yalnız tanıştırmanın prim oranı %7', async () => {
+  const k = await import('../src/data/kazancPlani');
+  const { VARSAYILAN_AYAR } = await import('../src/data/satisOrtakligi');
+  const { rehberHesabi } = await import('../src/data/politikalar/hesap');
+  expect(k.KADROLU_TANISTIRMA_ORANI).toBe(0.07);
+  expect(k.KADROLU_PRIM_KURALLARI).toContain(TANISTIRMA_KURALI);
+  expect(k.KADROLU_PRIM_KURALLARI.filter((x) => x.startsWith('Yalnız tanıştırdıysanız'))).toHaveLength(1);
+  const istoc = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'istoc' }, k.KAZANC_VARSAYILAN);
+  expect(rehberHesabi('kadrolu', 'istoc', istoc).odeme).toContain(TANISTIRMA_KURALI);
+  const segika = k.planliAyar({ ...VARSAYILAN_AYAR, marka: 'segika' }, k.projeVarsayilani('segika'));
+  expect(rehberHesabi('kadrolu', 'segika', segika).odeme.join(' ')).not.toContain('tanıştırdıysanız');
+});
+
+test('iStoc kadrolu sekmesi ve belgesi tanıştırma primini yazar', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('politikalar/?proje=istoc&rol=kadrolu');
+  await expect(page.getByRole('region', { name: 'Kazanç planı' }).locator('[data-kadrolu-kurallar]')).toContainText(TANISTIRMA_KURALI);
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.locator('#kazanc')).toContainText(TANISTIRMA_KURALI);
+  expect(await tasmaYok(page)).toBe(true);
+  await page.goto('politikalar/?proje=segika&rol=kadrolu');
+  await page.getByRole('button', { name: 'Bütün çalışma koşullarını açın', exact: true }).click();
+  await expect(page.locator('#kazanc')).toBeVisible();
+  await expect(page.locator('#kazanc')).not.toContainText('tanıştırdıysanız');
+});

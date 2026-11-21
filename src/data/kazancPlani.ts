@@ -298,6 +298,13 @@ export function paketPrimi(kademe: { esik: readonly number[]; oran: readonly num
 export const kadroluKota = (plan: KazancPlani) => Math.round(plan.kadrolu.maas * plan.kadrolu.kotaOrani);
 
 /**
+ * iStoc kadrolu uzman yalnız tanıştırdıysa prim oranı %7'dir (kullanıcı kararı 21 Kasım 2026 Cumartesi).
+ * Prim, satıştan sonraki ilk 3 aydaki ödemelerden hesaplanır. Örnek tutar kuralın yanındaki örnektir.
+ */
+export const KADROLU_TANISTIRMA_ORANI = 0.07;
+const TANISTIRMA_ORNEK_ODEME = 30_000;
+
+/**
  * iStoc kadrolu uzmanın prim kuralları (kullanıcı kararları 20 Kasım 2026 Cuma).
  * Bu kurallar yalnız iStoc'un SGK'lı, maaşlı çalışanı içindir. İş ortaklarının kazanç planı değişmedi.
  */
@@ -308,7 +315,9 @@ export const KADROLU_PRIM_KURALLARI = [
   'Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.',
   'Yıllık pakette bedelin tamamı satış ayının cirosuna yazılır. Prim satış ayında bir kerede ödenir.',
   'Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında %10 prim alırsınız. 25. aydan sonra prim yoktur.',
-  'Yalnız tanıştırdıysanız, satıştan sonraki ilk 3 aydaki ödemelerden prim alırsınız.',
+  `Yalnız tanıştırdıysanız prim oranı ${yuzdeMetni(KADROLU_TANISTIRMA_ORANI)} olur. Prim, satıştan sonraki ilk 3 aydaki ödemelerden hesaplanır. `
+    + `Örneğin müşteri ilk 3 ayda toplam ${num(TANISTIRMA_ORNEK_ODEME)} ₺ öder. `
+    + `Bu durumda ${num(Math.round(TANISTIRMA_ORNEK_ODEME * KADROLU_TANISTIRMA_ORANI))} ₺ prim alırsınız.`,
   'Tanıştırdığınız müşteri 90 gün sizin adınıza korunur.',
   'Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.',
 ] as const;
