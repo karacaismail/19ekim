@@ -10,6 +10,8 @@ blob-report/
 .env.*
 # Kaynak belgeler (PDF, fotoğraf) kişisel veri içerebilir; repoya girmez.
 *.pdf
+# Yayımlanan tanıtım belgeleri kaynak PDF değildir. Bu PDF'ler depoya girer.
+!public/indir/istoc/*.pdf
 *.jpg
 *.jpeg
 *.heic
