@@ -7,7 +7,7 @@ Metin 23 Kasım 2026 Pazartesi günü hazırlandı.
 
 Müşteriniz her ay bordrosunu size getiriyor.
 
-Teşvik kontrolü de aynı masada yapılabilir.
+Teşvik kontrolünü de aynı görüşmede yapabilirsiniz.
 
 Segika iş ortaklığı programına davetlisiniz. Bu davet mali müşavirler ve insan kaynakları danışmanları içindir.
 
@@ -62,13 +62,15 @@ Segika, Sosyal Güvenlik Kurumu (SGK) işlerini kolaylaştıran bir programdır.
 - SGK Otomasyon paketi her ay tekrarlanan bildirimleri kendiliğinden yapar.
 - Sağlık raporları elle onay beklemez. Kimlik bildirimi Emniyete ve Jandarmaya kendiliğinden gider.
 - İŞKUR işgücü çizelgesi de kendiliğinden bildirilir.
-- Segika Luca, Logo, Mikro ve ETA gibi bordro programlarıyla birlikte çalışır.
+- Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır. Bu bağlantı Teşvik ve Otomasyon paketindedir.
 
-Liste fiyatları segika.com sitesindedir. Fiyatlar 25 çalışan için aylıktır ve KDV hariçtir. KDV, katma değer vergisinin kısa adıdır.
+Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.
 
-- SGK Teşvik paketi 1.850 ₺ tutar.
-- SGK Otomasyon paketi 1.600 ₺ tutar.
-- SGK Teşvik ve Otomasyon paketi 2.600 ₺ tutar.
+Fiyatlar segika.com sitesindedir. Fiyatlar 25 çalışan için aylıktır. Bu belgede fiyatlar KDV hariç sayılır. KDV, katma değer vergisinin kısa adıdır.
+
+- SGK Teşvik paketi 1.850 TL tutar.
+- SGK Otomasyon paketi 1.600 TL tutar.
+- SGK Teşvik ve Otomasyon paketi 2.600 TL tutar.
 
 500'den fazla çalışan için Segika ayrıca teklif verir. Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.
 
@@ -93,21 +95,21 @@ Ciro, getirdiğiniz müşterilerin ödediği paket bedelidir. Ciro KDV hariç sa
 
 Satışı kapatırsanız taban oranınız %15'tir. Satışı kapatan kişi ürünü gösterir. Kurulumu ve ilk eğitimi de yapar.
 
-- Aylık ciro 30.000 ₺ altındaysa oran %15 olur.
-- Aylık ciro 30.000 ₺ ve üstündeyse oran %20 olur. Bu basamağın adı K1'dir.
-- Aylık ciro 70.000 ₺ ve üstündeyse oran %25 olur. Bu basamağın adı K2'dir.
-- Aylık ciro 120.000 ₺ ve üstündeyse oran %30 olur. Bu basamağın adı K3'tür.
+- Aylık ciro 30.000 TL altındaysa oran %15 olur.
+- Aylık ciro 30.000 TL ve üstündeyse oran %20 olur. Bu basamağın adı K1'dir.
+- Aylık ciro 70.000 TL ve üstündeyse oran %25 olur. Bu basamağın adı K2'dir.
+- Aylık ciro 120.000 TL ve üstündeyse oran %30 olur. Bu basamağın adı K3'tür.
 
 Yalnız tanıştırırsanız oranlar şöyledir.
 
-- Aylık ciro 30.000 ₺ altındaysa pay oluşmaz.
-- Aylık ciro 30.000 ₺ ve üstündeyse oran %7 olur.
-- Aylık ciro 70.000 ₺ ve üstündeyse oran %10 olur.
-- Aylık ciro 100.000 ₺ ve üstündeyse oran %15 olur.
+- Aylık ciro 30.000 TL altındaysa pay oluşmaz.
+- Aylık ciro 30.000 TL ve üstündeyse oran %7 olur.
+- Aylık ciro 70.000 TL ve üstündeyse oran %10 olur.
+- Aylık ciro 100.000 TL ve üstündeyse oran %15 olur.
 
-Ulaştığınız oran cironun tamamına uygulanır. Ciro eşikleri başlangıç değerleridir. Kesin eşikler yazılı anlaşmada yer alır.
+Ulaştığınız oran cironun tamamına uygulanır. Bu oranlar ve eşikler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
 
-Müşteri sonraki yıllarda da öderse payınız sürer.
+Müşteri sonraki yıllarda da öderse pay sürer. Satışı kapattıysanız müşteriye destek vermeyi sürdürmelisiniz. Destek vermediğiniz ay için pay oluşmaz.
 
 - Satışı kapatanın payı 2. yılda %10, 3. yılda %7, 4. yılda %5 olur.
 - Tanıştıranın payı 2. yılda %5, 3. yılda %2,5 olur.
@@ -120,35 +122,35 @@ Bu bölüm bir örnektir. Gerçek satış ya da kazanç sözü değildir.
 
 Bir ayda 2 işverene yıllık paket sattığınızı düşünün. Her işverenin 25 çalışanı var. İki işveren de Teşvik ve Otomasyon paketini alıyor.
 
-1. Paketin aylık bedeli 2.600 ₺'dir.
-2. Yıllık bedel 2.600 ₺ × 12 = 31.200 ₺ olur.
-3. İki işverenin cirosu 31.200 ₺ × 2 = 62.400 ₺ olur.
-4. Bu ciro 30.000 ₺ eşiğini geçer. Oranınız %20 olur.
-5. Kazancınız 62.400 ₺ × %20 = 12.480 ₺ olur.
+1. Paketin aylık bedeli 2.600 TL'dir.
+2. Yıllık bedel 2.600 TL × 12 = 31.200 TL olur.
+3. İki işverenin cirosu 31.200 TL × 2 = 62.400 TL olur.
+4. Bu ciro 30.000 TL eşiğini geçer. Oranınız %20 olur.
+5. Kazancınız 62.400 TL × %20 = 12.480 TL olur.
 
-İki işveren paketi yenilerse pay sürer.
+İki işveren paketi yenilerse ve siz destek vermeyi sürdürürseniz pay sürer.
 
-- 2. yılda 62.400 ₺ × %10 = 6.240 ₺ alırsınız.
-- 3. yılda 62.400 ₺ × %7 = 4.368 ₺ alırsınız.
-- 4. yılda 62.400 ₺ × %5 = 3.120 ₺ alırsınız.
+- 2. yılda 62.400 TL × %10 = 6.240 TL alırsınız.
+- 3. yılda 62.400 TL × %7 = 4.368 TL alırsınız.
+- 4. yılda 62.400 TL × %5 = 3.120 TL alırsınız.
 
-Dört yılın toplamı 26.208 ₺ olur. Sağlama şöyledir: 12.480 + 6.240 + 4.368 + 3.120 = 26.208.
+Dört yılın toplamı 26.208 TL olur. Sağlama şöyledir: 12.480 + 6.240 + 4.368 + 3.120 = 26.208.
 
-Aynı ayda daha çok işveren sattığınızı düşünün. Her işveren yine 31.200 ₺ öder.
+Aynı ayda daha çok işveren sattığınızı düşünün. Her işveren yine 31.200 TL öder.
 
-- 1 işveren 31.200 ₺ ciro yapar. Oran %20 olur. Kazanç 6.240 ₺ olur.
-- 2 işveren 62.400 ₺ ciro yapar. Oran %20 olur. Kazanç 12.480 ₺ olur.
-- 3 işveren 93.600 ₺ ciro yapar. Oran %25 olur. Kazanç 23.400 ₺ olur.
-- 4 işveren 124.800 ₺ ciro yapar. Oran %30 olur. Kazanç 37.440 ₺ olur.
+- 1 işveren 31.200 TL ciro yapar. Oran %20 olur. Kazanç 6.240 TL olur.
+- 2 işveren 62.400 TL ciro yapar. Oran %20 olur. Kazanç 12.480 TL olur.
+- 3 işveren 93.600 TL ciro yapar. Oran %25 olur. Kazanç 23.400 TL olur.
+- 4 işveren 124.800 TL ciro yapar. Oran %30 olur. Kazanç 37.440 TL olur.
 
 Tanıştıran ve satışı kapatan farklı kişi olabilir. Bu durumda tanıştıranın payı, kapatanın payından düşülür.
 
-- Ciro 62.400 ₺ olsun.
-- Tanıştıran %7 alır. Bu 4.368 ₺ eder.
-- Satışı kapatan %20 − %7 = %13 alır. Bu 8.112 ₺ eder.
-- Toplam 12.480 ₺ olur. Segika iki kişiye toplam %20 öder.
+- Ciro 62.400 TL olsun.
+- Tanıştıran %7 alır. Bu 4.368 TL eder.
+- Satışı kapatan %20 − %7 = %13 alır. Bu 8.112 TL eder.
+- Toplam 12.480 TL olur. Segika iki kişiye toplam %20 öder.
 
-## 7. Dört yol
+## 7. Dört ortaklık yolu
 
 Siz hangisisiniz?
 
@@ -160,7 +162,7 @@ Siz Segika'yı müşterinize gösterirsiniz. Satışı kapatırsınız. Kurulumu
 
 Kazancınız satışı kapatma oranından gelir. Oran %15 ile %30 arasıdır.
 
-Segika size ve destek personelinize her yıl 8 saat ücretsiz eğitim verir. Fazlası ücretlidir. Ek eğitimin bir saati 1.500 ₺ tutar.
+Bugünkü planda Segika size ve destek personelinize her yıl 8 saat ücretsiz eğitim verir. Fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.
 
 İlk adımda ortaklık sorumlusuyla programınızı seçin.
 
@@ -172,7 +174,7 @@ Siz işverene ürünü gösterirsiniz. Teklif hazırlarsınız. Satıştan sonra
 
 Maaşınızın yanında prim alırsınız. Kota, maaşınızın 2 katı kadar cirodur. Kotayı aşan cironun %10'u priminiz olur.
 
-Örnek şöyledir. Net maaş 50.000 ₺ olsun. Kota 50.000 ₺ × 2 = 100.000 ₺ olur. Bir ayda 5 yıllık paket satılsın. Ciro 5 × 31.200 ₺ = 156.000 ₺ olur. Kotayı aşan tutar 56.000 ₺ olur. Prim 56.000 ₺ × %10 = 5.600 ₺ olur.
+Örnek şöyledir. Net maaş 50.000 TL olsun. Kota 50.000 TL × 2 = 100.000 TL olur. Bir ayda 5 yıllık paket satılsın. Ciro 5 × 31.200 TL = 156.000 TL olur. Kotayı aşan tutar 56.000 TL olur. Prim 56.000 TL × %10 = 5.600 TL olur.
 
 İlk adımda yazılı görev tanımınızı insan kaynaklarından alın.
 
@@ -186,7 +188,7 @@ Siz yalnız tanıştırırsınız. Satışı, kurulumu ve desteği Segika yürü
 
 Tavsiyenin uygun sayılması için iki koşul vardır. Yeni müşteri yıllık paket alır. Yeni müşteri 60 gün kullanmaya devam eder.
 
-Örnek şöyledir. Paketiniz aylık 2.600 ₺ olsun. 2 ay ücretsiz kullanım 5.200 ₺ eder. Yılda en çok 3 tavsiye sayılır. Bu 15.600 ₺ eder.
+Örnek şöyledir. Paketiniz aylık 2.600 TL olsun. 2 ay ücretsiz kullanım 5.200 TL eder. Yılda en çok 3 tavsiye sayılır. Bu 15.600 TL eder.
 
 İlk adımda geçerli koşulu müşteri sorumlusundan yazılı isteyin.
 
@@ -198,9 +200,19 @@ Siz Segika'yı kitlenize anlatırsınız. Her ticari paylaşımın başına “r
 
 Kazancınız tanıştırma oranından gelir. Oran %7 ile %15 arasıdır.
 
-Örnek şöyledir. Bağlantınızdan gelen 2 işveren bir ayda yıllık paket alsın. Ciro 62.400 ₺ olur. Oran %7 olur. Kazancınız 4.368 ₺ olur.
+Örnek şöyledir. Bağlantınızdan gelen 2 işveren bir ayda yıllık paket alsın. Ciro 62.400 TL olur. Oran %7 olur. Kazancınız 4.368 TL olur.
 
 İlk adımda pazarlama sorumlusundan size özel bağlantıyı alın.
+
+### Öteki üç yol için kısa sayfa
+
+Görsel sunumda ve sunumda bu üç yol ayrı bir sayfada durur. Sayfanın başlığı “Satış sizin işiniz değilse de bir yol var.” cümlesidir. Her sütunun kendi kancası vardır. Kancalar 10. bölümde yazar.
+
+- Kadrolu uzman maaş alır. Kotayı aşınca prim başlar. Örnek prim 5.600 TL olur.
+- Mevcut müşteri, kullandığı programı tanıdığı bir firmaya önerir. Uygun her tavsiye için 2 ay ücretsiz kullanım alır.
+- Marka elçisi kitlesine bordroyu anlatır. Örnek kazancı 4.368 TL olur.
+
+Tutarlar örnektir. Oranlar ve süreler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
 
 ## 8. Koşullar
 
@@ -212,7 +224,7 @@ Segika şunları yapar:
 - Segika müşteri kaydını tek ortağa yazar.
 - Segika müşteri takip sistemini sağlar.
 - Segika teknik sorunları çözer.
-- Segika yılda 8 saat ücretsiz eğitim verir.
+- Segika bugünkü planda yılda 8 saat ücretsiz eğitim verir.
 - Segika tahsilatı doğrular ve payınızı öder.
 
 Siz şunları yaparsınız:
@@ -234,7 +246,11 @@ Bu sınırlar herkes içindir:
 
 Mali müşavirler meslek kurallarına bağlıdır. Hukuk danışmanı komisyonun uygunluğunu inceler. Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.
 
-Mali müşavir ofisleri için nakitsiz bir yol da vardır. Bu yolda ofis komisyon almaz. Ofis Segika'yı toptan fiyatla kullanır.
+Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika'yı toptan fiyatla kullanır.
+
+Bu yol hukuk görüşünü bekliyor. Toptan fiyat bantları yazılı anlaşmada belirlenir. Bu kabul edilmeden müşteriye teklif vermeyin.
+
+Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir.
 
 - Kayıtlı ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitim ve panel alır.
 - Panel, ofisin getirdiği müşterileri gördüğü ekrandır.
@@ -262,10 +278,14 @@ Bu metinler yalnız bir ya da iki belgede geçer. Sunumda ve görsel sunumda kan
 
 - Müşteriniz size her ay aynı soruyu soruyor mu?
 - Müşterinizi siz tanıyorsunuz.
-- Dört iş artık elle yapılmaz.
+- Segika dört işi kendiliğinden yapar.
 - %15'ten %30'a. Oranı aylık cironuz belirler.
-- Aynı ayda 3. işveren oranınızı %25'e çıkarır.
-- Müşteri kaldıkça payınız sürer.
+- Bugünkü planda 3. işveren oranı %25'e çıkarır.
+- Destek sürdükçe payınız 4. yıla kadar sürer.
+- Satış sizin işiniz değilse de bir yol var.
+- Maaşınız var. Kotayı aşınca prim başlar.
+- Kullandığınız programı tanıdığınız bir firmaya önerin.
+- Kitlenize bordroyu anlatıyor musunuz?
 
 El kitapçığında şu cümleler de geçer:
 
@@ -281,4 +301,7 @@ Grafiklerin yanında şu cümleler geçer:
 
 - Grafik satışı kapatanın oranını gösterir. Oran cironun tamamına uygulanır.
 - Örnekte 2 işveren var. İki işveren paketini her yıl yeniler.
-- Fiyatlar 25 çalışan için aylıktır. KDV hariçtir. Fiyat herkes için aynıdır.
+- Fiyatlar 25 çalışan için aylıktır. Bu belgede KDV hariç sayılır. Fiyat herkes için aynıdır.
+- Yeşil çubuk örnekteki durumdur.
+- Oran, bugünkü plandaki eşiklere göre hesaplandı. Kesin eşikler yazılı anlaşmada belirlenir.
+- Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz.

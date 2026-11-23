@@ -11,7 +11,7 @@
 export const TARIH = '23 Kasım 2026 Pazartesi günü';
 
 const sayi = (n) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(n);
-export const tl = (n) => `${sayi(n)} ₺`;
+export const tl = (n) => `${sayi(n)} TL`;
 export const yuzde = (o) => `%${sayi(Math.round(o * 1000) / 10)}`;
 function sagla(kosul, ne) { if (!kosul) throw new Error(`Sağlama tutmadı: ${ne}`); }
 
@@ -106,7 +106,7 @@ export const TAVSIYE_ORNEK = { kredi, yillik: kredi * TAVSIYE.yillikSinir };
 export const M = {
   kapak: {
     kanca: 'Müşteriniz her ay bordrosunu size getiriyor.',
-    kanca2: 'Teşvik kontrolü de aynı masada yapılabilir.',
+    kanca2: 'Teşvik kontrolünü de aynı görüşmede yapabilirsiniz.',
     davet: 'Segika iş ortaklığı programına davetlisiniz.',
     kitle: 'Bu davet mali müşavirler ve insan kaynakları danışmanları içindir.',
     tesvik: 'Teşvik, devletin işverene verdiği destektir. Sigorta prim desteği buna bir örnektir.',
@@ -150,8 +150,11 @@ export const M = {
       { b: 'Kimlik bildirimi', m: 'Kimlik bildirimi Emniyete ve Jandarmaya kendiliğinden gider.' },
       { b: 'İŞKUR çizelgesi', m: 'İŞKUR işgücü çizelgesi de kendiliğinden bildirilir.' },
     ],
-    entegrasyon: 'Segika Luca, Logo, Mikro ve ETA gibi bordro programlarıyla birlikte çalışır.',
-    fiyatNot: 'Liste fiyatları segika.com sitesindedir. Fiyatlar 25 çalışan için aylıktır ve KDV hariçtir.',
+    entegrasyon: 'Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır.',
+    entegrasyonPaket: 'Bu bağlantı Teşvik ve Otomasyon paketindedir.',
+    kanca2: 'Segika dört işi kendiliğinden yapar.',
+    paketAyrimi: 'Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.',
+    fiyatNot: 'Fiyatlar segika.com sitesindedir. Fiyatlar 25 çalışan için aylıktır. Bu belgede fiyatlar KDV hariç sayılır.',
     kdv: 'KDV, katma değer vergisinin kısa adıdır.',
     teklif: '500\'den fazla çalışan için Segika ayrıca teklif verir.',
     ayni: 'Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.',
@@ -175,25 +178,27 @@ export const M = {
     kanca: 'Oranınızı aylık cironuz belirler.',
     ciro: 'Ciro, getirdiğiniz müşterilerin ödediği paket bedelidir. Ciro KDV hariç sayılır.',
     kapatir: 'Satışı kapatırsanız taban oranınız %15\'tir. Satışı kapatan kişi ürünü gösterir. Kurulumu ve ilk eğitimi de yapar.',
-    tanistir: 'Yalnız tanıştırırsanız 30.000 ₺ altındaki aylık cirodan pay oluşmaz.',
+    tanistir: 'Yalnız tanıştırırsanız 30.000 TL altındaki aylık cirodan pay oluşmaz.',
     tamami: 'Ulaştığınız oran cironun tamamına uygulanır.',
-    esik: 'Ciro eşikleri başlangıç değerleridir. Kesin eşikler yazılı anlaşmada yer alır.',
-    surer: 'Müşteri sonraki yıllarda da öderse payınız sürer.',
+    esik: 'Bu oranlar ve eşikler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.',
+    surer: 'Müşteri sonraki yıllarda da öderse pay sürer. Satışı kapattıysanız müşteriye destek vermeyi sürdürmelisiniz. Destek vermediğiniz ay için pay oluşmaz.',
+    hakDegil: 'Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz.',
     yilKapatir: 'Satışı kapatanın payı 2. yılda %10, 3. yılda %7, 4. yılda %5 olur.',
     yilTanistir: 'Tanıştıranın payı 2. yılda %5, 3. yılda %2,5 olur.',
     k1: 'İlk 12 ayda K1 basamağına ulaşmazsanız 13. aydan sonra pay almazsınız.',
   },
   ornek: {
-    kanca: '2 işveren, 1 ay: 12.480 ₺.',
+    kanca: '2 işveren, 1 ay: 12.480 TL.',
     uyari: 'Bu bölüm bir örnektir. Gerçek satış ya da kazanç sözü değildir.',
+    esikNot: 'Oran, bugünkü plandaki eşiklere göre hesaplandı. Kesin eşikler yazılı anlaşmada belirlenir.',
     durum: 'Bir ayda 2 işverene yıllık paket sattığınızı düşünün. Her işverenin 25 çalışanı var. İki işveren de Teşvik ve Otomasyon paketini alıyor.',
-    yenile: 'İki işveren paketi yenilerse pay sürer.',
+    yenile: 'Paket yenilenir ve destek sürerse',
     saglama: 'Sağlama: 12.480 + 6.240 + 4.368 + 3.120 = 26.208.',
-    daha: 'Aynı ayda daha çok işveren sattığınızı düşünün. Her işveren yine 31.200 ₺ öder.',
+    daha: 'Aynı ayda daha çok işveren sattığınızı düşünün. Her işveren yine 31.200 TL öder.',
     bolusme: 'Tanıştıran ve satışı kapatan farklı kişi olabilir. Bu durumda tanıştıranın payı, kapatanın payından düşülür.',
   },
   roller: {
-    kanca: 'Dört yol var. Siz hangisisiniz?',
+    kanca: 'Dört ortaklık yolu var. Siz hangisisiniz?',
     liste: [
       {
         id: 'cozum', ad: 'Çözüm ortağı',
@@ -225,6 +230,21 @@ export const M = {
       },
     ],
   },
+  ucYol: {
+    kanca: 'Satış sizin işiniz değilse de bir yol var.',
+    not: 'Tutarlar örnektir. Oranlar ve süreler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.',
+    liste: [
+      { id: 'kadrolu', ad: 'Kadrolu uzman', kanca: 'Maaşınız var. Kotayı aşınca prim başlar.',
+        sayi: tl(KADROLU_ORNEK.prim), sayiAlt: `Bu bir örnektir. Net maaş ${tl(KADROLU_ORNEK.maas)} olsun. Kota ${tl(KADROLU_ORNEK.kota)} olur. Ciro ${tl(KADROLU_ORNEK.ciro)} olursa prim bu kadardır.`,
+        ilk: 'Yazılı görev tanımınızı insan kaynaklarından alın.' },
+      { id: 'tavsiye', ad: 'Mevcut müşteri', kanca: 'Kullandığınız programı tanıdığınız bir firmaya önerin.',
+        sayi: '2 ay', sayiAlt: 'Uygun her tavsiye için ücretsiz kullanım. Nakit değildir. Yeni müşteri yıllık paket alır ve 60 gün kullanır.',
+        ilk: 'Geçerli koşulu müşteri sorumlusundan yazılı isteyin.' },
+      { id: 'elci', ad: 'Marka elçisi', kanca: 'Kitlenize bordroyu anlatıyor musunuz?',
+        sayi: tl(ELCI.kazanc), sayiAlt: `Bu bir örnektir. Bağlantınızdan 2 işveren gelsin. Aylık ciro ${tl(ELCI.ciro)} olur. Oran %7 olur.`,
+        ilk: 'Pazarlama sorumlusundan özel bağlantınızı alın.' },
+    ],
+  },
   kosullar: {
     kanca: 'Kim ne yapar? Sınırlar baştan yazılıdır.',
     biz: [
@@ -232,7 +252,7 @@ export const M = {
       'Müşteri kaydını tek ortağa yazar.',
       'Müşteri takip sistemini sağlar.',
       'Teknik sorunları çözer.',
-      'Yılda 8 saat ücretsiz eğitim verir.',
+      'Bugünkü planda yılda 8 saat ücretsiz eğitim verir.',
       'Tahsilatı doğrular ve payınızı öder.',
     ],
     siz: [
@@ -251,7 +271,9 @@ export const M = {
       'İletişim izni olmayan kişiye ileti göndermeyin.',
     ],
     musavir: 'Mali müşavirler meslek kurallarına bağlıdır. Hukuk danışmanı komisyonun uygunluğunu inceler. Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.',
-    nakitsiz: 'Mali müşavir ofisleri için nakitsiz bir yol da vardır. Bu yolda ofis komisyon almaz. Ofis Segika\'yı toptan fiyatla kullanır.',
+    nakitsiz: 'Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika\'yı toptan fiyatla kullanır.',
+    bekliyor: 'Bu yol hukuk görüşünü bekliyor. Toptan fiyat bantları yazılı anlaşmada belirlenir. Bu kabul edilmeden müşteriye teklif vermeyin.',
+    sartlar: 'Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir.',
     seviyeler: [
       { ad: 'Kayıtlı ortak', kosul: 'Ücretsiz', m: 'Ofis 2 saatlik canlı eğitim ve panel alır.' },
       { ad: 'Gümüş', kosul: 'En az 10 aktif mükellef', m: 'Ofis toptan fiyatın 1. kademesini alır.' },
@@ -260,7 +282,7 @@ export const M = {
     panel: 'Panel, ofisin getirdiği müşterileri gördüğü ekrandır.',
     ikiYol: 'İki yol birlikte uygulanmaz. Ortaklık sorumlusu size uygun yolu belirler.',
     odeme: 'Müşteri ödemezse pay oluşmaz. Müşteri iade alırsa pay geri alınır. Ödeme günleri yazılı anlaşmada yer alır.',
-    egitim: 'Ücretsiz eğitimin fazlası ücretlidir. Ek eğitimin bir saati 1.500 ₺ tutar.',
+    egitim: 'Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.',
   },
   ilk: {
     kanca: 'İlk adım tek bir görüşmedir.',

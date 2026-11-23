@@ -14,13 +14,18 @@ Bu klasör Segika iş ortaklığı setinin kaynağıdır. Set üç dosyadan olu�
 npm install && npm run uret
 ```
 
-Komut üç dosyayı üretir. Her sayfanın önizlemesini de `onizleme/` klasörüne yazar.
+Komut üç dosyayı üretir. Önizlemeleri de `onizleme/` klasörüne yazar.
+
+- PDF önizlemeleri PDF'in kendisinden çizilir. Çizimi pdf.js (`pdfjs-dist`) yapar.
+- `sunum-01-quicklook.png` gerçek PPTX'in ilk slaytıdır. Bu resmi macOS Quick Look verir.
+- `sunum-yerlesim-*.png` resimleri PPTX ile aynı yerleşim verisinden, Arial ile çizilir. Bunlar PPTX'in kendisi değildir.
 
 ## Dosyalar
 
 - `metin.md`: Bütün metnin düz yazı hâli. Metin önce burada yazılır ve denetlenir.
 - `icerik.mjs`: Üç belgenin ortak metni ve hesapları. Hesaplar üretim sırasında sağlanır. Sağlama tutmazsa üretim durur.
-- `tokens.json`: Renk, yazı boyutu ve boşluk değerleri. Bütün belgeler bu dosyayı kullanır.
+- `tokens.json`: Renk, yazı boyutu ve boşluk değerleri. Bütün belgeler bu dosyayı kullanır. Yeşil yalnız örnekteki durumu gösterir.
+- `yazi-tipi/`: Outfit'in resmî sabit ağırlıklı TTF dosyaları ve lisansı (OFL). Kaynak github.com/Outfitio/Outfit-Fonts deposudur.
 - `sablon/`: El kitapçığı, görsel sunum ve PPTX şablonları.
 - `uret.mjs`: Üretim betiği.
 
@@ -29,18 +34,20 @@ Komut üç dosyayı üretir. Her sayfanın önizlemesini de `onizleme/` klasör�
 - Oranlar ve eşikler `src/data/kazancPlani.ts` dosyasından gelir. Segika için `projeVarsayilani('segika')` kullanılır.
 - Rol bilgileri `src/data/politikalar/segika/` klasöründen gelir.
 - Paket fiyatları ve örnek ayarlar `src/data/satisOrtakligi.ts` dosyasından gelir.
-- Paket fiyatları ve ölçek sayıları segika.com sitesinde de yazar. Site 23 Kasım 2026 Pazartesi günü okundu.
+- Paket fiyatları, entegrasyonlar ve ölçek sayıları segika.com sitesinde yazar. Site 23 Kasım 2026 Pazartesi günü okundu.
+- Rol verisindeki daha sıkı koşul geçerlidir. Örneğin sonraki yılların payı için destek vermek gerekir.
 - Kaynakta oran değişirse `icerik.mjs` dosyasını da güncelleyin. Sonra seti yeniden üretin.
 
 ## Üretim sırasında yapılan denetimler
 
 - Outfit yazı tipi yüklenmezse üretim durur.
 - PDF sayfasında taşan ya da alt bilgiye binen öğe varsa üretim durur.
-- PDF'te 9 pt altında yazı varsa üretim durur.
-- Slaytta taşan ya da üst üste binen metin varsa üretim durur. Bu denetim Outfit ile ve yedek yazı tipi Arial ile iki kez yapılır.
+- A4 belgelerde gövde, koşul ve grafik yazısı 11 pt altındaysa üretim durur. Kaynak notu ve alt bilgi 9 pt altındaysa da üretim durur.
+- Slaytta taşan ya da üst üste binen metin varsa üretim durur. Bu denetim Arial ölçüsüyle yapılır.
 
 ## Bilinen sınırlar
 
-- PPTX yazı tipi adı Outfit'tir. Outfit kurulu değilse PowerPoint ve Keynote benzer bir yazı tipi kullanır. Yerleşim Arial ile denendi.
-- Sunum önizlemesi PPTX'in kendisi değildir. Önizleme aynı yerleşim verisinden çizilir.
-- Chromium, PDF'e gömdüğü Outfit yazı tipine "Helvetica" adını verir. Harf şekilleri Outfit'tir.
+- PPTX'te bütün metin Arial'dir. Outfit PPTX'e gömülemiyor. Outfit'i olmayan görüntüleyici Times'a düşüyordu.
+- PDF'lerde Outfit sabit ağırlıklı TTF olarak gömülür. Metin kopyalanabilir ve aranabilir.
+- Outfit'te "₺" işareti yok. Bu yüzden tutarlar "TL" ile yazılır.
+- Bu Mac'te PowerPoint ve Keynote yok. PPTX'in bütün slaytları gerçek bir görüntüleyiciyle görülemedi.

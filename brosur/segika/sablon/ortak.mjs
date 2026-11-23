@@ -8,23 +8,25 @@ const burasi = dirname(fileURLToPath(import.meta.url));
 export const TOKENS = JSON.parse(readFileSync(resolve(burasi, '../tokens.json'), 'utf8'));
 const R = TOKENS.renk;
 
-const fontDizini = resolve(burasi, '../../../node_modules/@fontsource-variable/outfit/files');
+const fontDizini = resolve(burasi, '../yazi-tipi');
 const font = (ad) => pathToFileURL(resolve(fontDizini, ad)).href;
+const AGIRLIK = { 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold' };
 
-/** Outfit yazı tipi. Dosya kök depodaki @fontsource-variable/outfit paketinden gelir ve PDF'e gömülür. */
+/**
+ * Outfit yazı tipi. Dosyalar `yazi-tipi/` klasöründeki resmî sabit ağırlıklı TTF'lerdir.
+ * Kaynak: github.com/Outfitio/Outfit-Fonts, fonts/ttf klasörü. Lisans: yazi-tipi/OFL.txt.
+ * Değişken yazı tipi Chromium'da PDF'e Type3 olarak giriyordu. O zaman metin kopyalanınca bozuk çıkıyordu.
+ * Her ağırlık tek dosyadır. Böylece "ş" ve "İ" aynı yazı tipinden gelir ve metin araması bozulmaz.
+ */
 export function fontCss() {
-  return `@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 100 900; font-display: block;
-  src: url('${font('outfit-latin-wght-normal.woff2')}') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 100 900; font-display: block;
-  src: url('${font('outfit-latin-ext-wght-normal.woff2')}') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }`;
+  return Object.entries(AGIRLIK).map(([w, ad]) =>
+    `@font-face { font-family: 'Outfit'; font-style: normal; font-weight: ${w}; font-display: block; src: url('${font(`Outfit-${ad}.ttf`)}') format('truetype'); }`).join('\n');
 }
 
 /** Token'lardan CSS değişkenleri. Bileşenler yalnız bu değişkenleri kullanır. */
 export function tokenCss(olcek) {
   const o = TOKENS[olcek];
-  const renk = Object.entries(R).map(([k, v]) => `--r-${k}: ${v};`).join('\n  ');
+  const renk = Object.entries(R).filter(([k]) => !k.startsWith('$')).map(([k, v]) => `--r-${k}: ${v};`).join('\n  ');
   const boyut = Object.entries(o).filter(([k]) => !k.startsWith('$')).map(([k, v]) => `--o-${k}: ${v};`).join('\n  ');
   return `
 ${fontCss()}
@@ -47,6 +49,8 @@ body { font-family: var(--yazi); color: var(--r-murekkep); font-size: var(--o-go
 .kanca { font-weight: var(--w-baslik); letter-spacing: -0.015em; line-height: 1.08; color: var(--r-lacivert); text-wrap: balance; }
 .ust { font-size: var(--o-ust); font-weight: var(--w-kalin); letter-spacing: 0.12em; text-transform: uppercase; color: var(--r-yesilMetin); }
 .koyu .ust { color: var(--r-yesil); }
+.kaynak { font-size: var(--o-dipnot); color: var(--r-gri); line-height: 1.4; }
+.koyu .kaynak { color: var(--r-griLacivertUstu); }
 .koyu { background: var(--r-lacivert); color: var(--r-beyaz); }
 .koyu .kanca { color: var(--r-beyaz); }
 .rakam { font-variant-numeric: tabular-nums; }
@@ -56,13 +60,13 @@ body { font-family: var(--yazi); color: var(--r-murekkep); font-size: var(--o-go
 }
 
 /**
- * Metin düzeltmesi: düz kesme işaretini tipografik kesmeye çevirir. Sayı ile ₺ arasına ve sıra sayısından sonra
- * bölünmeyen boşluk koyar. Böylece "93.600 ₺" ve "4. yıl" satır sonunda bölünmez. Yalnız metne uygulanır.
+ * Metin düzeltmesi: düz kesme işaretini tipografik kesmeye çevirir. Sayı ile TL arasına ve sıra sayısından sonra
+ * bölünmeyen boşluk koyar. Böylece "93.600 TL" ve "4. yıl" satır sonunda bölünmez. Yalnız metne uygulanır.
  */
 export function metinDuzelt(t) {
   return t
     .replace(/([A-Za-zÇĞİÖŞÜçğıöşü0-9%])'([a-zçğıöşü])/g, '$1’$2')
-    .replace(/(\d) ₺/g, '$1\u00A0₺')
+    .replace(/(\d) TL/g, '$1\u00A0TL')
     .replace(/(\d+)\. (?=[a-zçğıöşü])/g, '$1.\u00A0')
     .replace(/ × /g, '\u00A0× ');
 }
@@ -110,7 +114,7 @@ export function basamakGrafik({ seriler, genislik = 640, yukseklik = 300, boyut 
       const h = Math.max(b.oran / enCok * alan, 3);
       const x = gx + j * (cubukG + ara);
       const y = ustBosluk + alan - h;
-      svg += `<rect x="${x}" y="${y}" width="${cubukG}" height="${h}" fill="${s.renk}"/>`;
+      svg += `<rect x="${x}" y="${y}" width="${cubukG}" height="${h}" fill="${s.renkler?.[i] ?? s.renk}"/>`;
       svg += `<text x="${x + cubukG / 2}" y="${y - boyut * 0.55}" text-anchor="middle" font-size="${boyut * (n === 1 ? 1.5 : 1.15)}" font-weight="700" fill="${s.yaziRenk ?? yaziRenk}" font-family="Outfit, Arial">${yuzde(b.oran)}</text>`;
     });
     const b0 = seriler[0].basamaklar[i];
@@ -118,7 +122,7 @@ export function basamakGrafik({ seriler, genislik = 640, yukseklik = 300, boyut 
     if (esikYaz) {
       const esikler = [...new Set(seriler.map((s) => s.basamaklar[i].esik))];
       const metin = i === 0 ? 'eşik yok' : esikler.map((e) => `${tl(e)}+`).join(' | ');
-      svg += `<text x="${grup * i + grup / 2}" y="${ustBosluk + alan + boyut * 2.85}" text-anchor="middle" font-size="${boyut * 0.92}" fill="${altYazi}" font-family="Outfit, Arial">${metin}</text>`;
+      svg += `<text x="${grup * i + grup / 2}" y="${ustBosluk + alan + boyut * 2.85}" text-anchor="middle" font-size="${boyut}" fill="${altYazi}" font-family="Outfit, Arial">${metin}</text>`;
     }
   }
   svg += `<line x1="0" y1="${ustBosluk + alan}" x2="${genislik}" y2="${ustBosluk + alan}" stroke="${eksenRenk}" stroke-width="1.5"/>`;
@@ -140,7 +144,7 @@ export function yilGrafik({ yillar, genislik = 640, yukseklik = 260, boyut = 14,
     svg += `<rect x="${x}" y="${yy}" width="${g}" height="${h}" fill="${renkler[i] ?? R.lacivert}"/>`;
     svg += `<text x="${x + g / 2}" y="${yy - boyut * 0.6}" text-anchor="middle" font-size="${boyut * 1.2}" font-weight="700" fill="${yaziRenk}" font-family="Outfit, Arial">${tl(y.tutar)}</text>`;
     svg += `<text x="${grup * i + grup / 2}" y="${ust + alan + boyut * 1.45}" text-anchor="middle" font-size="${boyut}" font-weight="700" fill="${yaziRenk}" font-family="Outfit, Arial">${y.ad}</text>`;
-    svg += `<text x="${grup * i + grup / 2}" y="${ust + alan + boyut * 2.8}" text-anchor="middle" font-size="${boyut * 0.92}" fill="${altYazi}" font-family="Outfit, Arial">oran ${yuzde(y.oran)}</text>`;
+    svg += `<text x="${grup * i + grup / 2}" y="${ust + alan + boyut * 2.8}" text-anchor="middle" font-size="${boyut}" fill="${altYazi}" font-family="Outfit, Arial">oran ${yuzde(y.oran)}</text>`;
   });
   svg += `<line x1="0" y1="${ust + alan}" x2="${genislik}" y2="${ust + alan}" stroke="${eksen}" stroke-width="1.5"/>`;
   return `<svg viewBox="0 0 ${genislik} ${yukseklik}" width="100%" role="img" aria-label="Yıllara göre pay">${svg}</svg>`;
