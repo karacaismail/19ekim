@@ -55,7 +55,8 @@ test.describe('iç bağlantılar', () => {
     const eposta = baglantilar.filter((b) => b.yol.startsWith('/email'));
     expect(eposta, 'e-posta sayfasına bağlantı').toEqual([]);
 
-    const kirik = baglantilar.filter((b) => !VAR_OLAN.has(b.yol)).map((b) => `${b.kaynak} → ${b.href}`);
+    // İndirilen dosya sayfa değildir. Dosyanın varlığını tests/politika-indirme.spec.ts denetler.
+    const kirik = baglantilar.filter((b) => !b.yol.startsWith('/indir/') && !VAR_OLAN.has(b.yol)).map((b) => `${b.kaynak} → ${b.href}`);
     expect([...new Set(kirik)], 'hedef sayfası olmayan bağlantı').toEqual([]);
 
     // Bölüm adresi: hedef sayfa gezildiyse kimlikleri bilinir. Gezilmeyen hedef (ör. sürümsüz adres) bir kez açılır.

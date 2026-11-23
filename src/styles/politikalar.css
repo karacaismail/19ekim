@@ -431,3 +431,10 @@ html[data-focus-mode='keyboard'] .pol-kz-merdiven-dugme:focus-visible { outline:
 .pol-gecersiz :is(a, a:hover) { text-decoration-line: underline line-through; }
 /* Klavye odağında üstü çizili çizgi kalkar. Yalnız merkezi odak göstergesi, yani odak renkli alt çizgi görünür. */
 html[data-focus-mode='keyboard'] .pol-gecersiz a:focus-visible { text-decoration-line: underline; text-decoration-color: var(--focus-indicator); }
+
+/* İş ortaklığı tanıtım dosyaları: rol sekmelerinin altında, rehberin üstünde. Kart ve kenarlık yoktur. */
+.pol-indir { margin-block: var(--space-4) var(--space-2); }
+.pol-indir-aciklama { margin-block: var(--space-1) var(--space-2); color: var(--text-secondary); font-size: var(--text-md); line-height: var(--leading-body); }
+.pol-indir-liste { list-style: none; display: flex; flex-wrap: wrap; gap: 0 var(--space-5); padding: 0; margin: 0; }
+.pol-indir-baglanti { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: var(--hit-min); color: var(--text-link); font-size: var(--text-md); font-weight: var(--weight-medium); line-height: var(--leading-body); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.pol-indir-simge { flex: none; inline-size: 1.25em; block-size: 1.25em; }
