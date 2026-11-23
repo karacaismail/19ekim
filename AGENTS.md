@@ -1742,6 +1742,17 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Varsayılan testler Chromium ve WebKit kullanır.
   WebKit sonucu gerçek Safari veya fiziksel cihaz sonucu sayılmaz.
 
+## İş ortaklığı tanıtım dosyaları
+
+- Rehber sayfası her projenin üç tanıtım dosyasını tek tıkla indirtir.
+  Bölüm rol sekmelerinin altında, rehberin üstündedir. Bölüm dört rol sekmesinde de aynıdır.
+- Dosyalar `public/indir/<proje>/` klasöründe durur. Kaynakları `brosur/<proje>/` klasöründedir.
+  Adlar sabittir: `<proje>-is-ortakligi-sunum.pptx`, `<proje>-is-ortakligi-el-kitapcigi.pdf`, `<proje>-is-ortakligi-gorsel-sunum.pdf`.
+- Tek liste `src/data/politikalar/indirilecekler.ts` dosyasıdır. Bölüm `src/components/TanitimDosyalari.tsx` dosyasıdır.
+  Bağlantı gerçek `<a href download>` öğesidir. Adres `import.meta.env.BASE_URL` ile kurulur.
+- `tests/politika-indirme.spec.ts` bağlantıları, proje değişimini, klavyeyi ve 320 px görünümü denetler.
+  Aynı test listedeki her dosyanın `public/` altında olduğunu da denetler. Dosya eksikse test düşer.
+
 ## Ortak persona parametreleri
 
 - Google Sheets, iki projenin parametrelerini ayrı tutar.

@@ -7,6 +7,7 @@ import type { AkisOlustur } from '../data/politikaAkislari/types';
 import { href } from '../lib/paths';
 import { PolitikaAkisi } from './PolitikaAkisi';
 import { KazancPlaniBolumu } from '../components/KazancPlaniBolumu';
+import { TanitimDosyalari } from '../components/TanitimDosyalari';
 
 const PROJELER = [{ id: 'istoc', ad: 'iStoc' }, { id: 'segika', ad: 'Segika' }] as const;
 // Kullanıcı kararı 17 Kasım 2026: “Öncü ortak” rolü ve bütün içeriği bu sayfadan kalktı. Eski adres ilk role döner.
@@ -117,6 +118,8 @@ function RehberSekmeleri({ eskiRol }: { eskiRol?: RolId }) {
             <Tabs.List aria-label="Çalışma rolü">
               {ROLLER.map((p) => <Tabs.Tab key={p.id} value={p.id}>{KISA_ADLAR[p.id]}</Tabs.Tab>)}
             </Tabs.List>
+            {/* Tanıtım dosyaları dört rolü de anlatır. Bu yüzden bölüm bütün rol sekmelerinde aynıdır. */}
+            <TanitimDosyalari proje={secim.proje} />
             {ROLLER.map((p) => <Tabs.Panel key={p.id} value={p.id}>
               {/* Kullanıcı kararı 17 Kasım 2026 Salı: önce seçenekler ve kararlar, sonra iş sırası gelir. */}
               <KazancPlaniBolumu proje={secim.proje} rol={secim.rol} />
