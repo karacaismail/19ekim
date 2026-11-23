@@ -20,3 +20,7 @@ Tohum.js
 
 # Sahibin özgün (kişi adlı) rapor kopyaları depoya girmez (AGENTS “Gizlilik ve yayın”)
 docs/*.ozgun.md
+
+# Segika tanıtım seti: PDF çıktıları yayımlanır. Ara HTML dosyaları depoya girmez (brosur/segika/README.md).
+!public/indir/segika/*.pdf
+brosur/segika/.uretim/
