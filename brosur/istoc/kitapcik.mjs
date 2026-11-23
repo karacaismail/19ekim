@@ -1,0 +1,515 @@
+// El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
+import { a4 } from './tokenlar.mjs';
+import { plan, fiyat, tavsiye, hesap, kademeler, sayi, tl, yuzde, avro } from './veri.mjs';
+import { sayfaIskeleti, marka, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
+
+const TOPLAM = 9;
+const css = `
+.sayfa { width: 210mm; height: 297mm; padding: ${a4.kenar}mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; display: flex; flex-direction: column; background: var(--kagit); }
+.sayfa:last-child { page-break-after: auto; break-after: auto; }
+.koyu { background: var(--murekkep); color: var(--kagit); }
+.ust, .alt { display: flex; justify-content: space-between; align-items: baseline; font-size: ${a4.dipnot}pt; color: var(--soluk); }
+.koyu .ust, .koyu .alt { color: var(--solukKoyu); }
+.alt { margin-top: auto; padding-top: 5mm; }
+.marka { font-weight: 700; letter-spacing: -0.02em; color: inherit; }
+.marka-i { color: var(--turuncuMetin); }
+.koyu .marka-i { color: var(--turuncu); }
+.ust .marka { font-size: 12pt; color: var(--murekkep); }
+.koyu .ust .marka { color: var(--kagit); }
+.bolum { display: flex; gap: 3mm; align-items: baseline; margin: 9mm 0 3mm; font-size: ${a4.govde}pt; font-weight: 600; color: var(--turuncuMetin); }
+.bolum b { font-weight: 800; }
+h1.kanca { font-size: ${a4.baslik}pt; line-height: 1.08; font-weight: 750; letter-spacing: -0.025em; max-width: 160mm; }
+h2 { font-size: ${a4.ara}pt; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: ${a4.govdeBuyuk}pt; line-height: 1.25; font-weight: 700; }
+p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
+.giris { font-size: ${a4.govdeBuyuk}pt; line-height: 1.4; margin-top: 4mm; max-width: 150mm; color: var(--murekkep); }
+.not { font-size: ${a4.dipnot}pt; line-height: 1.4; color: var(--soluk); }
+.koyu .not { color: var(--solukKoyu); }
+.turuncu-yazi { color: var(--turuncuMetin); }
+.yuzey { background: var(--kum); }
+.sayi-dev { font-weight: 800; letter-spacing: -0.045em; line-height: 0.85; }
+
+/* Kapak */
+.kapak .ust .marka { font-size: 22pt; }
+.kapak-orta { margin-top: 16mm; }
+.kapak-48 { font-size: 250pt; color: var(--turuncu); margin-left: -3mm; }
+.kapak-48 small { font-size: 64pt; letter-spacing: -0.02em; font-weight: 800; margin-left: 3mm; }
+.kapak h1 { font-size: 34pt; line-height: 1.06; font-weight: 750; letter-spacing: -0.025em; margin-top: 10mm; max-width: 165mm; }
+.aylar { margin-top: 12mm; display: grid; grid-template-columns: 22mm 1fr 14mm; row-gap: 2.2mm; align-items: center; }
+.aylar .yil { font-size: ${a4.dipnot}pt; color: var(--solukKoyu); }
+.aylar .oran { font-size: ${a4.govde}pt; font-weight: 700; color: var(--turuncu); text-align: right; }
+.aylar .kare { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.6mm; }
+.aylar .kare i { display: block; height: 7mm; background: var(--turuncu); }
+.davet { margin-top: auto; display: grid; grid-template-columns: 1fr; gap: 3mm; padding-top: 10mm; }
+.davet p.buyuk { color: var(--kagit); font-size: 19pt; line-height: 1.25; font-weight: 600; max-width: 150mm; }
+.davet p { font-size: ${a4.govdeBuyuk}pt; color: var(--solukKoyu); max-width: 150mm; }
+
+/* Neden siz */
+.soru-liste { margin-top: 6mm; display: grid; gap: 0; }
+.soru { display: grid; grid-template-columns: 1fr 72mm; gap: 8mm; padding: 3mm 0; border-top: 0.3mm solid var(--cizgi); }
+.soru:last-child { border-bottom: 0.3mm solid var(--cizgi); }
+.soru .kim { font-size: ${a4.dipnot + 0.5}pt; color: var(--soluk); font-weight: 600; }
+.soru q { display: block; quotes: '“' '”'; font-size: 16pt; line-height: 1.18; font-weight: 600; margin-top: 1mm; letter-spacing: -0.01em; }
+.soru .yanit { background: var(--kum); padding: 3mm 4mm; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.soru .yanit b { display: block; font-size: ${a4.dipnot}pt; color: var(--turuncuMetin); font-weight: 700; margin-bottom: 1mm; }
+.bedel { margin-top: auto; background: var(--murekkep); color: var(--kagit); margin: auto -${a4.kenar}mm -${a4.kenar}mm; padding: 7mm ${a4.kenar}mm 6mm; }
+.bedel .alt { color: var(--solukKoyu); padding-top: 5mm; }
+.bedel h2 { font-size: 14pt; margin-bottom: 4mm; }
+.bedel-sayi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm; }
+.bedel-sayi div b { display: block; font-size: 23pt; font-weight: 800; letter-spacing: -0.03em; color: var(--turuncu); line-height: 1; }
+.bedel-sayi div span { display: block; font-size: ${a4.govde}pt; line-height: 1.3; margin-top: 2mm; }
+.bedel .not { margin-top: 4mm; font-size: ${a4.govde}pt; color: var(--kagit); }
+.bedel + .alt { display: none; }
+.sayfa-son-koyu .alt { position: absolute; left: ${a4.kenar}mm; right: ${a4.kenar}mm; bottom: 6mm; color: var(--solukKoyu); }
+
+/* Süreç */
+.akis { margin-top: 9mm; display: grid; gap: 0; position: relative; }
+.adim { display: grid; grid-template-columns: 16mm 1fr; gap: 5mm; padding-bottom: 6mm; position: relative; }
+.adim::before { content: ''; position: absolute; left: 6.5mm; top: 13mm; bottom: 0; width: 0.6mm; background: var(--kumKoyu); }
+.adim:last-child::before { display: none; }
+.adim .no { width: 13.5mm; height: 13.5mm; border-radius: 50%; background: var(--turuncu); color: var(--murekkep); font-weight: 800; font-size: 15pt; display: flex; align-items: center; justify-content: center; }
+.adim h2 { font-size: 15pt; margin-top: 2.6mm; }
+.adim p { margin-top: 1.5mm; max-width: 140mm; }
+.catal { margin-top: 3mm; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; max-width: 150mm; }
+.catal div { padding: 3.5mm 4mm; background: var(--kum); }
+.catal div:first-child { background: var(--kumKoyu); }
+.catal b { display: block; font-size: ${a4.dipnot + 0.5}pt; color: var(--turuncuMetin); margin-bottom: 1mm; }
+.terim { margin-top: 2mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; padding-top: 5mm; border-top: 0.3mm solid var(--cizgi); }
+
+/* Kazanç */
+.tanimlar { margin-top: 5mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; }
+.tanimlar p b { display: block; font-size: ${a4.govdeBuyuk}pt; margin-bottom: 1mm; }
+.grafik { margin-top: 6mm; }
+.yillar { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 0; margin-top: 2mm; }
+.yillar > div { padding: 3mm 4mm 3mm 0; border-top: 0.6mm solid var(--murekkep); }
+.yillar > div + div { padding-left: 4mm; }
+.yillar b { display: block; font-size: ${a4.govdeBuyuk}pt; }
+.yillar span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); }
+.yillar .k { color: var(--turuncuMetin); font-weight: 700; }
+.lejant { display: flex; gap: 8mm; font-size: ${a4.dipnot + 0.5}pt; color: var(--soluk); margin-bottom: 2mm; }
+.lejant i { display: inline-block; width: 8mm; height: 2mm; vertical-align: middle; margin-right: 2mm; background: var(--murekkep); }
+.lejant i.t { background: var(--turuncu); height: 3mm; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 700; padding: 2.4mm 3mm; font-size: ${a4.govde}pt; }
+table.kota td, table.kota th { padding-top: 1.8mm; padding-bottom: 1.8mm; white-space: nowrap; }
+td { padding: 2.4mm 3mm; border-top: 0.3mm solid var(--cizgi); vertical-align: top; }
+thead th { border-bottom: 0.6mm solid var(--murekkep); }
+td.vurgu, th.vurgu { background: var(--kum); }
+td.vurgu b { color: var(--turuncuMetin); }
+.tablo-baslik { margin-top: 7mm; margin-bottom: 1.5mm; }
+.iki-tablo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8mm; }
+
+/* Örnek */
+.varsayim { margin-top: 5mm; padding: 4mm 5mm; background: var(--kum); max-width: 178mm; }
+.zincirler { margin-top: 5mm; display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
+.zincir h2 { font-size: 14pt; margin-bottom: 3mm; }
+.zincir ol { list-style: none; display: grid; gap: 0; }
+.zincir li { display: grid; grid-template-columns: 1fr auto; gap: 3mm; padding: 2.1mm 0; border-top: 0.3mm solid var(--cizgi); align-items: baseline; }
+.zincir li span { color: var(--soluk); font-size: ${a4.govde}pt; }
+.zincir li b { font-weight: 700; font-size: ${a4.govde}pt; white-space: nowrap; }
+.zincir .toplam { margin-top: 3mm; padding: 4mm; display: flex; justify-content: space-between; align-items: baseline; }
+.zincir .toplam span { font-size: ${a4.govde}pt; font-weight: 600; }
+.zincir .toplam b { font-size: 24pt; font-weight: 800; letter-spacing: -0.02em; }
+.zincir.kapat .toplam { background: var(--turuncu); color: var(--murekkep); }
+.zincir.tanis .toplam { background: var(--murekkep); color: var(--kagit); }
+
+/* Persona tablosu */
+.persona { margin-top: 8mm; table-layout: fixed; }
+.persona th.satir { width: 25mm; font-size: ${a4.dipnot + 0.5}pt; color: var(--soluk); font-weight: 700; padding-left: 0; }
+.persona thead th { vertical-align: bottom; border-bottom: 0; padding-bottom: 3mm; }
+.persona thead th .rol { display: block; font-size: 13pt; line-height: 1.15; white-space: nowrap; }
+.persona thead th.ust-sayi { padding-bottom: 1mm; vertical-align: bottom; }
+.persona thead th.rol-adi { padding-top: 0; vertical-align: top; }
+.persona thead th .buyuk { display: block; font-size: 20pt; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 2mm; color: var(--murekkep); }
+.persona thead th.ana { background: var(--turuncu); color: var(--murekkep); }
+.persona thead th.ana.ust-sayi { padding-top: 4mm; }
+.persona thead th.ana .buyuk { color: var(--murekkep); }
+.persona tbody th.satir { vertical-align: top; padding-top: 3mm; }
+.persona td { font-size: 10.8pt; line-height: 1.38; padding: 3mm; }
+.persona td.ana { background: var(--kum); }
+.persona tbody tr:first-child td { border-top: 0.6mm solid var(--murekkep); }
+
+/* Persona sayfaları */
+.rol-ust { display: grid; grid-template-columns: 1fr 52mm; gap: 8mm; align-items: end; }
+.rol-sayi { text-align: right; }
+h1.kanca.kucuk { font-size: 23pt; }
+.sikisik .giris { margin-top: 3mm; }
+.sikisik .iki { margin-top: 3mm !important; }
+.sikisik .ilk-adim { margin-top: 4mm; }
+.sikisik .bolum { margin-top: 7mm; }
+.sikisik .rol-sayi b { font-size: 44pt; }
+.rol-sayi b { display: block; font-size: 54pt; color: var(--turuncuMetin); }
+.rol-sayi span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); margin-top: 2mm; }
+.duz { margin-top: 5mm; display: grid; gap: 2mm; max-width: 165mm; }
+.iki { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; margin-top: 7mm; }
+.ilk-adim { margin-top: 6mm; padding: 4mm 5mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: 26mm 1fr; gap: 4mm; align-items: baseline; }
+.ilk-adim b { color: var(--turuncu); font-size: ${a4.govde}pt; }
+.kural-liste { list-style: none; display: grid; gap: 0; }
+.kural-liste li { padding: 2.2mm 0; border-top: 0.3mm solid var(--cizgi); }
+.ayrac { height: 0; border-top: 0.6mm solid var(--murekkep); margin: 9mm 0 0; }
+
+/* Koşullar */
+.biz-siz { margin-top: 7mm; display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.biz-siz > div { padding: 5mm 5mm 4mm; }
+.biz-siz > div:first-child { background: var(--murekkep); color: var(--kagit); }
+.biz-siz > div:last-child { background: var(--kumKoyu); }
+.biz-siz h2 { font-size: 15pt; margin-bottom: 3mm; }
+.biz-siz > div:first-child h2 { color: var(--turuncu); }
+.biz-siz ul { list-style: none; display: grid; gap: 2.2mm; }
+.biz-siz li { padding-left: 5mm; position: relative; }
+.biz-siz li::before { content: ''; position: absolute; left: 0; top: 2.1mm; width: 2mm; height: 2mm; background: var(--turuncu); }
+.biz-siz > div:last-child li::before { background: var(--murekkep); }
+.kurallar { margin-top: 6mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 9mm; }
+.kurallar h2 { grid-column: 1 / -1; font-size: 14pt; margin-bottom: 1mm; }
+.kurallar p { padding: 2.2mm 0; border-top: 0.3mm solid var(--cizgi); }
+.son { margin-top: auto; margin-left: -${a4.kenar}mm; margin-right: -${a4.kenar}mm; margin-bottom: -${a4.kenar}mm; background: var(--murekkep); color: var(--kagit); padding: 8mm ${a4.kenar}mm 9mm; display: grid; grid-template-columns: 1fr 62mm; gap: 8mm; }
+.son h2 { font-size: 22pt; letter-spacing: -0.02em; margin-bottom: 4mm; }
+.son ol { list-style: none; counter-reset: s; display: grid; gap: 2mm; }
+.son li { counter-increment: s; display: grid; grid-template-columns: 8mm 1fr; font-size: ${a4.govdeBuyuk}pt; }
+.son li::before { content: counter(s); font-weight: 800; color: var(--turuncu); }
+.son .adres { align-self: end; text-align: right; }
+.son .adres b { display: block; font-size: 26pt; font-weight: 800; letter-spacing: -0.02em; }
+.son .adres .not { margin-top: 3mm; color: var(--solukKoyu); }
+`;
+
+const ust = (bolumAdi) => `<header class="ust">${marka()}<span>${bolumAdi}</span></header>`;
+const alt = (n) => `<footer class="alt"><span>iStoc iş ortaklığı programı</span><span>${n} / ${TOPLAM}</span></footer>`;
+const bolum = (no, ad) => `<div class="bolum"><b>${String(no).padStart(2, '0')}</b><span>${ad}</span></div>`;
+
+const kap = kademeler('kapatir');
+const tan = kademeler('tanistir');
+const K = hesap.kapat, T = hesap.tanis;
+
+function kapak() {
+  const satirlar = [
+    { yil: '1. yıl', oran: K.oran, op: 1 },
+    ...K.yillar.map((y) => ({ yil: `${y.yil}. yıl`, oran: y.oran, op: 0.25 + (y.oran / K.oran) * 0.75 })),
+  ];
+  return `<section class="sayfa koyu kapak">
+  <header class="ust">${marka()}<span>İş ortaklığı programı</span></header>
+  <div class="kapak-orta">
+    <div class="kapak-48 sayi-dev">48<small>ay</small></div>
+    <h1>Satışını kapattığınız müşteri size 48 ay pay getirir.</h1>
+  </div>
+  <div class="aylar" aria-label="48 ayın payı">
+    ${satirlar.map((s) => `<span class="yil">${s.yil}</span><span class="kare">${'<i></i>'.repeat(12).replaceAll('<i>', `<i style="opacity:${s.op.toFixed(2)}">`)}</span><span class="oran">${yuzde(s.oran)}</span>`).join('')}
+  </div>
+  <p class="not" style="margin-top:3mm">Kareler ayları gösterir. Oranlar ${tl(plan.ornekCiro)} aylık cirolu örnektendir.</p>
+  <div class="davet">
+    <p class="buyuk">iStoc iş ortaklığı programına sizi davet ediyoruz.</p>
+    <p>Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
+    <p class="not">Pay, müşteri ödemeye devam ettikçe sürer. Koşullar bu belgenin sonundadır.</p>
+  </div>
+  <footer class="alt"><span>istoc.com</span><span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
+</section>`;
+}
+
+const SORULAR = [
+  ['Katalog stüdyosunun müşterisi sorar.', 'Hazırlanan kataloğu alıcılarla nasıl paylaşırım?', 'iStoc kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.'],
+  ['İhracat danışmanının müşterisi sorar.', 'Alıcının istediği ürün bilgisi bende hazır mı?', 'Katalog Arapça, Rusça, Fransızca ve İngilizce hazırlanır. Fiyat dolar ya da avro olarak girilir.'],
+  ['Yazılım bayisinin müşterisi sorar.', 'Stok listemi alıcılara nasıl gönderirim?', 'Stok ve satışlar telefondan görünür. Kur değişince fiyatlar tek tuşla güncellenir.'],
+  ['Lojistik firmasının müşterisi sorar.', 'Yeni alıcılarla görüşmeleri nasıl takip ederim?', 'WhatsApp’tan gelen siparişler tek ekranda toplanır. Fiyat teklifi 2 dakikada hazırlanır.'],
+];
+export { SORULAR };
+
+function nedenSiz() {
+  return `<section class="sayfa">
+  ${ust('Neden siz')}
+  ${bolum(1, 'Neden siz')}
+  <h1 class="kanca">Müşteriniz size her ay aynı soruyu soruyor mu?</h1>
+  <p class="giris">Siz satıcı firmalara zaten hizmet veriyorsunuz. İşletme size güvenir. iStoc bu güvene somut bir yanıt ekler.</p>
+  <div class="soru-liste">
+    ${SORULAR.map(([kim, soru, yanit]) => `<div class="soru"><div><span class="kim">${kim}</span><q>${soru}</q></div><div class="yanit"><b>iStoc’un yanıtı</b><p>${yanit}</p></div></div>`).join('')}
+  </div>
+  <div class="bedel">
+    <h2>Müşterinizin ödediği bedel</h2>
+    <div class="bedel-sayi">
+      <div><b>${fiyat.denemeGun} gün</b><span>Satıcı paketi ücretsiz dener.</span></div>
+      <div><b>${avro(fiyat.basicAyEur)}</b><span>Basic paket ayda bu kadar tutar.</span></div>
+      <div><b>${avro(fiyat.basicYilEur)}</b><span>Yıllık pakette 12 ay için 10 aylık bedel ödenir.</span></div>
+      <div><b>${avro(fiyat.kurulumEur)}</b><span>Mağaza kurulumu bir kez bu kadar tutar.</span></div>
+    </div>
+    <p class="not">iStoc satıcının satışından komisyon almaz. Fiyat herkes için aynıdır. Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.</p>
+    ${alt(2)}
+  </div>
+</section>`;
+}
+
+const ADIMLAR = [
+  ['Katkı düzeyinizi yazılı belirleyin.', 'Ortaklık sorumlusu yapacağınız işi sizinle yazar. Yalnız tanıştırma ve satışı kapatma iki ayrı katkıdır.'],
+  ['İşletmenin ihtiyacını konuşun.', 'Ürün bilgisinin hazır olup olmadığını öğrenin. Ulaşmak istediği alıcıyı not edin.'],
+  ['Müşteri kaydını açtırın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar. Kayıt kabul edilince müşteri sizin kaydınızdadır.'],
+  ['Ürünü gösterin.', 'Gösterimi işletmenin kendi ürünleriyle yapın. Teklifi yetkili satış sorumlusu fiyat tablosundaki fiyatla hazırlar.'],
+  ['Kurulumu yapın ya da devredin.', null],
+  ['Ödemenizi alın.', 'Finans ekibi müşterinin ödemesini doğrular ve payınızı hesaplar. Siz şirkete fatura kesersiniz.'],
+];
+export { ADIMLAR };
+
+function nasilIsler() {
+  return `<section class="sayfa">
+  ${ust('Nasıl işler')}
+  ${bolum(2, 'Nasıl işler')}
+  <h1 class="kanca">Altı adım var. İlk adım tek bir görüşmedir.</h1>
+  <div class="akis">
+    ${ADIMLAR.map(([b, m], i) => `<div class="adim"><div class="no">${i + 1}</div><div><h2>${b}</h2>${m ? `<p>${m}</p>` : `<div class="catal">
+      <div><b>Satışı siz kapattıysanız</b><p>Kurulumu ve ilk eğitimi siz yaparsınız.</p></div>
+      <div><b>Yalnız tanıştırdıysanız</b><p>Kurulumu şirket yapar.</p></div></div>`}</div></div>`).join('')}
+  </div>
+  <div class="terim">
+    <p><b>Kurulum nedir?</b><br>Kurulum, işletmenin hesabını açmak ve ürünlerini yüklemektir.</p>
+    <p><b>Sonraki destek</b><br>Kurulumdan sonraki desteği her durumda şirket verir.</p>
+  </div>
+  ${alt(3)}
+</section>`;
+}
+
+function kazancPlani() {
+  return `<section class="sayfa">
+  ${ust('Kazanç planı')}
+  ${bolum(3, 'Kazanç planı')}
+  <h1 class="kanca">Satışı kapatırsanız payınız %30’a kadar çıkar.</h1>
+  <div class="tanimlar">
+    <p><b>Ciro</b>Ciro, getirdiğiniz müşterilerin ödediği tutardır.</p>
+    <p><b>Kota</b>Kota, bir aydaki ciro eşiğidir. Planda üç kota vardır: K1, K2 ve K3.</p>
+    <p><b>Oran</b>Ulaştığınız kotanın oranı cironun tamamına uygulanır.</p>
+  </div>
+  <div class="grafik">
+    <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
+    ${merdiven({ g: 640, y: 214, kapat: kap, tanis: tan, ornekCiro: plan.ornekCiro, yaziBoyu: 14 })}
+  </div>
+  <h3 class="tablo-baslik">Bir aydaki ciroya göre oran</h3>
+  <table class="kota"><thead><tr><th>Kota</th><th>Tanıştırmada eşik</th><th>Oran</th><th class="vurgu">Kapatmada eşik</th><th class="vurgu">Oran</th></tr></thead><tbody>
+    ${['Kota yok', 'K1', 'K2', 'K3'].map((ad, i) => `<tr><td>${ad}</td><td>${i ? `${tl(tan[i].esik)} ve üstü` : `${tl(tan[1].esik)} altı`}</td><td><b>${yuzde(tan[i].oran)}</b></td><td class="vurgu">${i ? `${tl(kap[i].esik)} ve üstü` : `${tl(kap[1].esik)} altı`}</td><td class="vurgu"><b>${yuzde(kap[i].oran)}</b></td></tr>`).join('')}
+  </tbody></table>
+  <h3 class="tablo-baslik">Pay yıllara yayılır</h3>
+  <div class="yillar">
+    <div><b>İlk 12 ay</b><span>Kotanızın oranını alırsınız.</span></div>
+    ${plan.kapatir.gecmis.slice(0, 3).map((g, i) => `<div><b>${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay</b><span>Tanıştırma: ${plan.tanistir.gecmis[i] ? yuzde(plan.tanistir.gecmis[i]) : 'pay yok'}</span><span class="k">Kapatma: ${yuzde(g)}</span></div>`).join('')}
+  </div>
+  <p class="not" style="margin-top:2mm">Sonraki yıllarda pay azalarak sürer. Oran müşterinin o yılki cirosuna uygulanır.</p>
+  <p class="not" style="margin-top:3mm"><b>Bu oranlar bugünkü plandır. Kesin oranlar yazılı anlaşmada belirlenir.</b></p>
+  ${alt(4)}
+</section>`;
+}
+
+const zincir = (h, sinif, satirlar, toplamAd, toplam) => `<div class="zincir ${sinif}"><h2>${h}</h2><ol>
+  ${satirlar.map(([a, b]) => `<li><span>${a}</span><b>${b}</b></li>`).join('')}
+  </ol><div class="toplam"><span>${toplamAd}</span><b>${tl(toplam)}</b></div></div>`;
+
+function ornekHesap() {
+  const yil = (y) => `${12 * (y.yil - 1) + 1}. ile ${12 * y.yil}. ay`;
+  return `<section class="sayfa">
+  ${ust('Örnek hesap')}
+  ${bolum(4, 'Örnek hesap')}
+  <h1 class="kanca">Ayda ${tl(plan.ornekCiro)} ciro, 4 yılda ${tl(K.toplam)} pay.</h1>
+  <p class="varsayim">Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam ${tl(plan.ornekCiro)} öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.</p>
+  <div class="grafik">
+    <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
+    ${donemCubuklari({ g: 640, y: 200, kapat: K, tanis: T, yaziBoyu: 14 })}
+    <p class="not">Çubuklar her dönemin toplam payını gösterir. Tutarlar bin ₺ cinsindendir.</p>
+  </div>
+  <div class="zincirler">
+    ${zincir('Satışı kapatırsanız', 'kapat', [
+      ['Aylık ciro', tl(K.ciro)],
+      ['Bu ciro K1 kotasını geçer. Oranınız', yuzde(K.oran)],
+      [`${tl(K.ciro)} × ${yuzde(K.oran)}`, `ayda ${tl(K.aylik)}`],
+      [`İlk 12 ay: ${tl(K.aylik)} × 12`, tl(K.ilkYil)],
+      ...K.yillar.map((y) => [`${yil(y)}: ${tl(y.ciro)} × ${yuzde(y.oran)}`, tl(y.tutar)]),
+    ], 'Dört yılın toplamı', K.toplam)}
+    ${zincir('Yalnız tanıştırırsanız', 'tanis', [
+      ['Aylık ciro', tl(T.ciro)],
+      ['Bu ciro K1 kotasını geçer. Oranınız', yuzde(T.oran)],
+      [`${tl(T.ciro)} × ${yuzde(T.oran)}`, `ayda ${tl(T.aylik)}`],
+      [`İlk 12 ay: ${tl(T.aylik)} × 12`, tl(T.ilkYil)],
+      ...T.yillar.map((y) => [`${yil(y)}: ${tl(y.ciro)} × ${yuzde(y.oran)}`, tl(y.tutar)]),
+    ], 'Üç yılın toplamı', T.toplam)}
+  </div>
+  <p class="not" style="margin-top:4mm">Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.</p>
+  ${alt(5)}
+</section>`;
+}
+
+export const PERSONALAR = [
+  { ad: 'Çözüm ortağı', buyuk: '%30’a kadar', ana: true,
+    kim: 'Satıcı firmalara hizmet veren danışman ya da hizmet firması.', ne: 'Müşterisini iStoc ile tanıştırır ya da satışı kapatır.',
+    kazanc: 'Ciro üzerinden pay alır. Oran %30’a kadar çıkar.', basla: 'Katkı düzeyini yazılı belirler.' },
+  { ad: 'Kadrolu uzman', buyuk: 'Maaş ve prim',
+    kim: 'Şirkette SGK’lı ve maaşlı çalışan satış uzmanı.', ne: 'Satıcıları ziyaret eder ve satışı yapar.',
+    kazanc: 'Maaş alır. Ayrıca paket primi alır.', basla: 'İş sözleşmesini ve prim ekini imzalar.' },
+  { ad: 'Mevcut müşteri', buyuk: '2 ay',
+    kim: 'iStoc kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye iStoc’u önerir.',
+    kazanc: 'Uygun tavsiye başına 2 ay ücretsiz kullanım alır.', basla: 'Geçerli koşulu müşteri sorumlusundan öğrenir.' },
+  { ad: 'Marka elçisi', buyuk: '%30’a kadar',
+    kim: 'Ticaret yapan bir kitleye ulaşan kişi.', ne: 'iStoc’u tanıtır ve ilgilenen satıcıyı yönlendirir.',
+    kazanc: 'Çözüm ortağıyla aynı plandan pay alır.', basla: 'Anlatımını şirkete doğrulatır.' },
+];
+
+function dortPersona() {
+  const satir = (ad, alan) => `<tr><th class="satir" scope="row">${ad}</th>${PERSONALAR.map((p) => `<td class="${p.ana ? 'ana' : ''}">${p[alan]}</td>`).join('')}</tr>`;
+  return `<section class="sayfa">
+  ${ust('Dört persona')}
+  ${bolum(5, 'Dört persona')}
+  <h1 class="kanca">Hangisi sizsiniz?</h1>
+  <p class="giris">Aynı ürünü dört farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.</p>
+  <table class="persona">
+    <thead><tr><th class="satir"></th>${PERSONALAR.map((p) => `<th class="${p.ana ? 'ana' : ''} ust-sayi"><span class="buyuk">${p.buyuk}</span></th>`).join('')}</tr>
+      <tr><th class="satir"></th>${PERSONALAR.map((p) => `<th class="${p.ana ? 'ana' : ''} rol-adi" scope="col"><span class="rol">${p.ad}</span></th>`).join('')}</tr></thead>
+    <tbody>${satir('Kim?', 'kim')}${satir('Ne yapar?', 'ne')}${satir('Nasıl kazanır?', 'kazanc')}${satir('Nasıl başlar?', 'basla')}</tbody>
+  </table>
+  <p class="not" style="margin-top:4mm">SGK, sosyal güvenlik kaydıdır. Bu belgenin ana okuru çözüm ortağıdır. Öteki üç yol sonraki iki sayfadadır.</p>
+  <div class="ayrac"></div>
+  <div class="iki">
+    <div><h3>Çözüm ortağı ile marka elçisi aynı plandan kazanır.</h3><p style="margin-top:2mm">İkisi de ciro üzerinden pay alır. Yapılan iş ve bir aydaki ciro oranı belirler.</p></div>
+    <div><h3>Kadrolu uzman ile mevcut müşteri ayrı kurallarla kazanır.</h3><p style="margin-top:2mm">Kadrolu uzman maaş ve paket primi alır. Mevcut müşteri ücretsiz kullanım kazanır.</p></div>
+  </div>
+  ${alt(6)}
+</section>`;
+}
+
+function kadrolu() {
+  const P = hesap.kadrolu;
+  const kd = [
+    { ad: '4 ve altı', oran: 0 },
+    ...plan.kadrolu.paketEsik.map((e, i) => ({ ad: `${e} ve üstü`, oran: plan.kadrolu.paketOran[i] })),
+  ];
+  return `<section class="sayfa">
+  ${ust('Kadrolu uzman')}
+  ${bolum(6, 'Kadrolu uzman')}
+  <div class="rol-ust">
+    <h1 class="kanca">Maaşınız sabittir. Priminiz sattığınız paket sayısıyla artar.</h1>
+    <div class="rol-sayi"><b class="sayi-dev">%10</b><span>En yüksek prim oranı</span></div>
+  </div>
+  <p class="giris">Bu modelde şirket sizi SGK’lı ve maaşlı çalıştırır. Net maaşınız ayda ${tl(plan.kadrolu.maas[0])} ile ${tl(plan.kadrolu.maas[1])} arasındadır.</p>
+  <div class="iki">
+    <div>
+      <h3>Ayda satılan pakete göre prim</h3>
+      <div style="margin-top:4mm">${paketMerdiveni({ g: 320, y: 170, kademeler: kd, secili: 2, yaziBoyu: 14 })}</div>
+      <p class="not">Çubuklar paket sayısını ve prim oranını gösterir. Turuncu çubuk örnekteki kademedir.</p>
+      <p style="margin-top:4mm">Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır. Aylık ve yıllık paketler birlikte sayılır.</p>
+    </div>
+    <div class="zincir kapat">
+      <h2>Örnek prim</h2>
+      <ol>
+        <li><span>Bir ayda satılan yıllık paket</span><b>${P.adet} paket</b></li>
+        <li><span>Bir yıllık paketin bedeli</span><b>${avro(fiyat.basicYilEur)}</b></li>
+        <li><span>Örnekte kullanılan avro kuru</span><b>${tl(fiyat.kur)}</b></li>
+        <li><span>${P.adet} paketin bedeli</span><b>${tl(P.ciro)}</b></li>
+        <li><span>${P.adet} paket K2 kademesidir. Oran</span><b>${yuzde(P.oran)}</b></li>
+      </ol>
+      <div class="toplam"><span>Priminiz</span><b>${tl(P.prim)}</b></div>
+    </div>
+  </div>
+  <h3 style="margin-top:8mm">Öteki prim kuralları</h3>
+  <ul class="kural-liste" style="margin-top:2mm">
+    <li>Yalnız tanıştırdıysanız prim oranı ${yuzde(plan.kadrolu.tanistirmaOrani)} olur. Prim ilk 3 aydaki ödemelerden hesaplanır.</li>
+    <li>Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında ${yuzde(plan.kadrolu.yenilemeOrani)} prim alırsınız.</li>
+    <li>Kurulum ücreti ciroya girmez.</li>
+    <li>İlk iki ayın prim kuralını insan kaynakları ayrıca yazar.</li>
+  </ul>
+  <div class="ilk-adim"><b>İlk adım</b><span>İnsan kaynaklarıyla görevinizi ve bölgenizi netleştirin.</span></div>
+  ${alt(7)}
+</section>`;
+}
+
+function musteriElci() {
+  const E = hesap.elci;
+  return `<section class="sayfa sikisik">
+  ${ust('Mevcut müşteri ve marka elçisi')}
+  ${bolum(7, 'Mevcut müşteri')}
+  <div class="rol-ust">
+    <h1 class="kanca kucuk">Uygun her tavsiye size 2 ay ücretsiz iStoc kazandırır.</h1>
+    <div class="rol-sayi"><b class="sayi-dev">${tavsiye.krediAy} ay</b><span>Uygun tavsiye başına</span></div>
+  </div>
+  <p class="giris">Siz iStoc kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.</p>
+  <div class="iki" style="margin-top:5mm">
+    <ul class="kural-liste">
+      <li>Uygun tavsiye başına size ${tavsiye.krediAy} ay ücretsiz kullanım verilir. Bu süre Basic paket fiyatıyla ${avro(hesap.tavsiyeEur)} değerindedir.</li>
+      <li>Yeni müşteriye ${tavsiye.yeniKrediAy} ay ücretsiz kullanım verilir.</li>
+      <li>Yılda en çok ${tavsiye.sinir} uygun tavsiye sayılır. Bu, yılda en çok ${hesap.tavsiyeYilAy} ay ücretsiz kullanım eder.</li>
+    </ul>
+    <ul class="kural-liste">
+      <li>Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.</li>
+      <li>Ödül nakit değildir. Ödül ücretsiz iStoc kullanımıdır.</li>
+      <li>Ödül aldığınızı işletmeye açıkça söyleyin.</li>
+    </ul>
+  </div>
+  <div class="ilk-adim"><b>İlk adım</b><span>Geçerli koşulu müşteri sorumlusundan öğrenin.</span></div>
+  ${bolum(8, 'Marka elçisi')}
+  <div class="rol-ust">
+    <h1 class="kanca kucuk">Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.</h1>
+    <div class="rol-sayi"><b class="sayi-dev">${yuzde(E.oran)}</b><span>${tl(E.ciro)} aylık ciroda</span></div>
+  </div>
+  <p class="giris">iStoc’u sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.</p>
+  <div class="iki" style="margin-top:5mm">
+    <ul class="kural-liste">
+      <li>Size bir bağlantı ve bir kod verilir. Başvurular bu bağlantıyla sizin kaydınıza ulaşır.</li>
+      <li>Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.</li>
+      <li>Yalnız tanıtırsanız satışı ve kurulumu şirket yapar.</li>
+      <li>Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.</li>
+    </ul>
+    <div class="zincir tanis">
+      <h2 style="font-size:13pt">Örnek pay</h2>
+      <ol>
+        <li><span>Tanıttığınız satıcıların aylık ödemesi</span><b>${tl(E.ciro)}</b></li>
+        <li><span>Bu ciro K1 kotasıdır. Tanıştırma payınız</span><b>${yuzde(E.oran)}</b></li>
+        <li><span>${tl(E.ciro)} × ${yuzde(E.oran)}</span><b>ayda ${tl(E.aylik)}</b></li>
+      </ol>
+      <p class="not" style="margin-top:2mm">Çözüm ortağıyla aynı plandan pay alırsınız. Bu ilişki maaşlı iş değildir.</p>
+    </div>
+  </div>
+  <div class="ilk-adim"><b>İlk adım</b><span>İçeriğinizin amacını belirleyin. Anlatımınızı şirkete doğrulatın.</span></div>
+  ${alt(8)}
+</section>`;
+}
+
+export const BIZ = [
+  'Fiyatı fiyat tablosu belirler. Fiyat herkes için aynıdır.',
+  'Yetkili satış sorumlusu teklifi hazırlar.',
+  'Yalnız tanıştırdığınız müşterinin satışını ve kurulumunu biz yaparız.',
+  'Kurulumdan sonraki desteği her durumda biz veririz.',
+  'Her firmayı yalnız bir ortağın kaydına yazarız.',
+  'Finans ekibi ödemeyi doğrular ve payınızı hesaplar.',
+];
+export const SIZ = [
+  'Katkı düzeyinizi yazılı belirlersiniz.',
+  'Satışı kapatırsanız kurulumu ve ilk eğitimi siz yaparsınız.',
+  'Fiyat ya da indirim sözü vermezsiniz.',
+  'Alıcı, sipariş ya da satış sözü vermezsiniz.',
+  'Müşterinin izni olmadan kataloğunu paylaşmazsınız.',
+  'Kazancınız için şirkete fatura kesersiniz.',
+];
+export const ILK_ADIMLAR = ['istoc.com adresinden iStoc’u inceleyin.', 'Ortaklık sorumlusuyla görüşün.', 'Katkı düzeyinizi yazılı belirleyin.', 'İlk müşteri kaydınızı açtırın.'];
+
+function kosullar() {
+  return `<section class="sayfa">
+  ${ust('Koşullar ve ilk adım')}
+  ${bolum(9, 'Koşullar')}
+  <h1 class="kanca">Kim ne yapar? Baştan yazılıdır.</h1>
+  <div class="biz-siz">
+    <div><h2>Biz ne yaparız</h2><ul>${BIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
+    <div><h2>Siz ne yaparsınız</h2><ul>${SIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
+  </div>
+  <div class="kurallar">
+    <h2>Ödeme kuralları</h2>
+    <p>İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.</p>
+    <p>Tanıştırma CRM’e kaydedilir. CRM, şirketin müşteri kayıt sistemidir. Planda tanıştırma ${plan.tanistirmaSureAy} ay geçerlidir.</p>
+    <p>Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür. Bölüşme yazılı anlaşmada belirlenir.</p>
+    <p>Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır.</p>
+    <p>Fatura, vergi ve stopajı mali müşaviriniz doğrulasın. Şirket ortak getirmeye para ödemez.</p>
+    <p><b>Bu belge sözleşme değildir. Kesin oranlar yazılı anlaşmada belirlenir.</b></p>
+  </div>
+  <div class="son">
+    <div>
+      <h2>Hangi müşterinizle başlarsınız?</h2>
+      <ol>${ILK_ADIMLAR.map((x) => `<li>${x}</li>`).join('')}</ol>
+    </div>
+    <div class="adres">${marka()}<b>istoc.com</b><p class="not">Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı. Sayfa ${TOPLAM} / ${TOPLAM}</p></div>
+  </div>
+</section>`;
+}
+
+export function kitapcikHtml() {
+  const govde = [kapak(), nedenSiz(), nasilIsler(), kazancPlani(), ornekHesap(), dortPersona(), kadrolu(), musteriElci(), kosullar()].join('\n');
+  return sayfaIskeleti({ baslik: 'iStoc iş ortaklığı el kitapçığı', boyut: 'A4 portrait', css, govde });
+}
+export const KITAPCIK_SAYFA = TOPLAM;
