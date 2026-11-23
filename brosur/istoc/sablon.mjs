@@ -4,7 +4,13 @@ import { pathToFileURL } from 'node:url';
 import { renk, yazi } from './tokenlar.mjs';
 import { KOK, sayi } from './veri.mjs';
 
-const fontDosyasi = (ad) => pathToFileURL(path.join(KOK, 'node_modules/@fontsource-variable/outfit/files', ad)).href;
+// Sabit ağırlıklı Outfit dosyaları kullanılır. Değişken dosya PDF'e Type3 olarak girer ve metin kopyalanamaz.
+const fontDosyasi = (ad) => pathToFileURL(path.join(import.meta.dirname, 'node_modules/@fontsource/outfit/files', ad)).href;
+const AGIRLIKLAR = [300, 400, 500, 600, 700, 800];
+const EXT = 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF';
+const LATIN = 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
+const fontYuzleri = () => AGIRLIKLAR.flatMap((w) => [['latin-ext', EXT], ['latin', LATIN]].map(([alt, aralik]) =>
+  `@font-face { font-family: 'Outfit'; font-style: normal; font-display: block; font-weight: ${w}; src: url('${fontDosyasi(`outfit-${alt}-${w}-normal.woff2`)}') format('woff2'); unicode-range: ${aralik}; }`)).join('\n');
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -12,12 +18,7 @@ export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
 export function tokenCss() {
   const r = Object.entries(renk).map(([k, v]) => `--${k}: ${v};`).join('\n  ');
   return `
-@font-face { font-family: 'Outfit'; font-style: normal; font-display: block; font-weight: 100 900;
-  src: url('${fontDosyasi('outfit-latin-ext-wght-normal.woff2')}') format('woff2-variations');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: 'Outfit'; font-style: normal; font-display: block; font-weight: 100 900;
-  src: url('${fontDosyasi('outfit-latin-wght-normal.woff2')}') format('woff2-variations');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+${fontYuzleri()}
 :root {
   ${r}
   --yazi: ${yazi.yigin};
@@ -64,13 +65,19 @@ export function merdiven({ g = 760, y = 380, kapat, tanis, ornekCiro, koyu = fal
   const ikinci = koyu ? 'var(--solukKoyu)' : 'var(--murekkep)';
   const yEks = [0, 0.1, 0.2, 0.3].map((o) => `<line x1="${sol}" x2="${g - sag}" y1="${Y(o)}" y2="${Y(o)}" stroke="${izgara}" stroke-width="1"/>
     <text x="${sol - 12}" y="${Y(o) + 5}" text-anchor="end" font-size="${yaziBoyu - 2}" fill="${soluk}">%${o * 100}</text>`).join('');
-  const xEks = [0, 30_000, 60_000, 90_000, 120_000, 150_000].map((c) => `<text x="${X(c)}" y="${y - alt + 26}" text-anchor="middle" font-size="${yaziBoyu - 2}" fill="${soluk}">${c ? `${sayi(c / 1000)} bin ₺` : '0 ₺'}</text>`).join('');
+  const xEks = [0, 30_000, 60_000, 90_000, 120_000, 150_000].map((c) => `<text x="${X(c)}" y="${y - alt + 26}" text-anchor="middle" font-size="${yaziBoyu - 2}" fill="${soluk}">${c ? `${sayi(c / 1000)} bin TL` : '0 TL'}</text>`).join('');
   const zemin = koyu ? 'var(--murekkep)' : 'var(--kagit)';
-  const hale = `paint-order="stroke" stroke="${zemin}" stroke-width="6" stroke-linejoin="round"`;
+  // Etiketin arkasına zemin renginde dikdörtgen konur. Çizgili metin (stroke) PDF'e Type3 olarak girdiği için kullanılmaz.
+  const zeminKutu = (x, y, metin, boy, orta = true) => {
+    const g = metin.length * boy * 0.62 + 8;
+    return `<rect x="${orta ? x - g / 2 : x - 4}" y="${y - boy * 0.9}" width="${g}" height="${boy * 1.15}" fill="${zemin}"/>`;
+  };
   const etiket = (k, renkDeger, yukari) => k.map((s, i) => {
     const son = i === k.length - 1 ? enCok : k[i + 1].esik;
     const orta = (X(s.esik) + X(son)) / 2;
-    return `<text x="${orta}" y="${Y(s.oran) + (yukari ? -10 : 22)}" text-anchor="middle" font-size="${yaziBoyu}" font-weight="700" fill="${renkDeger}" ${hale}>%${sayi(s.oran * 100)}</text>`;
+    const ty = Y(s.oran) + (yukari ? -10 : 22);
+    const m = `%${sayi(s.oran * 100)}`;
+    return `${zeminKutu(orta, ty, m, yaziBoyu)}<text x="${orta}" y="${ty}" text-anchor="middle" font-size="${yaziBoyu}" font-weight="700" fill="${renkDeger}">${m}</text>`;
   }).join('');
   const oX = X(ornekCiro);
   return `<svg viewBox="0 0 ${g} ${y}" width="100%" role="img" aria-label="Aylık ciroya göre pay oranı" font-family="Outfit, Arial, sans-serif">
@@ -78,7 +85,7 @@ export function merdiven({ g = 760, y = 380, kapat, tanis, ornekCiro, koyu = fal
   <text x="${sol - 12}" y="${ust - 8}" text-anchor="end" font-size="${yaziBoyu - 2}" fill="${soluk}">Oran</text>
   <text x="${g - sag}" y="${y - 4}" text-anchor="end" font-size="${yaziBoyu - 2}" fill="${soluk}">Bir aydaki ciro</text>
   <line x1="${oX}" x2="${oX}" y1="${ust}" y2="${y - alt}" stroke="${soluk}" stroke-width="1.5" stroke-dasharray="4 5"/>
-  <text x="${oX + 8}" y="${ust + 10}" ${hale} font-size="${yaziBoyu - 2}" fill="${soluk}">Örnek: ${sayi(ornekCiro)} ₺</text>
+  ${zeminKutu(oX + 8, ust + 10, `Örnek: ${sayi(ornekCiro)} TL`, yaziBoyu - 2, false)}<text x="${oX + 8}" y="${ust + 10}" font-size="${yaziBoyu - 2}" fill="${soluk}">Örnek: ${sayi(ornekCiro)} TL</text>
   <path d="${yol(tanis)}" fill="none" stroke="${ikinci}" stroke-width="4" stroke-linejoin="miter"/>
   <path d="${yol(kapat)}" fill="none" stroke="var(--turuncu)" stroke-width="7" stroke-linejoin="miter"/>
   ${etiket(kapat, koyu ? 'var(--turuncu)' : 'var(--turuncuMetin)', true)}

@@ -52,7 +52,7 @@ export function paketPrimi(adet) {
 }
 
 export const sayi = (n) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(n);
-export const tl = (n) => `${sayi(n)}\u00a0₺`;
+export const tl = (n) => `${sayi(n)}\u00a0TL`;
 export const yuzde = (n) => `%${sayi(Math.round(n * 1000) / 10)}`;
 export const avro = (n) => `${sayi(n)}\u00a0€`;
 

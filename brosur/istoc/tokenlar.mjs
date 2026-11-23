@@ -48,6 +48,8 @@ export const a4 = {
 
 // Slayt ölçeği. Slayt 13,333 × 7,5 inçtir. 1920 piksel genişlikte 1 pt = 2 px olur. Gövde en az 12 pt (24 px).
 export const slayt = {
+  // PPTX'e yazı tipi gömülemez. Outfit kurulu değilse sunum Times ile açılır. Bu yüzden sunumda Arial kullanılır.
+  yazi: 'Arial',
   genislik: 13.333,
   yukseklik: 7.5,
   kenar: 0.7,

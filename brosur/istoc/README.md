@@ -6,7 +6,7 @@ Bu klasör üç belgeyi üretir. Belgeler yalnız iStoc (istoc.com) içindir.
 | --- | --- | --- |
 | `public/indir/istoc/istoc-is-ortakligi-sunum.pptx` | 16:9 sunum | 10 slayt |
 | `public/indir/istoc/istoc-is-ortakligi-el-kitapcigi.pdf` | A4 dikey | 9 sayfa |
-| `public/indir/istoc/istoc-is-ortakligi-gorsel-sunum.pdf` | A4 yatay | 8 sayfa |
+| `public/indir/istoc/istoc-is-ortakligi-gorsel-sunum.pdf` | A4 yatay | 9 sayfa |
 
 ## Üretim komutu
 
@@ -16,7 +16,7 @@ Bu klasör üç belgeyi üretir. Belgeler yalnız iStoc (istoc.com) içindir.
 cd brosur/istoc && npm ci && node uret.mjs
 ```
 
-Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörüne koyar. Denetimlerden biri başarısız olursa komut hata koduyla biter.
+Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörüne koyar. PDF önizlemesi gerçek PDF dosyasından çizilir. Slayt önizlemesi Arial ile yapılan bir benzetimdir. `sunum-quicklook-kapak.png` gerçek PPTX'in kapağıdır. Denetimlerden biri başarısız olursa komut hata koduyla biter.
 
 ## Dosyalar
 
@@ -31,6 +31,7 @@ Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörün
 | `sunum.mjs` | Sunumun slaytlarıdır. |
 | `kontrol.mjs` | Kontrast ve metin denetimleri buradadır. |
 | `uret.mjs` | Belgeleri üretir ve denetler. |
+| `pdfgorsel.mjs` | PDF metnini çıkarır ve PDF sayfalarını görüntüye çevirir. |
 
 ## Denetimler
 
@@ -40,12 +41,20 @@ Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörün
 2. Oran ve fiyatları depodaki kaynak dosyalarla karşılaştırır.
 3. Renk çiftlerinin kontrastını ölçer. Her çift en az 4,5:1 olmalıdır.
 4. Sayfa dışına çıkan öğeyi ve taşan metin kutusunu arar.
-5. En küçük yazı boyunu ölçer. A4 belgede sınır 9 pt, slaytta 24 pikseldir.
+5. En küçük yazı boyunu ölçer. A4 belgede koşul ve açıklama metni en az 11 pt olur. Dipnot, üst bilgi ve grafik etiketi en az 9 pt olur. Slaytta sınır 24 pikseldir.
 6. Yasak kelimeleri ve öteki markanın adını arar.
 7. Belgedeki her tam cümlenin `metin.md` içinde olduğunu denetler.
 8. PDF sayfa sayısını ve Outfit yazı tipinin gömüldüğünü denetler.
+9. PDF'te Type3 yazı tipi arar. Type3 varsa metin doğru kopyalanmaz.
+10. PDF metnini çıkarır. Metinde "müşteri" ve "İlk adım" gibi kelimeleri arar.
 
-Sunum, Outfit yazı tipiyle ve Arial yedek yazı tipiyle ayrı ayrı ölçülür. Outfit kurulu değilse PowerPoint başka bir yazı tipi kullanır.
+## Yazı tipleri
+
+PDF belgeleri sabit ağırlıklı Outfit dosyalarını kullanır. Değişken Outfit dosyası PDF'e Type3 olarak girer. Bu yüzden değişken dosya kullanılmaz.
+
+Sunum Arial kullanır. PPTX dosyasına yazı tipi gömülemez. Outfit kurulu olmayan bilgisayarda sunum başka bir yazı tipiyle açılır.
+
+Para birimi "TL" diye yazılır. Outfit yazı tipinde "₺" işareti yoktur.
 
 ## Kaynak değişirse
 

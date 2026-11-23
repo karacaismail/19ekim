@@ -6,13 +6,13 @@ Plan tarihi 23 Kasım 2026 Pazartesi günüdür. Oranlar ve fiyatlar bu depodaki
 
 ## Kapak
 
-Satışını kapattığınız müşteri size 48 ay pay getirir.
+Satışını kapattığınız müşteri size 48 aya kadar pay getirir.
 
 iStoc iş ortaklığı programına sizi davet ediyoruz.
 
 Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.
 
-Pay, müşteri ödemeye devam ettikçe sürer. Koşullar bu belgenin sonundadır.
+Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.
 
 ## Neden siz
 
@@ -30,11 +30,11 @@ iStoc kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.
 
 “Alıcının istediği ürün bilgisi bende hazır mı?”
 
-Katalog Arapça, Rusça, Fransızca ve İngilizce hazırlanır. Fiyat dolar ya da avro olarak girilir.
+Ürün bilgisi bugünden eksiksiz tutulur. Ölçü, ağırlık, malzeme ve üretildiği ülke yazılır.
 
 Yazılım bayisinin müşterisi sorar.
 
-“Stok listemi alıcılara nasıl gönderirim?”
+“Stokumu ve satışlarımı nereden izlerim?”
 
 Stok ve satışlar telefondan görünür. Kur değişince fiyatlar tek tuşla güncellenir.
 
@@ -105,9 +105,9 @@ Ulaştığınız kotanın oranı cironun tamamına uygulanır.
 | Kota | Yalnız tanıştırırsanız | Satışı kapatırsanız |
 | --- | --- | --- |
 | Kota yok | %0 | %15 |
-| K1 | 30.000 ₺ ve üstü: %7 | 30.000 ₺ ve üstü: %20 |
-| K2 | 60.000 ₺ ve üstü: %10 | 70.000 ₺ ve üstü: %25 |
-| K3 | 100.000 ₺ ve üstü: %15 | 120.000 ₺ ve üstü: %30 |
+| K1 | 30.000 TL ve üstü: %7 | 30.000 TL ve üstü: %20 |
+| K2 | 60.000 TL ve üstü: %10 | 70.000 TL ve üstü: %25 |
+| K3 | 100.000 TL ve üstü: %15 | 120.000 TL ve üstü: %30 |
 
 Tablodaki tutarlar bir aydaki cirodur.
 
@@ -123,39 +123,39 @@ Tablodaki tutarlar bir aydaki cirodur.
 
 Sonraki yıllarda oran müşterinin o yılki cirosuna uygulanır.
 
-Bu oranlar bugünkü plandır. Kesin oranlar yazılı anlaşmada belirlenir.
+Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
 
 ## Örnek hesap
 
-Ayda 50.000 ₺ ciro, 4 yılda 252.000 ₺ pay.
+Örnekte aylık 50.000 TL ciro 4 yılda 252.000 TL pay getirir.
 
-Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam 50.000 ₺ öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.
+Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam 50.000 TL öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.
 
 ### Satışı kapatırsanız
 
-1. Aylık ciro 50.000 ₺ olur.
+1. Aylık ciro 50.000 TL olur.
 2. Bu ciro K1 kotasını geçer. Oranınız %20 olur.
-3. 50.000 ₺ × %20 = ayda 10.000 ₺.
-4. İlk 12 ay: 10.000 ₺ × 12 = 120.000 ₺.
-5. 13. ile 24. ay arası: 600.000 ₺ × %10 = 60.000 ₺.
-6. 25. ile 36. ay arası: 600.000 ₺ × %7 = 42.000 ₺.
-7. 37. ile 48. ay arası: 600.000 ₺ × %5 = 30.000 ₺.
+3. 50.000 TL × %20 = ayda 10.000 TL.
+4. İlk 12 ay: 10.000 TL × 12 = 120.000 TL.
+5. 13. ile 24. ay arası: 600.000 TL × %10 = 60.000 TL.
+6. 25. ile 36. ay arası: 600.000 TL × %7 = 42.000 TL.
+7. 37. ile 48. ay arası: 600.000 TL × %5 = 30.000 TL.
 
-Dört yılın toplamı 252.000 ₺ olur.
+Dört yılın toplamı 252.000 TL olur.
 
 ### Yalnız tanıştırırsanız
 
 1. Bu ciro K1 kotasını geçer. Oranınız %7 olur.
-2. 50.000 ₺ × %7 = ayda 3.500 ₺.
-3. İlk 12 ay: 3.500 ₺ × 12 = 42.000 ₺.
-4. 13. ile 24. ay arası: 600.000 ₺ × %5 = 30.000 ₺.
-5. 25. ile 36. ay arası: 600.000 ₺ × %2,5 = 15.000 ₺.
+2. 50.000 TL × %7 = ayda 3.500 TL.
+3. İlk 12 ay: 3.500 TL × 12 = 42.000 TL.
+4. 13. ile 24. ay arası: 600.000 TL × %5 = 30.000 TL.
+5. 25. ile 36. ay arası: 600.000 TL × %2,5 = 15.000 TL.
 
-Üç yılın toplamı 87.000 ₺ olur.
+Üç yılın toplamı 87.000 TL olur.
 
 Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.
 
-## Dört persona
+## Dört ortaklık yolu
 
 Hangisi sizsiniz?
 
@@ -165,16 +165,16 @@ Aynı ürünü dört farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı
 | --- | --- | --- | --- | --- |
 | Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Şirkette SGK’lı ve maaşlı çalışan satış uzmanı. | iStoc kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
 | Ne yapar? | Müşterisini iStoc ile tanıştırır ya da satışı kapatır. | Satıcıları ziyaret eder ve satışı yapar. | Çevresindeki bir işletmeye iStoc’u önerir. | iStoc’u tanıtır ve ilgilenen satıcıyı yönlendirir. |
-| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Maaş alır. Ayrıca paket primi alır. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. |
-| Nasıl başlar? | Katkı düzeyini yazılı belirler. | İş sözleşmesini ve prim ekini imzalar. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
+| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Maaş alır. Ayrıca paket primi alır. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. |
+| Nasıl başlar? | Katkı düzeyini yazılı belirler. | Görevini ve bölgesini netleştirir. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
 
-SGK, sosyal güvenlik kaydıdır.
+SGK’lı, sosyal güvenlik kaydı olan çalışan demektir.
 
 ## Kadrolu uzman
 
 Maaşınız sabittir. Priminiz sattığınız paket sayısıyla artar.
 
-Bu modelde şirket sizi SGK’lı ve maaşlı çalıştırır. Net maaşınız ayda 50.000 ₺ ile 60.000 ₺ arasındadır.
+Bu modelde şirket sizi SGK’lı ve maaşlı çalıştırır. Net maaşınız ayda 50.000 TL ile 60.000 TL arasındadır.
 
 | Ayda satılan paket | Prim oranı |
 | --- | --- |
@@ -189,16 +189,26 @@ Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır. Aylık 
 
 1. Bir ayda 8 yıllık paket satarsınız.
 2. Bir yıllık paket 3.990 € tutar.
-3. Örnekte 1 € 55,31 ₺ sayılır.
-4. 8 paketin bedeli 1.765.495 ₺ olur.
-5. 8 paket K2 kademesidir. Oran %7 olur.
-6. Priminiz 123.585 ₺ olur.
+3. Örnekte 1 € 55,31 TL sayılır.
+4. 8 paketin bedeli 1.765.495 TL olur.
+5. 8 paket ikinci kademedir. Oran %7 olur.
+6. Priminiz 123.585 TL olur.
 
 Yalnız tanıştırdıysanız prim oranı %7 olur. Prim ilk 3 aydaki ödemelerden hesaplanır.
 
 Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında %10 prim alırsınız.
 
 Kurulum ücreti ciroya girmez.
+
+Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.
+
+Aylık paketin oranı 12 ay boyunca satış ayındaki oranla aynı kalır.
+
+Yenilenen yıllık pakette 25. aydan sonra prim yoktur.
+
+Tanıştırdığınız müşteri 90 gün sizin adınıza korunur.
+
+Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.
 
 İlk iki ayın prim kuralını insan kaynakları ayrıca yazar.
 
@@ -220,9 +230,11 @@ Yılda en çok 3 uygun tavsiye sayılır. Bu, yılda en çok 6 ay ücretsiz kull
 
 Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.
 
+Yeni müşteri iStoc’u 60 gün kullanmaya devam etmelidir.
+
 Ödül nakit değildir. Ödül ücretsiz iStoc kullanımıdır.
 
-Ödül aldığınızı işletmeye açıkça söyleyin.
+Ödül alabileceğinizi işletmeye açıkça söyleyin.
 
 #### İlk adım
 
@@ -234,7 +246,7 @@ Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.
 
 iStoc’u sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.
 
-Size bir bağlantı ve bir kod verilir. Başvurular bu bağlantıyla sizin kaydınıza ulaşır.
+Size bir bağlantı ya da bir kod verilir. Başvurular bu yolla sizin kaydınıza ulaşır.
 
 Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.
 
@@ -246,9 +258,9 @@ Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.
 
 ### Örnek pay
 
-1. Tanıttığınız satıcılar ayda toplam 30.000 ₺ öder.
+1. Tanıttığınız satıcılar ayda toplam 30.000 TL öder.
 2. Bu ciro K1 kotasıdır. Yalnız tanıştırma payınız %7 olur.
-3. 30.000 ₺ × %7 = ayda 2.100 ₺.
+3. 30.000 TL × %7 = ayda 2.100 TL.
 
 Bu ilişki maaşlı iş değildir.
 
@@ -286,19 +298,19 @@ Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.
 
 Tanıştırma CRM’e kaydedilir. CRM, şirketin müşteri kayıt sistemidir.
 
-Planda tanıştırma 6 ay geçerlidir.
+Planda tanıştırma 6 ay geçerlidir. Ayrıntıyı yazılı anlaşma belirler.
 
 Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür.
 
 Bölüşme yazılı anlaşmada belirlenir.
 
-Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır.
+Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır. Ayrıntıyı yazılı anlaşma belirler.
 
 Fatura, vergi ve stopajı mali müşaviriniz doğrulasın.
 
 Şirket ortak getirmeye para ödemez.
 
-Bu belge sözleşme değildir. Kesin oranlar yazılı anlaşmada belirlenir.
+Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir.
 
 ## İlk adım
 
@@ -313,12 +325,13 @@ istoc.com
 
 Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.
 
+
 ## Belgelere özel kısa metinler
 
 Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgeler bu cümleleri yukarıdaki metne ek olarak kullanır.
 
 - Kareler ayları gösterir.
-- Oranlar 50.000 ₺ aylık cirolu örnektendir.
+- Oranlar 50.000 TL aylık cirolu örnektendir.
 - Satıcı paketi ücretsiz dener.
 - Basic paket ayda bu kadar tutar.
 - Mağaza kurulumu bir kez bu kadar tutar.
@@ -327,7 +340,7 @@ Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgel
 - Kotanızın oranını alırsınız.
 - Oran müşterinin o yılki cirosuna uygulanır.
 - Çubuklar her dönemin toplam payını gösterir.
-- Tutarlar bin ₺ cinsindendir.
+- Tutarlar bin TL cinsindendir.
 - Bu belgenin ana okuru çözüm ortağıdır.
 - Öteki üç yol sonraki iki sayfadadır.
 - Çözüm ortağı ile marka elçisi aynı plandan kazanır.
@@ -340,12 +353,16 @@ Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgel
 - Turuncu çubuk örnekteki kademedir.
 - Satışı kapatırsanız bu tutarı 48 ayda alırsınız.
 - Yalnız tanıştırırsanız bu tutarı 36 ayda alırsınız.
-- Çubuklardaki tutarlar bin ₺ cinsindendir.
 - Vergi ve stopaj dahil değildir.
+- Çubuklardaki tutarlar bin TL cinsindendir.
+- Her yolun kendi kazancı ve kendi ilk adımı var.
+- Priminiz paket sayısıyla artar.
+- Ayda 5 paket ve üstünde prim başlar.
+- Örnekte 8 paket 123.585 TL prim eder.
+- Örneğin 30.000 TL aylık ciroda yalnız tanıştırma payı %7 olur.
 - Ayrıntılar el kitapçığındadır.
-- Pay 48 ay boyunca azalarak sürer.
-- İlk yıl 50.000 ₺ aylık cirolu örnektir.
-- Sonraki yıllarda oran o yılki ciroya uygulanır.
-- Müşteriler her ay toplam 50.000 ₺ öder.
+- Pay 48 aya kadar azalarak sürer.
+- Müşteriler her ay toplam 50.000 TL öder.
 - Yalnız tanıştırırsanız oran %7 olur.
-- Üç yılın toplamı 87.000 ₺ eder.
+- Üç yılın toplamı 87.000 TL eder.
+- Bu tutar aylık paydır.
