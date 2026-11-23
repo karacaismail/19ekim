@@ -1,0 +1,12 @@
+{
+  "name": "segika-is-ortakligi-brosur",
+  "private": true,
+  "type": "module",
+  "description": "Segika iş ortaklığı tanıtım seti: PPTX sunum, A4 el kitapçığı ve A4 yatay görsel sunum.",
+  "scripts": {
+    "uret": "node uret.mjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "3.12.0"
+  }
+}
