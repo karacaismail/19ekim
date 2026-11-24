@@ -16,6 +16,7 @@ import { createRequire } from 'node:module';
 import { kitapcikHtml } from './sablon/kitapcik.mjs';
 import { gorselHtml } from './sablon/gorsel.mjs';
 import { sunumUret, sunumOnizlemeHtml } from './sablon/sunum.mjs';
+import { denetle } from './denetim.mjs';
 
 const burasi = dirname(fileURLToPath(import.meta.url));
 const kok = resolve(burasi, '../..');
@@ -186,3 +187,6 @@ try {
 } finally {
   await tarayici.close();
 }
+
+// İçerik denetimi gerçek çıktıyı okur. Yalnız bütün set üretildiğinde çalışır.
+if (!sadece) await denetle();

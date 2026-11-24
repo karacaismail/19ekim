@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Segika iş ortaklığı tanıtım seti: PPTX sunum, A4 el kitapçığı ve A4 yatay görsel sunum.",
   "scripts": {
-    "uret": "node uret.mjs"
+    "uret": "node uret.mjs",
+    "denetle": "node denetim.mjs"
   },
   "dependencies": {
     "pptxgenjs": "3.12.0"
