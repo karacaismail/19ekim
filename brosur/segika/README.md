@@ -55,6 +55,9 @@ Komut üç dosyayı üretir. Önizlemeleri de `onizleme/` klasörüne yazar. En 
 - Bu fiyatlar `src/data/satisOrtakligi.ts` içindeki `segikaFiyat` değerlerinden farklıdır. `segikaFiyat` 25 çalışan içindir: 1.850 TL, 1.600 TL ve 2.600 TL. segika.com fiyat sayfası da 24 Kasım 2026 Salı günü aynı 25 çalışan fiyatlarını gösterdi. `src/` altındaki fiyat verisi değişmedi.
 - 25 çalışan fiyatının 4 katı 7.400 TL, 6.400 TL ve 10.400 TL eder. Kullanıcının 100 çalışan fiyatları bunlardan yaklaşık %15 düşüktür. Site 100 çalışan fiyatı yazmıyor.
 - Ölçek sayıları Segika tanıtım broşüründen gelir. Bunlar Temmuz 2025 verileridir.
+- "500'den fazla çalışan için Segika ayrıca teklif verir." cümlesinin kaynağı segika.com fiyat sayfasıdır. Adres https://www.segika.com/program-ozellikleri/fiyatlandirma/ şeklindedir. Sayfada "500’den fazla çalışan için fiyat teklifi alınız." yazıyor. Bu bilgi 24 Kasım 2026 Salı günü doğrulandı.
+- Belgede fiyat kaynağı olarak şu cümle yazar: "Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika'dan yazılı isteyin."
+- Mali müşavir ofisleri için nakitsiz yol üç dosyada da yazar. El kitapçığında 5. sayfadadır. Görsel sunumda ve sunumda son sayfadadır.
 - "Her ay 360 milyon TL teşvik" sayısı yalnız Segika'nın beyanı olarak ve kaynağıyla yazılır.
 - Rol verisindeki daha sıkı koşul geçerlidir. Örneğin sonraki yılların payı için destek vermek gerekir.
 - Kaynakta oran değişirse `icerik.mjs` dosyasını da güncelleyin. Sonra seti yeniden üretin.
@@ -64,6 +67,16 @@ Komut üç dosyayı üretir. Önizlemeleri de `onizleme/` klasörüne yazar. En 
 `kazancPlani.ts` aylık ödeyen müşterinin cirosunu iş ortakları için ayrıca tanımlamıyor. Kod yalnız aylık ciroyu ve "ulaşılan oran cironun tamamına uygulanır" kuralını tanımlar.
 
 Bu yüzden örnek şunu varsayar: aylık ödeyen işverenin o ay ödediği bedel o ayın cirosuna yazılır. Örnekte hiçbir işveren ayrılmaz. Varsayım belgelerde de yazar.
+
+## Yıllık satış örneğindeki varsayım
+
+Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Bu yüzden 2 işverenin cirosu 213.600 TL olur ve oran %30'a çıkar. `kazancPlani.ts` bunu iş ortakları için ayrıca tanımlamıyor. Kesin kural yazılı anlaşmada belirlenir. Varsayım belgelerde de yazar.
+
+Yıllık sayfanın örneği 2 işverendir. "Siz buradasınız" işareti 4. seviyede durur. 1. işveren okuru 3. seviyeye, 2. işveren 4. seviyeye taşır.
+
+## Basamak adları
+
+Okura görünen her yerde basamaklar "1. seviye" ile "4. seviye" arasında adlandırılır. Eski kısa adlar okura görünmez. İçerik denetimi bu adları arar ve bulursa üretimi durdurur.
 
 ## Üretim sırasında yapılan denetimler
 
@@ -76,6 +89,12 @@ Bu yüzden örnek şunu varsayar: aylık ödeyen işverenin o ay ödediği bedel
   - Bir dosyada 12'den çok sayfa vardır.
   - İlk sayfada belge türü ya da kapak fotoğrafı yoktur.
   - "Kadrolu", "insan kaynakları danışman", "Bu davet mali müşavir", "Dört ortaklık yolu", "25 çalışan" ya da "Fırsat" geçer.
+  - Eski fiyat kaynağı cümlesi geçer. Eski basamak adları geçer.
+  - Yıllık sayfada "%25 olur" yazar. Okur o sayfada iki farklı oran görmemelidir.
+  - Yeni fiyat cümlesi ya da dört seviye adı geçmez.
+  - Nakitsiz yolun koşulları geçmez.
+  - Marka elçisinin 30.000 TL sınırı geçmez.
+  - Yıllık varsayım ya da "Kazanılmış hak sayılmaz" notu geçmez.
   - "kümülatif", "100 çalışan", yeni fiyatlar, "Şirketinize uygun planı seçin." ya da iki taahhüt başlığı geçmez.
   - PDF'te Outfit dışında yazı tipi ya da Type3 yazı tipi vardır. PPTX'te Arial dışında yazı tipi vardır.
 

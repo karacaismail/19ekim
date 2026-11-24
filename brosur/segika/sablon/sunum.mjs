@@ -144,7 +144,7 @@ function s4() {
     metin(K, 4.45, W - 2 * K, 0.6, P.paketAyrimi, { boyut: 14, satir: 1.05 }),
     metin(K, 5.1, W - 2 * K, 0.6, `${P.entegrasyon} ${P.entegrasyonPaket} ${P.kazaNot}`, { boyut: 14, renk: R.gri, satir: 1.05 }),
     metin(K, 5.9, W - 2 * K, 0.6, `${P.kdv} ${P.teklif} ${P.ayni}`, { boyut: S.kucuk, renk: R.gri, satir: 1.05 }),
-    ...alt(4, false, P.kaynak),
+    ...alt(4),
   ] };
 }
 
@@ -219,21 +219,22 @@ function s7() {
   o.push(metin(zx + 0.3, 2.4, W - K - zx - 0.5, 0.28, 'Bu ayki kazanç', { boyut: S.kucuk, renk: R.lacivertDerin }));
   o.push(metin(zx + 0.3, 2.66, W - K - zx - 0.5, 0.6, tl(ORNEK.kazanc), { boyut: 30, kalin: true, renk: R.lacivertDerin }));
   // Seviyeler
-  const sw = 1.38, sara = 0.1, taban = 5.85;
+  const sw = 1.38, sara = 0.1, taban = 5.4;
   o.push(metin(K, 3.45, 5.8, 0.36, Y.seviyeBaslik, { boyut: 17, kalin: true, renk: R.lacivert }));
   SEVIYE.liste.forEach((s, i) => {
-    const h = 1.2 + i * 0.25, x = K + i * (sw + sara), y = taban - h, bur = s.no === SEVIYE.bir.seviye;
+    const h = 1.2 + i * 0.15, x = K + i * (sw + sara), y = taban - h, bur = s.no === SEVIYE.ornek;
     o.push(kutu(x, y, sw, h, bur ? R.lacivert : R.sisAcik));
     o.push(metin(x + 0.1, y + 0.08, sw - 0.2, 0.5, bur ? Y.buradasiniz : s.ad, { boyut: S.kucuk, kalin: true, renk: bur ? R.yesil : R.gri, satir: 1.0 }));
     o.push(metin(x + 0.1, taban - 0.78, sw - 0.2, 0.45, yuzde(s.oran), { boyut: 24, kalin: true, renk: bur ? R.beyaz : R.lacivert, satir: 1 }));
-    o.push(metin(x + 0.1, taban - 0.33, sw - 0.2, 0.28, s.esik ? `${binTl(s.esik).replace(',0', '')} bin TL+` : 'Başlangıç', { boyut: S.kucuk, renk: bur ? R.beyaz : R.murekkep }));
+    o.push(metin(x + 0.1, taban - 0.33, sw - 0.2, 0.28, s.esik ? `${binTl(s.esik).replace(',0', '')} bin TL+` : '30 bin TL altı', { boyut: S.kucuk, renk: bur ? R.beyaz : R.murekkep }));
   });
-  o.push(metin(K, 5.95, 5.8, 0.6, Y.kalan, { boyut: 15, kalin: true, renk: R.yesilMetin, satir: 1.05 }));
+  o.push(metin(K, 5.48, 5.8, 0.5, Y.yol, { boyut: 14, kalin: true, renk: R.yesilMetin, satir: 1.0 }));
+  o.push(metin(K, 6.0, 5.8, 0.8, `${Y.birIsveren} ${Y.varsayim}`, { boyut: S.kucuk, satir: 1.0 }));
   // 4 yıl
   const yx = 7.2, yw = W - K - yx;
   o.push(metin(yx, 3.4, yw, 0.5, Y.dortYil, { boyut: 26, kalin: true, renk: R.yesilMetin }));
-  o.push(...cubuklar({ x: yx, y: 3.75, w: yw, h: 2.25, veriler: ORNEK.yillar.map((x) => x.tutar), enCok: ORNEK.kazanc, renkler: [R.yesil, R.lacivert, R.lacivert, R.lacivert], ustYazi: ORNEK.yillar.map((x) => tl(x.tutar)), altYazi: ORNEK.yillar.map((x) => x.ad), altYazi2: null, boyut: 15 }));
-  o.push(metin(yx, 6.05, yw, 0.6, `${Y.toplam} ${Y.dortYilAlt}`, { boyut: S.kucuk, satir: 1.05 }));
+  o.push(...cubuklar({ x: yx, y: 3.75, w: yw, h: 1.95, veriler: ORNEK.yillar.map((x) => x.tutar), enCok: ORNEK.kazanc, renkler: [R.yesil, R.lacivert, R.lacivert, R.lacivert], ustYazi: ORNEK.yillar.map((x) => tl(x.tutar)), altYazi: ORNEK.yillar.map((x) => x.ad), altYazi2: null, boyut: 15 }));
+  o.push(metin(yx, 5.8, yw, 0.95, `${Y.toplam} ${Y.dortYilAlt} ${M.kazanc.hakDegil}`, { boyut: S.kucuk, satir: 1.0 }));
   return { ogeler: [
     ...ust('07  Yıllık satış'),
     kanca(Y.kanca, 1.05, 11.6, 0.65),
@@ -272,12 +273,12 @@ function s9() {
     const ix = gx + (bir ? 0.3 : 0.25), iw = gw - (bir ? 0.75 : 0.45);
     const etiket = bir ? R.yesil : R.yesilMetin, yazi = bir ? R.beyaz : R.murekkep;
     o.push(metin(ix, 2.02, iw, 0.5, r.ad, { boyut: 22, kalin: true, renk: bir ? R.yesil : R.lacivert }));
-    const satirlar = [['Kim', r.kim, 0.5], ['Ne yapar', r.ne, 0.5], ['Nasıl kazanır', r.kazanc, 0.5], ['Nasıl başlar', r.ilk, 0.5]];
+    const satirlar = [['Kim', r.kim, 0.5], ['Ne yapar', r.ne, 0.5], ['Nasıl kazanır', r.kazancNot ? `${r.kazanc}. ${r.kazancNot}` : r.kazanc, r.kazancNot ? 0.75 : 0.5], ['Nasıl başlar', r.ilk, 0.5]];
     let y = 2.62;
     satirlar.forEach(([e, m, h], j) => {
       o.push(metin(ix, y, iw, 0.26, e.toLocaleUpperCase('tr-TR'), { boyut: S.ust, kalin: true, renk: etiket, harf: 1 }));
       o.push(metin(ix, y + 0.28, iw, h, m, { boyut: 14, kalin: j === 2, renk: j === 2 && !bir ? R.lacivert : yazi, satir: 1.05 }));
-      y += 0.28 + h + 0.08;
+      y += 0.28 + h + 0.04;
     });
   });
   return { ogeler: [...ust('09  Üç ortaklık yolu'), kanca(M.roller.kanca, 1.15, 11.6, 0.7), ...o,
@@ -341,12 +342,22 @@ function s12() {
     o.push(metin(K + 0.55, y + 0.04, 5.8, 0.45, m, { boyut: 18, kalin: true, renk: R.beyaz }));
     o.push(cizgi(K, y + 0.6, 6.4, 0, R.cizgiLacivertUstu, 1));
   });
+  // Mali müşavir ofisleri için nakitsiz yol. Koşulları el kitapçığıyla aynıdır.
+  const nx = 7.75, nw = W - K - nx, Sr = M.surec;
+  const nakitsiz = [
+    cizgi(nx, 3.0, nw, 0, R.cizgiLacivertUstu, 1),
+    metin(nx, 3.08, nw, 0.36, Sr.nakitsizBaslik, { boyut: 15, kalin: true, renk: R.yesil }),
+    metin(nx, 3.46, nw, 1.3, `${Sr.nakitsiz} ${Sr.bekliyor}`, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
+    ...Sr.seviyeler.map((sv, i) => metin(nx, 4.65 + i * 0.5, nw, 0.44, `${sv.ad}: ${sv.kosul}. ${sv.m}`, { boyut: S.kucuk, renk: R.beyaz, satir: 1.0 })),
+    metin(nx, 6.2, nw, 0.45, Sr.ikiYol, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
+  ];
   return { zemin: R.lacivert, koyu: true, ogeler: [...ust('12  İlk adım', true),
     metin(K, 1.3, 7, 1.4, M.ilk.kanca, { boyut: 40, kalin: true, renk: R.beyaz, satir: 1.0 }),
     ...o,
-    ...markaYazisi(8.3, 3.2, 44, R.beyaz),
-    metin(8.3, 4.15, 4.2, 0.5, 'segika.com', { boyut: 24, kalin: true, renk: R.yesil }),
-    metin(8.3, 4.85, 4.2, 0.7, M.ilk.not, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.05 }),
+    ...markaYazisi(nx, 1.3, 32, R.beyaz),
+    metin(nx, 1.95, nw, 0.42, 'segika.com', { boyut: 20, kalin: true, renk: R.yesil }),
+    metin(nx, 2.4, nw, 0.5, M.ilk.not, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
+    ...nakitsiz,
     ...alt(12, true, TARIH)] };
 }
 

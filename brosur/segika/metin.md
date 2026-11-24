@@ -105,7 +105,7 @@ Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır. Bu bağlantı Te
 
 500'den fazla çalışan için Segika ayrıca teklif verir. Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.
 
-Fiyatlar Segika'nın 24 Kasım 2026 Salı günkü fiyatlarıdır.
+Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika'dan yazılı isteyin.
 
 ## 5. Nasıl işler
 
@@ -142,10 +142,10 @@ Ciro, getirdiğiniz müşterilerin ödediği paket bedelidir. Ciro KDV hariç sa
 
 Satışı kapatırsanız taban oranınız %15'tir. Satışı kapatan kişi ürünü gösterir. Kurulumu ve ilk eğitimi de yapar.
 
-- Aylık ciro 30.000 TL altındaysa oran %15 olur.
-- Aylık ciro 30.000 TL ve üstündeyse oran %20 olur. Bu basamağın adı K1'dir.
-- Aylık ciro 70.000 TL ve üstündeyse oran %25 olur. Bu basamağın adı K2'dir.
-- Aylık ciro 120.000 TL ve üstündeyse oran %30 olur. Bu basamağın adı K3'tür.
+- Aylık ciro 30.000 TL altındaysa oran %15 olur. Bu basamağın adı 1. seviyedir.
+- Aylık ciro 30.000 TL ve üstündeyse oran %20 olur. Bu basamağın adı 2. seviyedir.
+- Aylık ciro 70.000 TL ve üstündeyse oran %25 olur. Bu basamağın adı 3. seviyedir.
+- Aylık ciro 120.000 TL ve üstündeyse oran %30 olur. Bu basamağın adı 4. seviyedir.
 
 Yalnız tanıştırırsanız oranlar şöyledir.
 
@@ -161,7 +161,7 @@ Müşteri sonraki yıllarda da öderse pay sürer. Satışı kapattıysanız mü
 - Satışı kapatanın payı 2. yılda %10, 3. yılda %7, 4. yılda %5 olur.
 - Tanıştıranın payı 2. yılda %5, 3. yılda %2,5 olur.
 
-İlk 12 ayda K1 basamağına ulaşmazsanız 13. aydan sonra pay almazsınız.
+İlk 12 ayda 2. seviyeye ulaşmazsanız 13. aydan sonra pay almazsınız.
 
 ## 7. Yıllık satış
 
@@ -179,14 +179,18 @@ Bir ayda 2 işverene yıllık paket sattığınızı düşünün. Her işverenin
 
 ### Her seviye oranınızı artırır
 
-- 1. seviyede oran %15 olur. Her satış buradan başlar.
+- 1. seviyede oran %15 olur. Aylık ciro 30.000 TL altındadır.
 - 2. seviyede oran %20 olur. Aylık ciro 30.000 TL ve üstündedir.
 - 3. seviyede oran %25 olur. Aylık ciro 70.000 TL ve üstündedir.
 - 4. seviyede oran %30 olur. Aylık ciro 120.000 TL ve üstündedir.
 
-1 işverene yıllık paket sattınız. Ciro 106.800 TL olur. Bu ciro sizi 3. seviyeye taşır. Oranınız %25 olur.
+Örnekte siz 4. seviyedesiniz. "Siz buradasınız" işareti 4. seviyede durur.
 
-4. seviyeye 13.200 TL kaldı. 1 işveren daha, oran %30 olur.
+1. işveren sizi 3. seviyeye taşır. 2. işveren sizi 4. seviyeye taşır.
+
+1. işverenin cirosu 106.800 TL olur. 4. seviyeye 13.200 TL kalır.
+
+Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Kesin kural yazılı anlaşmada belirlenir.
 
 ### 4 yıla kadar süren pay
 
@@ -255,7 +259,7 @@ Siz bordro ve çalışma hayatı konusunda içerik üretirsiniz.
 
 Siz Segika'yı kitlenize anlatırsınız. Her ticari paylaşımın başına “reklam” yazarsınız. İlgilenen işveren size özel bağlantıyla başvurur.
 
-Kazancınız tanıştırma oranından gelir. Oran %7 ile %15 arasıdır.
+Kazancınız tanıştırma oranından gelir. Oran %7 ile %15 arasıdır. 30.000 TL cironun altında pay oluşmaz.
 
 Bağlantınızdan 1 işveren yıllık paket alsın. Ciro 106.800 TL olur. Bu ciro 100.000 TL eşiğini geçer. Oran %15 olur. Kazanç 16.020 TL olur.
 
@@ -333,7 +337,7 @@ Bu sayfa ilişkimizin kurallarını anlatır. Her iki taraf da sözünü tutar.
 - Destek vermediğiniz ay için pay oluşmaz.
 - Kayıt kabul edilmeden müşteri size ait sayılmaz.
 - Mali müşavir, uygunluk yazılmadan müşteriye ortaklıktan söz etmez.
-- İlk 12 ayda K1 basamağına ulaşmazsanız 13. aydan sonra pay almazsınız.
+- İlk 12 ayda 2. seviyeye ulaşmazsanız 13. aydan sonra pay almazsınız.
 
 Bu taahhütler yazılı anlaşmanın özüdür. Taahhütler, imzalanan anlaşmayla bağlayıcı olur. Bu belge tek başına sözleşme değildir.
 

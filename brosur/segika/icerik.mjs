@@ -45,9 +45,9 @@ export const OLCEK = [
 /* ---------- Basamaklar ---------- */
 export function basamaklar(tur) {
   const p = PLAN[tur];
-  const liste = [{ ad: 'Başlangıç', esik: 0, oran: p.taban }];
+  const liste = [{ ad: '1. seviye', esik: 0, oran: p.taban }];
   let oran = p.taban;
-  p.esik.forEach((e, i) => { oran = Math.round((oran + p.artis[i]) * 10000) / 10000; liste.push({ ad: `K${i + 1}`, esik: e, oran }); });
+  p.esik.forEach((e, i) => { oran = Math.round((oran + p.artis[i]) * 10000) / 10000; liste.push({ ad: `${i + 2}. seviye`, esik: e, oran }); });
   return liste;
 }
 export function oranBul(tur, ciro) {
@@ -86,8 +86,12 @@ const seviye1 = KAP.findIndex((b) => b.oran === oranBul('kapatir', ciro1));
 const kalan = KAP[seviye1 + 1].esik - ciro1;
 sagla(seviye1 === 2 && kalan === 13200, '1 işveren 3. seviyede, sonraki seviyeye 13.200 TL kalır');
 sagla(oranBul('kapatir', ciro1 + yillik) === 0.3, '1 işveren daha, oran %30 olur');
+const seviye2 = KAP.findIndex((b) => b.oran === oran2);
+sagla(seviye2 === 3, 'örnek 2 işveren 4. seviyededir');
 export const SEVIYE = {
-  liste: KAP.map((b, i) => ({ no: i + 1, ad: `${i + 1}. seviye`, esik: b.esik, oran: b.oran })),
+  liste: KAP.map((b, i) => ({ no: i + 1, ad: b.ad, esik: b.esik, oran: b.oran })),
+  /** "Siz buradasınız" işareti sayfanın örneğine aittir: 2 işveren, 4. seviye. */
+  ornek: seviye2 + 1,
   bir: { ciro: ciro1, seviye: seviye1 + 1, oran: oranBul('kapatir', ciro1), kalan, sonraki: KAP[seviye1 + 1].oran },
 };
 
@@ -195,13 +199,12 @@ export const M = {
   plan: {
     kanca: 'Şirketinize uygun planı seçin.',
     paketAyrimi: 'Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.',
-    fiyatNot: 'Fiyatlar 100 çalışanlı bir firma için aylıktır. Bu belgede fiyatlar KDV hariç sayılır.',
+    fiyatNot: 'Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika\'dan yazılı isteyin.',
     kdv: 'KDV, katma değer vergisinin kısa adıdır.',
     entegrasyon: 'Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır.',
     entegrasyonPaket: 'Bu bağlantı Teşvik ve Otomasyon paketindedir.',
     teklif: '500\'den fazla çalışan için Segika ayrıca teklif verir.',
     ayni: 'Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.',
-    kaynak: 'Fiyatlar Segika\'nın 24 Kasım 2026 Salı günkü fiyatlarıdır.',
     kazaNot: 'İş kazası SGK\'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.',
   },
   surec: {
@@ -220,6 +223,7 @@ export const M = {
       'Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.',
     ],
     musavir: 'Mali müşavirler meslek kurallarına bağlıdır. Hukuk danışmanı komisyonun uygunluğunu inceler. Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.',
+    nakitsizBaslik: 'Mali müşavir ofisleri için nakitsiz yol',
     nakitsiz: 'Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika\'yı toptan fiyatla kullanır.',
     bekliyor: 'Bu yol hukuk görüşünü bekliyor. Toptan fiyat bantları yazılı anlaşmada belirlenir. Bu kabul edilmeden müşteriye teklif vermeyin.',
     sartlar: 'Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir.',
@@ -243,7 +247,7 @@ export const M = {
     hakDegil: 'Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz.',
     yilKapatir: 'Satışı kapatanın payı 2. yılda %10, 3. yılda %7, 4. yılda %5 olur.',
     yilTanistir: 'Tanıştıranın payı 2. yılda %5, 3. yılda %2,5 olur.',
-    k1: 'İlk 12 ayda K1 basamağına ulaşmazsanız 13. aydan sonra pay almazsınız.',
+    k1: 'İlk 12 ayda 2. seviyeye ulaşmazsanız 13. aydan sonra pay almazsınız.',
     bolusme: 'Tanıştıran ve satışı kapatan farklı kişi olabilir. Bu durumda tanıştıranın payı, kapatanın payından düşülür.',
     bolusmeToplam: `Toplam oran ${yuzde(ORNEK.oran)} kalır.`,
   },
@@ -255,8 +259,9 @@ export const M = {
     hesap: `Hesap şöyledir: ${tl(paket)} × 12 = ${tl(yillik)}. Sonra ${tl(yillik)} × 2 = ${tl(ciro2)}. Sonra ${tl(ciro2)} × ${yuzde(oran2)} = ${tl(kazanc2)}.`,
     seviyeBaslik: 'Her seviye oranınızı artırır.',
     buradasiniz: 'Siz buradasınız',
-    birIsveren: `1 işverene yıllık paket sattınız. Ciro ${tl(ciro1)} olur. Bu ciro sizi 3. seviyeye taşır. Oranınız ${yuzde(SEVIYE.bir.oran)} olur.`,
-    kalan: `4. seviyeye ${tl(kalan)} kaldı. 1 işveren daha, oran %30 olur.`,
+    yol: '1. işveren sizi 3. seviyeye taşır. 2. işveren sizi 4. seviyeye taşır.',
+    birIsveren: `1. işverenin cirosu ${tl(ciro1)} olur. 4. seviyeye ${tl(kalan)} kalır.`,
+    varsayim: 'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Kesin kural yazılı anlaşmada belirlenir.',
     dortYil: '4 yıla kadar süren pay',
     dortYilAlt: 'Pay, müşteri ödedikçe ve siz destek verdikçe sürer.',
     toplam: `Dört yılın toplamı ${tl(dortYil)} olur.`,
@@ -297,6 +302,7 @@ export const M = {
         kim: 'Bordro ve çalışma hayatı içeriği üreten kişi',
         ne: 'İçerikle tanıtır, özel bağlantısını paylaşır.',
         kazanc: 'Tanıştırma oranı: %7 ile %15 arası',
+        kazancNot: '30.000 TL cironun altında pay oluşmaz.',
         ilk: 'Pazarlama sorumlusundan özel bağlantınızı alın.',
       },
     ],

@@ -136,13 +136,17 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .ilk-panel li::before { content: counter(s); font-weight: var(--w-dev); color: var(--r-yesil); }
 
 /* Eski son sayfa */
-.son-izgara { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16mm; flex: 1; align-items: center; }
-.son .kanca { font-size: 44pt; }
+.son-izgara { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; flex: 1; align-items: start; margin-top: 6mm; min-height: 0; }
+.son .kanca { font-size: 38pt; }
 .son ol { list-style: none; counter-reset: s; }
-.son li { counter-increment: s; display: grid; grid-template-columns: 14mm 1fr; align-items: baseline; font-size: 17pt; font-weight: var(--w-kalin); padding: 4mm 0; border-bottom: 1px solid var(--r-cizgiLacivertUstu); }
+.son li { counter-increment: s; display: grid; grid-template-columns: 14mm 1fr; align-items: baseline; font-size: 17pt; font-weight: var(--w-kalin); padding: 3.2mm 0; border-bottom: 1px solid var(--r-cizgiLacivertUstu); }
 .son li::before { content: counter(s); font-size: 24pt; font-weight: var(--w-dev); color: var(--r-yesil); }
-.son .adres .marka { font-size: 46pt; }
-.son .adres p.web { font-size: 24pt; font-weight: var(--w-kalin); color: var(--r-yesil); margin-top: 3mm; }
+.son .adres .marka { font-size: 34pt; }
+.son .adres p.web { font-size: 20pt; font-weight: var(--w-kalin); color: var(--r-yesil); margin-top: 1mm; }
+.son .nakitsiz { margin-top: 4mm; padding-top: 3mm; border-top: 1px solid var(--r-cizgiLacivertUstu); }
+.son .nakitsiz h3 { font-size: 14pt; font-weight: var(--w-baslik); color: var(--r-yesil); }
+.son .nakitsiz p { font-size: 11pt; line-height: 1.3; color: var(--r-griLacivertUstu); margin-top: 1.5mm; }
+.son .nakitsiz p.sv b { color: var(--r-beyaz); font-weight: var(--w-kalin); }
 
 /* Kapak: tam sayfa fotoğraf, üstte marka, fotoğrafın üstünde düz renkli metin alanı. Kutunun köşesi düzdür. */
 .kapak { padding: 0; }
@@ -189,13 +193,14 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 /* 7 Yıllık */
 .yil-alt { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; margin-top: auto; align-items: end; }
 .merdiven { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; align-items: end; margin-top: 2mm; }
-.merdiven div { background: var(--r-sisAcik); padding: 2.5mm 3mm; display: flex; flex-direction: column; justify-content: flex-end; }
-.merdiven div:nth-child(1) { height: 25mm; } .merdiven div:nth-child(2) { height: 29mm; }
-.merdiven div:nth-child(3) { height: 33mm; background: var(--r-lacivert); color: var(--r-beyaz); } .merdiven div:nth-child(4) { height: 37mm; }
+.merdiven div { background: var(--r-sisAcik); padding: 3mm; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.6mm; }
+.merdiven div:nth-child(1) { height: 30mm; } .merdiven div:nth-child(2) { height: 32.5mm; }
+.merdiven div:nth-child(3) { height: 35mm; } .merdiven div:nth-child(4) { height: 37.5mm; }
+.merdiven div.burada { background: var(--r-lacivert); color: var(--r-beyaz); }
 .merdiven small { font-size: 11pt; font-weight: var(--w-kalin); color: var(--r-gri); line-height: 1.2; }
-.merdiven div:nth-child(3) small { color: var(--r-yesil); }
+.merdiven div.burada small { color: var(--r-yesil); }
 .merdiven b { font-size: 22pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.05; }
-.merdiven div:nth-child(3) b { color: var(--r-beyaz); }
+.merdiven div.burada b { color: var(--r-beyaz); }
 .merdiven span { font-size: 11pt; line-height: 1.2; }
 .yil-alt h3 { font-size: 15pt; font-weight: var(--w-baslik); color: var(--r-lacivert); }
 .yil-alt .kalan { font-size: 14pt; font-weight: var(--w-baslik); color: var(--r-yesilMetin); margin-top: 2.5mm; line-height: 1.3; }
@@ -271,7 +276,7 @@ const sayfalar = [
     <p class="entegre-satir" style="color:var(--r-murekkep)">${P.paketAyrimi}</p>
     <p class="entegre-satir">${P.entegrasyon} ${P.entegrasyonPaket} ${P.kazaNot}</p>
     <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
-    ${alt(4, P.kaynak)}</section>`;
+    ${alt(4)}</section>`;
   },
   () => `<section class="sayfa">${bas(5, 'Nasıl işler')}
     <h2 class="kanca">${M.surec.kanca}</h2>
@@ -302,8 +307,8 @@ const sayfalar = [
     </div>
     <div class="yil-alt">
       <div><h3>${Y.seviyeBaslik}</h3>
-        <div class="merdiven">${SEVIYE.liste.map((s) => `<div><small>${s.no === SEVIYE.bir.seviye ? Y.buradasiniz : s.ad}</small><b class="rakam">${yuzde(s.oran)}</b><span>${s.esik ? `${tl(s.esik)}+` : 'Başlangıç'}</span></div>`).join('')}</div>
-        <p class="kalan">${Y.kalan}</p></div>
+        <div class="merdiven">${SEVIYE.liste.map((s) => `<div class="${s.no === SEVIYE.ornek ? 'burada' : ''}"><small>${s.no === SEVIYE.ornek ? Y.buradasiniz : s.ad}</small><b class="rakam">${yuzde(s.oran)}</b><span>${s.esik ? `${tl(s.esik)}+` : '30.000 TL altı'}</span></div>`).join('')}</div>
+        <p class="kalan">${Y.yol}</p><p class="k">${Y.birIsveren} ${Y.varsayim}</p></div>
       <div><p class="buyuk">${Y.dortYil}</p>${yilGrafik({ yillar: ORNEK.yillar, genislik: 470, yukseklik: 150, boyut: 15.5 })}
         <p class="k">${Y.toplam} ${Y.dortYilAlt} ${M.kazanc.hakDegil}</p></div>
     </div>${alt(7)}</section>`;
@@ -321,7 +326,7 @@ const sayfalar = [
   () => `<section class="sayfa">${bas(9, M.roller.baslik)}
     <h2 class="kanca">${M.roller.kanca}</h2>
     <div class="roller roller3">${M.roller.liste.map((r) => `<div class="${r.id === 'cozum' ? 'bir koyu' : ''}"><h3>${r.ad}</h3><dl>
-      <dt>Kim</dt><dd>${r.kim}</dd><dt>Ne yapar</dt><dd>${r.ne}</dd><dt>Nasıl kazanır</dt><dd class="oran">${r.kazanc}</dd><dt>Nasıl başlar</dt><dd>${r.ilk}</dd></dl></div>`).join('')}</div>
+      <dt>Kim</dt><dd>${r.kim}</dd><dt>Ne yapar</dt><dd>${r.ne}</dd><dt>Nasıl kazanır</dt><dd class="oran">${r.kazanc}</dd>${r.kazancNot ? `<dd>${r.kazancNot}</dd>` : ''}<dt>Nasıl başlar</dt><dd>${r.ilk}</dd></dl></div>`).join('')}</div>
     <p class="not" style="margin-top:4mm">${M.roller.elciHesap} Kazanç ${tl(ELCI.kazanc)} olur. ${M.roller.not}</p>
     ${alt(9)}</section>`,
   () => {
@@ -350,7 +355,9 @@ const sayfalar = [
   () => `<section class="sayfa son koyu">${bas(12, 'İlk adım')}
     <div class="son-izgara">
       <div><h2 class="kanca">${M.ilk.kanca}</h2><ol style="margin-top:8mm">${M.ilk.adimlar.map((x) => `<li>${x}</li>`).join('')}</ol></div>
-      <div class="adres">${marka()}<p class="web">segika.com</p><p class="not" style="margin-top:6mm">${M.ilk.not}</p></div>
+      <div class="adres">${marka()}<p class="web">segika.com</p><p class="not" style="margin-top:3mm">${M.ilk.not}</p>
+        <div class="nakitsiz"><h3>${M.surec.nakitsizBaslik}</h3><p>${M.surec.nakitsiz} ${M.surec.bekliyor}</p>
+          ${M.surec.seviyeler.map((s) => `<p class="sv"><b>${s.ad}:</b> ${s.kosul}. ${s.m}</p>`).join('')}<p>${M.surec.ikiYol}</p></div></div>
     </div>${alt(12, TARIH)}</section>`,
 ];
 
