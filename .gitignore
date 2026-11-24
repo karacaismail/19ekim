@@ -14,6 +14,8 @@ blob-report/
 !public/indir/istoc/*.pdf
 *.jpg
 *.jpeg
+# Segika kapak fotoğrafı lisansı açık bir stok fotoğraftır. Kaynağı brosur/segika/README.md dosyasındadır.
+!brosur/segika/gorsel/*.jpg
 *.heic
 .claude/
 # OPEX: kişisel veri içeren tohum ve Apps Script paketi repoya girmez (repo dışında: ../opex-google/).

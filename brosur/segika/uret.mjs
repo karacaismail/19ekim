@@ -13,9 +13,6 @@ import { execFileSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
-import { kitapcikHtml } from './sablon/kitapcik.mjs';
-import { gorselHtml } from './sablon/gorsel.mjs';
-import { sunumUret, sunumOnizlemeHtml } from './sablon/sunum.mjs';
 import { denetle } from './denetim.mjs';
 
 const burasi = dirname(fileURLToPath(import.meta.url));
@@ -58,7 +55,15 @@ async function pdfUret(tarayici, { ad, html, genislik, yukseklik, onek }) {
     return [...s.querySelectorAll('*')].filter((e) => !alt.contains(e) && e !== alt && !e.contains(alt) && e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().bottom > ust + 0.5)
       .map((e) => `sayfa ${i + 1}: ${e.tagName.toLowerCase()}.${e.className} alt bilgiye biniyor`);
   }));
-  tasma.push(...binen);
+  // Kapsayıcısı taşanı gizliyorsa (overflow: hidden) öğe görünmez. Bu da taşma sayılır. Kapak fotoğrafı istisnadır.
+  const gizli = await sayfa.evaluate(() => [...document.querySelectorAll('.sayfa')].flatMap((s, i) => [...s.querySelectorAll('*')].filter((e) => {
+    if (e.closest('.foto') || !e.getBoundingClientRect().height) return false;
+    for (let a = e.parentElement; a && a !== s; a = a.parentElement) {
+      if (getComputedStyle(a).overflow !== 'visible') return e.getBoundingClientRect().bottom > a.getBoundingClientRect().bottom + 0.5;
+    }
+    return false;
+  }).map((e) => `sayfa ${i + 1}: ${e.tagName.toLowerCase()}.${e.className} kapsayıcısında gizleniyor`)));
+  tasma.push(...binen, ...gizli);
   if (tasma.length) throw new Error(`Taşan öğe var:\n${tasma.join('\n')}`);
   // A4 belgelerde gövde, koşul, açıklama ve grafik yazısı en az 11 pt (14,67 CSS px) olur.
   // Yalnız kaynak notu (.kaynak) ve sayfa alt bilgisi (.alt) 9 pt (12 CSS px) olabilir.
@@ -127,13 +132,16 @@ const tarayici = await chromium.launch();
 try {
   if (!sadece || sadece === 'kitapcik') {
     const sayfa = await tarayici.newContext({ deviceScaleFactor: 1.4 });
+    const { kitapcikHtml } = await import('./sablon/kitapcik.mjs');
     await pdfUret(sayfa, { ad: 'el-kitapcigi', html: kitapcikHtml(), genislik: '210mm', yukseklik: '297mm', onek: 'el-kitapcigi' });
   }
   if (!sadece || sadece === 'gorsel') {
     const sayfa = await tarayici.newContext({ deviceScaleFactor: 1.2 });
+    const { gorselHtml } = await import('./sablon/gorsel.mjs');
     await pdfUret(sayfa, { ad: 'gorsel-sunum', html: gorselHtml(), genislik: '297mm', yukseklik: '210mm', onek: 'gorsel-sunum' });
   }
   if (!sadece || sadece === 'sunum') {
+    const { sunumUret, sunumOnizlemeHtml } = await import('./sablon/sunum.mjs');
     const pptxYolu = resolve(hedef, 'segika-is-ortakligi-sunum.pptx');
     const n = await sunumUret(pptxYolu);
     console.log(`${pptxYolu} (${n} slayt)`);

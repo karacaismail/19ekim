@@ -1,9 +1,9 @@
-/** El kitapçığı: A4 dikey, 9 sayfa. Okunacak belge. Koşullar, süreç ve hesap örnekleri eksiksizdir. */
-import { tokenCss, marka, aySeridi, basamakGrafik, yilGrafik, TOKENS, htmlDuzelt } from './ortak.mjs';
-import { M, TARIH, PAKETLER, OLCEK, ORNEK, ISVEREN_SAYISI, BOLUSME, ELCI, KADROLU_ORNEK, TAVSIYE_ORNEK, basamaklar, tl, yuzde } from '../icerik.mjs';
+/** El kitapçığı: A4 dikey, 12 sayfa. Okunacak belge. Koşullar, süreç ve hesap örnekleri eksiksizdir. */
+import { tokenCss, marka, aySeridi, basamakGrafik, yilGrafik, ayCubuk, binTl, TOKENS, htmlDuzelt, KAPAK_DIKEY } from './ortak.mjs';
+import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, BOLUSME, ELCI, TAVSIYE_ORNEK, basamaklar, tl, yuzde } from '../icerik.mjs';
 
 const R = TOKENS.renk;
-const TOPLAM = 9;
+const TOPLAM = 12;
 
 const css = `
 @page { size: 210mm 297mm; margin: 0; }
@@ -29,19 +29,6 @@ ul.liste li { position: relative; padding-left: 5mm; margin-top: 1.6mm; }
 ul.liste li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 2mm; height: 2mm; border-radius: 50%; background: var(--r-yesil); }
 .koyu ul.liste li::before { background: var(--r-yesil); }
 .bosluk { flex: 1; }
-
-/* Kapak */
-.kapak { background: var(--r-lacivert); color: var(--r-beyaz); }
-.kapak .bas .marka { font-size: 22pt; }
-.kapak .kanca { font-size: 44pt; line-height: 1.03; margin-top: 26mm; max-width: 172mm; }
-.kapak .kanca2 { font-size: 44pt; line-height: 1.04; font-weight: var(--w-baslik); color: var(--r-yesil); letter-spacing: -0.015em; margin-top: 4mm; max-width: 170mm; text-wrap: balance; }
-.kapak .serit { margin-top: auto; }
-.kapak .serit p { font-size: 13pt; color: var(--r-griLacivertUstu); margin-bottom: 5mm; }
-.kapak .serit p b { color: var(--r-beyaz); font-weight: var(--w-kalin); }
-.kapak .davet { margin-top: 16mm; display: grid; grid-template-columns: 1.2fr 1fr; gap: 10mm; align-items: end; }
-.kapak .davet b { display: block; font-size: 17pt; font-weight: var(--w-baslik); line-height: 1.2; margin-bottom: 2.5mm; }
-.kapak .davet p { font-size: 12pt; color: var(--r-griLacivertUstu); }
-.kapak .tanim { font-size: 11pt; color: var(--r-griLacivertUstu); border-top: 1px solid var(--r-cizgiLacivertUstu); padding-top: 3mm; }
 
 /* Neden siz */
 .kimler { margin-top: auto; padding-top: 8mm; }
@@ -80,7 +67,7 @@ ul.liste li::before { content: ''; position: absolute; left: 0; top: 0.62em; wid
 /* Süreç */
 .akis { list-style: none; counter-reset: a; position: relative; }
 .akis::before { content: ''; position: absolute; left: 4.9mm; top: 7mm; bottom: 7mm; width: 1.2mm; background: var(--r-sis); }
-.akis li { counter-increment: a; position: relative; display: grid; grid-template-columns: 11mm 1fr 46mm; gap: 6mm; align-items: center; padding: 1.6mm 0; }
+.akis li { counter-increment: a; position: relative; display: grid; grid-template-columns: 11mm 1fr 46mm; gap: 6mm; align-items: center; padding: 0.9mm 0; }
 .akis li::before { content: counter(a); width: 11mm; height: 11mm; border-radius: 50%; background: var(--r-lacivert); color: var(--r-beyaz); display: grid; place-items: center; font-size: 13pt; font-weight: var(--w-dev); position: relative; }
 .akis li:last-child::before { background: var(--r-yesil); color: var(--r-lacivertDerin); }
 .akis b { display: block; font-size: 13.5pt; font-weight: var(--w-baslik); color: var(--r-lacivert); line-height: 1.2; }
@@ -158,169 +145,295 @@ table.roller tbody tr.birincil > * { background: var(--r-sisAcik); }
 .son .adres .marka { font-size: 44pt; }
 .son .adres p.web { font-size: 20pt; font-weight: var(--w-kalin); color: var(--r-yesil); margin-top: 3mm; }
 .son .uyari { font-size: 11pt; color: var(--r-griLacivertUstu); margin-top: 8mm; max-width: 150mm; }
+
+/* Kapak: tam sayfa fotoğraf, üstte marka, fotoğrafın üstünde düz renkli metin alanı. Kutunun köşesi düzdür. */
+.kapak { padding: 0; background: var(--r-beyaz); }
+.kapak .ust-bant { height: 30mm; padding: 0 var(--o-kenar); display: flex; justify-content: space-between; align-items: center; }
+.kapak .ust-bant .marka { font-size: 26pt; color: var(--r-lacivert); }
+.kapak .ust-bant .tur { font-size: 15pt; font-weight: var(--w-baslik); color: var(--r-lacivert); }
+.kapak .foto { position: absolute; left: 0; right: 0; top: 30mm; bottom: 0; overflow: hidden; }
+.kapak .foto img { width: 100%; height: 100%; object-fit: cover; object-position: 35% 20%; display: block; }
+.kapak .kutu { position: absolute; right: 0; bottom: 24mm; width: 128mm; background: var(--r-lacivert); color: var(--r-beyaz); padding: 10mm 12mm 9mm 11mm; }
+.kapak .kutu .ust { color: var(--r-yesil); }
+.kapak .kutu h1 { font-size: 25pt; font-weight: var(--w-baslik); line-height: 1.12; letter-spacing: -0.01em; margin-top: 4mm; text-wrap: balance; }
+.kapak .kutu p { font-size: 11pt; color: var(--r-griLacivertUstu); margin-top: 5mm; }
+
+/* Açılış */
+.acilis .kanca { font-size: 33pt; line-height: 1.04; margin-top: 3mm; max-width: 172mm; }
+.acilis .kanca2 { font-size: 20pt; font-weight: var(--w-baslik); color: var(--r-yesil); margin-top: 3mm; }
+.acilis .tanim { font-size: 12pt; margin-top: 4mm; color: var(--r-griLacivertUstu); max-width: 165mm; }
+.acilis .isler4 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 9mm; margin-top: 6mm; }
+.acilis .isler4 b { display: block; font-size: 13pt; font-weight: var(--w-baslik); color: var(--r-yesil); }
+.acilis .isler4 p { font-size: 11pt; line-height: 1.38; color: var(--r-beyaz); }
+.acilis .serit { margin-top: auto; padding-top: 5mm; }
+.acilis .serit .s1 { font-size: 12.5pt; color: var(--r-beyaz); font-weight: var(--w-kalin); }
+.acilis .serit .s2 { font-size: 11pt; color: var(--r-griLacivertUstu); margin-top: 1mm; }
+.acilis .serit .s2 b { color: var(--r-yesil); }
+.acilis .serit .s3 { font-size: 11pt; color: var(--r-griLacivertUstu); margin-top: 1.5mm; }
+.acilis .davet { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 5mm; padding-top: 3mm; border-top: 1px solid var(--r-cizgiLacivertUstu); }
+.acilis .davet b { font-size: 14pt; font-weight: var(--w-baslik); line-height: 1.25; }
+.acilis .davet p { font-size: 11pt; color: var(--r-griLacivertUstu); }
+
+/* Yıllık sayfa: seviyeler */
+.merdiven { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; align-items: end; margin-top: 3mm; }
+.merdiven div { background: var(--r-sisAcik); padding: 3mm 3.5mm; display: flex; flex-direction: column; justify-content: flex-end; }
+.merdiven div:nth-child(1) { height: 25mm; } .merdiven div:nth-child(2) { height: 28mm; }
+.merdiven div:nth-child(3) { height: 31mm; background: var(--r-lacivert); color: var(--r-beyaz); } .merdiven div:nth-child(4) { height: 34mm; }
+.merdiven small { font-size: 11pt; font-weight: var(--w-kalin); color: var(--r-gri); }
+.merdiven div:nth-child(3) small { color: var(--r-yesil); }
+.merdiven b { font-size: 22pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.05; }
+.merdiven div:nth-child(3) b { color: var(--r-beyaz); }
+.merdiven span { font-size: 11pt; line-height: 1.25; }
+.ilerleme { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 3mm; }
+.ilerleme p { font-size: 11.5pt; }
+.ilerleme .kalan { font-weight: var(--w-baslik); color: var(--r-yesilMetin); font-size: 13pt; line-height: 1.3; }
+.dort-yil { display: grid; grid-template-columns: 1fr 1.3fr; gap: 6mm; align-items: center; margin-top: 4mm; }
+.dort-yil .buyuk { font-size: 30pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.02; letter-spacing: -0.02em; }
+.dort-yil .buyuk em { font-style: normal; color: var(--r-yesilMetin); }
+
+/* Aylık sayfa */
+.kumulatif-kutu { background: var(--r-yesilSoluk); padding: 3.5mm 5mm; margin-top: 3mm; font-size: 12.5pt; }
+.kumulatif-kutu b { font-weight: var(--w-dev); color: var(--r-lacivert); }
+table.aylik { width: 100%; border-collapse: collapse; font-size: 11pt; margin-top: 2mm; }
+table.aylik th, table.aylik td { padding: 0.6mm 2mm; text-align: right; }
+table.aylik th:first-child, table.aylik td:first-child { text-align: left; }
+table.aylik thead th { font-weight: var(--w-kalin); color: var(--r-gri); border-bottom: 1.2px solid var(--r-cizgi); }
+table.aylik tbody tr + tr td { border-top: 1px solid var(--r-sis); }
+table.aylik td.b { font-weight: var(--w-baslik); color: var(--r-lacivert); }
+
+/* Mevcut müşteri */
+.tavsiye-adim { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; align-items: end; margin-top: 6mm; }
+.tavsiye-adim div { background: var(--r-sisAcik); padding: 4mm 5mm; display: flex; flex-direction: column; justify-content: flex-end; }
+.tavsiye-adim div:nth-child(1) { height: 28mm; } .tavsiye-adim div:nth-child(2) { height: 36mm; }
+.tavsiye-adim div:nth-child(3) { height: 44mm; background: var(--r-lacivert); color: var(--r-beyaz); }
+.tavsiye-adim small { font-size: 11pt; font-weight: var(--w-kalin); color: var(--r-gri); }
+.tavsiye-adim div:nth-child(3) small { color: var(--r-yesil); }
+.tavsiye-adim b { font-size: 26pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.05; }
+.tavsiye-adim div:nth-child(3) b { color: var(--r-beyaz); }
+.deger { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 7mm; }
+.deger .rakam-buyuk { font-size: 34pt; font-weight: var(--w-dev); color: var(--r-yesilMetin); line-height: 1; letter-spacing: -0.02em; }
+
+.olcek6 { grid-template-columns: repeat(3, 1fr); }
+.olcek6 div:nth-child(4) { border-left: 0; }
+.olcek6 div:nth-child(n+4) { border-top: 1px solid var(--r-cizgiLacivertUstu); }
+.olcek6 b { font-size: 22pt; }
+.olcek6 div { padding: 5mm 5mm 4.5mm; }
+.olcek6 span { margin-top: 2mm; }
+
+/* Sözler */
+.sozler ul.liste li { font-size: 11pt; }
+.bag { font-size: 12pt; font-weight: var(--w-kalin); color: var(--r-lacivert); padding-top: 3mm; border-top: 1.2mm solid var(--r-yesil); }
 `;
 
 const bas = (no, ad) => `<div class="bas">${marka()}<span class="ust">${String(no).padStart(2, '0')}  ${ad}</span></div>`;
-const alt = (no) => `<div class="alt"><span>Segika iş ortaklığı programı</span><span class="rakam">${no} / ${TOPLAM}</span></div>`;
+const alt = (no) => `<div class="alt"><span>Segika iş ortaklığı el kitapçığı</span><span class="rakam">${no} / ${TOPLAM}</span></div>`;
 const li = (x) => `<li>${x}</li>`;
 
 function kapak() {
-  return `<section class="sayfa kapak koyu"><div class="ic">
-  <div class="bas">${marka()}<span class="ust">İş ortaklığı programı</span></div>
-  <h1 class="kanca">${M.kapak.kanca}</h1>
-  <p class="kanca2">${M.kapak.kanca2}</p>
-  <div class="serit"><p><b>12 ay, 12 bordro.</b> Her bordroda bir teşvik kontrolü vardır.</p>${aySeridi({ genislik: 640, boyut: 15 })}</div>
-  <div class="davet">
-    <div><b>${M.kapak.davet}</b><p>${M.kapak.kitle}</p></div>
-    <p class="tanim">${M.kapak.tesvik}</p>
-  </div>
-  </div><div class="alt"><span>El kitapçığı</span><span>${TARIH}</span></div></section>`;
+  return `<section class="sayfa kapak">
+  <div class="ust-bant">${marka()}<span class="tur">${M.kapak.kitapcik}</span></div>
+  <div class="foto"><img src="${KAPAK_DIKEY}" alt="Takım elbiseli bir danışman ofiste kollarını kavuşturmuş duruyor."></div>
+  <div class="kutu"><p class="ust" style="margin-top:0">${M.kapak.baslik}</p><h1>${M.kapak.alt}</h1><p>${M.kapak.kitapcik}. ${TARIH} hazırlandı.</p></div>
+  </section>`;
 }
 
-function neden() {
-  return `<section class="sayfa"><div class="ic">${bas(2, 'Neden siz')}
-  <h2 class="kanca">${M.neden.kanca}</h2>
-  <div class="sizsiniz">
-    <div><p>${M.neden.p.join(' ')}</p></div>
-    <div><p>${M.neden.siz.join(' ')}</p></div>
+function acilis() {
+  const A = M.acilis;
+  return `<section class="sayfa acilis koyu"><div class="ic">${bas(2, 'Segika ne yapar')}
+  <h1 class="kanca">${A.kanca}</h1>
+  <p class="kanca2">${A.kanca2}</p>
+  <p class="tanim">${A.tanim}</p>
+  <div class="isler4">${A.isler.map((x) => `<div><b>${x.b}</b><p>${x.m}</p></div>`).join('')}</div>
+  <div class="serit">
+    <p class="s1">${A.serit}</p>
+    <p class="s2">${A.cubuk} <b>${A.kumulatif}</b></p>
+    ${ayCubuk({ degerler: AYLIK.map((a) => a.birikim), genislik: 640, yukseklik: 120, boyut: 15 })}
+    ${aySeridi({ genislik: 640, boyut: 15 })}
+    <p class="s3">Çubuktaki tutarlar bin TL'dir. ${A.cubukNot}</p>
   </div>
-  <div class="yuzey" style="margin-top:8mm">
-    <p class="buyuk-alinti">${M.neden.soru}</p>
-    <p style="margin-top:3mm">${M.neden.soruAlt}</p>
-  </div>
-  <div class="izgara3" style="margin-top:auto;padding-top:8mm">${M.neden.sizinIcin.map((x) => `<div><h3>${x.b}</h3><p class="kucuk-govde">${x.m}</p></div>`).join('')}</div>
-  <div class="kimler"><h3>${M.neden.kimlerBaslik}</h3><ul class="liste">${M.neden.kimler.map(li).join('')}</ul><p class="not" style="margin-top:2mm">${M.neden.mukellef}</p></div>
-  <p class="giris" style="margin-top:auto;padding-top:8mm"><span class="vurgu">${M.neden.olcekGiris}</span></p>
-  <div class="olcek">${OLCEK.map((o) => `<div><b>${o.sayi}</b><span>${o.metin}</span></div>`).join('')}</div>
-  <p class="kaynak" style="margin-top:3mm">${M.neden.kaynak}</p>
+  <div class="davet"><b>${A.davet}</b><p>${A.tesvik}</p></div>
   </div>${alt(2)}</section>`;
 }
 
-function urun() {
-  return `<section class="sayfa"><div class="ic">${bas(3, 'Müşteriniz ne kazanır')}
-  <h2 class="kanca">${M.urun.kanca}</h2>
-  <p class="giris">${M.urun.tanim}</p>
-  <p style="margin-top:2mm">${M.urun.paketAyrimi}</p>
-  <div class="isler" style="margin-top:8mm">${M.urun.isler.map((x) => `<div><b>${x.b}</b><p>${x.m}</p></div>`).join('')}</div>
-  <div class="entegre"><p>${M.urun.entegrasyon} ${M.urun.entegrasyonPaket}</p><ul><li>Luca</li><li>Mikro</li><li>ETA</li></ul></div>
-  <h3 style="margin-top:auto">Liste fiyatları</h3>
-  <p>${M.urun.fiyatNot}</p>
-  <div class="fiyatlar">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. 25 çalışan için aylık.</span></div>`).join('')}</div>
-  <p class="not" style="margin-top:4mm">${M.urun.kdv} ${M.urun.teklif} ${M.urun.ayni}</p>
-  <p class="kaynak" style="margin-top:2mm">Fiyatlar segika.com fiyat sayfasından alındı. Site 23 Kasım 2026 Pazartesi günü okundu.</p>
+function neden() {
+  const N = M.neden;
+  return `<section class="sayfa"><div class="ic">${bas(3, 'Neden siz')}
+  <h2 class="kanca">${N.kanca}</h2>
+  <div class="sizsiniz">
+    <div><p>${N.p.join(' ')}</p></div>
+    <div><p>${N.siz.join(' ')}</p></div>
+  </div>
+  <div class="yuzey" style="margin-top:5mm">
+    <p class="buyuk-alinti">${N.soru}</p>
+    <p style="margin-top:2mm">${N.soruAlt}</p>
+  </div>
+  <div class="izgara3" style="margin-top:5mm">${N.sizinIcin.map((x) => `<div><h3>${x.b}</h3><p class="kucuk-govde">${x.m}</p></div>`).join('')}</div>
+  <div class="kimler" style="padding-top:5mm"><h3>${N.kimlerBaslik}</h3><ul class="liste">${N.kimler.map(li).join('')}</ul><p class="not" style="margin-top:1.5mm">${N.mukellef}</p></div>
+  <p class="giris" style="margin-top:auto;padding-top:5mm"><span class="vurgu">${N.olcekGiris}</span></p>
+  <div class="olcek olcek6">${OLCEK.map((o) => `<div><b>${o.sayi}</b><span>${o.metin}</span></div>`).join('')}<div><span>${N.sicil}</span></div></div>
+  <p class="kaynak" style="margin-top:2mm">${N.kaynak} ${N.beyan}</p>
   </div>${alt(3)}</section>`;
 }
 
-function surec() {
-  const K = M.kosullar;
-  return `<section class="sayfa"><div class="ic">${bas(4, 'Nasıl işler')}
-  <h2 class="kanca">${M.surec.kanca}</h2>
-  <ol class="akis">${M.surec.adimlar.map((a) => `<li><div><b>${a.b}</b><span>${a.m}</span></div><em><strong>Bu adımı yapan</strong>${a.kim}</em></li>`).join('')}</ol>
-  <div style="margin-top:2mm"><h3>Kayıt kuralı</h3><ul class="liste">${M.surec.kayit.map(li).join('')}<li>Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.</li></ul></div>
-  <div class="yuzey" style="margin-top:auto">
-    <h3>Mali müşavirler için iki yol</h3>
-    <p>${K.musavir}</p>
-    <p>${K.nakitsiz} ${K.bekliyor}</p>
-    <div class="seviye">${K.seviyeler.map((s) => `<div><small>${s.kosul}</small><b>${s.ad}</b><span>${s.m}</span></div>`).join('')}</div>
-    <p style="margin-top:2.5mm">${K.sartlar} ${K.panel} ${K.ikiYol}</p>
-  </div>
+function plan() {
+  const P = M.plan;
+  return `<section class="sayfa"><div class="ic">${bas(4, 'Paketler ve fiyatlar')}
+  <h2 class="kanca">${P.kanca}</h2>
+  <p class="giris">${P.fiyatNot}</p>
+  <div class="fiyatlar">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
+  <p style="margin-top:5mm">${P.paketAyrimi}</p>
+  <div class="entegre"><p>${P.entegrasyon} ${P.entegrasyonPaket}</p><ul><li>Luca</li><li>Mikro</li><li>ETA</li></ul></div>
+  <div class="yuzey" style="margin-top:7mm"><h3>İş kazası bildirimi</h3><p>${P.kazaNot}</p></div>
+  <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
+  <p class="kaynak" style="margin-top:2mm">${P.kaynak}</p>
   </div>${alt(4)}</section>`;
 }
 
+function surec() {
+  const S = M.surec;
+  return `<section class="sayfa"><div class="ic">${bas(5, 'Nasıl işler')}
+  <h2 class="kanca">${S.kanca}</h2>
+  <ol class="akis">${S.adimlar.map((a) => `<li><div><b>${a.b}</b><span>${a.m}</span></div><em><strong>Bu adımı yapan</strong>${a.kim}</em></li>`).join('')}</ol>
+  <div style="margin-top:2mm"><h3>Kayıt kuralı</h3><ul class="liste">${S.kayit.map(li).join('')}</ul></div>
+  <div class="yuzey" style="margin-top:auto">
+    <h3>Mali müşavirler için iki yol</h3>
+    <p>${S.musavir}</p>
+    <p>${S.nakitsiz} ${S.bekliyor}</p>
+    <div class="seviye">${S.seviyeler.map((s) => `<div><small>${s.kosul}</small><b>${s.ad}</b><span>${s.m}</span></div>`).join('')}</div>
+    <p style="margin-top:2.5mm">${S.sartlar} ${S.panel} ${S.ikiYol}</p>
+  </div>
+  </div>${alt(5)}</section>`;
+}
+
 function kazanc() {
+  const K = M.kazanc;
   const kap = basamaklar('kapatir');
   const tan = basamaklar('tanistir');
-  return `<section class="sayfa"><div class="ic">${bas(5, 'Ne kazanırsınız')}
-  <h2 class="kanca">${M.kazanc.kanca}</h2>
-  <p class="giris">${M.kazanc.ciro} ${M.kazanc.tamami}</p>
-  <div style="margin-top:7mm">
+  return `<section class="sayfa"><div class="ic">${bas(6, 'Ne kazanırsınız')}
+  <h2 class="kanca">${K.kanca}</h2>
+  <p class="giris">${K.ciro} ${K.tamami}</p>
+  <div style="margin-top:4mm">
     <div class="grafik-baslik"><span><i style="background:${R.lacivert}"></i>Satışı kapatırsanız</span><span><i style="background:${R.tanistirma}"></i>Yalnız tanıştırırsanız</span></div>
-    ${basamakGrafik({ seriler: [{ ad: 'Kapatır', renk: R.lacivert, basamaklar: kap }, { ad: 'Tanıştırır', renk: R.tanistirma, basamaklar: tan }], genislik: 640, yukseklik: 205, boyut: 15, esikYaz: false })}
+    ${basamakGrafik({ seriler: [{ ad: 'Kapatır', renk: R.lacivert, basamaklar: kap }, { ad: 'Tanıştırır', renk: R.tanistirma, basamaklar: tan }], genislik: 640, yukseklik: 165, boyut: 15, esikYaz: false })}
   </div>
   <table class="esik"><thead><tr><th>Basamak</th><th>Satışı kapatırsanız</th><th class="sag">Oran</th><th>Yalnız tanıştırırsanız</th><th class="sag">Oran</th></tr></thead><tbody>
   ${kap.map((b, i) => `<tr><th>${b.ad}</th><td>${i === 0 ? '30.000 TL altı' : `${tl(b.esik)} ve üstü`}</td><td class="sag rakam"><b>${yuzde(b.oran)}</b></td><td>${i === 0 ? '30.000 TL altı' : `${tl(tan[i].esik)} ve üstü`}</td><td class="sag rakam"><b>${i === 0 ? 'Pay yok' : yuzde(tan[i].oran)}</b></td></tr>`).join('')}
   </tbody></table>
-  <p style="margin-top:2mm">Tablodaki tutarlar aylık cirodur. <b>${M.kazanc.esik}</b></p>
+  <p style="margin-top:2mm">${K.tablo} <b>${K.esik}</b></p>
   <div class="kural">
-    <div><h3>Kim ne yapar?</h3><p>${M.kazanc.kapatir}</p></div>
-    <div><h3>Sonraki yıllar</h3><p>${M.kazanc.surer} ${M.kazanc.yilKapatir} ${M.kazanc.yilTanistir} ${M.kazanc.hakDegil}</p></div>
+    <div><h3>Kim ne yapar?</h3><p>${K.kapatir}</p></div>
+    <div><h3>Sonraki yıllar</h3><p>${K.surer} ${K.yilKapatir} ${K.yilTanistir}</p></div>
   </div>
-  <p class="vurgu-cizgi" style="margin-top:auto">${M.kazanc.k1}</p>
-  </div>${alt(5)}</section>`;
-}
-
-function ornek() {
-  const z = [
-    ['Paketin aylık bedeli', tl(ORNEK.paket)],
-    ['Yıllık bedel', tl(ORNEK.yillik)],
-    ['2 işverenin cirosu', tl(ORNEK.ciro)],
-    ['Ulaşılan oran', yuzde(ORNEK.oran)],
-  ];
-  return `<section class="sayfa"><div class="ic">${bas(6, 'Örnek hesap')}
-  <h2 class="kanca" style="margin-bottom:2mm">${M.ornek.kanca}</h2>
-  <p class="uyari-ust">${M.ornek.uyari}</p>
-  <p class="giris" style="margin-top:4mm">${M.ornek.durum}</p>
-  <div class="zincir" style="margin-top:5mm">${z.map(([a, b]) => `<div><small>${a}</small><b class="rakam">${b}</b></div>`).join('')}<div class="son"><small>Bu ayki kazancınız</small><b class="rakam">${tl(ORNEK.kazanc)}</b></div></div>
-  <p class="not" style="margin-top:2mm">Hesap: 2.600 TL × 12 = 31.200 TL. Sonra 31.200 TL × 2 = 62.400 TL. Sonra 62.400 TL × %20 = 12.480 TL.</p>
-  <div class="grafik-blok"><h3>${M.ornek.yenile}</h3>${yilGrafik({ yillar: ORNEK.yillar, genislik: 640, yukseklik: 175, boyut: 15, renkler: [R.yesil, R.lacivert, R.lacivert, R.lacivert] })}<p>Dört yılın toplamı <b>${tl(ORNEK.toplam)}</b> olur. ${M.ornek.saglama} ${M.kazanc.hakDegil}</p></div>
-  <div class="grafik-blok"><h3>Aynı ayda daha çok işveren</h3>${yilGrafik({ yillar: ISVEREN_SAYISI.map((x) => ({ ad: `${x.n} işveren`, oran: x.oran, tutar: x.kazanc })), genislik: 640, yukseklik: 175, boyut: 15, renkler: [R.lacivert, R.yesil, R.lacivert, R.lacivert] })}<p>${M.ornek.daha} 3 işverende ciro 93.600 TL olur ve oran %25'e çıkar. <b>${M.ornek.esikNot}</b></p></div>
+  <p class="vurgu-cizgi" style="margin-top:auto">${K.k1}</p>
   </div>${alt(6)}</section>`;
 }
 
-function roller() {
-  const L = M.roller.liste;
-  const detay = {
-    kadrolu: `<p>Siz Segika'nın maaşlı ve sigortalı satış çalışanısınız. Kota, net maaşınızın 2 katı kadar cirodur. Kotayı aşan cironun %10'u priminiz olur.</p>
-      <div class="hesap">Örnek: net maaş ${tl(KADROLU_ORNEK.maas)}. Kota ${tl(KADROLU_ORNEK.kota)}. Bir ayda 5 yıllık paket satılır. Ciro ${tl(KADROLU_ORNEK.ciro)} olur. Kotayı aşan tutar ${tl(KADROLU_ORNEK.asan)} olur.<b class="rakam">Prim ${tl(KADROLU_ORNEK.prim)}</b></div>`,
-    tavsiye: `<p>Siz yalnız tanıştırırsınız. Satışı, kurulumu ve desteği Segika yürütür. Ödülünüz nakit değildir. Ödülünüz ücretsiz kullanımdır. Yeni müşteri de 1 ay ücretsiz kullanım alır.</p>
-      <div class="hesap">Yeni müşteri yıllık paket alır ve 60 gün kullanır. Paketiniz aylık 2.600 TL ise 2 ay ${tl(TAVSIYE_ORNEK.kredi)} eder. Yılda en çok 3 tavsiye sayılır.<b class="rakam">Yılda ${tl(TAVSIYE_ORNEK.yillik)}</b></div>`,
-    elci: `<p>Siz Segika'yı kitlenize anlatırsınız. Her ticari paylaşımın başına “reklam” yazarsınız. İlgilenen işveren size özel bağlantıyla başvurur.</p>
-      <div class="hesap">Bağlantınızdan 2 işveren bir ayda yıllık paket alır. Ciro ${tl(ELCI.ciro)} olur. Oran ${yuzde(ELCI.oran)} olur.<b class="rakam">Kazanç ${tl(ELCI.kazanc)}</b></div>`,
-  };
-  return `<section class="sayfa"><div class="ic">${bas(7, 'Dört ortaklık yolu')}
-  <h2 class="kanca">${M.roller.kanca}</h2>
-  <table class="roller"><thead><tr><th>Yol</th><th>Kimdir</th><th>Ne yapar</th><th>Nasıl kazanır</th><th>Nasıl başlar</th></tr></thead><tbody>
-  ${L.map((r) => `<tr class="${r.id === 'cozum' ? 'birincil' : ''}"><th>${r.ad}</th><td>${r.kim}</td><td>${r.ne}</td><td>${r.kazanc}</td><td>${r.ilk}</td></tr>`).join('')}
-  </tbody></table>
-  <div class="rol-detay">${L.filter((r) => r.id !== 'cozum').map((r) => `<div><h3>${r.ad}</h3>${detay[r.id]}</div>`).join('')}</div>
-  <p class="not" style="margin-top:auto">Bu sayfadaki tutarlar örnektir. Oranlar ve süreler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir. Mevcut müşterinin geçerli koşulunu müşteri sorumlusu tavsiyeden önce yazılı bildirir. Kadrolu uzmanın prim koşulları iş sözleşmesinin ekine yazılır.</p>
+function yillik() {
+  const Y = M.yillik;
+  const z = [['Paketin aylık bedeli', tl(ORNEK.paket)], ['Yıllık bedel', tl(ORNEK.yillik)], ['2 işverenin cirosu', tl(ORNEK.ciro)], ['Ulaşılan oran', yuzde(ORNEK.oran)]];
+  return `<section class="sayfa"><div class="ic">${bas(7, Y.ust)}
+  <h2 class="kanca" style="margin-bottom:1.5mm">${Y.kanca}</h2>
+  <p class="uyari-ust">${Y.uyari}</p>
+  <p style="margin-top:2mm">${Y.durum}</p>
+  <div class="zincir" style="margin-top:3mm">${z.map(([a, b]) => `<div><small>${a}</small><b class="rakam">${b}</b></div>`).join('')}<div class="son"><small>Bu ayki kazancınız</small><b class="rakam">${tl(ORNEK.kazanc)}</b></div></div>
+  <p class="not" style="margin-top:1.5mm">${Y.hesap}</p>
+  <h3 style="margin-top:4mm">${Y.seviyeBaslik}</h3>
+  <div class="merdiven">${SEVIYE.liste.map((s) => `<div><small>${s.no === SEVIYE.bir.seviye ? Y.buradasiniz : s.ad}</small><b class="rakam">${yuzde(s.oran)}</b><span>${s.esik ? `${tl(s.esik)} ve üstü` : 'Her satış buradan başlar'}</span></div>`).join('')}</div>
+  <div class="ilerleme"><p>${Y.birIsveren}</p><p class="kalan">${Y.kalan}</p></div>
+  <div class="dort-yil">
+    <p class="buyuk"><em>${Y.dortYil}</em></p><p>${Y.dortYilAlt} ${M.kazanc.yilKapatir}</p>
+  </div>
+  <div>${yilGrafik({ yillar: ORNEK.yillar, genislik: 640, yukseklik: 128, boyut: 15 })}</div>
+  <p style="margin-top:2mm">${Y.toplam} ${Y.saglama} ${M.kazanc.hakDegil}</p>
+  <p class="not" style="margin-top:auto"><b>${Y.esikNot}</b> ${M.kazanc.k1}</p>
   </div>${alt(7)}</section>`;
 }
 
-function kosullar() {
-  const K = M.kosullar;
-  return `<section class="sayfa"><div class="ic">${bas(8, 'Koşullar')}
-  <h2 class="kanca">${K.kanca}</h2>
-  <div class="iki-sutun">
-    <div class="biz koyu"><h3>Segika ne yapar</h3><ul class="liste">${K.biz.map(li).join('')}</ul></div>
-    <div class="siz"><h3>Siz ne yaparsınız</h3><ul class="liste">${K.siz.map(li).join('')}</ul></div>
+function aylik() {
+  const A = M.aylik;
+  const renk = (o) => (o === 0.3 ? R.yesil : o === 0.25 ? R.lacivert : o === 0.2 ? R.tanistirma : R.cizgi);
+  return `<section class="sayfa"><div class="ic">${bas(8, A.ust)}
+  <h2 class="kanca" style="margin-bottom:1.5mm">${A.kanca}</h2>
+  <p class="kumulatif-kutu"><b>${A.kumulatif}</b> ${A.neden}</p>
+  <p class="uyari-ust" style="margin-top:3mm">${A.uyari}</p>
+  <p style="margin-top:1.5mm">${A.durum} ${A.oran}</p>
+  <div style="margin-top:3mm">${ayCubuk({ degerler: AYLIK.map((a) => a.kazanc), genislik: 640, yukseklik: 128, boyut: 15, renkler: AYLIK.map((a) => renk(a.oran)), yazi: R.murekkep, altRenk: R.gri, alt: (i) => `${i + 1}. ay`, eksen: R.cizgi })}</div>
+  <p class="not">Çubuk o ayın kazancını gösterir. Tutarlar bin TL'dir. Renk ulaşılan oranı gösterir: gri %15, açık mavi %20, lacivert %25, yeşil %30.</p>
+  <table class="aylik"><thead><tr><th>Ay</th><th>İşveren</th><th>Aylık ciro</th><th>Oran</th><th>O ayın kazancı</th><th>Kümülatif kazanç</th></tr></thead><tbody>
+  ${AYLIK.map((a) => `<tr><td>${a.ay}. ay</td><td class="rakam">${a.isveren}</td><td class="rakam">${tl(a.ciro)}</td><td class="rakam">${yuzde(a.oran)}</td><td class="rakam">${tl(a.kazanc)}</td><td class="rakam b">${tl(a.birikim)}</td></tr>`).join('')}
+  </tbody></table>
+  <p class="vurgu-cizgi" style="margin-top:3mm">${A.sonuc}</p>
+  <p class="not" style="margin-top:auto">${A.varsayim}</p>
+  </div>${alt(8)}</section>`;
+}
+
+function roller() {
+  const Rl = M.roller;
+  return `<section class="sayfa"><div class="ic">${bas(9, Rl.baslik)}
+  <h2 class="kanca">${Rl.kanca}</h2>
+  <table class="roller"><thead><tr><th>Yol</th><th>Kimdir</th><th>Ne yapar</th><th>Nasıl kazanır</th><th>Nasıl başlar</th></tr></thead><tbody>
+  ${Rl.liste.map((r) => `<tr class="${r.id === 'cozum' ? 'birincil' : ''}"><th>${r.ad}</th><td>${r.kim}</td><td>${r.ne}</td><td>${r.kazanc}</td><td>${r.ilk}</td></tr>`).join('')}
+  </tbody></table>
+  <div class="izgara2" style="margin-top:5mm">
+    <div><h3>Çözüm ortağı</h3><p>${Rl.cozum}</p><p>${Rl.cozumEgitim}</p></div>
+    <div><h3>Marka elçisi</h3><p>${Rl.elci}</p><p style="margin-top:2mm">${Rl.elciHesap} <span class="vurgu">Kazanç ${tl(ELCI.kazanc)} olur.</span></p></div>
   </div>
-  <div style="margin-top:auto;padding-top:6mm"><h3>Herkes için sınırlar</h3><ul class="liste iki-kolon">${K.sinirlar.map(li).join('')}</ul></div>
-  <div style="margin-top:auto;padding-top:6mm"><h3>Ödeme ve eğitim</h3><p>${K.odeme} ${K.egitim}</p></div>
-  <div class="yuzey" style="margin-top:auto">
+  <div class="yuzey" style="margin-top:5mm">
     <h3>Tanıştıran ve kapatan farklıysa</h3>
-    <p>${M.ornek.bolusme} Örnekte ciro ${tl(BOLUSME.ciro)} olur.</p>
+    <p>${M.kazanc.bolusme} Örnekte ciro ${tl(BOLUSME.ciro)} olur.</p>
     <div class="bolus">
       <div><small>Tanıştıran</small><b class="rakam">${tl(BOLUSME.tanistiran)}</b><span>${tl(BOLUSME.ciro)} × ${yuzde(BOLUSME.tOran)}</span></div>
       <div><small>Satışı kapatan</small><b class="rakam">${tl(BOLUSME.kapatan)}</b><span>${tl(BOLUSME.ciro)} × ${yuzde(BOLUSME.kapatanOran)}</span></div>
-      <div class="top"><small>Segika'nın toplam ödemesi</small><b class="rakam">${tl(BOLUSME.toplam)}</b><span>Toplam oran %20 kalır.</span></div>
+      <div class="top"><small>Segika'nın toplam ödemesi</small><b class="rakam">${tl(BOLUSME.toplam)}</b><span>${M.kazanc.bolusmeToplam}</span></div>
     </div>
   </div>
-  </div>${alt(8)}</section>`;
+  <p class="not" style="margin-top:auto">${Rl.not}</p>
+  </div>${alt(9)}</section>`;
+}
+
+function musteri() {
+  const U = M.musteri;
+  return `<section class="sayfa"><div class="ic">${bas(10, U.ust)}
+  <h2 class="kanca">${U.kanca}</h2>
+  <p class="giris">${U.giris}</p>
+  <p style="margin-top:2mm">${U.satisYok}</p>
+  <div class="tavsiye-adim">${[1, 2, 3].map((n) => `<div><small>${n}. tavsiye</small><b class="rakam">${n * 2} ay</b><span>ücretsiz kullanım</span></div>`).join('')}</div>
+  <p style="margin-top:3mm">${U.kural}</p>
+  <div class="deger">
+    <div><small class="ust">${CALISAN} çalışanlı örnek</small><p class="rakam-buyuk rakam" style="margin-top:2mm">${tl(TAVSIYE_ORNEK.yillik)}</p><p style="margin-top:2mm">${U.hesap}</p></div>
+    <div class="yuzey"><h3>Tavsiye ettiğiniz firma da kazanır</h3><p>${U.yeni}</p></div>
+  </div>
+  <div style="margin-top:auto"><h3>Koşullar</h3><ul class="liste">${[U.kosul, U.nakit, U.yazili].map(li).join('')}</ul></div>
+  <p class="vurgu-cizgi" style="margin-top:5mm">${U.ilkAdim}</p>
+  </div>${alt(10)}</section>`;
+}
+
+function sozler() {
+  const S = M.sozler;
+  return `<section class="sayfa sozler"><div class="ic">${bas(11, 'Taahhütler')}
+  <h2 class="kanca" style="margin-bottom:2mm">${S.kanca}</h2>
+  <p class="giris" style="margin-bottom:4mm">${S.giris}</p>
+  <div class="iki-sutun">
+    <div class="biz koyu"><h3>Segika'nın taahhütleri</h3><ul class="liste">${S.segika.map(li).join('')}</ul></div>
+    <div class="siz"><h3>Sizin taahhütleriniz</h3><ul class="liste">${S.siz.map(li).join('')}</ul></div>
+  </div>
+  <div style="margin-top:6mm"><h3>${S.ortakBaslik}</h3><ul class="liste">${S.ortak.map(li).join('')}<li>${M.kazanc.k1}</li></ul></div>
+  <p class="bag" style="margin-top:auto">${S.bag}</p>
+  </div>${alt(11)}</section>`;
 }
 
 function son() {
   return `<section class="sayfa son koyu"><div class="ic">
-  <div class="bas">${marka()}<span class="ust">09  İlk adım</span></div>
+  <div class="bas">${marka()}<span class="ust">12  İlk adım</span></div>
   <h2 class="kanca">${M.ilk.kanca}</h2>
   <ol class="adim">${M.ilk.adimlar.map(li).join('')}</ol>
   <div class="adres">${marka()}<p class="web">segika.com</p><p class="uyari">${M.ilk.not} Belge ${TARIH} hazırlandı.</p></div>
-  </div>${alt(9)}</section>`;
+  </div>${alt(12)}</section>`;
 }
 
 export function kitapcikHtml() {
   return htmlDuzelt(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Segika iş ortaklığı el kitapçığı</title>
 <style>${tokenCss('kitapcik')}${css}</style></head><body>
-${[kapak(), neden(), urun(), surec(), kazanc(), ornek(), roller(), kosullar(), son()].join('\n')}
+${[kapak(), acilis(), neden(), plan(), surec(), kazanc(), yillik(), aylik(), roller(), musteri(), sozler(), son()].join('\n')}
 </body></html>`);
 }

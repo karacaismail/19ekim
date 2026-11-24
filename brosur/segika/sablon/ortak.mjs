@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { tl, yuzde } from '../icerik.mjs';
+export const KAPAK_DIKEY = pathToFileURL(resolve(dirname(fileURLToPath(import.meta.url)), '../gorsel/kapak-dikey.jpg')).href;
+export const KAPAK_YATAY = pathToFileURL(resolve(dirname(fileURLToPath(import.meta.url)), '../gorsel/kapak-yatay.jpg')).href;
 
 const burasi = dirname(fileURLToPath(import.meta.url));
 export const TOKENS = JSON.parse(readFileSync(resolve(burasi, '../tokens.json'), 'utf8'));
@@ -148,4 +150,32 @@ export function yilGrafik({ yillar, genislik = 640, yukseklik = 260, boyut = 14,
   });
   svg += `<line x1="0" y1="${ust + alan}" x2="${genislik}" y2="${ust + alan}" stroke="${eksen}" stroke-width="1.5"/>`;
   return `<svg viewBox="0 0 ${genislik} ${yukseklik}" width="100%" role="img" aria-label="Yıllara göre pay">${svg}</svg>`;
+}
+
+/** Bin TL olarak kısa tutar: 391600 -> "391,6". Çubuk etiketlerinde kullanılır. */
+export const binTl = (n) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n / 1000);
+
+/**
+ * 12 sütunlu çubuk grafik. Sütunlar `aySeridi` ile aynı genişlikte ve aynı hizadadır.
+ * Böylece grafik ay şeridinin hemen üstüne konunca her çubuk kendi ayının üstünde durur.
+ * `degerler`: 12 sayı. `etiket`: çubuğun üstündeki yazı. `alt`: çubuğun altındaki yazı (isteğe bağlı).
+ */
+export function ayCubuk({ degerler, etiket = binTl, alt = null, genislik = 600, yukseklik = 160, boyut = 13, renkler = null, renk = R.yesil, yazi = R.beyaz, altRenk = R.griLacivertUstu, eksen = null }) {
+  const adim = genislik / 12;
+  const g = adim * 0.58;
+  const ust = boyut * 1.6;
+  const altB = alt ? boyut * 1.7 : 2;
+  const alan = yukseklik - ust - altB;
+  const enCok = Math.max(...degerler);
+  let svg = '';
+  degerler.forEach((v, i) => {
+    const h = Math.max(v / enCok * alan, 2);
+    const x = adim * i + (adim - g) / 2;
+    const y = ust + alan - h;
+    svg += `<rect x="${x}" y="${y}" width="${g}" height="${h}" fill="${renkler?.[i] ?? renk}"/>`;
+    svg += `<text x="${adim * i + adim / 2}" y="${y - boyut * 0.4}" text-anchor="middle" font-size="${boyut}" font-weight="700" fill="${yazi}" font-family="Outfit, Arial">${etiket(v, i)}</text>`;
+    if (alt) svg += `<text x="${adim * i + adim / 2}" y="${ust + alan + boyut * 1.25}" text-anchor="middle" font-size="${boyut}" fill="${altRenk}" font-family="Outfit, Arial">${alt(i)}</text>`;
+  });
+  if (eksen) svg += `<line x1="0" y1="${ust + alan}" x2="${genislik}" y2="${ust + alan}" stroke="${eksen}" stroke-width="1.2"/>`;
+  return `<svg viewBox="0 0 ${genislik} ${yukseklik}" width="100%" role="img" aria-label="12 aylık çubuk grafik">${svg}</svg>`;
 }

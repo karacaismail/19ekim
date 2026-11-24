@@ -1752,6 +1752,13 @@ ayar değişince sayfalar farklı gelir gösteriyordu. Kullanıcı 14 Kasım 202
   Bağlantı gerçek `<a href download>` öğesidir. Adres `import.meta.env.BASE_URL` ile kurulur.
 - `tests/politika-indirme.spec.ts` bağlantıları, proje değişimini, klavyeyi ve 320 px görünümü denetler.
   Aynı test listedeki her dosyanın `public/` altında olduğunu da denetler. Dosya eksikse test düşer.
+- Segika seti 24 Kasım 2026 Salı günü 2. revizyonla yenilendi. Üç dosyada da 12 sayfa vardır.
+  İlk sayfa fotoğraflı kapaktır. Fotoğrafın kaynağı ve lisansı `brosur/segika/README.md` dosyasındadır.
+- Segika örnekleri 100 çalışan üzerinden kurulur. Aylık fiyatlar 6.250 TL, 5.400 TL ve 8.900 TL'dir.
+  Bu fiyatlar kullanıcının kararıdır. `src/data/satisOrtakligi.ts` içindeki 25 çalışan fiyatları değişmedi.
+- `brosur/segika` içinde `npm run uret` sonunda içerik denetimi çalışır. Denetim `denetim.mjs` dosyasındadır.
+  Denetim yasak ve zorunlu ifadeleri, kapağı, sayfa sınırını ve yazı tiplerini gerçek çıktıdan okur.
+  Denetim tek başına `npm run denetle` komutuyla da çalışır.
 
 ## Ortak persona parametreleri
 
