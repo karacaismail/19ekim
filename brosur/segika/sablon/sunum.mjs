@@ -311,21 +311,12 @@ function s11() {
     o.push(metin(K + 0.55, y + 0.04, 5.8, 0.45, m, { boyut: 18, kalin: true, renk: R.beyaz }));
     o.push(cizgi(K, y + 0.6, 6.4, 0, R.cizgiLacivertUstu, 1));
   });
-  // Mali müşavir ofisleri için nakitsiz yol. Koşulları el kitapçığıyla aynıdır.
-  const nx = 7.75, nw = W - K - nx, Sr = M.surec;
-  const nakitsiz = [
-    cizgi(nx, 2.7, nw, 0, R.cizgiLacivertUstu, 1),
-    metin(nx, 2.85, nw, 0.36, Sr.nakitsizBaslik, { boyut: 15, kalin: true, renk: R.yesil }),
-    metin(nx, 3.25, nw, 0.75, Sr.nakitsiz, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
-    ...Sr.seviyeler.map((sv, i) => metin(nx, 4.15 + i * 0.55, nw, 0.44, `${sv.ad}: ${sv.kosul}. ${sv.m}`, { boyut: S.kucuk, renk: R.beyaz, satir: 1.0 })),
-    metin(nx, 5.85, nw, 0.45, Sr.ikiYol, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
-  ];
+  const nx = 7.75, nw = W - K - nx;
   return { zemin: R.lacivert, koyu: true, ogeler: [...ust('11  İlk adım', true),
     metin(K, 1.3, 7, 1.4, M.ilk.kanca, { boyut: 40, kalin: true, renk: R.beyaz, satir: 1.0 }),
     ...o,
     ...markaYazisi(nx, 1.3, 32, R.beyaz),
     metin(nx, 1.95, nw, 0.42, 'segika.com', { boyut: 20, kalin: true, renk: R.yesil }),
-    ...nakitsiz,
     ...alt(11, true, TARIH)] };
 }
 

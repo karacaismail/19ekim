@@ -143,10 +143,6 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .son li::before { content: counter(s); font-size: 24pt; font-weight: var(--w-dev); color: var(--r-yesil); }
 .son .adres .marka { font-size: 34pt; }
 .son .adres p.web { font-size: 20pt; font-weight: var(--w-kalin); color: var(--r-yesil); margin-top: 1mm; }
-.son .nakitsiz { margin-top: 4mm; padding-top: 3mm; border-top: 1px solid var(--r-cizgiLacivertUstu); }
-.son .nakitsiz h3 { font-size: 14pt; font-weight: var(--w-baslik); color: var(--r-yesil); }
-.son .nakitsiz p { font-size: 11pt; line-height: 1.3; color: var(--r-griLacivertUstu); margin-top: 1.5mm; }
-.son .nakitsiz p.sv b { color: var(--r-beyaz); font-weight: var(--w-kalin); }
 
 /* Kapak: tam sayfa fotoğraf, üstte marka, fotoğrafın üstünde düz renkli metin alanı. Kutunun köşesi düzdür. */
 .kapak { padding: 0; }
@@ -328,9 +324,7 @@ const sayfalar = [
   () => `<section class="sayfa son koyu">${bas(11, 'İlk adım')}
     <div class="son-izgara">
       <div><h2 class="kanca">${M.ilk.kanca}</h2><ol style="margin-top:8mm">${M.ilk.adimlar.map((x) => `<li>${x}</li>`).join('')}</ol></div>
-      <div class="adres">${marka()}<p class="web">segika.com</p>
-        <div class="nakitsiz"><h3>${M.surec.nakitsizBaslik}</h3><p>${M.surec.nakitsiz}</p>
-          ${M.surec.seviyeler.map((s) => `<p class="sv"><b>${s.ad}:</b> ${s.kosul}. ${s.m}</p>`).join('')}<p>${M.surec.ikiYol}</p></div></div>
+      <div class="adres">${marka()}<p class="web">segika.com</p></div>
     </div>${alt(11, TARIH)}</section>`,
 ];
 

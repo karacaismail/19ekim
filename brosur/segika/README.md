@@ -59,7 +59,6 @@ Komut üç dosyayı üretir. Önizlemeleri de `onizleme/` klasörüne yazar. En 
 - Ölçek sayıları Segika tanıtım broşüründen gelir. Bunlar Temmuz 2025 verileridir.
 - "500'den fazla çalışan için Segika ayrıca teklif verir." cümlesinin kaynağı segika.com fiyat sayfasıdır. Adres https://www.segika.com/program-ozellikleri/fiyatlandirma/ şeklindedir. Sayfada "500’den fazla çalışan için fiyat teklifi alınız." yazıyor. Bu bilgi 24 Kasım 2026 Salı günü doğrulandı.
 - Belgede fiyat kaynağı olarak şu cümle yazar: "Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika'dan yazılı isteyin."
-- Mali müşavir ofisleri için nakitsiz yol üç dosyada da yazar. El kitapçığında 5. sayfadadır. Görsel sunumda ve sunumda son sayfadadır.
 - "Her ay 360 milyon TL teşvik" sayısı yalnız Segika'nın beyanı olarak ve kaynağıyla yazılır.
 - Rol verisindeki daha sıkı koşul geçerlidir. Örneğin sonraki yılların payı için destek vermek gerekir.
 - Kaynakta oran değişirse `icerik.mjs` dosyasını da güncelleyin. Sonra seti yeniden üretin.
@@ -94,7 +93,6 @@ Okura görünen her yerde basamaklar "1. seviye" ile "4. seviye" arasında adlan
   - Eski fiyat kaynağı cümlesi geçer. Eski basamak adları geçer.
   - Yıllık sayfada "%25 olur" yazar. Okur o sayfada iki farklı oran görmemelidir.
   - Yeni fiyat cümlesi ya da dört seviye adı geçmez.
-  - Nakitsiz yolun koşulları geçmez.
   - Marka elçisinin 30.000 TL sınırı geçmez.
   - Yıllık varsayım ya da "Kazanılmış hak sayılmaz" notu geçmez.
   - "kümülatif", "100 çalışan", yeni fiyatlar, "Şirketinize uygun planı seçin." ya da iki taahhüt başlığı geçmez.

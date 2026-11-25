@@ -211,16 +211,6 @@ export const M = {
       'Ortaklık sorumlusu tanıştırmayı müşteri takip sistemine kaydeder. Bu kayıt 6 ay geçerlidir.',
       'Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.',
     ],
-    nakitsizBaslik: 'Mali müşavir ofisleri için nakitsiz yol',
-    nakitsiz: 'Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika\'yı toptan fiyatla kullanır.',
-    sartlar: 'Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir.',
-    seviyeler: [
-      { ad: 'Kayıtlı ortak', kosul: 'Ücretsiz', m: 'Ofis 2 saatlik canlı eğitim ve panel alır.' },
-      { ad: 'Gümüş', kosul: 'En az 10 aktif mükellef', m: 'Ofis toptan fiyatın 1. kademesini alır.' },
-      { ad: 'Altın', kosul: 'En az 50 aktif mükellef', m: 'Ofis toptan fiyatın 2. kademesini alır.' },
-    ],
-    panel: 'Panel, ofisin getirdiği müşterileri gördüğü ekrandır.',
-    ikiYol: 'İki yol birlikte uygulanmaz. Ortaklık sorumlusu size uygun yolu belirler.',
   },
   kazanc: {
     kanca: 'Oranınızı aylık cironuz belirler.',

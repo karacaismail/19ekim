@@ -95,7 +95,6 @@ const ZORUNLU = [
   'Temmuz 2025',
   '1. seviye', '2. seviye', '3. seviye', '4. seviye',
   'Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika\'dan yazılı isteyin.',
-  'toptan fiyat', 'Kayıtlı ortak', 'Gümüş', 'Altın',
   'Segika bugünkü planda yılda 2 saat ücretsiz eğitim verir.',
   'Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.',
   'İlk görüşmeden ilk ödemeye kadar 5 adım vardır.',
@@ -104,8 +103,6 @@ const ZORUNLU = [
   'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır.',
   '1. işveren sizi 3. seviyeye taşır. 2. işveren sizi 4. seviyeye taşır.',
 ];
-/** Ortaklık şartı yalnız el kitapçığında ve metin.md içinde yazar. Entegrasyon bölümü kaldırılırken bu cümle kalır. */
-const SART = 'Ofis Luca, Mikro ya da ETA kullanmalıdır.';
 /** Çözüm ortağının eğitim cümlesi yalnız el kitapçığında yazar. Süre 25 Kasım 2026 Çarşamba günü 2 saat oldu. */
 const EGITIM_CUMLESI = 'Bugünkü planda Segika size ve destek personelinize her yıl 2 saat ücretsiz eğitim verir.';
 const KAPAK = { kitapcik: 'İş ortaklığı el kitapçığı', gorsel: 'İş ortaklığı tanıtım sunumu', sunum: 'İş ortaklığı tanıtım sunumu' };
@@ -126,7 +123,7 @@ export async function denetle() {
     for (const y of YASAK) if (geciyor(tum, y)) hatalar.push(`${ad}: "${y}" metinde geçmemeli.`);
     for (const k of kelimeBul(tum)) hatalar.push(`${ad}: "${k}" ile başlayan kelime metinde geçmemeli.`);
     for (const z of ZORUNLU) if (!geciyor(tum, z)) hatalar.push(`${ad}: "${z}" metinde geçmeli.`);
-    if (ad === 'kitapcik') for (const z of [SART, EGITIM_CUMLESI]) if (!geciyor(tum, z)) hatalar.push(`kitapcik: "${z}" metinde geçmeli.`);
+    if (ad === 'kitapcik') for (const z of [EGITIM_CUMLESI]) if (!geciyor(tum, z)) hatalar.push(`kitapcik: "${z}" metinde geçmeli.`);
     b.sayfalar.forEach((s, i) => { const m = s.metin.match(ESKI_BASAMAK); if (m) hatalar.push(`${ad}: ${i + 1}. sayfada eski basamak adı "${m[0].trim()}" geçiyor. "1. seviye" gibi yazın.`); });
     const yil = b.sayfalar.find((s) => geciyor(s.metin, 'Siz buradasınız'));
     if (yil && geciyor(yil.metin, '%25 olur')) hatalar.push(`${ad}: yıllık sayfada iki farklı oran var. Örnek yalnız %30 oranını göstermeli.`);
@@ -144,7 +141,6 @@ export async function denetle() {
   }
   const metin = readFileSync(resolve(burasi, 'metin.md'), 'utf8');
   for (const y of ['Kadrolu', 'kadrolu', 'İnsan kaynakları danışman', 'insan kaynakları danışman', 'ETA programlarıyla birlikte çalışır']) if (metin.includes(y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
-  if (!metin.includes(SART)) hatalar.push(`metin.md: "${SART}" geçmeli.`);
   for (const k of kelimeBul(metin)) hatalar.push(`metin.md: "${k}" ile başlayan kelime geçmemeli.`);
   for (const y of YASAK.slice(YASAK.indexOf('İş kazası bildirimi'))) if (geciyor(metin, y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
   if (ESKI_BASAMAK.test(metin)) hatalar.push('metin.md: eski basamak adı (K1, K2, K3) geçmemeli.');

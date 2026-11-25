@@ -283,12 +283,6 @@ function surec() {
   <h2 class="kanca">${S.kanca}</h2>
   <ol class="akis">${S.adimlar.map((a) => `<li><div><b>${a.b}</b><span>${a.m}</span></div><em><strong>Bu adımı yapan</strong>${a.kim}</em></li>`).join('')}</ol>
   <div style="margin-top:2mm"><h3>Kayıt kuralı</h3><ul class="liste">${S.kayit.map(li).join('')}</ul></div>
-  <div class="yuzey" style="margin-top:auto">
-    <h3>Mali müşavirler için iki yol</h3>
-    <p>${S.nakitsiz}</p>
-    <div class="seviye">${S.seviyeler.map((s) => `<div><small>${s.kosul}</small><b>${s.ad}</b><span>${s.m}</span></div>`).join('')}</div>
-    <p style="margin-top:2.5mm">${S.sartlar} ${S.panel} ${S.ikiYol}</p>
-  </div>
   </div>${alt(5)}</section>`;
 }
 

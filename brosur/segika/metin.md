@@ -115,16 +115,6 @@ Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segik
 
 Kayıt kabul edilmeden müşteriyi kendinize ait saymayın. Ortaklık sorumlusu tanıştırmayı müşteri takip sistemine kaydeder. Bu kayıt 6 ay geçerlidir. Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.
 
-### Mali müşavirler için iki yol
-
-Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika'yı toptan fiyatla kullanır.
-
-- Kayıtlı ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitim ve panel alır.
-- Gümüş seviye için en az 10 aktif mükellef gerekir. Ofis toptan fiyatın 1. kademesini alır.
-- Altın seviye için en az 50 aktif mükellef gerekir. Ofis toptan fiyatın 2. kademesini alır.
-
-Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir. Panel, ofisin getirdiği müşterileri gördüğü ekrandır. İki yol birlikte uygulanmaz. Ortaklık sorumlusu size uygun yolu belirler.
-
 ## 6. Ne kazanırsınız
 
 Oranınızı aylık cironuz belirler.
