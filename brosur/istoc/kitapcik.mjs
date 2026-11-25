@@ -1,7 +1,7 @@
 // El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
 import { a4 } from './tokenlar.mjs';
 import { plan, fiyat, tavsiye, hesap, kademeler, sayi, tl, yuzde, avro } from './veri.mjs';
-import { sayfaIskeleti, marka, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
+import { sayfaIskeleti, logo, imza, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
 
 const TOPLAM = 9;
 const css = `
@@ -11,12 +11,13 @@ const css = `
 .ust, .alt { display: flex; justify-content: space-between; align-items: baseline; font-size: ${a4.dipnot}pt; color: var(--soluk); }
 .koyu .ust, .koyu .alt { color: var(--solukKoyu); }
 .alt { margin-top: auto; padding-top: 5mm; }
-.marka { font-weight: 700; letter-spacing: -0.02em; color: inherit; }
-.marka-i { color: var(--turuncuMetin); }
-.koyu .marka-i { color: var(--turuncu); }
-.ust .marka { font-size: 12pt; color: var(--murekkep); }
-.koyu .ust .marka { color: var(--kagit); }
-.bolum { display: flex; gap: 3mm; align-items: baseline; margin: 9mm 0 3mm; font-size: ${a4.govde}pt; font-weight: 600; color: var(--turuncuMetin); }
+.logo { display: block; }
+.ust { align-items: center; }
+.imza { display: block; margin-top: 1.5mm; font-size: ${a4.dipnot}pt; font-weight: 600; letter-spacing: 0.02em; color: var(--solukKoyu); }
+.kapak-imza { display: flex; flex-direction: column; align-items: flex-start; }
+.kapak-imza .ceviri { margin-top: 1mm; }
+.belge-adi { font-size: ${a4.ara}pt; font-weight: 700; color: var(--sari); letter-spacing: -0.01em; }
+.bolum { display: flex; gap: 3mm; align-items: baseline; margin: 9mm 0 3mm; font-size: ${a4.govde}pt; font-weight: 600; color: var(--lacivert); }
 .bolum b { font-weight: 800; }
 h1.kanca { font-size: ${a4.baslik}pt; line-height: 1.08; font-weight: 700; letter-spacing: -0.025em; max-width: 160mm; }
 h2 { font-size: ${a4.ara}pt; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
@@ -27,21 +28,21 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .dipnot { font-size: ${a4.dipnot}pt; line-height: 1.4; color: var(--soluk); }
 .koyu .dipnot { color: var(--solukKoyu); }
 .koyu .not { color: var(--solukKoyu); }
-.turuncu-yazi { color: var(--turuncuMetin); }
+.vurgu-yazi { color: var(--lacivert); }
 .yuzey { background: var(--kum); }
 .sayi-dev { font-weight: 800; letter-spacing: -0.02em; line-height: 0.85; }
 
 /* Kapak */
-.kapak .ust .marka { font-size: 22pt; }
-.kapak-orta { margin-top: 16mm; }
-.kapak-48 { font-size: 250pt; color: var(--turuncu); margin-left: -3mm; }
+.kapak .ust { align-items: flex-start; }
+.kapak-orta { margin-top: 6mm; }
+.kapak-48 { font-size: 250pt; color: var(--sari); margin-left: -3mm; }
 .kapak-48 small { font-size: 40pt; letter-spacing: -0.02em; font-weight: 800; margin-left: 3mm; }
 .kapak h1 { font-size: 34pt; line-height: 1.06; font-weight: 700; letter-spacing: -0.025em; margin-top: 10mm; max-width: 165mm; }
 .aylar { margin-top: 12mm; display: grid; grid-template-columns: 22mm 1fr 14mm; row-gap: 2.2mm; align-items: center; }
 .aylar .yil { font-size: ${a4.govde}pt; color: var(--solukKoyu); }
-.aylar .oran { font-size: ${a4.govde}pt; font-weight: 700; color: var(--turuncu); text-align: right; }
+.aylar .oran { font-size: ${a4.govde}pt; font-weight: 700; color: var(--sari); text-align: right; }
 .aylar .kare { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.6mm; }
-.aylar .kare i { display: block; height: 7mm; background: var(--turuncu); }
+.aylar .kare i { display: block; height: 7mm; background: var(--sari); }
 .davet { margin-top: auto; display: grid; grid-template-columns: 1fr; gap: 3mm; padding-top: 10mm; }
 .davet p.buyuk { color: var(--kagit); font-size: 19pt; line-height: 1.25; font-weight: 600; max-width: 150mm; }
 .davet p { font-size: ${a4.govdeBuyuk}pt; color: var(--solukKoyu); max-width: 150mm; }
@@ -53,12 +54,12 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .soru .kim { font-size: ${a4.govde}pt; color: var(--soluk); font-weight: 600; }
 .soru q { display: block; quotes: '“' '”'; font-size: 15pt; line-height: 1.18; font-weight: 600; margin-top: 1mm; letter-spacing: -0.01em; }
 .soru .yanit { background: var(--kum); padding: 3mm 4mm; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
-.soru .yanit b { display: block; font-size: ${a4.govde}pt; color: var(--turuncuMetin); font-weight: 700; margin-bottom: 1mm; }
+.soru .yanit b { display: block; font-size: ${a4.govde}pt; color: var(--lacivert); font-weight: 700; margin-bottom: 1mm; }
 .bedel { margin-top: auto; background: var(--murekkep); color: var(--kagit); margin: auto -${a4.kenar}mm -${a4.kenar}mm; padding: 7mm ${a4.kenar}mm 6mm; }
 .bedel .alt { color: var(--solukKoyu); padding-top: 5mm; }
 .bedel h2 { font-size: 14pt; margin-bottom: 4mm; }
 .bedel-sayi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm; }
-.bedel-sayi div b { display: block; font-size: 21pt; font-weight: 800; letter-spacing: -0.03em; color: var(--turuncu); line-height: 1; }
+.bedel-sayi div b { display: block; font-size: 21pt; font-weight: 800; letter-spacing: -0.03em; color: var(--sari); line-height: 1; }
 .bedel-sayi div span { display: block; font-size: ${a4.govde}pt; line-height: 1.3; margin-top: 2mm; }
 .bedel .not { margin-top: 4mm; font-size: ${a4.govde}pt; color: var(--kagit); }
 .bedel + .alt { display: none; }
@@ -69,7 +70,7 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .adim { display: grid; grid-template-columns: 16mm 1fr; gap: 5mm; padding-bottom: 6mm; position: relative; }
 .adim::before { content: ''; position: absolute; left: 6.5mm; top: 13mm; bottom: 0; width: 0.6mm; background: var(--kumKoyu); }
 .adim:last-child::before { display: none; }
-.adim .no { width: 13.5mm; height: 13.5mm; border-radius: 50%; background: var(--turuncu); color: var(--murekkep); font-weight: 800; font-size: 15pt; display: flex; align-items: center; justify-content: center; }
+.adim .no { width: 13.5mm; height: 13.5mm; border-radius: 50%; background: var(--sari); color: var(--murekkep); font-weight: 800; font-size: 15pt; display: flex; align-items: center; justify-content: center; }
 .adim h2 { font-size: 15pt; margin-top: 2.6mm; }
 .adim p { margin-top: 1.5mm; max-width: 140mm; }
 .catal { margin-top: 3mm; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; max-width: 150mm; }
@@ -87,17 +88,17 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .yillar > div + div { padding-left: 4mm; }
 .yillar b { display: block; font-size: ${a4.govdeBuyuk}pt; }
 .yillar span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); }
-.yillar .k { color: var(--turuncuMetin); font-weight: 700; }
+.yillar .k { color: var(--lacivert); font-weight: 700; }
 .lejant { display: flex; gap: 8mm; font-size: ${a4.govde}pt; color: var(--soluk); margin-bottom: 2mm; }
 .lejant i { display: inline-block; width: 8mm; height: 2mm; vertical-align: middle; margin-right: 2mm; background: var(--murekkep); }
-.lejant i.t { background: var(--turuncu); height: 3mm; }
+.lejant i.t { background: var(--sari); height: 3mm; box-shadow: inset 0 0 0 0.3mm var(--murekkep); }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; font-weight: 700; padding: 2.4mm 3mm; font-size: ${a4.govde}pt; }
 table.kota td, table.kota th { padding-top: 1.8mm; padding-bottom: 1.8mm; white-space: nowrap; }
 td { padding: 2.4mm 3mm; border-top: 0.3mm solid var(--cizgi); vertical-align: top; }
 thead th { border-bottom: 0.6mm solid var(--murekkep); }
 td.vurgu, th.vurgu { background: var(--kum); }
-td.vurgu b { color: var(--turuncuMetin); }
+td.vurgu b { color: var(--lacivert); }
 .tablo-baslik { margin-top: 7mm; margin-bottom: 1.5mm; }
 .iki-tablo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8mm; }
 
@@ -112,7 +113,7 @@ td.vurgu b { color: var(--turuncuMetin); }
 .zincir .toplam { margin-top: 3mm; padding: 4mm; display: flex; justify-content: space-between; align-items: baseline; }
 .zincir .toplam span { font-size: ${a4.govde}pt; font-weight: 600; }
 .zincir .toplam b { font-size: 24pt; font-weight: 800; letter-spacing: -0.02em; }
-.zincir.kapat .toplam { background: var(--turuncu); color: var(--murekkep); }
+.zincir.kapat .toplam { background: var(--sari); color: var(--murekkep); }
 .zincir.tanis .toplam { background: var(--murekkep); color: var(--kagit); }
 
 /* Persona tablosu */
@@ -123,7 +124,7 @@ td.vurgu b { color: var(--turuncuMetin); }
 .persona thead th.ust-sayi { padding-bottom: 1mm; vertical-align: bottom; }
 .persona thead th.rol-adi { padding-top: 0; vertical-align: top; }
 .persona thead th .buyuk { display: block; font-size: 20pt; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 2mm; color: var(--murekkep); }
-.persona thead th.ana { background: var(--turuncu); color: var(--murekkep); }
+.persona thead th.ana { background: var(--sari); color: var(--murekkep); }
 .persona thead th.ana.ust-sayi { padding-top: 4mm; }
 .persona thead th.ana .buyuk { color: var(--murekkep); }
 .persona tbody th.satir { vertical-align: top; padding-top: 3mm; }
@@ -141,12 +142,12 @@ h1.kanca.orta { font-size: 25pt; }
 .sikisik .ilk-adim { margin-top: 4mm; }
 .sikisik .bolum { margin-top: 7mm; }
 .sikisik .rol-sayi b { font-size: 44pt; }
-.rol-sayi b { display: block; font-size: 54pt; color: var(--turuncuMetin); }
+.rol-sayi b { display: block; font-size: 54pt; color: var(--lacivert); }
 .rol-sayi span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); margin-top: 2mm; }
 .duz { margin-top: 5mm; display: grid; gap: 2mm; max-width: 165mm; }
 .iki { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; margin-top: 7mm; }
 .ilk-adim { margin-top: 6mm; padding: 4mm 5mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: 26mm 1fr; gap: 4mm; align-items: baseline; }
-.ilk-adim b { color: var(--turuncu); font-size: ${a4.govde}pt; }
+.ilk-adim b { color: var(--sari); font-size: ${a4.govde}pt; }
 .kural-liste { list-style: none; display: grid; gap: 0; }
 .kural-liste li { padding: 2.2mm 0; border-top: 0.3mm solid var(--cizgi); }
 .kural-liste.iki-sutun { grid-template-columns: 1fr 1fr; column-gap: 8mm; }
@@ -158,10 +159,10 @@ h1.kanca.orta { font-size: 25pt; }
 .biz-siz > div:first-child { background: var(--murekkep); color: var(--kagit); }
 .biz-siz > div:last-child { background: var(--kumKoyu); }
 .biz-siz h2 { font-size: 15pt; margin-bottom: 3mm; }
-.biz-siz > div:first-child h2 { color: var(--turuncu); }
+.biz-siz > div:first-child h2 { color: var(--sari); }
 .biz-siz ul { list-style: none; display: grid; gap: 2.2mm; }
 .biz-siz li { padding-left: 5mm; position: relative; }
-.biz-siz li::before { content: ''; position: absolute; left: 0; top: 2.1mm; width: 2mm; height: 2mm; background: var(--turuncu); }
+.biz-siz li::before { content: ''; position: absolute; left: 0; top: 2.1mm; width: 2mm; height: 2mm; background: var(--sari); }
 .biz-siz > div:last-child li::before { background: var(--murekkep); }
 .kurallar { margin-top: 6mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 9mm; }
 .kurallar h2 { grid-column: 1 / -1; font-size: 14pt; margin-bottom: 1mm; }
@@ -170,14 +171,15 @@ h1.kanca.orta { font-size: 25pt; }
 .son h2 { font-size: 22pt; letter-spacing: -0.02em; margin-bottom: 4mm; }
 .son ol { list-style: none; counter-reset: s; display: grid; gap: 2mm; }
 .son li { counter-increment: s; display: grid; grid-template-columns: 8mm 1fr; font-size: ${a4.govdeBuyuk}pt; }
-.son li::before { content: counter(s); font-weight: 800; color: var(--turuncu); }
-.son .adres { align-self: end; text-align: right; }
+.son li::before { content: counter(s); font-weight: 800; color: var(--sari); }
+.son .adres { align-self: end; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.son .adres .imza { margin-bottom: 3mm; }
 .son .adres b { display: block; font-size: 26pt; font-weight: 800; letter-spacing: -0.02em; }
 .son .adres .dipnot { margin-top: 3mm; color: var(--solukKoyu); }
 `;
 
-const ust = (bolumAdi) => `<header class="ust">${marka()}<span>${bolumAdi}</span></header>`;
-const alt = (n) => `<footer class="alt"><span>iStoc iş ortaklığı programı</span><span>${n} / ${TOPLAM}</span></footer>`;
+const ust = (bolumAdi) => `<header class="ust">${logo({ mm: 20 })}<span>${bolumAdi}</span></header>`;
+const alt = (n) => `<footer class="alt"><span>Thoptan iş ortaklığı kılavuzu</span><span>${n} / ${TOPLAM}</span></footer>`;
 const bolum = (no, ad) => `<div class="bolum"><b>${String(no).padStart(2, '0')}</b><span>${ad}</span></div>`;
 
 const kap = kademeler('kapatir');
@@ -190,26 +192,27 @@ function kapak() {
     ...K.yillar.map((y) => ({ yil: `${y.yil}. yıl`, oran: y.oran, op: 0.25 + (y.oran / K.oran) * 0.75 })),
   ];
   return `<section class="sayfa koyu kapak">
-  <header class="ust">${marka()}<span>İş ortaklığı programı</span></header>
+  <header class="ust"><div class="kapak-imza">${logo({ koyu: true, mm: 42 })}${imza()}<span class="dipnot ceviri">Thoptan ile istoc.com ağına bağlanırsınız.</span></div><span>İş ortaklığı programı</span></header>
   <div class="kapak-orta">
+    <p class="belge-adi">Thoptan iş ortaklığı kılavuzu</p>
     <div class="kapak-48 sayi-dev">48<small>aya kadar</small></div>
     <h1>Satışını kapattığınız müşteri size 48 aya kadar pay getirir.</h1>
   </div>
   <div class="aylar" aria-label="48 ayın payı">
-    ${satirlar.map((s) => `<span class="yil">${s.yil}</span><span class="kare">${'<i></i>'.repeat(12).replaceAll('<i>', `<i style="opacity:${s.op.toFixed(2)}">`)}</span><span class="oran">${yuzde(s.oran)}</span>`).join('')}
+    ${satirlar.map((s) => `<span class="yil">${s.yil}</span><span class="kare">${'<i></i>'.repeat(12).replaceAll('<i>', `<i style="opacity:${s.op.toFixed(2)};background:var(--${s.op === 1 ? 'sari' : 'solukKoyu'})">`)}</span><span class="oran">${yuzde(s.oran)}</span>`).join('')}
   </div>
   <p class="dipnot" style="margin-top:3mm">Kareler ayları gösterir. Oranlar ${tl(plan.ornekCiro)} aylık cirolu örnektendir.</p>
   <div class="davet">
-    <p class="buyuk">iStoc iş ortaklığı programına sizi davet ediyoruz.</p>
+    <p class="buyuk">Thoptan iş ortaklığı programına sizi davet ediyoruz.</p>
     <p>Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
     <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.</p>
   </div>
-  <footer class="alt"><span>istoc.com</span><span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
+  <footer class="alt"><span>thoptan.com</span><span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
 </section>`;
 }
 
 const SORULAR = [
-  ['Katalog stüdyosunun müşterisi sorar.', 'Hazırlanan kataloğu alıcılarla nasıl paylaşırım?', 'iStoc kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.'],
+  ['Katalog stüdyosunun müşterisi sorar.', 'Hazırlanan kataloğu alıcılarla nasıl paylaşırım?', 'Thoptan kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.'],
   ['İhracat danışmanının müşterisi sorar.', 'Alıcının istediği ürün bilgisi bende hazır mı?', 'Ürün bilgisi bugünden eksiksiz tutulur. Ölçü, ağırlık, malzeme ve üretildiği ülke yazılır.'],
   ['Yazılım bayisinin müşterisi sorar.', 'Stokumu ve satışlarımı nereden izlerim?', 'Stok ve satışlar telefondan görünür. Kur değişince fiyatlar tek tuşla güncellenir.'],
   ['Lojistik firmasının müşterisi sorar.', 'Yeni alıcılarla görüşmeleri nasıl takip ederim?', 'WhatsApp’tan gelen siparişler tek ekranda toplanır. Fiyat teklifi 2 dakikada hazırlanır.'],
@@ -221,9 +224,9 @@ function nedenSiz() {
   ${ust('Neden siz')}
   ${bolum(1, 'Neden siz')}
   <h1 class="kanca">Müşteriniz size her ay aynı soruyu soruyor mu?</h1>
-  <p class="giris">Siz satıcı firmalara zaten hizmet veriyorsunuz. İşletme size güvenir. iStoc bu güvene somut bir yanıt ekler.</p>
+  <p class="giris">Siz satıcı firmalara zaten hizmet veriyorsunuz. İşletme size güvenir. Thoptan bu güvene somut bir yanıt ekler.</p>
   <div class="soru-liste">
-    ${SORULAR.map(([kim, soru, yanit]) => `<div class="soru"><div><span class="kim">${kim}</span><q>${soru}</q></div><div class="yanit"><b>iStoc’un yanıtı</b><p>${yanit}</p></div></div>`).join('')}
+    ${SORULAR.map(([kim, soru, yanit]) => `<div class="soru"><div><span class="kim">${kim}</span><q>${soru}</q></div><div class="yanit"><b>Thoptan’ın yanıtı</b><p>${yanit}</p></div></div>`).join('')}
   </div>
   <div class="bedel">
     <h2>Müşterinizin ödediği bedel</h2>
@@ -233,7 +236,7 @@ function nedenSiz() {
       <div><b>${avro(fiyat.basicYilEur)}</b><span>Yıllık pakette 12 ay için 10 aylık bedel ödenir.</span></div>
       <div><b>${avro(fiyat.kurulumEur)}</b><span>Mağaza kurulumu bir kez bu kadar tutar.</span></div>
     </div>
-    <p class="not">iStoc satıcının satışından komisyon almaz. Fiyat herkes için aynıdır. Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.</p>
+    <p class="not">Thoptan satıcının satışından komisyon almaz. Fiyat herkes için aynıdır. Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.</p>
     ${alt(2)}
   </div>
 </section>`;
@@ -335,16 +338,16 @@ function ornekHesap() {
 
 export const PERSONALAR = [
   { ad: 'Çözüm ortağı', buyuk: '%30’a kadar', ana: true,
-    kim: 'Satıcı firmalara hizmet veren danışman ya da hizmet firması.', ne: 'Müşterisini iStoc ile tanıştırır ya da satışı kapatır.',
+    kim: 'Satıcı firmalara hizmet veren danışman ya da hizmet firması.', ne: 'Müşterisini Thoptan ile tanıştırır ya da satışı kapatır.',
     kazanc: 'Ciro üzerinden pay alır. Oran %30’a kadar çıkar.', basla: 'Katkı düzeyini yazılı belirler.' },
   { ad: 'Kadrolu uzman', buyuk: 'Maaş ve prim',
     kim: 'Şirkette SGK’lı ve maaşlı çalışan satış uzmanı.', ne: 'Satıcıları ziyaret eder ve satışı yapar.',
     kazanc: 'Maaş alır. Ayrıca paket primi alır.', basla: 'Görevini ve bölgesini netleştirir.' },
   { ad: 'Mevcut müşteri', buyuk: '2 ay',
-    kim: 'iStoc kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye iStoc’u önerir.',
+    kim: 'Thoptan kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye Thoptan’ı önerir.',
     kazanc: 'Uygun tavsiye başına 2 ay ücretsiz kullanım alır.', basla: 'Geçerli koşulu müşteri sorumlusundan öğrenir.' },
   { ad: 'Marka elçisi', buyuk: '%15’e kadar',
-    kim: 'Ticaret yapan bir kitleye ulaşan kişi.', ne: 'iStoc’u tanıtır ve ilgilenen satıcıyı yönlendirir.',
+    kim: 'Ticaret yapan bir kitleye ulaşan kişi.', ne: 'Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir.',
     kazanc: 'Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar.', basla: 'Anlatımını şirkete doğrulatır.' },
 ];
 
@@ -388,7 +391,7 @@ function kadrolu() {
     <div>
       <h3>Ayda satılan pakete göre prim</h3>
       <div style="margin-top:4mm">${paketMerdiveni({ g: 320, y: 170, kademeler: kd, secili: 2, yaziBoyu: 14 })}</div>
-      <p class="dipnot">Çubuklar paket sayısını ve prim oranını gösterir. Turuncu çubuk örnekteki kademedir.</p>
+      <p class="dipnot">Çubuklar paket sayısını ve prim oranını gösterir. Sarı çubuk örnekteki kademedir.</p>
       <p style="margin-top:4mm">Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır. Aylık ve yıllık paketler birlikte sayılır.</p>
     </div>
     <div class="zincir kapat">
@@ -426,10 +429,10 @@ function musteriElci() {
   ${ust('Mevcut müşteri ve marka elçisi')}
   ${bolum(7, 'Mevcut müşteri')}
   <div class="rol-ust">
-    <h1 class="kanca kucuk">Uygun her tavsiye size 2 ay ücretsiz iStoc kazandırır.</h1>
+    <h1 class="kanca kucuk">Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.</h1>
     <div class="rol-sayi"><b class="sayi-dev">${tavsiye.krediAy} ay</b><span>Uygun tavsiye başına</span></div>
   </div>
-  <p class="giris">Siz iStoc kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.</p>
+  <p class="giris">Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.</p>
   <div class="iki" style="margin-top:5mm">
     <ul class="kural-liste">
       <li>Uygun tavsiye başına size ${tavsiye.krediAy} ay ücretsiz kullanım verilir. Bu süre Basic paket fiyatıyla ${avro(hesap.tavsiyeEur)} değerindedir.</li>
@@ -438,8 +441,8 @@ function musteriElci() {
     </ul>
     <ul class="kural-liste">
       <li>Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.</li>
-      <li>Yeni müşteri iStoc’u 60 gün kullanmaya devam etmelidir.</li>
-      <li>Ödül nakit değildir. Ödül ücretsiz iStoc kullanımıdır.</li>
+      <li>Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.</li>
+      <li>Ödül nakit değildir. Ödül ücretsiz Thoptan kullanımıdır.</li>
       <li>Ödül alabileceğinizi işletmeye açıkça söyleyin.</li>
     </ul>
   </div>
@@ -449,7 +452,7 @@ function musteriElci() {
     <h1 class="kanca kucuk">Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.</h1>
     <div class="rol-sayi"><b class="sayi-dev">${yuzde(E.oran)}</b><span>${tl(E.ciro)} aylık ciroda</span></div>
   </div>
-  <p class="giris">iStoc’u sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.</p>
+  <p class="giris">Thoptan’ı sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.</p>
   <div class="iki" style="margin-top:5mm">
     <ul class="kural-liste">
       <li>Size bir bağlantı ya da bir kod verilir. Başvurular bu yolla sizin kaydınıza ulaşır.</li>
@@ -477,7 +480,7 @@ export const OTEKI_YOLLAR = [
   { ad: 'Kadrolu uzman', kanca: 'Maaşınız sabittir. Priminiz paket sayısıyla artar.', sayi: '%5 ile %10',
     sayiNotu: `Ayda 5 paket ve üstünde prim başlar. Örnekte 8 paket ${tl(hesap.kadrolu.prim)} prim eder.`,
     ilkAdim: 'İnsan kaynaklarıyla görevinizi ve bölgenizi netleştirin.' },
-  { ad: 'Mevcut müşteri', kanca: 'Uygun her tavsiye size 2 ay ücretsiz iStoc kazandırır.', sayi: `${tavsiye.krediAy} ay`,
+  { ad: 'Mevcut müşteri', kanca: 'Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.', sayi: `${tavsiye.krediAy} ay`,
     sayiNotu: `Yılda en çok ${tavsiye.sinir} uygun tavsiye sayılır. Ödül nakit değildir.`,
     ilkAdim: 'Geçerli koşulu müşteri sorumlusundan öğrenin.' },
   { ad: 'Marka elçisi', kanca: 'Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.', sayi: tl(hesap.elci.aylik),
@@ -501,7 +504,7 @@ export const SIZ = [
   'Müşterinin izni olmadan kataloğunu paylaşmazsınız.',
   'Kazancınız için şirkete fatura kesersiniz.',
 ];
-export const ILK_ADIMLAR = ['istoc.com adresinden iStoc’u inceleyin.', 'Ortaklık sorumlusuyla görüşün.', 'Katkı düzeyinizi yazılı belirleyin.', 'İlk müşteri kaydınızı açtırın.'];
+export const ILK_ADIMLAR = ['thoptan.com adresinden Thoptan’ı inceleyin.', 'Ortaklık sorumlusuyla görüşün.', 'Katkı düzeyinizi yazılı belirleyin.', 'İlk müşteri kaydınızı açtırın.'];
 
 function kosullar() {
   return `<section class="sayfa">
@@ -526,13 +529,13 @@ function kosullar() {
       <h2>Hangi müşterinizle başlarsınız?</h2>
       <ol>${ILK_ADIMLAR.map((x) => `<li>${x}</li>`).join('')}</ol>
     </div>
-    <div class="adres">${marka()}<b>istoc.com</b><p class="dipnot">Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı. Sayfa ${TOPLAM} / ${TOPLAM}</p></div>
+    <div class="adres">${logo({ koyu: true, mm: 42 })}${imza()}<b>thoptan.com</b><p class="dipnot">Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı. Sayfa ${TOPLAM} / ${TOPLAM}</p></div>
   </div>
 </section>`;
 }
 
 export function kitapcikHtml() {
   const govde = [kapak(), nedenSiz(), nasilIsler(), kazancPlani(), ornekHesap(), dortPersona(), kadrolu(), musteriElci(), kosullar()].join('\n');
-  return sayfaIskeleti({ baslik: 'iStoc iş ortaklığı el kitapçığı', boyut: 'A4 portrait', css, govde });
+  return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı kılavuzu', boyut: 'A4 portrait', css, govde });
 }
 export const KITAPCIK_SAYFA = TOPLAM;

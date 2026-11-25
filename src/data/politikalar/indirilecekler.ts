@@ -7,14 +7,19 @@ import type { Marka } from './types';
  */
 export type IndirilecekDosya = { dosya: string; ad: string; tur: string };
 
-const tanitimDosyalari = (proje: Marka): IndirilecekDosya[] => [
-  { dosya: `indir/${proje}/${proje}-is-ortakligi-sunum.pptx`, ad: 'Görsel sunum', tur: 'PowerPoint' },
-  { dosya: `indir/${proje}/${proje}-is-ortakligi-el-kitapcigi.pdf`, ad: 'El kitapçığı', tur: 'PDF, A4 dikey' },
-  { dosya: `indir/${proje}/${proje}-is-ortakligi-gorsel-sunum.pdf`, ad: 'Görsel sunum', tur: 'PDF, A4 yatay' },
+/** Bağlantıda görünen adlar. Dosya yolu bu adlardan bağımsızdır. */
+type Adlar = { sunum: string; kitapcik: string };
+const VARSAYILAN_AD: Adlar = { sunum: 'Görsel sunum', kitapcik: 'El kitapçığı' };
+
+const tanitimDosyalari = (proje: Marka, ad: Adlar = VARSAYILAN_AD): IndirilecekDosya[] => [
+  { dosya: `indir/${proje}/${proje}-is-ortakligi-sunum.pptx`, ad: ad.sunum, tur: 'PowerPoint' },
+  { dosya: `indir/${proje}/${proje}-is-ortakligi-el-kitapcigi.pdf`, ad: ad.kitapcik, tur: 'PDF, A4 dikey' },
+  { dosya: `indir/${proje}/${proje}-is-ortakligi-gorsel-sunum.pdf`, ad: ad.sunum, tur: 'PDF, A4 yatay' },
 ];
 
 export const INDIRILECEKLER: Record<Marka, IndirilecekDosya[]> = {
-  istoc: tanitimDosyalari('istoc'),
+  // iStoc dosyalarının asıl markası Thoptan'dır (kullanıcı kararı, 25 Kasım 2026). Dosya yolları aynı kalır.
+  istoc: tanitimDosyalari('istoc', { sunum: 'Thoptan iş ortaklığı tanıtım sunumu', kitapcik: 'Thoptan iş ortaklığı kılavuzu' }),
   segika: tanitimDosyalari('segika'),
 };
 

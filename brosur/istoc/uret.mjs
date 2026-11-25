@@ -8,7 +8,7 @@ import { KOK, saglama, kaynakDenetimi } from './veri.mjs';
 import { kitapcikHtml, KITAPCIK_SAYFA } from './kitapcik.mjs';
 import { gorselHtml, GORSEL_SAYFA } from './gorsel.mjs';
 import { sunumPptx, sunumOnizlemeHtml, SLAYT_SAYISI } from './sunum.mjs';
-import { kontrastDenetimi, metinDenetimi, metinEslesmesi } from './kontrol.mjs';
+import { kontrastDenetimi, metinDenetimi, metinEslesmesi, renkDenetimi } from './kontrol.mjs';
 import { pdfMetni, yaziTipiTurleri, pdfPng } from './pdfgorsel.mjs';
 
 const BURASI = import.meta.dirname;
@@ -39,6 +39,7 @@ const belgeler = [
 const tarayici = await chromium.launch();
 let hata = 0;
 for (const b of belgeler) {
+  for (const m of renkDenetimi(b.html)) { not(`HATA ${b.ad}: ${m}`); hata++; }
   const dosya = path.join(DERLEME, `${b.ad}.html`);
   fs.writeFileSync(dosya, b.html);
   const sayfa = await tarayici.newPage({ viewport: { width: b.g, height: b.y }, deviceScaleFactor: b.slayt ? 1 : 2 });
@@ -103,8 +104,8 @@ for (const b of belgeler) {
     const turler = yaziTipiTurleri(hedef);
     const pdfSayfalari = await pdfMetni(hedef);
     const pdfYazisi = pdfSayfalari.join('\n');
-    // Kopyalanan metin doğru çıkmalı. Türkçe harfler ve büyük İ ayrıca aranır.
-    const aranan = ['müşteri', 'İlk adım', 'Koşullar', 'şirket', 'iStoc'].filter((k) => !pdfYazisi.includes(k));
+    // Kopyalanan metin doğru çıkmalı. Türkçe harfler ve büyük İ ayrıca aranır. Asıl marka Thoptan'dır.
+    const aranan = ['müşteri', 'İlk adım', 'Koşullar', 'şirket', 'Thoptan', 'thoptan.com', 'Connect to iStoc', 'Thoptan ile istoc.com ağına bağlanırsınız.'].filter((k) => !pdfYazisi.includes(k));
     not(`${b.pdf}: ${pdfSayfalari.length} sayfa, Outfit gömülü: ${gomulu ? 'evet' : 'hayır'}, yazı tipi türleri: ${turler.join(', ')}, ${Math.round(fs.statSync(hedef).size / 1024)} KB.`);
     if (pdfSayfalari.length !== b.sayfa || !gomulu) { not(`HATA ${b.pdf}: sayfa ya da yazı tipi beklenen gibi değil.`); hata++; }
     if (turler.includes('Type3')) { not(`HATA ${b.pdf}: Type3 yazı tipi var. Metin kopyalanamaz.`); hata++; }
