@@ -195,6 +195,9 @@ h1.kanca.orta { font-size: 25pt; }
 .rol-sayi span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); margin-top: 2mm; }
 .duz { margin-top: 5mm; display: grid; gap: 2mm; max-width: 165mm; }
 .iki { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; margin-top: 7mm; }
+/* Örnek kazanç listesi: açıklama solda, tutar sağda durur. Aralarında boşluk kalır. */
+.zincir ol li { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }
+.zincir ol li b { white-space: nowrap; }
 .ilk-adim { margin-top: 6mm; padding: 4mm 5mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: 26mm 1fr; gap: 4mm; align-items: baseline; }
 .ilk-adim b { color: var(--sari); font-size: ${a4.govde}pt; }
 .kural-liste { list-style: none; display: grid; gap: 0; }
