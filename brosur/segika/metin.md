@@ -1,9 +1,9 @@
 # Segika iş ortaklığı: düz metin
 
 Bu dosya üç belgenin ortak metnidir. Önce bu metin denetlenir. Sonra tasarım yapılır.
-Metin 24 Kasım 2026 Salı günü 2. revizyonla yenilendi.
+Metin 24 Kasım 2026 Salı günü 2. revizyonla yenilendi. 25 Kasım 2026 Çarşamba günkü toplantı kararlarıyla güncellendi.
 
-Üç belgede de 12 sayfa vardır. Sayfaların sırası aşağıdaki bölümlerle aynıdır.
+Üç belgede de 11 sayfa vardır. Sayfaların sırası aşağıdaki bölümlerle aynıdır.
 
 ## 1. Kapak
 
@@ -99,32 +99,25 @@ Fiyatlar 100 çalışanlı bir firma için aylıktır. Bu belgede fiyatlar KDV h
 
 Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.
 
-İş kazası SGK'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.
-
 500'den fazla çalışan için Segika ayrıca teklif verir. Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.
 
 Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika'dan yazılı isteyin.
 
 ## 5. Nasıl işler
 
-İlk görüşmeden ilk ödemeye kadar 6 adım vardır.
+İlk görüşmeden ilk ödemeye kadar 5 adım vardır.
 
 1. Programı seçin. Ortaklık sorumlusu yapacağınız işi sizinle belirler.
-2. Meslek kuralınızı doğrulatın. Hukuk danışmanı ortaklığın uygunluğunu inceler.
-3. İhtiyacı sorun. Bunu aylık bordro kapanışında yapabilirsiniz.
-4. Kaydı açtırın. Segika her firmayı yalnız bir ortağın kaydına yazar.
-5. Gösterin ve satışı kapatın. Örnek veri kullanın. Gerçek çalışan bilgisi kullanmayın.
-6. Kurulumu yapın ve destek verin. Kazancınız için Segika'ya fatura kesin.
+2. İhtiyacı sorun. Bunu aylık bordro kapanışında yapabilirsiniz.
+3. Kaydı açtırın. Segika her firmayı yalnız bir ortağın kaydına yazar.
+4. Gösterin ve satışı kapatın. Örnek veri kullanın. Gerçek çalışan bilgisi kullanmayın.
+5. Kurulumu yapın ve destek verin. Kazancınız için Segika'ya fatura kesin.
 
 Kayıt kabul edilmeden müşteriyi kendinize ait saymayın. Ortaklık sorumlusu tanıştırmayı müşteri takip sistemine kaydeder. Bu kayıt 6 ay geçerlidir. Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.
 
 ### Mali müşavirler için iki yol
 
-Mali müşavirler meslek kurallarına bağlıdır. Hukuk danışmanı komisyonun uygunluğunu inceler. Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.
-
 Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika'yı toptan fiyatla kullanır.
-
-Bu yol hukuk görüşünü bekliyor. Toptan fiyat bantları yazılı anlaşmada belirlenir. Bu kabul edilmeden müşteriye teklif vermeyin.
 
 - Kayıtlı ortak seviyesi ücretsizdir. Ofis 2 saatlik canlı eğitim ve panel alır.
 - Gümüş seviye için en az 10 aktif mükellef gerekir. Ofis toptan fiyatın 1. kademesini alır.
@@ -152,7 +145,7 @@ Yalnız tanıştırırsanız oranlar şöyledir.
 - Aylık ciro 70.000 TL ve üstündeyse oran %10 olur.
 - Aylık ciro 100.000 TL ve üstündeyse oran %15 olur.
 
-Tablodaki tutarlar aylık cirodur. Bu oranlar ve eşikler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
+Tablodaki tutarlar aylık cirodur. Bu oranlar ve eşikler bugünkü plandır.
 
 Müşteri sonraki yıllarda da öderse pay sürer. Satışı kapattıysanız müşteriye destek vermeyi sürdürmelisiniz. Destek vermediğiniz ay için pay oluşmaz.
 
@@ -188,7 +181,7 @@ Bir ayda 2 işverene yıllık paket sattığınızı düşünün. Her işverenin
 
 1. işverenin cirosu 106.800 TL olur. 4. seviyeye 13.200 TL kalır.
 
-Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Kesin kural yazılı anlaşmada belirlenir.
+Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır.
 
 ### 4 yıla kadar süren pay
 
@@ -201,7 +194,7 @@ Pay, müşteri ödedikçe ve siz destek verdikçe sürer. Satışı kapatanın p
 
 Dört yılın toplamı 111.072 TL olur. Sağlama şöyledir: 64.080 + 21.360 + 14.952 + 10.680 = 111.072.
 
-Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz. Oran, bugünkü plandaki eşiklere göre hesaplandı. Kesin eşikler yazılı anlaşmada belirlenir.
+Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz. Oran, bugünkü plandaki eşiklere göre hesaplandı.
 
 ## 8. Aylık satış
 
@@ -225,11 +218,11 @@ Ciro büyüdükçe oran da artar. Oran 2. ayda %20, 4. ayda %25, 7. ayda %30 olu
 
 El kitapçığında 12 ayın hepsi tabloda yazar. Tablonun sütunları şunlardır: ay, işveren, aylık ciro, oran, o ayın kazancı ve kümülatif kazanç.
 
-Örnek bir varsayıma dayanır. Aylık ödeyen işverenin o ay ödediği bedel o ayın cirosuna yazılır. Kazanç planı aylık ödemeyi ayrıca tanımlamıyor. Örnekte hiçbir işveren ayrılmaz. Kesin kural yazılı anlaşmada belirlenir.
+Örnek bir varsayıma dayanır. Aylık ödeyen işverenin o ay ödediği bedel o ayın cirosuna yazılır. Kazanç planı aylık ödemeyi ayrıca tanımlamıyor. Örnekte hiçbir işveren ayrılmaz.
 
-## 9. Üç ortaklık yolu
+## 9. İki ortaklık yolu
 
-Üç ortaklık yolu var. Siz hangisisiniz?
+İki ortaklık yolu var. Siz hangisisiniz?
 
 ### Çözüm ortağı
 
@@ -239,17 +232,9 @@ Siz işverene bordro, danışmanlık ya da iş güvenliği hizmeti verirsiniz. S
 
 Kazancınız satışı kapatma oranından gelir. Oran %15 ile %30 arasıdır.
 
-Bugünkü planda Segika size ve destek personelinize her yıl 8 saat ücretsiz eğitim verir.
+Bugünkü planda Segika size ve destek personelinize her yıl 2 saat ücretsiz eğitim verir.
 
 İlk adımda ortaklık sorumlusuyla programınızı seçin.
-
-### Mevcut müşteri
-
-Firmanız Segika'yı zaten kullanıyor. Siz tanıdığınız bir firmayı Segika ile tanıştırırsınız.
-
-Ödülünüz yılda 3 uygun tavsiye ile 6 ay ücretsiz kullanımdır. Ayrıntılar 10. bölümdedir.
-
-İlk adımda geçerli koşulu müşteri sorumlusundan yazılı isteyin.
 
 ### Marka elçisi
 
@@ -272,35 +257,9 @@ Tanıştıran ve satışı kapatan farklı kişi olabilir. Bu durumda tanıştı
 - Satışı kapatan %30 − %15 = %15 alır. Bu 32.040 TL eder.
 - Toplam 64.080 TL olur. Toplam oran %30 kalır.
 
-Bu sayfadaki tutarlar örnektir. Oranlar ve süreler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
+Bu sayfadaki tutarlar örnektir. Oranlar ve süreler bugünkü plandır.
 
-## 10. Mevcut müşteri
-
-Yılda 3 tavsiye, 6 ay ücretsiz Segika.
-
-Firmanız Segika'yı zaten kullanıyor. Memnunsanız bunu tanıdığınız bir firmaya söyleyin.
-
-Siz satış yapmazsınız. Yalnız tanıştırırsınız. Satışı, kurulumu ve desteği Segika yürütür.
-
-Uygun her tavsiye için 2 ay ücretsiz kullanım alırsınız. Yılda en çok 3 tavsiye sayılır. 3 tavsiye 6 ay eder.
-
-- 1. tavsiye 2 ay ücretsiz kullanım eder.
-- 2. tavsiye ile toplam 4 ay olur.
-- 3. tavsiye ile toplam 6 ay olur.
-
-Firmanızda 100 çalışan olsun. Teşvik ve Otomasyon paketini kullanın. Aylık bedel 8.900 TL olur. 6 ay ücretsiz kullanım 53.400 TL eder.
-
-Tavsiye ettiğiniz firma da 1 ay ücretsiz kullanır. 100 çalışanlı bir firma için bu 8.900 TL eder.
-
-Tavsiyenin uygun sayılması için iki koşul vardır. Yeni müşteri yıllık paket alır. Yeni müşteri 60 gün kullanmaya devam eder.
-
-Ödülünüz nakit değildir. Ödülünüz ücretsiz kullanımdır.
-
-Mevcut müşterinin geçerli koşulunu müşteri sorumlusu tavsiyeden önce yazılı bildirir.
-
-İlk adımda geçerli koşulu müşteri sorumlusundan yazılı isteyin.
-
-## 11. Taahhütler
+## 10. Taahhütler
 
 Birbirimize verdiğimiz sözler.
 
@@ -312,7 +271,7 @@ Bu sayfa ilişkimizin kurallarını anlatır. Her iki taraf da sözünü tutar.
 - Segika her müşteriyi yalnız bir ortağın kaydına yazar.
 - Segika müşteri takip sistemini sağlar.
 - Segika teknik sorunları çözer.
-- Segika bugünkü planda yılda 8 saat ücretsiz eğitim verir.
+- Segika bugünkü planda yılda 2 saat ücretsiz eğitim verir.
 - Segika tahsilatı doğrular ve payınızı öder.
 
 ### Sizin taahhütleriniz
@@ -322,7 +281,6 @@ Bu sayfa ilişkimizin kurallarını anlatır. Her iki taraf da sözünü tutar.
 - Siz kurulumu, ilk eğitimi ve desteği verirsiniz.
 - Siz fiyatı değiştirmez ve indirim sözü vermezsiniz.
 - Siz teşvik tutarı için söz vermezsiniz.
-- Siz müşterinin SGK ya da bordro şifresini istemezsiniz.
 - Siz yasal dayanak olmadan çalışan bilgisini paylaşmazsınız.
 - Siz iletişim izni olmayan kişiye ileti göndermezsiniz.
 - Siz kazancınız için fatura kesersiniz.
@@ -330,27 +288,20 @@ Bu sayfa ilişkimizin kurallarını anlatır. Her iki taraf da sözünü tutar.
 ### İkimiz için de geçerli kurallar
 
 - Müşteri ödemezse pay oluşmaz. Müşteri iade alırsa pay geri alınır.
-- Ödeme günleri yazılı anlaşmada yer alır.
 - Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.
 - Destek vermediğiniz ay için pay oluşmaz.
 - Kayıt kabul edilmeden müşteri size ait sayılmaz.
-- Mali müşavir, uygunluk yazılmadan müşteriye ortaklıktan söz etmez.
 - İlk 12 ayda 2. seviyeye ulaşmazsanız 13. aydan sonra pay almazsınız.
 
-Bu taahhütler yazılı anlaşmanın özüdür. Taahhütler, imzalanan anlaşmayla bağlayıcı olur. Bu belge tek başına sözleşme değildir.
-
-## 12. İlk adım
+## 11. İlk adım
 
 İlk adım tek bir görüşmedir.
 
 1. segika.com adresinden Segika'ya ulaşın.
 2. Ortaklık sorumlusuyla görüşün.
 3. Size uyan yolu birlikte seçin.
-4. Yazılı anlaşmayı inceleyin.
 
-Bu belge bir sözleşme değildir. Koşullar yazılı anlaşmada kesinleşir.
-
-## 13. Belgelere özel kısa metinler
+## 12. Belgelere özel kısa metinler
 
 Görsel sunumda 6. sayfanın başlığı farklıdır: “Aylık cironuz büyüdükçe oranınız %15'ten %30'a çıkar.”
 

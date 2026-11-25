@@ -1,9 +1,9 @@
-/** El kitapçığı: A4 dikey, 12 sayfa. Okunacak belge. Koşullar, süreç ve hesap örnekleri eksiksizdir. */
+/** El kitapçığı: A4 dikey, 11 sayfa. Okunacak belge. Koşullar, süreç ve hesap örnekleri eksiksizdir. */
 import { tokenCss, marka, aySeridi, basamakGrafik, yilGrafik, ayCubuk, binTl, TOKENS, htmlDuzelt, KAPAK_DIKEY } from './ortak.mjs';
-import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, BOLUSME, ELCI, TAVSIYE_ORNEK, basamaklar, tl, yuzde } from '../icerik.mjs';
+import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, BOLUSME, ELCI, basamaklar, tl, yuzde } from '../icerik.mjs';
 
 const R = TOKENS.renk;
-const TOPLAM = 12;
+const TOPLAM = 11;
 
 const css = `
 @page { size: 210mm 297mm; margin: 0; }
@@ -59,11 +59,17 @@ ul.liste li::before { content: ''; position: absolute; left: 0; top: 0.62em; wid
 .fiyatlar b { display: block; font-size: 32pt; font-weight: var(--w-dev); letter-spacing: -0.02em; color: var(--r-lacivert); line-height: 1.1; margin-top: 2mm; }
 .fiyatlar .one b { color: var(--r-yesil); }
 .fiyatlar span { display: block; font-size: 11pt; margin-top: 1mm; line-height: 1.3; }
+/* İş kazası kutusu kalkınca paketler alt alta dizilir. Her pakette ad ve açıklama solda, fiyat sağdadır. */
+.fiyatlar.satir { grid-template-columns: 1fr; gap: 5mm; margin-top: 7mm; }
+.fiyatlar.satir div { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 8mm; align-items: center; padding: 10mm 10mm; }
+.fiyatlar.satir small { font-size: 15pt; grid-column: 1; grid-row: 1; }
+.fiyatlar.satir span { font-size: 12.5pt; grid-column: 1; grid-row: 2; margin-top: 2mm; }
+.fiyatlar.satir b { font-size: 40pt; grid-column: 2; grid-row: 1 / span 2; margin-top: 0; }
 
 /* Süreç */
 .akis { list-style: none; counter-reset: a; position: relative; }
 .akis::before { content: ''; position: absolute; left: 4.9mm; top: 7mm; bottom: 7mm; width: 1.2mm; background: var(--r-sis); }
-.akis li { counter-increment: a; position: relative; display: grid; grid-template-columns: 11mm 1fr 46mm; gap: 6mm; align-items: center; padding: 0.9mm 0; }
+.akis li { counter-increment: a; position: relative; display: grid; grid-template-columns: 11mm 1fr 46mm; gap: 6mm; align-items: center; padding: 2.6mm 0; }
 .akis li::before { content: counter(a); width: 11mm; height: 11mm; border-radius: 50%; background: var(--r-lacivert); color: var(--r-beyaz); display: grid; place-items: center; font-size: 13pt; font-weight: var(--w-dev); position: relative; }
 .akis li:last-child::before { background: var(--r-yesil); color: var(--r-lacivertDerin); }
 .akis b { display: block; font-size: 13.5pt; font-weight: var(--w-baslik); color: var(--r-lacivert); line-height: 1.2; }
@@ -104,7 +110,7 @@ table.esik .sag { text-align: right; }
 
 /* Roller */
 table.roller { width: 100%; border-collapse: collapse; font-size: 11pt; line-height: 1.38; }
-table.roller th, table.roller td { text-align: left; vertical-align: top; padding: 2.7mm 2.4mm; }
+table.roller th, table.roller td { text-align: left; vertical-align: top; padding: 4.5mm 2.4mm; }
 table.roller thead th { font-size: 11pt; letter-spacing: 0.02em; text-transform: uppercase; color: var(--r-gri); font-weight: var(--w-kalin); border-bottom: 1.2px solid var(--r-cizgi); }
 table.roller tbody th { font-size: 12pt; font-weight: var(--w-baslik); color: var(--r-lacivert); width: 28mm; }
 table.roller tbody tr + tr > * { border-top: 1px solid var(--r-sis); }
@@ -198,18 +204,6 @@ table.aylik thead th { font-weight: var(--w-kalin); color: var(--r-gri); border-
 table.aylik tbody tr + tr td { border-top: 1px solid var(--r-sis); }
 table.aylik td.b { font-weight: var(--w-baslik); color: var(--r-lacivert); }
 
-/* Mevcut müşteri */
-.tavsiye-adim { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; align-items: end; margin-top: 6mm; }
-.tavsiye-adim div { background: var(--r-sisAcik); padding: 4mm 5mm; display: flex; flex-direction: column; justify-content: flex-end; }
-.tavsiye-adim div:nth-child(1) { height: 36mm; } .tavsiye-adim div:nth-child(2) { height: 50mm; }
-.tavsiye-adim div:nth-child(3) { height: 64mm; background: var(--r-lacivert); color: var(--r-beyaz); }
-.tavsiye-adim small { font-size: 11pt; font-weight: var(--w-kalin); color: var(--r-gri); }
-.tavsiye-adim div:nth-child(3) small { color: var(--r-yesil); }
-.tavsiye-adim b { font-size: 32pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.05; }
-.tavsiye-adim div:nth-child(3) b { color: var(--r-beyaz); }
-.deger { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 7mm; }
-.deger .rakam-buyuk { font-size: 34pt; font-weight: var(--w-dev); color: var(--r-yesilMetin); line-height: 1; letter-spacing: -0.02em; }
-
 .olcek6 { grid-template-columns: repeat(3, 1fr); }
 .olcek6 div:nth-child(4) { border-left: 0; }
 .olcek6 div:nth-child(n+4) { border-top: 1px solid var(--r-cizgiLacivertUstu); }
@@ -218,8 +212,8 @@ table.aylik td.b { font-weight: var(--w-baslik); color: var(--r-lacivert); }
 .olcek6 span { margin-top: 2mm; }
 
 /* Sözler */
-.sozler ul.liste li { font-size: 11pt; }
-.bag { font-size: 12pt; font-weight: var(--w-kalin); color: var(--r-lacivert); padding-top: 3mm; border-top: 1.2mm solid var(--r-yesil); }
+.sozler ul.liste li { font-size: 12.5pt; margin-top: 2.2mm; }
+.sozler .iki-sutun > div { padding: 7mm 8mm; }
 `;
 
 const bas = (no, ad) => `<div class="bas">${marka()}<span class="ust">${String(no).padStart(2, '0')}  ${ad}</span></div>`;
@@ -277,9 +271,8 @@ function plan() {
   return `<section class="sayfa"><div class="ic">${bas(4, 'Paketler ve fiyatlar')}
   <h2 class="kanca">${P.kanca}</h2>
   <p class="giris">${P.fiyatNot}</p>
-  <div class="fiyatlar">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
-  <p style="margin-top:5mm">${P.paketAyrimi}</p>
-  <div class="yuzey" style="margin-top:7mm"><h3>İş kazası bildirimi</h3><p>${P.kazaNot}</p></div>
+  <div class="fiyatlar satir">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
+  <p style="margin-top:7mm">${P.paketAyrimi}</p>
   <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
   </div>${alt(4)}</section>`;
 }
@@ -292,8 +285,7 @@ function surec() {
   <div style="margin-top:2mm"><h3>Kayıt kuralı</h3><ul class="liste">${S.kayit.map(li).join('')}</ul></div>
   <div class="yuzey" style="margin-top:auto">
     <h3>Mali müşavirler için iki yol</h3>
-    <p>${S.musavir}</p>
-    <p>${S.nakitsiz} ${S.bekliyor}</p>
+    <p>${S.nakitsiz}</p>
     <div class="seviye">${S.seviyeler.map((s) => `<div><small>${s.kosul}</small><b>${s.ad}</b><span>${s.m}</span></div>`).join('')}</div>
     <p style="margin-top:2.5mm">${S.sartlar} ${S.panel} ${S.ikiYol}</p>
   </div>
@@ -386,26 +378,9 @@ function roller() {
   </div>${alt(9)}</section>`;
 }
 
-function musteri() {
-  const U = M.musteri;
-  return `<section class="sayfa"><div class="ic">${bas(10, U.ust)}
-  <h2 class="kanca">${U.kanca}</h2>
-  <p class="giris">${U.giris}</p>
-  <p style="margin-top:2mm">${U.satisYok}</p>
-  <div class="tavsiye-adim">${[1, 2, 3].map((n) => `<div><small>${n}. tavsiye</small><b class="rakam">${n * 2} ay</b><span>ücretsiz kullanım</span></div>`).join('')}</div>
-  <p style="margin-top:3mm">${U.kural}</p>
-  <div class="deger">
-    <div><small class="ust">${CALISAN} çalışanlı örnek</small><p class="rakam-buyuk rakam" style="margin-top:2mm">${tl(TAVSIYE_ORNEK.yillik)}</p><p style="margin-top:2mm">${U.hesap}</p></div>
-    <div class="yuzey"><h3>Tavsiye ettiğiniz firma da kazanır</h3><p>${U.yeni}</p></div>
-  </div>
-  <div style="margin-top:10mm"><h3>Koşullar</h3><ul class="liste">${[U.kosul, U.nakit, U.yazili].map(li).join('')}</ul></div>
-  <p class="vurgu-cizgi" style="margin-top:auto">${U.ilkAdim}</p>
-  </div>${alt(10)}</section>`;
-}
-
 function sozler() {
   const S = M.sozler;
-  return `<section class="sayfa sozler"><div class="ic">${bas(11, 'Taahhütler')}
+  return `<section class="sayfa sozler"><div class="ic">${bas(10, 'Taahhütler')}
   <h2 class="kanca" style="margin-bottom:2mm">${S.kanca}</h2>
   <p class="giris" style="margin-bottom:4mm">${S.giris}</p>
   <div class="iki-sutun">
@@ -413,22 +388,21 @@ function sozler() {
     <div class="siz"><h3>Sizin taahhütleriniz</h3><ul class="liste">${S.siz.map(li).join('')}</ul></div>
   </div>
   <div style="margin-top:6mm"><h3>${S.ortakBaslik}</h3><ul class="liste">${S.ortak.map(li).join('')}<li>${M.kazanc.k1}</li></ul></div>
-  <p class="bag" style="margin-top:auto">${S.bag}</p>
-  </div>${alt(11)}</section>`;
+  </div>${alt(10)}</section>`;
 }
 
 function son() {
   return `<section class="sayfa son koyu"><div class="ic">
-  <div class="bas">${marka()}<span class="ust">12  İlk adım</span></div>
+  <div class="bas">${marka()}<span class="ust">11  İlk adım</span></div>
   <h2 class="kanca">${M.ilk.kanca}</h2>
   <ol class="adim">${M.ilk.adimlar.map(li).join('')}</ol>
-  <div class="adres">${marka()}<p class="web">segika.com</p><p class="uyari">${M.ilk.not} Belge ${TARIH} hazırlandı.</p></div>
-  </div>${alt(12)}</section>`;
+  <div class="adres">${marka()}<p class="web">segika.com</p><p class="uyari">Belge ${TARIH} hazırlandı.</p></div>
+  </div>${alt(11)}</section>`;
 }
 
 export function kitapcikHtml() {
   return htmlDuzelt(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Segika iş ortaklığı el kitapçığı</title>
 <style>${tokenCss('kitapcik')}${css}</style></head><body>
-${[kapak(), acilis(), neden(), plan(), surec(), kazanc(), yillik(), aylik(), roller(), musteri(), sozler(), son()].join('\n')}
+${[kapak(), acilis(), neden(), plan(), surec(), kazanc(), yillik(), aylik(), roller(), sozler(), son()].join('\n')}
 </body></html>`);
 }

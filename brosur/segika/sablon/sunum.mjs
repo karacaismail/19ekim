@@ -1,5 +1,5 @@
 /**
- * Sunum: 16:9, 12 slayt. Metinler düzenlenebilir gerçek metindir. Grafikler PowerPoint şekilleridir.
+ * Sunum: 16:9, 11 slayt. Metinler düzenlenebilir gerçek metindir. Grafikler PowerPoint şekilleridir.
  * Bütün metnin yazı tipi Arial'dir. Outfit PPTX'e gömülemiyor. Outfit'i olmayan görüntüleyici Times'a düşüyordu.
  * Yerleşim tek bir veri modelinde tutulur. Aynı model hem PPTX dosyasını hem önizleme HTML'ini üretir.
  * Ölçüler inçtir. Yazı boyutları pt'dir. 1920 px genişlikte 1 inç 144 px, 1 pt 2 px eder.
@@ -8,7 +8,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { TOKENS, metinDuzelt, binTl } from './ortak.mjs';
-import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, ELCI, TAVSIYE_ORNEK, basamaklar, tl, yuzde } from '../icerik.mjs';
+import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, ELCI, basamaklar, tl, yuzde } from '../icerik.mjs';
 
 const require = createRequire(import.meta.url);
 const PptxGenJS = require('pptxgenjs');
@@ -38,7 +38,7 @@ function ust(yazi, koyu = false) {
 }
 function alt(no, koyu = false, sol = 'Segika iş ortaklığı programı') {
   const renk = koyu ? R.griLacivertUstu : R.gri;
-  return [metin(K, H - 0.55, 7, 0.3, sol, { boyut: S.kucuk, renk }), metin(W - K - 2, H - 0.55, 2, 0.3, `${no} / 12`, { boyut: S.kucuk, renk, hiza: 'right' })];
+  return [metin(K, H - 0.55, 7, 0.3, sol, { boyut: S.kucuk, renk }), metin(W - K - 2, H - 0.55, 2, 0.3, `${no} / ${SLAYT_SAYISI}`, { boyut: S.kucuk, renk, hiza: 'right' })];
 }
 const kanca = (yazi, y = 1.15, w = 11.5, h = 1.1, renk = R.lacivert, boyut = S.h2) => metin(K, y, w, h, yazi, { boyut, kalin: true, renk, satir: 1.05 });
 
@@ -128,21 +128,20 @@ function s3() {
 function s4() {
   const P = M.plan;
   const o = [];
-  const ara = 0.3, cw = (W - 2 * K - 2 * ara) / 3, y0 = 2.2, ch = 2.0;
+  const ara = 0.3, cw = (W - 2 * K - 2 * ara) / 3, y0 = 2.3, ch = 2.6;
   PAKETLER.forEach((p, i) => {
     const x = K + i * (cw + ara), bir = i === 2;
     o.push(kutu(x, y0, cw, ch, bir ? R.lacivert : R.sisAcik, { kose: 0.08 }));
-    o.push(metin(x + 0.3, y0 + 0.22, cw - 0.6, 0.32, p.ad, { boyut: 15, kalin: true, renk: bir ? R.griLacivertUstu : R.gri }));
-    o.push(metin(x + 0.3, y0 + 0.6, cw - 0.6, 0.72, tl(p.fiyat), { boyut: 38, kalin: true, renk: bir ? R.yesil : R.lacivert, satir: 1 }));
-    o.push(metin(x + 0.3, y0 + 1.38, cw - 0.6, 0.5, `${p.kisa}. ${CALISAN} çalışan için aylık.`, { boyut: S.kucuk, renk: bir ? R.beyaz : R.murekkep, satir: 1.05 }));
+    o.push(metin(x + 0.3, y0 + 0.35, cw - 0.6, 0.32, p.ad, { boyut: 15, kalin: true, renk: bir ? R.griLacivertUstu : R.gri }));
+    o.push(metin(x + 0.3, y0 + 0.8, cw - 0.6, 0.8, tl(p.fiyat), { boyut: 44, kalin: true, renk: bir ? R.yesil : R.lacivert, satir: 1 }));
+    o.push(metin(x + 0.3, y0 + 1.75, cw - 0.6, 0.5, `${p.kisa}. ${CALISAN} çalışan için aylık.`, { boyut: S.kucuk, renk: bir ? R.beyaz : R.murekkep, satir: 1.05 }));
   });
   return { ogeler: [
     ...ust('04  Paketler ve fiyatlar'),
     kanca(P.kanca, 1.15, 11.6, 0.7),
     metin(K, 1.75, W - 2 * K, 0.35, P.fiyatNot, { boyut: S.govde, renk: R.gri }),
     ...o,
-    metin(K, 4.45, W - 2 * K, 0.6, P.paketAyrimi, { boyut: 14, satir: 1.05 }),
-    metin(K, 5.1, W - 2 * K, 0.6, P.kazaNot, { boyut: 14, renk: R.gri, satir: 1.05 }),
+    metin(K, 5.2, W - 2 * K, 0.6, P.paketAyrimi, { boyut: 16, satir: 1.05 }),
     metin(K, 5.9, W - 2 * K, 0.6, `${P.kdv} ${P.teklif} ${P.ayni}`, { boyut: S.kucuk, renk: R.gri, satir: 1.05 }),
     ...alt(4),
   ] };
@@ -150,7 +149,7 @@ function s4() {
 
 function s5() {
   const o = [];
-  const n = 6, gw = (W - 2 * K) / n, d = 0.95, cy = 2.2;
+  const n = M.surec.adimlar.length, gw = (W - 2 * K) / n, d = 0.95, cy = 2.2;
   o.push(cizgi(K + gw / 2, cy + d / 2, gw * (n - 1), 0, R.sis, 5));
   M.surec.adimlar.forEach((a, i) => {
     const cx = K + gw * i + gw / 2;
@@ -264,7 +263,7 @@ function s8() {
 
 function s9() {
   const o = [];
-  const gw = (W - 2 * K) / 3;
+  const gw = (W - 2 * K) / M.roller.liste.length;
   M.roller.liste.forEach((r, i) => {
     const gx = K + i * gw;
     const bir = r.id === 'cozum';
@@ -281,39 +280,11 @@ function s9() {
       y += 0.28 + h + 0.04;
     });
   });
-  return { ogeler: [...ust('09  Üç ortaklık yolu'), kanca(M.roller.kanca, 1.15, 11.6, 0.7), ...o,
+  return { ogeler: [...ust(`09  ${M.roller.baslik}`), kanca(M.roller.kanca, 1.15, 11.6, 0.7), ...o,
     metin(K, 6.33, W - 2 * K, 0.55, `${M.roller.elciHesap} Kazanç ${tl(ELCI.kazanc)} olur. ${M.roller.not}`, { boyut: S.kucuk, renk: R.gri, satir: 1.0 }), ...alt(9)] };
 }
 
 function s10() {
-  const U = M.musteri;
-  const o = [];
-  const bw = 1.75, taban = 5.0;
-  [1, 2, 3].forEach((n, i) => {
-    const h = 1.15 + i * 0.4, x = K + i * (bw + 0.15), y = taban - h, son = n === 3;
-    o.push(kutu(x, y, bw, h, son ? R.lacivert : R.sisAcik));
-    o.push(metin(x + 0.15, taban - 1.05, bw - 0.3, 0.28, `${n}. tavsiye`, { boyut: S.kucuk, kalin: true, renk: son ? R.yesil : R.gri }));
-    o.push(metin(x + 0.15, taban - 0.75, bw - 0.3, 0.5, `${n * 2} ay`, { boyut: 26, kalin: true, renk: son ? R.beyaz : R.lacivert, satir: 1 }));
-    o.push(metin(x + 0.15, taban - 0.3, bw - 0.3, 0.26, 'ücretsiz', { boyut: S.kucuk, renk: son ? R.beyaz : R.murekkep }));
-  });
-  const px = 7.0, pw = W - K - px;
-  return { ogeler: [
-    ...ust('10  Mevcut müşteri'),
-    kanca(U.kanca, 1.15, 11.6, 0.7),
-    metin(K, 1.9, 5.9, 0.9, U.satisYok, { boyut: 15, satir: 1.05 }),
-    ...o,
-    metin(K, 5.15, 5.9, 1.1, `${U.kosul} ${U.nakit}`, { boyut: S.kucuk, renk: R.gri, satir: 1.05 }),
-    kutu(px, 1.9, pw, 4.4, R.sisAcik, { kose: 0.08 }),
-    metin(px + 0.35, 2.1, pw - 0.7, 0.28, `${CALISAN} ÇALIŞANLI ÖRNEK`, { boyut: S.ust, kalin: true, renk: R.yesilMetin, harf: 1 }),
-    metin(px + 0.35, 2.42, pw - 0.7, 0.8, tl(TAVSIYE_ORNEK.yillik), { boyut: 44, kalin: true, renk: R.yesilMetin, satir: 1 }),
-    metin(px + 0.35, 3.35, pw - 0.7, 1.0, U.hesap, { boyut: 14, satir: 1.05 }),
-    metin(px + 0.35, 4.45, pw - 0.7, 0.75, U.yeni, { boyut: 14, satir: 1.05 }),
-    metin(px + 0.35, 5.4, pw - 0.7, 0.75, `${U.ilkAdim}`, { boyut: 14, kalin: true, renk: R.lacivert, satir: 1.05 }),
-    ...alt(10),
-  ] };
-}
-
-function s11() {
   const S2 = M.sozler;
   const o = [];
   const c1 = 5.2, c2 = W - 2 * K - c1, y0 = 1.75, bh = 3.85;
@@ -328,13 +299,12 @@ function s11() {
       o.push(metin(x + 0.32, y, cw - 0.75, koyu ? 0.45 : 0.3, m, { boyut: S.kucuk, renk: koyu ? R.beyaz : R.murekkep, satir: 1.0 }));
     });
   });
-  return { ogeler: [...ust('11  Taahhütler'), kanca(S2.kanca, 1.1, 11.6, 0.65), ...o,
+  return { ogeler: [...ust('10  Taahhütler'), kanca(S2.kanca, 1.1, 11.6, 0.65), ...o,
     metin(K, 5.7, W - 2 * K, 0.88, [...S2.ortak, M.kazanc.k1].join(' '), { boyut: S.kucuk, renk: R.gri, satir: 1.0 }),
-    metin(K, 6.6, W - 2 * K, 0.32, S2.bag, { boyut: S.kucuk, kalin: true, renk: R.lacivert }),
-    ...alt(11)] };
+    ...alt(10)] };
 }
 
-function s12() {
+function s11() {
   const o = [];
   M.ilk.adimlar.forEach((m, i) => {
     const y = 3.0 + i * 0.7;
@@ -345,23 +315,24 @@ function s12() {
   // Mali müşavir ofisleri için nakitsiz yol. Koşulları el kitapçığıyla aynıdır.
   const nx = 7.75, nw = W - K - nx, Sr = M.surec;
   const nakitsiz = [
-    cizgi(nx, 3.0, nw, 0, R.cizgiLacivertUstu, 1),
-    metin(nx, 3.08, nw, 0.36, Sr.nakitsizBaslik, { boyut: 15, kalin: true, renk: R.yesil }),
-    metin(nx, 3.46, nw, 1.3, `${Sr.nakitsiz} ${Sr.bekliyor}`, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
-    ...Sr.seviyeler.map((sv, i) => metin(nx, 4.65 + i * 0.5, nw, 0.44, `${sv.ad}: ${sv.kosul}. ${sv.m}`, { boyut: S.kucuk, renk: R.beyaz, satir: 1.0 })),
-    metin(nx, 6.2, nw, 0.45, Sr.ikiYol, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
+    cizgi(nx, 2.7, nw, 0, R.cizgiLacivertUstu, 1),
+    metin(nx, 2.85, nw, 0.36, Sr.nakitsizBaslik, { boyut: 15, kalin: true, renk: R.yesil }),
+    metin(nx, 3.25, nw, 0.75, Sr.nakitsiz, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
+    ...Sr.seviyeler.map((sv, i) => metin(nx, 4.15 + i * 0.55, nw, 0.44, `${sv.ad}: ${sv.kosul}. ${sv.m}`, { boyut: S.kucuk, renk: R.beyaz, satir: 1.0 })),
+    metin(nx, 5.85, nw, 0.45, Sr.ikiYol, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
   ];
-  return { zemin: R.lacivert, koyu: true, ogeler: [...ust('12  İlk adım', true),
+  return { zemin: R.lacivert, koyu: true, ogeler: [...ust('11  İlk adım', true),
     metin(K, 1.3, 7, 1.4, M.ilk.kanca, { boyut: 40, kalin: true, renk: R.beyaz, satir: 1.0 }),
     ...o,
     ...markaYazisi(nx, 1.3, 32, R.beyaz),
     metin(nx, 1.95, nw, 0.42, 'segika.com', { boyut: 20, kalin: true, renk: R.yesil }),
-    metin(nx, 2.4, nw, 0.5, M.ilk.not, { boyut: S.kucuk, renk: R.griLacivertUstu, satir: 1.0 }),
     ...nakitsiz,
-    ...alt(12, true, TARIH)] };
+    ...alt(11, true, TARIH)] };
 }
 
-export const SLAYTLAR = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12].map((f) => f());
+const SLAYT_FONKSIYONLARI = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11];
+const SLAYT_SAYISI = SLAYT_FONKSIYONLARI.length;
+export const SLAYTLAR = SLAYT_FONKSIYONLARI.map((f) => f());
 
 /* ---------- PPTX ---------- */
 const hex = (r) => r.replace('#', '');

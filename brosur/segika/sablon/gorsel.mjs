@@ -1,9 +1,9 @@
-/** Görsel sunum: A4 yatay, 12 sayfa. Az metin, büyük sayılar, şemalar. Ekranda ve baskıda tam sayfa. */
+/** Görsel sunum: A4 yatay, 11 sayfa. Az metin, büyük sayılar, şemalar. Ekranda ve baskıda tam sayfa. */
 import { tokenCss, marka, aySeridi, basamakGrafik, yilGrafik, ayCubuk, TOKENS, htmlDuzelt, KAPAK_YATAY } from './ortak.mjs';
-import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, ELCI, TAVSIYE_ORNEK, basamaklar, tl, yuzde } from '../icerik.mjs';
+import { M, TARIH, CALISAN, PAKETLER, OLCEK, ORNEK, SEVIYE, AYLIK, ELCI, basamaklar, tl, yuzde } from '../icerik.mjs';
 
 const R = TOKENS.renk;
-const TOPLAM = 12;
+const TOPLAM = 11;
 
 const css = `
 @page { size: 297mm 210mm; margin: 0; }
@@ -47,7 +47,7 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .fiyat-serit p { font-size: 12.5pt; line-height: 1.35; }
 
 /* 4 Süreç */
-.akis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin-top: 18mm; position: relative; list-style: none; counter-reset: a; }
+.akis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin-top: 18mm; position: relative; list-style: none; counter-reset: a; }
 .akis::before { content: ''; position: absolute; left: 8%; right: 8%; top: 13mm; height: 1.6mm; background: var(--r-sis); }
 .akis li { counter-increment: a; position: relative; padding: 0 2.5mm; text-align: center; }
 .akis li::before { content: counter(a); display: grid; place-items: center; width: 26mm; height: 26mm; margin: 0 auto 7mm; border-radius: 50%; background: var(--r-lacivert); color: var(--r-beyaz); font-size: 26pt; font-weight: var(--w-dev); position: relative; }
@@ -99,7 +99,7 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .roller dd.oran { font-size: 17pt; font-weight: var(--w-baslik); color: var(--r-lacivert); line-height: 1.15; }
 .roller .bir dd.oran { color: var(--r-beyaz); }
 
-.roller3 { grid-template-columns: repeat(3, 1fr); }
+.roller2 { grid-template-columns: repeat(2, 1fr); }
 /* 8 Koşullar */
 .iki-sutun { display: grid; grid-template-columns: 1fr 1fr; margin-top: 9mm; border-radius: var(--o-kose); overflow: hidden; flex: 1; }
 .iki-sutun > div { padding: 8mm 10mm; }
@@ -182,13 +182,13 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 
 /* 4 Plan */
 .plan-kart { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 7mm; }
-.plan-kart div { background: var(--r-sisAcik); border-radius: var(--o-kose); padding: 7mm; }
+.plan-kart div { background: var(--r-sisAcik); border-radius: var(--o-kose); padding: 11mm 8mm; }
 .plan-kart div.one { background: var(--r-lacivert); color: var(--r-beyaz); }
-.plan-kart small { display: block; font-size: 13pt; font-weight: var(--w-kalin); color: var(--r-gri); }
+.plan-kart small { display: block; font-size: 15pt; font-weight: var(--w-kalin); color: var(--r-gri); }
 .plan-kart .one small { color: var(--r-griLacivertUstu); }
-.plan-kart b { display: block; font-size: 38pt; font-weight: var(--w-dev); color: var(--r-lacivert); letter-spacing: -0.02em; line-height: 1.1; margin-top: 2mm; }
+.plan-kart b { display: block; font-size: 46pt; font-weight: var(--w-dev); color: var(--r-lacivert); letter-spacing: -0.02em; line-height: 1.1; margin-top: 2mm; }
 .plan-kart .one b { color: var(--r-yesil); }
-.plan-kart span { display: block; font-size: 13pt; margin-top: 2mm; line-height: 1.3; }
+.plan-kart span { display: block; font-size: 14pt; margin-top: 4mm; line-height: 1.3; }
 
 /* 7 Yıllık */
 .yil-alt { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; margin-top: auto; align-items: end; }
@@ -214,28 +214,14 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .aylik-sonuc .sonuc { font-size: 14pt; font-weight: var(--w-baslik); color: var(--r-lacivert); line-height: 1.3; }
 
 /* 10 Mevcut müşteri */
-.musteri-izgara { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12mm; flex: 1; margin-top: 6mm; }
-.tavsiye-adim { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; align-items: end; margin-top: 6mm; }
-.tavsiye-adim div { background: var(--r-sisAcik); padding: 4mm 5mm; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 0; }
-.tavsiye-adim div:nth-child(1) { height: 26mm; } .tavsiye-adim div:nth-child(2) { height: 34mm; }
-.tavsiye-adim div:nth-child(3) { height: 42mm; background: var(--r-lacivert); color: var(--r-beyaz); }
-.tavsiye-adim small { font-size: 12pt; font-weight: var(--w-kalin); color: var(--r-gri); }
-.tavsiye-adim div:nth-child(3) small { color: var(--r-yesil); }
-.tavsiye-adim b { font-size: 28pt; font-weight: var(--w-dev); color: var(--r-lacivert); line-height: 1.05; }
-.tavsiye-adim div:nth-child(3) b { color: var(--r-beyaz); }
-.tavsiye-adim span { font-size: 12pt; }
-.deger-kutu { background: var(--r-sisAcik); border-radius: var(--o-kose); padding: 7mm 8mm; display: flex; flex-direction: column; }
-.deger-kutu b.rakam-buyuk { font-size: 44pt; font-weight: var(--w-dev); color: var(--r-yesilMetin); letter-spacing: -0.02em; line-height: 1; margin-top: 2mm; }
-.deger-kutu p { font-size: 13pt; line-height: 1.35; margin-top: 3mm; }
 
 /* 11 Sözler */
-.soz .iki-sutun li { font-size: 12pt; padding: 0.9mm 0; line-height: 1.25; }
-.soz .iki-sutun > div { padding: 5mm 8mm; }
+.soz .iki-sutun li { font-size: 13.5pt; padding: 1.1mm 0; line-height: 1.25; }
+.soz .iki-sutun > div { padding: 7mm 8mm; }
 .soz .iki-sutun { flex: none; }
 .soz .iki-sutun h3 { font-size: 16pt; }
 .soz .iki-sutun ol { margin-top: 2mm; }
-.ortak { font-size: 12pt; margin-top: 3mm; line-height: 1.35; }
-.bag { font-size: 13pt; font-weight: var(--w-kalin); color: var(--r-lacivert); margin-top: 3mm; }
+.ortak { font-size: 13pt; margin-top: 5mm; line-height: 1.4; }
 `;
 
 const bas = (no, ad) => `<div class="bas">${marka()}<span class="ust">${String(no).padStart(2, '0')}  ${ad}</span></div>`;
@@ -274,7 +260,6 @@ const sayfalar = [
     <p class="alt-baslik">${P.fiyatNot}</p>
     <div class="plan-kart">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
     <p class="entegre-satir" style="color:var(--r-murekkep)">${P.paketAyrimi}</p>
-    <p class="entegre-satir">${P.kazaNot}</p>
     <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
     ${alt(4)}</section>`;
   },
@@ -325,40 +310,28 @@ const sayfalar = [
   },
   () => `<section class="sayfa">${bas(9, M.roller.baslik)}
     <h2 class="kanca">${M.roller.kanca}</h2>
-    <div class="roller roller3">${M.roller.liste.map((r) => `<div class="${r.id === 'cozum' ? 'bir koyu' : ''}"><h3>${r.ad}</h3><dl>
+    <div class="roller roller2">${M.roller.liste.map((r) => `<div class="${r.id === 'cozum' ? 'bir koyu' : ''}"><h3>${r.ad}</h3><dl>
       <dt>Kim</dt><dd>${r.kim}</dd><dt>Ne yapar</dt><dd>${r.ne}</dd><dt>Nasıl kazanır</dt><dd class="oran">${r.kazanc}</dd>${r.kazancNot ? `<dd>${r.kazancNot}</dd>` : ''}<dt>Nasıl başlar</dt><dd>${r.ilk}</dd></dl></div>`).join('')}</div>
     <p class="not" style="margin-top:4mm">${M.roller.elciHesap} Kazanç ${tl(ELCI.kazanc)} olur. ${M.roller.not}</p>
     ${alt(9)}</section>`,
   () => {
-    const U = M.musteri;
-    return `<section class="sayfa">${bas(10, U.ust)}
-    <h2 class="kanca">${U.kanca}</h2>
-    <div class="musteri-izgara">
-      <div><p class="alt-baslik" style="color:var(--r-murekkep);margin-top:0">${U.satisYok}</p>
-        <div class="tavsiye-adim">${[1, 2, 3].map((n) => `<div><small>${n}. tavsiye</small><b class="rakam">${n * 2} ay</b><span>ücretsiz kullanım</span></div>`).join('')}</div>
-        <p class="not" style="margin-top:4mm">${U.kosul} ${U.nakit}</p></div>
-      <div class="deger-kutu"><small class="ust">${CALISAN} çalışanlı örnek</small><b class="rakam-buyuk rakam">${tl(TAVSIYE_ORNEK.yillik)}</b><p>${U.hesap}</p><p>${U.yeni}</p><p style="margin-top:auto;font-weight:600;color:var(--r-lacivert)">${U.ilkAdim}</p></div>
-    </div>${alt(10)}</section>`;
-  },
-  () => {
     const S = M.sozler;
-    return `<section class="sayfa soz">${bas(11, 'Taahhütler')}
+    return `<section class="sayfa soz">${bas(10, 'Taahhütler')}
     <h2 class="kanca">${S.kanca}</h2>
     <div class="iki-sutun" style="margin-top:5mm">
       <div class="biz koyu"><h3>Segika'nın taahhütleri</h3><ol>${S.segika.map((x) => `<li>${x}</li>`).join('')}</ol></div>
       <div class="siz"><h3>Sizin taahhütleriniz</h3><ol>${S.siz.map((x) => `<li>${x}</li>`).join('')}</ol></div>
     </div>
     <p class="ortak">${[...S.ortak, M.kazanc.k1].join(' ')}</p>
-    <p class="bag">${S.bag}</p>
-    ${alt(11)}</section>`;
+    ${alt(10)}</section>`;
   },
-  () => `<section class="sayfa son koyu">${bas(12, 'İlk adım')}
+  () => `<section class="sayfa son koyu">${bas(11, 'İlk adım')}
     <div class="son-izgara">
       <div><h2 class="kanca">${M.ilk.kanca}</h2><ol style="margin-top:8mm">${M.ilk.adimlar.map((x) => `<li>${x}</li>`).join('')}</ol></div>
-      <div class="adres">${marka()}<p class="web">segika.com</p><p class="not" style="margin-top:3mm">${M.ilk.not}</p>
-        <div class="nakitsiz"><h3>${M.surec.nakitsizBaslik}</h3><p>${M.surec.nakitsiz} ${M.surec.bekliyor}</p>
+      <div class="adres">${marka()}<p class="web">segika.com</p>
+        <div class="nakitsiz"><h3>${M.surec.nakitsizBaslik}</h3><p>${M.surec.nakitsiz}</p>
           ${M.surec.seviyeler.map((s) => `<p class="sv"><b>${s.ad}:</b> ${s.kosul}. ${s.m}</p>`).join('')}<p>${M.surec.ikiYol}</p></div></div>
-    </div>${alt(12, TARIH)}</section>`,
+    </div>${alt(11, TARIH)}</section>`,
 ];
 
 export function gorselHtml() {

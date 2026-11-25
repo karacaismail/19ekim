@@ -1,10 +1,12 @@
 /**
  * Segika iş ortaklığı setinin ortak içeriği ve hesapları. 2. revizyon, 24 Kasım 2026 Salı günü.
+ * 25 Kasım 2026 Çarşamba günkü toplantı kararlarıyla güncellendi.
  * Metin `metin.md` dosyasından gelir. Sayılar aşağıdaki kaynaklardan gelir ve burada yeniden hesaplanır:
  * - Oranlar ve eşikler: src/data/kazancPlani.ts (projeVarsayilani('segika'), SABIT_KURALLAR, PROJE_VARSAYILANI).
  * - 100 çalışan fiyatları: kullanıcının 24 Kasım 2026 Salı günkü kararı. Bu fiyatlar src/data/satisOrtakligi.ts
  *   içindeki segikaFiyat değerlerinden (25 çalışan) farklıdır. Fark README.md dosyasında yazar. src/ değişmedi.
- * - Eğitim ve tavsiye ödülü: src/data/satisOrtakligi.ts VARSAYILAN_AYAR ve src/data/politikalar/segika/.
+ * - Eğitim kuralı: src/data/satisOrtakligi.ts VARSAYILAN_AYAR ve src/data/politikalar/segika/.
+ *   Ücretsiz eğitim süresi kullanıcının 25 Kasım 2026 Çarşamba günkü kararıdır: yılda 2 saat.
  * - Ölçek sayıları: Segika tanıtım broşürü, Temmuz 2025 verileri.
  * Her hesap `sagla` ile denetlenir. Sağlama tutmazsa üretim durur.
  */
@@ -32,8 +34,7 @@ export const PLAN = {
   tanistir: { taban: 0, esik: [30000, 70000, 100000], artis: [0.07, 0.03, 0.05], yillar: [0.05, 0.025] },
   tanistirmaSuresiAy: 6,
 };
-export const EGITIM = { ucretsizSaat: 8, saatUcreti: 1500 };
-export const TAVSIYE = { krediAy: 2, yeniKrediAy: 1, yillikSinir: 3, gun: 60 };
+export const EGITIM = { ucretsizSaat: 2, saatUcreti: 1500 };
 export const OLCEK = [
   { sayi: '20.000+', metin: 'Her ay 20.000\'den fazla firma için işlem yapılıyor.' },
   { sayi: '61.000+', metin: 'Her ay 61.000\'den fazla sicil için işlem yapılıyor.' },
@@ -132,13 +133,6 @@ const elciKazanc = Math.round(elciCiro * elciOran);
 sagla(elciOran === 0.15 && elciKazanc === 16020, 'elçi: 106.800 × %15 = 16.020');
 export const ELCI = { ciro: elciCiro, oran: elciOran, kazanc: elciKazanc };
 
-/* ---------- Mevcut müşteri ---------- */
-const kredi = paket * TAVSIYE.krediAy;
-const yillikAy = TAVSIYE.krediAy * TAVSIYE.yillikSinir;
-sagla(kredi === 17800 && yillikAy === 6 && paket * yillikAy === 53400, 'tavsiye: 3 tavsiye 6 ay, 53.400 TL');
-export const TAVSIYE_ORNEK = { kredi, ay: yillikAy, yillik: paket * yillikAy, yeni: paket * TAVSIYE.yeniKrediAy };
-sagla(TAVSIYE_ORNEK.yeni === 8900, 'tavsiye edilen firma 1 ay: 8.900 TL');
-
 /* ---------- Metin parçaları (metin.md ile aynı) ---------- */
 export const M = {
   kapak: {
@@ -203,13 +197,11 @@ export const M = {
     kdv: 'KDV, katma değer vergisinin kısa adıdır.',
     teklif: '500\'den fazla çalışan için Segika ayrıca teklif verir.',
     ayni: 'Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.',
-    kazaNot: 'İş kazası SGK\'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.',
   },
   surec: {
-    kanca: 'İlk görüşmeden ilk ödemeye kadar 6 adım vardır.',
+    kanca: 'İlk görüşmeden ilk ödemeye kadar 5 adım vardır.',
     adimlar: [
       { b: 'Programı seçin', m: 'Ortaklık sorumlusu yapacağınız işi sizinle belirler.', kim: 'Siz ve ortaklık sorumlusu' },
-      { b: 'Meslek kuralınızı doğrulatın', m: 'Hukuk danışmanı ortaklığın uygunluğunu inceler.', kim: 'Hukuk danışmanı' },
       { b: 'İhtiyacı sorun', m: 'Bunu aylık bordro kapanışında yapabilirsiniz.', kim: 'Siz' },
       { b: 'Kaydı açtırın', m: 'Segika her firmayı yalnız bir ortağın kaydına yazar.', kim: 'Ortaklık sorumlusu' },
       { b: 'Gösterin ve satışı kapatın', m: 'Örnek veri kullanın. Gerçek çalışan bilgisi kullanmayın.', kim: 'Siz' },
@@ -220,10 +212,8 @@ export const M = {
       'Ortaklık sorumlusu tanıştırmayı müşteri takip sistemine kaydeder. Bu kayıt 6 ay geçerlidir.',
       'Kurulumdan önce çalışan verisine erişimin yasal dayanağı yazılır.',
     ],
-    musavir: 'Mali müşavirler meslek kurallarına bağlıdır. Hukuk danışmanı komisyonun uygunluğunu inceler. Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.',
     nakitsizBaslik: 'Mali müşavir ofisleri için nakitsiz yol',
     nakitsiz: 'Mali müşavir ofisleri için nakitsiz bir yol da planlanıyor. Bu yolda ofis komisyon almaz. Ofis Segika\'yı toptan fiyatla kullanır.',
-    bekliyor: 'Bu yol hukuk görüşünü bekliyor. Toptan fiyat bantları yazılı anlaşmada belirlenir. Bu kabul edilmeden müşteriye teklif vermeyin.',
     sartlar: 'Ofis bordro hizmeti vermelidir. Ofis Luca, Mikro ya da ETA kullanmalıdır. Ofis sertifika eğitimini bitirmelidir.',
     seviyeler: [
       { ad: 'Kayıtlı ortak', kosul: 'Ücretsiz', m: 'Ofis 2 saatlik canlı eğitim ve panel alır.' },
@@ -240,7 +230,7 @@ export const M = {
     kapatir: 'Satışı kapatırsanız taban oranınız %15\'tir. Satışı kapatan kişi ürünü gösterir. Kurulumu ve ilk eğitimi de yapar.',
     tamami: 'Ulaştığınız oran cironun tamamına uygulanır.',
     tablo: 'Tablodaki tutarlar aylık cirodur.',
-    esik: 'Bu oranlar ve eşikler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.',
+    esik: 'Bu oranlar ve eşikler bugünkü plandır.',
     surer: 'Müşteri sonraki yıllarda da öderse pay sürer. Satışı kapattıysanız müşteriye destek vermeyi sürdürmelisiniz. Destek vermediğiniz ay için pay oluşmaz.',
     hakDegil: 'Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz.',
     yilKapatir: 'Satışı kapatanın payı 2. yılda %10, 3. yılda %7, 4. yılda %5 olur.',
@@ -259,12 +249,12 @@ export const M = {
     buradasiniz: 'Siz buradasınız',
     yol: '1. işveren sizi 3. seviyeye taşır. 2. işveren sizi 4. seviyeye taşır.',
     birIsveren: `1. işverenin cirosu ${tl(ciro1)} olur. 4. seviyeye ${tl(kalan)} kalır.`,
-    varsayim: 'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Kesin kural yazılı anlaşmada belirlenir.',
+    varsayim: 'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır.',
     dortYil: '4 yıla kadar süren pay',
     dortYilAlt: 'Pay, müşteri ödedikçe ve siz destek verdikçe sürer.',
     toplam: `Dört yılın toplamı ${tl(dortYil)} olur.`,
     saglama: `Sağlama şöyledir: ${[kazanc2, ...yilTutarlari].map(sayi).join(' + ')} = ${sayi(dortYil)}.`,
-    esikNot: 'Oran, bugünkü plandaki eşiklere göre hesaplandı. Kesin eşikler yazılı anlaşmada belirlenir.',
+    esikNot: 'Oran, bugünkü plandaki eşiklere göre hesaplandı.',
   },
   aylik: {
     ust: 'Aylık satış',
@@ -275,11 +265,11 @@ export const M = {
     neden: 'Önceki ayların işverenleri ödemeye devam eder. Yeni işverenler bunların üstüne eklenir. Bu yüzden aylık ciro her ay büyür.',
     oran: 'Ciro büyüdükçe oran da artar. Oran 2. ayda %20, 4. ayda %25, 7. ayda %30 olur.',
     sonuc: `12. ayda 24 işveren olur. O ayın kazancı ${tl(AYLIK[11].kazanc)} olur. 12 ayın birikimi ${tl(AYLIK[11].birikim)} olur.`,
-    varsayim: 'Örnek bir varsayıma dayanır. Aylık ödeyen işverenin o ay ödediği bedel o ayın cirosuna yazılır. Kazanç planı aylık ödemeyi ayrıca tanımlamıyor. Örnekte hiçbir işveren ayrılmaz. Kesin kural yazılı anlaşmada belirlenir.',
+    varsayim: 'Örnek bir varsayıma dayanır. Aylık ödeyen işverenin o ay ödediği bedel o ayın cirosuna yazılır. Kazanç planı aylık ödemeyi ayrıca tanımlamıyor. Örnekte hiçbir işveren ayrılmaz.',
   },
   roller: {
-    kanca: 'Üç ortaklık yolu var. Siz hangisisiniz?',
-    baslik: 'Üç ortaklık yolu',
+    kanca: 'İki ortaklık yolu var. Siz hangisisiniz?',
+    baslik: 'İki ortaklık yolu',
     liste: [
       {
         id: 'cozum', ad: 'Çözüm ortağı',
@@ -287,13 +277,6 @@ export const M = {
         ne: 'Gösterir, satışı kapatır, kurar ve destek verir.',
         kazanc: 'Satışı kapatma oranı: %15 ile %30 arası',
         ilk: 'Ortaklık sorumlusuyla programınızı seçin.',
-      },
-      {
-        id: 'tavsiye', ad: 'Mevcut müşteri',
-        kim: 'Segika\'yı zaten kullanan firma',
-        ne: 'Tanıdığı bir firmayı Segika ile tanıştırır.',
-        kazanc: 'Yılda 3 uygun tavsiye ile 6 ay ücretsiz kullanım',
-        ilk: 'Geçerli koşulu müşteri sorumlusundan yazılı isteyin.',
       },
       {
         id: 'elci', ad: 'Marka elçisi',
@@ -305,24 +288,10 @@ export const M = {
       },
     ],
     cozum: 'Siz işverene bordro, danışmanlık ya da iş güvenliği hizmeti verirsiniz. Segika\'yı müşterinize gösterirsiniz. Satışı kapatırsınız. Kurulumu ve müşteri desteğini siz verirsiniz.',
-    cozumEgitim: 'Bugünkü planda Segika size ve destek personelinize her yıl 8 saat ücretsiz eğitim verir.',
+    cozumEgitim: `Bugünkü planda Segika size ve destek personelinize her yıl ${EGITIM.ucretsizSaat} saat ücretsiz eğitim verir.`,
     elci: 'Siz Segika\'yı kitlenize anlatırsınız. Her ticari paylaşımın başına “reklam” yazarsınız. İlgilenen işveren size özel bağlantıyla başvurur.',
     elciHesap: `Bağlantınızdan 1 işveren yıllık paket alsın. Ciro ${tl(elciCiro)} olur. Bu ciro 100.000 TL eşiğini geçer. Oran ${yuzde(elciOran)} olur.`,
-    not: 'Bu sayfadaki tutarlar örnektir. Oranlar ve süreler bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.',
-  },
-  musteri: {
-    ust: 'Mevcut müşteri',
-    kanca: 'Yılda 3 tavsiye, 6 ay ücretsiz Segika.',
-    giris: 'Firmanız Segika\'yı zaten kullanıyor. Memnunsanız bunu tanıdığınız bir firmaya söyleyin.',
-    satisYok: 'Siz satış yapmazsınız. Yalnız tanıştırırsınız. Satışı, kurulumu ve desteği Segika yürütür.',
-    kural: 'Uygun her tavsiye için 2 ay ücretsiz kullanım alırsınız. Yılda en çok 3 tavsiye sayılır. 3 tavsiye 6 ay eder.',
-    hesap: `Firmanızda ${CALISAN} çalışan olsun. Teşvik ve Otomasyon paketini kullanın. Aylık bedel ${tl(paket)} olur. 6 ay ücretsiz kullanım ${tl(paket * yillikAy)} eder.`,
-    yeni: `Tavsiye ettiğiniz firma da 1 ay ücretsiz kullanır. 100 çalışanlı bir firma için bu ${tl(paket)} eder.`,
-    kosul: 'Tavsiyenin uygun sayılması için iki koşul vardır. Yeni müşteri yıllık paket alır. Yeni müşteri 60 gün kullanmaya devam eder.',
-    nakit: 'Ödülünüz nakit değildir. Ödülünüz ücretsiz kullanımdır.',
-    yazili: 'Mevcut müşterinin geçerli koşulunu müşteri sorumlusu tavsiyeden önce yazılı bildirir.',
-    ilk: 'Geçerli koşulu müşteri sorumlusundan yazılı isteyin.',
-    ilkAdim: 'İlk adımda geçerli koşulu müşteri sorumlusundan yazılı isteyin.',
+    not: 'Bu sayfadaki tutarlar örnektir. Oranlar ve süreler bugünkü plandır.',
   },
   sozler: {
     kanca: 'Birbirimize verdiğimiz sözler.',
@@ -332,7 +301,7 @@ export const M = {
       'Segika her müşteriyi yalnız bir ortağın kaydına yazar.',
       'Segika müşteri takip sistemini sağlar.',
       'Segika teknik sorunları çözer.',
-      'Segika bugünkü planda yılda 8 saat ücretsiz eğitim verir.',
+      `Segika bugünkü planda yılda ${EGITIM.ucretsizSaat} saat ücretsiz eğitim verir.`,
       'Segika tahsilatı doğrular ve payınızı öder.',
     ],
     siz: [
@@ -341,7 +310,6 @@ export const M = {
       'Siz kurulumu, ilk eğitimi ve desteği verirsiniz.',
       'Siz fiyatı değiştirmez ve indirim sözü vermezsiniz.',
       'Siz teşvik tutarı için söz vermezsiniz.',
-      'Siz müşterinin SGK ya da bordro şifresini istemezsiniz.',
       'Siz yasal dayanak olmadan çalışan bilgisini paylaşmazsınız.',
       'Siz iletişim izni olmayan kişiye ileti göndermezsiniz.',
       'Siz kazancınız için fatura kesersiniz.',
@@ -349,13 +317,10 @@ export const M = {
     ortakBaslik: 'İkimiz için de geçerli kurallar',
     ortak: [
       'Müşteri ödemezse pay oluşmaz. Müşteri iade alırsa pay geri alınır.',
-      'Ödeme günleri yazılı anlaşmada yer alır.',
-      'Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.',
+      `Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati ${tl(EGITIM.saatUcreti)} tutar.`,
       'Destek vermediğiniz ay için pay oluşmaz.',
       'Kayıt kabul edilmeden müşteri size ait sayılmaz.',
-      'Mali müşavir, uygunluk yazılmadan müşteriye ortaklıktan söz etmez.',
     ],
-    bag: 'Bu taahhütler yazılı anlaşmanın özüdür. Taahhütler, imzalanan anlaşmayla bağlayıcı olur. Bu belge tek başına sözleşme değildir.',
   },
   ilk: {
     kanca: 'İlk adım tek bir görüşmedir.',
@@ -363,8 +328,6 @@ export const M = {
       'segika.com adresinden Segika\'ya ulaşın.',
       'Ortaklık sorumlusuyla görüşün.',
       'Size uyan yolu birlikte seçin.',
-      'Yazılı anlaşmayı inceleyin.',
     ],
-    not: 'Bu belge bir sözleşme değildir. Koşullar yazılı anlaşmada kesinleşir.',
   },
 };

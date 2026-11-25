@@ -15,7 +15,8 @@ const DOSYA = {
   gorsel: resolve(hedef, 'segika-is-ortakligi-gorsel-sunum.pdf'),
   sunum: resolve(hedef, 'segika-is-ortakligi-sunum.pptx'),
 };
-const EN_COK_SAYFA = 12;
+/** 25 Kasım 2026 Çarşamba günkü toplantıdan sonra üç belgede de 11 sayfa vardır. */
+const SAYFA = 11;
 
 /** Karşılaştırma için metni sadeleştirir: tipografik kesme düz olur, boşluklar teke iner. */
 const sade = (t) => t.replace(/[’‘]/g, "'").replace(/[ \s]+/g, ' ').trim();
@@ -56,18 +57,48 @@ function pptxOku(yol) {
 /** Üç dosyada da geçmesi ve geçmemesi gereken ifadeler. */
 const YASAK = ['Kadrolu', 'insan kaynakları danışman', 'Bu davet mali müşavir', 'Dört ortaklık yolu', '25 çalışan', 'Fırsat',
   "Fiyatlar Segika'nın 24 Kasım 2026 Salı günkü fiyatlarıdır.",
-  'ETA programlarıyla birlikte çalışır', 'Bu bağlantı Teşvik ve Otomasyon paketindedir.', 'Luca Mikro ETA'];
+  'ETA programlarıyla birlikte çalışır', 'Bu bağlantı Teşvik ve Otomasyon paketindedir.', 'Luca Mikro ETA',
+  // 25 Kasım 2026 Çarşamba günkü toplantı kararıyla kaldırılan cümleler. Bu cümleler geri gelemez.
+  'İş kazası bildirimi',
+  "İş kazası SGK'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.",
+  'Üç ortaklık yolu', 'Mevcut müşteri', 'Yılda 3 tavsiye, 6 ay ücretsiz Segika.',
+  'Yılda 3 uygun tavsiye ile 6 ay ücretsiz kullanım', 'Geçerli koşulu müşteri sorumlusundan yazılı isteyin.',
+  "Segika'yı zaten kullanan firma", 'Tanıdığı bir firmayı Segika ile tanıştırır.',
+  'Uygun her tavsiye için 2 ay ücretsiz kullanım alırsınız.', 'Tavsiye ettiğiniz firma da 1 ay ücretsiz kullanır.',
+  'Ödülünüz nakit değildir. Ödülünüz ücretsiz kullanımdır.',
+  'Meslek kuralınızı doğrulatın', 'Hukuk danışmanı ortaklığın uygunluğunu inceler.',
+  'Mali müşavirler meslek kurallarına bağlıdır.', 'Hukuk danışmanı komisyonun uygunluğunu inceler.',
+  'Uygunluk yazılmadan müşteriye ortaklıktan söz etmeyin.', 'Mali müşavir, uygunluk yazılmadan müşteriye ortaklıktan söz etmez.',
+  'Bu yol hukuk görüşünü bekliyor.', 'Toptan fiyat bantları yazılı anlaşmada belirlenir.',
+  'Bu kabul edilmeden müşteriye teklif vermeyin.',
+  'Kesin değerler yazılı anlaşmada belirlenir.', 'Kesin kural yazılı anlaşmada belirlenir.',
+  'Kesin eşikler yazılı anlaşmada belirlenir.', 'Ödeme günleri yazılı anlaşmada yer alır.',
+  'Bu taahhütler yazılı anlaşmanın özüdür.', 'Taahhütler, imzalanan anlaşmayla bağlayıcı olur.',
+  'Bu belge tek başına sözleşme değildir.', 'Yazılı anlaşmayı inceleyin.', 'Bu belge bir sözleşme değildir.',
+  'Koşullar yazılı anlaşmada kesinleşir.', 'her yıl 8 saat ücretsiz eğitim', 'yılda 8 saat ücretsiz eğitim',
+  'Siz müşterinin SGK ya da bordro şifresini istemezsiniz.'];
+/**
+ * Toplantı kararıyla bu konular belgelerde hiç geçmez: hukuk, meslek kuralı, yazılı anlaşma, imza, sözleşme,
+ * bağlayıcılık, şifre ve mevcut müşteri ödülü. Kelime başı aranır. Böylece kelimenin bütün ekli biçimleri yakalanır.
+ */
+const YASAK_KELIME = [/hukuk/, /meslek kural/, /yazılı anlaşma/, /imza/, /sözleşme/, /bağlayıcı/, /şifre/, /tavsiye/,
+  /ücretsiz kullanım/, /müşteri sorumlusu/]
+  .map((r) => new RegExp(`(^|[^\\p{L}])${r.source}`, 'u'));
+const kelimeBul = (metin) => YASAK_KELIME.filter((r) => r.test(sade(metin).toLocaleLowerCase('tr-TR'))).map((r) => r.source.replace(/^.*\)/, ''));
 /** Basamağın eski kısa adları okura görünmez. Basamaklar "1. seviye" ile "4. seviye" arasında adlandırılır. */
 const ESKI_BASAMAK = /(^|[^0-9A-Za-zÇĞİÖŞÜçğıöşü])K[1-3](?![0-9])/;
 const ZORUNLU = [
   'kümülatif', 'Kümülatif, üst üste eklenen demektir.', '100 çalışan',
   'Şirketinize uygun planı seçin.', '6.250 TL', '5.400 TL', '8.900 TL',
-  'Üç ortaklık yolu', 'Mevcut müşteri', "Segika'nın taahhütleri", 'Sizin taahhütleriniz',
+  'İki ortaklık yolu', "Segika'nın taahhütleri", 'Sizin taahhütleriniz',
   'otomatik', '4 yıla kadar', '%15', '%20', '%25', '%30',
   'Temmuz 2025',
   '1. seviye', '2. seviye', '3. seviye', '4. seviye',
   'Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika\'dan yazılı isteyin.',
-  'toptan fiyat', 'Kayıtlı ortak', 'Gümüş', 'Altın', 'hukuk görüşünü bekliyor',
+  'toptan fiyat', 'Kayıtlı ortak', 'Gümüş', 'Altın',
+  'Segika bugünkü planda yılda 2 saat ücretsiz eğitim verir.',
+  'Ücretsiz eğitimin fazlası ücretlidir. Bugünkü planda ek eğitimin bir saati 1.500 TL tutar.',
+  'İlk görüşmeden ilk ödemeye kadar 5 adım vardır.',
   '30.000 TL cironun altında pay oluşmaz',
   'Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz.',
   'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır.',
@@ -75,6 +106,8 @@ const ZORUNLU = [
 ];
 /** Ortaklık şartı yalnız el kitapçığında ve metin.md içinde yazar. Entegrasyon bölümü kaldırılırken bu cümle kalır. */
 const SART = 'Ofis Luca, Mikro ya da ETA kullanmalıdır.';
+/** Çözüm ortağının eğitim cümlesi yalnız el kitapçığında yazar. Süre 25 Kasım 2026 Çarşamba günü 2 saat oldu. */
+const EGITIM_CUMLESI = 'Bugünkü planda Segika size ve destek personelinize her yıl 2 saat ücretsiz eğitim verir.';
 const KAPAK = { kitapcik: 'İş ortaklığı el kitapçığı', gorsel: 'İş ortaklığı tanıtım sunumu', sunum: 'İş ortaklığı tanıtım sunumu' };
 
 export async function denetle() {
@@ -89,10 +122,11 @@ export async function denetle() {
     const tum = b.sayfalar.map((s) => s.metin).join(' ');
     const n = b.sayfalar.length;
     ozet.push(`${ad}: ${n} sayfa`);
-    if (n > EN_COK_SAYFA) hatalar.push(`${ad}: ${n} sayfa var, en çok ${EN_COK_SAYFA} olabilir.`);
+    if (n !== SAYFA) hatalar.push(`${ad}: ${n} sayfa var, ${SAYFA} sayfa olmalı.`);
     for (const y of YASAK) if (geciyor(tum, y)) hatalar.push(`${ad}: "${y}" metinde geçmemeli.`);
+    for (const k of kelimeBul(tum)) hatalar.push(`${ad}: "${k}" ile başlayan kelime metinde geçmemeli.`);
     for (const z of ZORUNLU) if (!geciyor(tum, z)) hatalar.push(`${ad}: "${z}" metinde geçmeli.`);
-    if (ad === 'kitapcik' && !geciyor(tum, SART)) hatalar.push(`kitapcik: "${SART}" metinde geçmeli.`);
+    if (ad === 'kitapcik') for (const z of [SART, EGITIM_CUMLESI]) if (!geciyor(tum, z)) hatalar.push(`kitapcik: "${z}" metinde geçmeli.`);
     b.sayfalar.forEach((s, i) => { const m = s.metin.match(ESKI_BASAMAK); if (m) hatalar.push(`${ad}: ${i + 1}. sayfada eski basamak adı "${m[0].trim()}" geçiyor. "1. seviye" gibi yazın.`); });
     const yil = b.sayfalar.find((s) => geciyor(s.metin, 'Siz buradasınız'));
     if (yil && geciyor(yil.metin, '%25 olur')) hatalar.push(`${ad}: yıllık sayfada iki farklı oran var. Örnek yalnız %30 oranını göstermeli.`);
@@ -111,6 +145,8 @@ export async function denetle() {
   const metin = readFileSync(resolve(burasi, 'metin.md'), 'utf8');
   for (const y of ['Kadrolu', 'kadrolu', 'İnsan kaynakları danışman', 'insan kaynakları danışman', 'ETA programlarıyla birlikte çalışır']) if (metin.includes(y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
   if (!metin.includes(SART)) hatalar.push(`metin.md: "${SART}" geçmeli.`);
+  for (const k of kelimeBul(metin)) hatalar.push(`metin.md: "${k}" ile başlayan kelime geçmemeli.`);
+  for (const y of YASAK.slice(YASAK.indexOf('İş kazası bildirimi'))) if (geciyor(metin, y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
   if (ESKI_BASAMAK.test(metin)) hatalar.push('metin.md: eski basamak adı (K1, K2, K3) geçmemeli.');
   if (hatalar.length) throw new Error(`İçerik denetimi düştü (${hatalar.length} kural):\n- ${hatalar.join('\n- ')}`);
   console.log(`İçerik denetimi geçti. ${ozet.join(', ')}.`);

@@ -2,11 +2,13 @@
 
 Bu klasör Segika iş ortaklığı setinin kaynağıdır. Set üç dosyadan oluşur.
 
-1. `public/indir/segika/segika-is-ortakligi-sunum.pptx`: 16:9 sunum, 12 slayt.
-2. `public/indir/segika/segika-is-ortakligi-el-kitapcigi.pdf`: A4 dikey el kitapçığı, 12 sayfa.
-3. `public/indir/segika/segika-is-ortakligi-gorsel-sunum.pdf`: A4 yatay görsel sunum, 12 sayfa.
+1. `public/indir/segika/segika-is-ortakligi-sunum.pptx`: 16:9 sunum, 11 slayt.
+2. `public/indir/segika/segika-is-ortakligi-el-kitapcigi.pdf`: A4 dikey el kitapçığı, 11 sayfa.
+3. `public/indir/segika/segika-is-ortakligi-gorsel-sunum.pdf`: A4 yatay görsel sunum, 11 sayfa.
 
 Set 24 Kasım 2026 Salı günü 2. revizyonla yenilendi. Üç dosyanın ilk sayfası fotoğraflı kapaktır.
+
+25 Kasım 2026 Çarşamba günkü toplantı kararlarıyla set yeniden üretildi. Mevcut müşteri sayfası kalktı. Bu yüzden her belgede 11 sayfa var. Kaldırılan cümleler `denetim.mjs` içindeki yasak listesindedir. İçerik denetimi bu cümleleri bulursa üretimi durdurur.
 
 ## Üretim komutu
 
@@ -70,7 +72,7 @@ Bu yüzden örnek şunu varsayar: aylık ödeyen işverenin o ay ödediği bedel
 
 ## Yıllık satış örneğindeki varsayım
 
-Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Bu yüzden 2 işverenin cirosu 213.600 TL olur ve oran %30'a çıkar. `kazancPlani.ts` bunu iş ortakları için ayrıca tanımlamıyor. Kesin kural yazılı anlaşmada belirlenir. Varsayım belgelerde de yazar.
+Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır. Bu yüzden 2 işverenin cirosu 213.600 TL olur ve oran %30'a çıkar. `kazancPlani.ts` bunu iş ortakları için ayrıca tanımlamıyor. Varsayım belgelerde de yazar.
 
 Yıllık sayfanın örneği 2 işverendir. "Siz buradasınız" işareti 4. seviyede durur. 1. işveren okuru 3. seviyeye, 2. işveren 4. seviyeye taşır.
 
