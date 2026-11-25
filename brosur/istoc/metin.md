@@ -46,12 +46,6 @@ Thoptan kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi dolduru
 
 Ürün bilgisi bugünden eksiksiz tutulur. Ölçü, ağırlık, malzeme ve üretildiği ülke yazılır.
 
-Yazılım bayisinin müşterisi sorar.
-
-“Stokumu ve satışlarımı nereden izlerim?”
-
-Stok ve satışlar telefondan görünür. Kur değişince fiyatlar tek tuşla güncellenir.
-
 Lojistik firmasının müşterisi sorar.
 
 “Yeni alıcılarla görüşmeleri nasıl takip ederim?”
@@ -67,8 +61,6 @@ Satıcı paketi 14 gün ücretsiz dener.
 Basic paket ayda 399 € tutar.
 
 Yıllık pakette 12 ay için 10 aylık bedel ödenir. Bu bedel 3.990 € tutar.
-
-Mağaza kurulumu bir kez 150 € tutar.
 
 Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.
 
@@ -360,7 +352,6 @@ Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgel
 - Oranlar K3 seviyesinde satışı kapatma oranlarıdır.
 - Satıcı paketi ücretsiz dener.
 - Basic paket ayda bu kadar tutar.
-- Mağaza kurulumu bir kez bu kadar tutar.
 - Kurulumu ve ilk eğitimi siz yaparsınız.
 - Kurulumu şirket yapar.
 - Bu belgenin ana okuru çözüm ortağıdır.

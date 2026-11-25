@@ -62,8 +62,8 @@ function s1() {
 }
 
 function s2() {
-  const sw = (W - 2 * M - 3 * 0.35) / 4;
-  const sayilar = [[`${fiyat.denemeGun} gün`, 'Satıcı paketi ücretsiz dener.'], [avro(fiyat.basicAyEur), 'Basic paket ayda bu kadar tutar.'], [avro(fiyat.kurulumEur), 'Mağaza kurulumu bir kez bu kadar tutar.'], ['%0', 'Thoptan satıcının satışından komisyon almaz.']];
+  const sw = (W - 2 * M - 2 * 0.35) / 3;
+  const sayilar = [[`${fiyat.denemeGun} gün`, 'Satıcı paketi ücretsiz dener.'], [avro(fiyat.basicAyEur), 'Basic paket ayda bu kadar tutar.'], ['%0', 'Thoptan satıcının satışından komisyon almaz.']];
   return { zemin: 'kagit', ogeler: [
     ...ust(false, 'Neden siz'),
     baslik('Müşteriniz size her ay aynı soruyu soruyor mu?', false, 11.9, 0.75),

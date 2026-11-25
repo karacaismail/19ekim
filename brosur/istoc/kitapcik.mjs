@@ -60,7 +60,7 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .bedel { margin-top: auto; background: var(--murekkep); color: var(--kagit); margin: auto -${a4.kenar}mm -${a4.kenar}mm; padding: 7mm ${a4.kenar}mm 6mm; }
 .bedel .alt { color: var(--solukKoyu); padding-top: 5mm; }
 .bedel h2 { font-size: 14pt; margin-bottom: 4mm; }
-.bedel-sayi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm; }
+.bedel-sayi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
 .bedel-sayi div b { display: block; font-size: 21pt; font-weight: 800; letter-spacing: -0.03em; color: var(--sari); line-height: 1; }
 .bedel-sayi div span { display: block; font-size: ${a4.govde}pt; line-height: 1.3; margin-top: 2mm; }
 .bedel .not { margin-top: 4mm; font-size: ${a4.govde}pt; color: var(--kagit); }
@@ -243,7 +243,6 @@ function kapak() {
 const SORULAR = [
   ['Katalog stüdyosunun müşterisi sorar.', 'Hazırlanan kataloğu alıcılarla nasıl paylaşırım?', 'Thoptan kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.'],
   ['İhracat danışmanının müşterisi sorar.', 'Alıcının istediği ürün bilgisi bende hazır mı?', 'Ürün bilgisi bugünden eksiksiz tutulur. Ölçü, ağırlık, malzeme ve üretildiği ülke yazılır.'],
-  ['Yazılım bayisinin müşterisi sorar.', 'Stokumu ve satışlarımı nereden izlerim?', 'Stok ve satışlar telefondan görünür. Kur değişince fiyatlar tek tuşla güncellenir.'],
   ['Lojistik firmasının müşterisi sorar.', 'Yeni alıcılarla görüşmeleri nasıl takip ederim?', 'WhatsApp’tan gelen siparişler tek ekranda toplanır. Fiyat teklifi 2 dakikada hazırlanır.'],
 ];
 export { SORULAR };
@@ -263,7 +262,6 @@ function nedenSiz() {
       <div><b>${fiyat.denemeGun} gün</b><span>Satıcı paketi ücretsiz dener.</span></div>
       <div><b>${avro(fiyat.basicAyEur)}</b><span>Basic paket ayda bu kadar tutar.</span></div>
       <div><b>${avro(fiyat.basicYilEur)}</b><span>Yıllık pakette 12 ay için 10 aylık bedel ödenir.</span></div>
-      <div><b>${avro(fiyat.kurulumEur)}</b><span>Mağaza kurulumu bir kez bu kadar tutar.</span></div>
     </div>
     <p class="not">Thoptan satıcının satışından komisyon almaz. Fiyat herkes için aynıdır. Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.</p>
     ${alt(2)}

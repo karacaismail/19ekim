@@ -50,12 +50,12 @@ p, li { font-size: 12pt; line-height: 1.38; }
 .ay-etiket b { color: var(--sari); font-weight: 700; }
 
 /* Sorular */
-.dort { margin: auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 7mm; }
+.dort { margin: auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; }
 .dort .kim { font-size: 12pt; font-weight: 600; color: var(--soluk); min-height: 9mm; }
 .dort q { display: block; quotes: '“' '”'; font-size: 20pt; line-height: 1.16; font-weight: 600; letter-spacing: -0.01em; margin-top: 2mm; min-height: 36mm; }
 .dort .yanit { font-size: 13pt; }
 .dort .yanit { margin-top: 4mm; padding-top: 3mm; border-top: 1.2mm solid var(--sari); }
-.serit { margin: 0 -16mm -12mm; padding: 7mm 16mm 4mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: repeat(4, 1fr); gap: 7mm; }
+.serit { margin: 0 -16mm -12mm; padding: 7mm 16mm 4mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; }
 .serit b { display: block; font-size: 30pt; font-weight: 800; letter-spacing: -0.03em; color: var(--sari); line-height: 1; }
 .serit span { display: block; font-size: 12pt; margin-top: 2mm; }
 .serit .alt { grid-column: 1 / -1; color: var(--solukKoyu); padding-top: 3mm; }
@@ -184,7 +184,6 @@ function sorular() {
   <div class="serit">
     <div><b>${fiyat.denemeGun} gün</b><span>Satıcı paketi ücretsiz dener.</span></div>
     <div><b>${avro(fiyat.basicAyEur)}</b><span>Basic paket ayda bu kadar tutar.</span></div>
-    <div><b>${avro(fiyat.kurulumEur)}</b><span>Mağaza kurulumu bir kez bu kadar tutar.</span></div>
     <div><b>%0</b><span>Thoptan satıcının satışından komisyon almaz.</span></div>
     ${alt(2)}
   </div>
