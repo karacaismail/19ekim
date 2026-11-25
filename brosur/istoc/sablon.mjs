@@ -133,11 +133,13 @@ export function seviyeYolu({ kademeler, seviyeAyi, yuzde }) {
 }
 
 /** Kilometre taşları: her zaman anında o ayın kazancı ve o güne kadarki toplam kazanç. */
-export function kilometreTaslari({ anlar, avro }) {
+// Her euro tutarın altında ₺ karşılığı yumuşak zeminli bir hapta durur (kullanıcı kararı 25 Kasım 2026 Çarşamba).
+export function kilometreTaslari({ anlar, avro, liraHap }) {
+  const hap = (eur) => `<span class="hap-yer"></span><i class="tl-hap dipnot">${liraHap(eur)}</i>`;
   return `<ol class="kilometre" aria-label="Kilometre taşları">${anlar.map((a) => `<li>
     <span class="an">${a.ad}</span><span class="musteri">${a.musteri} müşteri</span>
-    <span class="etiket">O ay</span><b class="ay-kazanc">${avro(a.kazancEur)}</b>
-    <span class="etiket">Toplam</span><b class="toplam">${avro(a.toplamEur)}</b></li>`).join('')}</ol>`;
+    <span class="etiket">O ay</span><b class="ay-kazanc">${avro(a.kazancEur)}</b>${hap(a.kazancEur)}
+    <span class="etiket">Toplam</span><b class="toplam">${avro(a.toplamEur)}</b>${hap(a.toplamEur)}</li>`).join('')}</ol>`;
 }
 
 /** Küçük kur kutusu. TL karşılığı yalnız burada görünür (kullanıcı kararı 25 Kasım 2026 Çarşamba). */

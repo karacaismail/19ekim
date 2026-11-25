@@ -1,7 +1,7 @@
 // El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 import { a4 } from './tokenlar.mjs';
-import { plan, fiyat, tavsiye, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
+import { plan, fiyat, tavsiye, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
 import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
 
 const TOPLAM = 9;
@@ -123,8 +123,8 @@ table.sonraki td:first-child { white-space: nowrap; }
 .seviye-yolu .zirve .ad { color: var(--murekkep); }
 .seviye-yolu .oran { font-size: ${a4.govdeBuyuk}pt; font-weight: 700; }
 .seviye-yolu .ay { font-size: ${a4.govde}pt; color: var(--murekkep); }
-.kilometre { list-style: none; margin-top: 4mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
-.kilometre li { display: grid; grid-template-columns: auto 1fr; column-gap: 3mm; row-gap: 0.5mm; align-items: baseline; padding: 3mm 4mm; border-top: 0.8mm solid var(--murekkep); background: var(--kum); }
+.kilometre { list-style: none; margin-top: 2mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+.kilometre li { display: grid; grid-template-columns: auto 1fr; column-gap: 3mm; row-gap: 0; align-items: baseline; padding: 2mm 4mm; border-top: 0.8mm solid var(--murekkep); background: var(--kum); }
 .kilometre li:nth-child(n+4) { background: var(--kumKoyu); }
 .kilometre li:last-child { background: var(--sari); }
 .kilometre .an { font-size: ${a4.govdeBuyuk}pt; font-weight: 800; }
@@ -133,6 +133,10 @@ table.sonraki td:first-child { white-space: nowrap; }
 .kilometre .ay-kazanc { font-size: ${a4.govdeBuyuk}pt; text-align: right; }
 .kilometre .toplam { font-size: 17pt; font-weight: 800; letter-spacing: -0.02em; text-align: right; color: var(--lacivert); }
 .kilometre li:last-child .toplam { color: var(--murekkep); }
+/* ₺ hapı: euro tutarın altında, yumuşak pastel zeminde, italik. Sarı kartta zemin açık kâğıt olur. */
+.kilometre .tl-hap { justify-self: end; font-style: italic; font-size: 10pt; line-height: 1.15; padding: 0.3mm 2.4mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; margin: 0.4mm 0 0.6mm; }
+.kilometre li:last-child .tl-hap { background: var(--kagit); }
+.kur-dipnot { font-style: italic; color: var(--murekkep); }
 .garanti { margin-top: 3mm; font-weight: 600; color: var(--murekkep); }
 table.senaryo td, table.senaryo th { padding-top: 1.8mm; padding-bottom: 1.8mm; white-space: nowrap; }
 tr.ana td { background: var(--kum); font-weight: 700; }
@@ -341,9 +345,9 @@ function senaryo() {
   ${seviyeYolu({ kademeler: kap, seviyeAyi: K.seviyeAyi, yuzde })}
   <p style="margin-top:2mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. Oranınız ${yuzde(kap[3].oran)} olur.</p>
   <h3 class="tablo-baslik">Kilometre taşları</h3>
-  ${kilometreTaslari({ anlar: KA, avro })}
-  <p class="dipnot" style="margin-top:2mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır.</p>
-  <p class="not" style="margin-top:3mm">${plan.musteriAy}. ayda ${ay48.musteri} müşteriniz olur. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
+  ${kilometreTaslari({ anlar: KA, avro, liraHap })}
+  <p class="dipnot" style="margin-top:1.5mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır. <span class="kur-dipnot">${kurDipnotu()}</span></p>
+  <p class="not" style="margin-top:2mm">${plan.musteriAy}. ayda ${ay48.musteri} müşteriniz olur. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
   ${alt(5)}
 </section>`;

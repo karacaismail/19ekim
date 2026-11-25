@@ -170,6 +170,10 @@ Depoda gerçek satış verisi yoktur. Bu yüzden sayılar bir varsayımdır.
 
 4. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı 166.535 € olur.
 
+Her euro tutarın altında küçük bir hap durur. Hapta tutarın ₺ karşılığı yazar. Örneğin 160 € tutarın altında "≈ 8.850 ₺" yazar.
+
+Euro tutarlarının ₺ karşılığı 25 Kasım 2026 Çarşamba günkü kurla hesaplandı. Bu kurda 1 € 55,31 ₺ eder. Kur değişince ₺ karşılığı da değişir.
+
 Bu bir örnek senaryodur. Kazanç garantisi değildir.
 
 ## Senaryoları karşılaştırın

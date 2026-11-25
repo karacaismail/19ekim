@@ -17,6 +17,7 @@ export const renk = {
   cizgi: '#d3ddec', // tablo ızgarası
   cizgiKoyu: '#33558f', // koyu zeminde ızgara
   beyaz: '#ffffff',
+  pastel: '#fff4bf', // ₺ hapının yumuşak zemini: sarının açık tonu. Yazı her zaman koyu lacivert olur.
 };
 
 /** Denetlenen metin ve zemin çiftleri. Her çift en az 4,5:1 olmalıdır. Sarı yalnız koyu zeminde metin olur. */
@@ -24,7 +25,7 @@ export const kontrastCiftleri = [
   ['murekkep', 'kagit'], ['murekkep', 'kum'], ['murekkep', 'kumKoyu'], ['murekkep', 'sari'],
   ['soluk', 'kagit'], ['soluk', 'kum'], ['soluk', 'kumKoyu'], ['lacivert', 'kagit'], ['lacivert', 'kum'], ['lacivert', 'kumKoyu'],
   ['sari', 'murekkep'], ['sari', 'murekkepYuzey'], ['kagit', 'murekkep'], ['solukKoyu', 'murekkep'],
-  ['solukKoyu', 'murekkepYuzey'], ['kagit', 'murekkepYuzey'],
+  ['solukKoyu', 'murekkepYuzey'], ['kagit', 'murekkepYuzey'], ['murekkep', 'pastel'],
 ];
 
 /** Sarı açık zeminde metin rengi olmaz. `kontrol.mjs` bu çiftlerin listede olmadığını denetler. */

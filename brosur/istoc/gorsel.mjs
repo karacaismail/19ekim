@@ -1,6 +1,6 @@
 // Görsel PDF sunumu: A4 yatay, 9 sayfa. Az metin, büyük sayılar ve şemalar.
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
-import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
 import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
 import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
 
@@ -120,6 +120,11 @@ tr.ana td { background: var(--kum); font-weight: 700; }
 .kilometre .ay-kazanc { font-size: 16pt; }
 .kilometre .toplam { font-size: 21pt; font-weight: 800; letter-spacing: -0.02em; color: var(--lacivert); }
 .kilometre li:last-child .toplam { color: var(--murekkep); }
+/* ₺ hapı: euro tutarın altında, yumuşak pastel zeminde, italik. Sarı kartta zemin açık kâğıt olur. */
+.kilometre .hap-yer { display: none; }
+.kilometre .tl-hap { justify-self: start; font-style: italic; font-size: 10pt; line-height: 1.2; padding: 0.4mm 2.4mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; margin: 0.6mm 0 1.6mm; }
+.kilometre li:last-child .tl-hap { background: var(--kagit); }
+.kur-dipnot { font-style: italic; color: var(--murekkep); }
 .garanti { font-size: 13pt; font-weight: 600; color: var(--murekkep); }
 .karsi { flex: 1; display: grid; grid-template-columns: 1.25fr 1fr; gap: 10mm; margin-top: 6mm; align-items: start; }
 .karsi h2 { font-size: 16pt; margin-bottom: 2mm; }
@@ -231,8 +236,9 @@ function senaryo() {
     <p class="not">Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.</p>
     <div>${seviyeYolu({ kademeler: kap, seviyeAyi: K.seviyeAyi, yuzde })}</div>
   </div>
-  ${kilometreTaslari({ anlar: KA, avro })}
+  ${kilometreTaslari({ anlar: KA, avro, liraHap })}
   <p class="dipnot" style="margin-top:2mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır.</p>
+  <p class="dipnot kur-dipnot">${kurDipnotu()}</p>
   <p class="kosul" style="margin-top:4mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
   <p class="garanti" style="margin-top:2mm">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
   ${alt(5)}

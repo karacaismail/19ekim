@@ -1,7 +1,7 @@
 // Belgelerdeki bütün oran, fiyat ve örnek hesaplar. Değerler depodaki kaynak dosyalardan alındı.
 // `kaynakDenetimi` değerleri kaynak dosyalarla karşılaştırır. Kaynak değişirse üretim durur.
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: iStoc kazanç planı euro olur. Sabit ciro örneği kalktı.
-// Yerine büyüyen müşteri senaryosu geldi. TL karşılığı yalnız küçük kur kutusunda görünür.
+// Yerine büyüyen müşteri senaryosu geldi. ₺ karşılığı kilometre taşlarındaki hapta ve küçük kur kutusunda görünür.
 // Kadrolu uzman bilgisi belgelerden çıktı. Sitedeki kadrolu uzman bölümü değişmedi.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -96,6 +96,18 @@ export const yuzde = (n) => `%${sayi(Math.round(n * 1000) / 10)}`;
 export const avro = (n) => `${sayi(n)} €`;
 /** Tam euroya yuvarlanmış tutar. Senaryo tutarları bu biçimle yazılır. */
 export const avroTam = (n) => avro(Math.round(n));
+/**
+ * Euro tutarın altındaki ₺ hapı (kullanıcı kararı 25 Kasım 2026 Çarşamba). Önce euro tam sayıya yuvarlanır.
+ * Sonra o günün kuruyla çarpılır. Okur aynı çarpımı kendisi yapabilir.
+ */
+export const liraKarsilik = (eur) => Math.round(Math.round(eur) * fiyat.kur);
+export const liraHap = (eur) => `≈ ${sayi(liraKarsilik(eur))} ₺`;
+/** ₺ hapının dipnotu. Cümleler metin.md içinde de aynen durur. */
+export const kurDipnotu = () => [
+  `Euro tutarlarının ₺ karşılığı ${fiyat.kurTarihi} günkü kurla hesaplandı.`,
+  `Bu kurda 1 € ${sayi(fiyat.kur)} ₺ eder.`,
+  'Kur değişince ₺ karşılığı da değişir.',
+].join(' ');
 
 const ana = SENARYOLAR.find((s) => s.ana);
 export const hesap = {

@@ -3,7 +3,7 @@
 // Aynı liste hem PPTX dosyasını hem tarayıcı önizlemesini üretir. Önizleme taşma denetimi için kullanılır.
 import pptxgen from 'pptxgenjs';
 import { renk, slayt as S } from './tokenlar.mjs';
-import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
 import { pathToFileURL } from 'node:url';
 import { esc, tokenCss, LOGO } from './sablon.mjs';
 import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
@@ -21,7 +21,14 @@ const SATIR = 1.0; // PowerPoint satır aralığı çarpanı
 // `kenar` verilirse dikdörtgenin ince bir kenar çizgisi olur. Açık zeminde sarı şekil böyle zeminden ayrılır.
 const kutu = (x, y, w, h, renkAdi, ek = {}) => ({ t: 'rect', x, y, w, h, fill: renk[renkAdi], ...ek, kenar: ek.kenar ? renk[ek.kenar] : undefined });
 const daire = (x, y, d, renkAdi) => ({ t: 'ellipse', x, y, w: d, h: d, fill: renk[renkAdi] });
-const yaz = (x, y, w, h, metin, o = {}) => ({ t: 'text', x, y, w, h, metin, boy: o.boy ?? S.govde, renk: renk[o.renk ?? 'murekkep'], kalin: o.kalin ?? false, hiza: o.hiza ?? 'left', dikey: o.dikey ?? 'top', satir: o.satir ?? SATIR });
+const yaz = (x, y, w, h, metin, o = {}) => ({ t: 'text', x, y, w, h, metin, boy: o.boy ?? S.govde, renk: renk[o.renk ?? 'murekkep'], kalin: o.kalin ?? false, italik: o.italik ?? false, hiza: o.hiza ?? 'left', dikey: o.dikey ?? 'top', satir: o.satir ?? SATIR });
+// ₺ hapı: euro tutarın altında yumuşak pastel zeminli, uçları yuvarlak kutu. Yazı italik ve koyu laciverttir.
+// Genişlik yazının uzunluğuna göre bulunur. Arial 13 pt italikte bir karakter yaklaşık 0,1 inçtir.
+const hap = (x, y, enGenis, metin, zemin = 'pastel') => {
+  const h = 0.3;
+  const w = Math.min(enGenis, metin.length * 0.1 + 0.3);
+  return [kutu(x, y, w, h, zemin, { yuvarlak: true }), yaz(x, y, w, h, metin, { boy: S.kucuk, italik: true, hiza: 'center', dikey: 'middle' })];
+};
 const parca = (metin, renkAdi, kalin = true) => ({ metin, renk: renk[renkAdi], kalin });
 
 // Thoptan logosu. Yalnız genişlik verilir, yükseklik oranla gelir. Logo en çok 2,2 inç genişlikte olur.
@@ -190,16 +197,21 @@ function s6() {
       yaz(x + 0.1, 2.36, w - 0.2, 0.3, yuzde(k.oran), { boy: S.kucuk, kalin: true }),
       yaz(x + 0.1, 2.64, w - 0.2, 0.3, i ? `${K.seviyeAyi[i - 1]}. ay` : 'Başlangıç', { boy: S.kucuk })];
   }).flat();
+  // Kartlar ₺ hapları için uzadı. Bu yüzden kartlar biraz yukarıdan başlar.
   const tas = KA.flatMap((a, i) => {
     const x = M + i * (kw + 0.1);
-    const zemin = i === KA.length - 1 ? 'sari' : i >= 3 ? 'kumKoyu' : 'kum';
-    return [kutu(x, 3.3, kw, 2.75, zemin), kutu(x, 3.3, kw, 0.06, 'murekkep'),
-      yaz(x + 0.12, 3.45, kw - 0.24, 0.4, a.ad, { boy: 18, kalin: true }),
-      yaz(x + 0.12, 3.85, kw - 0.24, 0.3, `${a.musteri} müşteri`, { boy: S.kucuk }),
-      yaz(x + 0.12, 4.3, kw - 0.24, 0.3, 'O ay', { boy: S.kucuk }),
-      yaz(x + 0.12, 4.58, kw - 0.24, 0.4, avro(a.kazancEur), { boy: 18, kalin: true }),
-      yaz(x + 0.12, 5.05, kw - 0.24, 0.3, 'Toplam', { boy: S.kucuk }),
-      yaz(x + 0.12, 5.33, kw - 0.24, 0.5, avro(a.toplamEur), { boy: 22, kalin: true, renk: i === KA.length - 1 ? 'murekkep' : 'lacivert' })];
+    const son = i === KA.length - 1;
+    const zemin = son ? 'sari' : i >= 3 ? 'kumKoyu' : 'kum';
+    const hapZemin = son ? 'kagit' : 'pastel';
+    return [kutu(x, 3.12, kw, 2.93, zemin), kutu(x, 3.12, kw, 0.06, 'murekkep'),
+      yaz(x + 0.12, 3.24, kw - 0.24, 0.38, a.ad, { boy: 18, kalin: true }),
+      yaz(x + 0.12, 3.6, kw - 0.24, 0.28, `${a.musteri} müşteri`, { boy: S.kucuk }),
+      yaz(x + 0.12, 3.92, kw - 0.24, 0.28, 'O ay', { boy: S.kucuk }),
+      yaz(x + 0.12, 4.17, kw - 0.24, 0.38, avro(a.kazancEur), { boy: 18, kalin: true }),
+      ...hap(x + 0.12, 4.56, kw - 0.24, liraHap(a.kazancEur), hapZemin),
+      yaz(x + 0.12, 4.95, kw - 0.24, 0.28, 'Toplam', { boy: S.kucuk }),
+      yaz(x + 0.12, 5.2, kw - 0.24, 0.42, avro(a.toplamEur), { boy: 22, kalin: true, renk: son ? 'murekkep' : 'lacivert' }),
+      ...hap(x + 0.12, 5.64, kw - 0.24, liraHap(a.toplamEur), hapZemin)];
   });
   return { zemin: 'kagit', ogeler: [
     ...ust(false, 'Büyüyen müşteri senaryosu'),
@@ -207,8 +219,9 @@ function s6() {
     yaz(M, 1.95, 4.7, 1.25, `Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.`, { boy: S.kucuk, renk: 'soluk' }),
     ...seviye,
     ...tas,
-    yaz(M, 6.15, 11.9, 0.35, `${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.`, { boy: S.kucuk, kalin: true }),
-    yaz(M, 6.5, 11.9, 0.35, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
+    yaz(M, 6.1, 11.9, 0.26, kurDipnotu(), { boy: S.kucuk, italik: true }),
+    yaz(M, 6.38, 11.9, 0.26, `${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.`, { boy: S.kucuk, kalin: true }),
+    yaz(M, 6.64, 11.9, 0.26, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
     ...alt(6, false),
   ] };
 }
@@ -314,9 +327,10 @@ export async function sunumPptx(hedef) {
         sl.addImage({ path: o.yol, x: o.x, y: o.y, w: o.w, h: o.h, altText: 'Thoptan' });
       } else if (o.t === 'rect' || o.t === 'ellipse') {
         const line = o.kenar ? { color: hex(o.kenar), width: 1 } : { type: 'none' };
-        sl.addShape(o.t === 'rect' ? p.ShapeType.rect : p.ShapeType.ellipse, { x: o.x, y: o.y, w: o.w, h: o.h, fill: { color: hex(o.fill), transparency: o.saydam ?? 0 }, line });
+        const tur = o.t === 'ellipse' ? p.ShapeType.ellipse : o.yuvarlak ? p.ShapeType.roundRect : p.ShapeType.rect;
+        sl.addShape(tur, { x: o.x, y: o.y, w: o.w, h: o.h, fill: { color: hex(o.fill), transparency: o.saydam ?? 0 }, line, ...(o.yuvarlak ? { rectRadius: o.h / 2 } : {}) });
       } else {
-        const ortak = { fontFace: S.yazi, fontSize: o.boy, color: hex(o.renk), bold: o.kalin };
+        const ortak = { fontFace: S.yazi, fontSize: o.boy, color: hex(o.renk), bold: o.kalin, italic: o.italik };
         const metin = Array.isArray(o.metin)
           ? o.metin.map((r) => ({ text: r.metin, options: { ...ortak, color: hex(r.renk), bold: r.kalin, breakLine: false } }))
           : o.metin;
@@ -335,11 +349,11 @@ export function sunumOnizlemeHtml() {
   const slaytlar = SLAYTLAR().map((s) => `<div class="slayt" style="background:${renk[s.zemin]}">${s.ogeler.map((o) => {
     const yer = `left:${px(o.x)};top:${px(o.y)};width:${px(o.w)};height:${px(o.h)}`;
     if (o.t === 'image') return `<img alt="Thoptan" src="${pathToFileURL(o.yol).href}" style="position:absolute;${yer}">`;
-    if (o.t === 'rect') return `<div style="position:absolute;${yer};background:${o.fill};opacity:${1 - (o.saydam ?? 0) / 100}${o.kenar ? `;box-shadow:inset 0 0 0 2px ${o.kenar}` : ''}"></div>`;
+    if (o.t === 'rect') return `<div style="position:absolute;${yer};background:${o.fill};opacity:${1 - (o.saydam ?? 0) / 100}${o.yuvarlak ? ';border-radius:999px' : ''}${o.kenar ? `;box-shadow:inset 0 0 0 2px ${o.kenar}` : ''}"></div>`;
     if (o.t === 'ellipse') return `<div style="position:absolute;${yer};background:${o.fill};border-radius:50%"></div>`;
     const ic = Array.isArray(o.metin) ? o.metin.map((r) => `<span style="color:${r.renk};font-weight:${r.kalin ? 700 : 400}">${esc(r.metin).replace(/\n/g, '<br>')}</span>`).join('') : esc(o.metin).replace(/\n/g, '<br>');
     const dikey = o.dikey === 'middle' ? 'center' : o.dikey === 'bottom' ? 'flex-end' : 'flex-start';
-    return `<div class="kutu" style="position:absolute;${yer};font-size:${o.boy * 2}px;line-height:${sat(o.satir)};color:${o.renk};font-weight:${o.kalin ? 700 : 400};text-align:${o.hiza};display:flex;flex-direction:column;justify-content:${dikey}"><div>${ic}</div></div>`;
+    return `<div class="kutu" style="position:absolute;${yer};font-size:${o.boy * 2}px;line-height:${sat(o.satir)};color:${o.renk};font-weight:${o.kalin ? 700 : 400};font-style:${o.italik ? 'italic' : 'normal'};text-align:${o.hiza};display:flex;flex-direction:column;justify-content:${dikey}"><div>${ic}</div></div>`;
   }).join('')}</div>`).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Thoptan sunum önizlemesi</title><style>
 ${tokenCss()}
