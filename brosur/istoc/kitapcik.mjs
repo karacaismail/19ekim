@@ -137,8 +137,9 @@ table.sonraki td:first-child { white-space: nowrap; }
 .kilometre .tl-hap { justify-self: end; font-style: italic; font-size: 10pt; line-height: 1.15; padding: 0.3mm 2.4mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; margin: 0.4mm 0 0.6mm; }
 .kilometre li:last-child .tl-hap { background: var(--kagit); }
 .kur-dipnot { font-style: italic; color: var(--murekkep); }
+table.senaryo .tl-hap { display: table; margin-top: 0.5mm; font-style: italic; font-weight: 400; font-size: 10pt; line-height: 1.15; padding: 0.2mm 2.2mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; }
 .garanti { margin-top: 3mm; font-weight: 600; color: var(--murekkep); }
-table.senaryo td, table.senaryo th { padding-top: 1.8mm; padding-bottom: 1.8mm; white-space: nowrap; }
+table.senaryo td, table.senaryo th { padding-top: 1mm; padding-bottom: 1mm; white-space: nowrap; }
 tr.ana td { background: var(--kum); font-weight: 700; }
 .kur-kutusu { margin-top: 5mm; padding: 3mm 4mm; background: var(--kumKoyu); max-width: 120mm; }
 .kur-kutusu b { display: block; font-size: ${a4.govde}pt; margin-bottom: 0.5mm; }
@@ -353,6 +354,10 @@ function senaryo() {
 </section>`;
 }
 
+/** Tablo hücresi: euro tutar ve altında ₺ hapı. */
+const euroHucre = (eur, kalin = false) => `${kalin ? `<b>${avro(eur)}</b>` : avro(eur)}<i class="tl-hap dipnot">${liraHap(eur)}</i>`;
+export { euroHucre };
+
 function karsilastirma() {
   const S = hesap.senaryolar;
   return `<section class="sayfa">
@@ -361,16 +366,16 @@ function karsilastirma() {
   <h1 class="kanca">Her yeni müşteri kazancınızı büyütür.</h1>
   <h3 class="tablo-baslik">İki yol, gerçekçi senaryo</h3>
   <table class="senaryo"><thead><tr><th>Zaman</th><th class="vurgu">Kapatma: o ay</th><th class="vurgu">Kapatma: toplam</th><th>Tanıştırma: o ay</th><th>Tanıştırma: toplam</th></tr></thead><tbody>
-    ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu"><b>${avro(a.kazancEur)}</b></td><td class="vurgu"><b>${avro(a.toplamEur)}</b></td><td>${avro(TA[i].kazancEur)}</td><td>${avro(TA[i].toplamEur)}</td></tr>`).join('')}
+    ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu">${euroHucre(a.kazancEur, true)}</td><td class="vurgu">${euroHucre(a.toplamEur, true)}</td><td>${euroHucre(TA[i].kazancEur)}</td><td>${euroHucre(TA[i].toplamEur)}</td></tr>`).join('')}
   </tbody></table>
   <p class="not" style="margin-top:2mm">Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.</p>
   <h3 class="tablo-baslik">Üç senaryo, satışı kapatırsanız</h3>
   <table class="senaryo"><thead><tr><th>Senaryo</th><th>Ayda yeni müşteri</th><th>K3 ayı</th><th>12. ayın kazancı</th><th>4 yılın toplamı</th></tr></thead><tbody>
-    ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${s.kapat.seviyeAyi[2]}. ay</td><td>${avroTam(s.kapat.aylar[11].kazanc)}</td><td>${avroTam(s.kapat.aylar.at(-1).toplam)}</td></tr>`).join('')}
+    ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${s.kapat.seviyeAyi[2]}. ay</td><td>${euroHucre(Math.round(s.kapat.aylar[11].kazanc))}</td><td>${euroHucre(Math.round(s.kapat.aylar.at(-1).toplam))}</td></tr>`).join('')}
   </tbody></table>
   <p class="not" style="margin-top:2mm">Temkinli senaryoda 1. ayın cirosu ${avro(S[0].yeniMusteri * fiyat.basicAyEur)} olur. Bu ciro K1 kotasının altındadır. Bu yüzden temkinli senaryoda 13. aydan sonra pay yoktur.</p>
   <div class="ipucu"><b>İpucu</b><span>İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.</span></div>
-  ${kurKutusuHtml({ k: kur12, sayi, avro, tl })}
+  <p class="dipnot kur-dipnot" style="margin-top:3mm">${kurDipnotu()}</p>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
   <p class="not" style="margin-top:2mm">Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.</p>
   ${alt(6)}

@@ -24,8 +24,7 @@ const daire = (x, y, d, renkAdi) => ({ t: 'ellipse', x, y, w: d, h: d, fill: ren
 const yaz = (x, y, w, h, metin, o = {}) => ({ t: 'text', x, y, w, h, metin, boy: o.boy ?? S.govde, renk: renk[o.renk ?? 'murekkep'], kalin: o.kalin ?? false, italik: o.italik ?? false, hiza: o.hiza ?? 'left', dikey: o.dikey ?? 'top', satir: o.satir ?? SATIR });
 // ₺ hapı: euro tutarın altında yumuşak pastel zeminli, uçları yuvarlak kutu. Yazı italik ve koyu laciverttir.
 // Genişlik yazının uzunluğuna göre bulunur. Arial 13 pt italikte bir karakter yaklaşık 0,1 inçtir.
-const hap = (x, y, enGenis, metin, zemin = 'pastel') => {
-  const h = 0.3;
+const hap = (x, y, enGenis, metin, zemin = 'pastel', h = 0.3) => {
   const w = Math.min(enGenis, metin.length * 0.1 + 0.3);
   return [kutu(x, y, w, h, zemin, { yuvarlak: true }), yaz(x, y, w, h, metin, { boy: S.kucuk, italik: true, hiza: 'center', dikey: 'middle' })];
 };
@@ -148,23 +147,29 @@ function s4() {
 }
 
 /** Tablo: satırlar ince çizgiyle ayrılır. Vurgulu sütunun zemini kum rengidir. */
-function tablo(x, y0, sutunlar, satirlar, { satirH = 0.42, boy = S.kucuk, vurgu = [], vurguSatir = -1 } = {}) {
+// Hücre düz yazı ya da { metin, hap } olur. `hap` verilirse yazının altında ₺ hapı durur.
+// Bu durumda veri satırı `veriH` kadar yüksek olur. Başlık satırı `satirH` kadar kalır.
+function tablo(x, y0, sutunlar, satirlar, { satirH = 0.42, veriH = satirH, boy = S.kucuk, vurgu = [], vurguSatir = -1 } = {}) {
   const og = [];
   const w = sutunlar.reduce((t, s) => t + s.w, 0);
+  const satirY = (r) => y0 + satirH + veriH * r;
   let cx = x;
   sutunlar.forEach((s, i) => {
-    if (vurgu.includes(i)) og.push(kutu(cx, y0, s.w, satirH * (satirlar.length + 1), 'kum'));
+    if (vurgu.includes(i)) og.push(kutu(cx, y0, s.w, satirH + veriH * satirlar.length, 'kum'));
     og.push(yaz(cx + 0.1, y0 + 0.07, s.w - 0.2, satirH - 0.07, s.ad, { boy, kalin: true }));
     cx += s.w;
   });
-  if (vurguSatir >= 0) og.push(kutu(x, y0 + satirH * (vurguSatir + 1), w, satirH, 'kumKoyu'));
+  if (vurguSatir >= 0) og.push(kutu(x, satirY(vurguSatir), w, veriH, 'kumKoyu'));
   og.push(kutu(x, y0 + satirH - 0.02, w, 0.035, 'murekkep'));
   satirlar.forEach((satir, r) => {
-    const y = y0 + satirH * (r + 1);
+    const y = satirY(r);
     if (r) og.push(kutu(x, y, w, 0.012, 'cizgi'));
     let sx = x;
     satir.forEach((hucre, i) => {
-      og.push(yaz(sx + 0.1, y + 0.07, sutunlar[i].w - 0.2, satirH - 0.07, hucre, { boy, kalin: i > 0 && vurgu.includes(i), renk: i > 0 && vurgu.includes(i) ? 'lacivert' : 'murekkep' }));
+      const metin = typeof hucre === 'string' ? hucre : hucre.metin;
+      const vurgulu = i > 0 && vurgu.includes(i);
+      og.push(yaz(sx + 0.1, y + 0.06, sutunlar[i].w - 0.2, 0.3, metin, { boy, kalin: vurgulu, renk: vurgulu ? 'lacivert' : 'murekkep' }));
+      if (hucre.hap) og.push(...hap(sx + 0.1, y + 0.31, sutunlar[i].w - 0.2, hucre.hap, 'pastel', 0.25));
       sx += sutunlar[i].w;
     });
   });
@@ -231,19 +236,19 @@ function s7() {
   return { zemin: 'kagit', ogeler: [
     ...ust(false, 'Senaryoları karşılaştırın'),
     baslik('Her yeni müşteri kazancınızı büyütür.', false, 11.9, 0.75),
-    yaz(M, 1.9, 6.9, 0.4, 'İki yol, gerçekçi senaryo', { boy: 18, kalin: true }),
-    ...tablo(M, 2.35, [{ ad: 'Zaman', w: 1.75 }, { ad: 'Kapatma: o ay', w: 1.75 }, { ad: 'Kapatma: toplam', w: 1.85 }, { ad: 'Tanıştırma: toplam', w: 1.95 }],
-      KA.map((a, i) => [a.ad, avro(a.kazancEur), avro(a.toplamEur), avro(TA[i].toplamEur)]), { vurgu: [1, 2] }),
-    yaz(M, 5.4, 6.9, 0.35, 'Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.', { boy: S.kucuk, renk: 'soluk' }),
-    yaz(M + 7.6, 1.9, 4.3, 0.4, 'Üç senaryo, satışı kapatırsanız', { boy: 18, kalin: true }),
-    ...tablo(M + 7.6, 2.35, [{ ad: 'Senaryo', w: 1.35 }, { ad: 'Ayda yeni', w: 1.15 }, { ad: '4 yıl toplamı', w: 1.8 }],
-      Sn.map((x) => [x.ad, String(x.yeniMusteri), avroTam(x.kapat.aylar.at(-1).toplam)]), { vurguSatir: Sn.findIndex((x) => x.ana) }),
-    kutu(M + 7.6, 4.25, 4.3, 1.5, 'kumKoyu'),
-    yaz(M + 7.75, 4.3, 4.0, 0.3, 'Kur bilgisi', { boy: S.kucuk, kalin: true }),
-    yaz(M + 7.75, 4.6, 4.0, 0.6, `1 € = ${sayi(kur12.kur)} TL. 12. ay kazancı ${avro(kur12.eur)} yaklaşık ${tl(kur12.tl)} eder.`, { boy: S.kucuk }),
-    yaz(M + 7.75, 5.15, 4.0, 0.6, `Kur ${kur12.tarih} günkü değerdir. Kur değişince TL tutarı da değişir.`, { boy: S.kucuk }),
-    yaz(M, 6.0, 11.9, 0.35, `İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.`, { boy: S.kucuk, kalin: true }),
-    yaz(M, 6.4, 11.9, 0.35, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
+    // Her euro hücresinin altında ₺ hapı durur. Kur bilgisi italik dipnottadır.
+    yaz(M, 1.85, 7.3, 0.4, 'İki yol, gerçekçi senaryo', { boy: 18, kalin: true }),
+    ...tablo(M, 2.28, [{ ad: 'Zaman', w: 1.6 }, { ad: 'Kapatma: o ay', w: 1.8 }, { ad: 'Kapatma: toplam', w: 1.9 }, { ad: 'Tanıştırma: toplam', w: 2.0 }],
+      KA.map((a, i) => [a.ad, { metin: avro(a.kazancEur), hap: liraHap(a.kazancEur) }, { metin: avro(a.toplamEur), hap: liraHap(a.toplamEur) }, { metin: avro(TA[i].toplamEur), hap: liraHap(TA[i].toplamEur) }]),
+      { vurgu: [1, 2], satirH: 0.38, veriH: 0.6 }),
+    yaz(M, 6.32, 7.3, 0.3, 'Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.', { boy: S.kucuk, renk: 'soluk' }),
+    yaz(M + 7.6, 1.85, 4.3, 0.4, 'Üç senaryo, satışı kapatırsanız', { boy: 18, kalin: true }),
+    ...tablo(M + 7.6, 2.28, [{ ad: 'Senaryo', w: 1.1 }, { ad: 'Ayda yeni', w: 1.25 }, { ad: '4 yıl toplamı', w: 1.95 }],
+      Sn.map((x) => { const t = Math.round(x.kapat.aylar.at(-1).toplam); return [x.ad, String(x.yeniMusteri), { metin: avro(t), hap: liraHap(t) }]; }),
+      { vurguSatir: Sn.findIndex((x) => x.ana), satirH: 0.38, veriH: 0.6 }),
+    yaz(M + 7.6, 4.62, 4.3, 0.85, kurDipnotu(), { boy: S.kucuk, italik: true }),
+    yaz(M + 7.6, 5.62, 4.3, 0.55, `İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.`, { boy: S.kucuk, kalin: true }),
+    yaz(M + 7.6, 6.3, 4.3, 0.55, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
     ...alt(7, false),
   ] };
 }

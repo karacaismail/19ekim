@@ -2,7 +2,7 @@
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
 import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
-import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
+import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR, euroHucre } from './kitapcik.mjs';
 
 const TOPLAM = 9;
 const K = hesap.kapat, T = hesap.tanis;
@@ -125,6 +125,7 @@ tr.ana td { background: var(--kum); font-weight: 700; }
 .kilometre .tl-hap { justify-self: start; font-style: italic; font-size: 10pt; line-height: 1.2; padding: 0.4mm 2.4mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; margin: 0.6mm 0 1.6mm; }
 .kilometre li:last-child .tl-hap { background: var(--kagit); }
 .kur-dipnot { font-style: italic; color: var(--murekkep); }
+table .tl-hap { display: table; margin-top: 0.5mm; font-style: italic; font-weight: 400; font-size: 10pt; line-height: 1.15; padding: 0.2mm 2.2mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; }
 .garanti { font-size: 13pt; font-weight: 600; color: var(--murekkep); }
 .karsi { flex: 1; display: grid; grid-template-columns: 1.25fr 1fr; gap: 10mm; margin-top: 6mm; align-items: start; }
 .karsi h2 { font-size: 16pt; margin-bottom: 2mm; }
@@ -254,17 +255,17 @@ function karsilastirma() {
     <div>
       <h2>İki yol, gerçekçi senaryo</h2>
       <table><thead><tr><th>Zaman</th><th class="vurgu">Kapatma: o ay</th><th class="vurgu">Kapatma: toplam</th><th>Tanıştırma: toplam</th></tr></thead><tbody>
-        ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu"><b>${avro(a.kazancEur)}</b></td><td class="vurgu"><b>${avro(a.toplamEur)}</b></td><td>${avro(TA[i].toplamEur)}</td></tr>`).join('')}
+        ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu">${euroHucre(a.kazancEur, true)}</td><td class="vurgu">${euroHucre(a.toplamEur, true)}</td><td>${euroHucre(TA[i].toplamEur)}</td></tr>`).join('')}
       </tbody></table>
       <p class="not" style="margin-top:2mm">Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.</p>
     </div>
     <div>
       <h2>Üç senaryo, satışı kapatırsanız</h2>
       <table><thead><tr><th>Senaryo</th><th>Ayda yeni müşteri</th><th>4 yılın toplamı</th></tr></thead><tbody>
-        ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${avroTam(s.kapat.aylar.at(-1).toplam)}</td></tr>`).join('')}
+        ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${euroHucre(Math.round(s.kapat.aylar.at(-1).toplam))}</td></tr>`).join('')}
       </tbody></table>
       <p class="not" style="margin-top:2mm">İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.</p>
-      ${kurKutusuHtml({ k: kur12, sayi, avro, tl })}
+      <p class="dipnot kur-dipnot" style="margin-top:3mm">${kurDipnotu()}</p>
     </div>
   </div>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>

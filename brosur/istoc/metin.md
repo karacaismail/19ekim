@@ -207,11 +207,9 @@ Temkinli senaryoda 1. ayın cirosu 399 € olur. Bu ciro K1 kotasının altında
 
 İlk ay en az 2 müşteri getirin. Böylece K1 kotası her ay tutar.
 
-### Kur bilgisi
+Tablolarda da her euro tutarın altında ₺ hapı durur. Kur bilgisi italik dipnottadır.
 
-1 € = 55,31 TL. 12. ay kazancı 2.873 € yaklaşık 158.906 TL eder.
-
-Kur 25 Kasım 2026 Çarşamba günkü değerdir. Kur değişince TL tutarı da değişir.
+Euro tutarlarının ₺ karşılığı 25 Kasım 2026 Çarşamba günkü kurla hesaplandı. Bu kurda 1 € 55,31 ₺ eder. Kur değişince ₺ karşılığı da değişir.
 
 Bu bir örnek senaryodur. Kazanç garantisi değildir.
 
