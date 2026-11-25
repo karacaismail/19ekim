@@ -148,3 +148,38 @@ export function kurKutusuHtml({ k, sayi, avro, tl }) {
     <p>1 € = ${sayi(k.kur)} TL. 12. ay kazancı ${avro(k.eur)} yaklaşık ${tl(k.tl)} eder.</p>
     <p class="dipnot">Kur ${k.tarih} günkü değerdir. Kur değişince TL tutarı da değişir.</p></aside>`;
 }
+
+/**
+ * Toplam kazanç grafiği (kullanıcı kararı 25 Kasım 2026 Çarşamba). 48 çubuk vardır. Her çubuk o aya kadarki toplam kazançtır.
+ * Kilometre taşı ayları sarıdır ve işaretlidir. Son üç taşın tutarı çubuğun üstünde yazar.
+ * İlk üç taşın çubukları çok kısadır ve birbirine yakındır. Bu yüzden onların tutarı kilometre taşı kartlarındadır.
+ */
+export function toplamGrafigi({ g = 640, y = 220, egri, koyu = false, yaziBoyu = 14 }) {
+  // Sol boşluk en uzun eksen yazısına göre ayrılır. Örnek: “200.000 €”.
+  const sol = Math.ceil(yaziBoyu * 6.2), sag = 8, ust = 26, alt = 40;
+  const n = egri.noktalar.length;
+  const adim = (g - sol - sag) / n;
+  const cub = adim * 0.72;
+  const H = (v) => (v / egri.enCok) * (y - ust - alt);
+  const taban = y - alt;
+  const soluk = koyu ? 'var(--solukKoyu)' : 'var(--soluk)';
+  const izgara = koyu ? 'var(--cizgiKoyu)' : 'var(--cizgi)';
+  const isaretli = new Map(egri.isaretler.map((x) => [x.ay, x]));
+  const eksen = egri.eksen.map((v) => `<line x1="${sol}" x2="${g - sag}" y1="${taban - H(v)}" y2="${taban - H(v)}" stroke="${izgara}" stroke-width="1"/>
+    <text x="${sol - 10}" y="${taban - H(v) + 5}" text-anchor="end" font-size="${yaziBoyu - 1}" fill="${soluk}">${sayi(v)} €</text>`).join('');
+  const cubuklar = egri.noktalar.map((p, i) => {
+    const x = sol + i * adim + (adim - cub) / 2;
+    const isaret = isaretli.get(p.ay);
+    const govde = `<rect data-ay="${p.ay}"${isaret ? ` data-isaret="${p.ay}"` : ''} x="${x.toFixed(2)}" y="${(taban - H(p.toplam)).toFixed(2)}" width="${cub.toFixed(2)}" height="${Math.max(1, H(p.toplam)).toFixed(2)}" fill="${isaret ? 'var(--sari)' : 'var(--kumKoyu)'}"${isaret && !koyu ? ' stroke="var(--murekkep)" stroke-width="1"' : ''}/>`;
+    if (!isaret) return govde;
+    const etiket = `<text x="${(x + cub / 2).toFixed(2)}" y="${taban + 20}" text-anchor="middle" font-size="${yaziBoyu - 1}" font-weight="700" fill="${koyu ? 'var(--kagit)' : 'var(--murekkep)'}">${p.ay}</text>`;
+    const deger = p.ay >= 12 ? `<text x="${(x + cub / 2).toFixed(2)}" y="${(taban - H(p.toplam) - 8).toFixed(2)}" text-anchor="${p.ay === n ? 'end' : 'middle'}" font-size="${yaziBoyu}" font-weight="700" fill="${koyu ? 'var(--sari)' : 'var(--lacivert)'}">${sayi(isaret.toplamEur)} €</text>` : '';
+    return govde + etiket + deger;
+  }).join('');
+  return `<svg viewBox="0 0 ${g} ${y}" width="100%" role="img" aria-label="48 ay boyunca toplam kazanç" font-family="Outfit, Arial, sans-serif">
+  ${eksen}
+  <line x1="${sol}" x2="${g - sag}" y1="${taban}" y2="${taban}" stroke="${soluk}" stroke-width="1.5"/>
+  ${cubuklar}
+  <text x="${g - sag}" y="${y - 2}" text-anchor="end" font-size="${yaziBoyu - 1}" fill="${soluk}">Ay</text>
+</svg>`;
+}

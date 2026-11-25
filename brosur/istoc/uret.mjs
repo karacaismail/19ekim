@@ -30,10 +30,10 @@ not(`Kaynak: ${kaynakDenetimi()} değer depodaki kaynakla aynı.`);
 not(`Kontrast: ${kontrastDenetimi()} renk çifti WCAG AA (4,5:1) üstünde.`);
 
 const belgeler = [
-  { ad: 'el-kitapcigi', html: kitapcikHtml(), pdf: 'istoc-is-ortakligi-el-kitapcigi.pdf', g: 794, y: 1123, sayfa: KITAPCIK_SAYFA, sinir: [6, 9] },
-  { ad: 'gorsel-sunum', html: gorselHtml(), pdf: 'istoc-is-ortakligi-gorsel-sunum.pdf', g: 1123, y: 794, sayfa: GORSEL_SAYFA, sinir: [6, 9] },
+  { ad: 'el-kitapcigi', html: kitapcikHtml(), pdf: 'istoc-is-ortakligi-el-kitapcigi.pdf', g: 794, y: 1123, sayfa: KITAPCIK_SAYFA, sinir: [10, 10] },
+  { ad: 'gorsel-sunum', html: gorselHtml(), pdf: 'istoc-is-ortakligi-gorsel-sunum.pdf', g: 1123, y: 794, sayfa: GORSEL_SAYFA, sinir: [6, 10] },
   // PPTX bütün metinlerde Arial kullanır. Önizleme ve taşma ölçümü de Arial ile yapılır.
-  { ad: 'sunum', html: sunumOnizlemeHtml(), g: 1920, y: 1080, sayfa: SLAYT_SAYISI, sinir: [8, 10], slayt: true },
+  { ad: 'sunum', html: sunumOnizlemeHtml(), g: 1920, y: 1080, sayfa: SLAYT_SAYISI, sinir: [8, 11], slayt: true },
 ];
 
 const tarayici = await chromium.launch();

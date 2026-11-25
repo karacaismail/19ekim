@@ -1,9 +1,9 @@
-// Sunum: 16:9, 10 slayt. Her slayt tek bir öğe listesidir (inç cinsinden konum).
+// Sunum: 16:9, 11 slayt. 7. slayt toplam kazanç grafiğidir (kullanıcı kararı 25 Kasım 2026 Çarşamba). Her slayt tek bir öğe listesidir (inç cinsinden konum).
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 // Aynı liste hem PPTX dosyasını hem tarayıcı önizlemesini üretir. Önizleme taşma denetimi için kullanılır.
 import pptxgen from 'pptxgenjs';
 import { renk, slayt as S } from './tokenlar.mjs';
-import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu, toplamEgrisi } from './veri.mjs';
 import { pathToFileURL } from 'node:url';
 import { esc, tokenCss, LOGO } from './sablon.mjs';
 import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
@@ -40,7 +40,7 @@ const ust = (koyu, sag) => [logo(M, 0.38, 1.4, koyu), yaz(W - M - 6, 0.46, 6, 0.
 const alt = (n, koyu, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => [
   yaz(M, H - 0.55, 6, 0.3, sol, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk' }),
   yaz(W - M - 5.6, H - 0.55, 3.4, 0.3, 'Connect to iStoc.com', { boy: S.kucuk, kalin: true, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' }),
-  yaz(W - M - 2, H - 0.55, 2, 0.3, `${n} / 10`, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' }),
+  yaz(W - M - 2, H - 0.55, 2, 0.3, `${n} / ${SLAYT_SAYISI}`, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' }),
 ];
 const baslik = (metin, koyu = false, w = 11.4, h = 1.25, boy = S.baslik) => yaz(M, 1.05, w, h, metin, { boy, kalin: true, renk: koyu ? 'kagit' : 'murekkep', satir: 0.95 });
 
@@ -56,13 +56,13 @@ function s1() {
     yaz(6.3, 1.35, 6.35, 0.3, 'Thoptan ile istoc.com ağına bağlanırsınız.', { boy: S.kucuk, renk: 'solukKoyu' }),
     yaz(6.3, 1.8, 6.35, 0.4, 'Thoptan iş ortaklığı tanıtım sunumu', { boy: 18, kalin: true, renk: 'sari' }),
     yaz(M - 0.1, 0.75, 5.0, 4.6, '48', { boy: 280, kalin: true, renk: 'sari', satir: 0.9 }),
-    yaz(M + 0.1, 4.55, 2.2, 0.95, 'aya kadar', { boy: 32, kalin: true, renk: 'sari' }),
-    yaz(6.3, 2.25, 6.35, 1.75, 'Satışını kapattığınız müşteri size 48 aya kadar pay getirir.', { boy: 32, kalin: true, renk: 'kagit', satir: 0.95 }),
+    yaz(M + 0.1, 4.55, 5.0, 0.95, 'aya kadar kazanç', { boy: 32, kalin: true, renk: 'sari' }),
+    yaz(6.3, 2.25, 6.35, 1.75, 'Satışını kapattığınız müşteri size 48 aya kadar kazanç getirir.', { boy: 32, kalin: true, renk: 'kagit', satir: 0.95 }),
     yaz(6.3, 4.05, 6.35, 0.75, 'Thoptan iş ortaklığı programına sizi davet ediyoruz.', { boy: 20, renk: 'kagit' }),
-    yaz(6.3, 4.85, 6.35, 0.95, `Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.`, { boy: S.kucuk + 1, renk: 'solukKoyu' }),
+    yaz(6.3, 4.85, 6.35, 0.95, `Kazanç en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.`, { boy: S.kucuk + 1, renk: 'solukKoyu' }),
     ...kare,
     ...KAPAK_ORANLARI.map((o, i) => yaz(M + i * 12 * (gx + 0.04), 6.35, 2.8, 0.3, [parca(`${i + 1}. yıl  `, 'solukKoyu', false), parca(yuzde(o), 'sari')], { boy: S.kucuk })),
-    yaz(M, H - 0.55, 9, 0.3, 'Oranlar K3 seviyesinde satışı kapatma oranlarıdır. Kesin değerler yazılı anlaşmada belirlenir.', { boy: S.kucuk - 1, renk: 'solukKoyu' }),
+    yaz(M, H - 0.55, 9, 0.3, 'Oranlar K3 seviyesinde satışı kapatma oranlarıdır.', { boy: S.kucuk - 1, renk: 'solukKoyu' }),
     yaz(W - M - 2, H - 0.55, 2, 0.3, 'thoptan.com', { boy: S.kucuk - 1, renk: 'solukKoyu', hiza: 'right' }),
   ] };
 }
@@ -133,7 +133,7 @@ function merdivenOgeleri(x0, y0, w, h) {
 function s4() {
   return { zemin: 'kagit', ogeler: [
     ...ust(false, 'Kazanç planı'),
-    baslik('Satışı kapatırsanız payınız %30’a kadar çıkar.', false, 11.9, 0.75),
+    baslik('Satışı kapatırsanız kazanç oranınız %30’a kadar çıkar.', false, 11.9, 0.75, 30),
     kutu(M, 2.03, 0.4, 0.1, 'sari', { kenar: 'murekkep' }), yaz(M + 0.5, 1.93, 2.6, 0.32, 'Satışı kapatırsanız', { boy: S.kucuk, renk: 'soluk' }),
     kutu(M + 3.2, 2.06, 0.4, 0.04, 'murekkep'), yaz(M + 3.7, 1.93, 3, 0.32, 'Yalnız tanıştırırsanız', { boy: S.kucuk, renk: 'soluk' }),
     ...merdivenOgeleri(M + 0.85, 2.65, 7.3, 3.3),
@@ -141,7 +141,7 @@ function s4() {
     yaz(9.45, 3.4, 3.2, 0.65, `${avro(kap.at(-1).esik)} ve üstü aylık ciroda satışı kapatırsanız`, { boy: S.kucuk }),
     yaz(9.45, 4.15, 3.2, 1.05, yuzde(tan.at(-1).oran), { boy: 60, kalin: true, satir: 0.9 }),
     yaz(9.45, 5.15, 3.2, 0.65, 'Aynı ciroda yalnız tanıştırırsanız', { boy: S.kucuk }),
-    yaz(M, 6.4, 11.9, 0.4, 'Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.', { boy: S.govde - 1, kalin: true }),
+    yaz(M, 6.4, 11.9, 0.4, 'Eşikler ve oranlar bugünkü plandır.', { boy: S.govde - 1, kalin: true }),
     ...alt(4, false),
   ] };
 }
@@ -180,7 +180,7 @@ function s5() {
   const donem = (i) => `${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay`;
   return { zemin: 'kagit', ogeler: [
     ...ust(false, '13. aydan sonraki oranlar'),
-    baslik('Pay 48 aya kadar azalarak sürer.', false, 11.9, 0.75),
+    baslik('Kazanç 48 aya kadar azalarak sürer.', false, 11.9, 0.75),
     yaz(M, 1.85, 11.9, 0.4, 'Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.', { boy: S.govde, renk: 'soluk' }),
     yaz(M, 2.45, 8, 0.45, '13. aydan sonraki oranlar', { boy: 20, kalin: true }),
     ...tablo(M, 3.0, [{ ad: 'Dönem', w: 3.6 }, { ad: 'Yalnız tanıştırırsanız', w: 3.6 }, { ad: 'Satışı kapatırsanız', w: 3.6 }],
@@ -231,6 +231,41 @@ function s6() {
   ] };
 }
 
+/** Toplam kazanç grafiği. 48 ince dikdörtgen vardır. Böylece PowerPoint'te düzenlenebilir kalır. */
+function grafikOgeleri(x0, y0, w, h, egri) {
+  const og = [];
+  const n = egri.noktalar.length;
+  const adim = w / n, cub = adim * 0.72;
+  const Hh = (v) => (v / egri.enCok) * h;
+  const taban = y0 + h;
+  egri.eksen.forEach((v) => og.push(kutu(x0, taban - Hh(v), w, 0.012, 'cizgi'), yaz(x0 - 1.35, taban - Hh(v) - 0.16, 1.25, 0.3, `${sayi(v)} €`, { boy: S.kucuk, renk: 'soluk', hiza: 'right' })));
+  const isaretli = new Map(egri.isaretler.map((x) => [x.ay, x]));
+  egri.noktalar.forEach((p, i) => {
+    const x = x0 + i * adim + (adim - cub) / 2;
+    const isaret = isaretli.get(p.ay);
+    const yuk = Math.max(0.01, Hh(p.toplam));
+    og.push(kutu(x, taban - yuk, cub, yuk, isaret ? 'sari' : 'kumKoyu', isaret ? { kenar: 'murekkep' } : {}));
+    if (isaret) {
+      og.push(yaz(x + cub / 2 - 0.3, taban + 0.08, 0.6, 0.3, String(p.ay), { boy: S.kucuk, kalin: true, hiza: 'center' }));
+      if (p.ay >= 12) og.push(yaz(p.ay === n ? x + cub - 2.0 : x + cub / 2 - 1.0, taban - yuk - 0.42, 2.0, 0.34, `${sayi(isaret.toplamEur)} €`, { boy: S.govde, kalin: true, renk: 'lacivert', hiza: p.ay === n ? 'right' : 'center' }));
+    }
+  });
+  // “Ay” yazısı sayı satırının solunda durur. Böylece 48 ile üst üste binmez.
+  og.push(kutu(x0, taban, w, 0.02, 'soluk'), yaz(x0 - 1.35, taban + 0.08, 1.25, 0.3, 'Ay', { boy: S.kucuk, renk: 'soluk', hiza: 'right' }));
+  return og;
+}
+
+function s7grafik() {
+  return { zemin: 'kagit', ogeler: [
+    ...ust(false, 'Toplam kazanç'),
+    baslik(`4 yılda toplam kazancınız ${avroTam(ay48.toplam)} olur.`, false, 11.9, 0.75),
+    ...grafikOgeleri(M + 1.4, 2.15, W - 2 * M - 1.4, 3.55, toplamEgrisi(K)),
+    yaz(M, 6.1, 11.9, 0.35, 'Her çubuk o aya kadarki toplam kazançtır. Sarı çubuklar kilometre taşı aylarıdır.', { boy: S.kucuk, renk: 'soluk' }),
+    yaz(M, 6.45, 11.9, 0.35, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
+    ...alt(7, false),
+  ] };
+}
+
 function s7() {
   const Sn = hesap.senaryolar;
   return { zemin: 'kagit', ogeler: [
@@ -249,7 +284,7 @@ function s7() {
     yaz(M + 7.6, 4.62, 4.3, 0.85, kurDipnotu(), { boy: S.kucuk, italik: true }),
     yaz(M + 7.6, 5.62, 4.3, 0.55, `İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.`, { boy: S.kucuk, kalin: true }),
     yaz(M + 7.6, 6.3, 4.3, 0.55, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
-    ...alt(7, false),
+    ...alt(8, false),
   ] };
 }
 
@@ -273,7 +308,7 @@ function s8() {
       ];
     }),
     yaz(M, 6.45, 11.9, 0.35, 'Her yolun kendi kazancı ve kendi ilk adımı var.', { boy: S.kucuk, renk: 'soluk' }),
-    ...alt(8, false),
+    ...alt(9, false),
   ] };
 }
 
@@ -292,11 +327,11 @@ function s9() {
   const liste = (x, dizi, koyu) => yigin(x + 0.35, 2.45, cw - 0.7, dizi, 13, 0.13, koyu ? 'sari' : 'murekkep', koyu ? 'kagit' : 'murekkep');
   return { zemin: 'kagit', ogeler: [
     ...ust(false, 'Koşullar'),
-    baslik('Kim ne yapar? Baştan yazılıdır.', false, 11.9, 0.75),
+    baslik('Kim ne yapar? Görevler baştan bellidir.', false, 11.9, 0.75),
     kutu(M, 1.8, cw, 4.3, 'murekkep'), yaz(M + 0.35, 1.95, cw - 0.7, 0.45, 'Biz ne yaparız', { boy: 20, kalin: true, renk: 'sari' }), ...liste(M, BIZ, true),
     kutu(M + cw, 1.8, cw, 4.3, 'kumKoyu'), yaz(M + cw + 0.35, 1.95, cw - 0.7, 0.45, 'Siz ne yaparsınız', { boy: 20, kalin: true }), ...liste(M + cw, SIZ, false),
-    yaz(M, 6.2, 11.9, 0.7, 'İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz. Bu belge sözleşme değildir.', { boy: S.kucuk, kalin: true }),
-    ...alt(9, false),
+    yaz(M, 6.2, 11.9, 0.7, 'İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz. Koşulları şirketin politika sayfaları belirler.', { boy: S.kucuk, kalin: true }),
+    ...alt(10, false),
   ] };
 }
 
@@ -309,12 +344,12 @@ function s10() {
     yaz(8.1, 3.2, 4.6, 0.35, 'Connect to iStoc.com', { boy: 16, kalin: true, renk: 'solukKoyu' }),
     yaz(8.1, 3.65, 4.6, 1.0, 'thoptan.com', { boy: 50, kalin: true, renk: 'kagit' }),
     yaz(M, H - 0.55, 9, 0.3, 'Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.', { boy: S.kucuk, renk: 'solukKoyu' }),
-    yaz(W - M - 2, H - 0.55, 2, 0.3, '10 / 10', { boy: S.kucuk, renk: 'solukKoyu', hiza: 'right' }),
+    yaz(W - M - 2, H - 0.55, 2, 0.3, `${SLAYT_SAYISI} / ${SLAYT_SAYISI}`, { boy: S.kucuk, renk: 'solukKoyu', hiza: 'right' }),
   ] };
 }
 
-export const SLAYTLAR = () => [s1(), s2(), s3(), s4(), s5(), s6(), s7(), s8(), s9(), s10()];
-export const SLAYT_SAYISI = 10;
+export const SLAYTLAR = () => [s1(), s2(), s3(), s4(), s5(), s6(), s7grafik(), s7(), s8(), s9(), s10()];
+export const SLAYT_SAYISI = 11;
 
 const hex = (h) => h.replace('#', '').toUpperCase();
 

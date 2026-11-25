@@ -21,8 +21,10 @@ export const plan = {
 // Kaynakta kurun tarihi yazmıyor. Bu yüzden belge üretim tarihi kur tarihi sayıldı.
 export const fiyat = { basicAyEur: 399, basicYilEur: 3990, yilAy: 10, kurulumEur: 150, denemeGun: 14, kur: 55.31, kurTarihi: '25 Kasım 2026 Çarşamba' };
 
-// src/data/satisOrtakligi.ts → VARSAYILAN_AYAR (tavsiye ödülü).
-export const tavsiye = { krediAy: 2, yeniKrediAy: 1, sinir: 3 };
+// Tavsiye ödülü (kullanıcı kararı 25 Kasım 2026 Çarşamba, toplantı). Eski “2 ay ücretsiz” kuralı belgelerden kalktı.
+// Tavsiye eden müşteri yıllık bedelinden %15 indirim alır. Yeni müşteri de ilk yılında %15 indirim alır.
+// Yılda en çok 3 uygun tavsiye sayılır. Sitedeki tavsiye metni bu görevde değişmedi.
+export const tavsiye = { indirimOrani: 0.15, yeniIndirimOrani: 0.15, sinir: 3 };
 
 /** Ulaşılan kotanın oranı. Eşikler sırayla aranır (kazancPlani.ts → katkiOrani). */
 export function oran(tur, ciro) {
@@ -84,6 +86,22 @@ export function senaryo(tur, yeni, aySayisi = plan.musteriAy) {
 /** Bir senaryonun zaman anlarındaki değerleri. Tutarlar tam euroya yuvarlanır. */
 export const anlar = (s) => ANLAR.map((n) => ({ n, ad: anAdi(n), ...s.aylar[n - 1], kazancEur: Math.round(s.aylar[n - 1].kazanc), toplamEur: Math.round(s.aylar[n - 1].toplam) }));
 
+/**
+ * Toplam kazanç grafiğinin verisi (kullanıcı kararı 25 Kasım 2026 Çarşamba). Her ay o aya kadarki toplam kazançtır.
+ * Kilometre taşı ayları işaretlidir. Eksen 50.000 €'luk adımlarla en yüksek değerin üstünde biter.
+ */
+export function toplamEgrisi(s) {
+  const noktalar = s.aylar.map((a) => ({ ay: a.ay, toplam: a.toplam }));
+  const adim = 50_000;
+  const enCok = Math.ceil(noktalar.at(-1).toplam / adim) * adim;
+  return {
+    noktalar,
+    isaretler: ANLAR.map((n) => ({ ay: n, ad: anAdi(n), toplamEur: Math.round(s.aylar[n - 1].toplam) })),
+    enCok,
+    eksen: Array.from({ length: enCok / adim + 1 }, (_, i) => i * adim),
+  };
+}
+
 /** Kur kutusu: euro tutarın yaklaşık TL karşılığı. Önce euro tam sayıya yuvarlanır. Okur aynı çarpımı kendisi yapabilir. */
 export function kurKutusu(eur) {
   const e = Math.round(eur);
@@ -94,6 +112,8 @@ export const sayi = (n) => new Intl.NumberFormat('tr-TR', { maximumFractionDigit
 export const tl = (n) => `${sayi(n)} TL`;
 export const yuzde = (n) => `%${sayi(Math.round(n * 1000) / 10)}`;
 export const avro = (n) => `${sayi(n)} €`;
+/** Kuruşlu euro tutarı: 598,50 €. Tavsiye indirimi bu biçimle yazılır. */
+export const avroKurus = (n) => `${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}\u00a0€`;
 /** Tam euroya yuvarlanmış tutar. Senaryo tutarları bu biçimle yazılır. */
 export const avroTam = (n) => avro(Math.round(n));
 /**
@@ -116,8 +136,8 @@ export const hesap = {
   senaryolar: SENARYOLAR.map((s) => ({ ...s, kapat: senaryo('kapatir', s.yeniMusteri), tanis: senaryo('tanistir', s.yeniMusteri) })),
   // Marka elçisi örneği: tanıttığı satıcılar ayda K3 eşiği kadar öder.
   elci: (() => { const ciro = plan.tanistir.esik[2]; const o = oran('tanistir', ciro); return { ciro, ...o, aylik: Math.round(ciro * o.oran * 100) / 100 }; })(),
-  tavsiyeEur: fiyat.basicAyEur * tavsiye.krediAy,
-  tavsiyeYilAy: tavsiye.krediAy * tavsiye.sinir,
+  // Bir uygun tavsiyenin indirimi: yıllık bedelin %15'i. 3.990 € × %15 = 598,50 €.
+  tavsiyeIndirimEur: Math.round(fiyat.basicYilEur * tavsiye.indirimOrani * 100) / 100,
 };
 export const kur12 = kurKutusu(hesap.kapat.aylar[11].kazanc);
 
@@ -157,7 +177,8 @@ export function saglama() {
     [iki(hesap.senaryolar[2].kapat.aylar[47].toplam), iki(166_534.62 * 2 + 478.8)],
     [kur12.eur, 2_873], [kur12.tl, 158_906],
     [hesap.elci.oran, 0.15], [hesap.elci.aylik, 478.8],
-    [hesap.tavsiyeEur, 798], [hesap.tavsiyeYilAy, 6], [fiyat.basicAyEur * fiyat.yilAy, fiyat.basicYilEur],
+    [hesap.tavsiyeIndirimEur, 598.5], [fiyat.basicAyEur * fiyat.yilAy, fiyat.basicYilEur],
+    [toplamEgrisi(hesap.kapat).isaretler.map((x) => x.toplamEur).join(','), '160,1157,4748,18394,59092,166535'],
   ];
   // Her senaryo ve iki yol için ay sırası ile grup sırası aynı toplamı verir.
   for (const s of hesap.senaryolar) for (const tur of ['kapatir', 'tanistir']) {
@@ -186,7 +207,8 @@ export function kaynakDenetimi() {
     [paket, '"aylikEur": 399,\n    "yillikEur": 3990'],
     [paket, 'CANLI_DENEME_GUN = 14'],
     [gm, 'kurulum: 150'],
-    [so, 'istocAyEur: 399'], [so, 'istocYilAy: 10'], [so, 'krediAy: 2'], [so, 'yeniKrediAy: 1'], [so, 'tavsiyeSinir: 3'],
+    // Tavsiye ödülü toplantı kararıyla değişti. Sitedeki eski kredi değerleri bu yüzden denetlenmez. Yalnız yıllık sınır aynıdır.
+    [so, 'istocAyEur: 399'], [so, 'istocYilAy: 10'], [so, 'tavsiyeSinir: 3'],
     [prm, 'eurTry: 55.31'],
   ];
   const eksik = aranan.filter(([metin, parca]) => !metin.includes(parca)).map(([, p]) => p);
