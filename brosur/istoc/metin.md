@@ -8,6 +8,12 @@ Plan tarihi 23 Kasım 2026 Pazartesi günüdür. Oranlar ve fiyatlar bu depodaki
 
 Kazanç tutarları euro olarak yazılır. Sayılar `veri.mjs` hesabından gelir. Üretici, belgedeki her cümlenin bu dosyada olduğunu denetler.
 
+## Ön kapak
+
+El kitapçığının ilk sayfası kitap kapağıdır. Kapakta logo, belge adı ve imza durur.
+
+İş ortaklığı programı
+
 ## Kapak
 
 Thoptan iş ortaklığı kılavuzu
@@ -20,13 +26,15 @@ Bu yazı kapakta, son sayfada ve öteki sayfaların alt bilgisinde durur.
 
 Thoptan ile istoc.com ağına bağlanırsınız.
 
-Satışını kapattığınız müşteri size 48 aya kadar pay getirir.
+Satışını kapattığınız müşteri size 48 aya kadar kazanç getirir.
+
+48 aya kadar kazanç
 
 Thoptan iş ortaklığı programına sizi davet ediyoruz.
 
 Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.
 
-Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 798 € ödemelidir.
+Kazanç en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 798 € ödemelidir.
 
 ## Neden siz
 
@@ -70,9 +78,9 @@ Fiyat herkes için aynıdır.
 
 Altı adım var. İlk adım tek bir görüşmedir.
 
-1. Katkı düzeyinizi yazılı belirleyin.
+1. Katkı düzeyinizi konuşun.
 
-   Ortaklık sorumlusu yapacağınız işi sizinle yazar. Yalnız tanıştırma ve satışı kapatma iki ayrı katkıdır.
+   Ortaklık sorumlusu yapacağınız işi sizinle konuşur. Yalnız tanıştırma ve satışı kapatma iki ayrı katkıdır.
 
 2. İşletmenin ihtiyacını konuşun.
 
@@ -100,7 +108,7 @@ Kurulumdan sonraki desteği her durumda şirket verir.
 
 ## Kazanç planı
 
-Satışı kapatırsanız payınız %30’a kadar çıkar.
+Satışı kapatırsanız kazanç oranınız %30’a kadar çıkar.
 
 Ciro, getirdiğiniz müşterilerin ödediği tutardır.
 
@@ -130,7 +138,7 @@ Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.
 
 İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter. Oran müşterinin o yılki cirosuna uygulanır.
 
-Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
+Eşikler ve oranlar bugünkü plandır.
 
 ## Büyüyen müşteri senaryosu
 
@@ -174,6 +182,14 @@ Her euro tutarın altında küçük bir hap durur. Hapta tutarın ₺ karşılı
 
 Euro tutarlarının ₺ karşılığı 25 Kasım 2026 Çarşamba günkü kurla hesaplandı. Bu kurda 1 € 55,31 ₺ eder. Kur değişince ₺ karşılığı da değişir.
 
+### Toplam kazanç 48 ayda böyle büyür
+
+4 yılda toplam kazancınız 166.535 € olur.
+
+Grafikte 48 çubuk vardır. Her çubuk o aya kadarki toplam kazançtır. Sarı çubuklar kilometre taşı aylarıdır: 1., 3., 6., 12., 24. ve 48. ay.
+
+Her çubuk o aya kadarki toplam kazançtır. Sarı çubuklar kilometre taşı aylarıdır. 4 yılın toplamı 166.535 € olur.
+
 Bu bir örnek senaryodur. Kazanç garantisi değildir.
 
 ## Senaryoları karşılaştırın
@@ -213,48 +229,22 @@ Euro tutarlarının ₺ karşılığı 25 Kasım 2026 Çarşamba günkü kurla h
 
 Bu bir örnek senaryodur. Kazanç garantisi değildir.
 
-Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.
-
 ## Üç ortaklık yolu
 
 Hangisi sizsiniz?
 
 Aynı ürünü üç farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.
 
-| Soru | Çözüm ortağı | Mevcut müşteri | Marka elçisi |
+| Soru | Çözüm ortağı | Marka elçisi | Mevcut müşteri |
 | --- | --- | --- | --- |
-| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Thoptan kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
-| Ne yapar? | Müşterisini Thoptan ile tanıştırır ya da satışı kapatır. | Çevresindeki bir işletmeye Thoptan’ı önerir. | Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir. |
-| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. |
-| Nasıl başlar? | Katkı düzeyini yazılı belirler. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
+| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Ticaret yapan bir kitleye ulaşan kişi. | Thoptan kullanan satıcı işletme. |
+| Ne yapar? | Müşterisini Thoptan ile tanıştırır ya da satışı kapatır. | Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir. | Çevresindeki bir işletmeye Thoptan’ı önerir. |
+| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. | Uygun tavsiye başına yıllık bedelinden %15 indirim alır. |
+| Nasıl başlar? | Katkı düzeyini ortaklık sorumlusuyla konuşur. | Anlatımını şirkete doğrulatır. | Geçerli koşulu müşteri sorumlusundan öğrenir. |
 
 Bu belgenin ana okuru çözüm ortağıdır. Öteki iki yol sonraki sayfadadır.
 
 Her yolun kendi kazancı ve kendi ilk adımı var.
-
-## Mevcut müşteri
-
-Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.
-
-Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.
-
-Uygun tavsiye başına size 2 ay ücretsiz kullanım verilir. Bu süre Basic paket fiyatıyla 798 € değerindedir.
-
-Yeni müşteriye 1 ay ücretsiz kullanım verilir.
-
-Yılda en çok 3 uygun tavsiye sayılır. Bu, yılda en çok 6 ay ücretsiz kullanım eder.
-
-Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.
-
-Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.
-
-Ödül nakit değildir. Ödül ücretsiz Thoptan kullanımıdır.
-
-Ödül alabileceğinizi işletmeye açıkça söyleyin.
-
-#### İlk adım
-
-Geçerli koşulu müşteri sorumlusundan öğrenin.
 
 ## Marka elçisi
 
@@ -272,7 +262,7 @@ Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.
 
 Çözüm ortağıyla aynı plandan pay alırsınız.
 
-### Örnek pay
+### Örnek kazanç
 
 1. Tanıttığınız satıcılar ayda toplam 3.192 € öder.
 2. Bu ciro K3 kotasıdır. Yalnız tanıştırma payınız %15 olur.
@@ -284,9 +274,35 @@ Bu ilişki maaşlı iş değildir.
 
 İçeriğinizin amacını belirleyin. Anlatımınızı şirkete doğrulatın.
 
+## Mevcut müşteri
+
+Uygun her tavsiye size %15 indirim kazandırır.
+
+Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı ve desteği şirket yürütür.
+
+Her uygun tavsiye size yıllık bedelinizden %15 indirim kazandırır. 3.990 € yıllık bedelin %15’i 598,50 € eder.
+
+Tavsiye ettiğiniz yeni müşteri de ilk yılında %15 indirim alır.
+
+Yılda en çok 3 uygun tavsiye sayılır.
+
+Yeni müşteri aylık ya da yıllık paket alabilir.
+
+Yeni müşteri ödemesini yapmazsa tavsiye uygun sayılmaz.
+
+Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.
+
+Ödül nakit değildir. Ödül Thoptan bedelinden indirimdir.
+
+Ödül alabileceğinizi işletmeye açıkça söyleyin.
+
+#### İlk adım
+
+Geçerli koşulu müşteri sorumlusundan öğrenin.
+
 ## Koşullar
 
-Kim ne yapar? Baştan yazılıdır.
+Kim ne yapar? Görevler baştan bellidir.
 
 ### Biz ne yaparız
 
@@ -299,7 +315,7 @@ Kim ne yapar? Baştan yazılıdır.
 
 ### Siz ne yaparsınız
 
-- Katkı düzeyinizi yazılı belirlersiniz.
+- Katkı düzeyinizi ortaklık sorumlusuyla konuşursunuz.
 - Satışı kapatırsanız kurulumu ve ilk eğitimi siz yaparsınız.
 - Fiyat ya da indirim sözü vermezsiniz.
 - Alıcı, sipariş ya da satış sözü vermezsiniz.
@@ -314,21 +330,17 @@ Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.
 
 Tanıştırma CRM’e kaydedilir. CRM, şirketin müşteri kayıt sistemidir.
 
-Planda tanıştırma 6 ay geçerlidir. Ayrıntıyı yazılı anlaşma belirler.
+Planda tanıştırma 6 ay geçerlidir.
 
 Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür.
 
 Planda tanıştıranın payı satışı kapatanın payından düşülür.
 
-Bölüşme yazılı anlaşmada belirlenir.
-
-Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır. Ayrıntıyı yazılı anlaşma belirler.
-
-Fatura, vergi ve stopajı mali müşaviriniz doğrulasın.
+Ödeme günleri müşterinin ödeme gününden sayılır.
 
 Şirket ortak getirmeye para ödemez.
 
-Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir.
+Koşulları şirketin politika sayfaları belirler.
 
 ## İlk adım
 
@@ -336,7 +348,7 @@ Hangi müşterinizle başlarsınız?
 
 1. thoptan.com adresinden Thoptan’ı inceleyin.
 2. Ortaklık sorumlusuyla görüşün.
-3. Katkı düzeyinizi yazılı belirleyin.
+3. Katkı düzeyinizi konuşun.
 4. İlk müşteri kaydınızı açtırın.
 
 thoptan.com
@@ -360,8 +372,8 @@ Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgel
 - Çözüm ortağı ile marka elçisi aynı plandan kazanır.
 - İkisi de ciro üzerinden pay alır.
 - Yapılan iş ve bir aydaki ciro oranı belirler.
-- Mevcut müşteri ücretsiz kullanım kazanır.
+- Mevcut müşteri indirim kazanır.
 - Ödül nakit değildir.
-- Pay 48 aya kadar azalarak sürer.
+- Kazanç 48 aya kadar azalarak sürer.
 - Bu tutar aylık paydır.
 - Ayrıntılar el kitapçığındadır.

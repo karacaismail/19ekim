@@ -1,10 +1,10 @@
-// El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
+// El kitapçığı: A4 dikey, 10 sayfa. İlk sayfa kitap kapağıdır (kullanıcı kararı 25 Kasım 2026 Çarşamba). Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 import { a4 } from './tokenlar.mjs';
-import { plan, fiyat, tavsiye, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
+import { plan, fiyat, tavsiye, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, avroKurus, liraHap, kurDipnotu, toplamEgrisi } from './veri.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml, toplamGrafigi } from './sablon.mjs';
 
-const TOPLAM = 9;
+const TOPLAM = 10;
 const css = `
 .sayfa { width: 210mm; height: 297mm; padding: ${a4.kenar}mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; display: flex; flex-direction: column; background: var(--kagit); }
 .sayfa:last-child { page-break-after: auto; break-after: auto; }
@@ -34,11 +34,22 @@ p, li, td, th { font-size: ${a4.govde}pt; line-height: ${a4.satir}; }
 .yuzey { background: var(--kum); }
 .sayi-dev { font-weight: 800; letter-spacing: -0.02em; line-height: 0.85; }
 
+/* Ön kapak (kullanıcı kararı 25 Kasım 2026 Çarşamba): kitap kapağı gibi sade ve güçlü. Zemin Thoptan sarısıdır. */
+.on-kapak { background: var(--sari); color: var(--murekkep); padding: 22mm 20mm 18mm; }
+.on-kapak .on-ust { display: flex; justify-content: space-between; align-items: flex-start; }
+.on-kapak .on-ust span { font-size: ${a4.govde}pt; font-weight: 600; }
+.on-kapak .on-orta { margin-top: auto; }
+.on-kapak .on-cizgi { height: 2.4mm; width: 40mm; background: var(--murekkep); margin-bottom: 10mm; }
+.on-kapak h1 { font-size: 58pt; line-height: 0.98; font-weight: 800; letter-spacing: -0.035em; max-width: 160mm; }
+.on-kapak .on-alt { margin-top: 18mm; display: flex; justify-content: space-between; align-items: flex-end; }
+.on-kapak .on-imza { font-size: 16pt; font-weight: 700; letter-spacing: 0.02em; }
+.on-kapak .on-adres { font-size: ${a4.govdeBuyuk}pt; font-weight: 600; }
+
 /* Kapak */
 .kapak .ust { align-items: flex-start; }
 .kapak-orta { margin-top: 6mm; }
-.kapak-48 { font-size: 250pt; color: var(--sari); margin-left: -3mm; }
-.kapak-48 small { font-size: 40pt; letter-spacing: -0.02em; font-weight: 800; margin-left: 3mm; }
+.kapak-48 { font-size: 232pt; color: var(--sari); margin-left: -3mm; }
+.kapak-48 small { display: inline-block; line-height: 1; vertical-align: baseline; font-size: 34pt; letter-spacing: -0.02em; font-weight: 800; margin-left: 3mm; }
 .kapak h1 { font-size: 34pt; line-height: 1.06; font-weight: 700; letter-spacing: -0.025em; margin-top: 10mm; max-width: 165mm; }
 .aylar { margin-top: 12mm; display: grid; grid-template-columns: 22mm 1fr 14mm; row-gap: 2.2mm; align-items: center; }
 .aylar .yil { font-size: ${a4.govde}pt; color: var(--solukKoyu); }
@@ -116,10 +127,11 @@ table.sonraki td:first-child { white-space: nowrap; }
 /* Senaryo */
 .varsayim { margin-top: 5mm; padding: 4mm 5mm; background: var(--kum); }
 .varsayim p + p { margin-top: 1.5mm; }
-.seviye-yolu { list-style: none; margin-top: 6mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
-.seviye-yolu li { background: var(--kum); padding: 3mm 4mm; display: grid; gap: 0.5mm; }
+.seviye-yolu { list-style: none; margin-top: 2mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
+.seviye-yolu li { background: var(--kum); padding: 2mm 3.5mm; display: grid; grid-template-columns: auto 1fr; column-gap: 3mm; align-items: baseline; }
+.seviye-yolu .ay { grid-column: 1 / -1; }
 .seviye-yolu li.zirve { background: var(--sari); }
-.seviye-yolu .ad { font-size: 18pt; font-weight: 800; color: var(--lacivert); }
+.seviye-yolu .ad { font-size: 15pt; font-weight: 800; color: var(--lacivert); }
 .seviye-yolu .zirve .ad { color: var(--murekkep); }
 .seviye-yolu .oran { font-size: ${a4.govdeBuyuk}pt; font-weight: 700; }
 .seviye-yolu .ay { font-size: ${a4.govde}pt; color: var(--murekkep); }
@@ -136,6 +148,11 @@ table.sonraki td:first-child { white-space: nowrap; }
 /* ₺ hapı: euro tutarın altında, yumuşak pastel zeminde, italik. Sarı kartta zemin açık kâğıt olur. */
 .kilometre .tl-hap { justify-self: end; font-style: italic; font-size: 10pt; line-height: 1.15; padding: 0.3mm 2.4mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; margin: 0.4mm 0 0.6mm; }
 .kilometre li:last-child .tl-hap { background: var(--kagit); }
+.sikisik-senaryo .tablo-baslik { margin-top: 3mm; }
+.sikisik-senaryo .kilometre li { padding: 2mm 3.5mm; }
+.sikisik-senaryo .garanti { margin-top: 1.5mm; }
+.sikisik-senaryo .varsayim { margin-top: 3mm; padding: 3mm 4mm; }
+.toplam-grafik { margin-top: 1mm; }
 .kur-dipnot { font-style: italic; color: var(--murekkep); }
 table.senaryo .tl-hap { display: table; margin-top: 0.5mm; font-style: italic; font-weight: 400; font-size: 10pt; line-height: 1.15; padding: 0.2mm 2.2mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; }
 .garanti { margin-top: 3mm; font-weight: 600; color: var(--murekkep); }
@@ -171,7 +188,8 @@ h1.kanca.orta { font-size: 25pt; }
 .sikisik .giris { margin-top: 3mm; }
 .sikisik .iki { margin-top: 3mm !important; }
 .sikisik .ilk-adim { margin-top: 4mm; }
-.sikisik .bolum { margin-top: 7mm; }
+.sikisik .bolum { margin-top: 5mm; }
+.sikisik .kural-liste li { padding: 1.6mm 0; }
 .sikisik .rol-sayi b { font-size: 44pt; }
 .rol-sayi b { display: block; font-size: 54pt; color: var(--lacivert); }
 .rol-sayi span { display: block; font-size: ${a4.govde}pt; color: var(--soluk); margin-top: 2mm; }
@@ -223,23 +241,35 @@ const KAPAK_ORANLARI = [kap.at(-1).oran, ...plan.kapatir.gecmis.slice(0, 3)];
 /** Dönem adı: 13. ile 24. ay arası. */
 const donemAdi = (i) => `${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay arası`;
 
+/** Ön kapak. Yalnız logo, belge adı ve imza durur. */
+function onKapak() {
+  return `<section class="sayfa on-kapak">
+  <header class="on-ust">${logo({ mm: 42 })}<span>İş ortaklığı programı</span></header>
+  <div class="on-orta">
+    <div class="on-cizgi"></div>
+    <h1>Thoptan iş ortaklığı kılavuzu</h1>
+  </div>
+  <div class="on-alt"><span class="on-imza" lang="en">Connect to iStoc.com</span><span class="on-adres">thoptan.com</span></div>
+</section>`;
+}
+
 function kapak() {
   const satirlar = KAPAK_ORANLARI.map((o, i) => ({ yil: `${i + 1}. yıl`, oran: o, op: i ? 0.25 + (o / KAPAK_ORANLARI[0]) * 0.75 : 1 }));
   return `<section class="sayfa koyu kapak">
   <header class="ust"><div class="kapak-imza">${logo({ koyu: true, mm: 42 })}${imza()}<span class="dipnot ceviri">Thoptan ile istoc.com ağına bağlanırsınız.</span></div><span>İş ortaklığı programı</span></header>
   <div class="kapak-orta">
     <p class="belge-adi">Thoptan iş ortaklığı kılavuzu</p>
-    <div class="kapak-48 sayi-dev">48<small>aya kadar</small></div>
-    <h1>Satışını kapattığınız müşteri size 48 aya kadar pay getirir.</h1>
+    <div class="kapak-48 sayi-dev">48<small>aya kadar<br>kazanç</small></div>
+    <h1>Satışını kapattığınız müşteri size 48 aya kadar kazanç getirir.</h1>
   </div>
-  <div class="aylar" aria-label="48 ayın payı">
+  <div class="aylar" aria-label="48 ayın kazancı">
     ${satirlar.map((s) => `<span class="yil">${s.yil}</span><span class="kare">${'<i></i>'.repeat(12).replaceAll('<i>', `<i style="opacity:${s.op.toFixed(2)};background:var(--${s.op === 1 ? 'sari' : 'solukKoyu'})">`)}</span><span class="oran">${yuzde(s.oran)}</span>`).join('')}
   </div>
   <p class="dipnot" style="margin-top:3mm">Kareler ayları gösterir. Oranlar K3 seviyesinde satışı kapatma oranlarıdır.</p>
   <div class="davet">
     <p class="buyuk">Thoptan iş ortaklığı programına sizi davet ediyoruz.</p>
     <p>Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
-    <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
+    <p class="not">Kazanç en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
   </div>
   <footer class="alt"><span>thoptan.com</span>${altImza()}<span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
 </section>`;
@@ -269,13 +299,13 @@ function nedenSiz() {
       <div><b>${avro(fiyat.basicYilEur)}</b><span>Yıllık pakette 12 ay için 10 aylık bedel ödenir.</span></div>
     </div>
     <p class="not">Thoptan satıcının satışından komisyon almaz. Fiyat herkes için aynıdır. Fiyatlara KDV dahil değildir. KDV, katma değer vergisidir.</p>
-    ${alt(2)}
+    ${alt(3)}
   </div>
 </section>`;
 }
 
 const ADIMLAR = [
-  ['Katkı düzeyinizi yazılı belirleyin.', 'Ortaklık sorumlusu yapacağınız işi sizinle yazar. Yalnız tanıştırma ve satışı kapatma iki ayrı katkıdır.'],
+  ['Katkı düzeyinizi konuşun.', 'Ortaklık sorumlusu yapacağınız işi sizinle konuşur. Yalnız tanıştırma ve satışı kapatma iki ayrı katkıdır.'],
   ['İşletmenin ihtiyacını konuşun.', 'Ürün bilgisinin hazır olup olmadığını öğrenin. Ulaşmak istediği alıcıyı not edin.'],
   ['Müşteri kaydını açtırın.', 'Şirket her firmayı yalnız bir ortağın kaydına yazar. Kayıt kabul edilince müşteri sizin kaydınızdadır.'],
   ['Ürünü gösterin.', 'Gösterimi işletmenin kendi ürünleriyle yapın. Teklifi yetkili satış sorumlusu fiyat tablosundaki fiyatla hazırlar.'],
@@ -298,7 +328,7 @@ function nasilIsler() {
     <p><b>Kurulum nedir?</b><br>Kurulum, işletmenin hesabını açmak ve ürünlerini yüklemektir.</p>
     <p><b>Sonraki destek</b><br>Kurulumdan sonraki desteği her durumda şirket verir.</p>
   </div>
-  ${alt(3)}
+  ${alt(4)}
 </section>`;
 }
 
@@ -306,7 +336,7 @@ function kazancPlani() {
   return `<section class="sayfa sikisik-plan">
   ${ust('Kazanç planı')}
   ${bolum(3, 'Kazanç planı')}
-  <h1 class="kanca">Satışı kapatırsanız payınız %30’a kadar çıkar.</h1>
+  <h1 class="kanca">Satışı kapatırsanız kazanç oranınız %30’a kadar çıkar.</h1>
   <div class="tanimlar">
     <p><b>Ciro</b>Ciro, getirdiğiniz müşterilerin ödediği tutardır.</p>
     <p><b>Kota</b>Kota, bir aydaki ciro eşiğidir. Planda üç kota vardır: K1, K2 ve K3.</p>
@@ -328,29 +358,30 @@ function kazancPlani() {
     </div>
     ${sonrakiOranlarTablosu({ plan, yuzde, donemAdi: (i) => donemAdi(i).replace(' arası', '') })}
   </div>
-  <p class="not" style="margin-top:2mm">İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter. <b style="color:var(--murekkep)">Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.</b></p>
-  ${alt(4)}
+  <p class="not" style="margin-top:2mm">İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter. <b style="color:var(--murekkep)">Eşikler ve oranlar bugünkü plandır.</b></p>
+  ${alt(5)}
 </section>`;
 }
 
 function senaryo() {
-  return `<section class="sayfa">
+  return `<section class="sayfa sikisik-senaryo">
   ${ust('Büyüyen müşteri senaryosu')}
   ${bolum(4, 'Büyüyen müşteri senaryosu')}
-  <h1 class="kanca">12. ayda her ay ${avroTam(ay12.kazanc)} kazanırsınız.</h1>
-  <p class="giris">Her ay yeni müşteri gelir. Eski müşteriler ödemeye devam eder. Bu yüzden kazancınız her ay büyür.</p>
+  <h1 class="kanca orta">12. ayda her ay ${avroTam(ay12.kazanc)} kazanırsınız.</h1>
   <div class="varsayim">
-    <p>Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.</p>
+    <p>Her ay yeni müşteri gelir. Eski müşteriler ödemeye devam eder. Bu yüzden kazancınız her ay büyür. Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.</p>
   </div>
   <h3 class="tablo-baslik">Seviye yolu</h3>
   ${seviyeYolu({ kademeler: kap, seviyeAyi: K.seviyeAyi, yuzde })}
-  <p style="margin-top:2mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. Oranınız ${yuzde(kap[3].oran)} olur.</p>
+  <p style="margin-top:1.5mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. Oranınız ${yuzde(kap[3].oran)} olur.</p>
   <h3 class="tablo-baslik">Kilometre taşları</h3>
   ${kilometreTaslari({ anlar: KA, avro, liraHap })}
   <p class="dipnot" style="margin-top:1.5mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır. <span class="kur-dipnot">${kurDipnotu()}</span></p>
-  <p class="not" style="margin-top:2mm">${plan.musteriAy}. ayda ${ay48.musteri} müşteriniz olur. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
+  <h3 class="tablo-baslik">Toplam kazanç 48 ayda böyle büyür</h3>
+  <div class="toplam-grafik">${toplamGrafigi({ g: 640, y: 120, egri: toplamEgrisi(K), yaziBoyu: 14 })}</div>
+  <p class="dipnot">Her çubuk o aya kadarki toplam kazançtır. Sarı çubuklar kilometre taşı aylarıdır.</p>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
-  ${alt(5)}
+  ${alt(6)}
 </section>`;
 }
 
@@ -377,21 +408,21 @@ function karsilastirma() {
   <div class="ipucu"><b>İpucu</b><span>İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.</span></div>
   <p class="dipnot kur-dipnot" style="margin-top:3mm">${kurDipnotu()}</p>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
-  <p class="not" style="margin-top:2mm">Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.</p>
-  ${alt(6)}
+  ${alt(7)}
 </section>`;
 }
 
+// Kullanıcı kararı 25 Kasım 2026 Çarşamba: sıra çözüm ortağı, marka elçisi, mevcut müşteri olur.
 export const PERSONALAR = [
   { ad: 'Çözüm ortağı', buyuk: '%30’a kadar', ana: true,
     kim: 'Satıcı firmalara hizmet veren danışman ya da hizmet firması.', ne: 'Müşterisini Thoptan ile tanıştırır ya da satışı kapatır.',
-    kazanc: 'Ciro üzerinden pay alır. Oran %30’a kadar çıkar.', basla: 'Katkı düzeyini yazılı belirler.' },
-  { ad: 'Mevcut müşteri', buyuk: '2 ay',
-    kim: 'Thoptan kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye Thoptan’ı önerir.',
-    kazanc: 'Uygun tavsiye başına 2 ay ücretsiz kullanım alır.', basla: 'Geçerli koşulu müşteri sorumlusundan öğrenir.' },
+    kazanc: 'Ciro üzerinden pay alır. Oran %30’a kadar çıkar.', basla: 'Katkı düzeyini ortaklık sorumlusuyla konuşur.' },
   { ad: 'Marka elçisi', buyuk: '%15’e kadar',
     kim: 'Ticaret yapan bir kitleye ulaşan kişi.', ne: 'Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir.',
     kazanc: 'Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar.', basla: 'Anlatımını şirkete doğrulatır.' },
+  { ad: 'Mevcut müşteri', buyuk: '%15 indirim',
+    kim: 'Thoptan kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye Thoptan’ı önerir.',
+    kazanc: 'Uygun tavsiye başına yıllık bedelinden %15 indirim alır.', basla: 'Geçerli koşulu müşteri sorumlusundan öğrenir.' },
 ];
 
 function dortPersona() {
@@ -410,43 +441,23 @@ function dortPersona() {
   <div class="ayrac"></div>
   <div class="iki">
     <div><h3>Çözüm ortağı ile marka elçisi aynı plandan kazanır.</h3><p style="margin-top:2mm">İkisi de ciro üzerinden pay alır. Yapılan iş ve bir aydaki ciro oranı belirler.</p></div>
-    <div><h3>Mevcut müşteri ücretsiz kullanım kazanır.</h3><p style="margin-top:2mm">Uygun tavsiye başına 2 ay ücretsiz kullanım alır. Ödül nakit değildir.</p></div>
+    <div><h3>Mevcut müşteri indirim kazanır.</h3><p style="margin-top:2mm">Uygun tavsiye başına yıllık bedelinden %15 indirim alır. Ödül nakit değildir.</p></div>
   </div>
-  ${alt(7)}
+  ${alt(8)}
 </section>`;
 }
 
 function musteriElci() {
   const E = hesap.elci;
   return `<section class="sayfa sikisik">
-  ${ust('Mevcut müşteri ve marka elçisi')}
-  ${bolum(7, 'Mevcut müşteri')}
-  <div class="rol-ust">
-    <h1 class="kanca kucuk">Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.</h1>
-    <div class="rol-sayi"><b class="sayi-dev">${tavsiye.krediAy} ay</b><span>Uygun tavsiye başına</span></div>
-  </div>
-  <p class="giris">Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.</p>
-  <div class="iki" style="margin-top:5mm">
-    <ul class="kural-liste">
-      <li>Uygun tavsiye başına size ${tavsiye.krediAy} ay ücretsiz kullanım verilir. Bu süre Basic paket fiyatıyla ${avro(hesap.tavsiyeEur)} değerindedir.</li>
-      <li>Yeni müşteriye ${tavsiye.yeniKrediAy} ay ücretsiz kullanım verilir.</li>
-      <li>Yılda en çok ${tavsiye.sinir} uygun tavsiye sayılır. Bu, yılda en çok ${hesap.tavsiyeYilAy} ay ücretsiz kullanım eder.</li>
-    </ul>
-    <ul class="kural-liste">
-      <li>Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.</li>
-      <li>Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.</li>
-      <li>Ödül nakit değildir. Ödül ücretsiz Thoptan kullanımıdır.</li>
-      <li>Ödül alabileceğinizi işletmeye açıkça söyleyin.</li>
-    </ul>
-  </div>
-  <div class="ilk-adim"><b>İlk adım</b><span>Geçerli koşulu müşteri sorumlusundan öğrenin.</span></div>
-  ${bolum(8, 'Marka elçisi')}
+  ${ust('Marka elçisi ve mevcut müşteri')}
+  ${bolum(7, 'Marka elçisi')}
   <div class="rol-ust">
     <h1 class="kanca kucuk">Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.</h1>
     <div class="rol-sayi"><b class="sayi-dev">${yuzde(E.oran)}</b><span>${avro(E.ciro)} aylık ciroda</span></div>
   </div>
   <p class="giris">Thoptan’ı sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.</p>
-  <div class="iki" style="margin-top:5mm">
+  <div class="iki" style="margin-top:3mm">
     <ul class="kural-liste">
       <li>Size bir bağlantı ya da bir kod verilir. Başvurular bu yolla sizin kaydınıza ulaşır.</li>
       <li>Her ticari paylaşımda “reklam” sözcüğünü en başa yazın.</li>
@@ -454,7 +465,7 @@ function musteriElci() {
       <li>Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.</li>
     </ul>
     <div class="zincir tanis">
-      <h2 style="font-size:13pt">Örnek pay</h2>
+      <h2 style="font-size:13pt">Örnek kazanç</h2>
       <ol>
         <li><span>Tanıttığınız satıcıların aylık ödemesi</span><b>${avro(E.ciro)}</b></li>
         <li><span>Bu ciro K3 kotasıdır. Tanıştırma payınız</span><b>${yuzde(E.oran)}</b></li>
@@ -464,7 +475,28 @@ function musteriElci() {
     </div>
   </div>
   <div class="ilk-adim"><b>İlk adım</b><span>İçeriğinizin amacını belirleyin. Anlatımınızı şirkete doğrulatın.</span></div>
-  ${alt(8)}
+  ${bolum(8, 'Mevcut müşteri')}
+  <div class="rol-ust">
+    <h1 class="kanca kucuk">Uygun her tavsiye size %15 indirim kazandırır.</h1>
+    <div class="rol-sayi"><b class="sayi-dev">${yuzde(tavsiye.indirimOrani)}</b><span>Uygun tavsiye başına</span></div>
+  </div>
+  <p class="giris">Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı ve desteği şirket yürütür.</p>
+  <div class="iki" style="margin-top:3mm">
+    <ul class="kural-liste">
+      <li>Her uygun tavsiye size yıllık bedelinizden ${yuzde(tavsiye.indirimOrani)} indirim kazandırır. ${avro(fiyat.basicYilEur)} yıllık bedelin ${yuzde(tavsiye.indirimOrani)}’i ${avroKurus(hesap.tavsiyeIndirimEur)} eder.</li>
+      <li>Tavsiye ettiğiniz yeni müşteri de ilk yılında ${yuzde(tavsiye.yeniIndirimOrani)} indirim alır.</li>
+      <li>Yılda en çok ${tavsiye.sinir} uygun tavsiye sayılır.</li>
+    </ul>
+    <ul class="kural-liste">
+      <li>Yeni müşteri aylık ya da yıllık paket alabilir.</li>
+      <li>Yeni müşteri ödemesini yapmazsa tavsiye uygun sayılmaz.</li>
+      <li>Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.</li>
+      <li>Ödül nakit değildir. Ödül Thoptan bedelinden indirimdir.</li>
+      <li>Ödül alabileceğinizi işletmeye açıkça söyleyin.</li>
+    </ul>
+  </div>
+  <div class="ilk-adim"><b>İlk adım</b><span>Geçerli koşulu müşteri sorumlusundan öğrenin.</span></div>
+  ${alt(9)}
 </section>`;
 }
 
@@ -477,20 +509,20 @@ export const BIZ = [
   'Finans ekibi ödemeyi doğrular ve payınızı hesaplar.',
 ];
 export const SIZ = [
-  'Katkı düzeyinizi yazılı belirlersiniz.',
+  'Katkı düzeyinizi ortaklık sorumlusuyla konuşursunuz.',
   'Satışı kapatırsanız kurulumu ve ilk eğitimi siz yaparsınız.',
   'Fiyat ya da indirim sözü vermezsiniz.',
   'Alıcı, sipariş ya da satış sözü vermezsiniz.',
   'Müşterinin izni olmadan kataloğunu paylaşmazsınız.',
   'Kazancınız için şirkete fatura kesersiniz.',
 ];
-export const ILK_ADIMLAR = ['thoptan.com adresinden Thoptan’ı inceleyin.', 'Ortaklık sorumlusuyla görüşün.', 'Katkı düzeyinizi yazılı belirleyin.', 'İlk müşteri kaydınızı açtırın.'];
+export const ILK_ADIMLAR = ['thoptan.com adresinden Thoptan’ı inceleyin.', 'Ortaklık sorumlusuyla görüşün.', 'Katkı düzeyinizi konuşun.', 'İlk müşteri kaydınızı açtırın.'];
 
 function kosullar() {
   return `<section class="sayfa">
   ${ust('Koşullar ve ilk adım')}
   ${bolum(9, 'Koşullar')}
-  <h1 class="kanca">Kim ne yapar? Baştan yazılıdır.</h1>
+  <h1 class="kanca">Kim ne yapar? Görevler baştan bellidir.</h1>
   <div class="biz-siz">
     <div><h2>Biz ne yaparız</h2><ul>${BIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
     <div><h2>Siz ne yaparsınız</h2><ul>${SIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
@@ -499,10 +531,9 @@ function kosullar() {
     <h2>Ödeme kuralları</h2>
     <p>İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.</p>
     <p>Tanıştırma CRM’e kaydedilir. CRM, şirketin müşteri kayıt sistemidir. Planda tanıştırma ${plan.tanistirmaSureAy} ay geçerlidir.</p>
-    <p>Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür. Planda tanıştıranın payı satışı kapatanın payından düşülür. Bölüşme yazılı anlaşmada belirlenir.</p>
-    <p>Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır. Ayrıntıyı yazılı anlaşma belirler.</p>
-    <p>Fatura, vergi ve stopajı mali müşaviriniz doğrulasın. Şirket ortak getirmeye para ödemez.</p>
-    <p><b>Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir.</b></p>
+    <p>Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür. Planda tanıştıranın payı satışı kapatanın payından düşülür.</p>
+    <p>Ödeme günleri müşterinin ödeme gününden sayılır. Şirket ortak getirmeye para ödemez.</p>
+    <p><b>Koşulları şirketin politika sayfaları belirler.</b></p>
   </div>
   <div class="son">
     <div>
@@ -515,7 +546,7 @@ function kosullar() {
 }
 
 export function kitapcikHtml() {
-  const govde = [kapak(), nedenSiz(), nasilIsler(), kazancPlani(), senaryo(), karsilastirma(), dortPersona(), musteriElci(), kosullar()].join('\n');
+  const govde = [onKapak(), kapak(), nedenSiz(), nasilIsler(), kazancPlani(), senaryo(), karsilastirma(), dortPersona(), musteriElci(), kosullar()].join('\n');
   return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı kılavuzu', boyut: 'A4 portrait', css, govde });
 }
 export const KITAPCIK_SAYFA = TOPLAM;

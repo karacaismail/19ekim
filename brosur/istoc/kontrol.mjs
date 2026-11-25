@@ -34,6 +34,16 @@ const YASAK = [
   [/;/, 'noktalı virgül'], [/—|–/, 'uzun çizgi'], [/→|←|⇒/, 'ok işareti'], [/·/, 'orta nokta'],
   [/İSTOÇ|İstoç|ISTOÇ|istoç/, '“İSTOÇ” adı'], [/(^|[.?]\s+)iStoc(?=[\s’'])/m, 'iStoc cümle öznesi'],
   [/m[ae]kt[ae]d[ıi]r/i, '“-mektedir” kalıbı'], [/\d{1,2}[./]\d{1,2}[./]\d{2,4}/, 'sayıyla yazılmış tarih'],
+  // Toplantı kararları (kullanıcı kararı 25 Kasım 2026 Çarşamba). Kaldırılan cümleler belgelere geri gelemez.
+  // Koşulları şirketin politika sayfaları belirler. Yazılı anlaşma ve imza gerekmez.
+  [/yazılı anlaşma/i, '“yazılı anlaşma” ifadesi'], [/yazılı belirle/i, '“yazılı belirleme” ifadesi'], [/sözleşme/i, '“sözleşme” kelimesi'],
+  [/\bimza(?!sı\b)/i, '“imza” kelimesi'], [/bağlayıcı/i, '“bağlayıcı” kelimesi'], [/hukuk/i, '“hukuk” kelimesi'],
+  [/stopaj/i, 'stopaj cümlesi'], [/mali müşavir/i, 'mali müşavir cümlesi'],
+  // Tavsiye ödülü %15 indirim oldu. Eski ücretsiz ay kuralı geri gelemez.
+  [/\d+ ay ücretsiz/i, 'eski “ay ücretsiz” tavsiye ödülü'], [/ücretsiz kullanım/i, 'eski “ücretsiz kullanım” ödülü'],
+  [/yeni müşteri yıllık paket alır/i, 'kalkan “yıllık paket” koşulu'],
+  // “Pay” yerine “kazanç” denir.
+  [/pay getirir/i, '“pay getirir” ifadesi'],
 ];
 
 export function metinDenetimi(metin) {

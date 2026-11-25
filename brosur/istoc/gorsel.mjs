@@ -1,10 +1,10 @@
 // Görsel PDF sunumu: A4 yatay, 9 sayfa. Az metin, büyük sayılar ve şemalar.
 // Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
-import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam, liraHap, kurDipnotu, toplamEgrisi } from './veri.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml, toplamGrafigi } from './sablon.mjs';
 import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR, euroHucre } from './kitapcik.mjs';
 
-const TOPLAM = 9;
+const TOPLAM = 10;
 const K = hesap.kapat, T = hesap.tanis;
 const KA = anlar(K), TA = anlar(T);
 const kap = kademeler('kapatir');
@@ -126,6 +126,7 @@ tr.ana td { background: var(--kum); font-weight: 700; }
 .kilometre li:last-child .tl-hap { background: var(--kagit); }
 .kur-dipnot { font-style: italic; color: var(--murekkep); }
 table .tl-hap { display: table; margin-top: 0.5mm; font-style: italic; font-weight: 400; font-size: 10pt; line-height: 1.15; padding: 0.2mm 2.2mm; border-radius: 999px; background: var(--pastel); color: var(--murekkep); white-space: nowrap; }
+.grafik-tam { flex: 1; display: flex; align-items: center; margin: 4mm 0 2mm; }
 .garanti { font-size: 13pt; font-weight: 600; color: var(--murekkep); }
 .karsi { flex: 1; display: grid; grid-template-columns: 1.25fr 1fr; gap: 10mm; margin-top: 6mm; align-items: start; }
 .karsi h2 { font-size: 16pt; margin-bottom: 2mm; }
@@ -165,18 +166,18 @@ function kapak() {
   return `<section class="sayfa koyu">
   <header class="ust"><div class="kapak-imza">${logo({ koyu: true, mm: 42 })}${imza()}<span class="dipnot ceviri">Thoptan ile istoc.com ağına bağlanırsınız.</span></div><span>İş ortaklığı programı</span></header>
   <div class="kapak-izgara">
-    <div class="kapak-48 dev">48<span>aya kadar</span></div>
+    <div class="kapak-48 dev">48<span>aya kadar kazanç</span></div>
     <div class="kapak-sag">
       <p class="belge-adi">Thoptan iş ortaklığı tanıtım sunumu</p>
-      <h2>Satışını kapattığınız müşteri size 48 aya kadar pay getirir.</h2>
+      <h2>Satışını kapattığınız müşteri size 48 aya kadar kazanç getirir.</h2>
       <p>Thoptan iş ortaklığı programına sizi davet ediyoruz.</p>
-      <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
+      <p class="not">Kazanç en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
       <p class="not">Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
     </div>
   </div>
   <div class="ay-serit" aria-label="48 ay">${kareler}</div>
   <div class="ay-etiket">${KAPAK_ORANLARI.map((o, i) => `<span>${i + 1}. yıl <b>${yuzde(o)}</b></span>`).join('')}</div>
-  <footer class="alt"><span>Oranlar K3 seviyesinde satışı kapatma oranlarıdır. Kesin değerler yazılı anlaşmada belirlenir.</span><span>thoptan.com</span></footer>
+  <footer class="alt"><span>Oranlar K3 seviyesinde satışı kapatma oranlarıdır.</span><span>thoptan.com</span></footer>
 </section>`;
 }
 
@@ -211,7 +212,7 @@ function surec() {
 function oranlar() {
   return `<section class="sayfa">
   ${ust('Kazanç planı')}
-  <h1>Satışı kapatırsanız payınız %30’a kadar çıkar.</h1>
+  <h1>Satışı kapatırsanız kazanç oranınız %30’a kadar çıkar.</h1>
   <div class="grafik-izgara">
     <div>
       <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
@@ -224,7 +225,7 @@ function oranlar() {
     </div>
   </div>
   <p class="not">Ciro, getirdiğiniz müşterilerin ödediği tutardır. Ulaştığınız kotanın oranı cironun tamamına uygulanır.</p>
-  <p class="kosul">Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.</p>
+  <p class="kosul">Eşikler ve oranlar bugünkü plandır.</p>
   ${alt(4)}
 </section>`;
 }
@@ -243,6 +244,18 @@ function senaryo() {
   <p class="kosul" style="margin-top:4mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
   <p class="garanti" style="margin-top:2mm">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
   ${alt(5)}
+</section>`;
+}
+
+function grafik() {
+  return `<section class="sayfa">
+  ${ust('Toplam kazanç')}
+  <h1>4 yılda toplam kazancınız ${avroTam(ay48.toplam)} olur.</h1>
+  <div class="grafik-tam">${toplamGrafigi({ g: 900, y: 360, egri: toplamEgrisi(K), yaziBoyu: 16 })}</div>
+  <p class="not">Her çubuk o aya kadarki toplam kazançtır. Sarı çubuklar kilometre taşı aylarıdır.</p>
+  <p class="kosul" style="margin-top:2mm">Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Satışı siz kapatırsınız.</p>
+  <p class="garanti" style="margin-top:2mm">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
+  ${alt(6)}
 </section>`;
 }
 
@@ -269,7 +282,7 @@ function karsilastirma() {
     </div>
   </div>
   <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
-  ${alt(6)}
+  ${alt(7)}
 </section>`;
 }
 
@@ -282,23 +295,23 @@ function persona() {
       <p><b>Kim?</b>${p.kim}</p><p><b>Ne yapar?</b>${p.ne}</p><p><b>Nasıl kazanır?</b>${p.kazanc}</p><p><b>Nasıl başlar?</b>${p.basla}</p></div>`).join('')}
   </div>
   <p class="not" style="margin-top:3mm">Her yolun kendi kazancı ve kendi ilk adımı var.</p>
-  ${alt(7)}
+  ${alt(8)}
 </section>`;
 }
 
 function bizSiz() {
   return `<section class="sayfa">
   ${ust('Koşullar')}
-  <h1>Kim ne yapar? Baştan yazılıdır.</h1>
+  <h1>Kim ne yapar? Görevler baştan bellidir.</h1>
   <div class="biz-siz">
     <div><h2>Biz ne yaparız</h2><ul>${BIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
     <div><h2>Siz ne yaparsınız</h2><ul>${SIZ.map((x) => `<li>${x}</li>`).join('')}</ul></div>
   </div>
   <div class="alt-not">
     <p class="kosul">İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.</p>
-    <p class="kosul">Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir. Ayrıntılar el kitapçığındadır.</p>
+    <p class="kosul">Koşulları şirketin politika sayfaları belirler. Ayrıntılar el kitapçığındadır.</p>
   </div>
-  ${alt(8)}
+  ${alt(9)}
 </section>`;
 }
 
@@ -317,6 +330,6 @@ function son() {
 }
 
 export function gorselHtml() {
-  return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı tanıtım sunumu', boyut: 'A4 landscape', css, govde: [kapak(), sorular(), surec(), oranlar(), senaryo(), karsilastirma(), persona(), bizSiz(), son()].join('\n') });
+  return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı tanıtım sunumu', boyut: 'A4 landscape', css, govde: [kapak(), sorular(), surec(), oranlar(), senaryo(), grafik(), karsilastirma(), persona(), bizSiz(), son()].join('\n') });
 }
 export const GORSEL_SAYFA = TOPLAM;
