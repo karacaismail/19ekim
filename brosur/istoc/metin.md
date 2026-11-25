@@ -6,6 +6,8 @@ Belgelerin asıl markası Thoptan'dır. Web adresi thoptan.com adresidir.
 
 Plan tarihi 23 Kasım 2026 Pazartesi günüdür. Oranlar ve fiyatlar bu depodaki kazanç planından gelir.
 
+Kazanç tutarları euro olarak yazılır. Sayılar `veri.mjs` hesabından gelir. Üretici, belgedeki her cümlenin bu dosyada olduğunu denetler.
+
 ## Kapak
 
 Thoptan iş ortaklığı kılavuzu
@@ -24,7 +26,7 @@ Thoptan iş ortaklığı programına sizi davet ediyoruz.
 
 Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.
 
-Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.
+Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 798 € ödemelidir.
 
 ## Neden siz
 
@@ -117,116 +119,124 @@ Ulaştığınız kotanın oranı cironun tamamına uygulanır.
 | Kota | Yalnız tanıştırırsanız | Satışı kapatırsanız |
 | --- | --- | --- |
 | Kota yok | %0 | %15 |
-| K1 | 30.000 TL ve üstü: %7 | 30.000 TL ve üstü: %20 |
-| K2 | 60.000 TL ve üstü: %10 | 70.000 TL ve üstü: %25 |
-| K3 | 100.000 TL ve üstü: %15 | 120.000 TL ve üstü: %30 |
+| K1 | 798 € ve üstü: %7 | 798 € ve üstü: %20 |
+| K2 | 1.596 € ve üstü: %10 | 1.596 € ve üstü: %25 |
+| K3 | 3.192 € ve üstü: %15 | 3.192 € ve üstü: %30 |
 
 Tablodaki tutarlar bir aydaki cirodur.
 
-### Pay yıllara yayılır
+### 13. aydan sonraki oranlar
 
-İlk 12 ayda kotanızın oranını alırsınız. Sonraki yıllarda pay azalarak sürer.
+Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.
 
 | Dönem | Yalnız tanıştırırsanız | Satışı kapatırsanız |
 | --- | --- | --- |
-| 13. ile 24. ay arası | %5 | %10 |
-| 25. ile 36. ay arası | %2,5 | %7 |
-| 37. ile 48. ay arası | Pay yok | %5 |
+| 13. ile 24. ay | %5 | %10 |
+| 25. ile 36. ay | %2,5 | %7 |
+| 37. ile 48. ay | %0 | %5 |
+| 49. ile 60. ay | %0 | %0 |
 
-Sonraki yıllarda oran müşterinin o yılki cirosuna uygulanır.
+İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter. Oran müşterinin o yılki cirosuna uygulanır.
 
 Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.
 
-## Örnek hesap
+## Büyüyen müşteri senaryosu
 
-Örnekte aylık 50.000 TL ciro 4 yılda 252.000 TL pay getirir.
+12. ayda her ay 2.873 € kazanırsınız.
 
-Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam 50.000 TL öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.
+Her ay yeni müşteri gelir. Eski müşteriler ödemeye devam eder. Bu yüzden kazancınız her ay büyür.
 
-### Satışı kapatırsanız
+Bu gerçekçi senaryoda her ay 2 yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda 399 € öder. Müşteriler 48 ay kalır. Satışı siz kapatırsınız.
 
-1. Aylık ciro 50.000 TL olur.
-2. Bu ciro K1 kotasını geçer. Oranınız %20 olur.
-3. 50.000 TL × %20 = ayda 10.000 TL.
-4. İlk 12 ay: 10.000 TL × 12 = 120.000 TL.
-5. 13. ile 24. ay arası: 600.000 TL × %10 = 60.000 TL.
-6. 25. ile 36. ay arası: 600.000 TL × %7 = 42.000 TL.
-7. 37. ile 48. ay arası: 600.000 TL × %5 = 30.000 TL.
+Depoda gerçek satış verisi yoktur. Bu yüzden sayılar bir varsayımdır.
 
-Dört yılın toplamı 252.000 TL olur.
+### Seviye yolu
 
-### Yalnız tanıştırırsanız
+| Seviye | Oran | Ulaşılan ay |
+| --- | --- | --- |
+| K0 | %15 | Başlangıç |
+| K1 | %20 | 1. ay |
+| K2 | %25 | 2. ay |
+| K3 | %30 | 4. ay |
 
-1. Bu ciro K1 kotasını geçer. Oranınız %7 olur.
-2. 50.000 TL × %7 = ayda 3.500 TL.
-3. İlk 12 ay: 3.500 TL × 12 = 42.000 TL.
-4. 13. ile 24. ay arası: 600.000 TL × %5 = 30.000 TL.
-5. 25. ile 36. ay arası: 600.000 TL × %2,5 = 15.000 TL.
+4. ayda K3 seviyesine çıkarsınız. Oranınız %30 olur.
 
-Üç yılın toplamı 87.000 TL olur.
+### Kilometre taşları
+
+| Zaman | Müşteri | O ayın kazancı | Toplam kazanç |
+| --- | --- | --- | --- |
+| 1. ay | 2 | 160 € | 160 € |
+| 3. ay | 6 | 599 € | 1.157 € |
+| 6. ay | 12 | 1.436 € | 4.748 € |
+| 12. ay | 24 | 2.873 € | 18.394 € |
+| 2. yıl sonu | 48 | 3.830 € | 59.092 € |
+| 4. yıl sonu | 96 | 4.980 € | 166.535 € |
+
+“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır.
+
+48. ayda 96 müşteriniz olur. 4 yılın toplamı 166.535 € olur.
+
+4. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı 166.535 € olur.
+
+Bu bir örnek senaryodur. Kazanç garantisi değildir.
+
+## Senaryoları karşılaştırın
+
+Her yeni müşteri kazancınızı büyütür.
+
+### İki yol, gerçekçi senaryo
+
+| Zaman | Kapatma: o ay | Kapatma: toplam | Tanıştırma: o ay | Tanıştırma: toplam |
+| --- | --- | --- | --- | --- |
+| 1. ay | 160 € | 160 € | 56 € | 56 € |
+| 3. ay | 599 € | 1.157 € | 239 € | 455 € |
+| 6. ay | 1.436 € | 4.748 € | 718 € | 2.250 € |
+| 12. ay | 2.873 € | 18.394 € | 1.436 € | 9.073 € |
+| 2. yıl sonu | 3.830 € | 59.092 € | 1.915 € | 29.422 € |
+| 4. yıl sonu | 4.980 € | 166.535 € | 2.155 € | 79.816 € |
+
+Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.
+
+### Üç senaryo, satışı kapatırsanız
+
+| Senaryo | Ayda yeni müşteri | K3 ayı | 12. ayın kazancı | 4 yılın toplamı |
+| --- | --- | --- | --- | --- |
+| Temkinli | 1 | 8. ay | 1.436 € | 60.349 € |
+| Gerçekçi | 2 | 4. ay | 2.873 € | 166.535 € |
+| Güçlü | 4 | 2. ay | 5.746 € | 333.548 € |
+
+Temkinli senaryoda 1. ayın cirosu 399 € olur. Bu ciro K1 kotasının altındadır. Bu yüzden temkinli senaryoda 13. aydan sonra pay yoktur.
+
+#### İpucu
+
+İlk ay en az 2 müşteri getirin. Böylece K1 kotası her ay tutar.
+
+### Kur bilgisi
+
+1 € = 55,31 TL. 12. ay kazancı 2.873 € yaklaşık 158.906 TL eder.
+
+Kur 25 Kasım 2026 Çarşamba günkü değerdir. Kur değişince TL tutarı da değişir.
+
+Bu bir örnek senaryodur. Kazanç garantisi değildir.
 
 Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.
 
-## Dört ortaklık yolu
+## Üç ortaklık yolu
 
 Hangisi sizsiniz?
 
-Aynı ürünü dört farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.
+Aynı ürünü üç farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.
 
-| Soru | Çözüm ortağı | Kadrolu uzman | Mevcut müşteri | Marka elçisi |
-| --- | --- | --- | --- | --- |
-| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Şirkette SGK’lı ve maaşlı çalışan satış uzmanı. | Thoptan kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
-| Ne yapar? | Müşterisini Thoptan ile tanıştırır ya da satışı kapatır. | Satıcıları ziyaret eder ve satışı yapar. | Çevresindeki bir işletmeye Thoptan’ı önerir. | Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir. |
-| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Maaş alır. Ayrıca paket primi alır. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. |
-| Nasıl başlar? | Katkı düzeyini yazılı belirler. | Görevini ve bölgesini netleştirir. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
+| Soru | Çözüm ortağı | Mevcut müşteri | Marka elçisi |
+| --- | --- | --- | --- |
+| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Thoptan kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
+| Ne yapar? | Müşterisini Thoptan ile tanıştırır ya da satışı kapatır. | Çevresindeki bir işletmeye Thoptan’ı önerir. | Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir. |
+| Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. |
+| Nasıl başlar? | Katkı düzeyini yazılı belirler. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
 
-SGK’lı, sosyal güvenlik kaydı olan çalışan demektir.
+Bu belgenin ana okuru çözüm ortağıdır. Öteki iki yol sonraki sayfadadır.
 
-## Kadrolu uzman
-
-Maaşınız sabittir. Priminiz sattığınız paket sayısıyla artar.
-
-Bu modelde şirket sizi SGK’lı ve maaşlı çalıştırır. Net maaşınız ayda 50.000 TL ile 60.000 TL arasındadır.
-
-| Ayda satılan paket | Prim oranı |
-| --- | --- |
-| 4 paket ve altı | Prim yok |
-| 5 paket ve üstü | %5 |
-| 8 paket ve üstü | %7 |
-| 12 paket ve üstü | %10 |
-
-Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır. Aylık ve yıllık paketler birlikte sayılır.
-
-### Örnek prim
-
-1. Bir ayda 8 yıllık paket satarsınız.
-2. Bir yıllık paket 3.990 € tutar.
-3. Örnekte 1 € 55,31 TL sayılır.
-4. 8 paketin bedeli 1.765.495 TL olur.
-5. 8 paket ikinci kademedir. Oran %7 olur.
-6. Priminiz 123.585 TL olur.
-
-Yalnız tanıştırdıysanız prim oranı %7 olur. Prim ilk 3 aydaki ödemelerden hesaplanır.
-
-Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında %10 prim alırsınız.
-
-Kurulum ücreti ciroya girmez.
-
-Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.
-
-Aylık paketin oranı 12 ay boyunca satış ayındaki oranla aynı kalır.
-
-Yenilenen yıllık pakette 25. aydan sonra prim yoktur.
-
-Tanıştırdığınız müşteri 90 gün sizin adınıza korunur.
-
-Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.
-
-İlk iki ayın prim kuralını insan kaynakları ayrıca yazar.
-
-#### İlk adım
-
-İnsan kaynaklarıyla görevinizi ve bölgenizi netleştirin.
+Her yolun kendi kazancı ve kendi ilk adımı var.
 
 ## Mevcut müşteri
 
@@ -270,9 +280,9 @@ Satışı siz kapatırsanız kurulumu ve ilk eğitimi de siz yaparsınız.
 
 ### Örnek pay
 
-1. Tanıttığınız satıcılar ayda toplam 30.000 TL öder.
-2. Bu ciro K1 kotasıdır. Yalnız tanıştırma payınız %7 olur.
-3. 30.000 TL × %7 = ayda 2.100 TL.
+1. Tanıttığınız satıcılar ayda toplam 3.192 € öder.
+2. Bu ciro K3 kotasıdır. Yalnız tanıştırma payınız %15 olur.
+3. 3.192 € × %15 = ayda 478,8 €.
 
 Bu ilişki maaşlı iş değildir.
 
@@ -314,6 +324,8 @@ Planda tanıştırma 6 ay geçerlidir. Ayrıntıyı yazılı anlaşma belirler.
 
 Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür.
 
+Planda tanıştıranın payı satışı kapatanın payından düşülür.
+
 Bölüşme yazılı anlaşmada belirlenir.
 
 Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır. Ayrıntıyı yazılı anlaşma belirler.
@@ -345,38 +357,18 @@ Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.
 Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgeler bu cümleleri yukarıdaki metne ek olarak kullanır.
 
 - Kareler ayları gösterir.
-- Oranlar 50.000 TL aylık cirolu örnektendir.
+- Oranlar K3 seviyesinde satışı kapatma oranlarıdır.
 - Satıcı paketi ücretsiz dener.
 - Basic paket ayda bu kadar tutar.
 - Mağaza kurulumu bir kez bu kadar tutar.
 - Kurulumu ve ilk eğitimi siz yaparsınız.
 - Kurulumu şirket yapar.
-- Kotanızın oranını alırsınız.
-- Oran müşterinin o yılki cirosuna uygulanır.
-- Çubuklar her dönemin toplam payını gösterir.
-- Tutarlar bin TL cinsindendir.
 - Bu belgenin ana okuru çözüm ortağıdır.
-- Öteki üç yol sonraki iki sayfadadır.
 - Çözüm ortağı ile marka elçisi aynı plandan kazanır.
 - İkisi de ciro üzerinden pay alır.
 - Yapılan iş ve bir aydaki ciro oranı belirler.
-- Kadrolu uzman ile mevcut müşteri ayrı kurallarla kazanır.
-- Kadrolu uzman maaş ve paket primi alır.
 - Mevcut müşteri ücretsiz kullanım kazanır.
-- Çubuklar paket sayısını ve prim oranını gösterir.
-- Sarı çubuk örnekteki kademedir.
-- Satışı kapatırsanız bu tutarı 48 ayda alırsınız.
-- Yalnız tanıştırırsanız bu tutarı 36 ayda alırsınız.
-- Vergi ve stopaj dahil değildir.
-- Çubuklardaki tutarlar bin TL cinsindendir.
-- Her yolun kendi kazancı ve kendi ilk adımı var.
-- Priminiz paket sayısıyla artar.
-- Ayda 5 paket ve üstünde prim başlar.
-- Örnekte 8 paket 123.585 TL prim eder.
-- Örneğin 30.000 TL aylık ciroda yalnız tanıştırma payı %7 olur.
-- Ayrıntılar el kitapçığındadır.
+- Ödül nakit değildir.
 - Pay 48 aya kadar azalarak sürer.
-- Müşteriler her ay toplam 50.000 TL öder.
-- Yalnız tanıştırırsanız oran %7 olur.
-- Üç yılın toplamı 87.000 TL eder.
 - Bu tutar aylık paydır.
+- Ayrıntılar el kitapçığındadır.

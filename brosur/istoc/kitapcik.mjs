@@ -1,7 +1,8 @@
 // El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
+// Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 import { a4 } from './tokenlar.mjs';
-import { plan, fiyat, tavsiye, hesap, kademeler, sayi, tl, yuzde, avro } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, altImza, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
+import { plan, fiyat, tavsiye, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
 
 const TOPLAM = 9;
 const css = `
@@ -103,19 +104,43 @@ td.vurgu b { color: var(--lacivert); }
 .tablo-baslik { margin-top: 7mm; margin-bottom: 1.5mm; }
 .iki-tablo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8mm; }
 
-/* Örnek */
-.varsayim { margin-top: 5mm; padding: 4mm 5mm; background: var(--kum); max-width: 178mm; }
-.zincirler { margin-top: 5mm; display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
-.zincir h2 { font-size: 14pt; margin-bottom: 3mm; }
-.zincir ol { list-style: none; display: grid; gap: 0; }
-.zincir li { display: grid; grid-template-columns: 1fr auto; gap: 3mm; padding: 2.1mm 0; border-top: 0.3mm solid var(--cizgi); align-items: baseline; }
-.zincir li span { color: var(--soluk); font-size: ${a4.govde}pt; }
-.zincir li b { font-weight: 700; font-size: ${a4.govde}pt; white-space: nowrap; }
-.zincir .toplam { margin-top: 3mm; padding: 4mm; display: flex; justify-content: space-between; align-items: baseline; }
-.zincir .toplam span { font-size: ${a4.govde}pt; font-weight: 600; }
-.zincir .toplam b { font-size: 24pt; font-weight: 800; letter-spacing: -0.02em; }
-.zincir.kapat .toplam { background: var(--sari); color: var(--murekkep); }
-.zincir.tanis .toplam { background: var(--murekkep); color: var(--kagit); }
+/* 13. aydan sonraki oranlar */
+table.sonraki td, table.sonraki th { padding-top: 1.2mm; padding-bottom: 1.2mm; }
+.sikisik-plan .tanimlar { margin-top: 3mm; }
+.sikisik-plan .grafik { margin-top: 3mm; }
+.sikisik-plan .tablo-baslik { margin-top: 4mm; }
+.sikisik-plan table.kota td, .sikisik-plan table.kota th { padding-top: 1.3mm; padding-bottom: 1.3mm; }
+.iki-tablo { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 8mm; align-items: start; }
+table.sonraki td:first-child { white-space: nowrap; }
+
+/* Senaryo */
+.varsayim { margin-top: 5mm; padding: 4mm 5mm; background: var(--kum); }
+.varsayim p + p { margin-top: 1.5mm; }
+.seviye-yolu { list-style: none; margin-top: 6mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
+.seviye-yolu li { background: var(--kum); padding: 3mm 4mm; display: grid; gap: 0.5mm; }
+.seviye-yolu li.zirve { background: var(--sari); }
+.seviye-yolu .ad { font-size: 18pt; font-weight: 800; color: var(--lacivert); }
+.seviye-yolu .zirve .ad { color: var(--murekkep); }
+.seviye-yolu .oran { font-size: ${a4.govdeBuyuk}pt; font-weight: 700; }
+.seviye-yolu .ay { font-size: ${a4.govde}pt; color: var(--murekkep); }
+.kilometre { list-style: none; margin-top: 4mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+.kilometre li { display: grid; grid-template-columns: auto 1fr; column-gap: 3mm; row-gap: 0.5mm; align-items: baseline; padding: 3mm 4mm; border-top: 0.8mm solid var(--murekkep); background: var(--kum); }
+.kilometre li:nth-child(n+4) { background: var(--kumKoyu); }
+.kilometre li:last-child { background: var(--sari); }
+.kilometre .an { font-size: ${a4.govdeBuyuk}pt; font-weight: 800; }
+.kilometre .musteri { font-size: ${a4.govde}pt; color: var(--murekkep); text-align: right; }
+.kilometre .etiket { font-size: ${a4.govde}pt; color: var(--murekkep); }
+.kilometre .ay-kazanc { font-size: ${a4.govdeBuyuk}pt; text-align: right; }
+.kilometre .toplam { font-size: 17pt; font-weight: 800; letter-spacing: -0.02em; text-align: right; color: var(--lacivert); }
+.kilometre li:last-child .toplam { color: var(--murekkep); }
+.garanti { margin-top: 3mm; font-weight: 600; color: var(--murekkep); }
+table.senaryo td, table.senaryo th { padding-top: 1.8mm; padding-bottom: 1.8mm; white-space: nowrap; }
+tr.ana td { background: var(--kum); font-weight: 700; }
+.kur-kutusu { margin-top: 5mm; padding: 3mm 4mm; background: var(--kumKoyu); max-width: 120mm; }
+.kur-kutusu b { display: block; font-size: ${a4.govde}pt; margin-bottom: 0.5mm; }
+.kur-kutusu .dipnot { color: var(--murekkep); }
+.ipucu { margin-top: 4mm; padding: 3mm 4mm; background: var(--murekkep); color: var(--kagit); display: grid; grid-template-columns: 26mm 1fr; gap: 4mm; align-items: baseline; }
+.ipucu b { color: var(--sari); font-size: ${a4.govde}pt; }
 
 /* Persona tablosu */
 .persona { margin-top: 8mm; table-layout: fixed; }
@@ -186,12 +211,15 @@ const bolum = (no, ad) => `<div class="bolum"><b>${String(no).padStart(2, '0')}<
 const kap = kademeler('kapatir');
 const tan = kademeler('tanistir');
 const K = hesap.kapat, T = hesap.tanis;
+const KA = anlar(K), TA = anlar(T);
+const ay12 = KA.find((a) => a.n === 12), ay48 = KA.at(-1);
+/** 1. ile 13. ay arası K3 oranı, sonraki dönemler 13. aydan sonraki oranlardır. */
+const KAPAK_ORANLARI = [kap.at(-1).oran, ...plan.kapatir.gecmis.slice(0, 3)];
+/** Dönem adı: 13. ile 24. ay arası. */
+const donemAdi = (i) => `${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay arası`;
 
 function kapak() {
-  const satirlar = [
-    { yil: '1. yıl', oran: K.oran, op: 1 },
-    ...K.yillar.map((y) => ({ yil: `${y.yil}. yıl`, oran: y.oran, op: 0.25 + (y.oran / K.oran) * 0.75 })),
-  ];
+  const satirlar = KAPAK_ORANLARI.map((o, i) => ({ yil: `${i + 1}. yıl`, oran: o, op: i ? 0.25 + (o / KAPAK_ORANLARI[0]) * 0.75 : 1 }));
   return `<section class="sayfa koyu kapak">
   <header class="ust"><div class="kapak-imza">${logo({ koyu: true, mm: 42 })}${imza()}<span class="dipnot ceviri">Thoptan ile istoc.com ağına bağlanırsınız.</span></div><span>İş ortaklığı programı</span></header>
   <div class="kapak-orta">
@@ -202,11 +230,11 @@ function kapak() {
   <div class="aylar" aria-label="48 ayın payı">
     ${satirlar.map((s) => `<span class="yil">${s.yil}</span><span class="kare">${'<i></i>'.repeat(12).replaceAll('<i>', `<i style="opacity:${s.op.toFixed(2)};background:var(--${s.op === 1 ? 'sari' : 'solukKoyu'})">`)}</span><span class="oran">${yuzde(s.oran)}</span>`).join('')}
   </div>
-  <p class="dipnot" style="margin-top:3mm">Kareler ayları gösterir. Oranlar ${tl(plan.ornekCiro)} aylık cirolu örnektendir.</p>
+  <p class="dipnot" style="margin-top:3mm">Kareler ayları gösterir. Oranlar K3 seviyesinde satışı kapatma oranlarıdır.</p>
   <div class="davet">
     <p class="buyuk">Thoptan iş ortaklığı programına sizi davet ediyoruz.</p>
     <p>Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
-    <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.</p>
+    <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
   </div>
   <footer class="alt"><span>thoptan.com</span>${altImza()}<span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
 </section>`;
@@ -272,7 +300,7 @@ function nasilIsler() {
 }
 
 function kazancPlani() {
-  return `<section class="sayfa">
+  return `<section class="sayfa sikisik-plan">
   ${ust('Kazanç planı')}
   ${bolum(3, 'Kazanç planı')}
   <h1 class="kanca">Satışı kapatırsanız payınız %30’a kadar çıkar.</h1>
@@ -283,57 +311,67 @@ function kazancPlani() {
   </div>
   <div class="grafik">
     <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
-    ${merdiven({ g: 640, y: 214, kapat: kap, tanis: tan, ornekCiro: plan.ornekCiro, yaziBoyu: 14 })}
+    ${merdiven({ g: 640, y: 160, kapat: kap, tanis: tan, yaziBoyu: 14 })}
   </div>
   <h3 class="tablo-baslik">Bir aydaki ciroya göre oran</h3>
   <table class="kota"><thead><tr><th>Kota</th><th>Tanıştırmada eşik</th><th>Oran</th><th class="vurgu">Kapatmada eşik</th><th class="vurgu">Oran</th></tr></thead><tbody>
-    ${['Kota yok', 'K1', 'K2', 'K3'].map((ad, i) => `<tr><td>${ad}</td><td>${i ? `${tl(tan[i].esik)} ve üstü` : `${tl(tan[1].esik)} altı`}</td><td><b>${yuzde(tan[i].oran)}</b></td><td class="vurgu">${i ? `${tl(kap[i].esik)} ve üstü` : `${tl(kap[1].esik)} altı`}</td><td class="vurgu"><b>${yuzde(kap[i].oran)}</b></td></tr>`).join('')}
+    ${['Kota yok', 'K1', 'K2', 'K3'].map((ad, i) => `<tr><td>${ad}</td><td>${i ? `${avro(tan[i].esik)} ve üstü` : `${avro(tan[1].esik)} altı`}</td><td><b>${yuzde(tan[i].oran)}</b></td><td class="vurgu">${i ? `${avro(kap[i].esik)} ve üstü` : `${avro(kap[1].esik)} altı`}</td><td class="vurgu"><b>${yuzde(kap[i].oran)}</b></td></tr>`).join('')}
   </tbody></table>
-  <h3 class="tablo-baslik">Pay yıllara yayılır</h3>
-  <div class="yillar">
-    <div><b>İlk 12 ay</b><span>Kotanızın oranını alırsınız.</span></div>
-    ${plan.kapatir.gecmis.slice(0, 3).map((g, i) => `<div><b>${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay</b><span>Tanıştırma: ${plan.tanistir.gecmis[i] ? yuzde(plan.tanistir.gecmis[i]) : 'pay yok'}</span><span class="k">Kapatma: ${yuzde(g)}</span></div>`).join('')}
+  <div class="iki-tablo" style="margin-top:4mm">
+    <div>
+      <h3>13. aydan sonraki oranlar</h3>
+      <p class="not" style="margin-top:1mm">Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.</p>
+      <p class="not" style="margin-top:1mm">Oran müşterinin o yılki cirosuna uygulanır.</p>
+    </div>
+    ${sonrakiOranlarTablosu({ plan, yuzde, donemAdi: (i) => donemAdi(i).replace(' arası', '') })}
   </div>
-  <p class="not" style="margin-top:2mm">Sonraki yıllarda pay azalarak sürer. Oran müşterinin o yılki cirosuna uygulanır.</p>
-  <p class="not" style="margin-top:3mm;color:var(--murekkep)"><b>Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.</b></p>
+  <p class="not" style="margin-top:2mm">İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter. <b style="color:var(--murekkep)">Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.</b></p>
   ${alt(4)}
 </section>`;
 }
 
-const zincir = (h, sinif, satirlar, toplamAd, toplam) => `<div class="zincir ${sinif}"><h2>${h}</h2><ol>
-  ${satirlar.map(([a, b]) => `<li><span>${a}</span><b>${b}</b></li>`).join('')}
-  </ol><div class="toplam"><span>${toplamAd}</span><b>${tl(toplam)}</b></div></div>`;
-
-function ornekHesap() {
-  const yil = (y) => `${12 * (y.yil - 1) + 1}. ile ${12 * y.yil}. ay`;
+function senaryo() {
   return `<section class="sayfa">
-  ${ust('Örnek hesap')}
-  ${bolum(4, 'Örnek hesap')}
-  <h1 class="kanca">Örnekte aylık ${tl(plan.ornekCiro)} ciro 4 yılda ${tl(K.toplam)} pay getirir.</h1>
-  <p class="varsayim">Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam ${tl(plan.ornekCiro)} öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.</p>
-  <div class="grafik">
-    <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
-    ${donemCubuklari({ g: 640, y: 200, kapat: K, tanis: T, yaziBoyu: 14 })}
-    <p class="dipnot">Çubuklar her dönemin toplam payını gösterir. Tutarlar bin TL cinsindendir.</p>
+  ${ust('Büyüyen müşteri senaryosu')}
+  ${bolum(4, 'Büyüyen müşteri senaryosu')}
+  <h1 class="kanca">12. ayda her ay ${avroTam(ay12.kazanc)} kazanırsınız.</h1>
+  <p class="giris">Her ay yeni müşteri gelir. Eski müşteriler ödemeye devam eder. Bu yüzden kazancınız her ay büyür.</p>
+  <div class="varsayim">
+    <p>Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.</p>
   </div>
-  <div class="zincirler">
-    ${zincir('Satışı kapatırsanız', 'kapat', [
-      ['Aylık ciro', tl(K.ciro)],
-      ['Bu ciro K1 kotasını geçer. Oranınız', yuzde(K.oran)],
-      [`${tl(K.ciro)} × ${yuzde(K.oran)}`, `ayda ${tl(K.aylik)}`],
-      [`İlk 12 ay: ${tl(K.aylik)} × 12`, tl(K.ilkYil)],
-      ...K.yillar.map((y) => [`${yil(y)}: ${tl(y.ciro)} × ${yuzde(y.oran)}`, tl(y.tutar)]),
-    ], 'Dört yılın toplamı', K.toplam)}
-    ${zincir('Yalnız tanıştırırsanız', 'tanis', [
-      ['Aylık ciro', tl(T.ciro)],
-      ['Bu ciro K1 kotasını geçer. Oranınız', yuzde(T.oran)],
-      [`${tl(T.ciro)} × ${yuzde(T.oran)}`, `ayda ${tl(T.aylik)}`],
-      [`İlk 12 ay: ${tl(T.aylik)} × 12`, tl(T.ilkYil)],
-      ...T.yillar.map((y) => [`${yil(y)}: ${tl(y.ciro)} × ${yuzde(y.oran)}`, tl(y.tutar)]),
-    ], 'Üç yılın toplamı', T.toplam)}
-  </div>
-  <p class="not" style="margin-top:4mm">Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.</p>
+  <h3 class="tablo-baslik">Seviye yolu</h3>
+  ${seviyeYolu({ kademeler: kap, seviyeAyi: K.seviyeAyi, yuzde })}
+  <p style="margin-top:2mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. Oranınız ${yuzde(kap[3].oran)} olur.</p>
+  <h3 class="tablo-baslik">Kilometre taşları</h3>
+  ${kilometreTaslari({ anlar: KA, avro })}
+  <p class="dipnot" style="margin-top:2mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır.</p>
+  <p class="not" style="margin-top:3mm">${plan.musteriAy}. ayda ${ay48.musteri} müşteriniz olur. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
+  <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
   ${alt(5)}
+</section>`;
+}
+
+function karsilastirma() {
+  const S = hesap.senaryolar;
+  return `<section class="sayfa">
+  ${ust('Senaryoları karşılaştırın')}
+  ${bolum(5, 'Senaryoları karşılaştırın')}
+  <h1 class="kanca">Her yeni müşteri kazancınızı büyütür.</h1>
+  <h3 class="tablo-baslik">İki yol, gerçekçi senaryo</h3>
+  <table class="senaryo"><thead><tr><th>Zaman</th><th class="vurgu">Kapatma: o ay</th><th class="vurgu">Kapatma: toplam</th><th>Tanıştırma: o ay</th><th>Tanıştırma: toplam</th></tr></thead><tbody>
+    ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu"><b>${avro(a.kazancEur)}</b></td><td class="vurgu"><b>${avro(a.toplamEur)}</b></td><td>${avro(TA[i].kazancEur)}</td><td>${avro(TA[i].toplamEur)}</td></tr>`).join('')}
+  </tbody></table>
+  <p class="not" style="margin-top:2mm">Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.</p>
+  <h3 class="tablo-baslik">Üç senaryo, satışı kapatırsanız</h3>
+  <table class="senaryo"><thead><tr><th>Senaryo</th><th>Ayda yeni müşteri</th><th>K3 ayı</th><th>12. ayın kazancı</th><th>4 yılın toplamı</th></tr></thead><tbody>
+    ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${s.kapat.seviyeAyi[2]}. ay</td><td>${avroTam(s.kapat.aylar[11].kazanc)}</td><td>${avroTam(s.kapat.aylar.at(-1).toplam)}</td></tr>`).join('')}
+  </tbody></table>
+  <p class="not" style="margin-top:2mm">Temkinli senaryoda 1. ayın cirosu ${avro(S[0].yeniMusteri * fiyat.basicAyEur)} olur. Bu ciro K1 kotasının altındadır. Bu yüzden temkinli senaryoda 13. aydan sonra pay yoktur.</p>
+  <div class="ipucu"><b>İpucu</b><span>İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.</span></div>
+  ${kurKutusuHtml({ k: kur12, sayi, avro, tl })}
+  <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
+  <p class="not" style="margin-top:2mm">Vergi ve stopaj bu hesaba dahil değildir. Stopaj, ödemeden yapılan vergi kesintisidir.</p>
+  ${alt(6)}
 </section>`;
 }
 
@@ -341,9 +379,6 @@ export const PERSONALAR = [
   { ad: 'Çözüm ortağı', buyuk: '%30’a kadar', ana: true,
     kim: 'Satıcı firmalara hizmet veren danışman ya da hizmet firması.', ne: 'Müşterisini Thoptan ile tanıştırır ya da satışı kapatır.',
     kazanc: 'Ciro üzerinden pay alır. Oran %30’a kadar çıkar.', basla: 'Katkı düzeyini yazılı belirler.' },
-  { ad: 'Kadrolu uzman', buyuk: 'Maaş ve prim',
-    kim: 'Şirkette SGK’lı ve maaşlı çalışan satış uzmanı.', ne: 'Satıcıları ziyaret eder ve satışı yapar.',
-    kazanc: 'Maaş alır. Ayrıca paket primi alır.', basla: 'Görevini ve bölgesini netleştirir.' },
   { ad: 'Mevcut müşteri', buyuk: '2 ay',
     kim: 'Thoptan kullanan satıcı işletme.', ne: 'Çevresindeki bir işletmeye Thoptan’ı önerir.',
     kazanc: 'Uygun tavsiye başına 2 ay ücretsiz kullanım alır.', basla: 'Geçerli koşulu müşteri sorumlusundan öğrenir.' },
@@ -355,71 +390,21 @@ export const PERSONALAR = [
 function dortPersona() {
   const satir = (ad, alan) => `<tr><th class="satir" scope="row">${ad}</th>${PERSONALAR.map((p) => `<td class="${p.ana ? 'ana' : ''}">${p[alan]}</td>`).join('')}</tr>`;
   return `<section class="sayfa">
-  ${ust('Dört ortaklık yolu')}
-  ${bolum(5, 'Dört ortaklık yolu')}
+  ${ust('Üç ortaklık yolu')}
+  ${bolum(6, 'Üç ortaklık yolu')}
   <h1 class="kanca">Hangisi sizsiniz?</h1>
-  <p class="giris">Aynı ürünü dört farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.</p>
+  <p class="giris">Aynı ürünü üç farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı ayrıdır.</p>
   <table class="persona">
     <thead><tr><th class="satir"></th>${PERSONALAR.map((p) => `<th class="${p.ana ? 'ana' : ''} ust-sayi"><span class="buyuk">${p.buyuk}</span></th>`).join('')}</tr>
       <tr><th class="satir"></th>${PERSONALAR.map((p) => `<th class="${p.ana ? 'ana' : ''} rol-adi" scope="col"><span class="rol">${p.ad}</span></th>`).join('')}</tr></thead>
     <tbody>${satir('Kim?', 'kim')}${satir('Ne yapar?', 'ne')}${satir('Nasıl kazanır?', 'kazanc')}${satir('Nasıl başlar?', 'basla')}</tbody>
   </table>
-  <p class="not" style="margin-top:4mm">SGK’lı, sosyal güvenlik kaydı olan çalışan demektir. Bu belgenin ana okuru çözüm ortağıdır. Öteki üç yol sonraki iki sayfadadır.</p>
+  <p class="not" style="margin-top:4mm">Bu belgenin ana okuru çözüm ortağıdır. Öteki iki yol sonraki sayfadadır.</p>
   <div class="ayrac"></div>
   <div class="iki">
     <div><h3>Çözüm ortağı ile marka elçisi aynı plandan kazanır.</h3><p style="margin-top:2mm">İkisi de ciro üzerinden pay alır. Yapılan iş ve bir aydaki ciro oranı belirler.</p></div>
-    <div><h3>Kadrolu uzman ile mevcut müşteri ayrı kurallarla kazanır.</h3><p style="margin-top:2mm">Kadrolu uzman maaş ve paket primi alır. Mevcut müşteri ücretsiz kullanım kazanır.</p></div>
+    <div><h3>Mevcut müşteri ücretsiz kullanım kazanır.</h3><p style="margin-top:2mm">Uygun tavsiye başına 2 ay ücretsiz kullanım alır. Ödül nakit değildir.</p></div>
   </div>
-  ${alt(6)}
-</section>`;
-}
-
-function kadrolu() {
-  const P = hesap.kadrolu;
-  const kd = [
-    { ad: '4 ve altı', oran: 0 },
-    ...plan.kadrolu.paketEsik.map((e, i) => ({ ad: `${e} ve üstü`, oran: plan.kadrolu.paketOran[i] })),
-  ];
-  return `<section class="sayfa">
-  ${ust('Kadrolu uzman')}
-  ${bolum(6, 'Kadrolu uzman')}
-  <div class="rol-ust">
-    <h1 class="kanca orta">Maaşınız sabittir. Priminiz sattığınız paket sayısıyla artar.</h1>
-    <div class="rol-sayi"><b class="sayi-dev">%10</b><span>En yüksek prim oranı</span></div>
-  </div>
-  <p class="giris">Bu modelde şirket sizi SGK’lı ve maaşlı çalıştırır. Net maaşınız ayda ${tl(plan.kadrolu.maas[0])} ile ${tl(plan.kadrolu.maas[1])} arasındadır.</p>
-  <div class="iki">
-    <div>
-      <h3>Ayda satılan pakete göre prim</h3>
-      <div style="margin-top:4mm">${paketMerdiveni({ g: 320, y: 170, kademeler: kd, secili: 2, yaziBoyu: 14 })}</div>
-      <p class="dipnot">Çubuklar paket sayısını ve prim oranını gösterir. Sarı çubuk örnekteki kademedir.</p>
-      <p style="margin-top:4mm">Ulaştığınız kademenin oranı satılan bütün paketlere uygulanır. Aylık ve yıllık paketler birlikte sayılır.</p>
-    </div>
-    <div class="zincir kapat">
-      <h2>Örnek prim</h2>
-      <ol>
-        <li><span>Bir ayda satılan yıllık paket</span><b>${P.adet} paket</b></li>
-        <li><span>Bir yıllık paketin bedeli</span><b>${avro(fiyat.basicYilEur)}</b></li>
-        <li><span>Örnekte kullanılan avro kuru</span><b>${tl(fiyat.kur)}</b></li>
-        <li><span>${P.adet} paketin bedeli</span><b>${tl(P.ciro)}</b></li>
-        <li><span>${P.adet} paket ikinci kademedir. Oran</span><b>${yuzde(P.oran)}</b></li>
-      </ol>
-      <div class="toplam"><span>Priminiz</span><b>${tl(P.prim)}</b></div>
-    </div>
-  </div>
-  <h3 style="margin-top:8mm">Öteki prim kuralları</h3>
-  <ul class="kural-liste iki-sutun" style="margin-top:2mm">
-    <li>Yalnız tanıştırdıysanız prim oranı ${yuzde(plan.kadrolu.tanistirmaOrani)} olur. Prim ilk 3 aydaki ödemelerden hesaplanır.</li>
-    <li>Müşteri yıllık paketi yenileyebilir. Bu durumda 13. ile 24. ay arasında ${yuzde(plan.kadrolu.yenilemeOrani)} prim alırsınız.</li>
-    <li>Kurulum ücreti ciroya girmez.</li>
-    <li>Aylık pakette prim her ay ödenir. Prim en çok 12 ay sürer.</li>
-    <li>Aylık paketin oranı 12 ay boyunca satış ayındaki oranla aynı kalır.</li>
-    <li>Yenilenen yıllık pakette 25. aydan sonra prim yoktur.</li>
-    <li>Tanıştırdığınız müşteri 90 gün sizin adınıza korunur.</li>
-    <li>Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.</li>
-    <li>İlk iki ayın prim kuralını insan kaynakları ayrıca yazar.</li>
-  </ul>
-  <div class="ilk-adim"><b>İlk adım</b><span>İnsan kaynaklarıyla görevinizi ve bölgenizi netleştirin.</span></div>
   ${alt(7)}
 </section>`;
 }
@@ -451,7 +436,7 @@ function musteriElci() {
   ${bolum(8, 'Marka elçisi')}
   <div class="rol-ust">
     <h1 class="kanca kucuk">Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.</h1>
-    <div class="rol-sayi"><b class="sayi-dev">${yuzde(E.oran)}</b><span>${tl(E.ciro)} aylık ciroda</span></div>
+    <div class="rol-sayi"><b class="sayi-dev">${yuzde(E.oran)}</b><span>${avro(E.ciro)} aylık ciroda</span></div>
   </div>
   <p class="giris">Thoptan’ı sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.</p>
   <div class="iki" style="margin-top:5mm">
@@ -464,9 +449,9 @@ function musteriElci() {
     <div class="zincir tanis">
       <h2 style="font-size:13pt">Örnek pay</h2>
       <ol>
-        <li><span>Tanıttığınız satıcıların aylık ödemesi</span><b>${tl(E.ciro)}</b></li>
-        <li><span>Bu ciro K1 kotasıdır. Tanıştırma payınız</span><b>${yuzde(E.oran)}</b></li>
-        <li><span>${tl(E.ciro)} × ${yuzde(E.oran)}</span><b>ayda ${tl(E.aylik)}</b></li>
+        <li><span>Tanıttığınız satıcıların aylık ödemesi</span><b>${avro(E.ciro)}</b></li>
+        <li><span>Bu ciro K3 kotasıdır. Tanıştırma payınız</span><b>${yuzde(E.oran)}</b></li>
+        <li><span>${avro(E.ciro)} × ${yuzde(E.oran)}</span><b>ayda ${avro(E.aylik)}</b></li>
       </ol>
       <p class="not" style="margin-top:2mm">Çözüm ortağıyla aynı plandan pay alırsınız. Bu ilişki maaşlı iş değildir.</p>
     </div>
@@ -475,19 +460,6 @@ function musteriElci() {
   ${alt(8)}
 </section>`;
 }
-
-/** Öteki üç yolun kısa özeti. Görsel PDF ve sunum bu özeti kullanır. */
-export const OTEKI_YOLLAR = [
-  { ad: 'Kadrolu uzman', kanca: 'Maaşınız sabittir. Priminiz paket sayısıyla artar.', sayi: '%5 ile %10',
-    sayiNotu: `Ayda 5 paket ve üstünde prim başlar. Örnekte 8 paket ${tl(hesap.kadrolu.prim)} prim eder.`,
-    ilkAdim: 'İnsan kaynaklarıyla görevinizi ve bölgenizi netleştirin.' },
-  { ad: 'Mevcut müşteri', kanca: 'Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.', sayi: `${tavsiye.krediAy} ay`,
-    sayiNotu: `Yılda en çok ${tavsiye.sinir} uygun tavsiye sayılır. Ödül nakit değildir.`,
-    ilkAdim: 'Geçerli koşulu müşteri sorumlusundan öğrenin.' },
-  { ad: 'Marka elçisi', kanca: 'Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.', sayi: tl(hesap.elci.aylik),
-    sayiNotu: `Bu tutar aylık paydır. Örneğin ${tl(hesap.elci.ciro)} aylık ciroda yalnız tanıştırma payı ${yuzde(hesap.elci.oran)} olur.`,
-    ilkAdim: 'İçeriğinizin amacını belirleyin. Anlatımınızı şirkete doğrulatın.' },
-];
 
 export const BIZ = [
   'Fiyatı fiyat tablosu belirler. Fiyat herkes için aynıdır.',
@@ -520,7 +492,7 @@ function kosullar() {
     <h2>Ödeme kuralları</h2>
     <p>İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.</p>
     <p>Tanıştırma CRM’e kaydedilir. CRM, şirketin müşteri kayıt sistemidir. Planda tanıştırma ${plan.tanistirmaSureAy} ay geçerlidir.</p>
-    <p>Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür. Bölüşme yazılı anlaşmada belirlenir.</p>
+    <p>Tanıştıran ile satışı kapatan farklı kişi olabilir. Bu durumda pay ikisi arasında bölüşülür. Planda tanıştıranın payı satışı kapatanın payından düşülür. Bölüşme yazılı anlaşmada belirlenir.</p>
     <p>Ödeme günü sözleşmeye yazılır. Ödeme günleri müşterinin ödeme gününden sayılır. Ayrıntıyı yazılı anlaşma belirler.</p>
     <p>Fatura, vergi ve stopajı mali müşaviriniz doğrulasın. Şirket ortak getirmeye para ödemez.</p>
     <p><b>Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir.</b></p>
@@ -536,7 +508,7 @@ function kosullar() {
 }
 
 export function kitapcikHtml() {
-  const govde = [kapak(), nedenSiz(), nasilIsler(), kazancPlani(), ornekHesap(), dortPersona(), kadrolu(), musteriElci(), kosullar()].join('\n');
+  const govde = [kapak(), nedenSiz(), nasilIsler(), kazancPlani(), senaryo(), karsilastirma(), dortPersona(), musteriElci(), kosullar()].join('\n');
   return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı kılavuzu', boyut: 'A4 portrait', css, govde });
 }
 export const KITAPCIK_SAYFA = TOPLAM;

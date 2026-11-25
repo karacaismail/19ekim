@@ -187,7 +187,8 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   const anahtar = oranlar.getByRole('switch');
   await expect(anahtar).toHaveAttribute('aria-checked', 'false');
   await expect(kutu(page, 'Tanıştırma taban oranı')).toHaveValue('%0');
-  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('30.000 ₺');
+  // Kullanıcı kararı 25 Kasım 2026 Çarşamba: iStoc eşikleri euro olur.
+  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('798 €');
   await expect(kutu(page, 'Tanıştırma 13. ay ile 24. ay arası komisyonu')).toHaveValue('%5');
   // Grup içindeki görünür ad kısadır. Tam ad ekran okuyucuya gider.
   await expect(oranlar.locator('[data-etkin] label', { hasText: /^K1 için aylık ciro/ })).toBeVisible();
@@ -198,11 +199,11 @@ test('iStoc: bölümler alt alta durur, oranlar anahtarla seçilir ve değer yen
   await expect(anahtar).toHaveAttribute('aria-checked', 'true');
   await expect(kutu(page, 'Tanıştırma taban oranı')).toHaveCount(0);
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveValue('%15');
-  for (const [k, d] of [['K1', '30.000 ₺'], ['K2', '70.000 ₺'], ['K3', '120.000 ₺']]) await expect(kutu(page, `Satışı kapatma ${k} ciro eşiği`)).toHaveValue(d);
+  for (const [k, d] of [['K1', '798 €'], ['K2', '1.596 €'], ['K3', '3.192 €']]) await expect(kutu(page, `Satışı kapatma ${k} ciro eşiği`)).toHaveValue(d);
   await expect(kutu(page, 'Satışı kapatma 37. ay ile 48. ay arası komisyonu')).toHaveValue('%5');
   await kutu(page, 'Satışı kapatma taban oranı').fill('%20');
-  // 50.000 ₺ ciro K1 eşiğini geçer. Oran %20 taban ile %5 puandır.
-  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toHaveText('50.000 ₺ × %25 = 12.500 ₺');
+  // 3.192 € ciro K3 eşiğindedir. Oran %20 taban ile %15 puandır.
+  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toHaveText('3.192 € × %35 = 1.117 €');
   await page.reload();
   await bolum(page, 'Oranlar').getByRole('switch').click();
   await expect(kutu(page, 'Satışı kapatma taban oranı')).toHaveValue('%20');
@@ -232,7 +233,7 @@ test('kota eşiği girilince oran sırayla artar', async ({ page }) => {
   await kutu(page, 'Satışı kapatma K2 ciro eşiği').fill('250.000');
   await kutu(page, 'Satışı kapatma K3 ciro eşiği').fill('400.000');
   await expect(plani(page).locator('[data-kazanc="kapatir-oran"]')).toHaveText('%25');
-  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('75.000 ₺');
+  await expect(plani(page).locator('[data-kazanc="kapatir-bu-yil"]')).toContainText('75.000 €');
 });
 
 test('kadrolu uzman sekmesi maaşı, kotayı ve SGK kaydını söyler', async ({ page }) => {
@@ -276,14 +277,14 @@ test('iki katkının kota eşikleri birbirinden ayrıdır', async ({ page }) => 
   const anahtar = bolum(page, 'Oranlar').getByRole('switch');
   await kutu(page, 'Tanıştırma K1 ciro eşiği').fill('100.000');
   await anahtar.click();
-  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('30.000 ₺');
+  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('798 €');
   await kutu(page, 'Satışı kapatma K1 ciro eşiği').fill('250.000');
   await anahtar.click();
-  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('100.000 ₺');
+  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('100.000 €');
   await page.reload();
-  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('100.000 ₺');
+  await expect(kutu(page, 'Tanıştırma K1 ciro eşiği')).toHaveValue('100.000 €');
   await bolum(page, 'Oranlar').getByRole('switch').click();
-  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('250.000 ₺');
+  await expect(kutu(page, 'Satışı kapatma K1 ciro eşiği')).toHaveValue('250.000 €');
 });
 
 // Kullanıcı kararı 17 Kasım 2026 Salı: Sonuç bölümü satıcı adayını motive eden bir oyun panelidir.

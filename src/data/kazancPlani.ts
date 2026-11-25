@@ -104,7 +104,13 @@ export const SABIT_KURALLAR: Record<Marka, Record<string, number | string>> = {
 
 /** Kalıcı olmayan ama yöneticinin JSON'da verdiği başlangıç değerleri (kullanıcı kararı 17 Kasım 2026 Salı). */
 const PROJE_VARSAYILANI: Record<Marka, Record<string, number | string | null>> = {
-  istoc: {},
+  // Kullanıcı kararı 25 Kasım 2026 Çarşamba: iStoc kazanç planı euro olur. Eşikler iki yolda da aynıdır.
+  // K1 798 €, K2 1.596 €, K3 3.192 €. Örnek aylık ciro 3.192 € olur. Oranlar ve 48 ay süresi değişmez.
+  istoc: {
+    'tanistir.kotaEsik.0': 798, 'tanistir.kotaEsik.1': 1_596, 'tanistir.kotaEsik.2': 3_192,
+    'kapatir.kotaEsik.0': 798, 'kapatir.kotaEsik.1': 1_596, 'kapatir.kotaEsik.2': 3_192,
+    ornekCiro: 3_192,
+  },
   segika: {
     'tanistir.kotaEsik.0': 30_000, 'tanistir.kotaEsik.1': 70_000, 'tanistir.kotaEsik.2': 100_000,
     'kapatir.kotaEsik.0': 30_000, 'kapatir.kotaEsik.1': 70_000, 'kapatir.kotaEsik.2': 120_000,
@@ -135,6 +141,13 @@ export function projeVarsayilani(proje: Marka): KazancPlani {
  * Örnek: satışı kapatan 1.000.000 ₺ ciroda K3'e ulaşır. Oran %30'dur. Kazanç 300.000 ₺ olur.
  */
 export const KUMULATIF_KURALI = 'Ulaştığınız seviyenin oranı cironun tamamına uygulanır. Örneğin satışı kapatan 1.000.000 ₺ ciroda K3 seviyesindedir. Oranı %30 olur ve 300.000 ₺ alır.';
+/** iStoc örneği euro ile yazılır (kullanıcı kararı 25 Kasım 2026 Çarşamba). 10.000 € × %30 = 3.000 €. */
+export const KUMULATIF_KURALI_ISTOC = 'Ulaştığınız seviyenin oranı cironun tamamına uygulanır. Örneğin satışı kapatan 10.000 € ciroda K3 seviyesindedir. Oranı %30 olur ve 3.000 € alır.';
+export const kumulatifKurali = (proje: Marka) => (proje === 'istoc' ? KUMULATIF_KURALI_ISTOC : KUMULATIF_KURALI);
+
+/** Kazanç planının para birimi (kullanıcı kararı 25 Kasım 2026 Çarşamba). iStoc euro, Segika TL kullanır. Kadrolu uzman TL kalır. */
+export const paraBirimi = (proje: Marka) => (proje === 'istoc' ? '€' : '₺');
+export const paraMetni = (proje: Marka) => (n: number) => `${num(n)} ${paraBirimi(proje)}`;
 
 /** Ulaşılan kota sayısı ve geçerli oran. Eşikler sırayla aranır. Boş eşikten sonra kota sayılmaz. */
 export function katkiOrani(plan: KazancPlani, tur: KatkiTuru, ciro: number): { oran: number; kota: 0 | 1 | 2 | 3 } {
@@ -160,7 +173,8 @@ export const KOTA_KURALI = 'Kişi ilk 12 ayda K1 kotasını tamamlamazsa 13. ayd
  */
 export const KOTA_KURALI_ISTOC = 'İlk 12 ayın her birinde aylık ciro en az K1 kotası kadar olmalıdır. '
   + 'Ciro tek bir ay bile K1 kotasının altında kalırsa kişi 13. aydan sonra pay almaz. '
-  + 'Örneğin K1 kotası 30.000 ₺ olsun. Ciro 11 ay 35.000 ₺ olsun. Bir ay ise 28.000 ₺ olsun. '
+  // Kullanıcı kararı 25 Kasım 2026 Çarşamba: iStoc örneği euro ile yazılır. K1 kotası 798 €'dur.
+  + 'Örneğin K1 kotası 798 € olsun. Ciro 11 ay 900 € olsun. Bir ay ise 700 € olsun. '
   + 'Bu durumda kişi 13. aydan sonra pay almaz.';
 export const kotaKurali = (proje: Marka) => (proje === 'istoc' ? KOTA_KURALI_ISTOC : KOTA_KURALI);
 export function kotaTamam(plan: KazancPlani, tur: KatkiTuru, ciro: number) {
@@ -228,7 +242,7 @@ const yuzdeMetni = (n: number) => `%${num(Math.round(n * 1000) / 10)}`;
 const tlMetni = (n: number) => `${num(n)} ₺`;
 
 /** Kalıcı kural adayı olabilecek bütün değerler. Ad, ekrandaki kutu adıyla aynıdır. */
-export function kuralListesi(plan: KazancPlani) {
+export function kuralListesi(plan: KazancPlani, proje?: Marka) {
   type Kural = { id: string; ad: string; deger: number | string | null; gosterim: string };
   const oran = (id: string, ad: string, v: number | null): Kural => ({ id, ad, deger: v, gosterim: v === null ? 'Belirlenmedi' : yuzdeMetni(v) });
   const para = (id: string, ad: string, v: number | null): Kural => ({ id, ad, deger: v, gosterim: v === null ? 'Belirlenmedi' : tlMetni(v) });
@@ -237,7 +251,9 @@ export function kuralListesi(plan: KazancPlani) {
     const ad = KATKI_ADI[tur];
     const p = plan[tur];
     liste.push(oran(`${tur}.taban`, `${ad} taban oranı`, p.taban));
-    p.kotaEsik.forEach((e, i) => liste.push(para(`${tur}.kotaEsik.${i}`, `${ad} K${i + 1} ciro eşiği`, e)));
+    // Ciro eşiği projenin para birimiyle yazılır. Kadrolu uzmanın maaşı TL kalır.
+    const esikMetni = proje ? paraMetni(proje) : tlMetni;
+    p.kotaEsik.forEach((e, i) => liste.push({ id: `${tur}.kotaEsik.${i}`, ad: `${ad} K${i + 1} ciro eşiği`, deger: e, gosterim: e === null ? 'Belirlenmedi' : esikMetni(e) }));
     p.kotaArtis.forEach((a, i) => liste.push(oran(`${tur}.kotaArtis.${i}`, `${ad} K${i + 1} artışı`, a)));
     p.gecmis.forEach((g, i) => liste.push(oran(`${tur}.gecmis.${i}`, `${ad} ${donemAdi(i)} komisyonu`, g)));
   }
@@ -274,9 +290,9 @@ export function kaliciJson(plan: KazancPlani, proje: Marka, simdi: Date) {
     gorunum,
     tarih,
     tarihMetni: `${simdi.getDate()} ${AYLAR[simdi.getMonth()]} ${simdi.getFullYear()} ${GUNLER[simdi.getDay()]}`,
-    kurallar: kuralListesi(plan).filter((k) => secili.has(k.id)).map((k) => ({ ...k, gorunum, tarih })),
+    kurallar: kuralListesi(plan, proje).filter((k) => secili.has(k.id)).map((k) => ({ ...k, gorunum, tarih })),
     // Kullanıcı kararı 17 Kasım 2026 Salı: JSON, işaretli olmasa da bütün güncel değerleri içerir.
-    degerler: kuralListesi(plan).map((k) => ({ ...k, kalici: secili.has(k.id) })),
+    degerler: kuralListesi(plan, proje).map((k) => ({ ...k, kalici: secili.has(k.id) })),
   };
 }
 

@@ -27,9 +27,10 @@ export function renkDenetimi(...metinler) {
 
 // Pazarlama dili ve öteki markanın izi bu belgelere girmez. İSTOÇ bir ticaret merkezidir, bu markayla ilgisi yoktur.
 // Belgelerin asıl markası Thoptan'dır. iStoc hiçbir cümlenin başında ana özne olmaz.
+// Tek izinli kullanım “Kazanç garantisi değildir.” notudur (kullanıcı kararı 25 Kasım 2026 Çarşamba). Söz veren her öteki kullanım yasaktır.
 const YASAK = [
   [/fırsat/i, '“fırsat” kelimesi'], [/kaçırma/i, '“kaçırmayın” kalıbı'], [/eşsiz/i, '“eşsiz” kelimesi'], [/\bhemen\b/i, '“hemen” kelimesi'],
-  [/inanılmaz/i, '“inanılmaz” kelimesi'], [/garanti/i, '“garanti” kelimesi'], [/!/, 'ünlem'], [/segika/i, 'öteki marka adı'],
+  [/inanılmaz/i, '“inanılmaz” kelimesi'], [/garanti(?!si değildir\.)/i, '“garanti” kelimesi'], [/!/, 'ünlem'], [/segika/i, 'öteki marka adı'],
   [/;/, 'noktalı virgül'], [/—|–/, 'uzun çizgi'], [/→|←|⇒/, 'ok işareti'], [/·/, 'orta nokta'],
   [/İSTOÇ|İstoç|ISTOÇ|istoç/, '“İSTOÇ” adı'], [/(^|[.?]\s+)iStoc(?=[\s’'])/m, 'iStoc cümle öznesi'],
   [/m[ae]kt[ae]d[ıi]r/i, '“-mektedir” kalıbı'], [/\d{1,2}[./]\d{1,2}[./]\d{2,4}/, 'sayıyla yazılmış tarih'],

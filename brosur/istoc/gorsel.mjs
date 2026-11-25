@@ -1,10 +1,17 @@
-// Görsel PDF sunumu: A4 yatay, 8 sayfa. Az metin, büyük sayılar ve şemalar.
-import { plan, fiyat, hesap, kademeler, tl, yuzde, avro } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, altImza, merdiven, donemCubuklari } from './sablon.mjs';
-import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR, OTEKI_YOLLAR } from './kitapcik.mjs';
+// Görsel PDF sunumu: A4 yatay, 9 sayfa. Az metin, büyük sayılar ve şemalar.
+// Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, sonrakiOranlarTablosu, seviyeYolu, kilometreTaslari, kurKutusuHtml } from './sablon.mjs';
+import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
 
 const TOPLAM = 9;
 const K = hesap.kapat, T = hesap.tanis;
+const KA = anlar(K), TA = anlar(T);
+const kap = kademeler('kapatir');
+const ay12 = KA.find((a) => a.n === 12), ay48 = KA.at(-1);
+/** 1. yıl K3 oranı, sonraki yıllar 13. aydan sonraki oranlardır. */
+const KAPAK_ORANLARI = [kap.at(-1).oran, ...plan.kapatir.gecmis.slice(0, 3)];
+const donemAdi = (i) => `${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay`;
 const css = `
 .sayfa { width: 297mm; height: 210mm; padding: 14mm 16mm 12mm; position: relative; overflow: hidden; break-after: page; page-break-after: always; display: flex; flex-direction: column; background: var(--kagit); }
 .sayfa:last-child { break-after: auto; page-break-after: auto; }
@@ -75,27 +82,50 @@ p, li { font-size: 12pt; line-height: 1.38; }
 .buyuk-sayi .t b { color: var(--lacivert); }
 
 /* Persona */
-.persona4 { margin-top: 9mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; flex: 1; }
-.persona4 > div { padding: 6mm 5mm; display: flex; flex-direction: column; gap: 3mm; }
+.persona4 { margin-top: 9mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; flex: 1; }
+.persona4 > div { padding: 6mm 6mm; display: flex; flex-direction: column; gap: 3mm; }
 .persona4 > div.ana { background: var(--sari); }
 .persona4 > div:nth-child(2) { background: var(--kum); }
-.persona4 > div:nth-child(4) { background: var(--kum); }
 .persona4 .buyuk { font-size: 28pt; font-weight: 800; letter-spacing: -0.03em; line-height: 1; min-height: 2em; display: flex; align-items: flex-end; }
 .persona4 h2 { font-size: 19pt; }
 .persona4 p { font-size: 12pt; line-height: 1.3; }
 .persona4 p b { display: block; font-size: 11pt; font-weight: 700; color: var(--soluk); margin-bottom: 0.5mm; }
 .persona4 .ana p b { color: var(--murekkep); }
 
-/* Öteki üç yol */
-.uc { flex: 1; margin-top: 8mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9mm; }
-.uc > div { display: flex; flex-direction: column; gap: 4mm; padding-top: 4mm; border-top: 1.2mm solid var(--murekkep); }
-.uc > div:first-child { border-top-color: var(--sari); }
-.uc h2 { font-size: 19pt; }
-.uc .kanca { font-size: 15pt; font-weight: 600; line-height: 1.25; }
-.uc .sayi { font-size: 42pt; font-weight: 800; letter-spacing: -0.02em; color: var(--lacivert); line-height: 1; }
-.uc .sayi-notu { font-size: 12.5pt; color: var(--soluk); line-height: 1.35; }
-.uc .ilk { margin-top: auto; background: var(--murekkep); color: var(--kagit); padding: 4mm 5mm; font-size: 12.5pt; line-height: 1.35; }
-.uc .ilk b { display: block; color: var(--sari); font-size: 12pt; margin-bottom: 1mm; }
+/* 13. aydan sonraki oranlar */
+.sag-blok h2 { font-size: 18pt; margin-bottom: 2mm; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 700; padding: 2mm 3mm; font-size: 12pt; border-bottom: 0.6mm solid var(--murekkep); }
+td { padding: 2mm 3mm; border-top: 0.3mm solid var(--cizgi); font-size: 12pt; white-space: nowrap; }
+td.vurgu, th.vurgu { background: var(--kum); }
+td.vurgu b { color: var(--lacivert); }
+tr.ana td { background: var(--kum); font-weight: 700; }
+
+/* Senaryo */
+.senaryo-ust { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; align-items: end; margin-top: 4mm; }
+.seviye-yolu { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; }
+.seviye-yolu li { background: var(--kum); padding: 2.5mm 3mm; display: grid; gap: 0.5mm; }
+.seviye-yolu li.zirve { background: var(--sari); }
+.seviye-yolu .ad { font-size: 18pt; font-weight: 800; color: var(--lacivert); }
+.seviye-yolu .zirve .ad { color: var(--murekkep); }
+.seviye-yolu .oran { font-size: 13pt; font-weight: 700; }
+.seviye-yolu .ay { font-size: 12pt; color: var(--murekkep); }
+.kilometre { list-style: none; margin-top: 6mm; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.5mm; }
+.kilometre li { display: grid; gap: 0.5mm; padding: 3mm 3.5mm 4mm; border-top: 1.2mm solid var(--murekkep); background: var(--kum); }
+.kilometre li:nth-child(n+4) { background: var(--kumKoyu); }
+.kilometre li:last-child { background: var(--sari); }
+.kilometre .an { font-size: 15pt; font-weight: 800; }
+.kilometre .musteri { font-size: 12pt; color: var(--murekkep); margin-bottom: 2mm; }
+.kilometre .etiket { font-size: 12pt; color: var(--murekkep); }
+.kilometre .ay-kazanc { font-size: 16pt; }
+.kilometre .toplam { font-size: 21pt; font-weight: 800; letter-spacing: -0.02em; color: var(--lacivert); }
+.kilometre li:last-child .toplam { color: var(--murekkep); }
+.garanti { font-size: 13pt; font-weight: 600; color: var(--murekkep); }
+.karsi { flex: 1; display: grid; grid-template-columns: 1.25fr 1fr; gap: 10mm; margin-top: 6mm; align-items: start; }
+.karsi h2 { font-size: 16pt; margin-bottom: 2mm; }
+.kur-kutusu { margin-top: 5mm; padding: 3mm 4mm; background: var(--kumKoyu); }
+.kur-kutusu b { display: block; font-size: 12pt; margin-bottom: 0.5mm; }
+.kur-kutusu .dipnot { color: var(--murekkep); }
 
 /* Biz siz */
 .biz-siz { margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; flex: 1; }
@@ -124,7 +154,7 @@ const ust = (ad) => `<header class="ust">${logo({ mm: 26 })}<span>${ad}</span></
 const alt = (n, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => `<footer class="alt"><span>${sol}</span>${altImza()}<span>${n} / ${TOPLAM}</span></footer>`;
 
 function kapak() {
-  const op = [1, ...K.yillar.map((y) => 0.25 + (y.oran / K.oran) * 0.75)];
+  const op = KAPAK_ORANLARI.map((o, i) => (i ? 0.25 + (o / KAPAK_ORANLARI[0]) * 0.75 : 1));
   const kareler = op.flatMap((o) => Array(12).fill(`<i style="opacity:${o.toFixed(2)};background:var(--${o === 1 ? 'sari' : 'solukKoyu'})"></i>`)).join('');
   return `<section class="sayfa koyu">
   <header class="ust"><div class="kapak-imza">${logo({ koyu: true, mm: 42 })}${imza()}<span class="dipnot ceviri">Thoptan ile istoc.com ağına bağlanırsınız.</span></div><span>İş ortaklığı programı</span></header>
@@ -134,13 +164,13 @@ function kapak() {
       <p class="belge-adi">Thoptan iş ortaklığı tanıtım sunumu</p>
       <h2>Satışını kapattığınız müşteri size 48 aya kadar pay getirir.</h2>
       <p>Thoptan iş ortaklığı programına sizi davet ediyoruz.</p>
-      <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.</p>
+      <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.</p>
       <p class="not">Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
     </div>
   </div>
   <div class="ay-serit" aria-label="48 ay">${kareler}</div>
-  <div class="ay-etiket"><span>1. yıl <b>${yuzde(K.oran)}</b></span>${K.yillar.map((y) => `<span>${y.yil}. yıl <b>${yuzde(y.oran)}</b></span>`).join('')}</div>
-  <footer class="alt"><span>Oranlar ${tl(plan.ornekCiro)} aylık cirolu örnektendir. Kesin değerler yazılı anlaşmada belirlenir.</span><span>thoptan.com</span></footer>
+  <div class="ay-etiket">${KAPAK_ORANLARI.map((o, i) => `<span>${i + 1}. yıl <b>${yuzde(o)}</b></span>`).join('')}</div>
+  <footer class="alt"><span>Oranlar K3 seviyesinde satışı kapatma oranlarıdır. Kesin değerler yazılı anlaşmada belirlenir.</span><span>thoptan.com</span></footer>
 </section>`;
 }
 
@@ -180,11 +210,12 @@ function oranlar() {
   <div class="grafik-izgara">
     <div>
       <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
-      ${merdiven({ g: 600, y: 340, kapat: kademeler('kapatir'), tanis: kademeler('tanistir'), ornekCiro: plan.ornekCiro, yaziBoyu: 16 })}
+      ${merdiven({ g: 600, y: 340, kapat: kap, tanis: kademeler('tanistir'), yaziBoyu: 16 })}
     </div>
-    <div class="buyuk-sayi">
-      <div class="t"><b class="dev">${yuzde(K.oran)}</b><span>${tl(plan.ornekCiro)} aylık ciroda satışı kapatırsanız</span></div>
-      <div><b class="dev">${yuzde(T.oran)}</b><span>Aynı ciroda yalnız tanıştırırsanız</span></div>
+    <div class="sag-blok">
+      <h2>13. aydan sonraki oranlar</h2>
+      ${sonrakiOranlarTablosu({ plan, yuzde, donemAdi })}
+      <p class="not" style="margin-top:2mm">Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır. Oran %0 olunca pay biter.</p>
     </div>
   </div>
   <p class="not">Ciro, getirdiğiniz müşterilerin ödediği tutardır. Ulaştığınız kotanın oranı cironun tamamına uygulanır.</p>
@@ -193,47 +224,58 @@ function oranlar() {
 </section>`;
 }
 
-function ornek() {
+function senaryo() {
   return `<section class="sayfa">
-  ${ust('Örnek hesap')}
-  <h1>Örnekte aylık ${tl(plan.ornekCiro)} ciro 4 yılda ${tl(K.toplam)} pay getirir.</h1>
-  <div class="grafik-izgara">
+  ${ust('Büyüyen müşteri senaryosu')}
+  <h1>12. ayda her ay ${avroTam(ay12.kazanc)} kazanırsınız.</h1>
+  <div class="senaryo-ust">
+    <p class="not">Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.</p>
+    <div>${seviyeYolu({ kademeler: kap, seviyeAyi: K.seviyeAyi, yuzde })}</div>
+  </div>
+  ${kilometreTaslari({ anlar: KA, avro })}
+  <p class="dipnot" style="margin-top:2mm">“O ay” o ayın kazancıdır. “Toplam” o güne kadarki toplam kazançtır.</p>
+  <p class="kosul" style="margin-top:4mm">${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.</p>
+  <p class="garanti" style="margin-top:2mm">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
+  ${alt(5)}
+</section>`;
+}
+
+function karsilastirma() {
+  const S = hesap.senaryolar;
+  return `<section class="sayfa">
+  ${ust('Senaryoları karşılaştırın')}
+  <h1>Her yeni müşteri kazancınızı büyütür.</h1>
+  <div class="karsi">
     <div>
-      <div class="lejant"><span><i class="t"></i>Satışı kapatırsanız</span><span><i></i>Yalnız tanıştırırsanız</span></div>
-      ${donemCubuklari({ g: 600, y: 430, kapat: K, tanis: T, yaziBoyu: 16 })}
+      <h2>İki yol, gerçekçi senaryo</h2>
+      <table><thead><tr><th>Zaman</th><th class="vurgu">Kapatma: o ay</th><th class="vurgu">Kapatma: toplam</th><th>Tanıştırma: toplam</th></tr></thead><tbody>
+        ${KA.map((a, i) => `<tr><td>${a.ad}</td><td class="vurgu"><b>${avro(a.kazancEur)}</b></td><td class="vurgu"><b>${avro(a.toplamEur)}</b></td><td>${avro(TA[i].toplamEur)}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="not" style="margin-top:2mm">Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.</p>
     </div>
-    <div class="buyuk-sayi">
-      <div class="t"><b class="dev">${tl(K.toplam)}</b><span>Satışı kapatırsanız bu tutarı 48 ayda alırsınız.</span></div>
-      <div><b class="dev">${tl(T.toplam)}</b><span>Yalnız tanıştırırsanız bu tutarı 36 ayda alırsınız.</span></div>
+    <div>
+      <h2>Üç senaryo, satışı kapatırsanız</h2>
+      <table><thead><tr><th>Senaryo</th><th>Ayda yeni müşteri</th><th>4 yılın toplamı</th></tr></thead><tbody>
+        ${S.map((s) => `<tr class="${s.ana ? 'ana' : ''}"><td>${s.ad}</td><td>${s.yeniMusteri}</td><td>${avroTam(s.kapat.aylar.at(-1).toplam)}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="not" style="margin-top:2mm">İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.</p>
+      ${kurKutusuHtml({ k: kur12, sayi, avro, tl })}
     </div>
   </div>
-  <p class="kosul">Bu bir örnektir. Getirdiğiniz müşteriler her ay toplam ${tl(plan.ornekCiro)} öder. Kota koşulu her ay sağlanır. Vergi ve stopaj dahil değildir.</p>
-  <p class="dipnot">Çubuklardaki tutarlar bin TL cinsindendir.</p>
-  ${alt(5)}
+  <p class="garanti">Bu bir örnek senaryodur. Kazanç garantisi değildir.</p>
+  ${alt(6)}
 </section>`;
 }
 
 function persona() {
   return `<section class="sayfa">
-  ${ust('Dört ortaklık yolu')}
+  ${ust('Üç ortaklık yolu')}
   <h1>Hangisi sizsiniz?</h1>
   <div class="persona4">
     ${PERSONALAR.map((p) => `<div class="${p.ana ? 'ana' : ''}"><span class="buyuk">${p.buyuk}</span><h2>${p.ad}</h2>
       <p><b>Kim?</b>${p.kim}</p><p><b>Ne yapar?</b>${p.ne}</p><p><b>Nasıl kazanır?</b>${p.kazanc}</p><p><b>Nasıl başlar?</b>${p.basla}</p></div>`).join('')}
   </div>
-  <p class="not" style="margin-top:3mm">SGK’lı, sosyal güvenlik kaydı olan çalışan demektir.</p>
-  ${alt(6)}
-</section>`;
-}
-
-function otekiYollar() {
-  return `<section class="sayfa">
-  ${ust('Öteki üç yol')}
-  <h1>Her yolun kendi kazancı ve kendi ilk adımı var.</h1>
-  <div class="uc">
-    ${OTEKI_YOLLAR.map((y) => `<div><h2>${y.ad}</h2><p class="kanca">${y.kanca}</p><span class="sayi">${y.sayi}</span><p class="sayi-notu">${y.sayiNotu}</p>
-      <p class="ilk"><b>İlk adım</b>${y.ilkAdim}</p></div>`).join('')}
-  </div>
+  <p class="not" style="margin-top:3mm">Her yolun kendi kazancı ve kendi ilk adımı var.</p>
   ${alt(7)}
 </section>`;
 }
@@ -269,6 +311,6 @@ function son() {
 }
 
 export function gorselHtml() {
-  return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı tanıtım sunumu', boyut: 'A4 landscape', css, govde: [kapak(), sorular(), surec(), oranlar(), ornek(), persona(), otekiYollar(), bizSiz(), son()].join('\n') });
+  return sayfaIskeleti({ baslik: 'Thoptan iş ortaklığı tanıtım sunumu', boyut: 'A4 landscape', css, govde: [kapak(), sorular(), surec(), oranlar(), senaryo(), karsilastirma(), persona(), bizSiz(), son()].join('\n') });
 }
 export const GORSEL_SAYFA = TOPLAM;

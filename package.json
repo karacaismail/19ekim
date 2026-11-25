@@ -11,6 +11,7 @@
     "check": "astro check && node scripts/check-ui-gates.mjs",
     "gates": "node scripts/check-ui-gates.mjs",
     "test": "playwright test",
+    "birim": "node --test tests/birim/*.birim.mjs brosur/istoc/*.birim.mjs",
     "verify": "npm run check && npm run build && playwright test",
     "opex:paket": "node apps-script/build.mjs"
   },

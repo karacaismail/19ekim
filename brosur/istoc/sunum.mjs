@@ -1,14 +1,20 @@
 // Sunum: 16:9, 10 slayt. Her slayt tek bir öğe listesidir (inç cinsinden konum).
+// Kullanıcı kararı 25 Kasım 2026 Çarşamba: tutarlar euro olur. Örnek, büyüyen müşteri senaryosudur. Kadrolu uzman bilgisi yoktur.
 // Aynı liste hem PPTX dosyasını hem tarayıcı önizlemesini üretir. Önizleme taşma denetimi için kullanılır.
 import pptxgen from 'pptxgenjs';
 import { renk, slayt as S } from './tokenlar.mjs';
-import { plan, fiyat, hesap, kademeler, sayi, tl, yuzde, avro } from './veri.mjs';
+import { plan, fiyat, hesap, kademeler, anlar, kur12, sayi, tl, yuzde, avro, avroTam } from './veri.mjs';
 import { pathToFileURL } from 'node:url';
 import { esc, tokenCss, LOGO } from './sablon.mjs';
-import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR, OTEKI_YOLLAR } from './kitapcik.mjs';
+import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR } from './kitapcik.mjs';
 
 const W = S.genislik, H = S.yukseklik, M = S.kenar;
 const K = hesap.kapat, T = hesap.tanis;
+const KA = anlar(K), TA = anlar(T);
+const kap = kademeler('kapatir'), tan = kademeler('tanistir');
+const ay12 = KA.find((a) => a.n === 12), ay48 = KA.at(-1);
+/** 1. yıl K3 oranı, sonraki yıllar 13. aydan sonraki oranlardır. */
+const KAPAK_ORANLARI = [kap.at(-1).oran, ...plan.kapatir.gecmis.slice(0, 3)];
 const SATIR = 1.0; // PowerPoint satır aralığı çarpanı
 
 // Öğe yapıcıları
@@ -33,7 +39,7 @@ const alt = (n, koyu, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => [
 const baslik = (metin, koyu = false, w = 11.4, h = 1.25, boy = S.baslik) => yaz(M, 1.05, w, h, metin, { boy, kalin: true, renk: koyu ? 'kagit' : 'murekkep', satir: 0.95 });
 
 function s1() {
-  const op = [1, ...K.yillar.map((y) => 0.25 + (y.oran / K.oran) * 0.75)];
+  const op = KAPAK_ORANLARI.map((o, i) => (i ? 0.25 + (o / KAPAK_ORANLARI[0]) * 0.75 : 1));
   const kare = [];
   const gx = (W - 2 * M - 47 * 0.04) / 48;
   op.forEach((o, yi) => { for (let a = 0; a < 12; a++) kare.push(kutu(M + (yi * 12 + a) * (gx + 0.04), 5.95, gx, 0.32, o === 1 ? 'sari' : 'solukKoyu', { saydam: Math.round((1 - o) * 100) })); });
@@ -47,10 +53,10 @@ function s1() {
     yaz(M + 0.1, 4.55, 2.2, 0.95, 'aya kadar', { boy: 32, kalin: true, renk: 'sari' }),
     yaz(6.3, 2.25, 6.35, 1.75, 'Satışını kapattığınız müşteri size 48 aya kadar pay getirir.', { boy: 32, kalin: true, renk: 'kagit', satir: 0.95 }),
     yaz(6.3, 4.05, 6.35, 0.75, 'Thoptan iş ortaklığı programına sizi davet ediyoruz.', { boy: 20, renk: 'kagit' }),
-    yaz(6.3, 4.85, 6.35, 0.95, 'Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.', { boy: S.kucuk + 1, renk: 'solukKoyu' }),
+    yaz(6.3, 4.85, 6.35, 0.95, `Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az ${avro(plan.kapatir.esik[0])} ödemelidir.`, { boy: S.kucuk + 1, renk: 'solukKoyu' }),
     ...kare,
-    ...['1. yıl', ...K.yillar.map((y) => `${y.yil}. yıl`)].map((ad, i) => yaz(M + i * 12 * (gx + 0.04), 6.35, 2.8, 0.3, [parca(`${ad}  `, 'solukKoyu', false), parca(yuzde(i === 0 ? K.oran : K.yillar[i - 1].oran), 'sari')], { boy: S.kucuk })),
-    yaz(M, H - 0.55, 9, 0.3, `Oranlar ${tl(plan.ornekCiro)} aylık cirolu örnektendir. Kesin değerler yazılı anlaşmada belirlenir.`, { boy: S.kucuk - 1, renk: 'solukKoyu' }),
+    ...KAPAK_ORANLARI.map((o, i) => yaz(M + i * 12 * (gx + 0.04), 6.35, 2.8, 0.3, [parca(`${i + 1}. yıl  `, 'solukKoyu', false), parca(yuzde(o), 'sari')], { boy: S.kucuk })),
+    yaz(M, H - 0.55, 9, 0.3, 'Oranlar K3 seviyesinde satışı kapatma oranlarıdır. Kesin değerler yazılı anlaşmada belirlenir.', { boy: S.kucuk - 1, renk: 'solukKoyu' }),
     yaz(W - M - 2, H - 0.55, 2, 0.3, 'thoptan.com', { boy: S.kucuk - 1, renk: 'solukKoyu', hiza: 'right' }),
   ] };
 }
@@ -99,12 +105,12 @@ function s3() {
 }
 /** Kota merdiveni: basamaklar ince dikdörtgenlerdir. Böylece PowerPoint'te düzenlenebilir kalır. */
 function merdivenOgeleri(x0, y0, w, h) {
-  const enCok = 150_000, ust0 = 0.32;
+  const enCok = Math.ceil((kap.at(-1).esik * 1.25) / 1000) * 1000, ust0 = 0.32;
   const X = (c) => x0 + (c / enCok) * w;
   const Y = (o) => y0 + (1 - o / ust0) * h;
   const og = [];
   [0, 0.1, 0.2, 0.3].forEach((o) => { og.push(kutu(x0, Y(o), w, 0.012, 'cizgi'), yaz(x0 - 0.75, Y(o) - 0.14, 0.62, 0.3, `%${o * 100}`, { boy: S.kucuk, renk: 'soluk', hiza: 'right' })); });
-  [0, 30_000, 60_000, 90_000, 120_000, 150_000].forEach((c) => og.push(yaz(X(c) - 0.6, y0 + h + 0.1, 1.2, 0.3, c ? `${sayi(c / 1000)} bin TL` : '0 TL', { boy: S.kucuk, renk: 'soluk', hiza: 'center' })));
+  [0, 1, 2, 3, 4].map((i) => (enCok / 4) * i).forEach((c) => og.push(yaz(X(c) - 0.6, y0 + h + 0.1, 1.2, 0.3, `${sayi(c)} €`, { boy: S.kucuk, renk: 'soluk', hiza: 'center' })));
   // etiketRenk boşsa yalnız çizgi çizilir. Açık zeminde sarı çizginin altına lacivert bir kenar çizilir.
   const cizgi = (k, renkAdi, kal, etiketRenk, yukari) => k.forEach((s, i) => {
     const son = i === k.length - 1 ? enCok : k[i + 1].esik;
@@ -115,9 +121,6 @@ function merdivenOgeleri(x0, y0, w, h) {
   cizgi(kademeler('tanistir'), 'murekkep', 0.035, 'murekkep', true);
   cizgi(kademeler('kapatir'), 'murekkep', 0.1, null, true);
   cizgi(kademeler('kapatir'), 'sari', 0.06, 'lacivert', true);
-  const ox = X(plan.ornekCiro);
-  // Örnek çizgisi etiketlerin altında kalmasın diye kapatma etiketinin altından başlar.
-  og.push(kutu(ox, Y(0.2) + 0.05, 0.012, y0 + h - Y(0.2) - 0.05, 'soluk'), yaz(ox + 0.08, Y(0.035) - 0.16, 2.2, 0.3, `Örnek: ${tl(plan.ornekCiro)}`, { boy: S.kucuk, renk: 'soluk' }));
   return og;
 }
 
@@ -128,70 +131,114 @@ function s4() {
     kutu(M, 2.03, 0.4, 0.1, 'sari', { kenar: 'murekkep' }), yaz(M + 0.5, 1.93, 2.6, 0.32, 'Satışı kapatırsanız', { boy: S.kucuk, renk: 'soluk' }),
     kutu(M + 3.2, 2.06, 0.4, 0.04, 'murekkep'), yaz(M + 3.7, 1.93, 3, 0.32, 'Yalnız tanıştırırsanız', { boy: S.kucuk, renk: 'soluk' }),
     ...merdivenOgeleri(M + 0.85, 2.65, 7.3, 3.3),
-    yaz(9.45, 2.4, 3.2, 1.05, yuzde(K.oran), { boy: 60, kalin: true, renk: 'lacivert', satir: 0.9 }),
-    yaz(9.45, 3.4, 3.2, 0.65, `${tl(plan.ornekCiro)} aylık ciroda satışı kapatırsanız`, { boy: S.kucuk }),
-    yaz(9.45, 4.15, 3.2, 1.05, yuzde(T.oran), { boy: 60, kalin: true, satir: 0.9 }),
+    yaz(9.45, 2.4, 3.2, 1.05, yuzde(kap.at(-1).oran), { boy: 60, kalin: true, renk: 'lacivert', satir: 0.9 }),
+    yaz(9.45, 3.4, 3.2, 0.65, `${avro(kap.at(-1).esik)} ve üstü aylık ciroda satışı kapatırsanız`, { boy: S.kucuk }),
+    yaz(9.45, 4.15, 3.2, 1.05, yuzde(tan.at(-1).oran), { boy: 60, kalin: true, satir: 0.9 }),
     yaz(9.45, 5.15, 3.2, 0.65, 'Aynı ciroda yalnız tanıştırırsanız', { boy: S.kucuk }),
     yaz(M, 6.4, 11.9, 0.4, 'Eşikler ve oranlar bugünkü plandır. Kesin değerler yazılı anlaşmada belirlenir.', { boy: S.govde - 1, kalin: true }),
     ...alt(4, false),
   ] };
 }
 
-function s5() {
-  const donem = ['1. ile 12. ay', '13. ile 24. ay', '25. ile 36. ay', '37. ile 48. ay'];
-  const k = [K.oran, ...plan.kapatir.gecmis.slice(0, 3)];
-  const t = [T.oran, ...plan.tanistir.gecmis.slice(0, 3)];
-  const x0 = M, taban = 5.8, yuk = 3.0, gw = (W - 2 * M) / 4, cw = 0.95;
-  const Hh = (o) => (o / 0.2) * yuk;
-  const og = [kutu(x0, taban, W - 2 * M, 0.015, 'soluk')];
-  donem.forEach((d, i) => {
-    const xa = x0 + i * gw + 0.55, xb = xa + cw + 0.12;
-    og.push(kutu(xa, taban - Hh(k[i]), cw, Hh(k[i]), 'sari', { kenar: 'murekkep' }), yaz(xa - 0.3, taban - Hh(k[i]) - 0.48, cw + 0.6, 0.42, yuzde(k[i]), { boy: 20, kalin: true, renk: 'lacivert', hiza: 'center' }));
-    if (t[i]) og.push(kutu(xb, taban - Hh(t[i]), cw, Hh(t[i]), 'murekkep'), yaz(xb - 0.3, taban - Hh(t[i]) - 0.48, cw + 0.6, 0.42, yuzde(t[i]), { boy: 20, kalin: true, hiza: 'center' }));
-    else og.push(yaz(xb - 0.3, taban - 0.45, cw + 0.6, 0.4, 'Pay yok', { boy: S.kucuk, renk: 'soluk', hiza: 'center' }));
-    og.push(yaz(x0 + i * gw, taban + 0.12, gw, 0.32, d, { boy: S.kucuk, renk: 'soluk', hiza: 'center' }));
+/** Tablo: satırlar ince çizgiyle ayrılır. Vurgulu sütunun zemini kum rengidir. */
+function tablo(x, y0, sutunlar, satirlar, { satirH = 0.42, boy = S.kucuk, vurgu = [], vurguSatir = -1 } = {}) {
+  const og = [];
+  const w = sutunlar.reduce((t, s) => t + s.w, 0);
+  let cx = x;
+  sutunlar.forEach((s, i) => {
+    if (vurgu.includes(i)) og.push(kutu(cx, y0, s.w, satirH * (satirlar.length + 1), 'kum'));
+    og.push(yaz(cx + 0.1, y0 + 0.07, s.w - 0.2, satirH - 0.07, s.ad, { boy, kalin: true }));
+    cx += s.w;
   });
+  if (vurguSatir >= 0) og.push(kutu(x, y0 + satirH * (vurguSatir + 1), w, satirH, 'kumKoyu'));
+  og.push(kutu(x, y0 + satirH - 0.02, w, 0.035, 'murekkep'));
+  satirlar.forEach((satir, r) => {
+    const y = y0 + satirH * (r + 1);
+    if (r) og.push(kutu(x, y, w, 0.012, 'cizgi'));
+    let sx = x;
+    satir.forEach((hucre, i) => {
+      og.push(yaz(sx + 0.1, y + 0.07, sutunlar[i].w - 0.2, satirH - 0.07, hucre, { boy, kalin: i > 0 && vurgu.includes(i), renk: i > 0 && vurgu.includes(i) ? 'lacivert' : 'murekkep' }));
+      sx += sutunlar[i].w;
+    });
+  });
+  return og;
+}
+
+function s5() {
+  const donem = (i) => `${12 * (i + 1) + 1}. ile ${12 * (i + 2)}. ay`;
   return { zemin: 'kagit', ogeler: [
-    ...ust(false, 'Pay yıllara yayılır'),
+    ...ust(false, '13. aydan sonraki oranlar'),
     baslik('Pay 48 aya kadar azalarak sürer.', false, 11.9, 0.75),
-    kutu(M, 2.03, 0.4, 0.1, 'sari', { kenar: 'murekkep' }), yaz(M + 0.5, 1.93, 2.6, 0.32, 'Satışı kapatırsanız', { boy: S.kucuk, renk: 'soluk' }),
-    kutu(M + 3.2, 2.03, 0.4, 0.1, 'murekkep'), yaz(M + 3.7, 1.93, 3, 0.32, 'Yalnız tanıştırırsanız', { boy: S.kucuk, renk: 'soluk' }),
-    ...og,
+    yaz(M, 1.85, 11.9, 0.4, 'Müşteri ödemeye devam ederse satıcı bu aylarda bu oranı alır.', { boy: S.govde, renk: 'soluk' }),
+    yaz(M, 2.45, 8, 0.45, '13. aydan sonraki oranlar', { boy: 20, kalin: true }),
+    ...tablo(M, 3.0, [{ ad: 'Dönem', w: 3.6 }, { ad: 'Yalnız tanıştırırsanız', w: 3.6 }, { ad: 'Satışı kapatırsanız', w: 3.6 }],
+      plan.kapatir.gecmis.map((g, i) => [donem(i), yuzde(plan.tanistir.gecmis[i]), yuzde(g)]), { satirH: 0.55, boy: S.govde, vurgu: [2] }),
+    yaz(M, 5.95, 11.9, 0.35, 'İlk 12 ayda kotanızın oranını alırsınız. Oran %0 olunca pay biter.', { boy: S.kucuk, renk: 'soluk' }),
     yaz(M, 6.4, 11.9, 0.4, 'Ciro tek bir ay K1 kotasının altında kalırsa 13. aydan sonra pay alınmaz.', { boy: S.govde - 1, kalin: true }),
     ...alt(5, false),
   ] };
 }
 
 function s6() {
-  const kutuSayi = (x, w, ust1, alt1, renkAdi, yaziRenk) => [kutu(x, 2.45, w, 1.5, renkAdi), yaz(x + 0.25, 2.6, w - 0.5, 0.75, ust1, { boy: 32, kalin: true, renk: yaziRenk }), yaz(x + 0.25, 3.35, w - 0.5, 0.5, alt1, { boy: S.kucuk, renk: yaziRenk })];
-  const isaret = (x, s) => yaz(x, 2.8, 0.6, 0.8, s, { boy: 40, kalin: true, hiza: 'center', renk: 'soluk' });
-  const yil = [['İlk 12 ay', K.ilkYil], ...K.yillar.map((y) => [`${12 * (y.yil - 1) + 1}. ile ${12 * y.yil}. ay`, y.tutar])];
-  const yw = 1.95;
+  const sw = (W - 2 * M - 3 * 0.12) / 4;
+  const kw = (W - 2 * M - 5 * 0.1) / 6;
+  const seviye = kap.map((k, i) => {
+    const x = M + 5.0 + i * ((W - 2 * M - 5.0 - 3 * 0.08) / 4 + 0.08);
+    const w = (W - 2 * M - 5.0 - 3 * 0.08) / 4;
+    return [kutu(x, 1.95, w, 1.05, i === 3 ? 'sari' : 'kum'),
+      yaz(x + 0.1, 1.98, w - 0.2, 0.4, i ? `K${i}` : 'K0', { boy: 20, kalin: true, renk: i === 3 ? 'murekkep' : 'lacivert' }),
+      yaz(x + 0.1, 2.36, w - 0.2, 0.3, yuzde(k.oran), { boy: S.kucuk, kalin: true }),
+      yaz(x + 0.1, 2.64, w - 0.2, 0.3, i ? `${K.seviyeAyi[i - 1]}. ay` : 'Başlangıç', { boy: S.kucuk })];
+  }).flat();
+  const tas = KA.flatMap((a, i) => {
+    const x = M + i * (kw + 0.1);
+    const zemin = i === KA.length - 1 ? 'sari' : i >= 3 ? 'kumKoyu' : 'kum';
+    return [kutu(x, 3.3, kw, 2.75, zemin), kutu(x, 3.3, kw, 0.06, 'murekkep'),
+      yaz(x + 0.12, 3.45, kw - 0.24, 0.4, a.ad, { boy: 18, kalin: true }),
+      yaz(x + 0.12, 3.85, kw - 0.24, 0.3, `${a.musteri} müşteri`, { boy: S.kucuk }),
+      yaz(x + 0.12, 4.3, kw - 0.24, 0.3, 'O ay', { boy: S.kucuk }),
+      yaz(x + 0.12, 4.58, kw - 0.24, 0.4, avro(a.kazancEur), { boy: 18, kalin: true }),
+      yaz(x + 0.12, 5.05, kw - 0.24, 0.3, 'Toplam', { boy: S.kucuk }),
+      yaz(x + 0.12, 5.33, kw - 0.24, 0.5, avro(a.toplamEur), { boy: 22, kalin: true, renk: i === KA.length - 1 ? 'murekkep' : 'lacivert' })];
+  });
   return { zemin: 'kagit', ogeler: [
-    ...ust(false, 'Örnek hesap'),
-    baslik(`Örnekte aylık ${tl(plan.ornekCiro)} ciro 4 yılda ${tl(K.toplam)} pay getirir.`, false, 11.9, 0.75, 30),
-    yaz(M, 1.85, 11.9, 0.4, `Bu bir örnektir. Müşteriler her ay toplam ${tl(plan.ornekCiro)} öder. Müşteriler 48 ay kalır. Kota koşulu her ay sağlanır.`, { boy: S.kucuk, renk: 'soluk' }),
-    ...kutuSayi(M, 3.3, tl(K.ciro), 'Aylık ciro', 'kum', 'murekkep'),
-    isaret(M + 3.35, '×'),
-    ...kutuSayi(M + 4.0, 2.4, yuzde(K.oran), 'K1 kotasında oran', 'kum', 'murekkep'),
-    isaret(M + 6.45, '='),
-    ...kutuSayi(M + 7.1, 4.83, `ayda ${tl(K.aylik)}`, 'Satışı kapattığınızda payınız', 'sari', 'murekkep'),
-    ...yil.flatMap(([ad, v], i) => {
-      const x = M + i * (yw + 0.12);
-      return [kutu(x, 4.4, yw, 0.05, 'murekkep'), yaz(x, 4.55, yw, 0.35, ad, { boy: S.kucuk, renk: 'soluk' }), yaz(x, 4.9, yw, 0.6, tl(v), { boy: 22, kalin: true })];
-    }),
-    kutu(M + 4 * (yw + 0.12), 4.4, W - 2 * M - 4 * (yw + 0.12), 1.5, 'murekkep'),
-    yaz(M + 4 * (yw + 0.12) + 0.25, 4.55, 3.2, 0.35, 'Dört yılın toplamı', { boy: S.kucuk, renk: 'solukKoyu' }),
-    yaz(M + 4 * (yw + 0.12) + 0.25, 4.9, 3.4, 0.75, tl(K.toplam), { boy: 32, kalin: true, renk: 'sari' }),
-    yaz(M, 6.2, 11.9, 0.65, `Yalnız tanıştırırsanız oran ${yuzde(T.oran)} olur. Üç yılın toplamı ${tl(T.toplam)} eder. Vergi ve stopaj dahil değildir.`, { boy: S.kucuk, renk: 'soluk' }),
+    ...ust(false, 'Büyüyen müşteri senaryosu'),
+    baslik(`12. ayda her ay ${avroTam(ay12.kazanc)} kazanırsınız.`, false, 11.9, 0.75),
+    yaz(M, 1.95, 4.7, 1.25, `Bu gerçekçi senaryoda her ay ${K.yeni} yeni müşteri getirirsiniz. Her müşteri Basic paket için ayda ${avro(fiyat.basicAyEur)} öder. Müşteriler ${plan.musteriAy} ay kalır. Satışı siz kapatırsınız.`, { boy: S.kucuk, renk: 'soluk' }),
+    ...seviye,
+    ...tas,
+    yaz(M, 6.15, 11.9, 0.35, `${K.seviyeAyi[2]}. ayda K3 seviyesine çıkarsınız. 4 yılın toplamı ${avroTam(ay48.toplam)} olur.`, { boy: S.kucuk, kalin: true }),
+    yaz(M, 6.5, 11.9, 0.35, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
     ...alt(6, false),
   ] };
 }
 
 function s7() {
-  const sw = (W - 2 * M) / 4;
+  const Sn = hesap.senaryolar;
   return { zemin: 'kagit', ogeler: [
-    ...ust(false, 'Dört ortaklık yolu'),
+    ...ust(false, 'Senaryoları karşılaştırın'),
+    baslik('Her yeni müşteri kazancınızı büyütür.', false, 11.9, 0.75),
+    yaz(M, 1.9, 6.9, 0.4, 'İki yol, gerçekçi senaryo', { boy: 18, kalin: true }),
+    ...tablo(M, 2.35, [{ ad: 'Zaman', w: 1.75 }, { ad: 'Kapatma: o ay', w: 1.75 }, { ad: 'Kapatma: toplam', w: 1.85 }, { ad: 'Tanıştırma: toplam', w: 1.95 }],
+      KA.map((a, i) => [a.ad, avro(a.kazancEur), avro(a.toplamEur), avro(TA[i].toplamEur)]), { vurgu: [1, 2] }),
+    yaz(M, 5.4, 6.9, 0.35, 'Satışı kapatırsanız kazancınız yaklaşık 2 kat olur.', { boy: S.kucuk, renk: 'soluk' }),
+    yaz(M + 7.6, 1.9, 4.3, 0.4, 'Üç senaryo, satışı kapatırsanız', { boy: 18, kalin: true }),
+    ...tablo(M + 7.6, 2.35, [{ ad: 'Senaryo', w: 1.35 }, { ad: 'Ayda yeni', w: 1.15 }, { ad: '4 yıl toplamı', w: 1.8 }],
+      Sn.map((x) => [x.ad, String(x.yeniMusteri), avroTam(x.kapat.aylar.at(-1).toplam)]), { vurguSatir: Sn.findIndex((x) => x.ana) }),
+    kutu(M + 7.6, 4.25, 4.3, 1.5, 'kumKoyu'),
+    yaz(M + 7.75, 4.3, 4.0, 0.3, 'Kur bilgisi', { boy: S.kucuk, kalin: true }),
+    yaz(M + 7.75, 4.6, 4.0, 0.6, `1 € = ${sayi(kur12.kur)} TL. 12. ay kazancı ${avro(kur12.eur)} yaklaşık ${tl(kur12.tl)} eder.`, { boy: S.kucuk }),
+    yaz(M + 7.75, 5.15, 4.0, 0.6, `Kur ${kur12.tarih} günkü değerdir. Kur değişince TL tutarı da değişir.`, { boy: S.kucuk }),
+    yaz(M, 6.0, 11.9, 0.35, `İlk ay en az ${K.yeni} müşteri getirin. Böylece K1 kotası her ay tutar.`, { boy: S.kucuk, kalin: true }),
+    yaz(M, 6.4, 11.9, 0.35, 'Bu bir örnek senaryodur. Kazanç garantisi değildir.', { boy: S.kucuk, kalin: true }),
+    ...alt(7, false),
+  ] };
+}
+
+function s8() {
+  const sw = (W - 2 * M) / 3;
+  return { zemin: 'kagit', ogeler: [
+    ...ust(false, 'Üç ortaklık yolu'),
     baslik('Hangisi sizsiniz?', false, 11.9, 0.75),
     ...PERSONALAR.flatMap((p, i) => {
       const x = M + i * sw;
@@ -207,29 +254,7 @@ function s7() {
         yaz(x + 0.2, 5.65, sw - 0.4, 0.68, p.basla, { boy: S.kucuk }),
       ];
     }),
-    yaz(M, 6.45, 11.9, 0.35, 'SGK’lı, sosyal güvenlik kaydı olan çalışan demektir.', { boy: S.kucuk, renk: 'soluk' }),
-    ...alt(7, false),
-  ] };
-}
-
-function s8() {
-  const sw = (W - 2 * M - 2 * 0.3) / 3;
-  return { zemin: 'kagit', ogeler: [
-    ...ust(false, 'Öteki üç yol'),
-    baslik('Her yolun kendi kazancı ve kendi ilk adımı var.', false, 11.9, 0.75),
-    ...OTEKI_YOLLAR.flatMap((y, i) => {
-      const x = M + i * (sw + 0.3);
-      return [
-        kutu(x, 1.9, sw, 0.07, i === 0 ? 'sari' : 'murekkep'),
-        yaz(x, 2.05, sw, 0.4, y.ad, { boy: 18, kalin: true }),
-        yaz(x, 2.5, sw, 1.05, y.kanca, { boy: S.govde, kalin: true }),
-        yaz(x, 3.6, sw, 0.8, y.sayi, { boy: 40, kalin: true, renk: 'lacivert' }),
-        yaz(x, 4.4, sw, 0.95, y.sayiNotu, { boy: S.kucuk, renk: 'soluk' }),
-        kutu(x, 5.4, sw, 1.0, 'murekkep'),
-        yaz(x + 0.2, 5.48, sw - 0.4, 0.3, 'İlk adım', { boy: S.kucuk, kalin: true, renk: 'sari' }),
-        yaz(x + 0.2, 5.78, sw - 0.4, 0.58, y.ilkAdim, { boy: S.kucuk, renk: 'kagit' }),
-      ];
-    }),
+    yaz(M, 6.45, 11.9, 0.35, 'Her yolun kendi kazancı ve kendi ilk adımı var.', { boy: S.kucuk, renk: 'soluk' }),
     ...alt(8, false),
   ] };
 }
