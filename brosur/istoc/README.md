@@ -62,12 +62,22 @@ Renkler thoptan.com sitesindeki `brand.css` dosyasından alındı. Ana renk laci
 
 Sarı açık zeminde metin rengi olmaz. Sarı zeminde yazı lacivert olur. Açık zemindeki sarı grafik çubuğunun ince lacivert kenarı vardır.
 
-Logo dosyaları thoptan.com sitesinden alındı. Kaynak adresler şunlardır:
+Sitedeki logo dosyası yalnız 250 × 64 pikseldir. Bu boyut baskıda bulanık durur. Bu yüzden logo yeniden çizildi.
 
-- `gorsel/thoptan-logo.png`: https://thoptan.com/images/thoptan-logo.png (lacivert logo, açık zeminde)
-- `gorsel/thoptan-logo-beyaz.png`: https://thoptan.com/images/thoptan-logo-beyaz.png (sarı logo, koyu zeminde)
+Örnek logo thoptan.com sitesindeki dosyadır: https://thoptan.com/images/thoptan-logo.png
 
-Logo dosyası 250 × 64 pikseldir. Logo PDF'te en çok 42 mm genişlikte basılır. PPTX'te en çok 2,2 inç genişlikte durur. Üretici daha geniş logoyu reddeder. Logo esnetilmez ve rengi değiştirilmez.
+Logo Poppins SemiBold Italic yazı tipiyle çizildi. Harf aralığı yazı boyunun binde 12'si kadar daraltıldı. Poppins, SIL Open Font License 1.1 lisanslı bir Google Fonts yazı tipidir.
+
+- `gorsel/thoptan-logo.png`: lacivert `#23488d` logo, açık zeminde kullanılır.
+- `gorsel/thoptan-logo-beyaz.png`: sarı `#fcde00` logo, koyu zeminde kullanılır.
+
+İki dosya da 2500 × 640 pikseldir ve zemini saydamdır. Oran eski dosyayla aynıdır. Logoyu yeniden çizmek için şu komutu çalıştırın:
+
+```bash
+cd brosur/istoc && node logo-ciz.mjs
+```
+
+Logo PDF'te en çok 42 mm genişlikte basılır. PPTX'te en çok 2,2 inç genişlikte durur. Üretici daha geniş logoyu reddeder. Logo esnetilmez ve rengi değiştirilmez.
 
 ## Yazı tipleri
 

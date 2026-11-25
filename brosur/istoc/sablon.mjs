@@ -40,7 +40,7 @@ ${css}
 }
 
 /**
- * Thoptan logosu. Logo dosyaları thoptan.com sitesinden alındı (kaynak README.md içinde).
+ * Thoptan logosu. Logo `logo-ciz.mjs` ile 2500 × 640 piksel yeniden çizildi (kaynak README.md içinde).
  * Lacivert logo açık zeminde, sarı logo koyu lacivert zeminde kullanılır.
  * Logo esnetilmez: yalnız genişlik verilir, yükseklik oranla gelir. Genişlik en çok 42 mm olur.
  */
