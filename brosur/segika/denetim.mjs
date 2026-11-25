@@ -81,14 +81,14 @@ const YASAK = ['Kadrolu', 'insan kaynakları danışman', 'Bu davet mali müşav
  * Toplantı kararıyla bu konular belgelerde hiç geçmez: hukuk, meslek kuralı, yazılı anlaşma, imza, sözleşme,
  * bağlayıcılık, şifre ve mevcut müşteri ödülü. Kelime başı aranır. Böylece kelimenin bütün ekli biçimleri yakalanır.
  */
-const YASAK_KELIME = [/hukuk/, /meslek kural/, /yazılı anlaşma/, /imza/, /sözleşme/, /bağlayıcı/, /şifre/, /tavsiye/,
+const YASAK_KELIME = [/üst üste eklenen/, /hukuk/, /meslek kural/, /yazılı anlaşma/, /imza/, /sözleşme/, /bağlayıcı/, /şifre/, /tavsiye/,
   /ücretsiz kullanım/, /müşteri sorumlusu/]
   .map((r) => new RegExp(`(^|[^\\p{L}])${r.source}`, 'u'));
 const kelimeBul = (metin) => YASAK_KELIME.filter((r) => r.test(sade(metin).toLocaleLowerCase('tr-TR'))).map((r) => r.source.replace(/^.*\)/, ''));
 /** Basamağın eski kısa adları okura görünmez. Basamaklar "1. seviye" ile "4. seviye" arasında adlandırılır. */
 const ESKI_BASAMAK = /(^|[^0-9A-Za-zÇĞİÖŞÜçğıöşü])K[1-3](?![0-9])/;
 const ZORUNLU = [
-  'kümülatif', 'Kümülatif, üst üste eklenen demektir.', '100 çalışan',
+  'kümülatif', '100 çalışan',
   'Şirketinize uygun planı seçin.', '6.250 TL', '5.400 TL', '8.900 TL',
   'İki ortaklık yolu', "Segika'nın taahhütleri", 'Sizin taahhütleriniz',
   'otomatik', '4 yıla kadar', '%15', '%20', '%25', '%30',

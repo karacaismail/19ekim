@@ -154,7 +154,6 @@ export const M = {
     tesvik: 'Teşvik, devletin işverene verdiği destektir. Sigorta prim desteği buna bir örnektir.',
     serit: '12 ay, 12 bordro. Her bordroda bir teşvik kontrolü vardır.',
     cubuk: 'Kazancınız da ay ay birikir. Çubuklar kümülatif kazancı gösterir.',
-    kumulatif: 'Kümülatif, üst üste eklenen demektir.',
     cubukNot: `Örnekte her ay 2 yeni işveren aylık paket alır. 12. ayın sonunda birikim ${tl(AYLIK[11].birikim)} olur. Bu bir örnektir. Kazanç sözü değildir.`,
     davet: 'Segika iş ortaklığı programına davetlisiniz.',
   },
@@ -259,7 +258,6 @@ export const M = {
   aylik: {
     ust: 'Aylık satış',
     kanca: 'Aylık satışta kazancınız kümülatif büyür.',
-    kumulatif: 'Kümülatif, üst üste eklenen demektir.',
     uyari: 'Bu sayfa bir örnektir. Gerçek satış ya da kazanç sözü değildir.',
     durum: `Her ay 2 yeni işveren aylık paket alsın. Her işverenin ${CALISAN} çalışanı var. Her işveren Teşvik ve Otomasyon paketini alır ve her ay ${tl(paket)} öder.`,
     neden: 'Önceki ayların işverenleri ödemeye devam eder. Yeni işverenler bunların üstüne eklenir. Bu yüzden aylık ciro her ay büyür.',

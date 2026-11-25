@@ -240,7 +240,7 @@ const sayfalar = [
     <div class="acilis-izgara">
       <div><h1 class="kanca">${A.kanca}</h1><p class="kanca2">${A.kanca2}</p>
         <div class="isler4">${A.isler.map((x) => `<div><b>${x.b}</b><p>${x.m}</p></div>`).join('')}</div></div>
-      <div class="sag"><p class="s1">${A.serit}</p><p class="s2">${A.cubuk} <b>${A.kumulatif}</b></p>
+      <div class="sag"><p class="s1">${A.serit}</p><p class="s2">${A.cubuk}</p>
         ${ayCubuk({ degerler: AYLIK.map((a) => a.birikim), genislik: 500, yukseklik: 165, boyut: 15.5 })}
         ${aySeridi({ genislik: 500, boyut: 15.5 })}
         <p class="s3">Çubuktaki tutarlar bin TL'dir. ${A.cubukNot}</p></div>
@@ -302,7 +302,7 @@ const sayfalar = [
     const A = M.aylik;
     return `<section class="sayfa">${bas(8, A.ust)}
     <h2 class="kanca">${A.kanca}</h2>
-    <p class="kumulatif-kutu"><b>${A.kumulatif}</b> ${A.neden}</p>
+    <p class="kumulatif-kutu">${A.neden}</p>
     <p class="alt-baslik" style="color:var(--r-murekkep)">${A.durum}</p>
     <div style="margin-top:auto">${ayCubuk({ degerler: AYLIK.map((a) => a.kazanc), genislik: 900, yukseklik: 190, boyut: 16, renkler: AYLIK.map((a) => renkOran(a.oran)), yazi: R.murekkep, altRenk: R.gri, alt: (i) => `${i + 1}. ay`, eksen: R.cizgi })}</div>
     <div class="aylik-sonuc"><p class="sonuc">${A.sonuc}</p><p class="not">Çubuk o ayın kazancıdır. Tutarlar bin TL'dir. Renk oranı gösterir: gri %15, açık mavi %20, lacivert %25, yeşil %30. ${A.uyari} ${A.varsayim}</p></div>

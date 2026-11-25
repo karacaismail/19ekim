@@ -237,7 +237,7 @@ function acilis() {
   <div class="isler4">${A.isler.map((x) => `<div><b>${x.b}</b><p>${x.m}</p></div>`).join('')}</div>
   <div class="serit">
     <p class="s1">${A.serit}</p>
-    <p class="s2">${A.cubuk} <b>${A.kumulatif}</b></p>
+    <p class="s2">${A.cubuk}</p>
     ${ayCubuk({ degerler: AYLIK.map((a) => a.birikim), genislik: 640, yukseklik: 165, boyut: 15 })}
     ${aySeridi({ genislik: 640, boyut: 15 })}
     <p class="s3">Çubuktaki tutarlar bin TL'dir. ${A.cubukNot}</p>
@@ -341,7 +341,7 @@ function aylik() {
   const renk = (o) => (o === 0.3 ? R.yesil : o === 0.25 ? R.lacivert : o === 0.2 ? R.tanistirma : R.cizgi);
   return `<section class="sayfa"><div class="ic">${bas(8, A.ust)}
   <h2 class="kanca" style="margin-bottom:1.5mm">${A.kanca}</h2>
-  <p class="kumulatif-kutu"><b>${A.kumulatif}</b> ${A.neden}</p>
+  <p class="kumulatif-kutu">${A.neden}</p>
   <p class="uyari-ust" style="margin-top:3mm">${A.uyari}</p>
   <p style="margin-top:1.5mm">${A.durum} ${A.oran}</p>
   <div style="margin-top:3mm">${ayCubuk({ degerler: AYLIK.map((a) => a.kazanc), genislik: 640, yukseklik: 128, boyut: 15, renkler: AYLIK.map((a) => renk(a.oran)), yazi: R.murekkep, altRenk: R.gri, alt: (i) => `${i + 1}. ay`, eksen: R.cizgi })}</div>

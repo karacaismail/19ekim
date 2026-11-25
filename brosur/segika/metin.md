@@ -30,7 +30,7 @@ Segika, Sosyal Güvenlik Kurumu (SGK) işlerini otomatik yapan bir programdır.
 
 12 ay, 12 bordro. Her bordroda bir teşvik kontrolü vardır.
 
-Kazancınız da ay ay birikir. Çubuklar kümülatif kazancı gösterir. Kümülatif, üst üste eklenen demektir.
+Kazancınız da ay ay birikir. Çubuklar kümülatif kazancı gösterir.
 
 Her ayın noktasının hemen üstünde bir çubuk durur. Çubuktaki tutarlar bin TL'dir. Örnekte her ay 2 yeni işveren aylık paket alır. 12. ayın sonunda birikim 391.600 TL olur. Bu bir örnektir. Kazanç sözü değildir.
 
@@ -200,7 +200,7 @@ Yıllara yayılan tutar örnektir. Kazanılmış hak sayılmaz. Oran, bugünkü 
 
 Aylık satışta kazancınız kümülatif büyür.
 
-Kümülatif, üst üste eklenen demektir. Önceki ayların işverenleri ödemeye devam eder. Yeni işverenler bunların üstüne eklenir. Bu yüzden aylık ciro her ay büyür.
+Önceki ayların işverenleri ödemeye devam eder. Yeni işverenler bunların üstüne eklenir. Bu yüzden aylık ciro her ay büyür.
 
 Bu sayfa bir örnektir. Gerçek satış ya da kazanç sözü değildir.
 
