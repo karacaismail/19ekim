@@ -1,7 +1,7 @@
 // El kitapçığı: A4 dikey, 9 sayfa. Okunacak belgedir. Koşullar, süreç ve hesap örnekleri eksiksiz yazılır.
 import { a4 } from './tokenlar.mjs';
 import { plan, fiyat, tavsiye, hesap, kademeler, sayi, tl, yuzde, avro } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, donemCubuklari, paketMerdiveni } from './sablon.mjs';
 
 const TOPLAM = 9;
 const css = `
@@ -11,6 +11,7 @@ const css = `
 .ust, .alt { display: flex; justify-content: space-between; align-items: baseline; font-size: ${a4.dipnot}pt; color: var(--soluk); }
 .koyu .ust, .koyu .alt { color: var(--solukKoyu); }
 .alt { margin-top: auto; padding-top: 5mm; }
+.alt-imza { font-weight: 600; letter-spacing: 0.02em; }
 .logo { display: block; }
 .ust { align-items: center; }
 .imza { display: block; margin-top: 1.5mm; font-size: ${a4.dipnot}pt; font-weight: 600; letter-spacing: 0.02em; color: var(--solukKoyu); }
@@ -179,7 +180,7 @@ h1.kanca.orta { font-size: 25pt; }
 `;
 
 const ust = (bolumAdi) => `<header class="ust">${logo({ mm: 20 })}<span>${bolumAdi}</span></header>`;
-const alt = (n) => `<footer class="alt"><span>Thoptan iş ortaklığı kılavuzu</span><span>${n} / ${TOPLAM}</span></footer>`;
+const alt = (n) => `<footer class="alt"><span>Thoptan iş ortaklığı kılavuzu</span>${altImza()}<span>${n} / ${TOPLAM}</span></footer>`;
 const bolum = (no, ad) => `<div class="bolum"><b>${String(no).padStart(2, '0')}</b><span>${ad}</span></div>`;
 
 const kap = kademeler('kapatir');
@@ -207,7 +208,7 @@ function kapak() {
     <p>Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.</p>
     <p class="not">Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en az 30.000 TL ödemelidir.</p>
   </div>
-  <footer class="alt"><span>thoptan.com</span><span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
+  <footer class="alt"><span>thoptan.com</span>${altImza()}<span>23 Kasım 2026 Pazartesi günkü plan</span></footer>
 </section>`;
 }
 

@@ -12,7 +12,9 @@ Thoptan iş ortaklığı kılavuzu
 
 Thoptan iş ortaklığı tanıtım sunumu
 
-Connect to iStoc
+Connect to iStoc.com
+
+Bu yazı kapakta, son sayfada ve öteki sayfaların alt bilgisinde durur.
 
 Thoptan ile istoc.com ağına bağlanırsınız.
 
@@ -333,7 +335,7 @@ Hangi müşterinizle başlarsınız?
 
 thoptan.com
 
-Connect to iStoc
+Connect to iStoc.com
 
 Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.
 

@@ -105,7 +105,7 @@ for (const b of belgeler) {
     const pdfSayfalari = await pdfMetni(hedef);
     const pdfYazisi = pdfSayfalari.join('\n');
     // Kopyalanan metin doğru çıkmalı. Türkçe harfler ve büyük İ ayrıca aranır. Asıl marka Thoptan'dır.
-    const aranan = ['müşteri', 'İlk adım', 'Koşullar', 'şirket', 'Thoptan', 'thoptan.com', 'Connect to iStoc', 'Thoptan ile istoc.com ağına bağlanırsınız.'].filter((k) => !pdfYazisi.includes(k));
+    const aranan = ['müşteri', 'İlk adım', 'Koşullar', 'şirket', 'Thoptan', 'thoptan.com', 'Connect to iStoc.com','Thoptan ile istoc.com ağına bağlanırsınız.'].filter((k) => !pdfYazisi.includes(k));
     not(`${b.pdf}: ${pdfSayfalari.length} sayfa, Outfit gömülü: ${gomulu ? 'evet' : 'hayır'}, yazı tipi türleri: ${turler.join(', ')}, ${Math.round(fs.statSync(hedef).size / 1024)} KB.`);
     if (pdfSayfalari.length !== b.sayfa || !gomulu) { not(`HATA ${b.pdf}: sayfa ya da yazı tipi beklenen gibi değil.`); hata++; }
     if (turler.includes('Type3')) { not(`HATA ${b.pdf}: Type3 yazı tipi var. Metin kopyalanamaz.`); hata++; }

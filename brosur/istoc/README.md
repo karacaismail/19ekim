@@ -66,7 +66,7 @@ Sitedeki logo dosyası yalnız 250 × 64 pikseldir. Bu boyut baskıda bulanık d
 
 Örnek logo thoptan.com sitesindeki dosyadır: https://thoptan.com/images/thoptan-logo.png
 
-Logo Poppins SemiBold Italic yazı tipiyle çizildi. Harf aralığı yazı boyunun binde 12'si kadar daraltıldı. Poppins, SIL Open Font License 1.1 lisanslı bir Google Fonts yazı tipidir.
+Logo Poppins Bold Italic yazı tipiyle çizildi. Harf aralığı yazı boyunun yüzde 2'si kadar daraltıldı. SemiBold ağırlığı asıl logodan ince durdu. Poppins, SIL Open Font License 1.1 lisanslı bir Google Fonts yazı tipidir.
 
 - `gorsel/thoptan-logo.png`: lacivert `#23488d` logo, açık zeminde kullanılır.
 - `gorsel/thoptan-logo-beyaz.png`: sarı `#fcde00` logo, koyu zeminde kullanılır.

@@ -56,8 +56,11 @@ export function logo({ koyu = false, mm = 26 } = {}) {
   return `<img class="logo" src="${logoVeri(koyu)}" alt="Thoptan" style="width:${mm}mm;height:${(mm / LOGO.oran).toFixed(2)}mm">`;
 }
 
-/** Kapakta ve son sayfada logonun altındaki küçük imza. Her sayfaya konmaz. */
-export const imza = () => '<span class="imza dipnot" lang="en">Connect to iStoc</span>';
+/** Kapakta ve son sayfada logonun altındaki küçük imza. Aynı yazı öteki sayfaların alt bilgisinde de durur. */
+export const IMZA = 'Connect to iStoc.com';
+export const imza = () => `<span class="imza dipnot" lang="en">${IMZA}</span>`;
+/** Alt bilginin ortasındaki imza. */
+export const altImza = () => `<span class="alt-imza" lang="en">${IMZA}</span>`;
 
 /**
  * Kota merdiveni. Yatay eksen aylık ciro, dikey eksen orandır. İki katkı türü iki basamaklı çizgidir.

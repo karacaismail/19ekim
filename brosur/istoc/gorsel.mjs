@@ -1,6 +1,6 @@
 // Görsel PDF sunumu: A4 yatay, 8 sayfa. Az metin, büyük sayılar ve şemalar.
 import { plan, fiyat, hesap, kademeler, tl, yuzde, avro } from './veri.mjs';
-import { sayfaIskeleti, logo, imza, merdiven, donemCubuklari } from './sablon.mjs';
+import { sayfaIskeleti, logo, imza, altImza, merdiven, donemCubuklari } from './sablon.mjs';
 import { SORULAR, ADIMLAR, PERSONALAR, BIZ, SIZ, ILK_ADIMLAR, OTEKI_YOLLAR } from './kitapcik.mjs';
 
 const TOPLAM = 9;
@@ -12,6 +12,7 @@ const css = `
 .ust, .alt { display: flex; justify-content: space-between; align-items: baseline; font-size: 10pt; color: var(--soluk); }
 .koyu .ust, .koyu .alt { color: var(--solukKoyu); }
 .alt { margin-top: auto; padding-top: 4mm; }
+.alt-imza { font-weight: 600; letter-spacing: 0.02em; }
 .logo { display: block; }
 .ust { align-items: center; }
 .imza { display: block; margin-top: 1.5mm; font-size: 10pt; font-weight: 600; letter-spacing: 0.02em; color: var(--solukKoyu); }
@@ -120,7 +121,7 @@ p, li { font-size: 12pt; line-height: 1.38; }
 `;
 
 const ust = (ad) => `<header class="ust">${logo({ mm: 26 })}<span>${ad}</span></header>`;
-const alt = (n, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => `<footer class="alt"><span>${sol}</span><span>${n} / ${TOPLAM}</span></footer>`;
+const alt = (n, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => `<footer class="alt"><span>${sol}</span>${altImza()}<span>${n} / ${TOPLAM}</span></footer>`;
 
 function kapak() {
   const op = [1, ...K.yillar.map((y) => 0.25 + (y.oran / K.oran) * 0.75)];
@@ -263,7 +264,7 @@ function son() {
     </div>
     <div class="adres">${logo({ koyu: true, mm: 42 })}${imza()}<b>thoptan.com</b></div>
   </div>
-  <footer class="alt"><span>Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.</span><span>${TOPLAM} / ${TOPLAM}</span></footer>
+  <footer class="alt"><span>Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.</span>${altImza()}<span>${TOPLAM} / ${TOPLAM}</span></footer>
 </section>`;
 }
 

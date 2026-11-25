@@ -26,7 +26,8 @@ const logo = (x, y, w, koyu) => {
 };
 const ust = (koyu, sag) => [logo(M, 0.38, 1.4, koyu), yaz(W - M - 6, 0.46, 6, 0.32, sag, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' })];
 const alt = (n, koyu, sol = 'Thoptan iş ortaklığı tanıtım sunumu') => [
-  yaz(M, H - 0.55, 8, 0.3, sol, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk' }),
+  yaz(M, H - 0.55, 6, 0.3, sol, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk' }),
+  yaz(W - M - 5.6, H - 0.55, 3.4, 0.3, 'Connect to iStoc.com', { boy: S.kucuk, kalin: true, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' }),
   yaz(W - M - 2, H - 0.55, 2, 0.3, `${n} / 10`, { boy: S.kucuk, renk: koyu ? 'solukKoyu' : 'soluk', hiza: 'right' }),
 ];
 const baslik = (metin, koyu = false, w = 11.4, h = 1.25, boy = S.baslik) => yaz(M, 1.05, w, h, metin, { boy, kalin: true, renk: koyu ? 'kagit' : 'murekkep', satir: 0.95 });
@@ -39,7 +40,7 @@ function s1() {
   return { zemin: 'murekkep', ogeler: [
     yaz(W - M - 6, 0.46, 6, 0.32, 'İş ortaklığı programı', { boy: S.kucuk, renk: 'solukKoyu', hiza: 'right' }),
     logo(6.3, 0.4, 2.2, true),
-    yaz(6.3, 1.05, 3, 0.3, 'Connect to iStoc', { boy: S.kucuk, kalin: true, renk: 'solukKoyu' }),
+    yaz(6.3, 1.05, 3, 0.3, 'Connect to iStoc.com', { boy: S.kucuk, kalin: true, renk: 'solukKoyu' }),
     yaz(6.3, 1.35, 6.35, 0.3, 'Thoptan ile istoc.com ağına bağlanırsınız.', { boy: S.kucuk, renk: 'solukKoyu' }),
     yaz(6.3, 1.8, 6.35, 0.4, 'Thoptan iş ortaklığı tanıtım sunumu', { boy: 18, kalin: true, renk: 'sari' }),
     yaz(M - 0.1, 0.75, 5.0, 4.6, '48', { boy: 280, kalin: true, renk: 'sari', satir: 0.9 }),
@@ -262,7 +263,7 @@ function s10() {
     yaz(M, 1.4, 6.6, 1.9, 'Hangi müşterinizle başlarsınız?', { boy: 40, kalin: true, renk: 'kagit', satir: 0.95 }),
     ...ILK_ADIMLAR.flatMap((m, i) => [yaz(M, 3.55 + i * 0.62, 0.6, 0.5, String(i + 1), { boy: 24, kalin: true, renk: 'sari' }), yaz(M + 0.6, 3.6 + i * 0.62, 6.4, 0.5, m, { boy: 19, renk: 'kagit' })]),
     logo(8.1, 2.55, 2.2, true),
-    yaz(8.1, 3.2, 4.6, 0.35, 'Connect to iStoc', { boy: 16, kalin: true, renk: 'solukKoyu' }),
+    yaz(8.1, 3.2, 4.6, 0.35, 'Connect to iStoc.com', { boy: 16, kalin: true, renk: 'solukKoyu' }),
     yaz(8.1, 3.65, 4.6, 1.0, 'thoptan.com', { boy: 50, kalin: true, renk: 'kagit' }),
     yaz(M, H - 0.55, 9, 0.3, 'Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.', { boy: S.kucuk, renk: 'solukKoyu' }),
     yaz(W - M - 2, H - 0.55, 2, 0.3, '10 / 10', { boy: S.kucuk, renk: 'solukKoyu', hiza: 'right' }),

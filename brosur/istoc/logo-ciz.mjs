@@ -1,12 +1,12 @@
-// Thoptan logosunu Poppins SemiBold Italic ile 2500 × 640 piksel yeniden çizer.
+// Thoptan logosunu Poppins Bold Italic ile 2500 × 640 piksel yeniden çizer.
 // Oran eski site dosyasıyla aynıdır (250 / 64). Zemin saydamdır.
 // Yazı tipi Google Fonts'tan yüklenir. Bu yüzden komut internet ister.
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright';
 
-const AGIRLIK = 600;
-const ARALIK = -0.012; // harf aralığı, yazı boyunun oranı
+const AGIRLIK = 700;
+const ARALIK = -0.02; // harf aralığı, yazı boyunun oranı
 const W = 2500;
 const H = 640;
 const PAY = 14;
