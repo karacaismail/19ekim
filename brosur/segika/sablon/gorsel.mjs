@@ -274,7 +274,7 @@ const sayfalar = [
     <p class="alt-baslik">${P.fiyatNot}</p>
     <div class="plan-kart">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
     <p class="entegre-satir" style="color:var(--r-murekkep)">${P.paketAyrimi}</p>
-    <p class="entegre-satir">${P.entegrasyon} ${P.entegrasyonPaket} ${P.kazaNot}</p>
+    <p class="entegre-satir">${P.kazaNot}</p>
     <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
     ${alt(4)}</section>`;
   },

@@ -201,8 +201,6 @@ export const M = {
     paketAyrimi: 'Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.',
     fiyatNot: 'Fiyatlar 100 çalışan için aylıktır ve KDV hariçtir. Güncel fiyatı Segika\'dan yazılı isteyin.',
     kdv: 'KDV, katma değer vergisinin kısa adıdır.',
-    entegrasyon: 'Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır.',
-    entegrasyonPaket: 'Bu bağlantı Teşvik ve Otomasyon paketindedir.',
     teklif: '500\'den fazla çalışan için Segika ayrıca teklif verir.',
     ayni: 'Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.',
     kazaNot: 'İş kazası SGK\'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.',

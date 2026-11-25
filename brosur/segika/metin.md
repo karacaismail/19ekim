@@ -99,8 +99,6 @@ Fiyatlar 100 çalışanlı bir firma için aylıktır. Bu belgede fiyatlar KDV h
 
 Teşvik hesabı SGK Teşvik paketindedir. Bildirimler SGK Otomasyon paketindedir. İkisi birlikte Teşvik ve Otomasyon paketindedir.
 
-Segika Luca, Mikro ve ETA programlarıyla birlikte çalışır. Bu bağlantı Teşvik ve Otomasyon paketindedir.
-
 İş kazası SGK'ya 3 iş günü içinde bildirilmelidir. Segika bu süreyi takip eder ve e-postayla hatırlatır.
 
 500'den fazla çalışan için Segika ayrıca teklif verir. Fiyat herkes için aynıdır. Siz fiyatı değiştiremezsiniz.

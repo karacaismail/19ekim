@@ -142,7 +142,7 @@ function s4() {
     metin(K, 1.75, W - 2 * K, 0.35, P.fiyatNot, { boyut: S.govde, renk: R.gri }),
     ...o,
     metin(K, 4.45, W - 2 * K, 0.6, P.paketAyrimi, { boyut: 14, satir: 1.05 }),
-    metin(K, 5.1, W - 2 * K, 0.6, `${P.entegrasyon} ${P.entegrasyonPaket} ${P.kazaNot}`, { boyut: 14, renk: R.gri, satir: 1.05 }),
+    metin(K, 5.1, W - 2 * K, 0.6, P.kazaNot, { boyut: 14, renk: R.gri, satir: 1.05 }),
     metin(K, 5.9, W - 2 * K, 0.6, `${P.kdv} ${P.teklif} ${P.ayni}`, { boyut: S.kucuk, renk: R.gri, satir: 1.05 }),
     ...alt(4),
   ] };

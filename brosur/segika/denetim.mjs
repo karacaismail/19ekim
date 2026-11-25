@@ -55,7 +55,8 @@ function pptxOku(yol) {
 
 /** Üç dosyada da geçmesi ve geçmemesi gereken ifadeler. */
 const YASAK = ['Kadrolu', 'insan kaynakları danışman', 'Bu davet mali müşavir', 'Dört ortaklık yolu', '25 çalışan', 'Fırsat',
-  "Fiyatlar Segika'nın 24 Kasım 2026 Salı günkü fiyatlarıdır."];
+  "Fiyatlar Segika'nın 24 Kasım 2026 Salı günkü fiyatlarıdır.",
+  'ETA programlarıyla birlikte çalışır', 'Bu bağlantı Teşvik ve Otomasyon paketindedir.', 'Luca Mikro ETA'];
 /** Basamağın eski kısa adları okura görünmez. Basamaklar "1. seviye" ile "4. seviye" arasında adlandırılır. */
 const ESKI_BASAMAK = /(^|[^0-9A-Za-zÇĞİÖŞÜçğıöşü])K[1-3](?![0-9])/;
 const ZORUNLU = [
@@ -72,6 +73,8 @@ const ZORUNLU = [
   'Yıllık paketin bütün bedeli satışın yapıldığı ayın cirosuna yazılır.',
   '1. işveren sizi 3. seviyeye taşır. 2. işveren sizi 4. seviyeye taşır.',
 ];
+/** Ortaklık şartı yalnız el kitapçığında ve metin.md içinde yazar. Entegrasyon bölümü kaldırılırken bu cümle kalır. */
+const SART = 'Ofis Luca, Mikro ya da ETA kullanmalıdır.';
 const KAPAK = { kitapcik: 'İş ortaklığı el kitapçığı', gorsel: 'İş ortaklığı tanıtım sunumu', sunum: 'İş ortaklığı tanıtım sunumu' };
 
 export async function denetle() {
@@ -89,6 +92,7 @@ export async function denetle() {
     if (n > EN_COK_SAYFA) hatalar.push(`${ad}: ${n} sayfa var, en çok ${EN_COK_SAYFA} olabilir.`);
     for (const y of YASAK) if (geciyor(tum, y)) hatalar.push(`${ad}: "${y}" metinde geçmemeli.`);
     for (const z of ZORUNLU) if (!geciyor(tum, z)) hatalar.push(`${ad}: "${z}" metinde geçmeli.`);
+    if (ad === 'kitapcik' && !geciyor(tum, SART)) hatalar.push(`kitapcik: "${SART}" metinde geçmeli.`);
     b.sayfalar.forEach((s, i) => { const m = s.metin.match(ESKI_BASAMAK); if (m) hatalar.push(`${ad}: ${i + 1}. sayfada eski basamak adı "${m[0].trim()}" geçiyor. "1. seviye" gibi yazın.`); });
     const yil = b.sayfalar.find((s) => geciyor(s.metin, 'Siz buradasınız'));
     if (yil && geciyor(yil.metin, '%25 olur')) hatalar.push(`${ad}: yıllık sayfada iki farklı oran var. Örnek yalnız %30 oranını göstermeli.`);
@@ -105,7 +109,8 @@ export async function denetle() {
     }
   }
   const metin = readFileSync(resolve(burasi, 'metin.md'), 'utf8');
-  for (const y of ['Kadrolu', 'kadrolu', 'İnsan kaynakları danışman', 'insan kaynakları danışman']) if (metin.includes(y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
+  for (const y of ['Kadrolu', 'kadrolu', 'İnsan kaynakları danışman', 'insan kaynakları danışman', 'ETA programlarıyla birlikte çalışır']) if (metin.includes(y)) hatalar.push(`metin.md: "${y}" geçmemeli.`);
+  if (!metin.includes(SART)) hatalar.push(`metin.md: "${SART}" geçmeli.`);
   if (ESKI_BASAMAK.test(metin)) hatalar.push('metin.md: eski basamak adı (K1, K2, K3) geçmemeli.');
   if (hatalar.length) throw new Error(`İçerik denetimi düştü (${hatalar.length} kural):\n- ${hatalar.join('\n- ')}`);
   console.log(`İçerik denetimi geçti. ${ozet.join(', ')}.`);

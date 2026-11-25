@@ -49,10 +49,6 @@ ul.liste li::before { content: ''; position: absolute; left: 0; top: 0.62em; wid
 /* Ürün */
 .isler { display: grid; grid-template-columns: 1fr 1fr; gap: 11mm 10mm; margin-top: 4mm; }
 .isler p { font-size: 12pt; }
-.entegre { display: flex; align-items: center; gap: 8mm; background: var(--r-sisAcik); border-radius: var(--o-kose); padding: 6mm 7mm; margin-top: 9mm; }
-.entegre p { font-size: 11.5pt; max-width: 80mm; }
-.entegre ul { list-style: none; display: flex; flex: 1; justify-content: flex-end; gap: 9mm; }
-.entegre li { font-size: 25pt; font-weight: var(--w-dev); color: var(--r-lacivert); letter-spacing: -0.01em; }
 .isler div b { display: block; font-size: 14pt; font-weight: var(--w-baslik); color: var(--r-lacivert); margin-bottom: 1mm; }
 .isler div b::before { content: ''; display: inline-block; width: 2.4mm; height: 2.4mm; border-radius: 50%; background: var(--r-yesil); margin-right: 2.2mm; vertical-align: 0.12em; }
 .fiyatlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 5mm; }
@@ -283,7 +279,6 @@ function plan() {
   <p class="giris">${P.fiyatNot}</p>
   <div class="fiyatlar">${PAKETLER.map((p, i) => `<div class="${i === 2 ? 'one' : ''}"><small>${p.ad}</small><b class="rakam">${tl(p.fiyat)}</b><span>${p.kisa}. ${CALISAN} çalışan için aylık.</span></div>`).join('')}</div>
   <p style="margin-top:5mm">${P.paketAyrimi}</p>
-  <div class="entegre"><p>${P.entegrasyon} ${P.entegrasyonPaket}</p><ul><li>Luca</li><li>Mikro</li><li>ETA</li></ul></div>
   <div class="yuzey" style="margin-top:7mm"><h3>İş kazası bildirimi</h3><p>${P.kazaNot}</p></div>
   <p class="not" style="margin-top:auto">${P.kdv} ${P.teklif} ${P.ayni}</p>
   </div>${alt(4)}</section>`;
