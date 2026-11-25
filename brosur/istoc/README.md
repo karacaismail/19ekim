@@ -1,6 +1,12 @@
-# iStoc iş ortaklığı tanıtım seti
+# Thoptan iş ortaklığı tanıtım seti
 
-Bu klasör üç belgeyi üretir. Belgeler yalnız iStoc (istoc.com) içindir.
+Bu klasör üç belgeyi üretir. Belgelerin asıl markası Thoptan'dır. Web adresi `thoptan.com` adresidir. Bu karar kullanıcının 25 Kasım 2026 Çarşamba günkü kararıdır.
+
+El kitapçığının adı "Thoptan iş ortaklığı kılavuzu" olur. Görsel sunumun ve PPTX'in adı "Thoptan iş ortaklığı tanıtım sunumu" olur.
+
+iStoc belgelerde ikinci sırada durur. "Connect to iStoc" imzası yalnız kapakta ve son sayfada durur. İlk geçtiği yerde Türkçesi yazar: "Thoptan ile istoc.com ağına bağlanırsınız." Ürün ve hizmet cümlelerinde özne Thoptan olur. "İSTOÇ" adı kullanılmaz.
+
+Klasör adı ve dosya adları `istoc` olarak kalır. Sitedeki bağlantılar bu adlara bağlıdır.
 
 | Dosya | Biçim | Sayfa |
 | --- | --- | --- |
@@ -31,6 +37,7 @@ Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörün
 | `sunum.mjs` | Sunumun slaytlarıdır. |
 | `kontrol.mjs` | Kontrast ve metin denetimleri buradadır. |
 | `uret.mjs` | Belgeleri üretir ve denetler. |
+| `gorsel/` | Thoptan logo dosyaları buradadır. |
 | `pdfgorsel.mjs` | PDF metnini çıkarır ve PDF sayfalarını görüntüye çevirir. |
 
 ## Denetimler
@@ -42,11 +49,25 @@ Komut üç belgeyi yeniden yazar. Önizleme görsellerini `onizleme/` klasörün
 3. Renk çiftlerinin kontrastını ölçer. Her çift en az 4,5:1 olmalıdır.
 4. Sayfa dışına çıkan öğeyi ve taşan metin kutusunu arar.
 5. En küçük yazı boyunu ölçer. A4 belgede koşul ve açıklama metni en az 11 pt olur. Dipnot, üst bilgi ve grafik etiketi en az 9 pt olur. Slaytta sınır 24 pikseldir.
-6. Yasak kelimeleri ve öteki markanın adını arar.
-7. Belgedeki her tam cümlenin `metin.md` içinde olduğunu denetler.
-8. PDF sayfa sayısını ve Outfit yazı tipinin gömüldüğünü denetler.
-9. PDF'te Type3 yazı tipi arar. Type3 varsa metin doğru kopyalanmaz.
-10. PDF metnini çıkarır. Metinde "müşteri" ve "İlk adım" gibi kelimeleri arar.
+6. Yasak kelimeleri ve öteki markanın adını arar. "İSTOÇ" adını ve iStoc ile başlayan cümleyi de arar.
+7. Belgelerde iStoc turuncusunu arar. Turuncu bulunursa üretim durur.
+8. Belgedeki her tam cümlenin `metin.md` içinde olduğunu denetler.
+9. PDF sayfa sayısını ve Outfit yazı tipinin gömüldüğünü denetler.
+10. PDF'te Type3 yazı tipi arar. Type3 varsa metin doğru kopyalanmaz.
+11. PDF metnini çıkarır. Metinde "müşteri", "Thoptan" ve "Connect to iStoc" gibi kelimeleri arar.
+
+## Renkler ve logo
+
+Renkler thoptan.com sitesindeki `brand.css` dosyasından alındı. Ana renk lacivert `#23488d` rengidir. Koyu tonu `#1c3a72` rengidir. Vurgu rengi sarı `#fcde00` rengidir.
+
+Sarı açık zeminde metin rengi olmaz. Sarı zeminde yazı lacivert olur. Açık zemindeki sarı grafik çubuğunun ince lacivert kenarı vardır.
+
+Logo dosyaları thoptan.com sitesinden alındı. Kaynak adresler şunlardır:
+
+- `gorsel/thoptan-logo.png`: https://thoptan.com/images/thoptan-logo.png (lacivert logo, açık zeminde)
+- `gorsel/thoptan-logo-beyaz.png`: https://thoptan.com/images/thoptan-logo-beyaz.png (sarı logo, koyu zeminde)
+
+Logo dosyası 250 × 64 pikseldir. Logo PDF'te en çok 42 mm genişlikte basılır. PPTX'te en çok 2,2 inç genişlikte durur. Üretici daha geniş logoyu reddeder. Logo esnetilmez ve rengi değiştirilmez.
 
 ## Yazı tipleri
 

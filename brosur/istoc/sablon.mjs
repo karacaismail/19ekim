@@ -1,4 +1,5 @@
 // Ortak HTML iskeleti, token CSS'i ve vektör şemalar. İki PDF belgesi bu dosyayı kullanır.
+import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { renk, yazi } from './tokenlar.mjs';
@@ -38,8 +39,25 @@ ${css}
 </style></head><body>${govde}</body></html>`;
 }
 
-/** Yazı tipiyle yazılmış marka adı. Logo dosyası kullanılmaz. */
-export const marka = (ek = '') => `<span class="marka ${ek}"><span class="marka-i">i</span>Stoc</span>`;
+/**
+ * Thoptan logosu. Logo dosyaları thoptan.com sitesinden alındı (kaynak README.md içinde).
+ * Lacivert logo açık zeminde, sarı logo koyu lacivert zeminde kullanılır.
+ * Logo esnetilmez: yalnız genişlik verilir, yükseklik oranla gelir. Genişlik en çok 42 mm olur.
+ */
+export const LOGO = {
+  acik: path.join(import.meta.dirname, 'gorsel/thoptan-logo.png'),
+  koyu: path.join(import.meta.dirname, 'gorsel/thoptan-logo-beyaz.png'),
+  oran: 250 / 64,
+  enGenisMm: 42,
+};
+const logoVeri = (koyu) => `data:image/png;base64,${fs.readFileSync(koyu ? LOGO.koyu : LOGO.acik).toString('base64')}`;
+export function logo({ koyu = false, mm = 26 } = {}) {
+  if (mm > LOGO.enGenisMm) throw new Error(`Logo ${mm} mm olamaz. En çok ${LOGO.enGenisMm} mm olur.`);
+  return `<img class="logo" src="${logoVeri(koyu)}" alt="Thoptan" style="width:${mm}mm;height:${(mm / LOGO.oran).toFixed(2)}mm">`;
+}
+
+/** Kapakta ve son sayfada logonun altındaki küçük imza. Her sayfaya konmaz. */
+export const imza = () => '<span class="imza dipnot" lang="en">Connect to iStoc</span>';
 
 /**
  * Kota merdiveni. Yatay eksen aylık ciro, dikey eksen orandır. İki katkı türü iki basamaklı çizgidir.
@@ -87,11 +105,12 @@ export function merdiven({ g = 760, y = 380, kapat, tanis, ornekCiro, koyu = fal
   <line x1="${oX}" x2="${oX}" y1="${ust}" y2="${y - alt}" stroke="${soluk}" stroke-width="1.5" stroke-dasharray="4 5"/>
   ${zeminKutu(oX + 8, ust + 10, `Örnek: ${sayi(ornekCiro)} TL`, yaziBoyu - 2, false)}<text x="${oX + 8}" y="${ust + 10}" font-size="${yaziBoyu - 2}" fill="${soluk}">Örnek: ${sayi(ornekCiro)} TL</text>
   <path d="${yol(tanis)}" fill="none" stroke="${ikinci}" stroke-width="4" stroke-linejoin="miter"/>
-  <path d="${yol(kapat)}" fill="none" stroke="var(--turuncu)" stroke-width="7" stroke-linejoin="miter"/>
-  ${etiket(kapat, koyu ? 'var(--turuncu)' : 'var(--turuncuMetin)', true)}
+  ${koyu ? '' : `<path d="${yol(kapat)}" fill="none" stroke="var(--murekkep)" stroke-width="10" stroke-linejoin="miter"/>`}
+  <path d="${yol(kapat)}" fill="none" stroke="var(--sari)" stroke-width="7" stroke-linejoin="miter"/>
+  ${etiket(kapat, koyu ? 'var(--sari)' : 'var(--lacivert)', true)}
   ${etiket(tanis, metin, true)}
-  <text x="${X(enCok) + 12}" y="${Y(kapat.at(-1).oran) + 6}" font-size="${yaziBoyu}" font-weight="700" fill="${koyu ? 'var(--turuncu)' : 'var(--turuncuMetin)'}">Satışı</text>
-  <text x="${X(enCok) + 12}" y="${Y(kapat.at(-1).oran) + 6 + yaziBoyu * 1.2}" font-size="${yaziBoyu}" font-weight="700" fill="${koyu ? 'var(--turuncu)' : 'var(--turuncuMetin)'}">kapatırsanız</text>
+  <text x="${X(enCok) + 12}" y="${Y(kapat.at(-1).oran) + 6}" font-size="${yaziBoyu}" font-weight="700" fill="${koyu ? 'var(--sari)' : 'var(--lacivert)'}">Satışı</text>
+  <text x="${X(enCok) + 12}" y="${Y(kapat.at(-1).oran) + 6 + yaziBoyu * 1.2}" font-size="${yaziBoyu}" font-weight="700" fill="${koyu ? 'var(--sari)' : 'var(--lacivert)'}">kapatırsanız</text>
   <text x="${X(enCok) + 12}" y="${Y(tanis.at(-1).oran) + 6}" font-size="${yaziBoyu}" font-weight="700" fill="${metin}">Yalnız</text>
   <text x="${X(enCok) + 12}" y="${Y(tanis.at(-1).oran) + 6 + yaziBoyu * 1.2}" font-size="${yaziBoyu}" font-weight="700" fill="${metin}">tanıştırırsanız</text>
 </svg>`;
@@ -118,9 +137,10 @@ export function donemCubuklari({ g = 760, y = 340, kapat, tanis, koyu = false, y
     const deger = (v, x, renkD) => v
       ? `<text x="${x + cub / 2}" y="${taban - H(v) - 9}" text-anchor="middle" font-size="${yaziBoyu}" font-weight="700" fill="${renkD}">${sayi(v / 1000)} bin</text>`
       : `<text x="${x + cub / 2}" y="${taban - 9}" text-anchor="middle" font-size="${yaziBoyu - 1}" fill="${soluk}">yok</text>`;
-    return `<rect x="${x0}" y="${taban - H(k[i])}" width="${cub}" height="${H(k[i])}" fill="var(--turuncu)"/>
+    // Açık zeminde sarı çubuğun lacivert kenarı vardır. Böylece çubuk zeminden ayrılır.
+    return `<rect x="${x0}" y="${taban - H(k[i])}" width="${cub}" height="${H(k[i])}" fill="var(--sari)"${koyu ? '' : ' stroke="var(--murekkep)" stroke-width="1.5"'}/>
       <rect x="${x1}" y="${taban - H(t[i])}" width="${cub}" height="${H(t[i])}" fill="${ikinci}"/>
-      ${deger(k[i], x0, koyu ? 'var(--turuncu)' : 'var(--turuncuMetin)')}${deger(t[i], x1, metin)}
+      ${deger(k[i], x0, koyu ? 'var(--sari)' : 'var(--lacivert)')}${deger(t[i], x1, metin)}
       <text x="${x0 + cub + 3}" y="${taban + 26}" text-anchor="middle" font-size="${yaziBoyu - 1}" fill="${soluk}">${ad}</text>`;
   }).join('');
   return `<svg viewBox="0 0 ${g} ${y}" width="100%" role="img" aria-label="Dönemlere göre örnek pay" font-family="Outfit, Arial, sans-serif">
@@ -140,8 +160,8 @@ export function paketMerdiveni({ g = 520, y = 260, kademeler, secili, yaziBoyu =
   ${kademeler.map((k, i) => {
     const x = i * (w + ara);
     const vurgu = i === secili;
-    return `<rect x="${x}" y="${y - alt - H(k.oran)}" width="${w}" height="${H(k.oran)}" fill="${vurgu ? 'var(--turuncu)' : 'var(--kumKoyu)'}"/>
-      <text x="${x + w / 2}" y="${y - alt - H(k.oran) - 9}" text-anchor="middle" font-size="${yaziBoyu + 2}" font-weight="700" fill="${vurgu ? 'var(--turuncuMetin)' : 'var(--murekkep)'}">${k.oran ? `%${sayi(k.oran * 100)}` : 'yok'}</text>
+    return `<rect x="${x}" y="${y - alt - H(k.oran)}" width="${w}" height="${H(k.oran)}" fill="${vurgu ? 'var(--sari)' : 'var(--kumKoyu)'}"${vurgu ? ' stroke="var(--murekkep)" stroke-width="1.5"' : ''}/>
+      <text x="${x + w / 2}" y="${y - alt - H(k.oran) - 9}" text-anchor="middle" font-size="${yaziBoyu + 2}" font-weight="700" fill="${vurgu ? 'var(--lacivert)' : 'var(--murekkep)'}">${k.oran ? `%${sayi(k.oran * 100)}` : 'yok'}</text>
       <text x="${x + w / 2}" y="${y - alt + 24}" text-anchor="middle" font-size="${yaziBoyu - 1}" fill="var(--soluk)">${esc(k.ad)}</text>`;
   }).join('')}
 </svg>`;

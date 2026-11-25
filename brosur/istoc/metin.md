@@ -1,14 +1,24 @@
-# iStoc iş ortaklığı programı
+# Thoptan iş ortaklığı kılavuzu
 
 Bu dosya üç belgenin ortak metnidir. Belgeler bu metinden kurulur. Önce bu metni düzeltin, sonra belgeleri yeniden üretin.
+
+Belgelerin asıl markası Thoptan'dır. Web adresi thoptan.com adresidir.
 
 Plan tarihi 23 Kasım 2026 Pazartesi günüdür. Oranlar ve fiyatlar bu depodaki kazanç planından gelir.
 
 ## Kapak
 
+Thoptan iş ortaklığı kılavuzu
+
+Thoptan iş ortaklığı tanıtım sunumu
+
+Connect to iStoc
+
+Thoptan ile istoc.com ağına bağlanırsınız.
+
 Satışını kapattığınız müşteri size 48 aya kadar pay getirir.
 
-iStoc iş ortaklığı programına sizi davet ediyoruz.
+Thoptan iş ortaklığı programına sizi davet ediyoruz.
 
 Bu belge satıcı firmalara hizmet veren danışmanlar ve hizmet firmaları için hazırlandı.
 
@@ -18,13 +28,13 @@ Pay en çok 48 ay sürer. Bunun için müşteriler ilk 12 ayın her ayında en a
 
 Müşteriniz size her ay aynı soruyu soruyor mu?
 
-Siz satıcı firmalara zaten hizmet veriyorsunuz. İşletme size güvenir. iStoc bu güvene somut bir yanıt ekler.
+Siz satıcı firmalara zaten hizmet veriyorsunuz. İşletme size güvenir. Thoptan bu güvene somut bir yanıt ekler.
 
 Katalog stüdyosunun müşterisi sorar.
 
 “Hazırlanan kataloğu alıcılarla nasıl paylaşırım?”
 
-iStoc kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.
+Thoptan kataloğu bir bağlantıyla paylaşır. Alıcı sepetini kendisi doldurur.
 
 İhracat danışmanının müşterisi sorar.
 
@@ -46,7 +56,7 @@ WhatsApp’tan gelen siparişler tek ekranda toplanır. Fiyat teklifi 2 dakikada
 
 ### Müşterinizin ödediği bedel
 
-iStoc satıcının satışından komisyon almaz.
+Thoptan satıcının satışından komisyon almaz.
 
 Satıcı paketi 14 gün ücretsiz dener.
 
@@ -163,8 +173,8 @@ Aynı ürünü dört farklı yoldan anlatabilirsiniz. Her yolun işi ve kazancı
 
 | Soru | Çözüm ortağı | Kadrolu uzman | Mevcut müşteri | Marka elçisi |
 | --- | --- | --- | --- | --- |
-| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Şirkette SGK’lı ve maaşlı çalışan satış uzmanı. | iStoc kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
-| Ne yapar? | Müşterisini iStoc ile tanıştırır ya da satışı kapatır. | Satıcıları ziyaret eder ve satışı yapar. | Çevresindeki bir işletmeye iStoc’u önerir. | iStoc’u tanıtır ve ilgilenen satıcıyı yönlendirir. |
+| Kim? | Satıcı firmalara hizmet veren danışman ya da hizmet firması. | Şirkette SGK’lı ve maaşlı çalışan satış uzmanı. | Thoptan kullanan satıcı işletme. | Ticaret yapan bir kitleye ulaşan kişi. |
+| Ne yapar? | Müşterisini Thoptan ile tanıştırır ya da satışı kapatır. | Satıcıları ziyaret eder ve satışı yapar. | Çevresindeki bir işletmeye Thoptan’ı önerir. | Thoptan’ı tanıtır ve ilgilenen satıcıyı yönlendirir. |
 | Nasıl kazanır? | Ciro üzerinden pay alır. Oran %30’a kadar çıkar. | Maaş alır. Ayrıca paket primi alır. | Uygun tavsiye başına 2 ay ücretsiz kullanım alır. | Çözüm ortağıyla aynı plandan pay alır. Tanıtırsa oran %15’e kadar çıkar. |
 | Nasıl başlar? | Katkı düzeyini yazılı belirler. | Görevini ve bölgesini netleştirir. | Geçerli koşulu müşteri sorumlusundan öğrenir. | Anlatımını şirkete doğrulatır. |
 
@@ -218,9 +228,9 @@ Müşteri ayrılırsa prim durur. Ödenmiş prim geri istenmez.
 
 ## Mevcut müşteri
 
-Uygun her tavsiye size 2 ay ücretsiz iStoc kazandırır.
+Uygun her tavsiye size 2 ay ücretsiz Thoptan kazandırır.
 
-Siz iStoc kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.
+Siz Thoptan kullanan bir satıcısınız. Yalnız tanıştırma yaparsınız. Satışı, sözleşmeyi ve desteği şirket yürütür.
 
 Uygun tavsiye başına size 2 ay ücretsiz kullanım verilir. Bu süre Basic paket fiyatıyla 798 € değerindedir.
 
@@ -230,9 +240,9 @@ Yılda en çok 3 uygun tavsiye sayılır. Bu, yılda en çok 6 ay ücretsiz kull
 
 Tavsiyenin uygun sayılması için yeni müşteri yıllık paket alır.
 
-Yeni müşteri iStoc’u 60 gün kullanmaya devam etmelidir.
+Yeni müşteri Thoptan’ı 60 gün kullanmaya devam etmelidir.
 
-Ödül nakit değildir. Ödül ücretsiz iStoc kullanımıdır.
+Ödül nakit değildir. Ödül ücretsiz Thoptan kullanımıdır.
 
 Ödül alabileceğinizi işletmeye açıkça söyleyin.
 
@@ -244,7 +254,7 @@ Geçerli koşulu müşteri sorumlusundan öğrenin.
 
 Kitleniz ticaret yapıyor mu? Yönlendirdiğiniz başvuru kaydınıza yazılır.
 
-iStoc’u sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.
+Thoptan’ı sosyal medyada, eğitimde ya da etkinlikte tanıtırsınız.
 
 Size bir bağlantı ya da bir kod verilir. Başvurular bu yolla sizin kaydınıza ulaşır.
 
@@ -316,12 +326,14 @@ Bu belge sözleşme değildir. Kesin değerler yazılı anlaşmada belirlenir.
 
 Hangi müşterinizle başlarsınız?
 
-1. istoc.com adresinden iStoc’u inceleyin.
+1. thoptan.com adresinden Thoptan’ı inceleyin.
 2. Ortaklık sorumlusuyla görüşün.
 3. Katkı düzeyinizi yazılı belirleyin.
 4. İlk müşteri kaydınızı açtırın.
 
-istoc.com
+thoptan.com
+
+Connect to iStoc
 
 Bu belge 23 Kasım 2026 Pazartesi günkü plana göre hazırlandı.
 
@@ -350,7 +362,7 @@ Bu cümleler grafik notları, sayı açıklamaları ve kısa özetlerdir. Belgel
 - Kadrolu uzman maaş ve paket primi alır.
 - Mevcut müşteri ücretsiz kullanım kazanır.
 - Çubuklar paket sayısını ve prim oranını gösterir.
-- Turuncu çubuk örnekteki kademedir.
+- Sarı çubuk örnekteki kademedir.
 - Satışı kapatırsanız bu tutarı 48 ayda alırsınız.
 - Yalnız tanıştırırsanız bu tutarı 36 ayda alırsınız.
 - Vergi ve stopaj dahil değildir.

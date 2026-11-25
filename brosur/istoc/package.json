@@ -2,7 +2,7 @@
   "name": "istoc-is-ortakligi-brosur",
   "private": true,
   "type": "module",
-  "description": "iStoc iş ortaklığı tanıtım seti: sunum, el kitapçığı ve görsel PDF.",
+  "description": "Thoptan iş ortaklığı tanıtım seti: sunum, el kitapçığı ve görsel PDF.",
   "scripts": {
     "uret": "node uret.mjs"
   },

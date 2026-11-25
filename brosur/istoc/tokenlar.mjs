@@ -1,29 +1,37 @@
 // Tek merkezi görsel token dosyası. Üç belge de renk, yazı ve boşluğu buradan alır.
-// Renkler istoc.com sitesinin kendi değerlerinden türetildi (theme-color #ff8600, koyu mürekkep, açık turuncu yüzey).
+// Belgelerin asıl markası Thoptan'dır (kullanıcı kararı, 25 Kasım 2026).
+// Marka renkleri thoptan.com sitesindeki brand.css dosyasından alındı: lacivert #23488d, koyu lacivert #1c3a72, sarı #fcde00.
+// Açık yüzeyler ve ikincil metinler bu laciverdin açık ve soluk tonlarıdır. iStoc turuncusu kullanılmaz.
 // Kontrast oranları `kontrol.mjs` içinde WCAG AA için denetlenir.
 
 export const renk = {
-  murekkep: '#16120f', // koyu zemin ve ana metin
-  murekkepYuzey: '#241d18', // koyu zemin üstündeki ikinci yüzey
-  kagit: '#fffaf3', // açık zemin
-  kum: '#fff1e0', // açık zemin üstündeki ikinci yüzey
-  kumKoyu: '#ffe1c2', // vurgulu açık yüzey (istoc.com primary-100)
-  turuncu: '#ff8600', // marka rengi: şekil, koyu zeminde metin, turuncu zeminde koyu metin
-  turuncuMetin: '#a84f00', // açık zeminde turuncu metin (AA)
-  soluk: '#5c544c', // açık zeminde ikincil metin
-  solukKoyu: '#c9bfb4', // koyu zeminde ikincil metin
-  cizgi: '#e6d8c8', // tablo ızgarası
-  cizgiKoyu: '#3a3029', // koyu zeminde ızgara
+  murekkep: '#1c3a72', // koyu lacivert: koyu zemin ve ana metin
+  murekkepYuzey: '#23488d', // koyu zemin üstündeki ikinci yüzey (marka laciverdi)
+  kagit: '#f7f9fc', // açık zemin
+  kum: '#e9eff8', // açık zemin üstündeki ikinci yüzey
+  kumKoyu: '#d5e1f2', // vurgulu açık yüzey
+  sari: '#fcde00', // marka sarısı: şekil, koyu zeminde metin, sarı zeminde lacivert metin. Açık zeminde metin rengi olmaz.
+  lacivert: '#23488d', // açık zeminde vurgu metni
+  soluk: '#4a5a78', // açık zeminde ikincil metin
+  solukKoyu: '#c9d5ea', // koyu zeminde ikincil metin
+  cizgi: '#d3ddec', // tablo ızgarası
+  cizgiKoyu: '#33558f', // koyu zeminde ızgara
   beyaz: '#ffffff',
 };
 
-/** Denetlenen metin ve zemin çiftleri. Her çift en az 4,5:1 olmalıdır. */
+/** Denetlenen metin ve zemin çiftleri. Her çift en az 4,5:1 olmalıdır. Sarı yalnız koyu zeminde metin olur. */
 export const kontrastCiftleri = [
-  ['murekkep', 'kagit'], ['murekkep', 'kum'], ['murekkep', 'kumKoyu'], ['murekkep', 'turuncu'],
-  ['soluk', 'kagit'], ['soluk', 'kum'], ['turuncuMetin', 'kagit'], ['turuncuMetin', 'kum'],
-  ['turuncu', 'murekkep'], ['turuncu', 'murekkepYuzey'], ['kagit', 'murekkep'], ['solukKoyu', 'murekkep'],
+  ['murekkep', 'kagit'], ['murekkep', 'kum'], ['murekkep', 'kumKoyu'], ['murekkep', 'sari'],
+  ['soluk', 'kagit'], ['soluk', 'kum'], ['soluk', 'kumKoyu'], ['lacivert', 'kagit'], ['lacivert', 'kum'], ['lacivert', 'kumKoyu'],
+  ['sari', 'murekkep'], ['sari', 'murekkepYuzey'], ['kagit', 'murekkep'], ['solukKoyu', 'murekkep'],
   ['solukKoyu', 'murekkepYuzey'], ['kagit', 'murekkepYuzey'],
 ];
+
+/** Sarı açık zeminde metin rengi olmaz. `kontrol.mjs` bu çiftlerin listede olmadığını denetler. */
+export const yasakCiftler = [['sari', 'kagit'], ['sari', 'kum'], ['sari', 'kumKoyu'], ['sari', 'beyaz']];
+
+/** iStoc turuncu tonları. Bu renkler hiçbir tokende ve hiçbir belgede bulunmaz. */
+export const yasakRenkler = ['#ff8600', '#a84f00', '#fff1e0', '#ffe1c2', '#fffaf3'];
 
 export const yazi = {
   aile: 'Outfit',
