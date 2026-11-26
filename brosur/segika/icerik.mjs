@@ -277,7 +277,7 @@ export const M = {
         kim: 'Bordro ve çalışma hayatı içeriği üreten kişi',
         ne: 'İçerikle tanıtır, özel bağlantısını paylaşır.',
         kazanc: 'Tanıştırma oranı: %7 ile %15 arası',
-        kazancNot: '30.000 TL cironun altında pay oluşmaz.',
+        kazancNot: '30.000 TL cironun altında pay oluşmaz. Pay yalnız 1 yıl sürer.',
         ilk: 'Pazarlama sorumlusundan özel bağlantınızı alın.',
       },
     ],

@@ -236,7 +236,7 @@ Siz bordro ve çalışma hayatı konusunda içerik üretirsiniz.
 
 Siz Segika'yı kitlenize anlatırsınız. Her ticari paylaşımın başına “reklam” yazarsınız. İlgilenen işveren size özel bağlantıyla başvurur.
 
-Kazancınız tanıştırma oranından gelir. Oran %7 ile %15 arasıdır. 30.000 TL cironun altında pay oluşmaz.
+Kazancınız tanıştırma oranından gelir. Oran %7 ile %15 arasıdır. 30.000 TL cironun altında pay oluşmaz. Pay yalnız 1 yıl sürer.
 
 Bağlantınızdan 1 işveren yıllık paket alsın. Ciro 106.800 TL olur. Bu ciro 100.000 TL eşiğini geçer. Oran %15 olur. Kazanç 16.020 TL olur.
 
