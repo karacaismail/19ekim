@@ -13,7 +13,11 @@ El kitapçığının kapağında “İş ortaklığı el kitapçığı” yazar.
 
 Segika iş ortaklığı programı
 
+48 aya kadar kazanç
+
 SGK işlerini otomatik yapan programı müşterinize siz tanıtın.
+
+Satışını kapattığınız müşteri size 48 aya kadar kazanç getirir.
 
 ## 2. Segika ne yapar
 

@@ -45,15 +45,18 @@ const kanca = (yazi, y = 1.15, w = 11.5, h = 1.1, renk = R.lacivert, boyut = S.h
 /* ---------- Slaytlar ---------- */
 function s1() {
   // Kapak: üstte beyaz marka bandı, altında tam genişlikte fotoğraf, fotoğrafın üstünde düz renkli metin kutusu.
-  const bant = 0.95, kx = W - 6.2, ky = 3.75;
+  const bant = 0.95, kx = W - 6.2, ky = 2.2;
   return { ogeler: [
     resim(0, bant, W, H - bant, KAPAK),
     ...markaYazisi(K, 0.28, 26, R.lacivert),
     metin(W - K - 6, 0.3, 6, 0.4, M.kapak.sunum, { boyut: 20, kalin: true, renk: R.lacivert, hiza: 'right' }),
-    kutu(kx, ky, W - kx, 3.0, R.lacivert),
+    kutu(kx, ky, W - kx, 4.55, R.lacivert),
     metin(kx + 0.4, ky + 0.35, W - kx - 0.8, 0.3, M.kapak.baslik.toLocaleUpperCase('tr-TR'), { boyut: S.ust, kalin: true, renk: R.yesil, harf: 1.5 }),
-    metin(kx + 0.4, ky + 0.8, W - kx - 0.8, 1.45, M.kapak.alt, { boyut: 28, kalin: true, renk: R.beyaz, satir: 1.05 }),
-    metin(kx + 0.4, ky + 2.4, W - kx - 0.8, 0.35, `${M.kapak.sunum}. ${TARIH} hazırlandı.`, { boyut: S.kucuk, renk: R.griLacivertUstu }),
+    metin(kx + 0.4, ky + 0.75, 0.95, 0.9, M.kapak.ay, { boyut: 54, kalin: true, renk: R.yesil, satir: 1 }),
+    metin(kx + 1.4, ky + 1.1, W - kx - 1.8, 0.45, M.kapak.ayYazi, { boyut: 20, kalin: true, renk: R.yesil }),
+    metin(kx + 0.4, ky + 1.85, W - kx - 0.8, 1.45, M.kapak.alt, { boyut: 28, kalin: true, renk: R.beyaz, satir: 1.05 }),
+    metin(kx + 0.4, ky + 3.45, W - kx - 0.8, 0.6, M.kapak.ayCumle, { boyut: 14, renk: R.beyaz }),
+    metin(kx + 0.4, ky + 4.1, W - kx - 0.8, 0.35, `${M.kapak.sunum}. ${TARIH} hazırlandı.`, { boyut: S.kucuk, renk: R.griLacivertUstu }),
   ] };
 }
 

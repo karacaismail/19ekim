@@ -159,6 +159,9 @@ table.roller tbody tr.birincil > * { background: var(--r-sisAcik); }
 .kapak .kutu .ust { color: var(--r-yesil); }
 .kapak .kutu h1 { font-size: 25pt; font-weight: var(--w-baslik); line-height: 1.12; letter-spacing: -0.01em; margin-top: 4mm; text-wrap: balance; }
 .kapak .kutu p { font-size: 11pt; color: var(--r-griLacivertUstu); margin-top: 5mm; }
+.kapak .kutu .ay48 { display: flex; align-items: baseline; gap: 3mm; margin-top: 3mm; font-size: 20pt; font-weight: var(--w-baslik); color: var(--r-yesil); line-height: 1; }
+.kapak .kutu .ay48 b { font-size: 64pt; line-height: 0.9; }
+.kapak .kutu .ay-cumle { font-size: 13pt; color: var(--r-beyaz); }
 
 /* Açılış */
 .acilis .kanca { font-size: 33pt; line-height: 1.04; margin-top: 3mm; max-width: 172mm; }
@@ -224,7 +227,7 @@ function kapak() {
   return `<section class="sayfa kapak">
   <div class="ust-bant">${marka()}<span class="tur">${M.kapak.kitapcik}</span></div>
   <div class="foto"><img src="${KAPAK_DIKEY}" alt="Takım elbiseli bir danışman ofiste kollarını kavuşturmuş duruyor."></div>
-  <div class="kutu"><p class="ust" style="margin-top:0">${M.kapak.baslik}</p><h1>${M.kapak.alt}</h1><p>${M.kapak.kitapcik}. ${TARIH} hazırlandı.</p></div>
+  <div class="kutu"><p class="ust" style="margin-top:0">${M.kapak.baslik}</p><p class="ay48"><b>${M.kapak.ay}</b>${M.kapak.ayYazi}</p><h1>${M.kapak.alt}</h1><p class="ay-cumle">${M.kapak.ayCumle}</p><p>${M.kapak.kitapcik}. ${TARIH} hazırlandı.</p></div>
   </section>`;
 }
 

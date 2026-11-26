@@ -80,6 +80,9 @@ export const ORNEK = {
   ],
   toplam: dortYil,
 };
+/* Kapaktaki süre: satışı kapatanın payı 1. yıl ile 4. yıl arasında sürer. */
+const kazancAy = 12 * ORNEK.yillar.length;
+sagla(kazancAy === 48, 'satışı kapatanın payı en çok 48 ay sürer');
 
 /* ---------- Oyunlaştırma: seviyeler ---------- */
 const ciro1 = yillik;
@@ -140,6 +143,9 @@ export const M = {
     kitapcik: 'İş ortaklığı el kitapçığı',
     sunum: 'İş ortaklığı tanıtım sunumu',
     alt: 'SGK işlerini otomatik yapan programı müşterinize siz tanıtın.',
+    ay: String(kazancAy),
+    ayYazi: 'aya kadar kazanç',
+    ayCumle: `Satışını kapattığınız müşteri size ${kazancAy} aya kadar kazanç getirir.`,
   },
   acilis: {
     kanca: 'Müşterinizin SGK işleri her ay otomatik yürür.',

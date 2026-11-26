@@ -155,6 +155,9 @@ h2.kanca { font-size: var(--o-h2); margin-top: 8mm; max-width: 230mm; }
 .kapak .kutu .ust { color: var(--r-yesil); }
 .kapak .kutu h1 { font-size: 26pt; font-weight: var(--w-baslik); line-height: 1.12; margin-top: 4mm; text-wrap: balance; }
 .kapak .kutu p { font-size: 12pt; color: var(--r-griLacivertUstu); margin-top: 5mm; }
+.kapak .kutu .ay48 { display: flex; align-items: baseline; gap: 3mm; margin-top: 3mm; font-size: 20pt; font-weight: var(--w-baslik); color: var(--r-yesil); line-height: 1; }
+.kapak .kutu .ay48 b { font-size: 64pt; line-height: 0.9; }
+.kapak .kutu .ay-cumle { font-size: 13pt; color: var(--r-beyaz); }
 
 /* 2 Açılış */
 .acilis-izgara { display: grid; grid-template-columns: 1fr 1.08fr; gap: 12mm; flex: 1; margin-top: 6mm; min-height: 0; }
@@ -228,7 +231,7 @@ const sayfalar = [
   () => `<section class="sayfa kapak">
     <div class="ust-bant">${marka()}<span class="tur">${M.kapak.sunum}</span></div>
     <div class="foto"><img src="${KAPAK_YATAY}" alt="Takım elbiseli bir danışman ofiste kollarını kavuşturmuş duruyor."></div>
-    <div class="kutu"><p class="ust" style="margin-top:0">${M.kapak.baslik}</p><h1>${M.kapak.alt}</h1><p>${M.kapak.sunum}. ${TARIH} hazırlandı.</p></div>
+    <div class="kutu"><p class="ust" style="margin-top:0">${M.kapak.baslik}</p><p class="ay48"><b>${M.kapak.ay}</b>${M.kapak.ayYazi}</p><h1>${M.kapak.alt}</h1><p class="ay-cumle">${M.kapak.ayCumle}</p><p>${M.kapak.sunum}. ${TARIH} hazırlandı.</p></div>
   </section>`,
   () => {
     const A = M.acilis;
